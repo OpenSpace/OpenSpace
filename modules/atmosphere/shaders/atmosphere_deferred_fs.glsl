@@ -67,15 +67,15 @@ uniform int cullAtmosphere;
 uniform float Rg;
 uniform float Rt;
 uniform float groundRadianceEmission;
-uniform float HR;
-uniform vec3 betaRayleigh;
-uniform float HO;
-uniform vec3 betaOzoneExtinction;
-uniform float HM;
-uniform vec3 betaMieExtinction;
+// uniform float HR;
+// uniform vec3 betaRayleigh;
+// uniform float HO;
+// uniform vec3 betaOzoneExtinction;
+// uniform float HM;
+// uniform vec3 betaMieExtinction;
 uniform float mieG;
 uniform float sunRadiance;
-uniform bool ozoneLayerEnabled;
+// uniform bool ozoneLayerEnabled;
 uniform int SAMPLES_R;
 uniform int SAMPLES_MU;
 uniform int SAMPLES_MU_S;
@@ -83,6 +83,7 @@ uniform int SAMPLES_NU;
 uniform sampler2D transmittanceTexture;
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
+uniform sampler3D inscatterMieTexture;
 uniform sampler2D mainPositionTexture;
 uniform sampler2D mainNormalTexture;
 uniform sampler2D mainColorTexture;
@@ -94,6 +95,15 @@ uniform vec4 viewport;
 uniform vec2 resolution;
 uniform dvec3 camPosObj;
 uniform dvec3 sunDirectionObj;
+
+// Advanced options
+uniform bool advancedModeEnabled;
+uniform bool useCornettePhaseFunction;
+uniform bool useOnlyAdvancedMie;
+uniform bool usePenndorfPhaseFunction;
+uniform vec3 g1;
+uniform vec3 g2;
+uniform vec3 alpha;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
@@ -166,14 +176,14 @@ float opticalDepth(float localH, float r, float mu, float d, float Rg) {
   return sqrt(2.0 * M_PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
 }
 
-vec3 analyticTransmittance(float r, float mu, float d) {
-  vec3 ozone = vec3(0.0);
-  if (ozoneLayerEnabled) {
-    ozone = betaOzoneExtinction * 0.0000006 * opticalDepth(HO, r, mu, d, Rg);
-  }
-  return exp(-betaRayleigh * opticalDepth(HR, r, mu, d, Rg) - ozone -
-    betaMieExtinction * opticalDepth(HM, r, mu, d, Rg));
-}
+// vec3 analyticTransmittance(float r, float mu, float d) {
+//   vec3 ozone = vec3(0.0);
+//   if (ozoneLayerEnabled) {
+//     ozone = betaOzoneExtinction * 0.0000006 * opticalDepth(HO, r, mu, d, Rg);
+//   }
+//   return exp(-betaRayleigh * opticalDepth(HR, r, mu, d, Rg) - ozone -
+//     betaMieExtinction * opticalDepth(HM, r, mu, d, Rg));
+// }
 
 vec3 irradiance(sampler2D s, float r, float muSun) {
   float u_r = (r - Rg) / (Rt - Rg);
@@ -268,7 +278,7 @@ Ray calculateRayRenderableGlobe(vec2 st) {
 /* 
  * Calculates the light scattering in the view direction comming from other light rays
  * scattered in the atmosphere.
- * Following the paper:  S[L]|x - T(x,xs) * S[L]|xs
+ * Following the paper:  S[L](x, v, s) - T(x, xs) * S[L](xs, v, s)
  * The view direction here is the ray: x + tv, s is the sun direction, r and mu the
  * position and zenith cosine angle as in the paper.
  * Arguments:
@@ -297,8 +307,11 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   float r2 = r * r;
   float nu = dot(v, s);
   float muSun = dot(x, s) / r;
-  float rayleighPhase = rayleighPhaseFunction(nu);
-  float miePhase = miePhaseFunction(nu, mieG);
+  float rayleighPhase = rayleighPhaseFunction(advancedModeEnabled, useOnlyAdvancedMie,
+    usePenndorfPhaseFunction, nu);
+  vec3 miePhase = miePhaseFunction(advancedModeEnabled, useCornettePhaseFunction,
+    nu, mieG, g1, g2, alpha);
+
     
   // S[L](x,s,v)
   // I.e. the next line has the scattering light for the "infinite" ray passing through
@@ -309,6 +322,8 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
       SAMPLES_MU_S, SAMPLES_NU),
     0.0
   );
+  vec4 inscatterMieRadiance = max(texture4D(inscatterMieTexture, r, mu, muSun, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R,
+      SAMPLES_MU_S, SAMPLES_NU), 0.0);
     
   // After removing the initial path from camera pos to top of atmosphere (for an
   // observer in the space) we test if the light ray is hitting the atmosphere
@@ -336,12 +351,18 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
       SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
     inscatterRadiance = max(inscatterRadiance - attenuation.rgbr * inscatterFromSurface, 0.0);
 
+    vec4 inscatterMieFromSurface = texture4D(inscatterMieTexture, r0, mu0, muSun0, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+    inscatterMieRadiance = max(inscatterMieRadiance - attenuation.rgbr * inscatterMieFromSurface, 0.0);
+
     // We set the irradianceFactor to 1.0 so the reflected irradiance will be considered
     // when calculating the reflected light on the ground.
     irradianceFactor = 1.0;
   }
   else {
-    attenuation = analyticTransmittance(r, mu, t);
+    // JCC: analyticTransmittance doesn't include the Ozone layer absorption
+    // attenuation = analyticTransmittance(r, mu, t);
+    attenuation = transmittance(transmittanceTexture, r, mu, Rg, t);
     groundHit = false;
   }
 
@@ -380,6 +401,12 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // Attention for the attenuation.r value applied to the S_Mie
     vec4 inScatterAbove = max(inScatterAboveX - attenuation.rgbr * inScatterAboveXs, 0.0);
 
+    vec4 inScatterMieAboveX = texture4D(inscatterMieTexture, r, mu, muSun, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+    vec4 inScatterMieAboveXs = texture4D(inscatterMieTexture, r0, mu0, muSun0, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+    vec4 inScatterMieAbove = max(inScatterMieAboveX - attenuation.rgbr * inScatterMieAboveXs, 0.0);
+
     // Below Horizon
     mu = muHorizon + INTERPOLATION_EPS;
     //r0  = sqrt(r2 + t2 + 2.0 * r * t * mu);
@@ -394,8 +421,15 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // Attention for the attenuation.r value applied to the S_Mie
     vec4 inScatterBelow = max(inScatterBelowX - attenuation.rgbr * inScatterBelowXs, 0.0);
 
+    vec4 inScatterMieBelowX = texture4D(inscatterMieTexture, r, mu, muSun, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+    vec4 inScatterMieBelowXs = texture4D(inscatterMieTexture, r0, mu0, muSun0, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+    vec4 inScatterMieBelow = max(inScatterMieBelowX - attenuation.rgbr * inScatterMieBelowXs, 0.0);
+
     // Interpolate between above and below inScattering radiance
     inscatterRadiance = mix(inScatterAbove, inScatterBelow, interpolationValue);
+    inscatterMieRadiance = mix(inScatterMieAbove, inScatterMieBelow, interpolationValue);
   }      
 
   // The w component of inscatterRadiance has stored the Cm,r value (Cm = Sm[L0])
@@ -405,17 +439,19 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   // Hermite interpolation between two values
   // This step is done because imprecision problems happen when the Sun is slightly
   // below the horizon. When this happens, we avoid the Mie scattering contribution
-  inscatterRadiance.w *= smoothstep(0.0, 0.02, muSun);
-  vec3 inscatterMie =
-      inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
-      (betaRayleigh.r / betaRayleigh);
+  // inscatterRadiance.w *= smoothstep(0.0, 0.02, muSun);
+  // vec3 inscatterMie =
+  //     inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
+  //     (betaRayleigh.r / betaRayleigh);
     
-  radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMie * miePhase, 0.0);    
+  radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMieRadiance.rgb * miePhase, 0.0);    
   
   // Finally we add the Lsun (all calculations are done with no Lsun so we can change it
   // on the fly with no precomputations)
   vec3 finalScatteringRadiance = radiance * sunIntensity;
-  return groundHit ?  finalScatteringRadiance  :  spaceColor + finalScatteringRadiance;
+  return groundHit ?
+    finalScatteringRadiance :
+    spaceColor * attenuation.rgb + finalScatteringRadiance;
 }
 
 /* 

@@ -83,6 +83,6 @@ void main() {
   // Unmapping the variables from texture texels coordinates to mapped coordinates
   unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
   
-  // Write to texture deltaSR 
+  // Write to texture deltaS 
   renderTarget = vec4(inscatter(r, mu, muSun, nu), 1.0);
 }

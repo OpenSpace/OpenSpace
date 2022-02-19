@@ -145,18 +145,13 @@ private:
         ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
 
 
-    UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
-        betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, oxygenAbsLayerEnabled,
-        HO, betaOzoneExtinction, SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU,
+    UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission,mieG, sunRadiance,
+        SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU,
         advancedModeEnabled, inverseModelTransformMatrix, modelTransformMatrix,
         projectionToModelTransform, viewToWorldMatrix, camPosObj, sunDirectionObj,
         hardShadows, transmittanceTexture, irradianceTexture, inscatterTexture,
-        inscatterRayleighTexture, inscatterMieTexture) _uniformCache;
-    UniformCache(useOnlyAdvancedMie, useCornettePhaseFunction, usePenndorfPhaseFunction,
-        deltaPolarizability, nRealRayleigh, nComplexRayleigh, nRealMie, nComplexMie,
-        lambdaArray, nRayleigh, nMie, nRayleighAbsMolecule, radiusAbsMoleculeRayleigh,
-        meanRadiusParticleMie, turbidity, jungeExponent, kappa, g1, g2,
-        alpha) _uniformCacheAdvancedMode;
+        inscatterMieTexture, useOnlyAdvancedMie, useCornettePhaseFunction,
+        usePenndorfPhaseFunction, g1, g2, alpha) _uniformCache;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;

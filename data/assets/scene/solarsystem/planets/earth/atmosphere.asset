@@ -34,27 +34,32 @@ local Atmosphere = {
       -- Thickness of atmosphere if its density were uniform, in Km
       H_R = 8.0
     },
-    --[[
-      Ozone = {
+    Ozone = {
       Coefficients = {
-        -- Extinction coefficients 
-        Extinction = {3.426, 8.298, 0.356}
+        -- Cross-sections for wavelengths (680, 550, 440)nm
+        Absorption = {1.368209E-21, 3.314053E-21, 1.360173E-22}
+      },
+      H_O = 9.0,
+    },
+    Oxygen = {
+      Coefficients = {
+        -- Cross-sections for wavelengths (680, 550, 440)nm
+        Absorption = {4.164E-5, 5.06E-5, 7.525E-5}
       },
       H_O = 8.0,
     },
-    ]]
     -- Default
     Mie = {
-      Coefficients = {
-        -- Reflection coefficients are given in km^-1
-        Scattering = { 4.0e-3, 4.0e-3, 4.0e-3 },
-        -- Extinction coefficients are a fraction of the Mie coefficients
-        Extinction = { 4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9 }
-      },
-      -- Height scale (atmosphere thickness for constant density) in Km
-      H_M = 1.2,
-      -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
-      G = 0.85
+       Coefficients = {
+         -- Reflection coefficients are given in km^-1
+         Scattering = { 4.0e-3, 4.0e-3, 4.0e-3 },
+         -- Extinction coefficients are a fraction of the Mie coefficients
+         Extinction = { 4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9 }
+       },
+       -- Height scale (atmosphere thickness for constant density) in Km
+       H_M = 1.2,
+       -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
+       G = 0.85
     },
     -- Clear Sky
     -- Mie = {

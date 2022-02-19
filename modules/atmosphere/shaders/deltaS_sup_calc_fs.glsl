@@ -35,6 +35,10 @@ uniform int SAMPLES_NU;
 uniform int layer;
 uniform sampler3D deltaSTexture;
 
+uniform bool advancedModeEnabled;
+uniform bool useOnlyAdvancedMie;
+uniform bool usePenndorfPhaseFunction;
+
 void main() {
   vec2 p = gl_FragCoord.xy - vec2(0.5);
 
@@ -45,5 +49,7 @@ void main() {
 
   // See Bruneton and Neyret paper, "Angular Precision" paragraph to understanding why we
   // are dividing the S[L*] by the Rayleigh phase function.
-  renderTarget = vec4(texture(deltaSTexture, uvw).rgb / rayleighPhaseFunction(nu), 0.0);
+  float rayleighPhase = rayleighPhaseFunction(advancedModeEnabled, useOnlyAdvancedMie,
+    usePenndorfPhaseFunction, nu);
+  renderTarget = vec4(texture(deltaSTexture, uvw).rgb / rayleighPhase, 0.0);
  }

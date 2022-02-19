@@ -44,18 +44,26 @@ uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
 
+// Advanced options
+uniform bool advancedModeEnabled;
+uniform bool useOnlyAdvancedMie;
+uniform vec3 lambdaArray;
+uniform vec3  n_real_rayleigh;
+uniform float deltaPolarizability;
+uniform float N_rayleigh; // in m^3
+
 void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R, 
                out vec3 S_M)
 {
   // The integral's integrand is the single inscattering radiance:
-  // S[L0] = P_M*S_M[L0] + P_R*S_R[L0]
-  // where S_M[L0] = T*(betaMScattering * exp(-h/H_M))*L0 and
-  // S_R[L0] = T*(betaRScattering * exp(-h/H_R))*L0.
+  // S[L0] = P_M * S_M[L0] + P_R * S_R[L0] where:
+  // S_M[L0] = T * (betaMScattering * exp(-h/H_M)) * L0 and
+  // S_R[L0] = T * (betaRScattering * exp(-h/H_R)) * L0.
   // T = transmittance.
   // One must remember that because the occlusion on L0, the integrand here will be equal
   // to 0 in that cases. Also it is important to remember that the phase function for the
   // Rayleigh and Mie scattering are added during the rendering time to increase the
-  // angular precision
+  // angular precision (see Bruneton paper)
   S_R = vec3(0.0);
   S_M = vec3(0.0);
   
@@ -76,14 +84,8 @@ void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R,
       transmittance(transmittanceTexture, r, mu, y, Rg, Rt) *
       transmittance(transmittanceTexture, ri, muSun_i, Rg, Rt);
     // exp(-h/H)*T(x,v)
-    if (ozoneLayerEnabled) {
-      S_R = (exp(-(ri - Rg) / HO) + exp(-(ri - Rg) / HR)) * transmittanceY;
-      S_M = exp(-(ri - Rg) / HM) * transmittanceY;
-    }
-    else {
-      S_R = exp(-(ri - Rg) / HR) * transmittanceY;
-      S_M = exp(-(ri - Rg) / HM) * transmittanceY;
-    }
+    S_R = exp(-(ri - Rg) / HR) * transmittanceY;
+    S_M = exp(-(ri - Rg) / HM) * transmittanceY;
     // The L0 (sun radiance) is added in real-time.
   }
 }
@@ -112,7 +114,11 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
     S_Ri = S_Rj;
     S_Mi = S_Mj;
   }
-  S_R *= betaRayleigh * (rayDist / (2.0 * float(INSCATTER_INTEGRAL_SAMPLES)));
+  vec3 scattCoeffRayleigh = scatteringCoefficientRayleigh(advancedModeEnabled,
+    useOnlyAdvancedMie, lambdaArray, n_real_rayleigh, deltaPolarizability, N_rayleigh,
+    betaRayleigh);
+
+  S_R *= scattCoeffRayleigh * (rayDist / (2.0 * float(INSCATTER_INTEGRAL_SAMPLES)));
   S_M *= betaMieScattering * (rayDist / (2.0 * float(INSCATTER_INTEGRAL_SAMPLES)));
 }
 

@@ -70,24 +70,14 @@
 namespace {
     constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
 
-    constexpr const std::array<const char*, 31> UniformNames = {
-        "cullAtmosphere", "Rg", "Rt", "groundRadianceEmission", "HR", "betaRayleigh",
-        "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", 
-        "oxygenAbsLayerEnabled", "HO", "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU",
-        "SAMPLES_MU_S", "SAMPLES_NU", "advancedModeEnabled",
-        "inverseModelTransformMatrix", "modelTransformMatrix",
+    constexpr const std::array<const char*, 28> UniformNames = {
+        "cullAtmosphere", "Rg", "Rt", "groundRadianceEmission", "mieG", "sunRadiance", 
+        "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU",
+        "advancedModeEnabled", "inverseModelTransformMatrix", "modelTransformMatrix",
         "projectionToModelTransformMatrix", "viewToWorldMatrix", "camPosObj",
         "sunDirectionObj", "hardShadows", "transmittanceTexture", "irradianceTexture",
-        "inscatterTexture", "inscatterRayleighTexture", "inscatterMieTexture"
-    };
-
-    constexpr const std::array<const char*, 20> UniformNamesAdvMode = {
-        "useOnlyAdvancedMie", "useCornettePhaseFunction", "usePenndorfPhaseFunction",
-        "deltaPolarizability", "n_real_rayleigh", "n_complex_rayleigh",
-        "n_real_mie", "n_complex_mie", "lambdaArray", "N_rayleigh, N_mie",
-        "N_rayleigh_abs_molecule", "radius_abs_molecule_rayleigh",
-        "mean_radius_particle_mie", "turbidity", "jungeExponent", "Kappa", "g1", "g2",
-        "alpha"
+        "inscatterTexture", "inscatterMieTexture", "useOnlyAdvancedMie",
+        "useCornettePhaseFunction", "usePenndorfPhaseFunction", "g1", "g2", "alpha"
     };
 
     constexpr const float ATM_EPS = 2000.f;
@@ -319,16 +309,16 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         prg.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
         prg.setUniform(_uniformCache.Rt, _atmosphereRadius);
         prg.setUniform(_uniformCache.groundRadianceEmission, _groundRadianceEmission);
-        prg.setUniform(_uniformCache.HR, _rayleighHeightScale);
-        prg.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
-        prg.setUniform(_uniformCache.HM, _mieHeightScale);
-        prg.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
+        //prg.setUniform(_uniformCache.HR, _rayleighHeightScale);
+        //prg.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
+        //prg.setUniform(_uniformCache.HM, _mieHeightScale);
+        //prg.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
         prg.setUniform(_uniformCache.mieG, _miePhaseConstant);
         prg.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
-        prg.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
-        prg.setUniform(_uniformCache.oxygenAbsLayerEnabled, _oxygenEnabled);
-        prg.setUniform(_uniformCache.HO, _oxygenHeightScale);
-        prg.setUniform(_uniformCache.betaOzoneExtinction, _ozoneAbsCrossSection);
+        //prg.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
+        //prg.setUniform(_uniformCache.oxygenAbsLayerEnabled, _oxygenEnabled);
+        //prg.setUniform(_uniformCache.HO, _oxygenHeightScale);
+        //prg.setUniform(_uniformCache.betaOzoneExtinction, _ozoneAbsCrossSection);
         prg.setUniform(_uniformCache.SAMPLES_R, _rSamples);
         prg.setUniform(_uniformCache.SAMPLES_MU, _muSamples);
         prg.setUniform(_uniformCache.SAMPLES_MU_S, _muSSamples);
@@ -336,83 +326,27 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         prg.setUniform(_uniformCache.advancedModeEnabled, _advancedMode);
 
         prg.setUniform(
-            _uniformCacheAdvancedMode.deltaPolarizability,
-            _advModeData.deltaPolarizability
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.useOnlyAdvancedMie,
+            _uniformCache.useOnlyAdvancedMie,
             _advModeData.useOnlyAdvancedMie
         );
         prg.setUniform(
-            _uniformCacheAdvancedMode.useCornettePhaseFunction,
+            _uniformCache.useCornettePhaseFunction,
             _advModeData.useCornettePhaseFunction
         );
         prg.setUniform(
-            _uniformCacheAdvancedMode.usePenndorfPhaseFunction,
+            _uniformCache.usePenndorfPhaseFunction,
             _advModeData.usePenndorfPhaseFunction
         );
         prg.setUniform(
-            _uniformCacheAdvancedMode.jungeExponent,
-            _advModeData.jungeExponent
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.kappa,
-            _advModeData.Kappa
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.lambdaArray,
-            _advModeData.lambdaArray
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.meanRadiusParticleMie,
-            _advModeData.meanRadiusParticleMie
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.nComplexMie,
-            _advModeData.nComplexMie
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.nComplexRayleigh,
-            _advModeData.nComplexRayleigh
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.nMie,
-            _advModeData.NMie
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.nRayleigh,
-            _advModeData.NRayleigh
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.nRayleighAbsMolecule,
-            _advModeData.NRayleighAbsMolecule
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.nRealMie,
-            _advModeData.nRealMie
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.nRealRayleigh,
-            _advModeData.nRealRayleigh
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.radiusAbsMoleculeRayleigh,
-            _advModeData.radiusAbsMoleculeRayleigh
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.turbidity,
-            _advModeData.turbidity
-        );
-        prg.setUniform(
-            _uniformCacheAdvancedMode.g1,
+            _uniformCache.g1,
             _advModeData.g1
         );
         prg.setUniform(
-            _uniformCacheAdvancedMode.g2,
+            _uniformCache.g2,
             _advModeData.g2
         );
         prg.setUniform(
-            _uniformCacheAdvancedMode.alpha,
+            _uniformCache.alpha,
             _advModeData.alpha
         );
 
@@ -565,10 +499,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
     prg.setUniform(_uniformCache.inscatterTexture, _inScatteringTableTextureUnit);
 
-    // Is this used at all?
-    //_inScatteringMieTableTextureUnit.activate();
-    //glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
-    //prg.setUniform(_uniformCache.inscatterMieTexture, _inScatteringMieTableTextureUnit);
+    _inScatteringMieTableTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
+    prg.setUniform(_uniformCache.inscatterMieTexture, _inScatteringMieTableTextureUnit);
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData&, const DeferredcastData&,
@@ -600,11 +533,6 @@ void AtmosphereDeferredcaster::initializeCachedVariables(
                                                     ghoul::opengl::ProgramObject& program)
 {
     ghoul::opengl::updateUniformLocations(program, _uniformCache, UniformNames);
-    ghoul::opengl::updateUniformLocations(
-        program,
-        _uniformCacheAdvancedMode,
-        UniformNamesAdvMode
-    );
 }
 
 void AtmosphereDeferredcaster::setModelTransform(glm::dmat4 transform) {
@@ -695,8 +623,20 @@ void AtmosphereDeferredcaster::calculateTransmittance() {
     program->setUniform("betaMieExtinction", _mieExtinctionCoeff);
     program->setUniform("TRANSMITTANCE", _transmittanceTableSize);
     program->setUniform("ozoneLayerEnabled", _ozoneEnabled);
-    //program->setUniform("HO", _ozoneHeightScale);
-    program->setUniform("betaOzoneExtinction", _ozoneAbsCrossSection);
+    program->setUniform("oxygenAbsLayerEnabled", _oxygenEnabled);
+    program->setUniform("advancedModeEnabled", _advancedMode);
+    program->setUniform("useOnlyAdvancedMie", _advModeData.useOnlyAdvancedMie);
+    program->setUniform("mean_radius_particle_mie", _advModeData.meanRadiusParticleMie);
+    program->setUniform("n_real_mie", _advModeData.nRealMie);
+    program->setUniform("n_complex_mie", _advModeData.nComplexMie);
+    program->setUniform("lambdaArray", _advModeData.lambdaArray);
+    program->setUniform("N_mie", _advModeData.NMie);
+    program->setUniform("n_real_rayleigh", _advModeData.nRealRayleigh);
+    program->setUniform("deltaPolarizability", _advModeData.deltaPolarizability);
+    program->setUniform("N_rayleigh", _advModeData.NRayleigh);
+    program->setUniform("n_complex_rayleigh", _advModeData.nComplexRayleigh);
+    program->setUniform("radius_abs_molecule_rayleigh", _advModeData.radiusAbsMoleculeRayleigh);
+    program->setUniform("N_rayleigh_abs_molecule", _advModeData.NRayleighAbsMolecule);
 
     constexpr const float Black[] = { 0.f, 0.f, 0.f, 0.f };
     glClearBufferfv(GL_COLOR, 0, Black);
@@ -767,8 +707,13 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     program->setUniform("SAMPLES_MU_S", _muSSamples);
     program->setUniform("SAMPLES_NU", _nuSamples);
     program->setUniform("SAMPLES_MU", _muSamples);
-    program->setUniform("ozoneLayerEnabled", _ozoneEnabled);
-    //program->setUniform("HO", _ozoneHeightScale);
+    program->setUniform("advancedModeEnabled", _advancedMode);
+    program->setUniform("useOnlyAdvancedMie", _advModeData.useOnlyAdvancedMie);
+    program->setUniform("lambdaArray", _advModeData.lambdaArray);
+    program->setUniform("n_real_rayleigh", _advModeData.nRealRayleigh);
+    program->setUniform("deltaPolarizability", _advModeData.deltaPolarizability);
+    program->setUniform("N_rayleigh", _advModeData.NRayleigh);
+
     glClear(GL_COLOR_BUFFER_BIT);
     for (int layer = 0; layer < _rSamples; ++layer) {
         program->setUniform("layer", layer);
@@ -843,10 +788,10 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint deltaSRayleigh,
     glBindTexture(GL_TEXTURE_3D, deltaSRayleigh);
     program->setUniform("deltaSRTexture", deltaSRayleighUnit);
 
-    //ghoul::opengl::TextureUnit deltaSMieUnit;
-    //deltaSMieUnit.activate();
-    //glBindTexture(GL_TEXTURE_3D, deltaSMie);
-    //program->setUniform("deltaSMTexture", deltaSMieUnit);
+    ghoul::opengl::TextureUnit deltaSMieUnit;
+    deltaSMieUnit.activate();
+    glBindTexture(GL_TEXTURE_3D, deltaSMie);
+    program->setUniform("deltaSMTexture", deltaSMieUnit);
 
     program->setUniform("SAMPLES_MU_S", _muSSamples);
     program->setUniform("SAMPLES_NU", _nuSamples);
@@ -907,6 +852,21 @@ void AtmosphereDeferredcaster::calculateDeltaJ(int scatteringOrder,
     program.setUniform("SAMPLES_NU", _nuSamples);
     program.setUniform("SAMPLES_MU", _muSamples);
     program.setUniform("SAMPLES_R", _rSamples);
+    program.setUniform("advancedModeEnabled", _advancedMode);
+    program.setUniform("useOnlyAdvancedMie", _advModeData.useOnlyAdvancedMie);
+    program.setUniform("usePenndorfPhaseFunction", _advModeData.usePenndorfPhaseFunction);
+    program.setUniform("useCornettePhaseFunction", _advModeData.useCornettePhaseFunction);
+    program.setUniform("g1", _advModeData.g1);
+    program.setUniform("g2", _advModeData.g2);
+    program.setUniform("alpha", _advModeData.alpha);
+    program.setUniform("lambdaArray", _advModeData.lambdaArray);
+    program.setUniform("jungeExponent", _advModeData.jungeExponent);
+    program.setUniform("turbidity", _advModeData.turbidity);
+    program.setUniform("Kappa", _advModeData.Kappa);
+    program.setUniform("n_real_rayleigh", _advModeData.nRealRayleigh);
+    program.setUniform("deltaPolarizability", _advModeData.deltaPolarizability);
+    program.setUniform("N_rayleigh", _advModeData.NRayleigh);
+
     for (int layer = 0; layer < _rSamples; ++layer) {
         program.setUniform("layer", layer);
         step3DTexture(program, layer);
@@ -951,6 +911,14 @@ void AtmosphereDeferredcaster::calculateDeltaE(int scatteringOrder,
     program.setUniform("SAMPLES_NU", _nuSamples);
     program.setUniform("SAMPLES_MU", _muSamples);
     program.setUniform("SAMPLES_R", _rSamples);
+    program.setUniform("advancedModeEnabled", _advancedMode);
+    program.setUniform("useOnlyAdvancedMie", _advModeData.useOnlyAdvancedMie);
+    program.setUniform("useCornettePhaseFunction", _advModeData.useCornettePhaseFunction);
+    program.setUniform("usePenndorfPhaseFunction", _advModeData.usePenndorfPhaseFunction);
+    program.setUniform("g1", _advModeData.g1);
+    program.setUniform("g2", _advModeData.g2);
+    program.setUniform("alpha", _advModeData.alpha);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (_saveCalculationTextures) {
         saveTextureFile(
@@ -1056,6 +1024,10 @@ void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
     prg.setUniform("SAMPLES_NU", _nuSamples);
     prg.setUniform("SAMPLES_MU", _muSamples);
     prg.setUniform("SAMPLES_R", _rSamples);
+    prg.setUniform("advancedModeEnabled", _advancedMode);
+    prg.setUniform("useOnlyAdvancedMie", _advModeData.useOnlyAdvancedMie);
+    prg.setUniform("usePenndorfPhaseFunction", _advModeData.usePenndorfPhaseFunction);
+
     for (int layer = 0; layer < _rSamples; ++layer) {
         prg.setUniform("layer", layer);
         glDrawArrays(GL_TRIANGLES, 0, 6);

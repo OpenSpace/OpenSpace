@@ -48,6 +48,23 @@ uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 uniform int firstIteration;
 
+// Advanced options
+uniform bool advancedModeEnabled;
+uniform bool useOnlyAdvancedMie;
+uniform bool usePenndorfPhaseFunction;
+uniform bool useCornettePhaseFunction;
+uniform vec3 g1;
+uniform vec3 g2;
+uniform vec3 alpha;
+uniform vec3 lambdaArray;
+uniform float jungeExponent;
+uniform float turbidity;
+uniform vec3 Kappa;
+uniform vec3  n_real_rayleigh;
+uniform float deltaPolarizability;
+uniform float N_rayleigh; // in m^3
+
+
 const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
 
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI]
@@ -163,22 +180,24 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
 
     for (int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i) {
       float phi = (float(phi_i) + 0.5) * stepPhi;
-      // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
+      // spherical coordinates: dOmega = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere
-      float dw = stepTheta * stepPhi * sin(theta);
-      // w = (rho*sin(theta)*cos(phi), rho*sin(theta)*sin(phi), rho*cos(theta))
+      float dOmega = stepTheta * stepPhi * sin(theta);
+      // solidOmega = (rho*sin(theta)*cos(phi), rho*sin(theta)*sin(phi), rho*cos(theta))
       float sinPhi = sin(phi);
       float sinTheta = sin(theta);
       float cosPhi = cos(phi);
-      vec3 w = vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosineTheta);
+      vec3 solidOmega = vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosineTheta);
 
       // We calculate the Rayleigh and Mie phase function for the new scattering angle:
-      // cos(angle between vec(v) and vec(w)), ||v|| = ||w|| = 1
-      float nuWV = dot(v, w);
-      float phaseRayleighWV = rayleighPhaseFunction(nuWV);
-      float phaseMieWV = miePhaseFunction(nuWV, mieG);
+      // cos(angle between vec(v) and vec(solidOmega)), ||v|| = ||w|| = 1
+      float nuWV = dot(v, solidOmega);
+      float phaseRayleighWV = rayleighPhaseFunction(advancedModeEnabled, useOnlyAdvancedMie,
+        usePenndorfPhaseFunction, nuWV);
+      vec3 phaseMieWV = miePhaseFunction(advancedModeEnabled, useCornettePhaseFunction,
+        nuWV, mieG, g1, g2, alpha);
       
-      vec3 groundNormal = (vec3(0.0, 0.0, r) + distanceToGround * w) / Rg;
+      vec3 groundNormal = (vec3(0.0, 0.0, r) + distanceToGround * solidOmega) / Rg;
       vec3 groundIrradiance = irradianceLUT(deltaETexture, dot(groundNormal, s), Rg);
 
       // We finally calculate the radiance from the reflected ray from ground
@@ -186,21 +205,24 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       vec3 radianceJ1 = groundTransmittance * groundReflectance * groundIrradiance;
 
       // We calculate the Rayleigh and Mie phase function for the new scattering angle:
-      // cos(angle between vec(s) and vec(w)), ||s|| = ||w|| = 1
-      float nuSW = dot(s, w);
+      // cos(angle between vec(s) and vec(solidOmega)), ||s|| = ||w|| = 1
+      float nuSW = dot(s, solidOmega);
       // The first iteration is different from the others. In the first iteration all
       // the light InScattered is coming from the initial pre-computed single InScattered
       // light. We stored these values in the deltaS textures (Ray and Mie), and in order
       // to avoid problems with the high angle dependency in the phase functions, we don't
       // include the phase functions on those tables (that's why we calculate them now).
       if (firstIteration == 1) {        
-        float phaseRaySW = rayleighPhaseFunction(nuSW);
-        float phaseMieSW = miePhaseFunction(nuSW, mieG);
+        float phaseRaySW = rayleighPhaseFunction(advancedModeEnabled, useOnlyAdvancedMie,
+          usePenndorfPhaseFunction, nuSW);
+        vec3 phaseMieSW = miePhaseFunction(advancedModeEnabled, useCornettePhaseFunction,
+          nuSW, mieG, g1, g2, alpha);
+        
         // We can now access the values for the single InScattering in the textures deltaS textures.
-        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg, SAMPLES_MU,
-          Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
-        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW, Rg, SAMPLES_MU,
-          Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
+        vec3 singleRay = texture4D(deltaSRTexture, r, solidOmega.z, muSun, nuSW, Rg,
+          SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
+        vec3 singleMie = texture4D(deltaSMTexture, r, solidOmega.z, muSun, nuSW, Rg,
+          SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
 
         // Initial InScattering including the phase functions
         radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;        
@@ -210,15 +232,22 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
         // are not in the first iteration, we are getting the updated result of deltaSR
         // (not the single inscattered light but the accumulated (higher order)
         // inscattered light.
-        // w.z is the cosine(theta) = mu for vec(w)
-        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg, SAMPLES_MU, Rt,
-          SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
+        // solidOmega.z is the cosine(theta) = mu for vec(solidOmega)
+        radianceJ1 += texture4D(deltaSRTexture, r, solidOmega.z, muSun, nuSW, Rg,
+          SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
       }
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the
       // Atmosphere and Ocean from Thomas and Stamnes, pg 9-10.
-      radianceJAcc += radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
-        betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;        
+      vec3 scattCoeffRayleigh = scatteringCoefficientRayleigh(advancedModeEnabled,
+        useOnlyAdvancedMie, lambdaArray, n_real_rayleigh, deltaPolarizability, N_rayleigh,
+        betaRayleigh);
+
+      vec3 scattCoeffMie = scatteringCoefficientMie(advancedModeEnabled, lambdaArray,
+        jungeExponent, turbidity, Kappa, betaMieScattering);
+      
+      radianceJAcc += radianceJ1 * (scattCoeffRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
+        scattCoeffMie * exp(-(r - Rg) / HM) * phaseMieWV) * dOmega;
     }
   }
 

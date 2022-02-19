@@ -187,18 +187,192 @@ vec3 transmittance(sampler2D tex, float r, float mu, float d, float Rg, float Rt
 
 // Calculates Rayleigh phase function given the scattering cosine angle mu
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-float rayleighPhaseFunction(float mu) {
-  // return (3.0 / (16.0 * M_PI)) * (1.0 + mu * mu);
-  return 0.0596831036 * (1.0 + mu * mu);
+float rayleighPhaseFunction(bool advancedModeEnabled, bool useOnlyAdvancedMie,
+                            bool usePenndorfPhaseFunction, float mu)
+{
+    if ((advancedModeEnabled && !useOnlyAdvancedMie) || usePenndorfPhaseFunction) {
+    // Penndorf
+    return 0.7629 * (1.0 + 0.932 * mu * mu) * 0.25 / M_PI;
+  }
+  else {
+    // return (3.0f / (16.0f * M_PI)) * (1.0f + mu * mu);
+    return 0.0596831036 * (1.0 + mu * mu);
+  }
+}
+
+
+// -- Calculates DHG Mie phase function given thescattering cosine angle mu --
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+// g1 := forward scattering 
+// g2 := backward scattering
+// alpha: = ratio between g1 and g2
+vec3 miePhaseFunctionDHG(float mu, vec3 g1, vec3 g2, vec3 alpha) {
+  // assert(advancedModeEnabled)
+  // assert(!useCornettePhaseFunction)
+
+  // Double Henyey-Greenstein phase function
+  vec3 g1Sq = g1 * g1;
+  vec3 g2Sq = g2 * g2;
+  const float exponent = 3.0 / 2.0;
+
+  vec3 denom1 = vec3(1.0 + g1Sq - 2.0 * g1 * mu);
+  vec3 denom2 = vec3(1.0 + g2Sq - 2.0 * g2 * mu);
+  vec3 d1Powered = vec3(pow(denom1.r, exponent), pow(denom1.g, exponent), pow(denom1.b, exponent));
+  vec3 d2Powered = vec3(pow(denom2.r, exponent), pow(denom2.g, exponent), pow(denom2.b, exponent));
+
+  vec3 f1 = ((vec3(1.0) - g1Sq) / d1Powered);
+  vec3 f2 = ((vec3(1.0) - g2Sq) / d2Powered);
+  return (alpha * f1  + (vec3(1.0) - alpha) * f2) * 0.25 / M_PI;
 }
 
 // Calculates Mie phase function given the scattering cosine angle mu
 // mu   := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v)) / r
 // mieG := mie phase function value
-float miePhaseFunction(float mu, float mieG) {
+vec3 miePhaseFunctionBasic(float mu, float mieG) {
   float mieG2 = mieG * mieG;
-  return 0.1193662072 * (1.0 - mieG2) *
+  float cornette = 0.1193662072 * (1.0 - mieG2) *
     pow(1.0 + mieG2 - 2.0 * mieG * mu, -1.5) * (1.0 + mu * mu) / (2.0 + mieG2);
+  return vec3(cornette);
+}
+
+vec3 miePhaseFunction(bool advancedModeEnabled, bool useCornettePhaseFunction,
+                      float mu, float mieG, vec3 g1, vec3 g2, vec3 alpha)
+{
+  if (advancedModeEnabled && !useCornettePhaseFunction) {
+    return miePhaseFunctionDHG(mu, g1, g2, alpha);
+  }
+  else {
+    return miePhaseFunctionBasic(mu, mieG);
+  }
+}
+
+// Calculates Rayleigh Scattering Coefficients given the real part of the refractive index
+// and the wavelength of the incident light.
+// lambda := wavelength of the incident light (680, 550, 440) nm in our case
+// m := Real(n(lambada))
+vec3 scatteringCoefficientRayleigh(bool advancedModeEnabled, bool useOnlyAdvancedMie,
+                                   vec3 lambda, vec3 n_real_rayleigh,
+                                   float deltaPolarizability, float N_rayleigh,
+                                   vec3 betaRayleigh)
+{
+  if (advancedModeEnabled && !useOnlyAdvancedMie) {
+    vec3 lambda4 = lambda * lambda * lambda * lambda;
+    vec3 m2 = n_real_rayleigh * n_real_rayleigh;
+    vec3 alpha = (m2 - vec3(1.0));
+    float fDelta = (6.0 + 3.0 * deltaPolarizability) / (6.0 - 7.0 * deltaPolarizability);
+    const float mTokm = 1000.0;
+    return mTokm * ((8.0 * M_PI * M_PI * M_PI * alpha * alpha) / (3.f * N_rayleigh * lambda4)) * fDelta;
+  }
+  else {
+    return betaRayleigh;
+  }
+}
+
+// Calculates Rayleigh absorption Coefficients for a given type of molecule, given the
+// refractive index and the wavelength of the incident light.
+// lambda := wavelength of the incident light (680, 550, 440) nm in our case
+vec3 absorptionCoefficientRayleigh(vec3 lambda, vec3 n_real_rayleigh,
+                                   vec3 n_complex_rayleigh,
+                                   float radius_abs_molecule_rayleigh,
+                                   float N_rayleigh_abs_molecule)
+{
+  // n = m + ki => n^2 = (m^2 - k^2) + (2mk)i
+  // n^2 - 1 = (m^2 - k^2 - 1) + (2mk)i = a
+  // n^2 + 2 = (m^2 - k^2 + 2) + (2mk)i = b
+  // a/b = [a x b*]/[b x b*], where b* is the conjugate of b
+  vec3 n2_real    = (n_real_rayleigh * n_real_rayleigh) - (n_complex_rayleigh * n_complex_rayleigh);
+  vec3 n2_complex = (2.0 * n_real_rayleigh * n_complex_rayleigh);
+  
+  vec3 a_real    = n2_real - vec3(1.0);
+  vec3 b_real    = n2_real + vec3(2.0);
+  vec3 a_complex = n2_complex;
+  vec3 b_complex = n2_complex;
+  vec3 b_complex_conjugate = -b_complex;
+  
+  //vec3 ab_conjugate_real    = (a_real * b_real) - (a_complex * b_complex_conjugate);
+  vec3 ab_conjugate_complex = (a_real * b_complex_conjugate + a_complex * b_real);
+  vec3 bb_conjugate = (b_real * b_real) + (b_complex * b_complex);
+  vec3 imgPart = ab_conjugate_complex / bb_conjugate;
+
+  float r3 = radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh;
+  return ((8.0 * M_PI * M_PI * N_rayleigh_abs_molecule * r3) / lambda) * imgPart;
+}
+
+vec3 extinctionCoefficientRayleigh(bool advancedModeEnabled, bool useOnlyAdvancedMie,
+                                   vec3 lambda, vec3 n_real_rayleigh,
+                                   float deltaPolarizability, float N_rayleigh,
+                                   vec3 betaRayleigh, vec3 n_complex_rayleigh,
+                                   float radius_abs_molecule_rayleigh,
+                                   float N_rayleigh_abs_molecule)
+{
+  vec3 scatter = scatteringCoefficientRayleigh(advancedModeEnabled, useOnlyAdvancedMie,
+    lambda, n_real_rayleigh, deltaPolarizability, N_rayleigh, betaRayleigh);
+
+  if (advancedModeEnabled && !useOnlyAdvancedMie) {
+    vec3 absorption = absorptionCoefficientRayleigh(lambda, n_real_rayleigh,
+      n_complex_rayleigh, radius_abs_molecule_rayleigh, N_rayleigh_abs_molecule);
+    return scatter + absorption;
+  }
+  else {
+    return scatter;
+  }  
+}
+
+// Calculates Mie Scattering Coefficients given the wavelength of the incident light
+// lambda := wavelength of the incident light (680, 550, 440) nm in our case
+vec3 scatteringCoefficientMie(bool advancedModeEnabled, vec3 lambda, float jungeExponent,
+                              float turbidity, vec3 Kappa, vec3 betaMieScattering)
+{
+  if (advancedModeEnabled) {
+    vec3 tmp = (2.0 * M_PI / lambda);
+    float exponent = jungeExponent - 2.0;
+    vec3 lambdaJunge = vec3(
+      pow(tmp.x, exponent), 
+      pow(tmp.y, exponent), 
+      pow(tmp.z, exponent)
+    );
+    return 0.434 * (0.65 * turbidity - 0.65) * 1E-16 * M_PI * Kappa * lambdaJunge;
+  }
+  else {
+    return betaMieScattering;
+  }
+}
+
+vec3 mieExtinctionEfficiency(bool advancedModeEnabled, float mean_radius_particle_mie,
+                             vec3 n_real_mie, vec3 lambda, vec3 n_complex_mie,
+                             vec3 betaMieExtinction)
+{
+  if (advancedModeEnabled) {
+    vec3 rho = 4.0 * M_PI * mean_radius_particle_mie * (n_real_mie - vec3(1.0)) / lambda;
+    vec3 tanBeta = n_complex_mie / (n_real_mie - vec3(1.0));
+    vec3 beta = atan(tanBeta);
+    vec3 expRhoTanBeta = exp(-rho * tanBeta);
+    vec3 cosBetaOverRho = cos(beta) / rho;
+    vec3 cosBetaOverRho2 = cosBetaOverRho * cosBetaOverRho;
+    return 2.0 - 4.0 * expRhoTanBeta * cosBetaOverRho * sin(rho - beta)
+          - 4.0 * expRhoTanBeta * cosBetaOverRho2 * cos(rho - 2.0 * beta)
+          + 4.0 * cosBetaOverRho2 * cos(2.0 * beta);
+  }
+  else {
+    return betaMieExtinction;
+  }
+}
+
+
+// Calculates the Mie Absorption Coefficients for dust (of particles with same radius size
+// and type)
+vec3 extinctionCoefficientMie(bool advancedModeEnabled, float mean_radius_particle_mie,
+                             vec3 n_real_mie, vec3 lambda, vec3 n_complex_mie,
+                             vec3 betaMieExtinction, float N_mie)
+{
+  if (advancedModeEnabled) {
+    vec3 mieExtEff = mieExtinctionEfficiency(advancedModeEnabled,
+      mean_radius_particle_mie, n_real_mie, lambda, n_complex_mie, betaMieExtinction);
+    return mieExtEff * N_mie * M_PI * (mean_radius_particle_mie * mean_radius_particle_mie);
+  }
+  else {
+    return betaMieExtinction;
+  }
 }
 
 // Given the height rm view-zenith angle (cosine) mu, sun-zenith angle (cosine) muSun and

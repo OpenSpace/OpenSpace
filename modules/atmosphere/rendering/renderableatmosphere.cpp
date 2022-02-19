@@ -196,7 +196,7 @@ namespace {
     };
 
     openspace::properties::PropertyOwner::PropertyOwnerInfo AdvancedModeOwnerInfo = {
-        "Advanced Mode Parameters",
+        "AdvancedModeParameters",
         "Advanced Mode Parameters",
         ""
     };
