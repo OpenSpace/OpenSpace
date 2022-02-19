@@ -257,7 +257,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NRayleighAbsInfo = {
         "NRayleighAbs",
-        "N Rayliegh Absorption x 10^25",
+        "N Rayleigh Absorption x 10^25",
         ""
     };
 
@@ -400,7 +400,7 @@ namespace {
             std::optional<glm::vec3> kappa;
             std::optional<float> nMie;
             std::optional<float> mieMeanParticleRadius;
-            std::optional<float> turibidity;
+            std::optional<float> turbidity;
             std::optional<float> jungeExponent;
             std::optional<glm::vec3> g1;
             std::optional<glm::vec3> g2;
@@ -708,7 +708,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _meanRadiusParticleMie.onChange(updateWithCalculation);
     _advancedModeOwner.addProperty(_meanRadiusParticleMie);
 
-    _turbidity = p.mie.turibidity.value_or(_turbidity);
+    _turbidity = p.mie.turbidity.value_or(_turbidity);
     _turbidity.onChange(updateWithCalculation);
     _advancedModeOwner.addProperty(_turbidity);
 

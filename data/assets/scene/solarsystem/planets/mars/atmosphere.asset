@@ -52,7 +52,7 @@ local Atmosphere = {
           -- Reflection coefficients are given in cm^-1
           -- Scattering = { 53.61771e-3, 53.61771e-3, 53.61771e-3 },
           -- Paper Values
-          Scattering = { 53.61771e-3, 53.61771e-3, 53.61771e-3 },
+          Scattering = { 19.918E-3, 13.57E-3, 5.75E-3 },
           -- Extinction coefficients are a fraction of the Scattering coefficients
           Extinction = { 53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979 }
         },
