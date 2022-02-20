@@ -182,8 +182,13 @@ void AssetManager::update() {
             continue;
         }
 
-        _rootAssets.push_back(a);
         a->load(nullptr);
+        if (a->isFailed()) {
+            // The loading might fail because of any number of reasons, most likely of
+            // them some Lua syntax error
+            continue;
+        }
+        _rootAssets.push_back(a);
         a->startSynchronizations();
 
         _toBeInitialized.push_back(a);
