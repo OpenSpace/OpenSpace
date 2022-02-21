@@ -24,7 +24,7 @@
 
 #include "sgctedit/monitorbox.h"
 
-constexpr float MarginFractionOfWidgetSize = 0.025;
+constexpr float MarginFractionOfWidgetSize = 0.025f;
 
 MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
                        unsigned int nWindows, const std::array<QColor, 4>& winColors)
@@ -33,7 +33,7 @@ MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
     , _nWindows(nWindows)
     , _colorsForWindows(winColors)
 {
-    _nMonitors = monitorResolution.size();
+    _nMonitors = static_cast<unsigned int>(monitorResolution.size());
     _showLabel = (_nMonitors > 1);
     mapMonitorResolutionToWidgetCoordinates();
 }
@@ -102,7 +102,7 @@ void MonitorBox::paintWindowBeyondBounds(QPainter& painter, unsigned int winIdx)
 }
 
 void MonitorBox::paintWindow(QPainter& painter, size_t winIdx) {
-    setPenSpecificToWindow(painter, winIdx, true);
+    setPenSpecificToWindow(painter, static_cast<unsigned int>(winIdx), true);
     if (winIdx <= _windowRendering.size()) {
         painter.drawRect(_windowRendering[winIdx]);
         QColor fillColor = _colorsForWindows[winIdx];
@@ -135,15 +135,22 @@ void MonitorBox::windowDimensionsChanged(unsigned int monitorIdx, unsigned int w
 }
 
 void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
-    QSize virtualDesktopResolution;
+    for (const QRect& m : _monitorResolution) {
+        if (m.x() < _negativeCorrectionOffsets.x()) {
+            _negativeCorrectionOffsets.setX(m.x());
+        }
+        if (m.y() < _negativeCorrectionOffsets.y()) {
+            _negativeCorrectionOffsets.setY(m.y());
+        }
+    }
     float maxWidth = 0.f;
     float maxHeight = 0.f;
     for (const QRect& m : _monitorResolution) {
-        if ((m.x() + m.width()) > maxWidth) {
-            maxWidth = m.x() + m.width();
+        if ((m.x() + m.width() - _negativeCorrectionOffsets.x()) > maxWidth) {
+            maxWidth = m.x() + m.width() - _negativeCorrectionOffsets.x();
         }
-        if ((m.y() + m.height()) > maxHeight) {
-            maxHeight = m.y() + m.height();
+        if ((m.y() + m.height() - _negativeCorrectionOffsets.y()) > maxHeight) {
+            maxHeight = m.y() + m.height() - _negativeCorrectionOffsets.y();
         }
     }
     float aspectRatio = maxWidth / maxHeight;
@@ -172,9 +179,11 @@ void MonitorBox::computeScaledResolutionLandscape(float aspectRatio, float maxWi
     float newHeight = virtualWidth / aspectRatio;
     for (size_t m = 0; m < _monitorResolution.size(); ++m) {
         _monitorOffsets.push_back({
-            _marginWidget + _monitorResolution[m].x() * _monitorScaleFactor,
+            _marginWidget + (_monitorResolution[m].x() - _negativeCorrectionOffsets.x())
+                * _monitorScaleFactor,
             _marginWidget + (_monitorWidgetSize.height() - newHeight) / 2.0 +
-                _monitorResolution[m].y() * _monitorScaleFactor
+                (_monitorResolution[m].y() - _negativeCorrectionOffsets.y())
+                * _monitorScaleFactor
         });
     }
 }
@@ -188,8 +197,10 @@ void MonitorBox::computeScaledResolutionPortrait(float aspectRatio, float maxHei
     for (size_t m = 0; m < _monitorResolution.size(); ++m) {
         _monitorOffsets.push_back({
             _marginWidget + (_monitorWidgetSize.width() - newWidth) / 2.0
-                + _monitorResolution[m].x() * _monitorScaleFactor,
-            _marginWidget + _monitorResolution[m].y() * _monitorScaleFactor
+                + (_monitorResolution[m].x() - _negativeCorrectionOffsets.x())
+                * _monitorScaleFactor,
+            _marginWidget + (_monitorResolution[m].y() - _negativeCorrectionOffsets.y())
+                * _monitorScaleFactor
         });
     }
 }

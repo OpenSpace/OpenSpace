@@ -36,6 +36,7 @@
 #include <QPoint>
 #include <QVector>
 #include <algorithm>
+#include <array>
 #include <vector>
 #include <iostream>
 
@@ -71,6 +72,7 @@ private:
     unsigned int _nMonitors = 1;
     std::vector<QRect> _monitorResolution;
     std::vector<QRectF> _monitorDimensionsScaled;
+    QRectF _negativeCorrectionOffsets = {0.f, 0.f, 0.f, 0.f};
     std::vector<QRectF> _windowResolutions;
     std::vector<QRectF> _windowRendering = {
         {0.f, 0.f, 0.f, 0.f},
