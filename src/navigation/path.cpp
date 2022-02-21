@@ -343,7 +343,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     const glm::dvec3 closestPos = isCloserToEnd ? endNodePos : startNodePos;
     const double distanceToClosestNode = glm::distance(closestPos, _prevPose.position);
 
-    double speed = distanceToClosestNode;
+    const double speed = distanceToClosestNode;
 
     // Dampen at the start and end
     constexpr const double closeUpDistanceFactor = 3.0;
@@ -363,14 +363,20 @@ double Path::speedAlongPath(double traveledDistance) const {
     if (traveledDistance < startUpDistance) {
         dampeningFactor = traveledDistance / startUpDistance;
     }
+    else if (_type == Type::Linear) {
+        // Dampen at end of linear path is handled separately, as we can use the
+        // current position to scompute the remaining distance rather than the
+        // path length minus travels distance. This is more suitable for long paths
+        const double remainingDistance = glm::distance(
+            _prevPose.position,
+            _end.position()
+        );
+        if (remainingDistance < closeUpDistance) {
+            dampeningFactor = remainingDistance / closeUpDistance;
+        }
+    }
     else if (traveledDistance > (pathLength() - closeUpDistance)) {
-        double remainingDistance = 0.0;
-        if (_type == Type::Linear) {
-            remainingDistance = glm::distance(_prevPose.position, _end.position());
-        }
-        else {
-            remainingDistance = pathLength() - traveledDistance;
-        }
+        const double remainingDistance = pathLength() - traveledDistance;
         dampeningFactor = remainingDistance / closeUpDistance;
     }
 
