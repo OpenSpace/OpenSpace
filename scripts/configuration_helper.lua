@@ -179,7 +179,10 @@ function generateWindow(result, fullScreen, msaa, border, monitor, tags, stereo,
   end
 
   if #(tags) > 0 then
-    local t = table.concat(arg["tags"], [[,]])
+    for i, v in ipairs(tags) do
+      tags[i] = "\"" .. v .. "\""
+    end
+    local t = table.concat(tags, [[,]])
     table.insert(result, [[          "tags": [ ]] .. t .. [[ ], ]])
   end
 
@@ -250,11 +253,11 @@ end
 function generateSettings(result, refreshRate, vsync)
   table.insert(result,   [[    "display": {]])
 
-  if (arg["refreshRate"]) then
-    table.insert(result, [[      "refreshrate": ]] .. arg["refreshRate"] .. [[,]])
+  if (refreshRate) then
+    table.insert(result, [[      "refreshrate": ]] .. refreshRate .. [[,]])
   end
 
-  if arg["vsync"] then
+  if vsync then
     table.insert(result, [[      "swapinterval": 1]])
   else
     table.insert(result, [[      "swapinterval": 0]])
