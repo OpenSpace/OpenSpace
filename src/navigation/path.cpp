@@ -334,41 +334,36 @@ double Path::speedAlongPath(double traveledDistance) const {
     const glm::dvec3 endNodePos = _end.node()->worldPosition();
     const glm::dvec3 startNodePos = _start.node()->worldPosition();
 
+    // Set speed based on distance to closest node
     const double distanceToEndNode = glm::distance(_prevPose.position, endNodePos);
     const double distanceToStartNode = glm::distance(_prevPose.position, startNodePos);
+    bool isCloserToEnd = distanceToEndNode < distanceToStartNode;
 
-    // Decide which is the closest node
-    SceneGraphNode* closestNode = _start.node();
-    glm::dvec3 closestPos = startNodePos;
-
-    if (distanceToEndNode < distanceToStartNode) {
-        closestPos = endNodePos;
-        closestNode = _end.node();
-    }
-
+    const SceneGraphNode* closestNode = isCloserToEnd ? _end.node() : _start.node();
+    const glm::dvec3 closestPos = isCloserToEnd ? endNodePos : startNodePos;
     const double distanceToClosestNode = glm::distance(closestPos, _prevPose.position);
+
     double speed = distanceToClosestNode;
 
+    // Dampen at the start and end
     constexpr const double closeUpDistanceFactor = 3.0;
     constexpr const double startUpDistanceFactor = 2.0;
 
-    // Dampen speed in beginning of path
     double startUpDistance = startUpDistanceFactor * _start.node()->boundingSphere();
     if (startUpDistance < LengthEpsilon) { // zero bounding sphere
         startUpDistance = glm::distance(_start.position(), startNodePos);
     }
 
-    if (traveledDistance < startUpDistance) {
-        speed *= traveledDistance / startUpDistance + 0.01;
-    }
-
-    // Dampen speed in end of path
     double closeUpDistance = closeUpDistanceFactor * _end.node()->boundingSphere();
     if (closeUpDistance < LengthEpsilon) { // zero bounding sphere
         closeUpDistance = glm::distance(_end.position(), endNodePos);
     }
 
-    if (traveledDistance > (pathLength() - closeUpDistance)) {
+    double dampeningFactor = 1.0;
+    if (traveledDistance < startUpDistance) {
+        dampeningFactor = traveledDistance / startUpDistance;
+    }
+    else if (traveledDistance > (pathLength() - closeUpDistance)) {
         double remainingDistance = 0.0;
         if (_type == Type::Linear) {
             remainingDistance = glm::distance(_prevPose.position, _end.position());
@@ -376,9 +371,11 @@ double Path::speedAlongPath(double traveledDistance) const {
         else {
             remainingDistance = pathLength() - traveledDistance;
         }
-
-        speed *= remainingDistance / closeUpDistance + 0.01;
+        dampeningFactor = remainingDistance / closeUpDistance;
     }
+
+    // Prevent multiplying with 0 (and hence a speed of 0.0 => no movement)
+    dampeningFactor += 0.01;
 
     // TODO: also dampen speed based on curvature, or make sure the curve has a rounder
     //       shape
@@ -386,7 +383,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     // TODO: check for when path is shorter than the starUpDistance or closeUpDistance
     //       variables
 
-    return _speedFactorFromDuration * speed;
+    return _speedFactorFromDuration * speed * dampeningFactor;
 }
 
 Waypoint waypointFromCamera() {
