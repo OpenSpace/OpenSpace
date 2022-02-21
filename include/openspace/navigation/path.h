@@ -159,7 +159,7 @@ private:
     // Playback variables
     double _traveledDistance = 0.0; // Meters
     double _progressedTime = 0.0; // Time since playback started (seconds)
-    bool _shouldForceQuit = false;
+    bool _shouldQuit = false;
     CameraPose _prevPose;
 };
 

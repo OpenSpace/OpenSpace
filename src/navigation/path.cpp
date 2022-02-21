@@ -167,7 +167,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
         if (displacement > remainingDistance) {
             displacement = remainingDistance;
             _traveledDistance = pathLength();
-            _shouldForceQuit = true;
+            _shouldQuit = true;
             return _end.pose();
         }
 
@@ -182,7 +182,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
         if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
             // The distaces are too large, so we are not making progress because of
             // insufficient precision
-            _shouldForceQuit = true;
+            _shouldQuit = true;
             LWARNING("Quit camera path prematurely due to insufficient precision");
         }
 
@@ -199,7 +199,7 @@ std::string Path::currentAnchor() const {
 }
 
 bool Path::hasReachedEnd() const {
-    if (_shouldForceQuit) {
+    if (_shouldQuit) {
         return true;
     }
 
@@ -210,7 +210,7 @@ void Path::resetPlaybackVariables() {
     _prevPose = _start.pose();
     _traveledDistance = 0.0;
     _progressedTime = 0.0;
-    _shouldForceQuit = false;
+    _shouldQuit = false;
 }
 
 CameraPose Path::interpolatedPose(double distance) const {
