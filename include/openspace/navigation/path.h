@@ -92,7 +92,7 @@ public:
      */
     CameraPose interpolatedPose(double distance) const;
 
-    /*
+    /**
      * Reset variables used to play back path
      */
     void resetPlaybackVariables();
@@ -101,19 +101,31 @@ private:
     /**
      * Interpolate between the paths start and end rotation using the approach that
      * corresponds to the path's curve type. The interpolation parameter \p t is the
-     * same as for the position interpolation, i.e. the relative traveled in distance
+     * same as for the position interpolation, i.e. the relative traveled distance
      * along the path, in [0, 1]
+     *
+     * \param t The interpolation parameter, given as the relative traveled distance
+                along the path, in [0, 1]
      */
     glm::dquat interpolateRotation(double t) const;
 
     /**
      * Compute the interpolated rotation quaternion using an eased SLERP approach
+     *
+     * \param t The interpolation variable for the rotatation interpolation.
+     *          Should be the relative traveled distance, in [0, 1]
      */
     glm::dquat easedSlerpRotation(double t) const;
 
     /**
-     * Compute the interpolated rotation quaternion using a method that is
-     * customized to look good for linear paths
+     * Compute the interpolated rotation quaternion using a method that is customized
+     * for linear paths. The camera will first interpoalte to look at the targetted
+     * node, and keep doing so for most of the path. At the end, when within a certain
+     * distance from the target, the rotation is interpolated so that the camera ends up
+     * in the target pose at the end of the path.
+     *
+     * \param t The interpolation variable for the rotatation interpolation.
+     *          Should be the relative traveled distance, in [0, 1]
      */
     glm::dquat linearPathRotation(double t) const;
 
@@ -121,6 +133,9 @@ private:
      * Compute the interpolated rotation quaternion using an approach that first
      * interpolates to look at the start node, and then the end node, before
      * interpolating to the end rotation
+     *
+     * \param t The interpolation variable for the rotatation interpolation.
+     *          Should be the relative traveled distance, in [0, 1]
      */
     glm::dquat lookAtTargetsRotation(double t) const;
 
@@ -128,6 +143,8 @@ private:
      * Evaluate the current traversal speed along the path, based on the currently
      * traveled distance. The final speed will be scaled to match the desired duration
      * for the path (which might have been specified by the user)
+     *
+     * \param traveledDistance The current distance traveled along the path, in meters
      */
     double speedAlongPath(double traveledDistance) const;
 
@@ -140,9 +157,9 @@ private:
     double _speedFactorFromDuration = 1.0;
 
     // Playback variables
-    double _traveledDistance = 0.0;
-    double _progressedTime = 0.0; // Time since playback started
-    bool _forceQuit = false;
+    double _traveledDistance = 0.0; // Meters
+    double _progressedTime = 0.0; // Time since playback started (seconds)
+    bool _shouldForceQuit = false;
     CameraPose _prevPose;
 };
 

@@ -37,10 +37,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 
-namespace {
-    constexpr const double Epsilon = 1e-5;
-} // namespace
-
 namespace openspace::luascriptfunctions {
 
 int isFlying(lua_State* L) {
@@ -97,7 +93,7 @@ int flyTo(lua_State* L) {
         }
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
-            if (d <= Epsilon) {
+            if (d <= 0.0) {
                 return ghoul::lua::luaError(L, "Duration must be larger than zero");
             }
             insDict.setValue("Duration", d);
@@ -105,7 +101,7 @@ int flyTo(lua_State* L) {
     }
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= Epsilon) {
+        if (d <= 0.0) {
             return ghoul::lua::luaError(L, "Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
@@ -145,7 +141,7 @@ int flyToHeight(lua_State* L) {
         }
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
-            if (d <= Epsilon) {
+            if (d <= 0.0) {
                 return ghoul::lua::luaError(L, "Duration must be larger than zero");
             }
             insDict.setValue("Duration", d);
@@ -153,7 +149,7 @@ int flyToHeight(lua_State* L) {
     }
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= Epsilon) {
+        if (d <= 0.0) {
             return ghoul::lua::luaError(L, "Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
@@ -193,7 +189,7 @@ int flyToNavigationState(lua_State* L) {
 
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= Epsilon) {
+        if (d <= 0.0) {
             return ghoul::lua::luaError(L, "Duration must be larger than zero");
         }
         instruction.setValue("Duration", d);
@@ -223,7 +219,7 @@ int zoomToFocus(lua_State* L) {
 
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= Epsilon) {
+        if (d <= 0.0) {
             return ghoul::lua::luaError(L, "Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
@@ -243,7 +239,7 @@ int zoomToDistance(lua_State* L) {
     auto [distance, duration] =
         ghoul::lua::values<double, std::optional<double>>(L);
 
-    if (distance <= 0.f) {
+    if (distance <= 0.0) {
         return ghoul::lua::luaError(L, "The distance must be larger than zero");
     }
 
@@ -260,7 +256,7 @@ int zoomToDistance(lua_State* L) {
 
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= Epsilon) {
+        if (d <= 0.0) {
             return ghoul::lua::luaError(L, "Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
@@ -280,7 +276,7 @@ int zoomToDistanceRelative(lua_State* L) {
     auto [distance, duration] =
         ghoul::lua::values<double, std::optional<double>>(L);
 
-    if (distance <= 0.f) {
+    if (distance <= 0.0) {
         return ghoul::lua::luaError(L, "The distance must be larger than zero");
     }
 
@@ -299,7 +295,7 @@ int zoomToDistanceRelative(lua_State* L) {
 
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= Epsilon) {
+        if (d <= 0.0) {
             return ghoul::lua::luaError(L, "Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);

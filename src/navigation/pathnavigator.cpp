@@ -240,7 +240,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
         return;
     }
 
-    LINFO("Successfully generated camera path");
+    LDEBUG("Successfully generated camera path");
 }
 
 void PathNavigator::clearPath() {
@@ -441,9 +441,9 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 &luascriptfunctions::flyTo,
                 "string [, bool, double]",
                 "Move the camera to the node with the specified identifier. The optional "
-                "double specifies the duration of the motion. If the optional bool is "
-                "set to true the target up vector for camera is set based on the target "
-                "node. Either of the optional parameters can be left out."
+                "double specifies the duration of the motion, in seconds. If the optional "
+                "bool is set to true the target up vector for camera is set based on the "
+                "target node. Either of the optional parameters can be left out."
             },
             {
                 "flyToHeight",
@@ -452,25 +452,26 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "Move the camera to the node with the specified identifier. The second "
                 "argument is the desired target height above the target node's bounding "
                 "sphere, in meters. The optional double specifies the duration of the "
-                "motion. If the optional bool is set to true, the target up vector for "
-                "camera is set based on the target node. Either of the optional "
-                "parameters can be left out."
+                "motion, in seconds. If the optional bool is set to true, the target "
+                "up vector for camera is set based on the target node. Either of the "
+                "optional parameters can be left out."
             },
             {
                 "flyToNavigationState",
                 &luascriptfunctions::flyToNavigationState,
                 "table, [double]",
                 "Create a path to the navigation state described by the input table. "
-                "The optional double specifies the target duration of the motion. Note "
-                "that roll must be included for the target up direction to be taken "
-                "into account."
+                "The optional double specifies the target duration of the motion, "
+                "in seconds. Note that roll must be included for the target up "
+                "direction to be taken into account."
             },
             {
                 "zoomToFocus",
                 &luascriptfunctions::zoomToFocus,
                 "[duration]",
                 "Zoom linearly to the current focus node, using the default distance."
-                "The optional input parameter specifies the duration for the motion."
+                "The optional input parameter specifies the duration for the motion, "
+                "in seconds."
             },
             {
                 "zoomToDistance",
@@ -479,7 +480,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "Fly linearly to a specific distance in relation to the focus node. "
                 "The distance is given in meters above the bounding sphere of the "
                 "current focus node."
-                "The optional input parameter specifies the duration for the motion."
+                "The optional input parameter specifies the duration for the motion, "
+                "in seconds."
             },
             {
                 "zoomToDistanceRelative",
@@ -490,7 +492,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "current focus node. That is, a value of 1 will result in a position "
                 "at a distance of one times the size of the bounding sphere away from "
                 "the object."
-                "The optional input parameter specifies the duration for the motion."
+                "The optional input parameter specifies the duration for the motion, "
+                "in seconds."
             },
             {
                 "createPath",

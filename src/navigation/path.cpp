@@ -148,7 +148,7 @@ std::vector<glm::dvec3> Path::controlPoints() const {
 CameraPose Path::traversePath(double dt, float speedScale) {
     double speed = speedAlongPath(_traveledDistance);
     speed *= static_cast<double>(speedScale);
-    double displacement =  dt * speed;
+    double displacement = dt * speed;
 
     const double prevDistance = _traveledDistance;
 
@@ -167,7 +167,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
         if (displacement > remainingDistance) {
             displacement = remainingDistance;
             _traveledDistance = pathLength();
-            _forceQuit = true;
+            _shouldForceQuit = true;
             return _end.pose();
         }
 
@@ -182,7 +182,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
         if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
             // The distaces are too large, so we are not making progress because of
             // insufficient precision
-            _forceQuit = true;
+            _shouldForceQuit = true;
             LWARNING("Quit camera path prematurely due to insufficient precision");
         }
 
@@ -199,7 +199,7 @@ std::string Path::currentAnchor() const {
 }
 
 bool Path::hasReachedEnd() const {
-    if (_forceQuit) {
+    if (_shouldForceQuit) {
         return true;
     }
 
@@ -210,7 +210,7 @@ void Path::resetPlaybackVariables() {
     _prevPose = _start.pose();
     _traveledDistance = 0.0;
     _progressedTime = 0.0;
-    _forceQuit = false;
+    _shouldForceQuit = false;
 }
 
 CameraPose Path::interpolatedPose(double distance) const {
@@ -259,6 +259,9 @@ glm::dquat Path::linearPathRotation(double t) const {
     // This distance is guaranteed to be strictly decreasing for linear paths
     const double distanceToEnd = glm::distance(_prevPose.position, _end.position());
 
+    // Determine the distance at which to start interpolating to the target rotation.
+    // The magic numbers here are just randomly picked constants, set to make the
+    // resulting rotation look ok-ish
     double closingUpDistance = 10.0 * _end.validBoundingSphere();
     if (pathLength() < 2.0 * closingUpDistance) {
         closingUpDistance = 0.2 * pathLength();
@@ -368,7 +371,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     if (traveledDistance > (pathLength() - closeUpDistance)) {
         double remainingDistance = 0.0;
         if (_type == Type::Linear) {
-            remainingDistance = glm::distance(_prevPose.position,_end.position());
+            remainingDistance = glm::distance(_prevPose.position, _end.position());
         }
         else {
             remainingDistance = pathLength() - traveledDistance;

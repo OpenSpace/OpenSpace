@@ -45,6 +45,9 @@ public:
 
     virtual ~PathCurve() = 0;
 
+    /**
+     * Return the length of the curve, in meters
+     */
     double length() const;
 
     /**
@@ -74,16 +77,16 @@ public:
 
 protected:
     /**
-     * Precompute information related to the spline parameters, that are
+     * Precompute information related to the spline parameters that are
      * needed for arc length reparameterization. Must be called after
-     * control point creation
+     * control point creation.
      */
     void initializeParameterData();
 
     /**
      * Compute curve parameter u that matches the input arc length s.
-     * Input s is a length value, in the range [0, _totalLength]. The returned curve
-     * parameter u is in range [0, 1]
+     * Input s is a length value in meters, in the range [0, _totalLength].
+     * The returned curve parameter u is in range [0, 1].
      */
     double curveParameter(double s) const;
 
@@ -96,7 +99,7 @@ protected:
 
     std::vector<double> _curveParameterSteps; // per segment
     std::vector<double> _lengthSums; // per segment
-    double _totalLength = 0.0;
+    double _totalLength = 0.0; // meters
 
     struct ParameterPair {
         double u; // curve parameter

@@ -79,10 +79,9 @@ void PathCurve::initializeParameterData() {
 
     // Evenly space out parameter intervals
     _curveParameterSteps.reserve(_nSegments + 1);
-    for (double i = 0.0; i < max; i += 1.0) {
-        _curveParameterSteps.push_back(i);
+    for (int i = 0; i <= _nSegments; i++) {
+        _curveParameterSteps.push_back(static_cast<double>(i));
     }
-    _curveParameterSteps.push_back(max);
 
     // Arc lengths
     _lengthSums.reserve(_nSegments + 1);
@@ -100,31 +99,24 @@ void PathCurve::initializeParameterData() {
     }
 
     // Compute a map of arc lengths s and curve parameters u, for reparameterization
-    constexpr const int steps = 100;
-    const double uStep = 1.0 / static_cast<double>(steps);
-    _parameterSamples.reserve(steps * _nSegments + 1);
-
-    bool problematic = false;
+    constexpr const int Steps = 100;
+    const double uStep = 1.0 / static_cast<double>(Steps);
+    _parameterSamples.reserve(Steps * _nSegments + 1);
 
     for (unsigned int i = 0; i < _nSegments; i++) {
         double uStart = _curveParameterSteps[i];
         double sStart = _lengthSums[i];
         _parameterSamples.push_back({ uStart, sStart });
         // Intermediate sampels
-        for (int j = 1; j < steps; ++j) {
+        for (int j = 1; j < Steps; ++j) {
             double u = uStart + j * uStep;
             double s = sStart + arcLength(uStart, u);
-            // Ignore samples that are indistinguishable due to precision limitations
+            // Identify samples that are indistinguishable due to precision limitations
             if (std::abs(s - _parameterSamples.back().s) < LengthEpsilon) {
-                problematic = true;
-                continue;
+                throw InsufficientPrecisionError("Insufficient precision due to path length");
             }
             _parameterSamples.push_back({ u, s });
         }
-    }
-
-    if (problematic) {
-        throw InsufficientPrecisionError("Insufficient precision due to path length");
     }
 
     // Remove the very last sample if indistinguishable from the final one
