@@ -345,15 +345,14 @@ double Path::speedAlongPath(double traveledDistance) const {
     const double speed = distanceToClosestNode;
 
     // Dampen at the start and end
-    constexpr const double closeUpDistanceFactor = 3.0;
-    constexpr const double startUpDistanceFactor = 2.0;
+    constexpr const double DampenDistanceFactor = 3.0;
 
-    double startUpDistance = startUpDistanceFactor * _start.node()->boundingSphere();
+    double startUpDistance = DampenDistanceFactor * _start.node()->boundingSphere();
     if (startUpDistance < LengthEpsilon) { // zero bounding sphere
         startUpDistance = glm::distance(_start.position(), startNodePos);
     }
 
-    double closeUpDistance = closeUpDistanceFactor * _end.node()->boundingSphere();
+    double closeUpDistance = DampenDistanceFactor * _end.node()->boundingSphere();
     if (closeUpDistance < LengthEpsilon) { // zero bounding sphere
         closeUpDistance = glm::distance(_end.position(), endNodePos);
     }
@@ -378,6 +377,7 @@ double Path::speedAlongPath(double traveledDistance) const {
         const double remainingDistance = pathLength() - traveledDistance;
         dampeningFactor = remainingDistance / closeUpDistance;
     }
+    dampeningFactor = ghoul::sineEaseOut(dampeningFactor);
 
     // Prevent multiplying with 0 (and hence a speed of 0.0 => no movement)
     dampeningFactor += 0.01;
