@@ -339,7 +339,6 @@ double Path::speedAlongPath(double traveledDistance) const {
     const double distanceToStartNode = glm::distance(_prevPose.position, startNodePos);
     bool isCloserToEnd = distanceToEndNode < distanceToStartNode;
 
-    const SceneGraphNode* closestNode = isCloserToEnd ? _end.node() : _start.node();
     const glm::dvec3 closestPos = isCloserToEnd ? endNodePos : startNodePos;
     const double distanceToClosestNode = glm::distance(closestPos, _prevPose.position);
 
