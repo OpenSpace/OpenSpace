@@ -885,6 +885,21 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
                 "Removes the asset with the specfied name from the scene. The parameter "
                 "to this function is the same that was originally used to load this "
                 "asset, i.e. the path to the asset file"
+            },
+            {
+                "isLoaded",
+                &luascriptfunctions::asset::isLoaded,
+                "string",
+                "Returns true if the referenced asset already has been loaded. Otherwise "
+                "false is returned. The parameter to this function is the path of the "
+                "asset that should be tested"
+            },
+            {
+                "allAssets",
+                &luascriptfunctions::asset::allAssets,
+                "",
+                "Returns the paths to all loaded assets, loaded directly or indirectly, "
+                "as a table containing the paths to all loaded assets."
             }
         }
     };
