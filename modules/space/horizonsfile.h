@@ -26,7 +26,10 @@
 #define __OPENSPACE_MODULE_SPACE___HORIZONSFILE___H__
 
 #include <openspace/json.h>
+#include <ghoul/glm.h>
 #include <filesystem>
+#include <string>
+#include <vector>
 
 using json = nlohmann::json;
 
@@ -49,11 +52,9 @@ namespace openspace {
  */
 class HorizonsFile {
 public:
-    enum class HorizonsResult {
+    enum class ResultCode {
         Valid,
         Empty,
-        ErrorVersion,
-        ErrorSource,
 
         // Erros caught by the error field in the json output
         ErrorSize,
@@ -72,6 +73,28 @@ public:
         UnknownError
     };
 
+    enum class Type {
+        Observer, // Default
+        Vector,   // Default for sending for new data
+        Invalid   // If errors or empty etc
+    };
+
+    struct HorizonsKeyframe {
+        double time; // J2000 seconds
+        glm::dvec3 position;
+    };
+
+    struct HorizonsResult {
+
+        HorizonsResult()
+            : type(Type::Invalid), errorCode(ResultCode::UnknownError)
+        {}
+
+        Type type;
+        ResultCode errorCode;
+        std::vector<HorizonsKeyframe> data;
+    };
+
     HorizonsFile();
     HorizonsFile(std::filesystem::path file);
 
@@ -79,10 +102,20 @@ public:
     const std::filesystem::path& file() const;
     std::filesystem::path& file();
 
-    static HorizonsResult isValidAnswer(const json& answer);
-    HorizonsResult isValidHorizonsFile() const;
+    static ResultCode isValidAnswer(const json& answer);
+    ResultCode isValidHorizonsFile() const;
+    void displayErrorMessage(ResultCode code) const;
+    HorizonsResult readFile();
 
 private:
+    HorizonsResult readVectorFile();
+    HorizonsResult readObserverFile();
+
+    std::vector<std::string> parseMatches(const std::string& startPhrase,
+        const std::string& endPhrase) const;
+    std::pair<std::string, std::string> parseValidTimeRange(
+        const std::string& startPhrase, const std::string& endPhrase) const;
+
     std::filesystem::path _file;
 };
 

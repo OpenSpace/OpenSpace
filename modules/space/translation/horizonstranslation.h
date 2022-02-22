@@ -31,6 +31,7 @@
 #include <openspace/util/timeline.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/lua/luastate.h>
+#include <modules/space/horizonsfile.h>
 #include <memory>
 
 namespace openspace {
@@ -40,14 +41,30 @@ namespace documentation { struct Documentation; }
 
 /**
  * The HorizonsTranslation is based on text files generated from NASA JPL HORIZONS Website
- * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation expects a file with format:
+ * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector table
+ * and Observer as Horizons data table
+ *
+ * In case of Vector table data the implementation expects a file with format:
+ * TIME(JulianDayNumber = A.D. YYYY-MM-DD HH:MM:SS TDB)
+ *   X(km) Y(km) Z(km)
+ * TIME - Only the "YYYY-MM-DD HH:MM:SS" part is of interest, the rest is ignored
+ * X - X position in kilometers in Ecliptic J2000 reference frame
+ * Y - Y position in kilometers in Ecliptic J2000 reference frame
+ * Z - Z position in kilometers in Ecliptic J2000 reference frame
+ * Changes required in the "Table Settings" for compatible data:
+ * 1. Under "Select Output Quantities" choose option "Position components {x, y, z} only
+ * 2. Uncheck the "Vector labels" options
+ *
+ * In case of Observer table data the implementation expects a file with format:
  * TIME(YYYY-MM-DD HH:MM:SS) Range(km) GalLon(degrees) GalLat(degrees)
- * Range - The distance from target to observer. Chosen as "Observer range & range-rate"
- * in "Table Setting". This also generates a delta that can be suppressed under "Optional
- * observer-table settings" to limit file size. User must set output settings to
- * kilometers.
- * GalLon - Galactic Longitude. User must set output to Degrees in "Table Settings".
- * GalLat - Galactic Latitude. User must set output to Degrees in "Table Settings".
+ * Range - The distance from target to observer in kilometers
+ * GalLon - Galactic Longitude in degrees
+ * GalLat - Galactic Latitude in degrees
+ * Changes required in the "Table Settings" for compatible data:
+ * 1. Under "Observer Table Settings" uncheck all options except
+ *    "Observer range & range-rate" and "Galactic longitude & latitude"
+ * 2. Change "Range units" to "kilometers (km)" instead of "astronomical units (au)"
+ * 3. Check the "Suppress range-rate" option
  */
 class HorizonsTranslation : public Translation {
 public:
@@ -60,7 +77,7 @@ public:
 
 private:
     void loadData();
-    void readHorizonsTextFile(const std::filesystem::path& file);
+    void readHorizonsTextFile(HorizonsFile& horizonsFile);
     bool loadCachedFile(const std::filesystem::path& file);
     void saveCachedFile(const std::filesystem::path& file) const;
 

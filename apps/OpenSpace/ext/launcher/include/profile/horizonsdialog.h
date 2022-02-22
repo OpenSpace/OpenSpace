@@ -79,7 +79,7 @@ private:
     json handleReply(QNetworkReply* reply);
     bool checkHttpStatus(const QVariant& statusCode);
     std::filesystem::path handleAnswer(json& answer);
-    bool handleResult(openspace::HorizonsFile::HorizonsResult& result);
+    bool handleResult(openspace::HorizonsFile::ResultCode& result);
     void appendLog(const std::string& message, const LogLevel level);
 
     std::filesystem::path _horizonsFile;

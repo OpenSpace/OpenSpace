@@ -168,67 +168,24 @@ void HorizonsTranslation::loadData() {
         }
         LINFO(fmt::format("Loading Horizon file '{}'", file));
 
-        readHorizonsTextFile(file);
+        HorizonsFile horizonsFile(file);
+        readHorizonsTextFile(horizonsFile);
 
         LINFO("Saving cache");
         saveCachedFile(cachedFile);
     }
 }
 
-void HorizonsTranslation::readHorizonsTextFile(const std::filesystem::path& file) {
-    std::ifstream fileStream(file);
-
-    if (!fileStream.good()) {
-        LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", file
-        ));
+void HorizonsTranslation::readHorizonsTextFile(HorizonsFile& horizonsFile) {
+    HorizonsFile::HorizonsResult result = horizonsFile.readFile();
+    if (result.errorCode != HorizonsFile::ResultCode::Valid) {
+        horizonsFile.displayErrorMessage(result.errorCode);
         return;
     }
 
-    // The beginning of a Horizons file has a header with a lot of information about the
-    // query that we do not care about. Ignore everything until data starts, including
-    // the row marked by $$SOE (i.e. Start Of Ephemerides).
-    std::string line;
-    while (line[0] != '$') {
-        std::getline(fileStream, line);
+    for (HorizonsFile::HorizonsKeyframe& keyframe : result.data) {
+        _timeline.addKeyframe(keyframe.time, std::move(keyframe.position));
     }
-
-    // Read data line by line until $$EOE (i.e. End Of Ephemerides).
-    // Skip the rest of the file.
-    std::getline(fileStream, line);
-    while (line[0] != '$') {
-        std::stringstream str(line);
-        std::string date;
-        std::string time;
-        double range = 0;
-        double gLon = 0;
-        double gLat = 0;
-
-        // File is structured by:
-        // YYYY-MM-DD
-        // HH:MM:SS
-        // Range-to-observer (km)
-        // Range-delta (km/s) -- suppressed!
-        // Galactic Longitude (degrees)
-        // Galactic Latitude (degrees)
-        str >> date >> time >> range >> gLon >> gLat;
-
-        // Convert date and time to seconds after 2000
-        // and pos to Galactic positions in meter from Observer.
-        std::string timeString = date + " " + time;
-        double timeInJ2000 = Time::convertTime(timeString);
-        glm::dvec3 gPos = glm::dvec3(
-            1000 * range * cos(glm::radians(gLat)) * cos(glm::radians(gLon)),
-            1000 * range * cos(glm::radians(gLat)) * sin(glm::radians(gLon)),
-            1000 * range * sin(glm::radians(gLat))
-        );
-
-        // Add position to stored timeline.
-        _timeline.addKeyframe(timeInJ2000, std::move(gPos));
-
-        std::getline(fileStream, line);
-    }
-    fileStream.close();
 }
 
 bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {

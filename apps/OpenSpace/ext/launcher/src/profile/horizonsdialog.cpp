@@ -480,7 +480,7 @@ bool HorizonsDialog::handleRequest() {
 
     _horizonsFile = file;
     openspace::HorizonsFile horizonsFile(_horizonsFile);
-    openspace::HorizonsFile::HorizonsResult result =
+    openspace::HorizonsFile::ResultCode result =
         horizonsFile.isValidHorizonsFile();
 
     return handleResult(result);
@@ -759,10 +759,10 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
 }
 
 std::filesystem::path HorizonsDialog::handleAnswer(json& answer) {
-    openspace::HorizonsFile::HorizonsResult isValid = openspace::HorizonsFile::isValidAnswer(answer);
-    if (isValid != openspace::HorizonsFile::HorizonsResult::Valid &&
-        isValid != openspace::HorizonsFile::HorizonsResult::MultipleObserverStations &&
-        isValid != openspace::HorizonsFile::HorizonsResult::ErrorTimeRange)
+    openspace::HorizonsFile::ResultCode isValid = openspace::HorizonsFile::isValidAnswer(answer);
+    if (isValid != openspace::HorizonsFile::ResultCode::Valid &&
+        isValid != openspace::HorizonsFile::ResultCode::MultipleObserverStations &&
+        isValid != openspace::HorizonsFile::ResultCode::ErrorTimeRange)
     {
         // Special case with MultipleObserverStations since it is detected as an error
         // but could be fixed by parsing the matches and let user choose
@@ -802,26 +802,16 @@ std::filesystem::path HorizonsDialog::handleAnswer(json& answer) {
     return fullFilePath;
 }
 
-bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& result) {
+bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
     switch (result) {
-        case openspace::HorizonsFile::HorizonsResult::Valid:
+        case openspace::HorizonsFile::ResultCode::Valid:
             return true;
 
-        case openspace::HorizonsFile::HorizonsResult::Empty:
+        case openspace::HorizonsFile::ResultCode::Empty:
             _errorMsg->setText("The horizons file is empty");
             break;
 
-        case openspace::HorizonsFile::HorizonsResult::ErrorVersion:
-            appendLog(
-                "The recieved data has a different version than what is supported",
-                HorizonsDialog::LogLevel::Warning
-            );
-            break;
-        case openspace::HorizonsFile::HorizonsResult::ErrorSource:
-            appendLog("The API source is unkown", HorizonsDialog::LogLevel::Warning);
-            break;
-
-        case openspace::HorizonsFile::HorizonsResult::ErrorSize: {
+        case openspace::HorizonsFile::ResultCode::ErrorSize: {
             std::string message = "Time range '" + _startTime + "' to '" + _endTime +
                 "' with step size '" + _stepEdit->text().toStdString() +
                 "' " + _timeTypeCombo->currentText().toStdString() +
@@ -831,14 +821,14 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& resul
             break;
         }
 
-        case openspace::HorizonsFile::HorizonsResult::ErrorSpan:
+        case openspace::HorizonsFile::ResultCode::ErrorSpan:
             appendLog(
                 "Step size is too big, exceeds available time span for target",
                 HorizonsDialog::LogLevel::Error
             );
             break;
 
-        case openspace::HorizonsFile::HorizonsResult::ErrorTimeRange: {
+        case openspace::HorizonsFile::ResultCode::ErrorTimeRange: {
             appendLog("Time range is outside the valid range for target '"
                 + _targetName + "'.", HorizonsDialog::LogLevel::Error);
 
@@ -857,21 +847,21 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& resul
             break;
         }
 
-        case openspace::HorizonsFile::HorizonsResult::ErrorNoObserver:
+        case openspace::HorizonsFile::ResultCode::ErrorNoObserver:
             appendLog("No match was found for observer '" + _observerName + "'. "
                 "Use '@" + _observerName + "' as observer to list possible matches.",
                 HorizonsDialog::LogLevel::Error
             );
             break;
 
-        case openspace::HorizonsFile::HorizonsResult::ErrorObserverTargetSame:
+        case openspace::HorizonsFile::ResultCode::ErrorObserverTargetSame:
             appendLog("The observer '" + _observerName + "' and target '" + _targetName +
                 "' are the same. Please use another observer for the current target.",
                 HorizonsDialog::LogLevel::Error
             );
             break;
 
-        case openspace::HorizonsFile::HorizonsResult::ErrorNoData:
+        case openspace::HorizonsFile::ResultCode::ErrorNoData:
             appendLog("There is not enough data to compute the state of target '" +
                 _targetName + "' in relation to the observer '" + _observerName +
                 "' for the time range '" + _startTime + "' to '" + _endTime +
@@ -880,7 +870,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& resul
             );
             break;
 
-        case openspace::HorizonsFile::HorizonsResult::MultipleObserverStations: {
+        case openspace::HorizonsFile::ResultCode::MultipleObserverStations: {
             appendLog("Multiple matching observer stations were found for observer '" +
                 _observerName + "'. ", HorizonsDialog::LogLevel::Warning
             );
@@ -909,7 +899,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& resul
             break;
         }
 
-        case openspace::HorizonsFile::HorizonsResult::MultipleObserver: {
+        case openspace::HorizonsFile::ResultCode::MultipleObserver: {
             appendLog("Multiple matches were found for observer '" +
                 _observerName + "'",
                 HorizonsDialog::LogLevel::Warning
@@ -935,13 +925,13 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& resul
             break;
         }
 
-        case openspace::HorizonsFile::HorizonsResult::ErrorNoTarget:
+        case openspace::HorizonsFile::ResultCode::ErrorNoTarget:
             appendLog("No match was found for target '" + _targetName + "'",
                 HorizonsDialog::LogLevel::Error
             );
             break;
 
-        case openspace::HorizonsFile::HorizonsResult::MultipleTarget: {
+        case openspace::HorizonsFile::ResultCode::MultipleTarget: {
             // Case Small Bodies:
             // Line before data: Matching small-bodies
             // Format: Record #, Epoch-yr, >MATCH DESIG<, Primary Desig, Name
@@ -976,7 +966,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& resul
             break;
         }
 
-        case openspace::HorizonsFile::HorizonsResult::UnknownError:
+        case openspace::HorizonsFile::ResultCode::UnknownError:
             _errorMsg->setText("An unknown error occured");
             break;
 
