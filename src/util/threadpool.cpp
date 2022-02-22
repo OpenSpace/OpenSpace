@@ -99,4 +99,8 @@ void ThreadPool::clearTasks() {
     } // release lock
 }
 
+bool ThreadPool::hasOutstandingTasks() const {
+    return !tasks.empty();
+}
+
 } // namespace openspace
