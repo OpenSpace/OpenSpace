@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,11 +59,11 @@ namespace {
         // [[codegen::verbatim(SourceFolderInfo.description)]]
         std::string sourceFolder;
 
-        enum class RenderType {
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderType {
             Background,
             Opaque,
-            PreDeferredTransparency,
-            PostDeferredTransparency,
+            PreDeferredTransparent [[codegen::key("PreDeferredTransparency")]],
+            PostDeferredTransparent [[codegen::key("PostDeferredTransparency")]],
             Overlay
         };
 
@@ -113,23 +113,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     _sourceFolder.onChange([this]() { _texture = loadTexture(); });
 
     if (p.renderType.has_value()) {
-        switch (*p.renderType) {
-            case Parameters::RenderType::Background:
-                setRenderBin(Renderable::RenderBin::Background);
-                break;
-            case Parameters::RenderType::Opaque:
-                setRenderBin(Renderable::RenderBin::Opaque);
-                break;
-            case Parameters::RenderType::PreDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-                break;
-            case Parameters::RenderType::PostDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-                break;
-            case Parameters::RenderType::Overlay:
-                setRenderBin(Renderable::RenderBin::Overlay);
-                break;
-        }
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderType));
     }
     else {
         setRenderBin(Renderable::RenderBin::Opaque);
@@ -168,7 +152,8 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
     _textureFiles.resize(_sourceFiles.size());
     for (size_t i = 0; i < _sourceFiles.size(); ++i) {
         _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_sourceFiles[i]).string()
+            absPath(_sourceFiles[i]).string(),
+            2
         );
         _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
         _textureFiles[i]->uploadTexture();
@@ -306,7 +291,7 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
         const double lastTriggerTime = _startTimes[_sourceFiles.size() - 1];
         const double sequenceDuration = lastTriggerTime - _startTimes[0];
         const double averageStateDuration = sequenceDuration /
-            (static_cast<double>(_sourceFiles.size() - 1.0));
+            static_cast<double>(_sourceFiles.size() - 1);
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
 }

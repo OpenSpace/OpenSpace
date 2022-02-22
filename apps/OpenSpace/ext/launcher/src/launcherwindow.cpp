@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -382,6 +382,23 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     }
 }
 
+// Returns 'true' if the file was a configuration file, 'false' otherwise
+bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_entry& p) {
+    const bool isXml = p.path().extension() == ".xml";
+    const bool isJson = p.path().extension() == ".json";
+    if (!isXml && !isJson) {
+        return false;
+    }
+    box.addItem(QString::fromStdString(p.path().filename().string()));
+
+    // For now, mark the XML configuration files to show that they are deprecated
+    if (isXml) {
+        box.setItemData(box.count() - 1, QBrush(Qt::darkYellow), Qt::ForegroundRole);
+    }
+
+    return true;
+}
+
 void LauncherWindow::populateWindowConfigsList(std::string preset) {
     namespace fs = std::filesystem;
 
@@ -389,34 +406,49 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
 
     _userConfigCount = 0;
     _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
-    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
+    const QStandardItemModel* model =
+        qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
+
     model->item(_userConfigCount)->setEnabled(false);
     ++_userConfigCount;
-    // Add all the files with the .xml extension to the dropdown
+
+    bool hasXmlConfig = false;
+
+    // Add all the files with the .xml or .json extension to the dropdown
     for (const fs::directory_entry& p : fs::directory_iterator(_userConfigPath)) {
-        if (p.path().extension() != ".xml") {
-            continue;
+        bool isConfigFile = handleConfigurationFile(*_windowConfigBox, p);
+        if (isConfigFile) {
+            ++_userConfigCount;
         }
-        _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
-         ++_userConfigCount;
+
+        hasXmlConfig |= p.path().extension() == ".xml";
     }
     _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
     model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
     model->item(_userConfigCount)->setEnabled(false);
 
     if (std::filesystem::exists(_configPath)) {
-        // Add all the files with the .xml extension to the dropdown
+        // Add all the files with the .xml or .json extension to the dropdown
         for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
-            if (p.path().extension() != ".xml") {
-                continue;
-            }
-            _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
+            handleConfigurationFile(*_windowConfigBox, p);
+            hasXmlConfig |= p.path().extension() == ".xml";
         }
     }
     else {
         LINFOC(
             "LauncherWindow",
             fmt::format("Could not find config folder '{}'", _configPath)
+        );
+    }
+
+    if (hasXmlConfig) {
+        // At least one XML configuration file is present, so we should show the tooltip
+        // informing the user that files will be deprecated
+        _windowConfigBox->setToolTip(
+            "Support for XML-based configuration files will be removed in the next "
+            "version of OpenSpace. Please convert the files to the new JSON format or "
+            "run the Node tool at "
+            "https://github.com/sgct/sgct/tree/master/support/config-converter"
         );
     }
 
@@ -434,7 +466,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
 }
 
-void LauncherWindow::openProfileEditor(const std::string& profile, const bool isUserProfile) {
+void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserProfile) {
     std::optional<Profile> p;
     std::string saveProfilePath = isUserProfile ? _userProfilePath : _profilePath;
     if (profile.empty()) {

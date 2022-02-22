@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickinputstate.h>
 
 namespace {
@@ -86,7 +85,7 @@ void GuiJoystickComponent::render() {
     ImGui::Text("%s", "Summed contributions");
     ImGui::Text("%s", "Axes");
     for (int i = 0; i < JoystickInputState::MaxAxes; ++i) {
-        float f = global::joystickInputStates->axis(i);
+        float f = global::joystickInputStates->axis("", i);
         ImGui::SliderFloat(
             std::to_string(i).c_str(),
             &f,
@@ -98,8 +97,8 @@ void GuiJoystickComponent::render() {
     for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
         ImGui::RadioButton(
             std::to_string(i).c_str(),
-            global::joystickInputStates->button(i, JoystickAction::Press) ||
-                global::joystickInputStates->button(i, JoystickAction::Repeat)
+            global::joystickInputStates->button("", i, JoystickAction::Press) ||
+                global::joystickInputStates->button("", i, JoystickAction::Repeat)
         );
     }
 

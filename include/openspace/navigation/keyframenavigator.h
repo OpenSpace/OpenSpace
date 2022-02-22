@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,6 @@ public:
     void removeKeyframesAfter(double timestamp, Inclusive inclusive = Inclusive::No);
     void clearKeyframes();
     size_t nKeyframes() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
     double currentTime() const;
     void setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp);
 

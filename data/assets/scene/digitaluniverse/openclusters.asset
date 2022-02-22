@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Open Clusters Textures",
   Type = "HttpSynchronization",
@@ -23,12 +19,12 @@ local object = {
     Enabled = false,
     Color = { 0.1, 0.8, 0.4 },
     Opacity = 0.5,
-    File = speck .. "/oc.speck",
+    File = speck .. "oc.speck",
     Unit = "pc",
-    Texture = textures .. "/point4.png",
+    Texture = textures .. "point4.png",
     PolygonSides = 12,
     TextColor = { 0.05, 0.4, 0.2 },
-    LabelFile = speck .. "/oc.label",
+    LabelFile = speck .. "oc.label",
     ScaleFactor = 405.75,
     TextSize = 15.5,
     TextMinMaxSize = { 4, 30 },
@@ -52,15 +48,23 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+  
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Open Star Clusters",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Digital Universe asset for Open Star Clusters]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"OpenStarClusters"}
+  License = "AMNH Digital Universe"
 }

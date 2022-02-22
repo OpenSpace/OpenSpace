@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,38 +33,68 @@
 
 namespace openspace::interaction {
 
-float JoystickInputStates::axis(int axis) const {
+float JoystickInputStates::axis(const std::string& joystickName, int axis) const {
     ghoul_precondition(axis >= 0, "axis must be 0 or positive");
 
-    float res = std::accumulate(
-        begin(),
-        end(),
-        0.f,
-        [axis](float value, const JoystickInputState& state) {
-            if (state.isConnected) {
-                value += state.axes[axis];
+    if (joystickName.empty()) {
+        float res = std::accumulate(
+            begin(),
+            end(),
+            0.f,
+            [axis](float value, const JoystickInputState& state) {
+                if (state.isConnected) {
+                    value += state.axes[axis];
+                }
+                return value;
             }
-            return value;
-        }
-    );
+        );
 
-    // If multiple joysticks are connected, we might get values outside the -1,1 range by
-    // summing them up
-    glm::clamp(res, -1.f, 1.f);
-    return res;
+        // If multiple joysticks are connected, we might get values outside the -1,1 range by
+        // summing them up
+        glm::clamp(res, -1.f, 1.f);
+        return res;
+    }
+
+    const JoystickInputState* state = nullptr;
+    for (auto it = begin(); it < end(); ++it) {
+        if (it->name == joystickName) {
+            state = &(*it);
+        }
+    }
+
+    if (!state) {
+        return 0.f;
+    }
+
+    return state->axes[axis];
 }
 
-bool JoystickInputStates::button(int button, JoystickAction action) const {
+bool JoystickInputStates::button(const std::string& joystickName, int button, JoystickAction action) const {
     ghoul_precondition(button >= 0, "button must be 0 or positive");
 
-    bool res = std::any_of(
-        begin(),
-        end(),
-        [button, action](const JoystickInputState& state) {
-            return state.isConnected ? (state.buttons[button] == action) : false;
+    if (joystickName.empty()) {
+        bool res = std::any_of(
+            begin(),
+            end(),
+            [button, action](const JoystickInputState& state) {
+                return state.isConnected ? (state.buttons[button] == action) : false;
+            }
+        );
+        return res;
+    }
+
+    const JoystickInputState* state = nullptr;
+    for (auto it = begin(); it < end(); ++it) {
+        if (it->name == joystickName) {
+            state = &(*it);
         }
-    );
-    return res;
+    }
+
+    if (!state) {
+        return false;
+    }
+
+    return state->isConnected ? (state->buttons[button] == action) : false;
 }
 
 } // namespace openspace::interaction

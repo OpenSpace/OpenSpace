@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,15 @@
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -236,7 +244,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
         addPropertySubOwner(_tileCache.get());
 
-        tileprovider::initializeDefaultTile();
+        TileProvider::initializeDefaultTile();
 
         // Convert from MB to Bytes
         GdalWrapper::create(
@@ -249,9 +257,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     global::callback::deinitializeGL->emplace_back([]() {
         ZoneScopedN("GlobeBrowsingModule")
 
-        tileprovider::deinitializeDefaultTile();
+        TileProvider::deinitializeDefaultTile();
     });
-
 
     // Render
     global::callback::render->emplace_back([&]() {
@@ -267,61 +274,57 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         GdalWrapper::destroy();
     });
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 
-    auto fTranslation = FactoryManager::ref().factory<Translation>();
+    ghoul::TemplateFactory<Translation>* fTranslation =
+        FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Translation factory was not created");
     fTranslation->registerClass<globebrowsing::GlobeTranslation>("GlobeTranslation");
 
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
+    ghoul::TemplateFactory<Rotation>* fRotation =
+        FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
     fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
 
-    auto fTileProvider =
-        std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
+    FactoryManager::ref().addFactory<TileProvider>(_factoryName);
+
+    ghoul::TemplateFactory<TileProvider>* fTileProvider =
+        FactoryManager::ref().factory<TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
-    fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::DefaultTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::SingleImageProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::SingleImageTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::TemporalTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::TileIndexTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::SizeReferenceTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::TileProviderByLevel>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::ByLevelTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::ByIndexTileLayer
-        )]
-    );
+    {
+        using namespace layergroupid;
+        fTileProvider->registerClass<DefaultTileProvider>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::DefaultTileLayer)]
+        );
+        fTileProvider->registerClass<SingleImageProvider>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SingleImageTileLayer)]
+        );
+        fTileProvider->registerClass<ImageSequenceTileProvider>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ImageSequenceTileLayer)]
+        );
+        fTileProvider->registerClass<TemporalTileProvider>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::TemporalTileLayer)]
+        );
+        fTileProvider->registerClass<TileIndexTileProvider>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::TileIndexTileLayer)]
+        );
+        fTileProvider->registerClass<SizeReferenceTileProvider>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SizeReferenceTileLayer)]
+        );
+        fTileProvider->registerClass<TileProviderByLevel>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByLevelTileLayer)]
+        );
+        fTileProvider->registerClass<TileProviderByIndex>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByIndexTileLayer)]
+        );
+    }
 
-    FactoryManager::ref().addFactory(std::move(fTileProvider), _factoryName);
-
-    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+        FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemGlobeLocation>("DashboardItemGlobeLocation");
@@ -351,13 +354,13 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "deleteLayer",
             &globebrowsing::luascriptfunctions::deleteLayer,
-            "string, string",
+            "string, string, (string, table)",
             "Removes a layer from the specified globe. The first argument specifies "
             "the name of the scene graph node of which to remove the layer. "
             "The renderable of the specified scene graph node needs to be a "
             "renderable globe. The second argument is the layer group which can be "
-            "any of " + listLayerGroups + ". The third argument is the dictionary"
-            "defining the layer."
+            "any of " + listLayerGroups + ". The third argument is either the identifier "
+            "for the layer or a dictionary with the 'Identifier' key that is used instead"
         },
         {
             "getLayers",
@@ -371,12 +374,14 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "moveLayer",
             &globebrowsing::luascriptfunctions::moveLayer,
             "string, string, number, number",
-            "Rearranges the order of a single layer in a scene graph node. The first "
-            "parameter specifies the scene graph node, the second parameter specifies "
+            "Rearranges the order of a single layer on a globe. The first parameter"
+            "is the identifier of the globe, the second parameter specifies "
             "the name of the layer group, the third parameter is the original position "
             "of the layer that should be moved and the last parameter is the new "
-            "position. The new position may be -1 to place the layer at the top or any "
-            "large number bigger than the number of layers to place it at the bottom."
+            "position in the list. The first position in the list has index 0, and the "
+            "last position is given by the number of layers minus one. The new position "
+            "may be -1 to place the layer at the top or any number bigger than the "
+            "number of layers to place it at the bottom."
         },
         {
             "goToChunk",
@@ -470,7 +475,15 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::LayerAdjustment::Documentation(),
         globebrowsing::LayerManager::Documentation(),
         globebrowsing::GlobeTranslation::Documentation(),
+        globebrowsing::GlobeRotation::Documentation(),
         globebrowsing::RenderableGlobe::Documentation(),
+        globebrowsing::DefaultTileProvider::Documentation(),
+        globebrowsing::ImageSequenceTileProvider::Documentation(),
+        globebrowsing::SingleImageProvider::Documentation(),
+        globebrowsing::SizeReferenceTileProvider::Documentation(),
+        globebrowsing::TemporalTileProvider::Documentation(),
+        globebrowsing::TileProviderByIndex::Documentation(),
+        globebrowsing::TileProviderByLevel::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation()

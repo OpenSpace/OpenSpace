@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -608,10 +608,18 @@ void RingsComponent::update(const UpdateData& data) {
         _textureIsDirty = false;
     }
 
-    _sunPosition = glm::normalize(
-        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
-        data.modelTransform.translation
-    );
+    // @TODO (abock, 2022-02-20) This should be replaced with the more general light
+    // source solution that we are using in other places
+    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
+    if (sun) {
+        _sunPosition = glm::normalize(
+            sun->worldPosition() - data.modelTransform.translation
+        );
+    }
+    else {
+        // If the Sun node is not found, we assume the light source to be in the origin
+        _sunPosition = glm::normalize(-data.modelTransform.translation);
+    }
 }
 
 void RingsComponent::loadTexture() {
@@ -619,9 +627,9 @@ void RingsComponent::loadTexture() {
     using namespace ghoul::opengl;
 
     if (!_texturePath.value().empty()) {
-
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath).string()
+            absPath(_texturePath).string(),
+            1
         );
 
         if (texture) {
@@ -643,7 +651,8 @@ void RingsComponent::loadTexture() {
 
     if (!_textureFwrdPath.value().empty()) {
         std::unique_ptr<Texture> textureForwards = TextureReader::ref().loadTexture(
-            absPath(_textureFwrdPath).string()
+            absPath(_textureFwrdPath).string(),
+            1
         );
 
         if (textureForwards) {
@@ -669,7 +678,8 @@ void RingsComponent::loadTexture() {
 
     if (!_textureBckwrdPath.value().empty()) {
         std::unique_ptr<Texture> textureBackwards = TextureReader::ref().loadTexture(
-            absPath(_textureBckwrdPath).string()
+            absPath(_textureBckwrdPath).string(),
+            1
         );
 
         if (textureBackwards) {
@@ -695,7 +705,8 @@ void RingsComponent::loadTexture() {
 
     if (!_textureUnlitPath.value().empty()) {
         std::unique_ptr<Texture> textureUnlit = TextureReader::ref().loadTexture(
-            absPath(_textureUnlitPath).string()
+            absPath(_textureUnlitPath).string(),
+            1
         );
 
         if (textureUnlit) {
@@ -717,7 +728,8 @@ void RingsComponent::loadTexture() {
 
     if (!_textureColorPath.value().empty()) {
         std::unique_ptr<Texture> textureColor = TextureReader::ref().loadTexture(
-            absPath(_textureColorPath).string()
+            absPath(_textureColorPath).string(),
+            1
         );
 
         if (textureColor) {
@@ -739,7 +751,8 @@ void RingsComponent::loadTexture() {
 
     if (!_textureTransparencyPath.value().empty()) {
         std::unique_ptr<Texture> textureTransparency = TextureReader::ref().loadTexture(
-            absPath(_textureTransparencyPath).string()
+            absPath(_textureTransparencyPath).string(),
+            1
         );
 
         if (textureTransparency) {

@@ -1,8 +1,0 @@
-local models = asset.syncedResource({
-  Name = "Voyager Model",
-  Type = "HttpSynchronization",
-  Identifier = "voyager_model",
-  Version = 1
-})
-
-asset.export('modelFolder', models)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -155,11 +155,6 @@ namespace {
         "Skipping Nodes By Radius",
         "Select nodes to skip depending on Radius."
     };
-    constexpr openspace::properties::Property::PropertyInfo DistanceplanetInfo = {
-        "Distanceplanet",
-        "Distance Planet",
-        "Deciding what planet to check distance to."
-    };
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
         "DistancePlanetThreshold",
         "Threshold for distance between planet",
@@ -169,11 +164,6 @@ namespace {
         "ProximityNodesSize",
         "Earths Proximity Nodes Size",
         "Changes size of nodes only close to earth."
-    };
-    constexpr openspace::properties::Property::PropertyInfo MisalignedIndexInfo = {
-        "MisalignedIndex",
-        "Index to shift sequence number",
-        "The misalignment number for sequence for fluxnodes vs Fieldlines"
     };
     constexpr openspace::properties::Property::PropertyInfo MaxNodeDistanceSizeInfo = {
         "MaxNodeDistanceSize",
@@ -248,42 +238,43 @@ documentation::Documentation RenderableFluxNodes::Documentation() {
 
 RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _earthdistGroup({ "Earthfocus" })
     , _goesEnergyBins(GoesEnergyBinsInfo, properties::OptionProperty::DisplayType::Radio)
     , _styleGroup({ "Style" })
     , _colorMode(ColorModeInfo, properties::OptionProperty::DisplayType::Radio)
-    , _scalingMethod(ScalingmethodInfo, properties::OptionProperty::DisplayType::Radio)
-    , _nodeskipMethod(NodeskipMethodInfo, properties::OptionProperty::DisplayType::Radio)
     , _streamColor(
         StreamColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
         glm::vec4(0.f),
-        glm::vec4(1.f))
-    , _streamGroup({ "Streams" })
-    , _nodesAmountGroup({ "NodeGroup" })
-    , _nodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
+        glm::vec4(1.f)
+    )
     , _colorTablePath(ColorTablePathInfo)
     , _colorTableRange(colorTableRangeInfo, { -2.f, 4.f }, { -8.f, -8.f }, { 8.f, 8.f })
-    , _domainZ(DomainZInfo, { -2.5f, 2.5f }, { -2.5f, -2.5f }, { 2.5f, 2.5f})
     , _fluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
+    , _streamGroup({ "Streams" })
+    , _scalingMethod(ScalingmethodInfo, properties::OptionProperty::DisplayType::Radio)
+    , _nodesAmountGroup({ "NodeGroup" })
+    , _nodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
+    , _distanceThreshold(DistanceThresholdInfo, 0.f, 0.f, 1.f)
+    , _proximityNodesSize(ProximityNodesSizeInfo, 1.f, 0.f, 100.f)
+    , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
+    , _minMaxNodeSize(MinMaxNodeSizeInfo, { 2.f, 30.f }, { 1.f, 1.f }, { 10.f, 200.f })
+    , _domainZ(DomainZInfo, { -2.5f, 2.5f }, { -2.5f, -2.5f }, { 2.5f, 2.5f })
     , _thresholdFlux(ThresholdFluxInfo, -1.5f, -50.f, 10.f)
     , _filteringLower(FilteringInfo, 0.f, 0.f, 5.f)
     , _filteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
     , _amountofNodes(AmountofNodesInfo, 1, 1, 100)
+    , _nodeskipMethod(NodeskipMethodInfo, properties::OptionProperty::DisplayType::Radio)
     , _defaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
-    , _earthNodeSkip(EarthNodeSkipInfo, 1, 1, 100)
     , _fluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
+    , _earthNodeSkip(EarthNodeSkipInfo, 1, 1, 100)
     , _radiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
-    , _earthdistGroup({ "Earthfocus" })
-    , _distanceThreshold(DistanceThresholdInfo, 0.f, 0.f, 1.f)
-    , _proximityNodesSize(ProximityNodesSizeInfo, 1.f, 0.f, 100.f)
-    , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
+    , _cameraPerspectiveGroup({ "CameraPerspective" })
     , _cameraPerspectiveEnabled(CameraPerspectiveEnabledInfo, false)
     , _drawingCircles(DrawingCirclesInfo, true)
-    , _cameraPerspectiveGroup({ "CameraPerspective" })
     , _drawingHollow(DrawingHollowInfo, false)
     , _gaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
     , _perspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 2.67f, 1.f, 20.f)
-    , _minMaxNodeSize(MinMaxNodeSizeInfo, {2.f, 30.f}, {1.f, 1.f}, {10.f, 200.f})
     , _pulseEnabled(pulseEnabledInfo, false)
     , _gaussianPulseEnabled(gaussianPulseEnabledInfo, false)
 {
@@ -528,10 +519,6 @@ bool RenderableFluxNodes::isReady() const {
 }
 
 void RenderableFluxNodes::populateStartTimes() {
-    // number of  characters in UTC ISO8601 format (without additional Z)
-    // 'YYYY-MM-DDTHH-MM-SS-XXX'
-    constexpr const int timeFormatSize = 23;
-
     std::string timeFile;
     std::string fileType;
     for (const std::string& filePath : _binarySourceFiles) {
@@ -641,10 +628,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
     const glm::dmat4 modelMat =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        rotMat *
-        glm::dmat4(glm::scale(
-            glm::dmat4(1.0), data.modelTransform.scale
-        ));
+        rotMat * glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
     const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
     _shaderProgram->setUniform("modelViewProjection",
@@ -812,7 +796,7 @@ void RenderableFluxNodes::updatePositionBuffer() {
 
     glEnableVertexAttribArray(0);
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -830,7 +814,7 @@ void RenderableFluxNodes::updateVertexColorBuffer() {
     );
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -848,7 +832,7 @@ void RenderableFluxNodes::updateVertexFilteringBuffer() {
     );
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

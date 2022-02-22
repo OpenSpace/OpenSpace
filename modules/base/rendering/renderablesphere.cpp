@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,12 +75,6 @@ namespace {
         "outside of the sphere, or both."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseAdditiveBlendingInfo = {
-        "UseAdditiveBlending",
-        "Use Additive Blending",
-        "Render the object using additive blending."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
@@ -113,12 +107,6 @@ namespace {
         "Enables/Disables the Fade-In/Out effects."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
-        "Background",
-        "Sets the current sphere rendering as a background rendering type",
-        "Enables/Disables background rendering."
-    };
-
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
@@ -129,7 +117,7 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
-        enum class Orientation {
+        enum class [[codegen::map(Orientation)]] Orientation {
             Outside,
             Inside,
             Both
@@ -137,9 +125,6 @@ namespace {
 
         // [[codegen::verbatim(OrientationInfo.description)]]
         std::optional<Orientation> orientation;
-
-        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
-        std::optional<bool> useAdditiveBlending;
 
         // [[codegen::verbatim(MirrorTextureInfo.description)]]
         std::optional<bool> mirrorTexture;
@@ -152,9 +137,6 @@ namespace {
 
         // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
         std::optional<bool> disableFadeInOut;
-
-        // [[codegen::verbatim(BackgroundInfo.description)]]
-        std::optional<bool> background;
     };
 #include "renderablesphere_codegen.cpp"
 } // namespace
@@ -172,9 +154,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _mirrorTexture(MirrorTextureInfo, false)
-    , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
     , _disableFadeInDistance(DisableFadeInOutInfo, true)
-    , _backgroundRendering(BackgroundInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, -1.f, 0.f, 1.f)
     , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, 0.f, 1.f)
 {
@@ -194,19 +174,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     });
 
     if (p.orientation.has_value()) {
-        switch (*p.orientation) {
-            case Parameters::Orientation::Inside:
-                _orientation = static_cast<int>(Orientation::Inside);
-                break;
-            case Parameters::Orientation::Outside:
-                _orientation = static_cast<int>(Orientation::Outside);
-                break;
-            case Parameters::Orientation::Both:
-                _orientation = static_cast<int>(Orientation::Both);
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        _orientation = static_cast<int>(codegen::map<Orientation>(*p.orientation));
     }
     else {
         _orientation = static_cast<int>(Orientation::Outside);
@@ -227,14 +195,8 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     _texturePath.onChange([this]() { loadTexture(); });
 
     addProperty(_mirrorTexture);
-    addProperty(_useAdditiveBlending);
 
     _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
-    _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
-
-    if (_useAdditiveBlending) {
-        setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-    }
 
     bool hasGivenFadeOut = p.fadeOutThreshold.has_value();
     if (hasGivenFadeOut) {
@@ -251,12 +213,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     if (hasGivenFadeIn || hasGivenFadeOut) {
         _disableFadeInDistance = false;
         addProperty(_disableFadeInDistance);
-    }
-
-    _backgroundRendering = p.background.value_or(_backgroundRendering);
-
-    if (_backgroundRendering) {
-        setRenderBin(Renderable::RenderBin::Background);
     }
 
     setBoundingSphere(_size);
@@ -398,14 +354,14 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    if (_useAdditiveBlending) {
+    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (_useAdditiveBlending) {
+    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(true);
     }
@@ -437,7 +393,7 @@ void RenderableSphere::update(const UpdateData&) {
 void RenderableSphere::loadTexture() {
     if (!_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+            ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2);
 
         if (texture) {
             LDEBUGC(

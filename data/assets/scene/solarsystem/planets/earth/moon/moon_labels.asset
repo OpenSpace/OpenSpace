@@ -1,8 +1,0 @@
-local LabelsPath = asset.syncedResource({
-  Name = "Moon Labels",
-  Type = "HttpSynchronization",
-  Identifier = "moon_labels",
-  Version = 1
-})
-
-asset.export("LabelsPath", LabelsPath)

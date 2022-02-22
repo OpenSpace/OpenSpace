@@ -1,7 +1,11 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernels = asset.require('../mar097').Kernels
+local transforms = asset.require("../transforms")
 
+local kernels = asset.syncedResource({
+  Name = "Mars Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_kernels",
+  Version = 1
+})
 
 local Deimos = {
   Identifier = "Deimos",
@@ -11,13 +15,13 @@ local Deimos = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_DEIMOS",
       DestinationFrame = "GALACTIC",
-      Kernels = kernels
+      Kernels = kernels .. "mar097.bsp"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "DEIMOS",
       Observer = "MARS BARYCENTER",
-      Kernels = kernels
+      Kernels = kernels .. "mar097.bsp"
     }
   },
   Renderable = {
@@ -56,15 +60,26 @@ local DeimosTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Deimos)
+  openspace.addSceneGraphNode(DeimosTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DeimosTrail)
+  openspace.removeSceneGraphNode(Deimos)
+end)
+    
+asset.export(Deimos)
+asset.export(DeimosTrail)
+
 
 
 asset.meta = {
   Name = "Deimos",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ RenderableGlobe and Trail for Deimos.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Deimos", "DeimosTrail"}
+  License = "MIT license"
 }

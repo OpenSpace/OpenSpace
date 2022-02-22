@@ -1,9 +1,8 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("./transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local OsirisRexKernels = asset.require('./kernels').kernels
+local OsirisRexKernels = asset.require("./kernels").kernels
 
 local models = asset.syncedResource({
   Name = "Osiris Rex Models",
@@ -48,7 +47,7 @@ local OsirisRex = {
   Renderable = {
     Type = "RenderableModel",
     Body = "OSIRIS-REX",
-    GeometryFile = models .. "/orx_base_resized_12_sep_2016.obj",
+    GeometryFile = models .. "orx_base_resized_12_sep_2016.obj",
     LightSources = LightSources
   },
   GUI = {
@@ -74,7 +73,7 @@ local PolyCam = {
   Renderable = {
     Type = "RenderableModel",
     Body = "OSIRIS-REX",
-    GeometryFile = models .. "/orx_polycam_resized_12_sep_2016.obj",
+    GeometryFile = models .. "orx_polycam_resized_12_sep_2016.obj",
     LightSources = LightSources
   },
   GUI = {
@@ -89,7 +88,7 @@ local Rexis = {
   Renderable = {
     Type = "RenderableModel",
     Body = "OSIRIS-REX",
-    GeometryFile = models .. "/orx_rexis_resized_12_sep_2016.obj",
+    GeometryFile = models .. "orx_rexis_resized_12_sep_2016.obj",
     LightSources = LightSources
   },
   Transform = {
@@ -156,10 +155,26 @@ local PolyCamFov = {
 --   }
 -- }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes =  {
   OsirisRex,
   PolyCam,
   Rexis,
   PolyCamFov,
   -- RexisFov
-})
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

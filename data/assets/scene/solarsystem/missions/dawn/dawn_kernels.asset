@@ -1,8 +1,0 @@
-local Kernels = asset.syncedResource({
-  Name = "Dawn Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "dawn_kernels",
-  Version = 2
-})
-
-asset.export("Kernels", Kernels)

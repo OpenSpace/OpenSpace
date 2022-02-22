@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("./transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -36,12 +35,12 @@ local CharonProjection = {
       Segments = 350
     },
     ColorTexturePaths = {
-      textures .. "/NH_Charon_mosaic.png",
-      textures .. "/NH_Charon_mosaic_8192.png"
+      textures .. "NH_Charon_mosaic.png",
+      textures .. "NH_Charon_mosaic_8192.png"
     },
     HeightTexturePaths = {
-      textures .. "/NH_Charon_DTM.png",
-      textures .. "/NH_Charon_DTM_8192.png"
+      textures .. "NH_Charon_DTM.png",
+      textures .. "NH_Charon_DTM_8192.png"
     },
     MeridianShift = true,
     Projection = {
@@ -78,7 +77,7 @@ local CharonText = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = {0, -1000000.0, 0}
+      Position = { 0, -1000000.0, 0 }
     }
   },
   Renderable = {
@@ -86,7 +85,7 @@ local CharonText = {
     Size = 10^6.3,
     Origin = "Center",
     Billboard = true,
-    Texture = textures .. "/Charon-Text.png",
+    Texture = textures .. "Charon-Text.png",
     BlendMode = "Additive"
   },
   GUI = {
@@ -114,8 +113,18 @@ local CharonShadow = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  CharonProjection,
-  CharonText,
-  CharonShadow
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CharonProjection)
+  openspace.addSceneGraphNode(CharonText)
+  openspace.addSceneGraphNode(CharonShadow)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CharonShadow)
+  openspace.removeSceneGraphNode(CharonText)
+  openspace.removeSceneGraphNode(CharonProjection)
+end)
+    
+asset.export(CharonProjection)
+asset.export(CharonText)
+asset.export(CharonShadow)

@@ -1,7 +1,6 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
+asset.require("./trail")
 
 local Jupiter = {
   Identifier = "Jupiter",
@@ -61,15 +60,26 @@ local JupiterLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Jupiter, JupiterLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Jupiter)
+  openspace.addSceneGraphNode(JupiterLabel)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JupiterLabel)
+  openspace.removeSceneGraphNode(Jupiter)
+end)
+    
+asset.export(Jupiter)
+asset.export(JupiterLabel)
+
 
 
 asset.meta = {
   Name = "Jupiter",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Jupiter globe, and main planet label.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Jupiter", "JupiterLabel"}
+  License = "MIT license"
 }

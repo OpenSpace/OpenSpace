@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,7 +49,7 @@ TEST_CASE("CreateSingleColorImage: Create image and check return value",
     std::string path = ghoul::lua::value<std::string>(L, 1);
     CHECK_THAT(
         path,
-        Catch::Matchers::Contains("OpenSpace\\cache\\colorFile.ppm")
+        Catch::Matchers::Contains("colorFile.ppm")
     );
 }
 
@@ -157,7 +157,7 @@ TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage
 
     ppmFile >> version >> width >> height;
 
-    REQUIRE(width == 1);
-    REQUIRE(height == 1);
+    CHECK(width == 1);
+    CHECK(height == 1);
 }
 

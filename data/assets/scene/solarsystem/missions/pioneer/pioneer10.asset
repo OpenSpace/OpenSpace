@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
 
 
@@ -10,7 +9,7 @@ local kernelsFolder = asset.syncedResource({
   Version = 1
 })
 
-local kernelsList = {kernelsFolder .. '/p10-a.bsp'}
+local kernelsList = { kernelsFolder .. "p10-a.bsp" }
 
 local Pioneer10NAIF = "-23"
 
@@ -59,7 +58,19 @@ local Pioneer10Trail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Pioneer10, Pioneer10Trail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Pioneer10)
+  openspace.addSceneGraphNode(Pioneer10Trail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Pioneer10Trail)
+  openspace.removeSceneGraphNode(Pioneer10)
+end)
+    
+asset.export(Pioneer10)
+asset.export(Pioneer10Trail)
+
 
 
 asset.meta = {

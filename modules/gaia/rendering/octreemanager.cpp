@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -134,7 +134,7 @@ void OctreeManager::sliceLodData(size_t branchIndex) {
 }
 
 void OctreeManager::printStarsPerNode() const {
-    auto accumulatedString = std::string();
+    std::string accumulatedString;
 
     for (int i = 0; i < 8; ++i) {
         std::string prefix = "{" + std::to_string(i);
@@ -297,7 +297,7 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
                                              int y, int z, int additionalLevelsToFetch)
 {
     unsigned long long parentId = firstParentId;
-    auto indexStack = std::stack<int>();
+    std::stack<int> indexStack;
 
     // Fetch first layer children if we're already at root.
     if (parentId == 8) {
@@ -398,7 +398,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
                                                               gaia::RenderOption option,
                                                               float lodPixelThreshold)
 {
-    auto renderData = std::map<int, std::vector<float>>();
+    std::map<int, std::vector<float>> renderData;
     bool innerRebuild = false;
     _minTotalPixelsLod = lodPixelThreshold;
 
@@ -1264,7 +1264,7 @@ std::vector<float> OctreeManager::getNodeData(const OctreeNode& node,
     }
 
     // If we're not in a leaf, get data from all children recursively.
-    auto nodeData = std::vector<float>();
+    std::vector<float> nodeData;
     for (size_t i = 0; i < 8; ++i) {
         std::vector<float> tmpData = getNodeData(*node.Children[i], option);
         nodeData.insert(nodeData.end(), tmpData.begin(), tmpData.end());

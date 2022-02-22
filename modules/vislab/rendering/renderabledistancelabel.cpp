@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -136,11 +136,19 @@ void RenderableDistanceLabel::update(const UpdateData&) {
 
         // Update placement of label with transformation matrix
         SceneGraphNode* startNode = RE.scene()->sceneGraphNode(nodeline->start());
-        glm::dvec3 start = startNode->worldPosition();
         SceneGraphNode* endNode = RE.scene()->sceneGraphNode(nodeline->end());
-        glm::dvec3 end = endNode->worldPosition();
-        glm::dvec3 goalPos = start + (end - start) / 2.0;
-        _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
+        if (startNode && endNode) {
+            glm::dvec3 start = startNode->worldPosition();
+            glm::dvec3 end = endNode->worldPosition();
+            glm::dvec3 goalPos = start + (end - start) / 2.0;
+            _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
+        }
+        else {
+            LERROR(fmt::format(
+                "Could not find scene graph node {} or {}",
+                nodeline->start(), nodeline->end()
+            ));
+        }
     }
     else {
         LERROR(fmt::format("There is no scenegraph node with id {}", _nodelineId));

@@ -1,5 +1,4 @@
---apollo_globebrowsing.asset
-local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local heightmaps = asset.syncedResource({
   Name = "Apollo Globebrowsing Heightmaps",

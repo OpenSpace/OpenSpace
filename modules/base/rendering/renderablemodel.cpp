@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -150,7 +150,7 @@ namespace {
         // the Renderable.
         std::filesystem::path geometryFile;
 
-        enum class ScaleUnit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
             Nanometer,
             Micrometer,
             Millimeter,
@@ -189,7 +189,7 @@ namespace {
         // In format 'YYYY MM DD hh:mm:ss'.
         std::optional<std::string> animationStartTime [[codegen::datetime()]];
 
-        enum class AnimationTimeUnit {
+        enum class [[codegen::map(openspace::TimeUnit)]] AnimationTimeUnit {
             Nanosecond,
             Microsecond,
             Millisecond,
@@ -318,56 +318,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
             Parameters::ScaleUnit scaleUnit =
                 std::get<Parameters::ScaleUnit>(*p.modelScale);
-            DistanceUnit distanceUnit;
-
-            switch (scaleUnit) {
-                case Parameters::ScaleUnit::Nanometer:
-                    distanceUnit = DistanceUnit::Nanometer;
-                    break;
-                case Parameters::ScaleUnit::Micrometer:
-                    distanceUnit = DistanceUnit::Micrometer;
-                    break;
-                case Parameters::ScaleUnit::Millimeter:
-                    distanceUnit = DistanceUnit::Millimeter;
-                    break;
-                case Parameters::ScaleUnit::Centimeter:
-                    distanceUnit = DistanceUnit::Centimeter;
-                    break;
-                case Parameters::ScaleUnit::Decimeter:
-                    distanceUnit = DistanceUnit::Decimeter;
-                    break;
-                case Parameters::ScaleUnit::Meter:
-                    distanceUnit = DistanceUnit::Meter;
-                    break;
-                case Parameters::ScaleUnit::Kilometer:
-                    distanceUnit = DistanceUnit::Kilometer;
-                    break;
-
-                // Weird units
-                case Parameters::ScaleUnit::Thou:
-                    distanceUnit = DistanceUnit::Thou;
-                    break;
-                case Parameters::ScaleUnit::Inch:
-                    distanceUnit = DistanceUnit::Inch;
-                    break;
-                case Parameters::ScaleUnit::Foot:
-                    distanceUnit = DistanceUnit::Foot;
-                    break;
-                case Parameters::ScaleUnit::Yard:
-                    distanceUnit = DistanceUnit::Yard;
-                    break;
-                case Parameters::ScaleUnit::Chain:
-                    distanceUnit = DistanceUnit::Chain;
-                    break;
-                case Parameters::ScaleUnit::Furlong:
-                    distanceUnit = DistanceUnit::Furlong;
-                    break;
-                case Parameters::ScaleUnit::Mile:
-                    distanceUnit = DistanceUnit::Mile;
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
+            DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
             _modelScale = toMeter(distanceUnit);
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
@@ -409,30 +360,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         else if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
         }
-        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(*p.animationTimeScale)) {
+        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(
+                    *p.animationTimeScale)
+                )
+        {
             Parameters::AnimationTimeUnit animationTimeUnit =
                 std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
-            TimeUnit timeUnit;
-
-            switch (animationTimeUnit) {
-                case Parameters::AnimationTimeUnit::Nanosecond:
-                    timeUnit = TimeUnit::Nanosecond;
-                    break;
-                case Parameters::AnimationTimeUnit::Microsecond:
-                    timeUnit = TimeUnit::Microsecond;
-                    break;
-                case Parameters::AnimationTimeUnit::Millisecond:
-                    timeUnit = TimeUnit::Millisecond;
-                    break;
-                case Parameters::AnimationTimeUnit::Second:
-                    timeUnit = TimeUnit::Second;
-                    break;
-                case Parameters::AnimationTimeUnit::Minute:
-                    timeUnit = TimeUnit::Minute;
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
+            TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
 
             _geometry->setTimeScale(static_cast<float>(
                 convertTime(1.0, timeUnit, TimeUnit::Second))
@@ -652,10 +586,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
             glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-            glm::scale(
-                glm::dmat4(_modelTransform.value()),
-                glm::dvec3(_modelScale) // Model scale unit
-            );
+            glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
         const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
             modelTransform;
 

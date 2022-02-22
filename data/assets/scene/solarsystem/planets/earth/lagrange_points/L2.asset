@@ -1,18 +1,29 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local circle = asset.require('util/circle').circle
-local kernels = asset.require('scene/solarsystem/planets/earth/lagrange_points/lagrange_kernels').kernels
-asset.require('spice/base')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+
+local circle = asset.syncedResource({
+  Name = "Circle",
+  Type = "HttpSynchronization",
+  Identifier = "circle_image",
+  Version = 1
+})
+
+local kernels = asset.syncedResource({
+  Name = "Lagrange Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_lagrange_kernels",
+  Version = 1
+})
 
 local L2Small = {
   Identifier = "L2Small",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    RenderableType = "Opaque",
+    RenderBinMode = "Opaque",
     Billboard = true,
     Size = 400E4,
-    Texture = circle .. "/circle.png",
+    Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
   Transform = {
@@ -20,7 +31,7 @@ local L2Small = {
       Type = "SpiceTranslation",
       Target = "392", -- L2
       Observer = "SSB",
-      Kernels = kernels .. "/L2_de431.bsp"
+      Kernels = kernels .. "L2_de431.bsp"
     }
   },
   Tag = { "lagrange_points_earth_l2_small" },
@@ -35,10 +46,10 @@ local L2 = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    RenderableType = "Opaque",
+    RenderBinMode = "Opaque",
     Billboard = true,
     Size = 700E5,
-    Texture = circle .. "/circle.png",
+    Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
   Transform = {
@@ -46,7 +57,7 @@ local L2 = {
       Type = "SpiceTranslation",
       Target = "392", -- L2
       Observer = "SSB",
-      Kernels = kernels .. "/L2_de431.bsp"
+      Kernels = kernels .. "L2_de431.bsp"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
@@ -115,10 +126,38 @@ local L2SunLine = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   L2Small,
   L2,
   L2SunLine,
   L2SmallLabel,
   L2Label
-})
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end
+
+
+
+asset.meta = {
+  Name = "Lagrange point L2",
+  Version = "1.0",
+  Description = [[ Lagrange point L2 large and small nodes, sun line, and large and small
+  labels. ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

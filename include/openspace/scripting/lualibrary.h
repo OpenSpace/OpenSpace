@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,7 +59,7 @@ struct LuaLibrary {
     /// A list of script files that are executed for each Lua state
     std::vector<std::filesystem::path> scripts = std::vector<std::filesystem::path>();
     /// A list of all libraries that are children for this library
-    std::vector<LuaLibrary> subLibraries;
+    std::vector<LuaLibrary> subLibraries = std::vector<LuaLibrary>();
 
     /// This struct contains information about a function or constant that is defined in
     /// a Lua script

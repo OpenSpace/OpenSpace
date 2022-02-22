@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -652,17 +652,17 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
     ProfilePropertyLua elem = propertyProcessValue(L, value);
     if (!_valueIsTable) {
         std::visit(overloaded{
-            [&L](const bool value) {
-                ghoul::lua::push(L, value);
+            [&L](bool v) {
+                ghoul::lua::push(L, v);
             },
-            [&L](const float value) {
-                ghoul::lua::push(L, value);
+            [&L](float v) {
+                ghoul::lua::push(L, v);
             },
-            [&L](const std::string value) {
-                ghoul::lua::push(L, value);
+            [&L](const std::string& v) {
+                ghoul::lua::push(L, v);
             },
-            [&L](const ghoul::lua::nil_t nilValue) {
-                ghoul::lua::push(L, nilValue);
+            [&L](ghoul::lua::nil_t v) {
+                ghoul::lua::push(L, v);
             }
         }, elem);
     }
@@ -854,13 +854,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "expression"
             },
             {
-                "loadScene",
-                &luascriptfunctions::loadScene,
-                "string",
-                "Loads the scene found at the file passed as an "
-                "argument. If a scene is already loaded, it is unloaded first"
-            },
-            {
                 "addSceneGraphNode",
                 &luascriptfunctions::addSceneGraphNode,
                 "table",
@@ -870,8 +863,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "removeSceneGraphNode",
                 &luascriptfunctions::removeSceneGraphNode,
-                "string",
-                "Removes the SceneGraphNode identified by name"
+                "(string, table)",
+                "Removes the SceneGraphNode identified by name or by extracting the "
+                "'Identifier' key if the parameter is a table"
             },
             {
                 "removeSceneGraphNodesFromRegex",

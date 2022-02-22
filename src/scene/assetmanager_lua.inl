@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,45 +23,52 @@
  ****************************************************************************************/
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::luascriptfunctions::asset {
 
 int add(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::add");
-
-    AssetManager& assetManager = global::openSpaceEngine->assetManager();
     const std::string assetName = ghoul::lua::value<std::string>(L);
-
-    if (global::renderEngine->scene()) {
-        assetManager.add(assetName);
-    }
-    else {
-        // The scene might not exist yet if OpenSpace was started without specifying an
-        // initial asset
-        global::openSpaceEngine->scheduleLoadSingleAsset(assetName);
-    }
-
+    global::openSpaceEngine->assetManager().add(assetName);
     return 0;
 }
 
 int remove(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::remove");
-
-    AssetManager& assetManager = global::openSpaceEngine->assetManager();
     const std::string assetName = ghoul::lua::value<std::string>(L);
-
-    assetManager.remove(assetName);
+    global::openSpaceEngine->assetManager().remove(assetName);
     return 0;
 }
 
-int removeAll(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAll");
+int isLoaded(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::isLoaded");
+    const std::string assetName = ghoul::lua::value<std::string>(L);
 
-    AssetManager& assetManager = global::openSpaceEngine->assetManager();
-    assetManager.removeAll();
-    return 0;
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    for (const Asset* a : as) {
+        if (a->path() == assetName) {
+            ghoul::lua::push(L, true);
+            return 1;
+        }
+    }
+
+    ghoul::lua::push(L, false);
+    return 1;
+}
+
+int allAssets(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::allAssets");
+
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    std::vector<std::string> res;
+    res.reserve(as.size());
+    for (const Asset* a : as) {
+        res.push_back(a->path().string());
+    }
+    ghoul::lua::push(L, res);
+    return 1;
 }
 
 } // namespace openspace::luascriptfunctions

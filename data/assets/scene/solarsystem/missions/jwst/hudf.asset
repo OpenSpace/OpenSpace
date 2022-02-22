@@ -1,8 +1,7 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local jwstTransforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local image = asset.require('./image').image
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local jwstTransforms = asset.require("./transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local image = asset.require("./image").image
 
 local DISTANCE = 9.2E15;
 
@@ -42,7 +41,7 @@ local HUDFImage = {
   RadiusAzimuthElevation = { 200.0, 0.5, 0.1 },
   UsePerspectiveProjection = false,
   Opacity = 1.0,
-  TexturePath = image .. "/Hubble_ultra_deep_field.png",
+  TexturePath = image .. "Hubble_ultra_deep_field.png",
   Tag = { "mission_jwst_hudf" },
   Description = [[
     Image of the Hubble Ultra Deep Field by NASA, ESA, and S. Beckwith (STScI) and
@@ -76,14 +75,24 @@ local HUDFJWSTLine = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { HUDFPosition, HUDFImage, HUDFJWSTLine })
-
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(HUDFImage)
+
+  openspace.addSceneGraphNode(HUDFPosition)
+  openspace.addSceneGraphNode(HUDFImage)
+  openspace.addSceneGraphNode(HUDFJWSTLine)
 end)
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(HUDFImage.Identifier)
+  openspace.removeSceneGraphNode(HUDFPosition)
+  openspace.removeSceneGraphNode(HUDFImage)
+  openspace.removeSceneGraphNode(HUDFJWSTLine)
+
+  openspace.removeScreenSpaceRenderable(HUDFImage)
 end)
+
+asset.export(HUDFJWSTLine)
+asset.export(HUDFImage)
+asset.export(HUDFPosition)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field Image and Line",

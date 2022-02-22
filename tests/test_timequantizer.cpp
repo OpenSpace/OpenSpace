@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@ namespace {
         int kernelID = openspace::SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
         );
-        REQUIRE(kernelID == 1);
+        CHECK(kernelID == 1);
         return kernelID;
     }
 
@@ -47,7 +47,7 @@ namespace {
     {
         t.setTime(input);
         tq.quantize(t, clamp);
-        REQUIRE(t.ISO8601() == expected);
+        CHECK(t.ISO8601() == expected);
     }
 
     void singleResolutionTest(globebrowsing::TimeQuantizer& tq, std::string resolution, 
@@ -62,10 +62,10 @@ namespace {
         }
 
         if (expectFailure) {
-            REQUIRE(res.find(expectedType) != std::string::npos);
+            CHECK(res.find(expectedType) != std::string::npos);
         }
         else {
-            REQUIRE(res.find(expectedType) == std::string::npos);
+            CHECK(res.find(expectedType) == std::string::npos);
         }
     }
 
@@ -81,10 +81,10 @@ namespace {
         }
 
         if (expectFailure) {
-            REQUIRE(res.find(expectedErrSubstring) != std::string::npos);
+            CHECK(res.find(expectedErrSubstring) != std::string::npos);
         }
         else {
-            REQUIRE(res.find(expectedErrSubstring) == std::string::npos);
+            CHECK(res.find(expectedErrSubstring) == std::string::npos);
         }
     }
 
@@ -100,10 +100,10 @@ namespace {
         }
 
         if (expectFailure) {
-            REQUIRE(res.find(expectedErrSubstring) != std::string::npos);
+            CHECK(res.find(expectedErrSubstring) != std::string::npos);
         }
         else {
-            REQUIRE(res.find(expectedErrSubstring) == std::string::npos);
+            CHECK(res.find(expectedErrSubstring) == std::string::npos);
         }
     }
 } // namespace
@@ -214,8 +214,8 @@ TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
         t1.setStartEndRange("2017-01-30T00:00:00", "2020-09-01T00:00:00");
     }
     catch (const ghoul::RuntimeError& e) {
-        REQUIRE(e.message.find("Invalid start day value of 30 for monthly increment, "
-                               "valid days are 1 - 28") != std::string::npos);
+        CHECK(e.message.find("Invalid start day value of 30 for monthly increment, "
+                             "valid days are 1 - 28") != std::string::npos);
     }
 
     t1.setStartEndRange("2016-01-17T00:00:00", "2020-09-01T00:00:00");

@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local trail = asset.syncedResource({
@@ -15,7 +14,7 @@ local GaiaPosition = {
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trail .. "/gaia_orbit_horizons.dat"
+      HorizonsTextFile = trail .. "gaia_orbit_horizons.dat"
     },
   },
   GUI = {
@@ -24,4 +23,12 @@ local GaiaPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaPosition })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GaiaPosition)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GaiaPosition)
+end)
+  
+asset.export(GaiaPosition)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
 
-    static documentation::Documentation documentation();
+    static documentation::Documentation Documentation();
 
 private:
     std::string _inFilenamePrefix;
