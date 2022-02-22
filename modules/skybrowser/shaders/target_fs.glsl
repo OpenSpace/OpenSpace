@@ -46,14 +46,6 @@ float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
   return crosshair_horizontal + crosshair_vertical;
 }
 
-float createFilledRectangle(in float size, in float ratio, in vec2 coord) {
-  float center = 0.5f;
-  float horizontal = createLine(center, size, coord.y);
-  float vertical = createLine(center, size, coord.x);
-
-  return horizontal * vertical;
-}
-
 #include "fragment.glsl"
 
 Fragment getFragment() {
@@ -63,15 +55,12 @@ Fragment getFragment() {
 
     if(showCrosshair) {
       crosshair = createCrosshair(lineWidth, ratio, vs_st);
+      float border = 1.0f - createRectangle(lineWidth * 5.0f, ratio, vs_st);
+      crosshair *= border;
     }
 
     if(showRectangle) {
       rectangle = createRectangle(lineWidth, ratio, vs_st);
-    }
-
-    // If both rectangle and crosshair are displayed, draw crosshair a bit smaller
-    if(showCrosshair && showRectangle) {
-      crosshair *= createFilledRectangle(lineWidth * 7.0f, ratio, vs_st);
     }
 
     float result = clamp(crosshair + rectangle, 0.0, 1.0);
