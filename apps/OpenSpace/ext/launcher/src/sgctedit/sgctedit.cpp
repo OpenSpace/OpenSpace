@@ -37,7 +37,7 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
 
 void SgctEdit::systemMonitorConfiguration(const QList<QScreen*>& screenList) {
     size_t nScreensManaged = std::min(screenList.length(), 2);
-    for (size_t s = 0; s < nScreensManaged; ++s) {
+    for (unsigned int s = 0; s < static_cast<unsigned int>(nScreensManaged); ++s) {
         int actualWidth = std::max(
             screenList[s]->size().width(),
             screenList[s]->availableGeometry().width()

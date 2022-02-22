@@ -90,14 +90,14 @@ private:
     std::function<void(int, int, const QRectF&)> _windowChangeCallback;
     std::function<void(unsigned int)> _windowGuiCheckCallback;
     QRectF defaultWindowSizes[4] = {
-        {50.0, 50.0, 1280.0, 720.0},
-        {900.0, 250.0, 1280.0, 720.0},
-        {1200.0, 340.0, 1280.0, 720.0},
-        {50.0, 50.0, 1280.0, 720.0}
+        {50.f, 50.f, 1280.f, 720.f},
+        {900.f, 250.f, 1280.f, 720.f},
+        {1200.f, 340.f, 1280.f, 720.f},
+        {50.f, 50.f, 1280.f, 720.f}
     };
     QList<QString> _monitorNames = { "Primary", "Secondary" };
     int _lineEditWidthFixed = 50;
-    float _marginFractionOfWidgetSize = 0.025;
+    float _marginFractionOfWidgetSize = 0.025f;
     unsigned int _nMonitors = 1;
     unsigned int _monIndex = 0;
     unsigned int _index = 0;

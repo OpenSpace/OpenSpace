@@ -64,7 +64,7 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     , _monitorResolutions(monitorDims)
     , _colorForWindow(winColor)
 {
-    _nMonitors = _monitorResolutions.size();
+    _nMonitors = static_cast<unsigned int>(_monitorResolutions.size());
     createWidgets(parent);
 }
 
@@ -390,7 +390,7 @@ void WindowControl::onOffsetXChanged(const QString& newText) {
             _windowChangeCallback(_monIndex, _index, _windowDims);
         }
     }
-    catch (std::exception &e) {
+    catch (std::exception) {
         //The QIntValidator ensures that the range is a +/- integer
         //However, it's possible to enter only a - character which
         //causes an exception throw, which is ignored here (when user
@@ -407,7 +407,7 @@ void WindowControl::onOffsetYChanged(const QString& newText) {
             _windowChangeCallback(_monIndex, _index, _windowDims);
         }
     }
-    catch (std::exception &e) {
+    catch (std::exception) {
         //See comment in onOffsetXChanged
     }
 }
