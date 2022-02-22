@@ -103,7 +103,7 @@ double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
         for (SceneGraphNode* child : node->children()) {
             bs = child->boundingSphere();
             if (bs > minValidBoundingSphere) {
-                LWARNING(fmt::format(
+                LDEBUG(fmt::format(
                     "The scene graph node '{}' has no, or a very small, bounding sphere. "
                     "Using bounding sphere of child node '{}' in computations.",
                     node->identifier(),
@@ -114,7 +114,7 @@ double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
             }
         }
 
-        LWARNING(fmt::format(
+        LDEBUG(fmt::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
             "minimal value. This might lead to unexpected results.",
             node->identifier())
