@@ -427,9 +427,7 @@ int createTargetBrowserPair(lua_State* L) {
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
     glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
     std::string guiPath = "/SkyBrowser";
-    //std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
-    std::string url = "http://localhost:8000"; // check webgl version
-    //std::string url = "https://get.webgl.org";
+    std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
 
     const std::string browser = "{"
         "Identifier = '" + idBrowser + "',"
