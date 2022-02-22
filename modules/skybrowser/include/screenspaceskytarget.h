@@ -95,13 +95,6 @@ namespace openspace {
         // Animation
         glm::dvec3 _animationEnd;        // Cartesian equatorial coordinates
         glm::dvec3 _animationStart;      // Cartesian equatorial coordinates
-        
-        // Time variables
-        // For capping sending of equatorial coordinates to sky browser
-        const std::chrono::microseconds interval = std::chrono::microseconds(10000);
-        std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
-        constexpr static const std::chrono::milliseconds _timeUpdateInterval{ 10 };
-        std::chrono::system_clock::time_point _lastUpdateTime;
     };
 }
 
