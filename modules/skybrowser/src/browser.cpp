@@ -103,9 +103,10 @@ namespace openspace {
 
     bool Browser::initializeGL() {
         _texture = std::make_unique<ghoul::opengl::Texture>(
-            glm::uvec3(_browserPixeldimensions.value(), 1.0f)
+            glm::uvec3(glm::ivec2(_browserPixeldimensions.value()), 1),
+            GL_TEXTURE_2D
             );
-
+       
         _renderHandler->setTexture(*_texture);
 
         _browserInstance->initialize();

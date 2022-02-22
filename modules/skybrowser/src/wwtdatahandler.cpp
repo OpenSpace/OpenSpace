@@ -32,11 +32,10 @@ namespace openspace {
     // Parsing and downloading of wtml files
     bool downloadFile(const std::string& url, const std::string& fileDestination) {
         // Get the web page and save to file
-        HttpRequest::RequestOptions opt{ 5 };
-        SyncHttpFileDownload wtml_root(
+        HttpFileDownload wtml_root(
             url, fileDestination, HttpFileDownload::Overwrite::Yes
         );
-        wtml_root.download(opt);
+        wtml_root.start(std::chrono::milliseconds(5));
         return wtml_root.hasSucceeded();
     }
 
