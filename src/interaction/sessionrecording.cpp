@@ -99,7 +99,7 @@ SessionRecording::SessionRecording(bool isGlobal)
     , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
 {
     if (isGlobal) {
-        auto fTask = FactoryManager::ref().factory<Task>();
+        ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
         ghoul_assert(fTask, "No task factory existed");
         fTask->registerClass<ConvertRecFormatTask>("ConvertRecFormatTask");
         fTask->registerClass<ConvertRecFileVersionTask>("ConvertRecFileVersionTask");
@@ -2004,7 +2004,6 @@ bool SessionRecording::processCameraKeyframe(double now) {
     Scene* scene = camera->parent()->scene();
 
     const SceneGraphNode* n = scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode);
-
     if (n) {
         global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
     }

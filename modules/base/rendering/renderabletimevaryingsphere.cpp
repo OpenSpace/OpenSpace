@@ -44,7 +44,7 @@
 
 namespace {
     constexpr const char* ProgramName = "Timevarying Sphere";
-    constexpr const char* _loggerCat = "RenderableTimeVaryingSphere";
+    
     constexpr const std::array<const char*, 5> UniformNames = {
         "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
         "mirrorTexture"
@@ -75,12 +75,6 @@ namespace {
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
         "outside of the sphere, or both."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo UseAdditiveBlendingInfo = {
-        "UseAdditiveBlending",
-        "Use Additive Blending",
-        "Render the object using additive blending."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
@@ -115,14 +109,6 @@ namespace {
         "Enables/Disables the Fade-In/Out effects."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
-        "Background",
-        "Render as Background",
-        "If this value is set, the sphere is rendered in the background rendering bin, "
-        "causing it to be rendered before most other scene graph nodes"
-    };
-
-
     struct [[codegen::Dictionary(RenerableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
@@ -142,9 +128,6 @@ namespace {
         // [[codegen::verbatim(OrientationInfo.description)]]
         std::optional<Orientation> orientation;
 
-        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
-        std::optional<bool> useAdditiveBlending;
-
         // [[codegen::verbatim(MirrorTextureInfo.description)]]
         std::optional<bool> mirrorTexture;
 
@@ -156,9 +139,6 @@ namespace {
 
         // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
         std::optional<bool> disableFadeInOut;
-
-        // [[codegen::verbatim(BackgroundInfo.description)]]
-        std::optional<bool> background;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -179,9 +159,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _mirrorTexture(MirrorTextureInfo, false)
-    , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
     , _disableFadeInDistance(DisableFadeInOutInfo, true)
-    , _backgroundRendering(BackgroundInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, -1.f, -1.f, 1.f)
     , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, -1.f, 1.f)
 {
@@ -219,28 +197,16 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     _segments.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_mirrorTexture);
-    addProperty(_useAdditiveBlending);
     addProperty(_fadeOutThreshold);
     addProperty(_fadeInThreshold);
 
     _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
-    _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
     _fadeOutThreshold = p.fadeOutThreshold.value_or(_fadeOutThreshold);
     _fadeInThreshold = p.fadeInThreshold.value_or(_fadeInThreshold);
-
-    if (_useAdditiveBlending) {
-        setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-    }
 
     if (_fadeOutThreshold || _fadeInThreshold) {
         _disableFadeInDistance = false;
         addProperty(_disableFadeInDistance);
-    }
-
-    _backgroundRendering = p.background.value_or(_backgroundRendering);
-
-    if (_backgroundRendering) {
-        setRenderBin(Renderable::RenderBin::Background);
     }
 
     setBoundingSphere(_size);
@@ -383,14 +349,14 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         glDisable(GL_CULL_FACE);
     }
 
-    if (_useAdditiveBlending) {
+    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (_useAdditiveBlending) {
+    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(true);
     }

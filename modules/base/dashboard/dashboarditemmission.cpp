@@ -92,8 +92,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         ghoul::fontrendering::CrDirection::Down
     );
 
-    auto phaseTrace = mission.phaseTrace(currentTime);
-
+    MissionPhase::Trace phaseTrace = mission.phaseTrace(currentTime);
     if (!phaseTrace.empty()) {
         const MissionPhase& phase = phaseTrace.back().get();
         const std::string title = "Current Mission Phase: " + phase.name();

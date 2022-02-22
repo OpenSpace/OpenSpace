@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
 
     *global::configuration = configuration::loadConfigurationFromFile(
         configFile.string(),
+        glm::ivec2(0),
         ""
     );
     global::openSpaceEngine->registerPathTokens();

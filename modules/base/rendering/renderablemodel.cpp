@@ -586,10 +586,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
             glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-            glm::scale(
-                glm::dmat4(_modelTransform.value()),
-                glm::dvec3(_modelScale) // Model scale unit
-            );
+            glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
         const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
             modelTransform;
 

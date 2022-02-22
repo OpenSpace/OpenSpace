@@ -59,8 +59,6 @@ namespace {
     constexpr const int RenderOptionViewDirection = 0;
     constexpr const int RenderOptionPositionNormal = 1;
 
-    constexpr const double PARSEC = 0.308567756E17;
-
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
@@ -358,7 +356,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
                                       const glm::vec3& orthoRight,
                                       const glm::vec3& orthoUp)
 {
-    float scale = toMeter(_unit);
+    float scale = static_cast<float>(toMeter(_unit));
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
@@ -581,7 +579,7 @@ void RenderableDUMeshes::createMeshes() {
     LDEBUG("Creating planes");
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
-        float scale = toMeter(_unit);
+        float scale = static_cast<float>(toMeter(_unit));
 
         for (GLfloat& v : p.second.vertices) {
             v *= scale;

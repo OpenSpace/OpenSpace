@@ -35,23 +35,17 @@ namespace openspace::documentation {
 
 // The explicit template instantiations for many of the commonly used template values
 // This cuts down on the compilation time by only compiling these once
-//template struct Vector2Verifier<bool>;
 template struct Vector2Verifier<int>;
 template struct Vector2Verifier<double>;
-//template struct Vector3Verifier<bool>;
 template struct Vector3Verifier<int>;
 template struct Vector3Verifier<double>;
-//template struct Vector4Verifier<bool>;
 template struct Vector4Verifier<int>;
 template struct Vector4Verifier<double>;
 
-//template struct Vector2ListVerifier<bool>;
 template struct Vector2ListVerifier<int>;
 template struct Vector2ListVerifier<double>;
-//template struct Vector3ListVerifier<bool>;
 template struct Vector3ListVerifier<int>;
 template struct Vector3ListVerifier<double>;
-//template struct Vector4ListVerifier<bool>;
 template struct Vector4ListVerifier<int>;
 template struct Vector4ListVerifier<double>;
 

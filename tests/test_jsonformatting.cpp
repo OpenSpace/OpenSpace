@@ -49,20 +49,20 @@ TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
     luaValue.replace(0, 1, "[");
     luaValue.replace(luaValue.size() - 1, 1, "]");
 
-    REQUIRE(json == luaValue);
+    CHECK(json == luaValue);
 }
 
 TEST_CASE("FormatJson - Bool", "[formatjson]") {
     bool trueVal = true;
     bool falseVal = false;
 
-    REQUIRE(openspace::formatJson(trueVal) == "true");
-    REQUIRE(openspace::formatJson(falseVal) == "false");
+    CHECK(openspace::formatJson(trueVal) == "true");
+    CHECK(openspace::formatJson(falseVal) == "false");
 }
 
 TEST_CASE("FormatJson - Infinity & Nan", "[formatjson]") {
-    REQUIRE(openspace::formatJson(std::numeric_limits<double>::infinity()) == "null");
-    REQUIRE(openspace::formatJson(std::numeric_limits<double>::quiet_NaN()) == "null");
+    CHECK(openspace::formatJson(std::numeric_limits<double>::infinity()) == "null");
+    CHECK(openspace::formatJson(std::numeric_limits<double>::quiet_NaN()) == "null");
 }
 
 // @TODO(emmbr 2021-04-29) Add more tests at some point, if we find it necessary

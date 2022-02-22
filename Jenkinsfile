@@ -110,12 +110,12 @@ linux_gcc_make: {
           cmakeCompileOptions += ' -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS:STRING="-DGLM_ENABLE_EXPERIMENTAL"';
           cmakeCompileOptions += ' -DOpenGL_GL_PREFERENCE:STRING=GLVND -DASSIMP_BUILD_MINIZIP=1';
           // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-make');
+          compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, '', 'build-make');
           compileHelper.recordCompileIssues(compileHelper.Gcc());
       }
       stage('linux-gcc-make/test') {
-        // testHelper.runUnitTests('build/OpenSpaceTest');
-        // testHelper.runUnitTests('bin/codegentest')
+        testHelper.runUnitTests('bin/OpenSpaceTest');
+        testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -132,11 +132,11 @@ linux_gcc_ninja: {
           def cmakeCompileOptions = moduleCMakeFlags();
           cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release';
           // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
+          compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, '', 'build-ninja');
       }
       stage('linux-gcc-ninja/test') {
-        // testHelper.runUnitTests('build/OpenSpaceTest');
-        // testHelper.runUnitTests('bin/codegentest')
+        testHelper.runUnitTests('bin/OpenSpaceTest');
+        testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -153,12 +153,12 @@ linux_clang_make: {
           def cmakeCompileOptions = moduleCMakeFlags()
           cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release'
           // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-make');
+          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-make');
           compileHelper.recordCompileIssues(compileHelper.Clang());
       }
       stage('linux-clang-make/test') {
-        // testHelper.runUnitTests('build/OpenSpaceTest');
-        // testHelper.runUnitTests('bin/codegentest')
+        testHelper.runUnitTests('bin/OpenSpaceTest');
+        testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -175,11 +175,11 @@ linux_clang_ninja: {
           def cmakeCompileOptions = moduleCMakeFlags()
           cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release'
           // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
+          compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-ninja');
       }
       stage('linux-clang-ninja/test') {
-        // testHelper.runUnitTests('build/OpenSpaceTest');
-        // testHelper.runUnitTests('bin/codegentest')
+        testHelper.runUnitTests('bin/OpenSpaceTest');
+        testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -197,8 +197,7 @@ windows_msvc: {
         compileHelper.recordCompileIssues(compileHelper.VisualStudio());
       }
       stage('windows-msvc/test') {
-        // Currently, the unit tests are failing on Windows
-        // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
+        testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
         testHelper.runUnitTests('bin\\Debug\\codegentest')
       }
       cleanWs()
@@ -236,8 +235,8 @@ macos_make: {
           compileHelper.build(compileHelper.Make(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-make');
       }
       stage('macos-make/test') {
-        // Currently, the unit tests are crashing on OS X
-        // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+        testHelper.runUnitTests('bin/Debug/OpenSpaceTest')
+        testHelper.runUnitTests('bin/Debug/codegentest')
       }
       cleanWs()
     } // node('macos')
@@ -254,8 +253,8 @@ macos_xcode: {
           compileHelper.build(compileHelper.Xcode(), compileHelper.Xcode(), moduleCMakeFlags(), '', 'build-xcode');
       }
       stage('macos-xcode/test') {
-        // Currently, the unit tests are crashing on OS X
-        // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+        testHelper.runUnitTests('bin/Debug/OpenSpaceTest')
+        testHelper.runUnitTests('bin/Debug/codegentest')
       }
       cleanWs()
     } // node('macos')

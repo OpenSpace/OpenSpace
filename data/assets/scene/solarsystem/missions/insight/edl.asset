@@ -1,5 +1,6 @@
 asset.require("spice/base")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
 local models = asset.syncedResource({
   Name = "Insight Models Chutes",
@@ -155,7 +156,7 @@ local RotationKeyframes = {
 
 local InsightParent = {
   Identifier = "InsightParent",
-  Parent = "Mars",
+  Parent = mars.Identifier,
   Transform = {
     Translation ={
       Type = "TimelineTranslation",
@@ -740,7 +741,7 @@ local Insight_Panels_Deployed_tex2 = {
     Start = panelDeployTime,
   },
   GUI = {
-    Hidden = true,
+    -- Hidden = true,
     Name = "Insight panels_deploy_tex2",
     Path = "/Solar System/Missions/Insight"
   }

@@ -182,8 +182,13 @@ void AssetManager::update() {
             continue;
         }
 
-        _rootAssets.push_back(a);
         a->load(nullptr);
+        if (a->isFailed()) {
+            // The loading might fail because of any number of reasons, most likely of
+            // them some Lua syntax error
+            continue;
+        }
+        _rootAssets.push_back(a);
         a->startSynchronizations();
 
         _toBeInitialized.push_back(a);
@@ -351,6 +356,16 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
         meta.url = p.url.value_or("");
         meta.license = p.license.value_or("");
         meta.identifiers = p.identifiers.value_or(std::vector<std::string>());
+
+        // We need to do this as the asset might have 'export'ed identifiers before
+        // defining the meta table.  Therefore the meta information already contains some
+        // identifiers that we don't want to throw away
+        if (asset->metaInformation().has_value() &&
+            !asset->metaInformation()->identifiers.empty())
+        {
+            std::vector<std::string> ids = asset->metaInformation()->identifiers;
+            meta.identifiers.insert(meta.identifiers.end(), ids.begin(), ids.end());
+        }
         asset->setMetaInformation(std::move(meta));
     }
 
@@ -480,7 +495,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 std::unique_ptr<ResourceSynchronization> s =
                     ResourceSynchronization::createFromDictionary(d);
 
-                std::unique_ptr<SyncItem> si = std::make_unique<SyncItem>();
+                auto si = std::make_unique<SyncItem>();
                 si->synchronization = std::move(s);
                 si->assets.push_back(asset);
                 syncItem = si.get();
@@ -619,8 +634,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 exportName = identifier;
                 targetLocation = 1;
             }
-            
-            if (n == 2) {
+            else if (n == 2) {
                 exportName = ghoul::lua::value<std::string>(
                     L,
                     1,
@@ -643,6 +657,9 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                         identifier = d.value<std::string>("Identifier");
                     }
                 }
+            }
+            else {
+                throw ghoul::MissingCaseException();
             }
 
 
@@ -746,9 +763,8 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path) {
     if (!std::filesystem::is_regular_file(path)) {
         throw ghoul::RuntimeError(fmt::format("Could not find asset file {}", path));
     }
-    std::unique_ptr<Asset> asset = std::make_unique<Asset>(*this, path);
+    auto asset = std::make_unique<Asset>(*this, path);
     Asset* res = asset.get();
-
     setUpAssetLuaTable(res);
     _assets.push_back(std::move(asset));
     return res;
@@ -869,6 +885,21 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
                 "Removes the asset with the specfied name from the scene. The parameter "
                 "to this function is the same that was originally used to load this "
                 "asset, i.e. the path to the asset file"
+            },
+            {
+                "isLoaded",
+                &luascriptfunctions::asset::isLoaded,
+                "string",
+                "Returns true if the referenced asset already has been loaded. Otherwise "
+                "false is returned. The parameter to this function is the path of the "
+                "asset that should be tested"
+            },
+            {
+                "allAssets",
+                &luascriptfunctions::asset::allAssets,
+                "",
+                "Returns the paths to all loaded assets, loaded directly or indirectly, "
+                "as a table containing the paths to all loaded assets."
             }
         }
     };
