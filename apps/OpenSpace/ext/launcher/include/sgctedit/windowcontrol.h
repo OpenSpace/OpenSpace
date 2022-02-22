@@ -38,18 +38,37 @@
 class WindowControl : public QWidget {
 Q_OBJECT
 public:
+    /**
+     * Constructor for WindowControl class, which contains settings and configuration
+     * for individual windows
+     *
+     * \param monitorIndex The zero-based index for monitor number that this window
+     *                     resides in
+     * \param windowIndex The zero-based window index
+     * \param monitorDims Vector of monitor dimensions in QRect form
+     * \param winColor A  QColor object for this window's unique color
+    */
     WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
         std::vector<QRect>& monitorDims, const QColor& winColor,
         QWidget *parent);
     ~WindowControl();
+    /**
+     * Sets callback function to be invoked when a window's setting changes
+     *
+     * \param cb Callback function that accepts the listed arg types, in order of
+     *           monitorIndex, windowIndex, and windowDims (that were just changed)
+     */
     void setWindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
+    /**
+     * Sets callback function to be invoked when a window gets its GUI checkbox selected
+     *
+     * \param cb Callback function that accepts the index of the window that has its
+     *           WebGUI option selected
+     */
     void setWebGuiChangeCallback(std::function<void(unsigned int)> cb);
     void showWindowLabel(bool show);
     QVBoxLayout* initializeLayout();
     QRectF& dimensions();
-    QCheckBox* checkBoxWindowDecor();
-    QCheckBox* checkBoxWebGui();
-    QCheckBox* checkBoxSpoutOutput();
     std::string windowName() const;
     sgct::ivec2 windowSize() const;
     sgct::ivec2 windowPos() const;
@@ -70,8 +89,6 @@ public:
         Equirectangular
     };
     ProjectionIndeces projectionSelectedIndex() const;
-    int QualityValues[10] = {256, 512, 1024, 1536, 2048, 4096, 8192, 16384,
-        32768, 65536};
 
 private slots:
     void onSizeXChanged(const QString& newText);
@@ -96,6 +113,8 @@ private:
         {50.f, 50.f, 1280.f, 720.f}
     };
     QList<QString> _monitorNames = { "Primary", "Secondary" };
+    int QualityValues[10] = { 256, 512, 1024, 1536, 2048, 4096, 8192, 16384,
+    32768, 65536 };
     int _lineEditWidthFixed = 50;
     float _marginFractionOfWidgetSize = 0.025f;
     unsigned int _nMonitors = 1;

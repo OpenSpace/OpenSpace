@@ -43,19 +43,50 @@
 class MonitorBox : public QWidget {
 Q_OBJECT
 public:
+    /**
+     * Constructor for MonitorBox class, which displays the system's monitor(s),
+     * their relative position and size, and window(s) that they contain
+     *
+     * \param widgetDims The size of the display widget in pixels, stored in QRect
+     * \param monitorResolution A vector containing the monitor's maximum display
+     *                          size in pixels in a QRect object
+     * \param nWindows The current number of windows that has been selected by the user
+     * \param winColors An array of QColor objects for window colors. The indexing of
+     *                  this array matches the window indexing used elsewhere in the
+     *                  class. This allows for a unique color for each window.
+    */
     MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
         unsigned int nWindows, const std::array<QColor, 4>& winColors);
-    void mapMonitorResolutionToWidgetCoordinates();
+    /**
+     * Maps window resolution into the scaled resolution of the display widget
+     *
+     * \param mIdx The zero-based monitor index (primary monitor is 0)
+     * \param wIdx The zero-based window index
+     * \param winDimensions Dimensions (pixels) of window to be mapped in QRect
+    */
     void mapWindowResolutionToWidgetCoordinates(unsigned int mIdx, unsigned int wIdx,
-        const QRectF& w);
+        const QRectF& winDimensions);
+    /**
+     * Sets the number of windows to be displayed
+     *
+     * \param nWindows Number of windows to be displayed
+    */
     void setNumWindowsDisplayed(unsigned int nWindows);
-    void windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
+    /**
+     * Called when window dimensions or monitor location have changed, requiring redraw
+     *
+     * \param mIdx The zero-based monitor index (primary monitor is 0)
+     * \param wIdx The zero-based window index
+     * \param newDimensions Dimensions (pixels) of window to be mapped in QRect
+    */
+    void windowDimensionsChanged(unsigned int mIdx, unsigned int wIdx,
             const QRectF& newDimensions);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
+    void mapMonitorResolutionToWidgetCoordinates();
     void paintWidgetBorder(QPainter& painter, int width, int height);
     void paintMonitorBackgrounds(QPainter& painter);
     void paintWindow(QPainter& painter, size_t winIdx);

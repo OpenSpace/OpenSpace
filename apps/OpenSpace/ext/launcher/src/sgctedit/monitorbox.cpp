@@ -122,16 +122,16 @@ void MonitorBox::paintWindowNumber(QPainter& painter, unsigned int winIdx) {
 }
 
 void MonitorBox::setPenSpecificToWindow(QPainter& painter, unsigned int windowIdx,
-                                                                       bool visibleBorder)
+                                        bool visibleBorder)
 {
     int penWidth = (visibleBorder) ? 1 : -1;
     painter.setPen(QPen(_colorsForWindows[windowIdx], penWidth));
 }
 
-void MonitorBox::windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
-                                                              const QRectF& newDimensions)
+void MonitorBox::windowDimensionsChanged(unsigned int mIdx, unsigned int wIdx,
+                                         const QRectF& newDimensions)
 {
-    mapWindowResolutionToWidgetCoordinates(monitorIdx, windowIdx, newDimensions);
+    mapWindowResolutionToWidgetCoordinates(mIdx, wIdx, newDimensions);
 }
 
 void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
@@ -214,12 +214,12 @@ void MonitorBox::setNumWindowsDisplayed(unsigned int nWindows) {
 
 void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int mIdx,
                                                         unsigned int wIdx,
-                                                        const QRectF& w)
+                                                        const QRectF& winDimensions)
 {
     if (mIdx > (_maxNumMonitors - 1) || wIdx > (_nWindows - 1)) {
         return;
     }
-    QRectF wF = w;
+    QRectF wF = winDimensions;
     _windowRendering[wIdx] = {
         _monitorDimensionsScaled[mIdx].x() + wF.left() * _monitorScaleFactor,
         _monitorDimensionsScaled[mIdx].y() + wF.top() * _monitorScaleFactor,

@@ -483,18 +483,6 @@ QRectF& WindowControl::dimensions() {
     return _windowDims;
 }
 
-QCheckBox* WindowControl::checkBoxWindowDecor() {
-    return _checkBoxWindowDecor;
-}
-
-QCheckBox* WindowControl::checkBoxWebGui() {
-    return _checkBoxWebGui;
-}
-
-QCheckBox* WindowControl::checkBoxSpoutOutput() {
-    return _checkBoxSpoutOutput;
-}
-
 std::string WindowControl::windowName() const {
     return _windowName->text().toStdString();
 }
