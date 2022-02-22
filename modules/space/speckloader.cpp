@@ -333,8 +333,6 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             entry.comment = rest;
         }
 
-        int i = 0;
-        i += 1;
         res.entries.push_back(std::move(entry));
     }
 
