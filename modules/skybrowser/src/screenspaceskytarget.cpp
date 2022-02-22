@@ -40,7 +40,7 @@ namespace {
     constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo =
     {
         "AnimationSpeed",
-        "TrAnimation Speed",
+        "Animation Speed",
         "The factor which is multiplied with the animation speed of the target."
     };
 
@@ -51,6 +51,13 @@ namespace {
         "The threshold for when the target is determined to have appeared at its "
         "destination. Angle in radians between the destination and the target position in"
         "equatorial Cartesian coordinate system."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo LineWidthInfo =
+    {
+        "LineWidth",
+        "Line Width",
+        "The thickness of the line of the target. The larger number, the thicker line."
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyTarget)]] Parameters {
@@ -67,6 +74,9 @@ namespace {
         // [[codegen::verbatim(AnimationThresholdInfo.description)]]
         std::optional<float> animationThreshold;
 
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
     };
 
 #include "screenspaceskytarget_codegen.cpp"
@@ -76,10 +86,11 @@ namespace {
 namespace openspace {
     ScreenSpaceSkyTarget::ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary)
         : ScreenSpaceRenderable(dictionary)
-        , _showCrosshairThreshold(CrosshairThresholdInfo, 2.0f, 0.1f, 70.f)
-        , _showRectangleThreshold(RectangleThresholdInfo, 0.6f, 0.1f, 70.f)
+        , _showCrosshairThreshold(CrosshairThresholdInfo, 4.f, 0.1f, 70.f)
+        , _showRectangleThreshold(RectangleThresholdInfo, 2.f, 0.1f, 70.f)
         , _stopAnimationThreshold(AnimationThresholdInfo, 0.0005, 0.0, 0.005)
         , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
+        , _lineWidth(LineWidthInfo, 25.f, 1.f, 100.f)
         , _borderColor(220, 220, 220)  
     {
         // Handle target dimension property
@@ -93,6 +104,7 @@ namespace openspace {
         addProperty(_showRectangleThreshold);
         addProperty(_stopAnimationThreshold);
         addProperty(_animationSpeed);
+        addProperty(_lineWidth);
 
         // Set a unique identifier
         std::string identifier;
@@ -188,7 +200,7 @@ namespace openspace {
         glm::vec4 color = { glm::vec3(_borderColor) / 255.f, _opacity.value() };
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * 
             localRotationMatrix() * scaleMatrix();
-        float lineWidth = 0.0016f/_scale.value();
+        float lineWidth = (_lineWidth * 0.0001f) / _scale.value();
 
         glDisable(GL_CULL_FACE);
 

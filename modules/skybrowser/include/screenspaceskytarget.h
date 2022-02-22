@@ -63,6 +63,7 @@ namespace openspace {
         // Properties
         properties::FloatProperty _showCrosshairThreshold;
         properties::FloatProperty _showRectangleThreshold;
+        properties::FloatProperty _lineWidth;
         properties::DoubleProperty _stopAnimationThreshold;
         properties::DoubleProperty _animationSpeed;
 
