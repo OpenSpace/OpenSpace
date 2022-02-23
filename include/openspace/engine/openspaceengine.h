@@ -107,6 +107,12 @@ public:
     bool setMode(Mode newMode);
     void resetMode();
 
+    using CallbackHandle = int;
+    using ModeChangeCallback = std::function<void()>;
+
+    CallbackHandle addModeChangeCallback(ModeChangeCallback cb);
+    void removeModeChangeCallback(CallbackHandle handle);
+
     // Guaranteed to return a valid pointer
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
@@ -151,6 +157,10 @@ private:
     bool _isRenderingFirstFrame = true;
 
     Mode _currentMode = Mode::UserControl;
+    Mode _modeLastFrame = Mode::UserControl;
+
+    int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
 };
 
 /**
