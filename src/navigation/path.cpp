@@ -357,6 +357,11 @@ double Path::speedAlongPath(double traveledDistance) const {
         closeUpDistance = glm::distance(_end.position(), endNodePos);
     }
 
+    if (pathLength() < startUpDistance + closeUpDistance) {
+        startUpDistance = 0.49 * pathLength(); // a little less than half
+        closeUpDistance = startUpDistance;
+    }
+
     double dampeningFactor = 1.0;
     if (traveledDistance < startUpDistance) {
         dampeningFactor = traveledDistance / startUpDistance;
@@ -384,9 +389,6 @@ double Path::speedAlongPath(double traveledDistance) const {
 
     // TODO: also dampen speed based on curvature, or make sure the curve has a rounder
     //       shape
-
-    // TODO: check for when path is shorter than the starUpDistance or closeUpDistance
-    //       variables
 
     return _speedFactorFromDuration * speed * dampeningFactor;
 }
