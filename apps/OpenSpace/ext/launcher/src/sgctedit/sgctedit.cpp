@@ -78,7 +78,7 @@ void SgctEdit::createWidgets() {
     }
     {
         layoutMainV->addLayout(layoutMainH);
-        _orientationWidget->addButtonToLayout(layoutMainV);
+        _orientationWidget->addControlsToParentLayout(layoutMainV);
         _fileSupportWidget = new FileSupport(
             layoutMainV,
             _monitorSizeList,

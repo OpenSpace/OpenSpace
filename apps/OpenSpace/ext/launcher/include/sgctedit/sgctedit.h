@@ -45,15 +45,38 @@ class SgctEdit final : public QDialog
 {
 Q_OBJECT
 public:
+    /**
+     * Constructor for SgctEdit class, the underlying class for the full window
+     * configuration editor
+     *
+     * \param parent The Qt QWidget parent object
+     * \param windowList vector of sgct::config::Window objects which will be modified
+     *                   by the user settings, and then used for writing to file in
+     *                   the launcher code
+     * \param cluster reference to sgct::config::Cluster object that contains sgct
+     *                objects that will be modified by the window configuration settings
+     * \param screenList A QList containing a QScreen object for each monitor in the
+     *                   system
+    */
     SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
         sgct::config::Cluster& cluster, const QList<QScreen*>& screenList);
     ~SgctEdit();
-    void addDisplayLayout(QHBoxLayout* layout);
-    void createWidgets();
+    /**
+     * Used to determine if the window configuration was saved to file, or canceled
+     *
+     * \return true if configuration was saved to file
+    */
     bool wasSaved() const;
+    /**
+     * Returns the saved filename
+     *
+     * \return saved filename in std::string
+    */
     std::string saveFilename();
 
 private:
+    void addDisplayLayout(QHBoxLayout* layout);
+    void createWidgets();
     void systemMonitorConfiguration(const QList<QScreen*>& screenList);
 
     std::shared_ptr<MonitorBox> _monBox = nullptr;

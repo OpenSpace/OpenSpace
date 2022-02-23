@@ -36,6 +36,13 @@ class QWidget;
 class OrientationDialog : public QDialog {
 Q_OBJECT
 public:
+    /**
+     * Constructor for OrientationDialog object which contains the input text boxes for
+     * orientation x,y,z values
+     *
+     * \param orientation x,y,z angles in degrees contained in sgct::quat object
+     * \param parent pointer to Qt QWidget parent object
+    */
     OrientationDialog(sgct::quat& orientation, QWidget* parent);
 
 private slots:

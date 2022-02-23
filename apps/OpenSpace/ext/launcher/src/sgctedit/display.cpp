@@ -161,9 +161,3 @@ void Display::initializeWindowControl() {
     }
 }
 
-void Display::uncheckWebGuiOptions() {
-    for (std::shared_ptr<WindowControl> w : _windowControl) {
-        w->uncheckWebGuiOption();
-    }
-}
-

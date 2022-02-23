@@ -55,7 +55,7 @@ Orientation::Orientation()
     }
 }
 
-void Orientation::addButtonToLayout(QVBoxLayout* parentLayout) {
+void Orientation::addControlsToParentLayout(QVBoxLayout* parentLayout) {
     parentLayout->addLayout(_layoutOrientationFull);
 }
 

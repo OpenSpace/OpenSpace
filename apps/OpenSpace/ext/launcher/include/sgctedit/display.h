@@ -45,12 +45,34 @@
 class Display : public QWidget {
 Q_OBJECT
 public:
+    /**
+     * Constructor for Display class, which manages the overall control layout including
+     * monitorBox, multiple WindowControl columns, and additional controls
+     *
+     * \param monitorRenderBox pointer to the MonitorBox object
+     * \param monitorSizeList A vector containing QRect objects containing pixel dims
+     *                        of each monitor
+     * \param nMaxWindows The maximum number of windows allowed (depends on the number
+     *                    of monitors in the system)
+     * \param winColors An array of QColor objects for window colors. The indexing of
+     *                  this array matches the window indexing used elsewhere in the
+     *                  class. This allows for a unique color for each window.
+    */
     Display(std::shared_ptr<MonitorBox> monitorRenderBox,
         std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
         const std::array<QColor, 4>& winColors);
+    /**
+     * Returns a vector of pointers to all WindowControl objects for all windows
+     *
+     * \return vector of pointers of WindowControl objects
+    */
     std::vector<std::shared_ptr<WindowControl>> windowControls() const;
+    /**
+     * Returns the current number of windows
+     *
+     * \return the currently-selected number of windows in unsigned int
+    */
     unsigned int nWindows() const;
-    void uncheckWebGuiOptions();
 
 private slots:
     void addWindow();

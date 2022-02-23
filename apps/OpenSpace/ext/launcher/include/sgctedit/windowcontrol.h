@@ -66,20 +66,94 @@ public:
      *           WebGUI option selected
      */
     void setWebGuiChangeCallback(std::function<void(unsigned int)> cb);
+    /**
+     * Makes the window label at top of a window control column visible
+     *
+     * \param bool Shows the window label if true
+     */
     void showWindowLabel(bool show);
+    /**
+     * Initializes the layout of a window controls column, returning the Qt layout object
+     *
+     * \return the QVBoxLayout object that contains the entire windows control column
+     */
     QVBoxLayout* initializeLayout();
+    /**
+     * Returns the dimensions of the window
+     *
+     * \return the QRectF object that contains the windows dimensions
+     */
     QRectF& dimensions();
+    /**
+     * Returns the title name of the window
+     *
+     * \return the std::string of the window name
+     */
     std::string windowName() const;
+    /**
+     * Returns the user-entered window size width, height from the text line objects
+     *
+     * \return the user-entered window size in sgct::ivec2 object
+     */
     sgct::ivec2 windowSize() const;
+    /**
+     * Returns the user-entered window position in x,y pixles from the text line objects
+     *
+     * \return the user-entered window position in sgct::ivec2 object
+     */
     sgct::ivec2 windowPos() const;
+    /**
+     * Returns bool for if the window control checkbox is set to be decorated
+     *
+     * \return bool for if window decoration is enabled
+     */
     bool isDecorated() const;
+    /**
+     * Returns bool for if the window control checkbox spout selection is enabled
+     *
+     * \return bool for if window has spout enabled
+     */
     bool isSpoutSelected() const;
+    /**
+     * Returns bool for if the window control checkbox for WebGUI is enabled
+     *
+     * \return bool for if window has WebGUI enabled
+     */
     bool isGuiWindow() const;
+    /**
+     * Function called in order to disable/uncheck the WebGUI checkbox option
+     */
     void uncheckWebGuiOption();
+    /**
+     * Returns index number of the selected window quality value. This is an index into
+     * the QualityValues array
+     *
+     * \return index int into the QualityValues array
+     */
     int qualitySelectedValue() const;
+    /**
+     * Returns index number of the monitor that this window is assigned to
+     *
+     * \return int index of monitor
+     */
     unsigned int monitorNum() const;
+    /**
+     * Returns the user-entered horizontal field-of-view (planar projection only)
+     *
+     * \return float value of horizontal FOV
+     */
     float fovH() const;
+    /**
+     * Returns the user-entered vertical field-of-view (planar projection only)
+     *
+     * \return float value of vertical FOV
+     */
     float fovV() const;
+    /**
+     * Returns the user-entered height offset (cylindrical projection only)
+     *
+     * \return float value of height offset
+     */
     float heightOffset() const;
     enum class ProjectionIndeces {
         Planar = 0,
@@ -88,6 +162,11 @@ public:
         Cylindrical,
         Equirectangular
     };
+    /**
+     * Returns the user-selected window projection type
+     *
+     * \return ProjectionIndeces enum of the projection type
+     */
     ProjectionIndeces projectionSelectedIndex() const;
 
 private slots:

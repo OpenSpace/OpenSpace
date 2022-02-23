@@ -37,9 +37,37 @@
 class Orientation : public QWidget {
 Q_OBJECT
 public:
+    /**
+     * Constructor for Orientation class, which manages the overall control layout including
+     * monitorBox, multiple WindowControl columns, and additional controls
+     *
+     * \param monitorRenderBox pointer to the MonitorBox object
+     * \param monitorSizeList A vector containing QRect objects containing pixel dims
+     *                        of each monitor
+     * \param nMaxWindows The maximum number of windows allowed (depends on the number
+     *                    of monitors in the system)
+     * \param winColors An array of QColor objects for window colors. The indexing of
+     *                  this array matches the window indexing used elsewhere in the
+     *                  class. This allows for a unique color for each window.
+    */
     Orientation();
-    void addButtonToLayout(QVBoxLayout* parentLayout);
+    /**
+     * Add Orientation controls to the parent layout
+     *
+     * \param parentLayout the layout to which the Orientation's controls will be added
+    */
+    void addControlsToParentLayout(QVBoxLayout* parentLayout);
+    /**
+     * Gets the user-provided x,y,z orientation values (degrees)
+     *
+     * \return the orientation angles provided in sgct::quat object
+    */
     sgct::quat orientationValue() const;
+    /**
+     * Gets the value for if VSync is enabled
+     *
+     * \return true if the VSync option is checked/enabled
+    */
     bool vsyncValue() const;
 
 private slots:
