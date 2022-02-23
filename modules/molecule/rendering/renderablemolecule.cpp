@@ -67,6 +67,11 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
     _pdb_id(pdb_id_info)
 {
+    _molecule = {0};
+    _trajectory = {0};
+    _draw_mol = {0};
+    _draw_rep = {0};
+
     _pdb_id.onChange([this]() {
         loadProteinPDB(_pdb_id.value());
     });
@@ -126,15 +131,16 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks& tasks) {
         //glm::mat4 view_matrix = data.camera.combinedViewMatrix();
         glm::mat4 proj_matrix = data.camera.projectionMatrix();
 
-        const md_gl_representation_t* draw_reps[] = {&_draw_rep};
-        const float* draw_model_matrices[] = {&model_matrix[0][0]};
+        md_gl_draw_op_t draw_op = {0};
+
+        draw_op.rep = &_draw_rep;
+        draw_op.model_matrix = &model_matrix[0][0];
 
         md_gl_draw_args_t args = {0};
         args.shaders = &_shaders;
-        args.representation = {
+        args.draw_operations = {
             1,
-            draw_reps,
-            draw_model_matrices,
+            &draw_op,
         };
         args.view_transform = {
             &view_matrix[0][0],
@@ -196,6 +202,7 @@ void RenderableMolecule::freeMolecule() {
         break;
     }
     _molecule = {0};
+    md_gl_representation_free(&_draw_rep);
 }
 
 void RenderableMolecule::freeTrajectory() {
