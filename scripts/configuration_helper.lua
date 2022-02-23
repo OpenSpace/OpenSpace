@@ -53,7 +53,7 @@ function sgct.config.single(arg) end
 -- shared: Determines whether the contents of the window should be shared using the SPOUT library [example: shared=true] {default: false}
 
 -- Expert settings:
--- vsync: Whether the rendering speed is locked to the refreshrate [example: vsync=true] {default: false}
+-- vsync: Whether the rendering speed is locked to the refreshrate [example: vsync=true] {default: true}
 -- refreshRate: If vsync is enabled, this is the target framerate [example: refreshRate=30] {default: infinity}
 -- stereo: Select the stereo rendering mode as supported by SGCT [example: stereo='anaglyph_red_cyan'] {default: 'none'}
 -- msaa: The multisampling anti-aliasing factor [example: msaa=8] {default: 4}
@@ -179,7 +179,10 @@ function generateWindow(result, fullScreen, msaa, border, monitor, tags, stereo,
   end
 
   if #(tags) > 0 then
-    local t = table.concat(arg["tags"], [[,]])
+    for i, v in ipairs(tags) do
+      tags[i] = "\"" .. v .. "\""
+    end
+    local t = table.concat(tags, [[,]])
     table.insert(result, [[          "tags": [ ]] .. t .. [[ ], ]])
   end
 
@@ -250,11 +253,11 @@ end
 function generateSettings(result, refreshRate, vsync)
   table.insert(result,   [[    "display": {]])
 
-  if (arg["refreshRate"]) then
-    table.insert(result, [[      "refreshrate": ]] .. arg["refreshRate"] .. [[,]])
+  if (refreshRate) then
+    table.insert(result, [[      "refreshrate": ]] .. refreshRate .. [[,]])
   end
 
-  if arg["vsync"] then
+  if vsync then
     table.insert(result, [[      "swapinterval": 1]])
   else
     table.insert(result, [[      "swapinterval": 0]])
@@ -276,11 +279,9 @@ function generateCluster(arg, viewport)
     table.insert(result, [[  "debug": ]] .. tostring(arg["sgctdebug"]) .. [[,]])
   end
 
-  if (arg["settings"]) then
-    table.insert(result, [[  "settings": {]])
-    generateSettings(result, arg["refreshRate"], arg["vsync"])
-    table.insert(result, [[  },]])
-  end
+  table.insert(result, [[  "settings": {]])
+  generateSettings(result, arg["refreshRate"], arg["vsync"])
+  table.insert(result, [[  },]])
 
   if arg["scene"] then
     table.insert(result, [[  "scene": {]])

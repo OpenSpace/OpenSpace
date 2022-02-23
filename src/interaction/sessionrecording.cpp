@@ -2004,7 +2004,6 @@ bool SessionRecording::processCameraKeyframe(double now) {
     Scene* scene = camera->parent()->scene();
 
     const SceneGraphNode* n = scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode);
-
     if (n) {
         global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
     }

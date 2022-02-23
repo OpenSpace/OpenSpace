@@ -608,10 +608,18 @@ void RingsComponent::update(const UpdateData& data) {
         _textureIsDirty = false;
     }
 
-    _sunPosition = glm::normalize(
-        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
-        data.modelTransform.translation
-    );
+    // @TODO (abock, 2022-02-20) This should be replaced with the more general light
+    // source solution that we are using in other places
+    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
+    if (sun) {
+        _sunPosition = glm::normalize(
+            sun->worldPosition() - data.modelTransform.translation
+        );
+    }
+    else {
+        // If the Sun node is not found, we assume the light source to be in the origin
+        _sunPosition = glm::normalize(-data.modelTransform.translation);
+    }
 }
 
 void RingsComponent::loadTexture() {
@@ -619,7 +627,6 @@ void RingsComponent::loadTexture() {
     using namespace ghoul::opengl;
 
     if (!_texturePath.value().empty()) {
-
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
             absPath(_texturePath).string(),
             1

@@ -130,7 +130,7 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
 
 void GlobeRotation::findGlobe() {
     SceneGraphNode* n = sceneGraphNode(_globe);
-    if (n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
+    if (n && n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
         _globeNode = dynamic_cast<RenderableGlobe*>(n->renderable());
     }
     else {
