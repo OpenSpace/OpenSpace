@@ -114,16 +114,16 @@ void RenderableMolecule::update(const UpdateData& data) {
 
 void RenderableMolecule::render(const RenderData& data, RendererTasks& tasks) {
     if (_molecule.atom.count) {
-
-        double extra_scale = 1000;
-
         glm::dmat4 modelTransform =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation - glm::dvec3(_center)) *
             glm::dmat4(data.modelTransform.rotation) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale) * extra_scale);
-        glm::mat4 model_matrix = glm::mat4(modelTransform);
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+        //glm::mat4 model_matrix = glm::mat4(modelTransform);
 
-        glm::mat4 view_matrix = data.camera.combinedViewMatrix();
+        glm::mat4 model_matrix = glm::mat4(1.0);
+        glm::mat4 view_matrix = glm::translate(glm::mat4(1.0), {0,0,-200});
+
+        //glm::mat4 view_matrix = data.camera.combinedViewMatrix();
         glm::mat4 proj_matrix = data.camera.projectionMatrix();
 
         const md_gl_representation_t* draw_reps[] = {&_draw_rep};
