@@ -80,8 +80,8 @@ public:
     };
 
     struct HorizonsKeyframe {
-        double time; // J2000 seconds
-        glm::dvec3 position;
+        double time;            // J2000 seconds
+        glm::dvec3 position;    // GALACTIC cartesian coordinates in meters
     };
 
     struct HorizonsResult {
@@ -100,21 +100,24 @@ public:
 
     void setFile(std::filesystem::path file);
     const std::filesystem::path& file() const;
-    std::filesystem::path& file();
 
+    static std::string constructUrl(Type type, const std::string& target,
+        const std::string& observer, const std::string& startTime,
+        const std::string& stopTime, const std::string& stepSize, const std::string& unit);
     static ResultCode isValidAnswer(const json& answer);
-    ResultCode isValidHorizonsFile() const;
-    void displayErrorMessage(ResultCode code) const;
-    HorizonsResult readFile();
 
-private:
-    HorizonsResult readVectorFile();
-    HorizonsResult readObserverFile();
+    ResultCode isValidHorizonsFile() const;
+    void displayErrorMessage(const ResultCode code) const;
+    HorizonsResult readFile() const;
 
     std::vector<std::string> parseMatches(const std::string& startPhrase,
         const std::string& endPhrase) const;
     std::pair<std::string, std::string> parseValidTimeRange(
         const std::string& startPhrase, const std::string& endPhrase) const;
+
+private:
+    HorizonsResult readVectorFile() const;
+    HorizonsResult readObserverFile() const;
 
     std::filesystem::path _file;
 };

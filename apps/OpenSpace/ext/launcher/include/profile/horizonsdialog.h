@@ -51,7 +51,6 @@ public:
     std::filesystem::path file() const;
 
 private slots:
-    void openFile();
     void openDirectory();
     void approved();
 
@@ -82,9 +81,10 @@ private:
     bool handleResult(openspace::HorizonsFile::ResultCode& result);
     void appendLog(const std::string& message, const LogLevel level);
 
-    std::filesystem::path _horizonsFile;
+    openspace::HorizonsFile _horizonsFile;
     QNetworkAccessManager* _manager;
 
+    QComboBox* _typeCombo = nullptr;
     QLineEdit* _directoryEdit = nullptr;
     QLineEdit* _nameEdit = nullptr;
     QLineEdit* _targetEdit = nullptr;

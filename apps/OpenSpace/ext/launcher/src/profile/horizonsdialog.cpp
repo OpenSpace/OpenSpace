@@ -22,21 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
- // Things needed to construct the url for the http request to JPL Horizons interface
-#define HORIZONS_REQUEST_URL "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&MAKE_EPHEM='YES'&TABLE_TYPE='OBSERVER'&QUANTITIES='20,33'&RANGE_UNITS='KM'&SUPPRESS_RANGE_RATE='YES'&CSV_FORMAT='NO'"
-#define COMMAND "&COMMAND="
-#define CENTER "&CENTER="
-#define START_TIME "&START_TIME="
-#define STOP_TIME "&STOP_TIME="
-#define STEP_SIZE "&STEP_SIZE="
-#define SPACE "%20"
-#define TIMEVARYING "arcseconds (time-varying)"
-#define MINUTES "minutes"
-#define HOURS "hours"
-#define DAYS "days"
-#define MONTHS "calendar months"
-#define YEARS "calendar years"
-#define UNITLESS "equal intervals (unitless)"
+
 
 #include "profile/horizonsdialog.h"
 
@@ -62,6 +48,15 @@
 #include <sstream>
 
 namespace {
+    // Text for the different units for the step size
+    constexpr const char* TimeVarying = "arcseconds (time-varying)";
+    constexpr const char* Minutes = "minutes";
+    constexpr const char* Hours = "hours";
+    constexpr const char* Days = "days";
+    constexpr const char* Months = "calendar months";
+    constexpr const char* Years = "calendar years";
+    constexpr const char* Unitless = "equal intervals (unitless)";
+
     std::string replaceAll(const std::string& string, const std::string& from, const std::string& to) {
         if (from.empty())
             return "";
@@ -120,52 +115,6 @@ namespace {
         return result;
     }
 
-    std::vector<std::string> parseMatches(std::filesystem::path& file,
-        std::string startPhrase, std::string endPhrase)
-    {
-        std::ifstream fileStream(file);
-        std::vector<std::string> matches;
-
-        if (!fileStream.good()) {
-            fileStream.close();
-            return matches;
-        }
-
-        // Ignore everything until start of matches
-        std::string line;
-        while (fileStream.good()) {
-            // Add the line with the start phrase first, to give context
-            if (line.find(startPhrase) != std::string::npos) {
-                matches.push_back(trim(line));
-                break;
-            }
-
-            std::getline(fileStream, line);
-        }
-
-        if (!fileStream.good()) {
-            fileStream.close();
-            return std::vector<std::string>();
-        }
-
-        // There will be one empty line before the list of matches, skip
-        std::getline(fileStream, line);
-        std::getline(fileStream, line);
-        while (fileStream.good()) {
-            // End of matches or file
-            if (line == " " || line.empty() || line.find(endPhrase) != std::string::npos) {
-                fileStream.close();
-                return matches;
-            }
-
-            matches.push_back(trim(line));
-            std::getline(fileStream, line);
-        }
-
-        fileStream.close();
-        return std::vector<std::string>();
-    }
-
     int findId(const std::string& match) {
         // Format: id, other information...
         std::stringstream str(match);
@@ -173,86 +122,6 @@ namespace {
 
         str >> id;
         return id;
-    }
-
-    std::pair<std::string, std::string> parseValidTimeRange(std::filesystem::path& file,
-        std::string startPhrase, std::string endPhrase)
-    {
-        std::ifstream fileStream(file);
-
-        if (!fileStream.good()) {
-            fileStream.close();
-            return std::pair<std::string, std::string>();
-        }
-
-        // Ignore everything until head of time range list
-        std::string line;
-        std::getline(fileStream, line);
-        while (fileStream.good() && line.find(startPhrase) == std::string::npos) {
-            std::getline(fileStream, line);
-        }
-
-        if (!fileStream.good()) {
-            fileStream.close();
-            return std::pair<std::string, std::string>();
-        }
-
-        // There will be one empty line before the list of time rnages, skip
-        std::getline(fileStream, line);
-        std::string startTime, endTime;
-
-        // From the first line get the start time
-        std::getline(fileStream, line);
-        if (fileStream.good()) {
-            std::stringstream str(line);
-
-            // Read and save each word.
-            std::vector<std::string> words;
-            std::string word;
-            while (str >> word)
-                words.push_back(word);
-
-            if (words.empty()) {
-                return std::pair<std::string, std::string>();
-            }
-
-            // Parse time stamps backwards
-            // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
-            endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
-            startTime = words[words.size() - 4] + " T " + words[words.size() - 3];
-        }
-        if (startTime.empty() || endTime.empty()) {
-            fileStream.close();
-            return std::pair<std::string, std::string>();
-        }
-
-        // Get the end time from the last trajectery
-        while (fileStream.good()) {
-            if (line.find(endPhrase) != std::string::npos || line.empty() || line == " ") {
-                fileStream.close();
-                return std::pair<std::string, std::string>(startTime, endTime);
-            }
-
-            // Read and save each word.
-            std::stringstream str(line);
-            std::vector<std::string> words;
-            std::string word;
-            while (str >> word)
-                words.push_back(word);
-
-            if (words.empty()) {
-                return std::pair<std::string, std::string>();
-            }
-
-            // Parse time stamps backwards
-            // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
-            endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
-
-            std::getline(fileStream, line);
-        }
-
-        fileStream.close();
-        return std::pair<std::string, std::string>();
     }
 } // namespace
 
@@ -266,7 +135,7 @@ HorizonsDialog::HorizonsDialog(QWidget* parent)
 }
 
 std::filesystem::path HorizonsDialog::file() const {
-    return _horizonsFile;
+    return _horizonsFile.file();
 }
 
 void HorizonsDialog::createWidgets() {
@@ -286,6 +155,23 @@ void HorizonsDialog::createWidgets() {
         infoLabel->setObjectName("url");
         infoLabel->setOpenExternalLinks(true);
         layout->addWidget(infoLabel);
+    }
+    {
+        QBoxLayout* container = new QHBoxLayout(this);
+        QLabel* typeLabel = new QLabel("Horizons data type", this);
+        container->addWidget(typeLabel);
+
+        _typeCombo = new QComboBox(this);
+        _typeCombo->setToolTip("Choose Horizons data type");
+        QStringList types = {
+           "Vector table",
+           "Observer table"
+        };
+        _typeCombo->addItems(types);
+        _typeCombo->setCurrentIndex(0);
+        container->addWidget(_typeCombo);
+
+        layout->addLayout(container);
     }
     {
         QBoxLayout* container = new QHBoxLayout(this);
@@ -387,13 +273,13 @@ void HorizonsDialog::createWidgets() {
         _timeTypeCombo = new QComboBox(this);
         _timeTypeCombo->setToolTip("Choose unit of the step size");
         QStringList timeTypes = {
-            TIMEVARYING,
-            MINUTES,
-            HOURS,
-            DAYS,
-            MONTHS,
-            YEARS,
-            UNITLESS
+            TimeVarying,
+            Minutes,
+            Hours,
+            Days,
+            Months,
+            Years,
+            Unitless
         };
         _timeTypeCombo->addItems(timeTypes);
         _timeTypeCombo->setCurrentIndex(1);
@@ -438,17 +324,6 @@ void HorizonsDialog::createWidgets() {
     }
 }
 
-void HorizonsDialog::openFile() {
-    std::string filePath = QFileDialog::getOpenFileName(
-        this,
-        tr("Open Horizons file"),
-        "",
-        tr("Horiozons file (*.dat)")
-    ).toStdString();
-    _horizonsFile = std::filesystem::absolute(filePath);
-    //_fileEdit->setText(QString(_horizonsFile.string().c_str()));
-}
-
 void HorizonsDialog::openDirectory() {
     std::string directory = QFileDialog::getExistingDirectory(this).toStdString();
     _directoryEdit->setText(directory.c_str());
@@ -478,10 +353,9 @@ bool HorizonsDialog::handleRequest() {
         return false;
     }
 
-    _horizonsFile = file;
-    openspace::HorizonsFile horizonsFile(_horizonsFile);
+    _horizonsFile = openspace::HorizonsFile(file);
     openspace::HorizonsFile::ResultCode result =
-        horizonsFile.isValidHorizonsFile();
+        _horizonsFile.isValidHorizonsFile();
 
     return handleResult(result);
 }
@@ -572,8 +446,17 @@ bool HorizonsDialog::isValidInput() {
 
 std::string HorizonsDialog::constructUrl() {
     // Construct url for request
-    std::string url = "";
-    url.append(HORIZONS_REQUEST_URL);
+    openspace::HorizonsFile::Type type;
+    if (_typeCombo->currentIndex() == 0) {
+        type = openspace::HorizonsFile::Type::Vector;
+    }
+    else if (_typeCombo->currentIndex() == 1) {
+        type = openspace::HorizonsFile::Type::Observer;
+    }
+    else {
+        _errorMsg->setText("Invalid Horizons type");
+        return "";
+    }
 
     std::string command;
     if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() != 0) {
@@ -585,10 +468,6 @@ std::string HorizonsDialog::constructUrl() {
         command = _targetEdit->text().toStdString();
         _targetName = command;
     }
-    url.append(COMMAND);
-    url.append("'");
-    url.append(replaceAll(command, " ", SPACE));
-    url.append("'");
 
     std::string center;
     if (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() != 0) {
@@ -603,52 +482,43 @@ std::string HorizonsDialog::constructUrl() {
         center = _centerEdit->text().toStdString();
         _observerName = center;
     }
-    url.append(CENTER);
-    url.append("'");
-    url.append(replaceAll(center, " ", SPACE));
-    url.append("'");
 
     _startTime = _startEdit->date().toString("yyyy-MM-dd").toStdString();
     _startTime.append(" ");
     _startTime.append(_startEdit->time().toString("hh:mm").toStdString());
-    url.append(START_TIME);
-    url.append("'");
-    url.append(replaceAll(_startTime, " ", SPACE));
-    url.append("'");
 
     _endTime = _endEdit->date().toString("yyyy-MM-dd").toStdString();
     _endTime.append(" ");
     _endTime.append(_endEdit->time().toString("hh:mm").toStdString());
-    url.append(STOP_TIME);
-    url.append("'");
-    url.append(replaceAll(_endTime, " ", SPACE));
-    url.append("'");
 
-    url.append(STEP_SIZE);
-    url.append("'");
-    url.append(_stepEdit->text().toStdString());
-    url.append(SPACE);
-    if (_timeTypeCombo->currentText().toStdString() == TIMEVARYING) {
-        url.append("VAR'");
+    std::string unit;
+    if (_timeTypeCombo->currentText().toStdString() == TimeVarying) {
+        unit = "VAR";
     }
-    else if (_timeTypeCombo->currentText().toStdString() == MINUTES) {
-        url.append("m'");
+    else if (_timeTypeCombo->currentText().toStdString() == Minutes) {
+        unit = "m";
     }
-    else if (_timeTypeCombo->currentText().toStdString() == HOURS) {
-        url.append("h'");
+    else if (_timeTypeCombo->currentText().toStdString() == Hours) {
+        unit = "h";
     }
-    else if (_timeTypeCombo->currentText().toStdString() == DAYS) {
-        url.append("d'");
+    else if (_timeTypeCombo->currentText().toStdString() == Days) {
+        unit = "d";
     }
-    else if (_timeTypeCombo->currentText().toStdString() == MONTHS) {
-        url.append("MO'");
+    else if (_timeTypeCombo->currentText().toStdString() == Months) {
+        unit = "MO";
     }
-    else if (_timeTypeCombo->currentText().toStdString() == YEARS) {
-        url.append("Y'");
+    else if (_timeTypeCombo->currentText().toStdString() == Years) {
+        unit = "Y";
     }
-    // else?
+    else if (_timeTypeCombo->currentText().toStdString() == Unitless) {
+        unit = "";
+    }
+    else {
+        _errorMsg->setText("Invalid unit type");
+        return "";
+    }
 
-    return url;
+    return openspace::HorizonsFile::constructUrl(type, command, center, _startTime, _endTime, _stepEdit->text().toStdString(), unit);
 }
 
 // Send request synchronously, EventLoop waits until request has finished
@@ -833,7 +703,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                 + _targetName + "'.", HorizonsDialog::LogLevel::Error);
 
             std::pair<std::string, std::string> validTimeRange =
-                parseValidTimeRange(_horizonsFile, "Trajectory files", "************");
+                _horizonsFile.parseValidTimeRange("Trajectory files", "************");
             if (validTimeRange.first.empty()) {
                 appendLog(
                     "Could not parse the valid time range from file",
@@ -880,7 +750,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             );
 
             std::vector<std::string> matchingstations =
-                parseMatches(_horizonsFile, "Observatory Name", "Multiple matching stations found");
+                _horizonsFile.parseMatches("Observatory Name", "Multiple matching stations found");
             if (matchingstations.empty()) {
                 appendLog("Could not parse the matching stations",
                     HorizonsDialog::LogLevel::Error
@@ -906,7 +776,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             );
 
             std::vector<std::string> matchingObservers =
-                parseMatches(_horizonsFile, "Name", "matches");
+                _horizonsFile.parseMatches("Name", "matches");
             if (matchingObservers.empty()) {
                 appendLog("Could not parse the matching observers",
                     HorizonsDialog::LogLevel::Error
@@ -947,7 +817,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             );
 
             std::vector<std::string> matchingTargets =
-                parseMatches(_horizonsFile, "Name", "matches");
+                _horizonsFile.parseMatches("Name", "matches");
             if (matchingTargets.empty()) {
                 appendLog("Could not parse the matching targets",
                     HorizonsDialog::LogLevel::Error
@@ -975,7 +845,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             break;
     }
 
-    std::filesystem::remove(_horizonsFile);
+    std::filesystem::remove(_horizonsFile.file());
     return false;
 }
 
@@ -1008,7 +878,7 @@ void HorizonsDialog::approved() {
     _downloadLabel->show();
     bool result = handleRequest();
     _downloadLabel->hide();
-    if (!result || !std::filesystem::is_regular_file(_horizonsFile)) {
+    if (!result || !std::filesystem::is_regular_file(_horizonsFile.file())) {
         return;
     }
     accept();
