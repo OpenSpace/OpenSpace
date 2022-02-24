@@ -191,7 +191,7 @@ void PathNavigator::updateCamera(double deltaTime) {
     camera()->setPose(newPose);
 
     if (_currentPath->hasReachedEnd()) {
-        LINFO("Reached end of path");
+        LINFO("Reached target");
         handlePathEnd();
 
         if (_applyIdleBehaviorOnFinish) {
@@ -244,7 +244,9 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
 }
 
 void PathNavigator::clearPath() {
-    LDEBUG("Clearing path");
+    if (_currentPath) {
+        LDEBUG("Clearing path");
+    }
     _currentPath = nullptr;
 }
 
