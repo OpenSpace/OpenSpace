@@ -159,26 +159,29 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        StereoInterpolationTimeInfo = {
-            "StereoInterpolationTime",
-            "Stereo Interpolation Time",
-            "The time to interpolate to a new stereoscopic depth "
-            "when the anchor node is changed, in seconds."
+        StereoInterpolationTimeInfo =
+    {
+        "StereoInterpolationTime",
+        "Stereo Interpolation Time",
+        "The time to interpolate to a new stereoscopic depth "
+        "when the anchor node is changed, in seconds."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        RetargetInterpolationTimeInfo = {
-            "RetargetAnchorInterpolationTime",
-            "Retarget Interpolation Time",
-            "The time to interpolate the camera rotation "
-            "when the anchor or aim node is changed, in seconds."
+        RetargetInterpolationTimeInfo =
+    {
+        "RetargetAnchorInterpolationTime",
+        "Retarget Interpolation Time",
+        "The time to interpolate the camera rotation "
+        "when the anchor or aim node is changed, in seconds."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        FollowRotationInterpTimeInfo = {
-            "FollowRotationInterpolationTime",
-            "Follow Rotation Interpolation Time",
-            "The interpolation time when toggling following focus node rotation."
+        FollowRotationInterpTimeInfo =
+    {
+        "FollowRotationInterpolationTime",
+        "Follow Rotation Interpolation Time",
+        "The interpolation time when toggling following focus node rotation."
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
@@ -190,31 +193,34 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        UseAdaptiveStereoscopicDepthInfo = {
-            "UseAdaptiveStereoscopicDepth",
-            "Adaptive Steroscopic Depth",
-            "Dynamically adjust the view scaling based on the distance to the surface of "
-            "the anchor and aim nodes. If enabled, view scale will be set to "
-            "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). "
-            "If disabled, view scale will be set to 10^StaticViewScaleExponent."
-        };
+        UseAdaptiveStereoscopicDepthInfo =
+    {
+        "UseAdaptiveStereoscopicDepth",
+        "Adaptive Steroscopic Depth",
+        "Dynamically adjust the view scaling based on the distance to the surface of "
+        "the anchor and aim nodes. If enabled, view scale will be set to "
+        "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). "
+        "If disabled, view scale will be set to 10^StaticViewScaleExponent."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo
-        StaticViewScaleExponentInfo = {
-            "StaticViewScaleExponent",
-            "Static View Scale Exponent",
-            "Statically scale the world by 10^StaticViewScaleExponent. "
-            "Only used if UseAdaptiveStereoscopicDepthInfo is set to false."
-        };
+        StaticViewScaleExponentInfo =
+    {
+        "StaticViewScaleExponent",
+        "Static View Scale Exponent",
+        "Statically scale the world by 10^StaticViewScaleExponent. "
+        "Only used if UseAdaptiveStereoscopicDepthInfo is set to false."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo
-        StereoscopicDepthOfFocusSurfaceInfo = {
-            "StereoscopicDepthOfFocusSurface",
-            "Stereoscopic Depth of the Surface in Focus",
-            "Set the stereoscopically perceived distance (in meters) to the closest "
-            "point out of the surface of the anchor and the center of the aim node. "
-            "Only used if UseAdaptiveStereoscopicDepthInfo is set to true."
-        };
+        StereoscopicDepthOfFocusSurfaceInfo =
+    {
+        "StereoscopicDepthOfFocusSurface",
+        "Stereoscopic Depth of the Surface in Focus",
+        "Set the stereoscopically perceived distance (in meters) to the closest "
+        "point out of the surface of the anchor and the center of the aim node. "
+        "Only used if UseAdaptiveStereoscopicDepthInfo is set to true."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
         "ApplyIdleBehavior",
@@ -238,7 +244,8 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        AbortOnCameraInteractionInfo = {
+        AbortOnCameraInteractionInfo =
+    {
         "AbortOnCameraInteraction",
         "Abort on Camera Interaction",
         "If set to true, the idle behavior is aborted on camera interaction. If false, "
@@ -248,7 +255,8 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        IdleBehaviorDampenInterpolationTimeInfo = {
+        IdleBehaviorDampenInterpolationTimeInfo =
+    {
         "DampenInterpolationTime",
         "Start/End Dampen Interpolation Time",
         "The time to interpolate to/from full speed when an idle behavior is triggered "
