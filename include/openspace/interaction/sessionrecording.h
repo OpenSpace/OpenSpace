@@ -671,7 +671,6 @@ protected:
     bool isPropertyAllowedForBaseline(const std::string& propString);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
-    std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
     bool doesStartWithSubstring(const std::string& s, const std::string& matchSubstr);
     void trimCommandsFromScriptIfFound(std::string& script);
     void replaceCommandsFromScriptIfFound(std::string& script);
@@ -800,6 +799,7 @@ protected:
     double _cameraFirstInTimeline_timestamp = 0;
 
     int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 
     DataMode _conversionDataMode = DataMode::Binary;
     int _conversionLineNum = 1;

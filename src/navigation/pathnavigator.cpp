@@ -191,7 +191,7 @@ void PathNavigator::updateCamera(double deltaTime) {
     camera()->setPose(newPose);
 
     if (_currentPath->hasReachedEnd()) {
-        LINFO("Reached end of path");
+        LINFO("Reached target");
         handlePathEnd();
 
         if (_applyIdleBehaviorOnFinish) {
@@ -211,10 +211,6 @@ void PathNavigator::updateCamera(double deltaTime) {
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
-    // @TODO (2021-08.16, emmbr): Improve how curve types are handled.
-    // We want the user to be able to choose easily
-    const int pathType = _defaultPathType;
-
     OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         // Silently ignore any paths that are being created during a session recording
@@ -225,9 +221,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     clearPath();
 
     try {
-        _currentPath = std::make_unique<Path>(
-            createPathFromDictionary(dictionary, Path::Type(pathType))
-        );
+        _currentPath = std::make_unique<Path>(createPathFromDictionary(dictionary));
     }
     catch (const documentation::SpecificationError& e) {
         LERROR("Could not create camera path");
@@ -238,16 +232,21 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
             LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
     }
+    catch (const PathCurve::TooShortPathError&) {
+        // Do nothing
+    }
     catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format("Could not create path. Reason: ", e.message));
         return;
     }
 
-    LINFO("Successfully generated camera path");
+    LDEBUG("Successfully generated camera path");
 }
 
 void PathNavigator::clearPath() {
-    LDEBUG("Clearing path");
+    if (_currentPath) {
+        LDEBUG("Clearing path");
+    }
     _currentPath = nullptr;
 }
 
@@ -282,6 +281,7 @@ void PathNavigator::startPath() {
     _isPlaying = true;
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
+    global::navigationHandler->orbitalNavigator().resetVelocities();
 }
 
 void PathNavigator::abortPath() {
@@ -321,6 +321,11 @@ void PathNavigator::continuePath() {
 
     LINFO("Continuing path");
     _isPlaying = true;
+}
+
+Path::Type PathNavigator::defaultPathType() const {
+    const int pathType = _defaultPathType;
+    return Path::Type(pathType);
 }
 
 double PathNavigator::minValidBoundingSphere() const {
@@ -438,9 +443,9 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 &luascriptfunctions::flyTo,
                 "string [, bool, double]",
                 "Move the camera to the node with the specified identifier. The optional "
-                "double specifies the duration of the motion. If the optional bool is "
-                "set to true the target up vector for camera is set based on the target "
-                "node. Either of the optional parameters can be left out."
+                "double specifies the duration of the motion, in seconds. If the optional "
+                "bool is set to true the target up vector for camera is set based on the "
+                "target node. Either of the optional parameters can be left out."
             },
             {
                 "flyToHeight",
@@ -449,18 +454,48 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "Move the camera to the node with the specified identifier. The second "
                 "argument is the desired target height above the target node's bounding "
                 "sphere, in meters. The optional double specifies the duration of the "
-                "motion. If the optional bool is set to true, the target up vector for "
-                "camera is set based on the target node. Either of the optional "
-                "parameters can be left out."
+                "motion, in seconds. If the optional bool is set to true, the target "
+                "up vector for camera is set based on the target node. Either of the "
+                "optional parameters can be left out."
             },
-             {
+            {
                 "flyToNavigationState",
                 &luascriptfunctions::flyToNavigationState,
                 "table, [double]",
                 "Create a path to the navigation state described by the input table. "
-                "The optional double specifies the target duration of the motion. Note "
-                "that roll must be included for the target up direction to be taken "
-                "into account."
+                "The optional double specifies the target duration of the motion, "
+                "in seconds. Note that roll must be included for the target up "
+                "direction to be taken into account."
+            },
+            {
+                "zoomToFocus",
+                &luascriptfunctions::zoomToFocus,
+                "[duration]",
+                "Zoom linearly to the current focus node, using the default distance."
+                "The optional input parameter specifies the duration for the motion, "
+                "in seconds."
+            },
+            {
+                "zoomToDistance",
+                &luascriptfunctions::zoomToDistance,
+                "distance, [duration]",
+                "Fly linearly to a specific distance in relation to the focus node. "
+                "The distance is given in meters above the bounding sphere of the "
+                "current focus node."
+                "The optional input parameter specifies the duration for the motion, "
+                "in seconds."
+            },
+            {
+                "zoomToDistanceRelative",
+                &luascriptfunctions::zoomToDistanceRelative,
+                "distance, [duration]",
+                "Fly linearly to a specific distance in relation to the focus node. "
+                "The distance is given as a multiple of the bounding sphere of the "
+                "current focus node. That is, a value of 1 will result in a position "
+                "at a distance of one times the size of the bounding sphere away from "
+                "the object."
+                "The optional input parameter specifies the duration for the motion, "
+                "in seconds."
             },
             {
                 "createPath",

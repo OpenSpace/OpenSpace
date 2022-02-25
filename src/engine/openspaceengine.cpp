@@ -1180,6 +1180,17 @@ void OpenSpaceEngine::preSynchronization() {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
     }
+
+    // Handle callback(s) for change in engine mode
+    if (_modeLastFrame != _currentMode) {
+        using K = CallbackHandle;
+        using V = ModeChangeCallback;
+        for (const std::pair<K, V>& it : _modeChangeCallbacks) {
+            it.second();
+        }
+    }
+    _modeLastFrame = _currentMode;
+
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
@@ -1615,6 +1626,31 @@ bool OpenSpaceEngine::setMode(Mode newMode) {
 void OpenSpaceEngine::resetMode() {
     _currentMode = Mode::UserControl;
     LDEBUG(fmt::format("Reset engine mode to {}", stringify(_currentMode)));
+}
+
+OpenSpaceEngine::CallbackHandle OpenSpaceEngine::addModeChangeCallback(
+                                                                   ModeChangeCallback cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _modeChangeCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _modeChangeCallbacks.begin(),
+        _modeChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, ModeChangeCallback>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _modeChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _modeChangeCallbacks.erase(it);
 }
 
 void setCameraFromProfile(const Profile& p) {
