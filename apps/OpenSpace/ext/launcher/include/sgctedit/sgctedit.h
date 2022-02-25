@@ -57,9 +57,12 @@ public:
      *                objects that will be modified by the window configuration settings
      * \param screenList A QList containing a QScreen object for each monitor in the
      *                   system
+     * \param userConfigPath A string containing the file path of the user config
+     *                       directory where all window configs are stored
     */
     SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
-        sgct::config::Cluster& cluster, const QList<QScreen*>& screenList);
+        sgct::config::Cluster& cluster, const QList<QScreen*>& screenList,
+        const std::string userConfigPath);
     ~SgctEdit();
     /**
      * Used to determine if the window configuration was saved to file, or canceled
@@ -89,6 +92,7 @@ private:
     Orientation* _orientationWidget = nullptr;
     sgct::config::Cluster& _cluster;
     std::vector<sgct::config::Window>& _windowList;
+    const std::string _userConfigPath;
     bool _saveSelected = false;
     unsigned int _nMaxWindows = 3;
     const std::array<QColor, 4> _colorsForWindows = {

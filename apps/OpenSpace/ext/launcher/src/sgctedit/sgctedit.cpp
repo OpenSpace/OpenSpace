@@ -23,12 +23,15 @@
  ****************************************************************************************/
 
 #include "sgctedit/sgctedit.h"
+#include <QFileDialog>
 
 SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
-                   sgct::config::Cluster& cluster, const QList<QScreen*>& screenList)
+                   sgct::config::Cluster& cluster, const QList<QScreen*>& screenList,
+                   const std::string userConfigPath)
     : QDialog(parent)
     , _cluster(cluster)
     , _windowList(windowList)
+    , _userConfigPath(userConfigPath)
 {
     systemMonitorConfiguration(screenList);
     setWindowTitle("Window Configuration Editor");
@@ -79,13 +82,17 @@ void SgctEdit::createWidgets() {
     {
         layoutMainV->addLayout(layoutMainH);
         _orientationWidget->addControlsToParentLayout(layoutMainV);
-        _fileSupportWidget = new FileSupport(
-            layoutMainV,
+        SgctConfigElements sgctCfg = {_windowList, _cluster};
+        UserConfigurationElements userCfg = {
             _monitorSizeList,
             _displayWidget,
             _orientationWidget,
-            _windowList,
-            _cluster,
+            _userConfigPath
+        };
+        _fileSupportWidget = new FileSupport(
+            layoutMainV,
+            userCfg,
+            sgctCfg,
             [this](bool accepted) {
                 if (accepted) {
                     _saveSelected = true;

@@ -500,6 +500,8 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
         );
     }
 
+    //Always add the .cfg sgct default as first item
+    _windowConfigBox->insertItem(0, QString::fromStdString(_sgctConfigName));
     // Try to find the requested configuration file and set it as the current one. As we
     // have support for function-generated configuration files that will not be in the
     // list we need to add a preset that doesn't exist a file for
@@ -509,8 +511,11 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
     else {
         // Add the requested preset at the top
-        _windowConfigBox->insertItem(0, QString::fromStdString(preset));
-        _windowConfigBox->setCurrentIndex(0);
+        _windowConfigBox->insertItem(1, QString::fromStdString(preset));
+        //Increment the user config count because there is an additional option added
+        //before the user config options
+        _userConfigCount++;
+        _windowConfigBox->setCurrentIndex(1);
     }
 }
 
@@ -559,19 +564,26 @@ void LauncherWindow::openWindowEditor() {
     }
     sgct::config::Cluster cluster;
     std::vector<sgct::config::Window> windowList;
-    SgctEdit editor(this, windowList, cluster, screenList);
+    SgctEdit editor(this, windowList, cluster, screenList, _userConfigPath);
     editor.exec();
     if (editor.wasSaved()) {
-        std::string fullFilename = editor.saveFilename() + ".json";
-        const std::string path = _userConfigPath + fullFilename;
+        std::string ext = ".json";
+        std::string savePath = editor.saveFilename();
+        if (savePath.size() >= ext.size()
+            && !(savePath.substr(savePath.size() - ext.size()).compare(ext) == 0))
+        {
+            savePath += ext;
+        }
         if (cluster.nodes.size() == 0) {
             cluster.nodes.push_back(sgct::config::Node());
         }
         for (auto w : windowList) {
             cluster.nodes[0].windows.push_back(w);
         }
-        saveWindowConfig(this, path, cluster);
-        populateWindowConfigsList(fullFilename);
+        saveWindowConfig(this, savePath, cluster);
+        //Truncate path to convert this back to path relative to _userConfigPath
+        savePath = savePath.substr(_userConfigPath.size());
+        populateWindowConfigsList(savePath);
     }
     else {
         const std::string current = _windowConfigBox->currentText().toStdString();

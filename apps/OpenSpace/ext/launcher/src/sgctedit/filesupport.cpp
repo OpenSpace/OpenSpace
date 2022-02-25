@@ -24,50 +24,37 @@
 
 #include "sgctedit/filesupport.h"
 
-FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorList,
-                         std::shared_ptr<Display> display, Orientation* orientation,
-                         std::vector<sgct::config::Window>& windowList,
-                         sgct::config::Cluster& cluster, std::function<void(bool)> cb)
-    : _displayWidget(display)
-    , _orientationWidget(orientation)
-    , _monitors(monitorList)
-    , _cluster(cluster)
-    , _windowList(windowList)
-    , _finishedCallback(cb)
+FileSupport::FileSupport(QVBoxLayout* parentLayout,
+                         UserConfigurationElements& cfgElements,
+                         SgctConfigElements& sgctElements,
+                         std::function<void(bool)> finishedCallback)
+    : _displayWidget(cfgElements.display)
+    , _orientationWidget(cfgElements.orientation)
+    , _monitors(cfgElements.monitorList)
+    , _cluster(sgctElements.cluster)
+    , _windowList(sgctElements.windowList)
+    , _finishedCallback(finishedCallback)
+    , _userConfigPath(cfgElements.configSavePath)
 {
     QVBoxLayout* layoutFullVertical = new QVBoxLayout;
-    _lineFilename = new QLineEdit;
-    _lineFilename->setFixedWidth(190);
-    {
-        QHBoxLayout* layoutFilename = new QHBoxLayout;
-        QLabel* labelFilename = new QLabel;
-        QString fileTip = "Enter a filename for this custom configuration to be saved "
-            "as a .json file in the user/config/ directory";
-        labelFilename->setToolTip(fileTip);
-        _lineFilename->setToolTip(fileTip);
-        labelFilename->setText("Filename: ");
-        layoutFilename->addStretch(1);
-        layoutFilename->addWidget(labelFilename);
-        layoutFilename->addWidget(_lineFilename);
-        layoutFilename->addStretch(1);
-        layoutFullVertical->addLayout(layoutFilename);
-    }
-    _saveButton = new QPushButton("Save");
-    _saveButton->setToolTip("Save global orientation changes");
+    _saveButton = new QPushButton("Save As");
+    _saveButton->setToolTip("Save configuration changes (opens file chooser dialog)");
     connect(_saveButton, &QPushButton::released, this, &FileSupport::save);
-    _saveButton->setEnabled(false);
     _cancelButton = new QPushButton("Cancel");
-    _cancelButton->setToolTip("Cancel global orientation changes");
+    _cancelButton->setToolTip("Cancel changes");
     connect(_cancelButton, &QPushButton::released, this, &FileSupport::cancel);
+    _applyButton = new QPushButton("Apply Without Saving");
+    _applyButton->setToolTip("Apply configuration changes without saving to file");
+    connect(_applyButton, &QPushButton::released, this, &FileSupport::apply);
     {
         QHBoxLayout* layoutButtonBox = new QHBoxLayout;
         layoutButtonBox->addStretch(1);
-        layoutButtonBox->addWidget(_saveButton);
         layoutButtonBox->addWidget(_cancelButton);
+        layoutButtonBox->addWidget(_saveButton);
+        layoutButtonBox->addWidget(_applyButton);
         layoutFullVertical->addLayout(layoutButtonBox);
     }
     parentLayout->addLayout(layoutFullVertical);
-    connect(_lineFilename, &QLineEdit::textEdited, this, &FileSupport::filenameEdited);
 }
 
 void FileSupport::saveCluster() {
@@ -251,21 +238,42 @@ ProjectionOptions FileSupport::saveProjectionNoSpout(
     }
 }
 
-void FileSupport::filenameEdited(const QString& newString) {
-    _saveButton->setEnabled(!newString.isEmpty());
-}
-
 std::string FileSupport::saveFilename() {
-    return _lineFilename->text().toStdString();
+    return _saveTarget;
 }
 
 void FileSupport::save() {
-    saveCluster();
-    saveWindows();
-    saveUser();
-    _finishedCallback(true);
+    QString fileName = QFileDialog::getSaveFileName(this,
+            "Save Window Configuration File", QString::fromStdString(_userConfigPath),
+            "Window Configuration (*.json);;(*.json)", nullptr,
+            QFileDialog::DontUseNativeDialog);
+    if (fileName.length() != 0) {
+        _saveTarget = fileName.toStdString();
+        saveConfigToSgctFormat();
+        _finishedCallback(true);
+    }
 }
 
 void FileSupport::cancel() {
     _finishedCallback(false);
+}
+
+void FileSupport::apply() {
+    std::string userCfgTempDir = _userConfigPath;
+    if (userCfgTempDir.back() != '/') {
+        userCfgTempDir += "/";
+    }
+    userCfgTempDir += "temp";
+    if (!std::filesystem::is_directory(userCfgTempDir)) {
+        std::filesystem::create_directories(absPath(userCfgTempDir));
+    }
+    _saveTarget = userCfgTempDir + "/" + "apply-without-saving.json";
+    saveConfigToSgctFormat();
+    _finishedCallback(true);
+}
+
+void FileSupport::saveConfigToSgctFormat() {
+    saveCluster();
+    saveWindows();
+    saveUser();
 }
