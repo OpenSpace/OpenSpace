@@ -310,17 +310,6 @@ QWidget* LauncherWindow::createCentralWidget() {
     newWindowButton->setGeometry(geometry::NewWindowButton);
     newWindowButton->setCursor(Qt::PointingHandCursor);
 
-    //QPushButton* editWindowButton = new QPushButton("Edit", centralWidget);
-    //connect(
-    //    editWindowButton, &QPushButton::released,
-    //    [this]() {
-    //        openWindowEditor();
-    //    }
-    //);
-    //editWindowButton->setObjectName("small");
-    //editWindowButton->setGeometry(geometry::EditWindowButton);
-    //editWindowButton->setCursor(Qt::PointingHandCursor);
-
     return centralWidget;
 }
 

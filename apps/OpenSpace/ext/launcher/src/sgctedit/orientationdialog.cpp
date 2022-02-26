@@ -24,7 +24,7 @@
 
 #include "sgctedit/orientationdialog.h"
 
-#include "sgctedit/display.h"
+#include "sgctedit/displaywindowunion.h"
 
 OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     : QDialog(parent)

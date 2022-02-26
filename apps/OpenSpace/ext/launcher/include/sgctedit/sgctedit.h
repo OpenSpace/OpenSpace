@@ -27,7 +27,7 @@
 
 #include <QDialog>
 
-#include <sgctedit/display.h>
+#include <sgctedit/displaywindowunion.h>
 #include <sgctedit/filesupport.h>
 #include <sgctedit/monitorbox.h>
 #include <sgctedit/orientation.h>
@@ -41,8 +41,7 @@
 
 class QWidget;
 
-class SgctEdit final : public QDialog
-{
+class SgctEdit final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -86,7 +85,7 @@ private:
     std::vector<QRect> _monitorSizeList;
     QVBoxLayout* _displayLayout = nullptr;
     QFrame* _displayFrame = nullptr;
-    std::shared_ptr<Display> _displayWidget = nullptr;
+    std::shared_ptr<DisplayWindowUnion> _displayWidget = nullptr;
     QRect _monitorWidgetSize = {0, 0, 500, 500};
     FileSupport* _fileSupportWidget = nullptr;
     Orientation* _orientationWidget = nullptr;

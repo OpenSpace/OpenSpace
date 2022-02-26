@@ -25,7 +25,7 @@
 #include "sgctedit/windowcontrol.h"
 
 #include <ghoul/fmt.h>
-#include "sgctedit/display.h"
+#include "sgctedit/displaywindowunion.h"
 #include "sgctedit/monitorbox.h"
 
 const std::string ProjectionTypeNames[5] = {"Planar", "Fisheye", "Spherical Mirror",

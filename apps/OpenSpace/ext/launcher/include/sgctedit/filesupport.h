@@ -28,7 +28,7 @@
 #include <QWidget>
 
 #include <ghoul/filesystem/filesystem.h>
-#include <sgctedit/display.h>
+#include <sgctedit/displaywindowunion.h>
 #include <sgctedit/orientation.h>
 #include <sgct/config.h>
 #include <QFileDialog>
@@ -59,7 +59,7 @@ struct SgctConfigElements {
 
 struct UserConfigurationElements {
     std::vector<QRect>& monitorList;
-    std::shared_ptr<Display> display;
+    std::shared_ptr<DisplayWindowUnion> display;
     Orientation* orientation;
     const std::string configSavePath;
 };
@@ -105,7 +105,7 @@ private:
     QPushButton* _saveButton = nullptr;
     QPushButton* _cancelButton = nullptr;
     QPushButton* _applyButton = nullptr;
-    std::shared_ptr<Display> _displayWidget;
+    std::shared_ptr<DisplayWindowUnion> _displayWidget;
     Orientation* _orientationWidget;
     std::vector<QRect>& _monitors;
     sgct::config::Cluster& _cluster;

@@ -21,8 +21,8 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-#ifndef __OPENSPACE_UI_LAUNCHER___DISPLAY___H__
-#define __OPENSPACE_UI_LAUNCHER___DISPLAY___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___DISPLAYWINDOWUNION___H__
+#define __OPENSPACE_UI_LAUNCHER___DISPLAYWINDOWUNION___H__
 
 #include <QWidget>
 
@@ -42,12 +42,12 @@
 #include <QVector>
 #include <vector>
 
-class Display : public QWidget {
+class DisplayWindowUnion : public QWidget {
 Q_OBJECT
 public:
     /**
-     * Constructor for Display class, which manages the overall control layout including
-     * monitorBox, multiple WindowControl columns, and additional controls
+     * Constructor for DisplayWindowUnion class, which manages the overall control layout
+     * including monitorBox, multiple WindowControl columns, and additional controls
      *
      * \param monitorRenderBox pointer to the MonitorBox object
      * \param monitorSizeList A vector containing QRect objects containing pixel dims
@@ -58,7 +58,7 @@ public:
      *                  this array matches the window indexing used elsewhere in the
      *                  class. This allows for a unique color for each window.
     */
-    Display(std::shared_ptr<MonitorBox> monitorRenderBox,
+    DisplayWindowUnion(std::shared_ptr<MonitorBox> monitorRenderBox,
         std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
         const std::array<QColor, 4>& winColors);
     /**
@@ -98,4 +98,4 @@ private:
     QFrame* _borderFrame = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___DISPLAY___H__
+#endif // __OPENSPACE_UI_LAUNCHER___DISPLAYWINDOWUNION___H__

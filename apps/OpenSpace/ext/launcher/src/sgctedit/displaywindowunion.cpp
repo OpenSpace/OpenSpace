@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "sgctedit/display.h"
+#include "sgctedit/displaywindowunion.h"
 
 #include <ghoul/fmt.h>
 #include "sgctedit/monitorbox.h"
@@ -32,7 +32,7 @@
 #include <QScreen>
 #include <string>
 
-Display::Display(std::shared_ptr<MonitorBox> monitorRenderBox,
+DisplayWindowUnion::DisplayWindowUnion(std::shared_ptr<MonitorBox> monitorRenderBox,
                  std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
                  const std::array<QColor, 4>& winColors)
     : _monBox(monitorRenderBox)
@@ -46,12 +46,12 @@ Display::Display(std::shared_ptr<MonitorBox> monitorRenderBox,
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         initializeWindowControl();
     }
-    connect(_addWindowButton, &QPushButton::clicked, this, &Display::addWindow);
-    connect(_removeWindowButton, &QPushButton::clicked, this, &Display::removeWindow);
+    connect(_addWindowButton, &QPushButton::clicked, this, &DisplayWindowUnion::addWindow);
+    connect(_removeWindowButton, &QPushButton::clicked, this, &DisplayWindowUnion::removeWindow);
     initializeLayout();
 }
 
-void Display::initializeLayout() {
+void DisplayWindowUnion::initializeLayout() {
     QVBoxLayout* layout = new QVBoxLayout(this);
     {
         QHBoxLayout* layoutMonButton = new QHBoxLayout;
@@ -89,15 +89,15 @@ void Display::initializeLayout() {
     layout->addLayout(layoutWindows);
 }
 
-std::vector<std::shared_ptr<WindowControl>> Display::windowControls() const {
+std::vector<std::shared_ptr<WindowControl>> DisplayWindowUnion::windowControls() const {
     return _windowControl;
 }
 
-unsigned int Display::nWindows() const {
+unsigned int DisplayWindowUnion::nWindows() const {
     return _nWindowsDisplayed;
 }
 
-void Display::addWindow() {
+void DisplayWindowUnion::addWindow() {
     if (_nWindowsDisplayed < _nMaxWindows) {
         _windowControl[_nWindowsDisplayed]->resetToDefaults();
         _nWindowsDisplayed++;
@@ -105,14 +105,14 @@ void Display::addWindow() {
     }
 }
 
-void Display::removeWindow() {
+void DisplayWindowUnion::removeWindow() {
     if (_nWindowsDisplayed > 1) {
         _nWindowsDisplayed--;
         showWindows();
     }
 }
 
-void Display::showWindows() {
+void DisplayWindowUnion::showWindows() {
     for (size_t i = 0; i < _layoutWindowWrappers.size(); ++i) {
         _layoutWindowWrappers[i]->setVisible(i < _nWindowsDisplayed);
     }
@@ -127,7 +127,7 @@ void Display::showWindows() {
     _monBox->setNumWindowsDisplayed(_nWindowsDisplayed);
 }
 
-void Display::initializeWindowControl() {
+void DisplayWindowUnion::initializeWindowControl() {
     if (_nWindowsAllocated < _nMaxWindows) {
         unsigned int monitorNumForThisWindow = 0;
         if (_nMaxWindows > 3 && _nWindowsAllocated >= 2) {

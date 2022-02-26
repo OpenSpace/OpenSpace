@@ -113,7 +113,7 @@ void SgctEdit::createWidgets() {
 
 void SgctEdit::addDisplayLayout(QHBoxLayout* layout) {
     _displayLayout = new QVBoxLayout;
-    _displayWidget = std::make_shared<Display>(
+    _displayWidget = std::make_shared<DisplayWindowUnion>(
         _monBox,
         _monitorSizeList,
         _nMaxWindows,
