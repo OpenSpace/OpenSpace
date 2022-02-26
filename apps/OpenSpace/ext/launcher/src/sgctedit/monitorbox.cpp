@@ -216,9 +216,6 @@ void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int mIdx,
                                                         unsigned int wIdx,
                                                         const QRectF& winDimensions)
 {
-    if (mIdx > (_maxNumMonitors - 1) || wIdx > (_nWindows - 1)) {
-        return;
-    }
     QRectF wF = winDimensions;
     _windowRendering[wIdx] = {
         _monitorDimensionsScaled[mIdx].x() + wF.left() * _monitorScaleFactor,

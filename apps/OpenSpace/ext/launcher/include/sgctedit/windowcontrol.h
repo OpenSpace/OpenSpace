@@ -168,6 +168,10 @@ public:
      * \return ProjectionIndeces enum of the projection type
      */
     ProjectionIndeces projectionSelectedIndex() const;
+    /**
+     * Resets all controls for this window to default settings
+     */
+    void resetToDefaults();
 
 private slots:
     void onSizeXChanged(const QString& newText);
@@ -182,6 +186,7 @@ private slots:
 
 private:
     void createWidgets(QWidget* parent);
+    void determineIdealWindowSize();
     void updateScaledWindowDimensions();
     std::function<void(int, int, const QRectF&)> _windowChangeCallback;
     std::function<void(unsigned int)> _windowGuiCheckCallback;
@@ -194,10 +199,15 @@ private:
     QList<QString> _monitorNames = { "Primary", "Secondary" };
     int QualityValues[10] = { 256, 512, 1024, 1536, 2048, 4096, 8192, 16384,
     32768, 65536 };
-    int _lineEditWidthFixed = 50;
+    int _lineEditWidthFixedWinSize = 50;
+    int _lineEditWidthFixedFov = 80;
     float _marginFractionOfWidgetSize = 0.025f;
+    float _defaultFovH = 80.f;
+    float _defaultFovV = 50.534f;
+    float _defaultHeightOffset = 0.f;
     unsigned int _nMonitors = 1;
     unsigned int _monIndex = 0;
+    unsigned int _monIndexDefault = 0;
     unsigned int _index = 0;
     std::vector<QRect>& _monitorResolutions;
     int _maxWindowSizePixels = 10000;

@@ -99,6 +99,7 @@ unsigned int Display::nWindows() const {
 
 void Display::addWindow() {
     if (_nWindowsDisplayed < _nMaxWindows) {
+        _windowControl[_nWindowsDisplayed]->resetToDefaults();
         _nWindowsDisplayed++;
         showWindows();
     }
@@ -128,7 +129,10 @@ void Display::showWindows() {
 
 void Display::initializeWindowControl() {
     if (_nWindowsAllocated < _nMaxWindows) {
-        unsigned int monitorNumForThisWindow = (_nWindowsAllocated >= 3) ? 1 : 0;
+        unsigned int monitorNumForThisWindow = 0;
+        if (_nMaxWindows > 3 && _nWindowsAllocated >= 2) {
+            monitorNumForThisWindow = 1;
+        }
         _windowControl.push_back(
             std::make_shared<WindowControl>(
                 monitorNumForThisWindow,

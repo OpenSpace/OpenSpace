@@ -84,7 +84,6 @@ private:
     void showWindows();
     std::shared_ptr<MonitorBox> _monBox;
     std::vector<QRect>& _monitorResolutions;
-    QRect _widgetDims = {0, 0, 400, 400};
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
     unsigned int _nMaxWindows = 3;

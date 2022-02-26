@@ -82,6 +82,11 @@ void SgctEdit::createWidgets() {
     {
         layoutMainV->addLayout(layoutMainH);
         _orientationWidget->addControlsToParentLayout(layoutMainV);
+
+        QFrame* bottomBorder = new QFrame();
+        bottomBorder->setFrameShape(QFrame::HLine);
+        layoutMainV->addWidget(bottomBorder);
+
         SgctConfigElements sgctCfg = {_windowList, _cluster};
         UserConfigurationElements userCfg = {
             _monitorSizeList,
