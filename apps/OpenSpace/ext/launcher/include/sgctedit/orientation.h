@@ -38,8 +38,8 @@ class Orientation : public QWidget {
 Q_OBJECT
 public:
     /**
-     * Constructor for Orientation class, which manages the overall control layout including
-     * monitorBox, multiple WindowControl columns, and additional controls
+     * Constructor for Orientation class, which manages the overall control layout
+     * including monitorBox, multiple WindowControl columns, and additional controls
      *
      * \param monitorRenderBox pointer to the MonitorBox object
      * \param monitorSizeList A vector containing QRect objects containing pixel dims

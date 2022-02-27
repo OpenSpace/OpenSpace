@@ -183,6 +183,7 @@ private slots:
     void onFullscreenClicked();
     void onSpoutSelection(int selectionState);
     void onWebGuiSelection(int selectionState);
+    void onAspectRatioLockClicked();
 
 private:
     void createWidgets(QWidget* parent);
@@ -201,6 +202,7 @@ private:
     32768, 65536 };
     int _lineEditWidthFixedWinSize = 50;
     int _lineEditWidthFixedFov = 80;
+    float _aspectRatioSize = 16.f / 9.f;
     float _marginFractionOfWidgetSize = 0.025f;
     float _defaultFovH = 80.f;
     float _defaultFovV = 50.534f;
@@ -209,6 +211,7 @@ private:
     unsigned int _monIndex = 0;
     unsigned int _monIndexDefault = 0;
     unsigned int _index = 0;
+    bool _aspectRatioLocked = false;
     std::vector<QRect>& _monitorResolutions;
     int _maxWindowSizePixels = 10000;
     const QColor& _colorForWindow;
@@ -218,6 +221,7 @@ private:
     QLineEdit* _sizeY = nullptr;
     QLineEdit* _offsetX = nullptr;
     QLineEdit* _offsetY = nullptr;
+    QPushButton* _buttonLockAspectRatio = nullptr;
     QRectF _windowDims;
     QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;
@@ -234,6 +238,8 @@ private:
     QLabel* _labelHeightOffset = nullptr;
     QLineEdit* _lineHeightOffset = nullptr;
     QLineEdit* _windowName = nullptr;
+    QIcon _lockIcon;
+    QIcon _unlockIcon;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___WINDOWCONTROL___H__

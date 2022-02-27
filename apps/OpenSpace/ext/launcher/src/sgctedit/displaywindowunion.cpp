@@ -46,8 +46,18 @@ DisplayWindowUnion::DisplayWindowUnion(std::shared_ptr<MonitorBox> monitorRender
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         initializeWindowControl();
     }
-    connect(_addWindowButton, &QPushButton::clicked, this, &DisplayWindowUnion::addWindow);
-    connect(_removeWindowButton, &QPushButton::clicked, this, &DisplayWindowUnion::removeWindow);
+    connect(
+        _addWindowButton,
+        &QPushButton::clicked,
+        this,
+        &DisplayWindowUnion::addWindow
+    );
+    connect(
+        _removeWindowButton,
+        &QPushButton::clicked,
+        this,
+        &DisplayWindowUnion::removeWindow
+    );
     initializeLayout();
 }
 

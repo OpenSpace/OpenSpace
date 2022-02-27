@@ -65,6 +65,7 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     , _monitorResolutions(monitorDims)
     , _colorForWindow(winColor)
 {
+    Q_INIT_RESOURCE(resources);
     _nMonitors = static_cast<unsigned int>(_monitorResolutions.size());
     createWidgets(parent);
     resetToDefaults();
@@ -121,6 +122,10 @@ void WindowControl::createWidgets(QWidget* parent) {
     _labelFovH = new QLabel;
     _labelFovV = new QLabel;
     _labelHeightOffset = new QLabel;
+    _buttonLockAspectRatio = new QPushButton(parent);
+    _lockIcon.addPixmap(QPixmap(":/images/outline_locked.png"));
+    _unlockIcon.addPixmap(QPixmap(":/images/outline_unlocked.png"));
+    _buttonLockAspectRatio->setIcon(_unlockIcon);
     {
         QIntValidator* validatorSizeX = new QIntValidator(10, _maxWindowSizePixels);
         QIntValidator* validatorSizeY = new QIntValidator(10, _maxWindowSizePixels);
@@ -200,6 +205,12 @@ void WindowControl::createWidgets(QWidget* parent) {
         this,
         &WindowControl::onFullscreenClicked
     );
+    connect(
+        _buttonLockAspectRatio,
+        &QPushButton::released,
+        this,
+        &WindowControl::onAspectRatioLockClicked
+    );
 }
 
 QVBoxLayout* WindowControl::initializeLayout() {
@@ -256,6 +267,7 @@ QVBoxLayout* WindowControl::initializeLayout() {
         labelSize->setToolTip("Enter window width & height in pixels");
         _sizeX->setToolTip("Enter window width (pixels)");
         _sizeY->setToolTip("Enter window height (pixels)");
+        _buttonLockAspectRatio->setToolTip("Locks/Unlocks size aspect ratio");
         layoutSize->addWidget(labelSize);
         labelSize->setText("Size:");
         labelSize->setFixedWidth(55);
@@ -263,6 +275,7 @@ QVBoxLayout* WindowControl::initializeLayout() {
         layoutSize->addWidget(labelDelim);
         layoutSize->addWidget(_sizeY);
         layoutSize->addWidget(labelUnit);
+        layoutSize->addWidget(_buttonLockAspectRatio);
         layoutSize->addStretch(1);
         labelDelim->setText("x");
         labelDelim->setFixedWidth(9);
@@ -409,6 +422,13 @@ void WindowControl::showWindowLabel(bool show) {
 
 void WindowControl::onSizeXChanged(const QString& newText) {
     _windowDims.setWidth(newText.toInt());
+    if (_aspectRatioLocked) {
+        int updatedHeight = _windowDims.width() / _aspectRatioSize;
+        _sizeY->blockSignals(true);
+        _sizeY->setText(QString::number(updatedHeight));
+        _sizeY->blockSignals(false);
+        _windowDims.setHeight(updatedHeight);
+    }
     if (_windowChangeCallback) {
         _windowChangeCallback(_monIndex, _index, _windowDims);
     }
@@ -416,6 +436,13 @@ void WindowControl::onSizeXChanged(const QString& newText) {
 
 void WindowControl::onSizeYChanged(const QString& newText) {
     _windowDims.setHeight(newText.toInt());
+    if (_aspectRatioLocked) {
+        int updatedWidth = _windowDims.height() * _aspectRatioSize;
+        _sizeX->blockSignals(true);
+        _sizeX->setText(QString::number(updatedWidth));
+        _sizeX->blockSignals(false);
+        _windowDims.setWidth(updatedWidth);
+    }
     if (_windowChangeCallback) {
         _windowChangeCallback(_monIndex, _index, _windowDims);
     }
@@ -502,6 +529,14 @@ void WindowControl::onProjectionChanged(int newSelection) {
     _lineHeightOffset->setVisible(selected == ProjectionIndeces::Cylindrical);
     _checkBoxSpoutOutput->setVisible(selected == ProjectionIndeces::Fisheye
         || selected == ProjectionIndeces::Equirectangular);
+}
+
+void WindowControl::onAspectRatioLockClicked() {
+    _aspectRatioLocked = !_aspectRatioLocked;
+    _buttonLockAspectRatio->setIcon(_aspectRatioLocked ? _lockIcon : _unlockIcon);
+    if (_aspectRatioLocked) {
+        _aspectRatioSize = _windowDims.width() / _windowDims.height();
+    }
 }
 
 void WindowControl::setWindowChangeCallback(
