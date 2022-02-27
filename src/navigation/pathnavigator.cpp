@@ -116,8 +116,8 @@ PathNavigator::PathNavigator()
 {
     _defaultPathType.addOptions({
         { Path::Type::AvoidCollision, "AvoidCollision" },
-        { Path::Type::Linear, "Linear" },
         { Path::Type::ZoomOutOverview, "ZoomOutOverview"},
+        { Path::Type::Linear, "Linear" },
         { Path::Type::AvoidCollisionWithLookAt, "AvoidCollisionWithLookAt"}
     });
     addProperty(_defaultPathType);
