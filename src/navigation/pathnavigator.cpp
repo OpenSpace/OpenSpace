@@ -45,10 +45,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultPathType",
         "Default Path Type",
-        "The defualt path type chosen when generating a path. See wiki for alternatives."
-        " The shape of the generated path will be different depending on the path type."
-        // TODO (2021-08-15, emmbr) right now there is no way to specify a type for a
-        // single path instance, only for any created paths
+        "The default path type chosen when generating a path or flying to a target. "
+        "See wiki for alternatives. The shape of the generated path will be different "
+        "depending on the path type."
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
@@ -70,6 +69,15 @@ namespace {
         "Apply Idle Behavior on Finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
         "triggered once the path has reached its target."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ArrivalDistanceFactorInfo = {
+        "ArrivalDistanceFactor",
+        "Arrival Distance Factor",
+        "A factor used to compute the default distance from a target scene graph node "
+        "when creating a camera path. The factor will be multipled with the node's "
+        "bounding sphere to compute the target height from the bounding sphere of the "
+        "object."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo =
@@ -102,6 +110,7 @@ PathNavigator::PathNavigator()
     , _includeRoll(IncludeRollInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
+    , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
@@ -116,6 +125,7 @@ PathNavigator::PathNavigator()
     addProperty(_includeRoll);
     addProperty(_speedScale);
     addProperty(_applyIdleBehaviorOnFinish);
+    addProperty(_arrivalDistanceFactor);
     addProperty(_minValidBoundingSphere);
 
     _relevantNodeTags = std::vector<std::string>{
@@ -142,6 +152,10 @@ const Path* PathNavigator::currentPath() const {
 
 double PathNavigator::speedScale() const {
     return _speedScale;
+}
+
+double PathNavigator::arrivalDistanceFactor() const {
+    return _arrivalDistanceFactor;
 }
 
 bool PathNavigator::hasCurrentPath() const {
