@@ -174,14 +174,25 @@ void ParallelPeer::sendAuthentication() {
     std::vector<char> buffer;
     buffer.reserve(size);
 
-    const uint64_t passCode = std::hash<std::string>{}(_password.value());
-
-    // Write the hashed password to buffer
+    // Write the password to buffer
+    std::string pw = _password;
+    uint32_t pwSize = static_cast<uint32_t>(pw.size());
     buffer.insert(
         buffer.end(),
-        reinterpret_cast<const char*>(&passCode),
-        reinterpret_cast<const char*>(&passCode) + sizeof(uint64_t)
+        reinterpret_cast<const char*>(&pwSize),
+        reinterpret_cast<const char*>(&pwSize) + sizeof(uint32_t)
     );
+    buffer.insert(buffer.end(), pw.begin(), pw.end());
+
+    // Write the host password to buffer
+    std::string hostPw = _hostPassword;
+    uint32_t hostPwSize = static_cast<uint32_t>(hostPw.size());
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<const char*>(&hostPwSize),
+        reinterpret_cast<const char*>(&hostPwSize) + sizeof(uint32_t)
+    );
+    buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
 
     // Write the length of the nodes name to buffer
     buffer.insert(
