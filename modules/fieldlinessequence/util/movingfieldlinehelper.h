@@ -37,12 +37,6 @@ namespace openspace {
     class FieldlinesState;
 
     namespace fls {
-        //Simon: Test to see if we can edit our seedpoints
-        struct pointsWithEigVec {
-            std::vector<glm::vec3> cPoints;
-            std::vector<glm::vec3> eigVals;
-            std::vector<glm::vec3> eigVecs;
-        };
 
         bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
             const std::vector<glm::vec3>& seedMap,
@@ -50,10 +44,6 @@ namespace openspace {
             std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars,
             const size_t nPointsOnPathLine, const size_t nPointsOnFieldLines);
 
-
-
-        glm::vec3 moveSeedpointInEigenvectorDirection(const glm::vec3& const pointInSpace, const glm::vec3& const eigenvector, const float& direction);
-        
         
     } // namespace fls
 } // namespace openspace
