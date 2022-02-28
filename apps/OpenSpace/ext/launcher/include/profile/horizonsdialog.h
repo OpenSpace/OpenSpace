@@ -26,10 +26,13 @@
 #define __OPENSPACE_UI_LAUNCHER___HORIZONS___H__
 
 #include <openspace/json.h>
-#include <../modules/space/horizonsfile.h>
 #include <QDialog>
 #include <filesystem>
 #include <string>
+
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
+#include <../modules/space/horizonsfile.h>
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 
 class QComboBox;
 class QLabel;
@@ -48,6 +51,8 @@ public:
      * Constructor for HorizonsDialog class
      */
     HorizonsDialog(QWidget* parent);
+
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     std::filesystem::path file() const;
 
 private slots:
@@ -103,6 +108,7 @@ private:
     QPlainTextEdit* _log = nullptr;
 
     QLabel* _errorMsg = nullptr;
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___HORIZONS___H__

@@ -125,9 +125,18 @@ void AssetEdit::openComponent() {
                     this,
                     &AssetEdit::openHorizons
                 );
-                generateButton->setCursor(Qt::PointingHandCursor);
-                container->addWidget(generateButton);
 
+                // In order to generate a Horizons File the Space module is required
+                #ifndef OPENSPACE_MODULE_SPACE_ENABLED
+                    generateButton->setEnabled(false);
+                    generateButton->setToolTip(
+                        "Connot generate Horizons file without the space module enabled"
+                    );
+                #else
+                    generateButton->setCursor(Qt::PointingHandCursor);
+                #endif // OPENSPACE_MODULE_SPACE_ENABLED
+
+                container->addWidget(generateButton);
                 horizonsLayout->addLayout(container);
             }
             horizonsLayout->addWidget(new Line);
@@ -153,10 +162,12 @@ void AssetEdit::openHorizonsFile() {
 
 void AssetEdit::openHorizons() {
     _errorMsg->clear();
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     HorizonsDialog* horizonsDialog = new HorizonsDialog(this);
     horizonsDialog->exec();
     _horizonsFile = horizonsDialog->file();
     _horizonsFileEdit->setText(QString(_horizonsFile.string().c_str()));
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 void AssetEdit::approved() {

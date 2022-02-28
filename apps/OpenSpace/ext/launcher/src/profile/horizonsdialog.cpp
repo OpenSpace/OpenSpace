@@ -113,11 +113,15 @@ namespace {
 HorizonsDialog::HorizonsDialog(QWidget* parent)
     : QDialog(parent)
 {
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     _manager = new QNetworkAccessManager(this);
 
     setWindowTitle("Horizons");
     createWidgets();
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
+
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
 
 std::filesystem::path HorizonsDialog::file() const {
     return _horizonsFile.file();
@@ -127,7 +131,7 @@ void HorizonsDialog::createWidgets() {
     QBoxLayout* wholeLayout = new QHBoxLayout(this);
     QBoxLayout* layout = new QVBoxLayout(this);
     {
-        QLabel* generateLabel = new QLabel("Generate a new Horizons file:", this);
+        QLabel* generateLabel = new QLabel("Generate a new Horizons file", this);
         generateLabel->setObjectName("heading");
         layout->addWidget(generateLabel);
 
@@ -892,3 +896,5 @@ void HorizonsDialog::approved() {
     }
     accept();
 }
+
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
