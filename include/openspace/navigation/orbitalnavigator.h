@@ -57,6 +57,24 @@ class KeyboardInputState;
 
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
+    struct IdleBehavior : public properties::PropertyOwner {
+        enum Behavior {
+            Orbit = 0,
+            OrbitAtConstantLat,
+            OrbitAroundUp
+        };
+
+        IdleBehavior();
+
+        properties::BoolProperty apply;
+        properties::FloatProperty speedScale;
+        properties::BoolProperty abortOnCameraInteraction;
+        properties::FloatProperty dampenInterpolationTime;
+
+        properties::OptionProperty defaultBehavior;
+        std::optional<Behavior> chosenBehavior = std::nullopt;
+    };
+
     OrbitalNavigator();
 
     void updateStatesFromInput(const MouseInputState& mouseInputState,
@@ -108,6 +126,9 @@ public:
 
     glm::dvec3 anchorNodeToCameraVector() const;
     glm::quat anchorNodeToCameraRotation() const;
+
+    void triggerDefaultIdleBehavior();
+    void triggerIdleBehavior(const std::string& choice);
 
 private:
     struct CameraRotationDecomposition {
@@ -191,21 +212,6 @@ private:
     Interpolator<double> _idleBehaviorDampenInterpolator;
     bool _invertIdleBehaviorInterpolation = false;
 
-    struct IdleBehavior : public properties::PropertyOwner {
-        enum Behavior {
-            Orbit = 0,
-            OrbitAtConstantLat,
-            OrbitAroundUp
-        };
-
-        IdleBehavior();
-
-        properties::BoolProperty apply;
-        properties::OptionProperty chosenBehavior;
-        properties::FloatProperty speedScale;
-        properties::BoolProperty abortOnCameraInteraction;
-        properties::FloatProperty dampenInterpolationTime;
-    };
     IdleBehavior _idleBehavior;
 
     /**
@@ -343,6 +349,8 @@ private:
      */
     SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
         const glm::dvec3 cameraPositionWorldSpace);
+
+    void resetIdleBehavior();
 
     /**
      * Apply the currently selected idle behavior to the position and rotations

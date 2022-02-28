@@ -262,6 +262,11 @@ namespace {
         "The time to interpolate to/from full speed when an idle behavior is triggered "
         "or canceled, in seconds."
     };
+
+    constexpr const char IdleBehaviorKeyOrbit[] = "Orbit";
+    constexpr const char IdleBehaviorKeyOrbitAtConstantLat[] = "OrbitAtConstantLatitude";
+    constexpr const char IdleBehaviorKeyOrbitAroundUp[] = "OrbitAroundUp";
+
 } // namespace
 
 namespace openspace::interaction {
@@ -282,19 +287,19 @@ OrbitalNavigator::Friction::Friction()
 OrbitalNavigator::IdleBehavior::IdleBehavior()
     : properties::PropertyOwner({ "IdleBehavior" })
     , apply(ApplyIdleBehaviorInfo, false)
-    , chosenBehavior(IdleBehaviorInfo)
+    , defaultBehavior(IdleBehaviorInfo)
     , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
     , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
     , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
 {
     addProperty(apply);
-    chosenBehavior.addOptions({
-        { IdleBehavior::Behavior::Orbit, "Orbit" },
-        { IdleBehavior::Behavior::OrbitAtConstantLat, "OrbitAtConstantLatitude" },
-        { IdleBehavior::Behavior::OrbitAroundUp, "OrbitAroundUp" }
+    defaultBehavior.addOptions({
+        { IdleBehavior::Behavior::Orbit, IdleBehaviorKeyOrbit },
+        { IdleBehavior::Behavior::OrbitAtConstantLat, IdleBehaviorKeyOrbitAtConstantLat },
+        { IdleBehavior::Behavior::OrbitAroundUp, IdleBehaviorKeyOrbitAroundUp }
     });
-    chosenBehavior = IdleBehavior::Behavior::Orbit;
-    addProperty(chosenBehavior);
+    defaultBehavior = IdleBehavior::Behavior::Orbit;
+    addProperty(defaultBehavior);
     addProperty(speedScale);
     addProperty(abortOnCameraInteraction);
     addProperty(dampenInterpolationTime);
@@ -707,7 +712,8 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
             _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
                 deltaTime,
                 _currentCameraToSurfaceDistance,
-                targetCameraToSurfaceDistance);
+                targetCameraToSurfaceDistance
+            );
         }
 
         _camera->setScaling(
@@ -723,9 +729,7 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
 void OrbitalNavigator::updateOnCameraInteraction() {
     // Disable idle behavior if camera interaction happened
     if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
-        _idleBehavior.apply = false;
-        // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
-        _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
+        resetIdleBehavior();
     }
 }
 
@@ -1510,6 +1514,38 @@ const ScriptCameraStates& OrbitalNavigator::scriptStates() const {
     return _scriptStates;
 }
 
+void OrbitalNavigator::triggerDefaultIdleBehavior() {
+    // TODO: check engine mode
+    _idleBehavior.chosenBehavior = std::nullopt;
+    _idleBehavior.apply = true;
+}
+
+void OrbitalNavigator::triggerIdleBehavior(const std::string& choice) {
+    // TODO: check engine mode
+    IdleBehavior::Behavior behavior;
+    if (choice == IdleBehaviorKeyOrbit) {
+        behavior = IdleBehavior::Behavior::Orbit;
+    }
+    else if (choice == IdleBehaviorKeyOrbitAtConstantLat) {
+        behavior = IdleBehavior::Behavior::OrbitAtConstantLat;
+    }
+    else if (choice == IdleBehaviorKeyOrbitAroundUp) {
+        behavior = IdleBehavior::Behavior::OrbitAroundUp;
+    }
+    else {
+        throw ghoul::MissingCaseException();
+    }
+    _idleBehavior.chosenBehavior = behavior;
+    _idleBehavior.apply = true;
+}
+
+void OrbitalNavigator::resetIdleBehavior() {
+    _idleBehavior.apply = false;
+    _idleBehavior.chosenBehavior = std::nullopt;
+    // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
+    _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
+}
+
 void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
                                          glm::dquat& localRotation,
                                          glm::dquat& globalRotation)
@@ -1549,10 +1585,11 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
     speedScale *= _invertIdleBehaviorInterpolation ? (1.0 - s) : s;
 
     // Apply the chosen behavior
-    const IdleBehavior::Behavior chosen =
-        static_cast<IdleBehavior::Behavior>(_idleBehavior.chosenBehavior.value());
+    const IdleBehavior::Behavior choice = _idleBehavior.chosenBehavior.value_or(
+        static_cast<IdleBehavior::Behavior>(_idleBehavior.defaultBehavior.value())
+    );
 
-    switch (chosen) {
+    switch (choice) {
         case IdleBehavior::Behavior::Orbit:
             orbitAnchor(deltaTime, position, globalRotation, speedScale);
             break;

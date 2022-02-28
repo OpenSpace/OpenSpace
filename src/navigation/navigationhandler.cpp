@@ -737,6 +737,13 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 &luascriptfunctions::addGlobalRoll,
                 "double, double",
                 "Directly adds to the global roll of the camera"
+            },
+            {
+                "triggerIdleBehavior",
+                &luascriptfunctions::triggerIdleBehavior,
+                "[string]",
+                "Immediately start applying the chosen IdleBehavior. If none is "
+                "specified, use the one set to default in the OrbitalNavigator."
             }
         }
     };
