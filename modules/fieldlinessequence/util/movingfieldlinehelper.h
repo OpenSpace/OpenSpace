@@ -25,22 +25,37 @@
 #ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___MOVINGFIELDLINEHELPER___H__
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___MOVINGFIELDLINEHELPER___H__
 
-//#include <ghoul/glm.h>
-//#include <string>
-//#include <vector>
+ //#include <ghoul/glm.h>
+ //#include <string>
+ //#include <vector>
+
+//for the use of ifstream
+#include <fstream>
 
 namespace openspace {
 
-class FieldlinesState;
+    class FieldlinesState;
 
-namespace fls {
-bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-    const std::vector<glm::vec3>& seedMap,
-    double manualTimeOffset, const std::string& tracingVar,
-    std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars,
-    const size_t nPointsOnPathLine, const size_t nPointsOnFieldLines);
+    namespace fls {
+        //Simon: Test to see if we can edit our seedpoints
+        struct pointsWithEigVec {
+            std::vector<glm::vec3> cPoints;
+            std::vector<glm::vec3> eigVals;
+            std::vector<glm::vec3> eigVecs;
+        };
 
-} // namespace fls
+        bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
+            const std::vector<glm::vec3>& seedMap,
+            double manualTimeOffset, const std::string& tracingVar,
+            std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars,
+            const size_t nPointsOnPathLine, const size_t nPointsOnFieldLines);
+
+
+
+        glm::vec3 moveSeedpointInEigenvectorDirection(const glm::vec3& const pointInSpace, const glm::vec3& const eigenvector, const float& direction);
+        
+        
+    } // namespace fls
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___MOVINGFIELDLINEHELPER___H__

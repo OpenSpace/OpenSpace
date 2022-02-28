@@ -127,6 +127,21 @@ bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 }
 
+/*
+Will get the point and eigenvector and then return a position
+moved a small step (epsilon) in the eigenvectors direction
+    TODO: get the eigenvector of the points
+*/
+glm::vec3 moveSeedpointInEigenvectorDirection(const glm::vec3& const pointInSpace, const glm::vec3& const eigenvector, const float& direction)
+{
+    glm::vec3 step = eigenvector * FLT_EPSILON * direction;
+    glm::vec3 movedPoint = pointInSpace + step;
+
+    return glm::vec3(movedPoint.x, movedPoint.y, movedPoint.z);
+}
+
+
+
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 bool traceAndAddLinesToState(ccmc::Kameleon* kameleon,
     const std::vector<glm::vec3>& seedPoints,
@@ -163,6 +178,8 @@ bool traceAndAddLinesToState(ccmc::Kameleon* kameleon,
         return success;
     }
 
+
+
     int i = 0;
     for (const glm::vec3& seed : seedPoints) {
         std::unique_ptr<ccmc::Interpolator> interpolator =
@@ -170,13 +187,22 @@ bool traceAndAddLinesToState(ccmc::Kameleon* kameleon,
         ccmc::Tracer tracer(kameleon, interpolator.get());
         tracer.setInnerBoundary(innerBoundaryLimit);
 
+        // Get a new seed position based on the eigenvector
+        //glm::vec3 movedSeedPosition = moveSeedpointInEigenvectorDirection(seed, );
+
         ccmc::Fieldline uPerpBPathLine;
         uPerpBPathLine = tracer.unidirectionalTrace(
             tracingVar,
             seed.x,
             seed.y,
-            seed.z
-        );
+            seed.z,
+            ccmc::Tracer::Direction::REVERSE 
+        ).reverseOrder(); 
+        //this code will trace backwards in the magnetic field 
+        //from a given seedpoint 
+        //without reverseOrder() the fieldline will move backwards as time porgresses
+        //forward. With bidirectionalTrace() a flowline can be traced in both directions
+        //from the given seedpoint.
 
         uPerpBPathLine.getDs();
         uPerpBPathLine.measure();
@@ -254,4 +280,5 @@ std::vector<glm::vec3> traceAndCreateFieldline(const glm::vec3& seedPoint,
     return vertices;
 }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
 } // namespace openspace::fls

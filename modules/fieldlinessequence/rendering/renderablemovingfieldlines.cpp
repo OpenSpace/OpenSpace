@@ -548,6 +548,7 @@ void RenderableMovingFieldlines::moveLine(const double dt,
                                           PathLineTraverser& traverser, GLint lineStart,
                                           GLsizei nVertices)
 {
+
     bool forward = std::signbit(dt) ? false : true;
     traverser.forward = forward;
     traverser.timeSinceInterpolation += dt;
