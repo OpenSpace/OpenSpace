@@ -41,7 +41,7 @@ namespace documentation { struct Documentation; }
 
 /**
  * The HorizonsTranslation is based on text files generated from NASA JPL HORIZONS Website
- * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector table
+ * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector
  * and Observer as Horizons data table
  *
  * In case of Vector table data the implementation expects a file with format:
@@ -52,7 +52,7 @@ namespace documentation { struct Documentation; }
  * Y - Y position in kilometers in Ecliptic J2000 reference frame
  * Z - Z position in kilometers in Ecliptic J2000 reference frame
  * Changes required in the "Table Settings" for compatible data:
- * 1. Under "Select Output Quantities" choose option "Position components {x, y, z} only
+ * 1. Under "Select Output Quantities" choose option "Position components {x, y, z} only"
  * 2. Uncheck the "Vector labels" options
  *
  * In case of Observer table data the implementation expects a file with format:

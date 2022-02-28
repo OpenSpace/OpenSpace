@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
-
 #include "profile/horizonsdialog.h"
 
 #include "profile/line.h"
@@ -56,19 +54,6 @@ namespace {
     constexpr const char* Months = "calendar months";
     constexpr const char* Years = "calendar years";
     constexpr const char* Unitless = "equal intervals (unitless)";
-
-    std::string replaceAll(const std::string& string, const std::string& from, const std::string& to) {
-        if (from.empty())
-            return "";
-
-        std::string result = string;
-        size_t startPos = 0;
-        while ((startPos = result.find(from, startPos)) != std::string::npos) {
-            result.replace(startPos, from.length(), to);
-            startPos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-        }
-        return result;
-    }
 
     std::string trim(const std::string& text) {
         std::string result = text;
@@ -146,8 +131,8 @@ void HorizonsDialog::createWidgets() {
         generateLabel->setObjectName("heading");
         layout->addWidget(generateLabel);
 
-        QLabel* infoLabel = new QLabel("<p>For more information about the Horizons system "
-            "please visit: <a href=\"https://ssd.jpl.nasa.gov/horizons/\">"
+        QLabel* infoLabel = new QLabel("<p>For more information about the Horizons "
+            "system please visit: <a href=\"https://ssd.jpl.nasa.gov/horizons/\">"
             "https://ssd.jpl.nasa.gov/horizons/</a></p>",
             this
         );
@@ -158,7 +143,7 @@ void HorizonsDialog::createWidgets() {
     }
     {
         QBoxLayout* container = new QHBoxLayout(this);
-        QLabel* typeLabel = new QLabel("Horizons data type", this);
+        QLabel* typeLabel = new QLabel("Horizons data type:", this);
         container->addWidget(typeLabel);
 
         _typeCombo = new QComboBox(this);
@@ -179,7 +164,9 @@ void HorizonsDialog::createWidgets() {
         container->addWidget(nameLabel);
 
         _nameEdit = new QLineEdit(QString::fromStdString("horizons.dat"), this);
-        _nameEdit->setToolTip("Name of the generated Horizons file. Must end with '.dat'");
+        _nameEdit->setToolTip(
+            "Name of the generated Horizons file. Must end with '.dat'"
+        );
         container->addWidget(_nameEdit);
 
         layout->addLayout(container);
@@ -190,7 +177,9 @@ void HorizonsDialog::createWidgets() {
         container->addWidget(directoryLabel);
 
         _directoryEdit = new QLineEdit(this);
-        _directoryEdit->setToolTip("Directory where the generated Horizons file is saved");
+        _directoryEdit->setToolTip(
+            "Directory where the generated Horizons file is saved"
+        );
         container->addWidget(_directoryEdit);
 
         QPushButton* directoryButton = new QPushButton("Browse", this);
@@ -210,15 +199,20 @@ void HorizonsDialog::createWidgets() {
         QLabel* targetLabel = new QLabel("Target Body:", this);
         container->addWidget(targetLabel);
 
-        _targetEdit = new QLineEdit(QString::fromStdString("Mars Reconnaissance Orbiter"), this);
-        _targetEdit->setToolTip("Which target or body would you like Horizons trajectery data for?");
+        _targetEdit =
+            new QLineEdit(QString::fromStdString("Mars Reconnaissance Orbiter"), this);
+        _targetEdit->setToolTip(
+            "Which target or body would you like Horizons trajectery data for?"
+        );
         container->addWidget(_targetEdit);
 
         layout->addLayout(container);
 
         _chooseTargetCombo = new QComboBox(this);
         _chooseTargetCombo->hide();
-        _chooseTargetCombo->setToolTip("Choose a target from the search, or search again");
+        _chooseTargetCombo->setToolTip(
+            "Choose a target from the search, or search again"
+        );
         layout->addWidget(_chooseTargetCombo);
     }
     {
@@ -234,7 +228,9 @@ void HorizonsDialog::createWidgets() {
 
         _chooseObserverCombo = new QComboBox(this);
         _chooseObserverCombo->hide();
-        _chooseObserverCombo->setToolTip("Choose an observer from the search, or search again");
+        _chooseObserverCombo->setToolTip(
+            "Choose an observer from the search, or search again"
+        );
         layout->addWidget(_chooseObserverCombo);
     }
     {
@@ -348,12 +344,12 @@ bool HorizonsDialog::handleRequest() {
         return false;
     }
 
-    std::filesystem::path file = handleAnswer(answer);
-    if (!std::filesystem::is_regular_file(file)) {
+    openspace::HorizonsFile file = handleAnswer(answer);
+    if (file.isEmpty()) {
         return false;
     }
 
-    _horizonsFile = openspace::HorizonsFile(file);
+    _horizonsFile = std::move(file);
     openspace::HorizonsFile::ResultCode result =
         _horizonsFile.isValidHorizonsFile();
 
@@ -460,7 +456,8 @@ std::string HorizonsDialog::constructUrl() {
 
     std::string command;
     if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() != 0) {
-        command = _chooseTargetCombo->itemData(_chooseTargetCombo->currentIndex()).toString().toStdString();
+        command = _chooseTargetCombo->itemData(_chooseTargetCombo->currentIndex())
+            .toString().toStdString();
         _targetName = _chooseTargetCombo->currentText().toStdString();
         _targetEdit->setText(command.c_str());
     }
@@ -518,7 +515,15 @@ std::string HorizonsDialog::constructUrl() {
         return "";
     }
 
-    return openspace::HorizonsFile::constructUrl(type, command, center, _startTime, _endTime, _stepEdit->text().toStdString(), unit);
+    return openspace::HorizonsFile::constructUrl(
+        type,
+        command,
+        center,
+        _startTime,
+        _endTime,
+        _stepEdit->text().toStdString(),
+        unit
+    );
 }
 
 // Send request synchronously, EventLoop waits until request has finished
@@ -591,7 +596,9 @@ json HorizonsDialog::handleReply(QNetworkReply* reply) {
 
 bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
     bool isKnown = true;
-    if (statusCode.isValid() && statusCode.toInt() != int(HorizonsDialog::HTTPCodes::Ok)) {
+    if (statusCode.isValid() &&
+        statusCode.toInt() != int(HorizonsDialog::HTTPCodes::Ok))
+    {
         std::string message;
         int code = statusCode.toInt();
 
@@ -628,8 +635,9 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
     return isKnown;
 }
 
-std::filesystem::path HorizonsDialog::handleAnswer(json& answer) {
-    openspace::HorizonsFile::ResultCode isValid = openspace::HorizonsFile::isValidAnswer(answer);
+openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
+    openspace::HorizonsFile::ResultCode isValid =
+        openspace::HorizonsFile::isValidAnswer(answer);
     if (isValid != openspace::HorizonsFile::ResultCode::Valid &&
         isValid != openspace::HorizonsFile::ResultCode::MultipleObserverStations &&
         isValid != openspace::HorizonsFile::ResultCode::ErrorTimeRange)
@@ -637,9 +645,9 @@ std::filesystem::path HorizonsDialog::handleAnswer(json& answer) {
         // Special case with MultipleObserverStations since it is detected as an error
         // but could be fixed by parsing the matches and let user choose
         // Special case with ErrorTimeRange since it is detected as an error
-        // but could be nice to display the avalable itme range of target to the user
+        // but could be nice to display the available time range of target to the user
         handleResult(isValid);
-        return std::filesystem::path();
+        return openspace::HorizonsFile();
     }
 
     // Create a text file and write reply to it
@@ -655,21 +663,17 @@ std::filesystem::path HorizonsDialog::handleAnswer(json& answer) {
             "Malformed answer recieved: " + answer.dump(),
             HorizonsDialog::LogLevel::Error
         );
-        return std::filesystem::path();
+        return openspace::HorizonsFile();
     }
 
     // Check if the file already exists
     if (std::filesystem::is_regular_file(fullFilePath)) {
         _errorMsg->setText("File already exist, try another filename");
-        return std::filesystem::path();
+        return openspace::HorizonsFile();
     }
 
-    // Write response into a new file
-    std::ofstream file(filePath);
-    file << replaceAll(*result, "\\n", "\n") << std::endl;
-    file.close();
-
-    return fullFilePath;
+    // Return a new file with the result
+    return openspace::HorizonsFile(fullFilePath, *result);
 }
 
 bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
@@ -735,7 +739,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             appendLog("There is not enough data to compute the state of target '" +
                 _targetName + "' in relation to the observer '" + _observerName +
                 "' for the time range '" + _startTime + "' to '" + _endTime +
-                "'. Try to use another observer for the current target or another time range.",
+                "'. Try to use another observer for the current target or another "
+                "time range.",
                 HorizonsDialog::LogLevel::Error
             );
             break;
@@ -750,7 +755,10 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             );
 
             std::vector<std::string> matchingstations =
-                _horizonsFile.parseMatches("Observatory Name", "Multiple matching stations found");
+                _horizonsFile.parseMatches(
+                    "Observatory Name",
+                    "Multiple matching stations found"
+                );
             if (matchingstations.empty()) {
                 appendLog("Could not parse the matching stations",
                     HorizonsDialog::LogLevel::Error
@@ -805,7 +813,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             // Case Small Bodies:
             // Line before data: Matching small-bodies
             // Format: Record #, Epoch-yr, >MATCH DESIG<, Primary Desig, Name
-            // Line after data: (X matches. To SELECT, enter record # (integer), followed by semi-colon.)
+            // Line after data:
+            // (X matches. To SELECT, enter record # (integer), followed by semi-colon.)
 
             // Case Major Bodies:
             // Line before data: Multiple major-bodies match string "X*"

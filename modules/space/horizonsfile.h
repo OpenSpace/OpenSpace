@@ -37,18 +37,30 @@ namespace openspace {
 
 /**
  * A Horizons file is a text file generated from NASA JPL HORIZONS Website
- * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation that reads these files
- * expects a file with format:
+ * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector
+ * and Observer as Horizons data table
+ *
+ * In case of Vector table data the implementation expects a file with format:
+ * TIME(JulianDayNumber = A.D. YYYY-MM-DD HH:MM:SS TDB)
+ *   X(km) Y(km) Z(km)
+ * TIME - Only the "YYYY-MM-DD HH:MM:SS" part is of interest, the rest is ignored
+ * X - X position in kilometers in Ecliptic J2000 reference frame
+ * Y - Y position in kilometers in Ecliptic J2000 reference frame
+ * Z - Z position in kilometers in Ecliptic J2000 reference frame
+ * Changes required in the "Table Settings" for compatible data:
+ * 1. Under "Select Output Quantities" choose option "Position components {x, y, z} only"
+ * 2. Uncheck the "Vector labels" options
+ *
+ * In case of Observer table data the implementation expects a file with format:
  * TIME(YYYY-MM-DD HH:MM:SS) Range(km) GalLon(degrees) GalLat(degrees)
- * Range - The distance from target to observer. Enabled with "Observer range &
- * range-rate" (nr 20) in "Table Setting". This also generates a delta that must be
- * suppressed under "Additional Table Settings". User must set output settings to
- * kilometers under "Range units".
- * GalLon - Galactic Longitude. Enabled with "Galactic longitude & latitude" (nr 33) in
- * "Table Setting".
- * GalLat - Galactic Latitude. Output is by default set to degrees.
- * Make sure that no other settings are enables in the "Table Setting" than the ones
- * descripbed above
+ * Range - The distance from target to observer in kilometers
+ * GalLon - Galactic Longitude in degrees
+ * GalLat - Galactic Latitude in degrees
+ * Changes required in the "Table Settings" for compatible data:
+ * 1. Under "Observer Table Settings" uncheck all options except
+ *    "Observer range & range-rate" and "Galactic longitude & latitude"
+ * 2. Change "Range units" to "kilometers (km)" instead of "astronomical units (au)"
+ * 3. Check the "Suppress range-rate" option
  */
 class HorizonsFile {
 public:
@@ -97,15 +109,18 @@ public:
 
     HorizonsFile();
     HorizonsFile(std::filesystem::path file);
+    HorizonsFile(std::filesystem::path filePath, const std::string& result);
 
     void setFile(std::filesystem::path file);
     const std::filesystem::path& file() const;
 
     static std::string constructUrl(Type type, const std::string& target,
         const std::string& observer, const std::string& startTime,
-        const std::string& stopTime, const std::string& stepSize, const std::string& unit);
+        const std::string& stopTime, const std::string& stepSize,
+        const std::string& unit);
     static ResultCode isValidAnswer(const json& answer);
 
+    bool isEmpty() const;
     ResultCode isValidHorizonsFile() const;
     void displayErrorMessage(const ResultCode code) const;
     HorizonsResult readFile() const;

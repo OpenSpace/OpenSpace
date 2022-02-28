@@ -42,9 +42,9 @@ namespace {
     constexpr const char* VectorUrl = "https://ssd.jpl.nasa.gov/api/horizons.api?format="
         "json&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'&VEC_TABLE='1'&VEC_LABELS='NO'&"
         "CSV_FORMAT='NO'";
-    constexpr const char* ObserverUrl = "https://ssd.jpl.nasa.gov/api/horizons.api?format="
-        "json&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&QUANTITIES='20,33'&RANGE_UNITS='KM'&"
-        "SUPPRESS_RANGE_RATE='YES'&CSV_FORMAT='NO'";
+    constexpr const char* ObserverUrl = "https://ssd.jpl.nasa.gov/api/horizons.api?"
+        "format=json&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&QUANTITIES='20,33'&"
+        "RANGE_UNITS='KM'&SUPPRESS_RANGE_RATE='YES'&CSV_FORMAT='NO'";
     constexpr const char* Command = "&COMMAND=";
     constexpr const char* Center = "&CENTER=";
     constexpr const char* StartTime = "&START_TIME=";
@@ -52,7 +52,9 @@ namespace {
     constexpr const char* StepSize = "&STEP_SIZE=";
     constexpr const char* WhiteSpace = "%20";
 
-    std::string replaceAll(const std::string& string, const std::string& from, const std::string& to) {
+    std::string replaceAll(const std::string& string, const std::string& from,
+                           const std::string& to)
+    {
         if (from.empty())
             return "";
 
@@ -60,7 +62,9 @@ namespace {
         size_t startPos = 0;
         while ((startPos = result.find(from, startPos)) != std::string::npos) {
             result.replace(startPos, from.length(), to);
-            startPos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+
+            // In case 'to' contains 'from', ex replacing 'x' with 'yx'
+            startPos += to.length();
         }
         return result;
     }
@@ -75,6 +79,14 @@ HorizonsFile::HorizonsFile()
 HorizonsFile::HorizonsFile(std::filesystem::path file)
     : _file(std::move(file))
 {}
+
+HorizonsFile::HorizonsFile(std::filesystem::path filePath, const std::string& result) {
+    // Write the response into a new file and save it
+    std::ofstream file(filePath);
+    file << replaceAll(result, "\\n", "\n") << std::endl;
+    file.close();
+    _file = std::move(filePath);
+}
 
 void HorizonsFile::setFile(std::filesystem::path file) {
     _file = std::move(file);
@@ -142,7 +154,9 @@ HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
         auto sourceIt = signature.find("source");
         if (sourceIt != signature.end()) {
             if (*sourceIt != ApiSource) {
-                LWARNING(fmt::format("Horizons answer from unkown source '{}'", *sourceIt));
+                LWARNING(fmt::format("Horizons answer from unkown source '{}'",
+                    *sourceIt)
+                );
             }
         }
         else {
@@ -157,7 +171,9 @@ HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
             }
         }
         else {
-            LWARNING("Could not find version information, version might not be supported");
+            LWARNING(
+                "Could not find version information, version might not be supported"
+            );
         }
     }
     else {
@@ -201,7 +217,9 @@ HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
         // -- - -------- ------ - ------ - ----------------;
         // * Observer station *
         // Multiple matching stations found.
-        else if (errorMessage.find("Multiple matching stations found") != std::string::npos) {
+        else if (errorMessage.find("Multiple matching stations found") !=
+                 std::string::npos)
+        {
             return ResultCode::MultipleObserverStations;
         }
         // Unknown error
@@ -211,6 +229,10 @@ HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
         }
     }
     return ResultCode::Valid;
+}
+
+bool HorizonsFile::isEmpty() const {
+    return !std::filesystem::is_regular_file(_file);
 }
 
 // Check whether the given Horizons file is valid or not
@@ -230,7 +252,10 @@ HorizonsFile::ResultCode HorizonsFile::isValidHorizonsFile() const {
     std::getline(fileStream, line); // First line is just stars (*) no information, skip
 
     // Valid Target?
-    if (fileStream.good() && (line.find("Revised") != std::string::npos || line.find("JPL") != std::string::npos)) {
+    if (fileStream.good() &&
+        (line.find("Revised") != std::string::npos ||
+         line.find("JPL") != std::string::npos))
+    {
         // If the target is valid, the first line is the date it was last revised
         // In case of comets it says the Source in the top
         foundTarget = true;
@@ -421,7 +446,8 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             // Case Small Bodies:
             // Line before data: Matching small-bodies
             // Format: Record #, Epoch-yr, >MATCH DESIG<, Primary Desig, Name
-            // Line after data: (X matches. To SELECT, enter record # (integer), followed by semi-colon.)
+            // Line after data:
+            // (X matches. To SELECT, enter record # (integer), followed by semi-colon.)
 
             // Case Major Bodies:
             // Line before data: Multiple major-bodies match string "X*"
@@ -635,7 +661,7 @@ HorizonsFile::HorizonsResult HorizonsFile::readObserverFile() const {
 }
 
 std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhrase,
-                                      const std::string& endPhrase) const
+                                                    const std::string& endPhrase) const
 {
     std::ifstream fileStream(_file);
     std::vector<std::string> matches;

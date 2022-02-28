@@ -77,7 +77,7 @@ private:
     json sendRequest(const std::string url);
     json handleReply(QNetworkReply* reply);
     bool checkHttpStatus(const QVariant& statusCode);
-    std::filesystem::path handleAnswer(json& answer);
+    openspace::HorizonsFile handleAnswer(json& answer);
     bool handleResult(openspace::HorizonsFile::ResultCode& result);
     void appendLog(const std::string& message, const LogLevel level);
 
