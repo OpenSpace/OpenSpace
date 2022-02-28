@@ -24,6 +24,7 @@
 
 #include "profile/horizonsdialog.h"
 
+#include <ghoul/logging/logmanager.h>
 #include "profile/line.h"
 #include <QComboBox>
 #include <QDateTimeEdit>
@@ -46,6 +47,8 @@
 #include <sstream>
 
 namespace {
+    constexpr const char* _loggerCat = "HorizonsDialog";
+
     // Text for the different units for the step size
     constexpr const char* TimeVarying = "arcseconds (time-varying)";
     constexpr const char* Minutes = "minutes";
@@ -438,8 +441,8 @@ bool HorizonsDialog::isValidInput() {
             std::to_string(std::numeric_limits<int32_t>::max());
     }
     else {
-        // In the case of arcseconds (first option) range is different
-        if (_timeTypeCombo->currentIndex() == 0) {
+        // In the case of arcseconds range is different
+        if (_timeTypeCombo->currentText() == TimeVarying) {
             if (60 > step || step > 3600) {
                 isValid = false;
                 message = "Angular step size needs to be in range 60 to 3600";
@@ -532,7 +535,7 @@ std::string HorizonsDialog::constructUrl() {
         unit = "";
     }
     else {
-        _errorMsg->setText("Invalid unit type");
+        _errorMsg->setText("Invalid time unit type");
         return "";
     }
 
@@ -885,9 +888,11 @@ void HorizonsDialog::appendLog(const std::string& message, const LogLevel level)
     {
         case HorizonsDialog::LogLevel::Error:
             htmlText = "<font color=\"Red\">(E)  ";
+            LERROR(message);
             break;
         case HorizonsDialog::LogLevel::Warning:
             htmlText = "<font color=\"Yellow\">(W)  ";
+            LWARNING(message);
             break;
         case HorizonsDialog::LogLevel::Info:
             htmlText = "<font color=\"White\">(I)  ";
