@@ -57,6 +57,7 @@ public:
 
 private slots:
     void openDirectory();
+    void typeOnChange(int index);
     void approved();
 
 private:

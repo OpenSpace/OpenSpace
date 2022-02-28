@@ -158,6 +158,10 @@ void HorizonsDialog::createWidgets() {
         };
         _typeCombo->addItems(types);
         _typeCombo->setCurrentIndex(0);
+        connect(
+            _typeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &HorizonsDialog::typeOnChange
+        );
         container->addWidget(_typeCombo);
 
         layout->addLayout(container);
@@ -273,7 +277,6 @@ void HorizonsDialog::createWidgets() {
         _timeTypeCombo = new QComboBox(this);
         _timeTypeCombo->setToolTip("Choose unit of the step size");
         QStringList timeTypes = {
-            TimeVarying,
             Minutes,
             Hours,
             Days,
@@ -282,7 +285,7 @@ void HorizonsDialog::createWidgets() {
             Unitless
         };
         _timeTypeCombo->addItems(timeTypes);
-        _timeTypeCombo->setCurrentIndex(1);
+        _timeTypeCombo->setCurrentIndex(0);
         container->addWidget(_timeTypeCombo);
 
         layout->addLayout(container);
@@ -327,6 +330,20 @@ void HorizonsDialog::createWidgets() {
 void HorizonsDialog::openDirectory() {
     std::string directory = QFileDialog::getExistingDirectory(this).toStdString();
     _directoryEdit->setText(directory.c_str());
+}
+
+void HorizonsDialog::typeOnChange(int index) {
+    // Vector table type doesn't support time varying or arcseconds time steps
+    if (index == 0 && _timeTypeCombo->itemText(0) == TimeVarying) {
+        _timeTypeCombo->removeItem(0);
+    }
+    // Observer
+    else if (index == 1 && _timeTypeCombo->itemText(0) != TimeVarying) {
+        _timeTypeCombo->insertItem(0, TimeVarying);
+    }
+    else {
+        _errorMsg->setText("Invalid Horizons type");
+    }
 }
 
 bool HorizonsDialog::handleRequest() {
