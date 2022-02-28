@@ -77,7 +77,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical onject."
+        "The path to the color map file of the astronomical object."
     };
 
     struct [[codegen::Dictionary(RenderablePoints)]] Parameters {
