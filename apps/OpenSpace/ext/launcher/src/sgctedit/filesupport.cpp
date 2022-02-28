@@ -243,10 +243,16 @@ std::string FileSupport::saveFilename() {
 }
 
 void FileSupport::save() {
-    QString fileName = QFileDialog::getSaveFileName(this,
-            "Save Window Configuration File", QString::fromStdString(_userConfigPath),
-            "Window Configuration (*.json);;(*.json)", nullptr,
-            QFileDialog::DontUseNativeDialog);
+    QString fileName = QFileDialog::getSaveFileName(
+        this,
+        "Save Window Configuration File",
+        QString::fromStdString(_userConfigPath),
+        "Window Configuration (*.json);;(*.json)",
+        nullptr
+#ifdef __linux__
+        , QFileDialog::DontUseNativeDialog
+#endif
+    );
     if (fileName.length() != 0) {
         _saveTarget = fileName.toStdString();
         saveConfigToSgctFormat();
