@@ -456,12 +456,14 @@ void ParallelPeer::setName(std::string name) {
 
 void ParallelPeer::requestHostship() {
     std::vector<char> buffer;
-    uint64_t passwordHash = std::hash<std::string>{}(_hostPassword);
+    std::string hostPw = _hostPassword;
+    uint32_t hostPwSize = static_cast<uint32_t>(hostPw.size());
     buffer.insert(
         buffer.end(),
-        reinterpret_cast<char*>(&passwordHash),
-        reinterpret_cast<char*>(&passwordHash) + sizeof(uint64_t)
+        reinterpret_cast<const char*>(&hostPwSize),
+        reinterpret_cast<const char*>(&hostPwSize) + sizeof(uint32_t)
     );
+    buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
 
     _connection.sendMessage(ParallelConnection::Message(
         ParallelConnection::MessageType::HostshipRequest,
