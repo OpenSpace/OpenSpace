@@ -184,25 +184,28 @@ private slots:
     void onSpoutSelection(int selectionState);
     void onWebGuiSelection(int selectionState);
     void onAspectRatioLockClicked();
+    void onFovLockClicked();
 
 private:
     void createWidgets(QWidget* parent);
     void determineIdealWindowSize();
+    void updatePlanarLockedFov();
     void updateScaledWindowDimensions();
     std::function<void(int, int, const QRectF&)> _windowChangeCallback;
     std::function<void(unsigned int)> _windowGuiCheckCallback;
     QRectF defaultWindowSizes[4] = {
         {50.f, 50.f, 1280.f, 720.f},
-        {900.f, 250.f, 1280.f, 720.f},
-        {1200.f, 340.f, 1280.f, 720.f},
-        {50.f, 50.f, 1280.f, 720.f}
+        {150.f, 150.f, 1280.f, 720.f},
+        {50.f, 50.f, 1280.f, 720.f},
+        {150.f, 150.f, 1280.f, 720.f}
     };
     QList<QString> _monitorNames = { "Primary", "Secondary" };
     int QualityValues[10] = { 256, 512, 1024, 1536, 2048, 4096, 8192, 16384,
     32768, 65536 };
     int _lineEditWidthFixedWinSize = 50;
     int _lineEditWidthFixedFov = 80;
-    float _aspectRatioSize = 16.f / 9.f;
+    const float _idealAspectRatio = 16.f / 9.f;
+    float _aspectRatioSize = _idealAspectRatio;
     float _marginFractionOfWidgetSize = 0.025f;
     float _defaultFovH = 80.f;
     float _defaultFovV = 50.534f;
@@ -212,6 +215,7 @@ private:
     unsigned int _monIndexDefault = 0;
     unsigned int _index = 0;
     bool _aspectRatioLocked = false;
+    bool _FovLocked = true;
     std::vector<QRect>& _monitorResolutions;
     int _maxWindowSizePixels = 10000;
     const QColor& _colorForWindow;
@@ -222,6 +226,7 @@ private:
     QLineEdit* _offsetX = nullptr;
     QLineEdit* _offsetY = nullptr;
     QPushButton* _buttonLockAspectRatio = nullptr;
+    QPushButton* _buttonLockFov = nullptr;
     QRectF _windowDims;
     QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;

@@ -123,9 +123,11 @@ void WindowControl::createWidgets(QWidget* parent) {
     _labelFovV = new QLabel;
     _labelHeightOffset = new QLabel;
     _buttonLockAspectRatio = new QPushButton(parent);
+    _buttonLockFov = new QPushButton(parent);
     _lockIcon.addPixmap(QPixmap(":/images/outline_locked.png"));
     _unlockIcon.addPixmap(QPixmap(":/images/outline_unlocked.png"));
     _buttonLockAspectRatio->setIcon(_unlockIcon);
+    _buttonLockFov->setIcon(_lockIcon);
     {
         QIntValidator* validatorSizeX = new QIntValidator(10, _maxWindowSizePixels);
         QIntValidator* validatorSizeY = new QIntValidator(10, _maxWindowSizePixels);
@@ -210,6 +212,12 @@ void WindowControl::createWidgets(QWidget* parent) {
         &QPushButton::released,
         this,
         &WindowControl::onAspectRatioLockClicked
+    );
+    connect(
+        _buttonLockFov,
+        &QPushButton::released,
+        this,
+        &WindowControl::onFovLockClicked
     );
 }
 
@@ -339,6 +347,9 @@ QVBoxLayout* WindowControl::initializeLayout() {
         QHBoxLayout* layoutComboProjection = new QHBoxLayout;
         _comboProjection->setToolTip("Select from the supported window projection types");
         layoutComboProjection->addWidget(_comboProjection);
+        layoutComboProjection->addWidget(_buttonLockFov);
+        _buttonLockFov->setToolTip("Locks and scales the Horizontal & Vertical F.O.V. "
+            "to the ideal settings based on aspect ratio.");
         layoutComboProjection->addStretch(1);
         layoutProjectionGroup->addLayout(layoutComboProjection);
         QFrame* borderProjectionGroup = new QFrame;
@@ -387,6 +398,8 @@ QVBoxLayout* WindowControl::initializeLayout() {
         layoutFovV->addWidget(_lineFovV);
         _lineFovH->setFixedWidth(_lineEditWidthFixedFov);
         _lineFovV->setFixedWidth(_lineEditWidthFixedFov);
+        _lineFovH->setEnabled(false);
+        _lineFovV->setEnabled(false);
         layoutProjectionGroup->addLayout(layoutFovH);
         layoutProjectionGroup->addLayout(layoutFovV);
         QHBoxLayout* layoutHeightOffset = new QHBoxLayout;
@@ -432,6 +445,9 @@ void WindowControl::onSizeXChanged(const QString& newText) {
     if (_windowChangeCallback) {
         _windowChangeCallback(_monIndex, _index, _windowDims);
     }
+    if (_FovLocked) {
+        updatePlanarLockedFov();
+    }
 }
 
 void WindowControl::onSizeYChanged(const QString& newText) {
@@ -445,6 +461,9 @@ void WindowControl::onSizeYChanged(const QString& newText) {
     }
     if (_windowChangeCallback) {
         _windowChangeCallback(_monIndex, _index, _windowDims);
+    }
+    if (_FovLocked) {
+        updatePlanarLockedFov();
     }
 }
 
@@ -525,6 +544,7 @@ void WindowControl::onProjectionChanged(int newSelection) {
     _lineFovH->setVisible(selected == ProjectionIndeces::Planar);
     _labelFovV->setVisible(selected == ProjectionIndeces::Planar);
     _lineFovV->setVisible(selected == ProjectionIndeces::Planar);
+    _buttonLockFov->setVisible(selected == ProjectionIndeces::Planar);
     _labelHeightOffset->setVisible(selected == ProjectionIndeces::Cylindrical);
     _lineHeightOffset->setVisible(selected == ProjectionIndeces::Cylindrical);
     _checkBoxSpoutOutput->setVisible(selected == ProjectionIndeces::Fisheye
@@ -536,6 +556,33 @@ void WindowControl::onAspectRatioLockClicked() {
     _buttonLockAspectRatio->setIcon(_aspectRatioLocked ? _lockIcon : _unlockIcon);
     if (_aspectRatioLocked) {
         _aspectRatioSize = _windowDims.width() / _windowDims.height();
+    }
+}
+
+void WindowControl::onFovLockClicked() {
+    _FovLocked = !_FovLocked;
+    _buttonLockFov->setIcon(_FovLocked ? _lockIcon : _unlockIcon);
+    if (_FovLocked) {
+        _lineFovH->setEnabled(false);
+        _lineFovV->setEnabled(false);
+        updatePlanarLockedFov();
+    }
+    else {
+        _lineFovH->setEnabled(true);
+        _lineFovV->setEnabled(true);
+    }
+}
+
+void WindowControl::updatePlanarLockedFov() {
+    float currentAspectRatio = _windowDims.width() / _windowDims.height();
+    float relativeRatio = currentAspectRatio / _idealAspectRatio;
+    if (relativeRatio >= 1.0) {
+        _lineFovH->setText(QString::number(std::min(_defaultFovH *relativeRatio, 180.f)));
+        _lineFovV->setText(QString::number(_defaultFovV));
+    }
+    else {
+        _lineFovH->setText(QString::number(_defaultFovH));
+        _lineFovV->setText(QString::number(std::min(_defaultFovV /relativeRatio, 180.f)));
     }
 }
 
