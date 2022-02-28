@@ -397,8 +397,8 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             break;
 
         case ResultCode::ErrorNoData:
-            LERROR("There is not enough data to compute the state of target in relation "
-                "to the observer for the selected time range.");
+            LERROR("There is not enough data to compute the state of the target in "
+                "relation to the observer for the selected time range.");
             break;
 
         case ResultCode::MultipleObserverStations: {
@@ -454,7 +454,7 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             // Format: ID#, Name, Designation, IAU/aliases/other
             // Line after data: Number of matches =  X. Use ID# to make unique selection.
 
-            LWARNING("Multiple matches was found for the target");
+            LWARNING("Multiple matches were found for the target");
 
             std::vector<std::string> matchingTargets =
                 parseMatches("Name", "matches");
@@ -482,11 +482,19 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
 }
 
 HorizonsFile::HorizonsResult HorizonsFile::readFile() const {
+    // Check if valid first
+    ResultCode code = isValidHorizonsFile();
+    if (code != ResultCode::Valid) {
+        HorizonsResult result;
+        result.errorCode = code;
+        return result;
+    }
+
     std::ifstream fileStream(_file);
 
     if (!fileStream.good()) {
         LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", _file
+            "Failed to open Horizons file '{}'", _file
         ));
         return HorizonsResult();
     }
@@ -514,12 +522,8 @@ HorizonsFile::HorizonsResult HorizonsFile::readFile() const {
 HorizonsFile::HorizonsResult HorizonsFile::readVectorFile() const {
     HorizonsResult result;
     result.type = HorizonsFile::Type::Vector;
-    result.errorCode = isValidHorizonsFile();
+    result.errorCode = ResultCode::Valid;
     std::vector<HorizonsKeyframe> data;
-
-    if (result.errorCode != ResultCode::Valid) {
-        return result;
-    }
 
     std::ifstream fileStream(_file);
     if (!fileStream.good()) {
@@ -592,12 +596,8 @@ HorizonsFile::HorizonsResult HorizonsFile::readVectorFile() const {
 HorizonsFile::HorizonsResult HorizonsFile::readObserverFile() const {
     HorizonsResult result;
     result.type = HorizonsFile::Type::Observer;
-    result.errorCode = isValidHorizonsFile();
+    result.errorCode = ResultCode::Valid;
     std::vector<HorizonsKeyframe> data;
-
-    if (result.errorCode != ResultCode::Valid) {
-        return result;
-    }
 
     std::ifstream fileStream(_file);
     if (!fileStream.good()) {
@@ -655,6 +655,10 @@ HorizonsFile::HorizonsResult HorizonsFile::readObserverFile() const {
     }
 
     fileStream.close();
+
+    LWARNING("Observer table data from Horizons might not align with SPICE data well. "
+        "We recommend using Vector table data from Horizons instead"
+    );
 
     result.data = data;
     return result;

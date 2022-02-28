@@ -845,7 +845,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             // Format: ID#, Name, Designation, IAU/aliases/other
             // Line after data: Number of matches =  X. Use ID# to make unique selection.
 
-            appendLog("Multiple matches was found for target '" + _targetName + "'",
+            appendLog("Multiple matches were found for target '" + _targetName + "'",
                 HorizonsDialog::LogLevel::Warning
             );
 
