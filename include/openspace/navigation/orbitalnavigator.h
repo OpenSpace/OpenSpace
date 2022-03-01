@@ -67,8 +67,10 @@ public:
         IdleBehavior();
 
         properties::BoolProperty apply;
-        properties::FloatProperty speedScale;
+        properties::BoolProperty shouldTriggerWhenIdle;
+        properties::FloatProperty idleWaitTime;
         properties::BoolProperty abortOnCameraInteraction;
+        properties::FloatProperty speedScale;
         properties::FloatProperty dampenInterpolationTime;
 
         properties::OptionProperty defaultBehavior;
@@ -89,6 +91,8 @@ public:
      * a session recording playback
      */
     void updateOnCameraInteraction();
+
+    void tickIdleBehaviorTimer(double deltaTime);
 
     Camera* camera() const;
     void setCamera(Camera* camera);
@@ -213,6 +217,7 @@ private:
     bool _invertIdleBehaviorInterpolation = false;
 
     IdleBehavior _idleBehavior;
+    float _idleBehaviorTriggerTimer = 0.f;
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by

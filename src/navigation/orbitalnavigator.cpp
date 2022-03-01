@@ -236,6 +236,22 @@ namespace {
         "applied. Each option represents a predefined camera behavior."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo
+        ShouldTriggerIdleBehaviorWhenIdleInfo =
+    {
+        "ShouldTriggerWhenIdle",
+        "Should Trigger When Idle",
+        "If true, the chosen idle behavior will trigger automatically after "
+        "a certain time (see 'IdleWaitTime' property)."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IdleWaitTimeInfo = {
+        "IdleWaitTime",
+        "Idle Wait Time",
+        "The time (seconds) until idle behavior starts, if no camera interaction "
+        "has been performed. Note that friction counts as camera interaction."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorSpeedInfo = {
         "SpeedFactor",
         "Speed Factor",
@@ -288,6 +304,8 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     : properties::PropertyOwner({ "IdleBehavior" })
     , apply(ApplyIdleBehaviorInfo, false)
     , defaultBehavior(IdleBehaviorInfo)
+    , shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
+    , idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f)
     , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
     , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
     , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
@@ -300,6 +318,9 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     });
     defaultBehavior = IdleBehavior::Behavior::Orbit;
     addProperty(defaultBehavior);
+    addProperty(shouldTriggerWhenIdle);
+    addProperty(idleWaitTime);
+    idleWaitTime.setExponent(2.2f);
     addProperty(speedScale);
     addProperty(abortOnCameraInteraction);
     addProperty(dampenInterpolationTime);
@@ -467,6 +488,13 @@ OrbitalNavigator::OrbitalNavigator()
             _idleBehavior.dampenInterpolationTime
         );
     });
+    _idleBehavior.shouldTriggerWhenIdle.onChange([&]() {
+        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
+    });
+    _idleBehavior.idleWaitTime.onChange([&]() {
+        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
+    });
+
     addProperty(_anchor);
     addProperty(_aim);
     addProperty(_retargetAnchor);
@@ -542,6 +570,9 @@ void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputSt
 
     if (interactionHappened) {
         updateOnCameraInteraction();
+    }
+    else {
+        tickIdleBehaviorTimer(deltaTime);
     }
 }
 
@@ -730,6 +761,18 @@ void OrbitalNavigator::updateOnCameraInteraction() {
     // Disable idle behavior if camera interaction happened
     if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
         resetIdleBehavior();
+    }
+}
+
+void OrbitalNavigator::tickIdleBehaviorTimer(double deltaTime) {
+    if (!_idleBehavior.shouldTriggerWhenIdle) {
+        return;
+    }
+    if (_idleBehaviorTriggerTimer > 0.f) {
+        _idleBehaviorTriggerTimer -= static_cast<float>(deltaTime);
+    }
+    else {
+        triggerDefaultIdleBehavior();
     }
 }
 
@@ -1544,6 +1587,7 @@ void OrbitalNavigator::resetIdleBehavior() {
     _idleBehavior.chosenBehavior = std::nullopt;
     // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
     _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
+    _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
 }
 
 void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
