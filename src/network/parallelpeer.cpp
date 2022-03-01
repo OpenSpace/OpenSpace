@@ -163,42 +163,59 @@ void ParallelPeer::disconnect() {
 }
 
 void ParallelPeer::sendAuthentication() {
-    std::string name = _name;
-    // Length of this nodes name
-    const uint32_t nameLength = static_cast<uint32_t>(name.length());
+    std::string password = _password;
+    if (password.size() > std::numeric_limits<uint16_t>::max()) {
+        password.resize(std::numeric_limits<uint16_t>::max());
+    }
+    const uint16_t passwordSize = static_cast<uint16_t>(password.size());
 
-    // Total size of the buffer: (passcode + namelength + name)
-    const size_t size = sizeof(uint64_t) + sizeof(uint32_t) + nameLength;
+    std::string hostPassword = _hostPassword;
+    if (hostPassword.size() > std::numeric_limits<uint16_t>::max()) {
+        hostPassword.resize(std::numeric_limits<uint16_t>::max());
+    }
+    const uint16_t hostPasswordSize = static_cast<uint16_t>(hostPassword.size());
+
+    std::string name = _name;
+    if (name.size() > std::numeric_limits<uint8_t>::max()) {
+        name.resize(std::numeric_limits<uint8_t>::max());
+    }
+    const uint8_t nameLength = static_cast<uint8_t>(name.length());
+
+
+    // Total size of the buffer
+    const size_t size =
+        sizeof(uint16_t) + // password length
+        passwordSize +     // password
+        sizeof(uint16_t) + // host password length
+        hostPasswordSize + // host password
+        sizeof(uint8_t)  + // name length
+        nameLength;        // name
 
     // Create and reserve buffer
     std::vector<char> buffer;
     buffer.reserve(size);
 
     // Write the password to buffer
-    std::string pw = _password;
-    uint32_t pwSize = static_cast<uint32_t>(pw.size());
     buffer.insert(
         buffer.end(),
-        reinterpret_cast<const char*>(&pwSize),
-        reinterpret_cast<const char*>(&pwSize) + sizeof(uint32_t)
+        reinterpret_cast<const char*>(&passwordSize),
+        reinterpret_cast<const char*>(&passwordSize) + sizeof(uint16_t)
     );
-    buffer.insert(buffer.end(), pw.begin(), pw.end());
+    buffer.insert(buffer.end(), password.begin(), password.end());
 
     // Write the host password to buffer
-    std::string hostPw = _hostPassword;
-    uint32_t hostPwSize = static_cast<uint32_t>(hostPw.size());
     buffer.insert(
         buffer.end(),
-        reinterpret_cast<const char*>(&hostPwSize),
-        reinterpret_cast<const char*>(&hostPwSize) + sizeof(uint32_t)
+        reinterpret_cast<const char*>(&hostPasswordSize),
+        reinterpret_cast<const char*>(&hostPasswordSize) + sizeof(uint16_t)
     );
-    buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
+    buffer.insert(buffer.end(), hostPassword.begin(), hostPassword.end());
 
     // Write the length of the nodes name to buffer
     buffer.insert(
         buffer.end(),
         reinterpret_cast<const char*>(&nameLength),
-        reinterpret_cast<const char*>(&nameLength) + sizeof(uint32_t)
+        reinterpret_cast<const char*>(&nameLength) + sizeof(uint8_t)
     );
 
     // Write this node's name to buffer
@@ -276,8 +293,8 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     size_t offset = 0;
 
     // The type of data message received
-    const uint32_t type = *(reinterpret_cast<const uint32_t*>(message.data() + offset));
-    offset += sizeof(uint32_t);
+    const uint8_t type = *(reinterpret_cast<const uint8_t*>(message.data() + offset));
+    offset += sizeof(uint8_t);
 
     const double timestamp = *(reinterpret_cast<const double*>(message.data() + offset));
     offset += sizeof(double);
@@ -374,19 +391,19 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
 }
 
 void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message) {
-    if (message.size() < 2 * sizeof(uint32_t)) {
+    if (message.size() < 2 * sizeof(uint8_t)) {
         LERROR("Malformed connection status message");
         return;
     }
     size_t pointer = 0;
-    uint32_t statusIn = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
+    const uint8_t statusIn = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
     const ParallelConnection::Status status = static_cast<ParallelConnection::Status>(
         statusIn
     );
-    pointer += sizeof(uint32_t);
+    pointer += sizeof(uint8_t);
 
-    const size_t hostNameSize = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
-    pointer += sizeof(uint32_t);
+    const uint8_t hostNameSize = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
+    pointer += sizeof(uint8_t);
 
     if (hostNameSize > message.size() - pointer) {
         LERROR("Malformed connection status message");
@@ -420,8 +437,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     global::timeManager->clearKeyframes();
 }
 
-void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
-{
+void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message) {
     if (message.size() < sizeof(uint32_t)) {
         LERROR("Malformed host info message");
         return;
@@ -435,8 +451,10 @@ void ParallelPeer::handleCommunication() {
         try {
             ParallelConnection::Message m = _connection.receiveMessage();
             queueInMessage(m);
-        } catch (const ParallelConnection::ConnectionLostError&) {
-            LERROR("Parallel connection lost");
+        } catch (const ParallelConnection::ConnectionLostError& e) {
+            if (e.shouldLogError) {
+                LERROR("Parallel connection lost");
+            }
         }
     }
     setStatus(ParallelConnection::Status::Disconnected);
@@ -457,11 +475,11 @@ void ParallelPeer::setName(std::string name) {
 void ParallelPeer::requestHostship() {
     std::vector<char> buffer;
     std::string hostPw = _hostPassword;
-    uint32_t hostPwSize = static_cast<uint32_t>(hostPw.size());
+    uint16_t hostPwSize = static_cast<uint16_t>(hostPw.size());
     buffer.insert(
         buffer.end(),
         reinterpret_cast<const char*>(&hostPwSize),
-        reinterpret_cast<const char*>(&hostPwSize) + sizeof(uint32_t)
+        reinterpret_cast<const char*>(&hostPwSize) + sizeof(uint16_t)
     );
     buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
 
@@ -517,7 +535,7 @@ void ParallelPeer::resetTimeOffset() {
 void ParallelPeer::preSynchronization() {
     ZoneScoped
 
-    std::unique_lock<std::mutex> unqlock(_receiveBufferMutex);
+    std::unique_lock<std::mutex> unlock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
         ParallelConnection::Message& message = _receiveBuffer.front();
         handleMessage(message);
