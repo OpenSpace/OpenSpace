@@ -29,6 +29,7 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/movingfieldlinehelper.h>
+#include <modules/fieldlinessequence/util/matchingfieldlinehelper.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
@@ -42,38 +43,18 @@ namespace documentation { struct Documentation; }
 class RenderableMovingFieldlines : public Renderable {
 public:
     struct PathLineTraverser {
-        PathLineTraverser(const std::vector<FieldlinesState::Fieldline>& fieldlines_)
-            : fieldlines(fieldlines_)
-            , currentFieldline(fieldlines.begin())
-        {
-        }
+        PathLineTraverser(const std::vector<FieldlinesState::Fieldline>& fieldlines_);
+        void advanceCurrent();
+        bool isAtEnd() const;
+        std::vector<FieldlinesState::Fieldline>::const_iterator nextFieldline();
 
         const std::vector<FieldlinesState::Fieldline>& fieldlines;
         float timeSinceInterpolation = 0.f;
         bool forward = true;
         std::vector<FieldlinesState::Fieldline>::const_iterator currentFieldline;
-        
-        std::vector<FieldlinesState::Fieldline>::const_iterator nextFieldline() {
-            return (currentFieldline + 1);
-        };
 
-        void advanceCurrent() {
-            if (forward) {
-                timeSinceInterpolation -= currentFieldline->timeToNextFieldline;
-                currentFieldline++;
-            }
-            else {
-                currentFieldline--;
-                timeSinceInterpolation += currentFieldline->timeToNextFieldline;
-            }
-        };
-
-        bool isAtEnd() const {
-            return forward ?
-                (currentFieldline == fieldlines.end() - 2) :
-                (currentFieldline == fieldlines.begin());
-        };
     };
+
 
     RenderableMovingFieldlines(const ghoul::Dictionary& dictionary);
     void initialize() override;

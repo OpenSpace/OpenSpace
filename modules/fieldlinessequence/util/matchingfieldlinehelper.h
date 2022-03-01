@@ -42,7 +42,7 @@ namespace openspace {
             std::vector<glm::vec3> eigVecs;
         };
 
-        bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
+        bool convertCdfToMatchingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
             const std::vector<glm::vec3>& seedMap,
             double manualTimeOffset, const std::string& tracingVar,
             std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars,
@@ -58,6 +58,9 @@ namespace openspace {
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___MOVINGFIELDLINEHELPER___H__
+
+
+
 
     /*
     Will get the point and eigenvector and then return a position

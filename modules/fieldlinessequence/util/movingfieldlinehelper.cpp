@@ -175,14 +175,8 @@ namespace openspace::fls {
                 tracingVar,
                 seed.x,
                 seed.y,
-                seed.z,
-                ccmc::Tracer::Direction::REVERSE
-            ).reverseOrder();
-            //this code will trace backwards in the magnetic field 
-            //from a given seedpoint 
-            //without reverseOrder() the fieldline will move backwards as time porgresses
-            //forward. With bidirectionalTrace() a flowline can be traced in both directions
-            //from the given seedpoint.
+                seed.z
+            );
 
             uPerpBPathLine.getDs();
             uPerpBPathLine.measure();
@@ -226,6 +220,7 @@ namespace openspace::fls {
         return success;
     }
 
+    // Creates a fieldline key frame for a vertex in the path line
     std::vector<glm::vec3> traceAndCreateFieldline(const glm::vec3& seedPoint,
         ccmc::Kameleon* kameleon,
         const float innerBoundaryLimit,

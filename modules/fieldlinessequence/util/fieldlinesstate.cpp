@@ -421,7 +421,7 @@ void FieldlinesState::addLinesToBeRendered() {
     // fieldlines position.
     for (int i = 0; i < _allPathLines.size(); ++i) {
         std::vector<glm::vec3> line;
-        for (Vertex v : _allPathLines[i].fieldlines[0].vertecies) {
+        for (Vertex v : _allPathLines[i].keyFrames[0].vertecies) {
             line.push_back(v.position);
         }
         addLine(line);
@@ -462,7 +462,7 @@ void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline,
         f.topology = Fieldline::Topology::Imf;
     }
 
-    _allPathLines[pathLineIndex].fieldlines.push_back(f);
+    _allPathLines[pathLineIndex].keyFrames.push_back(f);
 }
 
 void FieldlinesState::setExtraQuantityNames(std::vector<std::string> names) {

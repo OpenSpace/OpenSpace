@@ -38,9 +38,10 @@ public:
     struct Vertex {
         glm::vec3 position;
     };
+
     struct Fieldline {
         enum class Topology {
-            Closed,
+            Closed = 0,
             Open,
             Imf
         };
@@ -48,10 +49,15 @@ public:
         std::vector<Vertex> vertecies;
         float timeToNextFieldline;
     };
+
     struct PathLine {
-        std::vector<Fieldline> fieldlines;
+        std::vector<Fieldline> keyFrames;
         std::vector<glm::vec3> line;
         //float lifetime; // for when multiple cdf-files come into play ?
+    };
+
+    struct MatchingFieldlines {
+        std::pair<PathLine, PathLine> fieldlines;
     };
 
     void convertLatLonToCartesian(float scale = 1.f);
@@ -99,9 +105,9 @@ private:
     std::vector<GLsizei> _lineCount;
     std::vector<GLint> _lineStart;
 
+    std::vector<MatchingFieldlines> _allMatchingFieldlines;    // will replace _allPathLines
+
     std::vector<PathLine> _allPathLines;    // replaces _fieldLinesPerPath
-
-
     std::vector<std::vector<std::vector<glm::vec3>>> _fieldLinesPerPath;
     std::vector<glm::vec3> _vertexPositions;
 };

@@ -42,4 +42,4 @@ COMMIT.md
 *_codegen.cpp
 
 # REMOVE AFTER THESIS IS DONE
-/data/assets/scene/solarsystem/planets/earth/magnetosphere/moving_fieldlines.asset
+*moving_fieldlines.asset

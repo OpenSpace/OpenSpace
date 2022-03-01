@@ -248,7 +248,7 @@ void RenderableMovingFieldlines::initialize() {
         throw ghoul::RuntimeError("Trying to read cdf file failed");
     }
     for (int i = 0; i < _fieldlineState.lineCount().size(); ++i) {
-        PathLineTraverser plt(_fieldlineState.allPathLines()[i].fieldlines);
+        PathLineTraverser plt(_fieldlineState.allPathLines()[i].keyFrames);
         _traversers.push_back(plt);
     }
     _renderedLines = _fieldlineState.vertexPositions();
@@ -324,7 +324,10 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
     bool isSuccessful = false;
     for (const std::filesystem::path entry : _sourceFiles) {
         const std::string& cdfPath = entry.string();
+        /************ SWITCH MOVING/MATCHING HERE ****************/
         isSuccessful = fls::convertCdfToMovingFieldlinesState(
+        //isSuccessful = fls::convertCdfToMatchingFieldlinesState(
+        /*********************************************************/
             _fieldlineState,
             cdfPath,
             seedPoints,
@@ -671,4 +674,32 @@ void RenderableMovingFieldlines::updateVertexColorBuffer() {
         glBindVertexArray(0);
     }
 }
+RenderableMovingFieldlines::PathLineTraverser::PathLineTraverser(const std::vector<FieldlinesState::Fieldline>& fieldlines_) :
+    fieldlines(fieldlines_),
+    currentFieldline(fieldlines.begin()) {}
+
+void RenderableMovingFieldlines::PathLineTraverser::advanceCurrent()
+{
+    if (forward) {
+        timeSinceInterpolation -= currentFieldline->timeToNextFieldline;
+        currentFieldline++;
+    }
+    else {
+        currentFieldline--;
+        timeSinceInterpolation += currentFieldline->timeToNextFieldline;
+    }
+}
+
+bool RenderableMovingFieldlines::PathLineTraverser::isAtEnd() const
+{
+    return forward ?
+        (currentFieldline == fieldlines.end() - 2) :
+        (currentFieldline == fieldlines.begin());
+}
+
+std::vector<FieldlinesState::Fieldline>::const_iterator RenderableMovingFieldlines::PathLineTraverser::nextFieldline()
+{
+    return (currentFieldline + 1);
+}
+
 } // namespace openspace
