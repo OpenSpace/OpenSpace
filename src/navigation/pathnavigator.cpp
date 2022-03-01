@@ -285,10 +285,7 @@ void PathNavigator::startPath() {
         );
 
         _startSimulationTimeOnFinish = true;
-        LINFO(
-            "Pausing time simulation during path traversal. "
-            "Will unpause once the camera path is finished"
-        );
+        LINFO("Pausing time simulation during path traversal");
     }
 
     LINFO("Starting path");
