@@ -345,23 +345,17 @@ int addGlobalRoll(lua_State* L) {
 
 int triggerIdleBehavior(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, {0, 1}, "lua::triggerIdleBehavior");
-    auto [choice] = ghoul::lua::values<std::optional<std::string>>(L);
+    std::optional<std::string> choice = ghoul::lua::value<std::optional<std::string>>(L);
 
-    if (choice) {
-        try {
-            global::navigationHandler->orbitalNavigator().triggerIdleBehavior(
-                *choice
-            );
-        }
-        catch (ghoul::MissingCaseException&) {
-            return ghoul::lua::luaError(L, fmt::format(
-                "No existing IdleBehavior with identifier '{}'"
-            ));
-        }
+    try {
+        global::navigationHandler->orbitalNavigator().triggerIdleBehavior(choice);
     }
-    else {
-        global::navigationHandler->orbitalNavigator().triggerDefaultIdleBehavior();
+    catch (ghoul::MissingCaseException&) {
+        return ghoul::lua::luaError(L, fmt::format(
+            "No existing IdleBehavior with identifier '{}'"
+        ));
     }
+
     return 0;
 }
 

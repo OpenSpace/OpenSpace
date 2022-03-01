@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/camera/camerapose.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -772,7 +773,7 @@ void OrbitalNavigator::tickIdleBehaviorTimer(double deltaTime) {
         _idleBehaviorTriggerTimer -= static_cast<float>(deltaTime);
     }
     else {
-        triggerDefaultIdleBehavior();
+        triggerIdleBehavior();
     }
 }
 
@@ -1557,28 +1558,36 @@ const ScriptCameraStates& OrbitalNavigator::scriptStates() const {
     return _scriptStates;
 }
 
-void OrbitalNavigator::triggerDefaultIdleBehavior() {
-    // TODO: check engine mode
-    _idleBehavior.chosenBehavior = std::nullopt;
-    _idleBehavior.apply = true;
-}
+void OrbitalNavigator::triggerIdleBehavior(std::optional<std::string_view> choice) {
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode != OpenSpaceEngine::Mode::UserControl) {
+        LERROR(
+            "Could not start idle behavior. The camera is being controlled "
+            "by some other part of the system"
+        );
+        return;
+    }
 
-void OrbitalNavigator::triggerIdleBehavior(const std::string& choice) {
-    // TODO: check engine mode
-    IdleBehavior::Behavior behavior;
-    if (choice == IdleBehaviorKeyOrbit) {
-        behavior = IdleBehavior::Behavior::Orbit;
-    }
-    else if (choice == IdleBehaviorKeyOrbitAtConstantLat) {
-        behavior = IdleBehavior::Behavior::OrbitAtConstantLat;
-    }
-    else if (choice == IdleBehaviorKeyOrbitAroundUp) {
-        behavior = IdleBehavior::Behavior::OrbitAroundUp;
+    if (!choice.has_value()) {
+        _idleBehavior.chosenBehavior = std::nullopt;
     }
     else {
-        throw ghoul::MissingCaseException();
+        IdleBehavior::Behavior behavior;
+        if (choice == IdleBehaviorKeyOrbit) {
+            behavior = IdleBehavior::Behavior::Orbit;
+        }
+        else if (choice == IdleBehaviorKeyOrbitAtConstantLat) {
+            behavior = IdleBehavior::Behavior::OrbitAtConstantLat;
+        }
+        else if (choice == IdleBehaviorKeyOrbitAroundUp) {
+            behavior = IdleBehavior::Behavior::OrbitAroundUp;
+        }
+        else {
+            throw ghoul::MissingCaseException();
+        }
+        _idleBehavior.chosenBehavior = behavior;
     }
-    _idleBehavior.chosenBehavior = behavior;
+
     _idleBehavior.apply = true;
 }
 

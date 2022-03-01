@@ -93,6 +93,7 @@ public:
     void updateOnCameraInteraction();
 
     void tickIdleBehaviorTimer(double deltaTime);
+    void triggerIdleBehavior(std::optional<std::string_view> choice = std::nullopt);
 
     Camera* camera() const;
     void setCamera(Camera* camera);
@@ -130,9 +131,6 @@ public:
 
     glm::dvec3 anchorNodeToCameraVector() const;
     glm::quat anchorNodeToCameraRotation() const;
-
-    void triggerDefaultIdleBehavior();
-    void triggerIdleBehavior(const std::string& choice);
 
 private:
     struct CameraRotationDecomposition {
