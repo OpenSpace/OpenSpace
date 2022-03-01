@@ -133,7 +133,7 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 
 void GlobeTranslation::fillAttachedNode() {
     SceneGraphNode* n = sceneGraphNode(_globe);
-    if (n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
+    if (n && n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
         _attachedNode = dynamic_cast<RenderableGlobe*>(n->renderable());
     }
     else {
@@ -142,7 +142,7 @@ void GlobeTranslation::fillAttachedNode() {
             "Could not set attached node as it does not have a RenderableGlobe"
         );
         if (_attachedNode) {
-            // Reset the globe name to it's previous name
+            // Reset the globe name to its previous name
             _globe = _attachedNode->identifier();
         }
     }

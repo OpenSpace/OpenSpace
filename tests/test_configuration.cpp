@@ -32,8 +32,16 @@
 using namespace openspace::configuration;
 
 namespace {
+    // The absolute minimal configuration that is still expected to be loaded
     std::string MinimalConfig = R"(
 Paths = {}
+FontSize = {
+  FrameInfo = 1.0,
+  Shutdown = 2.0,
+  Log = 3.0,
+  CameraInfo = 4.0,
+  VersionInfo = 5.0
+}
 )";
 
     void writeConfig(const std::string& filename, const std::string& content) {
@@ -45,12 +53,17 @@ Paths = {}
     Configuration loadConfiguration(const std::string& tag, const std::string& content) {
         std::string filename = fmt::format("test_configuration_{}.cfg", tag);
         std::filesystem::path path = std::filesystem::temp_directory_path();
-        std::string configFile = (path / filename).string();
-        writeConfig(configFile, content);
-        Configuration conf = loadConfigurationFromFile(configFile, content);
-        std::filesystem::remove(configFile);
-        return conf;
-
+        std::string file = (path / filename).string();
+        writeConfig(file, content);
+        try {
+            Configuration conf = loadConfigurationFromFile(file, glm::ivec2(0), content);
+            std::filesystem::remove(file);
+            return conf;
+        }
+        catch (...) {
+            std::filesystem::remove(file);
+            throw;
+        }
     }
 } // namespace
 
@@ -61,32 +74,32 @@ TEST_CASE("Configuration: minimal", "[configuration]") {
 TEST_CASE("Configuration: windowConfiguration", "[configuration]") {
     constexpr const char Extra[] = R"(SGCTConfig = "foobar")";
     const Configuration c = loadConfiguration("windowConfiguration", Extra);
-    REQUIRE(c.windowConfiguration == "foobar");
+    CHECK(c.windowConfiguration == "foobar");
 }
 
 TEST_CASE("Configuration: asset", "[configuration]") {
     constexpr const char Extra[] = R"(Asset = "foobar")";
     const Configuration c = loadConfiguration("asset", Extra);
-    REQUIRE(c.asset == "foobar");
+    CHECK(c.asset == "foobar");
 }
 
 TEST_CASE("Configuration: profile", "[configuration]") {
     constexpr const char Extra[] = R"(Profile = "foobar")";
     const Configuration c = loadConfiguration("profile", Extra);
-    REQUIRE(c.profile == "foobar");
+    CHECK(c.profile == "foobar");
 }
 
 TEST_CASE("Configuration: globalCustomizationScripts", "[configuration]") {
     constexpr const char Extra[] = R"(GlobalCustomizationScripts = { "foo", "bar" })";
     const Configuration c = loadConfiguration("globalCustomization", Extra);
-    REQUIRE(c.globalCustomizationScripts.size() == 2);
+    CHECK(c.globalCustomizationScripts.size() == 2);
     CHECK(c.globalCustomizationScripts == std::vector<std::string>{ "foo", "bar" });
 }
 
 TEST_CASE("Configuration: paths", "[configuration]") {
     constexpr const char Extra[] = R"(Paths = { foo = "1", bar = "2" })";
     const Configuration c = loadConfiguration("paths", Extra);
-    REQUIRE(c.pathTokens.size() == 2);
+    CHECK(c.pathTokens.size() == 2);
     CHECK(
         c.pathTokens ==
         std::map<std::string, std::string>{ { "foo", "1" }, { "bar", "2" } }
@@ -96,7 +109,7 @@ TEST_CASE("Configuration: paths", "[configuration]") {
 TEST_CASE("Configuration: fonts", "[configuration]") {
     constexpr const char Extra[] = R"(Fonts = { foo = "1", bar = "2" })";
     const Configuration c = loadConfiguration("fonts", Extra);
-    REQUIRE(c.fonts.size() == 2);
+    CHECK(c.fonts.size() == 2);
     CHECK(
         c.fonts ==
         std::map<std::string, std::string>{ { "foo", "1" }, { "bar", "2" } }

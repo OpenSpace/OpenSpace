@@ -44,7 +44,8 @@ DigitalUniverseModule::DigitalUniverseModule()
 {}
 
 void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderablePoints>("RenderablePoints");

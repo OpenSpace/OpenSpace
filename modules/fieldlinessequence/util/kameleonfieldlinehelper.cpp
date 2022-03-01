@@ -159,8 +159,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         // We have to create a new tracer (or actually a new interpolator) for each //
         // new line, otherwise some issues occur                                    //
         //--------------------------------------------------------------------------//
-        std::unique_ptr<ccmc::Interpolator> interpolator =
-                std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+        auto interpolator = std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
         ccmc::Tracer tracer(kameleon, interpolator.get());
         tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
         ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(
@@ -212,8 +211,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
     const size_t nXtraScalars = extraScalarVars.size();
     const size_t nXtraMagnitudes = extraMagVars.size() / 3;
 
-    std::unique_ptr<ccmc::Interpolator> interpolator =
-            std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+    auto interpolator = std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
     // ------ Extract all the extraQuantities from kameleon and store in state! ------ //
     for (const glm::vec3& p : state.vertexPositions()) {

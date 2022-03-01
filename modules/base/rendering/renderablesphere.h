@@ -70,9 +70,7 @@ private:
     properties::IntProperty _segments;
 
     properties::BoolProperty _mirrorTexture;
-    properties::BoolProperty _useAdditiveBlending;
     properties::BoolProperty _disableFadeInDistance;
-    properties::BoolProperty _backgroundRendering;
 
     properties::FloatProperty _fadeInThreshold;
     properties::FloatProperty _fadeOutThreshold;

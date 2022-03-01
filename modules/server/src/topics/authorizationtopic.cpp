@@ -54,7 +54,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
     }
     else {
         try {
-            auto providedKey = json.at("key").get<std::string>();
+            std::string providedKey = json.at("key").get<std::string>();
             if (authorize(providedKey)) {
                 _connection->setAuthorized(true);
                 _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
@@ -63,9 +63,11 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
             else {
                 _connection->sendJson(wrappedPayload({ KeyStatus, IncorrectKey }));
             }
-        } catch (const std::out_of_range&) {
+        }
+        catch (const std::out_of_range&) {
             _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
-        } catch (const std::domain_error&) {
+        }
+        catch (const std::domain_error&) {
             _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
         }
     }

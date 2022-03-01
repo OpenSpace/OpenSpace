@@ -229,6 +229,10 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
                 iter->backwardScript :
                 iter->universalScript + "; " + iter->backwardScript;
             result.push_back(script);
+
+            if (iter == _scripts.begin()) {
+                break;
+            }
         }
 
         return result;

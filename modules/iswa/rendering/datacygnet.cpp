@@ -132,8 +132,7 @@ bool DataCygnet::updateTexture() {
         }
 
         if (!_textures[option]) {
-            using namespace ghoul::opengl;
-            std::unique_ptr<Texture> texture = std::make_unique<Texture>(
+            auto texture = std::make_unique<ghoul::opengl::Texture>(
                 values,
                 _textureDimensions,
                 GL_TEXTURE_2D,
@@ -146,7 +145,7 @@ bool DataCygnet::updateTexture() {
 
             if (texture) {
                 texture->uploadTexture();
-                texture->setFilter(Texture::FilterMode::LinearMipMap);
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
                 _textures[option] = std::move(texture);
             }
         }

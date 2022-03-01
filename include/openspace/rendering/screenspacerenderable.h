@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
@@ -105,11 +106,12 @@ protected:
 
     properties::FloatProperty _scale;
     properties::Vec3Property _multiplyColor;
+    properties::Vec4Property _backgroundColor;
     properties::FloatProperty _opacity;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
-    UniformCache(color, opacity, mvp, texture) _uniformCache;
+    UniformCache(color, opacity, mvp, texture, backgroundColor) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

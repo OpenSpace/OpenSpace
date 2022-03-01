@@ -34,7 +34,6 @@
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
@@ -132,42 +131,15 @@ OpenSpaceEngine::OpenSpaceEngine()
     : _printEvents(PrintEventsInfo, false)
 {
     FactoryManager::initialize();
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Renderable>>(),
-        "Renderable"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Translation>>(),
-        "Translation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
-        "Rotation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Scale>>(),
-        "Scale"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<TimeFrame>>(),
-        "TimeFrame"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<LightSource>>(),
-        "LightSource"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Task>>(),
-        "Task"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
-        "ResourceSynchronization"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<DashboardItem>>(),
-        "DashboardItem"
-    );
+    FactoryManager::ref().addFactory<Renderable>("Renderable");
+    FactoryManager::ref().addFactory<Translation>("Translation");
+    FactoryManager::ref().addFactory<Rotation>("Rotation");
+    FactoryManager::ref().addFactory<Scale>("Scale");
+    FactoryManager::ref().addFactory<TimeFrame>("TimeFrame");
+    FactoryManager::ref().addFactory<LightSource>("LightSource");
+    FactoryManager::ref().addFactory<Task>("Task");
+    FactoryManager::ref().addFactory<ResourceSynchronization>("ResourceSynchronization");
+    FactoryManager::ref().addFactory<DashboardItem>("DashboardItem");
 
     SpiceManager::initialize();
     TransformationManager::initialize();
@@ -768,7 +740,6 @@ void OpenSpaceEngine::loadAssets() {
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
 
-    bool loading = true;
     while (true) {
         _loadingScreen->render();
         _assetManager->update();
@@ -784,16 +755,16 @@ void OpenSpaceEngine::loadAssets() {
             if (sync->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
 
-                progressInfo.progress = [](const ResourceSynchronization* sync) {
-                    if (!sync->nTotalBytesIsKnown()) {
+                progressInfo.progress = [](const ResourceSynchronization* s) {
+                    if (!s->nTotalBytesIsKnown()) {
                         return 0.f;
                     }
-                    if (sync->nTotalBytes() == 0) {
+                    if (s->nTotalBytes() == 0) {
                         return 1.f;
                     }
                     return
-                        static_cast<float>(sync->nSynchronizedBytes()) /
-                        static_cast<float>(sync->nTotalBytes());
+                        static_cast<float>(s->nSynchronizedBytes()) /
+                        static_cast<float>(s->nTotalBytes());
                 }(sync);
 
                 _loadingScreen->updateItem(
@@ -829,7 +800,6 @@ void OpenSpaceEngine::loadAssets() {
             break;
         }
 
-        loading = false;
         auto it = allSyncs.begin();
         while (it != allSyncs.end()) {
             if ((*it)->isSyncing()) {
@@ -852,7 +822,6 @@ void OpenSpaceEngine::loadAssets() {
                     progressInfo.totalSize = (*it)->nTotalBytes();
                 }
 
-                loading = true;
                 _loadingScreen->updateItem(
                     (*it)->identifier(),
                     (*it)->name(),
@@ -1211,6 +1180,17 @@ void OpenSpaceEngine::preSynchronization() {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
     }
+
+    // Handle callback(s) for change in engine mode
+    if (_modeLastFrame != _currentMode) {
+        using K = CallbackHandle;
+        using V = ModeChangeCallback;
+        for (const std::pair<K, V>& it : _modeChangeCallbacks) {
+            it.second();
+        }
+    }
+    _modeLastFrame = _currentMode;
+
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
@@ -1648,6 +1628,31 @@ void OpenSpaceEngine::resetMode() {
     LDEBUG(fmt::format("Reset engine mode to {}", stringify(_currentMode)));
 }
 
+OpenSpaceEngine::CallbackHandle OpenSpaceEngine::addModeChangeCallback(
+                                                                   ModeChangeCallback cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _modeChangeCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _modeChangeCallbacks.begin(),
+        _modeChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, ModeChangeCallback>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _modeChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _modeChangeCallbacks.erase(it);
+}
+
 void setCameraFromProfile(const Profile& p) {
     if (!p.camera.has_value()) {
         throw ghoul::RuntimeError("No 'camera' entry exists in the startup profile");
@@ -1810,25 +1815,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::downloadFile,
                 "",
                 "Downloads a file from Lua scope"
-            },
-            {
-                "addVirtualProperty",
-                &luascriptfunctions::addVirtualProperty,
-                "type, name, identifier,"
-                "[description, value, minimumValue, maximumValue]",
-                "Adds a virtual property that will set a group of properties"
-            },
-            {
-                "removeVirtualProperty",
-                &luascriptfunctions::removeVirtualProperty,
-                "string",
-                "Removes a previously added virtual property"
-            },
-            {
-                "removeAllVirtualProperties",
-                &luascriptfunctions::removeAllVirtualProperties,
-                "",
-                "Remove all registered virtual properties"
             },
             {
                 "setScreenshotFolder",

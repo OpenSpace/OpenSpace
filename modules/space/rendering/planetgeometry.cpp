@@ -48,7 +48,8 @@ std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto factory = FactoryManager::ref().factory<PlanetGeometry>();
+    ghoul::TemplateFactory<PlanetGeometry>* factory =
+        FactoryManager::ref().factory<PlanetGeometry>();
 
     PlanetGeometry* result = factory->create(p.type, dictionary);
     return std::unique_ptr<PlanetGeometry>(result);

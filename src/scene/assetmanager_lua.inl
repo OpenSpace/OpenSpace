@@ -42,4 +42,33 @@ int remove(lua_State* L) {
     return 0;
 }
 
+int isLoaded(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::isLoaded");
+    const std::string assetName = ghoul::lua::value<std::string>(L);
+
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    for (const Asset* a : as) {
+        if (a->path() == assetName) {
+            ghoul::lua::push(L, true);
+            return 1;
+        }
+    }
+
+    ghoul::lua::push(L, false);
+    return 1;
+}
+
+int allAssets(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::allAssets");
+
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    std::vector<std::string> res;
+    res.reserve(as.size());
+    for (const Asset* a : as) {
+        res.push_back(a->path().string());
+    }
+    ghoul::lua::push(L, res);
+    return 1;
+}
+
 } // namespace openspace::luascriptfunctions

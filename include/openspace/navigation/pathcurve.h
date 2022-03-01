@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___PATHCURVE___H__
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/exception.h>
 #include <vector>
 
 namespace openspace::interaction {
@@ -34,21 +35,38 @@ class Waypoint;
 
 class PathCurve {
 public:
+    struct InsufficientPrecisionError : public ghoul::RuntimeError {
+        explicit InsufficientPrecisionError(std::string msg);
+    };
+
+    struct TooShortPathError : public ghoul::RuntimeError {
+        explicit TooShortPathError(std::string msg);
+    };
+
     virtual ~PathCurve() = 0;
 
+    /**
+     * Return the length of the curve, in meters
+     */
     double length() const;
 
     /**
      * Compute and return the position along the path at the specified relative
      * distance. The input parameter should be in range [0, 1], where 1 correspond to
-     * the full length of the path
+     * the full length of the path.
+     *
+     * Can be overridden by subclasses that want more control over the position
+     * interpolation
      */
-    glm::dvec3 positionAt(double relativeDistance) const;
+    virtual glm::dvec3 positionAt(double relativeDistance) const;
 
     /**
      * Get the intorlatied position along the spline, based on the given curve parameter
      * u in range [0, 1]. A curve parameter of 0 returns the start position and 1 the end
      * position. Note that u does not correspond to the relatively traveled distance.
+     *
+     * Can be overridden by subclasses that want more control over the position
+     * interpolation
      */
     virtual glm::dvec3 interpolate(double u) const;
 
@@ -59,16 +77,16 @@ public:
 
 protected:
     /**
-     * Precompute information related to the spline parameters, that are
+     * Precompute information related to the spline parameters that are
      * needed for arc length reparameterization. Must be called after
-     * control point creation
+     * control point creation.
      */
     void initializeParameterData();
 
     /**
      * Compute curve parameter u that matches the input arc length s.
-     * Input s is a length value, in the range [0, _totalLength]. The returned curve
-     * parameter u is in range [0, 1]
+     * Input s is a length value in meters, in the range [0, _totalLength].
+     * The returned curve parameter u is in range [0, 1].
      */
     double curveParameter(double s) const;
 
@@ -81,7 +99,7 @@ protected:
 
     std::vector<double> _curveParameterSteps; // per segment
     std::vector<double> _lengthSums; // per segment
-    double _totalLength = 0.0;
+    double _totalLength = 0.0; // meters
 
     struct ParameterPair {
         double u; // curve parameter
@@ -94,6 +112,9 @@ protected:
 class LinearCurve : public PathCurve {
 public:
     LinearCurve(const Waypoint& start, const Waypoint& end);
+
+    glm::dvec3 positionAt(double relativeDistance) const override;
+    glm::dvec3 interpolate(double u) const override;
 };
 
 } // namespace openspace::interaction

@@ -73,7 +73,8 @@ documentation::Documentation DashboardItem::Documentation() {
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
                                                              ghoul::Dictionary dictionary)
 {
-    auto factory = FactoryManager::ref().factory<DashboardItem>();
+    ghoul::TemplateFactory<DashboardItem>* factory =
+        FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(factory, "DashboardItem factory did not exist");
 
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);

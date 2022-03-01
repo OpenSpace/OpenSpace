@@ -158,34 +158,6 @@ namespace {
         "meters above the surface."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VelocityZoomControlInfo = {
-        "VelocityZoomControl",
-        "Velocity Zoom Control",
-        "Controls the velocity of the camera motion when zooming in to the focus node "
-        "on a linear flight. The higher the value the faster the camera will move "
-        "towards the focus."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ApplyLinearFlightInfo = {
-        "ApplyLinearFlight",
-        "Apply Linear Flight",
-        "This property makes the camera move to the specified distance "
-        "'DestinationDistance' while facing the anchor"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FlightDestinationDistInfo = {
-        "FlightDestinationDistance",
-        "Flight Destination Distance",
-        "The final distance we want to fly to, with regards to the anchor node."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FlightDestinationFactorInfo =
-    {
-        "FlightDestinationFactor",
-        "Flight Destination Factor",
-        "The minimal distance factor that we need to reach to end linear flight."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo
         StereoInterpolationTimeInfo = {
             "StereoInterpolationTime",
@@ -297,20 +269,6 @@ OrbitalNavigator::Friction::Friction()
     addProperty(rotational);
     addProperty(zoom);
     addProperty(friction);
-}
-
-OrbitalNavigator::LinearFlight::LinearFlight()
-    : properties::PropertyOwner({ "LinearFlight" })
-    , apply(ApplyLinearFlightInfo, false)
-    , destinationDistance(FlightDestinationDistInfo, 2e8f, 10.f, 1e10f)
-    , destinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5, 1E-3)
-    , velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)
-{
-    addProperty(apply);
-    addProperty(velocitySensitivity);
-    destinationDistance.setExponent(5.f);
-    addProperty(destinationDistance);
-    addProperty(destinationFactor);
 }
 
 OrbitalNavigator::IdleBehavior::IdleBehavior()
@@ -472,7 +430,6 @@ OrbitalNavigator::OrbitalNavigator()
     });
 
     addPropertySubOwner(_friction);
-    addPropertySubOwner(_linearFlight);
     addPropertySubOwner(_idleBehavior);
 
     _idleBehaviorDampenInterpolator.setTransferFunction(
@@ -592,37 +549,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _camera->positionVec3() + anchorDisplacement,
         _camera->rotationQuaternion()
     };
-
-    if (_linearFlight.apply) {
-        // Calculate a position handle based on the camera position in world space
-        glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
-        // Use the interaction sphere to get an approximate distance to the node surface
-        double nodeRadius = _anchorNode->interactionSphere();
-        double distFromCameraToFocus =
-            glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
-
-        // Make the approximation delta size depending on the flight distance
-        double arrivalThreshold =
-            _linearFlight.destinationDistance * _linearFlight.destinationFactor;
-
-        const double distToDestination =
-            std::fabs(distFromCameraToFocus - _linearFlight.destinationDistance);
-
-        // Fly towards the flight destination distance. When getting closer than
-        // arrivalThreshold terminate the flight
-        if (distToDestination > arrivalThreshold) {
-            pose.position = moveCameraAlongVector(
-                pose.position,
-                distFromCameraToFocus,
-                camPosToAnchorPosDiff,
-                _linearFlight.destinationDistance,
-                deltaTime
-            );
-        }
-        else {
-            _linearFlight.apply = false;
-        }
-    }
 
     const bool hasPreviousPositions =
         _previousAnchorNodePosition.has_value() &&
@@ -1414,28 +1340,6 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 
     // Add difference to position
     return cameraPosition + rotationDiffVec3;
-}
-
-glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
-                                                  double distFromCameraToFocus,
-                                                  const glm::dvec3& camPosToAnchorPosDiff,
-                                                  double destination,
-                                                  double deltaTime) const
-{
-    // This factor adapts the velocity so it slows down when getting closer
-    // to our final destination
-    double velocity = 0.0;
-
-    if (destination < distFromCameraToFocus) { // When flying towards anchor
-        velocity = 1.0 - destination / distFromCameraToFocus;
-    }
-    else { // When flying away from anchor
-        velocity = distFromCameraToFocus / destination - 1.0;
-    }
-    velocity *= _linearFlight.velocitySensitivity * deltaTime;
-
-    // Return the updated camera position
-    return camPos - velocity * camPosToAnchorPosDiff;
 }
 
 glm::dvec3 OrbitalNavigator::followAnchorNodeRotation(const glm::dvec3& cameraPosition,

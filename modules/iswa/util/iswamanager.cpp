@@ -336,8 +336,7 @@ std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation() {
 }
 
 std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id) {
-    std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
-
+    auto metaFuture = std::make_shared<MetadataFuture>();
     metaFuture->id = id;
     global::downloadManager->fetchFile(
         _baseUrl + std::to_string(-id),
@@ -672,7 +671,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
                                         // ,"listOfStaleCygnets", "listOfInactiveCygnets",
                                         };
 
-        for (auto list : lists) {
+        for (const std::string& list : lists) {
             json jsonList = j[list];
             for (size_t i = 0; i < jsonList.size(); ++i) {
                 json jCygnet = jsonList.at(i);
@@ -699,10 +698,10 @@ ghoul::Event<>& IswaManager::iswaEvent() {
 }
 
 void IswaManager::addCdfFiles(std::string cdfpath) {
-    std::filesystem::path cdf = absPath(cdfpath);
-    if (std::filesystem::is_regular_file(cdf)) {
+    std::filesystem::path cdfFile = absPath(cdfpath);
+    if (std::filesystem::is_regular_file(cdfFile)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
-        std::ifstream jsonFile(cdf);
+        std::ifstream jsonFile(cdfFile);
 
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
@@ -741,7 +740,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdf));
+        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdfFile));
     }
 }
 

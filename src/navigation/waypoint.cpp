@@ -90,7 +90,7 @@ double Waypoint::validBoundingSphere() const {
 }
 
 double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
-    double bs = static_cast<double>(node->boundingSphere());
+    double bs = node->boundingSphere();
 
     const double minValidBoundingSphere =
         global::navigationHandler->pathNavigator().minValidBoundingSphere();
@@ -101,9 +101,9 @@ double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
         // Alsp. the chance to find a bounding sphere that represents the visual size of
         // the target well is higher for these nodes
         for (SceneGraphNode* child : node->children()) {
-            bs = static_cast<double>(child->boundingSphere());
+            bs = child->boundingSphere();
             if (bs > minValidBoundingSphere) {
-                LWARNING(fmt::format(
+                LDEBUG(fmt::format(
                     "The scene graph node '{}' has no, or a very small, bounding sphere. "
                     "Using bounding sphere of child node '{}' in computations.",
                     node->identifier(),
@@ -114,7 +114,7 @@ double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
             }
         }
 
-        LWARNING(fmt::format(
+        LDEBUG(fmt::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
             "minimal value. This might lead to unexpected results.",
             node->identifier())
