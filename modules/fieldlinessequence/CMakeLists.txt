@@ -31,7 +31,7 @@ set(HEADER_FILES
   util/fieldlinesstate.h
   util/kameleonfieldlinehelper.h
   util/movingfieldlinehelper.h
-  util/matchingfieldlinehelper.h
+  util/matchingfieldlineshelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -42,7 +42,7 @@ set(SOURCE_FILES
   util/fieldlinesstate.cpp
   util/kameleonfieldlinehelper.cpp
   util/movingfieldlinehelper.cpp
-  util/matchingfieldlinehelper.cpp
+  util/matchingfieldlineshelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

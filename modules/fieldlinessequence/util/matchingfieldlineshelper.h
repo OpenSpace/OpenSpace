@@ -29,6 +29,9 @@
  #include <string>
  #include <vector>
 
+//fel att göra så
+#include <ghoul/logging/logmanager.h>
+
 
 namespace openspace {
 
@@ -49,8 +52,8 @@ namespace openspace {
             const size_t nPointsOnPathLine, const size_t nPointsOnFieldLines);
 
 
-        std::vector<glm::vec3> getDataFromFileIntoVectorvec3f(std::ifstream&);
         pointsWithEigVec getCriticalPoints();
+        std::vector<glm::vec3> getDataFromFileIntoVectorvec3f(std::ifstream&);
         glm::vec3 moveSeedpointInEigenvectorDirection(const glm::vec3& const pointInSpace, const glm::vec3& const eigenvector, const float& direction);
 
 

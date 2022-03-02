@@ -421,7 +421,7 @@ void FieldlinesState::addLinesToBeRendered() {
     // fieldlines position.
     for (int i = 0; i < _allPathLines.size(); ++i) {
         std::vector<glm::vec3> line;
-        for (Vertex v : _allPathLines[i].keyFrames[0].vertecies) {
+        for (Vertex v : _allPathLines[i].keyFrames[0].vertices) {
             line.push_back(v.position);
         }
         addLine(line);
@@ -438,6 +438,59 @@ void FieldlinesState::addPathLine(const std::vector<glm::vec3> line, const int i
     _allPathLines.push_back(pl);
 }
 
+void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLine1, const std::vector<glm::vec3>&& pathLine2)
+{
+    MatchingFieldlines m;
+    PathLine pl1, pl2;
+    pl1.line = pathLine1;
+    pl2.line = pathLine2;
+    m.pathLines = std::make_pair(pl1, pl2);
+    _allMatchingFieldlines.push_back(m);
+}
+
+void FieldlinesState::addMatchingKeyFrames(
+    const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2,
+    const float time1, const float time2, int matchingFieldlinesId) {
+    
+    Fieldline f1, f2;
+
+    for (int i = 0; i < keyFrame1.size(); ++i) {
+        Vertex v1, v2;
+        v1.position = keyFrame1[i] * fls::ReToMeter;
+        v2.position = keyFrame2[i] * fls::ReToMeter;
+        f1.vertices.push_back(v1);
+        f2.vertices.push_back(v2);
+    }
+
+    f1.timeToNextFieldline = time1;
+    f2.timeToNextFieldline = time2;
+
+    // Elon: check if even correct. Probably will need both front and back to be < 1.5f
+    // to be considered closed. 1.5 is just a number from thin air
+    if (glm::length(keyFrame1.front()) < 1.5f && glm::length(keyFrame1.back()) < 1.5f) {
+        f1.topology = Fieldline::Topology::Closed;
+    }
+    else if (glm::length(keyFrame1.back()) < 1.5f || glm::length(keyFrame1.front()) < 1.5f) {
+        f1.topology = Fieldline::Topology::Open;
+    }
+    else {
+        f1.topology = Fieldline::Topology::Imf;
+    }
+
+    if (glm::length(keyFrame2.front()) < 1.5f && glm::length(keyFrame2.back()) < 1.5f) {
+        f2.topology = Fieldline::Topology::Closed;
+    }
+    else if (glm::length(keyFrame2.back()) < 1.5f || glm::length(keyFrame2.front()) < 1.5f) {
+        f2.topology = Fieldline::Topology::Open;
+    }
+    else {
+        f2.topology = Fieldline::Topology::Imf;
+    }
+
+    _allMatchingFieldlines[matchingFieldlinesId].pathLines.first.keyFrames.push_back(f1);
+    _allMatchingFieldlines[matchingFieldlinesId].pathLines.second.keyFrames.push_back(f2);
+}
+
 void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline, 
                                    const float time, const int pathLineIndex)
 {
@@ -445,7 +498,7 @@ void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline,
     for (glm::vec3 pos : fieldline) {
         Vertex v;
         v.position = pos * fls::ReToMeter;
-        f.vertecies.push_back(v);
+        f.vertices.push_back(v);
     }
 
     f.timeToNextFieldline = time;
@@ -488,6 +541,10 @@ const std::vector<GLint>& FieldlinesState::lineStart() const {
 
 const std::vector<FieldlinesState::PathLine>& FieldlinesState::allPathLines() const {
     return _allPathLines;
+}
+
+const std::vector<FieldlinesState::MatchingFieldlines>& FieldlinesState::getAllMatchingFieldlines() const {
+    return _allMatchingFieldlines;
 }
 
 fls::Model FieldlinesState::FieldlinesState::model() const {

@@ -235,6 +235,7 @@ RenderableMovingFieldlines::RenderableMovingFieldlines(
     }
 }
 
+// TODO: VI BEHÖVER FÅ DENNA FUNKTIONEN ATT FUNGERA MED MATCHING FIELDLINES
 void RenderableMovingFieldlines::initialize() {
     // Set a default color table, just in case the (optional) user defined paths are
     // corrupt or not provided
@@ -325,8 +326,8 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
     for (const std::filesystem::path entry : _sourceFiles) {
         const std::string& cdfPath = entry.string();
         /************ SWITCH MOVING/MATCHING HERE ****************/
-        isSuccessful = fls::convertCdfToMovingFieldlinesState(
-        //isSuccessful = fls::convertCdfToMatchingFieldlinesState(
+        //isSuccessful = fls::convertCdfToMovingFieldlinesState(
+        isSuccessful = fls::convertCdfToMatchingFieldlinesState(
         /*********************************************************/
             _fieldlineState,
             cdfPath,
@@ -518,9 +519,9 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
 
         for (int fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
             glm::vec3 currentPosition = 
-                traverser.currentFieldline->vertecies[fieldlineVertex].position;
+                traverser.currentFieldline->vertices[fieldlineVertex].position;
             glm::vec3 nextPosition = 
-                traverser.nextFieldline()->vertecies[fieldlineVertex].position;
+                traverser.nextFieldline()->vertices[fieldlineVertex].position;
             _renderedLines[fieldlineVertex + lineStart] =
                 lerp(currentPosition, nextPosition, normalizedTime);
 
@@ -539,7 +540,7 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
             // set the rendered lines vertex positions to be = 
             // to current fieldlines vertex
             _renderedLines[fieldlineVertex + lineStart] = 
-                traverser.currentFieldline->vertecies[fieldlineVertex].position;
+                traverser.currentFieldline->vertices[fieldlineVertex].position;
             _debugTopologyColor[fieldlineVertex + lineStart] =
                 debugColor(traverser.currentFieldline->topology);
         }
@@ -551,7 +552,6 @@ void RenderableMovingFieldlines::moveLine(const double dt,
                                           PathLineTraverser& traverser, GLint lineStart,
                                           GLsizei nVertices)
 {
-
     bool forward = std::signbit(dt) ? false : true;
     traverser.forward = forward;
     traverser.timeSinceInterpolation += dt;

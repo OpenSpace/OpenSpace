@@ -46,7 +46,7 @@ public:
             Imf
         };
         Topology topology;
-        std::vector<Vertex> vertecies;
+        std::vector<Vertex> vertices;
         float timeToNextFieldline;
     };
 
@@ -57,7 +57,7 @@ public:
     };
 
     struct MatchingFieldlines {
-        std::pair<PathLine, PathLine> fieldlines;
+        std::pair<PathLine, PathLine> pathLines;
     };
 
     void convertLatLonToCartesian(float scale = 1.f);
@@ -75,6 +75,7 @@ public:
     const std::vector<GLsizei>& lineCount() const;
     const std::vector<GLint>& lineStart() const;
     const std::vector<PathLine>& allPathLines() const;
+    const std::vector<MatchingFieldlines>& getAllMatchingFieldlines() const;
 
     fls::Model model() const;
     size_t nExtraQuantities() const;
@@ -94,6 +95,10 @@ public:
 
     void addPathLine(const std::vector<glm::vec3>, const int i);
     void addFieldLine(const std::vector<glm::vec3> fieldLines, const float time, const int i);
+    void addMatchingPathLines(const std::vector<glm::vec3>&&, const std::vector<glm::vec3>&&);
+    void addMatchingKeyFrames(
+        const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2, 
+        const float time1, const float time2, int matchingFieldlinesId);
 
 private:
     bool _isMorphable = false;

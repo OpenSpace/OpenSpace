@@ -29,7 +29,7 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/movingfieldlinehelper.h>
-#include <modules/fieldlinessequence/util/matchingfieldlinehelper.h>
+#include <modules/fieldlinessequence/util/matchingfieldlineshelper.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
