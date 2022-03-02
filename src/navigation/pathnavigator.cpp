@@ -362,7 +362,6 @@ void PathNavigator::handlePathEnd() {
         );
     }
     _startSimulationTimeOnFinish = false;
-    clearPath();
     global::openSpaceEngine->resetMode();
 }
 
