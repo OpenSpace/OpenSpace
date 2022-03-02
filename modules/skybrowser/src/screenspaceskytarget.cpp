@@ -1,3 +1,26 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2022                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 
 #include <modules/skybrowser/skybrowsermodule.h>
@@ -61,7 +84,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyTarget)]] Parameters {
-
         // [[codegen::verbatim(CrosshairThresholdInfo.description)]]
         std::optional<float> crosshairThreshold;
 
@@ -76,7 +98,6 @@ namespace {
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
-
     };
 
 #include "screenspaceskytarget_codegen.cpp"
@@ -118,10 +139,11 @@ namespace openspace {
         setIdentifier(identifier);
 
         // Set the position to screen space z
-        glm::dvec3 startPos{ _cartesianPosition.value().x, _cartesianPosition.value().y, 
-            skybrowser::ScreenSpaceZ };
-
-        _cartesianPosition.setValue(startPos);
+        _cartesianPosition = glm::dvec3(
+            _cartesianPosition.value().x,
+            _cartesianPosition.value().y,
+            skybrowser::ScreenSpaceZ
+        );
 
     }
 
@@ -134,16 +156,13 @@ namespace openspace {
     }
 
     // Pure virtual in the screen space renderable class and hence must be defined 
-    void ScreenSpaceSkyTarget::bindTexture() {
-
-    }
+    void ScreenSpaceSkyTarget::bindTexture() {}
 
     bool ScreenSpaceSkyTarget::isReady() const {
         return _shader != nullptr;
     }
 
     bool ScreenSpaceSkyTarget::initializeGL() {
-
         glGenVertexArrays(1, &_vertexArray);
         glGenBuffers(1, &_vertexBuffer);
         createShaders();
@@ -151,8 +170,7 @@ namespace openspace {
         return isReady();
     }
 
-    bool ScreenSpaceSkyTarget::deinitializeGL()
-    {
+    bool ScreenSpaceSkyTarget::deinitializeGL() {
         return ScreenSpaceRenderable::deinitializeGL();
     }
 
@@ -173,7 +191,6 @@ namespace openspace {
 
 
     void ScreenSpaceSkyTarget::createShaders() {
-
         _shader = global::renderEngine->buildRenderProgram(
             "ScreenSpaceProgram",
             absPath("${MODULE_SKYBROWSER}/shaders/target_vs.glsl"),
@@ -185,7 +202,7 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyTarget::setColor(glm::ivec3 color) {
-        _borderColor = color;
+        _borderColor = std::move(color);
     }
 
     glm::ivec3 ScreenSpaceSkyTarget::borderColor() const {
@@ -193,7 +210,6 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyTarget::render() {
-
         bool showCrosshair = _verticalFov < _showCrosshairThreshold;
         bool showRectangle = _verticalFov > _showRectangleThreshold;
         
@@ -224,8 +240,7 @@ namespace openspace {
         _shader->deactivate();
     }
 
-    void ScreenSpaceSkyTarget::update()
-    {
+    void ScreenSpaceSkyTarget::update() {
         if (_isLocked) {
             glm::dvec3 localCamera = skybrowser::equatorialToLocalCamera(
                 _lockedCoordinates
@@ -252,11 +267,9 @@ namespace openspace {
     }
 
     glm::dvec3 ScreenSpaceSkyTarget::directionGalactic() const {
-
         glm::vec3 localCamera = _cartesianPosition.value();
 
         if (_useRadiusAzimuthElevation) {
-
             localCamera = raeToCartesian(_raePosition.value());
         }
 
@@ -281,8 +294,7 @@ namespace openspace {
         _scale = std::max(heightRatio, smallestHeightRatio);
     }
 
-    void ScreenSpaceSkyTarget::setFovFromScale()
-    {
+    void ScreenSpaceSkyTarget::setFovFromScale() {
         glm::dvec2 fovs = skybrowser::fovWindow();
         _verticalFov = _scale * fovs.y;
     }
@@ -291,14 +303,12 @@ namespace openspace {
         return _isLocked;
     }
 
-    bool ScreenSpaceSkyTarget::isAnimated()
-    {
+    bool ScreenSpaceSkyTarget::isAnimated() {
         return _isAnimated;
     }
 
     void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 equatorialCoordsEnd, 
-                                              bool shouldLockAfter)
-    {
+                                              bool shouldLockAfter) {
         _animationStart = glm::normalize(
             skybrowser::sphericalToCartesian(equatorialAim())
         );
@@ -308,8 +318,7 @@ namespace openspace {
         _isLocked = false;
     }
 
-    void ScreenSpaceSkyTarget::incrementallyAnimateToCoordinate(float deltaTime)
-    {
+    void ScreenSpaceSkyTarget::incrementallyAnimateToCoordinate(float deltaTime) {
         // At fps that are too low, the animation stops working. Just place target instead
         bool fpsTooLow = deltaTime > DeltaTimeThreshold;
         // Find smallest angle between the two vectors
@@ -362,52 +371,48 @@ namespace openspace {
     }
 
     glm::dvec2 ScreenSpaceSkyTarget::equatorialAim() const {
-
+        glm::dvec3 cartesian;
         // Get the local camera coordinates of the target
         if (_useRadiusAzimuthElevation) {
-            glm::vec3 cartesian = raeToCartesian(_raePosition.value());
+            cartesian = raeToCartesian(_raePosition.value());
             glm::dvec3 equatorial = skybrowser::localCameraToEquatorial(cartesian);
             return skybrowser::cartesianToSpherical(equatorial);
             
         }
         else {
-            glm::dvec3 cartesian = skybrowser::localCameraToEquatorial(_cartesianPosition.value());
+            cartesian = skybrowser::localCameraToEquatorial(_cartesianPosition.value());
             return skybrowser::cartesianToSpherical(cartesian);
         }
     }
 
-
-    void ScreenSpaceSkyTarget::highlight(glm::ivec3 addition)
-    {
+    void ScreenSpaceSkyTarget::highlight(glm::ivec3 addition) {
         _borderColor += addition;
     }
 
-    void ScreenSpaceSkyTarget::removeHighlight(glm::ivec3 removal)
-    {
+    void ScreenSpaceSkyTarget::removeHighlight(glm::ivec3 removal) {
         _borderColor -= removal;
     }
 
     float ScreenSpaceSkyTarget::opacity() const {
-        return _opacity.value();
+        return _opacity;
     }
 
-    glm::dvec2 ScreenSpaceSkyTarget::lockedCoordinates() const
-    {
+    glm::dvec2 ScreenSpaceSkyTarget::lockedCoordinates() const {
         return skybrowser::cartesianToSpherical(_lockedCoordinates);
     }
 
     void ScreenSpaceSkyTarget::setOpacity(float opacity) {
         _opacity = opacity;
     }
-    void ScreenSpaceSkyTarget::setLock(bool isLocked)
-    {
+
+    void ScreenSpaceSkyTarget::setLock(bool isLocked) {
         _isLocked = isLocked;
         if (_isLocked) {
             _lockedCoordinates = skybrowser::sphericalToCartesian(equatorialAim());
         }
     }
-    void ScreenSpaceSkyTarget::setEquatorialAim(const glm::dvec2& aim)
-    {
+
+    void ScreenSpaceSkyTarget::setEquatorialAim(const glm::dvec2& aim) {
         _isAnimated = false;
         _isLocked = false;
 

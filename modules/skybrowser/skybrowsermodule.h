@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/util/openspacemodule.h>
+
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/mouse.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -53,40 +54,34 @@ enum class MouseInteraction {
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:
-
     constexpr static const char* Name = "SkyBrowser";
-    constexpr static const double StopAnimationThreshold{ 0.0005 };
-    constexpr static const double FadingTime = { 2.0 };
-    constexpr static const double AnimationSpeed = { 1.0 };
+    constexpr static const double StopAnimationThreshold = 0.0005;
+    constexpr static const double FadingTime = 2.0;
+    constexpr static const double AnimationSpeed = 1.0;
     const double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
 
-    // Constructor & destructor
     SkyBrowserModule();
-    virtual ~SkyBrowserModule();
 
-    // Getters
     std::vector<std::unique_ptr<TargetBrowserPair>>& getPairs();
     int nPairs();
     TargetBrowserPair* getPair(const std::string& id);
-    const std::unique_ptr<WwtDataHandler>& getWwtDataHandler();
-    std::string selectedBrowserId();
+    const std::unique_ptr<WwtDataHandler>& getWwtDataHandler() const;
+    std::string selectedBrowserId() const;
     std::string selectedTargetId();
-    glm::ivec3 highlight();
+    glm::ivec3 highlight() const;
 
-    // Setters
     void setSelectedBrowser(const std::string& id);
     void setSelectedObject(); // Manage mouse interactions
     void setHoverCircle(ScreenSpaceImageLocal* circle);
    
     // Rotation, animation, placement
-    void lookAtTarget(std::string id);
+    void lookAtTarget(const std::string& id);
     void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
     void incrementallyRotateCamera(double deltaTime);
     void incrementallyFadeBrowserTargets(Transparency goal, float deltaTime);
     void incrementallyAnimateTargets(double deltaTime);
    
-    // Boolean functions
-    bool isCameraInSolarSystem();
+    bool isCameraInSolarSystem() const;
     bool isSelectedPairFacingCamera();
     bool isSelectedPairUsingRae();
 
@@ -99,7 +94,7 @@ public:
     void disableHoverCircle();
     
     // Image collection handling
-    void loadImages(const std::string& root, const std::string& directory);
+    void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages();
 
     // Mouse interaction
@@ -110,21 +105,20 @@ public:
 
 protected: 
     void internalInitialize(const ghoul::Dictionary& dict) override;
-    void internalDeinitialize() override;
 
 private:
     properties::BoolProperty _allowMouseInteraction;
     properties::BoolProperty _allowCameraRotation;
-    glm::ivec3 _highlightAddition{ 35 }; // Highlight object when mouse hovers
+    glm::ivec3 _highlightAddition = glm::ivec3(35); // Highlight object when mouse hovers
 
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
-    TargetBrowserPair* _mouseOnPair{ nullptr };
-    ScreenSpaceImageLocal* _hoverCircle{ nullptr };
-    std::string _selectedBrowser{ "" }; // Currently selected browser
+    TargetBrowserPair* _mouseOnPair = nullptr;
+    ScreenSpaceImageLocal* _hoverCircle = nullptr;
+    std::string _selectedBrowser = ""; // Currently selected browser
 
     // Fading
-    Transparency _goal;
+    Transparency _goal = Transparency::Opaque;
     
     // Flags
     bool _isCameraInSolarSystem{ true }; // Visualization modes
@@ -144,7 +138,6 @@ private:
     // Data handler for the image collections
     std::unique_ptr<WwtDataHandler> _dataHandler;    
 };
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__

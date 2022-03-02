@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #include <modules/skybrowser/skybrowsermodule.h>
 
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
@@ -30,7 +29,6 @@
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
-#include "skybrowsermodule_lua.inl"
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -39,9 +37,9 @@
 #include <openspace/camera/camera.h>
 #include <openspace/util/factorymanager.h>
 
+#include "skybrowsermodule_lua.inl"
 
 namespace {
-
     constexpr const openspace::properties::Property::PropertyInfo AllowInteractionInfo =
     {
         "AllowMouseInteraction",
@@ -69,11 +67,8 @@ namespace {
     #include "skybrowsermodule_codegen.cpp"
 } // namespace
 
-
 namespace openspace {
-    
     scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
-
         scripting::LuaLibrary res;
         res.name = "skybrowser";
         res.functions = {
@@ -263,8 +258,6 @@ namespace openspace {
         return res;
     }
 
-
-
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
     , _allowMouseInteraction(AllowInteractionInfo, true)
@@ -276,7 +269,6 @@ SkyBrowserModule::SkyBrowserModule()
     // Set callback functions
     global::callback::mouseButton->emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
-
             if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
                 return false;
             }
@@ -304,7 +296,6 @@ SkyBrowserModule::SkyBrowserModule()
     if (global::windowDelegate->isMaster()) {
         global::callback::mousePosition->emplace_back(
             [&](double x, double y) {
-
                 if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
                     return false;
                 }
@@ -314,30 +305,25 @@ SkyBrowserModule::SkyBrowserModule()
                 glm::vec2 translation = _mousePosition - _startMousePosition;
 
                 switch (_interactionMode) {
-                case MouseInteraction::Hover:
-                    setSelectedObject();
-
-                    break;
-
-                case MouseInteraction::Drag:
-                    _mouseOnPair->translateSelected(_startDragPosition, translation);
-                    break;
-
-                case MouseInteraction::FineTune:
-                    _mouseOnPair->fineTuneTarget(_startDragPosition, translation);
-                    break;
-
-                default:
-                    setSelectedObject();
-                    break;
-                }
+                    case MouseInteraction::Hover:
+                        setSelectedObject();
+                        break;
+                    case MouseInteraction::Drag:
+                        _mouseOnPair->translateSelected(_startDragPosition, translation);
+                        break;
+                    case MouseInteraction::FineTune:
+                        _mouseOnPair->fineTuneTarget(_startDragPosition, translation);
+                        break;
+                    default:
+                        setSelectedObject();
+                        break;
+                    }
                 return false;
             }
         );
 
         global::callback::mouseScrollWheel->emplace_back(
             [&](double, double scroll) -> bool {
-
                 if (!_isCameraInSolarSystem || !_mouseOnPair || !_allowMouseInteraction) {
                     return false;
                 }
@@ -351,7 +337,6 @@ SkyBrowserModule::SkyBrowserModule()
     }
 
     global::callback::preSync->emplace_back([this]() {
-
         // Disable browser and targets when camera is outside of solar system
         bool camWasInSolarSystem = _isCameraInSolarSystem;
         glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
@@ -375,10 +360,13 @@ SkyBrowserModule::SkyBrowserModule()
             incrementallyFadeBrowserTargets(_goal, deltaTime);
         }
         if (_isCameraInSolarSystem) {
-            std::for_each(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
+            std::for_each(
+                _targetsBrowsers.begin(), 
+                _targetsBrowsers.end(),
                 [&](const std::unique_ptr<TargetBrowserPair>& pair) {
                     pair->synchronizeAim();
-                });
+                }
+            );
             incrementallyAnimateTargets(deltaTime);
         }
         if (_isCameraRotating && _allowCameraRotation) {
@@ -387,18 +375,12 @@ SkyBrowserModule::SkyBrowserModule()
     }); 
 } 
 
-SkyBrowserModule::~SkyBrowserModule() {
-}
-
-void SkyBrowserModule::internalDeinitialize() {
-}
-
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
-    
     const Parameters p = codegen::bake<Parameters>(dict);
 
     // Register ScreenSpaceRenderable
-    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable = 
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
 
     // Register ScreenSpaceSkyTarget
@@ -412,8 +394,7 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     _dataHandler = std::make_unique<WwtDataHandler>();
 }
 
-void SkyBrowserModule::setSelectedObject()
-{
+void SkyBrowserModule::setSelectedObject() {
     if (_interactionMode != MouseInteraction::Hover) {
         return;
     }
@@ -421,13 +402,15 @@ void SkyBrowserModule::setSelectedObject()
     TargetBrowserPair* previousPair = _mouseOnPair;
 
     // Find and save what mouse is currently hovering on
-    auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
+    auto it = std::find_if(
+        _targetsBrowsers.begin(),
+        _targetsBrowsers.end(),
         [&] (const std::unique_ptr<TargetBrowserPair> &pair) {      
             return pair->checkMouseIntersection(_mousePosition) && 
                    !pair->isUsingRadiusAzimuthElevation();
         });
 
-    if (it == std::end(_targetsBrowsers)) {
+    if (it == _targetsBrowsers.end()) {
         _mouseOnPair = nullptr;
     }
     else {
@@ -436,7 +419,6 @@ void SkyBrowserModule::setSelectedObject()
 
     // Selection has changed
     if (previousPair != _mouseOnPair) {
-       
         // Remove highlight
         if (previousPair) {
             previousPair->removeHighlight(_highlightAddition);
@@ -449,13 +431,12 @@ void SkyBrowserModule::setSelectedObject()
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId, const std::string& browserId) {
-    
     ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(
         global::renderEngine->screenSpaceRenderable(targetId)
-        );
+    );
     ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(
         global::renderEngine->screenSpaceRenderable(browserId)
-        );
+    );
     
     // Ensure pair has both target and browser
     if (browser && target) {
@@ -464,36 +445,35 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId, const s
 }
 
 void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
-
     TargetBrowserPair* found = getPair(id);
     if (!found) {
         return;
     }
 
-    auto it = std::remove_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
+    auto it = std::remove_if(
+        _targetsBrowsers.begin(), 
+        _targetsBrowsers.end(),
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
             return *found == *(pair.get());
-        });
+        }
+    );
 
-    _targetsBrowsers.erase(it, std::end(_targetsBrowsers));
+    _targetsBrowsers.erase(it, _targetsBrowsers.end());
     _mouseOnPair = nullptr;
 }
 
-void SkyBrowserModule::lookAtTarget(std::string id)
-{
+void SkyBrowserModule::lookAtTarget(const std::string& id) {
     TargetBrowserPair* pair = getPair(id);
     if (pair) {
         startRotatingCamera(pair->targetDirectionGalactic());
     }
 }
     
-void SkyBrowserModule::setHoverCircle(ScreenSpaceImageLocal* circle)
-{
+void SkyBrowserModule::setHoverCircle(ScreenSpaceImageLocal* circle) {
     _hoverCircle = circle;
 }
 
-void SkyBrowserModule::moveHoverCircle(int i)
-{
+void SkyBrowserModule::moveHoverCircle(int i) {
     const ImageData& image = _dataHandler->getImage(i);
 
     // Only move and show circle if the image has coordinates
@@ -516,25 +496,22 @@ void SkyBrowserModule::moveHoverCircle(int i)
     }
 }
 
-void SkyBrowserModule::disableHoverCircle()
-{
+void SkyBrowserModule::disableHoverCircle() {
     if (_hoverCircle && _hoverCircle->isEnabled()) {
         _hoverCircle->setEnabled(false);
     }
 }
 
-void SkyBrowserModule::loadImages(const std::string& root, const std::string& directory)
-{
+void SkyBrowserModule::loadImages(const std::string& root, 
+                                  const std::filesystem::path& directory) {
     _dataHandler->loadImages(root, directory);
 }
 
-int SkyBrowserModule::nLoadedImages()
-{
+int SkyBrowserModule::nLoadedImages() {
     return _dataHandler->nLoadedImages();
 }
 
-void SkyBrowserModule::handleMouseClick(const MouseButton& button)
-{
+void SkyBrowserModule::handleMouseClick(const MouseButton& button) {
     setSelectedBrowser(_mouseOnPair->browserId());
 
     if (button == MouseButton::Left) {
@@ -561,28 +538,28 @@ void SkyBrowserModule::handleMouseClick(const MouseButton& button)
     }
 }
 
-const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWwtDataHandler() {
+const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWwtDataHandler() const {
     return _dataHandler;
 }
 
-std::vector<std::unique_ptr<TargetBrowserPair>>& SkyBrowserModule::getPairs()
-{
+std::vector<std::unique_ptr<TargetBrowserPair>>& SkyBrowserModule::getPairs() {
     return _targetsBrowsers;
 }
 
-int SkyBrowserModule::nPairs()
-{
+int SkyBrowserModule::nPairs() {
     return static_cast<int>(_targetsBrowsers.size());
 }
 
-TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id)
-{
-    auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
+TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) {
+    auto it = std::find_if(
+        _targetsBrowsers.begin(), 
+        _targetsBrowsers.end(),
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
             bool foundBrowser = pair->browserId() == id;
             bool foundTarget = pair->targetId() == id;
             return foundBrowser || foundTarget;
-        });
+        }
+    );
     if (it == std::end(_targetsBrowsers)) {
         return nullptr;
     }
@@ -623,16 +600,17 @@ void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
     }
 }
 
-void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float deltaTime)
+void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, 
+                                                       float deltaTime) 
 {
     float transparency = [](Transparency goal) {
         switch (goal) {
-        case Transparency::Transparent:
-            return 0.f;
+            case Transparency::Transparent:
+                return 0.f;
 
-        case Transparency::Opaque:
-            return 1.f;
-        }
+            case Transparency::Opaque:
+                return 1.f;
+            }
     }(goal);
     
      bool isAllFinished{ false };
@@ -655,8 +633,7 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
      }
 }
 
-void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime)
-{
+void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime) {
     for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
         if (pair->isEnabled()) {
             pair->incrementallyAnimateToCoordinate(deltaTime);
@@ -665,59 +642,51 @@ void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime)
 }
 
 void SkyBrowserModule::setSelectedBrowser(const std::string& id) {
-    if (getPair(id)) {
+    TargetBrowserPair* found = getPair(id);
+    if (found) {
         _selectedBrowser = id;
     }
 }
 
-std::string SkyBrowserModule::selectedBrowserId() {
+std::string SkyBrowserModule::selectedBrowserId() const {
     return _selectedBrowser;
 }
 
-std::string SkyBrowserModule::selectedTargetId()
-{
-    if (getPair(_selectedBrowser)) {
-        return getPair(_selectedBrowser)->targetId();
+std::string SkyBrowserModule::selectedTargetId() {
+    TargetBrowserPair* found = getPair(_selectedBrowser);
+    if (found) {
+        return found->targetId();
     }
     else {
         return "";
     }
 }
 
-glm::ivec3 SkyBrowserModule::highlight()
-{
+glm::ivec3 SkyBrowserModule::highlight() const {
     return _highlightAddition;
 }
 
-bool SkyBrowserModule::isCameraInSolarSystem() {
+bool SkyBrowserModule::isCameraInSolarSystem() const {
     return _isCameraInSolarSystem;
 }
 
-bool SkyBrowserModule::isSelectedPairUsingRae()
-{
-    if (getPair(_selectedBrowser)) {
-        return getPair(_selectedBrowser)->isUsingRadiusAzimuthElevation();
+bool SkyBrowserModule::isSelectedPairUsingRae() {
+    TargetBrowserPair* found = getPair(_selectedBrowser);
+    if (found) {
+        return found->isUsingRadiusAzimuthElevation();
     }
     else {
         return false;
     }
 }
 
-bool SkyBrowserModule::isSelectedPairFacingCamera()
-{
-    if (getPair(_selectedBrowser)) {
-        return getPair(_selectedBrowser)->isFacingCamera();
+bool SkyBrowserModule::isSelectedPairFacingCamera() {
+    TargetBrowserPair* found = getPair(_selectedBrowser);
+    if (found) {
+        return found->isFacingCamera();
     }
     else {
         return false;
     }
 }
-
-//std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {
-//    return {
-//        ExoplanetsDataPreparationTask::documentation(),
-//        RenderableOrbitDisc::Documentation()
-//    };
-//}
-
 } // namespace openspace

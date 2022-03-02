@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,13 +37,10 @@ class ImageData;
 
 class TargetBrowserPair {
 public:
-
     constexpr static const float FadeThreshold = 0.01f;
     constexpr static const double AnimationThreshold = 0.0001f;
 
     TargetBrowserPair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target);
-    TargetBrowserPair(TargetBrowserPair const&) = default;
-    // user-defined copy assignment (copy-and-swap idiom)
     TargetBrowserPair& operator=(TargetBrowserPair other);
 
     // Target & Browser
@@ -73,14 +70,12 @@ public:
     void lock();
     void unlock();
 
-    // Boolean functions
     bool hasFinishedFading(float goalState) const;
     bool isFacingCamera() const;
     bool isUsingRadiusAzimuthElevation() const;
     bool isEnabled() const;
     bool isLocked() const;
 
-    // Setters
     void setEnabled(bool enable);
     void setIsSyncedWithWwt(bool isSynced);
     void setVerticalFov(float vfov);
@@ -90,7 +85,6 @@ public:
     void setVerticalFovWithScroll(float scroll);
     void setSelectedWithId(const std::string& id);
 
-    // Getters by value 
     float verticalFov() const;
     glm::ivec3 borderColor() const;
     glm::dvec2 targetDirectionEquatorial() const;
@@ -100,8 +94,7 @@ public:
     std::string targetId() const;
     std::string selectedId();
     glm::vec2 size() const;
-
-    // Getters by reference
+    
     ScreenSpaceSkyTarget* getTarget();
     ScreenSpaceSkyBrowser* getBrowser();
     const std::deque<int>& getSelectedImages() const;
@@ -114,7 +107,6 @@ public:
     void setImageOpacity(int i, float opacity);
     void hideChromeInterface(bool shouldHide);
 
-    // Comparision operators
     friend bool operator==(const TargetBrowserPair& lhs, 
                            const TargetBrowserPair& rhs);
     friend bool operator!=(const TargetBrowserPair& lhs, 

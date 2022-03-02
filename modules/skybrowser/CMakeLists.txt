@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,40 +25,35 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    
-    skybrowsermodule.h
-    include/screenspaceskytarget.h
-    include/wwtdatahandler.h
-    include/utility.h
-    include/targetbrowserpair.h
-    include/wwtcommunicator.h
-    include/browser.h
-    include/screenspaceskybrowser.h
-    ext/tinyxml2/tinyxml2.h
-    
+  skybrowsermodule.h
+  include/screenspaceskytarget.h
+  include/wwtdatahandler.h
+  include/utility.h
+  include/targetbrowserpair.h
+  include/wwtcommunicator.h
+  include/browser.h
+  include/screenspaceskybrowser.h
+  ext/tinyxml2/tinyxml2.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    
-    skybrowsermodule.cpp
-    skybrowsermodule_lua.inl
-    src/screenspaceskytarget.cpp
-    src/wwtdatahandler.cpp
-    src/utility.cpp
-    src/targetbrowserpair.cpp
-    src/wwtcommunicator.cpp
-    src/browser.cpp
-    src/screenspaceskybrowser.cpp
-    ext/tinyxml2/tinyxml2.cpp
-
+  skybrowsermodule.cpp
+  skybrowsermodule_lua.inl
+  src/screenspaceskytarget.cpp
+  src/wwtdatahandler.cpp
+  src/utility.cpp
+  src/targetbrowserpair.cpp
+  src/wwtcommunicator.cpp
+  src/browser.cpp
+  src/screenspaceskybrowser.cpp
+  ext/tinyxml2/tinyxml2.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
-
 create_new_module(
-    "SkyBrowser"
-    skybrowser_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES}
+  "SkyBrowser"
+  skybrowser_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES}
 )

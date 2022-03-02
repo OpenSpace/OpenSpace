@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 
 #include <modules/skybrowser/include/browser.h>
+
 #include <openspace/properties/vector/ivec3property.h>
 #include <openspace/properties/vector/dvec2property.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -35,11 +36,10 @@
 namespace openspace {
 
 class WwtCommunicator : public Browser {
-
 public:
-    WwtCommunicator(const ghoul::Dictionary& dictionary);
-    WwtCommunicator(WwtCommunicator const&) = default;
-    virtual ~WwtCommunicator();
+    explicit WwtCommunicator(const ghoul::Dictionary& dictionary);
+    WwtCommunicator(const WwtCommunicator&) = default;
+    ~WwtCommunicator();
 
     void update();
     void render();
@@ -48,74 +48,65 @@ public:
 
     // WorldWide Telescope communication
     void displayImage(const std::string& url, int i);
-    void removeSelectedImage(const int i);
+    void removeSelectedImage(int i);
     void setImageOrder(int i, int order);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity);
     void hideChromeInterface(bool shouldHide);
 
-    // Getters
-    const std::deque<int>& getSelectedImages();
-    glm::ivec3 borderColor() const;
-    float verticalFov() const;
-    glm::dvec2 fieldsOfView();
     bool hasLoadedImages() const;
+    float verticalFov() const;
+    glm::ivec3 borderColor() const;
     glm::dvec2 equatorialAim() const;
+    glm::dvec2 fieldsOfView() const;
+    const std::deque<int>& getSelectedImages() const;
 
-    // Setters
     void setHasLoadedImages(bool isLoaded);
     void setVerticalFov(float vfov);
     void setIsSyncedWithWwt(bool isSynced);
-    void setEquatorialAim(const glm::dvec2& equatorial);
-    void setBorderColor(const glm::ivec3& color);
+    void setEquatorialAim(glm::dvec2 equatorial);
+    void setBorderColor(glm::ivec3 color);
 
-    // Display
     void highlight(glm::ivec3 addition);
+    // The removal parameter decides what will be removed from the border color
     void removeHighlight(glm::ivec3 removal);
     void updateBorderColor();
     void updateAim();
     
-
 protected:
-    // Web page communication
     void setIdInBrowser(const std::string& id);
 
-    glm::dvec2 _equatorialAim;
-    float _verticalFov{ 10.f };
-    glm::ivec3 _borderColor;
-
+    float _verticalFov = 10.f;
+    glm::ivec3 _borderColor = glm::ivec3(70);
+    glm::dvec2 _equatorialAim = glm::dvec2(0.0);
+    bool _hasLoadedImages = false;
     std::deque<int> _selectedImages;
-    bool _hasLoadedImages{ false };
 
 private:
-    bool _isSyncedWithWwt{ false };
-
-    bool _borderColorIsDirty{ false };
-    bool _equatorialAimIsDirty{ false };
-
     void setWebpageBorderColor(glm::ivec3 color);
     void sendMessageToWwt(const ghoul::Dictionary& msg);
 
-    int messageCounter{ 0 };
-
-    ghoul::Dictionary moveCamera(const glm::dvec2& celestCoords, double fov,
+    // WorldWide Telescope messages
+    ghoul::Dictionary moveCameraMessage(const glm::dvec2& celestCoords, double fov,
         double roll, bool shouldMoveInstantly = true);
-    ghoul::Dictionary loadCollection(const std::string& url);
-    ghoul::Dictionary setForeground(const std::string& name);
-    ghoul::Dictionary addImage(const std::string& id, const std::string& url);
-    ghoul::Dictionary removeImage(const std::string& id);
-    ghoul::Dictionary setImageOpacity(const std::string& id, double opacity);
-    ghoul::Dictionary setForegroundOpacity(double val);
-    ghoul::Dictionary setLayerOrder(const std::string& id, int version);
-    ghoul::Dictionary hideChromeGui(bool isHidden);
+    ghoul::Dictionary loadCollectionMessage(const std::string& url);
+    ghoul::Dictionary setForegroundMessage(const std::string& name);
+    ghoul::Dictionary addImageMessage(const std::string& id, const std::string& url);
+    ghoul::Dictionary removeImageMessage(const std::string& id);
+    ghoul::Dictionary setImageOpacityMessage(const std::string& id, double opacity);
+    ghoul::Dictionary setLayerOrderMessage(const std::string& id, int version);
+    ghoul::Dictionary hideChromeGuiMessage(bool isHidden); // Requires a newer CEF version 
+    
+    bool _isSyncedWithWwt = false;
+    bool _borderColorIsDirty = false;
+    bool _equatorialAimIsDirty = false;
+    int messageCounter{ 0 };
 
     // Time variables
     // For capping the message passing to WWT
-    constexpr static const std::chrono::milliseconds _timeUpdateInterval{ 10 };
+    constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 10 };
     std::chrono::system_clock::time_point _lastUpdateTime;
-
 };
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__

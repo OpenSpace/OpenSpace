@@ -1,9 +1,9 @@
-asset.require('./static_server')
+asset.require("./static_server")
 
-local guiCustomization = asset.require('customization/gui')
+local guiCustomization = asset.require("customization/gui")
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "7f2b2b84ef526d7e67ed50462853a0d9a09b4f71"
+local frontendHash = "aa9aa521ace55cc25f447d287d34624f2cb56832"
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
@@ -15,9 +15,9 @@ local frontend = asset.syncedResource({
 
 asset.onInitialize(function ()
   -- Unzip the frontend bundle
-  local dest = frontend .. "/frontend"
+  local dest = frontend .. "frontend"
   if not openspace.directoryExists(dest) then
-    openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
+    openspace.unzipFile(frontend .. "frontend.zip", dest, true)
   end
 
   -- Disable the server, add production gui endpoint, and restart server.
@@ -31,7 +31,7 @@ asset.onInitialize(function ()
 
   local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
   directories[#directories + 1] = "frontend"
-  directories[#directories + 1] = frontend .. '/frontend'
+  directories[#directories + 1] = frontend .. "frontend"
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
@@ -39,12 +39,12 @@ asset.onInitialize(function ()
 
   -- The GUI contains date and simulation increment,
   -- so let's remove these from the dashboard.
-  if openspace.getPropertyValue('Modules.CefWebGui.Visible') then
-    if openspace.hasProperty('Dashboard.Date.Enabled') then
-      openspace.setPropertyValueSingle('Dashboard.Date.Enabled', false)
+  if openspace.getPropertyValue("Modules.CefWebGui.Visible") then
+    if openspace.hasProperty("Dashboard.Date.Enabled") then
+      openspace.setPropertyValueSingle("Dashboard.Date.Enabled", false)
     end
-    if openspace.hasProperty('Dashboard.SimulationIncrement.Enabled') then
-      openspace.setPropertyValueSingle('Dashboard.SimulationIncrement.Enabled', false)
+    if openspace.hasProperty("Dashboard.SimulationIncrement.Enabled") then
+      openspace.setPropertyValueSingle("Dashboard.SimulationIncrement.Enabled", false)
     end
   end
 end)

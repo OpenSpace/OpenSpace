@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,15 +37,15 @@
 
 namespace openspace {
 
-    TargetBrowserPair::TargetBrowserPair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target)
+    TargetBrowserPair::TargetBrowserPair(ScreenSpaceSkyBrowser* browser, 
+                                         ScreenSpaceSkyTarget* target)
        : _target(target), _browser(browser)
     {
         ghoul_assert(browser != nullptr, "Sky browser is null pointer!");
         ghoul_assert(target != nullptr, "Sky target is null pointer!");
     }
 
-    TargetBrowserPair& TargetBrowserPair::operator=(TargetBrowserPair other)
-    {
+    TargetBrowserPair& TargetBrowserPair::operator=(TargetBrowserPair other) {
         std::swap(_target, other._target);
         std::swap(_browser, other._browser);
         return *this;
@@ -64,34 +64,29 @@ namespace openspace {
         _browser->setImageOrder(i, order);
     }
 
-    void TargetBrowserPair::removeHighlight(glm::ivec3 color)
-    {
+    void TargetBrowserPair::removeHighlight(glm::ivec3 color) {
         _target->removeHighlight(color);
         _browser->removeHighlight(color);
     }
 
-    void TargetBrowserPair::highlight(glm::ivec3 color)
-    {
+    void TargetBrowserPair::highlight(glm::ivec3 color) {
         _browser->highlight(color);
         _target->highlight(color);
     }
 
-    bool TargetBrowserPair::isTargetFadeFinished(float goalState) const
-    {
+    bool TargetBrowserPair::isTargetFadeFinished(float goalState) const {
         // Is fading finished?
         float targetDiff = abs(_target->opacity() - goalState);
         
         return targetDiff < FadeThreshold;
     }
 
-    bool TargetBrowserPair::isBrowserFadeFinished(float goalState) const
-    {
+    bool TargetBrowserPair::isBrowserFadeFinished(float goalState) const {
         float browserDiff = abs(_browser->opacity() - goalState);
         return browserDiff < FadeThreshold;
     }
 
-    bool TargetBrowserPair::checkMouseIntersection(glm::vec2 mousePosition)
-    {
+    bool TargetBrowserPair::checkMouseIntersection(glm::vec2 mousePosition) {
         bool onBrowser = _browser->intersection(mousePosition);
         bool onTarget = _target->intersection(mousePosition);
         if (onBrowser) {
@@ -109,50 +104,46 @@ namespace openspace {
         return onBrowser || onTarget;
     }
 
-    glm::vec2 TargetBrowserPair::selectedScreenSpacePosition()
-    {
+    glm::vec2 TargetBrowserPair::selectedScreenSpacePosition() {
         return _selected->screenSpacePosition();
     }
 
-    bool TargetBrowserPair::isBrowserSelected()
-    {
+    bool TargetBrowserPair::isBrowserSelected() {
         return _isSelectedBrowser;
     }
 
-    bool TargetBrowserPair::isTargetSelected()
-    {
+    bool TargetBrowserPair::isTargetSelected() {
         return _selected && !_isSelectedBrowser;
     }
 
     void TargetBrowserPair::fineTuneTarget(const glm::vec2& start, 
                                            const glm::vec2& translation)
     {
-        glm::vec2 fineTune = -_browser->fineTuneVector(translation);
+        glm::vec2 fineTune = _browser->fineTuneVector(translation);
 
         openspace::global::scriptEngine->queueScript(
             "openspace.skybrowser.translateScreenSpaceRenderable(\"" + targetId() + "\","
             + std::to_string(start.x) + "," + std::to_string(start.y) + ","
-            + std::to_string(translation.x) + "," + std::to_string(translation.y) + ")",
+            + std::to_string(fineTune.x) + "," + std::to_string(fineTune.y) + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 
     void TargetBrowserPair::translateSelected(const glm::vec2& start, 
-                                              const glm::vec2& translation)
+                                              const glm::vec2& trans)
     {
         if (this && _selected) {
             std::string id = _selected->identifier();
             openspace::global::scriptEngine->queueScript(
                 "openspace.skybrowser.translateScreenSpaceRenderable(\"" + id + "\","
                 + std::to_string(start.x) + "," + std::to_string(start.y) + ","
-                + std::to_string(translation.x) + "," + std::to_string(translation.y) + ")",
+                + std::to_string(trans.x) + "," + std::to_string(trans.y) + ")",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
     }
 
-    void TargetBrowserPair::synchronizeAim()
-    {
+    void TargetBrowserPair::synchronizeAim() {
         if (!_target->isAnimated()) {
             glm::dvec2 aim;
             // To remove the lag effect when moving the camera while having a locked
@@ -169,82 +160,67 @@ namespace openspace {
         }
     }
 
-    void TargetBrowserPair::setEnabled(bool enable)
-    {
+    void TargetBrowserPair::setEnabled(bool enable) {
         _browser->setEnabled(enable);
         _target->setEnabled(enable);
     }
 
-    bool TargetBrowserPair::isEnabled() const
-    {
+    bool TargetBrowserPair::isEnabled() const {
         return _target->isEnabled() && _browser->isEnabled();
     }
 
-    bool TargetBrowserPair::isLocked() const
-    {
+    bool TargetBrowserPair::isLocked() const {
         return _target->isLocked();
     }
 
-    void TargetBrowserPair::initialize()
-    {
+    void TargetBrowserPair::initialize() {
         _target->setColor(_browser->borderColor());
         _target->setDimensions(_browser->browserPixelDimensions());
         _target->setScaleFromVfov(_browser->verticalFov());
         _browser->updateBorderColor();
     }
 
-    glm::ivec3 TargetBrowserPair::borderColor() const
-    {
+    glm::ivec3 TargetBrowserPair::borderColor() const {
         return _browser->borderColor();
     }
 
-    glm::dvec2 TargetBrowserPair::targetDirectionEquatorial() const
-    {
+    glm::dvec2 TargetBrowserPair::targetDirectionEquatorial() const {
         return _target->equatorialAim();
     }
 
-    glm::dvec3 TargetBrowserPair::targetDirectionGalactic() const
-    {
+    glm::dvec3 TargetBrowserPair::targetDirectionGalactic() const {
         return _target->directionGalactic();
     }
 
-    std::string TargetBrowserPair::browserGuiName() const
-    {
+    std::string TargetBrowserPair::browserGuiName() const {
         return _browser->guiName();
     }
 
-    std::string TargetBrowserPair::browserId() const
-    {
+    std::string TargetBrowserPair::browserId() const {
         return _browser->identifier();
     }
 
-    std::string TargetBrowserPair::targetId() const
-    {
+    std::string TargetBrowserPair::targetId() const {
         return _target->identifier();
     }
 
-    std::string TargetBrowserPair::selectedId()
-    {
+    std::string TargetBrowserPair::selectedId() {
         return _selected->identifier();
     }
 
-    glm::vec2 TargetBrowserPair::size() const
-    {
+    glm::vec2 TargetBrowserPair::size() const {
         return _browser->size();
     }
 
-    float TargetBrowserPair::verticalFov() const
-    {
+    float TargetBrowserPair::verticalFov() const {
         return _browser->verticalFov();
     }
 
-    const std::deque<int>& TargetBrowserPair::getSelectedImages() const
-    {
+    const std::deque<int>& TargetBrowserPair::getSelectedImages() const {
         return _browser->getSelectedImages();
     }
 
-    void TargetBrowserPair::selectImage(const ImageData& image, int i)
-    {
+    void TargetBrowserPair::selectImage(const ImageData& image, int i) {
         // Load image into browser
         _browser->displayImage(image.imageUrl, i);
 
@@ -257,28 +233,23 @@ namespace openspace {
         }
     }
 
-    void TargetBrowserPair::removeSelectedImage(int i)
-    {
+    void TargetBrowserPair::removeSelectedImage(int i) {
         _browser->removeSelectedImage(i);
     }
 
-    void TargetBrowserPair::loadImageCollection(const std::string& collection)
-    {
+    void TargetBrowserPair::loadImageCollection(const std::string& collection) {
         _browser->loadImageCollection(collection);
     }
 
-    void TargetBrowserPair::setImageOpacity(int i, float opacity)
-    {
+    void TargetBrowserPair::setImageOpacity(int i, float opacity) {
         _browser->setImageOpacity(i, opacity);
     }
 
-    void TargetBrowserPair::hideChromeInterface(bool shouldHide)
-    {
+    void TargetBrowserPair::hideChromeInterface(bool shouldHide) {
         _browser->hideChromeInterface(shouldHide);
     }
 
-    void TargetBrowserPair::sendIdToBrowser()
-    {
+    void TargetBrowserPair::sendIdToBrowser() {
         _browser->setIdInBrowser();
     }
 
@@ -286,46 +257,39 @@ namespace openspace {
         _browser->updateBrowserSize();
     }
 
-    void TargetBrowserPair::setIsSyncedWithWwt(bool isSynced)
-    {
+    void TargetBrowserPair::setIsSyncedWithWwt(bool isSynced) {
         _browser->setIsSyncedWithWwt(isSynced);
     }
 
-    void TargetBrowserPair::setVerticalFov(float vfov)
-    {
+    void TargetBrowserPair::setVerticalFov(float vfov) {
         _verticalFov = vfov;
         _browser->setVerticalFov(vfov);
         _target->setScaleFromVfov(vfov);
     }
 
-    void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim)
-    {
+    void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
         _equatorialAim = aim;
         _target->setEquatorialAim(aim);
         _browser->setEquatorialAim(aim);
     }
 
-    void TargetBrowserPair::setBorderColor(const glm::ivec3& color)
-    {
+    void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
         _borderColor = color;
         _target->setColor(color);
         _browser->setBorderColor(color);
     }
 
-    void TargetBrowserPair::setScreenSpaceSize(const glm::vec2& dimensions)
-    {
+    void TargetBrowserPair::setScreenSpaceSize(const glm::vec2& dimensions) {
         _dimensions = dimensions;
         _target->setDimensions(dimensions);
         _browser->setScreenSpaceSize(dimensions);
     }
 
-    void TargetBrowserPair::setVerticalFovWithScroll(float scroll)
-    {
+    void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
         _browser->setVerticalFovWithScroll(scroll);
     }
 
-    void TargetBrowserPair::setSelectedWithId(const std::string& id)
-    {
+    void TargetBrowserPair::setSelectedWithId(const std::string& id) {
         if (browserId() == id) {
             _isSelectedBrowser = true;
             _selected = _browser;
@@ -340,8 +304,7 @@ namespace openspace {
         }
     }
 
-    void TargetBrowserPair::incrementallyAnimateToCoordinate(double deltaTime) 
-    {
+    void TargetBrowserPair::incrementallyAnimateToCoordinate(double deltaTime) {
         // Animate the target before the field of view starts to animate
         if (_target->isAnimated()) {
             _target->incrementallyAnimateToCoordinate(static_cast<float>(deltaTime));
@@ -358,8 +321,7 @@ namespace openspace {
         _browser->startFovAnimation(fovEnd);
     }
 
-    void TargetBrowserPair::centerTargetOnScreen()
-    {
+    void TargetBrowserPair::centerTargetOnScreen() {
         // Animate the target to the center of the screen
         unlock();
         // Get camera direction in celestial spherical coordinates
@@ -369,18 +331,15 @@ namespace openspace {
         startAnimation(viewDirection, currentFov, false);
     }
 
-    bool TargetBrowserPair::hasFinishedFading(float goalState) const
-    {
+    bool TargetBrowserPair::hasFinishedFading(float goalState) const {
         return isTargetFadeFinished(goalState) && isBrowserFadeFinished(goalState);
     }
 
-    bool TargetBrowserPair::isFacingCamera() const
-    {
+    bool TargetBrowserPair::isFacingCamera() const {
         return _browser->isFacingCamera() || _target->isFacingCamera();
     }
 
-    bool TargetBrowserPair::isUsingRadiusAzimuthElevation() const
-    {
+    bool TargetBrowserPair::isUsingRadiusAzimuthElevation() const {
         return _browser->isUsingRaeCoords() || _target->isUsingRaeCoords();
     }
 
@@ -392,7 +351,8 @@ namespace openspace {
         return _browser;
     }
 
-    void TargetBrowserPair::incrementallyFade(float goalState, float fadeTime, float deltaTime)
+    void TargetBrowserPair::incrementallyFade(float goalState, float fadeTime, 
+                                              float deltaTime)
     {
         float opacityDelta = static_cast<float>(deltaTime / fadeTime);
         if (_target->opacity() > goalState) {
@@ -417,9 +377,8 @@ namespace openspace {
     bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {
         return lhs._target == rhs._target && lhs._browser == rhs._browser;
     }
+
     bool operator!=(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {
         return !(lhs == rhs);
     }
-    
-  
 } // namespace openspace

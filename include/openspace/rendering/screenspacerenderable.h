@@ -75,7 +75,6 @@ public:
     void setEnabled(bool isEnabled);
     float depth();
 
-    // Added by skybrowser team
     // Screen space functionality in these coords: [-1,1][-ratio,ratio]
     glm::vec2 screenSpacePosition();
     glm::vec2 screenSpaceDimensions();
@@ -86,7 +85,6 @@ public:
     void setCartesianPosition(const glm::vec3& position);
     void setRaeFromCartesianPosition(const glm::vec3& position);
     glm::vec3 raePosition() const;
-    // End of addition by skybrowser team
 
     static documentation::Documentation Documentation();
 

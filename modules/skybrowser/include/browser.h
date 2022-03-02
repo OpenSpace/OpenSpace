@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___BROWSER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___BROWSER___H__
 
-#include <openspace/documentation/documentation.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/triggerproperty.h>
@@ -61,9 +61,8 @@ class WebKeyboardHandler;
 
 class Browser {
 public:
-    Browser(const ghoul::Dictionary& dictionary);
-    Browser(Browser const&) = default;
-    ~Browser();
+    explicit Browser(const ghoul::Dictionary& dictionary);
+    virtual ~Browser();
 
     bool initializeGL();
     bool deinitializeGL();
