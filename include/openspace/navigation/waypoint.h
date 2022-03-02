@@ -41,8 +41,6 @@ public:
     Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
     explicit Waypoint(const NavigationState& ns);
 
-    static double findValidBoundingSphere(const SceneGraphNode* node);
-
     CameraPose pose() const;
     glm::dvec3 position() const;
     glm::dquat rotation() const;

@@ -498,9 +498,10 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         );
     }
     else {
-        const double radius = Waypoint::findValidBoundingSphere(targetNode);
-        const double defaultHeight = radius *
-            global::navigationHandler->pathNavigator().arrivalDistanceFactor();
+        const PathNavigator& navigator = global::navigationHandler->pathNavigator();
+
+        const double radius = navigator.findValidBoundingSphere(targetNode);
+        const double defaultHeight = radius * navigator.arrivalDistanceFactor();
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
