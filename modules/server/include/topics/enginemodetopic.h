@@ -22,39 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___WAYPOINT___H__
-#define __OPENSPACE_CORE___WAYPOINT___H__
+#ifndef __OPENSPACE_MODULE_SERVER___ENGINE_MODE_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___ENGINE_MODE_TOPIC___H__
 
-#include <openspace/camera/camerapose.h>
-#include <ghoul/glm.h>
-#include <string>
+#include <modules/server/include/topics/topic.h>
 
-namespace openspace { class SceneGraphNode; }
+#include <openspace/engine/openspaceengine.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
-struct NavigationState;
-
-class Waypoint {
+class EngineModeTopic : public Topic {
 public:
-    Waypoint() = default;
-    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
-    explicit Waypoint(const NavigationState& ns);
+    EngineModeTopic();
+    virtual ~EngineModeTopic();
 
-    CameraPose pose() const;
-    glm::dvec3 position() const;
-    glm::dquat rotation() const;
-    SceneGraphNode* node() const;
-    std::string nodeIdentifier() const;
-    double validBoundingSphere() const;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
 private:
-    CameraPose _pose;
-    std::string _nodeIdentifier;
-    // to be able to handle nodes with faulty bounding spheres
-    double _validBoundingSphere = 0.0;
+    static const int UnsetOnChangeHandle = -1;
+
+    // Provides the mode int value in json message
+    void sendJsonData();
+
+    OpenSpaceEngine::Mode _lastMode;
+    int _modeCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___WAYPOINT___H__
+#endif // __OPENSPACE_MODULE_SERVER___ENGINE_MODE_TOPIC___H__

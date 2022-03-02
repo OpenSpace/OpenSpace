@@ -64,20 +64,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSatellites::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "space_renderablesatellites"
+    return codegen::doc<Parameters>(
+        "space_renderablesatellites",
+        RenderableOrbitalKepler::Documentation()
     );
-
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderableOrbitalKepler::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-
-    return doc;
 }
 
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)

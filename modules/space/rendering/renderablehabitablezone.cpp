@@ -94,21 +94,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableHabitableZone::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "space_renderablehabitablezone"
+    return codegen::doc<Parameters>(
+        "space_renderablehabitablezone",
+        RenderableDisc::Documentation()
     );
-
-    // @TODO cleanup
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderableDisc::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-
-    return doc;
 }
 
 RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictionary)

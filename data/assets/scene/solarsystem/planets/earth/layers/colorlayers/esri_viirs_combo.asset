@@ -1,7 +1,5 @@
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
-local fallBackLayer = asset.require("./fallbacks/blue_marble").layer
-
 local layer = {
   Identifier = "ESRI_VIIRS_Combo",
   Name = "ESRI VIIRS Combo",
@@ -41,7 +39,6 @@ local layer = {
     },
   },
   PadTiles = false,
-  Fallback = fallBackLayer,
   Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
     Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
 }

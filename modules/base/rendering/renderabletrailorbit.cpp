@@ -136,20 +136,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTrailOrbit::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "base_renderable_renderabletrailorbit"
+    return codegen::doc<Parameters>(
+        "base_renderable_renderabletrailorbit",
+        RenderableTrail::Documentation()
     );
-
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderableTrail::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-
-    return doc;
 }
 
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
