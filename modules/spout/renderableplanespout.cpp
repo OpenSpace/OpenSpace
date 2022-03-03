@@ -71,10 +71,7 @@ documentation::Documentation RenderablePlaneSpout::Documentation() {
 
 RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
-    , _spoutName(NameInfo)
-    , _spoutSelection(SelectionInfo)
-    , _updateSelection(UpdateInfo)
-    , _receiver(GetSpout())
+    , _spoutReceiver(*this, dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -96,115 +93,36 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
         // Adding an extra space to the user-facing name as it looks nicer
         setGuiName("RenderablePlaneSpout " + std::to_string(iIdentifier));
     }
-
-    _spoutName = p.spoutName.value_or(_spoutName);
-    _spoutName.onChange([this]() {
-        _isSpoutDirty = true;
-        _isErrorMessageDisplayed = false;
-
-        _receiver->SetActiveSender(_spoutName.value().c_str());
-    });
-    addProperty(_spoutName);
-
-    _spoutSelection.onChange([this](){
-        _spoutName = _spoutSelection.option().description;
-    });
-    _spoutSelection.addOption(0, "");
-    addProperty(_spoutSelection);
-
-    _updateSelection.onChange([this]() {
-        const std::string& currentValue = _spoutSelection.options().empty() ?
-            "" :
-            _spoutSelection.option().description;
-
-        _spoutSelection.clearOptions();
-        _spoutSelection.addOption(0, "");
-
-        const int nSenders = _receiver->GetSenderCount();
-        int idx = 0;
-
-        for (int i = 0; i < nSenders; ++i) {
-            char Name[256];
-            _receiver->GetSenderName(i, Name, 256);
-
-            _spoutSelection.addOption(i + 1, Name);
-
-            if (currentValue == Name) {
-                idx = i + 1;
-            }
-        }
-
-        _spoutSelection = idx;
-    });
-    addProperty(_updateSelection);
 }
 
 void RenderablePlaneSpout::deinitializeGL() {
-    _receiver->ReleaseReceiver();
-    _receiver->Release();
+    _spoutReceiver.release();
 
     RenderablePlane::deinitializeGL();
 }
 
 void RenderablePlaneSpout::update(const UpdateData& data) {
     RenderablePlane::update(data);
-
-    if (_isFirstUpdate) {
-        // Trigger an update; the value is a dummy that is ignored
-        _updateSelection.set(0);
-
-        // #0 is the empty string and we just pick the first one after that (if it exists)
-        if (_spoutSelection.options().size() > 1) {
-            _spoutSelection = 1;
-        }
-
-        _isFirstUpdate = false;
-    }
-
-    if (_spoutName.value().empty()) {
-        return;
-    }
-
-    if (_isSpoutDirty) {
-        defer { _isSpoutDirty = false; };
-
-        std::memset(_currentSenderName, 0, 256);
-        unsigned int width;
-        unsigned int height;
-
-        _receiver->ReleaseReceiver();
-
-        _receiver->GetActiveSender(_currentSenderName);
-
-        bool hasCreated = _receiver->CreateReceiver(_currentSenderName, width, height);
-        if (!hasCreated) {
-            LWARNINGC(
-                LoggerCat,
-                fmt::format("Could not create receiver for {}", _currentSenderName)
-            );
-            return;
-        }
-    }
-
-    unsigned int width;
-    unsigned int height;
-    const bool hasReceived = _receiver->ReceiveTexture(_currentSenderName, width, height);
-
-    if (!hasReceived && !_isErrorMessageDisplayed) {
-        LWARNINGC(
-            LoggerCat,
-            fmt::format("Could not receive texture for {}", _currentSenderName)
-        );
-        _isErrorMessageDisplayed = true;
-    }
+    _spoutReceiver.updateReceiver();
 }
 
 void RenderablePlaneSpout::bindTexture() {
-    _receiver->BindSharedTexture();
+    if (_spoutReceiver.isReceiving()) {
+        _spoutReceiver.saveGLTextureState();
+        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_spoutReceiver.spoutTexture()));
+    }
+    else {
+        RenderablePlane::bindTexture();
+    }
 }
 
 void RenderablePlaneSpout::unbindTexture() {
-    _receiver->UnBindSharedTexture();
+    if (_spoutReceiver.isReceiving()) {
+        _spoutReceiver.restoreGLTextureState();
+    }
+    else {
+        RenderablePlane::unbindTexture();
+    }
 }
 
 } // namespace openspace

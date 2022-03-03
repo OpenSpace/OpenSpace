@@ -114,6 +114,10 @@ TileDepthTransform SizeReferenceTileProvider::depthTransform() {
 
 void SizeReferenceTileProvider::update() {}
 
+int SizeReferenceTileProvider::minLevel() {
+    return 1;
+}
+
 int SizeReferenceTileProvider::maxLevel() {
     return 1337; // unlimited
 }
