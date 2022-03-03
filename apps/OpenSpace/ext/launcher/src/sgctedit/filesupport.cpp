@@ -112,6 +112,9 @@ void FileSupport::saveWindows() {
             wCtrl->monitorNum(),
             wCtrl->windowSize()
         );
+        if (tmpWindow.isFullScreen) {
+            tmpWindow.monitor = wCtrl->monitorNum();
+        }
         saveWindowsWebGui(windowIndex, tmpWindow);
         if (!wCtrl->windowName().empty()) {
             tmpWindow.name = wCtrl->windowName();
