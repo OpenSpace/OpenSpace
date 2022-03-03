@@ -149,6 +149,10 @@ void ImageSequenceTileProvider::reset() {
     }
 }
 
+int ImageSequenceTileProvider::minLevel() {
+    return 1;
+}
+
 int ImageSequenceTileProvider::maxLevel() {
     return _currentTileProvider ? _currentTileProvider->maxLevel() : 0;
 }

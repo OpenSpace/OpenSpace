@@ -56,7 +56,7 @@ enum GroupID {
     Unknown
 };
 
-static constexpr const int NUM_LAYER_TYPES = 9;
+static constexpr const int NUM_LAYER_TYPES = 10;
 static constexpr const char* LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
     "DefaultTileLayer",
     "SingleImageTileLayer",
@@ -66,7 +66,8 @@ static constexpr const char* LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
     "TileIndexTileLayer",
     "ByIndexTileLayer",
     "ByLevelTileLayer",
-    "SolidColor"
+    "SolidColor",
+    "SpoutImageTileLayer"
 };
 
 /**
@@ -82,7 +83,8 @@ enum class TypeID {
     TileIndexTileLayer = 5,
     ByIndexTileLayer = 6,
     ByLevelTileLayer = 7,
-    SolidColor = 8
+    SolidColor = 8,
+    SpoutImageTileLayer = 9
 };
 
 static constexpr int NUM_ADJUSTMENT_TYPES = 3;

@@ -54,6 +54,10 @@ TileDepthTransform TileIndexTileProvider::depthTransform() {
 
 void TileIndexTileProvider::update() {}
 
+int TileIndexTileProvider::minLevel() {
+    return 1;
+}
+
 int TileIndexTileProvider::maxLevel() {
     return 1337; // unlimited
 }

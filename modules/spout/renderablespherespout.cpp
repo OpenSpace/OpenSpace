@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,56 +24,51 @@
 
 #ifdef WIN32
 
-#include <modules/spout/renderableplanespout.h>
+#include <modules/spout/renderablespherespout.h>
 
+#include <openspace/util/sphere.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
-#include <optional>
+#include <ghoul/opengl/texture.h>
 
 namespace {
-    constexpr const char* LoggerCat = "ScreenSpaceSpout";
-
-    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
-        "SpoutName",
-        "Spout Sender Name",
-        "This value explicitly sets the Spout receiver to use a specific name. If this "
-        "is not a valid name, an empty image is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
-        "SpoutSelection",
-        "Spout Selection",
-        "This property displays all available Spout sender on the system. If one them is "
-        "selected, its value is stored in the 'SpoutName' property, overwriting its "
-        "previous value."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo UpdateInfo = {
-        "UpdateSelection",
-        "Update Selection",
-        "If this property is trigged, the 'SpoutSelection' options will be refreshed."
-    };
-
-    struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
-        // [[codegen::verbatim(NameInfo.description)]]
-        std::optional<std::string> spoutName;
-    };
-#include "renderableplanespout_codegen.cpp"
-
+    constexpr const char* KeyName = "Name";
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneSpout::Documentation() {
-    return codegen::doc<Parameters>("spout_screenspace_spout");
+documentation::Documentation RenderableSphereSpout::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Renderable Sphere Spout",
+        "spout_sphere_spout",
+        {
+            {
+                KeyName,
+                new StringVerifier,
+                Optional::Yes,
+                "Specifies the GUI name of the RenderableSphereSpout"
+            },
+            {
+                spout::SpoutReceiverPropertyProxy::NameInfoProperty().identifier,
+                new StringVerifier,
+                Optional::Yes,
+                spout::SpoutReceiverPropertyProxy::NameInfoProperty().description
+            }
+        }
+    };
 }
 
-RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
+RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary)
+    : RenderableSphere(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableSphereSpout"
+    );
 
     int iIdentifier = 0;
     if (_identifier.empty()) {
@@ -81,47 +76,47 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
         iIdentifier = id;
 
         if (iIdentifier == 0) {
-            setIdentifier("RenderablePlaneSpout");
+            setIdentifier("RenderableSphereSpout");
         }
         else {
-            setIdentifier("RenderablePlaneSpout" + std::to_string(iIdentifier));
+            setIdentifier("RenderableSphereSpout" + std::to_string(iIdentifier));
         }
         ++id;
     }
 
     if (_guiName.empty()) {
         // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("RenderablePlaneSpout " + std::to_string(iIdentifier));
+        setGuiName("RenderableSphereSpout " + std::to_string(iIdentifier));
     }
 }
 
-void RenderablePlaneSpout::deinitializeGL() {
+void RenderableSphereSpout::deinitializeGL() {
     _spoutReceiver.Release();
-
-    RenderablePlane::deinitializeGL();
+    RenderableSphere::deinitializeGL();
 }
 
-void RenderablePlaneSpout::update(const UpdateData& data) {
-    RenderablePlane::update(data);
+void RenderableSphereSpout::update(const UpdateData& data) {
+    RenderableSphere::update(data);
     _spoutReceiver.UpdateReceiver();
+
 }
 
-void RenderablePlaneSpout::bindTexture() {
+void RenderableSphereSpout::bindTexture() {
     if (_spoutReceiver.isReceiving()) {
         _spoutReceiver.SaveGLTextureState();
         glBindTexture(GL_TEXTURE_2D, (GLuint)_spoutReceiver.SpoutTexture());
     }
     else {
-        RenderablePlane::bindTexture();
+        RenderableSphere::bindTexture();
     }
 }
 
-void RenderablePlaneSpout::unbindTexture() {
+void RenderableSphereSpout::unbindTexture() {
     if (_spoutReceiver.isReceiving()) {
         _spoutReceiver.RestoreGLTextureState();
     }
     else {
-        RenderablePlane::unbindTexture();
+        RenderableSphere::unbindTexture();
     }
 }
 
