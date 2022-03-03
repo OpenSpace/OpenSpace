@@ -176,7 +176,6 @@ void MonitorBox::determineMonitorArrangement() {
 }
 
 void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
-
     if (_monitorArrangementAspectRatio >= 1.0) {
         computeScaledResolutionLandscape(
             _monitorArrangementAspectRatio,
