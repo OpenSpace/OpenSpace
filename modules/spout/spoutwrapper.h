@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_OPENSPACE___SPOUTWRAPPER___H__
-#define __OPENSPACE_APP_OPENSPACE___SPOUTWRAPPER___H__
+#ifndef __OPENSPACE_MODULE_SPOUT___SPOUTWRAPPER___H__
+#define __OPENSPACE_MODULE_SPOUT___SPOUTWRAPPER___H__
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
@@ -156,7 +156,7 @@ public:
 
 private:
     bool updateSenderStatus();
-    
+
     bool _isErrorMessageDisplayed = false;
     bool _isCreated = false;
     bool _isSending = false;
@@ -187,4 +187,4 @@ private:
 
 } // namespace openspace::spout
 
-#endif // __OPENSPACE_APP_OPENSPACE___SPOUTWRAPPER___H__
+#endif // __OPENSPACE_MODULE_SPOUT___SPOUTWRAPPER___H__

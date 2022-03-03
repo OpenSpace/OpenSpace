@@ -86,13 +86,13 @@ void SpoutMain::saveGLState() {
 
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &buf);
     _defaultDrawFBO = static_cast<unsigned int>(buf);
-    
+
     glGetIntegerv(GL_READ_BUFFER, &buf);
     _defaultReadBuffer = static_cast<unsigned int>(buf);
 
     glGetIntegerv(GL_DRAW_BUFFER0, &buf);
     _defaultReadBuffer = static_cast<unsigned int>(buf);
-    
+
     saveGLTextureState();
 }
 
@@ -163,7 +163,7 @@ bool SpoutReceiver::updateReceiver() {
     // if spout is not connected a 10x10 texture is created
     if (updateTexture(width, height) && _isReceiving) {
         saveGLState();
-        
+
         _spoutHandle->ReceiveTexture(
             currentSpoutName,
             width,
