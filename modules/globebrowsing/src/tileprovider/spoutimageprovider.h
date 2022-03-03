@@ -47,6 +47,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    void internalInitialize() override final;
+    void internalDeinitialize() override final;
+
     std::array<std::unique_ptr<ghoul::opengl::Texture>, 2> tileTexture;
     std::array<GLuint, 2> fbo = { 0, 0 };
     std::array<Tile, 2> tiles;
@@ -56,8 +59,6 @@ private:
 #endif
 
     bool spoutUpdate = false;
-    void internalInitialize() override final;
-    void internalDeinitialize() override final;
 };
 
 } // namespace openspace::globebrowsing

@@ -109,7 +109,7 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 void RenderablePlaneSpout::bindTexture() {
     if (_spoutReceiver.isReceiving()) {
         _spoutReceiver.SaveGLTextureState();
-        glBindTexture(GL_TEXTURE_2D, (GLuint)_spoutReceiver.SpoutTexture());
+        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_spoutReceiver.SpoutTexture()));
     }
     else {
         RenderablePlane::bindTexture();

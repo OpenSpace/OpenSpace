@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,10 +32,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
-namespace {
-    constexpr const char* KeyName = "Name";
-} // namespace
-
 namespace openspace {
 
 documentation::Documentation RenderableSphereSpout::Documentation() {
@@ -45,7 +41,7 @@ documentation::Documentation RenderableSphereSpout::Documentation() {
         "spout_sphere_spout",
         {
             {
-                KeyName,
+                "Name",
                 new StringVerifier,
                 Optional::Yes,
                 "Specifies the GUI name of the RenderableSphereSpout"
@@ -104,7 +100,7 @@ void RenderableSphereSpout::update(const UpdateData& data) {
 void RenderableSphereSpout::bindTexture() {
     if (_spoutReceiver.isReceiving()) {
         _spoutReceiver.SaveGLTextureState();
-        glBindTexture(GL_TEXTURE_2D, (GLuint)_spoutReceiver.SpoutTexture());
+        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_spoutReceiver.SpoutTexture()));
     }
     else {
         RenderableSphere::bindTexture();

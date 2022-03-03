@@ -32,6 +32,9 @@
 #include <string>
 #include <vector>
 
+struct SPOUTLIBRARY;
+typedef SPOUTLIBRARY* SPOUTHANDLE;
+
 namespace ghoul::opengl {
     class Texture;
 }; // namespace ghoul::opengl
@@ -61,7 +64,7 @@ protected:
     unsigned int _defaultReadBuffer;
     unsigned int _defaultDrawBuffer[1] = { 0 };
 
-    void* _spoutHandle = nullptr;
+    SPOUTHANDLE _spoutHandle = nullptr;
 
     std::string _currentSpoutName;
     unsigned int _spoutWidth = 0;
@@ -111,11 +114,11 @@ private:
 
 class SpoutReceiverPropertyProxy : public SpoutReceiver {
 public:
-    static const openspace::properties::Property::PropertyInfo& NameInfoProperty();
-    static const openspace::properties::Property::PropertyInfo& SelectionInfoProperty();
-    static const openspace::properties::Property::PropertyInfo& UpdateInfoProperty();
+    static const properties::Property::PropertyInfo& NameInfoProperty();
+    static const properties::Property::PropertyInfo& SelectionInfoProperty();
+    static const properties::Property::PropertyInfo& UpdateInfoProperty();
 
-    SpoutReceiverPropertyProxy(openspace::properties::PropertyOwner& owner,
+    SpoutReceiverPropertyProxy(properties::PropertyOwner& owner,
         const ghoul::Dictionary& dictionary);
     virtual ~SpoutReceiverPropertyProxy();
 
@@ -123,9 +126,9 @@ public:
     void ReleaseReceiver() override;
 
 private:
-    openspace::properties::StringProperty _spoutName;
-    openspace::properties::OptionProperty _spoutSelection;
-    openspace::properties::TriggerProperty _updateSelection;
+    properties::StringProperty _spoutName;
+    properties::OptionProperty _spoutSelection;
+    properties::TriggerProperty _updateSelection;
 
     bool _isSpoutDirty = true;
     bool _isSelectAny = false;
@@ -169,9 +172,9 @@ private:
 
 class SpoutSenderPropertyProxy : public SpoutSender {
 public:
-    static const openspace::properties::Property::PropertyInfo& NameInfoProperty();
+    static const properties::Property::PropertyInfo& NameInfoProperty();
 
-    SpoutSenderPropertyProxy(openspace::properties::PropertyOwner& owner,
+    SpoutSenderPropertyProxy(properties::PropertyOwner& owner,
         const ghoul::Dictionary& dictionary);
     virtual ~SpoutSenderPropertyProxy();
 
@@ -179,7 +182,7 @@ public:
     void ReleaseSender() override;
 
 private:
-    openspace::properties::StringProperty _spoutName;
+    properties::StringProperty _spoutName;
 
     bool _isSpoutDirty = true;
 };

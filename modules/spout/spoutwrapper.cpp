@@ -72,36 +72,52 @@ SpoutMain::~SpoutMain() {}
 
 void SpoutMain::Release() {
     if (_spoutHandle) {
-        reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->Release();
+        _spoutHandle->Release();
     }
 }
 
 void SpoutMain::SaveGLState() {
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&_defaultFBO);
-    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, (GLint*)&_defaultReadFBO);
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, (GLint*)&_defaultDrawFBO);
-    glGetIntegerv(GL_READ_BUFFER, (GLint*)&_defaultReadBuffer);
-    glGetIntegerv(GL_DRAW_BUFFER0, (GLint*)_defaultDrawBuffer);
+    GLint buf;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buf);
+    _defaultFBO = static_cast<unsigned int>(buf);
+
+    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &buf);
+    _defaultReadFBO = static_cast<unsigned int>(buf);
+
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &buf);
+    _defaultDrawFBO = static_cast<unsigned int>(buf);
+    
+    glGetIntegerv(GL_READ_BUFFER, &buf);
+    _defaultReadBuffer = static_cast<unsigned int>(buf);
+
+    glGetIntegerv(GL_DRAW_BUFFER0, &buf);
+    _defaultReadBuffer = static_cast<unsigned int>(buf);
+    
     SaveGLTextureState();
 }
+
 void SpoutMain::RestoreGLState() {
-    glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)_defaultFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_defaultFBO));
     if (_defaultFBO) {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, (GLuint)_defaultReadFBO);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, (GLuint)_defaultDrawFBO);
-        glReadBuffer((GLenum)_defaultReadBuffer);
-        glDrawBuffers(1, (GLenum*)_defaultDrawBuffer);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, static_cast<GLuint>(_defaultReadFBO));
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, static_cast<GLuint>(_defaultDrawFBO));
+        glReadBuffer(static_cast<GLenum>(_defaultReadBuffer));
+        GLenum buf[1];
+        buf[0] = static_cast<GLenum>(_defaultDrawBuffer[0]);
+        glDrawBuffers(1, buf);
     }
     RestoreGLTextureState();
 }
 
 void SpoutMain::SaveGLTextureState() {
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&_defaultTexture);
-}
-void SpoutMain::RestoreGLTextureState() {
-    glBindTexture(GL_TEXTURE_2D, (GLuint)_defaultTexture);
+    GLint buf;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &buf);
+    _defaultTexture = static_cast<unsigned int>(buf);
 }
 
+void SpoutMain::RestoreGLTextureState() {
+    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_defaultTexture));
+}
 
 SpoutReceiver::SpoutReceiver() {}
 
@@ -112,12 +128,12 @@ const std::vector<std::string> &SpoutReceiver::SpoutReceiverList() {
         return _receiverList;
     }
 
-    const int nSenders = reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->GetSenderCount();
+    const int nSenders = _spoutHandle->GetSenderCount();
     _receiverList.clear();
 
     for (int i = 0; i < nSenders; ++i) {
         char Name[256];
-        reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->GetSenderName(i, Name, 256);
+        _spoutHandle->GetSenderName(i, Name, 256);
         _receiverList.push_back(Name);
     }
 
@@ -142,18 +158,13 @@ bool SpoutReceiver::UpdateReceiver() {
 
     char currentSpoutName[256] = { 0 };
     std::memcpy(currentSpoutName, _currentSpoutName.data(), _currentSpoutName.size());
-    reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->CheckReceiver(
-        currentSpoutName,
-        width,
-        height,
-        _isReceiving
-    );
+    _spoutHandle->CheckReceiver(currentSpoutName, width, height, _isReceiving);
 
     // if spout is not connected a 10x10 texture is created
     if (UpdateTexture(width, height) && _isReceiving) {
         SaveGLState();
         
-        reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->ReceiveTexture(
+        _spoutHandle->ReceiveTexture(
             currentSpoutName,
             width,
             height,
@@ -195,16 +206,11 @@ bool SpoutReceiver::UpdateReceiverName(const std::string& name) {
 
     char nameBuf[256] = { 0 };
     std::memcpy(nameBuf, name.data(), name.size());
-    bool hasCreated = reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->CreateReceiver(
-        nameBuf,
-        width,
-        height
-    );
+    bool hasCreated = _spoutHandle->CreateReceiver(nameBuf, width, height);
     if (!hasCreated) {
         if (!_isErrorMessageDisplayed) {
             LWARNING(fmt::format(
-                "Could not create receiver for {} -> {}x{}",
-                name, width, height
+                "Could not create receiver for {} -> {}x{}", name, width, height
             ));
             _isErrorMessageDisplayed = true;
         }
@@ -232,7 +238,7 @@ void SpoutReceiver::ReleaseReceiver() {
     }
     ReleaseTexture();
     if (_spoutHandle) {
-        reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->ReleaseReceiver();
+        _spoutHandle->ReleaseReceiver();
     }
 }
 
@@ -241,14 +247,12 @@ void SpoutReceiver::Release() {
     SpoutMain::Release();
 }
 
-void SpoutReceiver::OnUpdateReceiverName(
-                                        std::function<bool(const std::string &)> callback)
+void SpoutReceiver::OnUpdateReceiverName(std::function<bool(const std::string&)> callback)
 {
     _onUpdateReceiverNameCallback = std::move(callback);
 }
 
-void SpoutReceiver::OnUpdateReceiver(
-                                     std::function<bool(int, int, unsigned int)> callback)
+void SpoutReceiver::OnUpdateReceiver(std::function<bool(int, int, unsigned int)> callback)
 {
     _onUpdateReceiverCallback = std::move(callback);
 }
@@ -437,11 +441,7 @@ bool SpoutSender::UpdateSenderStatus() {
         char name[256] = { 0 };
         std::memcpy(name, _currentSpoutName.data(), _currentSpoutName.size());
 
-        bool hasCreated = reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->CreateSender(
-            name,
-            _spoutWidth,
-            _spoutHeight
-        );
+        bool hasCreated = _spoutHandle->CreateSender(name, _spoutWidth, _spoutHeight);
         if (!hasCreated) {
             if (!_isErrorMessageDisplayed) {
                 LWARNING(fmt::format(
@@ -465,22 +465,17 @@ bool SpoutSender::UpdateSender(unsigned int texture, unsigned int textureType) {
         return false;
     }
 
-    reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->SendTexture(
-        texture,
-        textureType,
-        _spoutWidth,
-        _spoutHeight
-    );
+    _spoutHandle->SendTexture(texture, textureType, _spoutWidth, _spoutHeight);
 
     if (_onUpdateSenderCallback) {
-        if (!_onUpdateSenderCallback(
-                _currentSpoutName,
-                texture,
-                textureType,
-                _spoutWidth,
-                _spoutHeight
-        ))
-        {
+        bool s = _onUpdateSenderCallback(
+            _currentSpoutName,
+            texture,
+            textureType,
+            _spoutWidth,
+            _spoutHeight
+        );
+        if (!s) {
             return false;
         }
     }
@@ -550,7 +545,7 @@ void SpoutSender::ReleaseSender() {
         _onReleaseSenderCallback();
     }
     if (_spoutHandle) {
-        reinterpret_cast<SPOUTHANDLE>(_spoutHandle)->ReleaseReceiver();
+        _spoutHandle->ReleaseReceiver();
     }
 }
 
@@ -559,7 +554,7 @@ void SpoutSender::Release() {
     SpoutMain::Release();
 }
 
-void SpoutSender::OnUpdateSenderName(std::function<bool(const std::string &)> callback) {
+void SpoutSender::OnUpdateSenderName(std::function<bool(const std::string&)> callback) {
     _onUpdateSenderNameCallback = std::move(callback);
 }
 
@@ -602,7 +597,7 @@ bool SpoutSenderPropertyProxy::UpdateSender(unsigned int texture,
                                             unsigned int textureType)
 {
     if (_isSpoutDirty) {
-        if (!UpdateSenderName(_spoutName.value())) {
+        if (!UpdateSenderName(_spoutName)) {
             return false;
         }
         _isSpoutDirty = false;
