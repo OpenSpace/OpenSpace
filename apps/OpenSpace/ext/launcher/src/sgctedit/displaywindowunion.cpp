@@ -72,6 +72,8 @@ void DisplayWindowUnion::initializeLayout() {
             "Add a window to the configuration (up to {} windows allowed)", _nMaxWindows
         );
         _addWindowButton->setToolTip(QString::fromStdString(addTip));
+        _addWindowButton->setFocusPolicy(Qt::NoFocus);
+        _removeWindowButton->setFocusPolicy(Qt::NoFocus);
         layoutMonButton->addWidget(_removeWindowButton);
         layoutMonButton->addStretch(1);
         layoutMonButton->addWidget(_addWindowButton);

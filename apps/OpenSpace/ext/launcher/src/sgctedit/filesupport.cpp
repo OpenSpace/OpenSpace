@@ -39,12 +39,15 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout,
     QVBoxLayout* layoutFullVertical = new QVBoxLayout;
     _saveButton = new QPushButton("Save As");
     _saveButton->setToolTip("Save configuration changes (opens file chooser dialog)");
+    _saveButton->setFocusPolicy(Qt::NoFocus);
     connect(_saveButton, &QPushButton::released, this, &FileSupport::save);
     _cancelButton = new QPushButton("Cancel");
     _cancelButton->setToolTip("Cancel changes");
+    _cancelButton->setFocusPolicy(Qt::NoFocus);
     connect(_cancelButton, &QPushButton::released, this, &FileSupport::cancel);
     _applyButton = new QPushButton("Apply Without Saving");
     _applyButton->setToolTip("Apply configuration changes without saving to file");
+    _applyButton->setFocusPolicy(Qt::NoFocus);
     connect(_applyButton, &QPushButton::released, this, &FileSupport::apply);
     {
         QHBoxLayout* layoutButtonBox = new QHBoxLayout;

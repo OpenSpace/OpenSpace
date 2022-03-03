@@ -42,6 +42,7 @@ Orientation::Orientation()
             "Opens a separate dialog for setting the pitch, "
             "yaw, and roll of the camera\n(the orientation applies to all viewports)"
         );
+        orientationButton->setFocusPolicy(Qt::NoFocus);
         layoutOrientationControls->addWidget(orientationButton);
         _layoutOrientationFull->addStretch(1);
         _layoutOrientationFull->addLayout(layoutOrientationControls);

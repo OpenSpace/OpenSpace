@@ -92,10 +92,12 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         QHBoxLayout* layoutButtonBox = new QHBoxLayout;
         QPushButton* buttonSave = new QPushButton("OK");
         buttonSave->setToolTip("Save global orientation changes");
+        buttonSave->setFocusPolicy(Qt::NoFocus);
         layoutButtonBox->addStretch(1);
         layoutButtonBox->addWidget(buttonSave);
         QPushButton* buttonCancel = new QPushButton("Cancel");
         buttonCancel->setToolTip("Cancel global orientation changes");
+        buttonCancel->setFocusPolicy(Qt::NoFocus);
         layoutButtonBox->addWidget(buttonCancel);
         layoutButtonBox->addStretch(1);
         connect(buttonSave, &QPushButton::released, this, &OrientationDialog::ok);

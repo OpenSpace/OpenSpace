@@ -287,6 +287,7 @@ QVBoxLayout* WindowControl::initializeLayout() {
         labelSize->setToolTip("Enter window width & height in pixels");
         _sizeX->setToolTip("Enter window width (pixels)");
         _sizeY->setToolTip("Enter window height (pixels)");
+        _buttonLockAspectRatio->setFocusPolicy(Qt::NoFocus);
         _buttonLockAspectRatio->setToolTip("Locks/Unlocks size aspect ratio");
         layoutSize->addWidget(labelSize);
         labelSize->setText("Size:");
@@ -338,6 +339,7 @@ QVBoxLayout* WindowControl::initializeLayout() {
         _fullscreenButton->setToolTip("If enabled, the window will be created in an "
             "exclusive fullscreen mode. The size of this\nwindow will be set to the "
             "screen resolution, and the window decoration automatically disabled.");
+        _fullscreenButton->setFocusPolicy(Qt::NoFocus);
         layoutFullscreenButton->addWidget(_fullscreenButton);
         layoutFullscreenButton->addStretch(1);
         layoutCheckboxesFull2->addLayout(layoutFullscreenButton);
@@ -362,6 +364,7 @@ QVBoxLayout* WindowControl::initializeLayout() {
         layoutComboProjection->addWidget(_buttonLockFov);
         _buttonLockFov->setToolTip("Locks and scales the Horizontal & Vertical F.O.V. "
             "to the ideal settings based on aspect ratio.");
+        _buttonLockFov->setFocusPolicy(Qt::NoFocus);
         layoutComboProjection->addStretch(1);
         layoutProjectionGroup->addLayout(layoutComboProjection);
         QFrame* borderProjectionGroup = new QFrame;
