@@ -58,7 +58,7 @@ SpoutImageProvider::SpoutImageProvider(const ghoul::Dictionary& dictionary) {
         dictionary
     );
 
-    spoutReceiver->OnUpdateTexture([this](int width, int height) {
+    spoutReceiver->onUpdateTexture([this](int width, int height) {
         for (int i = 0; i < 2; i++) {
             if (!fbo[i]) {
                 glGenFramebuffers(1, &fbo[i]);
@@ -86,7 +86,7 @@ SpoutImageProvider::SpoutImageProvider(const ghoul::Dictionary& dictionary) {
     });
 
 
-    spoutReceiver->OnReleaseTexture([this]() {
+    spoutReceiver->onReleaseTexture([this]() {
         for (int i = 0; i < 2; i++) {
             if (fbo[i]) {
                 glDeleteFramebuffers(1, &fbo[i]);
@@ -97,7 +97,7 @@ SpoutImageProvider::SpoutImageProvider(const ghoul::Dictionary& dictionary) {
     });
 
 
-    spoutReceiver->OnUpdateReceiver([this](int width, int height, unsigned int texture) {
+    spoutReceiver->onUpdateReceiver([this](int width, int height, unsigned int texture) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo[0]);
         glFramebufferTexture2D(
             GL_READ_FRAMEBUFFER,
@@ -160,13 +160,13 @@ void SpoutImageProvider::internalInitialize() {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_SPOUT
-    spoutReceiver->UpdateReceiver();
+    spoutReceiver->updateReceiver();
 #endif // OPENSPACE_HAS_SPOUT
 }
 
 void SpoutImageProvider::internalDeinitialize() {
 #ifdef OPENSPACE_HAS_SPOUT
-    spoutReceiver->Release();
+    spoutReceiver->release();
 #endif // OPENSPACE_HAS_SPOUT
 }
 
@@ -197,11 +197,11 @@ void SpoutImageProvider::update() {
         }
     }
     
-    spoutReceiver->UpdateReceiver();
+    spoutReceiver->updateReceiver();
 }
 
 void SpoutImageProvider::reset() {
-    spoutReceiver->UpdateReceiver();
+    spoutReceiver->updateReceiver();
 }
 
 int SpoutImageProvider::minLevel() {

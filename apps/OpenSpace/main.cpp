@@ -295,15 +295,15 @@ void mainInitFunc(GLFWwindow*) {
 
         if (hasStereo) {
             mainWindowName = window.name() + "_left";
-            retValue &= w.right.UpdateSenderName((window.name() + "_right").c_str());
-            retValue &= w.right.UpdateSenderSize(
+            retValue &= w.right.updateSenderName((window.name() + "_right").c_str());
+            retValue &= w.right.updateSenderSize(
                 window.framebufferResolution().x,
                 window.framebufferResolution().y
             );
         }
 
-        retValue &= w.leftOrMain.UpdateSenderName(mainWindowName.c_str());
-        retValue &= w.leftOrMain.UpdateSenderSize(
+        retValue &= w.leftOrMain.updateSenderName(mainWindowName.c_str());
+        retValue &= w.leftOrMain.updateSenderSize(
             window.framebufferResolution().x,
             window.framebufferResolution().y
         );
@@ -507,20 +507,20 @@ void mainRenderFunc(const sgct::RenderData& data) {
             int width = window.framebufferResolution().x;
             int height = window.framebufferResolution().y;
 
-            w.leftOrMain.SaveGLState();
+            w.leftOrMain.saveGLState();
 
-            if (w.leftOrMain.isCreated() && w.leftOrMain.UpdateSenderSize(width, height))
+            if (w.leftOrMain.isCreated() && w.leftOrMain.updateSenderSize(width, height))
             {
                 GLuint texId = window.frameBufferTexture(Window::TextureIndex::LeftEye);
-                w.leftOrMain.UpdateSender(texId, static_cast<int>(GL_TEXTURE_2D));
+                w.leftOrMain.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
             }
 
-            if (w.right.isCreated() && w.right.UpdateSenderSize(width, height)) {
+            if (w.right.isCreated() && w.right.updateSenderSize(width, height)) {
                 GLuint texId = window.frameBufferTexture(Window::TextureIndex::RightEye);
-                w.right.UpdateSender(texId, static_cast<int>(GL_TEXTURE_2D));
+                w.right.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
             }
 
-            w.leftOrMain.RestoreGLState();
+            w.leftOrMain.restoreGLState();
         }
 #endif // OPENSPACE_HAS_SPOUT
     }
@@ -1343,8 +1343,8 @@ int main(int argc, char* argv[]) {
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (SpoutWindow& w : SpoutWindows) {
-        w.leftOrMain.Release();
-        w.right.Release();
+        w.leftOrMain.release();
+        w.right.release();
     }
 #endif // OPENSPACE_HAS_SPOUT
 

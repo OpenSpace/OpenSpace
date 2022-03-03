@@ -24,12 +24,12 @@
 
 #include "modules/spout/spoutwrapper.h"
 
+#include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #define SPOUT_NO_GL_INCLUDE
 #include <SpoutLibrary.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
 
 namespace {
     constexpr const char _loggerCat[] = "Spout";
@@ -70,13 +70,13 @@ SpoutMain::SpoutMain() {
 
 SpoutMain::~SpoutMain() {}
 
-void SpoutMain::Release() {
+void SpoutMain::release() {
     if (_spoutHandle) {
         _spoutHandle->Release();
     }
 }
 
-void SpoutMain::SaveGLState() {
+void SpoutMain::saveGLState() {
     GLint buf;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buf);
     _defaultFBO = static_cast<unsigned int>(buf);
@@ -93,10 +93,10 @@ void SpoutMain::SaveGLState() {
     glGetIntegerv(GL_DRAW_BUFFER0, &buf);
     _defaultReadBuffer = static_cast<unsigned int>(buf);
     
-    SaveGLTextureState();
+    saveGLTextureState();
 }
 
-void SpoutMain::RestoreGLState() {
+void SpoutMain::restoreGLState() {
     glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_defaultFBO));
     if (_defaultFBO) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, static_cast<GLuint>(_defaultReadFBO));
@@ -106,16 +106,16 @@ void SpoutMain::RestoreGLState() {
         buf[0] = static_cast<GLenum>(_defaultDrawBuffer[0]);
         glDrawBuffers(1, buf);
     }
-    RestoreGLTextureState();
+    restoreGLTextureState();
 }
 
-void SpoutMain::SaveGLTextureState() {
+void SpoutMain::saveGLTextureState() {
     GLint buf;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &buf);
     _defaultTexture = static_cast<unsigned int>(buf);
 }
 
-void SpoutMain::RestoreGLTextureState() {
+void SpoutMain::restoreGLTextureState() {
     glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_defaultTexture));
 }
 
@@ -123,7 +123,7 @@ SpoutReceiver::SpoutReceiver() {}
 
 SpoutReceiver::~SpoutReceiver() {}
 
-const std::vector<std::string> &SpoutReceiver::SpoutReceiverList() {
+const std::vector<std::string> &SpoutReceiver::spoutReceiverList() {
     if (!_spoutHandle) {
         return _receiverList;
     }
@@ -148,7 +148,7 @@ bool SpoutReceiver::isReceiving() const {
     return _isReceiving;
 }
 
-bool SpoutReceiver::UpdateReceiver() {
+bool SpoutReceiver::updateReceiver() {
     unsigned int width = 10;
     unsigned int height = 10;
 
@@ -161,8 +161,8 @@ bool SpoutReceiver::UpdateReceiver() {
     _spoutHandle->CheckReceiver(currentSpoutName, width, height, _isReceiving);
 
     // if spout is not connected a 10x10 texture is created
-    if (UpdateTexture(width, height) && _isReceiving) {
-        SaveGLState();
+    if (updateTexture(width, height) && _isReceiving) {
+        saveGLState();
         
         _spoutHandle->ReceiveTexture(
             currentSpoutName,
@@ -176,19 +176,19 @@ bool SpoutReceiver::UpdateReceiver() {
         if (_onUpdateReceiverCallback) {
             const GLuint t = static_cast<GLuint>(*_spoutTexture);
             if (!_onUpdateReceiverCallback(width, height, t)) {
-                RestoreGLState();
+                restoreGLState();
                 return false;
             }
         }
 
-        RestoreGLState();
+        restoreGLState();
         return true;
     }
 
     return false;
 }
 
-bool SpoutReceiver::UpdateReceiverName(const std::string& name) {
+bool SpoutReceiver::updateReceiverName(const std::string& name) {
     unsigned int width = 0;
     unsigned int height = 0;
 
@@ -196,7 +196,7 @@ bool SpoutReceiver::UpdateReceiverName(const std::string& name) {
         return false;
     }
 
-    ReleaseReceiver();
+    releaseReceiver();
 
     if (_onUpdateReceiverNameCallback) {
         if (!_onUpdateReceiverNameCallback(name)) {
@@ -224,7 +224,7 @@ bool SpoutReceiver::UpdateReceiverName(const std::string& name) {
     return true;
 }
 
-void SpoutReceiver::ReleaseReceiver() {
+void SpoutReceiver::releaseReceiver() {
     if (!_isCreated) {
         return;
     }
@@ -236,46 +236,46 @@ void SpoutReceiver::ReleaseReceiver() {
     if (_onReleaseReceiverCallback) {
         _onReleaseReceiverCallback();
     }
-    ReleaseTexture();
+    releaseTexture();
     if (_spoutHandle) {
         _spoutHandle->ReleaseReceiver();
     }
 }
 
-void SpoutReceiver::Release() {
-    ReleaseReceiver();
-    SpoutMain::Release();
+void SpoutReceiver::release() {
+    releaseReceiver();
+    SpoutMain::release();
 }
 
-void SpoutReceiver::OnUpdateReceiverName(std::function<bool(const std::string&)> callback)
+void SpoutReceiver::onUpdateReceiverName(std::function<bool(const std::string&)> callback)
 {
     _onUpdateReceiverNameCallback = std::move(callback);
 }
 
-void SpoutReceiver::OnUpdateReceiver(std::function<bool(int, int, unsigned int)> callback)
+void SpoutReceiver::onUpdateReceiver(std::function<bool(int, int, unsigned int)> callback)
 {
     _onUpdateReceiverCallback = std::move(callback);
 }
 
-void SpoutReceiver::OnReleaseReceiver(std::function<void()> callback) {
+void SpoutReceiver::onReleaseReceiver(std::function<void()> callback) {
     _onReleaseReceiverCallback = std::move(callback);
 }
 
-void SpoutReceiver::OnUpdateTexture(std::function<bool(int, int)> callback) {
+void SpoutReceiver::onUpdateTexture(std::function<bool(int, int)> callback) {
     _onUpdateTextureCallback = std::move(callback);
 }
 
-void SpoutReceiver::OnReleaseTexture(std::function<void()> callback) {
+void SpoutReceiver::onReleaseTexture(std::function<void()> callback) {
     _onReleaseTextureCallback = std::move(callback);
 }
 
-unsigned int SpoutReceiver::SpoutTexture() const {
+unsigned int SpoutReceiver::spoutTexture() const {
     return _spoutTexture ? static_cast<unsigned int>(*_spoutTexture) : 0;
 }
 
-bool SpoutReceiver::UpdateTexture(unsigned int width, unsigned int height) {
+bool SpoutReceiver::updateTexture(unsigned int width, unsigned int height) {
     if (width != _spoutWidth || height != _spoutHeight) {
-        ReleaseTexture();
+        releaseTexture();
         _spoutTexture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(width, height, 1),
             GL_TEXTURE_2D,
@@ -310,7 +310,7 @@ bool SpoutReceiver::UpdateTexture(unsigned int width, unsigned int height) {
     return true;
 }
 
-void SpoutReceiver::ReleaseTexture() {
+void SpoutReceiver::releaseTexture() {
     _spoutWidth = 0;
     _spoutHeight = 0;
     if (_onReleaseTextureCallback) {
@@ -363,7 +363,7 @@ SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner
     owner.addProperty(_spoutSelection);
 
     _updateSelection.onChange([this]() {
-        const std::vector<std::string> receiverList = SpoutReceiverList();
+        const std::vector<std::string> receiverList = spoutReceiverList();
 
         _spoutSelection.clearOptions();
         _spoutSelection.addOption(0, "");
@@ -388,19 +388,19 @@ SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner
 
 SpoutReceiverPropertyProxy::~SpoutReceiverPropertyProxy() {}
 
-bool SpoutReceiverPropertyProxy::UpdateReceiver() {
+bool SpoutReceiverPropertyProxy::updateReceiver() {
     if (_isSpoutDirty) {
-        if (!UpdateReceiverName(_spoutName.value())) {
+        if (!updateReceiverName(_spoutName.value())) {
             return false;
         }
         _isSpoutDirty = false;
     }
-    return SpoutReceiver::UpdateReceiver();
+    return SpoutReceiver::updateReceiver();
 }
 
-void SpoutReceiverPropertyProxy::ReleaseReceiver() {
+void SpoutReceiverPropertyProxy::releaseReceiver() {
     _isSpoutDirty = true;
-    SpoutReceiver::ReleaseReceiver();
+    SpoutReceiver::releaseReceiver();
 }
 
 
@@ -416,7 +416,7 @@ bool SpoutSender::isSending() const {
     return _isSending;
 }
 
-bool SpoutSender::UpdateSenderStatus() {
+bool SpoutSender::updateSenderStatus() {
     if (!_isSending) {
         if (_spoutWidth == 0 || _spoutHeight == 0) {
             if (!_isErrorMessageDisplayed) {
@@ -460,8 +460,8 @@ bool SpoutSender::UpdateSenderStatus() {
     return true;
 }
 
-bool SpoutSender::UpdateSender(unsigned int texture, unsigned int textureType) {
-    if (!_spoutHandle || !UpdateSenderStatus()) {
+bool SpoutSender::updateSender(unsigned int texture, unsigned int textureType) {
+    if (!_spoutHandle || !updateSenderStatus()) {
         return false;
     }
 
@@ -483,7 +483,7 @@ bool SpoutSender::UpdateSender(unsigned int texture, unsigned int textureType) {
     return true;
 }
 
-bool SpoutSender::UpdateSenderName(const std::string& name) {
+bool SpoutSender::updateSenderName(const std::string& name) {
     if (!_spoutHandle) {
         return false;
     }
@@ -491,7 +491,7 @@ bool SpoutSender::UpdateSenderName(const std::string& name) {
         return true;
     }
 
-    ReleaseSender();
+    releaseSender();
 
     if (_onUpdateSenderNameCallback) {
         if (!_onUpdateSenderNameCallback(name)) {
@@ -505,7 +505,7 @@ bool SpoutSender::UpdateSenderName(const std::string& name) {
     return true;
 }
 
-bool SpoutSender::UpdateSenderSize(int width, int height) {
+bool SpoutSender::updateSenderSize(int width, int height) {
     if (!_spoutHandle) {
         return false;
     }
@@ -515,7 +515,7 @@ bool SpoutSender::UpdateSenderSize(int width, int height) {
         return true;
     }
 
-    ReleaseSender();
+    releaseSender();
 
     if (_onUpdateSenderSizeCallback) {
         if (!_onUpdateSenderSizeCallback(width, height)) {
@@ -530,7 +530,7 @@ bool SpoutSender::UpdateSenderSize(int width, int height) {
     return true;
 }
 
-void SpoutSender::ReleaseSender() {
+void SpoutSender::releaseSender() {
     if (!_isSending) {
         return;
     }
@@ -549,26 +549,26 @@ void SpoutSender::ReleaseSender() {
     }
 }
 
-void SpoutSender::Release() {
-    ReleaseSender();
-    SpoutMain::Release();
+void SpoutSender::release() {
+    releaseSender();
+    SpoutMain::release();
 }
 
-void SpoutSender::OnUpdateSenderName(std::function<bool(const std::string&)> callback) {
+void SpoutSender::onUpdateSenderName(std::function<bool(const std::string&)> callback) {
     _onUpdateSenderNameCallback = std::move(callback);
 }
 
-void SpoutSender::OnUpdateSenderSize(std::function<bool(int, int)> callback) {
+void SpoutSender::onUpdateSenderSize(std::function<bool(int, int)> callback) {
     _onUpdateSenderSizeCallback = std::move(callback);
 }
 
-void SpoutSender::OnUpdateSender(std::function<bool(const std::string&, unsigned int,
+void SpoutSender::onUpdateSender(std::function<bool(const std::string&, unsigned int,
                                                     unsigned int, int, int)> callback)
 {
     _onUpdateSenderCallback = std::move(callback);
 }
 
-void SpoutSender::OnReleaseSender(std::function<void()> callback) {
+void SpoutSender::onReleaseSender(std::function<void()> callback) {
     _onReleaseSenderCallback = std::move(callback);
 }
 
@@ -593,21 +593,21 @@ SpoutSenderPropertyProxy::SpoutSenderPropertyProxy(properties::PropertyOwner& ow
 
 SpoutSenderPropertyProxy::~SpoutSenderPropertyProxy() {}
 
-bool SpoutSenderPropertyProxy::UpdateSender(unsigned int texture,
+bool SpoutSenderPropertyProxy::updateSender(unsigned int texture,
                                             unsigned int textureType)
 {
     if (_isSpoutDirty) {
-        if (!UpdateSenderName(_spoutName)) {
+        if (!updateSenderName(_spoutName)) {
             return false;
         }
         _isSpoutDirty = false;
     }
-    return SpoutSender::UpdateSender(texture, textureType);
+    return SpoutSender::updateSender(texture, textureType);
 }
 
-void SpoutSenderPropertyProxy::ReleaseSender() {
+void SpoutSenderPropertyProxy::releaseSender() {
     _isSpoutDirty = true;
-    SpoutSender::ReleaseSender();
+    SpoutSender::releaseSender();
 }
 
 } // namespace openspace::spout

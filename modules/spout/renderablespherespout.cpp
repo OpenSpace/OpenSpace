@@ -26,9 +26,9 @@
 
 #include <modules/spout/renderablespherespout.h>
 
-#include <openspace/util/sphere.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/sphere.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
@@ -87,20 +87,19 @@ RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary
 }
 
 void RenderableSphereSpout::deinitializeGL() {
-    _spoutReceiver.Release();
+    _spoutReceiver.release();
     RenderableSphere::deinitializeGL();
 }
 
 void RenderableSphereSpout::update(const UpdateData& data) {
     RenderableSphere::update(data);
-    _spoutReceiver.UpdateReceiver();
-
+    _spoutReceiver.updateReceiver();
 }
 
 void RenderableSphereSpout::bindTexture() {
     if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.SaveGLTextureState();
-        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_spoutReceiver.SpoutTexture()));
+        _spoutReceiver.saveGLTextureState();
+        glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
     }
     else {
         RenderableSphere::bindTexture();
@@ -109,7 +108,7 @@ void RenderableSphereSpout::bindTexture() {
 
 void RenderableSphereSpout::unbindTexture() {
     if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.RestoreGLTextureState();
+        _spoutReceiver.restoreGLTextureState();
     }
     else {
         RenderableSphere::unbindTexture();

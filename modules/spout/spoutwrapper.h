@@ -25,19 +25,17 @@
 #ifndef __OPENSPACE_APP_OPENSPACE___SPOUTWRAPPER___H__
 #define __OPENSPACE_APP_OPENSPACE___SPOUTWRAPPER___H__
 
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <string>
 #include <vector>
 
 struct SPOUTLIBRARY;
 typedef SPOUTLIBRARY* SPOUTHANDLE;
 
-namespace ghoul::opengl {
-    class Texture;
-}; // namespace ghoul::opengl
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace::spout {
 
@@ -48,13 +46,13 @@ public:
     SpoutMain();
     virtual ~SpoutMain();
 
-    virtual void Release();
+    virtual void release();
 
-    void SaveGLState();
-    void RestoreGLState();
+    void saveGLState();
+    void restoreGLState();
 
-    void SaveGLTextureState();
-    void RestoreGLTextureState();
+    void saveGLTextureState();
+    void restoreGLTextureState();
 
 protected:
     unsigned int _defaultTexture;
@@ -76,26 +74,26 @@ public:
     SpoutReceiver();
     virtual ~SpoutReceiver();
 
-    void Release() override;
+    void release() override;
 
-    virtual bool UpdateReceiverName(const std::string& name);
-    virtual bool UpdateReceiver();
-    virtual void ReleaseReceiver();
+    virtual bool updateReceiverName(const std::string& name);
+    virtual bool updateReceiver();
+    virtual void releaseReceiver();
 
-    void OnUpdateReceiverName(std::function<bool(const std::string&)> callback);
-    void OnUpdateReceiver(std::function<bool(int, int, unsigned int)> callback);
-    void OnReleaseReceiver(std::function<void()> callback);
-    void OnUpdateTexture(std::function<bool(int, int)> callback);
-    void OnReleaseTexture(std::function<void()> callback);
+    void onUpdateReceiverName(std::function<bool(const std::string&)> callback);
+    void onUpdateReceiver(std::function<bool(int, int, unsigned int)> callback);
+    void onReleaseReceiver(std::function<void()> callback);
+    void onUpdateTexture(std::function<bool(int, int)> callback);
+    void onReleaseTexture(std::function<void()> callback);
 
-    const std::vector<std::string>& SpoutReceiverList();
+    const std::vector<std::string>& spoutReceiverList();
     bool isCreated() const;
     bool isReceiving() const;
-    unsigned int SpoutTexture() const;
+    unsigned int spoutTexture() const;
 
 private:
-    bool UpdateTexture(unsigned int width, unsigned int height);
-    void ReleaseTexture();
+    bool updateTexture(unsigned int width, unsigned int height);
+    void releaseTexture();
 
     bool _isErrorMessageDisplayed = false;
     bool _isCreated = false;
@@ -122,8 +120,8 @@ public:
         const ghoul::Dictionary& dictionary);
     virtual ~SpoutReceiverPropertyProxy();
 
-    bool UpdateReceiver() override;
-    void ReleaseReceiver() override;
+    bool updateReceiver() override;
+    void releaseReceiver() override;
 
 private:
     properties::StringProperty _spoutName;
@@ -140,23 +138,25 @@ public:
     SpoutSender();
     virtual ~SpoutSender();
 
-    void Release() override;
+    void release() override;
 
-    virtual bool UpdateSenderName(const std::string& name);
-    virtual bool UpdateSenderSize(int width, int height);
-    virtual bool UpdateSender(unsigned int texture, unsigned int textureType);
-    virtual void ReleaseSender();
+    virtual bool updateSenderName(const std::string& name);
+    virtual bool updateSenderSize(int width, int height);
+    virtual bool updateSender(unsigned int texture, unsigned int textureType);
+    virtual void releaseSender();
 
-    void OnUpdateSenderName(std::function<bool(const std::string&)> callback);
-    void OnUpdateSenderSize(std::function<bool(int, int)> callback);
-    void OnUpdateSender(std::function<bool(const std::string&, unsigned int,
+    void onUpdateSenderName(std::function<bool(const std::string&)> callback);
+    void onUpdateSenderSize(std::function<bool(int, int)> callback);
+    void onUpdateSender(std::function<bool(const std::string&, unsigned int,
                                            unsigned int, int, int)> callback);
-    void OnReleaseSender(std::function<void()> callback);
+    void onReleaseSender(std::function<void()> callback);
 
     bool isCreated() const;
     bool isSending() const;
 
 private:
+    bool updateSenderStatus();
+    
     bool _isErrorMessageDisplayed = false;
     bool _isCreated = false;
     bool _isSending = false;
@@ -166,8 +166,6 @@ private:
     std::function<bool(const std::string&, unsigned int,
         unsigned int, int, int)> _onUpdateSenderCallback = nullptr;
     std::function<void()> _onReleaseSenderCallback = nullptr;
-
-    bool UpdateSenderStatus();
 };
 
 class SpoutSenderPropertyProxy : public SpoutSender {
@@ -178,8 +176,8 @@ public:
         const ghoul::Dictionary& dictionary);
     virtual ~SpoutSenderPropertyProxy();
 
-    bool UpdateSender(unsigned int texture, unsigned int textureType) override;
-    void ReleaseSender() override;
+    bool updateSender(unsigned int texture, unsigned int textureType) override;
+    void releaseSender() override;
 
 private:
     properties::StringProperty _spoutName;

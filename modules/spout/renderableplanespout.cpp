@@ -96,20 +96,20 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
 }
 
 void RenderablePlaneSpout::deinitializeGL() {
-    _spoutReceiver.Release();
+    _spoutReceiver.release();
 
     RenderablePlane::deinitializeGL();
 }
 
 void RenderablePlaneSpout::update(const UpdateData& data) {
     RenderablePlane::update(data);
-    _spoutReceiver.UpdateReceiver();
+    _spoutReceiver.updateReceiver();
 }
 
 void RenderablePlaneSpout::bindTexture() {
     if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.SaveGLTextureState();
-        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_spoutReceiver.SpoutTexture()));
+        _spoutReceiver.saveGLTextureState();
+        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_spoutReceiver.spoutTexture()));
     }
     else {
         RenderablePlane::bindTexture();
@@ -118,7 +118,7 @@ void RenderablePlaneSpout::bindTexture() {
 
 void RenderablePlaneSpout::unbindTexture() {
     if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.RestoreGLTextureState();
+        _spoutReceiver.restoreGLTextureState();
     }
     else {
         RenderablePlane::unbindTexture();

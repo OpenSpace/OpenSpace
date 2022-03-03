@@ -71,8 +71,6 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -85,7 +83,7 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
 }
 
 bool ScreenSpaceSpout::deinitializeGL() {
-    _spoutReceiver.Release();
+    _spoutReceiver.release();
 
     return ScreenSpaceRenderable::deinitializeGL();
 }
@@ -96,16 +94,16 @@ bool ScreenSpaceSpout::isReady() const {
 
 void ScreenSpaceSpout::update() {
     ScreenSpaceRenderable::update();
-    _spoutReceiver.UpdateReceiver();
+    _spoutReceiver.updateReceiver();
 }
 
 void ScreenSpaceSpout::bindTexture() {
-    _spoutReceiver.SaveGLTextureState();
-    glBindTexture(GL_TEXTURE_2D, (GLuint)_spoutReceiver.SpoutTexture());
+    _spoutReceiver.saveGLTextureState();
+    glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
 }
 
 void ScreenSpaceSpout::unbindTexture() {
-    _spoutReceiver.RestoreGLTextureState();
+    _spoutReceiver.restoreGLTextureState();
 }
 
 } // namespace openspace

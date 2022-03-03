@@ -28,6 +28,7 @@
 #ifdef WIN32
 
 #include <modules/base/rendering/renderablesphere.h>
+
 #include <modules/spout/spoutwrapper.h>
 
 namespace openspace {
