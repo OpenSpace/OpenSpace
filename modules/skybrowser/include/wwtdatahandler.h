@@ -53,12 +53,12 @@ namespace openspace::wwt {
 namespace openspace {
 
 struct ImageData {
-    std::string name{ wwt::Undefined };
-    std::string thumbnailUrl{ wwt::Undefined };
-    std::string imageUrl{ wwt::Undefined };
-    std::string credits{ wwt::Undefined };
-    std::string creditsUrl{ wwt::Undefined };
-    std::string collection{ wwt::Undefined };
+    std::string name = wwt::Undefined;
+    std::string thumbnailUrl = wwt::Undefined;
+    std::string imageUrl = wwt::Undefined;
+    std::string credits = wwt::Undefined;
+    std::string creditsUrl = wwt::Undefined;
+    std::string collection = wwt::Undefined;
     bool hasCelestialCoords = false;
     float fov = 0.f;
     glm::dvec2 equatorialSpherical = glm::dvec2(0.0);

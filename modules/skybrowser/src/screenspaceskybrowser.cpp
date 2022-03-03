@@ -39,18 +39,17 @@
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
 
-    constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo =
-    {
+    constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Field Of View Animation Speed",
-        "The factor which is multiplied with the animation of the field of view."
+        "A factor that determines the speed of the animation of the field of view. A "
+        "higher number for the factor means a faster speed."
     };
-    constexpr const openspace::properties::Property::PropertyInfo TextureQualityInfo =
-    {
+    constexpr const openspace::properties::Property::PropertyInfo TextureQualityInfo = {
         "TextureQuality",
         "Quality of Texture",
         "A parameter to set the resolution of the texture. 1 is full resolution and "
-        "slower framerate. Lower value means lower resolution of texture and faster "
+        "slower frame rate. Lower value means lower resolution of texture and faster "
         "frame rate."
     };
 

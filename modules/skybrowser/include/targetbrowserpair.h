@@ -46,17 +46,17 @@ public:
     // Target & Browser
     void initialize();
     // Highlighting
-    void removeHighlight(glm::ivec3 color); 
-    void highlight(glm::ivec3 color);
+    void removeHighlight(const glm::ivec3& color); 
+    void highlight(const glm::ivec3& color);
     // Animation
     void startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool shouldLockAfter = true);
     void incrementallyAnimateToCoordinate(double deltaTime);
     void incrementallyFade(float goalState, float fadeTime, float deltaTime);
     // Mouse interaction
-    bool checkMouseIntersection(glm::vec2 mousePosition);
-    glm::vec2 selectedScreenSpacePosition();
-    bool isBrowserSelected();
-    bool isTargetSelected();
+    bool checkMouseIntersection(const glm::vec2& mousePosition);
+    glm::vec2 selectedScreenSpacePosition() const;
+    bool isBrowserSelected() const;
+    bool isTargetSelected() const;
     void fineTuneTarget(const glm::vec2& start, const glm::vec2& translation);
     void translateSelected(const glm::vec2& start, const glm::vec2& translation);
     void synchronizeAim();
@@ -97,7 +97,7 @@ public:
     
     ScreenSpaceSkyTarget* getTarget();
     ScreenSpaceSkyBrowser* getBrowser();
-    const std::deque<int>& getSelectedImages() const;
+    const std::deque<int>& selectedImages() const;
     
     // WorldWide Telescope image handling
     void setImageOrder(int i, int order);

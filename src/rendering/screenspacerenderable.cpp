@@ -476,18 +476,19 @@ void ScreenSpaceRenderable::update() {}
 bool ScreenSpaceRenderable::isEnabled() const {
     return _enabled;
 }
-bool ScreenSpaceRenderable::isUsingRaeCoords() const
-{
+
+bool ScreenSpaceRenderable::isUsingRaeCoords() const {
     return _useRadiusAzimuthElevation;
 }
-bool ScreenSpaceRenderable::isFacingCamera() const
-{
+
+bool ScreenSpaceRenderable::isFacingCamera() const {
     return _faceCamera;
 }
-void ScreenSpaceRenderable::setEnabled(bool isEnabled)
-{
+
+void ScreenSpaceRenderable::setEnabled(bool isEnabled) {
     _enabled = isEnabled;
 }
+
 float ScreenSpaceRenderable::depth() {
     return _useRadiusAzimuthElevation ?
         _raePosition.value().x :
@@ -538,8 +539,9 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
   
     return scale;
 }
-glm::vec2  ScreenSpaceRenderable::screenSpacePosition() {
-    return glm::vec2(_cartesianPosition.value().x, _cartesianPosition.value().y);
+
+glm::vec2 ScreenSpaceRenderable::screenSpacePosition() {
+    return glm::vec2(_cartesianPosition.value());
 }
 
 glm::vec2  ScreenSpaceRenderable::screenSpaceDimensions() {
@@ -555,7 +557,7 @@ glm::vec2 ScreenSpaceRenderable::lowerLeftCornerScreenSpace() {
     return screenSpacePosition() - (screenSpaceDimensions() / 2.0f);
 }
 
-bool ScreenSpaceRenderable::intersection(glm::vec2 coord) {
+bool ScreenSpaceRenderable::isIntersecting(glm::vec2 coord) {
     bool isUnderTopBorder = coord.x < upperRightCornerScreenSpace().x;
     bool isLeftToRightBorder = coord.y < upperRightCornerScreenSpace().y;
     bool isRightToLeftBorder = coord.x > lowerLeftCornerScreenSpace().x;
@@ -574,18 +576,15 @@ void ScreenSpaceRenderable::translate(glm::vec2 translation, glm::vec2 position)
     _cartesianPosition = translationMatrix * origin;
 }
 
-void ScreenSpaceRenderable::setCartesianPosition(const glm::vec3& position)
-{
+void ScreenSpaceRenderable::setCartesianPosition(const glm::vec3& position) {
     _cartesianPosition = position;
 }
 
-void ScreenSpaceRenderable::setRaeFromCartesianPosition(const glm::vec3& position)
-{
+void ScreenSpaceRenderable::setRaeFromCartesianPosition(const glm::vec3& position) {
     _raePosition = cartesianToRae(position);
 }
 
-glm::vec3 ScreenSpaceRenderable::raePosition() const
-{
+glm::vec3 ScreenSpaceRenderable::raePosition() const {
     return _raePosition;
 }
 
@@ -623,13 +622,11 @@ glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
     return rotation * glm::mat4(glm::quat(glm::vec3(pitch, yaw, roll)));
 }
 
-glm::vec3 ScreenSpaceRenderable::raeToCartesian(const glm::vec3& rae) const
-{
+glm::vec3 ScreenSpaceRenderable::raeToCartesian(const glm::vec3& rae) const {
     return sphericalToCartesian(raeToSpherical(rae));
 }
 
-glm::vec3 ScreenSpaceRenderable::cartesianToRae(const glm::vec3& cartesian) const
-{
+glm::vec3 ScreenSpaceRenderable::cartesianToRae(const glm::vec3& cartesian) const {
     return sphericalToRae(cartesianToSpherical(cartesian));
 }
 

@@ -99,11 +99,11 @@ void WwtCommunicator::setBorderColor(glm::ivec3 color) {
     _borderColorIsDirty = true;
 }
 
-void WwtCommunicator::highlight(glm::ivec3 addition) {
+void WwtCommunicator::highlight(const glm::ivec3& addition) {
     setWebpageBorderColor(_borderColor + addition);
 }
 
-void WwtCommunicator::removeHighlight(glm::ivec3 removal) {
+void WwtCommunicator::removeHighlight(const glm::ivec3& removal) {
     setWebpageBorderColor(_borderColor - removal);
 }
 
@@ -221,12 +221,12 @@ float WwtCommunicator::verticalFov() const {
 
 // WWT messages
 ghoul::Dictionary WwtCommunicator::moveCameraMessage(const glm::dvec2& celestCoords, 
-                                                double fov, double roll, 
-                                                bool shouldMoveInstantly) {
+                                                     double fov, double roll, 
+                                                     bool shouldMoveInstantly) 
+{
     using namespace std::string_literals;
     ghoul::Dictionary msg;
 
-    // Create message
     msg.setValue("event", "center_on_coordinates"s);
     msg.setValue("ra", celestCoords.x);
     msg.setValue("dec", celestCoords.y);
@@ -257,7 +257,8 @@ ghoul::Dictionary WwtCommunicator::setForegroundMessage(const std::string& name)
 }
 
 ghoul::Dictionary WwtCommunicator::addImageMessage(const std::string& id, 
-                                            const std::string& url) {
+                                                   const std::string& url) 
+{
     using namespace std::string_literals;
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_create"s);
@@ -279,7 +280,8 @@ ghoul::Dictionary WwtCommunicator::removeImageMessage(const std::string& imageId
 }
 
 ghoul::Dictionary WwtCommunicator::setImageOpacityMessage(const std::string& imageId, 
-                                                    double opacity) {
+                                                          double opacity) 
+{
     using namespace std::string_literals;
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_set"s);

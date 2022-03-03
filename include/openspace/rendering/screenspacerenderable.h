@@ -80,7 +80,7 @@ public:
     glm::vec2 screenSpaceDimensions();
     glm::vec2 upperRightCornerScreenSpace();
     glm::vec2 lowerLeftCornerScreenSpace();
-    bool intersection(glm::vec2 coord);
+    bool isIntersecting(glm::vec2 coord);
     void translate(glm::vec2 translation, glm::vec2 position);
     void setCartesianPosition(const glm::vec3& position);
     void setRaeFromCartesianPosition(const glm::vec3& position);

@@ -34,7 +34,6 @@ namespace openspace::skybrowser {
 
 // Converts from spherical coordinates in the unit of degrees to cartesian coordianates
 glm::dvec3 sphericalToCartesian(const glm::dvec2& coords) {
-
     glm::dvec2 coordsRadians = glm::radians(coords);
 
     glm::dvec3 cartesian = glm::dvec3(
@@ -100,8 +99,7 @@ glm::dvec3 localCameraToEquatorial(const glm::dvec3& coords) {
     return skybrowser::galacticToEquatorial(galactic);
 }
     
-glm::dvec3 equatorialToLocalCamera(const glm::dvec3& coords)
-{
+glm::dvec3 equatorialToLocalCamera(const glm::dvec3& coords) {
     // Transform equatorial J2000 to galactic coord with infinite radius    
     glm::dvec3 galactic = equatorialToGalactic(coords);
     glm::dvec3 localCamera = galacticToLocalCamera(galactic);
@@ -161,7 +159,6 @@ bool isCoordinateInView(const glm::dvec3& equatorial) {
     bool isCoordInView = abs(coordsScreen.x) < r && abs(coordsScreen.y) < 1.f && 
                                 coordsScreen.z < 0;
 
-    // If the coordinate is not in view, rotate camera
     return isCoordInView;
 }
 
@@ -187,17 +184,15 @@ glm::dvec2 fovWindow() {
     return OpenSpaceFOV;
 }
 
-double angleBetweenVectors(const glm::dvec3&  start, const glm::dvec3&  end) {
-    
+double angleBetweenVectors(const glm::dvec3& start, const glm::dvec3& end) {
     // Find smallest angle between the two vectors
     double cos = glm::dot(start, end) / (glm::length(start) * glm::length(end));
     return std::acos(cos);
 }
 
-glm::dmat4 incrementalAnimationMatrix(const glm::dvec3&  start,
-                                const glm::dvec3&  end, double deltaTime, 
-                                double speedFactor) {
-        
+glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3& end, 
+                                      double deltaTime, double speedFactor) 
+{        
     double smallestAngle = angleBetweenVectors(start, end);
     // Calculate rotation this frame
     double rotationAngle = smallestAngle * deltaTime * speedFactor;

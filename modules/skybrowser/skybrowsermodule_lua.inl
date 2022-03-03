@@ -327,7 +327,7 @@ int getTargetData(lua_State* L) {
             std::string id = pair->browserId();
             // Convert deque to vector so ghoul can read it
             std::vector<int> selectedImagesVector;
-            const std::deque<int> selectedImages = pair->getSelectedImages();
+            const std::deque<int> selectedImages = pair->selectedImages();
             std::for_each(
                 selectedImages.begin(), 
                 selectedImages.end(), 

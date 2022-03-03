@@ -1133,7 +1133,6 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     );
 
     if (it != global::screenSpaceRenderables->end()) {
-
         global::eventEngine->publishEvent<events::EventScreenSpaceRenderableRemoved>(s);
         s->deinitializeGL();
         s->deinitialize();

@@ -67,9 +67,9 @@ public:
     void setEquatorialAim(glm::dvec2 equatorial);
     void setBorderColor(glm::ivec3 color);
 
-    void highlight(glm::ivec3 addition);
+    void highlight(const glm::ivec3& addition);
     // The removal parameter decides what will be removed from the border color
-    void removeHighlight(glm::ivec3 removal);
+    void removeHighlight(const glm::ivec3& removal);
     void updateBorderColor();
     void updateAim();
     

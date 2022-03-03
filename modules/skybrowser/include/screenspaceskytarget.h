@@ -78,8 +78,8 @@ public:
     void startAnimation(glm::dvec3 end, bool shouldLockAfter = true);
     void incrementallyAnimateToCoordinate(float deltaTime);
     // Display
-    void highlight(glm::ivec3 addition);
-    void removeHighlight(glm::ivec3 removal);
+    void highlight(const glm::ivec3& addition);
+    void removeHighlight(const glm::ivec3& removal);
 
 private:
     // Properties

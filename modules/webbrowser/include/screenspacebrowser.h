@@ -78,7 +78,6 @@ protected:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
 private:
-
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:
         void draw() override;
@@ -93,16 +92,13 @@ private:
     void bindTexture() override;
 
     properties::StringProperty _url;
-    
     properties::TriggerProperty _reload;
-
 
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
     
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;
 };
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
