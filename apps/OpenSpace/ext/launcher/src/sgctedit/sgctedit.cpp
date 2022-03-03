@@ -75,8 +75,6 @@ void SgctEdit::createWidgets() {
         layoutMonBox->addWidget(_monBox.get());
         layoutMonBox->addStretch(1);
         layoutMainV->addLayout(layoutMonBox);
-        _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        _monBox->setFixedSize(_monitorWidgetSize.width(), _monitorWidgetSize.height());
         addDisplayLayout(layoutMainH);
     }
     {

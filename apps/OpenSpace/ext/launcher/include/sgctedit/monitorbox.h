@@ -86,6 +86,7 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
+    void determineMonitorArrangement();
     void mapMonitorResolutionToWidgetCoordinates();
     void paintWidgetBorder(QPainter& painter, int width, int height);
     void paintMonitorBackgrounds(QPainter& painter);
@@ -101,6 +102,8 @@ private:
     QRectF _monitorWidgetSize;
     QRectF _monitorBoundaryRect;
     unsigned int _nMonitors = 1;
+    float _monitorArrangementAspectRatio = 1.f;
+    QSizeF _monitorArrangementDimensions = { 0.0, 0.0 };
     std::vector<QRect> _monitorResolution;
     std::vector<QRectF> _monitorDimensionsScaled;
     QRectF _negativeCorrectionOffsets = {0.f, 0.f, 0.f, 0.f};
