@@ -79,7 +79,6 @@
 #endif // OPENVR_SUPPORT
 
 #ifdef OPENSPACE_HAS_SPOUT
-#include "SpoutLibraryWrapper.h"
 #include <modules/spout/spoutwrapper.h>
 #endif // OPENSPACE_HAS_SPOUT
 
