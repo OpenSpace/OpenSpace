@@ -79,7 +79,9 @@ void WindowControl::resetToDefaults() {
     determineIdealWindowSize();
     _windowName->setText("");
     _monIndex = _monIndexDefault;
-    _comboMonitorSelect->setCurrentIndex(_monIndexDefault);
+    if (_nMonitors > 1) {
+        _comboMonitorSelect->setCurrentIndex(_monIndexDefault);
+    }
     _checkBoxWindowDecor->setCheckState(Qt::CheckState::Checked);
     _checkBoxWebGui->setCheckState(Qt::CheckState::Unchecked);
     onWebGuiSelection(_checkBoxWebGui->checkState());
@@ -110,6 +112,11 @@ void WindowControl::determineIdealWindowSize() {
     _windowDims.setWidth(newWidth);
     _sizeX->setText(QString::number(static_cast<int>(newWidth)));
     _sizeY->setText(QString::number(static_cast<int>(newHeight)));
+}
+
+QString WindowControl::resolutionLabelText(QRect resolution) {
+    return QString::number(resolution.width()) + "x" +
+        QString::number(resolution.height());
 }
 
 void WindowControl::createWidgets(QWidget* parent) {
@@ -146,6 +153,9 @@ void WindowControl::createWidgets(QWidget* parent) {
     }
     if (_nMonitors > 1) {
         _comboMonitorSelect = new QComboBox(this);
+        for (unsigned int i = 0; i < _nMonitors; ++i) {
+            _monitorNames[i] += " (" + resolutionLabelText(_monitorResolutions[i]) + ")";
+        }
         _comboMonitorSelect->addItems(_monitorNames);
         _comboMonitorSelect->setCurrentIndex(_monIndexDefault);
     }
@@ -177,12 +187,14 @@ void WindowControl::createWidgets(QWidget* parent) {
     connect(_sizeY, &QLineEdit::textChanged, this, &WindowControl::onSizeYChanged);
     connect(_offsetX, &QLineEdit::textChanged, this, &WindowControl::onOffsetXChanged);
     connect(_offsetY, &QLineEdit::textChanged, this, &WindowControl::onOffsetYChanged);
-    connect(
-        _comboMonitorSelect,
-        qOverload<int>(&QComboBox::currentIndexChanged),
-        this,
-        &WindowControl::onMonitorChanged
-    );
+    if (_nMonitors > 1) {
+        connect(
+            _comboMonitorSelect,
+            qOverload<int>(&QComboBox::currentIndexChanged),
+            this,
+            &WindowControl::onMonitorChanged
+        );
+    }
     connect(
         _comboProjection,
         qOverload<int>(&QComboBox::currentIndexChanged),

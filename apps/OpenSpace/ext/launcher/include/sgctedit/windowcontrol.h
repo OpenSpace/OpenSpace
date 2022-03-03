@@ -189,6 +189,7 @@ private slots:
 private:
     void createWidgets(QWidget* parent);
     void determineIdealWindowSize();
+    QString resolutionLabelText(QRect resolution);
     void updatePlanarLockedFov();
     void updateScaledWindowDimensions();
     std::function<void(int, int, const QRectF&)> _windowChangeCallback;
