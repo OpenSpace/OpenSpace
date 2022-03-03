@@ -37,6 +37,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/collisionhelper.h>
 
 namespace openspace::globebrowsing::luascriptfunctions {
 
@@ -398,28 +399,50 @@ int getLocalPositionFromGeo(lua_State* L) {
 }
 
 int getGeoPositionForCamera(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getGeoPositionForCamera");
+    ghoul::lua::checkArgumentsAndThrow(L, { 0, 2 }, "lua::getGeoPositionForCamera");
+    std::optional<bool> eyePosition = ghoul::lua::value<std::optional<bool>>(L);
+    std::optional<double> eyeDistance = ghoul::lua::value<std::optional<double>>(L);
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-    const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
+    const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();//focus vs anchor
     if (!globe) {
         return ghoul::lua::luaError(L, "Focus node must be a RenderableGlobe");
     }
+    Camera* camera = global::navigationHandler->camera();
 
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    glm::dvec3 cameraPosition = camera->positionVec3();
     const SceneGraphNode* anchor =
-        global::navigationHandler->orbitalNavigator().anchorNode();
+        global::navigationHandler->orbitalNavigator().anchorNode(); //focus vs anchor
     const glm::dmat4 inverseModelTransform = glm::inverse(anchor->modelTransform());
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+    glm::dvec3 intersectionPoint;
+
+    if (eyePosition.value_or(false)) {
+        const glm::dvec3 anchorPos = anchor->worldPosition();
+        const glm::dvec3 cameraDir = ghoul::viewDirection(camera->rotationQuaternion());
+
+//        const double anchorToPosDistance = glm::log(glm::distance(anchorPos, cameraPosition)) * eyeDistance.value_or(500);
+       //const double anchorToPosDistance = 
+        glm::dvec3 lookAtPos = cameraPosition + globe->boundingSphere() * cameraDir;
+        bool didCollide = openspace::collision::lineSphereIntersection(cameraPosition, lookAtPos, anchorPos, globe->boundingSphere(), intersectionPoint);
+        if (didCollide) {
+            //cameraPosition = intersectionPoint;
+            //all good
+        }
+        else {
+            ///HADNDLDLLELELELELE
+            return ghoul::lua::luaError(L, "Cant find place for tower");
+        }
+    }
+//    const glm::dvec3 cameraPositionModelSpace =
+//glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
-        cameraPositionModelSpace
+        intersectionPoint
     );
 
     const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
         posHandle.centerToReferenceSurface
     );
-    const double altitude = glm::length(cameraPositionModelSpace -
+    const double altitude = glm::length(intersectionPoint -
                                   posHandle.centerToReferenceSurface);
 
     ghoul::lua::push(L, glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude);

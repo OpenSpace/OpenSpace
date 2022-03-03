@@ -438,9 +438,10 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getGeoPositionForCamera",
             &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
-            "void",
+            "[bool]",
             "Get geographic coordinates of the camera position in latitude, "
-            "longitude, and altitude (degrees and meters)."
+            "longitude, and altitude (degrees and meters). If the optional bool "
+            "paramater is specified, the camera eye postion will be used instead"
         },
         {
             "loadWMSCapabilities",
