@@ -34,7 +34,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "LayerGroup";
-    constexpr const char* KeyFallback = "Fallback";
 
     constexpr openspace::properties::Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
@@ -68,18 +67,6 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
-
-            if (layerDict.hasValue<ghoul::Dictionary>(KeyFallback))  {
-                LWARNING("Unable to create layer. Initializing fallback layer.");
-                ghoul::Dictionary fallbackLayerDict =
-                    layerDict.value<ghoul::Dictionary>(KeyFallback);
-                try {
-                    addLayer(fallbackLayerDict);
-                }
-                catch (const ghoul::RuntimeError& except) {
-                    LERRORC(except.component, except.message);
-                }
-            }
         }
     }
 }

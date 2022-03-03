@@ -56,6 +56,8 @@ public:
     void enqueue(std::function<void()> f);
     void clearTasks();
 
+    bool hasOutstandingTasks() const;
+
 private:
     friend class Worker;
 

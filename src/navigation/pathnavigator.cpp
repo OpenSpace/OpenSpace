@@ -45,10 +45,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultPathType",
         "Default Path Type",
-        "The defualt path type chosen when generating a path. See wiki for alternatives."
-        " The shape of the generated path will be different depending on the path type."
-        // TODO (2021-08-15, emmbr) right now there is no way to specify a type for a
-        // single path instance, only for any created paths
+        "The default path type chosen when generating a path or flying to a target. "
+        "See wiki for alternatives. The shape of the generated path will be different "
+        "depending on the path type."
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
@@ -70,6 +69,15 @@ namespace {
         "Apply Idle Behavior on Finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
         "triggered once the path has reached its target."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ArrivalDistanceFactorInfo = {
+        "ArrivalDistanceFactor",
+        "Arrival Distance Factor",
+        "A factor used to compute the default distance from a target scene graph node "
+        "when creating a camera path. The factor will be multipled with the node's "
+        "bounding sphere to compute the target height from the bounding sphere of the "
+        "object."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo =
@@ -102,13 +110,14 @@ PathNavigator::PathNavigator()
     , _includeRoll(IncludeRollInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
+    , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
     _defaultPathType.addOptions({
         { Path::Type::AvoidCollision, "AvoidCollision" },
-        { Path::Type::Linear, "Linear" },
         { Path::Type::ZoomOutOverview, "ZoomOutOverview"},
+        { Path::Type::Linear, "Linear" },
         { Path::Type::AvoidCollisionWithLookAt, "AvoidCollisionWithLookAt"}
     });
     addProperty(_defaultPathType);
@@ -116,6 +125,7 @@ PathNavigator::PathNavigator()
     addProperty(_includeRoll);
     addProperty(_speedScale);
     addProperty(_applyIdleBehaviorOnFinish);
+    addProperty(_arrivalDistanceFactor);
     addProperty(_minValidBoundingSphere);
 
     _relevantNodeTags = std::vector<std::string>{
@@ -142,6 +152,10 @@ const Path* PathNavigator::currentPath() const {
 
 double PathNavigator::speedScale() const {
     return _speedScale;
+}
+
+double PathNavigator::arrivalDistanceFactor() const {
+    return _arrivalDistanceFactor;
 }
 
 bool PathNavigator::hasCurrentPath() const {
@@ -191,7 +205,7 @@ void PathNavigator::updateCamera(double deltaTime) {
     camera()->setPose(newPose);
 
     if (_currentPath->hasReachedEnd()) {
-        LINFO("Reached end of path");
+        LINFO("Reached target");
         handlePathEnd();
 
         if (_applyIdleBehaviorOnFinish) {
@@ -211,10 +225,6 @@ void PathNavigator::updateCamera(double deltaTime) {
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
-    // @TODO (2021-08.16, emmbr): Improve how curve types are handled.
-    // We want the user to be able to choose easily
-    const int pathType = _defaultPathType;
-
     OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         // Silently ignore any paths that are being created during a session recording
@@ -225,9 +235,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     clearPath();
 
     try {
-        _currentPath = std::make_unique<Path>(
-            createPathFromDictionary(dictionary, Path::Type(pathType))
-        );
+        _currentPath = std::make_unique<Path>(createPathFromDictionary(dictionary));
     }
     catch (const documentation::SpecificationError& e) {
         LERROR("Could not create camera path");
@@ -238,16 +246,21 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
             LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
     }
+    catch (const PathCurve::TooShortPathError&) {
+        // Do nothing
+    }
     catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format("Could not create path. Reason: ", e.message));
         return;
     }
 
-    LINFO("Successfully generated camera path");
+    LDEBUG("Successfully generated camera path");
 }
 
 void PathNavigator::clearPath() {
-    LDEBUG("Clearing path");
+    if (_currentPath) {
+        LDEBUG("Clearing path");
+    }
     _currentPath = nullptr;
 }
 
@@ -272,16 +285,14 @@ void PathNavigator::startPath() {
         );
 
         _startSimulationTimeOnFinish = true;
-        LINFO(
-            "Pausing time simulation during path traversal. "
-            "Will unpause once the camera path is finished"
-        );
+        LINFO("Pausing time simulation during path traversal");
     }
 
     LINFO("Starting path");
     _isPlaying = true;
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
+    global::navigationHandler->orbitalNavigator().resetVelocities();
 }
 
 void PathNavigator::abortPath() {
@@ -323,8 +334,56 @@ void PathNavigator::continuePath() {
     _isPlaying = true;
 }
 
+Path::Type PathNavigator::defaultPathType() const {
+    const int pathType = _defaultPathType;
+    return Path::Type(pathType);
+}
+
 double PathNavigator::minValidBoundingSphere() const {
     return _minValidBoundingSphere;
+}
+
+double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const {
+    ghoul_assert(node != nullptr, "Node must not be nulltpr");
+    auto sphere = [](const SceneGraphNode* n) {
+        // Use the biggest of the bounding sphere and interaction sphere,
+        // so we don't accidentally choose a bounding sphere that is much smaller
+        // than the interaction sphere of the node
+        double bs = n->boundingSphere();
+        double is = n->interactionSphere();
+        return is > bs ? is : bs;
+    };
+
+    double result = sphere(node);
+
+    if (result < _minValidBoundingSphere) {
+        // If the bs of the target is too small, try to find a good value in a child node.
+        // Only check the closest children, to avoid deep traversal in the scene graph.
+        // Alsp. the chance to find a bounding sphere that represents the visual size of
+        // the target well is higher for these nodes
+        for (SceneGraphNode* child : node->children()) {
+            result = sphere(child);
+            if (result > _minValidBoundingSphere) {
+                LDEBUG(fmt::format(
+                    "The scene graph node '{}' has no, or a very small, bounding sphere. "
+                    "Using bounding sphere of child node '{}' in computations.",
+                    node->identifier(),
+                    child->identifier()
+                ));
+                return result;
+            }
+        }
+
+        LDEBUG(fmt::format(
+            "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
+            "minimal value. This might lead to unexpected results.",
+            node->identifier())
+        );
+
+        result = _minValidBoundingSphere;
+    }
+
+    return result;
 }
 
 const std::vector<SceneGraphNode*>& PathNavigator::relevantNodes() {
@@ -346,7 +405,6 @@ void PathNavigator::handlePathEnd() {
         );
     }
     _startSimulationTimeOnFinish = false;
-    clearPath();
     global::openSpaceEngine->resetMode();
 }
 
@@ -438,9 +496,9 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 &luascriptfunctions::flyTo,
                 "string [, bool, double]",
                 "Move the camera to the node with the specified identifier. The optional "
-                "double specifies the duration of the motion. If the optional bool is "
-                "set to true the target up vector for camera is set based on the target "
-                "node. Either of the optional parameters can be left out."
+                "double specifies the duration of the motion, in seconds. If the optional "
+                "bool is set to true the target up vector for camera is set based on the "
+                "target node. Either of the optional parameters can be left out."
             },
             {
                 "flyToHeight",
@@ -449,18 +507,48 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "Move the camera to the node with the specified identifier. The second "
                 "argument is the desired target height above the target node's bounding "
                 "sphere, in meters. The optional double specifies the duration of the "
-                "motion. If the optional bool is set to true, the target up vector for "
-                "camera is set based on the target node. Either of the optional "
-                "parameters can be left out."
+                "motion, in seconds. If the optional bool is set to true, the target "
+                "up vector for camera is set based on the target node. Either of the "
+                "optional parameters can be left out."
             },
-             {
+            {
                 "flyToNavigationState",
                 &luascriptfunctions::flyToNavigationState,
                 "table, [double]",
                 "Create a path to the navigation state described by the input table. "
-                "The optional double specifies the target duration of the motion. Note "
-                "that roll must be included for the target up direction to be taken "
-                "into account."
+                "The optional double specifies the target duration of the motion, "
+                "in seconds. Note that roll must be included for the target up "
+                "direction to be taken into account."
+            },
+            {
+                "zoomToFocus",
+                &luascriptfunctions::zoomToFocus,
+                "[duration]",
+                "Zoom linearly to the current focus node, using the default distance."
+                "The optional input parameter specifies the duration for the motion, "
+                "in seconds."
+            },
+            {
+                "zoomToDistance",
+                &luascriptfunctions::zoomToDistance,
+                "distance, [duration]",
+                "Fly linearly to a specific distance in relation to the focus node. "
+                "The distance is given in meters above the bounding sphere of the "
+                "current focus node."
+                "The optional input parameter specifies the duration for the motion, "
+                "in seconds."
+            },
+            {
+                "zoomToDistanceRelative",
+                &luascriptfunctions::zoomToDistanceRelative,
+                "distance, [duration]",
+                "Fly linearly to a specific distance in relation to the focus node. "
+                "The distance is given as a multiple of the bounding sphere of the "
+                "current focus node. That is, a value of 1 will result in a position "
+                "at a distance of one times the size of the bounding sphere away from "
+                "the object."
+                "The optional input parameter specifies the duration for the motion, "
+                "in seconds."
             },
             {
                 "createPath",

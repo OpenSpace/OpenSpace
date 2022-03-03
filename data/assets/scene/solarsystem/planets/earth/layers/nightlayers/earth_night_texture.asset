@@ -1,3 +1,5 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
 local texturesPath = asset.syncedResource({
   Name = "Earth Textures",
   Type = "HttpSynchronization",
@@ -11,6 +13,14 @@ local layer = {
   FilePath = texturesPath .. "earth_night.jpg",
   Description = [[ Earth's city lights are clearly visible from space ]]
 }
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "NightLayers", layer)
+end)
 
 asset.export("layer", layer)
 

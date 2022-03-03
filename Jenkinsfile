@@ -29,50 +29,12 @@ def moduleCMakeFlags() {
     modules = bat(returnStdout: true, script: '@dir modules /b /ad /on').trim().split('\r\n');
   }
 
-  // def dirs = readDir();
-  // def currentDir = new File('.')
-  // def dirs = []
-  // currentDir.eachFile FileType.DIRECTORIES, {
-  //     dirs << it.name
-  // }
-  // def moduleFlags = [
-  //   'atmosphere',
-  //   'base',
-  //   // 'cefwebgui',
-  //   'debugging',
-  //   'digitaluniverse',
-  //   'fieldlines',
-  //   'fieldlinessequence',
-  //   'fitsfilereader',
-  //   'gaia',
-  //   'galaxy',
-  //   'globebrowsing',
-  //   'imgui',
-  //   'iswa',
-  //   'kameleon',
-  //   'kameleonvolume',
-  //   'multiresvolume',
-  //   'server',
-  //   'space',
-  //   'spacecraftinstruments',
-  //   'space',
-  //   'spout',
-  //   'sync',
-  //   'touch',
-  //   'toyvolume',
-  //   'volume',
-  //   // 'webbrowser',
-  //   // 'webgui'
-  // ];
-
   def flags = '';
   for (module in modules) {
       flags += "-DOPENSPACE_MODULE_${module.toUpperCase()}=ON "
   }
   return flags;
 }
-
-// echo flags
 
 //
 // Pipeline start
@@ -114,8 +76,10 @@ linux_gcc_make: {
           compileHelper.recordCompileIssues(compileHelper.Gcc());
       }
       stage('linux-gcc-make/test') {
+        testHelper.runUnitTests('bin/codegentest');
+        testHelper.runUnitTests('bin/SGCTTest');
+        testHelper.runUnitTests('bin/GhoulTest');
         testHelper.runUnitTests('bin/OpenSpaceTest');
-        testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -135,8 +99,10 @@ linux_gcc_ninja: {
           compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, '', 'build-ninja');
       }
       stage('linux-gcc-ninja/test') {
+        testHelper.runUnitTests('bin/codegentest');
+        testHelper.runUnitTests('bin/SGCTTest');
+        testHelper.runUnitTests('bin/GhoulTest');
         testHelper.runUnitTests('bin/OpenSpaceTest');
-        testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -157,8 +123,10 @@ linux_clang_make: {
           compileHelper.recordCompileIssues(compileHelper.Clang());
       }
       stage('linux-clang-make/test') {
+        testHelper.runUnitTests('bin/codegentest');
+        testHelper.runUnitTests('bin/SGCTTest');
+        testHelper.runUnitTests('bin/GhoulTest');
         testHelper.runUnitTests('bin/OpenSpaceTest');
-        testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -178,8 +146,10 @@ linux_clang_ninja: {
           compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-ninja');
       }
       stage('linux-clang-ninja/test') {
+        testHelper.runUnitTests('bin/codegentest');
+        testHelper.runUnitTests('bin/SGCTTest');
+        testHelper.runUnitTests('bin/GhoulTest');
         testHelper.runUnitTests('bin/OpenSpaceTest');
-        testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -197,8 +167,10 @@ windows_msvc: {
         compileHelper.recordCompileIssues(compileHelper.VisualStudio());
       }
       stage('windows-msvc/test') {
-        testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
-        testHelper.runUnitTests('bin\\Debug\\codegentest')
+        testHelper.runUnitTests('bin\\Debug\\codegentest');
+        testHelper.runUnitTests('bin\\Debug\\SGCTTest');
+        testHelper.runUnitTests('bin\\Debug\\GhoulTest');
+        testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest');
       }
       cleanWs()
     } // node('windows')

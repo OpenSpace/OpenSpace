@@ -22,69 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLENODELINE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLENODELINE___H__
+#ifndef __OPENSPACE_MODULE_SERVER___ENGINE_MODE_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___ENGINE_MODE_TOPIC___H__
 
-#include <openspace/rendering/renderable.h>
+#include <modules/server/include/topics/topic.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
-
-namespace ghoul::opengl { class ProgramObject; }
-namespace openspace::documentation { struct Documentation; }
+#include <openspace/engine/openspaceengine.h>
 
 namespace openspace {
 
-class Translation;
-
-/**
- * This is a class for a line that is drawn between two nodes in OpenSpace.
- */
-class RenderableNodeLine : public Renderable {
+class EngineModeTopic : public Topic {
 public:
-    RenderableNodeLine(const ghoul::Dictionary& dictionary);
-    ~RenderableNodeLine() = default;
+    EngineModeTopic();
+    virtual ~EngineModeTopic();
 
-    static documentation::Documentation Documentation();
-
-    // Get the distance between the start and end node
-    double distance() const;
-
-    std::string start() const;
-    std::string end() const;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
 private:
-    void initializeGL() override;
-    void deinitializeGL() override;
+    static const int UnsetOnChangeHandle = -1;
 
-    bool isReady() const override;
-    void updateVertexData();
-    void update(const UpdateData& data) override;
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    // Provides the mode int value in json message
+    void sendJsonData();
 
-    void unbindGL();
-    void bindGL();
-
-    ghoul::opengl::ProgramObject* _program;
-    /// The vertex attribute location for position
-    /// must correlate to layout location in vertex shader
-    const GLuint _locVertex = 0;
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
-    std::vector<float> _vertexArray;
-
-    glm::dvec3 _startPos = glm::dvec3(0.0);
-    glm::dvec3 _endPos = glm::dvec3(0.0);
-
-    properties::StringProperty _start;
-    properties::StringProperty _end;
-    properties::Vec3Property _lineColor;
-    properties::FloatProperty _lineWidth;
+    OpenSpaceEngine::Mode _lastMode;
+    int _modeCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLENODELINE___H__
+#endif // __OPENSPACE_MODULE_SERVER___ENGINE_MODE_TOPIC___H__

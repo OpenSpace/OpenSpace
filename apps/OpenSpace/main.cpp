@@ -1138,15 +1138,21 @@ int main(int argc, char* argv[]) {
         std::filesystem::path base = configurationFilePath.parent_path();
         FileSys.registerPathToken("${BASE}", base);
 
-        // For now, we just initialize glfw since we can't execute anything meaningfully
-        // after SGCT initializes glfw. There is a bit of startup delay because of this,
-        // but it shouldn't be too bad
-        glfwInit();
-        GLFWmonitor* m = glfwGetPrimaryMonitor();
-        const GLFWvidmode* mode = glfwGetVideoMode(m);
-        glm::ivec2 size = glm::ivec2(mode->width, mode->height);
-        glfwTerminate();
-
+        // The previous incarnation of this was initializing GLFW to get the primary
+        // monitor's resolution, but that had some massive performance implications as
+        // there was some issue with the swap buffer handling inside of GLFW. My
+        // assumption is that GLFW doesn't like being initialized, destroyed, and then
+        // initialized again. Therefore we are using the platform specific functions now
+        glm::ivec2 size = glm::ivec2(1920, 1080);
+#ifdef WIN32
+        DEVMODEW dm = { 0 };
+        dm.dmSize = sizeof(DEVMODEW);
+        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+        if (success) {
+            size.x = dm.dmPelsWidth;
+            size.y = dm.dmPelsHeight;
+        }
+#endif // WIN32
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
