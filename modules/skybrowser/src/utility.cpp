@@ -83,11 +83,15 @@ glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords) {
 }
 
 glm::dvec3 localCameraToGalactic(const glm::dvec3& coords) {
-    glm::dmat4 rotation = glm::inverse(
-        global::navigationHandler->camera()->viewRotationMatrix());
-    glm::dvec4 position = glm::dvec4(coords, 1.0);
+    glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+    glm::dvec4 coordsVec4 = glm::dvec4(coords, 1.0) ;
+    glm::dmat4 camMat = glm::inverse(
+        global::navigationHandler->camera()->combinedViewMatrix()
+    );
+    // Subtract gamera position to get the view direction
+    glm::dvec3 galactic = glm::dvec3(camMat * coordsVec4) - camPos;
 
-    return glm::normalize(rotation * position) * skybrowser::CelestialSphereRadius;
+    return glm::normalize(galactic) * skybrowser::CelestialSphereRadius;
 }
 
 glm::dvec3 localCameraToEquatorial(const glm::dvec3& coords) {
@@ -108,10 +112,8 @@ glm::dvec3 equatorialToLocalCamera(const glm::dvec3& coords) {
 
 glm::dvec3 galacticToLocalCamera(const glm::dvec3& coords) {
     // Transform vector to camera's local coordinate system
-    glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
-    glm::dmat4 camMat = global::navigationHandler->camera()->viewRotationMatrix();
-    glm::dvec3 viewDirectionWorld = glm::normalize(coords - camPos);
-    glm::dvec3 viewDirectionLocal = camMat * glm::dvec4(viewDirectionWorld, 1.0);
+    glm::dmat4 camMat = global::navigationHandler->camera()->combinedViewMatrix();
+    glm::dvec3 viewDirectionLocal = camMat * glm::dvec4(coords, 1.0);
 
     return glm::normalize(viewDirectionLocal);
 }
