@@ -38,7 +38,6 @@ namespace openspace {
 class ScreenSpaceSkyBrowser;
 
 class ScreenSpaceSkyTarget : public ScreenSpaceRenderable {
-    
 public:
     constexpr static const float DeltaTimeThreshold = 0.03f; 
 
@@ -74,7 +73,7 @@ public:
     bool isLocked() const;
 
     // Animation
-    bool isAnimated();
+    bool isAnimated() const;
     void startAnimation(glm::dvec3 end, bool shouldLockAfter = true);
     void incrementallyAnimateToCoordinate(float deltaTime);
     // Display
@@ -112,7 +111,6 @@ private:
     glm::dvec3 _animationEnd;        // Cartesian equatorial coordinates
     glm::dvec3 _animationStart;      // Cartesian equatorial coordinates
 };
-}
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYTARGET___H__
-

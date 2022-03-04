@@ -6,11 +6,11 @@ local circle = {
   Name = "HoverCircle",
   FaceCamera = false,
   UseRadiusAzimuthElevation = false,
-  RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
+  RadiusAzimuthElevation = { 1.0, 0.0, 0.0 }, -- use for dome
   Scale = 0.025,
   Enabled = false,
   TexturePath = "${ASSETS}/circle.png",
-  CartesianPosition =  { 0, 0, -2.1 },
+  CartesianPosition = { 0, 0, -2.1 },
 };
 
 asset.onInitialize(function ()

@@ -40,16 +40,14 @@
 #include "skybrowsermodule_lua.inl"
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo AllowInteractionInfo =
-    {
+    constexpr const openspace::properties::Property::PropertyInfo AllowInteractionInfo = {
         "AllowMouseInteraction",
         "Allow Mouse Interaction",
         "Toggles if it is possible to interact with the sky browser and sky targets with "
         "the mouse or not."
     };
     
-    constexpr const openspace::properties::Property::PropertyInfo AllowRotationInfo =
-    {
+    constexpr const openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow Camera Rotation",
         "Toggles if the camera should rotate to look at the sky target if it is going "
@@ -77,7 +75,10 @@ namespace openspace {
                 &skybrowser::luascriptfunctions::getListOfImages,
                 "",
                 "Returns a list of all the loaded AAS WorldWide Telescope images that "
-                "has been loaded."
+                "have been loaded. Each image has a name, thumbnail url, equatorial "
+                "spherical coordinates RA and Dec, equatorial Cartesian coordinates, "
+                "if the image has celestial coordinates, credits text, credits url "
+                "and the identifier of the image which is a unique number."
             }, 
             {
                 "setHoverCircle",
@@ -97,7 +98,7 @@ namespace openspace {
                 &skybrowser::luascriptfunctions::disableHoverCircle,
                 "",
                 "Disables the hover circle, if there is one added to the sky browser "
-                "module. "
+                "module."
             },
             {
                 "loadImagesToWWT",
@@ -533,7 +534,7 @@ void SkyBrowserModule::handleMouseClick(const MouseButton& button) {
         // Change view (by moving target) within browser if right mouse 
         // click on browser
         _startMousePosition = _mousePosition;
-        _startDragPosition = _mouseOnPair->getTarget()->screenSpacePosition();
+        _startDragPosition = _mouseOnPair->target()->screenSpacePosition();
         _interactionMode = MouseInteraction::FineTune;
     }
 }

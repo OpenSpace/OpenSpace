@@ -60,8 +60,7 @@ namespace {
         "be rendered in the target."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo =
-    {
+    constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Animation Speed",
         "The factor which is multiplied with the animation speed of the target."
@@ -76,8 +75,7 @@ namespace {
         "in equatorial Cartesian coordinate system."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo LineWidthInfo =
-    {
+    constexpr const openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "The thickness of the line of the target. The larger number, the thicker line."
@@ -299,7 +297,7 @@ bool ScreenSpaceSkyTarget::isLocked() const {
     return _isLocked;
 }
 
-bool ScreenSpaceSkyTarget::isAnimated() {
+bool ScreenSpaceSkyTarget::isAnimated() const {
     return _isAnimated;
 }
 

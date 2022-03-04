@@ -30,7 +30,7 @@
 namespace openspace::skybrowser {
 // Constants
 constexpr const double ScreenSpaceZ = -2.1;
-constexpr const glm::dvec3 NorthPole = { 0.0 , 0.0 , 1.0 };
+constexpr const glm::dvec3 NorthPole = { 0.0, 0.0, 1.0 };
 constexpr const double CelestialSphereRadius = std::numeric_limits<float>::max();  
 
 // Conversion matrix - J2000 equatorial <-> galactic
@@ -44,35 +44,135 @@ const glm::dmat3 conversionMatrix = glm::dmat3({
 // Galactic coordinates are projected onto the celestial sphere
 // Equatorial coordinates are unit length
 // Conversion spherical <-> Cartesian
+/**
+ * Converts from Cartesian coordinates to spherical coordinates with unit length.
+ * \param coords Cartesian coordinates
+ * \return Spherical coordinates with unit length in degrees
+ */
 glm::dvec2 cartesianToSpherical(const glm::dvec3& coords);
+/**
+ * Converts from spherical coordinates to Cartesian coordinates with unit length.
+ * \param coords Spherical coordinates in degrees
+ * \return Cartesian coordinates with unit length
+ */
 glm::dvec3 sphericalToCartesian(const glm::dvec2& coords);
 
 // Conversion J2000 equatorial <-> galactic
+/**
+ * Converts from Cartesian galactic coordinates to Cartesian equatorial coordinates in epoch
+ * J2000 with unit length. 
+ * \param coords Cartesian galactic coordinates
+ * \return Cartesian equatorial coordinates in the epoch of J2000 with unit length
+ */
 glm::dvec3 galacticToEquatorial(const glm::dvec3& coords);
+/**
+ * Converts from Cartesian equatorial coordinates to Cartesian galactic 
+ * coordinates. The galactic coordinates vector has the length of the radius of the 
+ * Celestial sphere.
+ * \param coords Cartesian equatorial coordinates
+ * \return Cartesian galactic coordinates placed on the Celestial sphere
+ */
 glm::dvec3 equatorialToGalactic(const glm::dvec3& coords);
 
-// Conversion to screen space from local camera / pixels
+// Conversion to screenspace from local camera / pixels
+/**
+ * Converts from local camera coordinates to screenspace coordinates. The screenspace
+ * coordinates are placed on the screenspace plane which has the z-coordinate as -2.1.
+ * \param coords Cartesian local camera coordinates
+ * \return Cartesian galactic coordinates placed on the Celestial sphere
+ */
 glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords);
+/**
+ * Converts from pixel coordinates to screenspace coordinates in 2D.
+ * \param mouseCoordinate Pixel coordinate
+ * \return Cartesian ScreenSpace coordinate
+ */
 glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate);
 
 // Conversion local camera space <-> galactic / equatorial
+/**
+ * Converts from Cartesian equatorial coordinates in epoch J2000 to local camera space.
+ * \param coords Cartesian equatorial coordinates in epoch J2000
+ * \return Local camera coordinates with unit length
+ */
 glm::dvec3 equatorialToLocalCamera(const glm::dvec3& coords);
-glm::dvec3 galacticToLocalCamera(const glm::dvec3&  coords);
-glm::dvec3 localCameraToGalactic(const glm::dvec3&  coords);
-glm::dvec3 localCameraToEquatorial(const glm::dvec3&  coords);
+/**
+ * Converts from Cartesian galactic coordinates to local camera space with unit length.
+ * \param coords Cartesian galactic coordinates
+ * \return Cartesian local camera coordinates with unit length
+ */
+glm::dvec3 galacticToLocalCamera(const glm::dvec3& coords);
+/**
+ * Converts from Cartesian local camera coordinates to galactic coordinates.
+ * \param coords Cartesian local camera coordinates
+ * \return Cartesian galactic coordinates placed on the Celestial sphere
+ */
+glm::dvec3 localCameraToGalactic(const glm::dvec3& coords);
+/**
+ * Converts from local camera coordinates to Cartesian equatorial coordinates in the epoch
+ * J2000.
+ * \param coords Cartesian local camera coordinates
+ * \return Cartesian equatorial coordinates with unit length
+ */
+glm::dvec3 localCameraToEquatorial(const glm::dvec3& coords);
 
 // Camera roll and direction
-double cameraRoll(); // Camera roll is with respect to the equatorial North Pole
+/**
+ * Returns the angle between the up direction of the OpenSpace camera and the equatorial 
+ * North Pole direction.
+ * \return Angle in degrees between the OpenSpace camera's up direction vector and the
+ * equatorial North Pole direction.
+ */
+double cameraRoll(); 
+/**
+ * Returns the view direction of the OpenSpace camera in galactic coordinates.
+ * \return View direction of the OpenSpace camera in Cartesian galactic coordinates.
+ */
 glm::dvec3 cameraDirectionGalactic();
+/**
+ * Returns the view direction of the OpenSpace camera in equatorial coordinates in epoch
+ * J2000.
+ * \return View direction of the OpenSpace camera in Cartesian equatorial coordinates in 
+ * epoch J2000.
+ */
 glm::dvec3 cameraDirectionEquatorial();
 
 // Window and field of view
+/**
+ * Returns the window ratio r which is calculated as x / y.
+ * \return The window ratio x / y
+ */
 float windowRatio();
+/**
+ * Returns the vertical and horizontal field of view of the OpenSpace window.
+ * \return The horizontal and vertical field of view in degrees.
+ */
 glm::dvec2 fovWindow();
+/**
+ * Returns true if the Cartesian equatorial coordinate is in the current view of the 
+ * camera.
+ * \param equatorial Cartesian equatorial coordinates in epoch J2000
+ * \return True if the coordinates are in the camera's current field of view
+ */
 bool isCoordinateInView(const glm::dvec3& equatorial);
 
 // Animation for target and camera 
+/**
+ * Returns the angle between two vectors.
+ * \param start Cartesian vector
+ * \param end Cartesian vector
+ * \return Angle between two vectors in radians
+ */
 double angleBetweenVectors(const glm::dvec3& start, const glm::dvec3& end);
+/**
+ * Returns a 4x4 matrix for an incremental rotation of a vector. The matrix should be used
+ * multiple times in order to animate.
+ * \param start Cartesian vector
+ * \param end Cartesian vector
+ * \param deltaTime The time between the current frame and the last
+ * \param speedFactor Factor that determines how fast the animation will be
+ * \return 4x4 matrix for incremental rotation animation of a vector
+ */
 glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3& end, 
     double deltaTime, double speedFactor = 1.0);       
     

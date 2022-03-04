@@ -73,7 +73,6 @@ public:
 
     void updateBrowserSize();
 
-    // Getters
     glm::vec2 browserPixelDimensions() const;    
     float browserRatio() const;
     void setCallbackDimensions(const std::function<void(const glm::dvec2&)>& function);

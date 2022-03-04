@@ -100,11 +100,12 @@ private:
     bool _isSyncedWithWwt = false;
     bool _borderColorIsDirty = false;
     bool _equatorialAimIsDirty = false;
-    int messageCounter{ 0 };
+    int messageCounter = 0;
 
     // Time variables
     // For capping the message passing to WWT
-    constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 10 };
+    constexpr static const std::chrono::milliseconds TimeUpdateInterval =
+        std::chrono::milliseconds(10);
     std::chrono::system_clock::time_point _lastUpdateTime;
 };
 } // namespace openspace

@@ -45,6 +45,7 @@ namespace {
         "A factor that determines the speed of the animation of the field of view. A "
         "higher number for the factor means a faster speed."
     };
+
     constexpr const openspace::properties::Property::PropertyInfo TextureQualityInfo = {
         "TextureQuality",
         "Quality of Texture",

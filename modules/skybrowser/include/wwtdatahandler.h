@@ -82,7 +82,7 @@ private:
     std::vector<ImageData> _images;
     std::vector<tinyxml2::XMLDocument*> _xmls;
 };
-}
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 

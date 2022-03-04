@@ -38,7 +38,6 @@ class ImageData;
 class TargetBrowserPair {
 public:
     constexpr static const float FadeThreshold = 0.01f;
-    constexpr static const double AnimationThreshold = 0.0001f;
 
     TargetBrowserPair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target);
     TargetBrowserPair& operator=(TargetBrowserPair other);
@@ -95,8 +94,8 @@ public:
     std::string selectedId();
     glm::vec2 size() const;
     
-    ScreenSpaceSkyTarget* getTarget();
-    ScreenSpaceSkyBrowser* getBrowser();
+    ScreenSpaceSkyTarget* target() const;
+    ScreenSpaceSkyBrowser* browser() const;
     const std::deque<int>& selectedImages() const;
     
     // WorldWide Telescope image handling
@@ -117,18 +116,18 @@ private:
     bool isBrowserFadeFinished(float goalState) const;
 
     // Selection
-    ScreenSpaceRenderable* _selected{ nullptr };
-    bool _isSelectedBrowser{ false };
+    ScreenSpaceRenderable* _selected = nullptr;
+    bool _isSelectedBrowser = false;
     
     // Target and browser
-    ScreenSpaceSkyTarget* _target{ nullptr };
-    ScreenSpaceSkyBrowser* _browser{ nullptr };
+    ScreenSpaceSkyTarget* _target = nullptr;
+    ScreenSpaceSkyBrowser* _browser = nullptr;
 
     // Shared properties between the target and the browser
-    float _verticalFov{ 70.0f };
-    glm::dvec2 _equatorialAim{ 0.0 };
-    glm::ivec3 _borderColor{ 255 };
-    glm::vec2 _dimensions{ 0.5f, 0.5f };
+    float _verticalFov = 70.f;
+    glm::dvec2 _equatorialAim = glm::dvec2(0.0);
+    glm::ivec3 _borderColor = glm::ivec3(255);
+    glm::vec2 _dimensions = glm::vec2(0.5f);
 };
 
 } // namespace openspace

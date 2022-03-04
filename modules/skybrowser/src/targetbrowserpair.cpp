@@ -344,11 +344,11 @@ bool TargetBrowserPair::isUsingRadiusAzimuthElevation() const {
     return _browser->isUsingRaeCoords() || _target->isUsingRaeCoords();
 }
 
-ScreenSpaceSkyTarget* TargetBrowserPair::getTarget() {
+ScreenSpaceSkyTarget* TargetBrowserPair::target() const {
     return _target;
 }
 
-ScreenSpaceSkyBrowser* TargetBrowserPair::getBrowser() {
+ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
     return _browser;
 }
 
