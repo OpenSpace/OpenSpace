@@ -106,7 +106,7 @@ namespace openspace::fls {
             return false;
         }
 
-        for (int i = 0; i < seedPoints.size(); ++i) {
+        for (size_t i = 0; i < seedPoints.size(); ++i) {
             std::unique_ptr<ccmc::Interpolator> interpolator =
                 std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
             ccmc::Tracer tracer(kameleon, interpolator.get());
@@ -174,7 +174,7 @@ namespace openspace::fls {
 
             //std::vector<glm::vec3>::iterator it = pathLine1.begin();
             //for (; it != pathLine1.end(); ++it) {
-            for (int j = 0; j < pathLine1.size(); ++j) {
+            for (size_t j = 0; j < pathLine1.size(); ++j) {
 
                 std::vector<glm::vec3> keyFrame1;
                 traceAndCreateKeyFrame(keyFrame1, pathLine1[j], kameleon, innerBoundaryLimit, nPointsOnFieldlines);

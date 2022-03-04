@@ -405,13 +405,8 @@ void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
     _lineStart.push_back(static_cast<GLint>(nOldPoints));
     _lineCount.push_back(static_cast<GLsizei>(nNewPoints));
     _vertexPositions.reserve(nOldPoints + nNewPoints);
-    _vertexPositions.insert(
-        _vertexPositions.end(),
-        std::make_move_iterator(line.begin()),
-        std::make_move_iterator(line.end())
-    );
-    
-    line.clear();
+
+    std::copy(line.begin(), line.end(), std::back_inserter(_vertexPositions));    
 }
 
 void FieldlinesState::addLinesToBeRendered() {
@@ -421,11 +416,24 @@ void FieldlinesState::addLinesToBeRendered() {
     // fieldlines position.
     for (int i = 0; i < _allPathLines.size(); ++i) {
         std::vector<glm::vec3> line;
-        for (Vertex v : _allPathLines[i].keyFrames[0].vertices) {
-            line.push_back(v.position);
+        for (glm::vec3 v : _allPathLines[i].keyFrames[0].vertices) {
+            line.push_back(v);
         }
         addLine(line);
     }
+}
+
+/**
+* Adds the first keyframe from each pathline as a fieldline to be rendered.
+* Added in the vector _vertexPositions
+*/
+void FieldlinesState::initializeRenderedMatchingFieldlines() {
+
+    for (MatchingFieldlines mf : _allMatchingFieldlines) {
+        addLine(mf.pathLines.first.keyFrames[0].vertices);
+        addLine(mf.pathLines.second.keyFrames[0].vertices);
+    }
+
 }
 
 void FieldlinesState::appendToExtra(size_t idx, float val) {
@@ -450,14 +458,14 @@ void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLi
 
 void FieldlinesState::addMatchingKeyFrames(
     const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2,
-    const float time1, const float time2, int matchingFieldlinesId) {
+    const float time1, const float time2, size_t matchingFieldlinesId) {
     
     Fieldline f1, f2;
 
     for (int i = 0; i < keyFrame1.size(); ++i) {
-        Vertex v1, v2;
-        v1.position = keyFrame1[i] * fls::ReToMeter;
-        v2.position = keyFrame2[i] * fls::ReToMeter;
+        glm::vec3 v1, v2;
+        v1 = keyFrame1[i] * fls::ReToMeter;
+        v2 = keyFrame2[i] * fls::ReToMeter;
         f1.vertices.push_back(v1);
         f2.vertices.push_back(v2);
     }
@@ -496,8 +504,8 @@ void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline,
 {
     Fieldline f;
     for (glm::vec3 pos : fieldline) {
-        Vertex v;
-        v.position = pos * fls::ReToMeter;
+        glm::vec3 v;
+        v = pos * fls::ReToMeter;
         f.vertices.push_back(v);
     }
 

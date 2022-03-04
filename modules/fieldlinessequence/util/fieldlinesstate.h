@@ -35,10 +35,6 @@ namespace openspace {
 
 class FieldlinesState {
 public:
-    struct Vertex {
-        glm::vec3 position;
-    };
-
     struct Fieldline {
         enum class Topology {
             Closed = 0,
@@ -46,7 +42,7 @@ public:
             Imf
         };
         Topology topology;
-        std::vector<Vertex> vertices;
+        std::vector<glm::vec3> vertices;
         float timeToNextFieldline;
     };
 
@@ -98,7 +94,9 @@ public:
     void addMatchingPathLines(const std::vector<glm::vec3>&&, const std::vector<glm::vec3>&&);
     void addMatchingKeyFrames(
         const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2, 
-        const float time1, const float time2, int matchingFieldlinesId);
+        const float time1, const float time2, size_t matchingFieldlinesId);
+
+    void initializeRenderedMatchingFieldlines();
 
 private:
     bool _isMorphable = false;
@@ -107,8 +105,10 @@ private:
 
     std::vector<std::vector<float>> _extraQuantities;
     std::vector<std::string> _extraQuantityNames;
-    std::vector<GLsizei> _lineCount;
+    // the index where each fieldline first vertex is in _vertexPositions
     std::vector<GLint> _lineStart;
+    // the number of vertices for each fieldline in _vertexPositions
+    std::vector<GLsizei> _lineCount;
 
     std::vector<MatchingFieldlines> _allMatchingFieldlines;    // will replace _allPathLines
 

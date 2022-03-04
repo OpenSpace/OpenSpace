@@ -248,10 +248,16 @@ void RenderableMovingFieldlines::initialize() {
     if (!stateSuccuess) {
         throw ghoul::RuntimeError("Trying to read cdf file failed");
     }
-    for (int i = 0; i < _fieldlineState.lineCount().size(); ++i) {
-        PathLineTraverser plt(_fieldlineState.allPathLines()[i].keyFrames);
-        _traversers.push_back(plt);
+
+    for (const FieldlinesState::MatchingFieldlines& mf : _fieldlineState.getAllMatchingFieldlines()) {
+        _traversers.push_back(PathLineTraverser{mf.pathLines.first.keyFrames});
+        _traversers.push_back(PathLineTraverser{mf.pathLines.second.keyFrames});
     }
+
+    //for (int i = 0; i < _fieldlineState.lineCount().size(); ++i) {
+    //    PathLineTraverser plt(_fieldlineState.allPathLines()[i].keyFrames);
+    //    _traversers.push_back(plt);
+    //}
     _renderedLines = _fieldlineState.vertexPositions();
     _debugTopologyColor = std::vector<float>(_renderedLines.size(), -1.f);
     size_t nExtraQuantities = _fieldlineState.nExtraQuantities();
@@ -341,7 +347,8 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
         );
     }
 
-    _fieldlineState.addLinesToBeRendered();
+    //_fieldlineState.addLinesToBeRendered();
+    _fieldlineState.initializeRenderedMatchingFieldlines();
 
     if (isSuccessful) {
         switch (_fieldlineState.model()) {
@@ -519,9 +526,9 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
 
         for (int fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
             glm::vec3 currentPosition = 
-                traverser.currentFieldline->vertices[fieldlineVertex].position;
+                traverser.currentFieldline->vertices[fieldlineVertex];
             glm::vec3 nextPosition = 
-                traverser.nextFieldline()->vertices[fieldlineVertex].position;
+                traverser.nextFieldline()->vertices[fieldlineVertex];
             _renderedLines[fieldlineVertex + lineStart] =
                 lerp(currentPosition, nextPosition, normalizedTime);
 
@@ -540,7 +547,7 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
             // set the rendered lines vertex positions to be = 
             // to current fieldlines vertex
             _renderedLines[fieldlineVertex + lineStart] = 
-                traverser.currentFieldline->vertices[fieldlineVertex].position;
+                traverser.currentFieldline->vertices[fieldlineVertex];
             _debugTopologyColor[fieldlineVertex + lineStart] =
                 debugColor(traverser.currentFieldline->topology);
         }
