@@ -82,7 +82,7 @@ public:
 
 private:
     // Properties
-    properties::FloatProperty _showCrosshairThreshold;
+    properties::FloatProperty _crossHairSize;
     properties::FloatProperty _showRectangleThreshold;
     properties::FloatProperty _lineWidth;
     properties::DoubleProperty _stopAnimationThreshold;
@@ -94,7 +94,7 @@ private:
     bool _shouldLockAfterAnimation = false;
 
     // Shader
-    UniformCache(modelTransform, viewProj, showCrosshair, showRectangle, lineWidth, 
+    UniformCache(modelTransform, viewProj, crossHairSize, showRectangle, lineWidth,
         dimensions, lineColor) _uniformCache;
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;

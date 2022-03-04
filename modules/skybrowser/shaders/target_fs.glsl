@@ -27,7 +27,7 @@ in vec4 vs_position;
 
 uniform float lineWidth;
 uniform vec2 dimensions;
-uniform bool showCrosshair;
+uniform float crossHairSize;
 uniform bool showRectangle;
 uniform vec4 lineColor;
 
@@ -41,6 +41,10 @@ float createLine(float lineCenter, float lineWidth, float coord) {
   float endEdge = lineCenter + (lineWidth * 0.5);
 
   return step(startEdge, coord) - step(endEdge, coord);
+}
+
+float createFilledRectangle(float width, vec2 coord) {
+  return createLine(0.5, width, coord.x) * createLine(0.5, width, coord.y);
 }
 
 float createRectangle(float linewidthY, float ratio, vec2 coord) {
@@ -70,14 +74,11 @@ float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
 
 Fragment getFragment() {
     float ratio = dimensions.y / dimensions.x;
-    float crosshair = 0.0;
     float rectangle = 0.0;
+    float crossHairBox = createFilledRectangle(crossHairSize/dimensions.x, vs_st);
 
-    if (showCrosshair) {
-      crosshair = createCrosshair(lineWidth, ratio, vs_st);
-      float border = 1.0 - createRectangle(lineWidth * 5.0, ratio, vs_st);
-      crosshair *= border;
-    }
+    float crosshair = createCrosshair(lineWidth, ratio, vs_st);
+    crosshair *= crossHairBox;
 
     if (showRectangle) {
       rectangle = createRectangle(lineWidth, ratio, vs_st);

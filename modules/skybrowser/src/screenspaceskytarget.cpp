@@ -40,16 +40,15 @@ namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyTarget";
 
     constexpr const std::array<const char*, 7> UniformNames = {
-        "modelTransform", "viewProj", "showCrosshair", "showRectangle", "lineWidth", 
+        "modelTransform", "viewProj", "crossHairSize", "showRectangle", "lineWidth", 
         "dimensions", "lineColor"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo CrosshairThresholdInfo =
+    constexpr const openspace::properties::Property::PropertyInfo crossHairSizeInfo =
     {
-        "CrosshairThreshold",
-        "Crosshair Threshold",
-        "When the field of view is smaller than the crosshair threshold, a crosshair will"
-        "be rendered in the target."
+        "CrosshairSize",
+        "Crosshair Size",
+        "Determines the size of the crosshair."
     }; 
     
     constexpr const openspace::properties::Property::PropertyInfo RectangleThresholdInfo =
@@ -82,8 +81,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyTarget)]] Parameters {
-        // [[codegen::verbatim(CrosshairThresholdInfo.description)]]
-        std::optional<float> crosshairThreshold;
+        // [[codegen::verbatim(crossHairSizeInfo.description)]]
+        std::optional<float> crossHairSize;
 
         // [[codegen::verbatim(RectangleThresholdInfo.description)]]
         std::optional<float> rectangleThreshold;
@@ -104,7 +103,7 @@ namespace {
 namespace openspace {
 ScreenSpaceSkyTarget::ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _showCrosshairThreshold(CrosshairThresholdInfo, 4.f, 0.1f, 70.f)
+    , _crossHairSize(crossHairSizeInfo, 0.05f, 0.005f, 0.2f)
     , _showRectangleThreshold(RectangleThresholdInfo, 2.f, 0.1f, 70.f)
     , _stopAnimationThreshold(AnimationThresholdInfo, 0.0005, 0.0, 0.005)
     , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
@@ -113,12 +112,12 @@ ScreenSpaceSkyTarget::ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary)
 {
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _showCrosshairThreshold = p.crosshairThreshold.value_or(_showCrosshairThreshold);
+    _crossHairSize = p.crossHairSize.value_or(_crossHairSize);
     _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
-    _stopAnimationThreshold = p.crosshairThreshold.value_or(_stopAnimationThreshold);
+    _stopAnimationThreshold = p.crossHairSize.value_or(_stopAnimationThreshold);
     _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
          
-    addProperty(_showCrosshairThreshold);
+    addProperty(_crossHairSize);
     addProperty(_showRectangleThreshold);
     addProperty(_stopAnimationThreshold);
     addProperty(_animationSpeed);
@@ -205,7 +204,6 @@ glm::ivec3 ScreenSpaceSkyTarget::borderColor() const {
 }
 
 void ScreenSpaceSkyTarget::render() {
-    bool showCrosshair = _verticalFov < _showCrosshairThreshold;
     bool showRectangle = _verticalFov > _showRectangleThreshold;
         
     glm::vec4 color = { glm::vec3(_borderColor) / 255.f, _opacity.value() };
@@ -216,10 +214,10 @@ void ScreenSpaceSkyTarget::render() {
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
-    _shader->setUniform(_uniformCache.showCrosshair, showCrosshair);
+    _shader->setUniform(_uniformCache.crossHairSize, _crossHairSize);
     _shader->setUniform(_uniformCache.showRectangle, showRectangle);
     _shader->setUniform(_uniformCache.lineWidth, lineWidth);
-    _shader->setUniform(_uniformCache.dimensions, glm::vec2(_objectSize));
+    _shader->setUniform(_uniformCache.dimensions, screenSpaceDimensions());
     _shader->setUniform(_uniformCache.modelTransform, modelTransform);
     _shader->setUniform(_uniformCache.lineColor, color);
     _shader->setUniform(
