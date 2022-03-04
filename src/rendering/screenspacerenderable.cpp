@@ -343,7 +343,12 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     )
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _backgroundColor(BackgroundColorInfo)
+    , _backgroundColor(
+        BackgroundColorInfo,
+        glm::vec4(0.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
