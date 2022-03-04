@@ -118,18 +118,18 @@ namespace openspace::fls {
                 tracingVar,
                 seedPoints[i].first.x,
                 seedPoints[i].first.y,
-                seedPoints[i].first.z,
-                ccmc::Tracer::Direction::REVERSE
-            ).reverseOrder();
+                seedPoints[i].first.z//,
+                //ccmc::Tracer::Direction::REVERSE
+            );// .reverseOrder();
 
             ccmc::Fieldline uPerpBPathLine2;
             uPerpBPathLine2 = tracer.unidirectionalTrace(
                 tracingVar,
                 seedPoints[i].second.x,
                 seedPoints[i].second.y,
-                seedPoints[i].second.z,
-                ccmc::Tracer::Direction::REVERSE
-            ).reverseOrder();
+                seedPoints[i].second.z//,
+                //ccmc::Tracer::Direction::REVERSE
+            );// .reverseOrder();
 
             uPerpBPathLine1.getDs();
             uPerpBPathLine1.measure();

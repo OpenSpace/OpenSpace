@@ -449,25 +449,45 @@ void RenderableMovingFieldlines::render(const RenderData& data, RendererTasks&) 
     std::vector<int> lineLengths = _fieldlineState.lineCount();
     std::vector<int> lineStarts = _fieldlineState.lineStart();
     
+    // code used for matching fieldlines
     if (_renderFlowLine) {
-        std::vector<int> flowLengths;
-        std::vector<int> flowStarts;
+        // start is the index for the starting vertex of the next added
+        // pathline found in the vector containing all vertices
         int start = lineStarts.back() + _nPointsOnFieldlines;
-        const std::vector<FieldlinesState::PathLine> allPaths =
-            _fieldlineState.allPathLines();
-        for (int i = 0; i < allPaths.size(); i++) {
-            flowLengths.push_back(_nPointsOnPathLine);
-            flowStarts.push_back(start);
+
+        for (int i = 0; i < _fieldlineState.getAllMatchingFieldlines().size(); i++) {
+            lineLengths.push_back(_nPointsOnPathLine);
+            lineStarts.push_back(start);
+            start += _nPointsOnPathLine;
+
+            lineLengths.push_back(_nPointsOnPathLine);
+            lineStarts.push_back(start);
             start += _nPointsOnPathLine;
         }
-
-        for (int flowLen : flowLengths) {
-            lineLengths.push_back(flowLen);
-        }
-        for (int flowStart : flowStarts) {
-            lineStarts.push_back(flowStart);
-        }
     }
+
+    // oldChris 
+    // Code used for movingfieldlines
+    //if (_renderFlowLine) {
+    //    std::vector<int> flowLengths;
+    //    std::vector<int> flowStarts;
+    //    // start is the 
+    //    int start = lineStarts.back() + _nPointsOnFieldlines;
+    //    const std::vector<FieldlinesState::PathLine> allPaths =
+    //        _fieldlineState.allPathLines();
+    //    for (int i = 0; i < allPaths.size(); i++) {
+    //        flowLengths.push_back(_nPointsOnPathLine);
+    //        flowStarts.push_back(start);
+    //        start += _nPointsOnPathLine;
+    //    }
+
+    //    for (int flowLen : flowLengths) {
+    //        lineLengths.push_back(flowLen);
+    //    }
+    //    for (int flowStart : flowStarts) {
+    //        lineStarts.push_back(flowStart);
+    //    }
+    //}
 
     glMultiDrawArrays(
         GL_LINE_STRIP,
@@ -607,14 +627,36 @@ void RenderableMovingFieldlines::moveLine(const double dt,
 }
 
 void RenderableMovingFieldlines::moveLines(const double dt) {
-    const std::vector<FieldlinesState::PathLine>& allPathLineData = 
-        _fieldlineState.allPathLines();
 
-    for (size_t i = 0; i < allPathLineData.size(); ++i) { 
-        GLint lineStart = _fieldlineState.lineStart()[i];
-        GLsizei nVertices = _fieldlineState.lineCount()[i];
-        moveLine(dt, allPathLineData[i], _traversers[i], lineStart, nVertices);
+    const std::vector<FieldlinesState::MatchingFieldlines>& allMatchingFieldlines =
+        _fieldlineState.getAllMatchingFieldlines();
+
+    size_t lineIndex = 0;
+    GLint lineStart;
+    GLsizei nVertices;
+    for (size_t i = 0; i < allMatchingFieldlines.size(); ++i) {
+        lineStart = _fieldlineState.lineStart()[lineIndex];
+        nVertices = _fieldlineState.lineCount()[lineIndex];
+        moveLine(dt, allMatchingFieldlines[i].pathLines.first, _traversers[lineIndex], lineStart, nVertices);
+        ++lineIndex;
+
+        lineStart = _fieldlineState.lineStart()[lineIndex];
+        nVertices = _fieldlineState.lineCount()[lineIndex];
+        moveLine(dt, allMatchingFieldlines[i].pathLines.second, _traversers[lineIndex], lineStart, nVertices);
+        ++lineIndex;
     }
+
+    // oldChris
+    // code used for moving fieldlines
+
+    //const std::vector<FieldlinesState::PathLine>& allPathLineData = 
+    //    _fieldlineState.allPathLines();
+
+    //for (size_t i = 0; i < allPathLineData.size(); ++i) { 
+    //    GLint lineStart = _fieldlineState.lineStart()[i];
+    //    GLsizei nVertices = _fieldlineState.lineCount()[i];
+    //    moveLine(dt, allPathLineData[i], _traversers[i], lineStart, nVertices);
+    //}
 }
 
 void RenderableMovingFieldlines::updateVertexPositionBuffer() {
@@ -624,21 +666,34 @@ void RenderableMovingFieldlines::updateVertexPositionBuffer() {
     const std::vector<glm::vec3>& vertPos = _renderedLines;
 
     std::vector<glm::vec4> data;
-    for (glm::vec3 pos : vertPos) {
-        data.push_back({ pos, -1.f });
-    }
     for (int i = 0; i < data.size(); ++i) {
+        data.push_back({ vertPos[i], -1.f });
         data[i].w = _debugTopologyColor[i];
     }
     /// ////////////////////////////////////////
     if (_renderFlowLine) {
-        const std::vector<FieldlinesState::PathLine>& allPaths =
-            _fieldlineState.allPathLines();
-        for (int i = 0; i < allPaths.size(); ++i) {
-            for (int j = 0; j < allPaths[i].line.size(); ++j) {
-                data.push_back({ allPaths[i].line[j] * fls::ReToMeter, -1.f });
-            }
+
+        // convert all vertices from Re to meter and add to data
+        for (const FieldlinesState::MatchingFieldlines& mf : _fieldlineState.getAllMatchingFieldlines()) {
+            std::for_each(mf.pathLines.first.line.begin(), mf.pathLines.first.line.end(),
+                [&data](const glm::vec3& element) {
+                    data.push_back({ element * fls::ReToMeter, -1.f });
+                });
+
+            std::for_each(mf.pathLines.second.line.begin(), mf.pathLines.second.line.end(),
+                [&data](const glm::vec3& element) {
+                    data.push_back({ element * fls::ReToMeter, -1.f });
+                });
         }
+
+        // oldChris
+        //const std::vector<FieldlinesState::PathLine>& allPaths =
+        //    _fieldlineState.allPathLines();
+        //for (int i = 0; i < allPaths.size(); ++i) {
+        //    for (int j = 0; j < allPaths[i].line.size(); ++j) {
+        //        data.push_back({ allPaths[i].line[j] * fls::ReToMeter, -1.f });
+        //    }
+        //}
     }
     /// ////////////////////////////////////////
 
