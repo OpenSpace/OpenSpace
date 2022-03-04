@@ -428,6 +428,7 @@ int createTargetBrowserPair(lua_State* L) {
     std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
     glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
+    glm::vec3 positionTarget = { 1.0f, 0.5f, -2.1f };
     std::string guiPath = "/SkyBrowser";
     std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
 
@@ -444,6 +445,7 @@ int createTargetBrowserPair(lua_State* L) {
         "Type = 'ScreenSpaceSkyTarget',"
         "Name = '" + nameTarget + "',"
         "FaceCamera = false,"
+        "CartesianPosition = " + ghoul::to_string(positionTarget) +
         "}";
 
     global::scriptEngine->queueScript(
