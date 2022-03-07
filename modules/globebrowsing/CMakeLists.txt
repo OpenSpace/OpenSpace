@@ -63,6 +63,7 @@ set(HEADER_FILES
   src/tileprovider/imagesequencetileprovider.h
   src/tileprovider/singleimagetileprovider.h
   src/tileprovider/sizereferencetileprovider.h
+  src/tileprovider/spoutimageprovider.h
   src/tileprovider/temporaltileprovider.h
   src/tileprovider/texttileprovider.h
   src/tileprovider/tileindextileprovider.h
@@ -102,6 +103,7 @@ set(SOURCE_FILES
   src/tileprovider/imagesequencetileprovider.cpp
   src/tileprovider/singleimagetileprovider.cpp
   src/tileprovider/sizereferencetileprovider.cpp
+  src/tileprovider/spoutimageprovider.cpp
   src/tileprovider/temporaltileprovider.cpp
   src/tileprovider/texttileprovider.cpp
   src/tileprovider/tileindextileprovider.cpp

@@ -25,6 +25,7 @@
 #include <modules/spout/spoutmodule.h>
 
 #include <modules/spout/renderableplanespout.h>
+#include <modules/spout/renderablespherespout.h>
 #include <modules/spout/screenspacespout.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/templatefactory.h>
@@ -46,6 +47,7 @@ void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
+    fRenderable->registerClass<RenderableSphereSpout>("RenderableSphereSpout");
 #endif // WIN32
 }
 

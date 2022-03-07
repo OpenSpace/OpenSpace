@@ -74,6 +74,8 @@ public:
 
     Path::Type defaultPathType() const;
     double minValidBoundingSphere() const;
+    double findValidBoundingSphere(const SceneGraphNode* node) const;
+
     const std::vector<SceneGraphNode*>& relevantNodes();
 
     /**

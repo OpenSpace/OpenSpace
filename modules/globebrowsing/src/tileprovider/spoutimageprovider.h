@@ -22,37 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
-#define __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__SPOUTIMAGEPROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__SPOUTIMAGEPROVIDER___H__
 
-#ifdef WIN32
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-#include <modules/base/rendering/renderableplane.h>
+namespace openspace::spout { class SpoutReceiverPropertyProxy; }
 
-#include <modules/spout/spoutwrapper.h>
+namespace openspace::globebrowsing {
 
-namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-class RenderablePlaneSpout : public RenderablePlane {
+class SpoutImageProvider : public TileProvider {
 public:
-    RenderablePlaneSpout(const ghoul::Dictionary& dictionary);
+    SpoutImageProvider(const ghoul::Dictionary& dictionary);
 
-    void deinitializeGL() override;
-    void update(const UpdateData& data) override;
+    Tile tile(const TileIndex& tileIndex) override final;
+    Tile::Status tileStatus(const TileIndex& index) override final;
+    TileDepthTransform depthTransform() override final;
+    void update() override final;
+    void reset() override final;
+    int minLevel() override final;
+    int maxLevel() override final;
+    float noDataValueAsFloat() override final;
 
     static documentation::Documentation Documentation();
 
 private:
-    void bindTexture() override;
-    void unbindTexture() override;
+    void internalInitialize() override final;
+    void internalDeinitialize() override final;
 
-    spout::SpoutReceiverPropertyProxy _spoutReceiver;
+    std::array<std::unique_ptr<ghoul::opengl::Texture>, 2> tileTexture;
+    std::array<GLuint, 2> fbo = { 0, 0 };
+    std::array<Tile, 2> tiles;
+
+#ifdef OPENSPACE_HAS_SPOUT
+    std::unique_ptr<spout::SpoutReceiverPropertyProxy> spoutReceiver;
+#endif
+
+    bool spoutUpdate = false;
 };
 
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
-#endif // WIN32
-
-#endif // __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__SPOUTIMAGEPROVIDER___H__

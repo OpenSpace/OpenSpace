@@ -60,6 +60,10 @@ public:
 
     static documentation::Documentation Documentation();
 
+protected:
+    virtual void bindTexture();
+    virtual void unbindTexture();
+
 private:
     void loadTexture();
 

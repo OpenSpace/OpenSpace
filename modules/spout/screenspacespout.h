@@ -29,11 +29,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <modules/spout/spoutlibrary.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <modules/spout/spoutwrapper.h>
 
 namespace openspace {
 
@@ -54,17 +50,8 @@ public:
 private:
     void bindTexture() override;
     void unbindTexture() override;
-
-    properties::StringProperty _spoutName;
-    properties::OptionProperty _spoutSelection;
-    properties::TriggerProperty _updateSelection;
-
-    SPOUTHANDLE _receiver;
-
-    bool _isSpoutDirty = true;
-    char _currentSenderName[256] = {};
-    bool _isFirstUpdate = true;
-    bool _isErrorMessageDisplayed = false;
+    
+    spout::SpoutReceiverPropertyProxy _spoutReceiver;
 };
 
 } // namespace openspace

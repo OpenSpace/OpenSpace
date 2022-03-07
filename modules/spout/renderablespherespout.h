@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
-#define __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
+#ifndef __OPENSPACE_MODULE_SPOUT___RENDERABLESPHERESPOUT___H__
+#define __OPENSPACE_MODULE_SPOUT___RENDERABLESPHERESPOUT___H__
 
 #ifdef WIN32
 
-#include <modules/base/rendering/renderableplane.h>
+#include <modules/base/rendering/renderablesphere.h>
 
 #include <modules/spout/spoutwrapper.h>
 
@@ -35,9 +35,9 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderablePlaneSpout : public RenderablePlane {
+class RenderableSphereSpout : public RenderableSphere {
 public:
-    RenderablePlaneSpout(const ghoul::Dictionary& dictionary);
+    RenderableSphereSpout(const ghoul::Dictionary& dictionary);
 
     void deinitializeGL() override;
     void update(const UpdateData& data) override;
@@ -55,4 +55,4 @@ private:
 
 #endif // WIN32
 
-#endif // __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
+#endif // __OPENSPACE_MODULE_SPOUT___RENDERABLESPHERESPOUT___H__
