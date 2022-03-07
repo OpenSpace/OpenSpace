@@ -697,10 +697,6 @@ json HorizonsDialog::handleReply(QNetworkReply* reply) {
         return json();
     }
 
-    std::cout << "Reply: '" << std::endl;
-    std::cout << answer.toStdString();
-    std::cout << "'" << std::endl;
-
     // Convert the answer to a json object and return it
     return json::parse(answer.toStdString());
 }
@@ -986,11 +982,15 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
         }
 
         case openspace::HorizonsFile::ResultCode::UnknownError:
+            appendLog(
+                "Unknown error. For more information, see the saved horizons file",
+                LogLevel::Error
+            );
             _errorMsg->setText("An unknown error occured");
-            break;
+            return false;
 
         default:
-            _errorMsg->setText("Unknown result type");
+            _errorMsg->setText("Invalid result type");
             break;
     }
 
