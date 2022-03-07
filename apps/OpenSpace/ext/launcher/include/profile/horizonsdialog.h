@@ -41,6 +41,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QLineEdit;
 class QPlainTextEdit;
+class QProgressBar;
 
 using json = nlohmann::json;
 
@@ -56,8 +57,10 @@ public:
     std::filesystem::path file() const;
 
 private slots:
-    void openDirectory();
+    void openSaveAs();
     void typeOnChange(int index);
+    void downloadProgress(qint64 ist, qint64 max);
+    void importTimeRange();
     void approved();
 
 private:
@@ -77,6 +80,8 @@ private:
     };
 
     void createWidgets();
+    void cleanAllWidgets();
+    void styleLabel(QLabel* label, bool isDirty);
     bool handleRequest();
     bool isValidInput();
     std::string constructUrl();
@@ -90,21 +95,30 @@ private:
     openspace::HorizonsFile _horizonsFile;
     QNetworkAccessManager* _manager;
 
+    QLabel* _typeLabel = nullptr;
     QComboBox* _typeCombo = nullptr;
-    QLineEdit* _directoryEdit = nullptr;
-    QLineEdit* _nameEdit = nullptr;
+    QLabel* _fileLabel = nullptr;
+    QLineEdit* _fileEdit = nullptr;
+    QLabel* _targetLabel = nullptr;
     QLineEdit* _targetEdit = nullptr;
     QComboBox* _chooseTargetCombo = nullptr;
     std::string _targetName;
+    QLabel* _centerLabel = nullptr;
     QLineEdit* _centerEdit = nullptr;
     QComboBox* _chooseObserverCombo = nullptr;
     std::string _observerName;
+    QLabel* _startLabel = nullptr;
     QDateTimeEdit* _startEdit = nullptr;
     std::string _startTime;
+    QLabel* _endLabel = nullptr;
     QDateTimeEdit* _endEdit = nullptr;
     std::string _endTime;
+    std::pair<std::string, std::string> _validTimeRange;
+    QPushButton* _importTimeButton = nullptr;
+    QLabel* _stepLabel = nullptr;
     QLineEdit* _stepEdit = nullptr;
     QComboBox* _timeTypeCombo = nullptr;
+    QProgressBar* _downloadProgress = nullptr;
     QLabel* _downloadLabel = nullptr;
     QPlainTextEdit* _log = nullptr;
 

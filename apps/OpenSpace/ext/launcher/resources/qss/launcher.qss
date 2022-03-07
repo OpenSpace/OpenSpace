@@ -156,6 +156,14 @@ QPlainTextEdit#log {
   font-family: Courier;
 }
 
-QLabel#url {
+QLabel#thin {
   font-weight: normal;
+}
+
+QLabel#error {
+  color: rgb(221, 17, 17);
+}
+
+QLabel#normal {
+  color: rgb(0, 0, 0);
 }
