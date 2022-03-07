@@ -544,7 +544,7 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
         normalizedTime = traverser.timeSinceInterpolation /
             traverser.currentFieldline->timeToNextFieldline;
 
-        for (int fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
+        for (size_t fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
             glm::vec3 currentPosition = 
                 traverser.currentFieldline->vertices[fieldlineVertex];
             glm::vec3 nextPosition = 
@@ -563,7 +563,7 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
         }
     }
     else {
-        for (int fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
+        for (size_t fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
             // set the rendered lines vertex positions to be = 
             // to current fieldlines vertex
             _renderedLines[fieldlineVertex + lineStart] = 
@@ -666,7 +666,7 @@ void RenderableMovingFieldlines::updateVertexPositionBuffer() {
     const std::vector<glm::vec3>& vertPos = _renderedLines;
 
     std::vector<glm::vec4> data;
-    for (int i = 0; i < data.size(); ++i) {
+    for (int i = 0; i < vertPos.size(); ++i) {
         data.push_back({ vertPos[i], -1.f });
         data[i].w = _debugTopologyColor[i];
     }

@@ -466,6 +466,8 @@ void FieldlinesState::addMatchingKeyFrames(
         glm::vec3 v1, v2;
         v1 = keyFrame1[i] * fls::ReToMeter;
         v2 = keyFrame2[i] * fls::ReToMeter;
+        //v1 = keyFrame1[i];
+        //v2 = keyFrame2[i];
         f1.vertices.push_back(v1);
         f2.vertices.push_back(v2);
     }

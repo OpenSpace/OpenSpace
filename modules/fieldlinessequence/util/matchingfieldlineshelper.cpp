@@ -17,12 +17,12 @@ namespace openspace::fls {
 
     // ALIASES
 
-    using matchingSeedPoints = std::pair<glm::vec3, glm::vec3>;
+    using seedPointPair = std::pair<glm::vec3, glm::vec3>;
 
     // DECLARATIONS
 
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
-        const std::vector<matchingSeedPoints>& seeds, const std::string& tracingVar,
+        const std::vector<seedPointPair>& seeds, const std::string& tracingVar,
         FieldlinesState& state, const size_t nPointsOnPathLine,
         const size_t nPointsOnFieldlines);
 
@@ -43,18 +43,6 @@ namespace openspace::fls {
         std::vector<std::string>& extraMagVars,
         const size_t nPointsOnPathLine,
         const size_t nPointsOnFieldLines) {
-        // TEMPORARY HARD-CODED MATCHING SEED POINTS
-        // there exists a flt_epsilon global constant we could use otherwise
-        constexpr const float eps = 0.1f;
-
-        const glm::vec3 criticalPoint{ 10.019400000000000084f, -3.967299999999999827f, -0.02289000000000000062f };
-        const glm::vec3 eigenVector = glm::normalize(glm::vec3{ 9.025006184649818408f, -5.271561957959811195, -0.2821642266899985763f });
-
-        glm::vec3 imfSeed = criticalPoint + eigenVector * eps;
-        glm::vec3 cfSeed = criticalPoint - eigenVector * eps;
-        std::vector<matchingSeedPoints> seedPts;
-        seedPts.push_back(std::make_pair(imfSeed, cfSeed));
-        //******************************************
 
         std::unique_ptr<ccmc::Kameleon> kameleon =
             kameleonHelper::createKameleonObject(cdfPath);
@@ -67,14 +55,21 @@ namespace openspace::fls {
 
                 // use time as string for picking seedpoints from seedMap
             //std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);
-        bool isSuccessful = openspace::fls::traceAndAddMatchingLinesToState(kameleon.get(), seedPts, tracingVar, state,
+
+        // TODO: Check if an even amount of seed points
+        std::vector<seedPointPair> matchingSeedPoints;
+        for (size_t i = 0; i < seedPoints.size(); i += 2) {
+            matchingSeedPoints.push_back({ seedPoints[i], seedPoints[i + 1] });
+        }
+
+        bool isSuccessful = openspace::fls::traceAndAddMatchingLinesToState(kameleon.get(), matchingSeedPoints, tracingVar, state,
             nPointsOnPathLine, nPointsOnFieldLines);
 
         return isSuccessful;
     }
 
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
-        const std::vector<matchingSeedPoints>& seedPoints,
+        const std::vector<seedPointPair>& matchingSeedPoints,
         const std::string& tracingVar, FieldlinesState& state,
         const size_t nPointsOnPathLine,
         const size_t nPointsOnFieldlines) {
@@ -106,7 +101,7 @@ namespace openspace::fls {
             return false;
         }
 
-        for (size_t i = 0; i < seedPoints.size(); ++i) {
+        for (size_t i = 0; i < matchingSeedPoints.size(); ++i) {
             std::unique_ptr<ccmc::Interpolator> interpolator =
                 std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
             ccmc::Tracer tracer(kameleon, interpolator.get());
@@ -116,18 +111,18 @@ namespace openspace::fls {
             ccmc::Fieldline uPerpBPathLine1;
             uPerpBPathLine1 = tracer.unidirectionalTrace(
                 tracingVar,
-                seedPoints[i].first.x,
-                seedPoints[i].first.y,
-                seedPoints[i].first.z//,
+                matchingSeedPoints[i].first.x,
+                matchingSeedPoints[i].first.y,
+                matchingSeedPoints[i].first.z//,
                 //ccmc::Tracer::Direction::REVERSE
             );// .reverseOrder();
 
             ccmc::Fieldline uPerpBPathLine2;
             uPerpBPathLine2 = tracer.unidirectionalTrace(
                 tracingVar,
-                seedPoints[i].second.x,
-                seedPoints[i].second.y,
-                seedPoints[i].second.z//,
+                matchingSeedPoints[i].second.x,
+                matchingSeedPoints[i].second.y,
+                matchingSeedPoints[i].second.z//,
                 //ccmc::Tracer::Direction::REVERSE
             );// .reverseOrder();
 
