@@ -22,62 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___OSFLSCREATIONTASK___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___OSFLSCREATIONTASK___H__
 
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <modules/fieldlinessequence/rendering/renderablemovingfieldlines.h>
-#include <modules/fieldlinessequence/tasks/osflscreationtask.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
+#include <openspace/util/task.h>
 
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
+#include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 
-namespace openspace {
+#include <filesystem>
+#include <string>
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
+namespace openspace::fls {
 
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath(
-        "${TEMPORARY}/default_transfer_function.txt"
-    ).string();
+class OsflsCreationTask : public Task {
+public:
+    OsflsCreationTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
-}
+private:
+    std::string _tracingVariable;
+    std::filesystem::path _inputDirectory;
+    std::filesystem::path _inputSeedpoints;
+    std::filesystem::path _outputDirectory;
+    bool _jsonOutput = false;
+};
 
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
-    ghoul::TemplateFactory<Renderable>* factory = 
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-    
-    fTask->registerClass<OsflsCreationTask>("OsflsCreationTask");
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-    factory->registerClass<RenderableMovingFieldlines>("RenderableMovingFieldlines");
-}
+} // namespace openspace::fls 
 
-std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const {
-    return {
-        OsflsCreationTask::Documentation(),
-        RenderableFieldlinesSequence::Documentation()
-    };
-}
-
-} // namespace openspace
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___OSFLSCREATIONTASK___H__

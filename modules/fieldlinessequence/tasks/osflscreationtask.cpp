@@ -22,62 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
-
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <modules/fieldlinessequence/rendering/renderablemovingfieldlines.h>
 #include <modules/fieldlinessequence/tasks/osflscreationtask.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/util/factorymanager.h>
+
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
+#include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
+#include <optional>
 
 namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
+    constexpr const char* _loggerCat = "OsflsCreationTask";
+    struct [[codegen::Dictionary(OsflsCreationTask)]] Parameters {
+        // 'b' for fieldline, 'u' for velocity line or 'u_perp_b' for flow line
+        std::string tracingVariable;
+
+        // directory where cdf files are located
+        std::filesystem::path inputDirectory;
+        
+        // filepath to .txt file containing seedpoints
+        std::filesystem::path inputSeedpoints;
+
+        // directory for result / output of task run
+        std::filesystem::path outputDirectory;
+
+        // Also outputs in JSON format if set to true. False by default
+        std::optional<bool> jsonOutput;
+    };
+#include "osflscreationtask_codegen.cpp"
 } // namespace
 
-namespace openspace {
+namespace openspace::fls {
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
-
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath(
-        "${TEMPORARY}/default_transfer_function.txt"
-    ).string();
-
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
+documentation::Documentation OsflsCreationTask::documentation() {
+    return codegen::doc<parameters>("osfls_creation_task");
 }
 
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
-    ghoul::TemplateFactory<Renderable>* factory = 
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-    
-    fTask->registerClass<OsflsCreationTask>("OsflsCreationTask");
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-    factory->registerClass<RenderableMovingFieldlines>("RenderableMovingFieldlines");
+OsflsCreationTask::OsflsCreationTask(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _tracingVariable;
+    _inputDirectory;
+    _inputSeedpoints;
+    _outputDirectory;
+    _jsonOutput = p.jsonOutput.value_or(_jsonOutput);
 }
 
-std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const {
-    return {
-        OsflsCreationTask::Documentation(),
-        RenderableFieldlinesSequence::Documentation()
-    };
+std::string OsflsCreationTask::description() {
+    return fmt::format(
+        "Create osfls-files (or osfls and Json)-files by tracing, with the kameleon 
+        "tracer, the vector field described in cdf-files, from the input seed points."
+    );
 }
 
-} // namespace openspace
+void OsflsCreationTask::perform(const Task::ProgressCallback& progressCallback) {
+
+}
+
+} // namespace openspace::fls

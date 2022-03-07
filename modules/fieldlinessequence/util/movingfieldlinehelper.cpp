@@ -196,7 +196,7 @@ bool traceAndAddLinesToState(ccmc::Kameleon* kameleon,
         // Elon: optimizing trimming could go here
         // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
 
-        // Here all points on the pathLine will be used at seedpoints for 
+        // Here all points on the pathLine will be used as seedpoints for 
         // the actual fieldlines (traced with "b" by default)
         state.addPathLine(pathLine, i);
         for (std::vector<glm::vec3>::iterator it = pathLine.begin();
