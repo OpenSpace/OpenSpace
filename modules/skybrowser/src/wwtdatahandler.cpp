@@ -175,7 +175,7 @@ bool downloadAndParseWtmlFilesFromUrl(std::vector<tinyxml2::XMLDocument*>& _xmls
         std::string newDir = directory.string();
         // Remove the '/' at the end
         newDir.pop_back();
-        LINFO("Creating directory WWTimagedata");
+        LINFO("Creating directory" + newDir);
         std::filesystem::create_directory(newDir);
     }
 

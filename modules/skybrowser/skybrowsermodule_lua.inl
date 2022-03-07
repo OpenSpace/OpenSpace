@@ -239,7 +239,7 @@ int getListOfImages(lua_State* L) {
         std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/"
                             "wwt-web-client/master/assets/webclient-explore-root.wtml";
 
-        std::filesystem::path directory = absPath("${MODULE_SKYBROWSER}/WWTimagedata/");
+        std::filesystem::path directory = absPath("${MODULE_SKYBROWSER}/wwtimagedata/");
 
         module->loadImages(root, directory);
     }
