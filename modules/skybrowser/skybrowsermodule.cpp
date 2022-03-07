@@ -54,12 +54,22 @@ namespace {
         "outside of the current field of view."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo CameraRotSpeedInfo = {
+        "CameraRotationSpeed",
+        "Camera Rotation Speed",
+        "The speed of the rotation of the camera when the camera rotates to look at a "
+        "coordinate which is outside of the field of view."
+    };
+
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(AllowInteractionInfo.description)]]
         std::optional<bool> allowMouseInteraction;
 
         // [[codegen::verbatim(AllowRotationInfo.description)]]
         std::optional<bool> allowCameraRotation;
+
+        // [[codegen::verbatim(CameraRotSpeedInfo.description)]]
+        std::optional<double> cameraRotSpeed;
     };
     
     #include "skybrowsermodule_codegen.cpp"
@@ -263,9 +273,11 @@ SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
     , _allowMouseInteraction(AllowInteractionInfo, true)
     , _allowCameraRotation(AllowRotationInfo, true)
+    , _cameraRotationSpeed(CameraRotSpeedInfo, 1.f, 0.1f, 10.f)
 {
     addProperty(_allowMouseInteraction);
     addProperty(_allowCameraRotation);
+    addProperty(_cameraRotationSpeed);
 
     // Set callback functions
     global::callback::mouseButton->emplace_back(
@@ -371,7 +383,7 @@ SkyBrowserModule::SkyBrowserModule()
             incrementallyAnimateTargets(deltaTime);
         }
         if (_isCameraRotating && _allowCameraRotation) {
-            incrementallyRotateCamera(deltaTime);
+            incrementallyRotateCamera(deltaTime, _cameraRotationSpeed);
         }
     }); 
 } 
@@ -576,7 +588,7 @@ void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
     _isCameraRotating = true;
 }
 
-void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
+void SkyBrowserModule::incrementallyRotateCamera(double deltaTime, double animationSpeed) {
 
     // Find smallest angle between the two vectors
     double angle = skybrowser::angleBetweenVectors(_startAnimation, _endAnimation);
@@ -587,7 +599,7 @@ void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
             _startAnimation, 
             _endAnimation, 
             deltaTime, 
-            AnimationSpeed
+            animationSpeed
         );
 
         // Rotate

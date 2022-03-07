@@ -31,6 +31,7 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/mouse.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <fstream>
 
 namespace openspace {
@@ -57,7 +58,6 @@ public:
     constexpr static const char* Name = "SkyBrowser";
     constexpr static const double StopAnimationThreshold = 0.0005;
     constexpr static const double FadingTime = 2.0;
-    constexpr static const double AnimationSpeed = 1.0;
     const double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
 
     SkyBrowserModule();
@@ -77,7 +77,7 @@ public:
     // Rotation, animation, placement
     void lookAtTarget(const std::string& id);
     void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
-    void incrementallyRotateCamera(double deltaTime);
+    void incrementallyRotateCamera(double deltaTime, double animationSpeed);
     void incrementallyFadeBrowserTargets(Transparency goal, float deltaTime);
     void incrementallyAnimateTargets(double deltaTime);
    
@@ -109,6 +109,7 @@ protected:
 private:
     properties::BoolProperty _allowMouseInteraction;
     properties::BoolProperty _allowCameraRotation;
+    properties::DoubleProperty _cameraRotationSpeed;
     glm::ivec3 _highlightAddition = glm::ivec3(35); // Highlight object when mouse hovers
 
     // The browsers and targets
