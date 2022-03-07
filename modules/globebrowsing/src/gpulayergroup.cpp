@@ -68,6 +68,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
             // Intentional fall through. Same for all tile layers
             case layergroupid::TypeID::DefaultTileLayer:
             case layergroupid::TypeID::SingleImageTileLayer:
+            case layergroupid::TypeID::SpoutImageTileLayer:
             case layergroupid::TypeID::ImageSequenceTileLayer:
             case layergroupid::TypeID::SizeReferenceTileLayer:
             case layergroupid::TypeID::TemporalTileLayer:
@@ -149,6 +150,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
             // Intentional fall through. Same for all tile layers
             case layergroupid::TypeID::DefaultTileLayer:
             case layergroupid::TypeID::SingleImageTileLayer:
+            case layergroupid::TypeID::SpoutImageTileLayer:
             case layergroupid::TypeID::ImageSequenceTileLayer:
             case layergroupid::TypeID::SizeReferenceTileLayer:
             case layergroupid::TypeID::TemporalTileLayer:

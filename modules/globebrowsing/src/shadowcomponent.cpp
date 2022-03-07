@@ -356,7 +356,13 @@ void ShadowComponent::end() {
 void ShadowComponent::update(const UpdateData&) {
     ZoneScoped
 
-    _sunPosition = global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition();
+    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
+    if (sun) {
+        _sunPosition = sun->worldPosition();
+    }
+    else {
+        _sunPosition = glm::dvec3(0.0);
+    }
 
     glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
     if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||

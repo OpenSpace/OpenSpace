@@ -182,8 +182,13 @@ void AssetManager::update() {
             continue;
         }
 
-        _rootAssets.push_back(a);
         a->load(nullptr);
+        if (a->isFailed()) {
+            // The loading might fail because of any number of reasons, most likely of
+            // them some Lua syntax error
+            continue;
+        }
+        _rootAssets.push_back(a);
         a->startSynchronizations();
 
         _toBeInitialized.push_back(a);
@@ -629,8 +634,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 exportName = identifier;
                 targetLocation = 1;
             }
-
-            if (n == 2) {
+            else if (n == 2) {
                 exportName = ghoul::lua::value<std::string>(
                     L,
                     1,
@@ -653,6 +657,9 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                         identifier = d.value<std::string>("Identifier");
                     }
                 }
+            }
+            else {
+                throw ghoul::MissingCaseException();
             }
 
 
@@ -878,6 +885,21 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
                 "Removes the asset with the specfied name from the scene. The parameter "
                 "to this function is the same that was originally used to load this "
                 "asset, i.e. the path to the asset file"
+            },
+            {
+                "isLoaded",
+                &luascriptfunctions::asset::isLoaded,
+                "string",
+                "Returns true if the referenced asset already has been loaded. Otherwise "
+                "false is returned. The parameter to this function is the path of the "
+                "asset that should be tested"
+            },
+            {
+                "allAssets",
+                &luascriptfunctions::asset::allAssets,
+                "",
+                "Returns the paths to all loaded assets, loaded directly or indirectly, "
+                "as a table containing the paths to all loaded assets."
             }
         }
     };

@@ -82,8 +82,10 @@ TextureSliceVolumeReader<VoxelType>::getSlice(int sliceIndex) const
         std::shared_ptr<ghoul::opengl::Texture> texture =
             ghoul::io::TextureReader::ref().loadTexture(_paths[sliceIndex], 2);
 
-        glm::ivec2 dimensions = glm::uvec2(texture->dimensions());
-        ghoul_assert(dimensions == _sliceDimensions, "Slice dimensions do not agree.");
+        ghoul_assert(
+            glm::ivec2(texture->dimensions()) == _sliceDimensions,
+            "Slice dimensions do not agree"
+        );
         _cache.set(sliceIndex, std::move(texture));
     }
     return *_cache.get(sliceIndex).get();

@@ -1,6 +1,7 @@
 -- Color layer
-local colorLayer = asset.require("./layers/colorlayers/moc_wa_color_utah") -- TODO: fallback
-asset.require("./layers/colorlayers/moc_wa_color_sweden") -- TODO: fallback
+asset.require("./layers/colorlayers/mars_texture")
+local colorLayer = asset.require("./layers/colorlayers/moc_wa_color_utah")
+asset.require("./layers/colorlayers/moc_wa_color_sweden")
 asset.require("./layers/colorlayers/viking_mdim_utah") 
 asset.require("./layers/colorlayers/viking_mdim_sweden") 
 asset.require("./layers/colorlayers/mola_pseudo_color_utah") 

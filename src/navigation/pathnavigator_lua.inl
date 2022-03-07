@@ -37,10 +37,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 
-namespace {
-    constexpr const double Epsilon = 1e-5;
-} // namespace
-
 namespace openspace::luascriptfunctions {
 
 int isFlying(lua_State* L) {
@@ -81,7 +77,6 @@ int flyTo(lua_State* L) {
         return ghoul::lua::luaError(L, "Duration cannot be specified twice");
     }
 
-
     if (!sceneGraphNode(nodeIdentifier)) {
         return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
     }
@@ -98,7 +93,7 @@ int flyTo(lua_State* L) {
         }
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
-            if (d <= Epsilon) {
+            if (d <= 0.0) {
                 return ghoul::lua::luaError(L, "Duration must be larger than zero");
             }
             insDict.setValue("Duration", d);
@@ -106,7 +101,7 @@ int flyTo(lua_State* L) {
     }
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= Epsilon) {
+        if (d <= 0.0) {
             return ghoul::lua::luaError(L, "Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
@@ -146,7 +141,7 @@ int flyToHeight(lua_State* L) {
         }
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
-            if (d <= Epsilon) {
+            if (d <= 0.0) {
                 return ghoul::lua::luaError(L, "Duration must be larger than zero");
             }
             insDict.setValue("Duration", d);
@@ -154,7 +149,7 @@ int flyToHeight(lua_State* L) {
     }
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= Epsilon) {
+        if (d <= 0.0) {
             return ghoul::lua::luaError(L, "Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
@@ -194,7 +189,7 @@ int flyToNavigationState(lua_State* L) {
 
     if (duration.has_value()) {
         double d = *duration;
-        if (d <= Epsilon) {
+        if (d <= 0.0) {
             return ghoul::lua::luaError(L, "Duration must be larger than zero");
         }
         instruction.setValue("Duration", d);
@@ -205,6 +200,113 @@ int flyToNavigationState(lua_State* L) {
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
+    return 0;
+}
+
+int zoomToFocus(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::zoomToFocus");
+    std::optional<double> duration = ghoul::lua::value<std::optional<double>>(L);
+
+    const SceneGraphNode* node = global::navigationHandler->anchorNode();
+    if (!node) {
+        return ghoul::lua::luaError(L, "Could not determine current focus node");
+    }
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("Target", node->identifier());
+    insDict.setValue("PathType", std::string("Linear"));
+
+    if (duration.has_value()) {
+        double d = *duration;
+        if (d <= 0.0) {
+            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+        }
+        insDict.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(insDict);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
+
+    return 0;
+}
+
+int zoomToDistance(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::zoomToDistance");
+    auto [distance, duration] =
+        ghoul::lua::values<double, std::optional<double>>(L);
+
+    if (distance <= 0.0) {
+        return ghoul::lua::luaError(L, "The distance must be larger than zero");
+    }
+
+    const SceneGraphNode* node = global::navigationHandler->anchorNode();
+    if (!node) {
+        return ghoul::lua::luaError(L, "Could not determine current focus node");
+    }
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("Target", node->identifier());
+    insDict.setValue("Height", distance);
+    insDict.setValue("PathType", std::string("Linear"));
+
+    if (duration.has_value()) {
+        double d = *duration;
+        if (d <= 0.0) {
+            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+        }
+        insDict.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(insDict);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
+
+    return 0;
+}
+
+int zoomToDistanceRelative(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::zoomToDistanceRelative");
+    auto [distance, duration] =
+        ghoul::lua::values<double, std::optional<double>>(L);
+
+    if (distance <= 0.0) {
+        return ghoul::lua::luaError(L, "The distance must be larger than zero");
+    }
+
+    const SceneGraphNode* node = global::navigationHandler->anchorNode();
+    if (!node) {
+        return ghoul::lua::luaError(L, "Could not determine current focus node");
+    }
+
+    distance *= node->boundingSphere();
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("Target", node->identifier());
+    insDict.setValue("Height", distance);
+    insDict.setValue("PathType", std::string("Linear"));
+
+    if (duration.has_value()) {
+        double d = *duration;
+        if (d <= 0.0) {
+            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+        }
+        insDict.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(insDict);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
+
     return 0;
 }
 

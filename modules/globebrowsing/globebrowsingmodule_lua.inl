@@ -322,10 +322,21 @@ int flyToGeo(lua_State* L) {
         altitude
     );
 
+    const glm::dvec3 currentPosW = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 currentPosModelCoords =
+        glm::inverse(globe->modelTransform()) * glm::dvec4(currentPosW, 1.0);
+
+    constexpr const double LengthEpsilon = 10.0; // meters
+    if (glm::distance(currentPosModelCoords, positionModelCoords) < LengthEpsilon) {
+        LINFOC("GlobeBrowsing", "flyToGeo: Already at the requested position");
+        return 0;
+    }
+
     ghoul::Dictionary instruction;
     instruction.setValue("TargetType", std::string("Node"));
     instruction.setValue("Target", n->identifier());
     instruction.setValue("Position", positionModelCoords);
+    instruction.setValue("PathType", std::string("ZoomOutOverview"));
 
     // Handle the two optional arguments: duration and use target's up direction argument
     // The user can either provide both, or one of them

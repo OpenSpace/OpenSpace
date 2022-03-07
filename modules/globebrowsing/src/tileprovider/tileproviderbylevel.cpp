@@ -156,6 +156,10 @@ void TileProviderByLevel::reset() {
     }
 }
 
+int TileProviderByLevel::minLevel() {
+    return 1;
+}
+
 int TileProviderByLevel::maxLevel() {
     return static_cast<int>(_providerIndices.size() - 1);
 }
