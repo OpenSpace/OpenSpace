@@ -874,14 +874,16 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             {
                 "add",
                 &luascriptfunctions::asset::add,
-                "string",
+                { { "", "string" } },
+                "",
                 "Adds an asset to the current scene. The parameter passed into this "
                 "function is the path to the file that should be loaded"
             },
             {
                 "remove",
                 &luascriptfunctions::asset::remove,
-                "string",
+                { { "", "string" } },
+                "",
                 "Removes the asset with the specfied name from the scene. The parameter "
                 "to this function is the same that was originally used to load this "
                 "asset, i.e. the path to the asset file"
@@ -889,7 +891,8 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             {
                 "isLoaded",
                 &luascriptfunctions::asset::isLoaded,
-                "string",
+                { { "", "string" } },
+                "",
                 "Returns true if the referenced asset already has been loaded. Otherwise "
                 "false is returned. The parameter to this function is the path of the "
                 "asset that should be tested"
@@ -897,6 +900,7 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             {
                 "allAssets",
                 &luascriptfunctions::asset::allAssets,
+                { { "", "" } },
                 "",
                 "Returns the paths to all loaded assets, loaded directly or indirectly, "
                 "as a table containing the paths to all loaded assets."

@@ -717,7 +717,8 @@ scripting::LuaLibrary Profile::luaLibrary() {
             {
                 "saveSettingsToProfile",
                 &luascriptfunctions::saveSettingsToProfile,
-                "[string, bool]",
+                {},
+                "",
                 "Collects all changes that have been made since startup, including all "
                 "property changes and assets required, requested, or removed. All "
                 "changes will be added to the profile that OpenSpace was started with, "

@@ -113,13 +113,15 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "hasAction",
                 &luascriptfunctions::hasAction,
-                "string",
+                { { "", "string" } },
+                "",
                 "Checks if the passed identifier corresponds to an action"
             },
             {
                 "removeAction",
                 &luascriptfunctions::removeAction,
-                "(string, table)",
+                { { "", "string" }, { "", "table" } },
+                "",
                 "Removes an existing action from the list of possible actions. The "
                 "action is identifies either by the passed name, or if it is a table, "
                 "the value behind the 'Identifier' key is extract and used instead"
@@ -127,7 +129,8 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "registerAction",
                 &luascriptfunctions::registerAction,
-                "table",
+                { { "", "table" } },
+                "",
                 "Registers a new action. The table must at least contain the keys "
                 "'Identifier' and 'Command' represeting the unique identifier and the "
                 "Lua script that belong to this new action. Optional keys are 'Name' for "
@@ -140,7 +143,8 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "action",
                 &luascriptfunctions::action,
-                "string",
+                { { "", "string" } },
+                "",
                 "Returns information about the action as a table with the keys "
                 "'Identifier', 'Command', 'Name', 'Documentation', 'GuiPath', and "
                 "'Synchronization'"
@@ -148,6 +152,7 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "actions",
                 &luascriptfunctions::actions,
+                {},
                 "",
                 "Returns all registered actions in the system as a table of tables each "
                 "containing the keys 'Identifier', 'Command', 'Name', 'Documentation', "
@@ -156,7 +161,8 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "triggerAction",
                 &luascriptfunctions::triggerAction,
-                "string",
+                { { "", "string" } },
+                "",
                 "Triggers the action given by the specified identifier"
             }
         }

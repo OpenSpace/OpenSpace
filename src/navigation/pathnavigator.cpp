@@ -470,31 +470,36 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "isFlying",
                 &luascriptfunctions::isFlying,
+                {},
                 "",
                 "Returns true if a camera path is currently running, and false otherwise"
             },
             {
                 "continuePath",
                 &luascriptfunctions::continuePath,
+                {},
                 "",
                 "Continue playing a paused camera path"
             },
             {
                 "pausePath",
                 &luascriptfunctions::pausePath,
+                {},
                 "",
                 "Pause a playing camera path"
             },
             {
                 "stopPath",
                 &luascriptfunctions::stopPath,
+                {},
                 "",
                 "Stops a path, if one is being played"
             },
             {
                 "flyTo",
                 &luascriptfunctions::flyTo,
-                "string [, bool, double]",
+                {},
+                "",
                 "Move the camera to the node with the specified identifier. The optional "
                 "double specifies the duration of the motion, in seconds. If the optional "
                 "bool is set to true the target up vector for camera is set based on the "
@@ -503,7 +508,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "flyToHeight",
                 &luascriptfunctions::flyToHeight,
-                "string, double [, bool, double]",
+                {},
+                "",
                 "Move the camera to the node with the specified identifier. The second "
                 "argument is the desired target height above the target node's bounding "
                 "sphere, in meters. The optional double specifies the duration of the "
@@ -514,7 +520,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "flyToNavigationState",
                 &luascriptfunctions::flyToNavigationState,
-                "table, [double]",
+                {},
+                "",
                 "Create a path to the navigation state described by the input table. "
                 "The optional double specifies the target duration of the motion, "
                 "in seconds. Note that roll must be included for the target up "
@@ -523,7 +530,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "zoomToFocus",
                 &luascriptfunctions::zoomToFocus,
-                "[duration]",
+                {},
+                "",
                 "Zoom linearly to the current focus node, using the default distance."
                 "The optional input parameter specifies the duration for the motion, "
                 "in seconds."
@@ -531,7 +539,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "zoomToDistance",
                 &luascriptfunctions::zoomToDistance,
-                "distance, [duration]",
+                {},
+                "",
                 "Fly linearly to a specific distance in relation to the focus node. "
                 "The distance is given in meters above the bounding sphere of the "
                 "current focus node."
@@ -541,7 +550,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "zoomToDistanceRelative",
                 &luascriptfunctions::zoomToDistanceRelative,
-                "distance, [duration]",
+                {},
+                "",
                 "Fly linearly to a specific distance in relation to the focus node. "
                 "The distance is given as a multiple of the bounding sphere of the "
                 "current focus node. That is, a value of 1 will result in a position "
@@ -553,7 +563,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "createPath",
                 &luascriptfunctions::createPath,
-                "table",
+                {},
+                "",
                 "Create a camera path as described by the lua table input argument"
             },
         }

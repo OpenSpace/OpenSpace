@@ -798,7 +798,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
-                "name, value [, duration, easing, optimization]",
+                {},
+                "",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
                 "in the first argument. The second argument can be any type, but it has "
                 "to match the type that the property (or properties) expect. If the "
@@ -822,7 +823,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::property_setValueSingle,
-                "URI, value [, duration, easing]",
+                {},
+                "",
                 "Sets the property identified by the URI in the first argument. The "
                 "second argument can be any type, but it has to match the type that the "
                 "property expects. If the third is not present or is '0', the value "
@@ -837,54 +839,62 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "hasProperty",
                 &luascriptfunctions::property_hasProperty,
-                "string",
+                {},
+                "",
                 "Returns whether a property with the given URI exists"
             },
             {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,
-                "string",
+                {},
+                "",
                 "Returns the value the property, identified by the provided URI."
             },
             {
                 "getProperty",
                 &luascriptfunctions::property_getProperty,
-                "string",
+                {},
+                "",
                 "Returns a list of property identifiers that match the passed regular "
                 "expression"
             },
             {
                 "addSceneGraphNode",
                 &luascriptfunctions::addSceneGraphNode,
-                "table",
+                {},
+                "",
                 "Loads the SceneGraphNode described in the table and adds it to the "
                 "SceneGraph"
             },
             {
                 "removeSceneGraphNode",
                 &luascriptfunctions::removeSceneGraphNode,
-                "(string, table)",
+                {},
+                "",
                 "Removes the SceneGraphNode identified by name or by extracting the "
                 "'Identifier' key if the parameter is a table"
             },
             {
                 "removeSceneGraphNodesFromRegex",
                 &luascriptfunctions::removeSceneGraphNodesFromRegex,
-                "string",
+                {},
+                "",
                 "Removes all SceneGraphNodes with identifiers matching the input regular "
                 "expression"
             },
             {
                 "hasSceneGraphNode",
                 &luascriptfunctions::hasSceneGraphNode,
-                "string",
+                {},
+                "",
                 "Checks whether the specifies SceneGraphNode is present in the current "
                 "scene"
             },
             {
                 "addInterestingTime",
                 &luascriptfunctions::addInterestingTime,
-                "string, string",
+                {},
+                "",
                 "Adds an interesting time to the current scene. The first argument is "
                 "the name of the time and the second argument is the time itself in the "
                 "format YYYY-MM-DDThh:mm:ss.uuu"
@@ -892,35 +902,40 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "worldPosition",
                 &luascriptfunctions::worldPosition,
-                "string",
+                {},
+                "",
                 "Returns the world position of the scene graph node with the given "
                 "string as identifier"
             },
             {
                 "worldRotation",
                 & luascriptfunctions::worldRotation,
-                "string",
+                {},
+                "",
                 "Returns the world rotation matrix of the scene graph node with the "
                 "given string as identifier"
             },
             {
                 "setParent",
                 &luascriptfunctions::setParent,
-                "string, string",
+                {},
+                "",
                 "The scene graph node identified by the first string is reparented to be "
                 "a child of the scene graph node identified by the second string."
             },
             {
                 "boundingSphere",
                 &luascriptfunctions::boundingSphere,
-                "string",
+                {},
+                "",
                 "Returns the bounding sphere of the scene graph node with the given "
                 "string as identifier"
             },
             {
                 "interactionSphere",
                 &luascriptfunctions::interactionSphere,
-                "string",
+                {},
+                "",
                 "Returns the interaction sphere of the scene graph node with the given "
                 "string as identifier"
             }

@@ -87,7 +87,8 @@ namespace {
         for (const LuaLibrary::Function& f : library.functions) {
             json << "{";
             json << fmt::format(replStr, "name", f.name);
-            json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
+            // @TODO !
+            //json << fmt::format(replStr, "arguments", escapedJson(f.arguments));
             json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
             if (&f != &library.functions.back() || !library.documentations.empty()) {
@@ -417,81 +418,98 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printTrace",
                 &luascriptfunctions::printTrace,
-                "*",
+                { { "", "*" } },
+                "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Trace'"
             },
             {
                 "printDebug",
                 &luascriptfunctions::printDebug,
-                "*",
+                { { "", "*" } },
+                "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Debug'"
             },
             {
                 "printInfo",
                 &luascriptfunctions::printInfo,
-                "*",
+                { { "", "*" } },
+                "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Info'"
             },
             {
                 "printWarning",
                 &luascriptfunctions::printWarning,
-                "*",
+                { { "", "*" } },
+                "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Warning'"
             },
             {
                 "printError",
                 &luascriptfunctions::printError,
-                "*",
+                { { "", "*" } },
+                "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Error'"
             },
             {
                 "printFatal",
                 &luascriptfunctions::printFatal,
-                "*",
+                { { "", "*" } },
+                "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Fatal'"
             },
             {
                 "absPath",
                 &luascriptfunctions::absolutePath,
-                "string",
+                { { "", "string" } },
+                "",
                 "Returns the absolute path to the passed path, resolving path tokens as "
                 "well as resolving relative paths"
             },
             {
                 "fileExists",
                 &luascriptfunctions::fileExists,
-                "string",
+                { { "", "string" } },
+                "",
+
                 "Checks whether the provided file exists."
             },
             {
                 "readFile",
                 &luascriptfunctions::readFile,
-                "string",
+                { { "", "string" } },
+                "",
+
                 "Reads a file from disk and return its contents"
             },
             {
                 "directoryExists",
                 &luascriptfunctions::directoryExists,
-                "string",
+                { { "", "string" } },
+                "",
+
                 "Chckes whether the provided directory exists."
             },
             {
                 "setPathToken",
                 &luascriptfunctions::setPathToken,
-                "string, string",
+                { { "", "string" } },
+                "",
+
                 "Registers a new path token provided by the first argument to the path "
                 "provided in the second argument"
             },
             {
                 "walkDirectory",
                 &luascriptfunctions::walkDirectory,
-                "string [bool, bool]",
+                { { "", "string" } },
+                "",
+
                 "Walks a directory and returns all contents (files and directories) of "
                 "the directory as absolute paths. The first argument is the path of the "
                 "directory that should be walked, the second argument determines if the "
@@ -501,7 +519,9 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "walkDirectoryFiles",
                 &luascriptfunctions::walkDirectoryFiles,
-                "string [bool, bool]",
+                { { "", "string" } },
+                "",
+
                 "Walks a directory and returns the files of the directory as absolute "
                 "paths. The first argument is the path of the directory that should be "
                 "walked, the second argument determines if the walk is recursive and "
@@ -511,7 +531,9 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "walkDirectoryFolder",
                 &luascriptfunctions::walkDirectoryFolder,
-                "string [bool, bool]",
+                { { "", "string" } },
+                "",
+
                 "Walks a directory and returns the subfolders of the directory as "
                 "absolute paths. The first argument is the path of the directory that "
                 "should be walked, the second argument determines if the walk is "
@@ -521,7 +543,9 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "directoryForPath",
                 &luascriptfunctions::directoryForPath,
-                "string",
+                { { "", "string" } },
+                "",
+
                 "This function extracts the directory part of the passed path. For "
                 "example, if the parameter is 'C:/OpenSpace/foobar/foo.txt', this "
                 "function returns 'C:/OpenSpace/foobar'."
@@ -529,7 +553,9 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "unzipFile",
                 &luascriptfunctions::unzipFile,
-                "string, string [bool]",
+                { { "", "string" } },
+                "",
+
                 "This function extracts the contents of a zip file. The first "
                 "argument is the path to the zip file. The second argument is the "
                 "directory where to put the extracted files. If the third argument is "
@@ -539,7 +565,9 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "saveLastChangeToProfile",
                 &luascriptfunctions::saveLastChangeToProfile,
+                { { "", "string" } },
                 "",
+
                 "This function saves the last script log action into the profile."
             }
         }

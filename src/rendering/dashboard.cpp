@@ -152,18 +152,21 @@ scripting::LuaLibrary Dashboard::luaLibrary() {
             {
                 "addDashboardItem",
                 &luascriptfunctions::addDashboardItem,
-                "table",
+                {{ "", "table" }},
+                "",
                 "Adds a new dashboard item to the main dashboard."
             },
             {
                 "removeDashboardItem",
                 &luascriptfunctions::removeDashboardItem,
-                "string",
+                { { "", "string" } },
+                "",
                 "Removes the dashboard item with the specified identifier."
             },
             {
                 "clearDashboardItems",
                 &luascriptfunctions::clearDashboardItems,
+                {},
                 "",
                 "Removes all dashboard items from the main dashboard."
             }

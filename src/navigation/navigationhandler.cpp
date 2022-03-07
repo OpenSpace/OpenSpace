@@ -586,7 +586,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "getNavigationState",
                 &luascriptfunctions::getNavigationState,
-                "[string]",
+                {},
+                "",
                 "Return the current navigation state as a lua table. The optional "
                 "argument is the scene graph node to use as reference frame. By default, "
                 "the reference frame will picked based on whether the orbital navigator "
@@ -597,13 +598,15 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "setNavigationState",
                 &luascriptfunctions::setNavigationState,
-                "table",
+                {},
+                "",
                 "Set the navigation state. The argument must be a valid Navigation State."
             },
             {
                 "saveNavigationState",
                 &luascriptfunctions::saveNavigationState,
-                "string, [string]",
+                {},
+                "",
                 "Save the current navigation state to a file with the path given by the "
                 "first argument. The optoinal second argument is the scene graph node to "
                 "use as reference frame. By default, the reference frame will picked "
@@ -614,7 +617,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "loadNavigationState",
                 &luascriptfunctions::loadNavigationState,
-                "string",
+                {},
+                "",
                 "Load a navigation state from file. The file should be a lua file "
                 "returning the navigation state as a table formatted as a "
                 "Navigation State, such as the output files of saveNavigationState."
@@ -622,19 +626,22 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "retargetAnchor",
                 &luascriptfunctions::retargetAnchor,
-                "void",
+                {},
+                "",
                 "Reset the camera direction to point at the anchor node"
             },
             {
                 "retargetAim",
                 &luascriptfunctions::retargetAim,
-                "void",
+                {},
+                "",
                 "Reset the camera direction to point at the aim node"
             },
             {
                 "bindJoystickAxis",
                 &luascriptfunctions::bindJoystickAxis,
-                "name, axis, axisType [, isInverted, joystickType, isSticky, sensitivity]",
+                {},
+                "",
                 "Finds the input joystick with the given 'name' and binds the axis "
                 "identified by the second argument to be used as the type identified by "
                 "the third argument. If 'isInverted' is 'true', the axis value is "
@@ -647,8 +654,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "bindJoystickAxisProperty",
                 &luascriptfunctions::bindJoystickAxisProperty,
-                "name, axis, propertyUri [, min, max, isInverted, isSticky, sensitivity, "
-                "isRemote]",
+                {},
+                "",
                 "Finds the input joystick with the given 'name' and binds the axis "
                 "identified by the second argument to be bound to the property "
                 "identified by the third argument. 'min' and 'max' is the minimum and "
@@ -661,7 +668,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "joystickAxis",
                 &luascriptfunctions::joystickAxis,
-                "name, axis",
+                {},
+                "",
                 "Finds the input joystick with the given 'name' and returns the joystick "
                 "axis information for the passed axis. The information that is returned "
                 "is the current axis binding as a string, whether the values are "
@@ -674,7 +682,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "setAxisDeadZone",
                 &luascriptfunctions::setJoystickAxisDeadzone,
-                "name, axis, float",
+                {},
+                "",
                 "Finds the input joystick with the given 'name' and sets the deadzone "
                 "for a particular joystick axis, which means that any input less than "
                 "this value is completely ignored."
@@ -682,7 +691,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "bindJoystickButton",
                 &luascriptfunctions::bindJoystickButton,
-                "name, button, string [, string, string, bool]",
+                {},
+                "",
                 "Finds the input joystick with the given 'name' and binds a Lua script "
                 "given by the third argument to be executed when the joystick button "
                 "identified by the second argument is triggered. The fifth argument "
@@ -696,14 +706,16 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "clearJoystickButton",
                 &luascriptfunctions::clearJoystickButton,
-                "name, button",
+                {},
+                "",
                 "Finds the input joystick with the given 'name' and removes all commands "
                 "that are currently bound to the button identified by the second argument."
             },
             {
                 "joystickButton",
                 &luascriptfunctions::joystickButton,
-                "name, button",
+                {},
+                "",
                 "Finds the input joystick with the given 'name' and returns the script "
                 "that is currently bound to be executed when the provided button is "
                 "pressed."
@@ -711,31 +723,36 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "addGlobalRotation",
                 &luascriptfunctions::addGlobalRotation,
-                "double, double",
+                {},
+                "",
                 "Directly adds to the global rotation of the camera"
             },
             {
                 "addLocalRotation",
                 &luascriptfunctions::addLocalRotation,
-                "double, double",
+                {},
+                "",
                 "Directly adds to the local rotation of the camera"
             },
             {
                 "addTruckMovement",
                 &luascriptfunctions::addTruckMovement,
-                "double, double",
+                {},
+                "",
                 "Directly adds to the truck movement of the camera"
             },
             {
                 "addLocalRoll",
                 &luascriptfunctions::addLocalRoll,
-                "double, double",
+                {},
+                "",
                 "Directly adds to the local roll of the camera"
             },
             {
                 "addGlobalRoll",
                 &luascriptfunctions::addGlobalRoll,
-                "double, double",
+                {},
+                "",
                 "Directly adds to the global roll of the camera"
             }
         }

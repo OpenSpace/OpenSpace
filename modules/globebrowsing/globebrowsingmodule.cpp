@@ -347,7 +347,8 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "addLayer",
             &globebrowsing::luascriptfunctions::addLayer,
-            "string, string, table",
+                {},
+                "",
             "Adds a layer to the specified globe. The first argument specifies the "
             "name of the scene graph node of which to add the layer. The renderable "
             "of the specified scene graph node needs to be a renderable globe. "
@@ -358,7 +359,8 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "deleteLayer",
             &globebrowsing::luascriptfunctions::deleteLayer,
-            "string, string, (string, table)",
+                {},
+                "",
             "Removes a layer from the specified globe. The first argument specifies "
             "the name of the scene graph node of which to remove the layer. "
             "The renderable of the specified scene graph node needs to be a "
@@ -369,7 +371,8 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getLayers",
             &globebrowsing::luascriptfunctions::getLayers,
-            "string, string",
+                {},
+                "",
             "Returns the list of layers for the scene graph node specified in the first "
             "parameter. The second parameter specifies which layer type should be "
             "queried."
@@ -377,7 +380,8 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "moveLayer",
             &globebrowsing::luascriptfunctions::moveLayer,
-            "string, string, number, number",
+                {},
+                "",
             "Rearranges the order of a single layer on a globe. The first parameter"
             "is the identifier of the globe, the second parameter specifies "
             "the name of the layer group, the third parameter is the original position "
@@ -390,13 +394,15 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "goToChunk",
             &globebrowsing::luascriptfunctions::goToChunk,
-            "void",
+                {},
+                "",
             "Go to chunk with given index x, y, level"
         },
         {
             "goToGeo",
             &globebrowsing::luascriptfunctions::goToGeo,
-            "[string], number, number, [number]",
+                {},
+                "",
             "Go to geographic coordinates of a globe. The first (optional) argument is "
             "the identifier of a scene graph node that has a RenderableGlobe attached. "
             "If no globe is passed in, the current anchor will be used. "
@@ -411,7 +417,8 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             // paths work really well close to surfaces
             "flyToGeo",
             &globebrowsing::luascriptfunctions::flyToGeo,
-            "[string], number, number, number [, bool, number]",
+                {},
+                "",
             "Fly the camera to geographic coordinates of a globe, using the path "
             "navigation system. The first (optional) argument is the identifier of a "
             "scene graph node with a RenderableGlobe. If no globe is passed in, the "
@@ -424,7 +431,8 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getLocalPositionFromGeo",
             &globebrowsing::luascriptfunctions::getLocalPositionFromGeo,
-            "string, number, number, number",
+                {},
+                "",
             "Returns a position in the local Cartesian coordinate system of the globe "
             "identified by the first argument, that corresponds to the given geographic "
             "coordinates: latitude, longitude and altitude (in degrees and meters). In "
@@ -434,14 +442,16 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getGeoPositionForCamera",
             &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
-            "void",
+                {},
+                "",
             "Get geographic coordinates of the camera position in latitude, "
             "longitude, and altitude (degrees and meters)."
         },
         {
             "loadWMSCapabilities",
             &globebrowsing::luascriptfunctions::loadWMSCapabilities,
-            "string, string, string",
+                {},
+                "",
             "Loads and parses the WMS capabilities xml file from a remote server. "
             "The first argument is the name of the capabilities that can be used to "
             "later refer to the set of capabilities. The second argument is the "
@@ -451,7 +461,8 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "removeWMSServer",
             &globebrowsing::luascriptfunctions::removeWMSServer,
-            "string",
+                {},
+                "",
             "Removes the WMS server identified by the first argument from the list "
             "of available servers. The parameter corrsponds to the first argument in "
             "the loadWMSCapabilities call that was used to load the WMS server."
@@ -459,7 +470,8 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "capabilitiesWMS",
             &globebrowsing::luascriptfunctions::capabilities,
-            "string",
+                {},
+                "",
             "Returns an array of tables that describe the available layers that are "
             "supported by the WMS server identified by the provided name. The 'URL'"
             "component of the returned table can be used in the 'FilePath' argument "

@@ -146,7 +146,8 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
          {
             "createStateMachine",
             &luascriptfunctions::createStateMachine,
-            "table, table, [string]",
+                {},
+                "",
             "Creates a state machine from a list of states and transitions. See State "
             "and Transition documentation for details. The optional thrid argument is "
             "the identifier of the desired initial state. If left out, the first state "
@@ -155,13 +156,15 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
         {
             "destroyStateMachine",
             &luascriptfunctions::destroyStateMachine,
-            "",
+                {},
+                "",
             "Destroys the current state machine and deletes all the memory."
         },
         {
             "goToState",
             &luascriptfunctions::goToState,
-            "string",
+                {},
+                "",
             "Triggers a transition from the current state to the state with the given "
             "identifier. Requires that the specified string corresponds to an existing "
             "state, and that a transition between the two states exists."
@@ -169,7 +172,8 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
         {
             "setInitialState",
             &luascriptfunctions::setInitialState,
-            "string",
+                {},
+                "",
             "Immediately sets the current state to the state with the given name, if "
             "it exists. This is done without doing a transition and completely ignores "
             "the previous state."
@@ -177,34 +181,39 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
         {
             "currentState",
             &luascriptfunctions::currentState,
-            "",
+                {},
+                "",
             "Returns the string name of the current state that the statemachine is in."
         },
         {
             "possibleTransitions",
             &luascriptfunctions::possibleTransitions,
-            "",
+                {},
+                "",
             "Returns a list with the identifiers of all the states that can be "
             "transitioned to from the current state."
         },
         {
             "canGoToState",
             &luascriptfunctions::canGoToState,
-            "string",
+                {},
+                "",
             "Returns true if there is a defined transition between the current state and "
             "the given string name of a state, otherwise false"
         },
         {
             "printCurrentStateInfo",
             &luascriptfunctions::printCurrentStateInfo,
-            "",
+                {},
+                "",
             "Prints information about the current state and possible transitions to the "
             "log."
         },
         {
             "saveToDotFile",
             &luascriptfunctions::saveToDotFile,
-            "string, [string]",
+                {},
+                "",
             "Saves the current state machine to a .dot file as a directed graph. The "
             "resulting graph can be rendered using external tools such as Graphviz. "
             "The first parameter is the name of the file, and the second is an optional "

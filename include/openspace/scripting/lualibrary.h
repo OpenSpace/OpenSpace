@@ -47,8 +47,16 @@ struct LuaLibrary {
         std::string name;
         /// The function pointer that is executed if the function is called
         lua_CFunction function;
-        /// A text describing the arguments to this function
-        std::string argumentText;
+        struct Argument {
+            /// The name of the arguments
+            std::string name;
+            /// The type of the argument
+            std::string type;
+        };
+        /// The ordered arguments that this function takes
+        std::vector<Argument> arguments;
+        /// Information about the type that this function returns
+        std::string returnType;
         /// A help text describing what the function does/
         std::string helpText;
     };
