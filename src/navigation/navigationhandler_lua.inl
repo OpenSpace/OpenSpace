@@ -59,7 +59,8 @@ int getNavigationState(lua_State* L) {
         state = global::navigationHandler->navigationState();
     }
 
-
+    // @TODO (abock, 2022-03-08) This lambda should be necessary anymore and lua::push
+    // could be used directly
     const auto pushVector = [](lua_State* s, const glm::dvec3& v) {
         lua_newtable(s);
         ghoul::lua::push(s, 1, v.x);
