@@ -689,8 +689,8 @@ void RenderableModel::update(const UpdateData& data) {
     setBoundingSphere(_geometry->boundingRadius() * _modelScale *
         glm::compMax(data.modelTransform.scale)
     );
-
-    setInteractionSphere(_boundingSphere);
+    // Set Interaction sphere to be 10% in size as the bounding sphere
+    setInteractionSphere(_boundingSphere * 0.1);
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;
