@@ -371,6 +371,10 @@ void TemporalTileProvider::reset() {
     }
 }
 
+int TemporalTileProvider::minLevel() {
+    return 1;
+}
+
 int TemporalTileProvider::maxLevel() {
     if (!_currentTileProvider) {
         update();
@@ -831,6 +835,10 @@ void TemporalTileProvider::InterpolateTileProvider::reset() {
     t2->reset();
     before->reset();
     future->reset();
+}
+
+int TemporalTileProvider::InterpolateTileProvider::minLevel() {
+    return glm::max(t1->minLevel(), t2->minLevel());
 }
 
 int TemporalTileProvider::InterpolateTileProvider::maxLevel() {

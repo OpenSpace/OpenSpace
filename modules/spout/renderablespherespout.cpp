@@ -24,86 +24,95 @@
 
 #ifdef WIN32
 
-#include <modules/spout/screenspacespout.h>
+#include <modules/spout/renderablespherespout.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/sphere.h>
 #include <ghoul/logging/logmanager.h>
-#include <optional>
-
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
-        "SpoutName",
-        "Spout Sender Name",
-        "This value explicitly sets the Spout receiver to use a specific name. If this "
-        "is not a valid name, an empty image is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
-        "SpoutSelection",
-        "Spout Selection",
-        "This property displays all available Spout sender on the system. If one them is "
-        "selected, its value is stored in the 'SpoutName' property, overwriting its "
-        "previous value."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo UpdateInfo = {
-        "UpdateSelection",
-        "Update Selection",
-        "If this property is trigged, the 'SpoutSelection' options will be refreshed."
-    };
-
-    struct [[codegen::Dictionary(ScreenSpaceSpout)]] Parameters {
-        // [[codegen::verbatim(NameInfo.description)]]
-        std::optional<std::string> spoutName;
-    };
-#include "screenspacespout_codegen.cpp"
-
-} // namespace
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceSpout::Documentation() {
-    return codegen::doc<Parameters>("spout_screenspace_spout");
+documentation::Documentation RenderableSphereSpout::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Renderable Sphere Spout",
+        "spout_sphere_spout",
+        {
+            {
+                "Name",
+                new StringVerifier,
+                Optional::Yes,
+                "Specifies the GUI name of the RenderableSphereSpout"
+            },
+            {
+                spout::SpoutReceiverPropertyProxy::NameInfoProperty().identifier,
+                new StringVerifier,
+                Optional::Yes,
+                spout::SpoutReceiverPropertyProxy::NameInfoProperty().description
+            }
+        }
+    };
 }
 
-ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceRenderable(dictionary)
+RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary)
+    : RenderableSphere(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
-    std::string identifier;
-    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
-        identifier = dictionary.value<std::string>(KeyIdentifier);
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableSphereSpout"
+    );
+
+    int iIdentifier = 0;
+    if (_identifier.empty()) {
+        static int id = 0;
+        iIdentifier = id;
+
+        if (iIdentifier == 0) {
+            setIdentifier("RenderableSphereSpout");
+        }
+        else {
+            setIdentifier("RenderableSphereSpout" + std::to_string(iIdentifier));
+        }
+        ++id;
     }
-    else {
-        identifier = "ScreenSpaceSpout";
+
+    if (_guiName.empty()) {
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("RenderableSphereSpout " + std::to_string(iIdentifier));
     }
-    identifier = makeUniqueIdentifier(identifier);
-    setIdentifier(std::move(identifier));
 }
 
-bool ScreenSpaceSpout::deinitializeGL() {
+void RenderableSphereSpout::deinitializeGL() {
     _spoutReceiver.release();
-
-    return ScreenSpaceRenderable::deinitializeGL();
+    RenderableSphere::deinitializeGL();
 }
 
-bool ScreenSpaceSpout::isReady() const {
-    return ScreenSpaceRenderable::isReady() && !_spoutReceiver.isReceiving();
-}
-
-void ScreenSpaceSpout::update() {
-    ScreenSpaceRenderable::update();
+void RenderableSphereSpout::update(const UpdateData& data) {
+    RenderableSphere::update(data);
     _spoutReceiver.updateReceiver();
 }
 
-void ScreenSpaceSpout::bindTexture() {
-    _spoutReceiver.saveGLTextureState();
-    glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
+void RenderableSphereSpout::bindTexture() {
+    if (_spoutReceiver.isReceiving()) {
+        _spoutReceiver.saveGLTextureState();
+        glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
+    }
+    else {
+        RenderableSphere::bindTexture();
+    }
 }
 
-void ScreenSpaceSpout::unbindTexture() {
-    _spoutReceiver.restoreGLTextureState();
+void RenderableSphereSpout::unbindTexture() {
+    if (_spoutReceiver.isReceiving()) {
+        _spoutReceiver.restoreGLTextureState();
+    }
+    else {
+        RenderableSphere::unbindTexture();
+    }
 }
 
 } // namespace openspace

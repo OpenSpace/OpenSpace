@@ -142,6 +142,10 @@ void TileProviderByIndex::reset() {
     _defaultTileProvider->reset();
 }
 
+int TileProviderByIndex::minLevel() {
+    return 1;
+}
+
 int TileProviderByIndex::maxLevel() {
     return _defaultTileProvider->maxLevel();
 }
