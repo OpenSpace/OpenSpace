@@ -135,11 +135,12 @@ std::filesystem::path HorizonsDialog::file() const {
 }
 
 void HorizonsDialog::createWidgets() {
-    QBoxLayout* layout = new QVBoxLayout(this);
+    QGridLayout* layout = new QGridLayout(this);
+    layout->setSpacing(10);
     {
-        QLabel* generateLabel = new QLabel("Generate a new Horizons file", this);
+        QLabel* generateLabel = new QLabel("Generate a Horizons file", this);
         generateLabel->setObjectName("heading");
-        layout->addWidget(generateLabel);
+        layout->addWidget(generateLabel, 0, 0, 1, 3);
 
         QLabel* infoLabel = new QLabel("<p>For more information about the Horizons "
             "system please visit: <a href=\"https://ssd.jpl.nasa.gov/horizons/\">"
@@ -149,13 +150,12 @@ void HorizonsDialog::createWidgets() {
         infoLabel->setWordWrap(true);
         infoLabel->setObjectName("thin");
         infoLabel->setOpenExternalLinks(true);
-        layout->addWidget(infoLabel);
+        layout->addWidget(infoLabel, 1, 0, 1, 3);
     }
     {
-        QBoxLayout* container = new QHBoxLayout(this);
         _typeLabel = new QLabel("Horizons data type:", this);
         _typeLabel->setToolTip("Choose Horizons data type");
-        container->addWidget(_typeLabel);
+        layout->addWidget(_typeLabel, 2, 0, 1, 2);
 
         _typeCombo = new QComboBox(this);
         _typeCombo->setToolTip("Choose Horizons data type");
@@ -169,106 +169,93 @@ void HorizonsDialog::createWidgets() {
             _typeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &HorizonsDialog::typeOnChange
         );
-        container->addWidget(_typeCombo);
-
-        layout->addLayout(container);
+        layout->addWidget(_typeCombo, 2, 2);
     }
     {
-        QBoxLayout* container = new QHBoxLayout(this);
         _fileLabel = new QLabel("File Path:", this);
         _fileLabel->setToolTip(
             "Where the generated Horizons file is saved"
         );
-        container->addWidget(_fileLabel);
+        layout->addWidget(_fileLabel, 3, 0);
 
+        QBoxLayout* container = new QHBoxLayout(this);
         _fileEdit = new QLineEdit(this);
         _fileEdit->setToolTip(
             "Where the generated Horizons file is saved"
         );
         container->addWidget(_fileEdit);
 
-        QPushButton* directoryButton = new QPushButton("Browse", this);
+        QPushButton* browseButton = new QPushButton("Browse", this);
         connect(
-            directoryButton,
+            browseButton,
             &QPushButton::released,
             this,
             &HorizonsDialog::openSaveAs
         );
-        directoryButton->setCursor(Qt::PointingHandCursor);
-        directoryButton->setToolTip(
+        browseButton->setCursor(Qt::PointingHandCursor);
+        browseButton->setToolTip(
             "Browse for a file path where the generated Horizons file will be saved"
         );
-        container->addWidget(directoryButton);
+        container->addWidget(browseButton);
 
-        layout->addLayout(container);
+        layout->addLayout(container, 3, 1, 1, 2);
     }
     {
-        QBoxLayout* container = new QHBoxLayout(this);
         _targetLabel = new QLabel("Target Body:", this);
         _targetLabel->setToolTip(
             "Which target or body would you like Horizons trajectery data for?"
         );
-        _targetLabel->setObjectName("horizons-error");
-        container->addWidget(_targetLabel);
+        layout->addWidget(_targetLabel, 4, 0);
 
         _targetEdit =
             new QLineEdit(QString::fromStdString("Mars Reconnaissance Orbiter"), this);
         _targetEdit->setToolTip(
             "Which target or body would you like Horizons trajectery data for?"
         );
-        container->addWidget(_targetEdit);
-
-        layout->addLayout(container);
+        layout->addWidget(_targetEdit, 4, 1, 1, 2);
 
         _chooseTargetCombo = new QComboBox(this);
         _chooseTargetCombo->hide();
         _chooseTargetCombo->setToolTip(
             "Choose a target from the search, or search again"
         );
-        layout->addWidget(_chooseTargetCombo);
+        layout->addWidget(_chooseTargetCombo, 5, 1, 1, 2);
     }
     {
-        QBoxLayout* container = new QHBoxLayout(this);
         _centerLabel = new QLabel("Observer Location:", this);
         _centerLabel->setToolTip("In which reference frame do you want the data in?");
-        container->addWidget(_centerLabel);
+        layout->addWidget(_centerLabel, 6, 0);
 
         _centerEdit = new QLineEdit(QString::fromStdString("500@499"), this);
         _centerEdit->setToolTip("In which reference frame do you want the data in?");
-        container->addWidget(_centerEdit);
-
-        layout->addLayout(container);
+        layout->addWidget(_centerEdit, 6, 1, 1, 2);
 
         _chooseObserverCombo = new QComboBox(this);
         _chooseObserverCombo->hide();
         _chooseObserverCombo->setToolTip(
             "Choose an observer from the search, or search again"
         );
-        layout->addWidget(_chooseObserverCombo);
+        layout->addWidget(_chooseObserverCombo, 7, 1, 1, 2);
     }
     {
-        QBoxLayout* container = new QHBoxLayout(this);
         _startLabel = new QLabel("Start Time:", this);
         _startLabel->setToolTip("Enter the start date and time for the data");
-        container->addWidget(_startLabel);
+        layout->addWidget(_startLabel, 8, 0, 1, 2);
         _startEdit = new QDateTimeEdit(this);
         _startEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _startEdit->setDate(QDate::currentDate().addDays(-1));
         _startEdit->setToolTip("Enter the start date and time for the data");
-        container->addWidget(_startEdit);
-        layout->addLayout(container);
+        layout->addWidget(_startEdit, 8, 2);
     }
     {
-        QBoxLayout* container = new QHBoxLayout(this);
         _endLabel = new QLabel("End Time:", this);
         _endLabel->setToolTip("Enter the end date and time for the data");
-        container->addWidget(_endLabel);
+        layout->addWidget(_endLabel, 9, 0, 1, 2);
         _endEdit = new QDateTimeEdit(this);
         _endEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _endEdit->setDate(QDate::currentDate());
         _endEdit->setToolTip("Enter the end date and time for the data");
-        container->addWidget(_endEdit);
-        layout->addLayout(container);
+        layout->addWidget(_endEdit, 9, 2);
     }
     {
         _importTimeButton = new QPushButton("Import timerange", this);
@@ -283,19 +270,18 @@ void HorizonsDialog::createWidgets() {
             "Import parsed timerange for full data coverage"
         );
         _importTimeButton->hide();
-        layout->addWidget(_importTimeButton);
+        layout->addWidget(_importTimeButton, 10, 2);
     }
     {
-        QBoxLayout* container = new QHBoxLayout(this);
         _stepLabel = new QLabel("Step Size:", this);
         _stepLabel->setToolTip("Enter the step size for the data");
-        container->addWidget(_stepLabel);
+        layout->addWidget(_stepLabel, 11, 0);
 
         _stepEdit = new QLineEdit(this);
         _stepEdit->setValidator(new QIntValidator(this));
         _stepEdit->setText(QString::number(10));
         _stepEdit->setToolTip("Enter the step size for the data");
-        container->addWidget(_stepEdit);
+        layout->addWidget(_stepEdit, 11, 1);
 
         _timeTypeCombo = new QComboBox(this);
         _timeTypeCombo->setToolTip("Choose unit of the step size");
@@ -309,11 +295,9 @@ void HorizonsDialog::createWidgets() {
         };
         _timeTypeCombo->addItems(timeTypes);
         _timeTypeCombo->setCurrentIndex(0);
-        container->addWidget(_timeTypeCombo);
-
-        layout->addLayout(container);
+        layout->addWidget(_timeTypeCombo, 11, 2);
     }
-    layout->addWidget(new Line);
+    layout->addWidget(new Line, 12, 0, 1, 3);
     {
         _log = new QPlainTextEdit(this);
         _log->setReadOnly(true);
@@ -325,23 +309,20 @@ void HorizonsDialog::createWidgets() {
 
         _log->setPalette(p);
         _log->setToolTip("Any error messages from the data request is displayed here");
-        layout->addWidget(_log);
+        layout->addWidget(_log, 13, 0, 1, 3);
 
         appendLog("Horizons log messages:", HorizonsDialog::LogLevel::None);
     }
-    layout->addWidget(new Line);
+    layout->addWidget(new Line, 14, 0, 1, 3);
     {
-        QBoxLayout* container = new QHBoxLayout(this);
         _downloadLabel = new QLabel("Downloading file...", this);
         _downloadLabel->setObjectName("thin");
         _downloadLabel->hide();
+        layout->addWidget(_downloadLabel, 15, 0);
 
         _downloadProgress = new QProgressBar(this);
         _downloadProgress->hide();
-
-        container->addWidget(_downloadLabel);
-        container->addWidget(_downloadProgress);
-        layout->addLayout(container);
+        layout->addWidget(_downloadProgress, 15, 1, 1, 2);
     }
     {
         QBoxLayout* footer = new QHBoxLayout(this);
@@ -355,7 +336,7 @@ void HorizonsDialog::createWidgets() {
         connect(buttons, &QDialogButtonBox::accepted, this, &HorizonsDialog::approved);
         connect(buttons, &QDialogButtonBox::rejected, this, &HorizonsDialog::reject);
         footer->addWidget(buttons);
-        layout->addLayout(footer);
+        layout->addLayout(footer, 16, 0, 1, 3);
     }
 }
 
