@@ -66,6 +66,7 @@ class HorizonsFile {
 public:
     enum class ResultCode {
         Valid,
+        InvalidFormat,
         Empty,
 
         // Erros caught by the error field in the json output
@@ -113,6 +114,7 @@ public:
 
     void setFile(std::filesystem::path file);
     const std::filesystem::path& file() const;
+    std::filesystem::path& file();
 
     static std::string constructUrl(Type type, const std::string& target,
         const std::string& observer, const std::string& startTime,

@@ -24,6 +24,8 @@
 
 #include "profile/horizonsdialog.h"
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include "profile/line.h"
 #include <QComboBox>
@@ -250,7 +252,7 @@ void HorizonsDialog::createWidgets() {
         _startLabel->setToolTip("Enter the start date and time for the data");
         container->addWidget(_startLabel);
         _startEdit = new QDateTimeEdit(this);
-        _startEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm");
+        _startEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _startEdit->setDate(QDate::currentDate().addDays(-1));
         _startEdit->setToolTip("Enter the start date and time for the data");
         container->addWidget(_startEdit);
@@ -262,7 +264,7 @@ void HorizonsDialog::createWidgets() {
         _endLabel->setToolTip("Enter the end date and time for the data");
         container->addWidget(_endLabel);
         _endEdit = new QDateTimeEdit(this);
-        _endEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm");
+        _endEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _endEdit->setDate(QDate::currentDate());
         _endEdit->setToolTip("Enter the end date and time for the data");
         container->addWidget(_endEdit);
@@ -384,7 +386,7 @@ void HorizonsDialog::openSaveAs() {
     std::string filename = QFileDialog::getSaveFileName(
         this,
         "Choose a file path where the generated Horizons file will be saved",
-        "",
+        absPath("${USER}").string().c_str(),
         "Horizons data file (*.dat);;(*.dat)",
         nullptr
 #ifdef __linux__
@@ -419,12 +421,25 @@ void HorizonsDialog::downloadProgress(qint64 value, qint64 total) {
 }
 
 void HorizonsDialog::importTimeRange() {
-    _startEdit->setDateTime(
-        QDateTime::fromString(_validTimeRange.first.c_str(), "yyyy-MMM-dd T hh:mm")
-    );
-    _endEdit->setDateTime(
-        QDateTime::fromString(_validTimeRange.second.c_str(), "yyyy-MMM-dd T hh:mm")
-    );
+    QDateTime start, end;
+    start = QDateTime::fromString(_validTimeRange.first.c_str(), "yyyy-MMM-dd T hh:mm");
+    end = QDateTime::fromString(_validTimeRange.second.c_str(), "yyyy-MMM-dd T hh:mm");
+
+    if (!start.isValid() || !end.isValid()) {
+        start = QDateTime::fromString(_validTimeRange.first.c_str(), "yyyy-MMM-dd T hh:mm:ss");
+        end = QDateTime::fromString(_validTimeRange.second.c_str(), "yyyy-MMM-dd T hh:mm:ss");
+
+        if (!start.isValid() || !end.isValid()) {
+            _errorMsg->setText("Could not import time range");
+            appendLog(fmt::format("Could not import time range '{}' to '{}'",
+                _validTimeRange.first, _validTimeRange.second), LogLevel::Error
+            );
+            return;
+        }
+    }
+
+    _startEdit->setDateTime(start);
+    _endEdit->setDateTime(end);
     _importTimeButton->hide();
     _validTimeRange = std::pair<std::string, std::string>();
 }
@@ -433,9 +448,13 @@ bool HorizonsDialog::handleRequest() {
     if (!isValidInput()) {
         return false;
     }
+
+    // Reset
     _errorMsg->clear();
     cleanAllWidgets();
     _importTimeButton->hide();
+    _validTimeRange = std::pair<std::string, std::string>();
+    _latestHorizonsError.clear();
 
     std::string url = constructUrl();
 
@@ -459,7 +478,21 @@ bool HorizonsDialog::handleRequest() {
     openspace::HorizonsFile::ResultCode result =
         _horizonsFile.isValidHorizonsFile();
 
-    return handleResult(result);
+    bool isValid = handleResult(result);
+
+    if (!isValid && std::filesystem::is_regular_file(_horizonsFile.file())) {
+        std::filesystem::path oldName = _horizonsFile.file();
+        std::filesystem::path newName = _horizonsFile.file().replace_extension(".txt");
+
+        // TODO: What to do if the txt file already exists?
+        if (std::filesystem::is_regular_file(newName)) {
+            return isValid;
+        }
+
+        std::filesystem::rename(oldName, newName);
+    }
+
+    return isValid;
 }
 
 bool HorizonsDialog::isValidInput() {
@@ -587,11 +620,11 @@ std::string HorizonsDialog::constructUrl() {
 
     _startTime = _startEdit->date().toString("yyyy-MM-dd").toStdString();
     _startTime.append(" ");
-    _startTime.append(_startEdit->time().toString("hh:mm").toStdString());
+    _startTime.append(_startEdit->time().toString("hh:mm:ss").toStdString());
 
     _endTime = _endEdit->date().toString("yyyy-MM-dd").toStdString();
     _endTime.append(" ");
-    _endTime.append(_endEdit->time().toString("hh:mm").toStdString());
+    _endTime.append(_endEdit->time().toString("hh:mm:ss").toStdString());
 
     std::string unit;
     if (_timeTypeCombo->currentText().toStdString() == TimeVarying) {
@@ -743,6 +776,11 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
 }
 
 openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
+    auto it = answer.find("error");
+    if (it != answer.end()) {
+        _latestHorizonsError = *it;
+    }
+
     openspace::HorizonsFile::ResultCode isValid =
         openspace::HorizonsFile::isValidAnswer(answer);
     if (isValid != openspace::HorizonsFile::ResultCode::Valid &&
@@ -773,8 +811,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
     // Check if the file already exists
     if (std::filesystem::is_regular_file(filePath)) {
         QMessageBox msgBox;
-        msgBox.setText("File already exist.");
-        msgBox.setInformativeText("Do you want to overwrite it?");
+        msgBox.setText("File already exist \nDo you want to replace it?");
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Yes);
         int ret = msgBox.exec();
@@ -803,8 +840,20 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
         case openspace::HorizonsFile::ResultCode::Valid:
             return true;
 
+        case openspace::HorizonsFile::ResultCode::InvalidFormat:
+            appendLog(fmt::format("Format of file '{}' is invalid. Horizons files must "
+                "have extension '.dat'", _horizonsFile.file()),
+                LogLevel::Error
+            );
+            break;
+
         case openspace::HorizonsFile::ResultCode::Empty:
             _errorMsg->setText("The horizons file is empty");
+            if (!_latestHorizonsError.empty()) {
+                appendLog(fmt::format("Latest Horizons error: {}", _latestHorizonsError),
+                    LogLevel::Error
+                );
+            }
             break;
 
         case openspace::HorizonsFile::ResultCode::ErrorSize: {
@@ -838,10 +887,16 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                 _horizonsFile.parseValidTimeRange("Trajectory files", "************");
             if (_validTimeRange.first.empty()) {
                 appendLog(
-                    "Could not parse the valid time range from file",
+                    "Could not parse the valid time range from file. "
+                    "For more information, see the saved horizons file",
                     HorizonsDialog::LogLevel::Error
                 );
-                break;
+                if (!_latestHorizonsError.empty()) {
+                    appendLog(fmt::format("Latest Horizons error: {}", _latestHorizonsError),
+                        LogLevel::Error
+                    );
+                }
+                return false;
             }
 
             appendLog("Valid time range is '" + _validTimeRange.first + "' to '" +
@@ -893,10 +948,16 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                     "Multiple matching stations found"
                 );
             if (matchingstations.empty()) {
-                appendLog("Could not parse the matching stations",
+                appendLog("Could not parse the matching stations. "
+                    "For more information, see the saved horizons file",
                     HorizonsDialog::LogLevel::Error
                 );
-                break;
+                if (!_latestHorizonsError.empty()) {
+                    appendLog(fmt::format("Latest Horizons error: {}", _latestHorizonsError),
+                        LogLevel::Error
+                    );
+                }
+                return false;
             }
             _chooseObserverCombo->clear();
             for (std::string station : matchingstations) {
@@ -920,10 +981,16 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             std::vector<std::string> matchingObservers =
                 _horizonsFile.parseMatches("Name", "matches");
             if (matchingObservers.empty()) {
-                appendLog("Could not parse the matching observers",
+                appendLog("Could not parse the matching observers. "
+                    "For more information, see the saved horizons file",
                     HorizonsDialog::LogLevel::Error
                 );
-                break;
+                if (!_latestHorizonsError.empty()) {
+                    appendLog(fmt::format("Latest Horizons error: {}", _latestHorizonsError),
+                        LogLevel::Error
+                    );
+                }
+                return false;
             }
             _chooseObserverCombo->clear();
             for (std::string observer : matchingObservers) {
@@ -964,10 +1031,17 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             std::vector<std::string> matchingTargets =
                 _horizonsFile.parseMatches("Name", "matches");
             if (matchingTargets.empty()) {
-                appendLog("Could not parse the matching targets",
+                appendLog("Could not parse the matching targets. "
+                    "For more information, see the saved horizons file",
                     HorizonsDialog::LogLevel::Error
                 );
-                break;
+                if (!_latestHorizonsError.empty()) {
+                    appendLog(
+                        fmt::format("Latest Horizons error: {}",_latestHorizonsError),
+                        LogLevel::Error
+                    );
+                }
+                return false;
             }
             _chooseTargetCombo->clear();
             for (std::string target : matchingTargets) {
@@ -986,10 +1060,20 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                 "Unknown error. For more information, see the saved horizons file",
                 LogLevel::Error
             );
+            if (!_latestHorizonsError.empty()) {
+                appendLog(fmt::format("Latest Horizons error: {}", _latestHorizonsError),
+                    LogLevel::Error
+                );
+            }
             _errorMsg->setText("An unknown error occured");
             return false;
 
         default:
+            if (!_latestHorizonsError.empty()) {
+                appendLog(fmt::format("Latest Horizons error: {}", _latestHorizonsError),
+                    LogLevel::Error
+                );
+            }
             _errorMsg->setText("Invalid result type");
             break;
     }

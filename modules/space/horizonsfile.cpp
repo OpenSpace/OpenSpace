@@ -96,6 +96,10 @@ const std::filesystem::path& HorizonsFile::file() const {
     return _file;
 }
 
+std::filesystem::path& HorizonsFile::file() {
+    return _file;
+}
+
 std::string HorizonsFile::constructUrl(HorizonsFile::Type type, const std::string& target,
     const std::string& observer, const std::string& startTime,
     const std::string& stopTime, const std::string& stepSize, const std::string& unit)
@@ -364,6 +368,13 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             LERROR("The horizons file is empty");
             break;
 
+        case ResultCode::InvalidFormat:
+            LERROR(fmt::format(
+                "Format of file '{}' is invalid. Horizons files must have extension '.dat'",
+                _file)
+            );
+            break;
+
         case ResultCode::ErrorSize:
             LERROR("The selected time range with the selected step size is too big, "
                 "try to increase the step size and/or decrease the time range");
@@ -482,7 +493,14 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
 }
 
 HorizonsFile::HorizonsResult HorizonsFile::readFile() const {
-    // Check if valid first
+    // Check if extension is correct first
+    if (_file.extension() != ".dat") {
+        HorizonsResult result;
+        result.errorCode = ResultCode::InvalidFormat;
+        return result;
+    }
+
+    // Check if valid
     ResultCode code = isValidHorizonsFile();
     if (code != ResultCode::Valid) {
         HorizonsResult result;

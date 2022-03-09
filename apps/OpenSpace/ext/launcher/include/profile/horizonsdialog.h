@@ -123,6 +123,7 @@ private:
     QPlainTextEdit* _log = nullptr;
 
     QLabel* _errorMsg = nullptr;
+    std::string _latestHorizonsError;
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 };
 
