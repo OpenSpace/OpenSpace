@@ -572,6 +572,8 @@ void RenderEngine::updateRenderer() {
         _renderer.setResolution(renderingResolution());
 
         using FR = ghoul::fontrendering::FontRenderer;
+        //@TODO - micah 2022-03-09
+        //We could replace the defaultRenderer with SceneRenderer, DashboardRenderer
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
         //Override the aspect ratio property value to match that of resized window
@@ -802,6 +804,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 
 void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
     ZoneScoped
+    ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
 
     const bool isMaster = global::windowDelegate->isMaster();
     if (isMaster || _showOverlayOnSlaves) {

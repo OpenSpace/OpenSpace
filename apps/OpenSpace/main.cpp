@@ -327,6 +327,9 @@ void mainPreSyncFunc() {
     ZoneScoped
     LTRACE("main::mainPreSyncFunc(begin)");
 
+    currentWindow = Engine::instance().windows().front().get();
+    currentViewport = currentWindow->viewports().front().get();
+
     try {
         global::openSpaceEngine->preSynchronization();
     }
