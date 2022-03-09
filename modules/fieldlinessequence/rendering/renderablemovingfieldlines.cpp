@@ -626,11 +626,16 @@ void RenderableMovingFieldlines::moveLine(const double dt,
     }
 }
 
+
+
 void RenderableMovingFieldlines::moveLines(const double dt) {
 
     const std::vector<FieldlinesState::MatchingFieldlines>& allMatchingFieldlines =
         _fieldlineState.getAllMatchingFieldlines();
 
+
+
+    // one line at the time
     size_t lineIndex = 0;
     GLint lineStart;
     GLsizei nVertices;

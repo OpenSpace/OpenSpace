@@ -19,7 +19,22 @@ namespace openspace::fls {
 
     using seedPointPair = std::pair<glm::vec3, glm::vec3>;
 
+    struct SplitPathlines{
+        FieldlinesState::MatchingFieldlines imfAndClosed;
+        FieldlinesState::MatchingFieldlines open;
+    };
+
     // DECLARATIONS
+
+    ccmc::Fieldline traceAndCreateMappedFieldline(const std::string& tracingVar,
+        ccmc::Tracer& tracer,
+        const glm::vec3& seedPoint,
+        const size_t nPointsOnPathLine,
+        ccmc::Tracer::Direction direction = ccmc::Tracer::Direction::FOWARD);
+
+    std::vector<glm::vec3> concatenatePathLines(
+        const std::vector<ccmc::Point3f>& firstPart,
+        const std::vector<ccmc::Point3f>& secondPart);
 
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
         const std::vector<seedPointPair>& seeds, const std::string& tracingVar,
@@ -68,6 +83,53 @@ namespace openspace::fls {
         return isSuccessful;
     }
 
+    /**
+    * Uses the tracer to trace and create a ccmc::Fieldline and returns.
+    * Default direction is forward tracing
+    */ 
+    ccmc::Fieldline traceAndCreateMappedFieldline(const std::string& tracingVar,
+        ccmc::Tracer &tracer, 
+        const glm::vec3& seedPoint,
+        const size_t nPointsOnPathLine,
+        ccmc::Tracer::Direction direction) {
+        
+        ccmc::Fieldline uPerpBPathLine;
+        uPerpBPathLine = tracer.unidirectionalTrace(
+            tracingVar,
+            seedPoint.x,
+            seedPoint.y,
+            seedPoint.z,
+            direction
+        );
+
+        if (direction == ccmc::Tracer::Direction::REVERSE) {
+            uPerpBPathLine = uPerpBPathLine.reverseOrder();
+        }
+
+        uPerpBPathLine.getDs();
+        uPerpBPathLine.measure();
+        uPerpBPathLine.integrate();
+
+        ccmc::Fieldline mappedPath = uPerpBPathLine.interpolate(1, nPointsOnPathLine);
+
+        return mappedPath;
+    }
+
+    std::vector<glm::vec3> concatenatePathLines(
+        const std::vector<ccmc::Point3f>& firstPart,
+        const std::vector<ccmc::Point3f>& secondPart) {
+
+        std::vector<glm::vec3> concatenated;
+        for (const ccmc::Point3f& p : firstPart) {
+            concatenated.emplace_back(p.component1, p.component2, p.component3);
+        }
+        for (const ccmc::Point3f& p : secondPart) {
+            concatenated.emplace_back(p.component1, p.component2, p.component3);
+        }
+
+        return concatenated;
+    }
+
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
         const std::vector<seedPointPair>& matchingSeedPoints,
         const std::string& tracingVar, FieldlinesState& state,
@@ -101,56 +163,48 @@ namespace openspace::fls {
             return false;
         }
 
-        for (size_t i = 0; i < matchingSeedPoints.size(); ++i) {
+
+        for (size_t i = 0; i < matchingSeedPoints.size(); i += 2) {
             std::unique_ptr<ccmc::Interpolator> interpolator =
                 std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
             ccmc::Tracer tracer(kameleon, interpolator.get());
             tracer.setInnerBoundary(innerBoundaryLimit);
 
-            // Create pathlines for matching fieldlines
-            ccmc::Fieldline uPerpBPathLine1;
-            uPerpBPathLine1 = tracer.unidirectionalTrace(
-                tracingVar,
-                matchingSeedPoints[i].first.x,
-                matchingSeedPoints[i].first.y,
-                matchingSeedPoints[i].first.z//,
-                //ccmc::Tracer::Direction::REVERSE
-            );// .reverseOrder();
+            // Create pathlines (IMF and CF) for matching fieldlines
+            // 11 is first part of first path line, 12 is the second part.
+            // same for the second path line with 21 and 22
+            // 
+            ccmc::Fieldline mappedPath11 = traceAndCreateMappedFieldline(tracingVar, tracer, 
+                matchingSeedPoints[i].first, nPointsOnPathLine, ccmc::Tracer::Direction::REVERSE);
+            ccmc::Fieldline mappedPath12 = traceAndCreateMappedFieldline(tracingVar, tracer,
+                matchingSeedPoints[i+1].first, nPointsOnPathLine);
 
-            ccmc::Fieldline uPerpBPathLine2;
-            uPerpBPathLine2 = tracer.unidirectionalTrace(
-                tracingVar,
-                matchingSeedPoints[i].second.x,
-                matchingSeedPoints[i].second.y,
-                matchingSeedPoints[i].second.z//,
-                //ccmc::Tracer::Direction::REVERSE
-            );// .reverseOrder();
+            ccmc::Fieldline mappedPath21 = traceAndCreateMappedFieldline(tracingVar, tracer, 
+                matchingSeedPoints[i].second, nPointsOnPathLine, ccmc::Tracer::Direction::REVERSE);
+            ccmc::Fieldline mappedPath22 = traceAndCreateMappedFieldline(tracingVar, tracer,
+                matchingSeedPoints[i+1].second, nPointsOnPathLine);
 
-            uPerpBPathLine1.getDs();
-            uPerpBPathLine1.measure();
-            uPerpBPathLine1.integrate();
+            //
+            std::vector<ccmc::Point3f> pathPositions11 = mappedPath11.getPositions();
+            std::vector<ccmc::Point3f> pathPositions12 = mappedPath12.getPositions();
 
-            uPerpBPathLine2.getDs();
-            uPerpBPathLine2.measure();
-            uPerpBPathLine2.integrate();
+            std::vector<ccmc::Point3f> pathPositions21 = mappedPath21.getPositions();
+            std::vector<ccmc::Point3f> pathPositions22 = mappedPath22.getPositions();
 
-            ccmc::Fieldline mappedPath1 = uPerpBPathLine1.interpolate(1, nPointsOnPathLine);
-            std::vector<ccmc::Point3f> pathPositions1 = mappedPath1.getPositions();
-
-            ccmc::Fieldline mappedPath2 = uPerpBPathLine2.interpolate(1, nPointsOnPathLine);
-            std::vector<ccmc::Point3f> pathPositions2 = mappedPath2.getPositions();
-
-            std::vector<glm::vec3> pathLine1;
-            for (const ccmc::Point3f& p : pathPositions1) {
+            std::vector<glm::vec3> pathLine1 = concatenatePathLines(pathPositions11, pathPositions12);
+            std::vector<glm::vec3> pathLine2 = concatenatePathLines(pathPositions21, pathPositions22);
+            
+            /*std::vector<glm::vec3> pathLine1;
+            for (const ccmc::Point3f& p : pathPositions11) {
                 pathLine1.emplace_back(p.component1, p.component2, p.component3);
-            }
+            }*/
 
-            std::vector<glm::vec3> pathLine2;
-            for (const ccmc::Point3f& p : pathPositions2) {
-                pathLine2.emplace_back(p.component1, p.component2, p.component3);
-            }
-
-            // Trim to get make matching fieldines equally long
+            //std::vector<glm::vec3> pathLine2;
+            //for (const ccmc::Point3f& p : pathPositions21) {
+            //    pathLine2.emplace_back(p.component1, p.component2, p.component3);
+            //}
+            
+            // Trim to get make matching path lines equally long
             if (pathLine1.size() > pathLine2.size()) {
                 pathLine1.resize(pathLine2.size());
             }
@@ -163,12 +217,11 @@ namespace openspace::fls {
             // Elon: optimizing trimming could go here
             // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
 
+
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)
             state.addMatchingPathLines(std::move(pathLine1), std::move(pathLine2));
 
-            //std::vector<glm::vec3>::iterator it = pathLine1.begin();
-            //for (; it != pathLine1.end(); ++it) {
             for (size_t j = 0; j < pathLine1.size(); ++j) {
 
                 std::vector<glm::vec3> keyFrame1;
@@ -186,7 +239,6 @@ namespace openspace::fls {
                 state.addMatchingKeyFrames(std::move(keyFrame1), std::move(keyFrame2), 
                     timeToNextKeyFrame1, timeToNextKeyFrame2, i);
             }
-
         }
         bool isSuccessful = state.getAllMatchingFieldlines().size() > 0;
         return isSuccessful;

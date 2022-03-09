@@ -78,6 +78,8 @@ private:
         PathLineTraverser traverser,
         GLint lineStart, GLsizei nVertices);
     
+
+
     void moveLine(const double dt, const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
         GLsizei nVertices);
