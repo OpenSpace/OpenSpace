@@ -184,7 +184,19 @@ void HorizonsTranslation::readHorizonsTextFile(HorizonsFile& horizonsFile) {
     }
 
     for (HorizonsFile::HorizonsKeyframe& keyframe : result.data) {
-        _timeline.addKeyframe(keyframe.time, std::move(keyframe.position));
+        // Search if the keyframe already exist in the timeline
+        auto it = std::find_if(
+            _timeline.keyframes().begin(),
+            _timeline.keyframes().end(),
+            [keyframe](const Keyframe<glm::dvec3>& kf) {
+                return kf.timestamp == keyframe.time;
+            }
+        );
+
+        // If it doesn't exist in the timeline then add it, prevent duplicates
+        if (it == _timeline.keyframes().end()) {
+            _timeline.addKeyframe(keyframe.time, std::move(keyframe.position));
+        }
     }
 }
 

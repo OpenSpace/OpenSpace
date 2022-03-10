@@ -46,7 +46,8 @@ AssetEdit::AssetEdit(QWidget* parent)
 void AssetEdit::createWidgets() {
     _layout = new QVBoxLayout(this);
     {
-        QLabel* heading = new QLabel("The Asset Editor is coming soon in a future release", this);
+        QLabel* heading =
+            new QLabel("The Asset Editor is coming soon in a future release", this);
         heading->setObjectName("heading");
         _layout->addWidget(heading);
     }
