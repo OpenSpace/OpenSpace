@@ -54,7 +54,7 @@ namespace openspace::fls {
         FieldlinesState& state,
         ccmc::Kameleon* kameleon,
         const std::vector<glm::vec3>& seedPoints,
-        const std::vector<double>& birthTimes,
+        const std::vector<double>& birthTimeOffsets,
         double manualTimeOffset,
         const std::string& tracingVar,
         std::vector<std::string>& extraVars,
@@ -72,7 +72,7 @@ namespace openspace::fls {
         bool isSuccessful = openspace::fls::traceAndAddMatchingLinesToState(
             kameleon,
             matchingSeedPoints, 
-            birthTimes, 
+            birthTimeOffsets,
             tracingVar, 
             state,
             nPointsOnPathLine, 
@@ -131,7 +131,7 @@ namespace openspace::fls {
 
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
         const std::vector<seedPointPair>& matchingSeedPoints,
-        const std::vector<double>& birthTimes,
+        const std::vector<double>& birthTimeOffsets,
         const std::string& tracingVar,
         FieldlinesState& state,
         const size_t nPointsOnPathLine,
@@ -165,7 +165,7 @@ namespace openspace::fls {
         }
 
 
-        for (size_t i = 0; i < matchingSeedPoints.size(); i += 2) {
+        for (size_t i = 0; i < matchingSeedPoints.size() / 2; i++) {
             std::unique_ptr<ccmc::Interpolator> interpolator =
                 std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
             ccmc::Tracer tracer(kameleon, interpolator.get());
@@ -175,15 +175,17 @@ namespace openspace::fls {
             // 11 is first part of first path line, 12 is the second part.
             // same for the second path line with 21 and 22
             // 
+            size_t firstSeedId = i * 2;
+            size_t secondSeedId = i * 2 + 1;
             ccmc::Fieldline mappedPath11 = traceAndCreateMappedFieldline(tracingVar, tracer, 
-                matchingSeedPoints[i].first, nPointsOnPathLine, ccmc::Tracer::Direction::REVERSE);
+                matchingSeedPoints[firstSeedId].first, nPointsOnPathLine, ccmc::Tracer::Direction::REVERSE);
             ccmc::Fieldline mappedPath12 = traceAndCreateMappedFieldline(tracingVar, tracer,
-                matchingSeedPoints[i+1].first, nPointsOnPathLine);
+                matchingSeedPoints[secondSeedId].first, nPointsOnPathLine);
 
             ccmc::Fieldline mappedPath21 = traceAndCreateMappedFieldline(tracingVar, tracer, 
-                matchingSeedPoints[i].second, nPointsOnPathLine, ccmc::Tracer::Direction::REVERSE);
+                matchingSeedPoints[firstSeedId].second, nPointsOnPathLine, ccmc::Tracer::Direction::REVERSE);
             ccmc::Fieldline mappedPath22 = traceAndCreateMappedFieldline(tracingVar, tracer,
-                matchingSeedPoints[i+1].second, nPointsOnPathLine);
+                matchingSeedPoints[secondSeedId].second, nPointsOnPathLine);
 
             //
             std::vector<ccmc::Point3f> pathPositions11 = mappedPath11.getPositions();
@@ -195,30 +197,13 @@ namespace openspace::fls {
             std::vector<glm::vec3> pathLine1 = concatenatePathLines(pathPositions11, pathPositions12);
             std::vector<glm::vec3> pathLine2 = concatenatePathLines(pathPositions21, pathPositions22);
             
-            /*std::vector<glm::vec3> pathLine1;
-            for (const ccmc::Point3f& p : pathPositions11) {
-                pathLine1.emplace_back(p.component1, p.component2, p.component3);
-            }*/
 
-            //std::vector<glm::vec3> pathLine2;
-            //for (const ccmc::Point3f& p : pathPositions21) {
-            //    pathLine2.emplace_back(p.component1, p.component2, p.component3);
-            //}
-            
-            // Trim to get make matching path lines equally long
-            if (pathLine1.size() > pathLine2.size()) {
-                pathLine1.resize(pathLine2.size());
-            }
-            else if (pathLine1.size() < pathLine2.size()) {
-                pathLine2.resize(pathLine1.size());
-            }
-
-            //std::vector<float> velocities = computeVelocities(pathLine, kameleon);
-            //std::vector<float> times = computeTimes(pathLine, velocities);
             // Elon: optimizing trimming could go here
+            // std::vector<float> velocities = computeVelocities(pathLine, kameleon);
+            // std::vector<float> times = computeTimes(pathLine, velocities);
             // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
 
-            double birthTime = kameleonHelper::getTime(kameleon, birthTimes[i]);
+            double birthTime = kameleonHelper::getTime(kameleon, birthTimeOffsets[i]);
 
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)

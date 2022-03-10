@@ -334,7 +334,7 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
     std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
 
     std::vector<glm::vec3> seedPoints;
-    std::vector<double> birthTimes;
+    std::vector<double> birthTimeOffsets;
         
     bool isSuccessful = false;
     bool shouldExtractSeedPoints = true;
@@ -367,7 +367,7 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
                 ));
             }
 
-            extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
+            extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimeOffsets, startTime);
             shouldExtractSeedPoints = false;
         }
 
@@ -378,7 +378,7 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
             _fieldlineState,
             kameleon.get(),
             seedPoints,
-            birthTimes,
+            birthTimeOffsets,
             _manualTimeOffset,
             _tracingVariable,
             _extraVars,
@@ -428,7 +428,7 @@ void RenderableMovingFieldlines::deinitializeGL() {
 std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
     std::filesystem::path filePath, 
     std::vector<glm::vec3>& seedPoints,
-    std::vector<double>& birthTimes,
+    std::vector<double>& birthTimeOffsets,
     double startTime
 ) {
 
@@ -460,7 +460,7 @@ std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFil
                 bool hasNoTime = nPointsInARow == 5;
                 if (hasNoTime) {
                     nPointsInARow = 1;
-                    birthTimes.push_back(0.0);
+                    birthTimeOffsets.push_back(0.0);
                 }
 
                 glm::vec3 point;
@@ -486,14 +486,14 @@ std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFil
 
                 double birthTime = Time::convertTime(ss.str().substr(0, ss.str().length() - 2));
                 
-                birthTimes.push_back(birthTime - startTime);
+                birthTimeOffsets.push_back(birthTime - startTime);
             }
             // Time in float format
             else {
                 nPointsInARow = 0;
                 double t;
                 ss >> t;
-                birthTimes.push_back(t);
+                birthTimeOffsets.push_back(t);
 
                 bool isEmpty = ss.eof();
                 if (!isEmpty) {
@@ -526,7 +526,7 @@ std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFil
         ));
     }
 
-    return std::make_tuple(seedPoints, birthTimes);
+    return std::make_tuple(seedPoints, birthTimeOffsets);
 }
 
 bool RenderableMovingFieldlines::isReady() const {
