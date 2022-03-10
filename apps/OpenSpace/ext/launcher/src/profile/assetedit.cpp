@@ -36,22 +36,49 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-AssetEdit::AssetEdit(const std::string& assetName, QWidget* parent)
+AssetEdit::AssetEdit(QWidget* parent)
     : QDialog(parent)
 {
     setWindowTitle("Asset Editor");
-    createWidgets(assetName);
+    createWidgets();
 }
 
-void AssetEdit::createWidgets(const std::string& assetName) {
+void AssetEdit::createWidgets() {
     _layout = new QVBoxLayout(this);
     {
+        QLabel* heading = new QLabel("The Asset Editor is coming soon in a future release", this);
+        heading->setObjectName("heading");
+        _layout->addWidget(heading);
+    }
+    {
+        QPushButton* generateButton = new QPushButton("Generate Horizons File", this);
+        connect(
+            generateButton,
+            &QPushButton::released,
+            this,
+            &AssetEdit::openHorizons
+        );
+        generateButton->setDefault(false);
+
+        // In order to generate a Horizons File the Space module is required
+#ifndef OPENSPACE_MODULE_SPACE_ENABLED
+        generateButton->setEnabled(false);
+        generateButton->setToolTip(
+            "Connot generate Horizons file without the space module enabled"
+        );
+#else
+        generateButton->setCursor(Qt::PointingHandCursor);
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
+
+        _layout->addWidget(generateButton);
+    }
+    /*{
         QBoxLayout* container = new QHBoxLayout(this);
         QLabel* assetLabel = new QLabel("Asset Name:");
         assetLabel->setObjectName("profile");
         container->addWidget(assetLabel);
 
-        _nameEdit = new QLineEdit(QString::fromStdString(assetName));
+        _nameEdit = new QLineEdit();
         container->addWidget(_nameEdit);
 
         _layout->addLayout(container);
@@ -70,7 +97,7 @@ void AssetEdit::createWidgets(const std::string& assetName) {
         container->addWidget(addButton);
 
         _layout->addLayout(container);
-    }
+    }*/
     _layout->addWidget(new Line);
     {
         QBoxLayout* footer = new QHBoxLayout;
@@ -88,7 +115,7 @@ void AssetEdit::createWidgets(const std::string& assetName) {
     }
 }
 
-void AssetEdit::openComponent() {
+/*void AssetEdit::openComponent() {
     switch (_components->currentIndex()) {
         case 0:
             _errorMsg->setText("Choose a component to add to the asset");
@@ -158,23 +185,23 @@ void AssetEdit::openHorizonsFile() {
     ).toStdString();
     _horizonsFile = std::filesystem::absolute(filePath);
     _horizonsFileEdit->setText(QString(_horizonsFile.string().c_str()));
-}
+}*/
 
 void AssetEdit::openHorizons() {
     _errorMsg->clear();
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     HorizonsDialog* horizonsDialog = new HorizonsDialog(this);
     horizonsDialog->exec();
-    _horizonsFile = horizonsDialog->file();
-    _horizonsFileEdit->setText(QString(_horizonsFile.string().c_str()));
+    //_horizonsFile = horizonsDialog->file();
+    //_horizonsFileEdit->setText(QString(_horizonsFile.string().c_str()));
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 void AssetEdit::approved() {
-    std::string assetName = _nameEdit->text().toStdString();
+    /*std::string assetName = _nameEdit->text().toStdString();
     if (assetName.empty()) {
         _errorMsg->setText("Asset name must be specified");
         return;
-    }
+    }*/
     accept();
 }

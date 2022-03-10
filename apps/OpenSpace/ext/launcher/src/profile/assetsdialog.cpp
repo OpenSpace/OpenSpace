@@ -148,10 +148,11 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
         connect(
             newAssetButton, &QPushButton::released,
             [this]() {
-                openAssetEditor("");
+                openAssetEditor();
             }
         );
         newAssetButton->setCursor(Qt::PointingHandCursor);
+        newAssetButton->setDefault(false);
         container->addWidget(newAssetButton, 0, 2);
         layout->addLayout(container);
     }
@@ -241,8 +242,8 @@ QString AssetsDialog::createTextSummary() {
     return summary;
 }
 
-void AssetsDialog::openAssetEditor(const std::string& asset) {
-    AssetEdit editor(asset, this);
+void AssetsDialog::openAssetEditor() {
+    AssetEdit editor(this);
     editor.exec();
 }
 

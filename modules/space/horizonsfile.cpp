@@ -370,7 +370,7 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
 
         case ResultCode::InvalidFormat:
             LERROR(fmt::format(
-                "Format of file '{}' is invalid. Horizons files must have extension '.dat'",
+                "Format of file '{}' is invalid. Horizons files must have extension '.hrz'",
                 _file)
             );
             break;
@@ -494,7 +494,7 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
 
 HorizonsFile::HorizonsResult HorizonsFile::readFile() const {
     // Check if extension is correct first
-    if (_file.extension() != ".dat") {
+    if (_file.extension() != ".hrz") {
         HorizonsResult result;
         result.errorCode = ResultCode::InvalidFormat;
         return result;

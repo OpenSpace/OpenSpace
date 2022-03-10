@@ -43,33 +43,33 @@ public:
     /**
      * Constructor for AssetEdit class
      */
-    AssetEdit(const std::string& assetName, QWidget* parent);
+    AssetEdit(QWidget* parent);
 
 private slots:
-    void openComponent();
+    //void openComponent();
 
-    void openHorizonsFile();
+    //void openHorizonsFile();
     void openHorizons();
 
     void approved();
 
 private:
-    void createWidgets(const std::string& assetName);
+    void createWidgets();
 
     QBoxLayout* _layout = nullptr;
     QLineEdit* _nameEdit = nullptr;
-    QComboBox* _components = nullptr;
+    //QComboBox* _components = nullptr;
 
-    std::filesystem::path _horizonsFile;
-    QLineEdit* _horizonsFileEdit = nullptr;
+    //std::filesystem::path _horizonsFile;
+    //QLineEdit* _horizonsFileEdit = nullptr;
 
     QLabel* _errorMsg = nullptr;
 
     // List of all the supported components
-    QStringList _supportedComponents = {
+    /*QStringList _supportedComponents = {
         "Choose Component",
         "Horizons Translation"
-    };
+    };*/
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__

@@ -186,6 +186,7 @@ void HorizonsDialog::createWidgets() {
         container->addWidget(_fileEdit);
 
         QPushButton* browseButton = new QPushButton("Browse", this);
+        browseButton->setDefault(false);
         connect(
             browseButton,
             &QPushButton::released,
@@ -259,6 +260,7 @@ void HorizonsDialog::createWidgets() {
     }
     {
         _importTimeButton = new QPushButton("Import timerange", this);
+        _importTimeButton->setDefault(false);
         connect(
             _importTimeButton,
             &QPushButton::released,
@@ -368,7 +370,7 @@ void HorizonsDialog::openSaveAs() {
         this,
         "Choose a file path where the generated Horizons file will be saved",
         absPath("${USER}").string().c_str(),
-        "Horizons data file (*.dat);;(*.dat)",
+        "Horizons data file (*.hrz);;(*.hrz)",
         nullptr
 #ifdef __linux__
         , QFileDialog::DontUseNativeDialog
@@ -823,7 +825,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
 
         case openspace::HorizonsFile::ResultCode::InvalidFormat:
             appendLog(fmt::format("Format of file '{}' is invalid. Horizons files must "
-                "have extension '.dat'", _horizonsFile.file()),
+                "have extension '.hrz'", _horizonsFile.file()),
                 LogLevel::Error
             );
             break;

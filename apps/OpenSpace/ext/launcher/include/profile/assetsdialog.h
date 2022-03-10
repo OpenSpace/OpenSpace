@@ -60,7 +60,7 @@ private:
      * \return the #std::string summary
      */
     QString createTextSummary();
-    void openAssetEditor(const std::string& asset);
+    void openAssetEditor();
 
     openspace::Profile* _profile = nullptr;
     AssetTreeModel _assetTreeModel;
