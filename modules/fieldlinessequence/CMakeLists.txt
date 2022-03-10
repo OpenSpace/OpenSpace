@@ -27,6 +27,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
   rendering/renderablefieldlinessequence.h
   rendering/renderablemovingfieldlines.h
+  tasks/osflscreationtask.h
   util/commons.h
   util/fieldlinesstate.h
   util/kameleonfieldlinehelper.h
@@ -37,6 +38,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
   rendering/renderablefieldlinessequence.cpp
   rendering/renderablemovingfieldlines.cpp
+  tasks/osflscreationtask.cpp
   util/commons.cpp
   util/fieldlinesstate.cpp
   util/kameleonfieldlinehelper.cpp

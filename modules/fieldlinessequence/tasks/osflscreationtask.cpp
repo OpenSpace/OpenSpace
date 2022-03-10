@@ -54,7 +54,7 @@ namespace {
 namespace openspace::fls {
 
 documentation::Documentation OsflsCreationTask::documentation() {
-    return codegen::doc<parameters>("osfls_creation_task");
+    return codegen::doc<Parameters>("osfls_creation_task");
 }
 
 OsflsCreationTask::OsflsCreationTask(const ghoul::Dictionary& dictionary) {
@@ -69,7 +69,7 @@ OsflsCreationTask::OsflsCreationTask(const ghoul::Dictionary& dictionary) {
 
 std::string OsflsCreationTask::description() {
     return fmt::format(
-        "Create osfls-files (or osfls and Json)-files by tracing, with the kameleon 
+        "Create osfls-files (or osfls and Json)-files by tracing, with the kameleon "
         "tracer, the vector field described in cdf-files, from the input seed points."
     );
 }

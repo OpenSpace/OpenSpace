@@ -49,6 +49,7 @@ mappingkey 1.0   255  255  255  255
 } // namespace
 
 namespace openspace {
+    using namespace fls;
 
 std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
 
@@ -75,7 +76,7 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const {
     return {
-        OsflsCreationTask::Documentation(),
+        OsflsCreationTask::documentation(),
         RenderableFieldlinesSequence::Documentation()
     };
 }

@@ -4,8 +4,8 @@ return {
     Type = "OsflsCreationTask",
 
     TracingVariable = "b",
-    InputDirectory = dataFolder .. "/cdf/lowres"
-    InputSeedpoints = dataFolder .. "/CriticalPoints/"
+    InputDirectory = dataFolder .. "/cdf/lowres",
+    InputSeedpoints = dataFolder .. "/CriticalPoints",
     OutputDirectory = dataFolder .. "/osflsOutputFromTaskRun",
     JsonOutput = true
   }
