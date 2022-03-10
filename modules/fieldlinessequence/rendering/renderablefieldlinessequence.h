@@ -37,6 +37,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <atomic>
 
+
 namespace openspace {
 
 class RenderableFieldlinesSequence : public Renderable {

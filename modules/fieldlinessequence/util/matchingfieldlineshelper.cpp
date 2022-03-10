@@ -7,10 +7,6 @@
 #include <modules/fieldlinessequence/util/movingfieldlinehelper.cpp>
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
-#include <modules/kameleon/include/kameleonhelper.h>
-
-#include <ccmc/Kameleon.h>
-#include <ccmc/KameleonInterpolator.h>
 
 
 namespace openspace::fls {
@@ -37,39 +33,35 @@ namespace openspace::fls {
         const std::vector<ccmc::Point3f>& secondPart);
 
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
-        const std::vector<seedPointPair>& seeds, const std::string& tracingVar,
-        FieldlinesState& state, const size_t nPointsOnPathLine,
-        const size_t nPointsOnFieldlines);
+        const std::vector<seedPointPair>& matchingSeedPoints,
+        const std::vector<double>& birthTimes,
+        const std::string& tracingVar,
+        FieldlinesState& state, 
+        const size_t nPointsOnPathLine,
+        const size_t nPointsOnFieldlines
+    );
 
     void traceAndCreateKeyFrame(std::vector<glm::vec3>& keyFrame,
         const glm::vec3& seedPoint,
         ccmc::Kameleon* kameleon,
         float innerbounds,
-        size_t nPointsOnFieldlines);
+        size_t nPointsOnFieldlines
+    );
 
     // DEFINITIONS
 
-    bool openspace::fls::convertCdfToMatchingFieldlinesState(FieldlinesState& state,
-        const std::string& cdfPath,
+    bool openspace::fls::convertCdfToMatchingFieldlinesState(
+        FieldlinesState& state,
+        ccmc::Kameleon* kameleon,
         const std::vector<glm::vec3>& seedPoints,
+        const std::vector<double>& birthTimes,
         double manualTimeOffset,
         const std::string& tracingVar,
         std::vector<std::string>& extraVars,
         std::vector<std::string>& extraMagVars,
         const size_t nPointsOnPathLine,
-        const size_t nPointsOnFieldLines) {
-
-        std::unique_ptr<ccmc::Kameleon> kameleon =
-            kameleonHelper::createKameleonObject(cdfPath);
-        state.setModel(fls::stringToModel(kameleon->getModelName()));
-
-        // get time as string.
-        state.setTriggerTime(kameleonHelper::getTime(kameleon.get(), manualTimeOffset));
-        //std::string cdfStringTime = 
-        //    SpiceManager::ref().dateFromEphemerisTime(cdfDoubleTime, "YYYYMMDDHRMNSC::RND");
-
-                // use time as string for picking seedpoints from seedMap
-            //std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);
+        const size_t nPointsOnFieldLines) 
+    {
 
         // TODO: Check if an even amount of seed points
         std::vector<seedPointPair> matchingSeedPoints;
@@ -77,8 +69,15 @@ namespace openspace::fls {
             matchingSeedPoints.push_back({ seedPoints[i], seedPoints[i + 1] });
         }
 
-        bool isSuccessful = openspace::fls::traceAndAddMatchingLinesToState(kameleon.get(), matchingSeedPoints, tracingVar, state,
-            nPointsOnPathLine, nPointsOnFieldLines);
+        bool isSuccessful = openspace::fls::traceAndAddMatchingLinesToState(
+            kameleon,
+            matchingSeedPoints, 
+            birthTimes, 
+            tracingVar, 
+            state,
+            nPointsOnPathLine, 
+            nPointsOnFieldLines
+        );
 
         return isSuccessful;
     }
@@ -132,7 +131,9 @@ namespace openspace::fls {
 
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
         const std::vector<seedPointPair>& matchingSeedPoints,
-        const std::string& tracingVar, FieldlinesState& state,
+        const std::vector<double>& birthTimes,
+        const std::string& tracingVar,
+        FieldlinesState& state,
         const size_t nPointsOnPathLine,
         const size_t nPointsOnFieldlines) {
 
@@ -217,10 +218,11 @@ namespace openspace::fls {
             // Elon: optimizing trimming could go here
             // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
 
+            double birthTime = kameleonHelper::getTime(kameleon, birthTimes[i]);
 
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)
-            state.addMatchingPathLines(std::move(pathLine1), std::move(pathLine2));
+            state.addMatchingPathLines(std::move(pathLine1), std::move(pathLine2), birthTime);
 
             for (size_t j = 0; j < pathLine1.size(); ++j) {
 

@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/rendering/renderablemovingfieldlines.h>
 
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+#include <modules/kameleon/include/kameleonhelper.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
@@ -33,8 +34,12 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <ccmc/Kameleon.h>
+#include <ccmc/KameleonInterpolator.h>
+
 #include <fstream>
 #pragma optimize("", off)
+
 namespace {
     constexpr const char* _loggerCat = "RenderableMovingFieldlines";
 
@@ -115,9 +120,13 @@ namespace {
 } // namespace
 
 namespace openspace {
-std::vector<glm::vec3> extractSeedPointsFromFile(std::filesystem::path);
-std::vector<std::string> 
-    extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
+std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
+    std::filesystem::path filePath,
+    std::vector<glm::vec3>& seedPoints,
+    std::vector<double>& birthTimes,
+    double startTime
+);
+std::vector<std::string> extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 
 documentation::Documentation RenderableMovingFieldlines::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablemovingfieldlines");
@@ -321,23 +330,55 @@ void RenderableMovingFieldlines::initializeGL() {
 }
 
 bool RenderableMovingFieldlines::getStateFromCdfFiles() {
+
     std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
-    
-    // TODO remove placeholder, fix map vs vector
-    std::vector<glm::vec3> seedPoints = extractSeedPointsFromFile(_seedFilePath);
-    //std::unordered_map<std::string, std::vector<glm::vec3>> seedpointsPlaceholder;
-    //seedpointsPlaceholder["20000101080000"] = _seedPoints;
-    
+
+    std::vector<glm::vec3> seedPoints;
+    std::vector<double> birthTimes;
+        
     bool isSuccessful = false;
+    bool shouldExtractSeedPoints = true;
+    double startTime = 0.0;
+
     for (const std::filesystem::path entry : _sourceFiles) {
         const std::string& cdfPath = entry.string();
+
+        std::unique_ptr<ccmc::Kameleon> kameleon =
+            kameleonHelper::createKameleonObject(cdfPath);
+
+        _fieldlineState.setModel(fls::stringToModel(kameleon->getModelName()));
+
+        // We only need to extract seed points once, but we need the start time of the first
+        // CDF-file to create correct birth times for the points.
+        if (shouldExtractSeedPoints) {
+
+            // Get start_time from cdf and convert it to double; needed to give seed points
+            // give in date-format their proper birthTime.
+            bool hasStartTime = kameleon->doesAttributeExist("start_time");
+            if (hasStartTime) {
+                std::string startTimeStr =
+                    kameleon->getGlobalAttribute("start_time").getAttributeString();
+                startTime = Time::convertTime(startTimeStr.substr(0, startTimeStr.length() - 2));
+            }
+            else {
+                LWARNING(fmt::format(
+                    "The first CDF-file at path {} does not have a \"start_time\"-attribute",
+                    cdfPath
+                ));
+            }
+
+            extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
+            shouldExtractSeedPoints = false;
+        }
+
         /************ SWITCH MOVING/MATCHING HERE ****************/
         //isSuccessful = fls::convertCdfToMovingFieldlinesState(
         isSuccessful = fls::convertCdfToMatchingFieldlinesState(
-        /*********************************************************/
+            /*********************************************************/
             _fieldlineState,
-            cdfPath,
+            kameleon.get(),
             seedPoints,
+            birthTimes,
             _manualTimeOffset,
             _tracingVariable,
             _extraVars,
@@ -346,7 +387,6 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
             _nPointsOnFieldlines
         );
     }
-
     //_fieldlineState.addLinesToBeRendered();
     _fieldlineState.initializeRenderedMatchingFieldlines();
 
@@ -379,8 +419,18 @@ void RenderableMovingFieldlines::deinitializeGL() {
     }
 }
 
-std::vector<glm::vec3> extractSeedPointsFromFile(std::filesystem::path filePath) {
-    std::vector<glm::vec3> outputSeedPoints;
+/**
+* Extracts seed points from .txt file. Each matching fieldline pair is created
+* by giving a time and four seed points on five separate lines. The time states
+* when the fieldline should start, the two first seed points gives the matching
+* IMF and closed fieldline and the last two gives their respective open fieldlines.
+*/
+std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
+    std::filesystem::path filePath, 
+    std::vector<glm::vec3>& seedPoints,
+    std::vector<double>& birthTimes,
+    double startTime
+) {
 
     if (!std::filesystem::is_regular_file(filePath) ||
         filePath.extension() != ".txt")
@@ -393,22 +443,90 @@ std::vector<glm::vec3> extractSeedPointsFromFile(std::filesystem::path filePath)
     if (!seedFileStream.good()) {
         throw ghoul::RuntimeError(fmt::format("Could not read from {}", seedFile));
     }
+
     std::string line;
+    int nPointsInARow = 0;
     while (std::getline(seedFileStream, line)) {
-        std::stringstream ss(line);
-        glm::vec3 point;
-        ss >> point.x;
-        ss >> point.y;
-        ss >> point.z;
-        outputSeedPoints.push_back(std::move(point));
+        try {
+            std::stringstream ss(line);
+
+            bool isPoint = ss.str().find_first_of(' ') != std::string::npos;
+            bool isDate = ss.str().find_first_of(':') != std::string::npos;
+
+            if (isPoint) {
+                ++nPointsInARow;
+
+                // No time input, seed starts at simulation start
+                bool hasNoTime = nPointsInARow == 5;
+                if (hasNoTime) {
+                    nPointsInARow = 1;
+                    birthTimes.push_back(0.0);
+                }
+
+                glm::vec3 point;
+                ss >> point.x;
+                ss >> point.y;
+                ss >> point.z;
+                seedPoints.push_back(point);
+
+                bool isEmpty = ss.eof();
+                if (!isEmpty) {
+                    throw std::invalid_argument("stringstream was not empty"
+                                                " after reading point");
+                }
+                bool hasFailed = ss.fail();
+                if (hasFailed) {
+                    throw std::invalid_argument("failed to read float value "
+                                                "from stringstream when reading point");
+                }
+            }
+            // Time in date format
+            else if (isDate) {
+                nPointsInARow = 0;
+
+                double birthTime = Time::convertTime(ss.str().substr(0, ss.str().length() - 2));
+                
+                birthTimes.push_back(birthTime - startTime);
+            }
+            // Time in float format
+            else {
+                nPointsInARow = 0;
+                double t;
+                ss >> t;
+                birthTimes.push_back(t);
+
+                bool isEmpty = ss.eof();
+                if (!isEmpty) {
+                    throw std::invalid_argument("stringstream was not empty after "
+                                                "reading time in float format");
+                }
+                bool hasFailed = ss.fail();
+                if (hasFailed) {
+                    throw std::invalid_argument("failed to read float value from "
+                                                "stringstream when reading time");
+                }
+            }
+        }
+        catch (std::invalid_argument& e) {
+            LERROR(fmt::format(
+                    "Incorrect format of seed point file, got error: {}",
+                    e.what()
+                ));
+            throw ghoul::RuntimeError(
+                fmt::format(
+                    "Incorrect format of seed point file, got error: {}",
+                    e.what()
+                ));
+        }
     }
-    if (outputSeedPoints.empty()) {
+    if (seedPoints.empty()) {
         throw ghoul::RuntimeError(fmt::format(
             "Found no seed points in: {}",
             filePath
         ));
     }
-    return outputSeedPoints;
+
+    return std::make_tuple(seedPoints, birthTimes);
 }
 
 bool RenderableMovingFieldlines::isReady() const {
@@ -512,6 +630,7 @@ void RenderableMovingFieldlines::update(const UpdateData& data) {
     const double previousTime = data.previousFrameTime.j2000Seconds();
     const double currentTime = data.time.j2000Seconds();
     const double dt = currentTime - previousTime;
+
     if (abs(dt) > DBL_EPSILON) {
         moveLines(dt);
     }

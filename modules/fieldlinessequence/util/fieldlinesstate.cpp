@@ -446,12 +446,18 @@ void FieldlinesState::addPathLine(const std::vector<glm::vec3> line, const int i
     _allPathLines.push_back(pl);
 }
 
-void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLine1, const std::vector<glm::vec3>&& pathLine2)
+void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLine1,
+    const std::vector<glm::vec3>&& pathLine2,
+    const double time)
 {
     MatchingFieldlines m;
     PathLine pl1, pl2;
     pl1.line = pathLine1;
     pl2.line = pathLine2;
+
+    pl1.birthTime = time;
+    pl2.birthTime = time;
+
     m.pathLines = std::make_pair(pl1, pl2);
     _allMatchingFieldlines.push_back(m);
 }

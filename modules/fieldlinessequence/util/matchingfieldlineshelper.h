@@ -31,6 +31,7 @@
 
 //fel att göra så
 #include <ghoul/logging/logmanager.h>
+#include <ccmc/Kameleon.h>
 
 
 namespace openspace {
@@ -45,11 +46,18 @@ namespace openspace {
             std::vector<glm::vec3> eigVecs;
         };
 
-        bool convertCdfToMatchingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-            const std::vector<glm::vec3>& seedMap,
-            double manualTimeOffset, const std::string& tracingVar,
-            std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars,
-            const size_t nPointsOnPathLine, const size_t nPointsOnFieldLines);
+        bool convertCdfToMatchingFieldlinesState(
+            FieldlinesState& state, 
+            ccmc::Kameleon* kameleon,
+            const std::vector<glm::vec3>& seedPoints,
+            const std::vector<double>& birthTimes,
+            double manualTimeOffset, 
+            const std::string& tracingVar,
+            std::vector<std::string>& extraVars, 
+            std::vector<std::string>& extraMagVars,
+            const size_t nPointsOnPathLine, 
+            const size_t nPointsOnFieldLines
+        );
 
 
         pointsWithEigVec getCriticalPoints();

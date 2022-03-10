@@ -38,11 +38,16 @@ namespace openspace {
 
     namespace fls {
 
-        bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
+        bool convertCdfToMovingFieldlinesState(FieldlinesState& state, 
+            const std::string& cdfPath,
             const std::vector<glm::vec3>& seedMap,
-            double manualTimeOffset, const std::string& tracingVar,
-            std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars,
-            const size_t nPointsOnPathLine, const size_t nPointsOnFieldLines);
+            double manualTimeOffset, 
+            const std::string& tracingVar,
+            std::vector<std::string>& extraVars, 
+            std::vector<std::string>& extraMagVars,
+            const size_t nPointsOnPathLine, 
+            const size_t nPointsOnFieldLines
+        );
 
         
     } // namespace fls

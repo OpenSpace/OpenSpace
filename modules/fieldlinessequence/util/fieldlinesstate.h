@@ -49,7 +49,11 @@ public:
     struct PathLine {
         std::vector<Fieldline> keyFrames;
         std::vector<glm::vec3> line;
-        //float lifetime; // for when multiple cdf-files come into play ?
+
+        // Defines the time each fieldline is visible.
+        // Path lines are visible even outside birth- and death time.
+        double birthTime;   // Number of seconds from simulation start the fieldlines starts
+        double deathTime;   // Number of seconds from simulation start the fieldlines ends
     };
 
     struct MatchingFieldlines {
@@ -91,7 +95,7 @@ public:
 
     void addPathLine(const std::vector<glm::vec3>, const int i);
     void addFieldLine(const std::vector<glm::vec3> fieldLines, const float time, const int i);
-    void addMatchingPathLines(const std::vector<glm::vec3>&&, const std::vector<glm::vec3>&&);
+    void addMatchingPathLines(const std::vector<glm::vec3>&&, const std::vector<glm::vec3>&&, const double time);
     void addMatchingKeyFrames(
         const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2, 
         const float time1, const float time2, size_t matchingFieldlinesId);
@@ -105,16 +109,25 @@ private:
 
     std::vector<std::vector<float>> _extraQuantities;
     std::vector<std::string> _extraQuantityNames;
-    // the index where each fieldline first vertex is in _vertexPositions
-    std::vector<GLint> _lineStart;
-    // the number of vertices for each fieldline in _vertexPositions
-    std::vector<GLsizei> _lineCount;
 
-    std::vector<MatchingFieldlines> _allMatchingFieldlines;    // will replace _allPathLines
+    // information about all matching path lines with associated key frames
+    std::vector<MatchingFieldlines> _allMatchingFieldlines;
+
+    /**
+    * The format with _lineStart, _lineCount and _vertexPositions is used to
+    * update the OpenGL vertex position buffer in the renderable.
+    */
+
+    // The index where each fieldline first vertex is in _vertexPositions
+    std::vector<GLint> _lineStart;
+    // The number of vertices for each fieldline in _vertexPositions
+    std::vector<GLsizei> _lineCount;
+    // Vertices for all rendered fieldlines
+    std::vector<glm::vec3> _vertexPositions;
+
+
 
     std::vector<PathLine> _allPathLines;    // replaces _fieldLinesPerPath
-
-    std::vector<glm::vec3> _vertexPositions;
 };
 
 } // namespace openspace

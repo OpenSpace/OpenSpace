@@ -96,7 +96,8 @@ namespace openspace::fls {
     *        a multiple of 3; e.g. "ux", "uy" & "uz" to get the magnitude of the velocity
     *        vector at each line vertex
     */
-    bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
+    bool convertCdfToMovingFieldlinesState(FieldlinesState& state, 
+        const std::string& cdfPath,
         const std::vector<glm::vec3>& seedPoints,
         double manualTimeOffset,
         const std::string& tracingVar,
