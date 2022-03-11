@@ -405,26 +405,87 @@ void HorizonsDialog::downloadProgress(qint64 value, qint64 total) {
 
 void HorizonsDialog::importTimeRange() {
     QDateTime start, end;
-    start = QDateTime::fromString(_validTimeRange.first.c_str(), "yyyy-MMM-dd T hh:mm");
-    end = QDateTime::fromString(_validTimeRange.second.c_str(), "yyyy-MMM-dd T hh:mm");
+    start = QDateTime::fromString(_validTimeRange.first.c_str());
+    end = QDateTime::fromString(_validTimeRange.second.c_str());
 
     if (!start.isValid() || !end.isValid()) {
-        start = QDateTime::fromString(_validTimeRange.first.c_str(), "yyyy-MMM-dd T hh:mm:ss");
-        end = QDateTime::fromString(_validTimeRange.second.c_str(), "yyyy-MMM-dd T hh:mm:ss");
+        QDate startDate = QDate::fromString(_validTimeRange.first.c_str(), "yyyy-MMM-dd");
+        QDate endDate = QDate::fromString(_validTimeRange.second.c_str(), "yyyy-MMM-dd");
 
-        if (!start.isValid() || !end.isValid()) {
-            _errorMsg->setText("Could not import time range");
-            appendLog(fmt::format("Could not import time range '{}' to '{}'",
-                _validTimeRange.first, _validTimeRange.second), LogLevel::Error
-            );
+        if (startDate.isValid() && endDate.isValid()) {
+            _startEdit->setDate(startDate);
+            _endEdit->setDate(endDate);
+            _importTimeButton->hide();
+            _validTimeRange = std::pair<std::string, std::string>();
             return;
         }
+
+        _errorMsg->setText("Could not import time range");
+        appendLog(fmt::format("Could not import time range '{}' to '{}'",
+            _validTimeRange.first, _validTimeRange.second), LogLevel::Error
+        );
+        return;
     }
 
     _startEdit->setDateTime(start);
     _endEdit->setDateTime(end);
     _importTimeButton->hide();
     _validTimeRange = std::pair<std::string, std::string>();
+}
+
+std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
+    std::pair<std::string, std::string> timeRange = _horizonsFile.parseValidTimeRange(
+        "Trajectory files",
+        "************",
+        "Trajectory name"
+    );
+
+    QDateTime start, end;
+    start = QDateTime::fromString(timeRange.first.c_str(), "yyyy-MMM-dd T hh:mm");
+    end = QDateTime::fromString(timeRange.second.c_str(), "yyyy-MMM-dd T hh:mm");
+
+    if (!start.isValid() || !end.isValid()) {
+        start = QDateTime::fromString(timeRange.first.c_str(), "yyyy-MMM-dd T hh:mm:ss");
+        end = QDateTime::fromString(timeRange.second.c_str(), "yyyy-MMM-dd T hh:mm:ss");
+
+        if (!start.isValid() || !end.isValid()) {
+            timeRange = _horizonsFile.parseValidTimeRange(
+                "Trajectory files",
+                "************",
+                "Trajectory name",
+                false
+            );
+
+            start = QDateTime::fromString(timeRange.first.c_str(), "yyyy-MMM-dd");
+            end = QDateTime::fromString(timeRange.second.c_str(), "yyyy-MMM-dd");
+
+            if (!start.isValid() || !end.isValid()) {
+                if (timeRange.first.empty() || timeRange.second.empty()) {
+                    _errorMsg->setText("Could not find time range");
+                    appendLog(
+                        "Could not find time range in Horizons file",
+                        LogLevel::Error
+                    );
+                }
+                else {
+                    _errorMsg->setText("Could not read time range");
+                    appendLog(fmt::format("Could not read time range '{}' to '{}'",
+                        timeRange.first, timeRange.second), LogLevel::Error
+                    );
+                }
+                return std::pair<std::string, std::string>();
+            }
+            else {
+                appendLog(
+                    fmt::format("Could not find all time range information. Latest "
+                        "Horizons mesage: {}", _latestHorizonsError
+                    ),
+                    LogLevel::Warning
+                );
+            }
+        }
+    }
+    return timeRange;
 }
 
 bool HorizonsDialog::handleRequest() {
@@ -866,9 +927,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             styleLabel(_startLabel, true);
             styleLabel(_endLabel, true);
 
-            _validTimeRange =
-                _horizonsFile.parseValidTimeRange("Trajectory files", "************");
-            if (_validTimeRange.first.empty()) {
+            _validTimeRange = readTimeRange();
+            if (_validTimeRange.first.empty() || _validTimeRange.second.empty()) {
                 appendLog(
                     "Could not parse the valid time range from file. "
                     "For more information, see the saved horizons file",
@@ -882,8 +942,10 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                 return false;
             }
 
-            appendLog("Valid time range is '" + _validTimeRange.first + "' to '" +
-                _validTimeRange.second + "'", HorizonsDialog::LogLevel::Info);
+            appendLog(fmt::format("Valid time range is '{}' to '{}'",
+                _validTimeRange.first, _validTimeRange.second),
+                HorizonsDialog::LogLevel::Info
+            );
             _importTimeButton->show();
             break;
         }
@@ -962,7 +1024,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             styleLabel(_centerLabel, true);
 
             std::vector<std::string> matchingObservers =
-                _horizonsFile.parseMatches("Name", "matches");
+                _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingObservers.empty()) {
                 appendLog("Could not parse the matching observers. "
                     "For more information, see the saved horizons file",
@@ -1012,7 +1074,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             styleLabel(_targetLabel, true);
 
             std::vector<std::string> matchingTargets =
-                _horizonsFile.parseMatches("Name", "matches");
+                _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingTargets.empty()) {
                 appendLog("Could not parse the matching targets. "
                     "For more information, see the saved horizons file",

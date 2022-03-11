@@ -388,7 +388,11 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             LERROR("Time range is outside the valid range for target");
 
             std::pair<std::string, std::string> validTimeRange =
-                parseValidTimeRange("Trajectory files", "************");
+                parseValidTimeRange(
+                    "Trajectory files",
+                    "************",
+                    "Trajectory name"
+                );
             if (validTimeRange.first.empty()) {
                 LERROR("Could not parse the valid time range from file");
                 break;
@@ -435,7 +439,7 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             LWARNING("Multiple matches were found for the selected observer");
 
             std::vector<std::string> matchingObservers =
-                parseMatches("Name", "matches");
+                parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingObservers.empty()) {
                 LERROR("Could not parse the matching observers");
                 break;
@@ -468,7 +472,7 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             LWARNING("Multiple matches were found for the target");
 
             std::vector<std::string> matchingTargets =
-                parseMatches("Name", "matches");
+                parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingTargets.empty()) {
                 LERROR("Could not parse the matching targets");
                 break;
@@ -683,7 +687,7 @@ HorizonsFile::HorizonsResult HorizonsFile::readObserverFile() const {
 }
 
 std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhrase,
-                                                    const std::string& endPhrase) const
+                    const std::string& endPhrase, const std::string& altStartPhrase) const
 {
     std::ifstream fileStream(_file);
     std::vector<std::string> matches;
@@ -698,6 +702,10 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
     while (fileStream.good()) {
         // Add the line with the start phrase first, to give context
         if (line.find(startPhrase) != std::string::npos) {
+            matches.push_back(line);
+            break;
+        }
+        else if (!altStartPhrase.empty() && line.find(altStartPhrase) != std::string::npos) {
             matches.push_back(line);
             break;
         }
@@ -729,7 +737,8 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
 }
 
 std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
-                       const std::string& startPhrase, const std::string& endPhrase) const
+                             const std::string& startPhrase, const std::string& endPhrase,
+                                    const std::string& altStartPhrase, bool hasTime) const
 {
     std::ifstream fileStream(_file);
 
@@ -741,7 +750,15 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
     // Ignore everything until head of time range list
     std::string line;
     std::getline(fileStream, line);
-    while (fileStream.good() && line.find(startPhrase) == std::string::npos) {
+    while (fileStream.good()) {
+        // Add the line with the start phrase first, to give context
+        if (line.find(startPhrase) != std::string::npos) {
+            break;
+        }
+        else if (!altStartPhrase.empty() && line.find(altStartPhrase) != std::string::npos) {
+            break;
+        }
+
         std::getline(fileStream, line);
     }
 
@@ -750,11 +767,11 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
         return std::pair<std::string, std::string>();
     }
 
-    // There will be one empty line before the list of time rnages, skip
+    // There will be one empty line before the list of time ranges, skip
     std::getline(fileStream, line);
-    std::string startTime, endTime;
 
     // From the first line get the start time
+    std::string startTime, endTime;
     std::getline(fileStream, line);
     if (fileStream.good()) {
         std::stringstream str(line);
@@ -771,8 +788,18 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
 
         // Parse time stamps backwards
         // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
-        endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
-        startTime = words[words.size() - 4] + " T " + words[words.size() - 3];
+        if (hasTime && words.size() > 4) {
+            startTime = words[words.size() - 4] + " T " + words[words.size() - 3];
+            endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
+        }
+        else if (words.size() > 2){
+            // Sometimes the format can be yyyy-mon-dd without time
+            startTime = words[words.size() - 2];
+            endTime = words[words.size() - 1];
+        }
+        else {
+            return std::pair<std::string, std::string>();
+        }
     }
     if (startTime.empty() || endTime.empty()) {
         fileStream.close();
@@ -799,7 +826,16 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
 
         // Parse time stamps backwards
         // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
-        endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
+        if (hasTime && words.size() > 4) {
+            endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
+        }
+        else if (words.size() > 2) {
+            // Sometimes the format can be yyyy-mon-dd without time
+            endTime = words[words.size() - 1];
+        }
+        else {
+            return std::pair<std::string, std::string>();
+        }
 
         std::getline(fileStream, line);
     }

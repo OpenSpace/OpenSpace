@@ -82,6 +82,7 @@ private:
     void createWidgets();
     void cleanAllWidgets();
     void styleLabel(QLabel* label, bool isDirty);
+    std::pair<std::string, std::string> readTimeRange();
     bool handleRequest();
     bool isValidInput();
     std::string constructUrl();

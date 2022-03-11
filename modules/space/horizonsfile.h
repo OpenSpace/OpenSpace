@@ -128,9 +128,10 @@ public:
     HorizonsResult readFile() const;
 
     std::vector<std::string> parseMatches(const std::string& startPhrase,
-        const std::string& endPhrase) const;
+        const std::string& endPhrase, const std::string& altStartPhrase = "") const;
     std::pair<std::string, std::string> parseValidTimeRange(
-        const std::string& startPhrase, const std::string& endPhrase) const;
+        const std::string& startPhrase, const std::string& endPhrase,
+        const std::string& altStartPhrase = "", bool hasTime = true) const;
 
 private:
     HorizonsResult readVectorFile() const;
