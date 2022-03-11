@@ -27,7 +27,33 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 
-#include "eventengine_lua.inl"
+namespace {
+    /**
+     * Registers an action to be executed whenever an event is encountered. If the
+     * optional third parameter is provided, it describes a filter that the event is being
+     * checked against and only if it passes the filter, the action is triggered.
+     */
+    [[codegen::luawrap]] void registerEventAction(std::string event, std::string action,
+                                                  std::optional<ghoul::Dictionary> filter)
+    {
+        using namespace openspace;
+        events::Event::Type type = events::fromString(event);
+        global::eventEngine->registerEventAction(type, std::move(action), std::move(filter));
+    }
+
+    /**
+     * Unregisters a specific combination of event, action, and potentially a filter.
+     */
+    [[codegen::luawrap]] void unregisterEventAction(std::string event, std::string action,
+                                                  std::optional<ghoul::Dictionary> filter)
+    {
+        using namespace openspace;
+        events::Event::Type type = events::fromString(event);
+        global::eventEngine->unregisterEventAction(type, action, filter);
+    }
+
+#include "eventengine_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
@@ -107,27 +133,13 @@ void EventEngine::triggerActions() const {
 }
 
 scripting::LuaLibrary EventEngine::luaLibrary() {
-    scripting::LuaLibrary res;
-    res.name = "event";
-    res.functions.push_back({
-        "registerEventAction",
-        &luascriptfunctions::registerEventAction,
-        { { "string, string [, table]" } },
-        "",
-        "Registers an action (second parameter) to be executed whenever an event (first "
-        "parameter) is encountered. If the optional third parameter is provided, it "
-        "describes a filter that the event is being checked against and only if it "
-        "passes the filter, the action is triggered"
-    });
-    res.functions.push_back({
-        "unregisterEventAction",
-        &luascriptfunctions::unregisterEventAction,
-        { { "string, string [, table]" } },
-        "",
-        "Unregisters a specific combination of event (first parameter), action (second "
-        "parameter), and potentially a filter (optional third argument)"
-    });
-    return res;
+    return {
+        "event",
+        {
+            codegen::lua::registerEventAction,
+            codegen::lua::unregisterEventAction
+        }
+    };
 }
 
 } // namespace openspace

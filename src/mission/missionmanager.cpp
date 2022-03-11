@@ -24,13 +24,58 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <filesystem>
 
-#include "missionmanager_lua.inl"
+namespace {
+    // Load mission phases from file.
+    [[codegen::luawrap]] std::string loadMission(std::string missionFileName) {
+        if (missionFileName.empty()) {
+            throw ghoul::lua::LuaError("Filepath is empty");
+        }
+
+        const std::string name =
+            openspace::global::missionManager->loadMission(missionFileName);
+        return name;
+    }
+
+    // Unloads a previously loaded mission.
+    [[codegen::luawrap]] void unloadMission(std::string missionName) {
+        if (missionName.empty()) {
+            throw ghoul::lua::LuaError("Mission name is empty");
+        }
+
+        if (!openspace::global::missionManager->hasMission(missionName)) {
+            throw ghoul::lua::LuaError("Mission was not previously loaded");
+        }
+
+        openspace::global::missionManager->unloadMission(missionName);
+    }
+
+    // Returns whether a mission with the provided name has been loaded.
+    [[codegen::luawrap]] bool hasMission(std::string missionName) {
+        if (missionName.empty()) {
+            throw ghoul::lua::LuaError("Missing name is empty");
+        }
+
+        bool hasMission = openspace::global::missionManager->hasMission(missionName);
+        return hasMission;
+    }
+
+    // Set the currnet mission.
+    [[codegen::luawrap]] void setCurrentMission(std::string missionName) {
+        if (missionName.empty()) {
+            throw ghoul::lua::LuaError("Mission name is empty");
+        }
+        openspace::global::missionManager->setCurrentMission(missionName);
+    }
+
+#include "missionmanager_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
@@ -108,34 +153,10 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
     return {
         "",
         {
-            {
-                "loadMission",
-                &luascriptfunctions::loadMission,
-                { { "", "string" } },
-                "",
-                "Load mission phases from file"
-            },
-            {
-                "unloadMission",
-                &luascriptfunctions::unloadMission,
-                { { "", "string" } },
-                "",
-                "Unloads a previously loaded mission"
-            },
-            {
-                "hasMission",
-                &luascriptfunctions::hasMission,
-                { { "", "string" } },
-                "",
-                "Returns whether a mission with the provided name has been loaded"
-            },
-            {
-                "setCurrentMission",
-                &luascriptfunctions::setCurrentMission,
-                { { "", "string" } },
-                "",
-                "Set the currnet mission"
-            },
+            codegen::lua::loadMission,
+            codegen::lua::unloadMission,
+            codegen::lua::hasMission,
+            codegen::lua::setCurrentMission
         }
     };
 }

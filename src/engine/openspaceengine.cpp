@@ -29,6 +29,7 @@
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/logfactory.h>
@@ -50,6 +51,7 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/profile.h>
@@ -71,6 +73,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -96,8 +99,6 @@
 #include <openspace/interaction/touchbar.h>
 #endif // __APPLE__
 
-#include "openspaceengine_lua.inl"
-
 namespace {
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -121,6 +122,173 @@ namespace {
         "If this is enabled, all events that are propagated through the system are "
         "printed to the log."
     };
+
+    /**
+     * Toggles the shutdown mode that will close the application after the countdown timer
+     * is reached
+     */
+    [[codegen::luawrap]] void toggleShutdown() {
+        using namespace openspace;
+        
+        global::openSpaceEngine->toggleShutdownMode();
+    }
+
+    /**
+     * Writes out documentation files
+     */
+    [[codegen::luawrap]] void writeDocumentation() {
+        using namespace openspace;
+        
+        global::openSpaceEngine->writeStaticDocumentation();
+        global::openSpaceEngine->writeSceneDocumentation();
+    }
+
+    // Sets the folder used for storing screenshots or session recording frames
+    [[codegen::luawrap]] void setScreenshotFolder(std::string newFolder) {
+        using namespace openspace;
+        
+        std::filesystem::path folder = absPath(newFolder);
+        if (!std::filesystem::exists(folder)) {
+            std::filesystem::create_directory(folder);
+        }
+
+        FileSys.registerPathToken(
+            "${SCREENSHOTS}",
+            folder,
+            ghoul::filesystem::FileSystem::Override::Yes
+        );
+
+        global::windowDelegate->setScreenshotFolder(folder.string());
+    }
+
+    // Adds a Tag to a SceneGraphNode identified by the provided uri
+    [[codegen::luawrap]] void addTag(std::string uri, std::string tag) {
+        using namespace openspace;
+
+        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
+        if (!node) {
+            throw ghoul::lua::LuaError(fmt::format("Unknown scene graph node '{}'", uri));
+        }
+
+        node->addTag(std::move(tag));
+    }
+
+    // Removes a tag (second argument) from a scene graph node (first argument)
+    [[codegen::luawrap]] void removeTag(std::string uri, std::string tag) {
+        using namespace openspace;
+        
+        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
+        if (!node) {
+            throw ghoul::lua::LuaError(fmt::format("Unknown scene graph node '{}'", uri));
+        }
+
+        node->removeTag(tag);
+    }
+
+    // Downloads a file from Lua interpreter
+    [[codegen::luawrap]] void downloadFile(std::string url, std::string savePath,
+                                           bool waitForCompletion = false)
+    {
+        using namespace openspace;
+        
+        LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", url));
+        std::shared_ptr<DownloadManager::FileFuture> future =
+            global::downloadManager->downloadFile(
+                url,
+                savePath,
+                DownloadManager::OverrideFile::Yes,
+                DownloadManager::FailOnError::Yes,
+                5
+            );
+
+        if (waitForCompletion) {
+            while (!future->isFinished && future->errorMessage.empty()) {
+                // just wait
+                LTRACEC("OpenSpaceEngine", fmt::format("waiting {}", future->errorMessage));
+            }
+        }
+
+        if (!future || !future->isFinished) {
+            throw ghoul::lua::LuaError(
+                future ? "Download failed: " + future->errorMessage : "Download failed"
+            );
+        }
+    }
+
+    /**
+     * Creates a 1 pixel image with a certain color in the cache folder and returns the
+     * path to the file. If a cached file with the given name already exists, the path to
+     * that file is returned. The first argument is the name of the file, without
+     * extension. The second is the RGB color, given as {r, g, b} with values between 0
+     * and 1.
+     */
+    [[codegen::luawrap]] std::filesystem::path createSingleColorImage(std::string name,
+                                                                      ghoul::Dictionary d)
+    {
+        using namespace openspace;
+        
+        // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
+        // Would like to clean this up with a more direct use of the Verifier in the future
+        const std::string& key = "color";
+        ghoul::Dictionary colorDict;
+        colorDict.setValue(key, d);
+        documentation::TestResult res = documentation::Color3Verifier()(colorDict, key);
+
+        if (!res.success) {
+            throw ghoul::lua::LuaError(
+                "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
+            );
+        }
+
+        const glm::dvec3 color = colorDict.value<glm::dvec3>(key);
+
+        std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(
+            name + ".ppm",
+            ""
+        );
+        const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
+        if (hasCachedFile) {
+            LDEBUGC("OpenSpaceEngine", fmt::format("Cached file '{}' used", fileName));
+            return fileName;
+        }
+        else {
+            // Write the color to a ppm file
+            static std::mutex fileMutex;
+            std::lock_guard guard(fileMutex);
+            std::ofstream ppmFile(fileName, std::ofstream::binary | std::ofstream::trunc);
+
+            unsigned int width = 1;
+            unsigned int height = 1;
+            unsigned int size = width * height;
+            std::vector<unsigned char> img(size * 3);
+            img[0] = static_cast<unsigned char>(255 * color.r);
+            img[1] = static_cast<unsigned char>(255 * color.g);
+            img[2] = static_cast<unsigned char>(255 * color.b);
+
+            if (!ppmFile.is_open()) {
+                throw ghoul::lua::LuaError("Could not open ppm file for writing");
+            }
+
+            ppmFile << "P6" << std::endl;
+            ppmFile << width << " " << height << std::endl;
+            ppmFile << 255 << std::endl;
+            ppmFile.write(reinterpret_cast<char*>(&img[0]), size * 3);
+            ppmFile.close();
+            return fileName;
+        }
+    }
+
+    /**
+     * Returns whether the current OpenSpace instance is the master node of a cluster
+     * configuration. If this instance is not part of a cluster, this function also
+     * returns 'true'
+     */
+    [[codegen::luawrap]] bool isMaster() {
+        return openspace::global::windowDelegate->isMaster();
+    }
+
+#include "openspaceengine_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
@@ -1797,69 +1965,14 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     return {
         "",
         {
-            {
-                "toggleShutdown",
-                &luascriptfunctions::toggleShutdown,
-                {},
-                "",
-                "Toggles the shutdown mode that will close the application after the "
-                "count down timer is reached"
-            },
-            {
-                "writeDocumentation",
-                &luascriptfunctions::writeDocumentation,
-                {},
-                "",
-                "Writes out documentation files"
-            },
-            {
-                "downloadFile",
-                &luascriptfunctions::downloadFile,
-                {},
-                "",
-                "Downloads a file from Lua scope"
-            },
-            {
-                "setScreenshotFolder",
-                &luascriptfunctions::setScreenshotFolder,
-                {},
-                "",
-                "Sets the folder used for storing screenshots or session recording frames"
-            },
-            {
-                "addTag",
-                &luascriptfunctions::addTag,
-                {},
-                "",
-                "Adds a tag (second argument) to a scene graph node (first argument)"
-            },
-            {
-                "removeTag",
-                &luascriptfunctions::removeTag,
-                {},
-                "",
-                "Removes a tag (second argument) from a scene graph node (first argument)"
-            },
-            {
-                "createSingleColorImage",
-                &luascriptfunctions::createSingleColorImage,
-                {},
-                "",
-                "Creates a 1 pixel image with a certain color in the cache folder and "
-                "returns the path to the file. If a cached file with the given name "
-                "already exists, the path to that file is returned. The first argument "
-                "is the name of the file, without extension. The second is the RGB "
-                "color, given as {r, g, b} with values between 0 and 1."
-            },
-            {
-                "isMaster",
-                &luascriptfunctions::isMaster,
-                {},
-                "",
-                "Returns whether the current OpenSpace instance is the master node of a "
-                "cluster configuration. If this instance is not part of a cluster, this "
-                "function also returns 'true'."
-            }
+            codegen::lua::toggleShutdown,
+            codegen::lua::writeDocumentation,
+            codegen::lua::setScreenshotFolder,
+            codegen::lua::addTag,
+            codegen::lua::removeTag,
+            codegen::lua::downloadFile,
+            codegen::lua::createSingleColorImage,
+            codegen::lua::isMaster
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
