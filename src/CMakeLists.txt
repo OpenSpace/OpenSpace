@@ -38,31 +38,39 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/globalscallbacks.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
+  ${OPENSPACE_BASE_DIR}/src/engine/moduleengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
+  ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
   ${OPENSPACE_BASE_DIR}/src/events/event.cpp
   ${OPENSPACE_BASE_DIR}/src/events/eventengine.cpp
+  ${OPENSPACE_BASE_DIR}/src/events/eventengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/mouseinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/keyboardinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/scriptcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/tasks/convertrecfileversiontask.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/tasks/convertrecformattask.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/navigation/pathcurves/avoidcollisioncurve.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/pathcurves/zoomoutoverviewcurve.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/keyframenavigator.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/navigationhandler.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationhandler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/navigation/navigationstate.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/orbitalnavigator.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/path.cpp

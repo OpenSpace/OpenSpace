@@ -27,33 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 
-namespace {
-    /**
-     * Registers an action to be executed whenever an event is encountered. If the
-     * optional third parameter is provided, it describes a filter that the event is being
-     * checked against and only if it passes the filter, the action is triggered.
-     */
-    [[codegen::luawrap]] void registerEventAction(std::string event, std::string action,
-                                                  std::optional<ghoul::Dictionary> filter)
-    {
-        using namespace openspace;
-        events::Event::Type type = events::fromString(event);
-        global::eventEngine->registerEventAction(type, std::move(action), std::move(filter));
-    }
-
-    /**
-     * Unregisters a specific combination of event, action, and potentially a filter.
-     */
-    [[codegen::luawrap]] void unregisterEventAction(std::string event, std::string action,
-                                                  std::optional<ghoul::Dictionary> filter)
-    {
-        using namespace openspace;
-        events::Event::Type type = events::fromString(event);
-        global::eventEngine->unregisterEventAction(type, action, filter);
-    }
-
-#include "eventengine_codegen.cpp"
-} // namespace
+#include "eventengine_lua.inl"
 
 namespace openspace {
 
@@ -136,8 +110,8 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
     return {
         "event",
         {
-            codegen::lua::registerEventAction,
-            codegen::lua::unregisterEventAction
+            codegen::lua::RegisterEventAction,
+            codegen::lua::UnregisterEventAction
         }
     };
 }

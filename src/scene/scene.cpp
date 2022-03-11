@@ -25,12 +25,18 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
@@ -39,6 +45,10 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/luastate.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/easing.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
 #include <string>
@@ -76,7 +86,7 @@ namespace {
 #endif // TRACY_ENABLE
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 } // namespace
 
 namespace openspace {
@@ -774,16 +784,27 @@ void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
 }
 
 PropertyValueType Scene::propertyValueType(const std::string& value) {
-    if (luascriptfunctions::isBoolValue(value)) {
+    auto isFloatValue = [](const std::string& s) {
+        try {
+            float converted = std::numeric_limits<float>::min();
+            converted = std::stof(s);
+            return (converted != std::numeric_limits<float>::min());
+        }
+        catch (...) {
+            return false;
+        }
+    };
+
+    if (value == "true" || value == "false") {
         return PropertyValueType::Boolean;
     }
-    else if (luascriptfunctions::isFloatValue(value)) {
+    else if (isFloatValue(value)) {
         return PropertyValueType::Float;
     }
-    else if (luascriptfunctions::isNilValue(value)) {
+    else if (value == "nil") {
         return PropertyValueType::Nil;
     }
-    else if (luascriptfunctions::isTableValue(value)) {
+    else if ((value.front() == '{') && (value.back() == '}')) {
         return PropertyValueType::Table;
     }
     else {
@@ -797,7 +818,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
         {
             {
                 "setPropertyValue",
-                &luascriptfunctions::property_setValue,
+                &luascriptfunctions::propertySetValue,
                 {},
                 "",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
@@ -822,7 +843,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             },
             {
                 "setPropertyValueSingle",
-                &luascriptfunctions::property_setValueSingle,
+                &luascriptfunctions::propertySetValueSingle,
                 {},
                 "",
                 "Sets the property identified by the URI in the first argument. The "
@@ -838,107 +859,36 @@ scripting::LuaLibrary Scene::luaLibrary() {
             },
             {
                 "hasProperty",
-                &luascriptfunctions::property_hasProperty,
+                &luascriptfunctions::propertyHasProperty,
                 {},
                 "",
                 "Returns whether a property with the given URI exists"
             },
             {
                 "getPropertyValue",
-                &luascriptfunctions::property_getValue,
+                &luascriptfunctions::propertyGetValue,
                 {},
                 "",
                 "Returns the value the property, identified by the provided URI."
             },
             {
                 "getProperty",
-                &luascriptfunctions::property_getProperty,
+                &luascriptfunctions::propertyGetProperty,
                 {},
                 "",
                 "Returns a list of property identifiers that match the passed regular "
                 "expression"
             },
-            {
-                "addSceneGraphNode",
-                &luascriptfunctions::addSceneGraphNode,
-                {},
-                "",
-                "Loads the SceneGraphNode described in the table and adds it to the "
-                "SceneGraph"
-            },
-            {
-                "removeSceneGraphNode",
-                &luascriptfunctions::removeSceneGraphNode,
-                {},
-                "",
-                "Removes the SceneGraphNode identified by name or by extracting the "
-                "'Identifier' key if the parameter is a table"
-            },
-            {
-                "removeSceneGraphNodesFromRegex",
-                &luascriptfunctions::removeSceneGraphNodesFromRegex,
-                {},
-                "",
-                "Removes all SceneGraphNodes with identifiers matching the input regular "
-                "expression"
-            },
-            {
-                "hasSceneGraphNode",
-                &luascriptfunctions::hasSceneGraphNode,
-                {},
-                "",
-                "Checks whether the specifies SceneGraphNode is present in the current "
-                "scene"
-            },
-            {
-                "addInterestingTime",
-                &luascriptfunctions::addInterestingTime,
-                {},
-                "",
-                "Adds an interesting time to the current scene. The first argument is "
-                "the name of the time and the second argument is the time itself in the "
-                "format YYYY-MM-DDThh:mm:ss.uuu"
-            },
-            {
-                "worldPosition",
-                &luascriptfunctions::worldPosition,
-                {},
-                "",
-                "Returns the world position of the scene graph node with the given "
-                "string as identifier"
-            },
-            {
-                "worldRotation",
-                & luascriptfunctions::worldRotation,
-                {},
-                "",
-                "Returns the world rotation matrix of the scene graph node with the "
-                "given string as identifier"
-            },
-            {
-                "setParent",
-                &luascriptfunctions::setParent,
-                {},
-                "",
-                "The scene graph node identified by the first string is reparented to be "
-                "a child of the scene graph node identified by the second string."
-            },
-            {
-                "boundingSphere",
-                &luascriptfunctions::boundingSphere,
-                {},
-                "",
-                "Returns the bounding sphere of the scene graph node with the given "
-                "string as identifier"
-            },
-            {
-                "interactionSphere",
-                &luascriptfunctions::interactionSphere,
-                {},
-                "",
-                "Returns the interaction sphere of the scene graph node with the given "
-                "string as identifier"
-            }
+            codegen::lua::AddSceneGraphNode,
+            codegen::lua::RemoveSceneGraphNode,
+            codegen::lua::RemoveSceneGraphNodesFromRegex,
+            codegen::lua::HasSceneGraphNode,
+            codegen::lua::AddInterestingTime,
+            codegen::lua::WorldPosition,
+            codegen::lua::WorldRotation,
+            codegen::lua::SetParent,
+            codegen::lua::BoundingSphere,
+            codegen::lua::InteractionSphere
         }
     };
 }

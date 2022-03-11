@@ -33,27 +33,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
+#include "moduleengine_lua.inl"
+
 namespace {
     constexpr const char* _loggerCat = "ModuleEngine";
-
-    /**
-     * Checks whether the passed OpenSpaceModule is loaded.
-     *
-     * \param moduleName The name of the module that should be checked
-     */
-    [[codegen::luawrap]] bool isLoaded(std::string moduleName) {
-        using namespace openspace;
-
-        const std::vector<OpenSpaceModule*>& modules = global::moduleEngine->modules();
-        const auto it = std::find_if(
-            modules.cbegin(), modules.cend(),
-            [moduleName](OpenSpaceModule* module) {
-                return module->identifier() == moduleName;
-            }
-        );
-        return it != modules.cend();
-    }
-#include "moduleengine_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -186,7 +169,7 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
     return {
         "modules",
         {
-            codegen::lua::isLoaded
+            codegen::lua::IsLoaded
         }
     };
 }

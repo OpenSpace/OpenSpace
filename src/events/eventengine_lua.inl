@@ -25,54 +25,29 @@
 namespace {
 
 /**
- * Adds an asset to the current scene. The parameter passed into this function is the path
- * to the file that should be loaded.
+ * Registers an action to be executed whenever an event is encountered. If the optional
+ * third parameter is provided, it describes a filter that the event is being checked
+ * against and only if it passes the filter, the action is triggered.
  */
-[[codegen::luawrap]] void add(std::string assetName) {
-    openspace::global::openSpaceEngine->assetManager().add(assetName);
-}
-
-/**
- * Removes the asset with the specfied name from the scene. The parameter to this function
- * is the same that was originally used to load this asset, i.e. the path to the asset
- * file.
- */
-[[codegen::luawrap]] void remove(std::string assetName) {
-    openspace::global::openSpaceEngine->assetManager().remove(assetName);
-}
-
-/**
- * Returns true if the referenced asset already has been loaded. Otherwise false is
- * returned. The parameter to this function is the path of the asset that should be
- * tested.
- */
-[[codegen::luawrap]] bool isLoaded(std::string assetName) {
+[[codegen::luawrap]] void registerEventAction(std::string event, std::string action,
+                                    std::optional<ghoul::Dictionary> filter)
+{
     using namespace openspace;
-    std::vector<const Asset*> as =
-        global::openSpaceEngine->assetManager().allAssets();
-    for (const Asset* a : as) {
-        if (a->path() == assetName) {
-            return true;
-        }
-    }
-    return false;
+    events::Event::Type type = events::fromString(event);
+    global::eventEngine->registerEventAction(type, std::move(action), std::move(filter));
 }
 
 /**
- * Returns the paths to all loaded assets, loaded directly or indirectly, as a table
- * containing the paths to all loaded assets.
+ * Unregisters a specific combination of event, action, and potentially a filter.
  */
-[[codegen::luawrap]] std::vector<std::string> allAssets(std::string assetName) {
+[[codegen::luawrap]] void unregisterEventAction(std::string event, std::string action,
+                                                std::optional<ghoul::Dictionary> filter)
+{
     using namespace openspace;
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    std::vector<std::string> res;
-    res.reserve(as.size());
-    for (const Asset* a : as) {
-        res.push_back(a->path().string());
-    }
-    return res;
+    events::Event::Type type = events::fromString(event);
+    global::eventEngine->unregisterEventAction(type, action, filter);
 }
 
-#include "assetmanager_lua_codegen.cpp"
+#include "eventengine_lua_codegen.cpp"
 
 } // namespace

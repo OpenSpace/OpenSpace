@@ -22,20 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
+namespace {
 
-namespace openspace::luascriptfunctions {
-
-int loadFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadFile");
-    const std::string& fileName = ghoul::lua::value<std::string>(L);
+// Load timed scripts from a Lua script file that returns a list of scheduled scripts.
+[[codegen::luawrap]] void loadFile(std::string fileName) {
+    using namespace openspace;
 
     if (fileName.empty()) {
-        return ghoul::lua::luaError(L, "filepath string is empty");
+        throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
     ghoul::Dictionary scriptsDict;
-    scriptsDict.setValue("Scripts", ghoul::lua::loadDictionaryFromFile(fileName, L));
+    scriptsDict.setValue("Scripts", ghoul::lua::loadDictionaryFromFile(fileName));
     documentation::testSpecificationAndThrow(
         scripting::ScriptScheduler::Documentation(),
         scriptsDict,
@@ -52,57 +50,61 @@ int loadFile(lua_State* L) {
     }
 
     global::scriptScheduler->loadScripts(scripts);
-    return 0;
 }
 
-int loadScheduledScript(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::loadScheduledScript");
-    auto [time, forwardScript, backwardScript, universalScript, group] =
-        ghoul::lua::values<
-            std::string,
-            std::string,
-            std::optional<std::string>,
-            std::optional<std::string>,
-            std::optional<int>
-        >(L);
-
-    scripting::ScriptScheduler::ScheduledScript script;
-    script.time = Time::convertTime(time);
+/**
+ * Load a single scheduled script. The first argument is the time at which the scheduled
+ * script is triggered, the second argument is the script that is executed in the forward
+ * direction, the optional third argument is the script executed in the backwards
+ * direction, and the optional last argument is the universal script, executed in either
+ * direction.
+ */
+[[codegen::luawrap]] void loadScheduledScript(std::string time, std::string forwardScript,
+                                              std::optional<std::string> backwardScript,
+                                              std::optional<std::string> universalScript,
+                                              std::optional<int> group)
+{
+    openspace::scripting::ScriptScheduler::ScheduledScript script;
+    script.time = openspace::Time::convertTime(time);
     script.forwardScript = std::move(forwardScript);
     script.backwardScript = backwardScript.value_or(script.backwardScript);
     script.universalScript = universalScript.value_or(script.universalScript);
     script.group = group.value_or(script.group);
 
-    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
+    std::vector<openspace::scripting::ScriptScheduler::ScheduledScript> scripts;
     scripts.push_back(std::move(script));
-    global::scriptScheduler->loadScripts(scripts);
-    return 0;
+    openspace::global::scriptScheduler->loadScripts(scripts);
 }
 
-int setModeApplicationTime(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeApplicationTime");
-    global::scriptScheduler->setModeApplicationTime();
-    return 0;
+/**
+ * Sets the time reference for scheduled scripts to application time (seconds since
+ * OpenSpace application started).
+ */
+[[codegen::luawrap]] void setModeApplicationTime() {
+    openspace::global::scriptScheduler->setModeApplicationTime();
 }
 
-int setModeRecordedTime(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeRecordedTime");
-    global::scriptScheduler->setModeRecordedTime();
-    return 0;
+/**
+ * Sets the time reference for scheduled scripts to the time since the recording was
+ * started (the same relative time applies to playback).
+ */
+[[codegen::luawrap]] void setModeRecordedTime() {
+    openspace::global::scriptScheduler->setModeRecordedTime();
 }
 
-int setModeSimulationTime(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeSimulationTime");
-    global::scriptScheduler->setModeSimulationTime();
-    return 0;
+/**
+ * Sets the time reference for scheduled scripts to the simulated date & time (J2000 epoch
+ * seconds).
+ */
+[[codegen::luawrap]] void setModeSimulationTime() {
+    openspace::global::scriptScheduler->setModeSimulationTime();
 }
 
-int clear(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::clear");
-    std::optional<int> group = ghoul::lua::value<std::optional<int>>(L);
-
-    global::scriptScheduler->clearSchedule(group);
-    return 0;
+// Clears all scheduled scripts.
+[[codegen::luawrap]] void clear(std::optional<int> group) {
+    openspace::global::scriptScheduler->clearSchedule(group);
 }
 
-} // namespace openspace::luascriptfunction
+#include "scriptscheduler_lua_codegen.cpp"
+
+} // namespace

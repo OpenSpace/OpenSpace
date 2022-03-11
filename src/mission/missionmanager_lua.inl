@@ -22,57 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace {
-
-/**
- * Adds an asset to the current scene. The parameter passed into this function is the path
- * to the file that should be loaded.
- */
-[[codegen::luawrap]] void add(std::string assetName) {
-    openspace::global::openSpaceEngine->assetManager().add(assetName);
-}
-
-/**
- * Removes the asset with the specfied name from the scene. The parameter to this function
- * is the same that was originally used to load this asset, i.e. the path to the asset
- * file.
- */
-[[codegen::luawrap]] void remove(std::string assetName) {
-    openspace::global::openSpaceEngine->assetManager().remove(assetName);
-}
-
-/**
- * Returns true if the referenced asset already has been loaded. Otherwise false is
- * returned. The parameter to this function is the path of the asset that should be
- * tested.
- */
-[[codegen::luawrap]] bool isLoaded(std::string assetName) {
-    using namespace openspace;
-    std::vector<const Asset*> as =
-        global::openSpaceEngine->assetManager().allAssets();
-    for (const Asset* a : as) {
-        if (a->path() == assetName) {
-            return true;
-        }
+// Load mission phases from file.
+[[codegen::luawrap]] std::string loadMission(std::string missionFileName) {
+    if (missionFileName.empty()) {
+        throw ghoul::lua::LuaError("Filepath is empty");
     }
-    return false;
+
+    const std::string name =
+        openspace::global::missionManager->loadMission(missionFileName);
+    return name;
 }
 
-/**
- * Returns the paths to all loaded assets, loaded directly or indirectly, as a table
- * containing the paths to all loaded assets.
- */
-[[codegen::luawrap]] std::vector<std::string> allAssets(std::string assetName) {
-    using namespace openspace;
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    std::vector<std::string> res;
-    res.reserve(as.size());
-    for (const Asset* a : as) {
-        res.push_back(a->path().string());
+// Unloads a previously loaded mission.
+[[codegen::luawrap]] void unloadMission(std::string missionName) {
+    if (missionName.empty()) {
+        throw ghoul::lua::LuaError("Mission name is empty");
     }
-    return res;
+
+    if (!openspace::global::missionManager->hasMission(missionName)) {
+        throw ghoul::lua::LuaError("Mission was not previously loaded");
+    }
+
+    openspace::global::missionManager->unloadMission(missionName);
 }
 
-#include "assetmanager_lua_codegen.cpp"
+// Returns whether a mission with the provided name has been loaded.
+[[codegen::luawrap]] bool hasMission(std::string missionName) {
+    if (missionName.empty()) {
+        throw ghoul::lua::LuaError("Missing name is empty");
+    }
 
-} // namespace
+    bool hasMission = openspace::global::missionManager->hasMission(missionName);
+    return hasMission;
+}
+
+// Set the currnet mission.
+[[codegen::luawrap]] void setCurrentMission(std::string missionName) {
+    if (missionName.empty()) {
+        throw ghoul::lua::LuaError("Mission name is empty");
+    }
+    openspace::global::missionManager->setCurrentMission(missionName);
+}
+
+#include "missionmanager_lua_codegen.cpp"

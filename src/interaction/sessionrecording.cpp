@@ -58,6 +58,8 @@
 #include <windows.h>
 #endif // WIN32
 
+#include "sessionrecording_lua.inl"
+
 namespace {
     constexpr const char* _loggerCat = "SessionRecording";
 
@@ -76,170 +78,6 @@ namespace {
     };
 
     constexpr const bool UsingTimeKeyframes = false;
-
-    /**
-     * Starts a recording session. The string argument is the filename used for the file
-     * where the recorded keyframes are saved. The file data format is binary.
-     */
-    [[codegen::luawrap]] void startRecording(std::string recordFilePath) {
-        if (recordFilePath.empty()) {
-            throw ghoul::lua::LuaError("Filepath string is empty");
-        }
-        openspace::global::sessionRecording->setRecordDataFormat(
-            openspace::interaction::SessionRecording::DataMode::Binary
-        );
-        openspace::global::sessionRecording->startRecording(recordFilePath);
-    }
-
-    /**
-     * Starts a recording session. The string argument is the filename used for the file
-     * where the recorded keyframes are saved. The file data format is ASCII.
-     */
-    [[codegen::luawrap]] void startRecordingAscii(std::string recordFilePath) {
-        if (recordFilePath.empty()) {
-            throw ghoul::lua::LuaError("Filepath string is empty");
-        }
-        openspace::global::sessionRecording->setRecordDataFormat(
-            openspace::interaction::SessionRecording::DataMode::Ascii
-        );
-        openspace::global::sessionRecording->startRecording(recordFilePath);
-    }
-
-    // Stops a recording session.
-    [[codegen::luawrap]] void stopRecording() {
-        openspace::global::sessionRecording->stopRecording();
-    }
-
-    /**
-     * Starts a playback session with keyframe times that are relative to the time since
-     * the recording was started (the same relative time applies to the playback). When
-     * playback starts, the simulation time is automatically set to what it was at
-     * recording time. The string argument is the filename to pull playback keyframes from
-     * (the file path is relative to the RECORDINGS variable specified in the config
-     * file). If a second input value of true is given, then playback will continually
-     * loop until it is manually stopped.
-     */
-    [[codegen::luawrap]] void startPlaybackDefault(std::string file, bool loop = false) {
-        if (file.empty()) {
-            throw ghoul::lua::LuaError("Filepath string is empty");
-        }
-        openspace::global::sessionRecording->startPlayback(
-            file,
-            openspace::interaction::KeyframeTimeRef::Relative_recordedStart,
-            true,
-            loop
-        );
-    }
-
-    /**
-     * Starts a playback session with keyframe times that are relative to application time
-     * (seconds since OpenSpace application started). The string argument is the filename
-     * to pull playback keyframes from (the file path is relative to the RECORDINGS
-     * variable specified in the config file).
-     */
-    [[codegen::luawrap]] void startPlaybackApplicationTime(std::string file) {
-        if (file.empty()) {
-            throw ghoul::lua::LuaError("Filepath string is empty");
-        }
-        openspace::global::sessionRecording->startPlayback(
-            file,
-            openspace::interaction::KeyframeTimeRef::Relative_applicationStart,
-            false,
-            false
-        );
-    }
-    
-    /**
-     * Starts a playback session with keyframe times that are relative to the time since
-     * the recording was started (the same relative time applies to the playback). The
-     * string argument is the filename to pull playback keyframes from (the file path is
-     * relative to the RECORDINGS variable specified in the config file). If a second
-     * input value of true is given, then playback will continually loop until it is
-     * manually stopped.
-     */
-    [[codegen::luawrap]] void startPlaybackRecordedTime(std::string file,
-                                                        bool loop = false)
-    {
-        if (file.empty()) {
-            throw ghoul::lua::LuaError("Filepath string is empty");
-        }
-        openspace::global::sessionRecording->startPlayback(
-            file,
-            openspace::interaction::KeyframeTimeRef::Relative_recordedStart,
-            false,
-            loop
-        );
-    }
-    
-    /**
-     * Starts a playback session with keyframe times that are relative to the simulated
-     * date & time. The string argument is the filename to pull playback keyframes from
-     * (the file path is relative to the RECORDINGS variable specified in the config
-     * file).
-     */
-    [[codegen::luawrap]] void startPlaybackSimulationTime(std::string file)
-    {
-        if (file.empty()) {
-            throw ghoul::lua::LuaError("Filepath string is empty");
-        }
-        openspace::global::sessionRecording->startPlayback(
-            file,
-            openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000,
-            false,
-            false
-        );
-    }
-
-    // Stops a playback session before playback of all keyframes is complete.
-    [[codegen::luawrap]] void stopPlayback() {
-        openspace::global::sessionRecording->stopPlayback();
-    }
-
-    /**
-     * Enables that rendered frames should be saved during playback. The parameter
-     * determines the number of frames that are exported per second if this value is not
-     * provided, 60 frames per second will be exported.
-     */
-    [[codegen::luawrap]] void enableTakeScreenShotDuringPlayback(int fps = 60) {
-        openspace::global::sessionRecording->enableTakeScreenShotDuringPlayback(fps);
-    }
-
-    // Used to disable that renderings are saved during playback.
-    [[codegen::luawrap]] void disableTakeScreenShotDuringPlayback() {
-        openspace::global::sessionRecording->disableTakeScreenShotDuringPlayback();
-    }
-
-    /**
-     * Performs a conversion of the specified file to the most most recent file format,
-     * creating a copy of the recording file.
-     */
-    [[codegen::luawrap]] void fileFormatConversion(std::string convertFilePath) {
-        if (convertFilePath.empty()) {
-            throw ghoul::lua::LuaError("Filepath string must not be empty");
-        }
-        openspace::global::sessionRecording->convertFile(convertFilePath);
-    }
-
-    // Pauses or resumes the playback progression through keyframes.
-    [[codegen::luawrap]] void setPlaybackPause(bool pause) {
-        openspace::global::sessionRecording->setPlaybackPause(pause);
-    }
-
-    /**
-     * Toggles the pause function, i.e. temporarily setting the delta time to 0 and
-     * restoring it afterwards.
-     */
-    [[codegen::luawrap]] void togglePlaybackPause() {
-        bool isPlaybackPaused = openspace::global::sessionRecording->isPlaybackPaused();
-        openspace::global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
-    }
-
-    // Returns true if session recording is currently playing back a recording.
-    [[codegen::luawrap]] bool isPlayingBack() {
-        return openspace::global::sessionRecording->isPlayingBack();
-    }
-
-#include "sessionrecording_codegen.cpp"
 } // namespace
 
 namespace openspace::interaction {
@@ -2707,20 +2545,20 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
     return {
         "sessionRecording",
         {
-            codegen::lua::startRecording,
-            codegen::lua::startRecordingAscii,
-            codegen::lua::stopRecording,
-            codegen::lua::startPlaybackDefault,
-            codegen::lua::startPlaybackApplicationTime,
-            codegen::lua::startPlaybackRecordedTime,
-            codegen::lua::startPlaybackSimulationTime,
-            codegen::lua::stopPlayback,
-            codegen::lua::enableTakeScreenShotDuringPlayback,
-            codegen::lua::disableTakeScreenShotDuringPlayback,
-            codegen::lua::fileFormatConversion,
-            codegen::lua::setPlaybackPause,
-            codegen::lua::togglePlaybackPause,
-            codegen::lua::isPlayingBack
+            codegen::lua::StartRecording,
+            codegen::lua::StartRecordingAscii,
+            codegen::lua::StopRecording,
+            codegen::lua::StartPlaybackDefault,
+            codegen::lua::StartPlaybackApplicationTime,
+            codegen::lua::StartPlaybackRecordedTime,
+            codegen::lua::StartPlaybackSimulationTime,
+            codegen::lua::StopPlayback,
+            codegen::lua::EnableTakeScreenShotDuringPlayback,
+            codegen::lua::DisableTakeScreenShotDuringPlayback,
+            codegen::lua::FileFormatConversion,
+            codegen::lua::SetPlaybackPause,
+            codegen::lua::TogglePlaybackPause,
+            codegen::lua::IsPlayingBack
         }
     };
 }

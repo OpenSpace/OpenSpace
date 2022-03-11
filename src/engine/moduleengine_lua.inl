@@ -24,55 +24,20 @@
 
 namespace {
 
-/**
- * Adds an asset to the current scene. The parameter passed into this function is the path
- * to the file that should be loaded.
- */
-[[codegen::luawrap]] void add(std::string assetName) {
-    openspace::global::openSpaceEngine->assetManager().add(assetName);
-}
-
-/**
- * Removes the asset with the specfied name from the scene. The parameter to this function
- * is the same that was originally used to load this asset, i.e. the path to the asset
- * file.
- */
-[[codegen::luawrap]] void remove(std::string assetName) {
-    openspace::global::openSpaceEngine->assetManager().remove(assetName);
-}
-
-/**
- * Returns true if the referenced asset already has been loaded. Otherwise false is
- * returned. The parameter to this function is the path of the asset that should be
- * tested.
- */
-[[codegen::luawrap]] bool isLoaded(std::string assetName) {
+// Checks whether the passed OpenSpaceModule is loaded.
+[[codegen::luawrap]] bool isLoaded(std::string moduleName) {
     using namespace openspace;
-    std::vector<const Asset*> as =
-        global::openSpaceEngine->assetManager().allAssets();
-    for (const Asset* a : as) {
-        if (a->path() == assetName) {
-            return true;
+
+    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine->modules();
+    const auto it = std::find_if(
+        modules.cbegin(), modules.cend(),
+        [moduleName](OpenSpaceModule* module) {
+            return module->identifier() == moduleName;
         }
-    }
-    return false;
+    );
+    return it != modules.cend();
 }
 
-/**
- * Returns the paths to all loaded assets, loaded directly or indirectly, as a table
- * containing the paths to all loaded assets.
- */
-[[codegen::luawrap]] std::vector<std::string> allAssets(std::string assetName) {
-    using namespace openspace;
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    std::vector<std::string> res;
-    res.reserve(as.size());
-    for (const Asset* a : as) {
-        res.push_back(a->path().string());
-    }
-    return res;
-}
-
-#include "assetmanager_lua_codegen.cpp"
+#include "moduleengine_lua_codegen.cpp"
 
 } // namespace

@@ -34,79 +34,7 @@
 #include <ghoul/glm.h>
 #include <sstream>
 
-namespace {
-    /**
-     * Binds a key to Lua command to both execute locally and broadcast to all clients if
-     * this node is hosting a parallel connection.
-     */
-    [[codegen::luawrap]] void bindKey(std::string key, std::string action) {
-        using namespace openspace;
-
-        if (action.empty()) {
-            throw ghoul::lua::LuaError("Action must not be empty");
-        }
-        if (!global::actionManager->hasAction(action)) {
-            throw ghoul::lua::LuaError(fmt::format("Action '{}' does not exist", action));
-        }
-
-        openspace::KeyWithModifier iKey = openspace::stringToKey(key);
-        if (iKey.key == openspace::Key::Unknown) {
-            std::string error = fmt::format("Could not find key '{}'", key);
-            LERRORC("lua.bindKey", error);
-            throw ghoul::lua::LuaError(error);
-        }
-
-        global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(action));
-    }
-
-    /**
-     * Returns the strings of the script that are bound to the passed key and whether they
-     * were local or remote key binds.
-     */
-    [[codegen::luawrap]] std::vector<std::string> keyBindings(std::string key) {
-        using namespace openspace;
-
-        using K = KeyWithModifier;
-        using V = std::string;
-        const std::vector<std::pair<K, V>>& info = global::keybindingManager->keyBinding(
-            stringToKey(key)
-        );
-
-        std::vector<std::string> res;
-        res.reserve(info.size());
-        for (const std::pair<K, V>& it : info) {
-            res.push_back(it.second);
-        }
-        return res;
-    }
-
-    /**
-     * Unbinds the key or keys that have been provided. This function can be called with a
-     * single key or with an array of keys to remove all of the provided keys at once.
-     */
-    [[codegen::luawrap]] void clearKey(std::variant<std::string, ghoul::Dictionary> key) {
-        using namespace openspace;
-
-        if (std::holds_alternative<std::string>(key)) {
-            KeyWithModifier k = stringToKey(std::get<std::string>(key));
-            global::keybindingManager->removeKeyBinding(k);
-        }
-        else {
-            ghoul::Dictionary d = std::get<ghoul::Dictionary>(key);
-            for (size_t i = 1; i <= d.size(); ++i) {
-                const std::string& k = d.value<std::string>(std::to_string(i));
-                global::keybindingManager->removeKeyBinding(stringToKey(k));
-            }
-        }
-    }
-
-    // Clear all key bindings
-    [[codegen::luawrap]] void clearKeys() {
-        openspace::global::keybindingManager->resetKeyBindings();
-    }
-
-#include "keybindingmanager_codegen.cpp"
-} // namespace
+#include "keybindingmanager_lua.inl"
 
 namespace openspace::interaction {
 
@@ -215,10 +143,10 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
     return {
         "",
         {
-            codegen::lua::bindKey,
-            codegen::lua::keyBindings,
-            codegen::lua::clearKey,
-            codegen::lua::clearKeys
+            codegen::lua::BindKey,
+            codegen::lua::KeyBindings,
+            codegen::lua::ClearKey,
+            codegen::lua::ClearKeys
         }
     };
 }

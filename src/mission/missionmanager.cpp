@@ -31,51 +31,7 @@
 #include <ghoul/misc/assert.h>
 #include <filesystem>
 
-namespace {
-    // Load mission phases from file.
-    [[codegen::luawrap]] std::string loadMission(std::string missionFileName) {
-        if (missionFileName.empty()) {
-            throw ghoul::lua::LuaError("Filepath is empty");
-        }
-
-        const std::string name =
-            openspace::global::missionManager->loadMission(missionFileName);
-        return name;
-    }
-
-    // Unloads a previously loaded mission.
-    [[codegen::luawrap]] void unloadMission(std::string missionName) {
-        if (missionName.empty()) {
-            throw ghoul::lua::LuaError("Mission name is empty");
-        }
-
-        if (!openspace::global::missionManager->hasMission(missionName)) {
-            throw ghoul::lua::LuaError("Mission was not previously loaded");
-        }
-
-        openspace::global::missionManager->unloadMission(missionName);
-    }
-
-    // Returns whether a mission with the provided name has been loaded.
-    [[codegen::luawrap]] bool hasMission(std::string missionName) {
-        if (missionName.empty()) {
-            throw ghoul::lua::LuaError("Missing name is empty");
-        }
-
-        bool hasMission = openspace::global::missionManager->hasMission(missionName);
-        return hasMission;
-    }
-
-    // Set the currnet mission.
-    [[codegen::luawrap]] void setCurrentMission(std::string missionName) {
-        if (missionName.empty()) {
-            throw ghoul::lua::LuaError("Mission name is empty");
-        }
-        openspace::global::missionManager->setCurrentMission(missionName);
-    }
-
-#include "missionmanager_codegen.cpp"
-} // namespace
+#include "missionmanager_lua.inl"
 
 namespace openspace {
 
@@ -153,10 +109,10 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
     return {
         "",
         {
-            codegen::lua::loadMission,
-            codegen::lua::unloadMission,
-            codegen::lua::hasMission,
-            codegen::lua::setCurrentMission
+            codegen::lua::LoadMission,
+            codegen::lua::UnloadMission,
+            codegen::lua::HasMission,
+            codegen::lua::SetCurrentMission
         }
     };
 }

@@ -25,10 +25,13 @@
 #include <openspace/scene/assetmanager.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 
 #include "assetmanager_lua.inl"
 
@@ -99,6 +102,7 @@ namespace {
         // to populate the descriptions in the main user interface
         std::optional<std::vector<std::string>> identifiers;
     };
+
 #include "assetmanager_codegen.cpp"
 } // namespace
 
@@ -870,41 +874,10 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
     return {
         "asset",
         {
-            // Functions for adding/removing assets
-            {
-                "add",
-                &luascriptfunctions::asset::add,
-                { { "", "string" } },
-                "",
-                "Adds an asset to the current scene. The parameter passed into this "
-                "function is the path to the file that should be loaded"
-            },
-            {
-                "remove",
-                &luascriptfunctions::asset::remove,
-                { { "", "string" } },
-                "",
-                "Removes the asset with the specfied name from the scene. The parameter "
-                "to this function is the same that was originally used to load this "
-                "asset, i.e. the path to the asset file"
-            },
-            {
-                "isLoaded",
-                &luascriptfunctions::asset::isLoaded,
-                { { "", "string" } },
-                "",
-                "Returns true if the referenced asset already has been loaded. Otherwise "
-                "false is returned. The parameter to this function is the path of the "
-                "asset that should be tested"
-            },
-            {
-                "allAssets",
-                &luascriptfunctions::asset::allAssets,
-                { { "", "" } },
-                "",
-                "Returns the paths to all loaded assets, loaded directly or indirectly, "
-                "as a table containing the paths to all loaded assets."
-            }
+            codegen::lua::Add,
+            codegen::lua::Remove,
+            codegen::lua::IsLoaded,
+            codegen::lua::AllAssets
         }
     };
 }
