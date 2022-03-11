@@ -143,9 +143,14 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, int SAMPLES_MU, float Rg, float Rt,
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 vec3 transmittance(sampler2D tex, float r, float mu, float Rg, float Rt) {
+  float H2 = Rt*Rt - Rg*Rg;
+  float u_r = sqrt((r*r - Rg*Rg) / H2);
+
+  // Old version
+  // -----------
   // Given the position x (here the altitude r) and the view angle v
   // (here the cosine(v)= mu), we map this
-  float u_r = sqrt((r - Rg) / (Rt - Rg));
+  // float u_r = sqrt((r - Rg) / (Rt - Rg));
   // See Collienne to understand the mapping
   float u_mu = atan((mu + 0.15) / 1.15 * tan(1.5)) / 1.5;
   
@@ -222,7 +227,7 @@ vec3 miePhaseFunctionDHG(float mu, vec3 g1, vec3 g2, vec3 alpha) {
 
   vec3 f1 = ((vec3(1.0) - g1Sq) / d1Powered);
   vec3 f2 = ((vec3(1.0) - g2Sq) / d2Powered);
-  return (alpha * f1  + (vec3(1.0) - alpha) * f2) * 0.25 / M_PI;
+  return (alpha * f1 + (vec3(1.0) - alpha) * f2) * 0.25 / M_PI;
 }
 
 // Calculates Mie phase function given the scattering cosine angle mu
@@ -338,24 +343,19 @@ vec3 scatteringCoefficientMie(bool advancedModeEnabled, vec3 lambda, float junge
   }
 }
 
-vec3 mieExtinctionEfficiency(bool advancedModeEnabled, float mean_radius_particle_mie,
+vec3 mieExtinctionEfficiency(float mean_radius_particle_mie,
                              vec3 n_real_mie, vec3 lambda, vec3 n_complex_mie,
                              vec3 betaMieExtinction)
 {
-  if (advancedModeEnabled) {
-    vec3 rho = 4.0 * M_PI * mean_radius_particle_mie * (n_real_mie - vec3(1.0)) / lambda;
-    vec3 tanBeta = n_complex_mie / (n_real_mie - vec3(1.0));
-    vec3 beta = atan(tanBeta);
-    vec3 expRhoTanBeta = exp(-rho * tanBeta);
-    vec3 cosBetaOverRho = cos(beta) / rho;
-    vec3 cosBetaOverRho2 = cosBetaOverRho * cosBetaOverRho;
-    return 2.0 - 4.0 * expRhoTanBeta * cosBetaOverRho * sin(rho - beta)
-          - 4.0 * expRhoTanBeta * cosBetaOverRho2 * cos(rho - 2.0 * beta)
-          + 4.0 * cosBetaOverRho2 * cos(2.0 * beta);
-  }
-  else {
-    return betaMieExtinction;
-  }
+  vec3 rho = 4.0 * M_PI * mean_radius_particle_mie * (n_real_mie - vec3(1.0)) / lambda;
+  vec3 tanBeta = n_complex_mie / (n_real_mie - vec3(1.0));
+  vec3 beta = atan(tanBeta);
+  vec3 expRhoTanBeta = exp(-rho * tanBeta);
+  vec3 cosBetaOverRho = cos(beta) / rho;
+  vec3 cosBetaOverRho2 = cosBetaOverRho * cosBetaOverRho;
+  return 2.0 - 4.0 * expRhoTanBeta * cosBetaOverRho * sin(rho - beta)
+        - 4.0 * expRhoTanBeta * cosBetaOverRho2 * cos(rho - 2.0 * beta)
+        + 4.0 * cosBetaOverRho2 * cos(2.0 * beta);
 }
 
 
@@ -366,8 +366,8 @@ vec3 extinctionCoefficientMie(bool advancedModeEnabled, float mean_radius_partic
                              vec3 betaMieExtinction, float N_mie)
 {
   if (advancedModeEnabled) {
-    vec3 mieExtEff = mieExtinctionEfficiency(advancedModeEnabled,
-      mean_radius_particle_mie, n_real_mie, lambda, n_complex_mie, betaMieExtinction);
+    vec3 mieExtEff = mieExtinctionEfficiency(mean_radius_particle_mie,
+      n_real_mie, lambda, n_complex_mie, betaMieExtinction);
     return mieExtEff * N_mie * M_PI * (mean_radius_particle_mie * mean_radius_particle_mie);
   }
   else {
@@ -386,6 +386,8 @@ vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float 
                int samplesMu, float Rt, int samplesR, int samplesMuS,
                int samplesNu)
 {
+
+  /*
   float r2 = r * r;
   float Rg2 = Rg * Rg;
   float Rt2 = Rt * Rt;
@@ -408,4 +410,45 @@ vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float 
   vec4 v1 = texture(table, vec3((u_nu + u_mu_s) / float(samplesNu), u_mu, u_r));
   vec4 v2 = texture(table, vec3((u_nu + u_mu_s + 1.0) / float(samplesNu), u_mu, u_r));
   return mix(v1, v2, t);
+  */
+
+  float r2     = r * r;
+  //float H      = sqrt(Rt2 - Rg2);
+  float Rg2 = Rg * Rg;
+  float rho    = sqrt(r2 - Rg2);
+  float rmu    = r * mu;
+  float delta  = rmu * rmu - r2 + Rg2;
+  float invSamplesMu = 1.0 / float(samplesMu);
+  float invSamplesR = 1.0 / float(samplesR);
+  float invSamplesMuS = 1.0 / float(samplesMuS);
+  float invSamplesNu = 1.0 / float(samplesNu);
+  // vec4 cst     = rmu < 0.0f && delta > 0.0f ?
+  //   vec4(1.0f, 0.0f, 0.0f, 0.5f - 0.5f / float(SAMPLES_MU)) :
+  //   vec4(-1.0f, H * H, H, 0.5f + 0.5f / float(SAMPLES_MU));
+
+  float Rt2 = Rt * Rt;
+  float H = sqrt(Rt2 - Rg2);
+  float H2 = Rt2 - Rg2;
+
+  vec4 cst     = rmu < 0.0 && delta > 0.0 ?
+    vec4(1.0, 0.0, 0.0, 0.5 - 0.5 * invSamplesMu) :
+    vec4(-1.0, H2, H, 0.5 + 0.5 * invSamplesMu);
+
+  //float u_r    = 0.5f / float(SAMPLES_R) + rho / H * (1.0f - 1.0f / float(SAMPLES_R));
+  float u_r    = 0.5f * invSamplesR + rho / H * (1.0 - invSamplesR);
+  //float u_mu   = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5f - 1.0f / float(SAMPLES_MU));
+  float u_mu   = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - invSamplesMu);
+  // float u_mu_s = 0.5f / float(SAMPLES_MU_S) +
+  //   (atan(max(muSun, -0.1975) * tan(1.26f * 1.1f)) / 1.1f + (1.0f - 0.26f)) * 0.5f * (1.0f - 1.0f / float(SAMPLES_MU_S));
+  float u_mu_s = 0.5 * invSamplesMuS +
+    (atan(max(muSun, -0.1975) * tan(1.386)) * 0.9090909090909090 + (0.74)) * 0.5 * (1.0 - invSamplesMuS);
+  float lerp = (nu + 1.0) / 2.0 * (float(samplesNu) - 1.0);
+  float u_nu = floor(lerp);
+  lerp = lerp - u_nu;
+
+  // return texture(table, vec3((u_nu + u_mu_s) / float(SAMPLES_NU), u_mu, u_r)) * (1.0f - lerp) +
+  //   texture(table, vec3((u_nu + u_mu_s + 1.0f) / float(SAMPLES_NU), u_mu, u_r)) * lerp;
+  
+  return texture(table, vec3((u_nu + u_mu_s) * invSamplesNu, u_mu, u_r)) * (1.0 - lerp) +
+    texture(table, vec3((u_nu + u_mu_s + 1.0) * invSamplesNu, u_mu, u_r)) * lerp;
 }

@@ -442,9 +442,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _oxygenEnabled(OxygenAbsInfo, false)
     , _ozoneAbsorptionCrossSection(
         OzoneLayerAbsCrossSectionInfo,
-        glm::vec3(1.368209f / 1000.f, 3.314053f / 1000.f, 13.60173f / 1000.f),
-        glm::vec3(0.00001f),
-        glm::vec3(0.001f)
+        glm::vec3(1.368209f, 3.314053f, 13.60173f),
+        glm::vec3(0.01f),
+        glm::vec3(100.f)
     )
     , _oxygenHeightScale(OxygenHeightScaleInfo, 9.f, 0.1f, 20.f)
     , _oxygenAbsorptionCrossSection(
@@ -677,7 +677,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _mieScatteringCoeff.onChange(updateWithCalculation);
     addProperty(_mieScatteringCoeff);
 
-    _mieExtinctionCoeff = p.mie.coefficients.extinction;
+    //_mieExtinctionCoeff = p.mie.coefficients.extinction;
     _mieExtinctionCoeff.onChange(updateWithCalculation);
     addProperty(_mieExtinctionCoeff);
 
@@ -733,14 +733,16 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _useCornettePhaseFunction.onChange(updateWithCalculation);
     _advancedModeOwner.addProperty(_useCornettePhaseFunction);
 
-    _mieScatteringExtinctionPropCoeff =
-        _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
-        _mieScatteringCoeff.value().x / _mieExtinctionCoeff.value().x;
+    _mieScatteringExtinctionPropCoeff = _mieScatteringCoeff.value().x / _mieExtinctionCoeff.value().x;
+    //_mieScatteringExtinctionPropCoeff =
+    //    _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
+    //    _mieScatteringCoeff.value().x / _mieExtinctionCoeff.value().x;
+
     _mieScatteringExtinctionPropCoeff.onChange(updateWithCalculation);
     addProperty(_mieScatteringExtinctionPropCoeff);
 
     _mieExtinctionCoeff =
-        _mieScatteringCoeff.value() * _mieScatteringExtinctionPropCoeff.value();
+        _mieScatteringCoeff.value() / _mieScatteringExtinctionPropCoeff.value();
 
     if (p.debug.has_value()) {
         _textureScale = p.debug->preCalculatedTextureScale.value_or(_textureScale);

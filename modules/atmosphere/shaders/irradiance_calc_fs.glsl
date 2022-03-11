@@ -36,7 +36,12 @@ uniform sampler2D transmittanceTexture;
 void main() {
   // See Bruneton and Collienne to understand the mapping
   float muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(OTHER_TEXTURES.x) - 1.0) * 1.2;
-  float r = Rg + (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES.y)) * (Rt - Rg);
+  // float r = Rg + (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES.y)) * (Rt - Rg);
+
+  float u_r = (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES.y) - 1.0);
+  float H = sqrt(Rt * Rt - Rg * Rg);
+  float rho = H * u_r;
+  float r = sqrt(Rg * Rg + rho * rho);
 
   // We are calculating the Irradiance for L0, i.e., only the radiance coming from the Sun
   // direction is accounted for:

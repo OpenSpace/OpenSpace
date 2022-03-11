@@ -145,7 +145,7 @@ private:
         ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
 
 
-    UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission,mieG, sunRadiance,
+    UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, mieG, sunRadiance,
         SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU,
         advancedModeEnabled, inverseModelTransformMatrix, modelTransformMatrix,
         projectionToModelTransform, viewToWorldMatrix, camPosObj, sunDirectionObj,

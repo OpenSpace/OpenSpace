@@ -164,17 +164,17 @@ float calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 p
   }
 }
 
-float opticalDepth(float localH, float r, float mu, float d, float Rg) {
-  float invH = 1.0 / localH;
-  float a = sqrt(0.5 * invH * r);
-  vec2 a01 = a * vec2(mu, mu + d / r);
-  vec2 a01s = sign(a01);
-  vec2 a01sq = a01 * a01;
-  float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
-  vec2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) *
-    vec2(1.0, exp(-d * invH * (d / (2.0 * r) + mu)));
-  return sqrt(2.0 * M_PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
-}
+// float opticalDepth(float localH, float r, float mu, float d, float Rg) {
+//   float invH = 1.0 / localH;
+//   float a = sqrt(0.5 * invH * r);
+//   vec2 a01 = a * vec2(mu, mu + d / r);
+//   vec2 a01s = sign(a01);
+//   vec2 a01sq = a01 * a01;
+//   float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
+//   vec2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) *
+//     vec2(1.0, exp(-d * invH * (d / (2.0 * r) + mu)));
+//   return sqrt(2.0 * M_PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
+// }
 
 // vec3 analyticTransmittance(float r, float mu, float d) {
 //   vec3 ozone = vec3(0.0);

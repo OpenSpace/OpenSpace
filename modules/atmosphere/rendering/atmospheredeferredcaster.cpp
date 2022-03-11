@@ -329,18 +329,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
             _uniformCache.usePenndorfPhaseFunction,
             _advModeData.usePenndorfPhaseFunction
         );
-        prg.setUniform(
-            _uniformCache.g1,
-            _advModeData.g1
-        );
-        prg.setUniform(
-            _uniformCache.g2,
-            _advModeData.g2
-        );
-        prg.setUniform(
-            _uniformCache.alpha,
-            _advModeData.alpha
-        );
+        prg.setUniform(_uniformCache.g1, _advModeData.g1);
+        prg.setUniform(_uniformCache.g2, _advModeData.g2);
+        prg.setUniform(_uniformCache.alpha, _advModeData.alpha);
 
         // Object Space
         glm::dmat4 invModelMatrix = glm::inverse(_modelTransform);

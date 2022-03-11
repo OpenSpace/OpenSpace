@@ -58,7 +58,12 @@ const float stepTheta = M_PI / (2.0 * float(IRRADIANCE_INTEGRAL_SAMPLES));
 void main() {
   // See Bruneton and Collienne to understand the mapping.
   float muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(SKY.x) - 1.0) * 1.2;
-  float r = Rg + (gl_FragCoord.y - 0.5) / (float(SKY.y) - 1.0) * (Rt - Rg);
+  // float u_r = Rg + (gl_FragCoord.y - 0.5) / (float(SKY.y) - 1.0) * (Rt - Rg);
+  float u_r = (gl_FragCoord.y - 0.5) / (float(SKY.y) - 1.0);
+
+  float H = sqrt(Rt*Rt - Rg*Rg);
+  float rho = H * u_r;
+  float r = sqrt(Rg*Rg + rho*rho);
 
   // We know that muSun = cos(sigma) = s.z/||s||
   // But, ||s|| = 1, so s.z = muSun. Also,
