@@ -26,11 +26,10 @@ namespace {
 
 // Checks if the passed identifier corresponds to an action.
 [[codegen::luawrap]] bool hasAction(std::string identifier) {
-    using namespace openspace;
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
-    const bool res = global::actionManager->hasAction(identifier);
+    const bool res = openspace::global::actionManager->hasAction(identifier);
     return res;
 }
 
@@ -49,10 +48,6 @@ namespace {
         identifier = std::get<std::string>(action);
     }
     else {
-        ghoul_assert(
-            std::holds_alternative<ghoul::Dictionary>(action),
-            "Missing case"
-        );
         ghoul::Dictionary d = std::get<ghoul::Dictionary>(action);
         if (!d.hasValue<std::string>("Identifier")) {
             throw ghoul::lua::LuaError(
@@ -104,8 +99,7 @@ namespace {
     if (!action.hasValue<std::string>("Command")) {
         throw ghoul::lua::LuaError(
             fmt::format(
-                "Identifier '{}' does not provide a Lua command to execute",
-                identifier
+                "Identifier '{}' does not provide a Lua command to execute", identifier
             )
         );
     }
@@ -168,8 +162,8 @@ namespace {
     using namespace openspace;
 
     std::vector<ghoul::Dictionary> res;
-    const std::vector<interaction::Action>& acts = global::actionManager->actions();
-    for (const interaction::Action& action : acts) {
+    const std::vector<interaction::Action>& actions = global::actionManager->actions();
+    for (const interaction::Action& action : actions) {
         ghoul::Dictionary d;
         d.setValue("Identifier", action.identifier);
         d.setValue("Command", action.command);

@@ -29,13 +29,15 @@ namespace {
  * the recorded keyframes are saved. The file data format is binary.
  */
 [[codegen::luawrap]] void startRecording(std::string recordFilePath) {
+    using namespace openspace;
+
     if (recordFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    openspace::global::sessionRecording->setRecordDataFormat(
-        openspace::interaction::SessionRecording::DataMode::Binary
+    global::sessionRecording->setRecordDataFormat(
+        interaction::SessionRecording::DataMode::Binary
     );
-    openspace::global::sessionRecording->startRecording(recordFilePath);
+    global::sessionRecording->startRecording(recordFilePath);
 }
 
 /**
@@ -43,13 +45,15 @@ namespace {
  * the recorded keyframes are saved. The file data format is ASCII.
  */
 [[codegen::luawrap]] void startRecordingAscii(std::string recordFilePath) {
+    using namespace openspace;
+    
     if (recordFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    openspace::global::sessionRecording->setRecordDataFormat(
-        openspace::interaction::SessionRecording::DataMode::Ascii
+    global::sessionRecording->setRecordDataFormat(
+        interaction::SessionRecording::DataMode::Ascii
     );
-    openspace::global::sessionRecording->startRecording(recordFilePath);
+    global::sessionRecording->startRecording(recordFilePath);
 }
 
 // Stops a recording session.
@@ -67,12 +71,14 @@ namespace {
  * stopped.
  */
 [[codegen::luawrap]] void startPlaybackDefault(std::string file, bool loop = false) {
+    using namespace openspace;
+    
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    openspace::global::sessionRecording->startPlayback(
+    global::sessionRecording->startPlayback(
         file,
-        openspace::interaction::KeyframeTimeRef::Relative_recordedStart,
+        interaction::KeyframeTimeRef::Relative_recordedStart,
         true,
         loop
     );
@@ -85,12 +91,14 @@ namespace {
  * specified in the config file).
  */
 [[codegen::luawrap]] void startPlaybackApplicationTime(std::string file) {
+    using namespace openspace;
+    
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    openspace::global::sessionRecording->startPlayback(
+    global::sessionRecording->startPlayback(
         file,
-        openspace::interaction::KeyframeTimeRef::Relative_applicationStart,
+        interaction::KeyframeTimeRef::Relative_applicationStart,
         false,
         false
     );
@@ -104,12 +112,14 @@ namespace {
  * is given, then playback will continually loop until it is manually stopped.
  */
 [[codegen::luawrap]] void startPlaybackRecordedTime(std::string file, bool loop = false) {
+    using namespace openspace;
+    
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    openspace::global::sessionRecording->startPlayback(
+    global::sessionRecording->startPlayback(
         file,
-        openspace::interaction::KeyframeTimeRef::Relative_recordedStart,
+        interaction::KeyframeTimeRef::Relative_recordedStart,
         false,
         loop
     );
@@ -121,12 +131,14 @@ namespace {
  * path is relative to the RECORDINGS variable specified in the config file).
  */
 [[codegen::luawrap]] void startPlaybackSimulationTime(std::string file) {
+    using namespace openspace;
+    
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    openspace::global::sessionRecording->startPlayback(
+    global::sessionRecording->startPlayback(
         file,
-        openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000,
+        interaction::KeyframeTimeRef::Absolute_simTimeJ2000,
         false,
         false
     );
@@ -172,8 +184,10 @@ namespace {
  * it afterwards.
  */
 [[codegen::luawrap]] void togglePlaybackPause() {
-    bool isPlaybackPaused = openspace::global::sessionRecording->isPlaybackPaused();
-    openspace::global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
+    using namespace openspace;
+
+    bool isPlaybackPaused = global::sessionRecording->isPlaybackPaused();
+    global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
 }
 
 // Returns true if session recording is currently playing back a recording.

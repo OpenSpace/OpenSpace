@@ -22,47 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/coordinateconversion.h>
+namespace {
 
-namespace openspace::space::luascriptfunctions {
-
-int convertFromRaDec(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertFromRaDec");
+/**
+ * Returns the cartesian world position of a ra dec coordinate with distance. If the
+ * coordinate is given as strings the format should be ra 'XhYmZs' and dec 'XdYmZs'. If
+ * the coordinate is given as numbers the values should be in degrees.
+ */
+[[codegen::luawrap]] glm::dvec3 convertFromRaDec(
+                                         std::variant<double, std::string> rightAscension,
+                                            std::variant<double, std::string> declination,
+                                                                          double distance)
+{
+    using namespace openspace;
 
     glm::dvec2 degrees = glm::dvec2(0.0);
-    if (ghoul::lua::hasValue<std::string>(L, 1) &&
-        ghoul::lua::hasValue<std::string>(L, 2))
+    if (std::holds_alternative<double>(rightAscension) &&
+        std::holds_alternative<double>(declination))
     {
-        auto [ra, dec] = ghoul::lua::values<std::string, std::string>(L);
-        degrees = icrsToDecimalDegrees(ra, dec);
+        degrees = glm::dvec2(
+            std::get<double>(rightAscension),
+            std::get<double>(declination)
+        );
     }
-    else if (ghoul::lua::hasValue<double>(L, 1) && ghoul::lua::hasValue<double>(L, 2)) {
-        auto [x, y] = ghoul::lua::values<double, double>(L);
-        degrees.x = x;
-        degrees.y = y;
+    else if (std::holds_alternative<std::string>(rightAscension) &&
+             std::holds_alternative<std::string>(declination))
+    {
+        degrees = icrsToDecimalDegrees(
+            std::get<std::string>(rightAscension),
+            std::get<std::string>(declination)
+        );
     }
     else {
-        throw ghoul::lua::LuaRuntimeException(
+        throw ghoul::lua::LuaError(
             "Ra and Dec have to be of the same type, either String or Number"
         );
     }
 
-    double distance = ghoul::lua::value<double>(L);
     glm::dvec3 pos = icrsToGalacticCartesian(degrees.x, degrees.y, distance);
-    ghoul::lua::push(L, pos);
-    return 1;
+    return pos;
 }
 
-int convertToRaDec(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertToRaDec");
-    auto [x, y, z] = ghoul::lua::values<double, double, double>(L);
-
+/**
+ * Returns the formatted ra, dec strings and distance for a given cartesian world
+ * coordinate.
+ */
+[[codegen::luawrap]] std::tuple<std::string, std::string, double> convertToRaDec(double x,
+                                                                                 double y,
+                                                                                 double z)
+{
+    using namespace openspace;
     glm::dvec3 deg = galacticCartesianToIcrs(x, y, z);
     std::pair<std::string, std::string> raDecPair = decimalDegreesToIcrs(deg.x, deg.y);
-
-    // Ra, Dec, Distance
-    ghoul::lua::push(L, raDecPair.first, raDecPair.second, deg.z);
-    return 3;
+    return { raDecPair.first, raDecPair.second, deg.z };
 }
 
-}  // namespace openspace::space::luascriptfunctions
+#include "spacemodule_lua_codegen.cpp"
+
+} // namespace

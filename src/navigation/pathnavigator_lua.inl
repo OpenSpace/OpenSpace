@@ -33,20 +33,17 @@ namespace {
 
 // Continue playing a paused camera path.
 [[codegen::luawrap]] void continuePath() {
-    using namespace openspace;
-    global::navigationHandler->pathNavigator().continuePath();
+    openspace::global::navigationHandler->pathNavigator().continuePath();
 }
 
 // Pause a playing camera path.
 [[codegen::luawrap]] void pausePath() {
-    using namespace openspace;
-    global::navigationHandler->pathNavigator().pausePath();
+    openspace::global::navigationHandler->pathNavigator().pausePath();
 }
 
 // Stops a path, if one is being played.
 [[codegen::luawrap]] void stopPath() {
-    using namespace openspace;
-    global::navigationHandler->pathNavigator().abortPath();
+    openspace::global::navigationHandler->pathNavigator().abortPath();
 }
 
 /**
@@ -61,8 +58,8 @@ namespace {
 {
     using namespace openspace;
     if (useUpFromTargetOrDuration.has_value() &&
-        std::holds_alternative<double>(*useUpFromTargetOrDuration)
-        && duration.has_value())
+        std::holds_alternative<double>(*useUpFromTargetOrDuration) &&
+        duration.has_value())
     {
         throw ghoul::lua::LuaError("Duration cannot be specified twice");
     }
@@ -172,9 +169,7 @@ namespace {
     }
     catch (const documentation::SpecificationError& e) {
         LERRORC("flyToNavigationState", ghoul::to_string(e.result));
-        throw ghoul::lua::LuaError(
-            fmt::format("Unable to create a path: {}", e.what())
-        );
+        throw ghoul::lua::LuaError(fmt::format("Unable to create a path: {}", e.what()));
     }
 
     ghoul::Dictionary instruction;

@@ -65,7 +65,7 @@ namespace {
  * Passes the argument to FileSystem::absolutePath, which resolves occuring path tokens
  * and returns the absolute path.
  */
-[[codegen::luawrap]] std::filesystem::path absolutePath(std::string path) {
+[[codegen::luawrap("absPath")]] std::filesystem::path absolutePath(std::string path) {
     std::filesystem::path result = absPath(path);
     return result;
 }

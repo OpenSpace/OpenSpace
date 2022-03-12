@@ -33,8 +33,9 @@ namespace {
         );
     }
     catch (const ghoul::RuntimeError& e) {
-        LERRORC("addDashboardItem", e.what());
-        throw ghoul::lua::LuaError("Error adding dashboard item");
+        throw ghoul::lua::LuaError(fmt::format(
+            "Error adding dashboard item: {}", e.what()
+        ));
     }
 }
 
@@ -47,15 +48,9 @@ namespace {
         identifierStr = std::get<std::string>(identifier);
     }
     else {
-        ghoul_assert(
-            std::holds_alternative<ghoul::Dictionary>(identifier),
-            "Missing case"
-        );
         ghoul::Dictionary d = std::get<ghoul::Dictionary>(identifier);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError(
-                "Table passed to removeDashbordItem does not contain an Identifier"
-            );
+            throw ghoul::lua::LuaError("Passed table does not contain an Identifier");
         }
         identifierStr = d.value<std::string>("Identifier");
     }

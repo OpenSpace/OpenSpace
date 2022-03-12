@@ -48,8 +48,7 @@ namespace {
  */
 [[codegen::luawrap]] bool isLoaded(std::string assetName) {
     using namespace openspace;
-    std::vector<const Asset*> as =
-        global::openSpaceEngine->assetManager().allAssets();
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
     for (const Asset* a : as) {
         if (a->path() == assetName) {
             return true;

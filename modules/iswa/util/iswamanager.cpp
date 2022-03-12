@@ -35,6 +35,8 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
@@ -753,62 +755,14 @@ scripting::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
         {
-            {
-                "addCygnet",
-                &luascriptfunctions::iswa_addCygnet,
-                {},
-                "",
-                "Adds a IswaCygnet",
-            },
-            {
-                "addScreenSpaceCygnet",
-                &luascriptfunctions::iswa_addScreenSpaceCygnet,
-                {},
-                "",
-                "Adds a Screen Space Cygnets",
-            },
-            {
-                "addKameleonPlanes",
-                &luascriptfunctions::iswa_addKameleonPlanes,
-                {},
-                "",
-                "Adds KameleonPlanes from cdf file.",
-            },
-            {
-                "addCdfFiles",
-                &luascriptfunctions::iswa_addCdfFiles,
-                {},
-                "",
-                "Adds a cdf files to choose from.",
-            },
-            {
-                "removeCygnet",
-                &luascriptfunctions::iswa_removeCygnet,
-                {},
-                "",
-                "Remove a Cygnets",
-            },
-            {
-                "removeScreenSpaceCygnet",
-                &luascriptfunctions::iswa_removeScrenSpaceCygnet,
-                {},
-                "",
-                "Remove a Screen Space Cygnets",
-            },
-            {
-                "removeGroup",
-                &luascriptfunctions::iswa_removeGroup,
-                {},
-                "",
-                "Remove a group of Cygnets",
-            },
-            {
-                "setBaseUrl",
-                &luascriptfunctions::iswa_setBaseUrl,
-                {},
-                "",
-                "sets the base url",
-            }
+            codegen::lua::AddCygnet,
+            codegen::lua::AddScreenSpaceCygnet,
+            codegen::lua::RemoveCygnet,
+            codegen::lua::RemoveScreenSpaceCygnet,
+            codegen::lua::RemoveGroup,
+            codegen::lua::AddCdfFiles,
+            codegen::lua::AddKameleonPlanes,
+            codegen::lua::SetBaseUrl
         }
     };
 }

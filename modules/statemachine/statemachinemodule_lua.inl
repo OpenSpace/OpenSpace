@@ -22,90 +22,91 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/statemachine/statemachinemodule.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/misc.h>
-#include <optional>
+namespace {
 
-namespace openspace::luascriptfunctions {
-
-int createStateMachine(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::createStateMachine");
-    auto [states, transitions, startState] = ghoul::lua::values<
-        ghoul::Dictionary, ghoul::Dictionary, std::optional<std::string>
-    >(L);
-
+/**
+ * Creates a state machine from a list of states and transitions. See State and Transition
+ * documentation for details. The optional thrid argument is the identifier of the desired
+ * initial state. If left out, the first state in the list will be used.
+ */
+[[codegen::luawrap]] void createStateMachine(ghoul::Dictionary states,
+                                             ghoul::Dictionary transitions,
+                                             std::optional<std::string> startState)
+{
+    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->initializeStateMachine(
         std::move(states),
         std::move(transitions),
         std::move(startState)
     );
-    return 0;
 }
 
-
-int destroyStateMachine(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::destroyStateMachine");
-
+// Destroys the current state machine and deletes all the memory.
+[[codegen::luawrap]] void destroyStateMachine() {
+    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->deinitializeStateMachine();
-    return 0;
 }
 
-int goToState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::goToState");
-    std::string newState = ghoul::lua::value<std::string>(L);
-
+/**
+ * Triggers a transition from the current state to the state with the given identifier.
+ * Requires that the specified string corresponds to an existing state, and that a
+ * transition between the two states exists.
+ */
+[[codegen::luawrap]] void goToState(std::string newState) {
+    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->transitionTo(newState);
     LINFOC("StateMachine", "Transitioning to " + newState);
-    return 0;
 }
 
-int setInitialState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setStartState");
-    std::string startState = ghoul::lua::value<std::string>(L);
-
+/**
+ * Immediately sets the current state to the state with the given name, if it exists. This
+ * is done without doing a transition and completely ignores the previous state.
+ */
+[[codegen::luawrap]] void setInitialState(std::string startState) {
+    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->setInitialState(startState);
     LINFOC("StateMachine", "Initial state set to: " + startState);
-    return 0;
 }
 
-int currentState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::currentState");
-
+// Returns the string name of the current state that the statemachine is in.
+[[codegen::luawrap]] std::string currentState() {
+    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string currentState = module->currentState();
-    ghoul::lua::push(L, std::move(currentState));
-    return 1;
+    return currentState;
 }
 
-int possibleTransitions(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::possibleTransitions");
-
+/**
+ * Returns a list with the identifiers of all the states that can be transitioned to from
+ * the current state.
+ */
+[[codegen::luawrap]] std::vector<std::string> possibleTransitions() {
+    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::vector<std::string> transitions = module->possibleTransitions();
-    ghoul::lua::push(L, transitions);
-    return 1;
+    return transitions;
 }
 
-int canGoToState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::canGoToState");
-    std::string state = ghoul::lua::value<std::string>(L);
-
+/**
+ * Returns true if there is a defined transition between the current state and the given
+ * string name of a state, otherwise false.
+ */
+[[codegen::luawrap]] bool canGoToState(std::string state) {
+    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
-    ghoul::lua::push(L, module->canGoToState(state));
-    return 1;
+    bool canTransition = module->canGoToState(state);
+    return canTransition;
 }
 
-int printCurrentStateInfo(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::printCurrentStateInfo");
-
+/**
+ * Prints information about the current state and possible transitions to the log.
+ */
+[[codegen::luawrap]] void printCurrentStateInfo() {
+    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     if (module->hasStateMachine()) {
         std::string currentState = module->currentState();
@@ -119,24 +120,27 @@ int printCurrentStateInfo(lua_State* L) {
     else {
         LINFOC("StateMachine", "No state machine has been created");
     }
-
-    return 1;
 }
 
-int saveToDotFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::saveToDotFile");
-    auto [filename, directory] =
-        ghoul::lua::values<std::string, std::optional<std::string>>(L);
-
+/**
+ * Saves the current state machine to a .dot file as a directed graph. The resulting graph
+ * can be rendered using external tools such as Graphviz. The first parameter is the name
+ * of the file, and the second is an optional directory. If no directory is given, the
+ * file is saved to the temp folder.
+ */
+[[codegen::luawrap]] void saveToDotFile(std::string filename,
+                                        std::optional<std::string> directory)
+{
+    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
-
     if (directory.has_value()) {
         module->saveToFile(filename, *directory);
     }
     else {
         module->saveToFile(filename);
     }
-    return 0;
 }
 
-} //namespace openspace::luascriptfunctions
+#include "statemachinemodule_lua_codegen.cpp"
+
+} // namespace

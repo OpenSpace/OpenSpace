@@ -38,7 +38,7 @@ namespace {
  * the name from the table.
  */
 [[codegen::luawrap]] void removeScreenSpaceRenderable(
-    std::variant<std::string, ghoul::Dictionary> identifier)
+                                  std::variant<std::string, ghoul::Dictionary> identifier)
 {
     using namespace openspace;
     std::string identifierStr;
@@ -46,16 +46,9 @@ namespace {
         identifierStr = std::get<std::string>(identifier);
     }
     else {
-        ghoul_assert(
-            std::holds_alternative<ghoul::Dictionary>(identifier),
-            "Missing case"
-        );
         ghoul::Dictionary d = std::get<ghoul::Dictionary>(identifier);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError(
-                "Table passed to removeScreenSpaceRenderable does not contain an "
-                "Identifier"
-            );
+            throw ghoul::lua::LuaError("Passed table does not contain an Identifier");
         }
         identifierStr = d.value<std::string>("Identifier");
     }

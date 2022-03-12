@@ -28,22 +28,23 @@
         throw ghoul::lua::LuaError("Filepath is empty");
     }
 
-    const std::string name =
-        openspace::global::missionManager->loadMission(missionFileName);
+    std::string name = openspace::global::missionManager->loadMission(missionFileName);
     return name;
 }
 
 // Unloads a previously loaded mission.
 [[codegen::luawrap]] void unloadMission(std::string missionName) {
+    using namespace openspace;
+
     if (missionName.empty()) {
         throw ghoul::lua::LuaError("Mission name is empty");
     }
 
-    if (!openspace::global::missionManager->hasMission(missionName)) {
+    if (!global::missionManager->hasMission(missionName)) {
         throw ghoul::lua::LuaError("Mission was not previously loaded");
     }
 
-    openspace::global::missionManager->unloadMission(missionName);
+    global::missionManager->unloadMission(missionName);
 }
 
 // Returns whether a mission with the provided name has been loaded.

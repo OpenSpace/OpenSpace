@@ -117,7 +117,6 @@ namespace {
  */
 [[codegen::luawrap]] void togglePause() {
     using namespace openspace;
-
     global::timeManager->setPause(!global::timeManager->isPaused());
 }
 
@@ -155,11 +154,12 @@ namespace {
         global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
     }
     else {
-        const bool pause = !global::timeManager->isPaused();
-        global::timeManager->interpolatePause(pause,
-            pause ?
-            global::timeManager->defaultPauseInterpolationDuration() :
-            global::timeManager->defaultUnpauseInterpolationDuration()
+        const bool isPaused = !global::timeManager->isPaused();
+        global::timeManager->interpolatePause(
+            isPaused,
+            isPaused ?
+                global::timeManager->defaultPauseInterpolationDuration() :
+                global::timeManager->defaultUnpauseInterpolationDuration()
         );
     }
 }
@@ -184,8 +184,8 @@ namespace {
 
     double interp = interpolationDuration.value_or(
         isPaused ?
-        global::timeManager->defaultPauseInterpolationDuration() :
-        global::timeManager->defaultUnpauseInterpolationDuration()
+            global::timeManager->defaultPauseInterpolationDuration() :
+            global::timeManager->defaultUnpauseInterpolationDuration()
     );
 
     global::timeManager->interpolatePause(isPaused, interp);

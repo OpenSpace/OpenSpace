@@ -28,14 +28,12 @@ namespace {
 [[codegen::luawrap]] bool isLoaded(std::string moduleName) {
     using namespace openspace;
 
-    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine->modules();
-    const auto it = std::find_if(
-        modules.cbegin(), modules.cend(),
-        [moduleName](OpenSpaceModule* module) {
-            return module->identifier() == moduleName;
+    for (OpenSpaceModule* module : global::moduleEngine->modules()) {
+        if (module->identifier() == moduleName) {
+            return true;
         }
-    );
-    return it != modules.cend();
+    }
+    return false;
 }
 
 #include "moduleengine_lua_codegen.cpp"

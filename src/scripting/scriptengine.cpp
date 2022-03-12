@@ -712,5 +712,4 @@ void ScriptEngine::addBaseLibrary() {
     addLibrary(lib);
 }
 
-
 } // namespace openspace::scripting

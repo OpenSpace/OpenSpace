@@ -73,10 +73,8 @@ namespace {
         std::filesystem::copy(sourcePath, destPath);
         saveFilePath = global::configuration->profile;
     }
-    else {
-        if (saveFilePath->empty()) {
-            throw ghoul::lua::LuaError("Save filepath string is empty");
-        }
+    if (saveFilePath->empty()) {
+        throw ghoul::lua::LuaError("Save filepath string is empty");
     }
 
     const properties::PropertyOwner& root = *global::rootPropertyOwner;

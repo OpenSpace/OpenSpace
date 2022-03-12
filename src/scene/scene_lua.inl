@@ -285,8 +285,7 @@ int propertySetValue(lua_State* L) {
                 ghoul::lua::value<double>(L, 3, ghoul::lua::PopValue::No);
         }
         else {
-            optimization =
-                ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::No);
+            optimization = ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::No);
         }
 
         if (lua_gettop(L) >= 4) {
@@ -319,7 +318,7 @@ int propertySetValue(lua_State* L) {
         bool correctName = ghoul::isValidEasingFunctionName(easingMethodName);
         if (!correctName) {
             LWARNINGC(
-                "property_setValue",
+                "propertySetValue",
                 fmt::format("{} is not a valid easing method", easingMethodName)
             );
         }
@@ -377,7 +376,7 @@ int propertySetValue(lua_State* L) {
     }
     else {
         LERRORC(
-            "lua::property_setGroup",
+            "lua::propertySetValue",
             fmt::format(
                 "{}: Unexpected optimization '{}'",
                 ghoul::lua::errorLocation(L), optimization
@@ -401,7 +400,7 @@ int propertySetValueSingle(lua_State* L) {
 }
 
 int propertyHasProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_hasProperty");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::propertyHasProperty");
     const std::string uri = ghoul::lua::value<std::string>(L);
 
     properties::Property* prop = property(uri);
@@ -410,13 +409,13 @@ int propertyHasProperty(lua_State* L) {
 }
 
 int propertyGetValue(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getValue");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetValue");
     const std::string uri = ghoul::lua::value<std::string>(L);
 
     properties::Property* prop = property(uri);
     if (!prop) {
         LERRORC(
-            "property_getValue",
+            "propertyGetValue",
             fmt::format(
                 "{}: Property with URI '{}' was not found",
                 ghoul::lua::errorLocation(L), uri
@@ -436,7 +435,7 @@ int propertyGetValue(lua_State* L) {
  * Returns a list of property identifiers that match the passed regular expression
  */
 int propertyGetProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getProperty");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetProperty");
     std::string regex = ghoul::lua::value<std::string>(L);
 
     std::string groupName;
@@ -457,7 +456,7 @@ int propertyGetProperty(lua_State* L) {
         // If none then malformed regular expression
         if (propertyName.empty() && nodeName.empty()) {
             LERRORC(
-                "property_getProperty",
+                "propertyGetProperty",
                 fmt::format(
                     "Malformed regular expression: '{}': Empty both before and after '*'",
                     regex
@@ -469,7 +468,7 @@ int propertyGetProperty(lua_State* L) {
         // Currently do not support several wildcards
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
             LERRORC(
-                "property_getProperty",
+                "propertyGetProperty",
                 fmt::format(
                     "Malformed regular expression: '{}': "
                     "Currently only one '*' is supported", regex
@@ -606,10 +605,6 @@ namespace {
         identifier = std::get<std::string>(node);
     }
     else {
-        ghoul_assert(
-            std::holds_alternative<ghoul::Dictionary>(node),
-            "Missing case"
-        );
         ghoul::Dictionary d = std::get<ghoul::Dictionary>(node);
         if (!d.hasValue<std::string>("Identifier")) {
             throw ghoul::lua::LuaError(
@@ -683,8 +678,7 @@ namespace {
         if (propertyName.empty() && nodeName.empty()) {
             throw ghoul::lua::LuaError(
                 fmt::format(
-                    "Malformed regular expression: '{}': Empty both "
-                    "before and after '*'",
+                    "Malformed regular expression: '{}': Empty both before and after '*'",
                     name
                 )
             );
@@ -695,7 +689,8 @@ namespace {
             throw ghoul::lua::LuaError(
                 fmt::format(
                     "Malformed regular expression: '{}': "
-                    "Currently only one '*' is supported", name
+                    "Currently only one '*' is supported",
+                    name
                 )
             );
         }
@@ -723,9 +718,7 @@ namespace {
                 }
 
                 // Match node name
-                if (!nodeName.empty() &&
-                    identifier.find(nodeName) == std::string::npos)
-                {
+                if (!nodeName.empty() && identifier.find(nodeName) == std::string::npos) {
                     continue;
                 }
             }
@@ -875,9 +868,9 @@ namespace {
     using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(
-            fmt::format("Did not find a match for identifier: {} ", identifier)
-        );
+        throw ghoul::lua::LuaError(fmt::format(
+            "Did not find a match for identifier: {} ", identifier
+        ));
     }
     SceneGraphNode* newParentNode = sceneGraphNode(newParent);
     if (!newParentNode) {
@@ -898,9 +891,9 @@ namespace {
     using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(
-            fmt::format("Did not find a match for identifier: {} ", identifier)
-        );
+        throw ghoul::lua::LuaError(fmt::format(
+            "Did not find a match for identifier: {} ", identifier
+        ));
     }
 
     double bs = node->boundingSphere();
@@ -915,9 +908,9 @@ namespace {
     using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(
-            fmt::format("Did not find a match for identifier: {} ", identifier)
-        );
+        throw ghoul::lua::LuaError(fmt::format(
+            "Did not find a match for identifier: {} ", identifier
+        ));
     }
 
     double is = node->interactionSphere();

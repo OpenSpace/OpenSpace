@@ -29,19 +29,15 @@ namespace {
  * is reached
  */
 [[codegen::luawrap]] void toggleShutdown() {
-    using namespace openspace;
-
-    global::openSpaceEngine->toggleShutdownMode();
+    openspace::global::openSpaceEngine->toggleShutdownMode();
 }
 
 /**
  * Writes out documentation files
  */
 [[codegen::luawrap]] void writeDocumentation() {
-    using namespace openspace;
-
-    global::openSpaceEngine->writeStaticDocumentation();
-    global::openSpaceEngine->writeSceneDocumentation();
+    openspace::global::openSpaceEngine->writeStaticDocumentation();
+    openspace::global::openSpaceEngine->writeSceneDocumentation();
 }
 
 // Sets the folder used for storing screenshots or session recording frames
@@ -116,6 +112,10 @@ namespace {
     }
 }
 
+} // namespace
+
+// Closing the anoynmous namespace here to allow a unit test to access this function
+
 /**
  * Creates a 1 pixel image with a certain color in the cache folder and returns the path
  * to the file. If a cached file with the given name already exists, the path to that file
@@ -123,7 +123,7 @@ namespace {
  * is the RGB color, given as {r, g, b} with values between 0 and 1.
  */
 [[codegen::luawrap]] std::filesystem::path createSingleColorImage(std::string name,
-                                                                  ghoul::Dictionary d)
+                                                                  glm::dvec3 color)
 {
     using namespace openspace;
 
@@ -131,7 +131,7 @@ namespace {
     // Would like to clean this up with a more direct use of the Verifier in the future
     const std::string& key = "color";
     ghoul::Dictionary colorDict;
-    colorDict.setValue(key, d);
+    colorDict.setValue(key, color);
     documentation::TestResult res = documentation::Color3Verifier()(colorDict, key);
 
     if (!res.success) {
@@ -139,8 +139,6 @@ namespace {
             "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
         );
     }
-
-    const glm::dvec3 color = colorDict.value<glm::dvec3>(key);
 
     std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(
         name + ".ppm",
@@ -172,11 +170,13 @@ namespace {
         ppmFile << "P6" << std::endl;
         ppmFile << width << " " << height << std::endl;
         ppmFile << 255 << std::endl;
-        ppmFile.write(reinterpret_cast<char*>(&img[0]), size * 3);
+        ppmFile.write(reinterpret_cast<char*>(img.data()), size * 3);
         ppmFile.close();
         return fileName;
     }
 }
+
+namespace {
 
 /**
  * Returns whether the current OpenSpace instance is the master node of a cluster

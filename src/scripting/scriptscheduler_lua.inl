@@ -64,16 +64,18 @@ namespace {
                                               std::optional<std::string> universalScript,
                                               std::optional<int> group)
 {
-    openspace::scripting::ScriptScheduler::ScheduledScript script;
-    script.time = openspace::Time::convertTime(time);
+    using namespace openspace;
+
+    scripting::ScriptScheduler::ScheduledScript script;
+    script.time = Time::convertTime(time);
     script.forwardScript = std::move(forwardScript);
     script.backwardScript = backwardScript.value_or(script.backwardScript);
     script.universalScript = universalScript.value_or(script.universalScript);
     script.group = group.value_or(script.group);
 
-    std::vector<openspace::scripting::ScriptScheduler::ScheduledScript> scripts;
+    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
     scripts.push_back(std::move(script));
-    openspace::global::scriptScheduler->loadScripts(scripts);
+    global::scriptScheduler->loadScripts(scripts);
 }
 
 /**

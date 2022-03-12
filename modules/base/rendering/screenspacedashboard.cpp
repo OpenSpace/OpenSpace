@@ -136,20 +136,8 @@ scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
     return {
         "dashboard",
         {
-            {
-                "addDashboardItemToScreenSpace",
-                &luascriptfunctions::addDashboardItemToScreenSpace,
-                {},
-                "",
-                "Adds a new dashboard item to an existing SceenSpaceDashboard."
-            },
-            {
-                "removeDashboardItemsFromScreenSpace",
-                &luascriptfunctions::removeDashboardItemsFromScreenSpace,
-                {},
-                "",
-                "Removes all dashboard items from an existing ScreenSpaceDashboard."
-            }
+            codegen::lua::AddDashboardItemToScreenSpace,
+            codegen::lua::RemoveDashboardItemsFromScreenSpace
         }
     };
 }

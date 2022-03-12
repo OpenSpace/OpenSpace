@@ -106,7 +106,7 @@ namespace {
 
 /**
  * Save the current navigation state to a file with the path given by the first argument.
- * The optoinal second argument is the scene graph node to use as reference frame. By
+ * The optional second argument is the scene graph node to use as reference frame. By
  * default, the reference frame will picked based on whether the orbital navigator is
  * currently following the anchor node rotation. If it is, the anchor will be chosen as
  * reference frame. If not, the reference frame will be set to the scene graph root.
@@ -115,7 +115,6 @@ namespace {
     if (path.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-
     openspace::global::navigationHandler->saveNavigationState(path, frame);
 }
 
@@ -146,14 +145,13 @@ namespace {
                                            double sensitivity = 0.0)
 {
     using namespace openspace;
+    using JoystickCameraStates = interaction::JoystickCameraStates;
     global::navigationHandler->setJoystickAxisMapping(
         std::move(joystickName),
         axis,
-        ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
-        interaction::JoystickCameraStates::AxisInvert(shouldInvert),
-        ghoul::from_string<interaction::JoystickCameraStates::JoystickType>(
-            joystickType
-            ),
+        ghoul::from_string<JoystickCameraStates::AxisType>(axisType),
+        JoystickCameraStates::AxisInvert(shouldInvert),
+        ghoul::from_string<JoystickCameraStates::JoystickType>(joystickType),
         isSticky,
         sensitivity
     );
@@ -200,12 +198,12 @@ joystickAxis(std::string joystickName, int axis)
 {
     using namespace openspace;
 
-    using AI = interaction::JoystickCameraStates::AxisInformation;
-    AI info = global::navigationHandler->joystickAxisMapping(joystickName, axis);
+    interaction::JoystickCameraStates::AxisInformation info =
+        global::navigationHandler->joystickAxisMapping(joystickName, axis);
 
     return {
         ghoul::to_string(info.type),
-        static_cast<bool>(info.invert),
+        info.invert,
         ghoul::to_string(info.joystickType),
         info.isSticky,
         info.sensitivity,
@@ -231,8 +229,7 @@ joystickAxis(std::string joystickName, int axis)
  * Returns the deadzone for the desired axis of the provided joystick.
  */
 [[codegen::luawrap]] float joystickAxisDeadzone(std::string joystickName, int axis) {
-    using namespace openspace;
-    float deadzone = global::navigationHandler->joystickAxisDeadzone(
+    float deadzone = openspace::global::navigationHandler->joystickAxisDeadzone(
         joystickName,
         axis
     );
@@ -273,8 +270,7 @@ joystickAxis(std::string joystickName, int axis)
  * currently bound to the button identified by the second argument.
  */
 [[codegen::luawrap]] void clearJoystickButton(std::string joystickName, int button) {
-    using namespace openspace;
-    global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
+    openspace::global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
 }
 
 /**

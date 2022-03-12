@@ -40,9 +40,7 @@ namespace {
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
     if (iKey.key == openspace::Key::Unknown) {
-        std::string error = fmt::format("Could not find key '{}'", key);
-        LERRORC("lua.bindKey", error);
-        throw ghoul::lua::LuaError(error);
+        throw ghoul::lua::LuaError(fmt::format("Could not find key '{}'", key));
     }
 
     global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(action));
@@ -73,7 +71,9 @@ namespace {
  * Unbinds the key or keys that have been provided. This function can be called with a
  * single key or with an array of keys to remove all of the provided keys at once.
  */
-[[codegen::luawrap]] void clearKey(std::variant<std::string, ghoul::Dictionary> key) {
+[[codegen::luawrap]] void clearKey(
+                                  std::variant<std::string, std::vector<std::string>> key)
+{
     using namespace openspace;
 
     if (std::holds_alternative<std::string>(key)) {
@@ -81,9 +81,7 @@ namespace {
         global::keybindingManager->removeKeyBinding(k);
     }
     else {
-        ghoul::Dictionary d = std::get<ghoul::Dictionary>(key);
-        for (size_t i = 1; i <= d.size(); ++i) {
-            const std::string& k = d.value<std::string>(std::to_string(i));
+        for (const std::string& k : std::get<std::vector<std::string>>(key)) {
             global::keybindingManager->removeKeyBinding(stringToKey(k));
         }
     }
