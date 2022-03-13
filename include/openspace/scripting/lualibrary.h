@@ -71,24 +71,6 @@ struct LuaLibrary {
     /// A list of all libraries that are children for this library
     std::vector<LuaLibrary> subLibraries = std::vector<LuaLibrary>();
 
-    /// This struct contains information about a function or constant that is defined in
-    /// a Lua script
-    //struct Documentation {
-    //    /// The name of the function/variable
-    //    std::string name;
-    //    struct Argument {
-    //        /// The name of the arguments
-    //        std::string name;
-    //        /// The type of the argument
-    //        std::string type;
-    //        /// The default value if it exists
-    //        std::optional<std::string> defaultValue = std::nullopt;
-    //    };
-    //    /// The description of the parameters for a function
-    //    std::vector<Argument> arguments;
-    //    /// The description of the function/variable
-    //    std::string description;
-    //};
     /// The list of documentations will be populated automatically by parsing the Lua
     /// scripts
     std::vector<Function> documentations = std::vector<Function>();
