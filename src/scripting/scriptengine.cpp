@@ -24,6 +24,7 @@
 
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
@@ -46,6 +47,13 @@ namespace {
 
     constexpr const int TableOffset = -3; // top-first argument-second argument
 
+    struct [[codegen::Dictionary(Documentation)]] Parameters {
+        std::string name;
+        std::vector<std::string> arguments;
+        std::optional<std::string> returnValue [[codegen::key("Return")]];
+        std::optional<std::string> documentation;
+    };
+
     std::vector<std::string> luaFunctions(const openspace::scripting::LuaLibrary& library,
                                           std::string prefix)
     {
@@ -67,8 +75,8 @@ namespace {
             result.insert(result.end(), r.begin(), r.end());
         }
 
-        for (const LuaLibrary::Documentation& doc : library.documentations) {
-            result.push_back(total + doc.name);
+        for (const LuaLibrary::Function& function : library.documentations) {
+            result.push_back(total + function.name);
         }
 
         return result;
@@ -89,8 +97,22 @@ namespace {
         for (const LuaLibrary::Function& f : library.functions) {
             json << "{";
             json << fmt::format(replStr, "name", f.name);
-            // @TODO !
-            //json << fmt::format(replStr, "arguments", escapedJson(f.arguments));
+            json << "\"arguments\": [";
+            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+                json << "{";
+                json << fmt::format(replStr, "name", escapedJson(arg.name));
+                json << fmt::format(replStr, "type", escapedJson(arg.type));
+                json << fmt::format(
+                    replStr2, "name", escapedJson(arg.defaultValue.value_or(""))
+                );
+                json << "}";
+
+                if (&arg != &f.arguments.back()) {
+                    json << ",";
+                }
+            }
+            json << "],";
+            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
             json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
             if (&f != &library.functions.back() || !library.documentations.empty()) {
@@ -98,13 +120,29 @@ namespace {
             }
         }
 
-        for (const LuaLibrary::Documentation& doc : library.documentations) {
+
+        for (const LuaLibrary::Function& f : library.documentations) {
             json << "{";
-            json << fmt::format(replStr, "name", doc.name);
-            json << fmt::format(replStr, "arguments", escapedJson(doc.parameter));
-            json << fmt::format(replStr2, "help", escapedJson(doc.description));
+            json << fmt::format(replStr, "name", f.name);
+            json << "\"arguments\": [";
+            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+                json << "{";
+                json << fmt::format(replStr, "name", escapedJson(arg.name));
+                json << fmt::format(replStr, "type", escapedJson(arg.type));
+                json << fmt::format(
+                    replStr2, "name", escapedJson(arg.defaultValue.value_or(""))
+                );
+                json << "}";
+
+                if (&arg != &f.arguments.back()) {
+                    json << ",";
+                }
+            }
+            json << "],";
+            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
+            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
-            if (&doc != &library.documentations.back()) {
+            if (&f != &library.documentations.back()) {
                 json << ",";
             }
         }
@@ -120,6 +158,8 @@ namespace {
         }
         json << "]}";
     }
+
+#include "scriptengine_codegen.cpp"
 } // namespace
 
 namespace openspace::scripting {
@@ -389,22 +429,33 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         else {
             lua_pushnil(state);
             while (lua_next(state, -2)) {
-                ghoul::lua::push(state, "Name");
-                lua_gettable(state, -2);
-                const std::string name = lua_tostring(state, -1);
+                ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
+                try {
+                    const Parameters p = codegen::bake<Parameters>(d);
+
+                    LuaLibrary::Function func;
+                    func.name = p.name;
+                    for (size_t i = 0; i < p.arguments.size(); i += 1) {
+                        LuaLibrary::Function::Argument arg;
+                        arg.name = std::to_string(i);
+                        arg.type = p.arguments[i];
+                        func.arguments.push_back(arg);
+                    }
+                    func.returnType = p.returnValue.value_or(func.returnType);
+                    func.helpText = p.documentation.value_or(func.helpText);
+                    library.documentations.push_back(std::move(func));
+                }
+                catch (const documentation::SpecificationError& e) {
+                    for (const documentation::TestResult::Offense& o : e.result.offenses)
+                    {
+                        LERRORC(o.offender, ghoul::to_string(o.reason));
+                    }
+                    for (const documentation::TestResult::Warning& w : e.result.warnings)
+                    {
+                        LWARNINGC(w.offender, ghoul::to_string(w.reason));
+                    }
+                }
                 lua_pop(state, 1);
-
-                ghoul::lua::push(state, "Arguments");
-                lua_gettable(state, -2);
-                const std::string arguments = lua_tostring(state, -1);
-                lua_pop(state, 1);
-
-                ghoul::lua::push(state, "Documentation");
-                lua_gettable(state, -2);
-                const std::string documentation = lua_tostring(state, -1);
-                lua_pop(state, 2);
-
-                library.documentations.push_back({ name, arguments, documentation });
             }
         }
         lua_pop(state, 1);
