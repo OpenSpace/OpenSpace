@@ -103,7 +103,7 @@ namespace {
                 json << fmt::format(replStr, "name", escapedJson(arg.name));
                 json << fmt::format(replStr, "type", escapedJson(arg.type));
                 json << fmt::format(
-                    replStr2, "name", escapedJson(arg.defaultValue.value_or(""))
+                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
                 );
                 json << "}";
 
@@ -130,7 +130,7 @@ namespace {
                 json << fmt::format(replStr, "name", escapedJson(arg.name));
                 json << fmt::format(replStr, "type", escapedJson(arg.type));
                 json << fmt::format(
-                    replStr2, "name", escapedJson(arg.defaultValue.value_or(""))
+                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
                 );
                 json << "}";
 

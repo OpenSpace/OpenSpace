@@ -14,7 +14,12 @@
             <a href="#{{urlify name}}" name="{{urlify name}}">
               
               <span class="documentation-key">{{name}}(</span>
-              <span class="documentation-type">{{arguments}}</span>
+              <span class="documentation-type">
+                (
+                  {{#each arguments}}
+                    {{name}}({{type}})
+                  {{/each}}
+                ) -> {{returnType}}
               <span class="documentation-key">)</span>
             </a>
           </p>
