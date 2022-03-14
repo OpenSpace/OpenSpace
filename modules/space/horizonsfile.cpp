@@ -38,7 +38,7 @@ namespace {
     constexpr const char* ApiSource = "NASA/JPL Horizons API";
     constexpr const char* CurrentVersion = "1.1";
 
-    // Values needed to construct the url for the http request to JPL Horizons interface
+    // Values needed to construct the url for the http request to JPL Horizons API
     constexpr const char* VectorUrl = "https://ssd.jpl.nasa.gov/api/horizons.api?format="
         "json&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'&VEC_TABLE='1'&VEC_LABELS='NO'&"
         "CSV_FORMAT='NO'";
@@ -50,7 +50,22 @@ namespace {
     constexpr const char* StartTime = "&START_TIME=";
     constexpr const char* StopTime = "&STOP_TIME=";
     constexpr const char* StepSize = "&STEP_SIZE=";
+
+    // URL encoding
     constexpr const char* WhiteSpace = "%20";
+    constexpr const char* HashTag = "%23";
+    constexpr const char* DollarSign = "%24";
+    constexpr const char* Ampersand = "%26";
+    constexpr const char* PlusSign = "%2B";
+    constexpr const char* Comma = "%2C";
+    constexpr const char* Slash = "%2F";
+    constexpr const char* Colon = "%3A";
+    constexpr const char* Semicolon = "%3B";
+    constexpr const char* EqualsSign = "%3D";
+    constexpr const char* QuestionMark = "%3F";
+    constexpr const char* AtSymbol = "%40";
+    constexpr const char* LeftSquareBracket = "%5B";
+    constexpr const char* RightSquareBracket = "%5D";
 
     std::string replaceAll(const std::string& string, const std::string& from,
                            const std::string& to)
@@ -68,6 +83,25 @@ namespace {
         }
         return result;
     }
+
+    std::string urlEncode(const std::string& string) {
+        std::string result = replaceAll(string, " ", WhiteSpace);
+        result = replaceAll(result, "#", HashTag);
+        result = replaceAll(result, "$", DollarSign);
+        result = replaceAll(result, "&", Ampersand);
+        result = replaceAll(result, "+", PlusSign);
+        result = replaceAll(result, ",", Comma);
+        result = replaceAll(result, "/", Slash);
+        result = replaceAll(result, ":", Colon);
+        result = replaceAll(result, ";", Semicolon);
+        result = replaceAll(result, "=", EqualsSign);
+        result = replaceAll(result, "?", QuestionMark);
+        result = replaceAll(result, "@", AtSymbol);
+        result = replaceAll(result, "[", LeftSquareBracket);
+        result = replaceAll(result, "]", RightSquareBracket);
+        return result;
+    }
+
 } // namespace
 
 namespace openspace {
@@ -119,22 +153,22 @@ std::string HorizonsFile::constructUrl(HorizonsFile::Type type, const std::strin
 
     url.append(Command);
     url.append("'");
-    url.append(replaceAll(target, " ", WhiteSpace));
+    url.append(urlEncode(target));
     url.append("'");
 
     url.append(Center);
     url.append("'");
-    url.append(replaceAll(observer, " ", WhiteSpace));
+    url.append(urlEncode(observer));
     url.append("'");
 
     url.append(StartTime);
     url.append("'");
-    url.append(replaceAll(startTime, " ", WhiteSpace));
+    url.append(urlEncode(startTime));
     url.append("'");
 
     url.append(StopTime);
     url.append("'");
-    url.append(replaceAll(stopTime, " ", WhiteSpace));
+    url.append(urlEncode(stopTime));
     url.append("'");
 
     url.append(StepSize);
@@ -776,7 +810,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
     if (fileStream.good()) {
         std::stringstream str(line);
 
-        // Read and save each word.
+        // Read and save each word
         std::vector<std::string> words;
         std::string word;
         while (str >> word)

@@ -788,7 +788,7 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
 
         switch (code) {
             case int(HorizonsDialog::HTTPCodes::BadRequest):
-                message = "The request contained invalid keywords and/or content or used "
+                message = "The request contained invalid keywords and/or used "
                 "a method other than GET or POST";
                 break;
             case int(HorizonsDialog::HTTPCodes::MethodNotAllowed):
