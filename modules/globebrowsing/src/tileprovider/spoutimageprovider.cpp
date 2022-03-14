@@ -186,6 +186,7 @@ TileDepthTransform SpoutImageProvider::depthTransform() {
 }
 
 void SpoutImageProvider::update() {
+#ifdef OPENSPACE_HAS_SPOUT
     if (!spoutUpdate) {
         return;
     }
@@ -198,10 +199,13 @@ void SpoutImageProvider::update() {
     }
     
     spoutReceiver->updateReceiver();
+#endif // OPENSPACE_HAS_SPOUT
 }
 
 void SpoutImageProvider::reset() {
+#ifdef OPENSPACE_HAS_SPOUT
     spoutReceiver->updateReceiver();
+#endif // OPENSPACE_HAS_SPOUT
 }
 
 int SpoutImageProvider::minLevel() {
