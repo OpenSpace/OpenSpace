@@ -31,15 +31,17 @@
 namespace openspace {
 
 class ScreenSpaceSkyBrowser;
-class ScreenSpaceSkyTarget;
+class RenderableSkyTarget;
 class ScreenSpaceRenderable;
 class ImageData;
+class SceneGraphNode;
 
 class TargetBrowserPair {
 public:
     constexpr static const float FadeThreshold = 0.01f;
+    constexpr static const float DeltaTimeThreshold = 0.03f;
 
-    TargetBrowserPair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target);
+    TargetBrowserPair(SceneGraphNode* target, ScreenSpaceSkyBrowser* browser);
     TargetBrowserPair& operator=(TargetBrowserPair other);
 
     // Target & Browser
@@ -54,8 +56,6 @@ public:
     // Mouse interaction
     bool checkMouseIntersection(const glm::vec2& mousePosition);
     glm::vec2 selectedScreenSpacePosition() const;
-    bool isBrowserSelected() const;
-    bool isTargetSelected() const;
     void fineTuneTarget(const glm::vec2& start, const glm::vec2& translation);
     void translateSelected(const glm::vec2& start, const glm::vec2& translation);
     void synchronizeAim();
@@ -68,12 +68,12 @@ public:
     void centerTargetOnScreen();
     void lock();
     void unlock();
+    void incrementallyAnimateTarget(float deltaTime);
 
     bool hasFinishedFading(float goalState) const;
     bool isFacingCamera() const;
     bool isUsingRadiusAzimuthElevation() const;
     bool isEnabled() const;
-    bool isLocked() const;
 
     void setEnabled(bool enable);
     void setIsSyncedWithWwt(bool isSynced);
@@ -82,7 +82,6 @@ public:
     void setBorderColor(const glm::ivec3& color);
     void setScreenSpaceSize(const glm::vec2& dimensions);
     void setVerticalFovWithScroll(float scroll);
-    void setSelectedWithId(const std::string& id);
 
     float verticalFov() const;
     glm::ivec3 borderColor() const;
@@ -90,11 +89,12 @@ public:
     glm::dvec3 targetDirectionGalactic() const;
     std::string browserGuiName() const;
     std::string browserId() const;
-    std::string targetId() const;
+    std::string targetRenderableId() const;
+    std::string targetNodeId() const;
     std::string selectedId();
     glm::vec2 size() const;
     
-    ScreenSpaceSkyTarget* target() const;
+    RenderableSkyTarget* target() const;
     ScreenSpaceSkyBrowser* browser() const;
     const std::deque<int>& selectedImages() const;
     
@@ -115,16 +115,22 @@ private:
     bool isTargetFadeFinished(float goalState) const;
     bool isBrowserFadeFinished(float goalState) const;
 
+    void aimTargetGalactic(glm::dvec3 position);
+
+    void setFovTarget(double fov);
+
     // Selection
-    ScreenSpaceRenderable* _selected = nullptr;
-    bool _isSelectedBrowser = false;
+    ScreenSpaceSkyBrowser* _selected = nullptr;
     
     // Target and browser
-    ScreenSpaceSkyTarget* _target = nullptr;
+    RenderableSkyTarget* _targetRenderable = nullptr;
     ScreenSpaceSkyBrowser* _browser = nullptr;
-
-    // Shared properties between the target and the browser
-    float _verticalFov = 70.f;
+    SceneGraphNode* _targetNode = nullptr;
+    glm::dvec3 _animationStart = glm::dvec3(0);
+    glm::dvec3 _animationEnd = glm::dvec3(0);
+    bool _shouldLockAfterAnimation = false;
+    bool _targetIsAnimated = false;
+    
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     glm::ivec3 _borderColor = glm::ivec3(255);
     glm::vec2 _dimensions = glm::vec2(0.5f);

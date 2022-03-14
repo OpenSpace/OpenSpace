@@ -21,19 +21,32 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-#version __CONTEXT__
+ #version __CONTEXT__
 
-out vec2 vs_st;
-out vec4 vs_position;
+ #include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform mat4 modelTransform;
-uniform mat4 viewProj;
+ layout(location = 0) in vec4 in_position;
+ layout(location = 1) in vec2 in_st;
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
+ out vec4 vs_gPosition;
+ out vec3 vs_gNormal;
+ out float vs_screenSpaceDepth;
+ out vec2 vs_st;
 
-void main(){
-    vs_st = in_st;
-    vs_position = viewProj * modelTransform * in_position;
-    gl_Position = vec4(vs_position);
-}
+ uniform mat4 modelViewProjectionTransform;
+ uniform mat4 modelViewTransform;
+
+ void main() {
+     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+     vec4 positionClipSpace = modelViewProjectionTransform * position;
+     vec4 positionScreenSpace = z_normalization(positionClipSpace);
+
+     gl_Position = positionScreenSpace;
+
+     // G-Buffer
+     vs_gNormal = vec3(0.0);
+     vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;
+
+     vs_st = in_st;
+     vs_screenSpaceDepth = positionScreenSpace.w;
+ }

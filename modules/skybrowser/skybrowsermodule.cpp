@@ -26,7 +26,7 @@
 
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
-#include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <modules/skybrowser/include/RenderableSkyTarget.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <openspace/scene/scene.h>
@@ -151,19 +151,6 @@ namespace openspace {
                 "",
                 "Returns a table of data regarding the current view and the sky browsers "
                 "and targets."
-            },
-            {
-                "lockTarget",
-                &skybrowser::luascriptfunctions::lockTarget,
-                "string",
-                "Takes an identifier to a sky browser or target. Locks the target " 
-                "to its current position."
-            },
-            {
-                "unlockTarget",
-                &skybrowser::luascriptfunctions::unlockTarget,
-                "string",
-                "Takes an identifier to a sky browser or target. Unlocks the target."
             },
             {
                 "createTargetBrowserPair",
@@ -396,12 +383,18 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
 
-    // Register ScreenSpaceSkyTarget
-    fScreenSpaceRenderable->registerClass<ScreenSpaceSkyTarget>("ScreenSpaceSkyTarget");
 
     // Register ScreenSpaceSkyBrowser
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 
+    // Register ScreenSpaceRenderable
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "Renderable factory was not created");
+
+    // Register ScreenSpaceSkyTarget
+    fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
+    
     // Create data handler dynamically to avoid the linking error that
     // came up when including the include file in the module header file
     _dataHandler = std::make_unique<WwtDataHandler>();
@@ -444,16 +437,18 @@ void SkyBrowserModule::setSelectedObject() {
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId, const std::string& browserId) {
-    ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(
-        global::renderEngine->screenSpaceRenderable(targetId)
-    );
+    if (!global::renderEngine->scene()) { 
+        return; 
+    }
+
+    SceneGraphNode* target = global::renderEngine->scene()->sceneGraphNode(targetId);
     ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(
         global::renderEngine->screenSpaceRenderable(browserId)
     );
     
     // Ensure pair has both target and browser
     if (browser && target) {
-        _targetsBrowsers.push_back(std::make_unique<TargetBrowserPair>(browser, target));
+        _targetsBrowsers.push_back(std::make_unique<TargetBrowserPair>(target, browser));
     }
 }
 
@@ -533,20 +528,13 @@ void SkyBrowserModule::handleMouseClick(const MouseButton& button) {
 
         // If it's not resize mode, it's drag mode
         _interactionMode = MouseInteraction::Drag;
-        
-        // If target is clicked, it should unlock
-        if (_mouseOnPair->isTargetSelected()) {
-            _mouseOnPair->unlock();
-        }
     }
     // Fine tuning mode of target
-    else if (button == MouseButton::Right && _mouseOnPair->isBrowserSelected()) {
-        // If you start dragging around on the browser, the target unlocks
-        _mouseOnPair->unlock();
+    else if (button == MouseButton::Right) {
         // Change view (by moving target) within browser if right mouse 
         // click on browser
         _startMousePosition = _mousePosition;
-        _startDragPosition = _mouseOnPair->target()->screenSpacePosition();
+        //_startDragPosition = _mouseOnPair->target()->screenSpacePosition();
         _interactionMode = MouseInteraction::FineTune;
     }
 }
@@ -569,7 +557,7 @@ TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) {
         _targetsBrowsers.end(),
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
             bool foundBrowser = pair->browserId() == id;
-            bool foundTarget = pair->targetId() == id;
+            bool foundTarget = pair->targetRenderableId() == id;
             return foundBrowser || foundTarget;
         }
     );
@@ -668,7 +656,7 @@ std::string SkyBrowserModule::selectedBrowserId() const {
 std::string SkyBrowserModule::selectedTargetId() {
     TargetBrowserPair* found = getPair(_selectedBrowser);
     if (found) {
-        return found->targetId();
+        return found->targetRenderableId();
     }
     else {
         return "";

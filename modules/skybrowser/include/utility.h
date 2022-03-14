@@ -26,12 +26,13 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/util/distanceconstants.h>
 
 namespace openspace::skybrowser {
 // Constants
 constexpr const double ScreenSpaceZ = -2.1;
 constexpr const glm::dvec3 NorthPole = { 0.0, 0.0, 1.0 };
-constexpr const double CelestialSphereRadius = std::numeric_limits<float>::max();  
+constexpr const double CelestialSphereRadius = 4 * distanceconstants::Parsec;
 
 // Conversion matrix - J2000 equatorial <-> galactic
 // https://arxiv.org/abs/1010.3773v1
@@ -174,7 +175,15 @@ double angleBetweenVectors(const glm::dvec3& start, const glm::dvec3& end);
  * \return 4x4 matrix for incremental rotation animation of a vector
  */
 glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3& end, 
-    double deltaTime, double speedFactor = 1.0);       
+    double deltaTime, double speedFactor = 1.0);  
+/**
+ * Returns the size in meters that for example a plane would need to have in order to 
+ * display a specified field of view. 
+ * \param fov The set field of view
+ * \param worldPosition The galactic position of the plane 
+ * \return Field of view
+ */
+double sizeFromFov(double fov, glm::dvec3 worldPosition);
     
 } // namespace openspace::skybrowser
 

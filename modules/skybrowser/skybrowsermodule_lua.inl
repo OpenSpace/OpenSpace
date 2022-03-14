@@ -57,7 +57,9 @@ int selectImage(lua_State* L) {
             // If the coordinate is not in view, rotate camera
             if (image.hasCelestialCoords && !isInView) {
                 module->startRotatingCamera(
-                    equatorialToGalactic(image.equatorialCartesian)
+                    equatorialToGalactic(
+                        image.equatorialCartesian * skybrowser::CelestialSphereRadius
+                    )
                 );
             }
         }
@@ -92,27 +94,7 @@ int disableHoverCircle(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableHoverCircle");
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     module->disableHoverCircle();
-        
-    return 0;
-}
 
-int lockTarget(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::lockTarget");
-    const std::string id = ghoul::lua::value<std::string>(L, 1);
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    if (module->getPair(id)) {
-        module->getPair(id)->lock();
-    }
-    return 0;
-}
-
-int unlockTarget(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::unlockTarget");
-    const std::string id = ghoul::lua::value<std::string>(L, 1);
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    if (module->getPair(id)) {
-        module->getPair(id)->unlock();
-    }
     return 0;
 }
 
@@ -358,8 +340,6 @@ int getTargetData(lua_State* L) {
             lua_settable(L, -3);
             ghoul::lua::push(L, "color", pair->borderColor());
             lua_settable(L, -3);
-            ghoul::lua::push(L, "isLocked", pair->isLocked());
-            lua_settable(L, -3);
             ghoul::lua::push(L, "size", pair->size());
             lua_settable(L, -3);
               
@@ -427,10 +407,14 @@ int createTargetBrowserPair(lua_State* L) {
     std::string nameTarget = "Sky Target " + std::to_string(noOfPairs);
     std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
+    // Determine starting point on screen for the target
     glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
     glm::vec3 positionTarget = { 1.0f, 0.5f, -2.1f };
+    glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
     std::string guiPath = "/SkyBrowser";
     std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
+    double fov = 5.0;
+    double size = skybrowser::sizeFromFov(fov, galacticTarget);
 
     const std::string browser = "{"
         "Identifier = '" + idBrowser + "',"
@@ -440,13 +424,39 @@ int createTargetBrowserPair(lua_State* L) {
         "FaceCamera = false,"
         "CartesianPosition = " + ghoul::to_string(positionBrowser) +
         "}";
+
     const std::string target = "{"
         "Identifier = '" + idTarget + "',"
-        "Type = 'ScreenSpaceSkyTarget',"
+        "Type = 'SkyTarget',"
         "Name = '" + nameTarget + "',"
-        "FaceCamera = false,"
-        "CartesianPosition = " + ghoul::to_string(positionTarget) +
-        "}";
+        "Transform = {"
+            "Translation = {"
+                "Type = 'StaticTranslation',"
+                "Position = {"
+                        + std::to_string(galacticTarget.x) + ", "
+                        + std::to_string(galacticTarget.y) + ", "
+                        + std::to_string(galacticTarget.z) + ", "
+                "},"
+            "},"
+            "Rotation = {"
+                "Type = 'StaticRotation',"
+                "Rotation = {0.0, 0.0, 0.0}"
+            "}"
+        "},"
+        "Renderable = {"
+            "Identifier = 'RenderableSkyTarget',"
+            "Type = 'RenderableSkyTarget',"
+            "Size = " + std::to_string(size) + ","
+            "VerticalFieldOfView = " + std::to_string(fov) + ","
+            "Origin = 'Center',"
+            "Billboard = true,"
+            "Opacity = 0.99"
+        "},"
+        "GUI = {"
+          "Name = 'Sky Target', "
+          "Path = '/SkyBrowser', "
+        "}"
+    "}";
 
     global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + browser + ");",
@@ -454,7 +464,7 @@ int createTargetBrowserPair(lua_State* L) {
     );
 
     global::scriptEngine->queueScript(
-        "openspace.addScreenSpaceRenderable(" + target + ");",
+        "openspace.addSceneGraphNode(" + target + ");",
         scripting::ScriptEngine::RemoteScripting::No
     );
 
@@ -479,7 +489,7 @@ int removeTargetBrowserPair(lua_State* L) {
     TargetBrowserPair* found = module->getPair(id);
     if (found) {
         std::string browser = found->browserId();
-        std::string target = found->targetId();
+        std::string target = found->targetNodeId();
 
         module->removeTargetBrowserPair(id);
 
@@ -490,7 +500,7 @@ int removeTargetBrowserPair(lua_State* L) {
         );
 
         global::scriptEngine->queueScript(
-            "openspace.removeScreenSpaceRenderable('" + target + "');",
+            "openspace.removeSceneGraphNode('" + target + "');",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }

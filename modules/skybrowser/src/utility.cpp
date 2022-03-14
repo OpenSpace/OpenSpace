@@ -65,7 +65,7 @@ glm::dvec3 galacticToEquatorial(const glm::dvec3& coords) {
 glm::dvec3 equatorialToGalactic(const glm::dvec3& coords) {
     // On the unit sphere
     glm::dvec3 rGalactic = conversionMatrix * glm::normalize(coords); 
-    return rGalactic * CelestialSphereRadius;
+    return rGalactic;
 }
         
 glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords) {
@@ -105,7 +105,7 @@ glm::dvec3 localCameraToEquatorial(const glm::dvec3& coords) {
     
 glm::dvec3 equatorialToLocalCamera(const glm::dvec3& coords) {
     // Transform equatorial J2000 to galactic coord with infinite radius    
-    glm::dvec3 galactic = equatorialToGalactic(coords);
+    glm::dvec3 galactic = equatorialToGalactic(coords) * CelestialSphereRadius;
     glm::dvec3 localCamera = galacticToLocalCamera(galactic);
     return localCamera;
 }
@@ -202,6 +202,17 @@ glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3&
     // Create the rotation matrix for local camera space
     glm::dvec3 rotationAxis = glm::normalize(glm::cross(start, end));
     return glm::rotate(rotationAngle, rotationAxis);
+}
+double sizeFromFov(double fov, glm::dvec3 worldPosition) {
+
+    // Calculate the size with trigonometry
+    //  /|
+    // /_|    Adjacent is the horizontal line, opposite the vertical 
+    // \ |    Calculate for half the triangle first, then multiply with 2
+    //  \|
+    double adjacent = glm::length(worldPosition);
+    double opposite = 2 * adjacent * glm::tan(glm::radians(fov * 0.5));
+    return opposite;
 }
 } // namespace openspace
 
