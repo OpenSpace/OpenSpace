@@ -58,13 +58,6 @@ namespace openspace {
             const size_t nPointsOnPathLine, 
             const size_t nPointsOnFieldLines
         );
-
-
-        pointsWithEigVec getCriticalPoints();
-        std::vector<glm::vec3> getDataFromFileIntoVectorvec3f(std::ifstream&);
-        glm::vec3 moveSeedpointInEigenvectorDirection(const glm::vec3& const pointInSpace, const glm::vec3& const eigenvector, const float& direction);
-
-
     } // namespace fls
 } // namespace openspace
 

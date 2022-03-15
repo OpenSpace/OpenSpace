@@ -126,6 +126,7 @@ std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFil
     std::vector<double>& birthTimes,
     double startTime
 );
+
 std::vector<std::string> extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 
 documentation::Documentation RenderableMovingFieldlines::Documentation() {
@@ -259,17 +260,17 @@ void RenderableMovingFieldlines::initialize() {
     }
 
     for (const FieldlinesState::MatchingFieldlines& mf : _fieldlineState.getAllMatchingFieldlines()) {
+        // Initialize one traverser for each path line
         _traversers.push_back(PathLineTraverser{mf.pathLines.first.keyFrames});
         _traversers.push_back(PathLineTraverser{mf.pathLines.second.keyFrames});
     }
 
-    //for (int i = 0; i < _fieldlineState.lineCount().size(); ++i) {
-    //    PathLineTraverser plt(_fieldlineState.allPathLines()[i].keyFrames);
-    //    _traversers.push_back(plt);
-    //}
     _renderedLines = _fieldlineState.vertexPositions();
     _debugTopologyColor = std::vector<float>(_renderedLines.size(), -1.f);
     size_t nExtraQuantities = _fieldlineState.nExtraQuantities();
+
+    // Each fieldline starts unrendered; changes depending on lifetime in update()
+    _renderedLinesAlpha = std::vector<float>(_renderedLines.size(), 0.0f);
         
     addProperty(_lineWidth);
     addProperty(_renderFlowLine);
@@ -324,6 +325,7 @@ void RenderableMovingFieldlines::initializeGL() {
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
     glGenBuffers(1, &_vertexColorBuffer);
+    glGenBuffers(1, &_vertexAlphaBuffer);
 
     // Needed for additive blending
     setRenderBin(Renderable::RenderBin::Overlay);
@@ -334,7 +336,7 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
     std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
 
     std::vector<glm::vec3> seedPoints;
-    std::vector<double> birthTimeOffsets;
+    std::vector<double> birthTimes;
         
     bool isSuccessful = false;
     bool shouldExtractSeedPoints = true;
@@ -367,7 +369,7 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
                 ));
             }
 
-            extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimeOffsets, startTime);
+            extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
             shouldExtractSeedPoints = false;
         }
 
@@ -378,7 +380,7 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
             _fieldlineState,
             kameleon.get(),
             seedPoints,
-            birthTimeOffsets,
+            birthTimes,
             _manualTimeOffset,
             _tracingVariable,
             _extraVars,
@@ -407,11 +409,17 @@ void RenderableMovingFieldlines::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArrayObject);
     _vertexArrayObject = 0;
 
+    glDeleteVertexArrays(1, &_vertexArrayObjectFlow);
+    _vertexArrayObjectFlow = 0;
+
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
     glDeleteBuffers(1, &_vertexColorBuffer);
     _vertexColorBuffer = 0;
+
+    glDeleteBuffers(1, &_vertexAlphaBuffer);
+    _vertexAlphaBuffer = 0;
 
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
@@ -428,7 +436,7 @@ void RenderableMovingFieldlines::deinitializeGL() {
 std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFile(
     std::filesystem::path filePath, 
     std::vector<glm::vec3>& seedPoints,
-    std::vector<double>& birthTimeOffsets,
+    std::vector<double>& birthTimes,
     double startTime
 ) {
 
@@ -460,7 +468,7 @@ std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFil
                 bool hasNoTime = nPointsInARow == 5;
                 if (hasNoTime) {
                     nPointsInARow = 1;
-                    birthTimeOffsets.push_back(0.0);
+                    birthTimes.push_back(startTime);
                 }
 
                 glm::vec3 point;
@@ -484,16 +492,16 @@ std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFil
             else if (isDate) {
                 nPointsInARow = 0;
 
-                double birthTime = Time::convertTime(ss.str().substr(0, ss.str().length() - 2));
-                
-                birthTimeOffsets.push_back(birthTime - startTime);
+                double t = Time::convertTime(ss.str().substr(0, ss.str().length() - 2));
+
+                birthTimes.push_back(t);
             }
             // Time in float format
             else {
                 nPointsInARow = 0;
                 double t;
                 ss >> t;
-                birthTimeOffsets.push_back(t);
+                birthTimes.push_back(startTime + t);
 
                 bool isEmpty = ss.eof();
                 if (!isEmpty) {
@@ -526,7 +534,7 @@ std::tuple<std::vector<glm::vec3>, std::vector<double>> extractSeedPointsFromFil
         ));
     }
 
-    return std::make_tuple(seedPoints, birthTimeOffsets);
+    return std::make_tuple(seedPoints, birthTimes);
 }
 
 bool RenderableMovingFieldlines::isReady() const {
@@ -546,6 +554,10 @@ void RenderableMovingFieldlines::render(const RenderData& data, RendererTasks&) 
 
     _shaderProgram->setUniform("modelViewProjection",
         data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+
+
+    // TODO: Fixa min nya alpha buffer MÅNS
+
     _shaderProgram->setUniform("lineColor", _colorUniform);
     _shaderProgram->setUniform("colorMethod", _colorMethod);
 
@@ -639,6 +651,8 @@ void RenderableMovingFieldlines::update(const UpdateData& data) {
     if (_fieldlineState.nExtraQuantities() > 0) {
         updateVertexColorBuffer();
     }
+
+    updateVertexAlphaBuffer(currentTime);
 }
 
 template <bool LerpLine>
@@ -745,14 +759,10 @@ void RenderableMovingFieldlines::moveLine(const double dt,
     }
 }
 
-
-
 void RenderableMovingFieldlines::moveLines(const double dt) {
 
     const std::vector<FieldlinesState::MatchingFieldlines>& allMatchingFieldlines =
         _fieldlineState.getAllMatchingFieldlines();
-
-
 
     // one line at the time
     size_t lineIndex = 0;
@@ -791,6 +801,7 @@ void RenderableMovingFieldlines::updateVertexPositionBuffer() {
 
     std::vector<glm::vec4> data;
     for (int i = 0; i < vertPos.size(); ++i) {
+        //data.push_back({ vertPos[i], -1.f });
         data.push_back({ vertPos[i], -1.f });
         data[i].w = _debugTopologyColor[i];
     }
@@ -860,6 +871,55 @@ void RenderableMovingFieldlines::updateVertexColorBuffer() {
         glBindVertexArray(0);
     }
 }
+
+/**
+* Updates OpenGL-buffer with a float value for each field- and path line vertex.
+* The float value is multiplied with the vetex color alpha in the vertex shader.
+*/
+void RenderableMovingFieldlines::updateVertexAlphaBuffer(const double currentTime) {
+    glBindVertexArray(_vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexAlphaBuffer);
+
+    std::vector<float> alpha = _renderedLinesAlpha;
+
+    for (size_t i = 0; i < _fieldlineState.getAllMatchingFieldlines().size(); i++) {
+        double birth = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.first.birthTime;
+        double death = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.first.deathTime;
+        bool isAlive = currentTime >= birth && currentTime <= death;
+
+        auto startIt = alpha.begin() + _fieldlineState.lineStart()[i * 2];
+        auto endIt = alpha.begin() + _fieldlineState.lineStart()[i * 2 + 1];
+        std::fill(startIt, endIt, static_cast<float>(isAlive));
+
+        birth = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.second.birthTime;
+        death = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.second.deathTime;
+        isAlive = currentTime >= birth && currentTime <= death;
+
+        startIt = alpha.begin() + _fieldlineState.lineStart()[i * 2 + 1];
+        endIt = alpha.begin() + _fieldlineState.lineStart()[i * 2 + 1] + _nPointsOnFieldlines;
+        std::fill(startIt, endIt, static_cast<float>(isAlive));
+    }
+
+    if (_renderFlowLine) {
+        int nFlowVertices = 
+            _fieldlineState.getAllMatchingFieldlines().size() * 2 * _nPointsOnPathLine;
+        alpha.insert(alpha.end(), nFlowVertices, 1.0f);
+    }
+
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        alpha.size() * sizeof(float),
+        alpha.data(),
+        GL_STATIC_DRAW
+    );
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
 RenderableMovingFieldlines::PathLineTraverser::PathLineTraverser(const std::vector<FieldlinesState::Fieldline>& fieldlines_) :
     fieldlines(fieldlines_),
     currentFieldline(fieldlines.begin()) {}

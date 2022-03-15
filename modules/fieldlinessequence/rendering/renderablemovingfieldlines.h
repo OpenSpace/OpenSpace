@@ -67,10 +67,13 @@ public:
     void update(const UpdateData& data) override;
     static documentation::Documentation Documentation();
 
+
+
 private:
     bool getStateFromCdfFiles();
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
+    void updateVertexAlphaBuffer(const double currentTime);
     void moveLines(const double dt);
     
     template <bool LerpLine>
@@ -126,6 +129,7 @@ private:
     GLuint _vertexColorBuffer = 0;
     GLuint _vertexArrayObjectFlow = 0;
     GLuint _vertexPositionBufferFlow = 0;
+    GLuint _vertexAlphaBuffer = 0;
 
     FieldlinesState _fieldlineState;
     double _manualTimeOffset = 0.0;
@@ -142,6 +146,9 @@ private:
     std::vector<glm::vec3> _renderedLines;
     std::vector<float> _debugTopologyColor;
     std::vector<PathLineTraverser> _traversers;
+
+    // Show or hide fieldlines, is 1 while current time is between birth- and death time
+    std::vector<float> _renderedLinesAlpha;
 };
 }
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEMOVINGFIELDLINES___H__

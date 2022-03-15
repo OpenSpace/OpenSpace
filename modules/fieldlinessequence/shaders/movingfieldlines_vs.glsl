@@ -34,6 +34,7 @@ uniform vec2 colorTableRange;
 // Inputs
 layout(location = 0) in vec4 in_position;        // Should be provided in meters
 layout(location = 1) in float in_color_scalar;   // The extra value used to color lines
+layout(location = 2) in float in_vertex_alpha;   // Vertex alpha based on lifetime
 
 // outs
 out vec4 vs_color;
@@ -56,6 +57,7 @@ void main() {
         vec4 quantityColor = getTransferFunctionColor();
         vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
     }
+    vs_color.a *= in_vertex_alpha;
 
     vec4 position_in_meters = vec4(in_position.xyz, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;

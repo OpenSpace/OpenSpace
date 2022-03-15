@@ -54,7 +54,7 @@ namespace openspace::fls {
         FieldlinesState& state,
         ccmc::Kameleon* kameleon,
         const std::vector<glm::vec3>& seedPoints,
-        const std::vector<double>& birthTimeOffsets,
+        const std::vector<double>& birthTimes,
         double manualTimeOffset,
         const std::string& tracingVar,
         std::vector<std::string>& extraVars,
@@ -72,7 +72,7 @@ namespace openspace::fls {
         bool isSuccessful = openspace::fls::traceAndAddMatchingLinesToState(
             kameleon,
             matchingSeedPoints, 
-            birthTimeOffsets,
+            birthTimes,
             tracingVar, 
             state,
             nPointsOnPathLine, 
@@ -131,7 +131,7 @@ namespace openspace::fls {
 
     bool traceAndAddMatchingLinesToState(ccmc::Kameleon* kameleon,
         const std::vector<seedPointPair>& matchingSeedPoints,
-        const std::vector<double>& birthTimeOffsets,
+        const std::vector<double>& birthTimes,
         const std::string& tracingVar,
         FieldlinesState& state,
         const size_t nPointsOnPathLine,
@@ -203,7 +203,7 @@ namespace openspace::fls {
             // std::vector<float> times = computeTimes(pathLine, velocities);
             // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
 
-            double birthTime = kameleonHelper::getTime(kameleon, birthTimeOffsets[i]);
+            double birthTime = birthTimes[i];
 
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)
@@ -263,13 +263,4 @@ namespace openspace::fls {
             keyFrame.emplace_back(pt.component1, pt.component2, pt.component3);
         }
     }
-
-
-
-    glm::vec3 openspace::fls::moveSeedpointInEigenvectorDirection(const glm::vec3& const pointInSpace, const glm::vec3& const eigenvector, const float& direction) {
-        glm::vec3 movedPoint = pointInSpace + (eigenvector * FLT_EPSILON * direction);
-
-        return movedPoint;
-    }
-
 } // openspace::fls

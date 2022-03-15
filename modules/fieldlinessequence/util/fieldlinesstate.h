@@ -52,8 +52,8 @@ public:
 
         // Defines the time each fieldline is visible.
         // Path lines are visible even outside birth- and death time.
-        double birthTime;   // Number of seconds from simulation start the fieldlines starts
-        double deathTime;   // Number of seconds from simulation start the fieldlines ends
+        double birthTime;   // Number of seconds from simulation start to when fieldline starts
+        double deathTime = FLT_MAX;   // Number of seconds from simulation start to when fieldline ends
     };
 
     struct MatchingFieldlines {
