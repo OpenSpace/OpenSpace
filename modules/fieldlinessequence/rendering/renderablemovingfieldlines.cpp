@@ -619,6 +619,10 @@ void RenderableMovingFieldlines::render(const RenderData& data, RendererTasks&) 
     //    }
     //}
 
+    // Something like this is needed for fieldline fade to work. This doesn't though...
+    //glEnable(GL_BLEND); 
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+
     glMultiDrawArrays(
         GL_LINE_STRIP,
         lineStarts.data(),
@@ -877,6 +881,9 @@ void RenderableMovingFieldlines::updateVertexColorBuffer() {
 * The float value is multiplied with the vetex color alpha in the vertex shader.
 */
 void RenderableMovingFieldlines::updateVertexAlphaBuffer(const double currentTime) {
+    
+    constexpr const double fieldlineFadeTime = 30.0;    // seconds
+    
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexAlphaBuffer);
 
@@ -885,19 +892,33 @@ void RenderableMovingFieldlines::updateVertexAlphaBuffer(const double currentTim
     for (size_t i = 0; i < _fieldlineState.getAllMatchingFieldlines().size(); i++) {
         double birth = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.first.birthTime;
         double death = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.first.deathTime;
-        bool isAlive = currentTime >= birth && currentTime <= death;
+        
+        double birthAlpha = std::min(
+            std::max(currentTime - birth, 0.0) / fieldlineFadeTime,
+            1.0);
+        double deathAlpha = std::min(
+            std::max(death - currentTime - fieldlineFadeTime, 0.0) / fieldlineFadeTime,
+            1.0);
+        double fadeAlpha = birthAlpha * deathAlpha;
 
         auto startIt = alpha.begin() + _fieldlineState.lineStart()[i * 2];
         auto endIt = alpha.begin() + _fieldlineState.lineStart()[i * 2 + 1];
-        std::fill(startIt, endIt, static_cast<float>(isAlive));
+        std::fill(startIt, endIt, static_cast<float>(fadeAlpha));
 
         birth = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.second.birthTime;
         death = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.second.deathTime;
-        isAlive = currentTime >= birth && currentTime <= death;
+
+        birthAlpha = std::min(
+            std::max(currentTime - birth, 0.0) / fieldlineFadeTime,
+            1.0);
+        deathAlpha = std::min(
+            std::max(death - currentTime - fieldlineFadeTime, 0.0) / fieldlineFadeTime,
+            1.0);
+        fadeAlpha = birthAlpha * deathAlpha;
 
         startIt = alpha.begin() + _fieldlineState.lineStart()[i * 2 + 1];
         endIt = alpha.begin() + _fieldlineState.lineStart()[i * 2 + 1] + _nPointsOnFieldlines;
-        std::fill(startIt, endIt, static_cast<float>(isAlive));
+        std::fill(startIt, endIt, static_cast<float>(fadeAlpha));
     }
 
     if (_renderFlowLine) {

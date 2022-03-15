@@ -29,7 +29,7 @@ in float vs_depth;
 in float debugTopologyColor;
 
 Fragment getFragment() {
-    if (vs_color.a == 0) {
+    if (vs_color.a == 0.0f) {
         discard;
     }
 
