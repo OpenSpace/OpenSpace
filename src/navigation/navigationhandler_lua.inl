@@ -348,12 +348,12 @@ int triggerIdleBehavior(lua_State* L) {
     std::optional<std::string> choice = ghoul::lua::value<std::optional<std::string>>(L);
 
     try {
-        global::navigationHandler->orbitalNavigator().triggerIdleBehavior(choice);
+        global::navigationHandler->orbitalNavigator().triggerIdleBehavior(
+            choice.value_or("")
+        );
     }
-    catch (ghoul::MissingCaseException&) {
-        return ghoul::lua::luaError(L, fmt::format(
-            "No existing IdleBehavior with identifier '{}'"
-        ));
+    catch (ghoul::RuntimeError& e) {
+        return ghoul::lua::luaError(L, e.message);
     }
 
     return 0;

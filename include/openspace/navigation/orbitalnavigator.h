@@ -58,7 +58,7 @@ class KeyboardInputState;
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
     struct IdleBehavior : public properties::PropertyOwner {
-        enum Behavior {
+        enum class Behavior {
             Orbit = 0,
             OrbitAtConstantLat,
             OrbitAroundUp
@@ -93,7 +93,7 @@ public:
     void updateOnCameraInteraction();
 
     void tickIdleBehaviorTimer(double deltaTime);
-    void triggerIdleBehavior(std::optional<std::string_view> choice = std::nullopt);
+    void triggerIdleBehavior(std::string_view choice = "");
 
     Camera* camera() const;
     void setCamera(Camera* camera);

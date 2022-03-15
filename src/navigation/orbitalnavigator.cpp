@@ -280,9 +280,9 @@ namespace {
         "or canceled, in seconds."
     };
 
-    constexpr const char IdleBehaviorKeyOrbit[] = "Orbit";
-    constexpr const char IdleBehaviorKeyOrbitAtConstantLat[] = "OrbitAtConstantLatitude";
-    constexpr const char IdleBehaviorKeyOrbitAroundUp[] = "OrbitAroundUp";
+    constexpr const char IdleKeyOrbit[] = "Orbit";
+    constexpr const char IdleKeyOrbitAtConstantLat[] = "OrbitAtConstantLatitude";
+    constexpr const char IdleKeyOrbitAroundUp[] = "OrbitAroundUp";
 
 } // namespace
 
@@ -312,12 +312,13 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
 {
     addProperty(apply);
+    using Behavior = IdleBehavior::Behavior;
     defaultBehavior.addOptions({
-        { IdleBehavior::Behavior::Orbit, IdleBehaviorKeyOrbit },
-        { IdleBehavior::Behavior::OrbitAtConstantLat, IdleBehaviorKeyOrbitAtConstantLat },
-        { IdleBehavior::Behavior::OrbitAroundUp, IdleBehaviorKeyOrbitAroundUp }
+        { static_cast<int>(Behavior::Orbit), IdleKeyOrbit },
+        { static_cast<int>(Behavior::OrbitAtConstantLat), IdleKeyOrbitAtConstantLat },
+        { static_cast<int>(Behavior::OrbitAroundUp), IdleKeyOrbitAroundUp }
     });
-    defaultBehavior = IdleBehavior::Behavior::Orbit;
+    defaultBehavior = static_cast<int>(IdleBehavior::Behavior::Orbit);
     addProperty(defaultBehavior);
     addProperty(shouldTriggerWhenIdle);
     addProperty(idleWaitTime);
@@ -1558,7 +1559,7 @@ const ScriptCameraStates& OrbitalNavigator::scriptStates() const {
     return _scriptStates;
 }
 
-void OrbitalNavigator::triggerIdleBehavior(std::optional<std::string_view> choice) {
+void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
     OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode != OpenSpaceEngine::Mode::UserControl) {
         LERROR(
@@ -1568,22 +1569,24 @@ void OrbitalNavigator::triggerIdleBehavior(std::optional<std::string_view> choic
         return;
     }
 
-    if (!choice.has_value()) {
+    if (choice.empty()) {
         _idleBehavior.chosenBehavior = std::nullopt;
     }
     else {
         IdleBehavior::Behavior behavior;
-        if (choice == IdleBehaviorKeyOrbit) {
+        if (choice == IdleKeyOrbit) {
             behavior = IdleBehavior::Behavior::Orbit;
         }
-        else if (choice == IdleBehaviorKeyOrbitAtConstantLat) {
+        else if (choice == IdleKeyOrbitAtConstantLat) {
             behavior = IdleBehavior::Behavior::OrbitAtConstantLat;
         }
-        else if (choice == IdleBehaviorKeyOrbitAroundUp) {
+        else if (choice == IdleKeyOrbitAroundUp) {
             behavior = IdleBehavior::Behavior::OrbitAroundUp;
         }
         else {
-            throw ghoul::MissingCaseException();
+            throw ghoul::RuntimeError(
+                fmt::format("No existing IdleBehavior with identifier '{}'", choice)
+            );
         }
         _idleBehavior.chosenBehavior = behavior;
     }
