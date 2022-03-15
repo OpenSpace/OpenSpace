@@ -4,7 +4,7 @@ local sync = asset.syncedResource({
   Name = "Swift Tuttle Orbit",
   Type = "HttpSynchronization",
   Identifier = "swift_tuttle_horizons",
-  Version = 1
+  Version = 2
 })
 
 local SwiftTuttleTrail = {
@@ -14,12 +14,17 @@ local SwiftTuttleTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = sync .. "horizons_swifttuttle.dat"
+      HorizonsTextFile = sync .. "horizons_swifttuttle.hrz"
+      -- Target: 109P/Swift-Tuttle (1995 epoch)
+      -- Observer: SSB
+      -- Start time: 1879-Jun-27 00:00:00 (first data point)
+      -- End time: 2050-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "1879 JUN 27 00:00:00",
-    EndTime = "1879 JUN 27 00:00:00",
-    SampleInterval = 60
+    EndTime = "2050 JAN 01 00:00:00",
+    SampleInterval = 86400
   },
   GUI = {
     Name = "Swift Tuttle Trail",
@@ -33,7 +38,7 @@ local SwiftTuttlePosition = {
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = sync .. "horizons_swifttuttle.dat"
+      HorizonsTextFile = sync .. "horizons_swifttuttle.hrz"
     }
   },
   GUI = {
@@ -59,9 +64,9 @@ asset.export(SwiftTuttleTrail)
 
 asset.meta = {
   Name = "Swift Tuttle",
-  Version = "1.1",
+  Version = "1.2",
   Description = [[ Position and Trail of Swift Tuttle from 1879 JUN 27
-    to 1879 JUN 27. Data from JPL Horizons]],
+    to 2050 JAN 01. Data from JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
   License = [[ JPL-authored documents are sponsored by NASA under Contract
