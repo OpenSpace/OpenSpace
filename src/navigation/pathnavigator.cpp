@@ -45,10 +45,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultPathType",
         "Default Path Type",
-        "The defualt path type chosen when generating a path. See wiki for alternatives."
-        " The shape of the generated path will be different depending on the path type."
-        // TODO (2021-08-15, emmbr) right now there is no way to specify a type for a
-        // single path instance, only for any created paths
+        "The default path type chosen when generating a path or flying to a target. "
+        "See wiki for alternatives. The shape of the generated path will be different "
+        "depending on the path type."
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
@@ -70,6 +69,15 @@ namespace {
         "Apply Idle Behavior on Finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
         "triggered once the path has reached its target."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ArrivalDistanceFactorInfo = {
+        "ArrivalDistanceFactor",
+        "Arrival Distance Factor",
+        "A factor used to compute the default distance from a target scene graph node "
+        "when creating a camera path. The factor will be multipled with the node's "
+        "bounding sphere to compute the target height from the bounding sphere of the "
+        "object."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo =
@@ -102,13 +110,14 @@ PathNavigator::PathNavigator()
     , _includeRoll(IncludeRollInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
+    , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
     _defaultPathType.addOptions({
         { Path::Type::AvoidCollision, "AvoidCollision" },
-        { Path::Type::Linear, "Linear" },
         { Path::Type::ZoomOutOverview, "ZoomOutOverview"},
+        { Path::Type::Linear, "Linear" },
         { Path::Type::AvoidCollisionWithLookAt, "AvoidCollisionWithLookAt"}
     });
     addProperty(_defaultPathType);
@@ -116,6 +125,7 @@ PathNavigator::PathNavigator()
     addProperty(_includeRoll);
     addProperty(_speedScale);
     addProperty(_applyIdleBehaviorOnFinish);
+    addProperty(_arrivalDistanceFactor);
     addProperty(_minValidBoundingSphere);
 
     _relevantNodeTags = std::vector<std::string>{
@@ -142,6 +152,10 @@ const Path* PathNavigator::currentPath() const {
 
 double PathNavigator::speedScale() const {
     return _speedScale;
+}
+
+double PathNavigator::arrivalDistanceFactor() const {
+    return _arrivalDistanceFactor;
 }
 
 bool PathNavigator::hasCurrentPath() const {
@@ -271,10 +285,7 @@ void PathNavigator::startPath() {
         );
 
         _startSimulationTimeOnFinish = true;
-        LINFO(
-            "Pausing time simulation during path traversal. "
-            "Will unpause once the camera path is finished"
-        );
+        LINFO("Pausing time simulation during path traversal");
     }
 
     LINFO("Starting path");
@@ -332,6 +343,49 @@ double PathNavigator::minValidBoundingSphere() const {
     return _minValidBoundingSphere;
 }
 
+double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const {
+    ghoul_assert(node != nullptr, "Node must not be nulltpr");
+    auto sphere = [](const SceneGraphNode* n) {
+        // Use the biggest of the bounding sphere and interaction sphere,
+        // so we don't accidentally choose a bounding sphere that is much smaller
+        // than the interaction sphere of the node
+        double bs = n->boundingSphere();
+        double is = n->interactionSphere();
+        return is > bs ? is : bs;
+    };
+
+    double result = sphere(node);
+
+    if (result < _minValidBoundingSphere) {
+        // If the bs of the target is too small, try to find a good value in a child node.
+        // Only check the closest children, to avoid deep traversal in the scene graph.
+        // Alsp. the chance to find a bounding sphere that represents the visual size of
+        // the target well is higher for these nodes
+        for (SceneGraphNode* child : node->children()) {
+            result = sphere(child);
+            if (result > _minValidBoundingSphere) {
+                LDEBUG(fmt::format(
+                    "The scene graph node '{}' has no, or a very small, bounding sphere. "
+                    "Using bounding sphere of child node '{}' in computations.",
+                    node->identifier(),
+                    child->identifier()
+                ));
+                return result;
+            }
+        }
+
+        LDEBUG(fmt::format(
+            "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
+            "minimal value. This might lead to unexpected results.",
+            node->identifier())
+        );
+
+        result = _minValidBoundingSphere;
+    }
+
+    return result;
+}
+
 const std::vector<SceneGraphNode*>& PathNavigator::relevantNodes() {
     if (!_hasInitializedRelevantNodes) {
         findRelevantNodes();
@@ -351,7 +405,6 @@ void PathNavigator::handlePathEnd() {
         );
     }
     _startSimulationTimeOnFinish = false;
-    clearPath();
     global::openSpaceEngine->resetMode();
 }
 

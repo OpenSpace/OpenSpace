@@ -346,16 +346,8 @@ double Path::speedAlongPath(double traveledDistance) const {
 
     // Dampen at the start and end
     constexpr const double DampenDistanceFactor = 3.0;
-
-    double startUpDistance = DampenDistanceFactor * _start.node()->boundingSphere();
-    if (startUpDistance < LengthEpsilon) { // zero bounding sphere
-        startUpDistance = glm::distance(_start.position(), startNodePos);
-    }
-
-    double closeUpDistance = DampenDistanceFactor * _end.node()->boundingSphere();
-    if (closeUpDistance < LengthEpsilon) { // zero bounding sphere
-        closeUpDistance = glm::distance(_end.position(), endNodePos);
-    }
+    double startUpDistance = DampenDistanceFactor * _start.validBoundingSphere();
+    double closeUpDistance = DampenDistanceFactor * _end.validBoundingSphere();
 
     if (pathLength() < startUpDistance + closeUpDistance) {
         startUpDistance = 0.49 * pathLength(); // a little less than half
@@ -506,8 +498,10 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         );
     }
     else {
-        const double radius = Waypoint::findValidBoundingSphere(targetNode);
-        const double defaultHeight = 2.0 * radius;
+        const PathNavigator& navigator = global::navigationHandler->pathNavigator();
+
+        const double radius = navigator.findValidBoundingSphere(targetNode);
+        const double defaultHeight = radius * navigator.arrivalDistanceFactor();
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 

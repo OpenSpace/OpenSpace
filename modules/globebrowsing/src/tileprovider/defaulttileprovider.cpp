@@ -195,6 +195,11 @@ void DefaultTileProvider::reset() {
     _asyncTextureDataProvider->prepareToBeDeleted();
 }
 
+int DefaultTileProvider::minLevel() {
+    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    return 1;
+}
+
 int DefaultTileProvider::maxLevel() {
     ghoul_assert(_asyncTextureDataProvider, "No data provider");
     return _asyncTextureDataProvider->rawTileDataReader().maxChunkLevel();
