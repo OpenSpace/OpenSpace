@@ -131,6 +131,7 @@ private:
     glm::vec2 _mousePosition; // Current mouse position in screen space coordinates
     glm::vec2 _startMousePosition;
     glm::vec2 _startDragPosition;
+    glm::dvec3 _startTargetPosition;
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
     glm::dvec3 _startAnimation;

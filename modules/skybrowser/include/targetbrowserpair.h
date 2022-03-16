@@ -56,7 +56,8 @@ public:
     // Mouse interaction
     bool checkMouseIntersection(const glm::vec2& mousePosition);
     glm::vec2 selectedScreenSpacePosition() const;
-    void fineTuneTarget(const glm::vec2& start, const glm::vec2& translation);
+    void fineTuneTarget(const glm::dvec3& startWorld, const glm::vec2& startMouse, 
+        const glm::vec2& translation);
     void translateSelected(const glm::vec2& start, const glm::vec2& translation);
     void synchronizeAim();
 
@@ -94,7 +95,7 @@ public:
     std::string selectedId();
     glm::vec2 size() const;
     
-    RenderableSkyTarget* target() const;
+    SceneGraphNode* targetNode() const;
     ScreenSpaceSkyBrowser* browser() const;
     const std::deque<int>& selectedImages() const;
     

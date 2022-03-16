@@ -123,12 +123,23 @@ glm::vec2 TargetBrowserPair::selectedScreenSpacePosition() const {
 // The fine tune of the target is a way to "drag and drop" the target with right click 
 // drag on the sky browser window. This is to be able to drag the target around when it 
 // has a very small field of view
-void TargetBrowserPair::fineTuneTarget(const glm::vec2& start, 
-                                        const glm::vec2& translation)
+void TargetBrowserPair::fineTuneTarget(const glm::dvec3& startWorldPosition, 
+                                       const glm::vec2& startMouse,
+                                       const glm::vec2& translation)
 {
     glm::vec2 fineTune = _browser->fineTuneVector(translation);
+    glm::vec2 endMouse = startMouse + fineTune;
+    
+    // Translation world
+    glm::dvec3 startWorld = skybrowser::localCameraToGalactic(
+        glm::vec3(startMouse, skybrowser::ScreenSpaceZ)
+    );
+    glm::dvec3 endWorld = skybrowser::localCameraToGalactic(
+        glm::vec3(endMouse, skybrowser::ScreenSpaceZ)
+    );
 
-
+    glm::dvec3 translationWorld = endWorld - startWorld;
+    aimTargetGalactic(startWorldPosition + translationWorld);
 }
 
 void TargetBrowserPair::translateSelected(const glm::vec2& start, 
@@ -361,8 +372,8 @@ bool TargetBrowserPair::isUsingRadiusAzimuthElevation() const {
     return _browser->isUsingRaeCoords();
 }
 
-RenderableSkyTarget* TargetBrowserPair::target() const {
-    return _targetRenderable;
+SceneGraphNode* TargetBrowserPair::targetNode() const {
+    return _targetNode;
 }
 
 ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {

@@ -208,6 +208,10 @@ void ScreenSpaceSkyBrowser::render() {
         localRotationMatrix() *
         scaleMatrix()
     );
+
+    // scale and translation probably
+    //if(global::windowDelegate->isMaster() && property)
+
 }
 
 void ScreenSpaceSkyBrowser::update() {

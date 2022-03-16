@@ -312,7 +312,11 @@ SkyBrowserModule::SkyBrowserModule()
                         _mouseOnPair->translateSelected(_startDragPosition, translation);
                         break;
                     case MouseInteraction::FineTune:
-                        _mouseOnPair->fineTuneTarget(_startDragPosition, translation);
+                        _mouseOnPair->fineTuneTarget(
+                            _startTargetPosition, 
+                            _startDragPosition, 
+                            translation
+                        );
                         break;
                     default:
                         setSelectedObject();
@@ -534,7 +538,7 @@ void SkyBrowserModule::handleMouseClick(const MouseButton& button) {
         // Change view (by moving target) within browser if right mouse 
         // click on browser
         _startMousePosition = _mousePosition;
-        //_startDragPosition = _mouseOnPair->target()->screenSpacePosition();
+        _startTargetPosition = _mouseOnPair->targetNode()->worldPosition();
         _interactionMode = MouseInteraction::FineTune;
     }
 }
