@@ -14,7 +14,8 @@ local function advance(time, days, hours, minutes, seconds)
   return result
 end
 
-local launchTime = "2021-12-25T12:50:00.000"
+local launchTime = "2021-12-25T12:20:00.000"
+local dataStartTime = "2021-12-25T12:50:00.000"
 local actionsList = {}
 
 -- JWST timelapse timeline, forwards
@@ -22,20 +23,21 @@ local function createForwardTimelapse()
   local timelapse = [[
     -- Mission start, setup 1 sec after
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 0, 1) .. [[",
+      advance(dataStartTime, 0, 0, 0, 1) .. [[",
       "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 0.7)" ..
       "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", false)"
     )
+
     -- Mission start, GO 2 sec after
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 0, 2) .. [[",
-      "openspace.time.interpolateDeltaTime(120)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 minutes/second\")"
+      advance(dataStartTime, 0, 0, 0, 2) .. [[",
+      "openspace.time.interpolateDeltaTime(2)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 seconds/second\")"
     )
 
     -- array deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 30 - 1, 20) .. [[", -- 1 min pre delay so time to interpolate
+      advance(launchTime, 0, 0, 30, 20 - 1) .. [[", -- 1 sec pre delay
       "openspace.time.interpolateDeltaTime(1)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 second/second\")"
     )
@@ -241,43 +243,14 @@ end
 -- JWST timelapse timeline, backwards
 local function createBackwardTimelapse()
   local timelapse = [[
-    -- Finished, slow down, 1 sec before start
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 0, -1) .. [[",
-      "",
-      "openspace.scriptScheduler.clear(0)"
-    )
-
-    -- Mission start, setup 1 sec after
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 0, 1) .. [[",
-      "",
-      "openspace.time.interpolateDeltaTime(-1)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")" ..
-      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
-      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)"
-    )
-    -- Mission start GO, 2 sec after
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 0, 2) .. [[",
-      "",
-      "openspace.time.interpolateDeltaTime(-1)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")"
-    )
-    -- Slow down in the end
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 4, 0) .. [[", -- 4 min pre delay
-      "",
-      "openspace.time.interpolateDeltaTime(-1)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")"
-    )
-
-    -- array deploy
+    -- Finished
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 0, 0, 30, 20) .. [[",
       "",
-      "openspace.time.interpolateDeltaTime(-120)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 minutes/second\")"
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")" ..
+      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
+      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)" ..
+      "openspace.scriptScheduler.clear(0)"
     )
 
     -- array complete
@@ -513,7 +486,7 @@ local function createActions()
       openspace.scriptScheduler.clear(0)
       openspace.time.setDeltaTime(1)
       openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
-      openspace.time.setTime("]] .. launchTime .. [[")
+      openspace.time.setTime("]] .. dataStartTime .. [[")
       ]] .. createForwardTimelapse() .. [[
       openspace.time.setDeltaTime(1)
     ]],
@@ -529,7 +502,7 @@ local function createActions()
       openspace.scriptScheduler.clear(0)
       openspace.time.setDeltaTime(-1)
       openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
-      openspace.time.setTime("2022 JAN 09 07:50:01")
+      openspace.time.setTime("2022 JAN 09 07:20:01")
       ]] .. createBackwardTimelapse() .. [[
       openspace.time.setDeltaTime(-1)
     ]],
