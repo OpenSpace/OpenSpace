@@ -72,6 +72,10 @@ public:
 private:
     properties::DoubleProperty _animationSpeed;
     properties::FloatProperty _textureQuality;
+    properties::BoolProperty _renderCopy1;
+    properties::Vec3Property _copyPosition1;
+    properties::BoolProperty _renderCopy2;
+    properties::Vec3Property _copyPosition2;
 
     void bindTexture() override;
 
