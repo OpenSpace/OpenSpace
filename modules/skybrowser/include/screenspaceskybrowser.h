@@ -54,11 +54,9 @@ public:
     void startFovAnimation(float fov);
     void incrementallyAnimateToFov(float deltaTime);
 
-    // Getters
     float opacity() const;
     glm::vec2 size() const;
 
-    // Setters
     void setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
     void setScreenSpaceSize(const glm::vec2& newSize);
@@ -69,13 +67,14 @@ public:
 
     void updateTextureResolution();
 
+    // Copies rendered
+    void addRenderCopy();
+    void removeRenderCopy();
+
 private:
     properties::DoubleProperty _animationSpeed;
     properties::FloatProperty _textureQuality;
-    properties::BoolProperty _renderCopy1;
-    properties::Vec3Property _copyPosition1;
-    properties::BoolProperty _renderCopy2;
-    properties::Vec3Property _copyPosition2;
+    std::vector<std::unique_ptr<properties::Vec3Property>> _renderCopies;
 
     void bindTexture() override;
 

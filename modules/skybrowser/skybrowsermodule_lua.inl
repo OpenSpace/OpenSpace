@@ -596,5 +596,34 @@ int setScreenSpaceSize(lua_State* L) {
     }
     return 0;
 }
+
+int addRenderCopy(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addRenderCopy");
+    auto [id] = ghoul::lua::values<std::string>(L);
+
+    // Get module
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+
+    TargetBrowserPair* pair = module->getPair(id);
+    if (pair) {
+        pair->browser()->addRenderCopy();
+    }
+    return 0;
+}
+
+
+int removeRenderCopy(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeRenderCopy");
+    auto [id] = ghoul::lua::values<std::string>(L);
+
+    // Get module
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+
+    TargetBrowserPair* pair = module->getPair(id);
+    if (pair) {
+        pair->browser()->removeRenderCopy();
+    }
+    return 0;
+}
 } // namespace openspace::skybrowser::luafunctions
 

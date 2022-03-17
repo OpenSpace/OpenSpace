@@ -54,30 +54,11 @@ namespace {
         "frame rate."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo RenderCopy1Info = {
-        "RenderCopy1",
-        "Render A Copy Of The Sky Browser",
+    constexpr const openspace::properties::Property::PropertyInfo RenderCopyInfo = {
+        "RenderCopy",
+        "RAE Position Of A Copy Of The Sky Browser",
         "Render a copy of this sky browser at an additional position. This copy will not "
-        "be interactive."
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo CopyPosition1Info = {
-        "CopyPosition1",
-        "Position Of First Copy Of Sky Browser",
-        "The (radius, azimuth, elevation) position where the copy will be placed. "
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo RenderCopy2Info = {
-        "RenderCopy2",
-        "Render An Additional Copy Of The Sky Browser",
-        "Render a copy of this sky browser at an additional position. This copy will not "
-        "be interactive."
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo CopyPosition2Info = {
-        "CopyPosition2",
-        "Position Of Second Copy Of Sky Browser",
-        "The (radius, azimuth, elevation) position where the copy will be placed. "
+        "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates."
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -86,18 +67,6 @@ namespace {
 
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
-
-        // [[codegen::verbatim(RenderCopy1Info.description)]]
-        std::optional<bool> renderCopy1;
-
-        // [[codegen::verbatim(CopyPosition1Info.description)]]
-        std::optional<glm::vec3> copyPosition1;
-
-        // [[codegen::verbatim(RenderCopy2Info.description)]]
-        std::optional<bool> renderCopy2;
-
-        // [[codegen::verbatim(CopyPosition2Info.description)]]
-        std::optional<glm::vec3> copyPosition2;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -130,18 +99,6 @@ namespace openspace {
     , WwtCommunicator(dictionary)
     , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
     , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
-    , _renderCopy1(RenderCopy1Info)
-    , _copyPosition1(CopyPosition1Info,
-        glm::vec3(2.1f, 0.f, 0.f),
-        glm::vec3(-4.f, -4.f, 0.f),
-        glm::vec3(4.f, 4.f, 10.f)
-    )
-    , _renderCopy2(RenderCopy2Info)
-    , _copyPosition2(CopyPosition2Info,
-        glm::vec3(2.1f, 0.f, 0.f),
-        glm::vec3(-4.f, -4.f, 0.f),
-        glm::vec3(4.f, 4.f, 10.f)
-    )
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
@@ -149,19 +106,11 @@ namespace openspace {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textureQuality = p.textureQuality.value_or(_textureQuality);
     _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
-    _renderCopy1 = p.renderCopy1.value_or(_renderCopy1);
-    _copyPosition1 = p.copyPosition1.value_or(_copyPosition1);    
-    _renderCopy2 = p.renderCopy1.value_or(_renderCopy2);
-    _copyPosition2 = p.copyPosition1.value_or(_copyPosition2);
 
     addProperty(_url);
     addProperty(_browserPixeldimensions);
     addProperty(_reload);
     addProperty(_textureQuality);
-    addProperty(_renderCopy1);
-    addProperty(_copyPosition1);    
-    addProperty(_renderCopy2);
-    addProperty(_copyPosition2);
 
     _textureQuality.onChange([this]() {
         _textureDimensionsIsDirty = true;
@@ -227,6 +176,25 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     _objectSize = glm::ivec3(_texture->dimensions());
 }
 
+void ScreenSpaceSkyBrowser::addRenderCopy() {
+    openspace::properties::Property::PropertyInfo info = RenderCopyInfo;
+    info.identifier += _renderCopies.size();
+    _renderCopies.push_back(
+        std::make_unique<properties::Vec3Property>(
+            info, 
+            glm::vec3(2.1f, 0.f, 0.f),
+            glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
+            glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
+        )
+    );
+    addProperty(_renderCopies.back().get());
+}
+
+void ScreenSpaceSkyBrowser::removeRenderCopy() {
+    removeProperty(_renderCopies.back().get());
+    _renderCopies.pop_back();
+}
+
 bool ScreenSpaceSkyBrowser::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
     WwtCommunicator::deinitializeGL();
@@ -268,8 +236,8 @@ void ScreenSpaceSkyBrowser::render() {
     );
 
     // Render a copy that is not interactive
-    if (_renderCopy1) {
-        glm::vec3 spherical = sphericalToCartesian(raeToSpherical(_copyPosition1));
+    for (const std::unique_ptr<properties::Vec3Property>& copy : _renderCopies) {
+        glm::vec3 spherical = sphericalToCartesian(raeToSpherical(copy.get()->value()));
         glm::mat4 localRotation = glm::inverse(glm::lookAt(
             glm::vec3(0.f),
             glm::normalize(spherical),
@@ -282,22 +250,6 @@ void ScreenSpaceSkyBrowser::render() {
             scaleMatrix()
         );
     }
-    // Render a copy that is not interactive
-    if (_renderCopy2) {
-        glm::vec3 spherical = sphericalToCartesian(raeToSpherical(_copyPosition2));
-        glm::mat4 localRotation = glm::inverse(glm::lookAt(
-            glm::vec3(0.f),
-            glm::normalize(spherical),
-            glm::vec3(0.f, 1.f, 0.f)
-        ));
-        draw(
-            globalRotationMatrix() *
-            glm::translate(glm::mat4(1.f), spherical) *
-            localRotation *
-            scaleMatrix()
-        );
-    }
-
 }
 
 void ScreenSpaceSkyBrowser::update() {

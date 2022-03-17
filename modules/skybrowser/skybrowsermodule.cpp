@@ -250,7 +250,20 @@ namespace openspace {
                 "string, float, float, float, float",
                 "Takes an identifier to a sky browser or sky target and the [x, y] "
                 "starting position and the [x, y] translation vector."
-             },
+            },
+            {
+                "addRenderCopy",
+                &skybrowser::luascriptfunctions::addRenderCopy,
+                "string",
+                "Takes an identifier to a sky browser and adds a rendered copy to it."
+            },
+            {
+                "removeRenderCopy",
+                &skybrowser::luascriptfunctions::removeRenderCopy,
+                "string",
+                "Takes an identifier to a sky browser and removes the latest added "
+                "rendered copy to it."
+            },
         };
 
         return res;
