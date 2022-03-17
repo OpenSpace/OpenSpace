@@ -603,7 +603,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::AddLocalRotation,
             codegen::lua::AddTruckMovement,
             codegen::lua::AddLocalRoll,
-            codegen::lua::AddGlobalRoll
+            codegen::lua::AddGlobalRoll,
+            codegen::lua::TriggerIdleBehavior
         }
     };
 }

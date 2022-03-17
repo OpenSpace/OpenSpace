@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/camera/camerapose.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -159,26 +160,29 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        StereoInterpolationTimeInfo = {
-            "StereoInterpolationTime",
-            "Stereo Interpolation Time",
-            "The time to interpolate to a new stereoscopic depth "
-            "when the anchor node is changed, in seconds."
+        StereoInterpolationTimeInfo =
+    {
+        "StereoInterpolationTime",
+        "Stereo Interpolation Time",
+        "The time to interpolate to a new stereoscopic depth "
+        "when the anchor node is changed, in seconds."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        RetargetInterpolationTimeInfo = {
-            "RetargetAnchorInterpolationTime",
-            "Retarget Interpolation Time",
-            "The time to interpolate the camera rotation "
-            "when the anchor or aim node is changed, in seconds."
+        RetargetInterpolationTimeInfo =
+    {
+        "RetargetAnchorInterpolationTime",
+        "Retarget Interpolation Time",
+        "The time to interpolate the camera rotation "
+        "when the anchor or aim node is changed, in seconds."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        FollowRotationInterpTimeInfo = {
-            "FollowRotationInterpolationTime",
-            "Follow Rotation Interpolation Time",
-            "The interpolation time when toggling following focus node rotation."
+        FollowRotationInterpTimeInfo =
+    {
+        "FollowRotationInterpolationTime",
+        "Follow Rotation Interpolation Time",
+        "The interpolation time when toggling following focus node rotation."
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
@@ -190,31 +194,34 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        UseAdaptiveStereoscopicDepthInfo = {
-            "UseAdaptiveStereoscopicDepth",
-            "Adaptive Steroscopic Depth",
-            "Dynamically adjust the view scaling based on the distance to the surface of "
-            "the anchor and aim nodes. If enabled, view scale will be set to "
-            "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). "
-            "If disabled, view scale will be set to 10^StaticViewScaleExponent."
-        };
+        UseAdaptiveStereoscopicDepthInfo =
+    {
+        "UseAdaptiveStereoscopicDepth",
+        "Adaptive Steroscopic Depth",
+        "Dynamically adjust the view scaling based on the distance to the surface of "
+        "the anchor and aim nodes. If enabled, view scale will be set to "
+        "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). "
+        "If disabled, view scale will be set to 10^StaticViewScaleExponent."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo
-        StaticViewScaleExponentInfo = {
-            "StaticViewScaleExponent",
-            "Static View Scale Exponent",
-            "Statically scale the world by 10^StaticViewScaleExponent. "
-            "Only used if UseAdaptiveStereoscopicDepthInfo is set to false."
-        };
+        StaticViewScaleExponentInfo =
+    {
+        "StaticViewScaleExponent",
+        "Static View Scale Exponent",
+        "Statically scale the world by 10^StaticViewScaleExponent. "
+        "Only used if UseAdaptiveStereoscopicDepthInfo is set to false."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo
-        StereoscopicDepthOfFocusSurfaceInfo = {
-            "StereoscopicDepthOfFocusSurface",
-            "Stereoscopic Depth of the Surface in Focus",
-            "Set the stereoscopically perceived distance (in meters) to the closest "
-            "point out of the surface of the anchor and the center of the aim node. "
-            "Only used if UseAdaptiveStereoscopicDepthInfo is set to true."
-        };
+        StereoscopicDepthOfFocusSurfaceInfo =
+    {
+        "StereoscopicDepthOfFocusSurface",
+        "Stereoscopic Depth of the Surface in Focus",
+        "Set the stereoscopically perceived distance (in meters) to the closest "
+        "point out of the surface of the anchor and the center of the aim node. "
+        "Only used if UseAdaptiveStereoscopicDepthInfo is set to true."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
         "ApplyIdleBehavior",
@@ -230,6 +237,22 @@ namespace {
         "applied. Each option represents a predefined camera behavior."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo
+        ShouldTriggerIdleBehaviorWhenIdleInfo =
+    {
+        "ShouldTriggerWhenIdle",
+        "Should Trigger When Idle",
+        "If true, the chosen idle behavior will trigger automatically after "
+        "a certain time (see 'IdleWaitTime' property)."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IdleWaitTimeInfo = {
+        "IdleWaitTime",
+        "Idle Wait Time",
+        "The time (seconds) until idle behavior starts, if no camera interaction "
+        "has been performed. Note that friction counts as camera interaction."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorSpeedInfo = {
         "SpeedFactor",
         "Speed Factor",
@@ -238,7 +261,8 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        AbortOnCameraInteractionInfo = {
+        AbortOnCameraInteractionInfo =
+    {
         "AbortOnCameraInteraction",
         "Abort on Camera Interaction",
         "If set to true, the idle behavior is aborted on camera interaction. If false, "
@@ -248,12 +272,18 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        IdleBehaviorDampenInterpolationTimeInfo = {
+        IdleBehaviorDampenInterpolationTimeInfo =
+    {
         "DampenInterpolationTime",
         "Start/End Dampen Interpolation Time",
         "The time to interpolate to/from full speed when an idle behavior is triggered "
         "or canceled, in seconds."
     };
+
+    constexpr const char IdleKeyOrbit[] = "Orbit";
+    constexpr const char IdleKeyOrbitAtConstantLat[] = "OrbitAtConstantLatitude";
+    constexpr const char IdleKeyOrbitAroundUp[] = "OrbitAroundUp";
+
 } // namespace
 
 namespace openspace::interaction {
@@ -274,19 +304,25 @@ OrbitalNavigator::Friction::Friction()
 OrbitalNavigator::IdleBehavior::IdleBehavior()
     : properties::PropertyOwner({ "IdleBehavior" })
     , apply(ApplyIdleBehaviorInfo, false)
-    , chosenBehavior(IdleBehaviorInfo)
+    , defaultBehavior(IdleBehaviorInfo)
+    , shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
+    , idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f)
     , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
     , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
     , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
 {
     addProperty(apply);
-    chosenBehavior.addOptions({
-        { IdleBehavior::Behavior::Orbit, "Orbit" },
-        { IdleBehavior::Behavior::OrbitAtConstantLat, "OrbitAtConstantLatitude" },
-        { IdleBehavior::Behavior::OrbitAroundUp, "OrbitAroundUp" }
+    using Behavior = IdleBehavior::Behavior;
+    defaultBehavior.addOptions({
+        { static_cast<int>(Behavior::Orbit), IdleKeyOrbit },
+        { static_cast<int>(Behavior::OrbitAtConstantLat), IdleKeyOrbitAtConstantLat },
+        { static_cast<int>(Behavior::OrbitAroundUp), IdleKeyOrbitAroundUp }
     });
-    chosenBehavior = IdleBehavior::Behavior::Orbit;
-    addProperty(chosenBehavior);
+    defaultBehavior = static_cast<int>(IdleBehavior::Behavior::Orbit);
+    addProperty(defaultBehavior);
+    addProperty(shouldTriggerWhenIdle);
+    addProperty(idleWaitTime);
+    idleWaitTime.setExponent(2.2f);
     addProperty(speedScale);
     addProperty(abortOnCameraInteraction);
     addProperty(dampenInterpolationTime);
@@ -454,6 +490,13 @@ OrbitalNavigator::OrbitalNavigator()
             _idleBehavior.dampenInterpolationTime
         );
     });
+    _idleBehavior.shouldTriggerWhenIdle.onChange([&]() {
+        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
+    });
+    _idleBehavior.idleWaitTime.onChange([&]() {
+        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
+    });
+
     addProperty(_anchor);
     addProperty(_aim);
     addProperty(_retargetAnchor);
@@ -529,6 +572,9 @@ void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputSt
 
     if (interactionHappened) {
         updateOnCameraInteraction();
+    }
+    else {
+        tickIdleBehaviorTimer(deltaTime);
     }
 }
 
@@ -699,7 +745,8 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
             _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
                 deltaTime,
                 _currentCameraToSurfaceDistance,
-                targetCameraToSurfaceDistance);
+                targetCameraToSurfaceDistance
+            );
         }
 
         _camera->setScaling(
@@ -715,9 +762,19 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
 void OrbitalNavigator::updateOnCameraInteraction() {
     // Disable idle behavior if camera interaction happened
     if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
-        _idleBehavior.apply = false;
-        // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
-        _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
+        resetIdleBehavior();
+    }
+}
+
+void OrbitalNavigator::tickIdleBehaviorTimer(double deltaTime) {
+    if (!_idleBehavior.shouldTriggerWhenIdle) {
+        return;
+    }
+    if (_idleBehaviorTriggerTimer > 0.f) {
+        _idleBehaviorTriggerTimer -= static_cast<float>(deltaTime);
+    }
+    else {
+        triggerIdleBehavior();
     }
 }
 
@@ -1502,6 +1559,49 @@ const ScriptCameraStates& OrbitalNavigator::scriptStates() const {
     return _scriptStates;
 }
 
+void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode != OpenSpaceEngine::Mode::UserControl) {
+        LERROR(
+            "Could not start idle behavior. The camera is being controlled "
+            "by some other part of the system"
+        );
+        return;
+    }
+
+    if (choice.empty()) {
+        _idleBehavior.chosenBehavior = std::nullopt;
+    }
+    else {
+        IdleBehavior::Behavior behavior;
+        if (choice == IdleKeyOrbit) {
+            behavior = IdleBehavior::Behavior::Orbit;
+        }
+        else if (choice == IdleKeyOrbitAtConstantLat) {
+            behavior = IdleBehavior::Behavior::OrbitAtConstantLat;
+        }
+        else if (choice == IdleKeyOrbitAroundUp) {
+            behavior = IdleBehavior::Behavior::OrbitAroundUp;
+        }
+        else {
+            throw ghoul::RuntimeError(
+                fmt::format("No existing IdleBehavior with identifier '{}'", choice)
+            );
+        }
+        _idleBehavior.chosenBehavior = behavior;
+    }
+
+    _idleBehavior.apply = true;
+}
+
+void OrbitalNavigator::resetIdleBehavior() {
+    _idleBehavior.apply = false;
+    _idleBehavior.chosenBehavior = std::nullopt;
+    // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
+    _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
+    _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
+}
+
 void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
                                          glm::dquat& localRotation,
                                          glm::dquat& globalRotation)
@@ -1541,10 +1641,11 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
     speedScale *= _invertIdleBehaviorInterpolation ? (1.0 - s) : s;
 
     // Apply the chosen behavior
-    const IdleBehavior::Behavior chosen =
-        static_cast<IdleBehavior::Behavior>(_idleBehavior.chosenBehavior.value());
+    const IdleBehavior::Behavior choice = _idleBehavior.chosenBehavior.value_or(
+        static_cast<IdleBehavior::Behavior>(_idleBehavior.defaultBehavior.value())
+    );
 
-    switch (chosen) {
+    switch (choice) {
         case IdleBehavior::Behavior::Orbit:
             orbitAnchor(deltaTime, position, globalRotation, speedScale);
             break;

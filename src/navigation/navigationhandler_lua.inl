@@ -333,6 +333,20 @@ joystickAxis(std::string joystickName, int axis)
     );
 }
 
+/**
+ * Immediately start applying the chosen IdleBehavior. If none is specified, use the one
+ * set to default in the OrbitalNavigator.
+ */
+[[codegen::luawrap]] void triggerIdleBehavior(std::string choice = "") {
+    using namespace openspace;
+    try {
+        global::navigationHandler->orbitalNavigator().triggerIdleBehavior(choice);
+    }
+    catch (ghoul::RuntimeError& e) {
+        throw ghoul::lua::LuaError(e.message);
+    }
+}
+
 #include "navigationhandler_lua_codegen.cpp"
 
 } // namespace
