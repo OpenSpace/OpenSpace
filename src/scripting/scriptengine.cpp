@@ -49,7 +49,7 @@ namespace {
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;
-        std::vector<std::string> arguments;
+        std::map<std::string, std::string> arguments;
         std::optional<std::string> returnValue [[codegen::key("Return")]];
         std::optional<std::string> documentation;
     };
@@ -435,10 +435,11 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 
                     LuaLibrary::Function func;
                     func.name = p.name;
-                    for (size_t i = 0; i < p.arguments.size(); i += 1) {
+                    for (const std::pair<const std::string, std::string>& p : p.arguments)
+                    {
                         LuaLibrary::Function::Argument arg;
-                        arg.name = std::to_string(i);
-                        arg.type = p.arguments[i];
+                        arg.name = p.first;
+                        arg.type = p.second;
                         func.arguments.push_back(arg);
                     }
                     func.returnType = p.returnValue.value_or(func.returnType);
