@@ -270,20 +270,30 @@ void ScreenSpaceSkyBrowser::render() {
     // Render a copy that is not interactive
     if (_renderCopy1) {
         glm::vec3 spherical = sphericalToCartesian(raeToSpherical(_copyPosition1));
+        glm::mat4 localRotation = glm::inverse(glm::lookAt(
+            glm::vec3(0.f),
+            glm::normalize(spherical),
+            glm::vec3(0.f, 1.f, 0.f)
+        ));
         draw(
             globalRotationMatrix() *
-            glm::translate(glm::mat4(1.f), spherical)*
-            localRotationMatrix() *
+            glm::translate(glm::mat4(1.f), spherical) *
+            localRotation *
             scaleMatrix()
         );
     }
     // Render a copy that is not interactive
     if (_renderCopy2) {
         glm::vec3 spherical = sphericalToCartesian(raeToSpherical(_copyPosition2));
+        glm::mat4 localRotation = glm::inverse(glm::lookAt(
+            glm::vec3(0.f),
+            glm::normalize(spherical),
+            glm::vec3(0.f, 1.f, 0.f)
+        ));
         draw(
             globalRotationMatrix() *
             glm::translate(glm::mat4(1.f), spherical) *
-            localRotationMatrix() *
+            localRotation *
             scaleMatrix()
         );
     }
