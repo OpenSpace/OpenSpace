@@ -481,7 +481,7 @@ void SkyBrowserModule::lookAtTarget(const std::string& id) {
     }
 }
     
-void SkyBrowserModule::setHoverCircle(ScreenSpaceImageLocal* circle) {
+void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
     _hoverCircle = circle;
 }
 
@@ -491,26 +491,20 @@ void SkyBrowserModule::moveHoverCircle(int i) {
     // Only move and show circle if the image has coordinates
     if (_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem) {
         // Make circle visible
-        _hoverCircle->setEnabled(true);
+        _hoverCircle->renderable()->property("Enabled")->set(true);
 
         // Set the exact target position 
-        glm::dvec3 localCamera = skybrowser::equatorialToLocalCamera(image.equatorialCartesian);
-
-        if (_hoverCircle->isUsingRaeCoords()) {
-            glm::vec3 position = _hoverCircle->raePosition().x * glm::vec3(localCamera);
-            _hoverCircle->setRaeFromCartesianPosition(position);
-        }
-        else {
-            _hoverCircle->setCartesianPosition(
-                skybrowser::localCameraToScreenSpace3d(localCamera)
-            );
-        }
+        // Move it slightly outside of the celestial sphere so it doesn't overlap with 
+        // the target
+        glm::dvec3 pos = skybrowser::equatorialToGalactic(image.equatorialCartesian);
+        pos *= skybrowser::CelestialSphereRadius * 1.1; 
+        _hoverCircle->property("Translation.Position")->set(pos);
     }
 }
 
 void SkyBrowserModule::disableHoverCircle() {
-    if (_hoverCircle && _hoverCircle->isEnabled()) {
-        _hoverCircle->setEnabled(false);
+    if (_hoverCircle && _hoverCircle->renderable()) {
+        _hoverCircle->renderable()->property("Enabled")->set(false);
     }
 }
 

@@ -73,8 +73,7 @@ int setHoverCircle(lua_State* L) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     std::string id = ghoul::lua::value<std::string>(L, 1);
 
-    ScreenSpaceImageLocal* circle = dynamic_cast<ScreenSpaceImageLocal*>(
-        global::renderEngine->screenSpaceRenderable(id));
+    SceneGraphNode* circle = global::renderEngine->scene()->sceneGraphNode(id);
     module->setHoverCircle(circle);     
 
     return 0;

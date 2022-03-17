@@ -72,7 +72,7 @@ public:
 
     void setSelectedBrowser(const std::string& id);
     void setSelectedObject(); // Manage mouse interactions
-    void setHoverCircle(ScreenSpaceImageLocal* circle);
+    void setHoverCircle(SceneGraphNode* circle);
    
     // Rotation, animation, placement
     void lookAtTarget(const std::string& id);
@@ -115,7 +115,7 @@ private:
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
     TargetBrowserPair* _mouseOnPair = nullptr;
-    ScreenSpaceImageLocal* _hoverCircle = nullptr;
+    SceneGraphNode* _hoverCircle = nullptr;
     std::string _selectedBrowser = ""; // Currently selected browser
 
     // Fading
