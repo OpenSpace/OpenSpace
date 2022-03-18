@@ -74,7 +74,7 @@ private:
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexAlphaBuffer(const double currentTime);
-    void moveLines(const double dt);
+    void moveLines(const double currentTime, const double previousTime);
     
     template <bool LerpLine>
     void setNewRenderedLinePosition(

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,9 +36,9 @@ Fragment getFragment() {
     Fragment frag;
     frag.depth = vs_depth;
     frag.color = vs_color;
-    frag.color = vec4(max(debugTopologyColor, 0), max(1-debugTopologyColor, 0), abs(debugTopologyColor), 1);
+    frag.color = vec4(max(debugTopologyColor, 0), max(1-debugTopologyColor, 0), abs(debugTopologyColor), vs_color.a);
     if (debugTopologyColor < -0.99) {
-        frag.color = vec4(0.7, 0.0, 0.2, 1.0);
+        frag.color = vec4(0.7, 0.0, 0.2, vs_color.a);
     }
 
 
