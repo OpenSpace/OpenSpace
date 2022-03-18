@@ -180,6 +180,10 @@ void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     global::initialize();
+    // Initialize the general capabilities component
+    SysCap.addComponent(
+        std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
+    );
 
     _printEvents = global::configuration->isPrintingEvents;
 
@@ -403,11 +407,8 @@ void OpenSpaceEngine::initializeGL() {
     glbinding::Binding::initialize(global::windowDelegate->openGLProcedureAddress);
     //glbinding::Binding::useCurrentContext();
 
-    LDEBUG("Adding system components");
+    LDEBUG("Adding OpenGL capabilities components");
     // Detect and log OpenCL and OpenGL versions and available devices
-    SysCap.addComponent(
-        std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
-    );
     SysCap.addComponent(
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
