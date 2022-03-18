@@ -446,17 +446,38 @@ void FieldlinesState::addPathLine(const std::vector<glm::vec3> line, const int i
     _allPathLines.push_back(pl);
 }
 
+//void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLine1,
+//    std::vector<glm::vec3>::const_iterator reconPathLine1, 
+//    const std::vector<glm::vec3>&& pathLine2, 
+//    std::vector<glm::vec3>::const_iterator reconPathLine2)
+//{
+//    MatchingFieldlines m;
+//    PathLine pl1, pl2;
+//    pl1.line = pathLine1;
+//    pl1.daysideReconnectionStart = reconPathLine1;
+//    pl2.line = pathLine2;
+//    pl2.daysideReconnectionStart = reconPathLine2;
+//    m.pathLines = std::make_pair(pl1, pl2);
+//    _allMatchingFieldlines.push_back(m);
+//}
+
 void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLine1,
+    size_t reconPathLine1,
     const std::vector<glm::vec3>&& pathLine2,
+    size_t reconPathLine2,
     const double time)
+
 {
     MatchingFieldlines m;
     PathLine pl1, pl2;
     pl1.line = pathLine1;
+    pl1.daysideReconnectionStart = reconPathLine1;
     pl2.line = pathLine2;
+    pl2.daysideReconnectionStart = reconPathLine2;
 
     pl1.birthTime = time;
     pl2.birthTime = time;
+
 
     m.pathLines = std::make_pair(pl1, pl2);
     _allMatchingFieldlines.push_back(m);
@@ -464,7 +485,7 @@ void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLi
 
 void FieldlinesState::addMatchingKeyFrames(
     const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2,
-    const float time1, const float time2, size_t matchingFieldlinesId) {
+    const double time1, const double time2, size_t matchingFieldlinesId) {
     
     Fieldline f1, f2;
 
@@ -472,14 +493,12 @@ void FieldlinesState::addMatchingKeyFrames(
         glm::vec3 v1, v2;
         v1 = keyFrame1[i] * fls::ReToMeter;
         v2 = keyFrame2[i] * fls::ReToMeter;
-        //v1 = keyFrame1[i];
-        //v2 = keyFrame2[i];
         f1.vertices.push_back(v1);
         f2.vertices.push_back(v2);
     }
 
-    f1.timeToNextFieldline = time1;
-    f2.timeToNextFieldline = time2;
+    f1.timeToNextKeyFrame = time1;
+    f2.timeToNextKeyFrame = time2;
 
     // Elon: check if even correct. Probably will need both front and back to be < 1.5f
     // to be considered closed. 1.5 is just a number from thin air
@@ -503,12 +522,12 @@ void FieldlinesState::addMatchingKeyFrames(
         f2.topology = Fieldline::Topology::Imf;
     }
 
-    _allMatchingFieldlines[matchingFieldlinesId].pathLines.first.keyFrames.push_back(f1);
-    _allMatchingFieldlines[matchingFieldlinesId].pathLines.second.keyFrames.push_back(f2);
+    _allMatchingFieldlines[matchingFieldlinesId/2].pathLines.first.keyFrames.push_back(f1);
+    _allMatchingFieldlines[matchingFieldlinesId/2].pathLines.second.keyFrames.push_back(f2);
 }
 
 void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline, 
-                                   const float time, const int pathLineIndex)
+                                   const double time, const int pathLineIndex)
 {
     Fieldline f;
     for (glm::vec3 pos : fieldline) {
@@ -517,7 +536,7 @@ void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline,
         f.vertices.push_back(v);
     }
 
-    f.timeToNextFieldline = time;
+    f.timeToNextKeyFrame = time;
 
     // Elon: check if even correct. Probably will need both front and back to be < 1.5f
     // to be considered closed. 1.5 is just a number from thin air

@@ -43,7 +43,7 @@ public:
         };
         Topology topology;
         std::vector<glm::vec3> vertices;
-        float timeToNextFieldline;
+        double timeToNextKeyFrame;
     };
 
     struct PathLine {
@@ -54,6 +54,10 @@ public:
         // Path lines are visible even outside birth- and death time.
         double birthTime;   // Number of seconds from simulation start to when fieldline starts
         double deathTime = FLT_MAX;   // Number of seconds from simulation start to when fieldline ends
+        // iterator to the point of reconnection on the PathLine
+        size_t daysideReconnectionStart;
+        //std::vector<glm::vec3>::const_iterator daysideReconnectionStart;
+        //float lifetime; // for when multiple cdf-files come into play ?
     };
 
     struct MatchingFieldlines {
@@ -94,11 +98,19 @@ public:
     void appendToExtra(size_t idx, float val);
 
     void addPathLine(const std::vector<glm::vec3>, const int i);
-    void addFieldLine(const std::vector<glm::vec3> fieldLines, const float time, const int i);
-    void addMatchingPathLines(const std::vector<glm::vec3>&&, const std::vector<glm::vec3>&&, const double time);
+    void addFieldLine(const std::vector<glm::vec3> fieldLines, const double time, const int i);
+    void addMatchingPathLines(const std::vector<glm::vec3>&& pathLine1,
+        size_t reconPathLine1,
+        const std::vector<glm::vec3>&& pathLine2,
+        size_t reconPathLine2,
+        const double time);
+    //void addMatchingPathLines(const std::vector<glm::vec3>&& pathLine1,
+    //    std::vector<glm::vec3>::const_iterator reconPathLine1,
+    //    const std::vector<glm::vec3>&& pathLine2,
+    //    std::vector<glm::vec3>::const_iterator reconPathLine2);
     void addMatchingKeyFrames(
         const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2, 
-        const float time1, const float time2, size_t matchingFieldlinesId);
+        const double time1, const double time2, size_t matchingFieldlinesId);
 
     void initializeRenderedMatchingFieldlines();
 

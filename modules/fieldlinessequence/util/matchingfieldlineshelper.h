@@ -56,8 +56,8 @@ namespace openspace {
             std::vector<std::string>& extraVars, 
             std::vector<std::string>& extraMagVars,
             const size_t nPointsOnPathLine, 
-            const size_t nPointsOnFieldLines
-        );
+            const size_t nPointsOnFieldLines);
+
     } // namespace fls
 } // namespace openspace
 

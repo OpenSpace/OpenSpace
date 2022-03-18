@@ -46,12 +46,18 @@ public:
         PathLineTraverser(const std::vector<FieldlinesState::Fieldline>& fieldlines_);
         void advanceCurrent();
         bool isAtEnd() const;
-        std::vector<FieldlinesState::Fieldline>::const_iterator nextFieldline();
+        bool isAtStart() const;
+        std::vector<FieldlinesState::Fieldline>::const_iterator nextKeyFrame();
+        double getTimeToReconnectionPoint(size_t indexOfReconnection);
+        double getTimeToEndKeyFrame();
+        void setStartPoint(double timeToRecon, size_t indexOfReconnection);
 
-        const std::vector<FieldlinesState::Fieldline>& fieldlines;
-        float timeSinceInterpolation = 0.f;
+        std::pair<double, size_t> startPositionValues;
+        const std::vector<FieldlinesState::Fieldline>& keyFrames;
+        double timeSinceInterpolation = 0.f;
         bool forward = true;
-        std::vector<FieldlinesState::Fieldline>::const_iterator currentFieldline;
+        bool hasSwapped = false;
+        std::vector<FieldlinesState::Fieldline>::const_iterator currentKeyFrame;
 
     };
 
@@ -81,9 +87,17 @@ private:
         PathLineTraverser traverser,
         GLint lineStart, GLsizei nVertices);
     
+    void moveLinePair(const double dt,
+        const double currentTime,
+        const FieldlinesState::PathLine& pathLine1,
+        const FieldlinesState::PathLine& pathLine2,
+        PathLineTraverser& traverser1,
+        PathLineTraverser& traverser2,
+        std::pair<GLint, GLint> lineStarts,
+        std::pair<GLsizei, GLsizei> nVertices);
 
-
-    void moveLine(const double dt, const FieldlinesState::PathLine& pathLine,
+    void moveLine(const double dt, const double currentTime,
+        const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
         GLsizei nVertices);
 
