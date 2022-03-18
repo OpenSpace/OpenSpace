@@ -21,11 +21,11 @@ local actionsList = {}
 -- JWST timelapse timeline, forwards
 local function createForwardTimelapse()
   local timelapse = [[
-    -- Mission start, setup 1 sec after
+    -- Mission start, setup 1 sec after, reset night layer
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(dataStartTime, 0, 0, 0, 1) .. [[",
-      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 0.7)" ..
-      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", false)"
+      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
+      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)"
     )
 
     -- Mission start, GO 2 sec after
@@ -47,6 +47,13 @@ local function createForwardTimelapse()
       advance(launchTime, 0, 0, 30, 42) .. [[",
       "openspace.time.interpolateDeltaTime(7200)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
+    )
+
+    -- Make night layer more visible, at around 14:00
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(dataStartTime, 0, 1, 10, 0) .. [[",
+      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 0.7)" ..
+      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", false)"
     )
 
     -- antenna deploy
@@ -266,6 +273,14 @@ local function createBackwardTimelapse()
       "",
       "openspace.time.interpolateDeltaTime(-120)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 minutes/second\")"
+    )
+
+    -- Reset night layer, at around 14:00
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(dataStartTime, 0, 1, 10, 0) .. [[",
+      "",
+      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
+      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)"
     )
 
     -- antenna deploy
