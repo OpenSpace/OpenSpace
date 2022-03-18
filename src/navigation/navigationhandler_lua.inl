@@ -343,4 +343,20 @@ int addGlobalRoll(lua_State* L) {
     return 0;
 }
 
+int triggerIdleBehavior(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, {0, 1}, "lua::triggerIdleBehavior");
+    std::optional<std::string> choice = ghoul::lua::value<std::optional<std::string>>(L);
+
+    try {
+        global::navigationHandler->orbitalNavigator().triggerIdleBehavior(
+            choice.value_or("")
+        );
+    }
+    catch (ghoul::RuntimeError& e) {
+        return ghoul::lua::luaError(L, e.message);
+    }
+
+    return 0;
+}
+
 } // namespace openspace::luascriptfunctions
