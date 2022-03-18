@@ -70,9 +70,7 @@ asset.onInitialize(function()
     "",
     1 -- Not default group, never clear this script
   )
-end)
 
-asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTPosition)
   openspace.addSceneGraphNode(JWSTRotation)
 end)
@@ -80,6 +78,7 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTRotation)
   openspace.removeSceneGraphNode(JWSTPosition)
+  openspace.scriptScheduler.clear(1)
 end)
 
 asset.export(JWSTPosition)

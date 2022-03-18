@@ -298,6 +298,16 @@
       "name": "Scene.JWSTModel.ApproachFactor",
       "type": "setPropertyValueSingle",
       "value": "900"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {
