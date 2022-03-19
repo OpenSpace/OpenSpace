@@ -1,3 +1,4 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
 
@@ -56,21 +57,6 @@ local RotationMatrix = {
   0, 1, 0
 }
 
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
-}
-
 local Messenger = {
   Identifier = "Messenger",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -105,7 +91,14 @@ local MessengerProbeBlack = {
     Type = "RenderableModel",
     GeometryFile = models .. "MessengerProbe_black.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe Black",
@@ -120,7 +113,14 @@ local MessengerProbeFoil = {
     Type = "RenderableModel",
     GeometryFile = models .. "MessengerProbe_foil.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe foil",
@@ -135,7 +135,14 @@ local MessengerProbeHeatShield = {
     Type = "RenderableModel",
     GeometryFile = models .. "MessengerProbe_heatShield.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe Heat Sheild",
@@ -150,7 +157,14 @@ local MessengerProbeMetal = {
     Type = "RenderableModel",
     GeometryFile = models .. "MessengerProbe_metal.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe Metal",
@@ -165,7 +179,14 @@ local MessengerProbePanels = {
     Type = "RenderableModel",
     GeometryFile = models .. "MessengerProbe_panels.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "MessengerProbe Panels",

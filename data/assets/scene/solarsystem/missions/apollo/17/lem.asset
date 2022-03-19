@@ -1,4 +1,4 @@
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local model = asset.syncedResource({
@@ -42,12 +42,7 @@ local Apollo17LemModel = {
     SpecularIntensity = 0.0,
     RotationVector = { 110.255219,171.229706,126.666664 },
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      },
+      sun.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
