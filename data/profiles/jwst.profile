@@ -84,6 +84,7 @@
     "scene/solarsystem/missions/jwst/jwst",
     "scene/solarsystem/missions/jwst/trail",
     "scene/solarsystem/missions/jwst/hudf",
+    "scene/solarsystem/missions/jwst/hubble",
     "scene/solarsystem/missions/jwst/timelapse",
     "scene/solarsystem/missions/jwst/toggle_trail",
     "scene/digitaluniverse/hdf"
@@ -306,6 +307,11 @@
     },
     {
       "name": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.ISS_trail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
     }
