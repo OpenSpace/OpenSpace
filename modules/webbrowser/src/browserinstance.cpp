@@ -48,7 +48,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
 {
-    _client = new BrowserClient(_renderHandler, _keyboardHandler);
+    _client = new BrowserClient(renderer, keyboardHandler);
 
     CefWindowInfo windowInfo;
     windowInfo.SetAsWindowless(nullptr);
@@ -62,6 +62,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
         _client.get(),
         url,
         browserSettings,
+        nullptr,
         nullptr
     );
 

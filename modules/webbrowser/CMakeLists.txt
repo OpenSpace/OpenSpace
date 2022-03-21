@@ -55,14 +55,15 @@ cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
 
-# Release from 04/24/2019 verified to work on Windows.
-set(CEF_VERSION "73.1.13+g6e3c989+chromium-73.0.3683.75")
+# Release from 03/21/2022 verified to work on Windows.
+set(CEF_VERSION "99.2.12+g2977b3a+chromium-99.0.4844.74")
 
+# Removing - micahnyc 03/21/2022
 # 73.1.13 has an issue on MacOS: The GUI freezing upon interaction.
 # Therefore, we fall back to 3.3578.1867 from 01/29/2019
-if (APPLE)
-  set(CEF_VERSION "3.3578.1867.g0f6d65a")
-endif ()
+#if (APPLE)
+#  set(CEF_VERSION "3.3578.1867.g0f6d65a")
+#endif ()
 
 # CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
 if (WIN32)
