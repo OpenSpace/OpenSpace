@@ -132,12 +132,11 @@ local JWSTLabel = {
     End = "2024 JAN 22"
   },
   Renderable = {
-    Enabled = true,
     Type = "RenderableLabels",
     Text = "JWST",
-    FontSize = 20,
-    Size = 6.25,
-    MinMaxSize = { 1.0, 100.0 },
+    FontSize = 50,
+    Size = 6.5,
+    MinMaxSize = { 4.0, 30.0 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Normal",
     EnableFading = false
