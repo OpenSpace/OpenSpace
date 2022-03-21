@@ -53,6 +53,10 @@ struct TransformData;
 struct ShadowConfiguration {
     std::pair<std::string, double> source;
     std::pair<std::string, double> caster;
+    // Set to 'true' if we printed an error because we couldn't find the source or caster.
+    // We only want to print a message once
+    bool printedSourceError = false;
+    bool printedCasterError = false;
 };
 
 namespace documentation { struct Documentation; }

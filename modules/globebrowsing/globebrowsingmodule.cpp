@@ -33,24 +33,36 @@
 #include <modules/globebrowsing/src/globerotation.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
+#include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/spoutimageprovider.h>
 #include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
@@ -306,6 +318,9 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         fTileProvider->registerClass<ImageSequenceTileProvider>(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::ImageSequenceTileLayer)]
         );
+        fTileProvider->registerClass<SpoutImageProvider>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SpoutImageTileLayer)]
+        );
         fTileProvider->registerClass<TemporalTileProvider>(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::TemporalTileLayer)]
         );
@@ -332,141 +347,6 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
 globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
     return _tileCache.get();
-}
-
-scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
-    std::string listLayerGroups = layerGroupNamesList();
-
-    scripting::LuaLibrary res;
-    res.name = "globebrowsing";
-    res.functions = {
-        {
-            "addLayer",
-            &globebrowsing::luascriptfunctions::addLayer,
-            "string, string, table",
-            "Adds a layer to the specified globe. The first argument specifies the "
-            "name of the scene graph node of which to add the layer. The renderable "
-            "of the specified scene graph node needs to be a renderable globe. "
-            "The second argument is the layer group which can be any of "
-            + listLayerGroups + ". The third argument is the dictionary defining the "
-            "layer."
-        },
-        {
-            "deleteLayer",
-            &globebrowsing::luascriptfunctions::deleteLayer,
-            "string, string, (string, table)",
-            "Removes a layer from the specified globe. The first argument specifies "
-            "the name of the scene graph node of which to remove the layer. "
-            "The renderable of the specified scene graph node needs to be a "
-            "renderable globe. The second argument is the layer group which can be "
-            "any of " + listLayerGroups + ". The third argument is either the identifier "
-            "for the layer or a dictionary with the 'Identifier' key that is used instead"
-        },
-        {
-            "getLayers",
-            &globebrowsing::luascriptfunctions::getLayers,
-            "string, string",
-            "Returns the list of layers for the scene graph node specified in the first "
-            "parameter. The second parameter specifies which layer type should be "
-            "queried."
-        },
-        {
-            "moveLayer",
-            &globebrowsing::luascriptfunctions::moveLayer,
-            "string, string, number, number",
-            "Rearranges the order of a single layer on a globe. The first parameter"
-            "is the identifier of the globe, the second parameter specifies "
-            "the name of the layer group, the third parameter is the original position "
-            "of the layer that should be moved and the last parameter is the new "
-            "position in the list. The first position in the list has index 0, and the "
-            "last position is given by the number of layers minus one. The new position "
-            "may be -1 to place the layer at the top or any number bigger than the "
-            "number of layers to place it at the bottom."
-        },
-        {
-            "goToChunk",
-            &globebrowsing::luascriptfunctions::goToChunk,
-            "void",
-            "Go to chunk with given index x, y, level"
-        },
-        {
-            "goToGeo",
-            &globebrowsing::luascriptfunctions::goToGeo,
-            "[string], number, number, [number]",
-            "Go to geographic coordinates of a globe. The first (optional) argument is "
-            "the identifier of a scene graph node that has a RenderableGlobe attached. "
-            "If no globe is passed in, the current anchor will be used. "
-            "The second argument is latitude and the third is longitude (degrees). "
-            "North and East are expressed as positive angles, while South and West are "
-            "negative. The optional fourh argument is the altitude in meters. If no "
-            "altitude is provided, the altitude will be kept as the current distance to "
-            "the surface of the specified globe."
-        },
-        {
-            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
-            // paths work really well close to surfaces
-            "flyToGeo",
-            &globebrowsing::luascriptfunctions::flyToGeo,
-            "[string], number, number, number [, bool, number]",
-            "Fly the camera to geographic coordinates of a globe, using the path "
-            "navigation system. The first (optional) argument is the identifier of a "
-            "scene graph node with a RenderableGlobe. If no globe is passed in, the "
-            "current anchor will be used. The second and third argument is latitude and "
-            "longitude (degrees). The fourth argument is the altitude, in meters. The "
-            "last two optional arguments are: a bool specifying whether the up vector "
-            "at the target position should be set to the globe's North vector, and a "
-            "duration for the motion, in seconds. Either of the two can be left out."
-        },
-        {
-            "getLocalPositionFromGeo",
-            &globebrowsing::luascriptfunctions::getLocalPositionFromGeo,
-            "string, number, number, number",
-            "Returns a position in the local Cartesian coordinate system of the globe "
-            "identified by the first argument, that corresponds to the given geographic "
-            "coordinates: latitude, longitude and altitude (in degrees and meters). In "
-            "the local coordinate system, the position (0,0,0) corresponds to the "
-            "globe's center."
-        },
-        {
-            "getGeoPositionForCamera",
-            &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
-            "void",
-            "Get geographic coordinates of the camera position in latitude, "
-            "longitude, and altitude (degrees and meters)."
-        },
-        {
-            "loadWMSCapabilities",
-            &globebrowsing::luascriptfunctions::loadWMSCapabilities,
-            "string, string, string",
-            "Loads and parses the WMS capabilities xml file from a remote server. "
-            "The first argument is the name of the capabilities that can be used to "
-            "later refer to the set of capabilities. The second argument is the "
-            "globe for which this server is applicable. The third argument is the "
-            "URL at which the capabilities file can be found."
-        },
-        {
-            "removeWMSServer",
-            &globebrowsing::luascriptfunctions::removeWMSServer,
-            "string",
-            "Removes the WMS server identified by the first argument from the list "
-            "of available servers. The parameter corrsponds to the first argument in "
-            "the loadWMSCapabilities call that was used to load the WMS server."
-        },
-        {
-            "capabilitiesWMS",
-            &globebrowsing::luascriptfunctions::capabilities,
-            "string",
-            "Returns an array of tables that describe the available layers that are "
-            "supported by the WMS server identified by the provided name. The 'URL'"
-            "component of the returned table can be used in the 'FilePath' argument "
-            "for a call to the 'addLayer' function to add the value to a globe."
-        }
-    };
-    res.scripts = {
-        absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
-    };
-
-    return res;
 }
 
 std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() const {
@@ -815,6 +695,34 @@ std::string GlobeBrowsingModule::wmsCacheLocation() const {
 uint64_t GlobeBrowsingModule::wmsCacheSize() const {
     uint64_t size = _wmsCacheSizeMB;
     return size * 1024 * 1024;
+}
+
+scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
+    std::string listLayerGroups = layerGroupNamesList();
+
+    scripting::LuaLibrary res;
+    res.name = "globebrowsing";
+    res.functions = {
+        codegen::lua::AddLayer,
+        codegen::lua::DeleteLayer,
+        codegen::lua::GetLayers,
+        codegen::lua::MoveLayer,
+        codegen::lua::GoToChunk,
+        codegen::lua::GoToGeo,
+        // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
+        // paths work really well close to surfaces
+        codegen::lua::FlyToGeo,
+        codegen::lua::GetLocalPositionFromGeo,
+        codegen::lua::GetGeoPositionForCamera,
+        codegen::lua::LoadWMSCapabilities,
+        codegen::lua::RemoveWMSServer,
+        codegen::lua::Capabilities
+    };
+    res.scripts = {
+        absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
+    };
+
+    return res;
 }
 
 } // namespace openspace

@@ -158,6 +158,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler.cpp
   ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding.cpp
+  ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/collisionhelper.cpp

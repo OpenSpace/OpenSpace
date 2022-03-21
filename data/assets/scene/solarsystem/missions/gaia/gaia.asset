@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local model = asset.syncedResource({
   Name = "Gaia Model",
@@ -32,12 +32,7 @@ local Gaia = {
     Body = "GAIA",
     GeometryFile = model .. "gaia.obj",
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 0.3
-      },
+      sun.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",

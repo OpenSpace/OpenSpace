@@ -115,6 +115,12 @@ struct TileProvider : public properties::PropertyOwner {
     virtual void reset() = 0;
 
     /**
+     * \return The minimum level as defined by the <code>TileIndex</code> that this
+     *         TileProvider is capable of providing.
+     */
+    virtual int minLevel() = 0;
+
+    /**
      * \return The maximum level as defined by <code>TileIndex</code> that this
      *         TileProvider is able provide.
      */
