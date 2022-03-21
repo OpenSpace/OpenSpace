@@ -1,34 +1,34 @@
 openspace.documentation = {
     {
         Name = "markInterestingNodes",
-        Arguments = "List of nodes",
+        Arguments = { sceneGraphNode = "[ String ]" },
         Documentation = "This function marks the scene graph nodes identified by name " ..
         "as interesting, which will provide shortcut access to focus buttons and " .. 
         "featured properties."
     },
     {
         Name = "markInterestingTimes",
-        Arguments = "List of { Name = '...', Time = '...' } or { '<name>', '<time>' }",
+        Arguments = { times = "[ Table ]" },
         Documentation = "This function marks interesting times for the current scene, " ..
         "which will create shortcuts for a quick access."
     },
     {
         Name = "removeInterestingNodes",
-        Arguments = "List of nodes",
+        Arguments = { sceneGraphNode = "[ String ]" },
         Documentation = "This function removes unmarks the scene graph nodes " ..
         "identified by name as interesting, thus removing the shortcuts from the " ..
         "features properties list."
     },
     {
         Name = "setDefaultGuiSorting",
-        Arguments = "",
+        Arguments = {},
         Documentation = "This function sets the default GUI sorting for the space " ..
         "environment to increasing size, from solar system, through Milky Way, " ..
         "Universe and finishing with other elements"
     },
     {
         Name = "setDefaultDashboard",
-        Arguments = "",
+        Arguments = {},
         Documentation = "This function sets the default values for the dashboard " ..
         "consisting of 'DashboardItemDate', 'DashboardItemSimulationIncrement', " ..
         "'DashboardItemDistance', 'DashboardItemFramerate', and " ..
@@ -36,7 +36,7 @@ openspace.documentation = {
     },
     {
         Name = "rebindKey",
-        Arguments = "string, string",
+        Arguments = { oldKey = "String", newKey = "String" },
         Documentation = "Rebinds all scripts from the old key (first argument) to the " ..
         "new key (second argument)."
     }

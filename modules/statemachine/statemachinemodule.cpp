@@ -28,10 +28,15 @@
 #include <modules/statemachine/include/statemachine.h>
 #include <modules/statemachine/include/transition.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <string>
+#include <optional>
 
 #include "statemachinemodule_lua.inl"
 
@@ -140,78 +145,20 @@ void StateMachineModule::saveToFile(const std::string& filename,
 }
 
 scripting::LuaLibrary StateMachineModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "statemachine";
-    res.functions = {
-         {
-            "createStateMachine",
-            &luascriptfunctions::createStateMachine,
-            "table, table, [string]",
-            "Creates a state machine from a list of states and transitions. See State "
-            "and Transition documentation for details. The optional thrid argument is "
-            "the identifier of the desired initial state. If left out, the first state "
-            "in the list will be used."
-        },
+    return {
+        "statemachine",
         {
-            "destroyStateMachine",
-            &luascriptfunctions::destroyStateMachine,
-            "",
-            "Destroys the current state machine and deletes all the memory."
-        },
-        {
-            "goToState",
-            &luascriptfunctions::goToState,
-            "string",
-            "Triggers a transition from the current state to the state with the given "
-            "identifier. Requires that the specified string corresponds to an existing "
-            "state, and that a transition between the two states exists."
-        },
-        {
-            "setInitialState",
-            &luascriptfunctions::setInitialState,
-            "string",
-            "Immediately sets the current state to the state with the given name, if "
-            "it exists. This is done without doing a transition and completely ignores "
-            "the previous state."
-        },
-        {
-            "currentState",
-            &luascriptfunctions::currentState,
-            "",
-            "Returns the string name of the current state that the statemachine is in."
-        },
-        {
-            "possibleTransitions",
-            &luascriptfunctions::possibleTransitions,
-            "",
-            "Returns a list with the identifiers of all the states that can be "
-            "transitioned to from the current state."
-        },
-        {
-            "canGoToState",
-            &luascriptfunctions::canGoToState,
-            "string",
-            "Returns true if there is a defined transition between the current state and "
-            "the given string name of a state, otherwise false"
-        },
-        {
-            "printCurrentStateInfo",
-            &luascriptfunctions::printCurrentStateInfo,
-            "",
-            "Prints information about the current state and possible transitions to the "
-            "log."
-        },
-        {
-            "saveToDotFile",
-            &luascriptfunctions::saveToDotFile,
-            "string, [string]",
-            "Saves the current state machine to a .dot file as a directed graph. The "
-            "resulting graph can be rendered using external tools such as Graphviz. "
-            "The first parameter is the name of the file, and the second is an optional "
-            "directory. If no directory is given, the file is saved to the temp folder."
+        codegen::lua::CreateStateMachine,
+        codegen::lua::DestroyStateMachine,
+        codegen::lua::GoToState,
+        codegen::lua::SetInitialState,
+        codegen::lua::CurrentState,
+        codegen::lua::PossibleTransitions,
+        codegen::lua::CanGoToState,
+        codegen::lua::PrintCurrentStateInfo,
+        codegen::lua::SaveToDotFile
         }
     };
-    return res;
 }
 
 std::vector<documentation::Documentation> StateMachineModule::documentations() const {

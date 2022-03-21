@@ -213,11 +213,6 @@ void setAdditionalScriptsFromProfile(const Profile& p);
 
 } // namespace openspace
 
-// Lua functions - exposed for testing
-namespace openspace::luascriptfunctions {
-
-int createSingleColorImage(lua_State* L);
-
-} // openspace::luascriptfunctions
+std::filesystem::path createSingleColorImage(std::string name, glm::dvec3 color);
 
 #endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__
