@@ -57,6 +57,26 @@ class KeyboardInputState;
 
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
+    struct IdleBehavior : public properties::PropertyOwner {
+        enum class Behavior {
+            Orbit = 0,
+            OrbitAtConstantLat,
+            OrbitAroundUp
+        };
+
+        IdleBehavior();
+
+        properties::BoolProperty apply;
+        properties::BoolProperty shouldTriggerWhenIdle;
+        properties::FloatProperty idleWaitTime;
+        properties::BoolProperty abortOnCameraInteraction;
+        properties::FloatProperty speedScale;
+        properties::FloatProperty dampenInterpolationTime;
+
+        properties::OptionProperty defaultBehavior;
+        std::optional<Behavior> chosenBehavior = std::nullopt;
+    };
+
     OrbitalNavigator();
 
     void updateStatesFromInput(const MouseInputState& mouseInputState,
@@ -71,6 +91,9 @@ public:
      * a session recording playback
      */
     void updateOnCameraInteraction();
+
+    void tickIdleBehaviorTimer(double deltaTime);
+    void triggerIdleBehavior(std::string_view choice = "");
 
     Camera* camera() const;
     void setCamera(Camera* camera);
@@ -191,22 +214,8 @@ private:
     Interpolator<double> _idleBehaviorDampenInterpolator;
     bool _invertIdleBehaviorInterpolation = false;
 
-    struct IdleBehavior : public properties::PropertyOwner {
-        enum Behavior {
-            Orbit = 0,
-            OrbitAtConstantLat,
-            OrbitAroundUp
-        };
-
-        IdleBehavior();
-
-        properties::BoolProperty apply;
-        properties::OptionProperty chosenBehavior;
-        properties::FloatProperty speedScale;
-        properties::BoolProperty abortOnCameraInteraction;
-        properties::FloatProperty dampenInterpolationTime;
-    };
     IdleBehavior _idleBehavior;
+    float _idleBehaviorTriggerTimer = 0.f;
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by
@@ -343,6 +352,8 @@ private:
      */
     SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
         const glm::dvec3 cameraPositionWorldSpace);
+
+    void resetIdleBehavior();
 
     /**
      * Apply the currently selected idle behavior to the position and rotations

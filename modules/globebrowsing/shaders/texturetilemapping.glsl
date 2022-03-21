@@ -163,7 +163,8 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 8) // SolidColor
   c.rgb = #{layerGroup}[#{i}].color;
-
+#elif (#{#{layerGroup}#{i}LayerType} == 9) // SpoutImageTileLayer
+  c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #endif
 
   return c;

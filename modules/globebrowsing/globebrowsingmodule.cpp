@@ -39,6 +39,7 @@
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/spoutimageprovider.h>
 #include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
@@ -305,6 +306,9 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         );
         fTileProvider->registerClass<ImageSequenceTileProvider>(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::ImageSequenceTileLayer)]
+        );
+        fTileProvider->registerClass<SpoutImageProvider>(
+            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SpoutImageTileLayer)]
         );
         fTileProvider->registerClass<TemporalTileProvider>(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::TemporalTileLayer)]
