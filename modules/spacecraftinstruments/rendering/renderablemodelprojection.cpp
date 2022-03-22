@@ -38,8 +38,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableModelProjection";
-
     constexpr const char* DestinationFrame = "GALACTIC";
 
     constexpr const std::array<const char*, 7> MainUniformNames = {
@@ -321,11 +319,14 @@ void RenderableModelProjection::update(const UpdateData& data) {
         }
     }
 
-    glm::dvec3 p =
-        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
-        data.modelTransform.translation;
-
-    _sunPosition = static_cast<glm::vec3>(p);
+    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
+    if (sun) {
+        _sunPosition = sun->worldPosition() - data.modelTransform.translation;
+    }
+    else {
+        // If the Sun node doesn't exist, we assume that the light source is in the origin
+        _sunPosition = -data.modelTransform.translation;
+    }
 }
 
 void RenderableModelProjection::imageProjectGPU(

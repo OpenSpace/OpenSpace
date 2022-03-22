@@ -55,8 +55,6 @@ namespace {
         "spriteTexture", "hasColorMap"
     };
 
-    constexpr double PARSEC = 0.308567756E17;
-
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
@@ -79,7 +77,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical onject."
+        "The path to the color map file of the astronomical object."
     };
 
     struct [[codegen::Dictionary(RenderablePoints)]] Parameters {

@@ -123,6 +123,7 @@ set_folder_location(quat "External")
 set_folder_location(tinyxml2static "External")
 set_folder_location(vrpn "External")
 set_folder_location(zlibstatic "External")
+set_folder_location(SGCTTest "Unit Tests")
 
 if (UNIX AND (NOT APPLE))
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)

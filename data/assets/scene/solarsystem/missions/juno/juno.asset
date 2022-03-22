@@ -1,5 +1,5 @@
 local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 local model = asset.syncedResource({
@@ -152,12 +152,7 @@ local Juno = {
     GeometryFile = model .. "Juno.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      },
+      sun.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",

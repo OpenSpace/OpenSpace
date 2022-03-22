@@ -53,15 +53,15 @@ FontSize = {
     Configuration loadConfiguration(const std::string& tag, const std::string& content) {
         std::string filename = fmt::format("test_configuration_{}.cfg", tag);
         std::filesystem::path path = std::filesystem::temp_directory_path();
-        std::string configFile = (path / filename).string();
-        writeConfig(configFile, content);
+        std::string file = (path / filename).string();
+        writeConfig(file, content);
         try {
-            Configuration conf = loadConfigurationFromFile(configFile, content);
-            std::filesystem::remove(configFile);
+            Configuration conf = loadConfigurationFromFile(file, glm::ivec2(0), content);
+            std::filesystem::remove(file);
             return conf;
         }
         catch (...) {
-            std::filesystem::remove(configFile);
+            std::filesystem::remove(file);
             throw;
         }
     }

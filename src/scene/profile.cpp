@@ -23,17 +23,25 @@
  ****************************************************************************************/
 
 #include <openspace/scene/profile.h>
-#include <openspace/scene/scene.h>
 
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/scene/scene.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ctime>
+#include <filesystem>
 #include <set>
 #include <json/json.hpp>
 
@@ -109,7 +117,6 @@ namespace {
         }
     }
 } // namespace
-
 
 //
 // Current version:
@@ -714,20 +721,7 @@ scripting::LuaLibrary Profile::luaLibrary() {
     return {
         "",
         {
-            {
-                "saveSettingsToProfile",
-                &luascriptfunctions::saveSettingsToProfile,
-                "[string, bool]",
-                "Collects all changes that have been made since startup, including all "
-                "property changes and assets required, requested, or removed. All "
-                "changes will be added to the profile that OpenSpace was started with, "
-                "and the new saved file will contain all of this information. If the "
-                "arugment is provided, the settings will be saved into new profile with "
-                "that name. If the argument is blank, the current profile will be saved "
-                "to a backup file and the original profile will be overwritten. The "
-                "second argument determines if a file that already exists should be "
-                "overwritten, which is 'false' by default"
-            }
+            codegen::lua::SaveSettingsToProfile
         }
     };
 }

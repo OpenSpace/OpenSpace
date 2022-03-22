@@ -1,6 +1,6 @@
 local satelliteHelper = asset.require("util/tle_helper")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local url = "http://celestrak.com/satcat/tle.php?CATNR=25544"
 local identifier = "ISS"
@@ -23,6 +23,7 @@ local initializeAndAddNodes = function()
   local iss = {
     Identifier = "ISS",
     Parent = transforms.EarthInertial.Identifier,
+    BoundingSphere = 54.5, -- half the width
     InteractionSphere = 30,
     Transform = {
       Translation = {
@@ -61,12 +62,7 @@ local initializeAndAddNodes = function()
         GeometryFile = models .. "ISS.fbx",
         ModelScale = "Centimeter",
         LightSources = {
-          {
-            Type = "SceneGraphLightSource",
-            Identifier = "Sun",
-            Node = sunTransforms.SolarSystemBarycenter.Identifier,
-            Intensity = 1.0
-          }
+          sun.LightSource
         },
         PerformShading = true,
         DisableFaceCulling = true
@@ -88,8 +84,8 @@ local initializeAndAddNodes = function()
         Observer = transforms.EarthInertial.Identifier,
         File = path,
         LineNumber = 1,
-        RenderBinMode = "PostDeferredTransparent"
       },
+      RenderBinMode = "PostDeferredTransparent",
       Color = { 0.9, 0.6715, 0.0 },
       Fade = 1.5,
       Period = period,

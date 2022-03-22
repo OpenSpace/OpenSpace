@@ -1,5 +1,5 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local kernels = asset.require("./kernels").kernels
 
 local models = asset.syncedResource({
@@ -65,12 +65,7 @@ local Apollo8Model = {
     GeometryFile = models .. "ApolloCSM.osmodel",
     ModelScale = 0.0001,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true

@@ -67,8 +67,6 @@ namespace {
         "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
-    constexpr double PARSEC = 0.308567756E17;
-
     enum RenderOption {
         ViewDirection = 0,
         PositionNormal

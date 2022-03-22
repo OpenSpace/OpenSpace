@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local models = asset.syncedResource({
   Name = "New Horizons Model",
@@ -19,12 +19,7 @@ local NewHorizons = {
     DiffuseIntensity = 1.0,
     SpecularIntensity = 1.0,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     }
   },
   GUI = {

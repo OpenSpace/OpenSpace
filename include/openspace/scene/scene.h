@@ -237,9 +237,7 @@ public:
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the
-     * scene graph. The functions contained are
-     * - openspace::luascriptfunctions::property_setValue
-     * - openspace::luascriptfunctions::property_getValue
+     * scene graph.
      * \return The Lua library that contains all Lua functions available to change the
      * scene graph
      */

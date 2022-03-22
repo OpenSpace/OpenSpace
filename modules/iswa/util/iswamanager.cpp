@@ -35,6 +35,8 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
@@ -698,10 +700,10 @@ ghoul::Event<>& IswaManager::iswaEvent() {
 }
 
 void IswaManager::addCdfFiles(std::string cdfpath) {
-    std::filesystem::path cdf = absPath(cdfpath);
-    if (std::filesystem::is_regular_file(cdf)) {
+    std::filesystem::path cdfFile = absPath(cdfpath);
+    if (std::filesystem::is_regular_file(cdfFile)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
-        std::ifstream jsonFile(cdf);
+        std::ifstream jsonFile(cdfFile);
 
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
@@ -740,7 +742,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdf));
+        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdfFile));
     }
 }
 
@@ -753,54 +755,14 @@ scripting::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
         {
-            {
-                "addCygnet",
-                &luascriptfunctions::iswa_addCygnet,
-                "int, string, string",
-                "Adds a IswaCygnet",
-            },
-            {
-                "addScreenSpaceCygnet",
-                &luascriptfunctions::iswa_addScreenSpaceCygnet,
-                "int, string, string",
-                "Adds a Screen Space Cygnets",
-            },
-            {
-                "addKameleonPlanes",
-                &luascriptfunctions::iswa_addKameleonPlanes,
-                "string, int",
-                "Adds KameleonPlanes from cdf file.",
-            },
-            {
-                "addCdfFiles",
-                &luascriptfunctions::iswa_addCdfFiles,
-                "string",
-                "Adds a cdf files to choose from.",
-            },
-            {
-                "removeCygnet",
-                &luascriptfunctions::iswa_removeCygnet,
-                "string",
-                "Remove a Cygnets",
-            },
-            {
-                "removeScreenSpaceCygnet",
-                &luascriptfunctions::iswa_removeScrenSpaceCygnet,
-                "int",
-                "Remove a Screen Space Cygnets",
-            },
-            {
-                "removeGroup",
-                &luascriptfunctions::iswa_removeGroup,
-                "int",
-                "Remove a group of Cygnets",
-            },
-            {
-                "setBaseUrl",
-                &luascriptfunctions::iswa_setBaseUrl,
-                "string",
-                "sets the base url",
-            }
+            codegen::lua::AddCygnet,
+            codegen::lua::AddScreenSpaceCygnet,
+            codegen::lua::RemoveCygnet,
+            codegen::lua::RemoveScreenSpaceCygnet,
+            codegen::lua::RemoveGroup,
+            codegen::lua::AddCdfFiles,
+            codegen::lua::AddKameleonPlanes,
+            codegen::lua::SetBaseUrl
         }
     };
 }

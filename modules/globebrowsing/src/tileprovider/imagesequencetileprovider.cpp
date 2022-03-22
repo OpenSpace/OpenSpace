@@ -112,7 +112,7 @@ TileDepthTransform ImageSequenceTileProvider::depthTransform() {
 
 void ImageSequenceTileProvider::update() {
     if (_isImageDirty && !_imagePaths.empty() &&
-        _index >= 0 && _index < _imagePaths.size())
+        _index >= 0 && _index < static_cast<int>(_imagePaths.size()))
     {
         if (_currentTileProvider) {
             _currentTileProvider->deinitialize();
@@ -147,6 +147,10 @@ void ImageSequenceTileProvider::reset() {
     if (_currentTileProvider) {
         _currentTileProvider->reset();
     }
+}
+
+int ImageSequenceTileProvider::minLevel() {
+    return 1;
 }
 
 int ImageSequenceTileProvider::maxLevel() {

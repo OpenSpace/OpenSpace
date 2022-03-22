@@ -1,3 +1,4 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
@@ -42,7 +43,7 @@ local JWSTBand = {
     DisableFadeInOut = true,
     Orientation = "Inside",
     Opacity = 0.05,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
   },
   Tag = { "mission_jwst_fov" },
   GUI = {
@@ -71,12 +72,7 @@ local JWSTModel = {
     AnimationTimeScale = "Millisecond",
     AnimationMode = "Once",
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true

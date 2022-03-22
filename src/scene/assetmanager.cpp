@@ -25,10 +25,13 @@
 #include <openspace/scene/assetmanager.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 
 #include "assetmanager_lua.inl"
 
@@ -99,6 +102,7 @@ namespace {
         // to populate the descriptions in the main user interface
         std::optional<std::vector<std::string>> identifiers;
     };
+
 #include "assetmanager_codegen.cpp"
 } // namespace
 
@@ -182,8 +186,13 @@ void AssetManager::update() {
             continue;
         }
 
-        _rootAssets.push_back(a);
         a->load(nullptr);
+        if (a->isFailed()) {
+            // The loading might fail because of any number of reasons, most likely of
+            // them some Lua syntax error
+            continue;
+        }
+        _rootAssets.push_back(a);
         a->startSynchronizations();
 
         _toBeInitialized.push_back(a);
@@ -629,8 +638,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 exportName = identifier;
                 targetLocation = 1;
             }
-
-            if (n == 2) {
+            else if (n == 2) {
                 exportName = ghoul::lua::value<std::string>(
                     L,
                     1,
@@ -653,6 +661,9 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                         identifier = d.value<std::string>("Identifier");
                     }
                 }
+            }
+            else {
+                throw ghoul::MissingCaseException();
             }
 
 
@@ -863,22 +874,10 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
     return {
         "asset",
         {
-            // Functions for adding/removing assets
-            {
-                "add",
-                &luascriptfunctions::asset::add,
-                "string",
-                "Adds an asset to the current scene. The parameter passed into this "
-                "function is the path to the file that should be loaded"
-            },
-            {
-                "remove",
-                &luascriptfunctions::asset::remove,
-                "string",
-                "Removes the asset with the specfied name from the scene. The parameter "
-                "to this function is the same that was originally used to load this "
-                "asset, i.e. the path to the asset file"
-            }
+            codegen::lua::Add,
+            codegen::lua::Remove,
+            codegen::lua::IsLoaded,
+            codegen::lua::AllAssets
         }
     };
 }

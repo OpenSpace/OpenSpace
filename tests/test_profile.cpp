@@ -153,16 +153,6 @@ namespace {
 
         return Profile(content);
     }
-
-    /// Loads the contents of the file and returns the raw contents
-    std::string loadFile(const std::string& filename) {
-        std::ifstream f(absPath(filename));
-        std::string content(
-            (std::istreambuf_iterator<char>(f)),
-            std::istreambuf_iterator<char>()
-        );
-        return content;
-    }
 } // namespace
 
 //

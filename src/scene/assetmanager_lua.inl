@@ -22,24 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/lua/lua_helper.h>
+namespace {
 
-namespace openspace::luascriptfunctions::asset {
-
-int add(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::add");
-    const std::string assetName = ghoul::lua::value<std::string>(L);
-    global::openSpaceEngine->assetManager().add(assetName);
-    return 0;
+/**
+ * Adds an asset to the current scene. The parameter passed into this function is the path
+ * to the file that should be loaded.
+ */
+[[codegen::luawrap]] void add(std::string assetName) {
+    openspace::global::openSpaceEngine->assetManager().add(assetName);
 }
 
-int remove(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::remove");
-    const std::string assetName = ghoul::lua::value<std::string>(L);
-    global::openSpaceEngine->assetManager().remove(assetName);
-    return 0;
+/**
+ * Removes the asset with the specfied name from the scene. The parameter to this function
+ * is the same that was originally used to load this asset, i.e. the path to the asset
+ * file.
+ */
+[[codegen::luawrap]] void remove(std::string assetName) {
+    openspace::global::openSpaceEngine->assetManager().remove(assetName);
 }
 
-} // namespace openspace::luascriptfunctions
+/**
+ * Returns true if the referenced asset already has been loaded. Otherwise false is
+ * returned. The parameter to this function is the path of the asset that should be
+ * tested.
+ */
+[[codegen::luawrap]] bool isLoaded(std::string assetName) {
+    using namespace openspace;
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    for (const Asset* a : as) {
+        if (a->path() == assetName) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns the paths to all loaded assets, loaded directly or indirectly, as a table
+ * containing the paths to all loaded assets.
+ */
+[[codegen::luawrap]] std::vector<std::string> allAssets(std::string assetName) {
+    using namespace openspace;
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    std::vector<std::string> res;
+    res.reserve(as.size());
+    for (const Asset* a : as) {
+        res.push_back(a->path().string());
+    }
+    return res;
+}
+
+#include "assetmanager_lua_codegen.cpp"
+
+} // namespace
