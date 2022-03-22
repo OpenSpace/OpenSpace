@@ -24,17 +24,16 @@
 
 #include <modules/skybrowser/skybrowsermodule.h>
 
+#include <modules/skybrowser/include/renderableskytarget.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
-#include <modules/skybrowser/include/RenderableSkyTarget.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
-#include <modules/base/rendering/screenspaceimagelocal.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/camera/camera.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 
 #include "skybrowsermodule_lua.inl"
@@ -76,199 +75,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-    scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
-        scripting::LuaLibrary res;
-        res.name = "skybrowser";
-        res.functions = {
-            {
-                "getListOfImages",
-                &skybrowser::luascriptfunctions::getListOfImages,
-                "",
-                "Returns a list of all the loaded AAS WorldWide Telescope images that "
-                "have been loaded. Each image has a name, thumbnail url, equatorial "
-                "spherical coordinates RA and Dec, equatorial Cartesian coordinates, "
-                "if the image has celestial coordinates, credits text, credits url "
-                "and the identifier of the image which is a unique number."
-            }, 
-            {
-                "setHoverCircle",
-                &skybrowser::luascriptfunctions::setHoverCircle,
-                "string",
-                "Takes an identifier to a screen space renderable and adds it to the "
-                "module."
-            },
-            {
-                "moveCircleToHoverImage",
-                &skybrowser::luascriptfunctions::moveCircleToHoverImage,
-                "int",
-                "Moves the hover circle to the coordinate specified by the image index."
-            },
-            {
-                "disableHoverCircle",
-                &skybrowser::luascriptfunctions::disableHoverCircle,
-                "",
-                "Disables the hover circle, if there is one added to the sky browser "
-                "module."
-            },
-            {
-                "loadImagesToWWT",
-                &skybrowser::luascriptfunctions::loadImagesToWWT,
-                "string",
-                "Takes an identifier to a sky browser or target and loads the WWT image "
-                "collection to that browser."
-            },
-            {
-                "selectImage",
-                &skybrowser::luascriptfunctions::selectImage,
-                "int",
-                "Takes an index to an image and selects that image in the currently "
-                "selected sky browser."
-            }, 
-            {
-                "removeSelectedImageInBrowser",
-                &skybrowser::luascriptfunctions::removeSelectedImageInBrowser,
-                "string, int",
-                "Takes an identifier to a sky browser or target and an index to an "
-                "image. Removes that image from that sky browser."
-            },
-            {
-                "adjustCamera",
-                & skybrowser::luascriptfunctions::adjustCamera,
-                "string",
-                "Takes an identifier to a sky browser or sky target. Rotates the camera "
-                "so that the target is placed in the center of the view."
-            },
-            {
-                "setSelectedBrowser",
-                & skybrowser::luascriptfunctions::setSelectedBrowser,
-                "string",
-                "Takes an identifier to a sky browser or target. Sets that sky browser " 
-                "currently selected."
-            },
-            {
-                "getTargetData",
-                &skybrowser::luascriptfunctions::getTargetData,
-                "",
-                "Returns a table of data regarding the current view and the sky browsers "
-                "and targets."
-            },
-            {
-                "createTargetBrowserPair",
-                &skybrowser::luascriptfunctions::createTargetBrowserPair,
-                "",
-                "Creates a sky browser and a target."
-            }, 
-             {
-                "removeTargetBrowserPair",
-                &skybrowser::luascriptfunctions::removeTargetBrowserPair,
-                "string",
-                "Takes in identifier to a sky browser or target and removes them."
-            },
-            {
-                "setOpacityOfImageLayer",
-                &skybrowser::luascriptfunctions::setOpacityOfImageLayer,
-                "string, int, double",
-                "Takes an identifier to a sky browser or sky target, an index to an image"
-                "and a value for the opacity."
-            },   
-            {
-                "sendOutIdsToBrowsers",
-                &skybrowser::luascriptfunctions::sendOutIdsToBrowsers,
-                "",
-                "Sends all sky browsers' identifiers to their respective CEF browser. "
-            },
-            {
-                "initializeBrowser",
-                &skybrowser::luascriptfunctions::initializeBrowser,
-                "string",
-                "Takes an identifier to a sky browser and starts the initialization "
-                "for that browser. That means that the browser starts to try to connect "
-                "to the AAS WorldWide Telescope application by sending it messages. And "
-                "that the target matches its appearance to its corresponding browser."
-            },  
-            {
-                "centerTargetOnScreen",
-                &skybrowser::luascriptfunctions::centerTargetOnScreen,
-                "string",
-                "Takes an identifier to a sky browser and animates its corresponding "
-                "target to the center of the current view."
-            }, 
-            {
-                "setImageLayerOrder",
-                &skybrowser::luascriptfunctions::setImageLayerOrder,
-                "string, int, int",
-                "Takes an identifier to a sky browser or a sky target, an image index "
-                "and the order which it should have in the selected image list. The "
-                "image is then changed to have this order."
-            }, 
-            {
-                "addPairToSkyBrowserModule",
-                &skybrowser::luascriptfunctions::addPairToSkyBrowserModule,
-                "string, string",
-                "Takes the identifier of the sky target and a sky browser and adds them "
-                "to the sky browser module."
-            },
-            {
-                "setEquatorialAim",
-                &skybrowser::luascriptfunctions::setEquatorialAim,
-                "string, double, double",
-                "Takes the identifier of a sky browser or a sky target and equatorial "
-                "coordinates Right Ascension and Declination. The target will animate to "
-                "this coordinate and the browser will display the coordinate."
-            },
-            {
-                "setVerticalFov",
-                &skybrowser::luascriptfunctions::setVerticalFov,
-                "string, float",
-                "Takes an identifier to a sky browser or a sky target and a vertical "
-                "field of view. Changes the field of view as specified by the input."
-            },
-            {
-                "setBorderColor",
-                &skybrowser::luascriptfunctions::setBorderColor,
-                "string, int, int, int",
-                "Takes an identifier to a sky browser or a sky target and a rgb color "
-                "in the ranges [0, 255]."
-            },
-            {
-                "setScreenSpaceSize",
-                &skybrowser::luascriptfunctions::setScreenSpaceSize,
-                "string, float, float",
-                "Sets the screen space size of the sky browser to the numbers specified "
-                "by the input [x, y]."
-            },
-            {
-                "startSetup",
-                &skybrowser::luascriptfunctions::startSetup,
-                "",
-                "Starts the setup process of the sky browers. This function calls "
-                "the lua function 'sendOutIdsToBrowsers' in all nodes in the cluster."
-            },
-            {
-                "translateScreenSpaceRenderable",
-                &skybrowser::luascriptfunctions::translateScreenSpaceRenderable,
-                "string, float, float, float, float",
-                "Takes an identifier to a sky browser or sky target and the [x, y] "
-                "starting position and the [x, y] translation vector."
-            },
-            {
-                "addRenderCopy",
-                &skybrowser::luascriptfunctions::addRenderCopy,
-                "string",
-                "Takes an identifier to a sky browser and adds a rendered copy to it."
-            },
-            {
-                "removeRenderCopy",
-                &skybrowser::luascriptfunctions::removeRenderCopy,
-                "string",
-                "Takes an identifier to a sky browser and removes the latest added "
-                "rendered copy to it."
-            },
-        };
-
-        return res;
-    }
-
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
     , _allowMouseInteraction(AllowInteractionInfo, true)
@@ -702,4 +508,39 @@ bool SkyBrowserModule::isSelectedPairFacingCamera() {
         return false;
     }
 }
+
+scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
+    return {
+        "skybrowser",
+        {
+            codegen::lua::StartSetup,
+            codegen::lua::InitializeBrowser,
+            codegen::lua::SendOutIdsToBrowsers,
+            codegen::lua::GetListOfImages,
+            codegen::lua::SetHoverCircle,
+            codegen::lua::MoveCircleToHoverImage,
+            codegen::lua::DisableHoverCircle,
+            codegen::lua::LoadImagesToWWT,
+            codegen::lua::SelectImage,
+            codegen::lua::RemoveSelectedImageInBrowser,
+            codegen::lua::AdjustCamera,
+            codegen::lua::SetSelectedBrowser,
+            codegen::lua::GetTargetData,
+            codegen::lua::CreateTargetBrowserPair,
+            codegen::lua::RemoveTargetBrowserPair,
+            codegen::lua::SetOpacityOfImageLayer,
+            codegen::lua::CenterTargetOnScreen,
+            codegen::lua::SetImageLayerOrder,
+            codegen::lua::AddPairToSkyBrowserModule,
+            codegen::lua::SetEquatorialAim,
+            codegen::lua::SetVerticalFov,
+            codegen::lua::SetBorderColor,
+            codegen::lua::TranslateScreenSpaceRenderable,
+            codegen::lua::AddRenderCopy,
+            codegen::lua::SetScreenSpaceSize,
+            codegen::lua::RemoveRenderCopy
+        }
+    };
+}
+
 } // namespace openspace
