@@ -350,8 +350,17 @@ double Path::speedAlongPath(double traveledDistance) const {
     double startUpDistance = DampenDistanceFactor * _start.validBoundingSphere();
     double closeUpDistance = DampenDistanceFactor * _end.validBoundingSphere();
 
+    // Kind of an ugly workaround to make damping behave over very long paths, and/or
+    // where the target nodes might have large bounding spheres. The current max is set
+    // based on the order of magnitude of the solar system, which ofc is very specific to
+    // our space content...
+    // @TODO (2022-03-22, emmbr) Come up with a better more general solution
+    constexpr const double MaxDistance = 1E12;
+    startUpDistance = glm::min(MaxDistance, startUpDistance);
+    closeUpDistance = glm::min(MaxDistance, closeUpDistance);
+
     if (pathLength() < startUpDistance + closeUpDistance) {
-        startUpDistance = 0.49 * pathLength(); // a little less than half
+        startUpDistance = 0.4 * pathLength(); // a little less than half
         closeUpDistance = startUpDistance;
     }
 
@@ -618,6 +627,23 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 p.height,
                 p.useTargetUpDirection.value_or(false)
             };
+
+            double startToTargetCenterDistance = glm::distance(
+                startPoint.position(),
+                targetNode->worldPosition()
+            );
+
+            // Use a linear path if camera start is within the bounding sphere
+            const PathNavigator& navigator = global::navigationHandler->pathNavigator();
+            const double bs = navigator.findValidBoundingSphere(targetNode);
+            bool withinTargetBoundingSphere = startToTargetCenterDistance < bs;
+            if (withinTargetBoundingSphere) {
+                LINFO(
+                    "Camera is within the bounding sphere of the target node. "
+                    "Using linear path"
+                );
+                type = Path::Type::Linear;
+            }
 
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, type) };
             break;
