@@ -4,6 +4,9 @@
 
 asset.require("./base_blank")
 
+-- Optional components
+asset.require("components/exoplanets/exoplanets")
+
 -- Specifying which other assets should be loaded in this scene
 asset.require("scene/solarsystem/sun/sun")
 asset.require("scene/solarsystem/sun/glare")
@@ -19,10 +22,6 @@ asset.require("scene/milkyway/constellations/constellation_art")
 asset.require("scene/milkyway/constellations/constellation_keybinds")
 asset.require("scene/milkyway/objects/orionnebula/orionnebula")
 asset.require("util/launcher_images")
-
--- For exoplanet system visualizations
-asset.require("scene/milkyway/exoplanets/exoplanets_data")
-asset.require("scene/milkyway/exoplanets/exoplanets_textures")
 
 asset.require("scene/digitaluniverse/2dF")
 asset.require("scene/digitaluniverse/2mass")
