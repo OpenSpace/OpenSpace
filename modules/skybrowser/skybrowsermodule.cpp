@@ -330,7 +330,15 @@ void SkyBrowserModule::moveHoverCircle(int i) {
         // the target
         glm::dvec3 pos = skybrowser::equatorialToGalactic(image.equatorialCartesian);
         pos *= skybrowser::CelestialSphereRadius * 1.1; 
-        _hoverCircle->property("Translation.Position")->set(pos);
+        // Uris for properties
+        std::string id = _hoverCircle->identifier();
+        std::string positionUri = "Scene." + id + ".Translation.Position";
+        std::string setValue = "openspace.setPropertyValueSingle('";
+
+        openspace::global::scriptEngine->queueScript(
+            setValue + positionUri + "', " + ghoul::to_string(pos) + ");",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
