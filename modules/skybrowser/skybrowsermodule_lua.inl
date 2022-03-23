@@ -25,6 +25,8 @@
 #include <modules/skybrowser/skybrowsermodule.h>
 
 #include <modules/skybrowser/include/utility.h>
+#include <modules/skybrowser/include/targetbrowserpair.h>
+#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
@@ -394,7 +396,7 @@ namespace {
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
     std::string guiPath = "/SkyBrowser";
     std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
-    double fov = 5.0;
+    double fov = 70.0;
     double size = skybrowser::sizeFromFov(fov, galacticTarget);
 
     const std::string browser = "{"

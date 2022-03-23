@@ -53,7 +53,7 @@ namespace {
     {
         "CrosshairSize",
         "Crosshair Size",
-        "Determines the size of the crosshair."
+        "Determines the size of the crosshair. The size is determined in fov (degrees). "
     }; 
     
     constexpr const openspace::properties::Property::PropertyInfo RectangleThresholdInfo =
@@ -85,12 +85,6 @@ namespace {
         "The thickness of the line of the target. The larger number, the thicker line."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo SmallestFovInfo = {
-        "SmallestFov",
-        "Smallest Vertical Field Of View",
-        "The smallest field of view that the target will display on screen."
-    };
-
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
         // [[codegen::verbatim(crossHairSizeInfo.description)]]
         std::optional<float> crossHairSize;
@@ -106,9 +100,6 @@ namespace {
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
-        
-        // [[codegen::verbatim(SmallestFovInfo.description)]]
-        std::optional<float> smallestFov;
     };
 
 #include "renderableskytarget_codegen.cpp"
@@ -122,7 +113,6 @@ namespace openspace {
         , _stopAnimationThreshold(AnimationThresholdInfo, 5.0f, 1.f, 10.f)
         , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
         , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
-        , _smallestFov(SmallestFovInfo, 3.0, 0.5, 20.0)
         , _borderColor(220, 220, 220)
         {
         // Handle target dimension property
@@ -131,14 +121,12 @@ namespace openspace {
         _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
         _stopAnimationThreshold = p.crossHairSize.value_or(_stopAnimationThreshold);
         _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
-        _smallestFov = p.smallestFov.value_or(_smallestFov);
 
         addProperty(_crossHairSize);
         addProperty(_showRectangleThreshold);
         addProperty(_stopAnimationThreshold);
         addProperty(_animationSpeed);
         addProperty(_lineWidth);
-        addProperty(_smallestFov);
 }
 
 void RenderableSkyTarget::bindTexture() {}
@@ -186,7 +174,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("crossHairSize", _crossHairSize);
     _shader->setUniform("showRectangle", showRectangle);
-    _shader->setUniform("lineWidth", _lineWidth);
+    _shader->setUniform("lineWidth", _lineWidth * 0.0001f);
     _shader->setUniform("dimensions", _dimensions);
     _shader->setUniform("lineColor", color);
     _shader->setUniform("fov", static_cast<float>(_verticalFov));
@@ -277,10 +265,6 @@ double RenderableSkyTarget::animationSpeed() const {
 
 double RenderableSkyTarget::stopAnimationThreshold() const {
     return _stopAnimationThreshold * 0.0001;
-}
-
-double RenderableSkyTarget::smallestFov() const {
-    return _smallestFov;
 }
 
 void RenderableSkyTarget::setOpacity(float opacity) {

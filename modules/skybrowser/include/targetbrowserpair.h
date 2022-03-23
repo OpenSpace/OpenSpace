@@ -67,8 +67,6 @@ public:
 
     // Target
     void centerTargetOnScreen();
-    void lock();
-    void unlock();
     void incrementallyAnimateTarget(float deltaTime);
 
     bool hasFinishedFading(float goalState) const;
@@ -116,9 +114,7 @@ private:
     bool isTargetFadeFinished(float goalState) const;
     bool isBrowserFadeFinished(float goalState) const;
 
-    void aimTargetGalactic(glm::dvec3 position);
-
-    void setFovTarget(double fov);
+    void aimTargetGalactic(glm::dvec3 direction);
 
     // Selection
     ScreenSpaceSkyBrowser* _selected = nullptr;

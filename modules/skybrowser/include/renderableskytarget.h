@@ -53,7 +53,6 @@ public:
     float opacity() const;
     double animationSpeed() const;
     double stopAnimationThreshold() const;
-    double smallestFov() const;
 
     void setDimensions(glm::vec2 dimensions);
     void setColor(glm::ivec3 color);
@@ -69,7 +68,6 @@ private:
     properties::FloatProperty _crossHairSize;
     properties::FloatProperty _showRectangleThreshold;
     properties::FloatProperty _lineWidth;
-    properties::DoubleProperty _smallestFov;
     properties::DoubleProperty _stopAnimationThreshold;
     properties::DoubleProperty _animationSpeed;
 

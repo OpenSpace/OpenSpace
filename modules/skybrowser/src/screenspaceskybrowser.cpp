@@ -164,7 +164,7 @@ glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(glm::dvec2 drag) {
     glm::dvec2 resultRelativeOs = angleResult / openSpaceFOV;
 
     // Convert to screen space coordinate system
-    glm::dvec2 convertToScreenSpace{ (2 * skybrowser::windowRatio()), 2.f };
+    glm::dvec2 convertToScreenSpace{ (2.f * skybrowser::windowRatio()), 2.f };
     glm::dvec2 result = - convertToScreenSpace * resultRelativeOs;
     return result;
 }
