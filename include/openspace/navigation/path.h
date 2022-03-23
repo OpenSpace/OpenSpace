@@ -39,10 +39,10 @@ namespace openspace::interaction {
 
 class Path {
 public:
-    enum Type {
-        AvoidCollision,
-        Linear,
+    enum class Type {
+        AvoidCollision = 0,
         ZoomOutOverview,
+        Linear,
         AvoidCollisionWithLookAt // @TODO (2021-08-13, emmbr) This type right now leads
                                  // to rapid rotations, but is useful in specific
                                  // scenarios, e.g. close to surfaces. Later we want to
