@@ -74,6 +74,7 @@ public:
 private:
     properties::DoubleProperty _animationSpeed;
     properties::FloatProperty _textureQuality;
+    properties::BoolProperty _renderOnlyOnMaster;
     std::vector<std::unique_ptr<properties::Vec3Property>> _renderCopies;
 
     void bindTexture() override;
