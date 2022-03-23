@@ -188,8 +188,9 @@ glm::dvec2 fovWindow() {
 
 double angleBetweenVectors(const glm::dvec3& start, const glm::dvec3& end) {
     // Find smallest angle between the two vectors
-    double cos = glm::dot(start, end) / (glm::length(start) * glm::length(end));
-    return std::acos(cos);
+    double cos = glm::dot(glm::normalize(start), glm::normalize(end));
+    // Ensure cos is within defined interval [-1,1]
+    return std::acos(std::clamp(cos, -1.0, 1.0));
 }
 
 glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3& end, 
