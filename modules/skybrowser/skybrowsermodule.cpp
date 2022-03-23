@@ -376,7 +376,7 @@ TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) {
             bool foundBrowser = pair->browserId() == id;
             bool foundTarget = pair->targetRenderableId() == id;
             bool foundTargetNode = pair->targetNodeId() == id;
-            return foundBrowser || foundTarget;
+            return foundBrowser || foundTarget || foundTargetNode;
         }
     );
     if (it == std::end(_targetsBrowsers)) {
