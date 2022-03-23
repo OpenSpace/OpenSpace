@@ -235,6 +235,8 @@ void RenderableBoxGrid::update(const UpdateData&) {
         _varray.push_back({ v7.x, v7.y, v7.z });
         _varray.push_back({ v3.x, v3.y, v3.z });
 
+        setBoundingSphere(static_cast<double>(glm::length(urb)));
+
         glBindVertexArray(_vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
         glBufferData(

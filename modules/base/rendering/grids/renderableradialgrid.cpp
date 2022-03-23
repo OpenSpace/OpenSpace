@@ -274,6 +274,8 @@ void RenderableRadialGrid::update(const UpdateData&) {
     }
     _lines.update();
 
+    setBoundingSphere(static_cast<double>(outerRadius));
+
     _gridIsDirty = false;
 }
 

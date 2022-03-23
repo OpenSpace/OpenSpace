@@ -243,6 +243,8 @@ void RenderableGrid::update(const UpdateData&) {
         _varray[nr++] = { halfSize.x, y1, 0.f };
     }
 
+    setBoundingSphere(static_cast<double>(glm::length(halfSize)));
+
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
     glBufferData(
