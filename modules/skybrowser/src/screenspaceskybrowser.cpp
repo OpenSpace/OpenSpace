@@ -298,7 +298,7 @@ void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     float x = _verticalFov;
     float zoomFactor = atan(x / 50.f) + exp(x / 40.f) - 0.999999f;
     float zoom = scroll > 0.f ? -zoomFactor : zoomFactor;
-    _verticalFov = std::clamp(_verticalFov + zoom, 0.001f, 70.0f);
+    _verticalFov = std::clamp(_verticalFov + zoom, 0.000001f, 70.0f);
 }
 
 void ScreenSpaceSkyBrowser::bindTexture() {
