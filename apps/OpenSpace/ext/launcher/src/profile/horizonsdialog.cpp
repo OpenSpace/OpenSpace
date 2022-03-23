@@ -216,6 +216,7 @@ void HorizonsDialog::createWidgets() {
         layout->addWidget(_targetEdit, 4, 1, 1, 2);
 
         _chooseTargetCombo = new QComboBox(this);
+        _chooseTargetCombo->setObjectName("mono");
         _chooseTargetCombo->hide();
         _chooseTargetCombo->setToolTip(
             "Choose a target from the search, or search again"
@@ -232,6 +233,7 @@ void HorizonsDialog::createWidgets() {
         layout->addWidget(_centerEdit, 6, 1, 1, 2);
 
         _chooseObserverCombo = new QComboBox(this);
+        _chooseObserverCombo->setObjectName("mono");
         _chooseObserverCombo->hide();
         _chooseObserverCombo->setToolTip(
             "Choose an observer from the search, or search again"

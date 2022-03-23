@@ -156,6 +156,10 @@ QPlainTextEdit#log {
   font-family: Courier;
 }
 
+QComboBox#mono {
+  font-family: Courier;
+}
+
 QLabel#thin {
   font-weight: normal;
 }
