@@ -1,5 +1,5 @@
 {
-  "version": { "major": 12, "minor": 13 },
+  "version": { "major": 1, "minor": 0 },
   "keybindings": [
     {
       "documentation": "T documentation",

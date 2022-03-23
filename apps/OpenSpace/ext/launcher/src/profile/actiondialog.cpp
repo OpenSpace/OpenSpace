@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -546,7 +546,7 @@ void ActionDialog::actionSaved() {
         // If we got this far, we have a new identifier and it is a new one, so we need to
         // update other keybinds now
         ghoul_assert(
-            _keybindingWidgets.list->count() == _keybindingsData.size(),
+            _keybindingWidgets.list->count() == static_cast<int>(_keybindingsData.size()),
             "The list and data got out of sync"
         );
         for (int i = 0; i < _keybindingWidgets.list->count(); ++i) {

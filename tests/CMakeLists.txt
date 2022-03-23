@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -26,7 +26,6 @@ add_executable(
   OpenSpaceTest
   main.cpp
   test_assetloader.cpp
-  test_concurrentjobmanager.cpp
   test_concurrentqueue.cpp
   test_distanceconversion.cpp
   test_configuration.cpp
@@ -40,7 +39,6 @@ add_executable(
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
   test_spicemanager.cpp
-  test_temporaltileprovider.cpp
   test_timequantizer.cpp
   test_timeline.cpp
 

@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "Themis_IR_Day_Utah",
   Name = "Themis IR Day [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Day.wms",
+  FilePath = asset.localResource("themis_ir_day_utah.wms"),
   BlendMode = "Color",
   Description = [[This mosaic represents the Thermal Emission Imaging System (THEMIS)
     -daytime infrared (IR) 100 meter/pixel mosaic (version 12) released in the summer
@@ -18,21 +17,25 @@ local layer = {
     (Description from URL).]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Themis IR Day [Utah]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Themis Day layer for Mars. This map is hosted on the OpenSpace server
     in Utah.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/Odyssey/THEMIS-IR-Mosaic-ASU/" ..
     "Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12",
-  License = "NASA/PDS",
-  Identifiers = {"Themis_IR_Day_Utah"}
+  License = "NASA/PDS"
 }

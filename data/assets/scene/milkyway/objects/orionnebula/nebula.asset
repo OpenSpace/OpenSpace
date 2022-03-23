@@ -1,9 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
-
-local center = sunTransforms.SolarSystemBarycenter.Identifier;
-local LIGHTS = assetHelper.getDefaultLightSources(center);
+local sun = asset.require("scene/solarsystem/sun/sun")
+local transforms = asset.require("./transforms")
 
 local sync = asset.syncedResource({
   Name = "Orion Nebula Model",
@@ -59,7 +55,7 @@ local OrionNebulaModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = sync .. "/orion_nebula.obj",
+    GeometryFile = sync .. "orion_nebula.obj",
     Opacity = 1.0,
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
@@ -67,12 +63,18 @@ local OrionNebulaModel = {
     DiffuseIntensity = 1.0,
     --PerformShading = false,
     RotationVector = { 0.000000, 22.300000, 0.000000 },
-    LightSources = LIGHTS;
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Orion Nebula Model",
     Path = "/Milky Way/Orion",
-    Hidden = true,
     Description = "Orion Nebula 3D model. See Orion Nebula for description."
   }
 }
@@ -88,7 +90,7 @@ local OrionNebulaShocksModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = sync .. "/orishocks.obj",
+    GeometryFile = sync .. "orishocks.obj",
     Opacity = 1.0, 
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
@@ -96,7 +98,14 @@ local OrionNebulaShocksModel = {
     DiffuseIntensity = 1.0,
     --PerformShading = false,
     RotationVector = { 0.000000, 22.300000, 0.000000 },
-    LightSources = LIGHTS;
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Orion Nebula Shocks",
@@ -117,7 +126,7 @@ local OrionNebulaProplydsModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = sync .. "/proplyds.obj",
+    GeometryFile = sync .. "proplyds.obj",
     Opacity = 1.0, 
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
@@ -125,7 +134,14 @@ local OrionNebulaProplydsModel = {
     DiffuseIntensity = 1.0,
     --PerformShading = false,
     RotationVector = { 0.000000, 22.300000, 0.000000 },
-    LightSources = LIGHTS;
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Orion Nebula Proplyds",
@@ -135,23 +151,34 @@ local OrionNebulaProplydsModel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  NebulaHolder,
-  OrionNebulaModel,
-  OrionNebulaShocksModel,
-  OrionNebulaProplydsModel
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NebulaHolder)
+  openspace.addSceneGraphNode(OrionNebulaModel)
+  openspace.addSceneGraphNode(OrionNebulaShocksModel)
+  openspace.addSceneGraphNode(OrionNebulaProplydsModel)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OrionNebulaProplydsModel)
+  openspace.removeSceneGraphNode(OrionNebulaShocksModel)
+  openspace.removeSceneGraphNode(OrionNebulaModel)
+  openspace.removeSceneGraphNode(NebulaHolder)
+end)
+  
+asset.export(NebulaHolder)
+asset.export(OrionNebulaModel)
+asset.export(OrionNebulaShocksModel)
+asset.export(OrionNebulaProplydsModel)
+
 
 
 asset.meta = {
   Name = "Orion Nebula Model",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Digital Universe asset for the Orion nebula 3D model. This asset
     contains seperate models for the nebula, proplyds and shocks. To be used in
     conjunction with orion star cluster. Use orionnebula.asset to include both.]],
   Author = "AMNH Digital Universe",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"OrionNebulaHolder", "OrionNebulaModel", "OrionNebulaProplydsModel",
-    "OrionNebulaShocksModel"}
+  License = "AMNH Digital Universe"
 }

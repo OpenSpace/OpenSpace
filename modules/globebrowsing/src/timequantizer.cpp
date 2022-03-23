@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -630,9 +630,8 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
 
     const double startSeconds = s.J2000();
     const double endSeconds = e.J2000();
-    const double delta = endSeconds - startSeconds;
     ghoul_assert(
-        static_cast<int>(delta) % static_cast<int>(_resolution) == 0,
+        static_cast<int>(endSeconds - startSeconds) % static_cast<int>(_resolution) == 0,
         "Quantization error"
     );
 

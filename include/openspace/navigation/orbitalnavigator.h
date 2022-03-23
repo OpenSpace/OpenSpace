@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,6 @@
 #include <openspace/properties/triggerproperty.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
-
 #include <optional>
 
 namespace openspace {
@@ -53,13 +52,35 @@ namespace openspace {
 
 namespace openspace::interaction {
 
-class InputState;
+class MouseInputState;
+class KeyboardInputState;
 
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
+    struct IdleBehavior : public properties::PropertyOwner {
+        enum class Behavior {
+            Orbit = 0,
+            OrbitAtConstantLat,
+            OrbitAroundUp
+        };
+
+        IdleBehavior();
+
+        properties::BoolProperty apply;
+        properties::BoolProperty shouldTriggerWhenIdle;
+        properties::FloatProperty idleWaitTime;
+        properties::BoolProperty abortOnCameraInteraction;
+        properties::FloatProperty speedScale;
+        properties::FloatProperty dampenInterpolationTime;
+
+        properties::OptionProperty defaultBehavior;
+        std::optional<Behavior> chosenBehavior = std::nullopt;
+    };
+
     OrbitalNavigator();
 
-    void updateStatesFromInput(const InputState& inputState, double deltaTime);
+    void updateStatesFromInput(const MouseInputState& mouseInputState,
+        const KeyboardInputState& keyboardInputState, double deltaTime);
     void updateCameraStateFromStates(double deltaTime);
     void updateCameraScalingFromAnchor(double deltaTime);
     void resetVelocities();
@@ -70,6 +91,9 @@ public:
      * a session recording playback
      */
     void updateOnCameraInteraction();
+
+    void tickIdleBehaviorTimer(double deltaTime);
+    void triggerIdleBehavior(std::string_view choice = "");
 
     Camera* camera() const;
     void setCamera(Camera* camera);
@@ -85,7 +109,7 @@ public:
     void startRetargetAim();
     float retargetInterpolationTime() const;
     void setRetargetInterpolationTime(float durationInSeconds);
-    void resetNodeMovements();
+    void updatePreviousStateVariables();
 
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
@@ -130,6 +154,9 @@ private:
         bool resetVelocitiesOnChange = true);
     void setAimNode(const SceneGraphNode* aimNode);
 
+    void updatePreviousAnchorState();
+    void updatePreviousAimState();
+
     Camera* _camera;
 
     Friction _friction;
@@ -147,18 +174,9 @@ private:
     // Reset camera direction to the aim node.
     properties::TriggerProperty _retargetAim;
 
+    properties::BoolProperty _followAnchorNodeRotation;
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
-
-    struct LinearFlight : public properties::PropertyOwner {
-        LinearFlight();
-
-        properties::BoolProperty apply;
-        properties::FloatProperty destinationDistance;
-        properties::DoubleProperty destinationFactor;
-        properties::FloatProperty velocitySensitivity;
-    };
-    LinearFlight _linearFlight;
 
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
@@ -196,22 +214,8 @@ private:
     Interpolator<double> _idleBehaviorDampenInterpolator;
     bool _invertIdleBehaviorInterpolation = false;
 
-    struct IdleBehavior : public properties::PropertyOwner {
-        enum Behavior {
-            Orbit = 0,
-            OrbitAtConstantLat,
-            OrbitAroundUp
-        };
-
-        IdleBehavior();
-
-        properties::BoolProperty apply;
-        properties::OptionProperty chosenBehavior;
-        properties::FloatProperty speedScale;
-        properties::BoolProperty abortOnCameraInteraction;
-        properties::FloatProperty dampenInterpolationTime;
-    };
     IdleBehavior _idleBehavior;
+    float _idleBehaviorTriggerTimer = 0.f;
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by
@@ -286,20 +290,6 @@ private:
         const glm::dvec3& objectPosition, const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
-    /**
-    * Moves the camera along a vector, camPosToCenterPosDiff, until it reaches the
-    * focusLimit. The velocity of the zooming depend on distFromCameraToFocus and the
-    * final frame where the camera stops moving depends on the distance set in the
-    * variable focusLimit. The bool determines whether to move/fly towards the focus node
-    * or away from it.
-    *
-    * \return a new position of the camera, closer to the focusLimit than the previous
-    *         position
-    */
-    glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
-        double distFromCameraToFocus, const glm::dvec3& camPosToCenterPosDiff,
-        double destination, double deltaTime) const;
-
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor
      * node defined by the differential anchorNodeRotationDiff.
@@ -362,6 +352,8 @@ private:
      */
     SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
         const glm::dvec3 cameraPositionWorldSpace);
+
+    void resetIdleBehavior();
 
     /**
      * Apply the currently selected idle behavior to the position and rotations

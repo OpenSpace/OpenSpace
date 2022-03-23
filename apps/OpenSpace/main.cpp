@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,7 +79,7 @@
 #endif // OPENVR_SUPPORT
 
 #ifdef OPENSPACE_HAS_SPOUT
-#include "SpoutLibrary.h"
+#include <modules/spout/spoutwrapper.h>
 #endif // OPENSPACE_HAS_SPOUT
 
 #ifdef OPENSPACE_HAS_NVTOOLS
@@ -120,16 +120,11 @@ Window* FirstOpenVRWindow = nullptr;
  * the \c leftOrMain and \c right members respectively.
  */
 struct SpoutWindow {
-    struct SpoutData {
-        SPOUTHANDLE handle = nullptr;
-        bool initialized = false;
-    };
-
     /// The left framebuffer (or main, if there is no stereo rendering)
-    SpoutData leftOrMain;
+    openspace::spout::SpoutSender leftOrMain;
 
     /// The right framebuffer
-    SpoutData right;
+    openspace::spout::SpoutSender right;
 
     /// The window ID of this windows
     size_t windowId = size_t(-1);
@@ -291,41 +286,33 @@ void mainInitFunc(GLFWwindow*) {
 
 #ifdef OPENSPACE_HAS_SPOUT
         SpoutWindow w;
-
-        w.windowId = i;
+        bool retValue = true;
+        std::string mainWindowName = window.name();
 
         const Window::StereoMode sm = window.stereoMode();
         const bool hasStereo = (sm != Window::StereoMode::NoStereo) &&
                                (sm < Window::StereoMode::SideBySide);
 
         if (hasStereo) {
-            SpoutWindow::SpoutData& left = w.leftOrMain;
-            left.handle = GetSpout();
-            left.initialized = left.handle->CreateSender(
-                (window.name() + "_left").c_str(),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
-            );
-
-            SpoutWindow::SpoutData& right = w.right;
-            right.handle = GetSpout();
-            right.initialized = right.handle->CreateSender(
-                (window.name() + "_right").c_str(),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
-            );
-        }
-        else {
-            SpoutWindow::SpoutData& main = w.leftOrMain;
-            main.handle = GetSpout();
-            main.initialized = main.handle->CreateSender(
-                window.name().c_str(),
+            mainWindowName = window.name() + "_left";
+            retValue &= w.right.updateSenderName((window.name() + "_right").c_str());
+            retValue &= w.right.updateSenderSize(
                 window.framebufferResolution().x,
                 window.framebufferResolution().y
             );
         }
 
-        SpoutWindows.push_back(std::move(w));
+        retValue &= w.leftOrMain.updateSenderName(mainWindowName.c_str());
+        retValue &= w.leftOrMain.updateSenderSize(
+            window.framebufferResolution().x,
+            window.framebufferResolution().y
+        );
+
+        w.windowId = i;
+
+        if (retValue) {
+            SpoutWindows.push_back(std::move(w));
+        }
 #else
         LWARNING("Spout was requested, but program was compiled without Spout support");
 #endif // OPENSPACE_HAS_SPOUT
@@ -369,27 +356,34 @@ void mainPreSyncFunc() {
 
             std::fill(state.axes.begin(), state.axes.end(), 0.f);
             std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
+
+            // Check axes and buttons
+            glfwGetJoystickAxes(i, &state.nAxes);
+            if (state.nAxes > JoystickInputState::MaxAxes) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
+                    "All excess axes are ignored",
+                    state.name, state.nAxes, JoystickInputState::MaxAxes
+                ));
+            }
+            glfwGetJoystickButtons(i, &state.nButtons);
+            if (state.nButtons > JoystickInputState::MaxButtons) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
+                    "supported. All excess buttons are ignored",
+                    state.name, state.nButtons, JoystickInputState::MaxButtons
+                ));
+            }
         }
 
         const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
         if (state.nAxes > JoystickInputState::MaxAxes) {
-            LWARNING(fmt::format(
-                "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
-                "All excess axes are ignored",
-                state.name, state.nAxes, JoystickInputState::MaxAxes
-            ));
             state.nAxes = JoystickInputState::MaxAxes;
         }
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
         const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-
         if (state.nButtons > JoystickInputState::MaxButtons) {
-            LWARNING(fmt::format(
-                "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
-                "supported. All excess buttons are ignored",
-                state.name, state.nButtons, JoystickInputState::MaxButtons
-            ));
             state.nButtons = JoystickInputState::MaxButtons;
         }
 
@@ -506,6 +500,29 @@ void mainRenderFunc(const sgct::RenderData& data) {
         currentModelMatrix = modelMatrix;
         currentModelViewProjectionMatrix = modelMatrix * viewMatrix * projectionMatrix;
         global::openSpaceEngine->render(modelMatrix, viewMatrix, projectionMatrix);
+
+#ifdef OPENSPACE_HAS_SPOUT
+        for (SpoutWindow& w : SpoutWindows) {
+            sgct::Window& window = *Engine::instance().windows()[w.windowId];
+            int width = window.framebufferResolution().x;
+            int height = window.framebufferResolution().y;
+
+            w.leftOrMain.saveGLState();
+
+            if (w.leftOrMain.isCreated() && w.leftOrMain.updateSenderSize(width, height))
+            {
+                GLuint texId = window.frameBufferTexture(Window::TextureIndex::LeftEye);
+                w.leftOrMain.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
+            }
+
+            if (w.right.isCreated() && w.right.updateSenderSize(width, height)) {
+                GLuint texId = window.frameBufferTexture(Window::TextureIndex::RightEye);
+                w.right.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
+            }
+
+            w.leftOrMain.restoreGLState();
+        }
+#endif // OPENSPACE_HAS_SPOUT
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -556,34 +573,6 @@ void mainPostDrawFunc() {
 #endif // OPENVR_SUPPORT
 
     global::openSpaceEngine->postDraw();
-
-#ifdef OPENSPACE_HAS_SPOUT
-    for (const SpoutWindow& w : SpoutWindows) {
-        sgct::Window& window = *Engine::instance().windows()[w.windowId];
-        if (w.leftOrMain.initialized) {
-            const GLuint texId = window.frameBufferTexture(Window::TextureIndex::LeftEye);
-            glBindTexture(GL_TEXTURE_2D, texId);
-            w.leftOrMain.handle->SendTexture(
-                texId,
-                GLuint(GL_TEXTURE_2D),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
-            );
-        }
-
-        if (w.right.initialized) {
-            const GLuint tId = window.frameBufferTexture(Window::TextureIndex::RightEye);
-            glBindTexture(GL_TEXTURE_2D, tId);
-            w.right.handle->SendTexture(
-                tId,
-                GLuint(GL_TEXTURE_2D),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
-            );
-        }
-    }
-    glBindTexture(GL_TEXTURE_2D, 0);
-#endif // OPENSPACE_HAS_SPOUT
 
     LTRACE("main::mainPostDrawFunc(end)");
 }
@@ -790,8 +779,8 @@ void setSgctDelegateFunctions() {
         Viewport* viewport = currentWindow->viewports().front().get();
         if (viewport != nullptr) {
             if (viewport->hasSubViewports() && viewport->nonLinearProjection()) {
-                int res = viewport->nonLinearProjection()->cubemapResolution();
-                return glm::ivec2(res, res);
+                ivec2 dim = viewport->nonLinearProjection()->cubemapResolution();
+                return glm::ivec2(dim.x, dim.y);
             }
             else if (currentWindow->viewports().size() > 1) {
                 // @TODO (abock, 2020-04-09) This should probably be based on the current
@@ -858,11 +847,11 @@ void setSgctDelegateFunctions() {
             currentWindow->viewports().front()->nonLinearProjection()
         ) != nullptr;
     };
-    sgctDelegate.takeScreenshot = [](bool applyWarping) {
+    sgctDelegate.takeScreenshot = [](bool applyWarping, std::vector<int> windowIds) {
         ZoneScoped
 
         Settings::instance().setCaptureFromBackBuffer(applyWarping);
-        Engine::instance().takeScreenshot();
+        Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {
@@ -982,8 +971,7 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
 
 std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
                                             std::string windowConfiguration,
-                                            const std::string& labelFromCfgFile,
-                                            const std::string& xmlExt)
+                                            const std::string& labelFromCfgFile)
 {
     std::string config = windowConfiguration;
     if (!hasCliSGCTConfig) {
@@ -997,14 +985,31 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            if ( (config.length() >= xmlExt.length())
-                && (0 == config.compare(config.length() - xmlExt.length(), xmlExt.length(), xmlExt)) ) {
-                //user customzied sgct config
+            std::filesystem::path c = absPath(config);
+            
+            std::filesystem::path cj = c;
+            cj.replace_extension(".json");
+            
+            std::filesystem::path cx = c;
+            cx.replace_extension(".xml");
+
+            if (c.extension().empty()) {
+                if (std::filesystem::exists(cj)) {
+                    config += ".json";
+                }
+                else if (std::filesystem::exists(cx)) {
+                    config += ".xml";
+                }
+                else {
+                    throw ghoul::RuntimeError(fmt::format(
+                        "Error loading configuration file {}. File could not be found",
+                        config
+                    ));
+                }
             }
             else {
-                config += xmlExt;
+                // user customzied sgct config
             }
-
         }
         global::configuration->windowConfiguration = config;
     }
@@ -1115,10 +1120,27 @@ int main(int argc, char* argv[]) {
         std::filesystem::path base = configurationFilePath.parent_path();
         FileSys.registerPathToken("${BASE}", base);
 
+        // The previous incarnation of this was initializing GLFW to get the primary
+        // monitor's resolution, but that had some massive performance implications as
+        // there was some issue with the swap buffer handling inside of GLFW. My
+        // assumption is that GLFW doesn't like being initialized, destroyed, and then
+        // initialized again. Therefore we are using the platform specific functions now
+        glm::ivec2 size = glm::ivec2(1920, 1080);
+#ifdef WIN32
+        DEVMODEW dm = { 0 };
+        dm.dmSize = sizeof(DEVMODEW);
+        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+        if (success) {
+            size.x = dm.dmPelsWidth;
+            size.y = dm.dmPelsHeight;
+        }
+#endif // WIN32
+
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = configuration::loadConfigurationFromFile(
             configurationFilePath.string(),
+            size,
             commandlineArguments.configurationOverride
         );
 
@@ -1157,7 +1179,6 @@ int main(int argc, char* argv[]) {
 
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
-    const std::string xmlExt = ".xml";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
         hasSGCTConfig,
@@ -1205,8 +1226,7 @@ int main(int argc, char* argv[]) {
             win,
             hasSGCTConfig,
             windowConfiguration,
-            labelFromCfgFile,
-            xmlExt
+            labelFromCfgFile
         );
     } else {
         glfwInit();
@@ -1323,14 +1343,8 @@ int main(int argc, char* argv[]) {
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (SpoutWindow& w : SpoutWindows) {
-        if (w.leftOrMain.handle) {
-            w.leftOrMain.handle->ReleaseReceiver();
-            w.leftOrMain.handle->Release();
-        }
-        if (w.right.handle) {
-            w.right.handle->ReleaseReceiver();
-            w.right.handle->Release();
-        }
+        w.leftOrMain.release();
+        w.right.release();
     }
 #endif // OPENSPACE_HAS_SPOUT
 

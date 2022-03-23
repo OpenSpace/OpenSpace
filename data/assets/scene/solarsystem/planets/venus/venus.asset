@@ -1,8 +1,13 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
-local labelsPath = asset.require('./venus_globelabels').LabelsPath
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Venus Labels",
+  Type = "HttpSynchronization",
+  Identifier = "venus_labels",
+  Version = 1
+})
 
 local Venus = {
   Identifier = "Venus",
@@ -32,7 +37,7 @@ local Venus = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/venus.labels",
+      FileName = labelsPath .. "venus.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 11.0,
@@ -72,15 +77,26 @@ local VenusLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Venus, VenusLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Venus)
+  openspace.addSceneGraphNode(VenusLabel)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VenusLabel)
+  openspace.removeSceneGraphNode(Venus)
+end)
+    
+asset.export(Venus)
+asset.export(VenusLabel)
+
 
 
 asset.meta = {
     Name = "Venus",
-    Version = "1.0",
+    Version = "1.1",
     Description = [[ Venus globe with labels, and main planet label.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Venus", "VenusLabel"}
+    License = "MIT license"
 }

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -123,6 +123,7 @@ set_folder_location(quat "External")
 set_folder_location(tinyxml2static "External")
 set_folder_location(vrpn "External")
 set_folder_location(zlibstatic "External")
+set_folder_location(SGCTTest "Unit Tests")
 
 if (UNIX AND (NOT APPLE))
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)

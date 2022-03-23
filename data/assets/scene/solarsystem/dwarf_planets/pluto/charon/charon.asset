@@ -1,10 +1,15 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./../transforms')
+local transforms = asset.require("../transforms")
 asset.require("spice/base")
-asset.require('../trail')
-local labelsPath = asset.require('./../pluto_globelabels').LabelsPath
+asset.require("../trail")
 
 
+
+local labelsPath = asset.syncedResource({
+  Name = "Pluto Labels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_labels",
+  Version = 1
+})
 
 local Charon = {
   Identifier = "Charon",
@@ -28,7 +33,7 @@ local Charon = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/charon.labels",
+      FileName = labelsPath .. "charon.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 9.0,
@@ -45,7 +50,16 @@ local Charon = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Charon })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Charon)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Charon)
+end)
+  
+asset.export(Charon)
+
 
 
 asset.meta = {

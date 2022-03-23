@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -150,7 +150,6 @@ GUI::GUI()
     )
     , _screenSpaceProperty("ScreenSpaceProperties", "ScreenSpace Properties")
     , _moduleProperty("ModuleProperties", "Module Properties")
-    , _virtualProperty("VirtualProperties", "Virtual Properties")
     , _featuredProperties(
         "FeaturedProperties",
         "Featured Properties",
@@ -311,11 +310,6 @@ void GUI::initializeGL() {
     for (GuiComponent* comp : _components) {
         comp->initialize();
     }
-    _sceneProperty.setHasRegularProperties(true);
-    _screenSpaceProperty.setHasRegularProperties(true);
-    _globalProperty.setHasRegularProperties(true);
-    _moduleProperty.setHasRegularProperties(true);
-    _featuredProperties.setHasRegularProperties(true);
 
     _program = ghoul::opengl::ProgramObject::Build(
         "GUI",
@@ -336,7 +330,8 @@ void GUI::initializeGL() {
         }
         _fontTexture = std::make_unique<ghoul::opengl::Texture>(
             texData,
-            glm::uvec3(texSize.x, texSize.y, 1)
+            glm::uvec3(texSize.x, texSize.y, 1),
+            GL_TEXTURE_2D
         );
         _fontTexture->setName("Gui Text");
         _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
@@ -795,7 +790,6 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _moduleProperty.setVisibility(_currentVisibility);
     _sceneProperty.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
-    _virtualProperty.setVisibility(_currentVisibility);
     _featuredProperties.setVisibility(_currentVisibility);
 }
 

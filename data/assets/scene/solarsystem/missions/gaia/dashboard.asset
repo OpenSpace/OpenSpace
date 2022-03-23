@@ -1,12 +1,17 @@
-local assetHelper = asset.require('util/asset_helper')
-assetHelper.registerDashboardItems(asset, {
-  {
-    Type = "DashboardItemDistance",
-    Identifier = "GaiaEarthDistance",
-    GuiName = "Gaia Earth Distance",
-    SourceType = "Node",
-    SourceNodeName = "Gaia",
-    DestinationType = "Node Surface",
-    DestinationNodeName = "Earth"
-  }
-})
+local distance = {
+  Type = "DashboardItemDistance",
+  Identifier = "GaiaEarthDistance",
+  GuiName = "Gaia Earth Distance",
+  SourceType = "Node",
+  SourceNodeName = "Gaia",
+  DestinationType = "Node Surface",
+  DestinationNodeName = "Earth"
+}
+
+asset.onInitialize(function ()
+  openspace.dashboard.addDashboardItem(distance)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.dashboard.removeDashboardItem(distance)
+end)

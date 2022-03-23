@@ -1,7 +1,0 @@
-local LabelsPath = asset.syncedResource({
-  Name = "Pluto Labels",
-  Type = "HttpSynchronization",
-  Identifier = "pluto_labels",
-  Version = 1
-})
-asset.export("LabelsPath", LabelsPath)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -183,7 +183,7 @@ namespace {
         // [[codegen::verbatim(DistanceEPSInfo.description)]]
         std::optional<float> distanceEPS;
 
-        enum class Alignment {
+        enum class [[codegen::map(LabelRenderingAlignmentType)]] Alignment {
             Horizontally,
             Circularly
         };
@@ -282,16 +282,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     _distanceEPS = p.distanceEPS.value_or(_distanceEPS);
 
     if (p.alignmentOption.has_value()) {
-        switch (*p.alignmentOption) {
-            case Parameters::Alignment::Horizontally:
-                _alignmentOption = Horizontally;
-                break;
-            case Parameters::Alignment::Circularly:
-                _alignmentOption = Circularly;
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        _alignmentOption = codegen::map<LabelRenderingAlignmentType>(*p.alignmentOption);
     }
 
     initializeFonts();
@@ -374,7 +365,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             // atlas)
             // Once this limitation is fixed, we can remove the next piece of code
             // Removing non ASCII characters:
-            strncpy(lEntry.feature, token.c_str(), 256);
+            strncpy(lEntry.feature, token.c_str(), 255);
             int tokenChar = 0;
             while (tokenChar < 256) {
                 if (lEntry.feature[tokenChar] < 0 && lEntry.feature[tokenChar] != '\0') {

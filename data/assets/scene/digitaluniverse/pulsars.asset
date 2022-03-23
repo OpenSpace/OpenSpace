@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Pulsars Textures",
   Type = "HttpSynchronization",
@@ -23,10 +19,10 @@ local object = {
     Enabled = false,
     Color = { 0.7, 0.0, 0.0 },
     Opacity = 1.0,
-    File = speck .. "/pulsar.speck",
-    Texture = textures .. "/point4.png",
+    File = speck .. "pulsar.speck",
+    Texture = textures .. "point4.png",
     PolygonSides = 4,
-    LabelFile = speck .. "/pulsar.label",
+    LabelFile = speck .. "pulsar.label",
     Unit = "pc",
     TextColor = { 0.7, 0.2, 0.2 },
     ScaleFactor = 424,
@@ -53,15 +49,23 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+  
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Pulsars",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Digital Universe asset for Pulsars.]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Pulsars"}
+  License = "AMNH Digital Universe"
 }

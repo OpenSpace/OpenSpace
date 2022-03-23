@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../transforms')
+local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local kernels = asset.require('../mar097').Kernels
 
@@ -17,14 +16,12 @@ local Deimos = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_DEIMOS",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels
+      DestinationFrame = "GALACTIC"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "DEIMOS",
-      Observer = "MARS BARYCENTER",
-      Kernels = kernels
+      Observer = "MARS BARYCENTER"
     }
   },
   Renderable = {
@@ -74,7 +71,18 @@ local DeimosTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Deimos)
+  openspace.addSceneGraphNode(DeimosTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DeimosTrail)
+  openspace.removeSceneGraphNode(Deimos)
+end)
+    
+asset.export(Deimos)
+asset.export(DeimosTrail)
 
 
 asset.meta = {
@@ -83,6 +91,5 @@ asset.meta = {
   Description = [[ RenderableModel and Trail for Deimos.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Deimos", "DeimosTrail"}
+  License = "MIT license"
 }

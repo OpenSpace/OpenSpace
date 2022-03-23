@@ -1,9 +1,14 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
-local earthAsset = asset.require('../earth')
-asset.require('spice/base')
-local labelsPath = asset.require('./moon_labels').LabelsPath
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
+local earthAsset = asset.require("../earth")
+asset.require("spice/base")
+
+local labelsPath = asset.syncedResource({
+  Name = "Moon Labels",
+  Type = "HttpSynchronization",
+  Identifier = "moon_labels",
+  Version = 1
+})
 
 local Moon = {
   Identifier = "Moon",
@@ -35,7 +40,7 @@ local Moon = {
     },        
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/moon.labels",
+      FileName = labelsPath .. "moon.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 7.6,
@@ -51,15 +56,23 @@ local Moon = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Moon })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Moon)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Moon)
+end)
+  
+asset.export(Moon)
+
 
 
 asset.meta = {
   Name = "Moon",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Moon globe with labels. ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Moon"}
+  License = "MIT license"
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,8 +37,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "renderableTravelSpeed";
-
     constexpr const std::array<const char*, 2> UniformNames = {"lineColor", "opacity"};
 
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
@@ -99,10 +97,10 @@ namespace {
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
-        
+
         // [[codegen::verbatim(IndicatorLengthInfo.description)]]
         std::optional<int> indicatorLength;
-        
+
         // [[codegen::verbatim(FadeLengthInfo.description)]]
         std::optional<int> fadeLength;
     };
@@ -121,14 +119,14 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     , _travelSpeed(
         SpeedInfo,
         distanceconstants::LightSecond,
-        1.0, 
+        1.0,
         distanceconstants::LightSecond
       )
     , _indicatorLength(IndicatorLengthInfo, 1, 1, 360)
     , _fadeLength(FadeLengthInfo, 1, 0, 360)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _opacity(LineOpacityInfo, 1.f, 0.f, 1.f)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , _opacity(LineOpacityInfo, 1.f, 0.f, 1.f)
+    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     setRenderBin(RenderBin::Overlay);
@@ -156,7 +154,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
             _targetNode = n;
             _targetPosition = _targetNode->worldPosition();
             _lightTravelTime = calculateLightTravelTime(
-                _sourcePosition, 
+                _sourcePosition,
                 _targetPosition
             );
             calculateDirectionVector();
@@ -234,7 +232,7 @@ void RenderableTravelSpeed::calculateVerticesPositions() {
         _vertexPositions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _vertexPositions.endOfFade = _travelSpeed * 
+        _vertexPositions.endOfFade = _travelSpeed *
             (_timeSinceStart - _indicatorLength - _fadeLength) * _directionVector;
     }
 }
@@ -276,7 +274,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     _sourcePosition = mySGNPointer->worldPosition();
 
     _lightTravelTime = calculateLightTravelTime(
-        _sourcePosition, 
+        _sourcePosition,
         _targetPosition
     );
 

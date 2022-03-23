@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,17 +23,25 @@
  ****************************************************************************************/
 
 #include <openspace/scene/profile.h>
-#include <openspace/scene/scene.h>
 
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/scene/scene.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ctime>
+#include <filesystem>
 #include <set>
 #include <json/json.hpp>
 
@@ -109,7 +117,6 @@ namespace {
         }
     }
 } // namespace
-
 
 //
 // Current version:
@@ -493,6 +500,7 @@ void from_json(const nlohmann::json& j, version10::Keybinding& v) {
 
 void convertVersion10to11(nlohmann::json& profile) {
     // Version 1.1 introduced actions and remove Lua function calling from keybindings
+    profile["version"] = Profile::Version{ 1, 1 };
 
     if (profile.find("keybindings") == profile.end()) {
         // We didn't find any keybindings, so there is nothing to do
@@ -525,8 +533,6 @@ void convertVersion10to11(nlohmann::json& profile) {
 
     profile["actions"] = actions;
     profile["keybindings"] = keybindings;
-
-    profile["version"] = Profile::Version{ 1, 1 };
 }
 
 } // namespace version10
@@ -715,20 +721,7 @@ scripting::LuaLibrary Profile::luaLibrary() {
     return {
         "",
         {
-            {
-                "saveSettingsToProfile",
-                &luascriptfunctions::saveSettingsToProfile,
-                "[string, bool]",
-                "Collects all changes that have been made since startup, including all "
-                "property changes and assets required, requested, or removed. All "
-                "changes will be added to the profile that OpenSpace was started with, "
-                "and the new saved file will contain all of this information. If the "
-                "arugment is provided, the settings will be saved into new profile with "
-                "that name. If the argument is blank, the current profile will be saved "
-                "to a backup file and the original profile will be overwritten. The "
-                "second argument determines if a file that already exists should be "
-                "overwritten, which is 'false' by default"
-            }
+            codegen::lua::SaveSettingsToProfile
         }
     };
 }

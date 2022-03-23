@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -237,9 +237,7 @@ public:
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the
-     * scene graph. The functions contained are
-     * - openspace::luascriptfunctions::property_setValue
-     * - openspace::luascriptfunctions::property_getValue
+     * scene graph.
      * \return The Lua library that contains all Lua functions available to change the
      * scene graph
      */

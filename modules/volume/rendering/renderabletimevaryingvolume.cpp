@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -142,7 +142,7 @@ namespace {
         std::optional<float> opacity;
 
         // [[codegen::verbatim(StepSizeInfo.description)]]
-        std::optional<double> stepSize;
+        std::optional<float> stepSize;
 
         // [[codegen::verbatim(GridTypeInfo.description)]]
         std::optional<std::string> gridType;
@@ -183,7 +183,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {}
     );
-    
+
     _invertDataAtZ = p.invertDataAtZ.value_or(_invertDataAtZ);
 
     _gridType.addOptions({
@@ -193,7 +193,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
     _stepSize = p.stepSize.value_or(_stepSize);
-    
+
     if (p.opacity.has_value()) {
         _opacity = *p.opacity * VolumeMaxOpacity;
     }
@@ -255,6 +255,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
             t.metadata.dimensions,
+            GL_TEXTURE_3D,
             ghoul::opengl::Texture::Format::Red,
             GL_RED,
             GL_FLOAT,

@@ -1,10 +1,21 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/lagrange_points/L2')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local horizons = asset.require('./horizons').horizons
-local kernels = asset.require('./kernels').kernels
+local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
+
+local horizons = asset.syncedResource({
+  Name = "JWST Horizons",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_horizons",
+  Version = 2
+})
+
+local kernels = asset.syncedResource({
+  Name = "JWST Kernel",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_kernels",
+  Version = 1
+})
 
 -- (malej 2021-10-04) In general, there is no trajectery data of JWST for the scheduled
 -- launch in December 2021, no horizons and no SPICE. Instead data from the 2018 launch
@@ -25,7 +36,7 @@ local JWSTTrailLaunch = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "/horizons_jwst_launch.dat",
+      HorizonsTextFile = horizons .. "horizons_jwst_launch.dat",
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2018 OCT 01 14:06:00",
@@ -56,7 +67,7 @@ local JWSTTrailOrbit = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "/horizons_jwst_orbit.dat",
+      HorizonsTextFile = horizons .. "horizons_jwst_orbit.dat",
     },
     Color = { 0.9, 0.9, 0.0 },
     Period = 182.621099, -- About 6 months
@@ -87,7 +98,7 @@ local JWSTSunTrail = {
       Type = "SpiceTranslation",
       Target = "JWST",
       Observer = "SSB",
-      Kernels = kernels .. "/jwst_horizons_20200101_20240101_v01.bsp"
+      Kernels = kernels .. "jwst_horizons_20200101_20240101_v01.bsp"
     },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,
@@ -103,11 +114,22 @@ local JWSTSunTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  JWSTTrailLaunch,
-  JWSTTrailOrbit,
-  JWSTSunTrail
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTTrailLaunch)
+  openspace.addSceneGraphNode(JWSTTrailOrbit)
+  openspace.addSceneGraphNode(JWSTSunTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTSunTrail)
+  openspace.removeSceneGraphNode(JWSTTrailOrbit)
+  openspace.removeSceneGraphNode(JWSTTrailLaunch)
+end)
+    
+asset.export(JWSTTrailLaunch)
+asset.export(JWSTTrailOrbit)
+asset.export(JWSTSunTrail)
+
 
 asset.meta = {
   Name = "James Webb Space Telescope Trails",

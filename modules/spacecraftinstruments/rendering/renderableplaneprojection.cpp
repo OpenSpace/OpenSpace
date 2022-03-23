@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,6 +45,7 @@ namespace {
     constexpr const char* _loggerCat = "RenderablePlaneProjection";
     constexpr const char* GalacticFrame = "GALACTIC";
 
+    // @TODO (emmbr 2022-01-20) Add documentation
     struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {
         std::optional<std::string> spacecraft;
         std::optional<std::string> instrument;
@@ -57,6 +58,10 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation RenderablePlaneProjection::Documentation() {
+    return codegen::doc<Parameters>("spacecraftinstruments_renderableorbitdisc");
+}
 
 RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dict)
     : Renderable(dict)
@@ -180,7 +185,7 @@ void RenderablePlaneProjection::loadTexture() {
     }
 
     std::unique_ptr<ghoul::opengl::Texture> texture =
-        ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath).string());
+        ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath).string(), 2);
     if (!texture) {
         return;
     }

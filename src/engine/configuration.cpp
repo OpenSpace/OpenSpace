@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -86,21 +86,12 @@ namespace {
         FontSizes fontSize;
 
         struct Logging {
-            // List from logmanager.cpp::levelFromString
-            enum class Level {
-                Trace,
-                Debug,
-                Info,
-                Warning,
-                Error,
-                Fatal,
-                None
-            };
             // The severity of log messages that will be displayed. Only messages of the
             // selected level or higher will be displayed. All levels below will be
             // silently discarded. The order of severities is:
             // Debug < Info < Warning < Error < Fatal < None.
-            std::optional<Level> logLevel;
+            std::optional<std::string> logLevel [[codegen::inlist("Trace", "Debug",
+                "Info", "Warning", "Error", "Fatal", "None")]];
 
             // Determines whether error messages will be displayed immediately or if it is
             // acceptable to have a short delay, but being more performant. If the delay
@@ -114,16 +105,11 @@ namespace {
             std::optional<std::vector<ghoul::Dictionary>> logs
                 [[codegen::reference("core_logfactory")]];
 
-            // List from OpenspaceEngine::initialize
-            enum class Verbosity {
-                None,
-                Minimal,
-                Default,
-                Full
-            };
             // At startup, a list of system capabilities is created and logged. This value
             // determines how verbose this listing should be
-            std::optional<Verbosity> capabilitiesVerbosity;
+            std::optional<std::string> capabilitiesVerbosity [[codegen::inlist("None",
+                "Minimal", "Default", "Full"
+            )]];
         };
         // Configurations for the logging of messages that are generated throughout the
         // code and are useful for debugging potential errors or other information
@@ -151,15 +137,12 @@ namespace {
         // should be retained. This value defaults to 'false'
         std::optional<bool> perProfileCache;
 
-        enum class Scaling {
-            Window [[codegen::key("window")]],
-            Framebuffer [[codegen::key("framebuffer")]]
-        };
         // The method for scaling the onscreen text in the window. As the resolution of
         // the rendering can be different from the size of the window, the onscreen text
         // can either be scaled according to the window size ('window'), or the rendering
         // resolution ('framebuffer'). This value defaults to 'window'
-        std::optional<Scaling> onScreenTextScaling;
+        std::optional<std::string> onScreenTextScaling [[codegen::inlist("window",
+            "framebuffer")]];
 
         // Toggles whether the master in a multi-application setup should be rendering or
         // just managing the state of the network. This is desired in cases where the
@@ -200,14 +183,9 @@ namespace {
             // The port of the http proxy
             int port [[codegen::inrange(0, 65536)]];
 
-            enum class Authentication {
-                Basic [[codegen::key("basic")]],
-                Ntlm [[codegen::key("ntlm")]],
-                Digest [[codegen::key("digest")]],
-                Any [[codegen::key("any")]]
-            };
             // The authentication method of the http proxy
-            std::optional<Authentication> authentication;
+            std::optional<std::string> authentication [[codegen::inlist("basic", "ntlm",
+                "digest", "any")]];
 
             // The user of the http proxy
             std::optional<std::string> user;
@@ -239,47 +217,23 @@ namespace {
                 // The identifier that is to be filtered
                 int identifier;
 
-                // Taken from ghoul::debugcontext.cpp
-                enum class Source {
-                    API,
-                    WindowSystem [[codegen::key("Window System")]],
-                    ShaderCompiler [[codegen::key("Shader Compiler")]],
-                    ThirdParty [[codegen::key("Third Party")]],
-                    Application,
-                    Other,
-                    DontCare [[codegen::key("Don't care")]]
-                };
                 // The source of the identifier to be filtered
-                Source source;
+                std::string source [[codegen::inlist("API", "Window System",
+                    "Shader Compiler", "Third Party", "Application", "Other",
+                    "Don't care")]];
 
-                // Taken from ghoul::debugcontext.cpp
-                enum class Type {
-                    Error,
-                    Deprecated,
-                    Undefined,
-                    Portability,
-                    Performance,
-                    Marker,
-                    PushGroup [[codegen::key("Push group")]],
-                    PopGroup [[codegen::key("Pop group")]],
-                    Other,
-                    DontCare [[codegen::key("Don't care")]]
-                };
                 // The type of the identifier to be filtered
-                Type type;
+                std::string type [[codegen::inlist("Error", "Deprecated", "Undefined",
+                    "Portability", "Performance", "Marker", "Push group", "Pop group",
+                    "Other", "Don't care")]];
             };
             // A list of OpenGL debug messages identifiers that are filtered
             std::optional<std::vector<Filter>> filterIdentifier;
 
-            // A list of severities that can are filtered out
-            enum class Severity {
-                High,
-                Medium,
-                Low,
-                Notification
-            };
             // Determines the settings for the creation of an OpenGL debug context
-            std::optional<std::vector<Severity>> filterSeverity;
+            std::optional<std::vector<std::string>> filterSeverity [[codegen::inlist(
+                "High", "Medium", "Low", "Notification"
+            )]];
         };
         // Determines the settings for the creation of an OpenGL debug context
         std::optional<OpenGLDebugContext> openGLDebugContext;
@@ -399,18 +353,7 @@ void parseLuaState(Configuration& configuration) {
     c.isPrintingEvents = p.printEvents.value_or(c.isPrintingEvents);
     c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
     c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
-    if (p.onScreenTextScaling.has_value()) {
-        switch (*p.onScreenTextScaling) {
-            case Parameters::Scaling::Window:
-                c.onScreenTextScaling = "window";
-                break;
-            case Parameters::Scaling::Framebuffer:
-                c.onScreenTextScaling = "framebuffer";
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    }
+    c.onScreenTextScaling = p.onScreenTextScaling.value_or(c.onScreenTextScaling);
     c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
     c.isRenderingOnMasterDisabled =
         p.disableRenderingOnMaster.value_or(c.isRenderingOnMasterDisabled);
@@ -419,55 +362,12 @@ void parseLuaState(Configuration& configuration) {
     c.screenSpaceRotation = p.screenSpaceRotation.value_or(c.screenSpaceRotation);
     c.isConsoleDisabled = p.disableInGameConsole.value_or(c.isConsoleDisabled);
     if (p.logging.has_value()) {
-        if (p.logging->logLevel.has_value()) {
-            switch (*p.logging->logLevel) {
-                case Parameters::Logging::Level::Trace:
-                    c.logging.level = "Trace";
-                    break;
-                case Parameters::Logging::Level::Debug:
-                    c.logging.level = "Debug";
-                    break;
-                case Parameters::Logging::Level::Info:
-                    c.logging.level = "Info";
-                    break;
-                case Parameters::Logging::Level::Warning:
-                    c.logging.level = "Warning";
-                    break;
-                case Parameters::Logging::Level::Error:
-                    c.logging.level = "Error";
-                    break;
-                case Parameters::Logging::Level::Fatal:
-                    c.logging.level = "Fatal";
-                    break;
-                case Parameters::Logging::Level::None:
-                    c.logging.level = "None";
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
-        }
-
+        c.logging.level = p.logging->logLevel.value_or(c.logging.level);
         c.logging.forceImmediateFlush =
             p.logging->immediateFlush.value_or(c.logging.forceImmediateFlush);
         c.logging.logs = p.logging->logs.value_or(c.logging.logs);
-        if (p.logging->capabilitiesVerbosity.has_value()) {
-            switch (*p.logging->capabilitiesVerbosity) {
-                case Parameters::Logging::Verbosity::None:
-                    c.logging.capabilitiesVerbosity = "None";
-                    break;
-                case Parameters::Logging::Verbosity::Minimal:
-                    c.logging.capabilitiesVerbosity = "Minimal";
-                    break;
-                case Parameters::Logging::Verbosity::Default:
-                    c.logging.capabilitiesVerbosity = "Default";
-                    break;
-                case Parameters::Logging::Verbosity::Full:
-                    c.logging.capabilitiesVerbosity = "Full";
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
-        }
+        c.logging.capabilitiesVerbosity =
+            p.logging->capabilitiesVerbosity.value_or(c.logging.capabilitiesVerbosity);
     }
 
     if (p.documentation.has_value()) {
@@ -499,90 +399,13 @@ void parseLuaState(Configuration& configuration) {
             for (const Parameters::OpenGLDebugContext::Filter& f : *l.filterIdentifier) {
                 Configuration::OpenGLDebugContext::IdentifierFilter filter;
                 filter.identifier = static_cast<unsigned int>(f.identifier);
-                switch (f.source) {
-                    case Parameters::OpenGLDebugContext::Filter::Source::API:
-                        filter.source = "API";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Source::WindowSystem:
-                        filter.source = "Window System";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Source::ShaderCompiler:
-                        filter.source = "Shader Compiler";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Source::ThirdParty:
-                        filter.source = "Third Party";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Source::Application:
-                        filter.source = "Application";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Source::Other:
-                        filter.source = "Other";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Source::DontCare:
-                        filter.source = "Don't care";
-                        break;
-                    default:
-                        throw ghoul::MissingCaseException();
-                }
-                switch (f.type) {
-                    case Parameters::OpenGLDebugContext::Filter::Type::Error:
-                        filter.type = "Error";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Type::Deprecated:
-                        filter.type = "Deprecated";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Type::Undefined:
-                        filter.type = "Undefined";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Type::Portability:
-                        filter.type = "Portability";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Type::Performance:
-                        filter.type = "Performance";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Type::Marker:
-                        filter.type = "Marker";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Type::PushGroup:
-                        filter.type = "Push group";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Type::PopGroup:
-                        filter.type = "Pop group";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Type::Other:
-                        filter.type = "Other";
-                        break;
-                    case Parameters::OpenGLDebugContext::Filter::Type::DontCare:
-                        filter.type = "Don't care";
-                        break;
-                    default:
-                        throw ghoul::MissingCaseException();
-                }
-
+                filter.source = f.source;
+                filter.type = f.type;
                 c.openGLDebugContext.identifierFilters.push_back(filter);
             }
         }
         if (l.filterSeverity.has_value()) {
-            for (Parameters::OpenGLDebugContext::Severity sev : *l.filterSeverity) {
-                std::string severity;
-                switch (sev) {
-                    case Parameters::OpenGLDebugContext::Severity::High:
-                        severity = "High";
-                        break;
-                    case Parameters::OpenGLDebugContext::Severity::Medium:
-                        severity = "Medium";
-                        break;
-                    case Parameters::OpenGLDebugContext::Severity::Low:
-                        severity = "Low";
-                        break;
-                    case Parameters::OpenGLDebugContext::Severity::Notification:
-                        severity = "Notification";
-                        break;
-                    default:
-                        throw ghoul::MissingCaseException();
-                }
-                c.openGLDebugContext.severityFilters.push_back(severity);
-            }
+            c.openGLDebugContext.severityFilters = *l.filterSeverity;
         }
     }
 
@@ -591,24 +414,8 @@ void parseLuaState(Configuration& configuration) {
             p.httpProxy->activate.value_or(c.httpProxy.usingHttpProxy);
         c.httpProxy.address = p.httpProxy->address;
         c.httpProxy.port = static_cast<unsigned int>(p.httpProxy->port);
-        if (p.httpProxy->authentication.has_value()) {
-            switch (*p.httpProxy->authentication) {
-                case Parameters::HttpProxy::Authentication::Basic:
-                    c.httpProxy.authentication = "basic";
-                    break;
-                case Parameters::HttpProxy::Authentication::Ntlm:
-                    c.httpProxy.authentication = "ntlm";
-                    break;
-                case Parameters::HttpProxy::Authentication::Digest:
-                    c.httpProxy.authentication = "digest";
-                    break;
-                case Parameters::HttpProxy::Authentication::Any:
-                    c.httpProxy.authentication = "any";
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
-        }
+        c.httpProxy.authentication =
+            p.httpProxy->authentication.value_or(c.httpProxy.authentication);
         c.httpProxy.user = p.httpProxy->user.value_or(c.httpProxy.user);
         c.httpProxy.password = p.httpProxy->password.value_or(c.httpProxy.password);
     }
@@ -645,11 +452,19 @@ std::filesystem::path findConfiguration(const std::string& filename) {
 }
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
+                                        const glm::ivec2& primaryMonitorResolution,
                                         const std::string& overrideScript)
 {
     ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
 
     Configuration result;
+
+    // Injecting the resolution of the primary screen into the Lua state
+    std::string script = fmt::format(
+        "ScreenResolution = {{ x = {}, y = {} }}",
+        primaryMonitorResolution.x, primaryMonitorResolution.y
+    );
+    ghoul::lua::runScript(result.state, script);
 
     // If there is an initial config helper file, load it into the state
     if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,7 +73,8 @@ documentation::Documentation DashboardItem::Documentation() {
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
                                                              ghoul::Dictionary dictionary)
 {
-    auto factory = FactoryManager::ref().factory<DashboardItem>();
+    ghoul::TemplateFactory<DashboardItem>* factory =
+        FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(factory, "DashboardItem factory did not exist");
 
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);

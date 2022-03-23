@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -119,7 +119,7 @@ namespace {
         // [[codegen::verbatim(ResolutionInfo.description)]]
         int resolution;
 
-        enum class RenderableType {
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderableType {
             Background,
             Opaque,
             PreDeferredTransparent,
@@ -136,20 +136,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTrailOrbit::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "base_renderable_renderabletrailorbit"
+    return codegen::doc<Parameters>(
+        "base_renderable_renderabletrailorbit",
+        RenderableTrail::Documentation()
     );
-
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderableTrail::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-
-    return doc;
 }
 
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
@@ -177,25 +167,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 
     if (p.renderableType.has_value()) {
-        switch (*p.renderableType) {
-            case Parameters::RenderableType::Background:
-                setRenderBin(Renderable::RenderBin::Background);
-                break;
-            case Parameters::RenderableType::Opaque:
-                setRenderBin(Renderable::RenderBin::Opaque);
-                break;
-            case Parameters::RenderableType::PreDeferredTransparent:
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-                break;
-            case Parameters::RenderableType::PostDeferredTransparent:
-                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-                break;
-            case Parameters::RenderableType::Overlay:
-                setRenderBin(Renderable::RenderBin::Overlay);
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderableType));
     }
     else {
         setRenderBin(Renderable::RenderBin::Overlay);

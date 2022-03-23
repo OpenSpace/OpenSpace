@@ -1,5 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
 local spec = {
   Type = "ScreenSpaceBrowser",
   Identifier = "ScreenSpaceBrowserExample",
@@ -7,4 +5,12 @@ local spec = {
   Url = "https://www.openspaceproject.com/"
 };
 
-assetHelper.registerScreenSpaceRenderables(asset, { spec })
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(spec)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(spec)
+end)
+
+asset.export(spec)

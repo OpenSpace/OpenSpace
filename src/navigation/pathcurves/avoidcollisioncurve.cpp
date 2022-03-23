@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,18 +70,29 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     // Add an extra point to first go backwards if starting close to planet
     glm::dvec3 nodeToStart = start.position() - startNodeCenter;
-    double distanceToStartNode = glm::length(nodeToStart);
+    const double distanceToStartNode = glm::length(nodeToStart);
 
-    if (distanceToStartNode < CloseToNodeThresholdRadiusMultiplier * startNodeRadius) {
-        double distance = startNodeRadius;
+    // Note that the factor 2.0 is arbitrarily chosen to look ok.
+    // @TODO: (2022-02-27, emmbr) Should be unified to a "getting close to object sphere"
+    // that can be used in multiple cases when creating paths more cleverly later on
+    const double closeToNodeThresholdFactor = glm::max(
+        CloseToNodeThresholdRadiusMultiplier,
+        2.0 * global::navigationHandler->pathNavigator().arrivalDistanceFactor()
+    );
+
+    if (distanceToStartNode < closeToNodeThresholdFactor * startNodeRadius) {
+        const double distance = startNodeRadius;
         glm::dvec3 newPos = start.position() + distance * glm::normalize(nodeToStart);
         _points.push_back(newPos);
     }
 
     const glm::dvec3 startToEnd = end.position() - start.position();
 
-    if (glm::length(startToEnd) > 0.0) {
-        // Add point for moving out if the end state is in opposite direction
+    // Add point for moving out if the end state is far away and in opposite direction.
+    // This helps with avoiding fast rotation in the center of the path
+    const double maxRadius = std::max(startNodeRadius, endNodeRadius);
+    bool nodesAreDifferent = start.nodeIdentifier() != end.nodeIdentifier();
+    if (glm::length(startToEnd) >  0.5 * maxRadius && nodesAreDifferent) {
         double cosAngleToTarget = glm::dot(normalize(-startViewDir), normalize(startToEnd));
         bool targetInOppositeDirection = cosAngleToTarget > 0.7;
 
@@ -101,8 +112,8 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     const glm::dvec3 nodeToEnd = end.position() - endNodeCenter;
     const double distanceToEndNode = glm::length(nodeToEnd);
 
-    if (distanceToEndNode < CloseToNodeThresholdRadiusMultiplier * endNodeRadius) {
-        double distance = endNodeRadius;
+    if (distanceToEndNode < closeToNodeThresholdFactor * endNodeRadius) {
+        const double distance = endNodeRadius;
         glm::dvec3 newPos = end.position() + distance * glm::normalize(nodeToEnd);
         _points.push_back(newPos);
     }

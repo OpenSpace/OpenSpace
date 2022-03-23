@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,6 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
@@ -89,7 +88,6 @@ namespace {
         sizeof(SyncEngine) +
         sizeof(TimeManager) +
         sizeof(VersionChecker) +
-        sizeof(VirtualPropertyManager) +
         sizeof(WindowDelegate) +
         sizeof(configuration::Configuration) +
         sizeof(interaction::ActionManager) +
@@ -256,14 +254,6 @@ void create() {
     currentPos += sizeof(VersionChecker);
 #else
     versionChecker = new VersionChecker;
-#endif // WIN32
-
-#ifdef WIN32
-    virtualPropertyManager = new (currentPos) VirtualPropertyManager;
-    ghoul_assert(virtualPropertyManager, "No virtualPropertyManager");
-    currentPos += sizeof(VirtualPropertyManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    virtualPropertyManager = new VirtualPropertyManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -505,13 +495,6 @@ void destroy() {
     windowDelegate->~WindowDelegate();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete windowDelegate;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'VirtualPropertyManager'");
-#ifdef WIN32
-    virtualPropertyManager->~VirtualPropertyManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete virtualPropertyManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'VersionChecker'");

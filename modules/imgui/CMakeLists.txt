@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -27,7 +27,6 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
   include/gui.h
   include/guiactioncomponent.h
-  include/guiassetcomponent.h
   include/guicomponent.h
   include/guifilepathcomponent.h
   include/guigibscomponent.h
@@ -48,7 +47,6 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
   src/gui.cpp
   src/guiactioncomponent.cpp
-  src/guiassetcomponent.cpp
   src/guicomponent.cpp
   src/guifilepathcomponent.cpp
   src/guigibscomponent.cpp
