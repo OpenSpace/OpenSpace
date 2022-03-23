@@ -48,6 +48,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/component_wise.hpp>
 #include <filesystem>
 #include <fstream>
 #include <optional>
@@ -318,6 +319,12 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
     addProperty(_downScaleVolumeRendering);
     addProperty(_numberOfRayCastingSteps);
+
+    // Use max component instead of length, to avoid problems with taking square
+    // of huge value
+    // @TODO (2022-03-23, emmbr) This does not correspond super well with the visual
+    // size of the galaxy. See if it can be computed some other way
+    setBoundingSphere(glm::compMax(_volumeSize));
 }
 
 void RenderableGalaxy::initialize() {
