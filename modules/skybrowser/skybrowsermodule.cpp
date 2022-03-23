@@ -167,15 +167,28 @@ SkyBrowserModule::SkyBrowserModule()
         bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
 
         // Visualization mode changed. Start fading
-        if (vizModeChanged) {
-            _isFading = true;
+        if (vizModeChanged && !_isCameraInSolarSystem) {
             // Camera moved into the solar system
-            if (!_isCameraInSolarSystem) {
-                _goal = Transparency::Transparent;
-            }
-            else {
-                _goal = Transparency::Opaque;
-            }
+            _isFading = true;
+            _goal = Transparency::Transparent;
+            
+            float transparency = [](Transparency goal) {
+                switch (goal) {
+                case Transparency::Transparent:
+                    return 0.f;
+
+                case Transparency::Opaque:
+                    return 1.f;
+                }
+            }(_goal);
+
+            std::for_each(
+                _targetsBrowsers.begin(),
+                _targetsBrowsers.end(),
+                [&](const std::unique_ptr<TargetBrowserPair>& pair) {
+                    pair->startFading(transparency, 2.f);
+                }
+            );
         }
         double deltaTime = global::windowDelegate->deltaTime();
         // Fade pairs if the camera moved in or out the solar system
@@ -421,26 +434,18 @@ void SkyBrowserModule::incrementallyRotateCamera(double deltaTime, double animat
 
 void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, 
                                                        float deltaTime) 
-{
-    float transparency = [](Transparency goal) {
-        switch (goal) {
-            case Transparency::Transparent:
-                return 0.f;
-
-            case Transparency::Opaque:
-                return 1.f;
-            }
-    }(goal);
-    
-     bool isAllFinished{ false };
+{    
+     bool isAllFinished = true;
      for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
          if (pair->isEnabled()) {
-             bool isPairFinished = pair->hasFinishedFading(transparency);
+             bool isPairFinished = pair->hasFinishedFading();
              if (!isPairFinished) {
-                 pair->incrementallyFade(transparency, FadingTime, deltaTime);
+                 pair->incrementallyFade(deltaTime);
              }
              else if (isPairFinished && goal == Transparency::Transparent) {
                  pair->setEnabled(false);
+                 pair->setOpacity(1.0);
+
              }
              isAllFinished &= isPairFinished;
          }
