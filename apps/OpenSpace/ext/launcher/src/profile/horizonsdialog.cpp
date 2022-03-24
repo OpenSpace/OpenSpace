@@ -527,15 +527,16 @@ bool HorizonsDialog::handleRequest() {
     bool isValid = handleResult(result);
 
     if (!isValid && std::filesystem::is_regular_file(_horizonsFile.file())) {
-        std::filesystem::path oldName = _horizonsFile.file();
-        std::filesystem::path newName = _horizonsFile.file().replace_extension(".txt");
+        std::string newName = _horizonsFile.file().filename().string();
+        newName = newName.substr(0, newName.size() - newName.find_first_of('.'));
 
-        // TODO: What to do if the txt file already exists?
-        if (std::filesystem::is_regular_file(newName)) {
-            return isValid;
-        }
+        std::filesystem::path oldFile = _horizonsFile.file()
+        std::filesystem::path newFile =_horizonsFile.file().replace_filename(
+            newName + "_error"
+        );
+        newFile = newFile.replace_extension(".txt");
 
-        std::filesystem::rename(oldName, newName);
+        std::filesystem::rename(oldFile, newFile);
     }
 
     return isValid;
@@ -883,9 +884,21 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
 
 bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
     switch (result) {
-        case openspace::HorizonsFile::ResultCode::Valid:
-            return true;
+    case openspace::HorizonsFile::ResultCode::Valid: {
+            // If the request worked then delete the corresponding error file if it exist
+            std::string newName = _horizonsFile.file().filename().string();
+            newName = newName.substr(0, newName.size() - newName.find_first_of('.'));
 
+            std::filesystem::path errorFile = _horizonsFile.file().replace_filename(
+                newName + "_error"
+            );
+            errorFile = errorFile.replace_extension(".txt");
+
+            if (std::filesystem::is_regular_file(errorFile)) {
+                std::filesystem::remove(errorFile);
+            }
+            return true;
+        }
         case openspace::HorizonsFile::ResultCode::InvalidFormat:
             appendLog(fmt::format("Format of file '{}' is invalid. Horizons files must "
                 "have extension '.hrz'", _horizonsFile.file()),
