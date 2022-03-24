@@ -45,7 +45,7 @@ void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
     commandLine->AppendSwitch("use-gl=desktop");
     commandLine->AppendSwitch("ignore-gpu-blacklist");
     commandLine->AppendSwitch("log-gpu-control-list-decisions");
-
+    commandLine->AppendSwitch("use-mock-keychain");
     commandLine->AppendSwitch("enable-begin-frame-scheduling");
     commandLine->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
 }

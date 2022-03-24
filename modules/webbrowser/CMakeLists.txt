@@ -129,7 +129,9 @@ set(WEBBROWSER_SOURCES ${WEBBROWSER_SOURCES} ${WEBBROWSER_RESOURCES_SOURCES})
 
 # CEF helper sources
 set(WEBBROWSER_HELPER_SOURCES src/webbrowserapp.cpp)
-set(WEBBROWSER_HELPER_SOURCES_MACOSX src/processhelpermac.cpp)
+if (OS_MACOSX)
+  list(APPEND WEBBROWSER_HELPER_SOURCES src/processhelpermac.cpp)
+endif()
 set(WEBBROWSER_HELPER_SOURCES_WINDOWS src/processhelperwindows.cpp)
 APPEND_PLATFORM_SOURCES(WEBBROWSER_HELPER_SOURCES)
 
@@ -152,30 +154,43 @@ set(WEBBROWSER_RESOURCES_SRCS
 # Place Helper in separate executable
 # The naming style "<ApplicionName> Helper" is required by Chromium.
 set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
+set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
 
 #
 # CEF platform-specific config
 #
 
+list(APPEND Targets ${CEF_HELPER_TARGET} ${CEF_HELPER_TARGET_GPU} ${CEF_HELPER_TARGET_RENDERER})
+
+
 if (OS_MACOSX)
-  # Helper executable target.
-  add_executable(${CEF_HELPER_TARGET} MACOSX_BUNDLE ${WEBBROWSER_HELPER_SOURCES})
-  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
-  # add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
-  add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
-  target_link_libraries(${CEF_HELPER_TARGET} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-  set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
-    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
-  )
+  ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+  foreach(target IN LISTS Targets)
+    # Helper executable target.
+        message(STATUS "set tar : ${target}")
 
-  target_compile_options(${CEF_HELPER_TARGET} PRIVATE -Wno-deprecated-declarations)
-  target_compile_options(libcef_dll_wrapper PRIVATE -Wno-deprecated-declarations)
+    add_executable(${target} MACOSX_BUNDLE ${WEBBROWSER_HELPER_SOURCES})
+    SET_EXECUTABLE_TARGET_PROPERTIES(${target})
+    # add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
+    add_dependencies(${target} libcef_dll_wrapper)
+    target_link_libraries(${target} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+    set_target_properties(${target} PROPERTIES
+      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
+    )
 
-  if (USE_SANDBOX)
-    # Logical target used to link the cef_sandbox library.
-    ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
-    target_link_libraries(${CEF_HELPER_TARGET} cef_sandbox_lib)
-  endif ()
+    target_compile_options(${target} PRIVATE -Wno-deprecated-declarations)
+    target_compile_options(libcef_dll_wrapper PRIVATE -Wno-deprecated-declarations)
+
+    if (USE_SANDBOX)
+      # Logical target used to link the cef_sandbox library.
+      target_link_libraries(${target} cef_sandbox_lib)
+    endif ()
+  endforeach()
+
+set_property(TARGET ${CEF_HELPER_TARGET_GPU} PROPERTY FOLDER "Helper")
+set_property(TARGET ${CEF_HELPER_TARGET_RENDERER} PROPERTY FOLDER "Helper")
+
 endif ()
 
 if (OS_WINDOWS)
