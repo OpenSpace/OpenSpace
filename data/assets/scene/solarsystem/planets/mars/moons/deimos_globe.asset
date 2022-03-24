@@ -1,6 +1,11 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
-local kernels = asset.require('../mar097').Kernels
+
+local kernels = asset.syncedResource({
+  Name = "Mars Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_kernels",
+  Version = 1
+})
 
 
 local DeimosGlobe = {
@@ -11,13 +16,13 @@ local DeimosGlobe = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_DEIMOS",
       DestinationFrame = "GALACTIC",
-      Kernels = kernels
+      Kernels = kernels .. "mar097.bsp"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "DEIMOS",
       Observer = "MARS BARYCENTER",
-      Kernels = kernels
+      Kernels = kernels .. "mar097.bsp"
     }
   },
   Renderable = {
@@ -34,7 +39,15 @@ local DeimosGlobe = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { DeimosGlobe })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DeimosGlobe)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DeimosGlobe)
+end)
+
+asset.export(DeimosGlobe)
 
 
 asset.meta = {

@@ -1,6 +1,11 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
-local kernels = asset.require('../mar097').Kernels
+
+local kernels = asset.syncedResource({
+  Name = "Mars Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_kernels",
+  Version = 1
+})
 
 
 local PhobosGlobe = {
@@ -11,13 +16,13 @@ local PhobosGlobe = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_PHOBOS",
       DestinationFrame = "GALACTIC",
-      Kernels = kernels
+      Kernels = kernels .. "mar097.bsp"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHOBOS",
       Observer = "MARS BARYCENTER",
-      Kernels = kernels
+      Kernels = kernels .. "mar097.bsp"
     }
   },
   Renderable = {
@@ -34,7 +39,15 @@ local PhobosGlobe = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { PhobosGlobe })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PhobosGlobe)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PhobosGlobe)
+end)
+
+asset.export(PhobosGlobe)
 
 
 asset.meta = {

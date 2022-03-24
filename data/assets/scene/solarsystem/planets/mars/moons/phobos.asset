@@ -8,6 +8,14 @@ local model = asset.syncedResource({
   Version = 1
 })
 
+local kernels = asset.syncedResource({
+  Name = "Mars Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_kernels",
+  Version = 1
+})
+
+
 local Phobos = {
   Identifier = "Phobos",
   Parent = transforms.MarsBarycenter.Identifier,
@@ -15,18 +23,21 @@ local Phobos = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_PHOBOS",
-      DestinationFrame = "GALACTIC"
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels .. "mar097.bsp"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHOBOS",
-      Observer = "MARS BARYCENTER"
+      Observer = "MARS BARYCENTER",
+      Kernels = kernels .. "mar097.bsp"
     }
   },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = model .. "/Phobos_1_1000.glb",
     ModelScale = 2000,
+    RotationVector = {90, 0, 90},
     AmbientIntensity = 0.02,
     SpecularIntensity = 0.0,
     LightSources = {
@@ -56,7 +67,8 @@ local PhobosTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHOBOS",
-      Observer = "MARS BARYCENTER"
+      Observer = "MARS BARYCENTER",
+      Kernels = kernels .. "mar097.bsp"
     },
     Color = { 1.0, 0.605, 0.420 },
     Period = 0.31891023,

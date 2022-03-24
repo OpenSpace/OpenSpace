@@ -1,11 +1,17 @@
 local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('../mar097').Kernels
 
 local model = asset.syncedResource({
   Name = "Deimos Model",
   Type = "HttpSynchronization",
   Identifier = "deimos_model",
+  Version = 1
+})
+
+local kernels = asset.syncedResource({
+  Name = "Mars Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_kernels",
   Version = 1
 })
 
@@ -16,12 +22,14 @@ local Deimos = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_DEIMOS",
-      DestinationFrame = "GALACTIC"
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels .. "mar097.bsp"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "DEIMOS",
-      Observer = "MARS BARYCENTER"
+      Observer = "MARS BARYCENTER",
+      Kernels = kernels .. "mar097.bsp"
     }
   },
   Renderable = {
