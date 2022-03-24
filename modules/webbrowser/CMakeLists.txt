@@ -56,7 +56,7 @@ cmake_policy(SET CMP0074 NEW)
 # Specify the CEF distribution version.
 
 # Release from 03/21/2022 verified to work on Windows.
-set(CEF_VERSION "99.2.12+g2977b3a+chromium-99.0.4844.74")
+set(CEF_VERSION "91.1.23+g04c8d56+chromium-91.0.4472.164")
 
 # Removing - micahnyc 03/21/2022
 # 73.1.13 has an issue on MacOS: The GUI freezing upon interaction.
