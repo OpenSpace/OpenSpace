@@ -78,7 +78,7 @@ Fragment getFragment() {
     crosshair *= crossHairBox;
 
     if (showRectangle) {
-      float height = fov/maxWwtFov;
+      float height = (fov * 0.5)/maxWwtFov;
       float width = height * ratio;
       float outerEdge = createFilledRectangle(height, width, vs_st);
       float lineWidthX = lineWidth * 2 * VerticalThickness;
