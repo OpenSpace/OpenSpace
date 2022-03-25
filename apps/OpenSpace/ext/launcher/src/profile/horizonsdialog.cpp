@@ -530,11 +530,10 @@ bool HorizonsDialog::handleRequest() {
         std::string newName = _horizonsFile.file().filename().string();
         newName = newName.substr(0, newName.size() - newName.find_first_of('.'));
 
-        std::filesystem::path oldFile = _horizonsFile.file()
+        std::filesystem::path oldFile = _horizonsFile.file();
         std::filesystem::path newFile =_horizonsFile.file().replace_filename(
-            newName + "_error"
+            newName + "_error.txt"
         );
-        newFile = newFile.replace_extension(".txt");
 
         std::filesystem::rename(oldFile, newFile);
     }
@@ -894,13 +893,15 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
     switch (result) {
     case openspace::HorizonsFile::ResultCode::Valid: {
             // If the request worked then delete the corresponding error file if it exist
-            std::string newName = _horizonsFile.file().filename().string();
-            newName = newName.substr(0, newName.size() - newName.find_first_of('.'));
+            std::filesystem::path validFile(_horizonsFile.file());
 
-            std::filesystem::path errorFile = _horizonsFile.file().replace_filename(
-                newName + "_error"
+            std::string errorName = validFile.filename().string();
+            errorName =
+                errorName.substr(0, errorName.size() - errorName.find_first_of('.'));
+
+            std::filesystem::path errorFile = validFile.replace_filename(
+                errorName + "_error.txt"
             );
-            errorFile = errorFile.replace_extension(".txt");
 
             if (std::filesystem::is_regular_file(errorFile)) {
                 std::filesystem::remove(errorFile);
