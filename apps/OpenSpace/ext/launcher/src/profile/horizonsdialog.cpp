@@ -209,7 +209,7 @@ void HorizonsDialog::createWidgets() {
         layout->addWidget(_targetLabel, 4, 0);
 
         _targetEdit =
-            new QLineEdit(QString::fromStdString("Mars Reconnaissance Orbiter"), this);
+            new QLineEdit(QString::fromStdString("Tesla"), this);
         _targetEdit->setToolTip(
             "Which target or body would you like Horizons trajectery data for?"
         );
@@ -228,7 +228,7 @@ void HorizonsDialog::createWidgets() {
         _centerLabel->setToolTip("In which reference frame do you want the data in?");
         layout->addWidget(_centerLabel, 6, 0);
 
-        _centerEdit = new QLineEdit(QString::fromStdString("500@499"), this);
+        _centerEdit = new QLineEdit(QString::fromStdString("@ssb"), this);
         _centerEdit->setToolTip("In which reference frame do you want the data in?");
         layout->addWidget(_centerEdit, 6, 1, 1, 2);
 
@@ -246,7 +246,7 @@ void HorizonsDialog::createWidgets() {
         layout->addWidget(_startLabel, 8, 0, 1, 2);
         _startEdit = new QDateTimeEdit(this);
         _startEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
-        _startEdit->setDate(QDate::currentDate().addDays(-1));
+        _startEdit->setDate(QDate::currentDate().addYears(-1));
         _startEdit->setToolTip("Enter the start date and time for the data");
         layout->addWidget(_startEdit, 8, 2);
     }
@@ -283,7 +283,7 @@ void HorizonsDialog::createWidgets() {
 
         _stepEdit = new QLineEdit(this);
         _stepEdit->setValidator(new QIntValidator(this));
-        _stepEdit->setText(QString::number(10));
+        _stepEdit->setText(QString::number(1));
         _stepEdit->setToolTip("Enter the step size for the data");
         layout->addWidget(_stepEdit, 11, 1);
 
@@ -298,7 +298,7 @@ void HorizonsDialog::createWidgets() {
             Unitless
         };
         _timeTypeCombo->addItems(timeTypes);
-        _timeTypeCombo->setCurrentIndex(0);
+        _timeTypeCombo->setCurrentIndex(2);
         layout->addWidget(_timeTypeCombo, 11, 2);
     }
     layout->addWidget(new Line, 12, 0, 1, 3);
