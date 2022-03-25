@@ -171,8 +171,9 @@ void WwtCommunicator::setImageOpacity(int i, float opacity) {
 }
 
 void WwtCommunicator::hideChromeInterface(bool shouldHide) {
-    ghoul::Dictionary msg = hideChromeGuiMessage(shouldHide);
-    sendMessageToWwt(msg);
+    std::string script = "sendMessageToWWT({event : \"modify_settings\", "
+        "settings : [[\"hideAllChrome\", true]], target: \"app\"});";
+    executeJavascript(script);
 }
 
 void WwtCommunicator::update() {
@@ -307,16 +308,6 @@ ghoul::Dictionary WwtCommunicator::setLayerOrderMessage(const std::string& id, i
     msg.setValue("version", messageCounter);
 
     messageCounter++;
-
-    return msg;
-}
-
-ghoul::Dictionary WwtCommunicator::hideChromeGuiMessage(bool isHidden) {
-    using namespace std::string_literals;
-    ghoul::Dictionary msg;
-    msg.setValue("event", "modify_settings"s);
-    msg.setValue("settings", "[[\"hideAllChrome\", true]]"s);
-    msg.setValue("target", "app"s);
 
     return msg;
 }

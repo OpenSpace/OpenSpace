@@ -97,7 +97,6 @@ private:
     ghoul::Dictionary removeImageMessage(const std::string& id);
     ghoul::Dictionary setImageOpacityMessage(const std::string& id, double opacity);
     ghoul::Dictionary setLayerOrderMessage(const std::string& id, int version);
-    ghoul::Dictionary hideChromeGuiMessage(bool isHidden); // Requires a newer CEF version 
     
     bool _isSyncedWithWwt = false;
     bool _borderColorIsDirty = false;
