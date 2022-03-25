@@ -76,6 +76,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    struct CacheKeyframe {
+        double timestamp;
+        glm::dvec3 position;
+    };
+
     void loadData();
     void readHorizonsTextFile(HorizonsFile& horizonsFile);
     bool loadCachedFile(const std::filesystem::path& file);

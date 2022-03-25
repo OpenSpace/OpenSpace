@@ -35,10 +35,11 @@
 #include <ghoul/lua/lua_helper.h>
 #include <filesystem>
 #include <fstream>
+#include <type_traits>
 
 namespace {
     constexpr const char* _loggerCat = "HorizonsTranslation";
-    constexpr int8_t CurrentCacheVersion = 1;
+    constexpr int8_t CurrentCacheVersion = 2;
 } // namespace
 
 namespace {
@@ -226,24 +227,15 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
         throw ghoul::RuntimeError("Error reading cache: No values were loaded");
     }
 
-    // Read the values in same order as they were written
+    // Read all data in one go
+    std::vector<CacheKeyframe> cacheKeyframes;
+    cacheKeyframes.reserve(nKeyframes);
+    fileStream.read(reinterpret_cast<char*>(cacheKeyframes.data()), sizeof(CacheKeyframe) * nKeyframes);
+
+    // Extract the data from the cache Keyframe vector
     for (int i = 0; i < nKeyframes; ++i) {
-        double timestamp, x, y, z;
-        glm::dvec3 gPos;
-
-        // Timestamp
-        fileStream.read(reinterpret_cast<char*>(&timestamp), sizeof(double));
-
-        // Position vector components
-        fileStream.read(reinterpret_cast<char*>(&x), sizeof(double));
-        fileStream.read(reinterpret_cast<char*>(&y), sizeof(double));
-        fileStream.read(reinterpret_cast<char*>(&z), sizeof(double));
-
-        // Recreate the position vector
-        gPos = glm::dvec3(x, y, z);
-
         // Add keyframe in timeline
-        _timeline.addKeyframe(timestamp, std::move(gPos));
+        _timeline.addKeyframe(std::move(cacheKeyframes[i].timestamp), std::move(cacheKeyframes[i].position));
     }
 
     return fileStream.good();
@@ -269,28 +261,28 @@ void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) cons
     }
     fileStream.write(reinterpret_cast<const char*>(&nKeyframes), sizeof(int32_t));
 
-    // Write data
+    // Transfer all data to a cache key frame vector, write it all in one go
     std::deque<Keyframe<glm::dvec3>> keyframes = _timeline.keyframes();
+    std::vector<CacheKeyframe> cachKeyframes;
+    cachKeyframes.reserve(nKeyframes);
     for (int i = 0; i < nKeyframes; i++) {
-        // First write timestamp
-        fileStream.write(reinterpret_cast<const char*>(
-            &keyframes[i].timestamp),
-            sizeof(double)
-        );
+        CacheKeyframe cacheKeyframe;
+        cacheKeyframe.timestamp = keyframes[i].timestamp;
+        cacheKeyframe.position = keyframes[i].data;
 
-        // and then the components of the position vector one by one
-        fileStream.write(reinterpret_cast<const char*>(
-            &keyframes[i].data.x),
-            sizeof(double)
-        );
-        fileStream.write(reinterpret_cast<const char*>(
-            &keyframes[i].data.y),
-            sizeof(double)
-        );
-        fileStream.write(reinterpret_cast<const char*>(
-            &keyframes[i].data.z),
-            sizeof(double)
-        );
+        cachKeyframes.push_back(cacheKeyframe);
     }
+
+    // Write of entire vector will only work if the data is plain old data type,
+    // is_pod is depricated in C++20 and replaced with both is_trivial and
+    // is_standard_layout
+    assert(std::is_trivial<CacheKeyframe>::value);
+    assert(std::is_standard_layout<CacheKeyframe>::value);
+
+    // Write data
+    fileStream.write(reinterpret_cast<const char*>(
+        cachKeyframes.data()),
+        sizeof(CacheKeyframe) * nKeyframes
+    );
 }
 } // namespace openspace
