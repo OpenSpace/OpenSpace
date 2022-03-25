@@ -103,8 +103,8 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     _renderHandler = new RenderHandler();
     _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
-        _renderHandler,
-        _keyboardHandler
+        _renderHandler.get(),
+        _keyboardHandler.get()
     );
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();

@@ -1,4 +1,4 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local modelFolder = asset.syncedResource({
   Name = "Pioneer 10/11 Models",
@@ -11,12 +11,7 @@ local ModelRenderable = {
   Type = "RenderableModel",
   GeometryFile = modelFolder .. "pioneer.fbx",
   LightSources = {
-    {
-      Type = "SceneGraphLightSource",
-      Identifier = "Sun",
-      Node = sunTransforms.SolarSystemBarycenter.Identifier,
-      Intensity = 1.0
-    },
+    sun.LightSource,
     {
       Identifier = "Camera",
       Type = "CameraLightSource",

@@ -1,19 +1,5 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("./transforms")
-
-local LIGHTS = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
-}
 
 local sync = asset.syncedResource({
   Name = "Orion Nebula Model",
@@ -77,7 +63,14 @@ local OrionNebulaModel = {
     DiffuseIntensity = 1.0,
     --PerformShading = false,
     RotationVector = { 0.000000, 22.300000, 0.000000 },
-    LightSources = LIGHTS;
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Orion Nebula Model",
@@ -105,7 +98,14 @@ local OrionNebulaShocksModel = {
     DiffuseIntensity = 1.0,
     --PerformShading = false,
     RotationVector = { 0.000000, 22.300000, 0.000000 },
-    LightSources = LIGHTS;
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Orion Nebula Shocks",
@@ -134,7 +134,14 @@ local OrionNebulaProplydsModel = {
     DiffuseIntensity = 1.0,
     --PerformShading = false,
     RotationVector = { 0.000000, 22.300000, 0.000000 },
-    LightSources = LIGHTS;
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Orion Nebula Proplyds",

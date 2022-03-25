@@ -1,4 +1,4 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local model = asset.syncedResource({
@@ -22,12 +22,7 @@ local model = {
     GeometryFile = model .. "BoxAnimated.glb",
     ModelScale = 3E7,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true,

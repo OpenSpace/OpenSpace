@@ -92,24 +92,6 @@ void TargetBrowserPair::aimTargetGalactic(glm::dvec3 direction) {
     );
 }
 
-void TargetBrowserPair::setFovTarget(double fov) {
-    std::string id = _targetNode->identifier();
-    std::string renderableId = _targetRenderable->identifier();
-    // Uris for properties
-    std::string sizeUri = "Scene." + id + "." + renderableId + ".Size";
-
-    double renderedFov = std::max(fov, _targetRenderable->smallestFov());
-    double size = skybrowser::sizeFromFov(renderedFov, _targetNode->worldPosition());
-
-    std::string setValue = "openspace.setPropertyValueSingle('";
-
-    openspace::global::scriptEngine->queueScript(
-        setValue + sizeUri + "', " + std::to_string(size) + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-    _targetRenderable->setVerticalFov(renderedFov);
-}
-
 bool TargetBrowserPair::checkMouseIntersection(const glm::vec2& mousePosition) {
     _selected = _browser->isIntersecting(mousePosition) ? _browser : nullptr;
 
@@ -162,7 +144,7 @@ void TargetBrowserPair::synchronizeAim() {
         // target, send the locked coordinates to wwt
         glm::dvec2 aim = targetDirectionEquatorial();
         _browser->setEquatorialAim(aim);
-        setFovTarget(_browser->verticalFov());
+        _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
 
@@ -176,7 +158,7 @@ bool TargetBrowserPair::isEnabled() const {
 
 void TargetBrowserPair::initialize() {
     _targetRenderable->setColor(_browser->borderColor());
-    _targetRenderable->setDimensions(_browser->browserPixelDimensions());
+    _targetRenderable->setDimensions(_browser->screenSpaceDimensions());
     _browser->updateBorderColor();
 }
 
@@ -271,7 +253,7 @@ void TargetBrowserPair::setIsSyncedWithWwt(bool isSynced) {
 
 void TargetBrowserPair::setVerticalFov(float vfov) {
     _browser->setVerticalFov(vfov);
-    setFovTarget(vfov);
+    _targetRenderable->setVerticalFov(vfov);
 }
 
 void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
@@ -290,6 +272,7 @@ void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
 
 void TargetBrowserPair::setScreenSpaceSize(const glm::vec2& dimensions) {
     _browser->setScreenSpaceSize(dimensions);
+    _targetRenderable->setDimensions(dimensions);
 }
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
@@ -303,7 +286,7 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate(double deltaTime) {
     }
     else if (_browser->isAnimated()) {
         _browser->incrementallyAnimateToFov(static_cast<float>(deltaTime));
-        setFovTarget(_browser->verticalFov());
+        _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
 

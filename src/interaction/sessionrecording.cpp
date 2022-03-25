@@ -58,6 +58,8 @@
 #include <windows.h>
 #endif // WIN32
 
+#include "sessionrecording_lua.inl"
+
 namespace {
     constexpr const char* _loggerCat = "SessionRecording";
 
@@ -76,10 +78,7 @@ namespace {
     };
 
     constexpr const bool UsingTimeKeyframes = false;
-
 } // namespace
-
-#include "sessionrecording_lua.inl"
 
 namespace openspace::interaction {
 
@@ -2546,118 +2545,20 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
     return {
         "sessionRecording",
         {
-            {
-                "startRecording",
-                &luascriptfunctions::startRecording,
-                "string",
-                "Starts a recording session. The string argument is the filename used "
-                "for the file where the recorded keyframes are saved. "
-                "The file data format is binary."
-            },
-            {
-                "startRecordingAscii",
-                &luascriptfunctions::startRecordingAscii,
-                "string",
-                "Starts a recording session. The string argument is the filename used "
-                "for the file where the recorded keyframes are saved. "
-                "The file data format is ASCII."
-            },
-            {
-                "stopRecording",
-                &luascriptfunctions::stopRecording,
-                "void",
-                "Stops a recording session"
-            },
-            {
-                "startPlayback",
-                &luascriptfunctions::startPlaybackDefault,
-                "string [, bool]",
-                "Starts a playback session with keyframe times that are relative to "
-                "the time since the recording was started (the same relative time "
-                "applies to the playback). When playback starts, the simulation time "
-                "is automatically set to what it was at recording time. The string "
-                "argument is the filename to pull playback keyframes from (the file "
-                "path is relative to the RECORDINGS variable specified in the config "
-                "file). If a second input value of true is given, then playback will "
-                "continually loop until it is manually stopped."
-            },
-            {
-                "startPlaybackApplicationTime",
-                &luascriptfunctions::startPlaybackApplicationTime,
-                "string",
-                "Starts a playback session with keyframe times that are relative to "
-                "application time (seconds since OpenSpace application started). "
-                "The string argument is the filename to pull playback keyframes from "
-                "(the file path is relative to the RECORDINGS variable specified in the "
-                "config file)."
-            },
-            {
-                "startPlaybackRecordedTime",
-                &luascriptfunctions::startPlaybackRecordedTime,
-                "string [, bool]",
-                "Starts a playback session with keyframe times that are relative to "
-                "the time since the recording was started (the same relative time "
-                "applies to the playback). The string argument is the filename to pull "
-                "playback keyframes from (the file path is relative to the RECORDINGS "
-                "variable specified in the config file). If a second input value of "
-                "true is given, then playback will continually loop until it is "
-                "manually stopped."
-            },
-            {
-                "startPlaybackSimulationTime",
-                &luascriptfunctions::startPlaybackSimulationTime,
-                "string",
-                "Starts a playback session with keyframe times that are relative to "
-                "the simulated date & time. The string argument is the filename to pull "
-                "playback keyframes from (the file path is relative to the RECORDINGS "
-                "variable specified in the config file)."
-            },
-            {
-                "stopPlayback",
-                &luascriptfunctions::stopPlayback,
-                "",
-                "Stops a playback session before playback of all keyframes is complete"
-            },
-            {
-                "enableTakeScreenShotDuringPlayback",
-                &luascriptfunctions::enableTakeScreenShotDuringPlayback,
-                "[int]",
-                "Enables that rendered frames should be saved during playback. The "
-                "parameter determines the number of frames that are exported per second "
-                "if this value is not provided, 60 frames per second will be exported."
-            },
-            {
-                "disableTakeScreenShotDuringPlayback",
-                &luascriptfunctions::disableTakeScreenShotDuringPlayback,
-                "",
-                "Used to disable that renderings are saved during playback"
-            },
-            {
-                "fileFormatConversion",
-                &luascriptfunctions::fileFormatConversion,
-                "string",
-                "Performs a conversion of the specified file to the most most recent "
-                "file format, creating a copy of the recording file."
-            },
-            {
-                "setPlaybackPause",
-                &luascriptfunctions::setPlaybackPause,
-                "bool",
-                "Pauses or resumes the playback progression through keyframes"
-            },
-            {
-                "togglePlaybackPause",
-                &luascriptfunctions::togglePlaybackPause,
-                "",
-                "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards"
-            },
-            {
-               "isPlayingBack",
-                & luascriptfunctions::isPlayingBack,
-                "",
-                "Returns true if session recording is currently playing back a recording"
-            }
+            codegen::lua::StartRecording,
+            codegen::lua::StartRecordingAscii,
+            codegen::lua::StopRecording,
+            codegen::lua::StartPlaybackDefault,
+            codegen::lua::StartPlaybackApplicationTime,
+            codegen::lua::StartPlaybackRecordedTime,
+            codegen::lua::StartPlaybackSimulationTime,
+            codegen::lua::StopPlayback,
+            codegen::lua::EnableTakeScreenShotDuringPlayback,
+            codegen::lua::DisableTakeScreenShotDuringPlayback,
+            codegen::lua::FileFormatConversion,
+            codegen::lua::SetPlaybackPause,
+            codegen::lua::TogglePlaybackPause,
+            codegen::lua::IsPlayingBack
         }
     };
 }

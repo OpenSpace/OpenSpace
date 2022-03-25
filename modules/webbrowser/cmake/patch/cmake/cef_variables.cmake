@@ -456,12 +456,10 @@ if(OS_WINDOWS)
   # List of CEF binary files.
   set(CEF_BINARY_FILES
     chrome_elf.dll
-    d3dcompiler_43.dll
     d3dcompiler_47.dll
     libcef.dll
     libEGL.dll
     libGLESv2.dll
-    natives_blob.bin
     snapshot_blob.bin
     v8_context_snapshot.bin
     #swiftshader
@@ -469,11 +467,9 @@ if(OS_WINDOWS)
 
   # List of CEF resource files.
   set(CEF_RESOURCE_FILES
-    cef.pak
-    cef_100_percent.pak
-    cef_200_percent.pak
-    cef_extensions.pak
-    devtools_resources.pak
+    chrome_100_percent.pak
+    chrome_200_percent.pak
+    resources.pak
     icudtl.dat
     locales
     )

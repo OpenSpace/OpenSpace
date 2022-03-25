@@ -61,12 +61,22 @@ namespace {
         "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo RenderOnMasterInfo = {
+        "RenderOnlyOnMaster",
+        "Render Only On Master",
+        "Render the interactive sky browser only on the master node (this setting won't "
+        "affect the copies). This setting allows mouse interactions in a dome environment."
+    };
+
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(AnimationSpeedInfo.description)]]
         std::optional<double> animationSpeed;
 
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
+
+        // [[codegen::verbatim(RenderOnMasterInfo.description)]]
+        std::optional<bool> renderOnlyOnMaster;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -99,6 +109,7 @@ namespace openspace {
     , WwtCommunicator(dictionary)
     , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
     , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
+    , _renderOnlyOnMaster(RenderOnMasterInfo, false)
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
@@ -106,11 +117,13 @@ namespace openspace {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textureQuality = p.textureQuality.value_or(_textureQuality);
     _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
+    _renderOnlyOnMaster = p.renderOnlyOnMaster.value_or(_renderOnlyOnMaster);
 
     addProperty(_url);
     addProperty(_browserPixeldimensions);
     addProperty(_reload);
     addProperty(_textureQuality);
+    addProperty(_renderOnlyOnMaster);
 
     _textureQuality.onChange([this]() {
         _textureDimensionsIsDirty = true;
@@ -151,7 +164,7 @@ glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(glm::dvec2 drag) {
     glm::dvec2 resultRelativeOs = angleResult / openSpaceFOV;
 
     // Convert to screen space coordinate system
-    glm::dvec2 convertToScreenSpace{ (2 * skybrowser::windowRatio()), 2.f };
+    glm::dvec2 convertToScreenSpace{ (2.f * skybrowser::windowRatio()), 2.f };
     glm::dvec2 result = - convertToScreenSpace * resultRelativeOs;
     return result;
 }
@@ -228,12 +241,23 @@ void ScreenSpaceSkyBrowser::incrementallyAnimateToFov(float deltaTime) {
 void ScreenSpaceSkyBrowser::render() {
     WwtCommunicator::render();
 
-    draw(
-        globalRotationMatrix() *
-        translationMatrix() *
-        localRotationMatrix() *
-        scaleMatrix()
-    );
+    // If the sky browser only should be rendered on master, don't use the
+    // global rotation
+    if (_renderOnlyOnMaster && global::windowDelegate->isMaster()) {
+        draw(
+            translationMatrix() *
+            localRotationMatrix() *
+            scaleMatrix()
+        );
+    }
+    else if(!_renderOnlyOnMaster) {
+        draw(
+            globalRotationMatrix() *
+            translationMatrix() *
+            localRotationMatrix() *
+            scaleMatrix()
+        );
+    }
 
     // Render a copy that is not interactive
     for (const std::unique_ptr<properties::Vec3Property>& copy : _renderCopies) {
@@ -274,7 +298,7 @@ void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     float x = _verticalFov;
     float zoomFactor = atan(x / 50.f) + exp(x / 40.f) - 0.999999f;
     float zoom = scroll > 0.f ? -zoomFactor : zoomFactor;
-    _verticalFov = std::clamp(_verticalFov + zoom, 0.001f, 70.0f);
+    _verticalFov = std::clamp(_verticalFov + zoom, 0.000001f, 70.0f);
 }
 
 void ScreenSpaceSkyBrowser::bindTexture() {

@@ -143,8 +143,6 @@ public:
 
     /**
      * Sets a relative time from profile.
-     * \param setTime a string containing time adjustment as described in documentation
-     * for luascriptfunctions::time_advancedTime
      */
     void setTimeRelativeFromProfile(const std::string& setTime);
 
