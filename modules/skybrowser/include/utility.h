@@ -124,7 +124,7 @@ glm::dvec3 localCameraToEquatorial(const glm::dvec3& coords);
  * \return Angle in degrees between the OpenSpace camera's up direction vector and the
  * equatorial North Pole direction.
  */
-double cameraRoll(); 
+double targetRoll(const glm::dvec3& up, const glm::dvec3& forward);
 /**
  * Returns the view direction of the OpenSpace camera in galactic coordinates.
  * \return View direction of the OpenSpace camera in Cartesian galactic coordinates.

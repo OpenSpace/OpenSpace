@@ -118,17 +118,13 @@ glm::dvec3 galacticToLocalCamera(const glm::dvec3& coords) {
     return glm::normalize(viewDirectionLocal);
 }
 
-double cameraRoll() {
-    openspace::Camera* camera = global::navigationHandler->camera();
-    glm::dvec3 upWorld = camera->lookUpVectorWorldSpace();
-    glm::dvec3 forwardWorld = camera->viewDirectionWorldSpace();
+double targetRoll(const glm::dvec3& up, const glm::dvec3& forward) {
+    glm::dvec3 upJ2000 = skybrowser::galacticToEquatorial(up);
+    glm::dvec3 forwardJ2000 = skybrowser::galacticToEquatorial(forward);
 
-    glm::dvec3 camUpJ2000 = skybrowser::galacticToEquatorial(upWorld);
-    glm::dvec3 camForwardJ2000 = skybrowser::galacticToEquatorial(forwardWorld);
-
-    glm::dvec3 crossUpNorth = glm::cross(camUpJ2000, skybrowser::NorthPole);
-    double dotNorthUp = glm::dot(skybrowser::NorthPole, camUpJ2000);
-    double dotCrossUpNorthForward = glm::dot(crossUpNorth, camForwardJ2000);
+    glm::dvec3 crossUpNorth = glm::cross(upJ2000, NorthPole);
+    double dotNorthUp = glm::dot(NorthPole, upJ2000);
+    double dotCrossUpNorthForward = glm::dot(upJ2000, forwardJ2000);
         
     return glm::degrees(atan2(dotCrossUpNorthForward, dotNorthUp));
 }

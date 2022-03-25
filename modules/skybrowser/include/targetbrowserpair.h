@@ -50,7 +50,7 @@ public:
     void removeHighlight(const glm::ivec3& color); 
     void highlight(const glm::ivec3& color);
     // Animation
-    void startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool shouldLockAfter = true);
+    void startAnimation(glm::dvec3 coordsEnd, double fovEnd, bool shouldLockAfter = true);
     void incrementallyAnimateToCoordinate(double deltaTime);
     void incrementallyFade(float goalState, float fadeTime, float deltaTime);
     // Mouse interaction
@@ -76,13 +76,13 @@ public:
 
     void setEnabled(bool enable);
     void setIsSyncedWithWwt(bool isSynced);
-    void setVerticalFov(float vfov);
+    void setVerticalFov(double vfov);
     void setEquatorialAim(const glm::dvec2& aim);
     void setBorderColor(const glm::ivec3& color);
     void setScreenSpaceSize(const glm::vec2& dimensions);
     void setVerticalFovWithScroll(float scroll);
 
-    float verticalFov() const;
+    double verticalFov() const;
     glm::ivec3 borderColor() const;
     glm::dvec2 targetDirectionEquatorial() const;
     glm::dvec3 targetDirectionGalactic() const;

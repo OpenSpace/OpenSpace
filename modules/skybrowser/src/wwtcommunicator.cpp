@@ -72,7 +72,12 @@ const std::deque<int>& WwtCommunicator::getSelectedImages() const {
     return _selectedImages;
 }
 
-void WwtCommunicator::setVerticalFov(float vfov) {
+void WwtCommunicator::setTargetRoll(double roll)
+{
+    _targetRoll = roll;
+}
+
+void WwtCommunicator::setVerticalFov(double vfov) {
     _verticalFov = vfov;
     _equatorialAimIsDirty = true;
 }
@@ -112,12 +117,11 @@ void WwtCommunicator::updateBorderColor() {
 }
 
 void WwtCommunicator::updateAim() {
-    double roll = _isSyncedWithWwt ? skybrowser::cameraRoll() : 0.0;
     // Message WorldWide Telescope current view
     ghoul::Dictionary message = moveCameraMessage(
         _equatorialAim,
         _verticalFov,
-        roll
+        _targetRoll
     );
     sendMessageToWwt(message);
 }
@@ -215,7 +219,7 @@ glm::ivec3 WwtCommunicator::borderColor() const {
     return _borderColor;
 }
 
-float WwtCommunicator::verticalFov() const {
+double WwtCommunicator::verticalFov() const {
     return _verticalFov;
 }
 

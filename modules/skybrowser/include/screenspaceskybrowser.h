@@ -51,7 +51,7 @@ public:
 
     // Animation
     bool isAnimated() const;
-    void startFovAnimation(float fov);
+    void startFovAnimation(double fov);
     void incrementallyAnimateToFov(float deltaTime);
 
     float opacity() const;
@@ -86,7 +86,7 @@ private:
     bool _sizeIsDirty = false;
 
     // Animation of fieldOfView
-    float _endVfov = 0.f;
+    double _endVfov = 0.0;
     glm::vec2 _size = glm::vec2(0.5f);
 };
 } // namespace openspace

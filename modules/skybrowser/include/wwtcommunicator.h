@@ -55,17 +55,18 @@ public:
     void hideChromeInterface(bool shouldHide);
 
     bool hasLoadedImages() const;
-    float verticalFov() const;
+    double verticalFov() const;
     glm::ivec3 borderColor() const;
     glm::dvec2 equatorialAim() const;
     glm::dvec2 fieldsOfView() const;
     const std::deque<int>& getSelectedImages() const;
 
     void setHasLoadedImages(bool isLoaded);
-    void setVerticalFov(float vfov);
+    void setVerticalFov(double vfov);
     void setIsSyncedWithWwt(bool isSynced);
     void setEquatorialAim(glm::dvec2 equatorial);
     void setBorderColor(glm::ivec3 color);
+    void setTargetRoll(double roll);
 
     void highlight(const glm::ivec3& addition);
     // The removal parameter decides what will be removed from the border color
@@ -76,9 +77,10 @@ public:
 protected:
     void setIdInBrowser(const std::string& id);
 
-    float _verticalFov = 10.f;
+    double _verticalFov = 10.0f;
     glm::ivec3 _borderColor = glm::ivec3(70);
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
+    double _targetRoll = 0.0;
     bool _hasLoadedImages = false;
     std::deque<int> _selectedImages;
 

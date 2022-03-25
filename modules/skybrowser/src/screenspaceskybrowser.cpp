@@ -219,19 +219,19 @@ bool ScreenSpaceSkyBrowser::isAnimated() const{
     return _isFovAnimated;
 }
 
-void ScreenSpaceSkyBrowser::startFovAnimation(float fov) {
+void ScreenSpaceSkyBrowser::startFovAnimation(double fov) {
     _isFovAnimated = true;
     _endVfov = fov;
 }
 
 void ScreenSpaceSkyBrowser::incrementallyAnimateToFov(float deltaTime) {
     // If distance too large, keep animating. Else, stop animation
-    float diff = _endVfov - verticalFov();
+    double diff = _endVfov - verticalFov();
     bool shouldAnimate = abs(diff) > FovThreshold;
 
     if (shouldAnimate) {
-        float delta = _animationSpeed * (diff * deltaTime);
-        _verticalFov = std::clamp(_verticalFov + delta, 0.0001f, 70.0f);
+        double delta = _animationSpeed * (diff * static_cast<double>(deltaTime));
+        _verticalFov = std::clamp(_verticalFov + delta, 0.0, 70.0);
     }
     else {
         _isFovAnimated = false;
@@ -295,10 +295,10 @@ void ScreenSpaceSkyBrowser::update() {
 
 void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     // Make scroll more sensitive the smaller the FOV
-    float x = _verticalFov;
-    float zoomFactor = atan(x / 50.f) + exp(x / 40.f) - 0.999999f;
-    float zoom = scroll > 0.f ? -zoomFactor : zoomFactor;
-    _verticalFov = std::clamp(_verticalFov + zoom, 0.000001f, 70.0f);
+    double x = _verticalFov;
+    double zoomFactor = atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
+    double zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
+    _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
 }
 
 void ScreenSpaceSkyBrowser::bindTexture() {

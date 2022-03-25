@@ -29,6 +29,8 @@
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/camera/camera.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/assert.h>
@@ -144,6 +146,11 @@ void TargetBrowserPair::synchronizeAim() {
         // target, send the locked coordinates to wwt
         glm::dvec2 aim = targetDirectionEquatorial();
         _browser->setEquatorialAim(aim);
+        glm::dvec3 direction = _targetNode->worldPosition() -
+            global::navigationHandler->camera()->positionVec3();
+        glm::dvec3 normalized = glm::normalize(direction);
+        glm::dvec3 up = global::navigationHandler->camera()->lookUpVectorWorldSpace();
+        _browser->setTargetRoll(skybrowser::targetRoll(up, normalized));
         _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
@@ -201,7 +208,7 @@ glm::vec2 TargetBrowserPair::size() const {
     return _browser->size();
 }
 
-float TargetBrowserPair::verticalFov() const {
+double TargetBrowserPair::verticalFov() const {
     return _browser->verticalFov();
 }
 
@@ -251,7 +258,7 @@ void TargetBrowserPair::setIsSyncedWithWwt(bool isSynced) {
     _browser->setIsSyncedWithWwt(isSynced);
 }
 
-void TargetBrowserPair::setVerticalFov(float vfov) {
+void TargetBrowserPair::setVerticalFov(double vfov) {
     _browser->setVerticalFov(vfov);
     _targetRenderable->setVerticalFov(vfov);
 }
@@ -290,7 +297,7 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate(double deltaTime) {
     }
 }
 
-void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, float fovEnd, 
+void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd, 
                             bool shouldLockAfter)
 {
     _browser->startFovAnimation(fovEnd);
