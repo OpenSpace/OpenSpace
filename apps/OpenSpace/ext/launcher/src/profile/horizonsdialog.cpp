@@ -978,9 +978,13 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
 
         case openspace::HorizonsFile::ResultCode::ErrorNoObserver:
             appendLog(
-                fmt::format("No match was found for observer '{}'. Use '@{}' as observer "
-                "to list possible matches.", _observerName, _observerName),
+                fmt::format("No match was found for observer '{}'", _observerName),
                 HorizonsDialog::LogLevel::Error
+            );
+            appendLog(
+                fmt::format("Try to use '@{}' as observer to search for possible "
+                "matches.", _observerName),
+                HorizonsDialog::LogLevel::Info
             );
             styleLabel(_centerLabel, true);
             break;
@@ -1086,6 +1090,11 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             appendLog(
                 fmt::format("No match was found for target '{}'", _targetName),
                 HorizonsDialog::LogLevel::Error
+            );
+            appendLog(
+                fmt::format("Try to use '{}*' as target to search for possible matches.",
+                _targetName),
+                HorizonsDialog::LogLevel::Info
             );
             styleLabel(_targetLabel, true);
             break;
