@@ -80,11 +80,11 @@
     "base",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
+    "scene/solarsystem/planets/earth/satellites/misc/hubble",
     "scene/solarsystem/planets/earth/lagrange_points/lagrange_points",
     "scene/solarsystem/missions/jwst/jwst",
     "scene/solarsystem/missions/jwst/trail",
     "scene/solarsystem/missions/jwst/hudf",
-    "scene/solarsystem/missions/jwst/hubble",
     "scene/solarsystem/missions/jwst/timelapse",
     "scene/solarsystem/missions/jwst/toggle_trail",
     "scene/digitaluniverse/hdf"
