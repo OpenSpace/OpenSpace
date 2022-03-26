@@ -27,7 +27,9 @@ local PhobosGlobe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 27000, 22000, 18000 },
+    Radii = { 13030, 11400, 9140 },
+--Radius source
+--https://naif.jpl.nasa.gov/pub/naif/generic_kernels/dsk/satellites/willner_etal_phobos.pdf
     SegmentsPerPatch = 90,
     Layers = {}
   },
