@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local orbit = asset.syncedResource({
@@ -46,18 +45,29 @@ local TeslaPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { TeslaPosition, TeslaRoadsterTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TeslaPosition)
+  openspace.addSceneGraphNode(TeslaRoadsterTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TeslaRoadsterTrail)
+  openspace.removeSceneGraphNode(TeslaPosition)
+end)
+    
+asset.export(TeslaPosition)
+asset.export(TeslaRoadsterTrail)
+
 
 
 asset.meta = {
   Name = "Tesla Roadster",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Position and Trail of Tesla Roadster from 2018 FEB 8
     to 2022 FEB 7 00:00:00. Data from JPL Horizons.]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
   License = [[ JPL-authored documents are sponsored by NASA under Contract
     NAS7-030010. All documents available from this server may be protected
-    under the U.S. and Foreign Copyright Laws.]],
-  Identifiers = {"TeslaPosition", "TeslaRoadsterTrail"}
+    under the U.S. and Foreign Copyright Laws.]]
 }

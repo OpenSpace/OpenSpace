@@ -1,5 +1,4 @@
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
-local asset_helper = asset.require("util/asset_helper")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local models = asset.syncedResource({
@@ -8,20 +7,6 @@ local models = asset.syncedResource({
   Identifier = "apollo_boulders",
   Version = 2
 })
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sun_transforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
-}
 
 local Station2Boulder1Holder = {
   Identifier = "Station_2_Boulder1",
@@ -55,7 +40,14 @@ local Station2Boulder1Model = {
     Type = "RenderableModel",
     GeometryFile = models .. "b1-v2.obj",
     RotationVector = { 243.243256 ,206.270264, 309.677429 },
-    LightSources = LightSources,
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
     PerformShading = false,
     DisableFaceCulling = true
   },
@@ -97,7 +89,14 @@ local Station2Boulder2Model = {
     Type = "RenderableModel",
     GeometryFile = models .. "b2model.obj",
     RotationVector = { 66.162155, 7.783780, 114.193550 },
-    LightSources = LightSources,
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
     PerformShading = false,
     DisableFaceCulling = true
   },
@@ -139,7 +138,14 @@ local Station2Boulder3Model = {
     Type = "RenderableModel",
     GeometryFile = models .. "b3model.obj",
     RotationVector = { 161.513519 ,243.243256, 65.806450 },
-    LightSources = LightSources,
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
     PerformShading = false,
     DisableFaceCulling = true
   },
@@ -149,8 +155,25 @@ local Station2Boulder3Model = {
   }
 }
 
-asset_helper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Station2Boulder1Holder, Station2Boulder1Model,
   Station2Boulder2Holder, Station2Boulder2Model,
   Station2Boulder3Holder, Station2Boulder3Model
-})
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node)
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

@@ -315,10 +315,27 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
         str >> entry.position.x >> entry.position.y >> entry.position.z;
         allZero &= (entry.position == glm::vec3(0.0));
 
+        if (!str.good()) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading position information out of data line {} in file {}. "
+                "Value was not a number",
+                res.entries.size(), path
+            ));
+        }
+
         entry.data.resize(nDataValues);
         for (int i = 0; i < nDataValues; i += 1) {
             str >> entry.data[i];
+            bool isGood = str.good();
             allZero &= (entry.data[i] == 0.0);
+
+            if (!str.good()) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Error loading data value {} out of data line {} in file {}. "
+                    "Value was not a number",
+                    i, res.entries.size(), path
+                ));
+            }
         }
 
         if (skipAllZeroLines && allZero) {

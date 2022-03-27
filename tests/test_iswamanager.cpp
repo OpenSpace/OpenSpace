@@ -36,7 +36,7 @@ TEST_CASE("ISWAManager: Initialize", "[iswamanager]") {
 
     openspace::IswaManager::initialize();
     REQUIRE(openspace::IswaManager::isInitialized());
-    REQUIRE(&openspace::IswaManager::ref() == &openspace::IswaManager::ref());
+    CHECK(&openspace::IswaManager::ref() == &openspace::IswaManager::ref());
 }
 
 #endif // OPENSPACE_MODULE_ISWA_ENABLED

@@ -58,6 +58,7 @@ public:
     const SceneGraphNode* anchor() const;
     const Path* currentPath() const;
     double speedScale() const;
+    double arrivalDistanceFactor() const;
 
     bool hasCurrentPath() const;
     bool hasFinished() const;
@@ -71,7 +72,10 @@ public:
     void pausePath();
     void continuePath();
 
+    Path::Type defaultPathType() const;
     double minValidBoundingSphere() const;
+    double findValidBoundingSphere(const SceneGraphNode* node) const;
+
     const std::vector<SceneGraphNode*>& relevantNodes();
 
     /**
@@ -98,6 +102,7 @@ private:
     properties::BoolProperty _includeRoll;
     properties::FloatProperty _speedScale;
     properties::BoolProperty _applyIdleBehaviorOnFinish;
+    properties::DoubleProperty _arrivalDistanceFactor;
     properties::DoubleProperty _minValidBoundingSphere;
     properties::StringListProperty _relevantNodeTags;
 

@@ -55,6 +55,9 @@
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/engine/moduleengine.h>
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 namespace {
     const std::string ConfigurationFile = "openspace.cfg";
@@ -127,8 +130,21 @@ int main(int argc, char** argv) {
     constexpr const char* BasePathToken = "${BASE}";
     FileSys.registerPathToken(BasePathToken, base);
 
+    // Using same configuration for size as in apps/OpenSpace/main.cpp
+    glm::ivec2 size = glm::ivec2(1920, 1080);
+#ifdef WIN32
+    DEVMODEW dm = { 0 };
+    dm.dmSize = sizeof(DEVMODEW);
+    BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+    if (success) {
+        size.x = dm.dmPelsWidth;
+        size.y = dm.dmPelsHeight;
+    }
+#endif // WIN32
+
     *global::configuration = configuration::loadConfigurationFromFile(
         configFile.string(),
+        size,
         ""
     );
     openspace::global::openSpaceEngine->registerPathTokens();

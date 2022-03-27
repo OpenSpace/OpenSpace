@@ -48,17 +48,16 @@ void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
 
     ImageSequencer::initialize();
 
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Decoder>>(),
-        "Decoder"
-    );
+    FactoryManager::ref().addFactory<Decoder>("Decoder");
 
-    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+        FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemInstruments>("DashboardItemInstruments");
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableCrawlingLine>("RenderableCrawlingLine");
@@ -68,7 +67,7 @@ void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
     fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
 
-    auto fDecoder = FactoryManager::ref().factory<Decoder>();
+    ghoul::TemplateFactory<Decoder>* fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
 }

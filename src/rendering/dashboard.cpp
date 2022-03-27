@@ -24,8 +24,10 @@
 
 #include <openspace/rendering/dashboard.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 
@@ -149,24 +151,9 @@ scripting::LuaLibrary Dashboard::luaLibrary() {
     return {
         "dashboard",
         {
-            {
-                "addDashboardItem",
-                &luascriptfunctions::addDashboardItem,
-                "table",
-                "Adds a new dashboard item to the main dashboard."
-            },
-            {
-                "removeDashboardItem",
-                &luascriptfunctions::removeDashboardItem,
-                "string",
-                "Removes the dashboard item with the specified identifier."
-            },
-            {
-                "clearDashboardItems",
-                &luascriptfunctions::clearDashboardItems,
-                "",
-                "Removes all dashboard items from the main dashboard."
-            }
+            codegen::lua::AddDashboardItem,
+            codegen::lua::RemoveDashboardItem,
+            codegen::lua::ClearDashboardItems
         }
     };
 }

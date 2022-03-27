@@ -36,8 +36,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char _loggerCat[] = "RenderablePrism";
-
     constexpr const std::array<const char*, 2> UniformNames = {
         "modelViewProjectionTransform", "vs_color"
     };
@@ -117,8 +115,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePrism::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>("base_renderable_prism");
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_prism");
 }
 
 RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)

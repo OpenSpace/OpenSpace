@@ -25,21 +25,25 @@ local layer = {
     references available here: http://astrogeology.usgs.gov/maps/mdim-2-1 ]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Viking MDIM [Sweden]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Alternate image layer for Mars. This map is hosted
     on the OpenSpace server in Sweden.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/Viking/MDIM21/" ..
     "Mars_Viking_MDIM21_ClrMosaic_global_232m",
-  License = "NASA/PDS",
-  Identifiers = {"Viking_MDIM_Sweden"}
+  License = "NASA/PDS"
 }

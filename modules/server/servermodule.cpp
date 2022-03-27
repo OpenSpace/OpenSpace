@@ -137,7 +137,7 @@ void ServerModule::preSync() {
                 continue;
             }
             socket->startStreams();
-            std::shared_ptr<Connection> connection = std::make_shared<Connection>(
+            auto connection = std::make_shared<Connection>(
                 std::move(socket),
                 address,
                 false,

@@ -136,7 +136,7 @@ namespace {
 
         // Contains information about projecting onto this planet
         ghoul::Dictionary projection
-            [[codegen::reference("newhorizons_projectioncomponent")]];
+            [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
         // [[codegen::verbatim(ColorTexturePathsInfo.description)]]
         std::vector<std::string> colorTexturePaths;

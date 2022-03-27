@@ -20,21 +20,25 @@ local layer = {
     is 463 meters per pixel (m). (Description from URL). Data Reference: (See URL).]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "MOLA Pseudo Color [Sweden]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Colorzied elevation data for Mars (with shading). This map is hosted
     on the OpenSpace server in Sweden.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/GlobalSurveyor/MOLA/" ..
     "Mars_MGS_MOLA_ClrShade_merge_global_463m",
-  License = "NASA/PDS",
-  Identifiers = {"MOLA_Pseudo_Color_Sweden"}
+  License = "NASA/PDS"
 }

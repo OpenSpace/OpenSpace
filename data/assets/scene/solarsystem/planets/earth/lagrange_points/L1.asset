@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
@@ -21,7 +20,7 @@ local L1 = {
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    RenderableType = "Opaque",
+    RenderBinMode = "Opaque",
     Billboard = true,
     Size = 700E5,
     Texture = circle .. "circle.png",
@@ -63,7 +62,26 @@ local L1Label = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  L1,
-  L1Label
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L1)
+  openspace.addSceneGraphNode(L1Label)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L1Label)
+  openspace.removeSceneGraphNode(L1)
+end)
+    
+asset.export(L1)
+asset.export(L1Label)
+
+
+
+asset.meta = {
+  Name = "Lagrange point L1",
+  Version = "1.0",
+  Description = [[ Lagrange point L1 node and label]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -391,12 +391,17 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     ++_userAssetCount;
 
     // Add all the files with the .profile extension to the dropdown
+    std::vector<fs::directory_entry> profiles;
     for (const fs::directory_entry& p : fs::directory_iterator(_userProfilePath)) {
         if (p.path().extension() != ".profile") {
             continue;
         }
-        _profileBox->addItem(QString::fromStdString(p.path().stem().string()));
+        profiles.push_back(p);
         ++_userAssetCount;
+    }
+    std::sort(profiles.begin(), profiles.end());
+    for (const fs::directory_entry& p : profiles) {
+        _profileBox->addItem(QString::fromStdString(p.path().stem().string()));
     }
 
     _profileBox->addItem(QString::fromStdString("--- OpenSpace Profiles ---"));
@@ -405,11 +410,17 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     ++_userAssetCount;
 
     // Add all the files with the .profile extension to the dropdown
-    for (const fs::directory_entry& p : fs::directory_iterator(_profilePath)) {
-        if (p.path().extension() != ".profile") {
+    profiles.clear();
+    for (const fs::directory_entry& path : fs::directory_iterator(_profilePath)) {
+        if (path.path().extension() != ".profile") {
             continue;
         }
-        _profileBox->addItem(QString::fromStdString(p.path().stem().string()));
+        profiles.push_back(path);
+    }
+    std::sort(profiles.begin(), profiles.end());
+    //add sorted items to list
+    for (const fs::directory_entry& profile : profiles) {
+        _profileBox->addItem(QString::fromStdString(profile.path().stem().string()));
     }
 
     // Try to find the requested profile and set it as the current one
@@ -451,8 +462,15 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
 
     bool hasXmlConfig = false;
 
-    // Add all the files with the .xml or .json extension to the dropdown
+    //sort files
+    std::vector<fs::directory_entry> files;
     for (const fs::directory_entry& p : fs::directory_iterator(_userConfigPath)) {
+        files.push_back(p);
+    }
+    std::sort(files.begin(), files.end());
+
+    // Add all the files with the .xml or .json extension to the dropdown
+    for (const fs::directory_entry& p : files) {
         bool isConfigFile = handleConfigurationFile(*_windowConfigBox, p);
         if (isConfigFile) {
             ++_userConfigCount;
@@ -465,8 +483,14 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     model->item(_userConfigCount)->setEnabled(false);
 
     if (std::filesystem::exists(_configPath)) {
-        // Add all the files with the .xml or .json extension to the dropdown
+        //sort files
+        files.clear();
         for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
+            files.push_back(p);
+        }
+        std::sort(files.begin(), files.end());
+        // Add all the files with the .xml or .json extension to the dropdown
+        for (const fs::directory_entry& p : files) {
             handleConfigurationFile(*_windowConfigBox, p);
             hasXmlConfig |= p.path().extension() == ".xml";
         }

@@ -630,9 +630,8 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
 
     const double startSeconds = s.J2000();
     const double endSeconds = e.J2000();
-    const double delta = endSeconds - startSeconds;
     ghoul_assert(
-        static_cast<int>(delta) % static_cast<int>(_resolution) == 0,
+        static_cast<int>(endSeconds - startSeconds) % static_cast<int>(_resolution) == 0,
         "Quantization error"
     );
 

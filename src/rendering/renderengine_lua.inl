@@ -22,35 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
+namespace {
 
-namespace openspace::luascriptfunctions {
-
-int addScreenSpaceRenderable(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addScreenSpaceRenderable");
-    const ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
+/// Will create a ScreenSpaceRenderable from a lua Table and add it in the RenderEngine
+[[codegen::luawrap]] void addScreenSpaceRenderable(ghoul::Dictionary screenSpace) {
+    using namespace openspace;
     std::unique_ptr<ScreenSpaceRenderable> s =
-       ScreenSpaceRenderable::createFromDictionary(d);
-
+        ScreenSpaceRenderable::createFromDictionary(screenSpace);
     global::renderEngine->addScreenSpaceRenderable(std::move(s));
-    return 0;
 }
 
-int removeScreenSpaceRenderable(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
-    const std::string name = ghoul::lua::value<std::string>(L);
+/**
+ * Given a ScreenSpaceRenderable name this script will remove it from the RenderEngine.
+ * The parameter can also be a table in which case the 'Identifier' key is used to look up
+ * the name from the table.
+ */
+[[codegen::luawrap]] void removeScreenSpaceRenderable(
+                                  std::variant<std::string, ghoul::Dictionary> identifier)
+{
+    using namespace openspace;
+    std::string identifierStr;
+    if (std::holds_alternative<std::string>(identifier)) {
+        identifierStr = std::get<std::string>(identifier);
+    }
+    else {
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(identifier);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError("Passed table does not contain an Identifier");
+        }
+        identifierStr = d.value<std::string>("Identifier");
+    }
 
-    global::renderEngine->removeScreenSpaceRenderable(name);
-    return 0;
+    global::renderEngine->removeScreenSpaceRenderable(identifierStr);
 }
 
-int takeScreenshot(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::takeScreenshot");
+/**
+ * Take a screenshot and return the screenshot number. The screenshot will be stored in
+ * the ${SCREENSHOTS} folder.
+ */
+[[codegen::luawrap]] int takeScreenshot() {
+    using namespace openspace;
     global::renderEngine->takeScreenshot();
-    const unsigned int screenshotNumber = global::renderEngine->latestScreenshotNumber();
-    ghoul::lua::push(L, screenshotNumber);
-    return 1;
+    unsigned int screenshotNumber = global::renderEngine->latestScreenshotNumber();
+    return static_cast<int>(screenshotNumber);
 }
 
-}// namespace openspace::luascriptfunctions
+#include "renderengine_lua_codegen.cpp"
+
+} // namespace

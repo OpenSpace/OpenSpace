@@ -27,6 +27,7 @@
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
 #include <modules/server/include/topics/documentationtopic.h>
+#include <modules/server/include/topics/enginemodetopic.h>
 #include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
@@ -59,6 +60,7 @@ namespace {
     constexpr const char* DocumentationTopicKey = "documentation";
     constexpr const char* GetPropertyTopicKey = "get";
     constexpr const char* LuaScriptTopicKey = "luascript";
+    constexpr const char* EngineModeTopicKey = "engineMode";
     constexpr const char* SessionRecordingTopicKey = "sessionRecording";
     constexpr const char* SetPropertyTopicKey = "set";
     constexpr const char* ShortcutTopicKey = "shortcuts";
@@ -97,6 +99,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
     _topicFactory.registerClass<DocumentationTopic>(DocumentationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
+    _topicFactory.registerClass<EngineModeTopic>(EngineModeTopicKey);
     _topicFactory.registerClass<SessionRecordingTopic>(SessionRecordingTopicKey);
     _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);
     _topicFactory.registerClass<ShortcutTopic>(ShortcutTopicKey);

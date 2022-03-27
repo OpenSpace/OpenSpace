@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
 
@@ -47,20 +46,28 @@ local Titan = {
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Titan",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Moons/Titan",
     Description = [[Largest moon of Saturn.]]
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Titan })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Titan)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Titan)
+end)
+  
+asset.export(Titan)
+
 
 
 asset.meta = {
   Name = "Titan",
-  Version = "1.0",
+  Version = "1.2",
   Description = [[ Titan globe with labels.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Titan"}
+  License = "MIT license"
 }

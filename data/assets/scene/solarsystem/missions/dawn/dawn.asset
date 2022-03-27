@@ -1,6 +1,5 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 local kernels = asset.syncedResource({
@@ -623,12 +622,7 @@ local KernelFiles = {
 }
 
 local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
+  sun.LightSource,
   {
     Identifier = "Camera",
     Type = "CameraLightSource",
@@ -789,11 +783,28 @@ local DawnFramingCamera2 = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Dawn,
   DawnSolarArray1,
   DawnSolarArray2,
   DawnTrail,
   DawnFramingCamera1,
   DawnFramingCamera2
-})
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node)
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

@@ -1,5 +1,4 @@
 local transforms = asset.require("./venus")
-local assetHelper = asset.require("util/asset_helper")
 
 
 
@@ -52,15 +51,24 @@ local Atmosphere = {
     Description = "Simulation of Venus' Atmosphere"
   }
 }
-assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Atmosphere)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Atmosphere)
+end)
+  
+asset.export(Atmosphere)
+
 
 
 asset.meta = {
   Name = "Venus Atmosphere",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Atmosphere of Venus.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"VenusAtmosphere"}
+  License = "MIT license"
 }

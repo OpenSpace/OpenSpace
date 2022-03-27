@@ -163,7 +163,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _eventHandler->initialize();
 
     // register ScreenSpaceBrowser
-    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }

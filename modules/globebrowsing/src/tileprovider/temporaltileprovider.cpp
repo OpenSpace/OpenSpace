@@ -44,17 +44,8 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* KeyBasePath = "BasePath";
-
     constexpr const char* TimePlaceholder = "${OpenSpaceTimeId}";
     
-    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
-        "FilePath",
-        "File Path",
-        "This is the path to the XML configuration file that describes the temporal tile "
-        "information."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
         "Use Fixed Time",
@@ -257,15 +248,33 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             std::tm tm = {};
             ss >> std::get_time(&tm, p.folder->format.c_str());
             if (!ss.fail()) {
-                std::string date = fmt::format(
-                    "{}-{}-{} {}:{}:{}",
-                    tm.tm_year + 1900,
-                    tm.tm_mon + 1,
-                    tm.tm_mday,
-                    tm.tm_hour,
-                    tm.tm_min,
-                    tm.tm_sec
-                );
+                std::string date;
+                if (p.folder->format.find("%j") != std::string::npos) {
+                    // If the user asked for a day-of-year, the day-of-month and the month
+                    // fields will not be set and calls to std::asctime will assert
+                    // unfortunately.  Luckily, Spice understands DOY date formats, so
+                    // we can specify those directly and noone would use a DOY and a DOM
+                    // time string in the same format string, right?  Right?!
+                    date = fmt::format(
+                        "{}-{}T{}:{}:{}",
+                        tm.tm_year + 1900,
+                        tm.tm_yday,
+                        tm.tm_hour,
+                        tm.tm_min,
+                        tm.tm_sec
+                    );
+                }
+                else {
+                    date = fmt::format(
+                        "{}-{}-{} {}:{}:{}",
+                        tm.tm_year + 1900,
+                        tm.tm_mon + 1,
+                        tm.tm_mday + 1,
+                        tm.tm_hour,
+                        tm.tm_min,
+                        tm.tm_sec
+                    );
+                }
 
                 double et = SpiceManager::ref().ephemerisTimeFromDate(date);
                 _folder.files.push_back({ et, path.path().string() });
@@ -281,6 +290,14 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                 return lhs.first < rhs.first;
             }
         );
+
+        if (_folder.files.empty()) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading layer '{}'. Folder {} does not contain any files that "
+                "matched the time format",
+                _identifier, _folder.folder
+            ));
+        }
     }
     
     _isInterpolating = p.interpolation.value_or(_isInterpolating);
@@ -354,6 +371,10 @@ void TemporalTileProvider::reset() {
     }
 }
 
+int TemporalTileProvider::minLevel() {
+    return 1;
+}
+
 int TemporalTileProvider::maxLevel() {
     if (!_currentTileProvider) {
         update();
@@ -424,8 +445,8 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
                     _folder.files.cbegin(),
                     _folder.files.cend(),
                     time,
-                    [](const std::pair<double, std::string>& p, double time) {
-                        return p.first < time;
+                    [](const std::pair<double, std::string>& p, double sec) {
+                        return p.first < sec;
                     }
                 );
                 return std::string_view(it->second);
@@ -695,9 +716,10 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     Tile prev = t1->tile(tileIndex);
     Tile next = t2->tile(tileIndex);
     // the tile before and the tile after the interpolation interval are loaded so the
-    // interpolation goes smoother
-    Tile prevprev = before->tile(tileIndex);
-    Tile nextnext = future->tile(tileIndex);
+    // interpolation goes smoother. It is on purpose that we are not actually storing the
+    // return tile here, we just want to trigger the load already
+    before->tile(tileIndex);
+    future->tile(tileIndex);
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
 
     if (!prev.texture || !next.texture) {
@@ -813,6 +835,10 @@ void TemporalTileProvider::InterpolateTileProvider::reset() {
     t2->reset();
     before->reset();
     future->reset();
+}
+
+int TemporalTileProvider::InterpolateTileProvider::minLevel() {
+    return glm::max(t1->minLevel(), t2->minLevel());
 }
 
 int TemporalTileProvider::InterpolateTileProvider::maxLevel() {

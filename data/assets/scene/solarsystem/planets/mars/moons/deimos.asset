@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 
 local kernels = asset.syncedResource({
   Name = "Mars Spice Kernels",
@@ -61,15 +60,26 @@ local DeimosTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Deimos)
+  openspace.addSceneGraphNode(DeimosTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DeimosTrail)
+  openspace.removeSceneGraphNode(Deimos)
+end)
+    
+asset.export(Deimos)
+asset.export(DeimosTrail)
+
 
 
 asset.meta = {
   Name = "Deimos",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ RenderableGlobe and Trail for Deimos.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Deimos", "DeimosTrail"}
+  License = "MIT license"
 }

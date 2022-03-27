@@ -24,6 +24,7 @@
 
 #include <openspace/camera/camera.h>
 
+#include <openspace/camera/camerapose.h>
 #include <sstream>
 
 namespace openspace {
@@ -42,6 +43,11 @@ Camera::Camera(const Camera& o)
     , _cachedViewDirection(o._cachedViewDirection)
     , _cachedLookupVector(o._cachedLookupVector)
 {}
+
+void Camera::setPose(CameraPose pose) {
+    setPositionVec3(std::move(pose.position));
+    setRotation(std::move(pose.rotation));
+}
 
 void Camera::setPositionVec3(glm::dvec3 pos) {
     if (!glm::any(glm::isnan(pos))) {

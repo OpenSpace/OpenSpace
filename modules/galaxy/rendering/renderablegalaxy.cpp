@@ -494,6 +494,11 @@ void RenderableGalaxy::deinitializeGL() {
         _raycaster = nullptr;
     }
 
+    global::renderEngine->removeRenderProgram(_pointsProgram.get());
+    _pointsProgram = nullptr;
+    global::renderEngine->removeRenderProgram(_billboardsProgram.get());
+    _billboardsProgram = nullptr;
+
     glDeleteVertexArrays(1, &_pointsVao);
     glDeleteBuffers(1, &_positionVbo);
     glDeleteBuffers(1, &_colorVbo);

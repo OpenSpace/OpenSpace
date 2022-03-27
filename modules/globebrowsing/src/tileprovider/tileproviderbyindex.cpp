@@ -27,23 +27,32 @@
 #include <openspace/documentation/documentation.h>
 
 namespace {
-    constexpr const char* KeyDefaultProvider = "DefaultProvider";
-    constexpr const char* KeyProviders = "IndexTileProviders";
-    constexpr const char* KeyTileIndex = "TileIndex";
-    constexpr const char* KeyTileProvider = "TileProvider";
-
     struct [[codegen::Dictionary(TileProviderByIndex)]] Parameters {
         ghoul::Dictionary defaultProvider;
 
         struct IndexProvider {
             struct Index {
+                // The x coordinate for this index. This specifies the horizontal
+                // direction (longitude) component
                 int x [[codegen::greaterequal(0)]];
+
+                // The y coordinate for this index. This specifies the vertical direction
+                // (latitude) component
                 int y [[codegen::greaterequal(0)]];
+
+                // The z-level which corresponds to the depth of the tile pyramid, which
+                // directly impacts the applied resolution of the tileprovider shown here
                 int level [[codegen::inrange(0, 255)]];
             };
+            // The index for which the provided tile provider is used
             Index tileIndex;
+
+            // The dictionary that described the tileprovider to be used by the provided
+            // index
             ghoul::Dictionary tileProvider;
         };
+
+        // The list of all tileprovides and the indices at which they are used
         std::vector<IndexProvider> indexTileProviders;
     };
 #include "tileproviderbyindex_codegen.cpp"
@@ -131,6 +140,10 @@ void TileProviderByIndex::reset() {
         it.second->reset();
     }
     _defaultTileProvider->reset();
+}
+
+int TileProviderByIndex::minLevel() {
+    return 1;
 }
 
 int TileProviderByIndex::maxLevel() {

@@ -130,11 +130,6 @@ void to_json(json& j, const SceneGraphNode& n) {
 
         { "subowners", n.propertySubOwners() }
     };
-/*
-    auto renderable = n.renderable();
-    if (renderable != nullptr) {
-        j["renderable"] = renderable;
-    }*/
 
     SceneGraphNode* parent = n.parent();
     if (parent) {

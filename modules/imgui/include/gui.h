@@ -63,7 +63,7 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 16;
+        const int nRegularComponents = 15;
         int totalComponents = nRegularComponents;
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -113,7 +113,6 @@ public:
     GuiPropertyComponent _moduleProperty;
     GuiMemoryComponent _memoryComponent;
 
-    GuiPropertyComponent _virtualProperty;
     GuiSpaceTimeComponent _spaceTime;
     GuiMissionComponent _mission;
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -136,11 +135,9 @@ private:
         &_sceneProperty,
         &_screenSpaceProperty,
         &_featuredProperties,
-        &_virtualProperty,
         &_globalProperty,
         &_moduleProperty,
         &_memoryComponent,
-
         &_spaceTime,
         &_mission,
         &_parallel,
@@ -149,14 +146,11 @@ private:
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
         &_iswa,
 #endif
-
         &_actions,
         &_joystick,
         &_filePath,
-
         &_help
     };
-
 
     GLuint vao = 0;
     GLuint vbo = 0;
