@@ -49,7 +49,8 @@ using ProjectionOptions = std::variant<
     sgct::config::PlanarProjection,
     sgct::config::ProjectionPlane,
     sgct::config::SphericalMirrorProjection,
-    sgct::config::SpoutOutputProjection
+    sgct::config::SpoutOutputProjection,
+    sgct::config::SpoutFlatProjection
 >;
 
 struct SgctConfigElements {
