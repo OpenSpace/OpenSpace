@@ -40,6 +40,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <sgct/readconfig.h>
 
 using namespace openspace;
 
@@ -61,18 +62,24 @@ namespace {
         constexpr const QRect ProfileBox(
             LeftRuler, TopRuler + 110, ItemWidth, ItemHeight
         );
-        constexpr const QRect OptionsLabel(LeftRuler, TopRuler + 180, 151, 24);
+        constexpr const QRect NewProfileButton(
+            LeftRuler + 140, TopRuler + 180, SmallItemWidth, SmallItemHeight
+        );
+        constexpr const QRect EditProfileButton(
+            LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
+        );
+        constexpr const QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
         constexpr const QRect WindowConfigBox(
-            LeftRuler, TopRuler + 210, ItemWidth, ItemHeight
+            LeftRuler, TopRuler + 260, ItemWidth, ItemHeight
+        );
+        constexpr const QRect NewWindowButton(
+            LeftRuler + 140, TopRuler + 330, SmallItemWidth, SmallItemHeight
+        );
+        constexpr const QRect EditWindowButton(
+            LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight
         );
         constexpr const QRect StartButton(
-            LeftRuler, TopRuler + 290, ItemWidth, ItemHeight
-        );
-        constexpr const QRect NewButton(
-            LeftRuler + 140, TopRuler + 380, SmallItemWidth, SmallItemHeight
-        );
-        constexpr const QRect EditButton(
-            LeftRuler, TopRuler + 380, SmallItemWidth, SmallItemHeight
+            LeftRuler, TopRuler + 400, ItemWidth, ItemHeight
         );
     } // geometry
 
@@ -123,6 +130,25 @@ namespace {
         try {
             outFile.open(path, std::ofstream::out);
             outFile << p.serialize();
+        }
+        catch (const std::ofstream::failure& e) {
+            QMessageBox::critical(
+                parent,
+                "Exception",
+                QString::fromStdString(fmt::format(
+                    "Error writing data to file: {} ({})", path, e.what()
+                ))
+            );
+        }
+    }
+
+    void saveWindowConfig(QWidget* parent, const std::string& path,
+                          sgct::config::Cluster& cluster)
+    {
+        std::ofstream outFile;
+        try {
+            outFile.open(path, std::ofstream::out);
+            outFile << sgct::serializeConfig(cluster);
         }
         catch (const std::ofstream::failure& e) {
             QMessageBox::critical(
@@ -248,20 +274,20 @@ QWidget* LauncherWindow::createCentralWidget() {
     startButton->setGeometry(geometry::StartButton);
     startButton->setCursor(Qt::PointingHandCursor);
 
-    QPushButton* newButton = new QPushButton("New", centralWidget);
+    QPushButton* newProfileButton = new QPushButton("New", centralWidget);
     connect(
-        newButton, &QPushButton::released,
+        newProfileButton, &QPushButton::released,
         [this]() {
             openProfileEditor("", true);
         }
     );
-    newButton->setObjectName("small");
-    newButton->setGeometry(geometry::NewButton);
-    newButton->setCursor(Qt::PointingHandCursor);
+    newProfileButton->setObjectName("small");
+    newProfileButton->setGeometry(geometry::NewProfileButton);
+    newProfileButton->setCursor(Qt::PointingHandCursor);
 
-    QPushButton* editButton = new QPushButton("Edit", centralWidget);
+    QPushButton* editProfileButton = new QPushButton("Edit", centralWidget);
     connect(
-        editButton, &QPushButton::released,
+        editProfileButton, &QPushButton::released,
         [this]() {
             const std::string selection = _profileBox->currentText().toStdString();
             int selectedIndex = _profileBox->currentIndex();
@@ -269,9 +295,20 @@ QWidget* LauncherWindow::createCentralWidget() {
             openProfileEditor(selection, isUserProfile);
         }
     );
-    editButton->setObjectName("small");
-    editButton->setGeometry(geometry::EditButton);
-    editButton->setCursor(Qt::PointingHandCursor);
+    editProfileButton->setObjectName("small");
+    editProfileButton->setGeometry(geometry::EditProfileButton);
+    editProfileButton->setCursor(Qt::PointingHandCursor);
+
+    QPushButton* newWindowButton = new QPushButton("New", centralWidget);
+    connect(
+        newWindowButton, &QPushButton::released,
+        [this]() {
+            openWindowEditor();
+        }
+    );
+    newWindowButton->setObjectName("small");
+    newWindowButton->setGeometry(geometry::NewWindowButton);
+    newWindowButton->setCursor(Qt::PointingHandCursor);
 
     return centralWidget;
 }
@@ -476,6 +513,8 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
         );
     }
 
+    //Always add the .cfg sgct default as first item
+    _windowConfigBox->insertItem(0, QString::fromStdString(_sgctConfigName));
     // Try to find the requested configuration file and set it as the current one. As we
     // have support for function-generated configuration files that will not be in the
     // list we need to add a preset that doesn't exist a file for
@@ -485,8 +524,11 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
     else {
         // Add the requested preset at the top
-        _windowConfigBox->insertItem(0, QString::fromStdString(preset));
-        _windowConfigBox->setCurrentIndex(0);
+        _windowConfigBox->insertItem(1, QString::fromStdString(preset));
+        //Increment the user config count because there is an additional option added
+        //before the user config options
+        _userConfigCount++;
+        _windowConfigBox->setCurrentIndex(1);
     }
 }
 
@@ -521,6 +563,44 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     else {
         const std::string current = _profileBox->currentText().toStdString();
         populateProfilesList(current);
+    }
+}
+
+void LauncherWindow::openWindowEditor() {
+    QList<QScreen*> screenList = qApp->screens();
+    if (screenList.length() == 0) {
+        LERRORC(
+            "LauncherWindow",
+            "Error: Qt reports no screens/monitors available"
+        );
+        return;
+    }
+    sgct::config::Cluster cluster;
+    std::vector<sgct::config::Window> windowList;
+    SgctEdit editor(this, windowList, cluster, screenList, _userConfigPath);
+    editor.exec();
+    if (editor.wasSaved()) {
+        std::string ext = ".json";
+        std::string savePath = editor.saveFilename();
+        if (savePath.size() >= ext.size()
+            && !(savePath.substr(savePath.size() - ext.size()).compare(ext) == 0))
+        {
+            savePath += ext;
+        }
+        if (cluster.nodes.size() == 0) {
+            cluster.nodes.push_back(sgct::config::Node());
+        }
+        for (auto w : windowList) {
+            cluster.nodes[0].windows.push_back(w);
+        }
+        saveWindowConfig(this, savePath, cluster);
+        //Truncate path to convert this back to path relative to _userConfigPath
+        savePath = savePath.substr(_userConfigPath.size());
+        populateWindowConfigsList(savePath);
+    }
+    else {
+        const std::string current = _windowConfigBox->currentText().toStdString();
+        populateWindowConfigsList(current);
     }
 }
 
