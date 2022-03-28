@@ -170,18 +170,21 @@ void HorizonsTranslation::loadData() {
         LINFO(fmt::format("Loading Horizon file '{}'", file));
 
         HorizonsFile horizonsFile(file);
-        readHorizonsTextFile(horizonsFile);
+        if (!readHorizonsTextFile(horizonsFile)) {
+            LERROR(fmt::format("Could not read data from Horizons file '{}'", file));
+            return;
+        }
 
         LINFO("Saving cache");
         saveCachedFile(cachedFile);
     }
 }
 
-void HorizonsTranslation::readHorizonsTextFile(HorizonsFile& horizonsFile) {
+bool HorizonsTranslation::readHorizonsTextFile(HorizonsFile& horizonsFile) {
     HorizonsFile::HorizonsResult result = horizonsFile.readFile();
     if (result.errorCode != HorizonsFile::ResultCode::Valid) {
         horizonsFile.displayErrorMessage(result.errorCode);
-        return;
+        return false;
     }
 
     for (HorizonsFile::HorizonsKeyframe& keyframe : result.data) {
@@ -199,6 +202,7 @@ void HorizonsTranslation::readHorizonsTextFile(HorizonsFile& horizonsFile) {
             _timeline.addKeyframe(keyframe.time, std::move(keyframe.position));
         }
     }
+    return true;
 }
 
 bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {

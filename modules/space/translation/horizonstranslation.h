@@ -82,7 +82,7 @@ private:
     };
 
     void loadData();
-    void readHorizonsTextFile(HorizonsFile& horizonsFile);
+    bool readHorizonsTextFile(HorizonsFile& horizonsFile);
     bool loadCachedFile(const std::filesystem::path& file);
     void saveCachedFile(const std::filesystem::path& file) const;
 
