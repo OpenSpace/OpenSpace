@@ -12,7 +12,7 @@ local GaiaTrail = {
   Identifier = "GaiaTrail",
   Parent = earthTransforms.EarthCenter.Identifier,
   Renderable = {
-    Type = "RenderableTrailTrajectory",
+    Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",
       HorizonsTextFile = {
@@ -26,14 +26,9 @@ local GaiaTrail = {
       }
     },
     Color = { 0.0, 0.8, 0.7 },
-    ShowFullTrail = false,
-    StartTime = "2013 DEC 19 09:55:27",
-    EndTime = "2026 SEP 14 21:15:27",
     PointSize = 5,
-    SampleInterval = 2400, -- 40 minutes in seconds
-    TimeStampSubsampleFactor = 1,
-    EnableFade = true,
-    Rendering = "Lines"
+    Period = 365, -- 1 year orbit time
+    Resolution = 24244 -- Sameple rate of 40 minutes
   },
   GUI = {
     Name = "Gaia Trail",
@@ -45,7 +40,7 @@ local GaiaTrailEclip = {
   Identifier = "GaiaTrail_Eclip",
   Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
-    Type = "RenderableTrailTrajectory",
+    Type = "RenderableTrailOrbit",
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
@@ -57,14 +52,9 @@ local GaiaTrailEclip = {
       -- Step size: 1 day
     },
     Color = { 1.0, 0.0, 0.0 },
-    ShowFullTrail = false,
-    StartTime = "2013 DEC 20 00:00:00",
-    EndTime = "2026 SEP 14 00:00:00",
     PointSize = 5,
-    SampleInterval = 86400,
-    TimeStampSubsampleFactor = 1,
-    EnableFade = true,
-    Rendering = "Lines"
+    Period = 365, -- 1 year orbit time
+    Resolution = 365 -- Sameple rate of 1 day
   },
   GUI = {
     Name = "Gaia Ecliptic Trail",
