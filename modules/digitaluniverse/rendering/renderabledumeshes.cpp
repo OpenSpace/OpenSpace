@@ -575,7 +575,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 }
 
                 // Check if new max radius
-                const double r = static_cast<double>(glm::length(pos));
+                const double r = glm::length(glm::dvec3(pos));
                 maxRadius = std::max(maxRadius, r);
 
                 // OLD CODE:
