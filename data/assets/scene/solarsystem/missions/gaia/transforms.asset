@@ -15,14 +15,13 @@ local GaiaPosition = {
     Translation = {
       Type = "HorizonsTranslation",
       HorizonsTextFile = {
-        trail .. "gaia_orbit_horizons_1.hrz", --2013-12-19 09:55:27 to 2019-06-20 05:55:27
-        trail .. "gaia_orbit_horizons_2.hrz", --2019-06-20 05:55:27 to 2024-12-31 23:55:27
-        trail .. "gaia_orbit_horizons_3.hrz", --2024-12-31 23:55:27 to 2026-09-14 21:15:27
+        trail .. "gaia_orbit_horizons_1.hrz", --2013-12-19 09:55:27 to 2014-01-19 00:00:00
+        trail .. "gaia_orbit_horizons_2.hrz"  --2014-01-19 00:00:00 to 2026-09-14 00:00:00
         -- Target: Gaia (spacecraft) (-139479)
         -- Observer: Earth (399 GEOCENTRIC)
         -- Start time: 2013-Dec-19 09:55:27 (first data point)
-        -- End time: 2026-Sep-14 21:15:27 (last data point)
-        -- Step size: 40 minutes
+        -- End time: 2026-Sep-14 00:00:00 (last data point)
+        -- Step size: First file has 40 minutes and seocnd has 1 day step size
       }
     },
   },
