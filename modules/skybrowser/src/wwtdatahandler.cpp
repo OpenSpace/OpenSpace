@@ -229,7 +229,7 @@ void WwtDataHandler::loadImages(const std::string& root,
                                 const std::filesystem::path& directory) 
 {
     // Collect the wtml files, either by reading from disc or from a url
-    if (directoryExists(directory)) {
+    if (directoryExists(directory) && !std::filesystem::is_empty(directory)) {
         parseWtmlsFromDisc(_xmls, directory);
         LINFO("Loading images from directory");
     }      
