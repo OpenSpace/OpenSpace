@@ -218,8 +218,10 @@ joystickAxis(std::string joystickName, int axis)
  * Finds the input joystick with the given 'name' and sets the deadzone for a particular
  * joystick axis, which means that any input less than this value is completely ignored.
  */
-[[codegen::luawrap]] void setJoystickAxisDeadZone(std::string joystickName, int axis,
-                                                  float deadzone)
+[[codegen::luawrap("setAxisDeadZone")]] void setJoystickAxisDeadZone(
+                                                                 std::string joystickName,
+                                                                                 int axis,
+                                                                           float deadzone)
 {
     using namespace openspace;
     global::navigationHandler->setJoystickAxisDeadzone(joystickName, axis, deadzone);
@@ -228,7 +230,9 @@ joystickAxis(std::string joystickName, int axis)
 /**
  * Returns the deadzone for the desired axis of the provided joystick.
  */
-[[codegen::luawrap]] float joystickAxisDeadzone(std::string joystickName, int axis) {
+[[codegen::luawrap("axisDeadzone")]] float joystickAxisDeadzone(std::string joystickName,
+                                                                int axis)
+{
     float deadzone = openspace::global::navigationHandler->joystickAxisDeadzone(
         joystickName,
         axis

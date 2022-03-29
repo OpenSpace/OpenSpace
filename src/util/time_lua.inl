@@ -273,7 +273,7 @@ namespace {
 /**
  * Returns the current time as an ISO 8601 date string (YYYY-MM-DDTHH:MN:SS).
  */
-[[codegen::luawrap]] std::string currentTimeUTC() {
+[[codegen::luawrap("UTC")]] std::string currentTimeUTC() {
     return std::string(openspace::global::timeManager->time().UTC());
 }
 

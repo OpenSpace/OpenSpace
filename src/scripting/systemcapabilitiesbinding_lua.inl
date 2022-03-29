@@ -95,7 +95,7 @@ namespace {
 }
 
 // Returns the L2 associativity.
-[[codegen::luawrap]] int l2Associativity() {
+[[codegen::luawrap("L2Associativity")]] int l2Associativity() {
     int assoc = static_cast<int>(CpuCap.L2Associativity());
     return assoc;
 }
