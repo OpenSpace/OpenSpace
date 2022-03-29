@@ -168,8 +168,6 @@ if (OS_MACOSX)
   ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
   foreach(target IN LISTS Targets)
     # Helper executable target.
-        message(STATUS "set tar : ${target}")
-
     add_executable(${target} MACOSX_BUNDLE ${WEBBROWSER_HELPER_SOURCES})
     SET_EXECUTABLE_TARGET_PROPERTIES(${target})
     # add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
