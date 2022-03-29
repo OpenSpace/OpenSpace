@@ -27,6 +27,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <deque>
+#include <chrono>
 
 namespace openspace {
 
@@ -38,7 +39,6 @@ class SceneGraphNode;
 
 class TargetBrowserPair {
 public:
-    constexpr static const float FadeThreshold = 0.01f;
     constexpr static const float DeltaTimeThreshold = 0.03f;
 
     TargetBrowserPair(SceneGraphNode* target, ScreenSpaceSkyBrowser* browser);
@@ -52,7 +52,8 @@ public:
     // Animation
     void startAnimation(glm::dvec3 coordsEnd, double fovEnd, bool shouldLockAfter = true);
     void incrementallyAnimateToCoordinate(double deltaTime);
-    void incrementallyFade(float goalState, float fadeTime, float deltaTime);
+    void startFading(float goal, float fadeTime);
+    void incrementallyFade(float deltaTime);
     // Mouse interaction
     bool checkMouseIntersection(const glm::vec2& mousePosition);
     glm::vec2 selectedScreenSpacePosition() const;
@@ -69,12 +70,13 @@ public:
     void centerTargetOnScreen();
     void incrementallyAnimateTarget(float deltaTime);
 
-    bool hasFinishedFading(float goalState) const;
+    bool hasFinishedFading() const;
     bool isFacingCamera() const;
     bool isUsingRadiusAzimuthElevation() const;
     bool isEnabled() const;
 
     void setEnabled(bool enable);
+    void setOpacity(float opacity);
     void setIsSyncedWithWwt(bool isSynced);
     void setVerticalFov(double vfov);
     void setEquatorialAim(const glm::dvec2& aim);
@@ -111,9 +113,6 @@ public:
                            const TargetBrowserPair& rhs);
 
 private:
-    bool isTargetFadeFinished(float goalState) const;
-    bool isBrowserFadeFinished(float goalState) const;
-
     void aimTargetGalactic(glm::dvec3 direction);
 
     // Selection
@@ -123,10 +122,20 @@ private:
     RenderableSkyTarget* _targetRenderable = nullptr;
     ScreenSpaceSkyBrowser* _browser = nullptr;
     SceneGraphNode* _targetNode = nullptr;
+
+    // Animation
     glm::dvec3 _animationStart = glm::dvec3(0);
     glm::dvec3 _animationEnd = glm::dvec3(0);
     bool _shouldLockAfterAnimation = false;
     bool _targetIsAnimated = false;
+
+    // Fading
+    float _goal = 1.0f;
+    float _startTarget = 1.0f;
+    float _startBrowser = 1.0f;
+    std::chrono::milliseconds _fadeTime = std::chrono::milliseconds(2000);
+    std::chrono::system_clock::time_point _fadeStart;
+    bool _isFading = false;
     
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     glm::ivec3 _borderColor = glm::ivec3(255);

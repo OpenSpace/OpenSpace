@@ -25,6 +25,7 @@
 #include <modules/skybrowser/include/targetbrowserpair.h>
 
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/renderableskytarget.h>
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
@@ -67,17 +68,6 @@ void TargetBrowserPair::removeHighlight(const glm::ivec3& color) {
 void TargetBrowserPair::highlight(const glm::ivec3& color) {
     _browser->highlight(color);
     _targetRenderable->highlight(color);
-}
-
-bool TargetBrowserPair::isTargetFadeFinished(float goalState) const {
-    float targetDiff = abs(_targetRenderable->opacity() - goalState);
-        
-    return targetDiff < FadeThreshold;
-}
-
-bool TargetBrowserPair::isBrowserFadeFinished(float goalState) const {
-    float browserDiff = abs(_browser->opacity() - goalState);
-    return browserDiff < FadeThreshold;
 }
 
 void TargetBrowserPair::aimTargetGalactic(glm::dvec3 direction) {
@@ -157,10 +147,17 @@ void TargetBrowserPair::synchronizeAim() {
 
 void TargetBrowserPair::setEnabled(bool enable) {
     _browser->setEnabled(enable);
+    _targetRenderable->property("Enabled")->set(false);
+}
+
+void TargetBrowserPair::setOpacity(float opacity)
+{
+    _browser->property("Opacity")->set(opacity);
+    _targetRenderable->property("Opacity")->set(opacity);
 }
 
 bool TargetBrowserPair::isEnabled() const {
-    return _targetRenderable->isEnabled() && _browser->isEnabled();
+    return _targetRenderable->isEnabled() || _browser->isEnabled();
 }
 
 void TargetBrowserPair::initialize() {
@@ -297,6 +294,16 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate(double deltaTime) {
     }
 }
 
+void TargetBrowserPair::startFading(float goal, float fadeTime)
+{
+    _startTarget = _targetRenderable->opacity();
+    _startBrowser = _browser->opacity();
+    _goal = goal;
+    _fadeTime = std::chrono::milliseconds(static_cast<int>(fadeTime * 1000));
+    _fadeStart = std::chrono::system_clock::now();
+    _isFading = true;
+}
+
 void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd, 
                             bool shouldLockAfter)
 {
@@ -314,8 +321,10 @@ void TargetBrowserPair::incrementallyAnimateTarget(float deltaTime) {
     // At fps that are too low, the animation stops working. Just place target instead
     bool fpsTooLow = deltaTime > DeltaTimeThreshold;
     // Find smallest angle between the two vectors
-    double smallestAngle = skybrowser::angleBetweenVectors(glm::normalize(_animationStart),
-        glm::normalize(_animationEnd));
+    double smallestAngle = skybrowser::angleBetweenVectors(
+        glm::normalize(_animationStart),
+        glm::normalize(_animationEnd)
+    );
     bool hasArrived = smallestAngle < _targetRenderable->stopAnimationThreshold();
 
     // Only keep animating when target is not at goal position
@@ -350,8 +359,8 @@ void TargetBrowserPair::centerTargetOnScreen() {
     startAnimation(viewDirection, currentFov, false);
 }
 
-bool TargetBrowserPair::hasFinishedFading(float goalState) const {
-    return isTargetFadeFinished(goalState) && isBrowserFadeFinished(goalState);
+bool TargetBrowserPair::hasFinishedFading() const {
+    return !_isFading;
 }
 
 bool TargetBrowserPair::isFacingCamera() const {
@@ -370,26 +379,30 @@ ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
     return _browser;
 }
 
-void TargetBrowserPair::incrementallyFade(float goalState, float fadeTime, 
-                                            float deltaTime)
+void TargetBrowserPair::incrementallyFade(float deltaTime)
 {
-    float opacityDelta = static_cast<float>(deltaTime / fadeTime);
-    if (_targetRenderable->opacity() > goalState) {
-        opacityDelta *= -1.f;
-    }
-    
-    if (!isTargetFadeFinished(goalState)) {
-        _targetRenderable->setOpacity(_targetRenderable->opacity() + opacityDelta);
-    }
-    else {
-        _targetRenderable->setOpacity(goalState);
-    }
-        
-    if (!isBrowserFadeFinished(goalState)) {
-        _browser->setOpacity(_browser->opacity() + opacityDelta);
+    using namespace std::chrono;
+    system_clock::time_point now = system_clock::now();
+    std::chrono::duration<double, std::milli> timeSpent = now - _fadeStart;
+
+    if (timeSpent.count() > _fadeTime.count()) {
+        _isFading = false;
+        _browser->setOpacity(_goal);
+        _targetRenderable->setOpacity(_goal);
     }
     else {
-        _browser->setOpacity(goalState);
+        float percentage = timeSpent / _fadeTime;
+        float newOpacityTarget;
+        float newOpacityBrowser;
+        if (_goal > _startTarget || _goal > _startBrowser) {
+            newOpacityTarget, newOpacityBrowser = _goal * percentage;
+        }
+        else {
+            newOpacityTarget = _startTarget * (1.f - percentage);
+            newOpacityBrowser = _startBrowser * (1.f - percentage);
+        }
+        _browser->setOpacity(newOpacityBrowser);
+        _targetRenderable->setOpacity(newOpacityTarget);
     }
 }
     
