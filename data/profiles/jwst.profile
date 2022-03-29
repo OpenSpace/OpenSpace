@@ -84,7 +84,7 @@
     "scene/solarsystem/planets/earth/lagrange_points/lagrange_points",
     "scene/solarsystem/missions/jwst/jwst",
     "scene/solarsystem/missions/jwst/trail",
-    "scene/solarsystem/missions/jwst/hudf",
+    "scene/solarsystem/missions/jwst/targets/targets",
     "scene/solarsystem/missions/jwst/timelapse",
     "scene/solarsystem/missions/jwst/toggle_trail",
     "scene/digitaluniverse/hdf"
@@ -271,8 +271,8 @@
       "value": "false"
     },
     {
-      "name": "ScreenSpace.HUDFImage.Enabled",
-      "type": "setPropertyValueSingle",
+      "name": "{mission_jwst_target}.Enabled",
+      "type": "setPropertyValue",
       "value": "false"
     },
     {

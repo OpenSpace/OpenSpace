@@ -13,9 +13,5 @@ asset.meta = {
   Description = "Hubble Ultra Deep Field Image",
   Author = "NASA, ESA, and S. Beckwith (STScI) and the HUDF Team",
   URL = "https://esahubble.org/images/heic0611b/",
-  License = [[
-    Original image by NASA, ESA, and S. Beckwith (STScI) and the HUDF Team,
-    white frame and red arrow added by OpenSpace Team.<br>
-    https://creativecommons.org/licenses/by/4.0/
-  ]]
+  License = "CC BY 4.0"
 }

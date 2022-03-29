@@ -1,7 +1,7 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local jwstTransforms = asset.require("./transforms")
+local jwstTransforms = asset.require("scene/solarsystem/missions/jwst/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local image = asset.require("./image").image
+local image = asset.require("./hudf_image").image
 
 local DISTANCE = 9.2E15;
 
@@ -41,7 +41,7 @@ local HUDFImage = {
   UsePerspectiveProjection = false,
   Opacity = 1.0,
   TexturePath = image .. "Hubble_ultra_deep_field.png",
-  Tag = { "mission_jwst_hudf" },
+  Tag = { "mission_jwst_hudf", "mission_jwst_target" },
   Description = [[
     Image of the Hubble Ultra Deep Field by NASA, ESA, and S. Beckwith (STScI) and
     the HUDF Team.
@@ -102,6 +102,5 @@ asset.meta = {
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"HUDFPosition", "HUDFImage", "HUDFJWSTLine"}
+  License = "MIT license"
 }
