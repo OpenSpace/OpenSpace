@@ -33,13 +33,15 @@ asset.require("./layers/colorlayers/fesimap_02122015")
 asset.require("./layers/colorlayers/mgsimap_02122015")
 asset.require("./layers/colorlayers/ssimap_02122015")
 
-asset.require("./layers/heightlayers/messenger_dem_utah")
+local heightLayer = asset.require("./layers/heightlayers/messenger_dem_utah")
 
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
 asset.onInitialize(function () 
   openspace.setPropertyValueSingle("Scene.Mercury.Renderable.Layers.ColorLayers." ..
   colorLayer.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Mercury.Renderable.Layers.HeightLayers." ..
+  heightLayer.layer.Identifier .. ".Enabled", true)
 end)
 
 

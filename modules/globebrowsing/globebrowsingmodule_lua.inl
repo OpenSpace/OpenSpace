@@ -437,7 +437,7 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
  * can be used in the 'FilePath' argument for a call to the 'addLayer' function to add the
  * value to a globe.
  */
-[[codegen::luawrap]] std::vector<ghoul::Dictionary> capabilities(std::string name) {
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> capabilitiesWMS(std::string name) {
     using namespace openspace;
     using namespace globebrowsing;
 

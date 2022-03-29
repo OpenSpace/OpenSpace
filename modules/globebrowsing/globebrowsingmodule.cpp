@@ -716,7 +716,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         codegen::lua::GetGeoPositionForCamera,
         codegen::lua::LoadWMSCapabilities,
         codegen::lua::RemoveWMSServer,
-        codegen::lua::Capabilities
+        codegen::lua::CapabilitiesWMS
     };
     res.scripts = {
         absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
