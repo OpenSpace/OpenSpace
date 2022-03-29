@@ -1,5 +1,6 @@
 local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local model = asset.syncedResource({
   Name = "Phobos Model",
@@ -36,17 +37,12 @@ local Phobos = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = model .. "/Phobos_1_1000.glb",
-    ModelScale = 1000,
-    RotationVector = {90, 0, 90},
+    ModelScale = 'Kilometer',
+    RotationVector = { 90, 0, 90 },
     AmbientIntensity = 0.02,
     SpecularIntensity = 0.0,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true
