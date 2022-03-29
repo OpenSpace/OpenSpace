@@ -522,8 +522,8 @@ void FieldlinesState::addMatchingKeyFrames(
         f2.topology = Fieldline::Topology::Imf;
     }
 
-    _allMatchingFieldlines[matchingFieldlinesId/2].pathLines.first.keyFrames.push_back(f1);
-    _allMatchingFieldlines[matchingFieldlinesId/2].pathLines.second.keyFrames.push_back(f2);
+    _allMatchingFieldlines[matchingFieldlinesId].pathLines.first.keyFrames.push_back(f1);
+    _allMatchingFieldlines[matchingFieldlinesId].pathLines.second.keyFrames.push_back(f2);
 }
 
 void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline, 

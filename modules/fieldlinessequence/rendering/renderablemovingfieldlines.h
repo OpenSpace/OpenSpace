@@ -52,7 +52,7 @@ public:
         double getTimeToEndKeyFrame();
         void setStartPoint(double timeToRecon, size_t indexOfReconnection);
 
-        std::pair<double, size_t> startPositionValues;
+        //std::pair<double, size_t> startPositionValues;
         const std::vector<FieldlinesState::Fieldline>& keyFrames;
         double timeSinceInterpolation = 0.f;
         bool forward = true;

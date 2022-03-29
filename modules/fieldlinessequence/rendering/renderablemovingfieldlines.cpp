@@ -470,7 +470,6 @@ namespace openspace {
         }
 
         std::string line;
-        int nPointsInARow = 0;
         while (std::getline(seedFileStream, line)) {
             try {
                 std::stringstream ss(line);
@@ -480,14 +479,6 @@ namespace openspace {
 
                 // Interprets line as point if it includes space
                 if (isPoint) {
-                    ++nPointsInARow;
-
-                    // No time input, seed starts at simulation start
-                    bool hasNoTime = nPointsInARow == 5;
-                    if (hasNoTime) {
-                        nPointsInARow = 1;
-                        birthTimes.push_back(startTime);
-                    }
 
                     glm::vec3 point;
                     ss >> point.x;
@@ -508,7 +499,6 @@ namespace openspace {
                 }
                 // Time in date format
                 else if (isDate) {
-                    nPointsInARow = 0;
 
                     double t = Time::convertTime(ss.str().substr(0, ss.str().length() - 2));
 
@@ -516,7 +506,7 @@ namespace openspace {
                 }
                 // Time in float format
                 else {
-                    nPointsInARow = 0;
+
                     double t;
                     ss >> t;
                     birthTimes.push_back(startTime + t);
@@ -531,6 +521,11 @@ namespace openspace {
                         throw std::invalid_argument("failed to read float value from "
                             "stringstream when reading time");
                     }
+                }
+
+                // add birth time if none was given
+                if (std::floor(seedPoints.size() / 4) > birthTimes.size()) {
+                    birthTimes.push_back(startTime);
                 }
             }
             catch (std::invalid_argument& e) {
@@ -689,7 +684,7 @@ namespace openspace {
         };
 
         if (LerpLine) {
-            float normalizedTime = 0.f;
+            double normalizedTime = 0.f;
             normalizedTime = traverser.timeSinceInterpolation /
                 traverser.currentKeyFrame->timeToNextKeyFrame;
 
@@ -739,6 +734,9 @@ namespace openspace {
         traverser.timeSinceInterpolation < 0;
 
         if (passNext) {
+
+            // Will be phased out in the future (isAtEnd)
+            // when birth and death times are correct
             if (!traverser.isAtEnd()) {
                 traverser.advanceCurrent();
             }
@@ -756,14 +754,11 @@ namespace openspace {
                     // Elon: 17 nov 2021. This advance call (plus set position call) makes
                     // the transition between the two fieldlines not accurate time wise
                     // since we are advancing its position prematurely
-                    //traverser.advanceCurrent();
-                    //setNewRenderedLinePosition<false>(traverser, lineStart, nVertices);
+                    traverser.advanceCurrent();
+                    setNewRenderedLinePosition<false>(traverser, lineStart, nVertices);
                 }
                 else {
                     setNewRenderedLinePosition<true>(traverser, lineStart, nVertices);
-                    traverser.timeSinceInterpolation = forward ?
-                        traverser.currentKeyFrame->timeToNextKeyFrame :
-                        0;
                 }
             }
         }
@@ -797,8 +792,8 @@ namespace openspace {
 
         bool forward = std::signbit(dt) ? false : true;
         traverser1.forward = traverser2.forward = forward;
-        traverser1.timeSinceInterpolation += dt;
-        traverser2.timeSinceInterpolation += dt;
+        //traverser1.timeSinceInterpolation += dt;
+        //traverser2.timeSinceInterpolation += dt;
 
         // if passing next or previous fieldline
         bool passNextKeyFrameFirstTraverser = forward ?
@@ -917,9 +912,7 @@ namespace openspace {
             nVertices2 = _fieldlineState.lineCount()[lineIndex + 1];
             // changes dt so that fieldlines stop at birth/death time
             bool isAfterBirth1 = currentTime >= allMatchingFieldlines[i].pathLines.first.birthTime;
-            bool isAfterBirth2 = currentTime >= allMatchingFieldlines[i].pathLines.second.birthTime;
             bool movesBeforeBirth1 = newTime < allMatchingFieldlines[i].pathLines.first.birthTime;
-            bool movesBeforeBirth2 = newTime < allMatchingFieldlines[i].pathLines.second.birthTime;
 
             //osäker på hur jag ska få ihop med dt och movelinepair
             //idé: separata dt men är osäker
@@ -927,50 +920,71 @@ namespace openspace {
                 dt += allMatchingFieldlines[i].pathLines.first.birthTime - newTime;
             }
 
+            bool isBeforeDeath1 = currentTime <= allMatchingFieldlines[i].pathLines.first.deathTime;
+            bool movesAfterDeath1 = newTime > allMatchingFieldlines[i].pathLines.first.deathTime;
+            if (isBeforeDeath1 && movesAfterDeath1) {
+                dt += allMatchingFieldlines[i].pathLines.first.deathTime - newTime;
+            }
+
+            if (isAfterBirth1 && isBeforeDeath1) {
+                lineStart1 = _fieldlineState.lineStart()[lineIndex];
+                nVertices1 = _fieldlineState.lineCount()[lineIndex];
+                moveLine(dt, currentTime, allMatchingFieldlines[i].pathLines.first,
+                    _traversers[lineIndex], lineStart1, nVertices1);
+            }
+
+            ++lineIndex;
+            dt = currentTime - previousTime;
+
+            bool isAfterBirth2 = currentTime >= allMatchingFieldlines[i].pathLines.second.birthTime;
+            bool movesBeforeBirth2 = newTime < allMatchingFieldlines[i].pathLines.second.birthTime;
             if (isAfterBirth2 && movesBeforeBirth2) {
                 dt += allMatchingFieldlines[i].pathLines.second.birthTime - newTime;
             }
 
-            bool isBeforeDeath1 = currentTime <= allMatchingFieldlines[i].pathLines.first.deathTime;
             bool isBeforeDeath2 = currentTime <= allMatchingFieldlines[i].pathLines.second.deathTime;
-            bool movesAfterDeath1 = newTime > allMatchingFieldlines[i].pathLines.first.deathTime;
             bool movesAfterDeath2 = newTime > allMatchingFieldlines[i].pathLines.second.deathTime;
-            if (isBeforeDeath1 && movesAfterDeath1) {
-                dt += allMatchingFieldlines[i].pathLines.first.deathTime - newTime;
-            }
             if (isBeforeDeath2 && movesAfterDeath2) {
                 dt += allMatchingFieldlines[i].pathLines.second.deathTime - newTime;
             }
 
-            // moves fieldline if between birth and death
-            if (isAfterBirth1 && isBeforeDeath1 && isAfterBirth2 && isBeforeDeath2) {
-                /*lineStart = _fieldlineState.lineStart()[lineIndex];
-                nVertices = _fieldlineState.lineCount()[lineIndex];
-                moveLine(dt, allMatchingFieldlines[i].pathLines.first,
-                    _traversers[lineIndex], lineStart, nVertices);
-                ++lineIndex;*/
-                moveLinePair(dt, currentTime,
-                    allMatchingFieldlines[i].pathLines.first,
-                    allMatchingFieldlines[i].pathLines.second,
-                    _traversers[lineIndex],
-                    _traversers[lineIndex + 1],
-                    std::make_pair(lineStart1, lineStart2),
-                    std::make_pair(nVertices1, nVertices2));
-                lineIndex += 2;
-            }
-            else if (isAfterBirth1 && isBeforeDeath1) {
-                // do we want to move individually if one is at start/end?
-                // Simon: I would prefer to keep them synced and remove this
-                // your call Måns
-                moveLine(dt, currentTime, allMatchingFieldlines[i].pathLines.first,
-                    _traversers[lineIndex], lineStart1, nVertices1);
-                ++lineIndex;
-            }
-            else if (isAfterBirth2 && isBeforeDeath2) {
+            if (isAfterBirth2 && isBeforeDeath2) {
+                lineStart2 = _fieldlineState.lineStart()[lineIndex];
+                nVertices2 = _fieldlineState.lineCount()[lineIndex];
                 moveLine(dt, currentTime, allMatchingFieldlines[i].pathLines.second,
                     _traversers[lineIndex], lineStart2, nVertices2);
-                ++lineIndex;
             }
+            ++lineIndex;
+
+            // moves fieldline if between birth and death
+            //if (isAfterBirth1 && isBeforeDeath1 && isAfterBirth2 && isBeforeDeath2) {
+            //    /*lineStart = _fieldlineState.lineStart()[lineIndex];
+            //    nVertices = _fieldlineState.lineCount()[lineIndex];
+            //    moveLine(dt, allMatchingFieldlines[i].pathLines.first,
+            //        _traversers[lineIndex], lineStart, nVertices);
+            //    ++lineIndex;*/
+            //    moveLinePair(dt, currentTime,
+            //        allMatchingFieldlines[i].pathLines.first,
+            //        allMatchingFieldlines[i].pathLines.second,
+            //        _traversers[lineIndex],
+            //        _traversers[lineIndex + 1],
+            //        std::make_pair(lineStart1, lineStart2),
+            //        std::make_pair(nVertices1, nVertices2));
+            //    lineIndex += 2;
+            //}
+            //else if (isAfterBirth1 && isBeforeDeath1) {
+            //    // do we want to move individually if one is at start/end?
+            //    // Simon: I would prefer to keep them synced and remove this
+            //    // your call Måns
+            //    moveLine(dt, currentTime, allMatchingFieldlines[i].pathLines.first,
+            //        _traversers[lineIndex], lineStart1, nVertices1);
+            //    ++lineIndex;
+            //}
+            //else if (isAfterBirth2 && isBeforeDeath2) {
+            //    moveLine(dt, currentTime, allMatchingFieldlines[i].pathLines.second,
+            //        _traversers[lineIndex], lineStart2, nVertices2);
+            //    ++lineIndex;
+            //}
         }
 
         // oldChris
@@ -1071,7 +1085,7 @@ namespace openspace {
     */
     void RenderableMovingFieldlines::updateVertexAlphaBuffer(const double currentTime) {
 
-        constexpr const double fieldlineFadeTime = 30.0;    // seconds
+        constexpr const double fieldlineFadeTime = 5.0;    // seconds
 
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAlphaBuffer);
@@ -1151,6 +1165,8 @@ namespace openspace {
         }
     }
 
+    // Will be phased out in the future
+    // when birth and death times are correct
     bool RenderableMovingFieldlines::PathLineTraverser::isAtEnd() const {
         return forward ?
             (currentKeyFrame == keyFrames.end() - 2) :
@@ -1164,11 +1180,11 @@ namespace openspace {
 
         // check if we are further away than the other fieldline in the pair
         // used to keep in sync
-        if ((currentKeyFrame - keyFrames.begin() == startPositionValues.second &&
-            timeSinceInterpolation < startPositionValues.first) || 
-            currentKeyFrame - keyFrames.begin() < startPositionValues.second) {
-            return true;
-        }
+        //if ((currentKeyFrame - keyFrames.begin() == startPositionValues.second &&
+        //    timeSinceInterpolation < startPositionValues.first) || 
+        //    currentKeyFrame - keyFrames.begin() < startPositionValues.second) {
+        //    return true;
+        //}
 
         return false;
     }
@@ -1205,7 +1221,7 @@ namespace openspace {
 
                 // Potentially used for starting position, when backing so the field line
                 // wouldn't traverse away and keep the pair in sync
-                startPositionValues = std::make_pair(i, timeSinceInterpolation);
+                //startPositionValues = std::make_pair(i, timeSinceInterpolation);
                 break;
             }
         }
