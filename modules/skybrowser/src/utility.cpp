@@ -124,7 +124,7 @@ double targetRoll(const glm::dvec3& up, const glm::dvec3& forward) {
 
     glm::dvec3 crossUpNorth = glm::cross(upJ2000, NorthPole);
     double dotNorthUp = glm::dot(NorthPole, upJ2000);
-    double dotCrossUpNorthForward = glm::dot(upJ2000, forwardJ2000);
+    double dotCrossUpNorthForward = glm::dot(crossUpNorth, forwardJ2000);
         
     return glm::degrees(atan2(dotCrossUpNorthForward, dotNorthUp));
 }

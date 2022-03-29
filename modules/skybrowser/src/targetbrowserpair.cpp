@@ -136,11 +136,18 @@ void TargetBrowserPair::synchronizeAim() {
         // target, send the locked coordinates to wwt
         glm::dvec2 aim = targetDirectionEquatorial();
         _browser->setEquatorialAim(aim);
-        glm::dvec3 direction = _targetNode->worldPosition() -
-            global::navigationHandler->camera()->positionVec3();
-        glm::dvec3 normalized = glm::normalize(direction);
-        glm::dvec3 up = global::navigationHandler->camera()->lookUpVectorWorldSpace();
-        _browser->setTargetRoll(skybrowser::targetRoll(up, normalized));
+        glm::dvec3 normal = glm::normalize(
+            _targetNode->worldPosition() - 
+            global::navigationHandler->camera()->positionVec3()
+        );
+        glm::dvec3 right = glm::normalize(
+            glm::cross(
+                global::navigationHandler->camera()->lookUpVectorWorldSpace(),
+                normal
+            )
+        );
+        glm::dvec3 up = glm::normalize(glm::cross(normal, right));
+        _browser->setTargetRoll(skybrowser::targetRoll(up, normal));
         _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
