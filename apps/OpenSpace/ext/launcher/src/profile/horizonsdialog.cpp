@@ -527,6 +527,11 @@ bool HorizonsDialog::isValidInput() {
         message = "Target not selected";
         styleLabel(_targetLabel, true);
     }
+    else if (_targetEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos) {
+        isValid = false;
+        message = "Target includes illegel characters";
+        styleLabel(_targetLabel, true);
+    }
 
     // Observer field
     else if (_centerEdit->text().isEmpty() &&
@@ -540,6 +545,11 @@ bool HorizonsDialog::isValidInput() {
     else if (_centerEdit->text().isEmpty() && _chooseObserverCombo->count() == 0) {
         isValid = false;
         message = "Observer not selected";
+        styleLabel(_centerLabel, true);
+    }
+    else if (_centerEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos) {
+        isValid = false;
+        message = "Observer includes illegel characters";
         styleLabel(_centerLabel, true);
     }
 
