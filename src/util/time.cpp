@@ -164,6 +164,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::InterpolateTimeRelative,
             codegen::lua::CurrentTime,
             codegen::lua::CurrentTimeUTC,
+            codegen::lua::CurrentTimeSpice,
             codegen::lua::CurrentWallTime,
             codegen::lua::CurrentApplicationTime,
             codegen::lua::AdvancedTime
