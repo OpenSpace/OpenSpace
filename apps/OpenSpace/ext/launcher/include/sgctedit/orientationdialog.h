@@ -22,32 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/webbrowser/include/defaultbrowserlauncher.h>
+#ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
 
-#include <ghoul/logging/logmanager.h>
+#include <QDialog>
 
-#ifdef WIN32
-#include <shellapi.h>
-#endif // WIN32
+#include <sgct/config.h>
+#include <QLineEdit>
+#include <glm/gtc/constants.hpp>
 
-namespace openspace {
+class QWidget;
 
-bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                           [[ maybe_unused ]] const CefString& targetUrl,
-                                           const CefString&,
-                                           CefLifeSpanHandler::WindowOpenDisposition,
-                                           bool, const CefPopupFeatures&, CefWindowInfo&,
-                                           CefRefPtr<CefClient>&, CefBrowserSettings&,
-                                           CefRefPtr<CefDictionaryValue>&,
-                                           bool*)
-{
-    // never permit CEF popups, always launch in default browser
-#ifdef WIN32
-    std::string url = targetUrl.ToString();
-    LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
-    ShellExecuteA(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
-#endif
-    return true;
-}
+class OrientationDialog : public QDialog {
+Q_OBJECT
+public:
+    /**
+     * Constructor for OrientationDialog object which contains the input text boxes for
+     * orientation x,y,z values
+     *
+     * \param orientation x,y,z angles in degrees contained in sgct::quat object
+     * \param parent pointer to Qt QWidget parent object
+    */
+    OrientationDialog(sgct::quat& orientation, QWidget* parent);
 
-} // namespace openspace
+private slots:
+    void cancel();
+    void ok();
+
+private:
+    QLineEdit* _linePitch = nullptr;
+    QLineEdit* _lineRoll = nullptr;
+    QLineEdit* _lineYaw = nullptr;
+    sgct::quat& _orientationValue;
+};
+
+#endif // __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__

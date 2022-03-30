@@ -22,32 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/webbrowser/include/defaultbrowserlauncher.h>
+#include "sgctedit/orientation.h"
 
-#include <ghoul/logging/logmanager.h>
+#include "sgctedit/orientationdialog.h"
 
-#ifdef WIN32
-#include <shellapi.h>
-#endif // WIN32
-
-namespace openspace {
-
-bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                           [[ maybe_unused ]] const CefString& targetUrl,
-                                           const CefString&,
-                                           CefLifeSpanHandler::WindowOpenDisposition,
-                                           bool, const CefPopupFeatures&, CefWindowInfo&,
-                                           CefRefPtr<CefClient>&, CefBrowserSettings&,
-                                           CefRefPtr<CefDictionaryValue>&,
-                                           bool*)
+Orientation::Orientation()
+    : _orientationDialog(_orientationValue, this)
 {
-    // never permit CEF popups, always launch in default browser
-#ifdef WIN32
-    std::string url = targetUrl.ToString();
-    LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
-    ShellExecuteA(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
-#endif
-    return true;
+    _layoutOrientationFull = new QHBoxLayout;
+    {
+        QVBoxLayout* layoutOrientationControls = new QVBoxLayout;
+        QPushButton* orientationButton = new QPushButton("Global Orientation");
+        _checkBoxVsync = new QCheckBox("VSync All Windows", this);
+        _checkBoxVsync->setToolTip(
+            "If enabled, the server will frame lock and wait for all client nodes"
+        );
+        layoutOrientationControls->addWidget(_checkBoxVsync);
+        orientationButton->setToolTip(
+            "Opens a separate dialog for setting the pitch, "
+            "yaw, and roll of the camera\n(the orientation applies to all viewports)"
+        );
+        orientationButton->setFocusPolicy(Qt::NoFocus);
+        layoutOrientationControls->addWidget(orientationButton);
+        _layoutOrientationFull->addStretch(1);
+        _layoutOrientationFull->addLayout(layoutOrientationControls);
+        _layoutOrientationFull->addStretch(1);
+        connect(
+            orientationButton,
+            &QPushButton::released,
+            this,
+            &Orientation::orientationDialog
+        );
+    }
 }
 
-} // namespace openspace
+void Orientation::addControlsToParentLayout(QVBoxLayout* parentLayout) {
+    parentLayout->addLayout(_layoutOrientationFull);
+}
+
+void Orientation::orientationDialog() {
+    _orientationDialog.exec();
+}
+
+sgct::quat Orientation::orientationValue() const {
+    return _orientationValue;
+}
+
+bool Orientation::vsyncValue() const {
+    return (_checkBoxVsync->checkState() == Qt::Checked);
+}

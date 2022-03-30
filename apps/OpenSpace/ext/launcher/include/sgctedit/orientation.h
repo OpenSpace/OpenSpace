@@ -22,32 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/webbrowser/include/defaultbrowserlauncher.h>
+#ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
+#define __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
 
-#include <ghoul/logging/logmanager.h>
+#include <QWidget>
 
-#ifdef WIN32
-#include <shellapi.h>
-#endif // WIN32
+#include <sgctedit/orientationdialog.h>
+#include <sgct/config.h>
+#include <sgct/math.h>
+#include <QCheckBox>
+#include <QLayout>
+#include <QPushButton>
 
-namespace openspace {
+class Orientation : public QWidget {
+Q_OBJECT
+public:
+    /**
+     * Constructor for Orientation class, which manages the overall control layout
+     * including monitorBox, multiple WindowControl columns, and additional controls
+     *
+     * \param monitorRenderBox pointer to the MonitorBox object
+     * \param monitorSizeList A vector containing QRect objects containing pixel dims
+     *                        of each monitor
+     * \param nMaxWindows The maximum number of windows allowed (depends on the number
+     *                    of monitors in the system)
+     * \param winColors An array of QColor objects for window colors. The indexing of
+     *                  this array matches the window indexing used elsewhere in the
+     *                  class. This allows for a unique color for each window.
+    */
+    Orientation();
+    /**
+     * Add Orientation controls to the parent layout
+     *
+     * \param parentLayout the layout to which the Orientation's controls will be added
+    */
+    void addControlsToParentLayout(QVBoxLayout* parentLayout);
+    /**
+     * Gets the user-provided x,y,z orientation values (degrees)
+     *
+     * \return the orientation angles provided in sgct::quat object
+    */
+    sgct::quat orientationValue() const;
+    /**
+     * Gets the value for if VSync is enabled
+     *
+     * \return true if the VSync option is checked/enabled
+    */
+    bool vsyncValue() const;
 
-bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                           [[ maybe_unused ]] const CefString& targetUrl,
-                                           const CefString&,
-                                           CefLifeSpanHandler::WindowOpenDisposition,
-                                           bool, const CefPopupFeatures&, CefWindowInfo&,
-                                           CefRefPtr<CefClient>&, CefBrowserSettings&,
-                                           CefRefPtr<CefDictionaryValue>&,
-                                           bool*)
-{
-    // never permit CEF popups, always launch in default browser
-#ifdef WIN32
-    std::string url = targetUrl.ToString();
-    LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
-    ShellExecuteA(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
-#endif
-    return true;
-}
+private slots:
+    void orientationDialog();
 
-} // namespace openspace
+private:
+    sgct::quat _orientationValue = {0.f, 0.f, 0.f, 0.f};
+    OrientationDialog _orientationDialog;
+    QHBoxLayout* _layoutOrientationFull = nullptr;
+    QCheckBox* _checkBoxVsync = nullptr;
+};
+
+#endif // __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__

@@ -70,7 +70,9 @@ namespace {
  * value of true is given, then playback will continually loop until it is manually
  * stopped.
  */
-[[codegen::luawrap]] void startPlaybackDefault(std::string file, bool loop = false) {
+[[codegen::luawrap("startPlayback")]] void startPlaybackDefault(std::string file,
+                                                                bool loop = false)
+{
     using namespace openspace;
     
     if (file.empty()) {

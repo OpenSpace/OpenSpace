@@ -103,6 +103,9 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    // Radius is always 1
+    setBoundingSphere(1.0);
 }
 
 bool RenderableSphericalGrid::isReady() const {

@@ -94,8 +94,8 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     _renderHandler = new ScreenSpaceRenderHandler;
     _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
-        _renderHandler,
-        _keyboardHandler
+        _renderHandler.get(),
+        _keyboardHandler.get()
     );
 
     _url.onChange([this]() { _isUrlDirty = true; });
