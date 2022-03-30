@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___TARGETBROWSERPAIR___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___TARGETBROWSERPAIR___H__
 
+#include <modules/skybrowser/include/utility.h>
 #include <openspace/documentation/documentation.h>
 #include <deque>
 #include <chrono>
@@ -129,13 +130,8 @@ private:
     bool _shouldLockAfterAnimation = false;
     bool _targetIsAnimated = false;
 
-    // Fading
-    float _goal = 1.0f;
-    float _startTarget = 1.0f;
-    float _startBrowser = 1.0f;
-    std::chrono::milliseconds _fadeTime = std::chrono::milliseconds(2000);
-    std::chrono::system_clock::time_point _fadeStart;
-    bool _isFading = false;
+    skybrowser::Animation _fadeBrowser = skybrowser::Animation(0.f, 0.f, 0.0);
+    skybrowser::Animation _fadeTarget = skybrowser::Animation(0.f, 0.f, 0.0);
     
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     glm::ivec3 _borderColor = glm::ivec3(255);

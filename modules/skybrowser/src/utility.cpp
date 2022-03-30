@@ -211,6 +211,37 @@ double sizeFromFov(double fov, glm::dvec3 worldPosition) {
     double opposite = 2 * adjacent * glm::tan(glm::radians(fov * 0.5));
     return opposite;
 }
+
+Animation::Animation(float start, float goal, double time)
+    : _start(start), _goal(goal)
+{
+    _animationTime = std::chrono::milliseconds(static_cast<int>(time * 1000));
+}
+
+void Animation::start()
+{
+    _isAnimating = true;
+    _startTime = std::chrono::system_clock::now();
+}
+
+bool Animation::isFinished() const
+{
+    return !_isAnimating;
+}
+
+float Animation::getNewValue() {
+    using namespace std::chrono;
+    system_clock::time_point now = system_clock::now();
+    std::chrono::duration<double, std::milli> timeSpent = now - _startTime;
+    if (timeSpent.count() > _animationTime.count()) {
+        _isAnimating = false;
+        return _goal;
+    }
+    else {
+        float percentage = timeSpent / _animationTime;
+        return _goal > _start ? _goal * percentage : _start * (1.f - percentage);
+    }
+}
 } // namespace openspace
 
 

@@ -303,12 +303,10 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate(double deltaTime) {
 
 void TargetBrowserPair::startFading(float goal, float fadeTime)
 {
-    _startTarget = _targetRenderable->opacity();
-    _startBrowser = _browser->opacity();
-    _goal = goal;
-    _fadeTime = std::chrono::milliseconds(static_cast<int>(fadeTime * 1000));
-    _fadeStart = std::chrono::system_clock::now();
-    _isFading = true;
+    _fadeTarget = skybrowser::Animation(_targetRenderable->opacity(), goal, fadeTime);
+    _fadeBrowser = skybrowser::Animation(_browser->opacity(), goal, fadeTime);
+    _fadeTarget.start();
+    _fadeBrowser.start();
 }
 
 void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd, 
@@ -367,7 +365,7 @@ void TargetBrowserPair::centerTargetOnScreen() {
 }
 
 bool TargetBrowserPair::hasFinishedFading() const {
-    return !_isFading;
+    return _fadeBrowser.isFinished() && _fadeTarget.isFinished();
 }
 
 bool TargetBrowserPair::isFacingCamera() const {
@@ -388,28 +386,11 @@ ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
 
 void TargetBrowserPair::incrementallyFade(float deltaTime)
 {
-    using namespace std::chrono;
-    system_clock::time_point now = system_clock::now();
-    std::chrono::duration<double, std::milli> timeSpent = now - _fadeStart;
-
-    if (timeSpent.count() > _fadeTime.count()) {
-        _isFading = false;
-        _browser->setOpacity(_goal);
-        _targetRenderable->setOpacity(_goal);
+    if (!_fadeBrowser.isFinished()) {
+        _browser->setOpacity(_fadeBrowser.getNewValue());
     }
-    else {
-        float percentage = timeSpent / _fadeTime;
-        float newOpacityTarget;
-        float newOpacityBrowser;
-        if (_goal > _startTarget || _goal > _startBrowser) {
-            newOpacityTarget, newOpacityBrowser = _goal * percentage;
-        }
-        else {
-            newOpacityTarget = _startTarget * (1.f - percentage);
-            newOpacityBrowser = _startBrowser * (1.f - percentage);
-        }
-        _browser->setOpacity(newOpacityBrowser);
-        _targetRenderable->setOpacity(newOpacityTarget);
+    if (!_fadeTarget.isFinished()) {
+        _targetRenderable->setOpacity(_fadeTarget.getNewValue());
     }
 }
     

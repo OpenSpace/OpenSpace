@@ -27,6 +27,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/distanceconstants.h>
+#include <chrono>
 
 namespace openspace::skybrowser {
 // Constants
@@ -184,6 +185,21 @@ glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3&
  * \return Field of view
  */
 double sizeFromFov(double fov, glm::dvec3 worldPosition);
+
+class Animation {
+public:
+    Animation(float start, float goal, double time);
+    void start();
+    bool isFinished() const;
+    float getNewValue();
+private:
+    // Animation
+    bool _isAnimating = false;
+    float _goal = 1.0f;
+    float _start = 1.0f;
+    std::chrono::milliseconds _animationTime = std::chrono::milliseconds(2000);
+    std::chrono::system_clock::time_point _startTime;
+};
     
 } // namespace openspace::skybrowser
 
