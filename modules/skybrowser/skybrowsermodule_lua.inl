@@ -392,10 +392,10 @@ namespace {
     std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
     // Determine starting point on screen for the target
-    glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
-    glm::vec3 positionTarget = { 1.0f, 0.5f, -2.1f };
+    glm::vec3 positionBrowser = { -1.f, -0.5f, -2.1f };
+    glm::vec3 positionTarget = { 0.9f, 0.4f, -2.1f };
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
-    std::string guiPath = "/SkyBrowser";
+    std::string guiPath = "/Sky Browser";
     std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
     double fov = 70.0;
     double size = skybrowser::sizeFromFov(fov, galacticTarget);

@@ -45,7 +45,7 @@ TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
     : _targetNode(targetNode), _browser(browser)
 {
     ghoul_assert(browser != nullptr, "Sky browser is null pointer!");
-    ghoul_assert(target != nullptr, "Sky target is null pointer!");
+    ghoul_assert(targetNode != nullptr, "Sky target is null pointer!");
 
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
 }

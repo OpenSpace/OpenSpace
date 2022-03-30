@@ -137,6 +137,7 @@ namespace openspace {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         _borderColor = randomBorderColor(module->highlight());
     } 
+    _scale = _size.y * 0.5;
 }
 
 ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
