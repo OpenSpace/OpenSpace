@@ -491,6 +491,12 @@ bool HorizonsDialog::handleRequest() {
         );
 
         std::filesystem::rename(oldFile, newFile);
+
+        appendLog(
+            fmt::format("For more information, see the saved error file {}",
+            newFile),
+            LogLevel::Info
+        );
     }
 
     return isValid;
@@ -909,8 +915,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             _validTimeRange = readTimeRange();
             if (_validTimeRange.first.empty() || _validTimeRange.second.empty()) {
                 appendLog(
-                    "Could not parse the valid time range from file. "
-                    "For more information, see the saved horizons file",
+                    "Could not parse the valid time range from file",
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
@@ -982,8 +987,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                     "Multiple matching stations found"
                 );
             if (matchingstations.empty()) {
-                appendLog("Could not parse the matching stations. "
-                    "For more information, see the saved horizons file",
+                appendLog("Could not parse the matching stations",
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
@@ -1017,8 +1021,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             std::vector<std::string> matchingObservers =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingObservers.empty()) {
-                appendLog("Could not parse the matching observers. "
-                    "For more information, see the saved horizons file",
+                appendLog("Could not parse the matching observers",
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
@@ -1075,8 +1078,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             std::vector<std::string> matchingTargets =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingTargets.empty()) {
-                appendLog("Could not parse the matching targets. "
-                    "For more information, see the saved horizons file",
+                appendLog("Could not parse the matching targets",
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
@@ -1101,7 +1103,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
 
         case openspace::HorizonsFile::ResultCode::UnknownError:
             appendLog(
-                "Unknown error. For more information, see the saved horizons file",
+                "Unknown error",
                 LogLevel::Error
             );
             if (!_latestHorizonsError.empty()) {
