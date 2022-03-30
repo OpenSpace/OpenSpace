@@ -246,6 +246,7 @@ namespace {
         image.setValue("thumbnail", img.thumbnailUrl);
         image.setValue("ra", img.equatorialSpherical.x);
         image.setValue("dec", img.equatorialSpherical.y);
+        image.setValue("fov", static_cast<double>(img.fov));
         image.setValue("cartesianDirection", img.equatorialCartesian);
         image.setValue("hasCelestialCoords", img.hasCelestialCoords);
         image.setValue("credits", img.credits);
