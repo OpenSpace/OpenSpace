@@ -12,6 +12,7 @@ local Sun = {
     Layers = {},
     PerformShading = false
   },
+  ApproachFactor = 15.0,
   GUI = {
     Name = "Sun",
     Path = "/Solar System/Sun",
