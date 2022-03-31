@@ -591,14 +591,17 @@ namespace {
 /**
 * Takes an identifier to a sky browser and adds a rendered copy to it.
 * \param id Identifier
+* \param raePosition Position in radius, azimuth, elevation coordinates
+* \param nCopies Number of copies
 */
-[[codegen::luawrap]] void addRenderCopy(std::string id) {
+[[codegen::luawrap]] void addRenderCopy(std::string id, 
+     int nCopies = 1, glm::vec3 raePosition = glm::vec3(2.1f, 0.f, 0.f)) {
     // Get module
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     TargetBrowserPair* pair = module->getPair(id);
     if (pair) {
-        pair->browser()->addRenderCopy();
+        pair->browser()->addRenderCopy(raePosition, nCopies);
     }
 }
 /**

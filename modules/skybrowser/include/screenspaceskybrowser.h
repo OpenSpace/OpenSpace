@@ -61,7 +61,7 @@ public:
     void updateTextureResolution();
 
     // Copies rendered
-    void addRenderCopy();
+    void addRenderCopy(const glm::vec3& raePosition, int nCopies);
     void removeRenderCopy();
 
 private:

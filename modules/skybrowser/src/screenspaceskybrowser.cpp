@@ -178,18 +178,24 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     _objectSize = glm::ivec3(_texture->dimensions());
 }
 
-void ScreenSpaceSkyBrowser::addRenderCopy() {
-    openspace::properties::Property::PropertyInfo info = RenderCopyInfo;
-    info.identifier += _renderCopies.size();
-    _renderCopies.push_back(
-        std::make_unique<properties::Vec3Property>(
-            info, 
-            glm::vec3(2.1f, 0.f, 0.f),
-            glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
-            glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
-        )
-    );
-    addProperty(_renderCopies.back().get());
+void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCopies) {
+    int start = _renderCopies.size();
+    for (int i = 0; i < nCopies; i++) {
+        openspace::properties::Property::PropertyInfo info = RenderCopyInfo;
+        float azimuth = i * glm::two_pi<float>() / nCopies;
+        glm::vec3 position = raePosition + glm::vec3(0.f, azimuth, 0.f);
+        std::string id = "Rendercopy" + std::to_string(start + i);
+        info.identifier = id.c_str();
+        _renderCopies.push_back(
+            std::make_unique<properties::Vec3Property>(
+                info, 
+                position,
+                glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
+                glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
+            )
+        );
+        addProperty(_renderCopies.back().get());
+    }
 }
 
 void ScreenSpaceSkyBrowser::removeRenderCopy() {
