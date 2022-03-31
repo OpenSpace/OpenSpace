@@ -39,8 +39,6 @@ class ScreenSpaceSkyBrowser;
 
 class RenderableSkyTarget : public RenderablePlane {
 public:
-    constexpr static const float DeltaTimeThreshold = 0.03f; 
-
     explicit RenderableSkyTarget(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;

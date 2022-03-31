@@ -40,8 +40,6 @@ class SceneGraphNode;
 
 class TargetBrowserPair {
 public:
-    constexpr static const float DeltaTimeThreshold = 0.03f;
-
     TargetBrowserPair(SceneGraphNode* target, ScreenSpaceSkyBrowser* browser);
     TargetBrowserPair& operator=(TargetBrowserPair other);
 
@@ -51,10 +49,10 @@ public:
     void removeHighlight(const glm::ivec3& color); 
     void highlight(const glm::ivec3& color);
     // Animation
-    void startAnimation(glm::dvec3 coordsEnd, double fovEnd, bool shouldLockAfter = true);
-    void incrementallyAnimateToCoordinate(double deltaTime);
+    void startAnimation(glm::dvec3 coordsEnd, double fovEnd);
+    void incrementallyAnimateToCoordinate();
     void startFading(float goal, float fadeTime);
-    void incrementallyFade(float deltaTime);
+    void incrementallyFade();
     // Mouse interaction
     bool checkMouseIntersection(const glm::vec2& mousePosition);
     glm::vec2 selectedScreenSpacePosition() const;
@@ -69,7 +67,6 @@ public:
 
     // Target
     void centerTargetOnScreen();
-    void incrementallyAnimateTarget(float deltaTime);
 
     bool hasFinishedFading() const;
     bool isFacingCamera() const;
@@ -125,13 +122,12 @@ private:
     SceneGraphNode* _targetNode = nullptr;
 
     // Animation
-    glm::dvec3 _animationStart = glm::dvec3(0);
-    glm::dvec3 _animationEnd = glm::dvec3(0);
-    bool _shouldLockAfterAnimation = false;
-    bool _targetIsAnimated = false;
-
-    skybrowser::Animation _fadeBrowser = skybrowser::Animation(0.f, 0.f, 0.0);
-    skybrowser::Animation _fadeTarget = skybrowser::Animation(0.f, 0.f, 0.0);
+    skybrowser::Animation<float> _fadeBrowser = skybrowser::Animation(0.f, 0.f, 0.0);
+    skybrowser::Animation<float> _fadeTarget = skybrowser::Animation(0.f, 0.f, 0.0);
+    skybrowser::Animation<double> _fovAnimation = skybrowser::Animation(0.0, 0.0, 0.0);
+    skybrowser::Animation<glm::dvec3> _moveTarget =
+        skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
+    bool _targetIsAnimating = false;
     
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     glm::ivec3 _borderColor = glm::ivec3(255);

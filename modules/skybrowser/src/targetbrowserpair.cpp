@@ -30,6 +30,7 @@
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/camera/camera.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -131,7 +132,7 @@ void TargetBrowserPair::translateSelected(const glm::vec2& start,
 }
 
 void TargetBrowserPair::synchronizeAim() {
-    if (!_targetIsAnimated) {
+    if (!_moveTarget.isAnimating()) {
         // To remove the lag effect when moving the camera while having a locked
         // target, send the locked coordinates to wwt
         glm::dvec2 aim = targetDirectionEquatorial();
@@ -230,7 +231,7 @@ void TargetBrowserPair::selectImage(const ImageData& image, int i) {
         // Animate the target to the image coordinate position
         // unlock();
         glm::dvec3 galactic = skybrowser::equatorialToGalactic(image.equatorialCartesian);
-        startAnimation(galactic * skybrowser::CelestialSphereRadius, image.fov, true);
+        startAnimation(galactic * skybrowser::CelestialSphereRadius, image.fov);
     }
 }
 
@@ -290,70 +291,46 @@ void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
     _browser->setVerticalFovWithScroll(scroll);
 }
 
-void TargetBrowserPair::incrementallyAnimateToCoordinate(double deltaTime) {
+void TargetBrowserPair::incrementallyAnimateToCoordinate() {
     // Animate the target before the field of view starts to animate
-    if (_targetIsAnimated) {
-        incrementallyAnimateTarget(static_cast<float>(deltaTime));
+    if (_moveTarget.isAnimating()) {
+        aimTargetGalactic(_moveTarget.getNewValue());
     }
-    else if (_browser->isAnimated()) {
-        _browser->incrementallyAnimateToFov(static_cast<float>(deltaTime));
+    else if (!_moveTarget.isAnimating() && _targetIsAnimating) {
+        // Set the finished position
+        aimTargetGalactic(_moveTarget.getNewValue());
+        _fovAnimation.start();
+        _targetIsAnimating = false;
+    }
+    if (_fovAnimation.isAnimating()) {
+        _browser->setVerticalFov(_fovAnimation.getNewValue());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
 
-void TargetBrowserPair::startFading(float goal, float fadeTime)
-{
+void TargetBrowserPair::startFading(float goal, float fadeTime) {
     _fadeTarget = skybrowser::Animation(_targetRenderable->opacity(), goal, fadeTime);
     _fadeBrowser = skybrowser::Animation(_browser->opacity(), goal, fadeTime);
     _fadeTarget.start();
     _fadeBrowser.start();
 }
 
-void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd, 
-                            bool shouldLockAfter)
-{
-    _browser->startFovAnimation(fovEnd);
+void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd) {
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    double fovSpeed = module->browserAnimationSpeed();
+    // The speed is given degrees /sec
+    double fovTime = abs(_browser->verticalFov() - fovEnd) / fovSpeed;
+    // Fov animation
+    _fovAnimation = skybrowser::Animation(_browser->verticalFov(), fovEnd, fovTime);
 
     // Target animation
-    _animationStart = glm::normalize(_targetNode->worldPosition()) * 
+    glm::dvec3 start = glm::normalize(_targetNode->worldPosition()) * 
         skybrowser::CelestialSphereRadius;
-    _animationEnd = galacticCoords;
-    _shouldLockAfterAnimation = shouldLockAfter;
-    _targetIsAnimated = true;
-}
-
-void TargetBrowserPair::incrementallyAnimateTarget(float deltaTime) {
-    // At fps that are too low, the animation stops working. Just place target instead
-    bool fpsTooLow = deltaTime > DeltaTimeThreshold;
-    // Find smallest angle between the two vectors
-    double smallestAngle = skybrowser::angleBetweenVectors(
-        glm::normalize(_animationStart),
-        glm::normalize(_animationEnd)
-    );
-    bool hasArrived = smallestAngle < _targetRenderable->stopAnimationThreshold();
-
-    // Only keep animating when target is not at goal position
-    if (!hasArrived && !fpsTooLow) {
-        glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
-            glm::normalize(_animationStart),
-            glm::normalize(_animationEnd),
-            deltaTime,
-            _targetRenderable->animationSpeed()
-        );
-
-        // Rotate target direction
-        glm::dvec3 newPos = glm::dvec3(rotMat * glm::dvec4(_animationStart, 1.0));
-
-        aimTargetGalactic(newPos);
-
-        // Update position
-        _animationStart = newPos;
-    }
-    else {
-        // Set the exact target position 
-        aimTargetGalactic(_animationEnd);
-        _targetIsAnimated = false;
-    }
+    double targetSpeed = module->targetAnimationSpeed();
+    double angle = skybrowser::angleBetweenVectors(start, galacticCoords);
+    _moveTarget = skybrowser::Animation(start, galacticCoords, angle / targetSpeed);
+    _moveTarget.start();
+    _targetIsAnimating = true;
 }
 
 void TargetBrowserPair::centerTargetOnScreen() {
@@ -361,11 +338,11 @@ void TargetBrowserPair::centerTargetOnScreen() {
     glm::dvec3 viewDirection = skybrowser::cameraDirectionGalactic();
     // Keep the current fov
     float currentFov = verticalFov();
-    startAnimation(viewDirection, currentFov, false);
+    startAnimation(viewDirection, currentFov);
 }
 
 bool TargetBrowserPair::hasFinishedFading() const {
-    return _fadeBrowser.isFinished() && _fadeTarget.isFinished();
+    return !_fadeBrowser.isAnimating() && !_fadeTarget.isAnimating();
 }
 
 bool TargetBrowserPair::isFacingCamera() const {
@@ -384,12 +361,12 @@ ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
     return _browser;
 }
 
-void TargetBrowserPair::incrementallyFade(float deltaTime)
+void TargetBrowserPair::incrementallyFade()
 {
-    if (!_fadeBrowser.isFinished()) {
+    if (_fadeBrowser.isAnimating()) {
         _browser->setOpacity(_fadeBrowser.getNewValue());
     }
-    if (!_fadeTarget.isFinished()) {
+    if (_fadeTarget.isAnimating()) {
         _targetRenderable->setOpacity(_fadeTarget.getNewValue());
     }
 }

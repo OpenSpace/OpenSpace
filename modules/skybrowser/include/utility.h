@@ -171,12 +171,12 @@ double angleBetweenVectors(const glm::dvec3& start, const glm::dvec3& end);
  * multiple times in order to animate.
  * \param start Cartesian vector
  * \param end Cartesian vector
- * \param deltaTime The time between the current frame and the last
- * \param speedFactor Factor that determines how fast the animation will be
+ * \param percentage Percentage of the angle between the vectors that the matrix should
+ * rotate
  * \return 4x4 matrix for incremental rotation animation of a vector
  */
 glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3& end, 
-    double deltaTime, double speedFactor = 1.0);  
+    double percentage);
 /**
  * Returns the size in meters that for example a plane would need to have in order to 
  * display a specified field of view. 
@@ -186,17 +186,53 @@ glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3&
  */
 double sizeFromFov(double fov, glm::dvec3 worldPosition);
 
+template<typename T> 
 class Animation {
 public:
-    Animation(float start, float goal, double time);
-    void start();
-    bool isFinished() const;
-    float getNewValue();
+    Animation(T start, T goal, double time)
+        : _start(start), _goal(goal)
+    {
+        _animationTime = std::chrono::milliseconds(static_cast<int>(time * 1000));
+    }
+    void start() {
+        _isStarted = true;
+        _startTime = std::chrono::system_clock::now();
+    }
+    void stop() {
+        _isStarted = false;
+    }
+    bool isAnimating() const {
+        bool timeLeft = timeSpent().count() < _animationTime.count() ? true : false;
+        return timeLeft && _isStarted;
+    }
+    T getNewValue();
+    glm::dmat4 getRotationMatrix();
+
 private:
+    std::chrono::duration<double, std::milli> timeSpent() const {
+        using namespace std::chrono;
+        system_clock::time_point now = system_clock::now();
+        std::chrono::duration<double, std::milli> timeSpent = now - _startTime;
+        return timeSpent;
+    }
+    double percentageSpent() const {
+        return timeSpent().count() / _animationTime.count();
+    }
+
+    double easeOutExpo(double x) {
+        double epsilon = std::numeric_limits<double>::epsilon();
+        return std::abs(x - 1.0) < epsilon ? 1.0 : 1.0 - pow(2.0, -10.0 * x);
+    }
+
+    double easeInOutSine(double x) {
+        return -(cos(glm::pi<double>() * x) - 1.0) / 2.0;
+    }
+
     // Animation
-    bool _isAnimating = false;
-    float _goal = 1.0f;
-    float _start = 1.0f;
+    bool _isStarted = false;
+    double _lastPercentage = 0;
+    T _goal;
+    T _start;
     std::chrono::milliseconds _animationTime = std::chrono::milliseconds(2000);
     std::chrono::system_clock::time_point _startTime;
 };

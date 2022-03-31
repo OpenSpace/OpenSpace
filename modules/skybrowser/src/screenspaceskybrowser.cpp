@@ -39,13 +39,6 @@
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
 
-    constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
-        "AnimationSpeed",
-        "Field Of View Animation Speed",
-        "A factor that determines the speed of the animation of the field of view. A "
-        "higher number for the factor means a faster speed."
-    };
-
     constexpr const openspace::properties::Property::PropertyInfo TextureQualityInfo = {
         "TextureQuality",
         "Quality of Texture",
@@ -69,9 +62,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
-        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
-        std::optional<double> animationSpeed;
-
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
 
@@ -107,7 +97,6 @@ namespace openspace {
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , WwtCommunicator(dictionary)
-    , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
     , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     , _renderOnlyOnMaster(RenderOnMasterInfo, false)
 {
@@ -116,7 +105,6 @@ namespace openspace {
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textureQuality = p.textureQuality.value_or(_textureQuality);
-    _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
     _renderOnlyOnMaster = p.renderOnlyOnMaster.value_or(_renderOnlyOnMaster);
 
     addProperty(_url);
@@ -214,29 +202,6 @@ bool ScreenSpaceSkyBrowser::deinitializeGL() {
     WwtCommunicator::deinitializeGL();
        
     return true;
-}
-
-bool ScreenSpaceSkyBrowser::isAnimated() const{
-    return _isFovAnimated;
-}
-
-void ScreenSpaceSkyBrowser::startFovAnimation(double fov) {
-    _isFovAnimated = true;
-    _endVfov = fov;
-}
-
-void ScreenSpaceSkyBrowser::incrementallyAnimateToFov(float deltaTime) {
-    // If distance too large, keep animating. Else, stop animation
-    double diff = _endVfov - verticalFov();
-    bool shouldAnimate = abs(diff) > FovThreshold;
-
-    if (shouldAnimate) {
-        double delta = _animationSpeed * (diff * static_cast<double>(deltaTime));
-        _verticalFov = std::clamp(_verticalFov + delta, 0.0, 70.0);
-    }
-    else {
-        _isFovAnimated = false;
-    }
 }
 
 void ScreenSpaceSkyBrowser::render() {

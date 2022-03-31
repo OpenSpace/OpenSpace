@@ -190,13 +190,13 @@ double angleBetweenVectors(const glm::dvec3& start, const glm::dvec3& end) {
 }
 
 glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3& end, 
-                                      double deltaTime, double speedFactor) 
+                                      double percentage) 
 {        
     double smallestAngle = angleBetweenVectors(start, end);
     // Calculate rotation this frame
-    double rotationAngle = smallestAngle * deltaTime * speedFactor;
+    double rotationAngle = smallestAngle * percentage;
 
-    // Create the rotation matrix for local camera space
+    // Create the rotation matrix
     glm::dvec3 rotationAxis = glm::normalize(glm::cross(start, end));
     return glm::rotate(rotationAngle, rotationAxis);
 }
@@ -212,35 +212,55 @@ double sizeFromFov(double fov, glm::dvec3 worldPosition) {
     return opposite;
 }
 
-Animation::Animation(float start, float goal, double time)
-    : _start(start), _goal(goal)
-{
-    _animationTime = std::chrono::milliseconds(static_cast<int>(time * 1000));
-}
-
-void Animation::start()
-{
-    _isAnimating = true;
-    _startTime = std::chrono::system_clock::now();
-}
-
-bool Animation::isFinished() const
-{
-    return !_isAnimating;
-}
-
-float Animation::getNewValue() {
-    using namespace std::chrono;
-    system_clock::time_point now = system_clock::now();
-    std::chrono::duration<double, std::milli> timeSpent = now - _startTime;
-    if (timeSpent.count() > _animationTime.count()) {
-        _isAnimating = false;
+float Animation<float>::getNewValue() {
+    if (!isAnimating()) {
         return _goal;
     }
     else {
-        float percentage = timeSpent / _animationTime;
-        return _goal > _start ? _goal * percentage : _start * (1.f - percentage);
+        float percentage = static_cast<float>(percentageSpent());
+        float diff = (_goal - _start) * easeOutExpo(percentage);
+        return _start + diff;
     }
+}
+
+double Animation<double>::getNewValue() {
+    if (!isAnimating()) {
+        return _goal;
+    }
+    else {
+        double percentage = percentageSpent();
+        double diff = (_goal - _start) * easeOutExpo(percentage);
+        return _start + diff;
+    }
+}
+
+glm::dmat4 Animation<glm::dvec3>::getRotationMatrix() {
+    if (!isAnimating()) {
+        return glm::dmat4(1.0);
+    }
+    double percentage = easeInOutSine(percentageSpent());
+    double increment = percentage - _lastPercentage;
+    _lastPercentage = percentage;
+
+    glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
+        glm::normalize(_start),
+        glm::normalize(_goal),
+        increment
+    );
+    return rotMat;
+}
+
+glm::dvec3 Animation<glm::dvec3>::getNewValue() {
+    if (!isAnimating()) {
+        return _goal;
+    }
+    glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
+        glm::normalize(_start),
+        glm::normalize(_goal),
+        easeOutExpo(percentageSpent())
+    );
+    // Rotate direction
+    return glm::dvec3(rotMat * glm::dvec4(_start, 1.0));;
 }
 } // namespace openspace
 

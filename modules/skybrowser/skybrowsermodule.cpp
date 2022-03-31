@@ -60,6 +60,18 @@ namespace {
         "coordinate which is outside of the field of view."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo TargetSpeedInfo = {
+        "TargetAnimationSpeed",
+        "Target Animation Speed",
+        "This determines the speed of the animation of the sky target."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
+        "BrowserAnimationSpeed",
+        "Field Of View Animation Speed",
+        "This determines the speed of the animation of the field of view in the browser."
+    };
+
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(AllowInteractionInfo.description)]]
         std::optional<bool> allowMouseInteraction;
@@ -69,6 +81,12 @@ namespace {
 
         // [[codegen::verbatim(CameraRotSpeedInfo.description)]]
         std::optional<double> cameraRotSpeed;
+
+        // [[codegen::verbatim(TargetSpeedInfo.description)]]
+        std::optional<double> targetSpeed;
+
+        // [[codegen::verbatim(BrowserSpeedInfo.description)]]
+        std::optional<double> browserSpeed;
     };
     
     #include "skybrowsermodule_codegen.cpp"
@@ -79,11 +97,15 @@ SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
     , _allowMouseInteraction(AllowInteractionInfo, true)
     , _allowCameraRotation(AllowRotationInfo, true)
-    , _cameraRotationSpeed(CameraRotSpeedInfo, 1.f, 0.1f, 10.f)
+    , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
+    , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
+    , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
 {
     addProperty(_allowMouseInteraction);
     addProperty(_allowCameraRotation);
     addProperty(_cameraRotationSpeed);
+    addProperty(_targetAnimationSpeed);
+    addProperty(_browserAnimationSpeed);
 
     // Set callback functions
     global::callback::mouseButton->emplace_back(
@@ -93,7 +115,7 @@ SkyBrowserModule::SkyBrowserModule()
             }
 
             if (action == MouseAction::Press) {      
-                _isCameraRotating = false;
+                _cameraRotation.stop();
                 if (_mouseOnPair) {
                     handleMouseClick(button);
                     return true;
@@ -190,10 +212,9 @@ SkyBrowserModule::SkyBrowserModule()
                 }
             );
         }
-        double deltaTime = global::windowDelegate->deltaTime();
         // Fade pairs if the camera moved in or out the solar system
         if (_isFading) {
-            incrementallyFadeBrowserTargets(_goal, deltaTime);
+            incrementallyFadeBrowserTargets(_goal);
         }
         if (_isCameraInSolarSystem) {
             std::for_each(
@@ -203,10 +224,10 @@ SkyBrowserModule::SkyBrowserModule()
                     pair->synchronizeAim();
                 }
             );
-            incrementallyAnimateTargets(deltaTime);
+            incrementallyAnimateTargets();
         }
-        if (_isCameraRotating && _allowCameraRotation) {
-            incrementallyRotateCamera(deltaTime, _cameraRotationSpeed);
+        if (_cameraRotation.isAnimating() && _allowCameraRotation) {
+            incrementallyRotateCamera();
         }
     }); 
 } 
@@ -410,45 +431,29 @@ TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) {
 
 void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
     // Save coordinates to rotate to in galactic world coordinates
-    _endAnimation = endAnimation;
-    _startAnimation = skybrowser::cameraDirectionGalactic();
-    _isCameraRotating = true;
-}
+    glm::dvec3 start = skybrowser::cameraDirectionGalactic();
+    double angle = skybrowser::angleBetweenVectors(start, endAnimation);
+    double time = angle / _cameraRotationSpeed;
+    _cameraRotation = skybrowser::Animation(start, endAnimation, time);
+    _cameraRotation.start();
+}   
 
-void SkyBrowserModule::incrementallyRotateCamera(double deltaTime, double animationSpeed) {
-
-    // Find smallest angle between the two vectors
-    double angle = skybrowser::angleBetweenVectors(_startAnimation, _endAnimation);
-
-    if(angle > StopAnimationThreshold) {
-        
-        glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
-            _startAnimation, 
-            _endAnimation, 
-            deltaTime, 
-            animationSpeed
-        );
-
+void SkyBrowserModule::incrementallyRotateCamera() {
+    if(_cameraRotation.isAnimating()) {
+        glm::dmat4 rotMat = _cameraRotation.getRotationMatrix();
         // Rotate
         global::navigationHandler->camera()->rotate(glm::quat_cast(rotMat));
-
-        // Update camera direction
-        _startAnimation = skybrowser::cameraDirectionGalactic();
-    }
-    else {
-        _isCameraRotating = false;
     }
 }
 
-void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, 
-                                                       float deltaTime) 
+void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal) 
 {    
      bool isAllFinished = true;
      for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
          if (pair->isEnabled()) {
              bool isPairFinished = pair->hasFinishedFading();
              if (!isPairFinished) {
-                 pair->incrementallyFade(deltaTime);
+                 pair->incrementallyFade();
              }
              else if (isPairFinished && goal == Transparency::Transparent) {
                  pair->setEnabled(false);
@@ -465,12 +470,20 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal,
      }
 }
 
-void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime) {
+void SkyBrowserModule::incrementallyAnimateTargets() {
     for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
         if (pair->isEnabled()) {
-            pair->incrementallyAnimateToCoordinate(deltaTime);
+            pair->incrementallyAnimateToCoordinate();
         }
     }
+}
+
+double SkyBrowserModule::targetAnimationSpeed() const {
+    return _targetAnimationSpeed;
+}
+
+double SkyBrowserModule::browserAnimationSpeed() const {
+    return _browserAnimationSpeed;
 }
 
 void SkyBrowserModule::setSelectedBrowser(const std::string& id) {

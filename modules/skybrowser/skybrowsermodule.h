@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/skybrowser/include/utility.h>
 
+#include <openspace/util/openspacemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/mouse.h>
@@ -56,8 +57,6 @@ enum class MouseInteraction {
 class SkyBrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SkyBrowser";
-    constexpr static const double StopAnimationThreshold = 0.0005;
-    constexpr static const double FadingTime = 2.0;
     const double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
 
     SkyBrowserModule();
@@ -77,9 +76,11 @@ public:
     // Rotation, animation, placement
     void lookAtTarget(const std::string& id);
     void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
-    void incrementallyRotateCamera(double deltaTime, double animationSpeed);
-    void incrementallyFadeBrowserTargets(Transparency goal, float deltaTime);
-    void incrementallyAnimateTargets(double deltaTime);
+    void incrementallyRotateCamera();
+    void incrementallyFadeBrowserTargets(Transparency goal);
+    void incrementallyAnimateTargets();
+    double targetAnimationSpeed() const;
+    double browserAnimationSpeed() const;
    
     bool isCameraInSolarSystem() const;
     bool isSelectedPairFacingCamera();
@@ -110,6 +111,8 @@ private:
     properties::BoolProperty _allowMouseInteraction;
     properties::BoolProperty _allowCameraRotation;
     properties::DoubleProperty _cameraRotationSpeed;
+    properties::DoubleProperty _targetAnimationSpeed;
+    properties::DoubleProperty _browserAnimationSpeed;
     glm::ivec3 _highlightAddition = glm::ivec3(35); // Highlight object when mouse hovers
 
     // The browsers and targets
@@ -122,9 +125,8 @@ private:
     Transparency _goal = Transparency::Opaque;
     
     // Flags
-    bool _isCameraInSolarSystem{ true }; // Visualization modes
-    bool _isFading{ false };
-    bool _isCameraRotating = false;
+    bool _isCameraInSolarSystem = true; // Visualization modes
+    bool _isFading = false;
 
     // Mouse interaction
     MouseInteraction _interactionMode;
@@ -134,8 +136,8 @@ private:
     glm::dvec3 _startTargetPosition;
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
-    glm::dvec3 _startAnimation;
-    glm::dvec3 _endAnimation;
+    skybrowser::Animation<glm::dvec3> _cameraRotation = 
+        skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
     
     // Data handler for the image collections
     std::unique_ptr<WwtDataHandler> _dataHandler;    

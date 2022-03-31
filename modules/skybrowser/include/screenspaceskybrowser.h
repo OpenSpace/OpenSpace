@@ -38,8 +38,6 @@ namespace openspace {
 class ScreenSpaceSkyBrowser : public ScreenSpaceRenderable, public WwtCommunicator
 {
 public:
-    constexpr static const double FovThreshold = 0.001;
-        
     explicit ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceSkyBrowser();
 
@@ -48,11 +46,6 @@ public:
     glm::mat4 scaleMatrix() override;
     void render() override;
     void update() override;
-
-    // Animation
-    bool isAnimated() const;
-    void startFovAnimation(double fov);
-    void incrementallyAnimateToFov(float deltaTime);
 
     float opacity() const;
     glm::vec2 size() const;
@@ -72,7 +65,6 @@ public:
     void removeRenderCopy();
 
 private:
-    properties::DoubleProperty _animationSpeed;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _renderOnlyOnMaster;
     std::vector<std::unique_ptr<properties::Vec3Property>> _renderCopies;
@@ -81,13 +73,10 @@ private:
 
     // Flags
     bool _isSyncedWithWwt = false;
-    bool _isFovAnimated = false;
     bool _textureDimensionsIsDirty = false;
     bool _sizeIsDirty = false;
 
     glm::vec2 _size = glm::vec2(1.f, 0.8f);
-    // Animation of fieldOfView
-    double _endVfov = 0.0;
 };
 } // namespace openspace
 
