@@ -1,9 +1,16 @@
 local sampleInterval = 24*60*60
 
-local horizons = asset.syncedResource({
-  Name = "Voyager & Pioneer horizons",
+local voyager_horizons = asset.syncedResource({
+  Name = "Voyager horizons",
   Type = "HttpSynchronization",
-  Identifier = "voyager_pioneer_horizons",
+  Identifier = "voyager_horizons",
+  Version = 1
+})
+
+local pioneer_horizons = asset.syncedResource({
+  Name = "Pioneer horizons",
+  Type = "HttpSynchronization",
+  Identifier = "pioneer_horizons",
   Version = 1
 })
 
@@ -15,7 +22,7 @@ local voyager1 = {
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "voyager_1.hrz"
+      HorizonsTextFile = voyager_horizons .. "voyager_1.hrz"
       -- Target: Voyager 1 (spacecraft) (-31)
       -- Observer: SSB
       -- Start time: 1977-Sep-06 00:00:00 (first data point)
@@ -45,7 +52,7 @@ local voyager2 = {
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "voyager_2.hrz"
+      HorizonsTextFile = voyager_horizons .. "voyager_2.hrz"
       -- Target: Voyager 2 (spacecraft) (-32)
       -- Observer: SSB
       -- Start time: 1977-Aug-21 00:00:00 (first data point)
@@ -75,7 +82,7 @@ local pioneer10 = {
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "pioneer_10.hrz"
+      HorizonsTextFile = pioneer_horizons .. "pioneer_10.hrz"
       -- Target: Pioneer 10 (spacecraft) (-23)
       -- Observer: SSB
       -- Start time: 1972-Mar-04 00:00:00 (first data point)
@@ -105,7 +112,7 @@ local pioneer11 ={
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "pioneer_11.hrz"
+      HorizonsTextFile = pioneer_horizons .. "pioneer_11.hrz"
       -- Target: Pioneer 11 (spacecraft) (-24)
       -- Observer: SSB
       -- Start time: 1973-Apr-07 00:00:00 (first data point)
