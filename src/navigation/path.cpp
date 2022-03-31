@@ -33,6 +33,7 @@
 #include <openspace/navigation/pathcurves/avoidcollisioncurve.h>
 #include <openspace/navigation/pathcurves/zoomoutoverviewcurve.h>
 #include <openspace/navigation/pathnavigator.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/collisionhelper.h>
@@ -533,6 +534,34 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     return Waypoint(targetPos, targetRot, info.identifier);
 }
 
+void checkVisibilityAndShowMessage(const SceneGraphNode* node) {
+    auto isEnabled = [](const Renderable* r) {
+        std::any propertyValueAny = r->property("Enabled")->get();
+        return std::any_cast<bool>(propertyValueAny);
+    };
+
+    // Show some info related to the visiblity of the object
+    const Renderable* renderable = node->renderable();
+    if (!renderable) {
+        // Check if any of the children are visible, if it has children
+        bool foundVisible = false;
+        for (const SceneGraphNode* child : node->children()) {
+            const Renderable* cr = child->renderable();
+            if (cr && isEnabled(cr)) {
+                foundVisible = true;
+                break;
+            }
+        }
+
+        if (!foundVisible) {
+            LINFO("Creating path to a node without a renderable or visible child nodes");
+        }
+    }
+    else if (!isEnabled(renderable)) {
+        LINFO("Creating path to disabled object");
+    }
+}
+
 Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                               std::optional<Path::Type> forceType)
 {
@@ -605,6 +634,8 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
         LINFO("Already at the requested target");
         throw PathCurve::TooShortPathError("Path too short!");
     }
+
+    checkVisibilityAndShowMessage(waypointToAdd.node());
 
     try {
         return Path(startPoint, waypointToAdd, type, duration);

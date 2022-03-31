@@ -1,3 +1,4 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local models = asset.syncedResource({
@@ -29,20 +30,6 @@ local RotationMatrix = {
   -1, 0, 0,
   0, 0, -1,
   0, -1, 0
-}
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
 }
 
 local Voyager1 = {
@@ -79,7 +66,14 @@ local Voyager1Main = {
     Type = "RenderableModel",
     GeometryFile = models .. "voyager-main.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Voyager 1 Main",
@@ -94,7 +88,14 @@ local Voyager1Antenna = {
     Type = "RenderableModel",
     GeometryFile = models .. "voyager-antenna.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Voyager 1 Antenna",

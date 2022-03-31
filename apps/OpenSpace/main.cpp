@@ -1044,9 +1044,10 @@ int main(int argc, char* argv[]) {
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
+        std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
+    LDEBUG(fmt::format("Registering ${{BIN}} to {}", absPath("${BIN}")));
 
     //
     // Parse commandline arguments

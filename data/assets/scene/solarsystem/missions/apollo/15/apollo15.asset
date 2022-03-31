@@ -1,5 +1,5 @@
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 asset.require("spice/base")
 
 local models = asset.syncedResource({
@@ -18,22 +18,6 @@ local kernels = asset.require("scene/solarsystem/missions/apollo/15/kernels").ke
 --   Identifier = "apollo_models",
 --   Version = 1
 -- })
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sun_transforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
--- {
---   Identifier = "Camera",
---   Type = "CameraLightSource",
---   Intensity = 0.5,
---   Enabled = false
--- }
-}
-
 
 local Apollo15 = {
   Identifier = "Apollo15",
@@ -57,12 +41,7 @@ local Apollo15 = {
     GeometryFile = models .. "ApolloCSM.osmodel",
     ModelScale = 0.0001,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true

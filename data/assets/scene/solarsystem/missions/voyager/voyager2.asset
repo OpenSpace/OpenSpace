@@ -1,3 +1,4 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -35,20 +36,6 @@ local RotationMatrix = {
 }
 
 
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
-}
-
 local Voyager2 = {
   Identifier = "Voyager_2",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -83,7 +70,14 @@ local Voyager2Main = {
     Type = "RenderableModel",
     GeometryFile = models .. "voyager-main.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Voyager 2 Main",
@@ -98,7 +92,14 @@ local Voyager2Antenna = {
     Type = "RenderableModel",
     GeometryFile = models .. "voyager-antenna.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Voyager 2 Antenna",

@@ -1,4 +1,4 @@
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local descentKeyframes = asset.require("./lem_descent.asset")
@@ -68,12 +68,7 @@ local Apollo11Model = {
     Type = "RenderableModel",
     GeometryFile = models .. "Apollo_CSM_shrunk_rotated_xy_double_size.obj",
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      },
+      sun.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -197,12 +192,7 @@ local Apollo11LemDescentModel = {
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      },
+      sun.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -235,12 +225,7 @@ local Apollo11LemLandedModel = {
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      },
+      sun.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",

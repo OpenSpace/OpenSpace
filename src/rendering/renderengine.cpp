@@ -1070,28 +1070,9 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
     return {
         "",
         {
-            {
-                "addScreenSpaceRenderable",
-                &luascriptfunctions::addScreenSpaceRenderable,
-                "table",
-                "Will create a ScreenSpaceRenderable from a lua Table and add it in the "
-                "RenderEngine"
-            },
-            {
-                "removeScreenSpaceRenderable",
-                &luascriptfunctions::removeScreenSpaceRenderable,
-                "(string, table)",
-                "Given a ScreenSpaceRenderable name this script will remove it from the "
-                "renderengine. The parameter can also be a table in which case the "
-                "'Identifier' key is used to look up the name from the table"
-            },
-            {
-                "takeScreenshot",
-                &luascriptfunctions::takeScreenshot,
-                "",
-                "Take a screenshot and return the screenshot number. The screenshot will "
-                "be stored in the ${SCREENSHOTS} folder. "
-            }
+            codegen::lua::AddScreenSpaceRenderable,
+            codegen::lua::RemoveScreenSpaceRenderable,
+            codegen::lua::TakeScreenshot
         }
     };
 }
