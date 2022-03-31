@@ -53,7 +53,7 @@ public:
         // Defines the time each fieldline is visible.
         // Path lines are visible even outside birth- and death time.
         double birthTime;   // Number of seconds from simulation start to when fieldline starts
-        double deathTime = FLT_MAX;   // Number of seconds from simulation start to when fieldline ends
+        double deathTime;   // Number of seconds from simulation start to when fieldline ends
         // iterator to the point of reconnection on the PathLine
         size_t daysideReconnectionStart;
         //std::vector<glm::vec3>::const_iterator daysideReconnectionStart;
@@ -92,6 +92,7 @@ public:
     void setModel(fls::Model m);
     void setTriggerTime(double t);
     void setExtraQuantityNames(std::vector<std::string> names);
+    void setDeathTimes(double time1, double time2, size_t index);
 
     void addLinesToBeRendered();
     void addLine(std::vector<glm::vec3>& line);

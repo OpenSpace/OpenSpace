@@ -666,11 +666,28 @@ namespace openspace {
         updateVertexAlphaBuffer(currentTime);
     }
 
-
-    template <bool LerpLine>
-    void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser traverser,
-        GLint lineStart,
+    void RenderableMovingFieldlines::moveLine(const double dt,
+        const FieldlinesState::PathLine& pathLine,
+        PathLineTraverser& traverser, GLint lineStart,
         GLsizei nVertices) {
+        bool forward = std::signbit(dt) ? false : true;
+        traverser.forward = forward;
+        traverser.timeSinceInterpolation += dt;
+
+        // if passing next or previous key frame
+        bool passNext = forward ?
+            traverser.timeSinceInterpolation >
+            traverser.backKeyFrame->timeToNextKeyFrame :
+        traverser.timeSinceInterpolation < 0;
+
+        if (passNext) {
+            if (traverser.hasSwapped) {
+                //traverser.hasSwapped = false;
+            }
+
+            traverser.advanceKeyFrames();
+        }
+
         auto debugColor = [](FieldlinesState::Fieldline::Topology topology) {
             switch (topology)
             {
@@ -683,91 +700,22 @@ namespace openspace {
             }
         };
 
-        if (LerpLine) {
-            double normalizedTime = 0.f;
-            normalizedTime = traverser.timeSinceInterpolation /
-                traverser.timeInterpolationNominator;
+        
+        double normalizedTime = 0.0;
+        normalizedTime = traverser.timeSinceInterpolation /
+            traverser.timeInterpolationNominator;
 
-            for (size_t fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
-                glm::vec3 currentPosition =
-                    traverser.backKeyFrame->vertices[fieldlineVertex];
-                glm::vec3 nextPosition =
-                    traverser.frontKeyFrame->vertices[fieldlineVertex];
-                _renderedLines[fieldlineVertex + lineStart] =
-                    lerp(currentPosition, nextPosition, normalizedTime);
+        for (size_t fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
+            glm::vec3 currentPosition =
+                traverser.backKeyFrame->vertices[fieldlineVertex];
+            glm::vec3 nextPosition =
+                traverser.frontKeyFrame->vertices[fieldlineVertex];
+            _renderedLines[fieldlineVertex + lineStart] =
+                lerp(currentPosition, nextPosition, normalizedTime);
 
-                _debugTopologyColor[fieldlineVertex + lineStart] =
-                    glm::mix(debugColor(traverser.backKeyFrame->topology),
-                        debugColor(traverser.frontKeyFrame->topology), normalizedTime);
-            }
-        }
-        else {
-            for (size_t fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
-                // set the rendered lines vertex positions to be = 
-                // to current fieldlines vertex
-                _renderedLines[fieldlineVertex + lineStart] =
-                    traverser.backKeyFrame->vertices[fieldlineVertex];
-                _debugTopologyColor[fieldlineVertex + lineStart] =
-                    debugColor(traverser.backKeyFrame->topology);
-            }
-        }
-    }
-
-
-    void RenderableMovingFieldlines::moveLine(const double dt, const double currentTime,
-        const FieldlinesState::PathLine& pathLine,
-        PathLineTraverser& traverser, GLint lineStart,
-        GLsizei nVertices) {
-        bool forward = std::signbit(dt) ? false : true;
-        traverser.forward = forward;
-        traverser.timeSinceInterpolation += dt;
-
-        // if passing next or previous fieldline
-        bool passNext = forward ?
-            traverser.timeSinceInterpolation >
-            traverser.backKeyFrame->timeToNextKeyFrame :
-        traverser.timeSinceInterpolation < 0;
-
-        if (passNext) {
-
-            // Will be phased out in the future (isAtEnd)
-            // when birth and death times are correct
-            if (!traverser.isAtEnd()) {
-                traverser.advanceKeyFrames();
-            }
-            if (traverser.isAtEnd()) {
-                traverser.timeSinceInterpolation = forward ?
-                    traverser.backKeyFrame->timeToNextKeyFrame :
-                    0;
-            }
-            else {
-                if (traverser.backKeyFrame->topology !=
-                    traverser.frontKeyFrame->topology)
-                {
-                    std::cout << "Traverser swapped topology current time: " << currentTime << "\n";
-
-                    // Elon: 17 nov 2021. This advance call (plus set position call) makes
-                    // the transition between the two fieldlines not accurate time wise
-                    // since we are advancing its position prematurely
-                    //traverser.advanceCurrent();
-                    //setNewRenderedLinePosition<false>(traverser, lineStart, nVertices);
-                    setNewRenderedLinePosition<true>(traverser, lineStart, nVertices);
-                }
-                else {
-                    setNewRenderedLinePosition<true>(traverser, lineStart, nVertices);
-                }
-            }
-        }
-        else {
-            if (!traverser.isAtEnd()) {
-                setNewRenderedLinePosition<true>(traverser, lineStart, nVertices);
-            }
-            else {
-                setNewRenderedLinePosition<true>(traverser, lineStart, nVertices);
-                traverser.timeSinceInterpolation = forward ?
-                    traverser.backKeyFrame->timeToNextKeyFrame :
-                    0;
-            }
+            _debugTopologyColor[fieldlineVertex + lineStart] =
+                glm::mix(debugColor(traverser.backKeyFrame->topology),
+                    debugColor(traverser.frontKeyFrame->topology), normalizedTime);
         }
     }
 
@@ -797,9 +745,6 @@ namespace openspace {
             lineStart2 = _fieldlineState.lineStart()[lineIndex + 1];
             nVertices1 = _fieldlineState.lineCount()[lineIndex];
             nVertices2 = _fieldlineState.lineCount()[lineIndex + 1];
-            // changes dt so that fieldlines stop at birth/death time
-            bool isAfterBirth1 = currentTime >= allMatchingFieldlines[i].pathLines.first.birthTime;
-            bool movesBeforeBirth1 = newTime < allMatchingFieldlines[i].pathLines.first.birthTime;
 
             // Booleans to see if either of the traversers reached a topology change
             bool isNewTopology1 = _traversers[lineIndex].backKeyFrame->topology !=
@@ -819,70 +764,97 @@ namespace openspace {
                 else if (isNewTopology2 && !_traversers[lineIndex + 1].hasSwapped) {
                     _traversers[lineIndex].skipKeyFrame(FieldlinesState::Fieldline::Topology::Open);
                 }
-                // Find the index of reconnection and the vertex by using the currentKeyFrame
-                // vertex is used to compare when finding it on the keyframe at reconnection
-                const ptrdiff_t index1 = _traversers[lineIndex].backKeyFrame - _traversers[lineIndex].keyFrames.begin();
-                const ptrdiff_t index2 = _traversers[lineIndex + 1].backKeyFrame - _traversers[lineIndex + 1].keyFrames.begin();
 
-                // Iterator to the index of vertex on the keyframe,
-                // used to find the point on the pathline where the vertex swap should be
-                auto itToIndex1 = _traversers[lineIndex].backKeyFrame->vertices.begin() + 50;
-                auto itToIndex2 = _traversers[lineIndex + 1].backKeyFrame->vertices.begin() + 50;
+                /**********************************************************************\
+                |   Find the index of reconnection and the vertex by                   |
+                |   using the currentKeyFramevertex                                    |
+                |   to compare when finding it on the keyframe at reconnection         |
+                |   Might want to use this to find optimal swap point instead of       |
+                |   just splitting in the middle                                       |
+                \**********************************************************************/
+                //const ptrdiff_t index1 = _traversers[lineIndex].backKeyFrame - _traversers[lineIndex].keyFrames.begin();
+                //const ptrdiff_t index2 = _traversers[lineIndex + 1].backKeyFrame - _traversers[lineIndex + 1].keyFrames.begin();
 
-                if (!_traversers[lineIndex].hasSwapped && !_traversers[lineIndex + 1].hasSwapped) {
 
-                    //ptrdiff_t nVerticesToSwap = _traversers[lineIndex].currentKeyFrame->vertices.end() - itToIndex1;
-                    //ptrdiff_t nVerticesToSwapPoint = itToIndex1 - _traversers[lineIndex].currentKeyFrame->vertices.begin();
+                bool isMovingForward = _traversers[lineIndex].forward;
+                bool hasSwapped = _traversers[lineIndex].hasSwapped && _traversers[lineIndex + 1].hasSwapped;
 
-                    // error identified, renderedLines is an interpolation between keyframes
-                    // this will only be avaliable until we set the new rendered line position
-                    // should probably swap in the keyframes of the traversers
+                // Swaps vertices in key frames between each pair of traversers to get smooth topology changes
+                if (isMovingForward && !hasSwapped) {
+                    // Iterator to the index of vertex on the keyframe,
+                    // used to find the point on the pathline where the vertex swap should be
+                    auto itToIndex1 = _traversers[lineIndex].backKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
+                    auto itToIndex2 = _traversers[lineIndex + 1].backKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
+
                     std::swap_ranges(itToIndex1, _traversers[lineIndex].backKeyFrame->vertices.end(), itToIndex2);
                     _traversers[lineIndex].hasSwapped = true;
                     _traversers[lineIndex + 1].hasSwapped = true;
-                    setNewRenderedLinePosition<true>(_traversers[lineIndex], lineStart1, nVertices1);
-                    setNewRenderedLinePosition<true>(_traversers[lineIndex + 1], lineStart2, nVertices2);
+                }
+                // Swap back if moving backwards
+                else if (!isMovingForward && hasSwapped) {
+                    // Iterator to the index of vertex on the keyframe,
+                    // used to find the point on the pathline where the vertex swap should be
+                    auto itToIndex1 = _traversers[lineIndex].frontKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
+                    auto itToIndex2 = _traversers[lineIndex + 1].frontKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
+
+                    std::swap_ranges(itToIndex1, _traversers[lineIndex].frontKeyFrame->vertices.end(), itToIndex2);
+                    _traversers[lineIndex].hasSwapped = false;
+                    _traversers[lineIndex + 1].hasSwapped = false;
                 }
             }
 
-            //osäker på hur jag ska få ihop med dt och movelinepair
-            //idé: separata dt men är osäker
+            // individual delta time for each traverser
+            // since it might be modified depending on birth and death
+            double dt1 = dt;
+
+            // checks if it will with current dt move after birth
+            // changes dt so that fieldlines stop at birth/death time           
+            bool isAfterBirth1 = currentTime >= allMatchingFieldlines[i].pathLines.first.birthTime;
+            bool movesBeforeBirth1 = newTime < allMatchingFieldlines[i].pathLines.first.birthTime;
             if (isAfterBirth1 && movesBeforeBirth1) {
-                dt += allMatchingFieldlines[i].pathLines.first.birthTime - newTime;
+                dt1 += allMatchingFieldlines[i].pathLines.first.birthTime - newTime;
             }
 
+            // checks if it will with current dt move after death
+            // changes dt so that fieldlines stop at birth/death time
             bool isBeforeDeath1 = currentTime <= allMatchingFieldlines[i].pathLines.first.deathTime;
             bool movesAfterDeath1 = newTime > allMatchingFieldlines[i].pathLines.first.deathTime;
             if (isBeforeDeath1 && movesAfterDeath1) {
-                dt += allMatchingFieldlines[i].pathLines.first.deathTime - newTime;
+                dt1 += allMatchingFieldlines[i].pathLines.first.deathTime - newTime;
             }
 
             if (isAfterBirth1 && isBeforeDeath1) {
                 lineStart1 = _fieldlineState.lineStart()[lineIndex];
                 nVertices1 = _fieldlineState.lineCount()[lineIndex];
-                moveLine(dt, currentTime, allMatchingFieldlines[i].pathLines.first,
+                moveLine(dt1, allMatchingFieldlines[i].pathLines.first,
                     _traversers[lineIndex], lineStart1, nVertices1);
             }
 
+            // individual delta time for each traverser
+            // since it might be modified depending on birth and death
+            double dt2 = dt;
             ++lineIndex;
-            dt = currentTime - previousTime;
 
+            // checks if it will with current dt move after birth
+            // changes dt so that fieldlines stop at birth/death time
             bool isAfterBirth2 = currentTime >= allMatchingFieldlines[i].pathLines.second.birthTime;
             bool movesBeforeBirth2 = newTime < allMatchingFieldlines[i].pathLines.second.birthTime;
             if (isAfterBirth2 && movesBeforeBirth2) {
-                dt += allMatchingFieldlines[i].pathLines.second.birthTime - newTime;
+                dt2 += allMatchingFieldlines[i].pathLines.second.birthTime - newTime;
             }
 
+            // checks if it will with current dt move after death
+            // changes dt so that fieldlines stop at birth/death time
             bool isBeforeDeath2 = currentTime <= allMatchingFieldlines[i].pathLines.second.deathTime;
             bool movesAfterDeath2 = newTime > allMatchingFieldlines[i].pathLines.second.deathTime;
             if (isBeforeDeath2 && movesAfterDeath2) {
-                dt += allMatchingFieldlines[i].pathLines.second.deathTime - newTime;
+                dt2 += allMatchingFieldlines[i].pathLines.second.deathTime - newTime;
             }
 
             if (isAfterBirth2 && isBeforeDeath2) {
                 lineStart2 = _fieldlineState.lineStart()[lineIndex];
                 nVertices2 = _fieldlineState.lineCount()[lineIndex];
-                moveLine(dt, currentTime, allMatchingFieldlines[i].pathLines.second,
+                moveLine(dt2, allMatchingFieldlines[i].pathLines.second,
                     _traversers[lineIndex], lineStart2, nVertices2);
             }
             ++lineIndex;

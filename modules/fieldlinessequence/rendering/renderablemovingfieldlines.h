@@ -59,7 +59,7 @@ public:
         bool forward = true;
         // this will be true when the traverser moves to a topology change
         // signals that it is ready to swap with its partner
-        bool canSwap = false;
+        bool shouldSwap = false;
         bool hasSwapped = false;
         std::vector<FieldlinesState::Fieldline>::iterator backKeyFrame;
         std::vector<FieldlinesState::Fieldline>::iterator frontKeyFrame;
@@ -86,22 +86,7 @@ private:
     void updateVertexColorBuffer();
     void updateVertexAlphaBuffer(const double currentTime);
     void moveLines(const double currentTime, const double previousTime);
-    
-    template <bool LerpLine>
-    void setNewRenderedLinePosition(
-        PathLineTraverser traverser,
-        GLint lineStart, GLsizei nVertices);
-    
-    void moveLinePair(const double dt,
-        const double currentTime,
-        const FieldlinesState::PathLine& pathLine1,
-        const FieldlinesState::PathLine& pathLine2,
-        PathLineTraverser& traverser1,
-        PathLineTraverser& traverser2,
-        std::pair<GLint, GLint> lineStarts,
-        std::pair<GLsizei, GLsizei> nVertices);
-
-    void moveLine(const double dt, const double currentTime,
+    void moveLine(const double dt,
         const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
         GLsizei nVertices);
@@ -157,8 +142,8 @@ private:
     std::vector<glm::vec3> _seedPoints;
     // Extra variables such as rho, p or t
     std::vector<std::string> _extraVars;
-    size_t _nPointsOnPathLine = 200;
-    size_t _nPointsOnFieldlines = 100;
+    size_t _nPointsOnPathLine;
+    size_t _nPointsOnFieldlines;
     // which tracing vaiable to trace. 'b' for fieldline is default
     std::string _tracingVariable = "u_perp_b";
 

@@ -229,6 +229,8 @@ namespace openspace::fls {
             // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
 
             double birthTime = birthTimes[i];
+            double deathTime1 = birthTime; // accumulates inside the loop
+            double deathTime2 = birthTime;
 
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)
@@ -269,7 +271,12 @@ namespace openspace::fls {
 
                 state.addMatchingKeyFrames(std::move(keyFrame1), std::move(keyFrame2), 
                     timeToNextKeyFrame1, timeToNextKeyFrame2, i);
+
+                deathTime1 += timeToNextKeyFrame1;
+                deathTime2 += timeToNextKeyFrame2;
             }
+
+            state.setDeathTimes(-26000 + i*50, -26000 + i*50 , i);
         }
         bool isSuccessful = state.getAllMatchingFieldlines().size() > 0;
         return isSuccessful;

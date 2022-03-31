@@ -558,6 +558,11 @@ void FieldlinesState::setExtraQuantityNames(std::vector<std::string> names) {
     _extraQuantities.resize(_extraQuantityNames.size());
 }
 
+void FieldlinesState::setDeathTimes(double time1, double time2, size_t index) {
+    _allMatchingFieldlines[index].pathLines.first.deathTime = time1;
+    _allMatchingFieldlines[index].pathLines.second.deathTime = time2;
+}
+
 const std::vector<std::vector<float>>& FieldlinesState::extraQuantities() const {
     return _extraQuantities;
 }
