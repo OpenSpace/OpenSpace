@@ -62,20 +62,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemPropertyValue::Documentation() {
-    documentation::Documentation doc =
-        codegen::doc<Parameters>("base_dashboarditem_propertyvalue");
-
-    // @TODO cleanup
-    // Insert the parent's documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = DashboardTextItem::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_propertyvalue",
+        DashboardTextItem::Documentation()
     );
-
-    return doc;
 }
 
 DashboardItemPropertyValue::DashboardItemPropertyValue(

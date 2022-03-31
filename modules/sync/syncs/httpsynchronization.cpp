@@ -35,9 +35,6 @@ namespace {
 
     constexpr const char* TempSuffix = ".tmp";
 
-    constexpr const char* QueryKeyIdentifier = "identifier";
-    constexpr const char* QueryKeyFileVersion = "file_version";
-    constexpr const char* QueryKeyApplicationVersion = "application_version";
     constexpr const int ApplicationVersion = 1;
 
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
@@ -170,12 +167,11 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             continue;
         }
 
-        std::unique_ptr<HttpFileDownload> download =
-            std::make_unique<HttpFileDownload>(
-                line,
-                destination,
-                HttpFileDownload::Overwrite::Yes
-            );
+        auto download = std::make_unique<HttpFileDownload>(
+            line,
+            destination,
+            HttpFileDownload::Overwrite::Yes
+        );
         HttpFileDownload* dl = download.get();
         downloads.push_back(std::move(download));
 

@@ -38,11 +38,12 @@ namespace openspace {
 GalaxyModule::GalaxyModule() : OpenSpaceModule(Name) {}
 
 void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableGalaxy>("RenderableGalaxy");
 
-    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fRenderable, "No task factory existed");
     fTask->registerClass<MilkywayConversionTask>("MilkywayConversionTask");
     fTask->registerClass<MilkywayPointsConversionTask>("MilkywayPointsConversionTask");

@@ -35,7 +35,8 @@ namespace openspace {
 VisLabModule::VisLabModule() : OpenSpaceModule(Name) {}
 
 void VisLabModule::internalInitialize(const ghoul::Dictionary&) {
-    auto renderableFactory = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* renderableFactory =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(renderableFactory, "No renderable factory existed");
 
     renderableFactory->registerClass<RenderableDistanceLabel>("RenderableDistanceLabel");

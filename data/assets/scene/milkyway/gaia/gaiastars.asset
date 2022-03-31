@@ -1,3 +1,9 @@
+local fullOS = openspace.systemCapabilities.fullOperatingSystem()
+if string.find(fullOS, "Darwin") then
+  openspace.printWarning("Gaia module (RenderableGaiaStars) not supported on mac")
+  return
+end
+
 -- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
 local starsFolder = asset.syncedResource({
   Name = "Gaia Stars RV",

@@ -93,6 +93,10 @@ void SingleImageProvider::reset() {
     _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
 }
 
+int SingleImageProvider::minLevel() {
+    return 1;
+}
+
 int SingleImageProvider::maxLevel() {
     return 1337; // unlimited
 }

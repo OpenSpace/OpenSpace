@@ -40,7 +40,10 @@ if is_image_file(extension) then
     TexturePath = "]] .. filename .. [["
   });]] .. ReloadUIScript
 elseif extension == ".asset" then
-  return [[openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
+  return [[
+    if openspace.asset.isLoaded("]] .. filename .. [[") ~= true then
+      openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
+    end
     openspace.asset.add("]] .. filename .. [[");]] .. ReloadUIScript
 elseif extension == ".osrec" or extension == ".osrectxt" then
   return [[openspace.sessionRecording.startPlayback("]] .. filename .. [[")]]

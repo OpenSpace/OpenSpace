@@ -1,21 +1,7 @@
 local trail = asset.require("./trail")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 -- asset.require("./fov")
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
-}
 
 local models = asset.syncedResource({
   Name = "Mars 2020 Kernels",
@@ -53,7 +39,14 @@ local Body = {
     Type = "RenderableModel",
     Body = "MARS SCIENCE LABORATORY",
     GeometryFile = models .. "Perseverance.obj",
-    LightSources = LightSources,
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
     PerformShading = false,
     RotationVector = {65.940000,201.389999,263.980011}
   },

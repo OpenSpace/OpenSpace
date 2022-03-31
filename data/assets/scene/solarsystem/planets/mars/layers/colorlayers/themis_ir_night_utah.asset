@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "Themis_IR_Night_Utah",
   Name = "Themis IR Night [Utah]",
-  FilePath = asset.localResource("themis_ir_night_utah.wms"),
+  FilePath = asset.localResource("themis_ir_night_utah.vrt"),
   BlendMode = "Color",
   Description = [[This mosaic represents the Thermal Emission Imaging System (THEMIS)
     -nighttime infrared (IR) 100 meter/pixel mosaic (version 12) released in the
@@ -13,7 +13,7 @@ local layer = {
     latitude. <br><br> Reference: * Edwards, C.S., K. J. Nowicki, P. R. Christensen,
     J. Hill, N. Gorelick, and K. Murray (2011), Mosaicking of global planetary image
     datasets: 1. Techniques and data processing for Thermal Emission Imaging System
-    (THEMIS) multi‐spectral data, J. Geophys. Res., 116, E10008,
+    (THEMIS) multi-spectral data, J. Geophys. Res., 116, E10008,
     doi:10.1029/2010JE003755. http://dx.doi.org/10.1029/2010JE003755 (Description from
     URL).]],
 }

@@ -27,7 +27,9 @@
 
 #include <QMainWindow>
 
+#include "sgctedit/sgctedit.h"
 #include <openspace/scene/profile.h>
+#include <QApplication>
 #include <optional>
 
 namespace openspace::configuration { struct Configuration; }
@@ -82,6 +84,7 @@ private:
     void setBackgroundImage(const std::string& syncPath);
 
     void openProfileEditor(const std::string& profile, bool isUserProfile);
+    void openWindowEditor();
 
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);

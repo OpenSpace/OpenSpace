@@ -50,8 +50,8 @@ IswaModule::IswaModule() : OpenSpaceModule(Name) {
 }
 
 void IswaModule::internalInitialize(const ghoul::Dictionary&) {
-
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<TexturePlane>("TexturePlane");
@@ -59,7 +59,8 @@ void IswaModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<KameleonPlane>("KameleonPlane");
     fRenderable->registerClass<DataSphere>("DataSphere");
 
-    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
 
     fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");

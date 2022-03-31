@@ -31,6 +31,7 @@
 
 namespace openspace {
 
+struct CameraPose;
 class SceneGraphNode;
 
 /**
@@ -67,6 +68,7 @@ public:
     ~Camera() = default;
 
     // Mutators
+    void setPose(CameraPose pose);
     void setPositionVec3(glm::dvec3 pos);
     void setRotation(glm::dquat rotation);
     void setScaling(float scaling);

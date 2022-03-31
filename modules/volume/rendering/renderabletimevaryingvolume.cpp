@@ -142,7 +142,7 @@ namespace {
         std::optional<float> opacity;
 
         // [[codegen::verbatim(StepSizeInfo.description)]]
-        std::optional<double> stepSize;
+        std::optional<float> stepSize;
 
         // [[codegen::verbatim(GridTypeInfo.description)]]
         std::optional<std::string> gridType;

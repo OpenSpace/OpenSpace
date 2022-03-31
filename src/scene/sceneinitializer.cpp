@@ -65,7 +65,12 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
             );
         }
 
-        node->initialize();
+        try {
+            node->initialize();
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+        }
         std::lock_guard g(_mutex);
         _initializedNodes.push_back(node);
         _initializingNodes.erase(node);
@@ -100,6 +105,13 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
 }
 
 std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::takeInitializedNodes() {
+    // Some of the scene graph nodes might still be in the initialization queue and we
+    // should wait for those to finish or we end up in some half-initialized state since
+    // other parts of the application already know about their existence
+    while (_threadPool.hasOutstandingTasks()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
     std::lock_guard g(_mutex);
     std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
     return nodes;

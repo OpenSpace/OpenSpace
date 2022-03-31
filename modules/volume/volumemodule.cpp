@@ -40,11 +40,12 @@ using namespace volume;
 VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
 
 void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    auto rFactory = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* rFactory =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(rFactory, "No renderable factory existed");
     rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
 
-    auto tFactory = FactoryManager::ref().factory<Task>();
+    ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
     ghoul_assert(tFactory, "No task factory existed");
     tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
 }

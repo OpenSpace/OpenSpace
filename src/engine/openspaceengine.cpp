@@ -29,12 +29,12 @@
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
@@ -51,6 +51,7 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/profile.h>
@@ -72,11 +73,13 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
@@ -101,9 +104,19 @@
 namespace {
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     constexpr const char* _loggerCat = "OpenSpaceEngine";
+
+    constexpr std::string_view stringify(openspace::OpenSpaceEngine::Mode m) {
+        using Mode = openspace::OpenSpaceEngine::Mode;
+        switch (m) {
+            case Mode::UserControl: return "UserControl";
+            case Mode::CameraPath: return "CameraPath";
+            case Mode::SessionRecordingPlayback: return "SessionRecording";
+            default: throw ghoul::MissingCaseException();
+        }
+    }
 
     openspace::properties::Property::PropertyInfo PrintEventsInfo = {
         "PrintEvents",
@@ -121,42 +134,15 @@ OpenSpaceEngine::OpenSpaceEngine()
     : _printEvents(PrintEventsInfo, false)
 {
     FactoryManager::initialize();
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Renderable>>(),
-        "Renderable"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Translation>>(),
-        "Translation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
-        "Rotation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Scale>>(),
-        "Scale"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<TimeFrame>>(),
-        "TimeFrame"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<LightSource>>(),
-        "LightSource"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Task>>(),
-        "Task"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
-        "ResourceSynchronization"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<DashboardItem>>(),
-        "DashboardItem"
-    );
+    FactoryManager::ref().addFactory<Renderable>("Renderable");
+    FactoryManager::ref().addFactory<Translation>("Translation");
+    FactoryManager::ref().addFactory<Rotation>("Rotation");
+    FactoryManager::ref().addFactory<Scale>("Scale");
+    FactoryManager::ref().addFactory<TimeFrame>("TimeFrame");
+    FactoryManager::ref().addFactory<LightSource>("LightSource");
+    FactoryManager::ref().addFactory<Task>("Task");
+    FactoryManager::ref().addFactory<ResourceSynchronization>("ResourceSynchronization");
+    FactoryManager::ref().addFactory<DashboardItem>("DashboardItem");
 
     SpiceManager::initialize();
     TransformationManager::initialize();
@@ -197,6 +183,10 @@ void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     global::initialize();
+    // Initialize the general capabilities component
+    SysCap.addComponent(
+        std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
+    );
 
     _printEvents = global::configuration->isPrintingEvents;
 
@@ -420,11 +410,8 @@ void OpenSpaceEngine::initializeGL() {
     glbinding::Binding::initialize(global::windowDelegate->openGLProcedureAddress);
     //glbinding::Binding::useCurrentContext();
 
-    LDEBUG("Adding system components");
+    LDEBUG("Adding OpenGL capabilities components");
     // Detect and log OpenCL and OpenGL versions and available devices
-    SysCap.addComponent(
-        std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
-    );
     SysCap.addComponent(
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
@@ -757,7 +744,6 @@ void OpenSpaceEngine::loadAssets() {
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
 
-    bool loading = true;
     while (true) {
         _loadingScreen->render();
         _assetManager->update();
@@ -773,18 +759,18 @@ void OpenSpaceEngine::loadAssets() {
             if (sync->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
 
-                progressInfo.progress = [](const ResourceSynchronization* sync) {
-                    if (!sync->nTotalBytesIsKnown()) {
+                progressInfo.progress = [](const ResourceSynchronization* s) {
+                    if (!s->nTotalBytesIsKnown()) {
                         return 0.f;
                     }
-                    if (sync->nTotalBytes() == 0) {
+                    if (s->nTotalBytes() == 0) {
                         return 1.f;
                     }
                     return
-                        static_cast<float>(sync->nSynchronizedBytes()) /
-                        static_cast<float>(sync->nTotalBytes());
+                        static_cast<float>(s->nSynchronizedBytes()) /
+                        static_cast<float>(s->nTotalBytes());
                 }(sync);
-                
+
                 _loadingScreen->updateItem(
                     sync->identifier(),
                     sync->name(),
@@ -813,12 +799,11 @@ void OpenSpaceEngine::loadAssets() {
             allAssets.end(),
             [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
         );
-        
+
         if (finishedLoading) {
             break;
         }
 
-        loading = false;
         auto it = allSyncs.begin();
         while (it != allSyncs.end()) {
             if ((*it)->isSyncing()) {
@@ -841,7 +826,6 @@ void OpenSpaceEngine::loadAssets() {
                     progressInfo.totalSize = (*it)->nTotalBytes();
                 }
 
-                loading = true;
                 _loadingScreen->updateItem(
                     (*it)->identifier(),
                     (*it)->name(),
@@ -1200,6 +1184,17 @@ void OpenSpaceEngine::preSynchronization() {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
     }
+
+    // Handle callback(s) for change in engine mode
+    if (_modeLastFrame != _currentMode) {
+        using K = CallbackHandle;
+        using V = ModeChangeCallback;
+        for (const std::pair<K, V>& it : _modeChangeCallbacks) {
+            it.second();
+        }
+    }
+    _modeLastFrame = _currentMode;
+
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
@@ -1604,6 +1599,64 @@ void OpenSpaceEngine::toggleShutdownMode() {
     }
 }
 
+OpenSpaceEngine::Mode OpenSpaceEngine::currentMode() const {
+    return _currentMode;
+}
+
+bool OpenSpaceEngine::setMode(Mode newMode) {
+    if (_currentMode == Mode::CameraPath && newMode == Mode::CameraPath) {
+        // Special case: It is okay to trigger another camera path while one is
+        // already playing. So just return that we were successful
+        return true;
+    }
+    else if (newMode == _currentMode) {
+        LERROR("Cannot switch to the currectly active mode");
+        return false;
+    }
+    else if (_currentMode != Mode::UserControl && newMode != Mode::UserControl) {
+        LERROR(fmt::format(
+            "Cannot switch to mode '{}' when in '{}' mode",
+            stringify(newMode), stringify(_currentMode)
+        ));
+        return false;
+    }
+
+    LDEBUG(fmt::format("Mode: {}", stringify(newMode)));
+
+    _currentMode = newMode;
+    return true;
+}
+
+void OpenSpaceEngine::resetMode() {
+    _currentMode = Mode::UserControl;
+    LDEBUG(fmt::format("Reset engine mode to {}", stringify(_currentMode)));
+}
+
+OpenSpaceEngine::CallbackHandle OpenSpaceEngine::addModeChangeCallback(
+                                                                   ModeChangeCallback cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _modeChangeCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _modeChangeCallbacks.begin(),
+        _modeChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, ModeChangeCallback>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _modeChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _modeChangeCallbacks.erase(it);
+}
+
 void setCameraFromProfile(const Profile& p) {
     if (!p.camera.has_value()) {
         throw ghoul::RuntimeError("No 'camera' entry exists in the startup profile");
@@ -1748,80 +1801,14 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     return {
         "",
         {
-            {
-                "toggleShutdown",
-                &luascriptfunctions::toggleShutdown,
-                "",
-                "Toggles the shutdown mode that will close the application after the "
-                "count down timer is reached"
-            },
-            {
-                "writeDocumentation",
-                &luascriptfunctions::writeDocumentation,
-                "",
-                "Writes out documentation files"
-            },
-            {
-                "downloadFile",
-                &luascriptfunctions::downloadFile,
-                "",
-                "Downloads a file from Lua scope"
-            },
-            {
-                "addVirtualProperty",
-                &luascriptfunctions::addVirtualProperty,
-                "type, name, identifier,"
-                "[description, value, minimumValue, maximumValue]",
-                "Adds a virtual property that will set a group of properties"
-            },
-            {
-                "removeVirtualProperty",
-                &luascriptfunctions::removeVirtualProperty,
-                "string",
-                "Removes a previously added virtual property"
-            },
-            {
-                "removeAllVirtualProperties",
-                &luascriptfunctions::removeAllVirtualProperties,
-                "",
-                "Remove all registered virtual properties"
-            },
-            {
-                "setScreenshotFolder",
-                &luascriptfunctions::setScreenshotFolder,
-                "string",
-                "Sets the folder used for storing screenshots or session recording frames"
-            },
-            {
-                "addTag",
-                &luascriptfunctions::addTag,
-                "string, string",
-                "Adds a tag (second argument) to a scene graph node (first argument)"
-            },
-            {
-                "removeTag",
-                &luascriptfunctions::removeTag,
-                "string, string",
-                "Removes a tag (second argument) from a scene graph node (first argument)"
-            },
-            {
-                "createSingleColorImage",
-                &luascriptfunctions::createSingleColorImage,
-                "string, vec3",
-                "Creates a 1 pixel image with a certain color in the cache folder and "
-                "returns the path to the file. If a cached file with the given name "
-                "already exists, the path to that file is returned. The first argument "
-                "is the name of the file, without extension. The second is the RGB "
-                "color, given as {r, g, b} with values between 0 and 1."
-            },
-            {
-                "isMaster",
-                &luascriptfunctions::isMaster,
-                "",
-                "Returns whether the current OpenSpace instance is the master node of a "
-                "cluster configuration. If this instance is not part of a cluster, this "
-                "function also returns 'true'."
-            }
+            codegen::lua::ToggleShutdown,
+            codegen::lua::WriteDocumentation,
+            codegen::lua::SetScreenshotFolder,
+            codegen::lua::AddTag,
+            codegen::lua::RemoveTag,
+            codegen::lua::DownloadFile,
+            codegen::lua::CreateSingleColorImage,
+            codegen::lua::IsMaster
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
