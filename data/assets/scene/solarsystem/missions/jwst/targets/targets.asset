@@ -1,4 +1,5 @@
 asset.require("./crab")
+asset.require("./hd84406")
 asset.require("./hh212")
 asset.require("./hudf")
 asset.require("./m51")
