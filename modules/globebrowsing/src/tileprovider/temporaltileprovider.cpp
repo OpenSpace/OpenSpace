@@ -45,7 +45,7 @@
 
 namespace {
     constexpr const char* TimePlaceholder = "${OpenSpaceTimeId}";
-    
+
     constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
         "Use Fixed Time",
@@ -113,7 +113,7 @@ namespace {
             // is checked against the provided format and added if it adheres to said
             // format
             std::filesystem::path folder [[codegen::directory()]];
-            
+
             // The format of files that is pared in the provided folder. The format string
             // has to be compatible to the C++ function get_time.
             // https://en.cppreference.com/w/cpp/io/manip/get_time
@@ -124,7 +124,7 @@ namespace {
         // Determines whether this tile provider should interpolate between two adjacent
         // layers
         std::optional<bool> interpolation;
-        
+
         // If provided, the tile provider will use this color map to convert a greyscale
         // image to color
         std::optional<std::string> colormap;
@@ -299,7 +299,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             ));
         }
     }
-    
+
     _isInterpolating = p.interpolation.value_or(_isInterpolating);
     if (_isInterpolating) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
@@ -479,7 +479,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
             return p.first < t;
         }
     );
-    
+
     if (it != _folder.files.begin()) {
         it -= 1;
     }
@@ -504,6 +504,11 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
     );
 
     It curr = next != _folder.files.begin() ? next - 1 : next;
+
+    if (next == _folder.files.end()) {
+        return retrieveTileProvider(Time(curr->first));
+    }
+
     It nextNext = next != _folder.files.end() ? next + 1 : curr;
     It prev = curr != _folder.files.begin() ? curr - 1 : curr;
 
@@ -555,7 +560,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
     Time secondToFirst = Time(_prototyped.startTimeJ2000);
 
     _interpolateTileProvider->t1 = retrieveTileProvider(tCopy);
-    
+
     // if the images are for each hour
     if (_prototyped.temporalResolution == "1h") {
         constexpr const int Hour = 60 * 60;
@@ -765,7 +770,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     glDisable(GL_BLEND);
     GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, textureBuffers);
-    
+
     // Setup our own viewport settings
     GLsizei w = static_cast<GLsizei>(writeTexture->width());
     GLsizei h = static_cast<GLsizei>(writeTexture->height());
