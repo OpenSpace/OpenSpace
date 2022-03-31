@@ -43,21 +43,26 @@ namespace documentation { struct Documentation; }
 class RenderableMovingFieldlines : public Renderable {
 public:
     struct PathLineTraverser {
-        PathLineTraverser(const std::vector<FieldlinesState::Fieldline>& fieldlines_);
-        void advanceCurrent();
+        PathLineTraverser(std::vector<FieldlinesState::Fieldline>& fieldlines_);
+        void advanceKeyFrames();
+        void skipKeyFrame(FieldlinesState::Fieldline::Topology desiredTopology);
         bool isAtEnd() const;
         bool isAtStart() const;
-        std::vector<FieldlinesState::Fieldline>::const_iterator nextKeyFrame();
         double getTimeToReconnectionPoint(size_t indexOfReconnection);
         double getTimeToEndKeyFrame();
         void setStartPoint(double timeToRecon, size_t indexOfReconnection);
 
         //std::pair<double, size_t> startPositionValues;
-        const std::vector<FieldlinesState::Fieldline>& keyFrames;
-        double timeSinceInterpolation = 0.f;
+        std::vector<FieldlinesState::Fieldline>& keyFrames;
+        double timeSinceInterpolation = 0.0;
+        double timeInterpolationNominator = 0.0;
         bool forward = true;
+        // this will be true when the traverser moves to a topology change
+        // signals that it is ready to swap with its partner
+        bool canSwap = false;
         bool hasSwapped = false;
-        std::vector<FieldlinesState::Fieldline>::const_iterator currentKeyFrame;
+        std::vector<FieldlinesState::Fieldline>::iterator backKeyFrame;
+        std::vector<FieldlinesState::Fieldline>::iterator frontKeyFrame;
 
     };
 
