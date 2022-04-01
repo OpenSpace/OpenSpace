@@ -24,91 +24,87 @@
 
 #include <modules/space/horizonsfile.h>
 
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <filesystem>
 #include <fstream>
 
-#include <openspace/util/spicemanager.h>
+using json = nlohmann::json;
 
 namespace {
-    constexpr const char* _loggerCat = "HorizonsFile";
-    constexpr const char* ApiSource = "NASA/JPL Horizons API";
-    constexpr const char* CurrentVersion = "1.1";
+    constexpr std::string_view _loggerCat = "HorizonsFile";
+    constexpr std::string_view ApiSource = "NASA/JPL Horizons API";
+    constexpr std::string_view CurrentVersion = "1.1";
 
     // Values needed to construct the url for the http request to JPL Horizons API
-    constexpr const char* VectorUrl = "https://ssd.jpl.nasa.gov/api/horizons.api?format="
-        "json&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'&VEC_TABLE='1'&VEC_LABELS='NO'&"
+    constexpr std::string_view VectorUrl = "https://ssd.jpl.nasa.gov/api/horizons.api?"
+        "format=json&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'&VEC_TABLE='1'&VEC_LABELS='NO'&"
         "CSV_FORMAT='NO'";
-    constexpr const char* ObserverUrl = "https://ssd.jpl.nasa.gov/api/horizons.api?"
+    constexpr std::string_view ObserverUrl = "https://ssd.jpl.nasa.gov/api/horizons.api?"
         "format=json&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&QUANTITIES='20,33'&"
         "RANGE_UNITS='KM'&SUPPRESS_RANGE_RATE='YES'&CSV_FORMAT='NO'";
-    constexpr const char* Command = "&COMMAND=";
-    constexpr const char* Center = "&CENTER=";
-    constexpr const char* StartTime = "&START_TIME=";
-    constexpr const char* StopTime = "&STOP_TIME=";
-    constexpr const char* StepSize = "&STEP_SIZE=";
+    constexpr std::string_view Command = "&COMMAND=";
+    constexpr std::string_view Center = "&CENTER=";
+    constexpr std::string_view StartTime = "&START_TIME=";
+    constexpr std::string_view StopTime = "&STOP_TIME=";
+    constexpr std::string_view StepSize = "&STEP_SIZE=";
 
     // URL encoding
-    constexpr const char* WhiteSpace = "%20";
-    constexpr const char* HashTag = "%23";
-    constexpr const char* DollarSign = "%24";
-    constexpr const char* Ampersand = "%26";
-    constexpr const char* PlusSign = "%2B";
-    constexpr const char* Comma = "%2C";
-    constexpr const char* Slash = "%2F";
-    constexpr const char* Colon = "%3A";
-    constexpr const char* Semicolon = "%3B";
-    constexpr const char* EqualsSign = "%3D";
-    constexpr const char* QuestionMark = "%3F";
-    constexpr const char* AtSymbol = "%40";
-    constexpr const char* LeftSquareBracket = "%5B";
-    constexpr const char* RightSquareBracket = "%5D";
+    constexpr std::string_view WhiteSpace = "%20";
+    constexpr std::string_view HashTag = "%23";
+    constexpr std::string_view DollarSign = "%24";
+    constexpr std::string_view Ampersand = "%26";
+    constexpr std::string_view PlusSign = "%2B";
+    constexpr std::string_view Comma = "%2C";
+    constexpr std::string_view Slash = "%2F";
+    constexpr std::string_view Colon = "%3A";
+    constexpr std::string_view Semicolon = "%3B";
+    constexpr std::string_view EqualsSign = "%3D";
+    constexpr std::string_view QuestionMark = "%3F";
+    constexpr std::string_view AtSymbol = "%40";
+    constexpr std::string_view LeftSquareBracket = "%5B";
+    constexpr std::string_view RightSquareBracket = "%5D";
 
-    std::string replaceAll(const std::string& string, const std::string& from,
+    std::string replaceAll(std::string string, const std::string& from,
                            const std::string& to)
     {
         if (from.empty())
             return "";
 
-        std::string result = string;
         size_t startPos = 0;
-        while ((startPos = result.find(from, startPos)) != std::string::npos) {
-            result.replace(startPos, from.length(), to);
+        while ((startPos = string.find(from, startPos)) != std::string::npos) {
+            string.replace(startPos, from.length(), to);
 
             // In case 'to' contains 'from', ex replacing 'x' with 'yx'
             startPos += to.length();
         }
-        return result;
+        return string;
     }
 
     std::string urlEncode(const std::string& string) {
-        std::string result = replaceAll(string, " ", WhiteSpace);
-        result = replaceAll(result, "#", HashTag);
-        result = replaceAll(result, "$", DollarSign);
-        result = replaceAll(result, "&", Ampersand);
-        result = replaceAll(result, "+", PlusSign);
-        result = replaceAll(result, ",", Comma);
-        result = replaceAll(result, "/", Slash);
-        result = replaceAll(result, ":", Colon);
-        result = replaceAll(result, ";", Semicolon);
-        result = replaceAll(result, "=", EqualsSign);
-        result = replaceAll(result, "?", QuestionMark);
-        result = replaceAll(result, "@", AtSymbol);
-        result = replaceAll(result, "[", LeftSquareBracket);
-        result = replaceAll(result, "]", RightSquareBracket);
+        std::string result = replaceAll(string, " ", WhiteSpace.data());
+        result = replaceAll(result, "#", HashTag.data());
+        result = replaceAll(result, "$", DollarSign.data());
+        result = replaceAll(result, "&", Ampersand.data());
+        result = replaceAll(result, "+", PlusSign.data());
+        result = replaceAll(result, ",", Comma.data());
+        result = replaceAll(result, "/", Slash.data());
+        result = replaceAll(result, ":", Colon.data());
+        result = replaceAll(result, ";", Semicolon.data());
+        result = replaceAll(result, "=", EqualsSign.data());
+        result = replaceAll(result, "?", QuestionMark.data());
+        result = replaceAll(result, "@", AtSymbol.data());
+        result = replaceAll(result, "[", LeftSquareBracket.data());
+        result = replaceAll(result, "]", RightSquareBracket.data());
         return result;
     }
 
 } // namespace
 
 namespace openspace {
-
-HorizonsFile::HorizonsFile()
-    : _file()
-{}
 
 HorizonsFile::HorizonsFile(std::filesystem::path file)
     : _file(std::move(file))
@@ -134,66 +130,75 @@ std::filesystem::path& HorizonsFile::file() {
     return _file;
 }
 
-std::string HorizonsFile::constructUrl(HorizonsFile::Type type, const std::string& target,
-    const std::string& observer, const std::string& startTime,
-    const std::string& stopTime, const std::string& stepSize, const std::string& unit)
+std::string HorizonsFile::constructUrl(HorizonsFile::Type type,const std::string& target,
+                                const std::string& observer, const std::string& startTime,
+        const std::string& stopTime, const std::string& stepSize, const std::string& unit)
 {
     // Construct url for request
     std::string url = "";
     switch (type) {
         case Type::Vector:
-            url.append(VectorUrl);
+            url = VectorUrl;
             break;
         case Type::Observer:
-            url.append(ObserverUrl);
+            url = ObserverUrl;
             break;
         default:
             throw ghoul::MissingCaseException();
     }
 
-    url.append(Command);
-    url.append("'");
-    url.append(urlEncode(target));
-    url.append("'");
+    url += fmt::format(
+        "{}'{}'",
+        Command,
+        urlEncode(target)
+    );
 
-    url.append(Center);
-    url.append("'");
-    url.append(urlEncode(observer));
-    url.append("'");
+    url += fmt::format(
+        "{}'{}'",
+        Center,
+        urlEncode(observer)
+    );
 
-    url.append(StartTime);
-    url.append("'");
-    url.append(urlEncode(startTime));
-    url.append("'");
+    url += fmt::format(
+        "{}'{}'",
+        StartTime,
+        urlEncode(startTime)
+    );
 
-    url.append(StopTime);
-    url.append("'");
-    url.append(urlEncode(stopTime));
-    url.append("'");
+    url += fmt::format(
+        "{}'{}'",
+        StopTime,
+        urlEncode(stopTime)
+    );
 
-    url.append(StepSize);
-    url.append("'");
-    url.append(stepSize);
-    if (!unit.empty()) {
-        url.append(WhiteSpace);
-        url.append(unit);
+    if (unit.empty()) {
+        url += fmt::format(
+            "{}'{}'",
+            StepSize,
+            urlEncode(stepSize)
+        );
     }
-    url.append("'");
+    else {
+        url += fmt::format(
+            "{}'{}{}{}'",
+            StepSize,
+            urlEncode(stepSize),
+            WhiteSpace,
+            unit
+        );
+    }
 
     return url;
 }
 
 HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
     // Signature, source and version
-    auto signatureIt = answer.find("signature");
-    if (signatureIt != answer.end()) {
-        json signature = *signatureIt;
+    if (auto signature = answer.find("signature");  signature != answer.end()) {
 
-        auto sourceIt = signature.find("source");
-        if (sourceIt != signature.end()) {
-            if (*sourceIt != ApiSource) {
+        if (auto source = signature->find("source"); source != signature->end()) {
+            if (*source != ApiSource.data()) {
                 LWARNING(fmt::format("Horizons answer from unkown source '{}'",
-                    *sourceIt)
+                    *source)
                 );
             }
         }
@@ -201,11 +206,10 @@ HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
             LWARNING("Could not find source information, source might not be acceptable");
         }
 
-        auto versionIt = signature.find("version");
-        if (versionIt != signature.end()) {
-            if (*versionIt != CurrentVersion) {
+        if (auto version = signature->find("version"); version != signature->end()) {
+            if (*version != CurrentVersion.data()) {
                 LWARNING(fmt::format("Unknown Horizons version '{}' found. The "
-                    "currently supported version is {}", *versionIt, CurrentVersion));
+                    "currently supported version is {}", *version, CurrentVersion));
             }
         }
         else {
@@ -219,64 +223,57 @@ HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
     }
 
     // Errors
-    auto it = answer.find("error");
-    if (it != answer.end()) {
+    if (auto it = answer.find("error"); it != answer.end()) {
         // There was an error
-        std::string errorMessage = *it;
+        std::string errorMsg = *it;
 
         // Projected output length (~X) exceeds 90024 line max -- change step-size
-        if (errorMessage.find("Projected output length") != std::string::npos) {
+        if (errorMsg.find("Projected output length") != std::string::npos) {
             return ResultCode::ErrorSize;
         }
         // STEP_SIZE too big, exceeds available span.
-        else if (errorMessage.find("STEP_SIZE too big") != std::string::npos) {
+        else if (errorMsg.find("STEP_SIZE too big") != std::string::npos) {
             return ResultCode::ErrorSpan;
         }
         // No ephemeris for target "X" after A.D. Y UT
-        else if (errorMessage.find("No ephemeris for target") != std::string::npos) {
+        else if (errorMsg.find("No ephemeris for target") != std::string::npos) {
             return ResultCode::ErrorTimeRange;
         }
         // No site matches. Use "*@body" to list, "c@body" to enter coords, ?! for help.
-        else if (errorMessage.find("No site matches") != std::string::npos ||
-                 errorMessage.find("Cannot find central body") != std::string::npos)
+        else if (errorMsg.find("No site matches") != std::string::npos ||
+                 errorMsg.find("Cannot find central body") != std::string::npos)
         {
             return ResultCode::ErrorNoObserver;
         }
         // Observer table for X / Y->Y disallowed.
-        else if (errorMessage.find("disallowed") != std::string::npos) {
+        else if (errorMsg.find("disallowed") != std::string::npos) {
             return ResultCode::ErrorObserverTargetSame;
         }
         // Insufficient ephemeris data has been loaded to compute the state of X
         // relative to Y at the ephemeris epoch Z;
-        else if (errorMessage.find("Insufficient ephemeris data") != std::string::npos) {
+        else if (errorMsg.find("Insufficient ephemeris data") != std::string::npos) {
             return ResultCode::ErrorNoData;
         }
         // #   E. Lon    DXY      DZ    Observatory Name;
         // -- - -------- ------ - ------ - ----------------;
         // * Observer station *
         // Multiple matching stations found.
-        else if (errorMessage.find("Multiple matching stations found") !=
-                 std::string::npos)
-        {
+        else if (errorMsg.find("Multiple matching stations found") != std::string::npos) {
             return ResultCode::MultipleObserverStations;
         }
         // Unknown error
         else {
-            LERROR(errorMessage);
-            return  ResultCode::UnknownError;
+            LERROR(errorMsg);
+            return ResultCode::UnknownError;
         }
     }
     return ResultCode::Valid;
 }
 
-bool HorizonsFile::isEmpty() const {
-    return !std::filesystem::is_regular_file(_file);
-}
-
 // Check whether the given Horizons file is valid or not
 // Return an error code with what is the problem if there was one
-HorizonsFile::ResultCode HorizonsFile::isValidHorizonsFile() const {
-    std::ifstream fileStream(_file);
+HorizonsFile::ResultCode HorizonsFile::isValidHorizonsFile(std::filesystem::path file) {
+    std::ifstream fileStream(file);
     if (!fileStream.good()) {
         return ResultCode::Empty;
     }
@@ -393,31 +390,30 @@ HorizonsFile::ResultCode HorizonsFile::isValidHorizonsFile() const {
     }
 }
 
+bool HorizonsFile::hasFile() const {
+    return std::filesystem::is_regular_file(_file);
+}
+
 void HorizonsFile::displayErrorMessage(const ResultCode code) const {
     switch (code) {
         case HorizonsFile::ResultCode::Valid:
             return;
-
         case ResultCode::Empty:
             LERROR("The horizons file is empty");
             break;
-
         case ResultCode::InvalidFormat:
             LERROR(fmt::format(
                 "Format of file '{}' is invalid. Horizons files must have extension '.hrz'",
                 _file)
             );
             break;
-
         case ResultCode::ErrorSize:
             LERROR("The selected time range with the selected step size is too big, "
                 "try to increase the step size and/or decrease the time range");
             break;
-
         case ResultCode::ErrorSpan:
             LERROR("Step size is too big, exceeds available time span for target");
             break;
-
         case ResultCode::ErrorTimeRange: {
             LERROR("Time range is outside the valid range for target");
 
@@ -436,20 +432,16 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
                 validTimeRange.second + "'");
             break;
         }
-
         case ResultCode::ErrorNoObserver:
             LERROR("No match was found for the observer");
             break;
-
         case ResultCode::ErrorObserverTargetSame:
             LERROR("The observer and target are the same");
             break;
-
         case ResultCode::ErrorNoData:
             LERROR("There is not enough data to compute the state of the target in "
                 "relation to the observer for the selected time range.");
             break;
-
         case ResultCode::MultipleObserverStations: {
             LWARNING("Multiple matching observer stations were found for the "
                 "selected observer");
@@ -465,10 +457,9 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             for (std::string station : matchingstations) {
                 matches += '\n' + station;
             }
-            LINFO("Mathing Observer Stations:" + matches);
+            LINFO("Matching Observer Stations:" + matches);
             break;
         }
-
         case ResultCode::MultipleObserver: {
             LWARNING("Multiple matches were found for the selected observer");
 
@@ -483,14 +474,12 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             for (std::string observer : matchingObservers) {
                 matches += '\n' + observer;
             }
-            LINFO("Mathing Observers:" + matches);
+            LINFO("Matching Observers:" + matches);
             break;
         }
-
         case ResultCode::ErrorNoTarget:
             LERROR("No match was found for the target");
             break;
-
         case ResultCode::MultipleTarget: {
             // Case Small Bodies:
             // Line before data: Matching small-bodies
@@ -516,41 +505,39 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             for (std::string target : matchingTargets) {
                 matches += '\n' + target;
             }
-            LINFO("Mathing targets:" + matches);
+            LINFO("Matching targets:" + matches);
             break;
         }
-
         case ResultCode::UnknownError:
             LERROR("An unknown error occured");
             break;
-
         default:
             LERROR("Unknown result type");
             break;
     }
 }
 
-HorizonsFile::HorizonsResult HorizonsFile::readFile() const {
+HorizonsFile::HorizonsResult HorizonsFile::readFile(std::filesystem::path file) {
     // Check if extension is correct first
-    if (_file.extension() != ".hrz") {
+    if (file.extension() != ".hrz") {
         HorizonsResult result;
         result.errorCode = ResultCode::InvalidFormat;
         return result;
     }
 
     // Check if valid
-    ResultCode code = isValidHorizonsFile();
+    ResultCode code = isValidHorizonsFile(file);
     if (code != ResultCode::Valid) {
         HorizonsResult result;
         result.errorCode = code;
         return result;
     }
 
-    std::ifstream fileStream(_file);
+    std::ifstream fileStream(file);
 
     if (!fileStream.good()) {
         LERROR(fmt::format(
-            "Failed to open Horizons file '{}'", _file
+            "Failed to open Horizons file '{}'", file
         ));
         return HorizonsResult();
     }
@@ -565,26 +552,26 @@ HorizonsFile::HorizonsResult HorizonsFile::readFile() const {
     while (line[0] != '$') {
         if (line == "JDTDB") {
             fileStream.close();
-            return readVectorFile();
+            return readVectorFile(file);
         }
 
         std::getline(fileStream, line);
     }
 
     fileStream.close();
-    return readObserverFile();
+    return readObserverFile(file);
 }
 
-HorizonsFile::HorizonsResult HorizonsFile::readVectorFile() const {
+HorizonsFile::HorizonsResult HorizonsFile::readVectorFile(std::filesystem::path file) {
     HorizonsResult result;
     result.type = HorizonsFile::Type::Vector;
     result.errorCode = ResultCode::Valid;
     std::vector<HorizonsKeyframe> data;
 
-    std::ifstream fileStream(_file);
+    std::ifstream fileStream(file);
     if (!fileStream.good()) {
         LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", _file
+            "Failed to open Horizons text file '{}'", file
         ));
         return HorizonsResult();
     }
@@ -603,29 +590,29 @@ HorizonsFile::HorizonsResult HorizonsFile::readVectorFile() const {
     while (line[0] != '$') {
         HorizonsKeyframe dataPoint;
         std::stringstream str1(line);
-        std::string temp;
-        std::string date;
-        std::string time;
-        double xPos;
-        double yPos;
-        double zPos;
 
         // File is structured as (data over two lines):
         // JulianDayNumber = A.D. YYYY-MM-DD HH:MM:SS TDB
         //   X Y Z
+        std::string temp;
+        std::string date;
+        std::string time;
         str1 >> temp >> temp >> temp >> date >> time >> temp;
 
         // Get next line of same data point
         std::getline(fileStream, line);
         if (!fileStream.good()) {
             LERROR(fmt::format(
-                "Malformed Horizons file '{}'", _file
+                "Malformed Horizons file '{}'", file
             ));
             return HorizonsResult();
         }
         std::stringstream str2(line);
 
         //   X Y Z
+        double xPos;
+        double yPos;
+        double zPos;
         str2 >> xPos >> yPos >> zPos;
 
         // Convert date and time to seconds after 2000
@@ -649,16 +636,16 @@ HorizonsFile::HorizonsResult HorizonsFile::readVectorFile() const {
     return result;
 }
 
-HorizonsFile::HorizonsResult HorizonsFile::readObserverFile() const {
+HorizonsFile::HorizonsResult HorizonsFile::readObserverFile(std::filesystem::path file) {
     HorizonsResult result;
     result.type = HorizonsFile::Type::Observer;
     result.errorCode = ResultCode::Valid;
     std::vector<HorizonsKeyframe> data;
 
-    std::ifstream fileStream(_file);
+    std::ifstream fileStream(file);
     if (!fileStream.good()) {
         LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", _file
+            "Failed to open Horizons text file '{}'", file
         ));
         return HorizonsResult();
     }
@@ -677,11 +664,6 @@ HorizonsFile::HorizonsResult HorizonsFile::readObserverFile() const {
     while (line[0] != '$') {
         HorizonsKeyframe dataPoint;
         std::stringstream str(line);
-        std::string date;
-        std::string time;
-        double range = 0;
-        double gLon = 0;
-        double gLat = 0;
 
         // File is structured by (all in one line):
         // YYYY-MM-DD
@@ -690,6 +672,11 @@ HorizonsFile::HorizonsResult HorizonsFile::readObserverFile() const {
         // Range-delta (km/s) -- suppressed!
         // Galactic Longitude (degrees)
         // Galactic Latitude (degrees)
+        std::string date;
+        std::string time;
+        double range = 0;
+        double gLon = 0;
+        double gLat = 0;
         str >> date >> time >> range >> gLon >> gLat;
 
         // Convert date and time to seconds after 2000
@@ -778,7 +765,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
 
     if (!fileStream.good()) {
         fileStream.close();
-        return std::pair<std::string, std::string>();
+        return { "", "" };
     }
 
     // Ignore everything until head of time range list
@@ -798,7 +785,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
 
     if (!fileStream.good()) {
         fileStream.close();
-        return std::pair<std::string, std::string>();
+        return { "", "" };
     }
 
     // There will be one empty line before the list of time ranges, skip
@@ -813,11 +800,12 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
         // Read and save each word
         std::vector<std::string> words;
         std::string word;
-        while (str >> word)
+        while (str >> word) {
             words.push_back(word);
+        }
 
         if (words.empty()) {
-            return std::pair<std::string, std::string>();
+            return { "", "" };
         }
 
         // Parse time stamps backwards
@@ -832,30 +820,31 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             endTime = words[words.size() - 1];
         }
         else {
-            return std::pair<std::string, std::string>();
+            return { "", "" };
         }
     }
     if (startTime.empty() || endTime.empty()) {
         fileStream.close();
-        return std::pair<std::string, std::string>();
+        return { "", "" };
     }
 
     // Get the end time from the last trajectery
     while (fileStream.good()) {
         if (line.find(endPhrase) != std::string::npos || line.empty() || line == " ") {
             fileStream.close();
-            return std::pair<std::string, std::string>(startTime, endTime);
+            return { startTime, endTime };
         }
 
         // Read and save each word.
         std::stringstream str(line);
         std::vector<std::string> words;
         std::string word;
-        while (str >> word)
+        while (str >> word) {
             words.push_back(word);
+        }
 
         if (words.empty()) {
-            return std::pair<std::string, std::string>();
+            return { "", "" };
         }
 
         // Parse time stamps backwards
@@ -868,14 +857,14 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             endTime = words[words.size() - 1];
         }
         else {
-            return std::pair<std::string, std::string>();
+            return { "", "" };
         }
 
         std::getline(fileStream, line);
     }
 
     fileStream.close();
-    return std::pair<std::string, std::string>();
+    return { "", "" };
 }
 
 } // namespace openspace

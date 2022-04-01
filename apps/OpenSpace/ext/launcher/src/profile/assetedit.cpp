@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,7 +65,7 @@ void AssetEdit::createWidgets() {
 #ifndef OPENSPACE_MODULE_SPACE_ENABLED
         generateButton->setEnabled(false);
         generateButton->setToolTip(
-            "Connot generate Horizons file without the space module enabled"
+            "Cannot generate Horizons file without the space module enabled"
         );
 #else
         generateButton->setCursor(Qt::PointingHandCursor);

@@ -88,7 +88,6 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
         }
 
         std::vector<std::string> files;
-        files.reserve(1);
         files.push_back(file);
         _horizonsTextFiles.set(files);
     }
@@ -96,7 +95,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
         std::vector<std::string> files =
             std::get<std::vector<std::string>>(p.horizonsTextFile);
 
-        for (std::string file : files) {
+        for (const std::string& file : files) {
             if (!std::filesystem::is_regular_file(absPath(file))) {
                 LWARNING(fmt::format("The Horizons text file '{}' could not be found",
                     file)
@@ -104,7 +103,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
                 return;
             }
         }
-        _horizonsTextFiles.set(files);
+        _horizonsTextFiles = files;
     }
     else {
         throw ghoul::MissingCaseException();
@@ -141,7 +140,7 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
 }
 
 void HorizonsTranslation::loadData() {
-    for (const std::string filePath : _horizonsTextFiles.value()) {
+    for (const std::string& filePath : _horizonsTextFiles.value()) {
         std::filesystem::path file = absPath(filePath);
         if (!std::filesystem::is_regular_file(file)) {
             LWARNING(fmt::format("The Horizons text file '{}' could not be found", file));
@@ -181,7 +180,7 @@ void HorizonsTranslation::loadData() {
 }
 
 bool HorizonsTranslation::readHorizonsTextFile(HorizonsFile& horizonsFile) {
-    HorizonsFile::HorizonsResult result = horizonsFile.readFile();
+    HorizonsFile::HorizonsResult result = HorizonsFile::readFile(horizonsFile.file());
     if (result.errorCode != HorizonsFile::ResultCode::Valid) {
         horizonsFile.displayErrorMessage(result.errorCode);
         return false;

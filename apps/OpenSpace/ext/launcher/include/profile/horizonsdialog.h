@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,19 +31,17 @@
 #include <string>
 
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-#include <../modules/space/horizonsfile.h>
+#include <modules/space/horizonsfile.h>
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 
 class QComboBox;
-class QLabel;
 class QDateTimeEdit;
+class QLabel;
+class QLineEdit;
 class QNetworkAccessManager;
 class QNetworkReply;
-class QLineEdit;
 class QPlainTextEdit;
 class QProgressBar;
-
-using json = nlohmann::json;
 
 class HorizonsDialog : public QDialog {
 Q_OBJECT
@@ -55,13 +53,17 @@ public:
 
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     std::filesystem::path file() const;
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 
 private slots:
     void openSaveAs();
     void typeOnChange(int index);
     void downloadProgress(qint64 ist, qint64 max);
     void importTimeRange();
+
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     void approved();
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 
 private:
     enum class LogLevel {
@@ -82,18 +84,22 @@ private:
     void createWidgets();
     void cleanAllWidgets();
     void styleLabel(QLabel* label, bool isDirty);
+    bool isValidInput();
+    nlohmann::json sendRequest(const std::string& url);
+    nlohmann::json handleReply(QNetworkReply* reply);
+    bool checkHttpStatus(const QVariant& statusCode);
+    void appendLog(const std::string& message, LogLevel level);
+
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     std::pair<std::string, std::string> readTimeRange();
     bool handleRequest();
-    bool isValidInput();
     std::string constructUrl();
-    json sendRequest(const std::string url);
-    json handleReply(QNetworkReply* reply);
-    bool checkHttpStatus(const QVariant& statusCode);
     openspace::HorizonsFile handleAnswer(json& answer);
     bool handleResult(openspace::HorizonsFile::ResultCode& result);
-    void appendLog(const std::string& message, const LogLevel level);
 
     openspace::HorizonsFile _horizonsFile;
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
+
     QNetworkAccessManager* _manager;
 
     QLabel* _typeLabel = nullptr;
@@ -125,7 +131,6 @@ private:
 
     QLabel* _errorMsg = nullptr;
     std::string _latestHorizonsError;
-#endif // OPENSPACE_MODULE_SPACE_ENABLED
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___HORIZONS___H__

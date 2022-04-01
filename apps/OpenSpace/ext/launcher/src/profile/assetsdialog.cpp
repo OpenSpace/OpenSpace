@@ -147,9 +147,7 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
         QPushButton* newAssetButton = new QPushButton("New Asset", this);
         connect(
             newAssetButton, &QPushButton::released,
-            [this]() {
-                openAssetEditor();
-            }
+            this, &AssetsDialog::openAssetEditor
         );
         newAssetButton->setCursor(Qt::PointingHandCursor);
         newAssetButton->setDefault(false);

@@ -31,8 +31,6 @@
 #include <string>
 #include <vector>
 
-using json = nlohmann::json;
-
 namespace openspace {
 
 /**
@@ -98,17 +96,12 @@ public:
     };
 
     struct HorizonsResult {
-
-        HorizonsResult()
-            : type(Type::Invalid), errorCode(ResultCode::UnknownError)
-        {}
-
-        Type type;
-        ResultCode errorCode;
-        std::vector<HorizonsKeyframe> data;
+        Type type = Type::Invalid;
+        ResultCode errorCode = ResultCode::UnknownError;
+        std::vector<HorizonsKeyframe> data = std::vector<HorizonsKeyframe>();
     };
 
-    HorizonsFile();
+    HorizonsFile() = default;
     HorizonsFile(std::filesystem::path file);
     HorizonsFile(std::filesystem::path filePath, const std::string& result);
 
@@ -120,12 +113,13 @@ public:
         const std::string& observer, const std::string& startTime,
         const std::string& stopTime, const std::string& stepSize,
         const std::string& unit);
-    static ResultCode isValidAnswer(const json& answer);
+    static ResultCode isValidAnswer(const nlohmann::json& answer);
+    static ResultCode isValidHorizonsFile(std::filesystem::path file);
+    static HorizonsResult readFile(std::filesystem::path file);
 
-    bool isEmpty() const;
-    ResultCode isValidHorizonsFile() const;
+    bool hasFile() const;
     void displayErrorMessage(const ResultCode code) const;
-    HorizonsResult readFile() const;
+
 
     std::vector<std::string> parseMatches(const std::string& startPhrase,
         const std::string& endPhrase, const std::string& altStartPhrase = "") const;
@@ -134,8 +128,8 @@ public:
         const std::string& altStartPhrase = "", bool hasTime = true) const;
 
 private:
-    HorizonsResult readVectorFile() const;
-    HorizonsResult readObserverFile() const;
+    static HorizonsResult readVectorFile(std::filesystem::path file);
+    static HorizonsResult readObserverFile(std::filesystem::path file);
 
     std::filesystem::path _file;
 };
