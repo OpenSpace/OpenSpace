@@ -199,8 +199,28 @@ void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCop
 }
 
 void ScreenSpaceSkyBrowser::removeRenderCopy() {
-    removeProperty(_renderCopies.back().get());
-    _renderCopies.pop_back();
+    if (_renderCopies.size() > 0) {
+        removeProperty(_renderCopies.back().get());
+        _renderCopies.pop_back();
+    }
+}
+
+std::vector<glm::dvec3>  ScreenSpaceSkyBrowser::renderCopies()
+{
+    std::vector<glm::dvec3> vec;
+    std::for_each(
+        _renderCopies.begin(),
+        _renderCopies.end(),
+        [&](const std::unique_ptr<properties::Vec3Property>& copy) {
+            vec.push_back(glm::dvec3(copy.get()->value()));
+        });
+    return vec;
+}
+
+void ScreenSpaceSkyBrowser::moveRenderCopy(int i, glm::vec3 raePosition) {
+    if (i < _renderCopies.size() && i >= 0) {
+        _renderCopies[i].get()->set(raePosition);
+    }
 }
 
 bool ScreenSpaceSkyBrowser::deinitializeGL() {

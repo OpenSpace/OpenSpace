@@ -259,6 +259,11 @@ void TargetBrowserPair::updateBrowserSize() {
     _browser->updateBrowserSize();
 }
 
+std::vector<glm::dvec3> TargetBrowserPair::renderCopies()
+{
+    return _browser->renderCopies();
+}
+
 void TargetBrowserPair::setIsSyncedWithWwt(bool isSynced) {
     _browser->setIsSyncedWithWwt(isSynced);
 }
