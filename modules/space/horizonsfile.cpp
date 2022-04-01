@@ -85,20 +85,21 @@ namespace {
     }
 
     std::string urlEncode(const std::string& string) {
-        std::string result = replaceAll(string, " ", WhiteSpace.data());
-        result = replaceAll(result, "#", HashTag.data());
-        result = replaceAll(result, "$", DollarSign.data());
-        result = replaceAll(result, "&", Ampersand.data());
-        result = replaceAll(result, "+", PlusSign.data());
-        result = replaceAll(result, ",", Comma.data());
-        result = replaceAll(result, "/", Slash.data());
-        result = replaceAll(result, ":", Colon.data());
-        result = replaceAll(result, ";", Semicolon.data());
-        result = replaceAll(result, "=", EqualsSign.data());
-        result = replaceAll(result, "?", QuestionMark.data());
-        result = replaceAll(result, "@", AtSymbol.data());
-        result = replaceAll(result, "[", LeftSquareBracket.data());
-        result = replaceAll(result, "]", RightSquareBracket.data());
+        std::string result =
+            replaceAll(string, " ", static_cast<std::string>(WhiteSpace));
+        result = replaceAll(result, "#", static_cast<std::string>(HashTag));
+        result = replaceAll(result, "$", static_cast<std::string>(DollarSign));
+        result = replaceAll(result, "&", static_cast<std::string>(Ampersand));
+        result = replaceAll(result, "+", static_cast<std::string>(PlusSign));
+        result = replaceAll(result, ",", static_cast<std::string>(Comma));
+        result = replaceAll(result, "/", static_cast<std::string>(Slash));
+        result = replaceAll(result, ":", static_cast<std::string>(Colon));
+        result = replaceAll(result, ";", static_cast<std::string>(Semicolon));
+        result = replaceAll(result, "=", static_cast<std::string>(EqualsSign));
+        result = replaceAll(result, "?", static_cast<std::string>(QuestionMark));
+        result = replaceAll(result, "@", static_cast<std::string>(AtSymbol));
+        result = replaceAll(result, "[", static_cast<std::string>(LeftSquareBracket));
+        result = replaceAll(result, "]", static_cast<std::string>(RightSquareBracket));
         return result;
     }
 
@@ -193,10 +194,10 @@ std::string HorizonsFile::constructUrl(HorizonsFile::Type type,const std::string
 
 HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
     // Signature, source and version
-    if (auto signature = answer.find("signature");  signature != answer.end()) {
+    if (auto signature = answer.find("signature"); signature != answer.end()) {
 
         if (auto source = signature->find("source"); source != signature->end()) {
-            if (*source != ApiSource.data()) {
+            if (*source != static_cast<std::string>(ApiSource)) {
                 LWARNING(fmt::format("Horizons answer from unkown source '{}'",
                     *source)
                 );
@@ -207,7 +208,7 @@ HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
         }
 
         if (auto version = signature->find("version"); version != signature->end()) {
-            if (*version != CurrentVersion.data()) {
+            if (*version != static_cast<std::string>(CurrentVersion)) {
                 LWARNING(fmt::format("Unknown Horizons version '{}' found. The "
                     "currently supported version is {}", *version, CurrentVersion));
             }

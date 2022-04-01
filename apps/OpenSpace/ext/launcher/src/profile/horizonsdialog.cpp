@@ -107,11 +107,11 @@ void HorizonsDialog::openSaveAs() {
 
 void HorizonsDialog::typeOnChange(int index) {
     // Vector table type doesn't support time varying or arcseconds time steps
-    if (index == 0 && _timeTypeCombo->itemText(0) == TimeVarying.data()) {
+    if (index == 0 && _timeTypeCombo->itemText(0).toStdString() == TimeVarying) {
         _timeTypeCombo->removeItem(0);
     }
     // Observer
-    else if (index == 1 && _timeTypeCombo->itemText(0) != TimeVarying.data()) {
+    else if (index == 1 && _timeTypeCombo->itemText(0).toStdString() != TimeVarying) {
         _timeTypeCombo->insertItem(0, TimeVarying.data());
     }
     else {
@@ -482,7 +482,7 @@ bool HorizonsDialog::isValidInput() {
     }
     else {
         // In the case of arcseconds range is different
-        if (_timeTypeCombo->currentText() == TimeVarying.data()) {
+        if (_timeTypeCombo->currentText().toStdString() == TimeVarying) {
             if (step < 60  || step > 3600) {
                 isValid = false;
                 message = "Angular step size needs to be in range 60 to 3600";
@@ -590,19 +590,19 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
         switch (code) {
             case static_cast<int>(HorizonsDialog::HTTPCodes::BadRequest) :
                 message = "The request contained invalid keywords and/or used "
-                "a method other than GET or POST";
+                    "a method other than GET or POST";
                 break;
             case static_cast<int>(HorizonsDialog::HTTPCodes::MethodNotAllowed) :
                 message = "The request used an incorrect method";
                 break;
             case static_cast<int>(HorizonsDialog::HTTPCodes::InternalServerError) :
                 message = "The database is currently not available, try again at a "
-                "later time";
+                    "later time";
                 break;
             case static_cast<int>(HorizonsDialog::HTTPCodes::ServiceUnavailable) :
                 message = "The server is currently unable to handle the request due to a "
-                "temporary overloading or maintenance of the server, try again at a "
-                "later time";
+                    "temporary overloading or maintenance of the server, try again at a "
+                    "later time";
                 break;
             default:
                 message = fmt::format("HTTP status code '{}' was returned",
@@ -805,9 +805,8 @@ std::string HorizonsDialog::constructUrl() {
 
     std::string center;
     if (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() != 0) {
-        QVariant observer = _chooseObserverCombo->itemData(
-            _chooseObserverCombo->currentIndex()
-        );
+        QVariant observer =
+            _chooseObserverCombo->itemData(_chooseObserverCombo->currentIndex());
         std::string id = observer.toString().toStdString();
         center = "@" + id;
         _observerName = _chooseObserverCombo->currentText().toStdString();
@@ -938,7 +937,6 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             std::filesystem::path validFile(_horizonsFile.file());
 
             std::string errorName = validFile.filename().stem().string();
-
             std::filesystem::path errorFile = validFile.replace_filename(
                 errorName + "_error.txt"
             );
@@ -1070,7 +1068,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                 return false;
             }
             _chooseObserverCombo->clear();
-            for (std::string& station : matchingstations) {
+            for (const std::string& station : matchingstations) {
                 _chooseObserverCombo->addItem(
                     QString::fromStdString(station),
                     findId(station)
@@ -1103,7 +1101,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                 return false;
             }
             _chooseObserverCombo->clear();
-            for (std::string& observer : matchingObservers) {
+            for (const std::string& observer : matchingObservers) {
                 _chooseObserverCombo->addItem(
                     QString::fromStdString(observer),
                     findId(observer)
@@ -1158,7 +1156,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                 return false;
             }
             _chooseTargetCombo->clear();
-            for (std::string& target : matchingTargets) {
+            for (const std::string& target : matchingTargets) {
                 _chooseTargetCombo->addItem(
                     QString::fromStdString(target),
                     findId(target)

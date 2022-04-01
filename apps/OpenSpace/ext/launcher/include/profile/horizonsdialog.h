@@ -94,7 +94,7 @@ private:
     std::pair<std::string, std::string> readTimeRange();
     bool handleRequest();
     std::string constructUrl();
-    openspace::HorizonsFile handleAnswer(json& answer);
+    openspace::HorizonsFile handleAnswer(nlohmann::json& answer);
     bool handleResult(openspace::HorizonsFile::ResultCode& result);
 
     openspace::HorizonsFile _horizonsFile;
