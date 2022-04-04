@@ -27,7 +27,7 @@ local images = asset.syncedResource({
   Name = "Pluto Images",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_plutoencounter_pluto_images",
-  Version = 1
+  Version = 2
 })
 
 local plutoRadius = 1.173E6

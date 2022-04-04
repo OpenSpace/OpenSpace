@@ -2155,6 +2155,7 @@ std::vector<std::string> SessionRecording::playbackList() const {
             }
         }
     }
+    std::sort(fileList.begin(), fileList.end());
     return fileList;
 }
 

@@ -273,7 +273,16 @@ namespace {
 /**
  * Returns the current time as an ISO 8601 date string (YYYY-MM-DDTHH:MN:SS).
  */
-[[codegen::luawrap]] std::string currentTimeUTC() {
+[[codegen::luawrap("UTC")]] std::string currentTimeUTC() {
+    return std::string(openspace::global::timeManager->time().ISO8601());
+}
+
+
+/**
+ * Returns the current time as an date string of the form
+ * (YYYY MON DDTHR:MN:SC.### ::RND) as returned by SPICE.
+ */
+[[codegen::luawrap("SPICE")]] std::string currentTimeSpice() {
     return std::string(openspace::global::timeManager->time().UTC());
 }
 

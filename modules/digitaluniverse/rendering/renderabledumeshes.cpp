@@ -460,6 +460,9 @@ bool RenderableDUMeshes::readSpeckFile() {
         return false;
     }
 
+    const float scale = static_cast<float>(toMeter(_unit));
+    double maxRadius = 0.0;
+
     int meshIndex = 0;
 
     // The beginning of the speck file has a header that either contains comments
@@ -540,23 +543,55 @@ bool RenderableDUMeshes::readSpeckFile() {
             // We can now read the vertices data:
             for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
                 std::getline(file, line);
-                if (line.substr(0, 1) != "}") {
-                    std::stringstream lineData(line);
-                    for (int i = 0; i < 7; ++i) {
-                        GLfloat value;
-                        lineData >> value;
-                        bool errorReading = lineData.rdstate() & std::ifstream::failbit;
-                        if (!errorReading) {
-                            mesh.vertices.push_back(value);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-                else {
+                if (line.substr(0, 1) == "}") {
                     break;
                 }
+
+                std::stringstream lineData(line);
+
+                // Try to read three values for the position
+                glm::vec3 pos;
+                bool success = true;
+                for (int i = 0; i < 3; ++i) {
+                    GLfloat value;
+                    lineData >> value;
+                    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
+                    if (errorReading) {
+                        success = false;
+                        break;
+                    }
+
+                    GLfloat scaledValue = value * scale;
+                    pos[i] = scaledValue;
+                    mesh.vertices.push_back(scaledValue);
+                }
+
+                if (!success) {
+                    LERROR(fmt::format(
+                        "Failed reading position on line {} of mesh {} in file: '{}'. "
+                        "Stopped reading mesh data", l, meshIndex, _speckFile
+                    ));
+                    break;
+                }
+
+                // Check if new max radius
+                const double r = glm::length(glm::dvec3(pos));
+                maxRadius = std::max(maxRadius, r);
+
+                // OLD CODE:
+                // (2022-03-23, emmbr)  None of our files included texture coordinates,
+                // and if they would they would still not be used by the shader
+                //for (int i = 0; i < 7; ++i) {
+                //    GLfloat value;
+                //    lineData >> value;
+                //    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
+                //    if (!errorReading) {
+                //        mesh.vertices.push_back(value);
+                //    }
+                //    else {
+                //        break;
+                //    }
+                //}
             }
 
             std::getline(file, line);
@@ -569,6 +604,8 @@ bool RenderableDUMeshes::readSpeckFile() {
         }
     }
 
+    setBoundingSphere(maxRadius);
+
     return true;
 }
 
@@ -579,12 +616,6 @@ void RenderableDUMeshes::createMeshes() {
     LDEBUG("Creating planes");
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
-        float scale = static_cast<float>(toMeter(_unit));
-
-        for (GLfloat& v : p.second.vertices) {
-            v *= scale;
-        }
-
         for (int i = 0; i < p.second.numU; ++i) {
             GLuint vao;
             glGenVertexArrays(1, &vao);
@@ -605,29 +636,32 @@ void RenderableDUMeshes::createMeshes() {
             );
             // in_position
             glEnableVertexAttribArray(0);
-            // U and V may not be given by the user
-            if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
-                glVertexAttribPointer(
-                    0,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    sizeof(GLfloat) * 5,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
-                );
+            // (2022-03-23, emmbr) This code was actually never used. We only read three
+            // values per line and di not handle any texture cooridnates, even if there
+            // would have been some in the file
+            //// U and V may not be given by the user
+            //if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
+            //    glVertexAttribPointer(
+            //        0,
+            //        3,
+            //        GL_FLOAT,
+            //        GL_FALSE,
+            //        sizeof(GLfloat) * 5,
+            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
+            //    );
 
-                // texture coords
-                glEnableVertexAttribArray(1);
-                glVertexAttribPointer(
-                    1,
-                    2,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    sizeof(GLfloat) * 7,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
-                );
-            }
-            else { // no U and V:
+            //    // texture coords
+            //    glEnableVertexAttribArray(1);
+            //    glVertexAttribPointer(
+            //        1,
+            //        2,
+            //        GL_FLOAT,
+            //        GL_FALSE,
+            //        sizeof(GLfloat) * 7,
+            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
+            //    );
+            //}
+            //else { // no U and V:
                 glVertexAttribPointer(
                     0,
                     3,
@@ -636,7 +670,7 @@ void RenderableDUMeshes::createMeshes() {
                     0,
                     reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
                 );
-            }
+            //}
         }
 
         // Grid: we need columns

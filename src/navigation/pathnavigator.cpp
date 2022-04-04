@@ -123,10 +123,10 @@ PathNavigator::PathNavigator()
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
     _defaultPathType.addOptions({
-        { Path::Type::AvoidCollision, "AvoidCollision" },
-        { Path::Type::ZoomOutOverview, "ZoomOutOverview"},
-        { Path::Type::Linear, "Linear" },
-        { Path::Type::AvoidCollisionWithLookAt, "AvoidCollisionWithLookAt"}
+        { static_cast<int>(Path::Type::AvoidCollision), "AvoidCollision" },
+        { static_cast<int>(Path::Type::ZoomOutOverview), "ZoomOutOverview" },
+        { static_cast<int>(Path::Type::Linear), "Linear" },
+        { static_cast<int>(Path::Type::AvoidCollisionWithLookAt), "AvoidCollisionWithLookAt"}
     });
     addProperty(_defaultPathType);
 
@@ -343,8 +343,7 @@ void PathNavigator::continuePath() {
 }
 
 Path::Type PathNavigator::defaultPathType() const {
-    const int pathType = _defaultPathType;
-    return Path::Type(pathType);
+    return static_cast<Path::Type>(_defaultPathType.value());
 }
 
 double PathNavigator::minValidBoundingSphere() const {
