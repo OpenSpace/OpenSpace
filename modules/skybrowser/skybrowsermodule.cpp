@@ -565,7 +565,6 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::AddRenderCopy,
             codegen::lua::SetScreenSpaceSize,
             codegen::lua::RemoveRenderCopy,
-            codegen::lua::MoveRenderCopy
         }
     };
 }

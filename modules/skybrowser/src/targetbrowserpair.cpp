@@ -259,7 +259,7 @@ void TargetBrowserPair::updateBrowserSize() {
     _browser->updateBrowserSize();
 }
 
-std::vector<glm::dvec3> TargetBrowserPair::renderCopies()
+std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::renderCopies()
 {
     return _browser->renderCopies();
 }

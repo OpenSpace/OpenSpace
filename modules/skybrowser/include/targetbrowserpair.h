@@ -64,7 +64,7 @@ public:
     // Browser
     void sendIdToBrowser();
     void updateBrowserSize();
-    std::vector<glm::dvec3> renderCopies();
+    std::vector<std::pair<std::string, glm::dvec3>> renderCopies();
 
     // Target
     void centerTargetOnScreen();

@@ -325,10 +325,10 @@ namespace {
             target.setValue("dec", spherical.y);
             target.setValue("color", pair->borderColor());
             target.setValue("size", glm::dvec2(pair->size()));
-            std::vector<glm::dvec3> copies = pair->renderCopies();
+            std::vector<std::pair<std::string, glm::dvec3>> copies = pair->renderCopies();
             ghoul::Dictionary copiesData;
             for (int i = 0; i < copies.size(); i++) {
-                copiesData.setValue("Copy" + std::to_string(i), copies[i]);
+                copiesData.setValue(copies[i].first, copies[i].second);
             }
             // Set table for the current target
             target.setValue("renderCopies", copiesData);
@@ -623,22 +623,7 @@ namespace {
         pair->browser()->removeRenderCopy();
     }
 }
-/**
-* Takes an identifier to a sky browser and the index to a render copy, and sets its RAE
-* position.
-* \param id Identifier
-* \param i Index to the render copy
-* \param raePosition Position in [Radius, Azimuth, Elevation] to move the render copy to
-*/
-[[codegen::luawrap]] void moveRenderCopy(std::string id, int i, glm::vec3 raePosition) {
-    // Get module
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-    TargetBrowserPair* pair = module->getPair(id);
-    if (pair) {
-        pair->browser()->moveRenderCopy(i, raePosition);
-    }
-}
 #include "skybrowsermodule_lua_codegen.cpp"
 
 } // namespace

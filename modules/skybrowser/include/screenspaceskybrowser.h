@@ -63,7 +63,7 @@ public:
     // Copies rendered
     void addRenderCopy(const glm::vec3& raePosition, int nCopies);
     void removeRenderCopy();
-    std::vector<glm::dvec3> renderCopies();
+    std::vector<std::pair<std::string, glm::dvec3>> renderCopies();
     void moveRenderCopy(int i, glm::vec3 raePosition);
 
 private:

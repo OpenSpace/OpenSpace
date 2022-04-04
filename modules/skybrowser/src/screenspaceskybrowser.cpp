@@ -184,7 +184,7 @@ void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCop
         openspace::properties::Property::PropertyInfo info = RenderCopyInfo;
         float azimuth = i * glm::two_pi<float>() / nCopies;
         glm::vec3 position = raePosition + glm::vec3(0.f, azimuth, 0.f);
-        std::string id = "Rendercopy" + std::to_string(start + i);
+        std::string id = "RenderCopy" + std::to_string(start + i);
         info.identifier = id.c_str();
         _renderCopies.push_back(
             std::make_unique<properties::Vec3Property>(
@@ -205,14 +205,18 @@ void ScreenSpaceSkyBrowser::removeRenderCopy() {
     }
 }
 
-std::vector<glm::dvec3>  ScreenSpaceSkyBrowser::renderCopies()
+std::vector<std::pair<std::string, glm::dvec3>>  ScreenSpaceSkyBrowser::renderCopies()
 {
-    std::vector<glm::dvec3> vec;
+    std::vector<std::pair<std::string, glm::dvec3>>  vec;
     std::for_each(
         _renderCopies.begin(),
         _renderCopies.end(),
         [&](const std::unique_ptr<properties::Vec3Property>& copy) {
-            vec.push_back(glm::dvec3(copy.get()->value()));
+            std::pair<std::string, glm::dvec3> pair = { 
+                copy.get()->identifier(), 
+                glm::dvec3(copy.get()->value()) 
+            };
+            vec.push_back(pair);
         });
     return vec;
 }
