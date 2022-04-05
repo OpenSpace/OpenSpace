@@ -57,7 +57,7 @@ public:
 
     /**
      * Decodes the <code>SyncBuffer</code> into the added Syncables.
-     * This method is only called on the SGCT slave nodes
+     * This method is only called on the SGCT client nodes
      */
     void decodeSyncables(std::vector<std::byte> data);
 

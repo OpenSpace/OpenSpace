@@ -600,7 +600,7 @@ void ScriptEngine::preSync(bool isMaster) {
         return;
     }
 
-    std::lock_guard guard(_slaveScriptsMutex);
+    std::lock_guard guard(_clientScriptsMutex);
     while (!_incomingScripts.empty()) {
         QueueItem item = std::move(_incomingScripts.front());
         _incomingScripts.pop();
@@ -634,14 +634,14 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     ZoneScoped
 
-    std::lock_guard guard(_slaveScriptsMutex);
+    std::lock_guard guard(_clientScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
     for (size_t i = 0; i < nScripts; ++i) {
         std::string script;
         syncBuffer->decode(script);
-        _slaveScriptQueue.push(std::move(script));
+        _clientScriptQueue.push(std::move(script));
     }
 }
 
@@ -663,11 +663,11 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        std::lock_guard guard(_slaveScriptsMutex);
-        while (!_slaveScriptQueue.empty()) {
+        std::lock_guard guard(_clientScriptsMutex);
+        while (!_clientScriptQueue.empty()) {
             try {
-                runScript(_slaveScriptQueue.front());
-                _slaveScriptQueue.pop();
+                runScript(_clientScriptQueue.front());
+                _clientScriptQueue.pop();
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);

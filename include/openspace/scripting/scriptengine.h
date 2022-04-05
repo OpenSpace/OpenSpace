@@ -115,10 +115,10 @@ private:
 
     std::queue<QueueItem> _incomingScripts;
 
-    // Slave scripts are mutex protected since decode and rendering may
-    // happen asynchronously.
-    std::mutex _slaveScriptsMutex;
-    std::queue<std::string> _slaveScriptQueue;
+    // Client scripts are mutex protected since decode and rendering may happen
+    // asynchronously
+    std::mutex _clientScriptsMutex;
+    std::queue<std::string> _clientScriptQueue;
     std::queue<QueueItem> _masterScriptQueue;
 
     std::vector<std::string> _scriptsToSync;
