@@ -7,12 +7,16 @@ local toggle_sun = {
       return
     end
 
-    if args.Transition == "Approaching" then
-      openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Enabled", false)
+    if not openspace.getPropertyValue("Scene.Sun.Renderable.Enabled") then
       openspace.setPropertyValueSingle("Scene.Sun.Renderable.Enabled", true)
+    end
+
+    if args.Transition == "Approaching" then
+      openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Fade", 0.0, 1.0)
+      openspace.setPropertyValueSingle("Scene.Sun.Renderable.Fade", 1.0, 1.0)
     else -- "Exiting"
-      openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle("Scene.Sun.Renderable.Enabled", false)
+      openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.Fade", 1.0, 1.0)
+      openspace.setPropertyValueSingle("Scene.Sun.Renderable.Fade", 0.0, 1.0)
     end
   ]],
   Documentation = [[Toggles the visibility of the Sun glare and the Sun globe when the 
