@@ -175,7 +175,7 @@ namespace {
         "CameraPerspectiveEnabled",
         "Use Camera perspective",
         "Camera perspective changes the size of the nodes dependent on the "
-        "distance from camera."
+        " distance from camera."
     };
     constexpr openspace::properties::Property::PropertyInfo DrawingCirclesInfo = {
         "RenderingCircles",

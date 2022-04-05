@@ -1,0 +1,37 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Earth Textures",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures",
+  Version = 2
+})
+
+local layer = {
+  Identifier = "Explorer_Base",
+  Name = "Explorer Base",
+  FilePath = texturesPath .. "eo_base_2020_clean.jpg",
+  Description = [[ Earth image from Explorer Base Next Generation ]],
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+  Name = "Explorer Base",
+  Version = "1.1",
+  Description = [[ Fallback layer for earth image if no internet is available. Contains
+    Explorer Base Next Generation ]],
+  Author = "OpenSpace Team",
+  URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
+  License = "NASA"
+}

@@ -1,0 +1,46 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+local layer = {
+  Identifier = "MODIS_Terra_Ice_Surface_Temp_Day_Temporal",
+  Name = "Ice Surface Temperature (Day) (Temporal)",
+  Type = "TemporalTileLayer",
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2000-02-24",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "MODIS_Terra_Ice_Surface_Temp_Day",
+      "1km",
+      "png"
+    )
+  },
+  Description = [[ Temporal coverage: 24 February 2000 - Present. The imagery resolution
+    is 1 km, and the temporal resolution is daily.]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Ice Surface Temperature (Day) (Temporal)",
+  Version = "1.1",
+  Description = [[ This layer has the best daily Earth Image. GIBS hosted layer created
+    with openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/" ..
+    "eosdis-components/gibs",
+  License = "NASA"
+}

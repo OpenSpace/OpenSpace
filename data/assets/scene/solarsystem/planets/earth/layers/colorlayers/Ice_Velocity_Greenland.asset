@@ -1,0 +1,46 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+local layer = {
+  Identifier = "MEaSUREs_Ice_Velocity_Greenland",
+  Name = "Ice Velocity (Greenland)",
+  Type = "TemporalTileLayer",
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2000-09-03",
+      End = "2009-03-01"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "OSCAR_Sea_Surface_Currents_Zonal",
+      "500m",
+      "png"
+    )
+  },
+  Description = [[ Temporal coverage: 03 September 2000 - 01 March 2009. The imagery resolution
+    is 2 km, and the temporal resolution is daily.]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Ice Velocity (Greenland)",
+  Version = "1.1",
+  Description = [[ This layer has the best daily Earth Image. GIBS hosted layer created
+    with openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/" ..
+    "eosdis-components/gibs",
+  License = "NASA"
+}

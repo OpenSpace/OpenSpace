@@ -292,7 +292,7 @@ void WebGuiModule::startProcess() {
         }
     );
 }
-
+ 
 void WebGuiModule::stopProcess() {
     for (const std::pair<const std::string, std::string>& e : _endpoints) {
         notifyEndpointListeners(e.first, false);
