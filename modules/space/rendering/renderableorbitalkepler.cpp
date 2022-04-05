@@ -451,7 +451,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     }
 
     _programObject->activate();
-    _programObject->setUniform(_uniformCache.opacity, _opacity);
+    _programObject->setUniform(_uniformCache.opacity, opacity());
     _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
 
     glm::dmat4 modelTransform =

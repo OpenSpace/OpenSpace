@@ -137,7 +137,7 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     program.setUniform("nClips_" + id, nClips);
     program.setUniform("clipNormals_" + id, clipNormals);
     program.setUniform("clipOffsets_" + id, clipOffsets);
-    program.setUniform("opacity_" + id, _opacity);
+    program.setUniform("opacity_" + id, opacity());
     program.setUniform("rNormalization_" + id, _rNormalization);
     program.setUniform("rUpperBound_" + id, _rUpperBound);
 }
