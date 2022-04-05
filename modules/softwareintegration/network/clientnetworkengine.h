@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-
-#include <openspace/util/openspacemodule.h>
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___CLIENTNETWORKENGINE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___CLIENTNETWORKENGINE___H__
 
 #include <modules/softwareintegration/network/common/basenetworkengine.h>
-#include <openspace/documentation/documentation.h>
+#include <modules/softwareintegration/network/softwareconnection.h>
+#include <modules/softwareintegration/pointdatamessagehandler.h>
+#include <openspace/util/concurrentqueue.h>
 
 namespace openspace {
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
+class ClientNetworkEngine : public BaseNetworkEngine {
 public:
-    constexpr static const char* Name = "SoftwareIntegration";
-
-    SoftwareIntegrationModule();
-    ~SoftwareIntegrationModule();
-
-    void storeData(const std::string& key, const std::vector<float> data);
-    std::vector<float> fetchData(const std::string& key);
-
-    std::vector<documentation::Documentation> documentations() const override;
-
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitialize() override;
-
-    BaseNetworkEngine* _server;
-
-    // Centralized storage for large datasets
-    std::map<std::string, std::vector<float>> _temporaryDataStorage;
+	void start() override;
+    void stop() override;
+    void update() override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___CLIENTNETWORKENGINE___H__

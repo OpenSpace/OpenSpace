@@ -26,6 +26,9 @@
 
 #include <openspace/rendering/renderable.h>
 #include <ghoul/logging/logmanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/syncengine.h>
+#include <openspace/engine/windowdelegate.h>
 
 namespace {
     constexpr const char* _loggerCat = "SoftwareConnection";
@@ -35,8 +38,19 @@ namespace openspace {
 
 const float SoftwareConnection::ProtocolVersion = 1.0;
 
-SoftwareConnection::Message::Message(MessageType type, std::vector<char> content)
-    : type(type), content(std::move(content))
+std::map<std::string, SoftwareConnection::MessageType> SoftwareConnection::mapSIMPTypeToMessageType {
+    {"CONN", MessageType::Connection},
+    {"PDAT", MessageType::ReadPointData},
+    {"RSGN", MessageType::RemoveSceneGraphNode},
+    {"UPCO", MessageType::Color},
+    {"UPOP", MessageType::Opacity},
+    {"UPSI", MessageType::Size},
+    {"TOVI", MessageType::Visibility},
+    {"DISC", MessageType::Disconnection},
+};
+
+SoftwareConnection::Message::Message(SoftwareConnection::MessageType type, std::vector<char> content)
+    : type{ type }, content{ std::move(content) }
 {}
 
 SoftwareConnection::SoftwareConnectionLostError::SoftwareConnectionLostError()
@@ -80,16 +94,25 @@ ghoul::io::TcpSocket* SoftwareConnection::socket() {
     return _socket.get();
 }
 
-SoftwareConnection::Message SoftwareConnection::receiveMessage() {
+/**
+ * @brief This function is only called on the server node, i.e. the node connected to the external software
+ * 
+ * @return SoftwareConnection::Message 
+ */
+SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
+    // LWARNING("SoftwareConnection::receiveMessageFromSoftware()");
+    // if (global::windowDelegate->isMaster()) {
+    // }
+    
     // Header consists of version (3 char), message type (4 char) & subject size (9 char)
-    size_t HeaderSize = 16 * sizeof(char);
+    size_t headerSize = 16 * sizeof(char);
 
     // Create basic buffer for receiving first part of message
-    std::vector<char> headerBuffer(HeaderSize);
+    std::vector<char> headerBuffer(headerSize);
     std::vector<char> subjectBuffer;
 
     // Receive the header data
-    if (!_socket->get(headerBuffer.data(), HeaderSize)) {
+    if (!_socket->get(headerBuffer.data(), headerSize)) {
         LERROR("Failed to read header from socket. Disconnecting.");
         throw SoftwareConnectionLostError();
     }
@@ -122,7 +145,7 @@ SoftwareConnection::Message SoftwareConnection::receiveMessage() {
     for (int i = 7; i < 16; i++) {
         subjectSizeIn.push_back(headerBuffer[i]);
     }
-    const size_t subjectSize = stoi(subjectSizeIn);
+    const size_t subjectSize = std::stoi(subjectSizeIn);
 
     // Receive the message data
     subjectBuffer.resize(subjectSize);
@@ -132,33 +155,16 @@ SoftwareConnection::Message SoftwareConnection::receiveMessage() {
     }
 
     // And delegate decoding depending on message type
-    if (type == "CONN") {
-        return Message(MessageType::Connection, subjectBuffer);
-    }
-    else if (type == "PDAT") {
-        return Message(MessageType::ReadPointData, subjectBuffer);
-    }
-    else if (type == "RSGN") {
-        return Message(MessageType::RemoveSceneGraphNode, subjectBuffer);
-    }
-    else if (type == "UPCO") {
-        _isListening = false;
-        return Message(MessageType::Color, subjectBuffer);
-    }
-    else if (type == "UPOP") {
-        _isListening = false;
-        return Message(MessageType::Opacity, subjectBuffer);
-    }
-    else if (type == "UPSI") {
-        _isListening = false;
-        return Message(MessageType::Size, subjectBuffer);
-    }
-    else if (type == "TOVI") {
-        _isListening = false;
-        return Message(MessageType::Visibility, subjectBuffer);
-    }
-    else if (type == "DISC") {
-        return Message(MessageType::Disconnection, subjectBuffer);
+    if (mapSIMPTypeToMessageType.count(type) != 0) {
+        if (mapSIMPTypeToMessageType[type] == MessageType::Color
+            || mapSIMPTypeToMessageType[type] == MessageType::Opacity
+            || mapSIMPTypeToMessageType[type] == MessageType::Size
+            || mapSIMPTypeToMessageType[type] == MessageType::Visibility
+        ) {
+            _isListening = false;
+        }
+
+        return Message(mapSIMPTypeToMessageType[type], subjectBuffer);
     }
     else {
         LERROR(fmt::format("Unsupported message type: {}. Disconnecting...", type));

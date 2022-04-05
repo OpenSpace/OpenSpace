@@ -1572,6 +1572,8 @@ std::vector<std::byte> OpenSpaceEngine::encode() {
     ZoneScoped
 
     std::vector<std::byte> buffer = global::syncEngine->encodeSyncables();
+    
+    // LWARNING(fmt::format("buffer.size() (OpenSpaceEngine::encode()): {}", buffer.size()));
     return buffer;
 }
 

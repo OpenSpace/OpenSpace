@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-
-#include <openspace/util/openspacemodule.h>
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
 
 #include <modules/softwareintegration/network/common/basenetworkengine.h>
-#include <openspace/documentation/documentation.h>
+#include <modules/softwareintegration/network/softwareconnection.h>
+#include <modules/softwareintegration/pointdatamessagehandler.h>
+#include <openspace/util/concurrentqueue.h>
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <openspace/util/syncdata.h>
 
 namespace openspace {
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
+class NetworkEngine : public BaseNetworkEngine {
 public:
-    constexpr static const char* Name = "SoftwareIntegration";
+	NetworkEngine(const int port = 4700);
 
-    SoftwareIntegrationModule();
-    ~SoftwareIntegrationModule();
+	struct Peer {
+		size_t id;
+		std::string name;
+		std::thread thread;
 
-    void storeData(const std::string& key, const std::vector<float> data);
-    std::vector<float> fetchData(const std::string& key);
+		SoftwareConnection connection;
+		SoftwareConnection::Status status;
+	};
 
-    std::vector<documentation::Documentation> documentations() const override;
+	void start() override;
+	void stop() override;
+	void update() override;
+
+protected:
+	void disconnect(Peer& peer);
+	void handleNewPeers();
+	void handlePeer(size_t id);
+	void handlePeerMessage(PeerMessage peerMessage);
 
 private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitialize() override;
+	bool isConnected(const Peer& peer) const;
 
-    BaseNetworkEngine* _server;
+	std::shared_ptr<Peer> peer(size_t id);
 
-    // Centralized storage for large datasets
-    std::map<std::string, std::vector<float>> _temporaryDataStorage;
+
+	std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
+	mutable std::mutex _peerListMutex;
+		
+	ghoul::io::TcpSocketServer _socketServer;
+	size_t _nextConnectionId = 1;
+	std::atomic_size_t _nConnections = 0;
+	std::thread _serverThread;
+	std::thread _eventLoopThread;
+
+	const int _port;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__

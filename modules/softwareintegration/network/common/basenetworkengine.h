@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___BASENETWORKENGINE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___BASENETWORKENGINE___H__
 
-#include <openspace/util/openspacemodule.h>
-
-#include <modules/softwareintegration/network/common/basenetworkengine.h>
-#include <openspace/documentation/documentation.h>
+#include <modules/softwareintegration/network/softwareconnection.h>
+#include <modules/softwareintegration/pointdatamessagehandler.h>
+#include <modules/softwareintegration/network/common/syncablequeue.h>
 
 namespace openspace {
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
+class BaseNetworkEngine {
 public:
-    constexpr static const char* Name = "SoftwareIntegration";
+    virtual ~BaseNetworkEngine() = 0;
 
-    SoftwareIntegrationModule();
-    ~SoftwareIntegrationModule();
+    virtual void start();
+    virtual void stop();
+    virtual void update();
 
-    void storeData(const std::string& key, const std::vector<float> data);
-    std::vector<float> fetchData(const std::string& key);
+    // size_t nConnections() const;
 
-    std::vector<documentation::Documentation> documentations() const override;
+protected:
+    void eventLoop();
 
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitialize() override;
+    std::vector<Syncable*> getSyncables();
 
-    BaseNetworkEngine* _server;
+    std::atomic_bool _shouldStop = false;
+    std::thread _eventLoopThread;
 
-    // Centralized storage for large datasets
-    std::map<std::string, std::vector<float>> _temporaryDataStorage;
+    // Message handlers
+	PointDataMessageHandler _pointDataMessageHandler;
+
+	// ConcurrentQueue<PeerMessage> _incomingMessages;
+    SyncableQueue<PeerMessage> _incomingMessages;
+    // SyncableQueue _incomingMessages;
+
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___BASENETWORKENGINE___H__

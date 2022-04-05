@@ -24,11 +24,15 @@
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 
+#include <modules/softwareintegration/network/networkengine.h>
+#include <modules/softwareintegration/network/clientnetworkengine.h>
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 
 namespace {
     constexpr const char* _loggerCat = "SoftwareIntegrationModule";
@@ -36,7 +40,21 @@ namespace {
 
 namespace openspace {
 
-SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
+SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {
+    if (global::windowDelegate->isMaster()) {
+        // The main node will handle all communication with the external software
+        // and forward it to the client nodes
+        // 4700, is the defualt port where the tcp socket will be opened to the ext. software
+        _server = new NetworkEngine();
+    } else {
+        // The client nodes will only communicate with the main node
+        _server = new ClientNetworkEngine();
+    }
+}
+
+SoftwareIntegrationModule::~SoftwareIntegrationModule() {
+    delete _server;
+}
 
 void SoftwareIntegrationModule::storeData(const std::string& key,
                                           const std::vector<float> data)
@@ -65,14 +83,13 @@ void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
 
     fRenderable->registerClass<RenderablePointsCloud>("RenderablePointsCloud");
 
-    // Open port
-    _server.start(4700);
+    _server->start();
 
-    global::callback::preSync->emplace_back([this]() { _server.update(); });
+    global::callback::preSync->emplace_back([this]() { _server->update(); });
 }
 
 void SoftwareIntegrationModule::internalDeinitialize() {
-    _server.stop();
+    _server->stop();
 }
 
 std::vector<documentation::Documentation>

@@ -48,6 +48,19 @@ public:
         Disconnection
     };
 
+    static std::map<std::string, MessageType> mapSIMPTypeToMessageType;
+
+    // struct SIMPMessageType {
+    //     static inline const std::string Connection = "CONN";
+    //     static inline const std::string ReadPointData = "PDAT";
+    //     static inline const std::string RemoveSceneGraphNode = "RSGN";
+    //     static inline const std::string Color = "UPCO";
+    //     static inline const std::string Opacity = "UPOP";
+    //     static inline const std::string Size = "UPSI";
+    //     static inline const std::string Visibility = "TOVI";
+    //     static inline const std::string Disconnection = "DISC";
+    // };
+
     struct Message {
         Message() = default;
         Message(MessageType type, std::vector<char> content);
@@ -61,7 +74,6 @@ public:
         explicit SoftwareConnectionLostError();
     };
 
-    SoftwareConnection() = default;
     SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
     bool isConnected() const;
@@ -71,7 +83,7 @@ public:
 
     ghoul::io::TcpSocket* socket();
 
-    SoftwareConnection::Message receiveMessage();
+    SoftwareConnection::Message receiveMessageFromSoftware();
 
     static const float ProtocolVersion;
 

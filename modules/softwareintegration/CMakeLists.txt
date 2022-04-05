@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -27,18 +27,26 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/pointdatamessagehandler.h
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/common/syncablemessagequeue.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/common/basenetworkengine.h
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareintegrationserver.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/networkengine.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/clientnetworkengine.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/common/syncablequeue.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/pointdatamessagehandler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/common/syncablemessagequeue.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/common/basenetworkengine.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareintegrationserver.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/networkengine.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/clientnetworkengine.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/common/syncablequeue.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

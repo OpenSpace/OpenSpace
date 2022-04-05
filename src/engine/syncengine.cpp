@@ -28,6 +28,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+// #include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 
@@ -44,6 +45,10 @@ std::vector<std::byte> SyncEngine::encodeSyncables() {
     }
 
     std::vector<std::byte> data = _syncBuffer.data();
+
+    // std::string msg = "_syncBuffer.size() (encodeSyncables):" + std::to_string(_syncBuffer.data().size());
+    // LWARNING(msg);
+    
     _syncBuffer.reset();
     return data;
 }

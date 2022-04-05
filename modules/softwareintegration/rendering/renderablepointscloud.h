@@ -77,7 +77,7 @@ protected:
 
     std::optional<std::string> _dataStorageKey = std::nullopt;
 
-    int _nPoints = 0;
+    int _nPoints = 0; // TODO: CHANGE TO size_t?
     int _nValuesPerPoint = 0;
 
     GLuint _vertexArrayObjectID = 0;

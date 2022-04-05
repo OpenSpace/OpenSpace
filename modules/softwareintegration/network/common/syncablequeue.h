@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEQUEUE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEQUEUE___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/util/syncable.h>
+#include <openspace/util/concurrentqueue.h>
 
-#include <modules/softwareintegration/network/common/basenetworkengine.h>
-#include <openspace/documentation/documentation.h>
+#include <openspace/util/syncbuffer.h>
 
 namespace openspace {
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
+class SyncBuffer;
+
+template <typename T>
+class SyncableQueue : public Syncable {
 public:
-    constexpr static const char* Name = "SoftwareIntegration";
+    // virtual void preSync(bool isMaster) override;
+    virtual void encode(SyncBuffer* syncBuffer) override;
+    virtual void decode(SyncBuffer* syncBuffer) override;
+    // virtual void postSync(bool isMaster) override;
 
-    SoftwareIntegrationModule();
-    ~SoftwareIntegrationModule();
+    void push(T &&item);
+    void push(const T& item);
 
-    void storeData(const std::string& key, const std::vector<float> data);
-    std::vector<float> fetchData(const std::string& key);
+    T pop();
+    void pop(T& item);
 
-    std::vector<documentation::Documentation> documentations() const override;
+    size_t size() const;
 
+    bool empty() const;
+    
 private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitialize() override;
+	ConcurrentQueue<T> _messages;
 
-    BaseNetworkEngine* _server;
-
-    // Centralized storage for large datasets
-    std::map<std::string, std::vector<float>> _temporaryDataStorage;
+    std::mutex _clientMessageMutex;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEQUEUE___H__

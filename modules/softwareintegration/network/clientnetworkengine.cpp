@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,65 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSERVER___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSERVER___H__
+#include <modules/softwareintegration/network/clientnetworkengine.h>
 
 #include <modules/softwareintegration/network/softwareconnection.h>
-#include <modules/softwareintegration/pointdatamessagehandler.h>
-#include <openspace/util/concurrentqueue.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/engine/syncengine.h>
+#include <openspace/engine/windowdelegate.h>
+#include <ghoul/logging/logmanager.h>
+
+#include <openspace/engine/openspaceengine.h>
+
+namespace {
+	constexpr const char* _loggerCat = "SoftwareIntegration_ClientNetworkEngine";
+} // namespace
 
 namespace openspace {
 
-class SoftwareIntegrationServer {
-public:
-    struct Peer {
-        size_t id;
-        std::string name;
-        std::thread thread;
+void ClientNetworkEngine::start() {
+	BaseNetworkEngine::start();
+}
 
-        SoftwareConnection connection;
-        SoftwareConnection::Status status;
-    };
+void ClientNetworkEngine::stop() {
+	BaseNetworkEngine::stop();
 
-    struct PeerMessage {
-        size_t peerId;
-        SoftwareConnection::Message message;
-    };
+	if (_eventLoopThread.joinable()) {
+		_eventLoopThread.join();
+	}
+}
 
-    void start(int port);
-    void stop();
-    void update();
+void ClientNetworkEngine::update() {
+	BaseNetworkEngine::update();
+}
 
-    size_t nConnections() const;
+void ClientNetworkEngine::eventLoop() {
+	bool shouldShowMessage = true;
+	bool shouldShowMessage1 = true;
+	
+	while (!_shouldStop) {
+		// if(shouldShowMessage1) {
+		// 	LWARNING(fmt::format("On CLIENT"));
+		// 	shouldShowMessage1 = false;
+		// }
 
-private:
-    bool isConnected(const Peer& peer) const;
-
-    std::shared_ptr<Peer> peer(size_t id);
-
-    void disconnect(Peer& peer);
-    void eventLoop();
-    void handleNewPeers();
-    void handlePeer(size_t id);
-    void handlePeerMessage(PeerMessage peerMessage);
-
-    std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
-    mutable std::mutex _peerListMutex;
-
-    ghoul::io::TcpSocketServer _socketServer;
-    size_t _nextConnectionId = 1;
-    std::atomic_bool _shouldStop = false;
-    std::atomic_size_t _nConnections = 0;
-    std::thread _eventLoopThread;
-    std::thread _serverThread;
-
-    ConcurrentQueue<PeerMessage> _incomingMessages;
-
-    // Message handlers
-    PointDataMessageHandler _pointDataMessageHandler;
-};
+		// if (shouldShowMessage && _message.data().content.size() > 0 ) {
+		// 	//  .type == SoftwareConnection::Message::Type::Color
+		// 	shouldShowMessage = false;
+		// 	std::string content = { std::begin(_message.data().content), std::end(_message.data().content) };
+		// 	LWARNING(fmt::format("Connected with {}", content));
+		// }
+	}
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSERVER___H__

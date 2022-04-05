@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,69 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEMESSAGEQUEUE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEMESSAGEQUEUE___H__
 
-#include <openspace/util/openspacemodule.h>
-
-#include <modules/softwareintegration/network/common/basenetworkengine.h>
-#include <openspace/documentation/documentation.h>
+#include <openspace/util/syncable.h>
+#include <modules/softwareintegration/network/softwareconnection.h>
 
 namespace openspace {
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
+struct PeerMessage {
+	size_t peerId;
+	SoftwareConnection::Message message;
+
+
+};
+
+/**
+ * A double buffered implementation of the Syncable interface.
+ * Users are encouraged to used this class as a default way to synchronize different
+ * C++ data types using the SyncEngine.
+ *
+ * This class aims to handle the synchronization parts and yet act like a regular
+ * instance of T. Implicit casts are supported, however, when accessing member functions
+ * or variables, user may have to do explicit casts.
+ *
+ * ((T&) t).method();
+ *
+ */
+class SyncableMessageQueue : public Syncable {
 public:
-    constexpr static const char* Name = "SoftwareIntegration";
+	/* ============== SyncEngine functions ============== */
+	// virtual void preSync(bool isMaster) override;
+	virtual void encode(SyncBuffer* syncBuffer) override;
+	virtual void decode(SyncBuffer* syncBuffer) override;
+	virtual void postSync(bool isMaster) override;
+	/* ================================================== */
 
-    SoftwareIntegrationModule();
-    ~SoftwareIntegrationModule();
+	/* =============== Utility functions ================ */
+	void push(PeerMessage &&item);
+	void push(const PeerMessage& item);
 
-    void storeData(const std::string& key, const std::vector<float> data);
-    std::vector<float> fetchData(const std::string& key);
+	PeerMessage pop();
 
-    std::vector<documentation::Documentation> documentations() const override;
+	size_t size() const;
+
+	[[nodiscard]] bool empty() const;
+
+	PeerMessage& front();
+	const PeerMessage& front() const;
+
+	PeerMessage& back();
+	const PeerMessage& back() const;
+
+	/* ================================================== */
 
 private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitialize() override;
+	std::mutex _mutex;
+	std::list<PeerMessage> _queue;
+	std::vector<PeerMessage> _messagesToSync;
 
-    BaseNetworkEngine* _server;
-
-    // Centralized storage for large datasets
-    std::map<std::string, std::vector<float>> _temporaryDataStorage;
+	bool showMessageEncode = true;
+	bool showMessageDecode = true;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEMESSAGEQUEUE___H__
