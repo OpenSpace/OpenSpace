@@ -54,7 +54,13 @@ namespace {
         if (selected) {
             const ImageData& image = module->getWwtDataHandler()->getImage(i);
             // Load image into browser
-            LINFO("Loading image " + image.name);
+            std::string str = image.name;
+            str.erase(std::remove_if(str.begin(), str.end(), [](char c) {
+                        // Check if character is ASCII - if it isn't, remove
+                        return !(c >= 0 && c < 128);
+                    }),
+                str.end());
+            LINFO("Loading image " + str);
             selected->selectImage(image, i);
 
             bool isInView = skybrowser::isCoordinateInView(image.equatorialCartesian);
