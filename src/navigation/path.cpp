@@ -40,16 +40,13 @@
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
+#include <glm/ext/quaternion_relational.hpp>
 
 namespace {
     constexpr const char _loggerCat[] = "Path";
     constexpr const float LengthEpsilon = 1e-5f;
 
     constexpr const char SunIdentifier[] = "Sun";
-
-    bool isApproximateSame(const glm::dquat& q1, const glm::dquat& q2, double precision) {
-        return 1.0 - std::abs(glm::dot(q1, q2)) < precision;
-    }
 
     // TODO: where should this documentation be?
     // It's nice to have these to interpret the dictionary when creating the path, but
@@ -192,11 +189,12 @@ bool Path::hasReachedEnd() const {
     }
 
     bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
-    bool isRotationFinished = isApproximateSame(
+    bool isRotationFinished = glm::all(glm::equal(
         _prevPose.rotation,
         _end.rotation(),
-        0.00001
-    );
+        glm::epsilon<double>()
+    ));
+
     return isPositionFinished && isRotationFinished;
 }
 
@@ -265,7 +263,7 @@ glm::dquat Path::linearPathRotation(double t) const {
     const double angle = std::acos(glm::dot(a, b)); // assumes length 1.0 for a & b
 
     // Seconds per pi angles. Per default, it takes 5 seconds to turn 90 degrees
-    double factor = 5.0 / (0.5 * glm::pi<double>()); // TODO: make property to adapt this
+    double factor = 5.0 / glm::half_pi<double>();
     factor *= global::navigationHandler->pathNavigator().linearRotationSpeedFactor();
 
     double turnDuration = std::max(angle * factor, 1.0); // Always at least 1 second
