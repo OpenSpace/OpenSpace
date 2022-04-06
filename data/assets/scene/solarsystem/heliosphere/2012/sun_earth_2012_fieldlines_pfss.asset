@@ -1,0 +1,92 @@
+local transforms = asset.require('../../sun/transforms_heliosphere.asset')
+
+-- Specifying transfer functions
+local transferFunctions = asset.syncedResource({
+  Name = "Fieldlines Transfer Functions",
+  Type = "HttpSynchronization",
+  Identifier = "sun_earth_event-fieldlines-transferfunctions",
+  Version = 1
+})
+
+-- Specifying transfer functions
+local fieldlineData  = asset.syncedResource({
+  Name = "Fieldlines Data",
+  Type = "HttpSynchronization",
+  Identifier = "sun_earth_event-fieldlines-data",
+  Version = 1
+})
+
+local pfssTransitionColorTable = transferFunctions .. "/pfss_transition.txt";
+local pfssTopologyColorTable = transferFunctions .. "/pfss_topology.txt";
+local pfssBsignColorTable = transferFunctions .. "/pfss_bsign.txt";
+
+PFSSPaths = {
+  SolarSoft = fieldlineData .. "/pfss/leilas_solar_soft_july_12_2012/"
+}
+
+local PFSS = {
+  Identifier = "FL_PFSS",
+  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    -- TracingMethod = "PreTracedBinary",
+    SourceFolder = PFSSPaths.SolarSoft,
+    InputFileType = "Osfls",
+    -- StartStateOffset = 515,
+    -- StateStepSize = 100,
+    -- MaxNumStates = 55,
+    ColorTablePaths = {
+      --pfssTransitionColorTable,
+      pfssTopologyColorTable,
+      pfssBsignColorTable,
+    },
+    --ColorTableMinMax = {
+    --  --{0, 1},
+    --  { 0, 2 },
+    --  { -1, 1 },
+    --},
+    --ExtraMinMaxLimits = {
+    --  --{-1, 1},
+    --  { 0, 2 },
+    --  { -1, 1 },
+    --},
+    --Color = {
+    --  Uniform = {0.3861, 1.0, 0.92174, 0.18644}
+    --},
+    --RadialDomainLimits = { 0, 50 },
+    --CartesianDomainLimits = {
+    --  { -50, 50 },
+    --  { -50, 50 },
+    --  { -50, 50 }
+    --},
+    Color = {0.35, 0.51, 0.875, 0.22},
+    FlowColor = { 1, 0.9, 1, 0.74 },
+    LoadAtRuntime = true
+  },
+    GUI = {
+      Name = "Fieldlines PFSS",
+      Path = "/Solar System/Heliosphere"
+    }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(PFSS)
+  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.color", { 1, 0.9, 1, 0.74 })
+  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSize", 5)
+  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSpacing", 250)
+  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.speed", 75.0)
+  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.reversed", true)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(PFSS)
+end)
+
+asset.meta = {
+  Name = "Fieldlines from PFSS model of 2012 event",
+  Version = "1.0",
+  Description = "Magnetic fieldlines from PFSS model for a 2012 CME event",
+  Author = "CCMC",
+  URL = "",
+  License = "CC-BY"
+}

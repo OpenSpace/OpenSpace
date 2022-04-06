@@ -70,7 +70,7 @@ namespace {
         "Color Table/Transfer Function to use for 'By Quantity' coloring."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
-        "Uniform",
+        "Uniform Color",
         "Uniform Line Color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'."
     };
@@ -105,9 +105,9 @@ namespace {
         "Valid radial range. [Min, Max]"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
-        "Color",
-        "Color",
-        "Color of particles."
+        "FlowColor",
+        "Flow Color",
+        "Color of particles flow direction indication."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
@@ -197,6 +197,9 @@ namespace {
         // Set to true if you are streaming data during runtime
         std::optional<bool> loadAtRuntime;
 
+        // [[codegen::verbatim(ColorUniformInfo.description)]]
+        std::optional<glm::vec4> color [[codegen::color()]];
+
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters
         std::optional<std::vector<std::string>> colorTablePaths;
@@ -214,6 +217,9 @@ namespace {
         // Enables flow, showing the direction, but not accurate speed, that particles 
         // would be traveling
         std::optional<bool> flowEnabled;
+
+        // [[codegen::verbatim(FlowColorInfo.description)]]
+        std::optional<glm::vec4> flowColor;
 
         // [[codegen::verbatim(MaskingEnabledInfo.description)]]
         std::optional<bool> maskingEnabled;
@@ -380,9 +386,9 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             "{} contains no {} files", sourcePath.string(), fileTypeString
         ));
     }
-
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
+    _flowColor = p.flowColor.value_or(_flowColor);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _modelStr = p.simulationModel.value_or(_modelStr);
@@ -390,6 +396,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
     _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
+    _colorUniform = p.color.value_or(_colorUniform);
 
     _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
     _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
@@ -448,32 +455,41 @@ void RenderableFieldlinesSequence::initialize() {
     _transferFunction = std::make_unique<TransferFunction>(
         absPath(_colorTablePaths[0]).string()
     );
+}
+
+void RenderableFieldlinesSequence::initializeGL() {
+    // Setup shader program
+    _shaderProgram = global::renderEngine->buildRenderProgram(
+        "FieldlinesSequence",
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
+    );
 
     // Extract source file type specific information from dictionary
     // & get states from source
     switch (_inputFileType) {
-        case SourceFileType::Cdf:
-            if (!getStatesFromCdfFiles()) {
-                return;
-            }
-            break;
-        case SourceFileType::Json:
-            if (!loadJsonStatesIntoRAM()) {
-                return;
-            }
-            break;
-        case SourceFileType::Osfls:
-            if (_loadingStatesDynamically) {
-                if (!prepareForOsflsStreaming()) {
-                    return;
-                }
-            }
-            else {
-                loadOsflsStatesIntoRAM();
-            }
-            break;
-        default:
+    case SourceFileType::Cdf:
+        if (!getStatesFromCdfFiles()) {
             return;
+        }
+        break;
+    case SourceFileType::Json:
+        if (!loadJsonStatesIntoRAM()) {
+            return;
+        }
+        break;
+    case SourceFileType::Osfls:
+        if (_loadingStatesDynamically) {
+            if (!prepareForOsflsStreaming()) {
+                return;
+            }
+        }
+        else {
+            loadOsflsStatesIntoRAM();
+        }
+        break;
+    default:
+        return;
     }
 
     // No need to store source paths in memory if they are already in RAM
@@ -489,17 +505,7 @@ void RenderableFieldlinesSequence::initialize() {
 
     computeSequenceEndTime();
     setModelDependentConstants();
-
     setupProperties();
-}
-
-void RenderableFieldlinesSequence::initializeGL() {
-    // Setup shader program
-    _shaderProgram = global::renderEngine->buildRenderProgram(
-        "FieldlinesSequence",
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
-    );
 
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);

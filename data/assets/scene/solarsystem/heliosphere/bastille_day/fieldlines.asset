@@ -36,9 +36,6 @@ local fieldlines = {
       { 100, 2000 }
     },
     SimulationModel = "mas",
-    Color = {
-      Uniform = { 0.0, 0.725, 0.75, 1.0 }
-    }
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
