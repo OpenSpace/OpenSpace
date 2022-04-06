@@ -88,6 +88,8 @@ protected:
     virtual void bindTexture() = 0;
     virtual void unbindTexture();
 
+    float opacity() const;
+
     properties::BoolProperty _enabled;
     properties::BoolProperty _usePerspectiveProjection;
     properties::BoolProperty _useRadiusAzimuthElevation;
@@ -108,6 +110,7 @@ protected:
     properties::Vec3Property _multiplyColor;
     properties::Vec4Property _backgroundColor;
     properties::FloatProperty _opacity;
+    properties::FloatProperty _fade;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);

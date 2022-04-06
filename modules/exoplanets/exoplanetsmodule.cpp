@@ -24,15 +24,29 @@
 
 #include <modules/exoplanets/exoplanetsmodule.h>
 
+#include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/timeconversion.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
+#include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 
 #include "exoplanetsmodule_lua.inl"
 
@@ -256,41 +270,6 @@ float ExoplanetsModule::habitableZoneOpacity() const {
     return _habitableZoneOpacity;
 }
 
-scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "exoplanets";
-    res.functions = {
-        {
-            "addExoplanetSystem",
-            &exoplanets::luascriptfunctions::addExoplanetSystem,
-            "string or list of strings",
-            "Add one or multiple exoplanet systems to the scene, as specified by the "
-            "input. An input string should be the name of the system host star"
-        },
-        {
-            "removeExoplanetSystem",
-            &exoplanets::luascriptfunctions::removeExoplanetSystem,
-            "string",
-            "Removes the nodes of the specified exoplanet system from the scene graph"
-        },
-        {
-            "listAvailableExoplanetSystems",
-            &exoplanets::luascriptfunctions::listAvailableExoplanetSystems,
-            "",
-            "Prints a list with the names of all exoplanet systems that can be added to "
-            "the scene graph to the OpenSpace Log"
-        },
-        {
-            "getListOfExoplanets",
-            &exoplanets::luascriptfunctions::getListOfExoplanets,
-            "",
-            "Gets a list with the names of all exoplanet systems"
-        }
-    };
-
-    return res;
-}
-
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
@@ -340,6 +319,18 @@ std::vector<documentation::Documentation> ExoplanetsModule::documentations() con
     return {
         ExoplanetsDataPreparationTask::documentation(),
         RenderableOrbitDisc::Documentation()
+    };
+}
+
+scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
+    return {
+        "exoplanets",
+        {
+            codegen::lua::AddExoplanetSystem,
+            codegen::lua::RemoveExoplanetSystem,
+            codegen::lua::GetListOfExoplanets,
+            codegen::lua::ListAvailableExoplanetSystems
+        }
     };
 }
 

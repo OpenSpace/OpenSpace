@@ -124,6 +124,16 @@ namespace {
         "completely transparent."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+        "Fade",
+        "Fade",
+        "This value is used by the system to be able to fade out renderables "
+        "independently from the Opacity value selected by the user. This value should "
+        "not be directly manipulated through a user interface, but instead used by other "
+        "components of the system programmatically",
+        openspace::properties::Property::Visibility::Developer
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
@@ -350,6 +360,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec4(1.f)
     )
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
+    , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -383,6 +394,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_multiplyColor);
     addProperty(_backgroundColor);
     addProperty(_opacity);
+    addProperty(_fade);
     addProperty(_localRotation);
 
 
@@ -589,7 +601,7 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     _shader->activate();
 
     _shader->setUniform(_uniformCache.color, _multiplyColor);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
 
     _shader->setUniform(
@@ -612,5 +624,9 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 }
 
 void ScreenSpaceRenderable::unbindTexture() {}
+
+float ScreenSpaceRenderable::opacity() const {
+    return _opacity * _fade;
+}
 
 } // namespace openspace

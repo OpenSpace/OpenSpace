@@ -25,6 +25,7 @@
 #include <openspace/engine/moduleengine.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -168,12 +169,7 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
     return {
         "modules",
         {
-            {
-                "isLoaded",
-                &luascriptfunctions::isLoaded,
-                "string",
-                "Checks whether a specific module is loaded"
-            }
+            codegen::lua::IsLoaded
         }
     };
 }

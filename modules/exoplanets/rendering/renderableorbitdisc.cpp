@@ -176,7 +176,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.offset, _offset);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(_uniformCache.eccentricity, _eccentricity);
     _shader->setUniform(_uniformCache.semiMajorAxis, _size);
 

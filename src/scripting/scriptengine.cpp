@@ -24,16 +24,19 @@
 
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/json_helper.h>
 #include <openspace/util/syncbuffer.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
 
@@ -43,6 +46,13 @@ namespace {
     constexpr const char* _loggerCat = "ScriptEngine";
 
     constexpr const int TableOffset = -3; // top-first argument-second argument
+
+    struct [[codegen::Dictionary(Documentation)]] Parameters {
+        std::string name;
+        std::map<std::string, std::string> arguments;
+        std::optional<std::string> returnValue [[codegen::key("Return")]];
+        std::optional<std::string> documentation;
+    };
 
     std::vector<std::string> luaFunctions(const openspace::scripting::LuaLibrary& library,
                                           std::string prefix)
@@ -65,8 +75,8 @@ namespace {
             result.insert(result.end(), r.begin(), r.end());
         }
 
-        for (const LuaLibrary::Documentation& doc : library.documentations) {
-            result.push_back(total + doc.name);
+        for (const LuaLibrary::Function& function : library.documentations) {
+            result.push_back(total + function.name);
         }
 
         return result;
@@ -87,7 +97,22 @@ namespace {
         for (const LuaLibrary::Function& f : library.functions) {
             json << "{";
             json << fmt::format(replStr, "name", f.name);
-            json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
+            json << "\"arguments\": [";
+            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+                json << "{";
+                json << fmt::format(replStr, "name", escapedJson(arg.name));
+                json << fmt::format(replStr, "type", escapedJson(arg.type));
+                json << fmt::format(
+                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
+                );
+                json << "}";
+
+                if (&arg != &f.arguments.back()) {
+                    json << ",";
+                }
+            }
+            json << "],";
+            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
             json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
             if (&f != &library.functions.back() || !library.documentations.empty()) {
@@ -95,13 +120,29 @@ namespace {
             }
         }
 
-        for (const LuaLibrary::Documentation& doc : library.documentations) {
+
+        for (const LuaLibrary::Function& f : library.documentations) {
             json << "{";
-            json << fmt::format(replStr, "name", doc.name);
-            json << fmt::format(replStr, "arguments", escapedJson(doc.parameter));
-            json << fmt::format(replStr2, "help", escapedJson(doc.description));
+            json << fmt::format(replStr, "name", f.name);
+            json << "\"arguments\": [";
+            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+                json << "{";
+                json << fmt::format(replStr, "name", escapedJson(arg.name));
+                json << fmt::format(replStr, "type", escapedJson(arg.type));
+                json << fmt::format(
+                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
+                );
+                json << "}";
+
+                if (&arg != &f.arguments.back()) {
+                    json << ",";
+                }
+            }
+            json << "],";
+            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
+            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
-            if (&doc != &library.documentations.back()) {
+            if (&f != &library.documentations.back()) {
                 json << ",";
             }
         }
@@ -117,6 +158,8 @@ namespace {
         }
         json << "]}";
     }
+
+#include "scriptengine_codegen.cpp"
 } // namespace
 
 namespace openspace::scripting {
@@ -386,165 +429,38 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         else {
             lua_pushnil(state);
             while (lua_next(state, -2)) {
-                ghoul::lua::push(state, "Name");
-                lua_gettable(state, -2);
-                const std::string name = lua_tostring(state, -1);
+                ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
+                try {
+                    const Parameters p = codegen::bake<Parameters>(d);
+
+                    LuaLibrary::Function func;
+                    func.name = p.name;
+                    for (const std::pair<const std::string, std::string>& p : p.arguments)
+                    {
+                        LuaLibrary::Function::Argument arg;
+                        arg.name = p.first;
+                        arg.type = p.second;
+                        func.arguments.push_back(arg);
+                    }
+                    func.returnType = p.returnValue.value_or(func.returnType);
+                    func.helpText = p.documentation.value_or(func.helpText);
+                    library.documentations.push_back(std::move(func));
+                }
+                catch (const documentation::SpecificationError& e) {
+                    for (const documentation::TestResult::Offense& o : e.result.offenses)
+                    {
+                        LERRORC(o.offender, ghoul::to_string(o.reason));
+                    }
+                    for (const documentation::TestResult::Warning& w : e.result.warnings)
+                    {
+                        LWARNINGC(w.offender, ghoul::to_string(w.reason));
+                    }
+                }
                 lua_pop(state, 1);
-
-                ghoul::lua::push(state, "Arguments");
-                lua_gettable(state, -2);
-                const std::string arguments = lua_tostring(state, -1);
-                lua_pop(state, 1);
-
-                ghoul::lua::push(state, "Documentation");
-                lua_gettable(state, -2);
-                const std::string documentation = lua_tostring(state, -1);
-                lua_pop(state, 2);
-
-                library.documentations.push_back({ name, arguments, documentation });
             }
         }
         lua_pop(state, 1);
     }
-}
-
-void ScriptEngine::addBaseLibrary() {
-    ZoneScoped
-
-    LuaLibrary lib = {
-        "",
-        {
-            {
-                "printTrace",
-                &luascriptfunctions::printTrace,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Trace'"
-            },
-            {
-                "printDebug",
-                &luascriptfunctions::printDebug,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Debug'"
-            },
-            {
-                "printInfo",
-                &luascriptfunctions::printInfo,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Info'"
-            },
-            {
-                "printWarning",
-                &luascriptfunctions::printWarning,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Warning'"
-            },
-            {
-                "printError",
-                &luascriptfunctions::printError,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Error'"
-            },
-            {
-                "printFatal",
-                &luascriptfunctions::printFatal,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Fatal'"
-            },
-            {
-                "absPath",
-                &luascriptfunctions::absolutePath,
-                "string",
-                "Returns the absolute path to the passed path, resolving path tokens as "
-                "well as resolving relative paths"
-            },
-            {
-                "fileExists",
-                &luascriptfunctions::fileExists,
-                "string",
-                "Checks whether the provided file exists."
-            },
-            {
-                "readFile",
-                &luascriptfunctions::readFile,
-                "string",
-                "Reads a file from disk and return its contents"
-            },
-            {
-                "directoryExists",
-                &luascriptfunctions::directoryExists,
-                "string",
-                "Chckes whether the provided directory exists."
-            },
-            {
-                "setPathToken",
-                &luascriptfunctions::setPathToken,
-                "string, string",
-                "Registers a new path token provided by the first argument to the path "
-                "provided in the second argument"
-            },
-            {
-                "walkDirectory",
-                &luascriptfunctions::walkDirectory,
-                "string [bool, bool]",
-                "Walks a directory and returns all contents (files and directories) of "
-                "the directory as absolute paths. The first argument is the path of the "
-                "directory that should be walked, the second argument determines if the "
-                "walk is recursive and will continue in contained directories. The third "
-                "argument determines whether the table that is returned is sorted."
-            },
-            {
-                "walkDirectoryFiles",
-                &luascriptfunctions::walkDirectoryFiles,
-                "string [bool, bool]",
-                "Walks a directory and returns the files of the directory as absolute "
-                "paths. The first argument is the path of the directory that should be "
-                "walked, the second argument determines if the walk is recursive and "
-                "will continue in contained directories. The third argument determines "
-                "whether the table that is returned is sorted."
-            },
-            {
-                "walkDirectoryFolder",
-                &luascriptfunctions::walkDirectoryFolder,
-                "string [bool, bool]",
-                "Walks a directory and returns the subfolders of the directory as "
-                "absolute paths. The first argument is the path of the directory that "
-                "should be walked, the second argument determines if the walk is "
-                "recursive and will continue in contained directories. The third "
-                "argument determines whether the table that is returned is sorted."
-            },
-            {
-                "directoryForPath",
-                &luascriptfunctions::directoryForPath,
-                "string",
-                "This function extracts the directory part of the passed path. For "
-                "example, if the parameter is 'C:/OpenSpace/foobar/foo.txt', this "
-                "function returns 'C:/OpenSpace/foobar'."
-            },
-            {
-                "unzipFile",
-                &luascriptfunctions::unzipFile,
-                "string, string [bool]",
-                "This function extracts the contents of a zip file. The first "
-                "argument is the path to the zip file. The second argument is the "
-                "directory where to put the extracted files. If the third argument is "
-                "true, then the compressed file will be deleted after the decompression "
-                 "is finished."
-            },
-            {
-                "saveLastChangeToProfile",
-                &luascriptfunctions::saveLastChangeToProfile,
-                "",
-                "This function saves the last script log action into the profile."
-            }
-        }
-    };
-    addLibrary(lib);
 }
 
 void ScriptEngine::remapPrintFunction() {
@@ -684,7 +600,7 @@ void ScriptEngine::preSync(bool isMaster) {
         return;
     }
 
-    std::lock_guard guard(_slaveScriptsMutex);
+    std::lock_guard guard(_clientScriptsMutex);
     while (!_incomingScripts.empty()) {
         QueueItem item = std::move(_incomingScripts.front());
         _incomingScripts.pop();
@@ -718,14 +634,14 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     ZoneScoped
 
-    std::lock_guard guard(_slaveScriptsMutex);
+    std::lock_guard guard(_clientScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
     for (size_t i = 0; i < nScripts; ++i) {
         std::string script;
         syncBuffer->decode(script);
-        _slaveScriptQueue.push(std::move(script));
+        _clientScriptQueue.push(std::move(script));
     }
 }
 
@@ -747,11 +663,11 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        std::lock_guard guard(_slaveScriptsMutex);
-        while (!_slaveScriptQueue.empty()) {
+        std::lock_guard guard(_clientScriptsMutex);
+        while (!_clientScriptQueue.empty()) {
             try {
-                runScript(_slaveScriptQueue.front());
-                _slaveScriptQueue.pop();
+                runScript(_clientScriptQueue.front());
+                _clientScriptQueue.pop();
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
@@ -769,6 +685,83 @@ void ScriptEngine::queueScript(const std::string& script,
     if (!script.empty()) {
         _incomingScripts.push({ script, remoteScripting, callback });
     }
+}
+
+
+void ScriptEngine::addBaseLibrary() {
+    ZoneScoped
+
+    LuaLibrary lib = {
+        "",
+        {
+            {
+                "printTrace",
+                &luascriptfunctions::printTrace,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Trace'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead."
+            },
+            {
+                "printDebug",
+                &luascriptfunctions::printDebug,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Debug'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead."
+            },
+            {
+                "printInfo",
+                &luascriptfunctions::printInfo,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Info'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead."
+            },
+            {
+                "printWarning",
+                &luascriptfunctions::printWarning,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Warning'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead."
+            },
+            {
+                "printError",
+                &luascriptfunctions::printError,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Error'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead."
+            },
+            {
+                "printFatal",
+                &luascriptfunctions::printFatal,
+                { { "", "*" } },
+                "",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Fatal'. For Boolean, numbers, and strings, the internal values are "
+                "printed, for all other types, the type is printed instead."
+            },
+            codegen::lua::AbsolutePath,
+            codegen::lua::SetPathToken,
+            codegen::lua::FileExists,
+            codegen::lua::ReadFile,
+            codegen::lua::DirectoryExists,
+            codegen::lua::WalkDirectory,
+            codegen::lua::WalkDirectoryFiles,
+            codegen::lua::WalkDirectoryFolder,
+            codegen::lua::DirectoryForPath,
+            codegen::lua::UnzipFile,
+            codegen::lua::SaveLastChangeToProfile
+        }
+    };
+    addLibrary(lib);
 }
 
 } // namespace openspace::scripting

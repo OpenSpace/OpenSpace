@@ -22,63 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/camera/camera.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/navigationstate.h>
-#include <openspace/navigation/pathnavigator.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/query/query.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <glm/gtx/vector_angle.hpp>
-
-namespace openspace::luascriptfunctions {
-
-int isFlying(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isFlying");
+namespace {
+ 
+// Returns true if a camera path is currently running, and false otherwise.
+[[codegen::luawrap]] bool isFlying() {
+    using namespace openspace;
     bool hasFinished = global::navigationHandler->pathNavigator().hasFinished();
-    ghoul::lua::push(L, !hasFinished);
-    return 1;
+    return hasFinished;
 }
 
-int continuePath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
-    global::navigationHandler->pathNavigator().continuePath();
-    return 0;
+// Continue playing a paused camera path.
+[[codegen::luawrap]] void continuePath() {
+    openspace::global::navigationHandler->pathNavigator().continuePath();
 }
 
-int pausePath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::pausePath");
-    global::navigationHandler->pathNavigator().pausePath();
-    return 0;
+// Pause a playing camera path.
+[[codegen::luawrap]] void pausePath() {
+    openspace::global::navigationHandler->pathNavigator().pausePath();
 }
 
-int stopPath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPath");
-    global::navigationHandler->pathNavigator().abortPath();
-    return 0;
+// Stops a path, if one is being played.
+[[codegen::luawrap]] void stopPath() {
+    openspace::global::navigationHandler->pathNavigator().abortPath();
 }
 
-int flyTo(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::flyTo");
-    auto [nodeIdentifier, useUpFromTargetOrDuration, duration] = ghoul::lua::values<
-        std::string, std::optional<std::variant<bool, double>>, std::optional<double>
-    >(L);
-
+/**
+ * Move the camera to the node with the specified identifier. The optional double
+ * specifies the duration of the motion, in seconds. If the optional bool is set to true
+ * the target up vector for camera is set based on the target node. Either of the optional
+ * parameters can be left out.
+ */
+[[codegen::luawrap]] void flyTo(std::string nodeIdentifier,
+                      std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,
+                                                           std::optional<double> duration)
+{
+    using namespace openspace;
     if (useUpFromTargetOrDuration.has_value() &&
-        std::holds_alternative<double>(*useUpFromTargetOrDuration)
-        && duration.has_value())
+        std::holds_alternative<double>(*useUpFromTargetOrDuration) &&
+        duration.has_value())
     {
-        return ghoul::lua::luaError(L, "Duration cannot be specified twice");
+        throw ghoul::lua::LuaError("Duration cannot be specified twice");
     }
 
     if (!sceneGraphNode(nodeIdentifier)) {
-        return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
+        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
 
     ghoul::Dictionary insDict;
@@ -94,7 +81,7 @@ int flyTo(lua_State* L) {
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
             if (d <= 0.0) {
-                return ghoul::lua::luaError(L, "Duration must be larger than zero");
+                throw ghoul::lua::LuaError("Duration must be larger than zero");
             }
             insDict.setValue("Duration", d);
         }
@@ -102,7 +89,7 @@ int flyTo(lua_State* L) {
     if (duration.has_value()) {
         double d = *duration;
         if (d <= 0.0) {
-            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+            throw ghoul::lua::LuaError("Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
     }
@@ -112,20 +99,22 @@ int flyTo(lua_State* L) {
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
-    return 0;
 }
 
-int flyToHeight(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::flyToHeight");
-    auto [nodeIdentifier, height, useUpFromTargetOrDuration, duration] =
-        ghoul::lua::values<
-            std::string, double, std::optional<std::variant<bool, double>>,
-            std::optional<double>
-        >(L);
-
-
+/**
+ * Move the camera to the node with the specified identifier. The second argument is the
+ * desired target height above the target node's bounding sphere, in meters. The optional
+ * double specifies the duration of the motion, in seconds. If the optional bool is set to
+ * true, the target up vector for camera is set based on the target node. Either of the
+ * optional parameters can be left out.
+ */
+[[codegen::luawrap]] void flyToHeight(std::string nodeIdentifier, double height,
+                      std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,
+                                                           std::optional<double> duration)
+{
+    using namespace openspace;
     if (!sceneGraphNode(nodeIdentifier)) {
-        return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
+        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
 
     ghoul::Dictionary insDict;
@@ -142,7 +131,7 @@ int flyToHeight(lua_State* L) {
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
             if (d <= 0.0) {
-                return ghoul::lua::luaError(L, "Duration must be larger than zero");
+                throw ghoul::lua::LuaError("Duration must be larger than zero");
             }
             insDict.setValue("Duration", d);
         }
@@ -150,7 +139,7 @@ int flyToHeight(lua_State* L) {
     if (duration.has_value()) {
         double d = *duration;
         if (d <= 0.0) {
-            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+            throw ghoul::lua::LuaError("Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
     }
@@ -160,27 +149,27 @@ int flyToHeight(lua_State* L) {
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
-
-    return 0;
 }
 
-int flyToNavigationState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::flyToNavigationState");
-    auto [navigationState, duration] =
-        ghoul::lua::values<ghoul::Dictionary, std::optional<double>>(L);
-
+/**
+ * Create a path to the navigation state described by the input table. The optional
+ * double specifies the target duration of the motion, in seconds. Note that roll must be
+ * included for the target up direction to be taken into account.
+ */
+[[codegen::luawrap]] void flyToNavigationState(ghoul::Dictionary navigationState,
+                                               std::optional<double> duration)
+{
+    using namespace openspace;
     try {
-        openspace::documentation::testSpecificationAndThrow(
+        documentation::testSpecificationAndThrow(
             interaction::NavigationState::Documentation(),
             navigationState,
             "NavigationState"
         );
     }
-    catch (documentation::SpecificationError& e) {
+    catch (const documentation::SpecificationError& e) {
         LERRORC("flyToNavigationState", ghoul::to_string(e.result));
-        return ghoul::lua::luaError(
-            L, fmt::format("Unable to create a path: {}", e.what())
-        );
+        throw ghoul::lua::LuaError(fmt::format("Unable to create a path: {}", e.what()));
     }
 
     ghoul::Dictionary instruction;
@@ -190,7 +179,7 @@ int flyToNavigationState(lua_State* L) {
     if (duration.has_value()) {
         double d = *duration;
         if (d <= 0.0) {
-            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+            throw ghoul::lua::LuaError("Duration must be larger than zero");
         }
         instruction.setValue("Duration", d);
     }
@@ -200,16 +189,17 @@ int flyToNavigationState(lua_State* L) {
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
-    return 0;
 }
 
-int zoomToFocus(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::zoomToFocus");
-    std::optional<double> duration = ghoul::lua::value<std::optional<double>>(L);
-
+/**
+ * Zoom linearly to the current focus node, using the default distance. The optional input
+ * parameter specifies the duration for the motion, in seconds.
+ */
+[[codegen::luawrap]] void zoomToFocus(std::optional<double> duration) {
+    using namespace openspace;
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        return ghoul::lua::luaError(L, "Could not determine current focus node");
+        throw ghoul::lua::LuaError("Could not determine current focus node");
     }
 
     ghoul::Dictionary insDict;
@@ -220,7 +210,7 @@ int zoomToFocus(lua_State* L) {
     if (duration.has_value()) {
         double d = *duration;
         if (d <= 0.0) {
-            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+            throw ghoul::lua::LuaError("Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
     }
@@ -230,22 +220,23 @@ int zoomToFocus(lua_State* L) {
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
-
-    return 0;
 }
 
-int zoomToDistance(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::zoomToDistance");
-    auto [distance, duration] =
-        ghoul::lua::values<double, std::optional<double>>(L);
-
+/**
+ * Fly linearly to a specific distance in relation to the focus node. The distance is
+ * given in meters above the bounding sphere of the current focus node. The optional input
+ * parameter specifies the duration for the motion, in seconds.
+ */
+[[codegen::luawrap]] void zoomToDistance(double distance, std::optional<double> duration)
+{
+    using namespace openspace;
     if (distance <= 0.0) {
-        return ghoul::lua::luaError(L, "The distance must be larger than zero");
+        throw ghoul::lua::LuaError("The distance must be larger than zero");
     }
 
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        return ghoul::lua::luaError(L, "Could not determine current focus node");
+        throw ghoul::lua::LuaError("Could not determine current focus node");
     }
 
     ghoul::Dictionary insDict;
@@ -257,7 +248,7 @@ int zoomToDistance(lua_State* L) {
     if (duration.has_value()) {
         double d = *duration;
         if (d <= 0.0) {
-            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+            throw ghoul::lua::LuaError("Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
     }
@@ -267,22 +258,26 @@ int zoomToDistance(lua_State* L) {
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
-
-    return 0;
 }
 
-int zoomToDistanceRelative(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::zoomToDistanceRelative");
-    auto [distance, duration] =
-        ghoul::lua::values<double, std::optional<double>>(L);
-
+/**
+ * Fly linearly to a specific distance in relation to the focus node. The distance is
+ * given as a multiple of the bounding sphere of the current focus node. That is, a value
+ * of 1 will result in a position at a distance of one times the size of the bounding
+ * sphere away from the object. The optional input parameter specifies the duration for
+ * the motion, in seconds.
+ */
+[[codegen::luawrap]] void zoomToDistanceRelative(double distance,
+                                                 std::optional<double> duration)
+{
+    using namespace openspace;
     if (distance <= 0.0) {
-        return ghoul::lua::luaError(L, "The distance must be larger than zero");
+        throw ghoul::lua::LuaError("The distance must be larger than zero");
     }
 
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        return ghoul::lua::luaError(L, "Could not determine current focus node");
+        throw ghoul::lua::LuaError("Could not determine current focus node");
     }
 
     distance *= node->boundingSphere();
@@ -296,7 +291,7 @@ int zoomToDistanceRelative(lua_State* L) {
     if (duration.has_value()) {
         double d = *duration;
         if (d <= 0.0) {
-            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+            throw ghoul::lua::LuaError("Duration must be larger than zero");
         }
         insDict.setValue("Duration", d);
     }
@@ -306,19 +301,17 @@ int zoomToDistanceRelative(lua_State* L) {
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
-
-    return 0;
 }
 
-int createPath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createPath");
-    ghoul::Dictionary dictionary = ghoul::lua::value<ghoul::Dictionary>(L);
-
-    global::navigationHandler->pathNavigator().createPath(dictionary);
+// Create a camera path as described by the lua table input argument.
+[[codegen::luawrap]] void createPath(ghoul::Dictionary path) {
+    using namespace openspace;
+    global::navigationHandler->pathNavigator().createPath(path);
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
-    return 0;
 }
 
-} // namespace openspace::luascriptfunctions
+#include "pathnavigator_lua_codegen.cpp"
+
+} // namespace

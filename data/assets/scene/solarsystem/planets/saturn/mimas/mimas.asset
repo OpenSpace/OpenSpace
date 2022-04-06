@@ -27,7 +27,7 @@ local Mimas = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = 198000,
+    Radii = { 207000, 197000, 191000 },
     SegmentsPerPatch = 64,
     Layers = { },
     Labels = {

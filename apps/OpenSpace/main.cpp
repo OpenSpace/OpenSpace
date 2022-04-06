@@ -1044,9 +1044,10 @@ int main(int argc, char* argv[]) {
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
+        std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
+    LDEBUG(fmt::format("Registering ${{BIN}} to {}", absPath("${BIN}")));
 
     //
     // Parse commandline arguments
@@ -1318,7 +1319,7 @@ int main(int argc, char* argv[]) {
 #endif // __APPLE__
 
 
-    // Do not print message if slaves are waiting for the master
+    // Do not print message if clients are waiting for the master
     // Only timeout after 15 minutes
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
 

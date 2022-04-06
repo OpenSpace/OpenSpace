@@ -11,6 +11,7 @@ asset.require("./communications/other_comm")
 asset.require("./communications/gorizont")
 asset.require("./communications/raduga")
 asset.require("./communications/molniya")
+asset.require("./communications/starlink")
 
 
 asset.meta = {

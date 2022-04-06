@@ -65,7 +65,12 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
             );
         }
 
-        node->initialize();
+        try {
+            node->initialize();
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+        }
         std::lock_guard g(_mutex);
         _initializedNodes.push_back(node);
         _initializingNodes.erase(node);

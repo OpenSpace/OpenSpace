@@ -39,10 +39,10 @@ namespace openspace::interaction {
 
 class Path {
 public:
-    enum Type {
-        AvoidCollision,
-        Linear,
+    enum class Type {
+        AvoidCollision = 0,
         ZoomOutOverview,
+        Linear,
         AvoidCollisionWithLookAt // @TODO (2021-08-13, emmbr) This type right now leads
                                  // to rapid rotations, but is useful in specific
                                  // scenarios, e.g. close to surfaces. Later we want to
@@ -86,6 +86,13 @@ public:
      * Return wether the path has reached its end point or not
      */
     bool hasReachedEnd() const;
+
+    /**
+     * Compute the interpolated camera pose at a certain distance along a *linear*
+     * path. Note that the linear path is a special case, to avoid risks of precision
+     * problems for long paths
+     */
+    CameraPose linearInterpolatedPose(double distance, double displacement);
 
     /**
      * Compute the interpolated camera pose at a certain distance along the path

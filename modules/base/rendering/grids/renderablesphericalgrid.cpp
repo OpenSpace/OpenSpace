@@ -103,6 +103,9 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    // Radius is always 1
+    setBoundingSphere(1.0);
 }
 
 bool RenderableSphericalGrid::isReady() const {
@@ -169,7 +172,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
-    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:

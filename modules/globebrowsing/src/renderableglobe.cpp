@@ -967,8 +967,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setUniform("orenNayarRoughness", onr);
     }
 
-    _localRenderer.program->setUniform("opacity", _opacity);
-    _globalRenderer.program->setUniform("opacity", _opacity);
+    _localRenderer.program->setUniform("opacity", opacity());
+    _globalRenderer.program->setUniform("opacity", opacity());
 
 
     if (_globalRenderer.updatedSinceLastCall) {

@@ -27,17 +27,27 @@
 #include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/pathnavigator.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/vector_angle.hpp>
 #include <vector>
+
+#include "pathnavigator_lua.inl"
 
 namespace {
     constexpr const char* _loggerCat = "PathNavigator";
@@ -59,7 +69,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
         "Speed Scale",
-        "Scale factor that the speed will be mulitplied with during path traversal. "
+        "Scale factor that the speed will be multiplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
         "value is larger than or smaller than one."
     };
@@ -80,6 +90,14 @@ namespace {
         "object."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RotationSpeedFactorInfo = {
+        "RotationSpeedFactor",
+        "Rotation Speed Factor (Linear Path)",
+        "Affects how fast the camera rotates to the target rotation during a linear "
+        "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
+        "seconds. A value of 2 means twice that fast, and so on."
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo =
     {
         "MinimalValidBoundingSphere",
@@ -97,8 +115,6 @@ namespace {
     };
 } // namespace
 
-#include "pathnavigator_lua.inl"
-
 namespace openspace::interaction {
 
 PathNavigator::PathNavigator()
@@ -111,14 +127,15 @@ PathNavigator::PathNavigator()
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
     , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
+    , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 1.f, 0.1f, 2.f)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
     _defaultPathType.addOptions({
-        { Path::Type::AvoidCollision, "AvoidCollision" },
-        { Path::Type::ZoomOutOverview, "ZoomOutOverview"},
-        { Path::Type::Linear, "Linear" },
-        { Path::Type::AvoidCollisionWithLookAt, "AvoidCollisionWithLookAt"}
+        { static_cast<int>(Path::Type::AvoidCollision), "AvoidCollision" },
+        { static_cast<int>(Path::Type::ZoomOutOverview), "ZoomOutOverview" },
+        { static_cast<int>(Path::Type::Linear), "Linear" },
+        { static_cast<int>(Path::Type::AvoidCollisionWithLookAt), "AvoidCollisionWithLookAt"}
     });
     addProperty(_defaultPathType);
 
@@ -126,6 +143,7 @@ PathNavigator::PathNavigator()
     addProperty(_speedScale);
     addProperty(_applyIdleBehaviorOnFinish);
     addProperty(_arrivalDistanceFactor);
+    addProperty(_linearRotationSpeedFactor);
     addProperty(_minValidBoundingSphere);
 
     _relevantNodeTags = std::vector<std::string>{
@@ -156,6 +174,10 @@ double PathNavigator::speedScale() const {
 
 double PathNavigator::arrivalDistanceFactor() const {
     return _arrivalDistanceFactor;
+}
+
+float PathNavigator::linearRotationSpeedFactor() const {
+    return _linearRotationSpeedFactor;
 }
 
 bool PathNavigator::hasCurrentPath() const {
@@ -335,8 +357,7 @@ void PathNavigator::continuePath() {
 }
 
 Path::Type PathNavigator::defaultPathType() const {
-    const int pathType = _defaultPathType;
-    return Path::Type(pathType);
+    return static_cast<Path::Type>(_defaultPathType.value());
 }
 
 double PathNavigator::minValidBoundingSphere() const {
@@ -467,95 +488,17 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
     return {
         "pathnavigation",
         {
-            {
-                "isFlying",
-                &luascriptfunctions::isFlying,
-                "",
-                "Returns true if a camera path is currently running, and false otherwise"
-            },
-            {
-                "continuePath",
-                &luascriptfunctions::continuePath,
-                "",
-                "Continue playing a paused camera path"
-            },
-            {
-                "pausePath",
-                &luascriptfunctions::pausePath,
-                "",
-                "Pause a playing camera path"
-            },
-            {
-                "stopPath",
-                &luascriptfunctions::stopPath,
-                "",
-                "Stops a path, if one is being played"
-            },
-            {
-                "flyTo",
-                &luascriptfunctions::flyTo,
-                "string [, bool, double]",
-                "Move the camera to the node with the specified identifier. The optional "
-                "double specifies the duration of the motion, in seconds. If the optional "
-                "bool is set to true the target up vector for camera is set based on the "
-                "target node. Either of the optional parameters can be left out."
-            },
-            {
-                "flyToHeight",
-                &luascriptfunctions::flyToHeight,
-                "string, double [, bool, double]",
-                "Move the camera to the node with the specified identifier. The second "
-                "argument is the desired target height above the target node's bounding "
-                "sphere, in meters. The optional double specifies the duration of the "
-                "motion, in seconds. If the optional bool is set to true, the target "
-                "up vector for camera is set based on the target node. Either of the "
-                "optional parameters can be left out."
-            },
-            {
-                "flyToNavigationState",
-                &luascriptfunctions::flyToNavigationState,
-                "table, [double]",
-                "Create a path to the navigation state described by the input table. "
-                "The optional double specifies the target duration of the motion, "
-                "in seconds. Note that roll must be included for the target up "
-                "direction to be taken into account."
-            },
-            {
-                "zoomToFocus",
-                &luascriptfunctions::zoomToFocus,
-                "[duration]",
-                "Zoom linearly to the current focus node, using the default distance."
-                "The optional input parameter specifies the duration for the motion, "
-                "in seconds."
-            },
-            {
-                "zoomToDistance",
-                &luascriptfunctions::zoomToDistance,
-                "distance, [duration]",
-                "Fly linearly to a specific distance in relation to the focus node. "
-                "The distance is given in meters above the bounding sphere of the "
-                "current focus node."
-                "The optional input parameter specifies the duration for the motion, "
-                "in seconds."
-            },
-            {
-                "zoomToDistanceRelative",
-                &luascriptfunctions::zoomToDistanceRelative,
-                "distance, [duration]",
-                "Fly linearly to a specific distance in relation to the focus node. "
-                "The distance is given as a multiple of the bounding sphere of the "
-                "current focus node. That is, a value of 1 will result in a position "
-                "at a distance of one times the size of the bounding sphere away from "
-                "the object."
-                "The optional input parameter specifies the duration for the motion, "
-                "in seconds."
-            },
-            {
-                "createPath",
-                &luascriptfunctions::createPath,
-                "table",
-                "Create a camera path as described by the lua table input argument"
-            },
+            codegen::lua::IsFlying,
+            codegen::lua::ContinuePath,
+            codegen::lua::PausePath,
+            codegen::lua::StopPath,
+            codegen::lua::FlyTo,
+            codegen::lua::FlyToHeight,
+            codegen::lua::FlyToNavigationState,
+            codegen::lua::ZoomToFocus,
+            codegen::lua::ZoomToDistance,
+            codegen::lua::ZoomToDistanceRelative,
+            codegen::lua::CreatePath
         }
     };
 }

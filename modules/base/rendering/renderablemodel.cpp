@@ -579,7 +579,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     if (distanceToCamera < maxDistance) {
         _program->activate();
 
-        _program->setUniform(_uniformCache.opacity, _opacity);
+        _program->setUniform(_uniformCache.opacity, opacity());
 
         // Model transform and view transform needs to be in double precision
         const glm::dmat4 modelTransform =

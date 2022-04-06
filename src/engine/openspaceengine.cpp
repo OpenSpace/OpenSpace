@@ -29,6 +29,7 @@
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/logfactory.h>
@@ -50,6 +51,7 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/profile.h>
@@ -71,6 +73,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -101,7 +104,7 @@
 namespace {
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     constexpr const char* _loggerCat = "OpenSpaceEngine";
 
@@ -1798,61 +1801,14 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     return {
         "",
         {
-            {
-                "toggleShutdown",
-                &luascriptfunctions::toggleShutdown,
-                "",
-                "Toggles the shutdown mode that will close the application after the "
-                "count down timer is reached"
-            },
-            {
-                "writeDocumentation",
-                &luascriptfunctions::writeDocumentation,
-                "",
-                "Writes out documentation files"
-            },
-            {
-                "downloadFile",
-                &luascriptfunctions::downloadFile,
-                "",
-                "Downloads a file from Lua scope"
-            },
-            {
-                "setScreenshotFolder",
-                &luascriptfunctions::setScreenshotFolder,
-                "string",
-                "Sets the folder used for storing screenshots or session recording frames"
-            },
-            {
-                "addTag",
-                &luascriptfunctions::addTag,
-                "string, string",
-                "Adds a tag (second argument) to a scene graph node (first argument)"
-            },
-            {
-                "removeTag",
-                &luascriptfunctions::removeTag,
-                "string, string",
-                "Removes a tag (second argument) from a scene graph node (first argument)"
-            },
-            {
-                "createSingleColorImage",
-                &luascriptfunctions::createSingleColorImage,
-                "string, vec3",
-                "Creates a 1 pixel image with a certain color in the cache folder and "
-                "returns the path to the file. If a cached file with the given name "
-                "already exists, the path to that file is returned. The first argument "
-                "is the name of the file, without extension. The second is the RGB "
-                "color, given as {r, g, b} with values between 0 and 1."
-            },
-            {
-                "isMaster",
-                &luascriptfunctions::isMaster,
-                "",
-                "Returns whether the current OpenSpace instance is the master node of a "
-                "cluster configuration. If this instance is not part of a cluster, this "
-                "function also returns 'true'."
-            }
+            codegen::lua::ToggleShutdown,
+            codegen::lua::WriteDocumentation,
+            codegen::lua::SetScreenshotFolder,
+            codegen::lua::AddTag,
+            codegen::lua::RemoveTag,
+            codegen::lua::DownloadFile,
+            codegen::lua::CreateSingleColorImage,
+            codegen::lua::IsMaster
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
