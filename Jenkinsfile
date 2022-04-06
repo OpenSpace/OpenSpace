@@ -27,7 +27,7 @@ def moduleCMakeFlags() {
   };
   else {
     modules = bat(returnStdout: true, script: '@dir modules /b /ad /on').trim().split('\r\n');
-  }
+  } 
 
   def flags = '';
   for (module in modules) {
