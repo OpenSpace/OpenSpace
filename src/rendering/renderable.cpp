@@ -51,6 +51,18 @@ namespace {
         "completely transparent."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+        "Fade",
+        "Fade",
+        "This value is used by the system to be able to fade out renderables "
+        "independently from the Opacity value selected by the user. This value should "
+        "not be directly manipulated through a user interface, but instead used by other "
+        "components of the system programmatically",
+        // The Developer mode should be used once the properties in the UI listen to this
+        // openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::Hidden
+    };
+
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable Type",
@@ -58,7 +70,8 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
+    {
         "RenderBinMode",
         "Render Bin Mode",
         "This value specifies if the renderable should be rendered in the Background,"
@@ -128,6 +141,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
+    , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
 {
     ZoneScoped
@@ -157,6 +171,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     _opacity = p.opacity.value_or(_opacity);
     // We don't add the property here as subclasses should decide on their own whether
     // they to expose the opacity or not
+
+    addProperty(_fade);
 
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
@@ -224,7 +240,7 @@ bool Renderable::matchesRenderBinMask(int binMask) {
 }
 
 bool Renderable::isVisible() const {
-    return _enabled;
+    return _enabled && _opacity > 0.f && _fade > 0.f;
 }
 
 bool Renderable::isReady() const {
@@ -249,7 +265,8 @@ void Renderable::setRenderBinFromOpacity() {
     if ((_renderBin != Renderable::RenderBin::PostDeferredTransparent) &&
         (_renderBin != Renderable::RenderBin::Overlay))
     {
-        if (_opacity >= 0.f && _opacity < 1.f) {
+        const float v = opacity();
+        if (v >= 0.f && v < 1.f) {
             setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
         }
         else {
@@ -260,6 +277,10 @@ void Renderable::setRenderBinFromOpacity() {
 
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this]() { setRenderBinFromOpacity(); });
+}
+
+float Renderable::opacity() const {
+    return _opacity * _fade;
 }
 
 }  // namespace openspace

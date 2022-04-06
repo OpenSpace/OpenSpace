@@ -1319,7 +1319,7 @@ int main(int argc, char* argv[]) {
 #endif // __APPLE__
 
 
-    // Do not print message if slaves are waiting for the master
+    // Do not print message if clients are waiting for the master
     // Only timeout after 15 minutes
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
 

@@ -290,7 +290,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     }
 
     _shaderProgram->setUniform("lineColor", _lineColor);
-    _shaderProgram->setUniform("opacity", _opacity);
+    _shaderProgram->setUniform("opacity", opacity());
 }
 
 void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {

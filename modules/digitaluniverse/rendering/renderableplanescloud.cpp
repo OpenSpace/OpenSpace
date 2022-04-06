@@ -455,7 +455,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         _uniformCache.modelViewProjectionTransform,
         modelViewProjectionMatrix
     );
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     glDisable(GL_CULL_FACE);

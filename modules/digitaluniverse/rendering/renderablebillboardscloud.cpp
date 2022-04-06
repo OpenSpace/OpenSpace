@@ -683,7 +683,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.minBillboardSize, minBillboardSize);
     _program->setUniform(_uniformCache.maxBillboardSize, maxBillboardSize);
     _program->setUniform(_uniformCache.color, _pointColor);
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));

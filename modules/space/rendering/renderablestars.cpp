@@ -1034,10 +1034,10 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         const double funcValue = a * distCamera + b;
         fadeInVariable *= static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
 
-        _program->setUniform(_uniformCache.alphaValue, _opacity * fadeInVariable);
+        _program->setUniform(_uniformCache.alphaValue, opacity() * fadeInVariable);
     }
     else {
-        _program->setUniform(_uniformCache.alphaValue, _opacity);
+        _program->setUniform(_uniformCache.alphaValue, opacity());
     }
 
     ghoul::opengl::TextureUnit psfUnit;

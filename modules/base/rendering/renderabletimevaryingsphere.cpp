@@ -275,7 +275,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
     );
     _shader->setUniform(_uniformCache.modelViewRotation, modelViewRotation);
 
-    float adjustedOpacity = _opacity;
+    float adjustedOpacity = opacity();
 
     if (!_disableFadeInDistance) {
         if (_fadeInThreshold > -1.0) {
