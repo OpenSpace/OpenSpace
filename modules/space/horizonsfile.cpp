@@ -131,9 +131,12 @@ std::filesystem::path& HorizonsFile::file() {
     return _file;
 }
 
-std::string HorizonsFile::constructUrl(HorizonsFile::Type type,const std::string& target,
-                                const std::string& observer, const std::string& startTime,
-        const std::string& stopTime, const std::string& stepSize, const std::string& unit)
+std::string HorizonsFile::constructUrl(HorizonsFile::Type type, const std::string& target,
+                                       const std::string& observer,
+                                       const std::string& startTime,
+                                       const std::string& stopTime,
+                                       const std::string& stepSize,
+                                       const std::string& unit)
 {
     // Construct url for request
     std::string url = "";
@@ -709,7 +712,8 @@ HorizonsFile::HorizonsResult HorizonsFile::readObserverFile(std::filesystem::pat
 }
 
 std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhrase,
-                    const std::string& endPhrase, const std::string& altStartPhrase) const
+                                                    const std::string& endPhrase,
+                                                  const std::string& altStartPhrase) const
 {
     std::ifstream fileStream(_file);
     std::vector<std::string> matches;
@@ -759,8 +763,10 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
 }
 
 std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
-                             const std::string& startPhrase, const std::string& endPhrase,
-                                    const std::string& altStartPhrase, bool hasTime) const
+                                                           const std::string& startPhrase,
+                                                             const std::string& endPhrase,
+                                                        const std::string& altStartPhrase,
+                                                                      bool hasTime) const
 {
     std::ifstream fileStream(_file);
 

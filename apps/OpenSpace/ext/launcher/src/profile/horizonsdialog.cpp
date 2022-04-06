@@ -92,7 +92,7 @@ std::filesystem::path HorizonsDialog::file() const {
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 
 void HorizonsDialog::openSaveAs() {
-    std::string filename = QFileDialog::getSaveFileName(
+    QString filename = QFileDialog::getSaveFileName(
         this,
         "Choose a file path where the generated Horizons file will be saved",
         QString::fromStdString(absPath("${USER}").string()),
@@ -101,8 +101,8 @@ void HorizonsDialog::openSaveAs() {
 #ifdef __linux__
         , QFileDialog::DontUseNativeDialog
 #endif
-    ).toStdString();
-    _fileEdit->setText(QString::fromStdString(filename));
+    );
+    _fileEdit->setText(filename);
 }
 
 void HorizonsDialog::typeOnChange(int index) {
@@ -412,99 +412,82 @@ void HorizonsDialog::styleLabel(QLabel* label, bool isDirty) {
 }
 
 bool HorizonsDialog::isValidInput() {
-    bool isValid = true;
-    std::string message;
-
     // File
     if (_fileEdit->text().isEmpty()) {
-        isValid = false;
-        message = "File path not selected";
+        _errorMsg->setText("File path not selected");
         styleLabel(_fileLabel, true);
+        return false;
     }
 
     // Target field
-    else if (_targetEdit->text().isEmpty() &&
-        (_chooseTargetCombo->count() > 0 &&
-            _chooseTargetCombo->currentIndex() == 0))
+    if (_targetEdit->text().isEmpty() && ((_chooseTargetCombo->count() > 0 &&
+        _chooseTargetCombo->currentIndex() == 0) || _chooseTargetCombo->count() == 0))
     {
-        isValid = false;
-        message = "Target not selected";
+        _errorMsg->setText("Target not selected");
         styleLabel(_targetLabel, true);
+        return false;
     }
-    else if (_targetEdit->text().isEmpty() && _chooseTargetCombo->count() == 0) {
-        isValid = false;
-        message = "Target not selected";
-        styleLabel(_targetLabel, true);
-    }
-    else if (_targetEdit->text().toStdString().find_first_of("¤<>§£´¨€") !=
-        std::string::npos)
+    if (_targetEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos)
     {
-        isValid = false;
-        message = "Target includes illegal characters";
+        _errorMsg->setText("Target includes illegal characters");
         styleLabel(_targetLabel, true);
+        return false;
     }
 
     // Observer field
-    else if (_centerEdit->text().isEmpty() && (_chooseObserverCombo->count() > 0 &&
-            _chooseObserverCombo->currentIndex() == 0) )
+    if (_centerEdit->text().isEmpty() && ((_chooseObserverCombo->count() > 0 &&
+        _chooseObserverCombo->currentIndex() == 0) || _chooseObserverCombo->count() == 0))
     {
-        isValid = false;
-        message = "Observer not selected";
+        _errorMsg->setText("Observer not selected");
         styleLabel(_centerLabel, true);
+        return false;
     }
-    else if (_centerEdit->text().isEmpty() && _chooseObserverCombo->count() == 0) {
-        isValid = false;
-        message = "Observer not selected";
-        styleLabel(_centerLabel, true);
-    }
-    else if (_centerEdit->text().toStdString().find_first_of("¤<>§£´¨€") !=
-        std::string::npos)
+    if (_centerEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos)
     {
-        isValid = false;
-        message = "Observer includes illegal characters";
+        _errorMsg->setText("Observer includes illegal characters");
         styleLabel(_centerLabel, true);
+        return false;
     }
 
     // Step size
-    else if (_stepEdit->text().isEmpty()) {
-        isValid = false;
-        message = "Step size not selected";
+    // Empty
+    if (_stepEdit->text().isEmpty()) {
+        _errorMsg->setText("Step size not selected");
         styleLabel(_stepLabel, true);
+        return false;
     }
-    // Check if input is numerical
+    // Numerical
     bool couldConvert = false;
     int32_t step = _stepEdit->text().toInt(&couldConvert);
     if (!couldConvert) {
-        isValid = false;
-        message = "Step size needs to be a number in range 1 to " +
-            std::to_string(std::numeric_limits<int32_t>::max());
+        _errorMsg->setText(QString::fromStdString(fmt::format(
+            "Step size needs to be a number in range 1 to {}",
+            std::to_string(std::numeric_limits<int32_t>::max())))
+        );
         styleLabel(_stepLabel, true);
+        return false;
     }
-    else {
-        // In the case of arcseconds range is different
-        if (_timeTypeCombo->currentText().toStdString() == TimeVarying) {
-            if (step < 60  || step > 3600) {
-                isValid = false;
-                message = "Angular step size needs to be in range 60 to 3600";
-                styleLabel(_stepLabel, true);
-            }
-        }
-        // Numbers only and in range 1 to 2147483647 (max of 32 bit int).
-        // Horizons read the step size into a 32 bit int, but verifies the input on their
-        // website as a uint32_t. If step size over 32 bit int is sent, this error
-        // message is recived: Cannot read numeric value -- re-enter
-        else if (step < 1 || step > std::numeric_limits<int32_t>::max()) {
-            isValid = false;
-            message = fmt::format("Step size is outside valid range 1 to '{}'",
-                std::to_string(std::numeric_limits<int32_t>::max()));
+    // In the case of arcseconds range is different
+    if (_timeTypeCombo->currentText().toStdString() == TimeVarying) {
+        if (step < 60  || step > 3600) {
+            _errorMsg->setText("Angular step size needs to be in range 60 to 3600");
             styleLabel(_stepLabel, true);
+            return false;
         }
     }
-
-    if (!message.empty()) {
-        _errorMsg->setText(QString::fromStdString(message));
+    // Range 1 to 2147483647 (max of 32 bit int).
+    // Horizons read the step size into a 32 bit int, but verifies the input on their
+    // website as a uint32_t. If step size over 32 bit int is sent, this error
+    // message is recived: Cannot read numeric value -- re-enter
+    if (step < 1 || step > std::numeric_limits<int32_t>::max()) {
+        _errorMsg->setText(QString::fromStdString(fmt::format(
+            "Step size is outside valid range 1 to '{}'",
+            std::to_string(std::numeric_limits<int32_t>::max())))
+        );
+        styleLabel(_stepLabel, true);
+        return false;
     }
-    return isValid;
+    return true;
 }
 
 // Send request synchronously, EventLoop waits until request has finished
@@ -699,7 +682,7 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
                     );
                 }
                 else {
-                    _errorMsg->setText("Could not read time range");
+                    _errorMsg->setText("Could not parse time range");
                     appendLog(
                         fmt::format("Could not read time range '{}' to '{}'",
                         timeRange.first, timeRange.second), LogLevel::Error
@@ -987,10 +970,6 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
 
             _validTimeRange = readTimeRange();
             if (_validTimeRange.first.empty() || _validTimeRange.second.empty()) {
-                appendLog(
-                    "Could not parse the valid time range from file",
-                    HorizonsDialog::LogLevel::Error
-                );
                 if (!_latestHorizonsError.empty()) {
                     appendLog(
                         fmt::format("Latest Horizons error: {}", _latestHorizonsError),
