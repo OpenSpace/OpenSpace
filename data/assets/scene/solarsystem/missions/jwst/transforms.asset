@@ -6,7 +6,7 @@ local horizons = asset.syncedResource({
   Name = "JWST Horizons",
   Type = "HttpSynchronization",
   Identifier = "jwst_horizons",
-  Version = 2
+  Version = 3
 })
 
 local JWSTPosition = {
@@ -19,11 +19,11 @@ local JWSTPosition = {
       Keyframes = {
         ["2021 DEC 25 12:50:00"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = "C:/Users/malej60/Documents/Data/jwst_horizons/horizons_jwst_launch.dat",
+          HorizonsTextFile = horizons.. "/horizons_jwst_launch.hrz",
         },
         ["2022 JAN 25 00:00:00"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = "C:/Users/malej60/Documents/Data/jwst_horizons/horizons_jwst_orbit.dat",
+          HorizonsTextFile = horizons .. "/horizons_jwst_orbit.hrz",
         }
       }
     },
