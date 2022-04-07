@@ -1,5 +1,7 @@
 asset.onInitialize(function ()
   local scale = openspace.dpiScaling()
+  openspace.printInfo("Setting the DPI scaling factor to " .. tostring(scale))
+
 
   if openspace.modules.isLoaded("CefWebGui") then
   openspace.setPropertyValueSingle(
