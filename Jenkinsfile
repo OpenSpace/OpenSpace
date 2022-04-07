@@ -24,7 +24,7 @@ def moduleCMakeFlags() {
   
   if (isUnix()) {
      modules = sh(returnStdout: true, script: 'ls -d modules/*').trim().split('\n');
-  };
+  };  
   else {
     modules = bat(returnStdout: true, script: '@dir modules /b /ad /on').trim().split('\r\n');
   } 
