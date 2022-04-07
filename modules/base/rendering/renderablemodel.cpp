@@ -689,7 +689,7 @@ void RenderableModel::update(const UpdateData& data) {
     setBoundingSphere(_geometry->boundingRadius() * _modelScale *
         glm::compMax(data.modelTransform.scale)
     );
-    // Set Interaction sphere to be 10% in size as the bounding sphere
+    // Set Interaction sphere size to be 10% of the bounding sphere
     setInteractionSphere(_boundingSphere * 0.1);
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {

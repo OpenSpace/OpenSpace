@@ -3,13 +3,11 @@ asset.require("spice/base") -- openspace.time.advancedTime depends on SPICE
 -- Function to advance a time stamp in the given number of days, hours, minutes and
 -- seconds. returns the new time stamp
 local function advance(time, days, hours, minutes, seconds)
-  local result = openspace.time.advancedTime(
-    openspace.time.advancedTime(
-      openspace.time.advancedTime(
-        openspace.time.advancedTime(time, tostring(days) .. "d"),
-        tostring(hours) .. "h"),
-      tostring(minutes) .. "m"),
-    tostring(seconds) .. "s")
+  local result = ""
+  result = openspace.time.advancedTime(time, tostring(days) .. "d")
+  result = openspace.time.advancedTime(result, tostring(hours) .. "h")
+  result = openspace.time.advancedTime(result, tostring(minutes) .. "m")
+  result = openspace.time.advancedTime(result, tostring(seconds) .. "s")
 
   return result
 end
@@ -555,7 +553,7 @@ local function createActions()
       openspace.time.setDeltaTime(-deltaTime)
 
       -- Switch timelapse script
-      if (deltaTime < 0) then
+      if deltaTime < 0 then
         -- Going backwards and switching to forwards
         openspace.scriptScheduler.clear(0)
         ]] .. createForwardTimelapse() .. [[
@@ -567,14 +565,14 @@ local function createActions()
 
       -- Update the dashboard text
       local text = openspace.getPropertyValue("Dashboard.JWSTStateText.Text")
-      if(string.len(text) > 14) then
+      if string.len(text) > 14 then
         local newText = ""
-        if(text:sub(13, 13) == "-") then
+        if text:sub(13, 13) == "-" then
           newText = text:sub(1,12) .. text:sub(14)
         else
           newText = text:sub(1,12) .. "-" .. text:sub(13)
         end
-        openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", tostring(newText))
+        openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", newText)
       else
         openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
       end

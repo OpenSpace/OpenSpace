@@ -31,7 +31,7 @@ local JWSTTrailLaunch = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "/horizons_jwst_launch.hrz",
+      HorizonsTextFile = horizons .. "horizons_jwst_launch.hrz",
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2021 DEC 25 12:50:00",
@@ -61,7 +61,7 @@ local JWSTTrailOrbit = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "/horizons_jwst_orbit.hrz",
+      HorizonsTextFile = horizons .. "horizons_jwst_orbit.hrz",
     },
     Color = { 0.9, 0.9, 0.0 },
     Period = 182.621099, -- About 6 months
@@ -88,7 +88,7 @@ local JWSTSunTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "/horizons_jwst_sun.hrz",
+      HorizonsTextFile = horizons .. "horizons_jwst_sun.hrz",
     },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,
