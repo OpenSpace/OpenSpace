@@ -1,39 +1,23 @@
 {
   "actions": [
     {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
-      "identifier": "profile.toggle.satellite",
+      "documentation": "Retargets the camera on points center",
+      "gui_path": "/PointsCenter",
+      "identifier": "profile.focus.pointscenter",
       "is_local": false,
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Earth",
-      "identifier": "profile.focus.iss",
-      "is_local": false,
-      "name": "Focus ISS",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Earth",
-      "identifier": "profile.focus.earth",
-      "is_local": false,
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "name": "Focus on Point center",
+      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'CosmicLifePoints')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
     }
   ],
   "assets": [
     "base_blank",
-    "examples/primitives"
+    "cosmic_view/cosmic_view_renderable"
   ],
   "camera": {
-    "altitude": 17000000.0,
+    "altitude": 2700000000000.0,
     "anchor": "Earth",
     "latitude": 58.5877,
-    "longitude": 16.1924,
+    "longitude": 16.1924, 
     "type": "goToGeo"
   },
   "delta_times": [
@@ -58,15 +42,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "profile.focus.earth",
-      "key": "HOME"
-    }
-  ],
-  "mark_nodes": [
-    "Earth"
-  ],
   "meta": {
     "author": "OpenSpace Team",
     "description": "A Cosmic View of Life Thesis Profile. Visualize relations between species.",
@@ -75,13 +50,6 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
-  "properties": [
-    {
-      "name": "{earth_satellites}.Renderable.Enabled",
-      "type": "setPropertyValue",
-      "value": "false"
-    }
-  ],
   "time": {
     "type": "relative",
     "value": "-1d"

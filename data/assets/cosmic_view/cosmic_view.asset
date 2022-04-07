@@ -21,7 +21,7 @@ for i, name in ipairs(data_names) do
       Color = { tonumber(i) / 12, 0.4, tonumber(i) / 20 },
       Opacity = 1.0,
       ScaleFactor = 350,
-      File = asset.localResource("categorized/" .. name .. ".speck"),
+      File = asset.localResource("C:/code/datafiles/categorized/" .. name .. ".speck"),
       DrawLabels = false,
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true
