@@ -97,9 +97,9 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
 
         for (const std::string& file : files) {
             if (!std::filesystem::is_regular_file(absPath(file))) {
-                LWARNING(fmt::format("The Horizons text file '{}' could not be found",
-                    file)
-                );
+                LWARNING(fmt::format(
+                    "The Horizons text file '{}' could not be found", file
+                ));
                 return;
             }
         }
@@ -283,8 +283,8 @@ void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) cons
     assert(std::is_standard_layout<CacheKeyframe>::value);
 
     // Write data
-    fileStream.write(reinterpret_cast<const char*>(
-        cachKeyframes.data()),
+    fileStream.write(
+        reinterpret_cast<const char*>(cachKeyframes.data()),
         sizeof(CacheKeyframe) * nKeyframes
     );
 }

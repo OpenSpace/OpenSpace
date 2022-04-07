@@ -64,7 +64,6 @@ class HorizonsFile {
 public:
     enum class ResultCode {
         Valid,
-        InvalidFormat,
         Empty,
 
         // Erros caught by the error field in the json output

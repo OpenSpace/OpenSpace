@@ -151,45 +151,16 @@ std::string HorizonsFile::constructUrl(HorizonsFile::Type type, const std::strin
             throw ghoul::MissingCaseException();
     }
 
-    url += fmt::format(
-        "{}'{}'",
-        Command,
-        urlEncode(target)
-    );
-
-    url += fmt::format(
-        "{}'{}'",
-        Center,
-        urlEncode(observer)
-    );
-
-    url += fmt::format(
-        "{}'{}'",
-        StartTime,
-        urlEncode(startTime)
-    );
-
-    url += fmt::format(
-        "{}'{}'",
-        StopTime,
-        urlEncode(stopTime)
-    );
+    url += fmt::format("{}'{}'", Command, urlEncode(target));
+    url += fmt::format("{}'{}'", Center, urlEncode(observer));
+    url += fmt::format("{}'{}'", StartTime, urlEncode(startTime));
+    url += fmt::format("{}'{}'", StopTime, urlEncode(stopTime));
 
     if (unit.empty()) {
-        url += fmt::format(
-            "{}'{}'",
-            StepSize,
-            urlEncode(stepSize)
-        );
+        url += fmt::format("{}'{}'", StepSize, urlEncode(stepSize));
     }
     else {
-        url += fmt::format(
-            "{}'{}{}{}'",
-            StepSize,
-            urlEncode(stepSize),
-            WhiteSpace,
-            unit
-        );
+        url += fmt::format("{}'{}{}{}'", StepSize, urlEncode(stepSize), WhiteSpace, unit);
     }
 
     return url;
@@ -201,9 +172,7 @@ HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
 
         if (auto source = signature->find("source"); source != signature->end()) {
             if (*source != static_cast<std::string>(ApiSource)) {
-                LWARNING(fmt::format("Horizons answer from unkown source '{}'",
-                    *source)
-                );
+                LWARNING(fmt::format("Horizons answer from unkown source '{}'", *source));
             }
         }
         else {
@@ -212,8 +181,10 @@ HorizonsFile::ResultCode HorizonsFile::isValidAnswer(const json& answer) {
 
         if (auto version = signature->find("version"); version != signature->end()) {
             if (*version != static_cast<std::string>(CurrentVersion)) {
-                LWARNING(fmt::format("Unknown Horizons version '{}' found. The "
-                    "currently supported version is {}", *version, CurrentVersion));
+                LWARNING(fmt::format(
+                    "Unknown Horizons version '{}' found. The currently supported "
+                    "version is {}", *version, CurrentVersion
+                ));
             }
         }
         else {
@@ -405,12 +376,6 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
         case ResultCode::Empty:
             LERROR("The horizons file is empty");
             break;
-        case ResultCode::InvalidFormat:
-            LERROR(fmt::format(
-                "Format of file '{}' is invalid. Horizons files must have extension '.hrz'",
-                _file)
-            );
-            break;
         case ResultCode::ErrorSize:
             LERROR("The selected time range with the selected step size is too big, "
                 "try to increase the step size and/or decrease the time range");
@@ -522,13 +487,6 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
 }
 
 HorizonsFile::HorizonsResult HorizonsFile::readFile(std::filesystem::path file) {
-    // Check if extension is correct first
-    if (file.extension() != ".hrz") {
-        HorizonsResult result;
-        result.errorCode = ResultCode::InvalidFormat;
-        return result;
-    }
-
     // Check if valid
     ResultCode code = isValidHorizonsFile(file);
     if (code != ResultCode::Valid) {
@@ -540,9 +498,7 @@ HorizonsFile::HorizonsResult HorizonsFile::readFile(std::filesystem::path file) 
     std::ifstream fileStream(file);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format(
-            "Failed to open Horizons file '{}'", file
-        ));
+        LERROR(fmt::format("Failed to open Horizons file '{}'", file));
         return HorizonsResult();
     }
 
@@ -574,9 +530,7 @@ HorizonsFile::HorizonsResult HorizonsFile::readVectorFile(std::filesystem::path 
 
     std::ifstream fileStream(file);
     if (!fileStream.good()) {
-        LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", file
-        ));
+        LERROR(fmt::format("Failed to open Horizons text file '{}'", file));
         return HorizonsResult();
     }
 
@@ -606,9 +560,7 @@ HorizonsFile::HorizonsResult HorizonsFile::readVectorFile(std::filesystem::path 
         // Get next line of same data point
         std::getline(fileStream, line);
         if (!fileStream.good()) {
-            LERROR(fmt::format(
-                "Malformed Horizons file '{}'", file
-            ));
+            LERROR(fmt::format("Malformed Horizons file '{}'", file));
             return HorizonsResult();
         }
         std::stringstream str2(line);
@@ -648,9 +600,7 @@ HorizonsFile::HorizonsResult HorizonsFile::readObserverFile(std::filesystem::pat
 
     std::ifstream fileStream(file);
     if (!fileStream.good()) {
-        LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", file
-        ));
+        LERROR(fmt::format("Failed to open Horizons text file '{}'", file));
         return HorizonsResult();
     }
 
