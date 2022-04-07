@@ -573,18 +573,18 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
         int code = statusCode.toInt();
 
         switch (code) {
-            case static_cast<int>(HorizonsDialog::HTTPCodes::BadRequest) :
+            case static_cast<int>(HorizonsDialog::HTTPCodes::BadRequest):
                 message = "The request contained invalid keywords and/or used "
                     "a method other than GET or POST";
                 break;
-            case static_cast<int>(HorizonsDialog::HTTPCodes::MethodNotAllowed) :
+            case static_cast<int>(HorizonsDialog::HTTPCodes::MethodNotAllowed):
                 message = "The request used an incorrect method";
                 break;
-            case static_cast<int>(HorizonsDialog::HTTPCodes::InternalServerError) :
+            case static_cast<int>(HorizonsDialog::HTTPCodes::InternalServerError):
                 message = "The database is currently not available, try again at a "
                     "later time";
                 break;
-            case static_cast<int>(HorizonsDialog::HTTPCodes::ServiceUnavailable) :
+            case static_cast<int>(HorizonsDialog::HTTPCodes::ServiceUnavailable):
                 message = "The server is currently unable to handle the request due to a "
                     "temporary overloading or maintenance of the server, try again at a "
                     "later time";
@@ -1039,7 +1039,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
                     "Multiple matching stations found"
                 );
             if (matchingstations.empty()) {
-                appendLog("Could not parse the matching stations",
+                appendLog(
+                    "Could not parse the matching stations",
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
@@ -1069,7 +1070,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             std::vector<std::string> matchingObservers =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingObservers.empty()) {
-                appendLog("Could not parse the matching observers",
+                appendLog(
+                    "Could not parse the matching observers",
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
@@ -1126,7 +1128,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             std::vector<std::string> matchingTargets =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingTargets.empty()) {
-                appendLog("Could not parse the matching targets",
+                appendLog(
+                    "Could not parse the matching targets",
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {

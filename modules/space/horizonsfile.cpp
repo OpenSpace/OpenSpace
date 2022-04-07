@@ -71,11 +71,12 @@ namespace {
     std::string replaceAll(std::string string, const std::string& from,
                            const std::string& to)
     {
-        if (from.empty())
+        if (from.empty()) {
             return "";
+        }
 
-        size_t startPos = 0;
-        while ((startPos = string.find(from, startPos)) != std::string::npos) {
+        size_t startPos = string.find(from);
+        while (startPos != std::string::npos) {
             string.replace(startPos, from.length(), to);
 
             // In case 'to' contains 'from', ex replacing 'x' with 'yx'
@@ -85,8 +86,8 @@ namespace {
     }
 
     std::string urlEncode(const std::string& string) {
-        std::string result =
-            replaceAll(string, " ", static_cast<std::string>(WhiteSpace));
+        std::string result;
+        result = replaceAll(string, " ", static_cast<std::string>(WhiteSpace));
         result = replaceAll(result, "#", static_cast<std::string>(HashTag));
         result = replaceAll(result, "$", static_cast<std::string>(DollarSign));
         result = replaceAll(result, "&", static_cast<std::string>(Ampersand));
@@ -262,9 +263,8 @@ HorizonsFile::ResultCode HorizonsFile::isValidHorizonsFile(std::filesystem::path
     std::getline(fileStream, line); // First line is just stars (*) no information, skip
 
     // Valid Target?
-    if (fileStream.good() &&
-        (line.find("Revised") != std::string::npos ||
-         line.find("JPL") != std::string::npos))
+    if (fileStream.good() && (line.find("Revised") != std::string::npos ||
+        line.find("JPL") != std::string::npos))
     {
         // If the target is valid, the first line is the date it was last revised
         // In case of comets it says the Source in the top
@@ -302,15 +302,13 @@ HorizonsFile::ResultCode HorizonsFile::isValidHorizonsFile(std::filesystem::path
         }
 
         // Are observer and target the same?
-        if (line.find("disallowed") != std::string::npos)
-        {
+        if (line.find("disallowed") != std::string::npos) {
             fileStream.close();
             return ResultCode::ErrorObserverTargetSame;
         }
 
         // Enough data?
-        if (line.find("Insufficient ephemeris data") != std::string::npos)
-        {
+        if (line.find("Insufficient ephemeris data") != std::string::npos) {
             fileStream.close();
             return ResultCode::ErrorNoData;
         }
@@ -377,8 +375,10 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             LERROR("The horizons file is empty");
             break;
         case ResultCode::ErrorSize:
-            LERROR("The selected time range with the selected step size is too big, "
-                "try to increase the step size and/or decrease the time range");
+            LERROR(
+                "The selected time range with the selected step size is too big, "
+                "try to increase the step size and/or decrease the time range"
+            );
             break;
         case ResultCode::ErrorSpan:
             LERROR("Step size is too big, exceeds available time span for target");
@@ -386,19 +386,20 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
         case ResultCode::ErrorTimeRange: {
             LERROR("Time range is outside the valid range for target");
 
-            std::pair<std::string, std::string> validTimeRange =
-                parseValidTimeRange(
-                    "Trajectory files",
-                    "************",
-                    "Trajectory name"
-                );
+            std::pair<std::string, std::string> validTimeRange = parseValidTimeRange(
+                "Trajectory files",
+                "************",
+                "Trajectory name"
+            );
             if (validTimeRange.first.empty()) {
                 LERROR("Could not parse the valid time range from file");
                 break;
             }
 
-            LINFO("Valid time range is '" + validTimeRange.first + "' to '" +
-                validTimeRange.second + "'");
+            LINFO(fmt::format(
+                "Valid time range is '{}' to '{}'", validTimeRange.first,
+                validTimeRange.second
+            ));
             break;
         }
         case ResultCode::ErrorNoObserver:
@@ -408,12 +409,16 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             LERROR("The observer and target are the same");
             break;
         case ResultCode::ErrorNoData:
-            LERROR("There is not enough data to compute the state of the target in "
-                "relation to the observer for the selected time range.");
+            LERROR(
+                "There is not enough data to compute the state of the target in "
+                "relation to the observer for the selected time range."
+            );
             break;
         case ResultCode::MultipleObserverStations: {
-            LWARNING("Multiple matching observer stations were found for the "
-                "selected observer");
+            LWARNING(
+                "Multiple matching observer stations were found for the "
+                "selected observer"
+            );
 
             std::vector<std::string> matchingstations =
                 parseMatches("Observatory Name", "Multiple matching stations found");
@@ -426,7 +431,7 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             for (std::string station : matchingstations) {
                 matches += '\n' + station;
             }
-            LINFO("Matching Observer Stations:" + matches);
+            LINFO(fmt::format("Matching Observer Stations: {}", matches));
             break;
         }
         case ResultCode::MultipleObserver: {
@@ -443,7 +448,7 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             for (std::string observer : matchingObservers) {
                 matches += '\n' + observer;
             }
-            LINFO("Matching Observers:" + matches);
+            LINFO(fmt::format("Matching Observers: {}", matches));
             break;
         }
         case ResultCode::ErrorNoTarget:
@@ -474,7 +479,7 @@ void HorizonsFile::displayErrorMessage(const ResultCode code) const {
             for (std::string target : matchingTargets) {
                 matches += '\n' + target;
             }
-            LINFO("Matching targets:" + matches);
+            LINFO(fmt::format("Matching targets: {}", matches));
             break;
         }
         case ResultCode::UnknownError:
@@ -572,7 +577,7 @@ HorizonsFile::HorizonsResult HorizonsFile::readVectorFile(std::filesystem::path 
         str2 >> xPos >> yPos >> zPos;
 
         // Convert date and time to seconds after 2000
-        std::string timeString = date + " " + time;
+        std::string timeString = fmt::format("{} {}", date, time);
         double timeInJ2000 = Time::convertTime(timeString);
         glm::dvec3 pos = glm::dvec3(1000 * xPos, 1000 * yPos, 1000 * zPos);
         glm::dmat3 transform =
@@ -635,7 +640,7 @@ HorizonsFile::HorizonsResult HorizonsFile::readObserverFile(std::filesystem::pat
 
         // Convert date and time to seconds after 2000
         // and pos to Galactic positions in meter from Observer.
-        std::string timeString = date + " " + time;
+        std::string timeString = fmt::format("{} {}", date, time);
         double timeInJ2000 = Time::convertTime(timeString);
         glm::dvec3 gPos = glm::dvec3(
             1000 * range * cos(glm::radians(gLat)) * cos(glm::radians(gLon)),
@@ -653,7 +658,8 @@ HorizonsFile::HorizonsResult HorizonsFile::readObserverFile(std::filesystem::pat
 
     fileStream.close();
 
-    LWARNING("Observer table data from Horizons might not align with SPICE data well. "
+    LWARNING(
+        "Observer table data from Horizons might not align with SPICE data well. "
         "We recommend using Vector table data from Horizons instead"
     );
 
@@ -761,15 +767,15 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             words.push_back(word);
         }
 
-        if (words.empty()) {
-            return { "", "" };
-        }
-
         // Parse time stamps backwards
         // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
         if (hasTime && words.size() > 4) {
-            startTime = words[words.size() - 4] + " T " + words[words.size() - 3];
-            endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
+            startTime = fmt::format(
+                "{} T {}", words[words.size() - 4], words[words.size() - 3]
+            );
+            endTime = fmt::format(
+                "{} T {}", words[words.size() - 2], words[words.size() - 1]
+            );
         }
         else if (words.size() > 2){
             // Sometimes the format can be yyyy-mon-dd without time
@@ -800,14 +806,12 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             words.push_back(word);
         }
 
-        if (words.empty()) {
-            return { "", "" };
-        }
-
         // Parse time stamps backwards
         // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
         if (hasTime && words.size() > 4) {
-            endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
+            endTime = fmt::format(
+                "{} T {}", words[words.size() - 2], words[words.size() - 1]
+            );
         }
         else if (words.size() > 2) {
             // Sometimes the format can be yyyy-mon-dd without time
