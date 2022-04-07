@@ -27,7 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <modules/softwareintegration/network/common/basenetworkengine.h>
+#include <modules/softwareintegration/network/networkengine.h>
+#include <modules/softwareintegration/syncabledatastorage.h>
 #include <openspace/documentation/documentation.h>
 
 namespace openspace {
@@ -47,11 +48,13 @@ public:
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitialize() override;
+    
+    std::vector<Syncable*> getSyncables();
 
-    BaseNetworkEngine* _server;
+    NetworkEngine* _server;
 
-    // Centralized storage for large datasets
-    std::map<std::string, std::vector<float>> _temporaryDataStorage;
+    // Centralized storage for datasets
+    SyncableDataStorage _syncableDataStorage;
 };
 
 } // namespace openspace

@@ -39,8 +39,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "SoftwareIntegration";
-
-    constexpr const int LargeDatasetThreshold = 5000;
 } // namespace
 
 namespace openspace {
@@ -93,47 +91,26 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     renderable.setValue("Opacity", static_cast<double>(opacity));
     renderable.setValue("Size", static_cast<double>(size));
 
-    if (nPoints > LargeDatasetThreshold) {
-        // If huge number of points, use the module's temporary data storage
-        const int nValuesPerPoint = 3;
-        const int nValues = nPoints * nValuesPerPoint;
+    const int nValues = nPoints * 3;
 
-        std::vector<float> data;
-        data.reserve(nValues);
-        for (int i = 0; i < nPoints; i++) {
-            float x = xCoordinates[i];
-            float y = yCoordinates[i];
-            float z = zCoordinates[i];
-            data.insert(data.end(), { x, y, z });
-        }
-
-        // Use the renderable identifier as the data key
-        const std::string key = identifier;
-        auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-        module->storeData(key, std::move(data));
-
-        renderable.setValue("DataStorageKey", key);
+    std::vector<float> dataSet;
+    dataSet.reserve(nValues);
+    for (int i = 0; i < nPoints; i++)
+    {
+        float x = xCoordinates[i];
+        float y = yCoordinates[i];
+        float z = zCoordinates[i];
+        dataSet.insert(dataSet.end(), { x, y, z });
     }
-    else {
-        ghoul::Dictionary pointDataDictonary;
-        for (int i = 0; i < nPoints; i++) {
-            float x = xCoordinates[i];
-            float y = yCoordinates[i];
-            float z = zCoordinates[i];
-            glm::dvec3 point{ x, y, z };
 
-            const std::string key = fmt::format("[{}]", i + 1);
+    // Use the renderable identifier as the data key
+    const std::string key = identifier;
+    auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
+    module->storeData(key, std::move(dataSet));
 
-            // Avoid passing nan values through dictionary
-            if (glm::any(glm::isnan(point))) {
-                point = glm::dvec3(0.0);
-                // @TODO Keep track of invalid indices?
-            }
+    renderable.setValue("DataStorageKey", key);
 
-            pointDataDictonary.setValue<glm::dvec3>(key, std::move(point));
-        }
-        renderable.setValue("Data", pointDataDictonary);
-    }
+
 
     ghoul::Dictionary gui;
     gui.setValue("Name", guiName);

@@ -48,38 +48,26 @@ NetworkEngine::NetworkEngine(const int port)
 {}
 
 void NetworkEngine::start() {
-	BaseNetworkEngine::start();
 	_socketServer.listen(_port);
 
 	_serverThread = std::thread([this]() { handleNewPeers(); });
-	_eventLoopThread = std::thread([this]() { eventLoop(); }); // TODO: Move this to BaseNetworkEngine::start();
+	_eventLoopThread = std::thread([this]() { eventLoop(); });
 }
 
 void NetworkEngine::stop() {
-	BaseNetworkEngine::stop();
-	
+	_shouldStop = true;
 	_socketServer.close();
 
 	if (_serverThread.joinable()) {
 		_serverThread.join();
 	}
-	if (_eventLoopThread.joinable()) { // TODO: Move this to BaseNetworkEngine::stop();
+	if (_eventLoopThread.joinable()) {
 		_eventLoopThread.join();
 	}
 }
 
 void NetworkEngine::update() {
-	BaseNetworkEngine::update();
-}
-
-// TODO: Move to BaseNetworkEngine
-void NetworkEngine::eventLoop() {
-	while (!_shouldStop) {
-		if (!_incomingMessages.empty()) {
-			PeerMessage pm = _incomingMessages.pop();
-			handlePeerMessage(std::move(pm));
-		}
-	}
+	_pointDataMessageHandler.preSyncUpdate();
 }
 
 bool NetworkEngine::isConnected(const Peer& peer) const {
@@ -104,6 +92,15 @@ void NetworkEngine::disconnect(Peer& peer) {
 	peer.connection.disconnect();
 	peer.thread.join();
 	_peers.erase(peer.id);
+}
+
+void NetworkEngine::eventLoop() {
+	while (!_shouldStop) {
+		if (!_incomingMessages.empty()) {
+			auto pm = _incomingMessages.pop();
+			handlePeerMessage(std::move(pm));
+		}
+	}
 }
 
 void NetworkEngine::handleNewPeers() {
@@ -164,21 +161,21 @@ void NetworkEngine::handlePeerMessage(PeerMessage peerMessage) {
 	const size_t peerId = peerMessage.peerId;
 	std::shared_ptr<NetworkEngine::Peer> peerPtr = peer(peerId);
 
-	const SoftwareConnection::Message::Type messageType = peerMessage.message.type;
+	const SoftwareConnection::MessageType messageType = peerMessage.message.type;
 	std::vector<char>& message = peerMessage.message.content;
 
 	switch (messageType) {
-	case SoftwareConnection::Message::Type::Connection: {
+	case SoftwareConnection::MessageType::Connection: {
 		const std::string software(message.begin(), message.end());
 		LINFO(fmt::format("OpenSpace has connected with {} through socket", software));
 		break;
 	}
-	case SoftwareConnection::Message::Type::ReadPointData: {
+	case SoftwareConnection::MessageType::ReadPointData: {
 		LDEBUG("Message recieved.. Point Data");
 		_pointDataMessageHandler.handlePointDataMessage(message, peerPtr->connection);
 		break;
 	}
-	case SoftwareConnection::Message::Type::RemoveSceneGraphNode: {
+	case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
 		const std::string identifier(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. Delete SGN: {}", identifier));
 
@@ -200,35 +197,35 @@ void NetworkEngine::handlePeerMessage(PeerMessage peerMessage) {
 		LDEBUG(fmt::format("Scene graph node '{}' removed.", identifier));
 		break;
 	}
-	case SoftwareConnection::Message::Type::Color: {
+	case SoftwareConnection::MessageType::Color: {
 		const std::string colorMessage(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. New Color: {}", colorMessage));
 
 		_pointDataMessageHandler.handleColorMessage(message);
 		break;
 	}
-	case SoftwareConnection::Message::Type::Opacity: {
+	case SoftwareConnection::MessageType::Opacity: {
 		const std::string opacityMessage(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. New Opacity: {}", opacityMessage));
 
 		_pointDataMessageHandler.handleOpacityMessage(message);
 		break;
 	}
-	case SoftwareConnection::Message::Type::Size: {
+	case SoftwareConnection::MessageType::Size: {
 		const std::string sizeMessage(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. New Size: {}", sizeMessage));
 
 		_pointDataMessageHandler.handlePointSizeMessage(message);
 		break;
 	}
-	case SoftwareConnection::Message::Type::Visibility: {
+	case SoftwareConnection::MessageType::Visibility: {
 		const std::string visibilityMessage(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. New Visibility: {}", visibilityMessage));
 
 		_pointDataMessageHandler.handleVisiblityMessage(message);
 		break;
 	}
-	case SoftwareConnection::Message::Type::Disconnection: {
+	case SoftwareConnection::MessageType::Disconnection: {
 		disconnect(*peerPtr);
 		break;
 	}
@@ -238,16 +235,6 @@ void NetworkEngine::handlePeerMessage(PeerMessage peerMessage) {
 		));
 		break;
 	}
-}
-
-void NetworkEngine::addIncomingMessage(PeerMessage peerMessage) {
-	_incomingMessages.push(peerMessage);
-	// std::lock_guard<std::mutex> lockMessage(_messageMutex);
-	// _message = peerMessage.message;
-	// std::vector<char> content = { 'h', 'e', 'l', 'l', 'o' };
-	// _message = SoftwareConnection::Message(SoftwareConnection::Message::mapSIMPTypeToMessageType["UPCO"], content);
-	// std::string msg = { std::begin(_message.data().content), std::end(_message.data().content) };
-	// LWARNING(fmt::format("Connected with {}", msg));
 }
 
 } // namespace openspace

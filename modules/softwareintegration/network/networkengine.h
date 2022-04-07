@@ -25,16 +25,14 @@
 #ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
 
-#include <modules/softwareintegration/network/common/basenetworkengine.h>
 #include <modules/softwareintegration/network/softwareconnection.h>
 #include <modules/softwareintegration/pointdatamessagehandler.h>
 #include <openspace/util/concurrentqueue.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
-#include <openspace/util/syncdata.h>
 
 namespace openspace {
 
-class NetworkEngine : public BaseNetworkEngine {
+class NetworkEngine {
 public:
 	NetworkEngine(const int port = 4700);
 
@@ -47,9 +45,14 @@ public:
 		SoftwareConnection::Status status;
 	};
 
-	void start() override;
-	void stop() override;
-	void update() override;
+	struct PeerMessage {
+		size_t peerId;
+		SoftwareConnection::Message message;
+	};
+
+	void start();
+	void stop();
+	void update();
 
 protected:
 	void disconnect(Peer& peer);
@@ -58,10 +61,11 @@ protected:
 	void handlePeerMessage(PeerMessage peerMessage);
 
 private:
+	void eventLoop();
+
 	bool isConnected(const Peer& peer) const;
 
 	std::shared_ptr<Peer> peer(size_t id);
-
 
 	std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
 	mutable std::mutex _peerListMutex;
@@ -71,8 +75,15 @@ private:
 	std::atomic_size_t _nConnections = 0;
 	std::thread _serverThread;
 	std::thread _eventLoopThread;
+	
+    std::atomic_bool _shouldStop = false;
 
 	const int _port;
+
+    // Message handlers
+	PointDataMessageHandler _pointDataMessageHandler;
+
+	ConcurrentQueue<PeerMessage> _incomingMessages;
 };
 
 } // namespace openspace

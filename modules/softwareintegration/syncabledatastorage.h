@@ -22,42 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEQUEUE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEQUEUE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEDATASTORAGE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEDATASTORAGE___H__
 
 #include <openspace/util/syncable.h>
-#include <openspace/util/concurrentqueue.h>
-
-#include <openspace/util/syncbuffer.h>
+#include <mutex>
 
 namespace openspace {
 
-class SyncBuffer;
-
-template <typename T>
-class SyncableQueue : public Syncable {
+/**
+ * A double buffered implementation of the Syncable interface.
+ * Users are encouraged to used this class as a default way to synchronize different
+ * C++ data types using the SyncEngine.
+ *
+ * This class aims to handle the synchronization parts and yet act like a regular
+ * instance of T. Implicit casts are supported, however, when accessing member functions
+ * or variables, user may have to do explicit casts.
+ *
+ * ((T&) t).method();
+ *
+ */
+class SyncableDataStorage : public Syncable {
 public:
-    // virtual void preSync(bool isMaster) override;
-    virtual void encode(SyncBuffer* syncBuffer) override;
-    virtual void decode(SyncBuffer* syncBuffer) override;
-    // virtual void postSync(bool isMaster) override;
+	/* ====================== Types ===================== */
+	typedef std::string Key;
+	typedef std::vector<float> Value;   // a dataset stored like x1, y1, z1, x2, y2 ....
+	typedef std::map<Key, Value> Storage;
+	typedef Storage::iterator Iterator;
+	/* ================================================== */
 
-    void push(T &&item);
-    void push(const T& item);
+	/* ============== SyncEngine functions ============== */
+	// virtual void preSync(bool isMaster) override;
+	virtual void encode(SyncBuffer* syncBuffer) override;
+	virtual void decode(SyncBuffer* syncBuffer) override;
+	virtual void postSync(bool isMaster) override;
+	/* ================================================== */
 
-    T pop();
-    void pop(T& item);
+	/* =============== Utility functions ================ */
+	Iterator erase(Iterator pos);
+	Iterator erase(const Iterator first, const Iterator last);
+	size_t erase(const Key& key);
 
-    size_t size() const;
+	std::pair<Iterator, bool> emplace(Key key, Value value);
 
-    bool empty() const;
-    
+	Value& at(const Key& key);
+	const Value& at(const Key& key) const;
+
+	Iterator find(const Key& key);
+	/* ================================================== */
+
+	/* =================== Iterators ==================== */
+	Iterator end() noexcept;
+			
+	Iterator begin() noexcept;
+	/* ================================================== */
+
+	/* =============== Operator overloads =============== */
+	Value& operator[](Key&& key);
+	/* ================================================== */
+
 private:
-	ConcurrentQueue<T> _messages;
+	std::mutex _mutex;
+	Storage _storage;
 
-    std::mutex _clientMessageMutex;
+	bool showMessageEncode = true;
+	bool showMessageDecode = true;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEQUEUE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEDATASTORAGE___H__

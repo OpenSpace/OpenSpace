@@ -24,8 +24,8 @@
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 
-#include <modules/softwareintegration/network/networkengine.h>
-#include <modules/softwareintegration/network/clientnetworkengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/syncengine.h>
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -42,29 +42,28 @@ namespace openspace {
 
 SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {
     if (global::windowDelegate->isMaster()) {
-        // The main node will handle all communication with the external software
-        // and forward it to the client nodes
+        // The Master node will handle all communication with the external software
+        // and forward it to the Client nodes
         // 4700, is the defualt port where the tcp socket will be opened to the ext. software
         _server = new NetworkEngine();
-    } else {
-        // The client nodes will only communicate with the main node
-        _server = new ClientNetworkEngine();
     }
 }
 
 SoftwareIntegrationModule::~SoftwareIntegrationModule() {
-    delete _server;
+    if (global::windowDelegate->isMaster()) {
+        delete _server;
+    }
 }
 
 void SoftwareIntegrationModule::storeData(const std::string& key,
                                           const std::vector<float> data)
 {
-    _temporaryDataStorage.emplace(key, std::move(data));
+    _syncableDataStorage.emplace(key, std::move(data));
 }
 
 std::vector<float> SoftwareIntegrationModule::fetchData(const std::string& key) {
-    auto it = _temporaryDataStorage.find(key);
-    if (it == _temporaryDataStorage.end()) {
+    auto it = _syncableDataStorage.find(key);
+    if (it == _syncableDataStorage.end()) {
         LERROR(fmt::format(
             "Could not find data with key '{}' in the temporary data storage", key
         ));
@@ -72,24 +71,30 @@ std::vector<float> SoftwareIntegrationModule::fetchData(const std::string& key) 
     }
 
     std::vector<float> data = it->second;
-    _temporaryDataStorage.erase(it);
+    _syncableDataStorage.erase(it);
 
     return std::move(data);
 }
 
 void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
+    global::syncEngine->addSyncables(getSyncables());
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderablePointsCloud>("RenderablePointsCloud");
 
-    _server->start();
+    if (global::windowDelegate->isMaster()) {
+        _server->start();
 
-    global::callback::preSync->emplace_back([this]() { _server->update(); });
+        global::callback::preSync->emplace_back([this]() { _server->update(); });
+    }
 }
 
 void SoftwareIntegrationModule::internalDeinitialize() {
-    _server->stop();
+    global::syncEngine->removeSyncables(getSyncables());
+    if (global::windowDelegate->isMaster()) {
+        _server->stop();
+    }
 }
 
 std::vector<documentation::Documentation>
@@ -98,6 +103,10 @@ SoftwareIntegrationModule::documentations() const
     return {
         RenderablePointsCloud::Documentation(),
     };
+}
+
+std::vector<Syncable*> SoftwareIntegrationModule::getSyncables() {
+    return { &_syncableDataStorage };
 }
 
 } // namespace openspace
