@@ -6,6 +6,12 @@ library('sharedSpace'); // jenkins-pipeline-lib
 def url = 'https://github.com/OpenSpace/OpenSpace';
 def branch = env.BRANCH_NAME;
 
+// The CHANGE_BRANCH only exists if we are building a PR branch in which case it returns
+// the original branch
+if (env.CHANGE_BRANCH) {
+  branch = env.CHANGE_BRANCH;
+}
+
 @NonCPS
 def readDir() {
   def dirsl = [];
