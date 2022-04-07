@@ -1,0 +1,26 @@
+local CosmicLifePoints = {
+  Identifier = "RenderableCosmicPoints",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Enabled = true,
+    DrawElements = false,
+    Color = { 0.7, 0.8, 0.4 },
+    Opacity = 0.65,
+    File = asset.localResource("C:/code/datafiles/MDS_APD_float.speck"),
+    Texture = asset.localResource("C:/code/datafiles/point3A.png"),
+    Unit = "Km",
+    ScaleFactor = 30.0,
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Cosmic View Points: ",
+    Path = "/Cosmic/Data"
+  }
+}
+  asset.onInitialize(function()
+      openspace.addSceneGraphNode(CosmicLifePoints)
+  end)
+  asset.onDeinitialize(function()
+      openspace.removeSceneGraphNode(CosmicLifePoints)
+  end)
+  asset.export(CosmicLifePoints)
