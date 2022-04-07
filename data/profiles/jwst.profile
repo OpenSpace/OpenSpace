@@ -87,6 +87,7 @@
     "scene/solarsystem/missions/jwst/targets/targets",
     "scene/solarsystem/missions/jwst/timelapse",
     "scene/solarsystem/missions/jwst/toggle_trail",
+    "scene/solarsystem/missions/jwst/point_jwst",
     "scene/digitaluniverse/hdf"
   ],
   "camera": {

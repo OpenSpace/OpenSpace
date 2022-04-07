@@ -79,10 +79,11 @@ asset.onDeinitialize(function ()
 end)
 
 asset.meta = {
-  Name = "Hubble Space Telescope",
+  Name = "Hubble Space Telescope Trail",
   Version = "1.0",
   Description = [[ Position and Trail for Hubble Space Telescope, trail from
-  celestrak.com]],
+    celestrak.com
+  ]],
   Author = "Dan Tell",
   URL = "www.calacademy.org",
   License = "CC-BY"
