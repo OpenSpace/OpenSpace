@@ -95,11 +95,14 @@ glm::vec2 TargetBrowserPair::selectedScreenSpacePosition() const {
     return _selected->screenSpacePosition();
 }
 
+void TargetBrowserPair::startFinetuningTarget() {
+    _startTargetPosition = _targetNode->worldPosition();
+}
+
 // The fine tune of the target is a way to "drag and drop" the target with right click 
 // drag on the sky browser window. This is to be able to drag the target around when it 
 // has a very small field of view
-void TargetBrowserPair::fineTuneTarget(const glm::dvec3& startWorldPosition, 
-                                       const glm::vec2& startMouse,
+void TargetBrowserPair::fineTuneTarget(const glm::vec2& startMouse,
                                        const glm::vec2& translation)
 {
     glm::vec2 fineTune = _browser->fineTuneVector(translation);
@@ -114,7 +117,7 @@ void TargetBrowserPair::fineTuneTarget(const glm::dvec3& startWorldPosition,
     );
 
     glm::dvec3 translationWorld = endWorld - startWorld;
-    aimTargetGalactic(startWorldPosition + translationWorld);
+    aimTargetGalactic(_startTargetPosition + translationWorld);
 }
 
 void TargetBrowserPair::translateSelected(const glm::vec2& start, 
@@ -133,22 +136,8 @@ void TargetBrowserPair::translateSelected(const glm::vec2& start,
 
 void TargetBrowserPair::synchronizeAim() {
     if (!_moveTarget.isAnimating()) {
-        // To remove the lag effect when moving the camera while having a locked
-        // target, send the locked coordinates to wwt
-        glm::dvec2 aim = targetDirectionEquatorial();
-        _browser->setEquatorialAim(aim);
-        glm::dvec3 normal = glm::normalize(
-            _targetNode->worldPosition() - 
-            global::navigationHandler->camera()->positionVec3()
-        );
-        glm::dvec3 right = glm::normalize(
-            glm::cross(
-                global::navigationHandler->camera()->lookUpVectorWorldSpace(),
-                normal
-            )
-        );
-        glm::dvec3 up = glm::normalize(glm::cross(normal, right));
-        _browser->setTargetRoll(skybrowser::targetRoll(up, normal));
+        _browser->setEquatorialAim(targetDirectionEquatorial());
+        _browser->setTargetRoll(targetRoll());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
@@ -344,6 +333,24 @@ void TargetBrowserPair::centerTargetOnScreen() {
     // Keep the current fov
     float currentFov = verticalFov();
     startAnimation(viewDirection, currentFov);
+}
+
+double TargetBrowserPair::targetRoll()
+{
+    // To remove the lag effect when moving the camera while having a locked
+       // target, send the locked coordinates to wwt
+    glm::dvec3 normal = glm::normalize(
+        _targetNode->worldPosition() -
+        global::navigationHandler->camera()->positionVec3()
+    );
+    glm::dvec3 right = glm::normalize(
+        glm::cross(
+            global::navigationHandler->camera()->lookUpVectorWorldSpace(),
+            normal
+        )
+    );
+    glm::dvec3 up = glm::normalize(glm::cross(normal, right));
+    return skybrowser::targetRoll(up, normal);
 }
 
 bool TargetBrowserPair::hasFinishedFading() const {

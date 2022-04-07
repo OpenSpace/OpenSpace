@@ -34,6 +34,8 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <glm/gtx/string_cast.hpp>
+
 
 namespace {
     constexpr const char _loggerCat[] = "SkyBrowserModule";
@@ -250,6 +252,7 @@ namespace {
         ghoul::Dictionary image;
         image.setValue("name", img.name);
         image.setValue("thumbnail", img.thumbnailUrl);
+        image.setValue("url", img.imageUrl);
         image.setValue("ra", img.equatorialSpherical.x);
         image.setValue("dec", img.equatorialSpherical.y);
         image.setValue("fov", static_cast<double>(img.fov));
@@ -329,6 +332,7 @@ namespace {
             target.setValue("cartesianDirection", cartesian);
             target.setValue("ra", spherical.x);
             target.setValue("dec", spherical.y);
+            target.setValue("roll", pair->targetRoll());
             target.setValue("color", pair->borderColor());
             target.setValue("size", glm::dvec2(pair->size()));
             std::vector<std::pair<std::string, glm::dvec3>> copies = pair->renderCopies();
@@ -565,6 +569,22 @@ namespace {
         pair->setVerticalFov(vfov);
     }
 }
+
+/**
+* Takes an identifier to a sky browser or a sky target and a vertical
+* field of view. Changes the field of view as specified by the input.
+* \param id Identifier
+* \param vfov Vertical Field of View
+*/
+[[codegen::luawrap]] void scrollOverBrowser(std::string id, float scroll) {
+    // Get module
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+
+    TargetBrowserPair* pair = module->getPair(id);
+    if (pair) {
+        pair->setVerticalFovWithScroll(scroll);
+    }
+}
 /**
 * Takes an identifier to a sky browser or a sky target and a rgb color
 * in the ranges [0, 255].
@@ -627,6 +647,43 @@ namespace {
     TargetBrowserPair* pair = module->getPair(id);
     if (pair) {
         pair->browser()->removeRenderCopy();
+    }
+}
+
+/**
+* Starts the finetuning of the target
+* rendered copy to it.
+* \param id Identifier to browser
+*/
+[[codegen::luawrap]] void startFinetuningTarget(std::string id) {
+    // Get module
+
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    TargetBrowserPair* pair = module->getPair(id);
+    if (pair) {
+        pair->startFinetuningTarget();
+    }
+}
+
+/**
+* Finetunes the target depending on a mouse drag. 
+* rendered copy to it.
+* \param id Identifier to browser
+* \param start Start pixel position of drag
+* \param end Current pixel position of mouse during drag
+*/
+[[codegen::luawrap]] void finetuneTargetPosition(std::string id, glm::vec2 start,
+    glm::vec2 end) {
+    // Get module
+
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    TargetBrowserPair* pair = module->getPair(id);
+    if (pair) {
+        glm::vec2 startScreenSpace = skybrowser::pixelToScreenSpace2d(start);
+        glm::vec2 endScreenSpace = skybrowser::pixelToScreenSpace2d(end);
+        glm::vec2 translation = endScreenSpace - startScreenSpace;
+        LINFO(glm::to_string(translation));
+        pair->fineTuneTarget(startScreenSpace, translation);
     }
 }
 

@@ -108,7 +108,7 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_browserAnimationSpeed);
 
     // Set callback functions
-    global::callback::mouseButton->emplace_back(
+    global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
         [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
             if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
                 return false;
@@ -135,7 +135,7 @@ SkyBrowserModule::SkyBrowserModule()
     );
 
     if (global::windowDelegate->isMaster()) {
-        global::callback::mousePosition->emplace_back(
+        global::callback::mousePosition->emplace(global::callback::mousePosition->begin(),
             [&](double x, double y) {
                 if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
                     return false;
@@ -154,7 +154,6 @@ SkyBrowserModule::SkyBrowserModule()
                         break;
                     case MouseInteraction::FineTune:
                         _mouseOnPair->fineTuneTarget(
-                            _startTargetPosition, 
                             _startDragPosition, 
                             translation
                         );
@@ -565,6 +564,9 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::AddRenderCopy,
             codegen::lua::SetScreenSpaceSize,
             codegen::lua::RemoveRenderCopy,
+            codegen::lua::StartFinetuningTarget,
+            codegen::lua::FinetuneTargetPosition,
+            codegen::lua::ScrollOverBrowser
         }
     };
 }

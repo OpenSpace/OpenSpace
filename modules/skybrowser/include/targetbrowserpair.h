@@ -56,8 +56,8 @@ public:
     // Mouse interaction
     bool checkMouseIntersection(const glm::vec2& mousePosition);
     glm::vec2 selectedScreenSpacePosition() const;
-    void fineTuneTarget(const glm::dvec3& startWorld, const glm::vec2& startMouse, 
-        const glm::vec2& translation);
+    void startFinetuningTarget();
+    void fineTuneTarget(const glm::vec2& startMouse, const glm::vec2& translation);
     void translateSelected(const glm::vec2& start, const glm::vec2& translation);
     void synchronizeAim();
 
@@ -68,6 +68,7 @@ public:
 
     // Target
     void centerTargetOnScreen();
+    double targetRoll();
 
     bool hasFinishedFading() const;
     bool isFacingCamera() const;
@@ -129,6 +130,9 @@ private:
     skybrowser::Animation<glm::dvec3> _moveTarget =
         skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
     bool _targetIsAnimating = false;
+
+    // Dragging
+    glm::dvec3 _startTargetPosition = glm::dvec3(0.0);
     
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     glm::ivec3 _borderColor = glm::ivec3(255);
