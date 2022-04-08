@@ -44,7 +44,7 @@ public:
     static ghoul::mm_unique_ptr<Rotation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    Rotation(const ghoul::Dictionary& dictionary);
+    Rotation();
     virtual ~Rotation() = default;
 
     virtual bool initialize();
@@ -56,7 +56,6 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    Rotation();
     void requireUpdate();
 
 private:

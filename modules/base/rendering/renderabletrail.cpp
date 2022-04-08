@@ -384,7 +384,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
 
     _programObject->activate();
-    _programObject->setUniform(_uniformCache.opacity, _opacity);
+    _programObject->setUniform(_uniformCache.opacity, opacity());
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *

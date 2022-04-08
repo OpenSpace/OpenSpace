@@ -452,7 +452,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
-        _raycaster->setOpacity(_opacity);
+        _raycaster->setOpacity(opacity());
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
     }

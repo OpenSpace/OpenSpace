@@ -242,7 +242,7 @@ void RenderablePoints::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.sides, 4);
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
     if (_hasSpriteTexture) {
