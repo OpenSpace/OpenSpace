@@ -439,7 +439,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
     glm::vec4 textColor = glm::vec4(glm::vec3(_color), 1.f);
 
     textColor.a *= fadeInVariable;
-    textColor.a *= _opacity;
+    textColor.a *= opacity();
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
 

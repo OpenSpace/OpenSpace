@@ -110,6 +110,7 @@ protected:
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
+    float opacity() const;
 
     properties::BoolProperty _enabled;
     properties::BoolProperty _usePerspectiveProjection;
@@ -131,6 +132,7 @@ protected:
     properties::Vec3Property _multiplyColor;
     properties::Vec4Property _backgroundColor;
     properties::FloatProperty _opacity;
+    properties::FloatProperty _fade;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);

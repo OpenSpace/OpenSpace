@@ -94,11 +94,11 @@ namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const char* KeyFontLight = "Light";
 
-    constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
-        "ShowOverlayOnSlaves",
-        "Show Overlay Information on Slaves",
+    constexpr openspace::properties::Property::PropertyInfo ShowOverlayClientsInfo = {
+        "ShowOverlayOnClients",
+        "Show Overlay Information on Clients",
         "If this value is enabled, the overlay information text is also automatically "
-        "rendered on the slave nodes. This values is disabled by default."
+        "rendered on client nodes. This values is disabled by default."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowLogInfo = {
@@ -280,7 +280,7 @@ namespace openspace {
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner({ "RenderEngine" })
-    , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
+    , _showOverlayOnClients(ShowOverlayClientsInfo, false)
     , _showLog(ShowLogInfo, true)
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
     , _showVersionInfo(ShowVersionInfo, true)
@@ -321,7 +321,7 @@ RenderEngine::RenderEngine()
     , _enabledFontColor(EnabledFontColorInfo, glm::vec4(0.2f, 0.75f, 0.2f, 1.f))
     , _disabledFontColor(DisabledFontColorInfo, glm::vec4(0.55f, 0.2f, 0.2f, 1.f))
 {
-    addProperty(_showOverlayOnSlaves);
+    addProperty(_showOverlayOnClients);
     addProperty(_showLog);
     addProperty(_verticalLogOffset);
     addProperty(_showVersionInfo);
@@ -804,7 +804,7 @@ void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
     ZoneScoped
 
     const bool isMaster = global::windowDelegate->isMaster();
-    if (isMaster || _showOverlayOnSlaves) {
+    if (isMaster || _showOverlayOnClients) {
         renderScreenLog();
         renderVersionInformation();
         renderDashboard();
@@ -1072,7 +1072,8 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
         {
             codegen::lua::AddScreenSpaceRenderable,
             codegen::lua::RemoveScreenSpaceRenderable,
-            codegen::lua::TakeScreenshot
+            codegen::lua::TakeScreenshot,
+            codegen::lua::DpiScaling
         }
     };
 }

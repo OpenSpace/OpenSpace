@@ -22,82 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/syncengine.h>
+#ifndef __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
+#define __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
 
-#include <openspace/util/syncdata.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <algorithm>
+#include <QDialog>
+#include <filesystem>
+#include <string>
 
-namespace openspace {
+namespace openspace { class Asset; }
 
-SyncEngine::SyncEngine(unsigned int syncBufferSize)
-    : _syncBuffer(syncBufferSize)
-{
-    ghoul_assert(syncBufferSize > 0, "syncBufferSize must be bigger than 0");
-}
+class QBoxLayout;
+class QComboBox;
+class QLabel;
+class QLineEdit;
+class QWidget;
 
-// Should be called on sgct master
-std::vector<std::byte> SyncEngine::encodeSyncables() {
-    for (Syncable* syncable : _syncables) {
-        syncable->encode(&_syncBuffer);
-    }
+class AssetEdit : public QDialog {
+Q_OBJECT
+public:
+    /**
+     * Constructor for AssetEdit class
+     */
+    AssetEdit(QWidget* parent);
 
-    std::vector<std::byte> data = _syncBuffer.data();
-    _syncBuffer.reset();
-    return data;
-}
+private slots:
+    //void openComponent();
 
-// Should be called on sgct clients
-void SyncEngine::decodeSyncables(std::vector<std::byte> data) {
-    _syncBuffer.setData(std::move(data));
-    for (Syncable* syncable : _syncables) {
-        syncable->decode(&_syncBuffer);
-    }
+    //void openHorizonsFile();
+    void openHorizons();
 
-    _syncBuffer.reset();
-}
+    void approved();
 
-void SyncEngine::preSynchronization(IsMaster isMaster) {
-    ZoneScoped
+private:
+    void createWidgets();
 
-    for (Syncable* syncable : _syncables) {
-        syncable->preSync(isMaster);
-    }
-}
+    QBoxLayout* _layout = nullptr;
+    QLineEdit* _nameEdit = nullptr;
+    //QComboBox* _components = nullptr;
 
-void SyncEngine::postSynchronization(IsMaster isMaster) {
-    ZoneScoped
+    //std::filesystem::path _horizonsFile;
+    //QLineEdit* _horizonsFileEdit = nullptr;
 
-    for (Syncable* syncable : _syncables) {
-        syncable->postSync(isMaster);
-    }
-}
+    QLabel* _errorMsg = nullptr;
 
-void SyncEngine::addSyncable(Syncable* syncable) {
-    ghoul_assert(syncable, "Syncable must not be nullptr");
+    // List of all the supported components
+    /*QStringList _supportedComponents = {
+        "Choose Component",
+        "Horizons Translation"
+    };*/
+};
 
-    _syncables.push_back(syncable);
-}
-
-void SyncEngine::addSyncables(const std::vector<Syncable*>& syncables) {
-    for (Syncable* syncable : syncables) {
-        ghoul_assert(syncable, "Syncables must not contain any nullptr");
-        addSyncable(syncable);
-    }
-}
-
-void SyncEngine::removeSyncable(Syncable* syncable) {
-    _syncables.erase(
-        std::remove(_syncables.begin(), _syncables.end(), syncable),
-        _syncables.end()
-    );
-}
-
-void SyncEngine::removeSyncables(const std::vector<Syncable*>& syncables) {
-    for (Syncable* syncable : syncables) {
-        removeSyncable(syncable);
-    }
-}
-
-} // namespace openspace
+#endif // __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
