@@ -343,6 +343,10 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
         LERROR(fmt::format("Could not load asset {}: {}", asset->path(), e.message));
         return false;
     }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+        return false;
+    }
 
     // Extract meta information from the asset file if it was provided
     lua_getglobal(*_luaState, AssetGlobalVariableName);
