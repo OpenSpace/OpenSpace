@@ -6,7 +6,7 @@ local horizons = asset.syncedResource({
   Name = "JWST Horizons",
   Type = "HttpSynchronization",
   Identifier = "jwst_horizons",
-  Version = 2
+  Version = 3
 })
 
 local JWSTPosition = {
@@ -17,13 +17,13 @@ local JWSTPosition = {
       Type = "TimelineTranslation",
       ShouldInterpolate = false,
       Keyframes = {
-        ["2018 OCT 01 14:06:03"] = {
+        ["2021 DEC 25 12:50:00"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "horizons_jwst_launch.dat",
+          HorizonsTextFile = horizons .. "horizons_jwst_launch.hrz",
         },
-        ["2018 NOV 01 00:00:00"] = {
+        ["2022 JAN 25 00:00:00"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "horizons_jwst_orbit.dat",
+          HorizonsTextFile = horizons .. "horizons_jwst_orbit.hrz",
         }
       }
     },
@@ -33,8 +33,7 @@ local JWSTPosition = {
     Path = "/Solar System/Missions/JWST",
     Hidden = true,
     Description = [[
-      James Webb Space Telescope Position relative to Earth based on Horizons data from the
-      2018 launch.
+      James Webb Space Telescope Position relative to Earth.
     ]],
   }
 }
@@ -62,27 +61,26 @@ local JWSTRotation = {
   }
 }
 
--- Reparent the JWSTPosition node when the data changes at 01 Nov 2018
+-- Reparent the JWSTPosition node when the data changes at 25 Jan 2022
 asset.onInitialize(function()
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 NOV 01 00:00:00",
+    "2022 JAN 25 00:00:00",
     [[openspace.setParent("JWSTPosition", "L2")]],
     [[openspace.setParent("JWSTPosition", "EarthCenter")]],
     "",
     1 -- Not default group, never clear this script
   )
-end)
 
-asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTPosition)
   openspace.addSceneGraphNode(JWSTRotation)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTRotation)
   openspace.removeSceneGraphNode(JWSTPosition)
+  openspace.scriptScheduler.clear(1)
 end)
-    
+
 asset.export(JWSTPosition)
 asset.export(JWSTRotation)
 
@@ -91,9 +89,8 @@ asset.meta = {
   Name = "James Webb Space Telescope Transforms",
   Version = "1.0",
   Description = [[
-    JWST transforms: JWST position relative to Earth using horizons data from the planned
-    launch of 2018. JWST rotation, a fixed rotation so sunshield always points toward
-    the Sun.
+    JWST transforms: JWST position relative to Earth and JWST rotation,
+    a fixed rotation so sunshield always points toward the Sun.
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
