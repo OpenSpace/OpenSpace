@@ -1,0 +1,84 @@
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+
+local modelFolder = asset.syncedResource({
+	Name = "Eiffel Tower Model",
+	Type = "HttpSynchronization",
+	Identifier = "eiffel_tower_model",
+	Version = 1
+  })
+  
+local eiffelTower = {
+	Identifier = "eiffelTower",
+	Parent = earthAsset.Earth.Identifier,
+	Renderable = {
+		Type = "RenderableModel",
+		GeometryFile = modelFolder .. "eiffeltower.osmodel",
+		ModelScale = "Centimeter",
+		RotationVector = {0,45,0},
+		LightSources = {
+			{
+				Type = "SceneGraphLightSource",
+				Identifier = "sunLightSourceForEiffelTower",
+				Node = sunAsset.Sun.Identifier
+			},
+		}
+	},
+	GUI = {
+		Name = "Eiffel Tower",
+		Path = "/Scale Objects"
+	},
+	Transform = {
+		Translation = {
+			Type = "GlobeTranslation",
+			Globe = earthAsset.Earth.Identifier,
+			Longitude = 2.29448,
+			Latitude = 48.85824,
+			Altitude = 0,
+			UseHeightmap = true
+		},
+		Rotation = {
+			Type = "GlobeRotation",
+			Globe = earthAsset.Earth.Identifier,
+			Longitude = 2.29448,
+			Latitude = 48.85824,
+			UseHeightmap = false
+		},
+		Scale = {
+			Type = "StaticScale",
+			Scale = 4.38
+		}
+	}
+}
+
+local updatePositionAction = {
+    Identifier = "dropEiffelTower",
+    Name = "Drop Eiffel Tower Under Camera",
+    Command = [[local lat, lon, alt = openspace.globebrowsing.getGeoPositionForCamera();
+	local camera = openspace.navigation.getNavigationState();
+	openspace.setParent('eiffelTower',camera.Anchor)
+	openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Globe', camera.Anchor);
+	openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Latitude', lat);
+	openspace.setPropertyValueSingle('Scene.eiffelTower.Translation.Longitude', lon);
+	openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Globe', camera.Anchor);
+	openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Latitude', lat);
+	openspace.setPropertyValueSingle('Scene.eiffelTower.Rotation.Longitude', lon);
+	]],
+    Documentation = "Updates the eiffel tower position based on the globe location of the camera (not the looking vector)",
+    GuiPath = "/Scale Objects",
+    IsLocal = false
+}
+
+asset.onInitialize(function()
+	openspace.addSceneGraphNode(eiffelTower)
+	openspace.action.registerAction(updatePositionAction)
+	openspace.bindKey("e", "dropEiffelTower");	
+end)
+	
+asset.onDeinitialize(function()
+	openspace.removeSceneGraphNode(eiffelTower)
+	openspace.action.removeAction(updatePositionAction)
+	openspace.clearKey("e");	
+end)
+	
+asset.export(eiffelTower)
