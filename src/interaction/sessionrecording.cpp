@@ -927,6 +927,19 @@ void SessionRecording::saveScriptKeyframeAscii(Timestamps& times,
 {
     std::stringstream keyframeLine = std::stringstream();
     saveHeaderAscii(times, HeaderScriptAscii, keyframeLine);
+    // Erase all \r (from windows newline), and all \n from line endings and replace with
+    // ';' so that lua will treat them as separate lines. This is done in order to treat
+    // a multi-line script as a single line in the file.
+    size_t startPos = sm._script.find("\r", 0);
+    while (startPos != std::string::npos) {
+        sm._script.erase(startPos, 1);
+        startPos = sm._script.find("\r", startPos);
+    }
+    startPos = sm._script.find("\n", 0);
+    while (startPos != std::string::npos) {
+        sm._script.replace(startPos, 1, ";");
+        startPos = sm._script.find("\n", startPos);
+    }
     sm.write(keyframeLine);
     saveKeyframeToFile(keyframeLine.str(), file);
 }
