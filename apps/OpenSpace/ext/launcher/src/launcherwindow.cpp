@@ -27,6 +27,7 @@
 #include "profile/profileedit.h"
 
 #include <openspace/engine/configuration.h>
+#include <openspace/openspace.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -148,7 +149,14 @@ namespace {
         std::ofstream outFile;
         try {
             outFile.open(path, std::ofstream::out);
-            outFile << sgct::serializeConfig(cluster);
+            outFile << sgct::serializeConfig(
+                cluster,
+                {
+                    "OpenSpace",
+                    OPENSPACE_VERSION_MAJOR,
+                    OPENSPACE_VERSION_MINOR
+                }
+            );
         }
         catch (const std::ofstream::failure& e) {
             QMessageBox::critical(
