@@ -1072,7 +1072,8 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
         {
             codegen::lua::AddScreenSpaceRenderable,
             codegen::lua::RemoveScreenSpaceRenderable,
-            codegen::lua::TakeScreenshot
+            codegen::lua::TakeScreenshot,
+            codegen::lua::DpiScaling
         }
     };
 }
