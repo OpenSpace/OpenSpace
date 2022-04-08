@@ -22,34 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/scriptcamerastates.h>
-#include <openspace/navigation/navigationstate.h>
-#include <numeric>
+namespace {
 
-namespace openspace::luascriptfunctions {
-
-int loadNavigationState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadNavigationState");
-    const std::string cameraStateFilePath = ghoul::lua::value<std::string>(L);
-
+/**
+ * Load a navigation state from file. The file should be a lua file returning the
+ * navigation state as a table formatted as a Navigation State, such as the output files
+ * of saveNavigationState.
+ */
+[[codegen::luawrap]] void loadNavigationState(std::string cameraStateFilePath) {
     if (cameraStateFilePath.empty()) {
-        return ghoul::lua::luaError(L, "filepath string is empty");
+        throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
-    global::navigationHandler->loadNavigationState(cameraStateFilePath);
-    return 0;
+    openspace::global::navigationHandler->loadNavigationState(cameraStateFilePath);
 }
 
-int getNavigationState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::getNavigationState");
-    std::optional<std::string> frame = ghoul::lua::value<std::optional<std::string>>(L);
+/**
+ * Return the current navigation state as a lua table. The optional argument is the scene
+ * graph node to use as reference frame. By default, the reference frame will picked based
+ * on whether the orbital navigator is currently following the anchor node rotation. If it
+ * is, the anchor will be chosen as reference frame. If not, the reference frame will be
+ * set to the scene graph root.
+ */
+[[codegen::luawrap]] ghoul::Dictionary getNavigationState(
+                                                         std::optional<std::string> frame)
+{
+    using namespace openspace;
 
     interaction::NavigationState state;
     if (frame.has_value()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(*frame);
         if (!referenceFrame) {
-            return ghoul::lua::luaError(
-                L,
+            throw ghoul::lua::LuaError(
                 fmt::format("Could not find node '{}' as reference frame", *frame)
             );
         }
@@ -59,157 +63,147 @@ int getNavigationState(lua_State* L) {
         state = global::navigationHandler->navigationState();
     }
 
-
-    const auto pushVector = [](lua_State* s, const glm::dvec3& v) {
-        lua_newtable(s);
-        ghoul::lua::push(s, 1, v.x);
-        lua_rawset(s, -3);
-        ghoul::lua::push(s, 2, v.y);
-        lua_rawset(s, -3);
-        ghoul::lua::push(s, 3, v.z);
-        lua_rawset(s, -3);
-    };
-
-    lua_newtable(L);
-    ghoul::lua::push(L, "Anchor", state.anchor);
-    lua_rawset(L, -3);
-
+    ghoul::Dictionary res;
+    res.setValue("Anchor", state.anchor);
     if (!state.aim.empty()) {
-        ghoul::lua::push(L, "Aim", state.aim);
-        lua_rawset(L, -3);
+        res.setValue("Aim", state.aim);
     }
     if (!state.referenceFrame.empty()) {
-        ghoul::lua::push(L, "ReferenceFrame", state.referenceFrame);
-        lua_rawset(L, -3);
+        res.setValue("ReferenceFrame", state.referenceFrame);
     }
-    ghoul::lua::push(L, "Position");
-    pushVector(L, state.position);
-    lua_rawset(L, -3);
-
+    res.setValue("ReferenceFrame", state.position);
     if (state.up.has_value()) {
-        ghoul::lua::push(L, "Up");
-        pushVector(L, *state.up);
-        lua_rawset(L, -3);
+        res.setValue("Up", *state.up);
     }
     if (state.yaw != 0) {
-        ghoul::lua::push(L, "Yaw", state.yaw);
-        lua_rawset(L, -3);
+        res.setValue("Up", state.yaw);
     }
     if (state.pitch != 0) {
-        ghoul::lua::push(L, "Pitch", state.pitch);
-        lua_rawset(L, -3);
+        res.setValue("Pitch", state.pitch);
     }
-
-    return 1;
+    return res;
 }
 
-int setNavigationState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setNavigationState");
-    ghoul::Dictionary navigationStateDictionary = ghoul::lua::value<ghoul::Dictionary>(L);
+// Set the navigation state. The argument must be a valid Navigation State.
+[[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState) {
+    using namespace openspace;
 
-    openspace::documentation::TestResult r = openspace::documentation::testSpecification(
+    documentation::TestResult r = documentation::testSpecification(
         interaction::NavigationState::Documentation(),
-        navigationStateDictionary
+        navigationState
     );
 
     if (!r.success) {
-        return ghoul::lua::luaError(
-            L,
+        throw ghoul::lua::LuaError(
             fmt::format("Could not set camera state: {}", ghoul::to_string(r))
         );
     }
 
     global::navigationHandler->setNavigationStateNextFrame(
-        interaction::NavigationState(navigationStateDictionary)
+        interaction::NavigationState(navigationState)
     );
-    return 0;
 }
 
-int saveNavigationState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::saveNavigationState");
-    auto [path, frame] = ghoul::lua::values<std::string, std::optional<std::string>>(L);
-    frame = frame.value_or("");
-
+/**
+ * Save the current navigation state to a file with the path given by the first argument.
+ * The optional second argument is the scene graph node to use as reference frame. By
+ * default, the reference frame will picked based on whether the orbital navigator is
+ * currently following the anchor node rotation. If it is, the anchor will be chosen as
+ * reference frame. If not, the reference frame will be set to the scene graph root.
+ */
+[[codegen::luawrap]] void saveNavigationState(std::string path, std::string frame = "") {
     if (path.empty()) {
-        return ghoul::lua::luaError(L, "Filepath string is empty");
+        throw ghoul::lua::LuaError("Filepath string is empty");
     }
-
-    global::navigationHandler->saveNavigationState(path, *frame);
-    return 0;
+    openspace::global::navigationHandler->saveNavigationState(path, frame);
 }
 
-int retargetAnchor(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::retargetAnchor");
-    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
-    return 0;
+// Reset the camera direction to point at the anchor node.
+[[codegen::luawrap]] void retargetAnchor() {
+    openspace::global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
-int retargetAim(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::retargetAim");
-    global::navigationHandler->orbitalNavigator().startRetargetAim();
-    return 0;
+// Reset the camera direction to point at the aim node.
+[[codegen::luawrap]] void retargetAim() {
+    openspace::global::navigationHandler->orbitalNavigator().startRetargetAim();
 }
 
-int bindJoystickAxis(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 3, 7 }, "lua::bindJoystickAxis");
-    auto [joystickName, axis, axisType, shouldInvert, joystickType, isSticky,
-          sensitivity] =
-        ghoul::lua::values<
-            std::string, int, std::string, std::optional<bool>,
-            std::optional<std::string>, std::optional<bool>, std::optional<double>
-        >(L);
-    shouldInvert = shouldInvert.value_or(false);
-    isSticky = isSticky.value_or(false);
-    sensitivity = sensitivity.value_or(0.0);
-    joystickType = joystickType.value_or("JoystickLike");
-
+/**
+ * Finds the input joystick with the given 'name' and binds the axis identified by the
+ * second argument to be used as the type identified by the third argument. If
+ * 'isInverted' is 'true', the axis value is inverted. 'joystickType' is if the joystick
+ * behaves more like a joystick or a trigger, where the first is the default. If
+ * 'isSticky' is 'true', the value is calculated relative to the previous value. If
+ * 'sensitivity' is given then that value will affect the sensitivity of the axis together
+ * with the global sensitivity.
+ */
+[[codegen::luawrap]] void bindJoystickAxis(std::string joystickName, int axis,
+                                           std::string axisType,
+                                           bool shouldInvert = false,
+                                           std::string joystickType = "JoystickLike",
+                                           bool isSticky = false,
+                                           double sensitivity = 0.0)
+{
+    using namespace openspace;
+    using JoystickCameraStates = interaction::JoystickCameraStates;
     global::navigationHandler->setJoystickAxisMapping(
         std::move(joystickName),
         axis,
-        ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
-        interaction::JoystickCameraStates::AxisInvert(*shouldInvert),
-        ghoul::from_string<interaction::JoystickCameraStates::JoystickType>(*joystickType),
-        *isSticky,
-        *sensitivity
+        ghoul::from_string<JoystickCameraStates::AxisType>(axisType),
+        JoystickCameraStates::AxisInvert(shouldInvert),
+        ghoul::from_string<JoystickCameraStates::JoystickType>(joystickType),
+        isSticky,
+        sensitivity
     );
-    return 0;
 }
 
-int bindJoystickAxisProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 3, 7 }, "lua::bindJoystickAxisProperty");
-    auto [joystickName, axis, propertyUri, min, max, shouldInvert, isRemote] =
-        ghoul::lua::values<
-            std::string, int, std::string, std::optional<float>, std::optional<float>,
-            std::optional<bool>, std::optional<bool>
-        >(L);
-    min = min.value_or(0.f);
-    max = max.value_or(1.f);
-    shouldInvert = shouldInvert.value_or(false);
-    isRemote = isRemote.value_or(true);
-
+/**
+ * Finds the input joystick with the given 'name' and binds the axis identified by the
+ * second argument to be bound to the property identified by the third argument. 'min' and
+ * 'max' is the minimum and the maximum allowed value for the given property and the axis
+ * value is rescaled from [-1, 1] to [min, max], default is [0, 1]. If 'isInverted' is
+ * 'true', the axis value is inverted. The last argument determines whether the property
+ * change is going to be executed locally or remotely, where the latter is the default.
+ */
+[[codegen::luawrap]] void bindJoystickAxisProperty(std::string joystickName, int axis,
+                                                   std::string propertyUri,
+                                                   float min = 0.f, float max = 1.f,
+                                                   bool shouldInvert = false,
+                                                   bool isRemote = true)
+{
+    using namespace openspace;
     global::navigationHandler->setJoystickAxisMappingProperty(
         std::move(joystickName),
         axis,
         std::move(propertyUri),
-        *min,
-        *max,
-        interaction::JoystickCameraStates::AxisInvert(*shouldInvert),
-        *isRemote
+        min,
+        max,
+        interaction::JoystickCameraStates::AxisInvert(shouldInvert),
+        isRemote
     );
-    return 0;
 }
 
-int joystickAxis(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::joystickAxis");
-    auto [joystickName, axis] = ghoul::lua::values<std::string, int>(L);
+/**
+ * Finds the input joystick with the given 'name' and returns the joystick axis
+ * information for the passed axis. The information that is returned is the current axis
+ * binding as a string, whether the values are inverted as bool, the joystick type as a
+ * string, whether the axis is sticky as bool, the sensitivity as number, the property uri
+ * bound to the axis as string (empty is type is not Property), the min and max values for
+ * the property as numbers and whether the property change will be executed remotly as
+ * bool.
+ */
+[[codegen::luawrap]]
+std::tuple<std::string, bool, std::string, bool, double, std::string, float, float, bool>
+joystickAxis(std::string joystickName, int axis)
+{
+    using namespace openspace;
 
-    using AI = interaction::JoystickCameraStates::AxisInformation;
-    AI info = global::navigationHandler->joystickAxisMapping(joystickName, axis);
+    interaction::JoystickCameraStates::AxisInformation info =
+        global::navigationHandler->joystickAxisMapping(joystickName, axis);
 
-    ghoul::lua::push(
-        L,
+    return {
         ghoul::to_string(info.type),
-        static_cast<bool>(info.invert),
+        info.invert,
         ghoul::to_string(info.joystickType),
         info.isSticky,
         info.sensitivity,
@@ -217,67 +211,78 @@ int joystickAxis(lua_State* L) {
         info.minValue,
         info.maxValue,
         info.isRemote
-    );
-    return 9;
+    };
 }
 
-int setJoystickAxisDeadzone(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setJoystickAxisDeadzone");
-    auto [joystickName, axis, deadzone] = ghoul::lua::values<std::string, int, float>(L);
-
+/**
+ * Finds the input joystick with the given 'name' and sets the deadzone for a particular
+ * joystick axis, which means that any input less than this value is completely ignored.
+ */
+[[codegen::luawrap("setAxisDeadZone")]] void setJoystickAxisDeadZone(
+                                                                 std::string joystickName,
+                                                                                 int axis,
+                                                                           float deadzone)
+{
+    using namespace openspace;
     global::navigationHandler->setJoystickAxisDeadzone(joystickName, axis, deadzone);
-    return 0;
 }
 
-int joystickAxisDeadzone(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::joystickAxisDeadzone");
-    auto [joystickName, axis] = ghoul::lua::values<std::string, int>(L);
-
-    const float deadzone = global::navigationHandler->joystickAxisDeadzone(joystickName, axis);
-    ghoul::lua::push(L, deadzone);
-    return 1;
+/**
+ * Returns the deadzone for the desired axis of the provided joystick.
+ */
+[[codegen::luawrap("axisDeadzone")]] float joystickAxisDeadzone(std::string joystickName,
+                                                                int axis)
+{
+    float deadzone = openspace::global::navigationHandler->joystickAxisDeadzone(
+        joystickName,
+        axis
+    );
+    return deadzone;
 }
 
-int bindJoystickButton(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 4, 6 }, "lua::bindJoystickButton");
-    auto [joystickName, button, command, documentation, actionStr, isRemote] =
-        ghoul::lua::values<
-            std::string,
-            int,
-            std::string,
-            std::string,
-            std::optional<std::string>,
-            std::optional<bool>
-        >(L);
-    actionStr = actionStr.value_or("Press");
-    isRemote = isRemote.value_or(true);
-
-    interaction::JoystickAction action =
-        ghoul::from_string<interaction::JoystickAction>(*actionStr);
+/**
+ * Finds the input joystick with the given 'name' and binds a Lua script given by the
+ * third argument to be executed when the joystick button identified by the second
+ * argument is triggered. The fifth argument determines when the script should be
+ * executed, this defaults to 'Press', which means that the script is run when the user
+ * presses the button. The fourth arguemnt is the documentation of the script in the third
+ * argument. The sixth argument determines whether the command is going to be executable
+ * locally or remotely, where the latter is the default.
+ */
+[[codegen::luawrap]] void bindJoystickButton(std::string joystickName, int button,
+                                             std::string command,
+                                             std::string documentation,
+                                             std::string action = "Press",
+                                             bool isRemote = true)
+{
+    using namespace openspace;
+    interaction::JoystickAction act =
+        ghoul::from_string<interaction::JoystickAction>(action);
 
     global::navigationHandler->bindJoystickButtonCommand(
         joystickName,
         button,
         command,
-        action,
-        interaction::JoystickCameraStates::ButtonCommandRemote(*isRemote),
+        act,
+        interaction::JoystickCameraStates::ButtonCommandRemote(isRemote),
         documentation
     );
-    return 0;
 }
 
-int clearJoystickButton(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::clearJoystickButton");
-    auto [joystickName, button] = ghoul::lua::values<std::string, int>(L);
-
-    global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
-    return 0;
+/**
+ * Finds the input joystick with the given 'name' and removes all commands that are
+ * currently bound to the button identified by the second argument.
+ */
+[[codegen::luawrap]] void clearJoystickButton(std::string joystickName, int button) {
+    openspace::global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
 }
 
-int joystickButton(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::joystickButton");
-    auto [joystickName, button] = ghoul::lua::values<std::string, int>(L);
-
+/**
+ * Finds the input joystick with the given 'name' and returns the script that is currently
+ * bound to be executed when the provided button is pressed.
+ */
+[[codegen::luawrap]] std::string joystickButton(std::string joystickName, int button) {
+    using namespace openspace;
     const std::vector<std::string>& cmds =
         global::navigationHandler->joystickButtonCommand(joystickName, button);
 
@@ -289,58 +294,63 @@ int joystickButton(lua_State* L) {
             return lhs + ";" + rhs;
         }
     );
-    ghoul::lua::push(L, cmd);
-    return 1;
+    return cmd;
 }
 
-int addGlobalRotation(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addGlobalRotation");
-    auto [v1, v2] = ghoul::lua::values<double, double>(L);
-
+// Directly adds to the global rotation of the camera.
+[[codegen::luawrap]] void addGlobalRotation(double v1, double v2) {
+    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRotation(
         glm::dvec2(v1, v2)
     );
-    return 0;
 }
 
-int addLocalRotation(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addLocalRotation");
-    auto [v1, v2] = ghoul::lua::values<double, double>(L);
-
+// Directly adds to the local rotation of the camera.
+[[codegen::luawrap]] void addLocalRotation(double v1, double v2) {
+    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRotation(
         glm::dvec2(v1, v2)
     );
-    return 0;
 }
 
-int addTruckMovement(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTruckMovement");
-    auto [v1, v2] = ghoul::lua::values<double, double>(L);
-
+// Directly adds to the truck movement of the camera.
+[[codegen::luawrap]] void addTruckMovement(double v1, double v2) {
+    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addTruckMovement(
         glm::dvec2(v1, v2)
     );
-    return 0;
 }
 
-int addLocalRoll(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addLocalRoll");
-    auto [v1, v2] = ghoul::lua::values<double, double>(L);
-
+// Directly adds to the local roll of the camera.
+[[codegen::luawrap]] void addLocalRoll(double v1, double v2) {
+    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRoll(
         glm::dvec2(v1, v2)
     );
-    return 0;
 }
 
-int addGlobalRoll(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addGlobalRoll");
-    auto [v1, v2] = ghoul::lua::values<double, double>(L);
-
+// Directly adds to the global roll of the camera.
+[[codegen::luawrap]] void addGlobalRoll(double v1, double v2) {
+    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRoll(
         glm::dvec2(v1, v2)
     );
-    return 0;
 }
 
-} // namespace openspace::luascriptfunctions
+/**
+ * Immediately start applying the chosen IdleBehavior. If none is specified, use the one
+ * set to default in the OrbitalNavigator.
+ */
+[[codegen::luawrap]] void triggerIdleBehavior(std::string choice = "") {
+    using namespace openspace;
+    try {
+        global::navigationHandler->orbitalNavigator().triggerIdleBehavior(choice);
+    }
+    catch (ghoul::RuntimeError& e) {
+        throw ghoul::lua::LuaError(e.message);
+    }
+}
+
+#include "navigationhandler_lua_codegen.cpp"
+
+} // namespace

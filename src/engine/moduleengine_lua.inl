@@ -22,28 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-#include <ghoul/lua/ghoul_lua.h>
+namespace {
 
-namespace openspace::luascriptfunctions {
+// Checks whether the passed OpenSpaceModule is loaded.
+[[codegen::luawrap]] bool isLoaded(std::string moduleName) {
+    using namespace openspace;
 
-/**
- * \ingroup LuaScripts
- * isLoaded(string):
- * Checks whether the passed OpenSpaceModule is loaded or not
- */
-int isLoaded(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::isLoaded");
-    const std::string name = ghoul::lua::value<std::string>(L);
-
-    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine->modules();
-    const auto it = std::find_if(
-        modules.cbegin(), modules.cend(),
-        [name](OpenSpaceModule* module) { return module->identifier() == name; }
-    );
-
-    ghoul::lua::push(L, it != modules.cend());
-    return 1;
+    for (OpenSpaceModule* module : global::moduleEngine->modules()) {
+        if (module->identifier() == moduleName) {
+            return true;
+        }
+    }
+    return false;
 }
 
-} // namespace openspace::luascriptfunctions
+#include "moduleengine_lua_codegen.cpp"
+
+} // namespace

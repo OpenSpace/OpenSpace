@@ -1,5 +1,5 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 local kernels = asset.syncedResource({
@@ -622,12 +622,7 @@ local KernelFiles = {
 }
 
 local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
+  sun.LightSource,
   {
     Identifier = "Camera",
     Type = "CameraLightSource",

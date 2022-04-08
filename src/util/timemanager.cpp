@@ -422,7 +422,7 @@ void TimeManager::clearKeyframes() {
 
 void TimeManager::setTimeNextFrame(Time t) {
     OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
-    if (global::openSpaceEngine->currentMode() == OpenSpaceEngine::Mode::CameraPath) {
+    if (m == OpenSpaceEngine::Mode::CameraPath) {
         LERROR("Cannot change simulation time during camera path");
         return;
     }

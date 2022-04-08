@@ -41,11 +41,17 @@ namespace openspace {
 
 class DefaultBrowserLauncher : public CefLifeSpanHandler, public CefRequestHandler {
 public:
-    bool OnBeforePopup(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
-        const CefString& targetUrl, const CefString& targetFrameName,
-        CefLifeSpanHandler::WindowOpenDisposition targetDisposition, bool userGesture,
-        const CefPopupFeatures& popupFeatures, CefWindowInfo& windowInfo,
-        CefRefPtr<CefClient>& client, CefBrowserSettings& settings,
+    bool OnBeforePopup(CefRefPtr<CefBrowser> browser,
+        CefRefPtr<CefFrame> frame,
+        const CefString& targetUrl,
+        const CefString& targetFrameName,
+        CefLifeSpanHandler::WindowOpenDisposition targetDisposition,
+        bool userGesture,
+        const CefPopupFeatures& popupFeatures,
+        CefWindowInfo& windowInfo,
+        CefRefPtr<CefClient>& client,
+        CefBrowserSettings& settings,
+        CefRefPtr<CefDictionaryValue>& extra_info,
         bool* noJavascriptAccess) override;
 
     //bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,

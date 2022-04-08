@@ -12,6 +12,7 @@ local Sun = {
     Layers = {},
     PerformShading = false
   },
+  ApproachFactor = 15.0,
   GUI = {
     Name = "Sun",
     Path = "/Solar System/Sun",
@@ -44,6 +45,13 @@ local SunLabel = {
   }
 }
 
+local LightSource = {
+  Type = "SceneGraphLightSource",
+  Identifier = "Sun",
+  Node = transforms.SolarSystemBarycenter.Identifier,
+  Intensity = 1.0
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Sun)
   openspace.addSceneGraphNode(SunLabel)
@@ -56,6 +64,7 @@ end)
     
 asset.export(Sun)
 asset.export(SunLabel)
+asset.export("LightSource", LightSource)
 
 
 

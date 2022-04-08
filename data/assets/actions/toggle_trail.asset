@@ -32,7 +32,11 @@ local toggle_trail = {
       visibility = not openspace.getPropertyValue("Scene." .. trail .. ".Renderable.Enabled")
     end
 
-    openspace.setPropertyValueSingle("Scene." .. trail .. ".Renderable.Enabled", visibility)
+    if visibility then
+      openspace.setPropertyValueSingle("Scene." .. trail .. ".Renderable.Fade", 1.0, 1.0)
+    else
+      openspace.setPropertyValueSingle("Scene." .. trail .. ".Renderable.Fade", 0.0, 1.0)
+    end
   ]],
   Documentation = [[Toggles the visibility of the associated trail of a scene graph node.
     This action takes optional arguments to 1) determine which trail to hide (as the
@@ -54,9 +58,9 @@ local hide_trail = {
     end
     
     if openspace.hasSceneGraphNode(node .. "Trail") then
-      openspace.setPropertyValue("Scene." .. node .. "Trail.Renderable.Enabled", false)
+      openspace.setPropertyValueSingle("Scene." .. node .. "Trail.Renderable.Fade", 0.0, 1.0)
     elseif openspace.hasSceneGraphNode(node .. "_trail") then
-      openspace.setPropertyValue("Scene." .. node .. "_trail.Renderable.Enabled", false)
+      openspace.setPropertyValueSingle("Scene." .. node .. "_trail.Renderable.Fade", 0.0, 1.0)
     end
   ]],
   Documentation = [[Hides the associated trail of a scene graph node. This action takes an
@@ -79,9 +83,9 @@ local show_trail = {
     end
     
     if openspace.hasSceneGraphNode(node .. "Trail") then
-      openspace.setPropertyValue("Scene." .. node .. "Trail.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle("Scene." .. node .. "Trail.Renderable.Fade", 1.0, 1.0)
     elseif openspace.hasSceneGraphNode(node .. "_trail") then
-      openspace.setPropertyValue("Scene." .. node .. "_trail.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle("Scene." .. node .. "_trail.Renderable.Fade", 1.0, 1.0)
     end
   ]],
   Documentation = [[Shows the associated trail of a scene graph node. This action takes an

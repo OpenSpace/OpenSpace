@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
@@ -72,6 +73,7 @@ namespace {
         // The group that this script belongs to, default group is 0
         std::optional<int> group;
     };
+
 #include "scriptscheduler_codegen.cpp"
 } // namespace
 
@@ -229,6 +231,10 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
                 iter->backwardScript :
                 iter->universalScript + "; " + iter->backwardScript;
             result.push_back(script);
+
+            if (iter == _scripts.begin()) {
+                break;
+            }
         }
 
         return result;
@@ -286,51 +292,12 @@ LuaLibrary ScriptScheduler::luaLibrary() {
     return {
         "scriptScheduler",
         {
-            {
-                "loadFile",
-                &luascriptfunctions::loadFile,
-                "string",
-                "Load timed scripts from a Lua script file that returns a list of "
-                "scheduled scripts."
-            },
-            {
-                "loadScheduledScript",
-                &luascriptfunctions::loadScheduledScript,
-                "string, string, (string, string)",
-                "Load a single scheduled script. The first argument is the time at which "
-                "the scheduled script is triggered, the second argument is the script "
-                "that is executed in the forward direction, the optional third argument "
-                "is the script executed in the backwards direction, and the optional "
-                "last argument is the universal script, executed in either direction."
-
-            },
-            {
-                "setModeApplicationTime",
-                &luascriptfunctions::setModeApplicationTime,
-                "",
-                "Sets the time reference for scheduled scripts to application time "
-                "(seconds since OpenSpace application started)."
-            },
-            {
-                "setModeRecordedTime",
-                &luascriptfunctions::setModeRecordedTime,
-                "",
-                "Sets the time reference for scheduled scripts to the time since the "
-                "recording was started (the same relative time applies to playback)."
-            },
-            {
-                "setModeSimulationTime",
-                &luascriptfunctions::setModeSimulationTime,
-                "",
-                "Sets the time reference for scheduled scripts to the simulated "
-                "date & time (J2000 epoch seconds)."
-            },
-            {
-                "clear",
-                &luascriptfunctions::clear,
-                "",
-                "Clears all scheduled scripts."
-            }
+            codegen::lua::LoadFile,
+            codegen::lua::LoadScheduledScript,
+            codegen::lua::SetModeApplicationTime,
+            codegen::lua::SetModeRecordedTime,
+            codegen::lua::SetModeSimulationTime,
+            codegen::lua::Clear
         }
     };
 }

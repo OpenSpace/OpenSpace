@@ -30,11 +30,11 @@ namespace {
     struct [[codegen::Dictionary(TileProviderByLevel)]] Parameters {
         int layerGroupID;
 
-        struct Providers {
+        struct Provider {
             int maxLevel [[codegen::greaterequal(0)]];
             ghoul::Dictionary tileProvider;
         };
-        std::vector<Providers> levelTileProviders;
+        std::vector<Provider> levelTileProviders;
     };
 #include "tileproviderbylevel_codegen.cpp"
 } // namespace
@@ -51,13 +51,14 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     layergroupid::GroupID layerGroup = static_cast<layergroupid::GroupID>(p.layerGroupID);
-    
-    for (Parameters::Providers p : p.levelTileProviders) {
-        p.tileProvider.setValue("LayerGroupID", static_cast<int>(layerGroup));
-        
+
+    for (Parameters::Provider provider : p.levelTileProviders) {
+        ghoul::Dictionary& tileProviderDict = provider.tileProvider;
+        tileProviderDict.setValue("LayerGroupID", static_cast<int>(layerGroup));
+
         layergroupid::TypeID typeID = layergroupid::TypeID::DefaultTileLayer;
-        if (p.tileProvider.hasValue<std::string>("Type")) {
-            std::string type = p.tileProvider.value<std::string>("Type");
+        if (tileProviderDict.hasValue<std::string>("Type")) {
+            std::string type = tileProviderDict.value<std::string>("Type");
             typeID = ghoul::from_string<layergroupid::TypeID>(type);
 
             if (typeID == layergroupid::TypeID::Unknown) {
@@ -65,23 +66,24 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             }
         }
 
-        std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, p.tileProvider);
+        std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, tileProviderDict);
 
-        std::string provId = p.tileProvider.value<std::string>("Identifier");
+        std::string provId = tileProviderDict.value<std::string>("Identifier");
         tp->setIdentifier(provId);
-        std::string providerName = p.tileProvider.value<std::string>("Name");
+        std::string providerName = tileProviderDict.value<std::string>("Name");
         tp->setGuiName(providerName);
         addPropertySubOwner(tp.get());
 
         _levelTileProviders.push_back(std::move(tp));
 
         // Ensure we can represent the max level
-        if (static_cast<int>(_providerIndices.size()) < p.maxLevel) {
-            _providerIndices.resize(p.maxLevel + 1, -1);
+        if (static_cast<int>(_providerIndices.size()) < provider.maxLevel) {
+            _providerIndices.resize(provider.maxLevel + 1, -1);
         }
 
         // map this level to the tile provider index
-        _providerIndices[p.maxLevel] = static_cast<int>(_levelTileProviders.size()) - 1;
+        _providerIndices[provider.maxLevel] =
+            static_cast<int>(_levelTileProviders.size()) - 1;
     }
 
     // Fill in the gaps (value -1 ) in provider indices, from back to end
@@ -152,6 +154,10 @@ void TileProviderByLevel::reset() {
     for (const std::unique_ptr<TileProvider>& provider : _levelTileProviders) {
         provider->reset();
     }
+}
+
+int TileProviderByLevel::minLevel() {
+    return 1;
 }
 
 int TileProviderByLevel::maxLevel() {

@@ -27,10 +27,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <string>
 
-namespace {
-    constexpr const char* _loggerCat = "PlaneGeometry";
-} // namespace
-
 namespace openspace {
 
 PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}

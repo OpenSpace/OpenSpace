@@ -65,8 +65,6 @@ namespace {
 std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
 Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
 
-constexpr const char* KeyFilePath = "FilePath";
-
 } // namespace
 
 unsigned int TileProvider::NumTileProviders = 0;
@@ -78,7 +76,11 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
     ZoneScoped
 
     const char* type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
-    auto factory = FactoryManager::ref().factory<TileProvider>();
+
+    ghoul::TemplateFactory<TileProvider>* factory =
+        FactoryManager::ref().factory<TileProvider>();
+    ghoul_assert(factory, "TileProvider factory not created");
+
     TileProvider* result = factory->create(type, dictionary);
     return std::unique_ptr<TileProvider>(result);
 }
@@ -188,7 +190,8 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
 
     // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
     //         has a loaded tile ready to use.
-    while (tileIndex.level > 1) {
+    int minimumLevel = minLevel();
+    while (tileIndex.level > minimumLevel) {
         Tile t = tile(tileIndex);
         if (t.status != Tile::Status::OK) {
             if (--maxParents < 0) {

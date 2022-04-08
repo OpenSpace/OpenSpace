@@ -142,7 +142,7 @@ namespace {
         std::optional<float> opacity;
 
         // [[codegen::verbatim(StepSizeInfo.description)]]
-        std::optional<double> stepSize;
+        std::optional<float> stepSize;
 
         // [[codegen::verbatim(GridTypeInfo.description)]]
         std::optional<std::string> gridType;
@@ -452,7 +452,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
-        _raycaster->setOpacity(_opacity);
+        _raycaster->setOpacity(opacity());
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
     }

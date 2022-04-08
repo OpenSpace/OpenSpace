@@ -138,7 +138,7 @@ void ParallelPeer::connect() {
 
     setStatus(ParallelConnection::Status::Connecting);
 
-    std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
+    auto socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
         atoi(_port.value().c_str())
     );
@@ -733,30 +733,10 @@ scripting::LuaLibrary ParallelPeer::luaLibrary() {
     return {
         "parallel",
         {
-            {
-                "connect",
-                &luascriptfunctions::connect,
-                "",
-                "Connect to parallel"
-            },
-            {
-                "disconnect",
-                &luascriptfunctions::disconnect,
-                "",
-                "Disconnect from parallel"
-            },
-            {
-                "requestHostship",
-                &luascriptfunctions::requestHostship,
-                "",
-                "Request to be the host for this session"
-            },
-            {
-                "resignHostship",
-                &luascriptfunctions::resignHostship,
-                "",
-                "Resign hostship"
-            },
+            codegen::lua::Connect,
+            codegen::lua::Disconnect,
+            codegen::lua::RequestHostship,
+            codegen::lua::ResignHostship
         }
     };
 }

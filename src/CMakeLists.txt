@@ -42,7 +42,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
-  ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/events/event.cpp
   ${OPENSPACE_BASE_DIR}/src/events/eventengine.cpp
   ${OPENSPACE_BASE_DIR}/src/events/eventengine_lua.inl
@@ -159,6 +158,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler.cpp
   ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding.cpp
+  ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/collisionhelper.cpp
@@ -223,7 +223,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/events/event.h
   ${OPENSPACE_BASE_DIR}/include/openspace/events/eventengine.h

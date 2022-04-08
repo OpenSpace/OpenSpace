@@ -107,6 +107,12 @@ public:
     bool setMode(Mode newMode);
     void resetMode();
 
+    using CallbackHandle = int;
+    using ModeChangeCallback = std::function<void()>;
+
+    CallbackHandle addModeChangeCallback(ModeChangeCallback cb);
+    void removeModeChangeCallback(CallbackHandle handle);
+
     // Guaranteed to return a valid pointer
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
@@ -151,6 +157,10 @@ private:
     bool _isRenderingFirstFrame = true;
 
     Mode _currentMode = Mode::UserControl;
+    Mode _modeLastFrame = Mode::UserControl;
+
+    int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
 };
 
 /**
@@ -203,11 +213,6 @@ void setAdditionalScriptsFromProfile(const Profile& p);
 
 } // namespace openspace
 
-// Lua functions - exposed for testing
-namespace openspace::luascriptfunctions {
-
-int createSingleColorImage(lua_State* L);
-
-} // openspace::luascriptfunctions
+std::filesystem::path createSingleColorImage(std::string name, glm::dvec3 color);
 
 #endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__

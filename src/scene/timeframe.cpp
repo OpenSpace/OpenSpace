@@ -51,12 +51,11 @@ documentation::Documentation TimeFrame::Documentation() {
 }
 
 ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                            const ghoul::Dictionary& dict)
 {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dict);
 
-    auto factory = FactoryManager::ref().factory<TimeFrame>();
-    TimeFrame* result = factory->create(p.type, dictionary);
+    TimeFrame* result = FactoryManager::ref().factory<TimeFrame>()->create(p.type, dict);
     result->setIdentifier("TimeFrame");
     return ghoul::mm_unique_ptr<TimeFrame>(result);
 }

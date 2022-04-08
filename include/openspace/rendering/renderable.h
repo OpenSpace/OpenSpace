@@ -105,6 +105,7 @@ public:
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
+    properties::FloatProperty _fade;
     properties::StringProperty _renderableType;
 
     void setBoundingSphere(double boundingSphere);
@@ -113,10 +114,14 @@ protected:
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
+    /// Returns the full opacity constructed from the _opactiy and _fade property values
+    float opacity() const;
+
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;
     bool _shouldUpdateIfDisabled = false;
+    RenderBin _renderBin = RenderBin::Opaque;
 
 private:
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
@@ -124,8 +129,6 @@ private:
     // parentage and that's no bueno
     friend ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         const ghoul::Dictionary&);
-
-    RenderBin _renderBin = RenderBin::Opaque;
 };
 
 } // namespace openspace

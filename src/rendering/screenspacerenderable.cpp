@@ -42,8 +42,8 @@
 #include <variant>
 
 namespace {
-    constexpr const std::array<const char*, 4> UniformNames = {
-        "color", "opacity", "mvpMatrix", "tex"
+    constexpr const std::array<const char*, 5> UniformNames = {
+        "color", "opacity", "mvpMatrix", "tex", "backgroundColor"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -107,12 +107,31 @@ namespace {
         "Useful for applying a color grayscale images."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo =
+    {
+        "BackgroundColor",
+        "Background Color",
+        "The fixed color that is combined with the screen space renderable to create the "
+        "final color. The actual color of the screen space renderable is alpha-blended "
+        "with the background color to produce the final result."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value determines the opacity of the screen space plane. If this value "
         "is 1, the plane is completely opaque, if this value is 0, the plane is "
         "completely transparent."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+        "Fade",
+        "Fade",
+        "This value is used by the system to be able to fade out renderables "
+        "independently from the Opacity value selected by the user. This value should "
+        "not be directly manipulated through a user interface, but instead used by other "
+        "components of the system programmatically",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
@@ -146,7 +165,6 @@ namespace {
 
         return glm::vec3(r, theta, phi);
     }
-
 
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) {
         // First convert to ISO convention spherical coordinates according to
@@ -254,6 +272,9 @@ namespace {
         // [[codegen::verbatim(MultiplyColorInfo.description)]]
         std::optional<glm::vec3> multiplyColor [[codegen::color()]];
 
+        // [[codegen::verbatim(BackgroundColorInfo.description)]]
+        std::optional<glm::vec4> backgroundColor [[codegen::color()]];
+
         // [codegen::verbatim(OpacityInfo.description)]]
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
@@ -332,7 +353,14 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     )
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _backgroundColor(
+        BackgroundColorInfo,
+        glm::vec4(0.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
+    , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -364,12 +392,17 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     addProperty(_scale);
     addProperty(_multiplyColor);
+    addProperty(_backgroundColor);
     addProperty(_opacity);
+    addProperty(_fade);
     addProperty(_localRotation);
 
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+
+    _backgroundColor = p.backgroundColor.value_or(_backgroundColor);
+    _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _enabled = p.enabled.value_or(_enabled);
     _useRadiusAzimuthElevation =
@@ -568,7 +601,9 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     _shader->activate();
 
     _shader->setUniform(_uniformCache.color, _multiplyColor);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
+    _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
+
     _shader->setUniform(
         _uniformCache.mvp,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
@@ -589,5 +624,9 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 }
 
 void ScreenSpaceRenderable::unbindTexture() {}
+
+float ScreenSpaceRenderable::opacity() const {
+    return _opacity * _fade;
+}
 
 } // namespace openspace

@@ -60,7 +60,8 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
+    ghoul::TemplateFactory<ResourceSynchronization>* factory =
+        FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(factory, "ResourceSynchronization factory did not exist");
     ResourceSynchronization* sync = factory->create(p.type, dictionary);
     sync->_name = p.name;

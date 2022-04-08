@@ -31,6 +31,7 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
+#include <openspace/interaction/scriptcamerastates.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/scene/profile.h>
@@ -47,15 +48,16 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <filesystem>
 #include <fstream>
+#include <numeric>
+
+#include "navigationhandler_lua.inl"
 
 namespace {
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     constexpr const char* _loggerCat = "NavigationHandler";
-
-    const double Epsilon = 1E-7;
 
     using namespace openspace;
     constexpr const properties::Property::PropertyInfo KeyDisableMouseInputInfo = {
@@ -77,8 +79,6 @@ namespace {
         "than using the mouse interaction."
     };
 } // namespace
-
-#include "navigationhandler_lua.inl"
 
 namespace openspace::interaction {
 
@@ -585,161 +585,26 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
     return {
         "navigation",
         {
-            {
-                "getNavigationState",
-                &luascriptfunctions::getNavigationState,
-                "[string]",
-                "Return the current navigation state as a lua table. The optional "
-                "argument is the scene graph node to use as reference frame. By default, "
-                "the reference frame will picked based on whether the orbital navigator "
-                "is currently following the anchor node rotation. If it is, the anchor "
-                "will be chosen as reference frame. If not, the reference frame will be "
-                "set to the scene graph root."
-            },
-            {
-                "setNavigationState",
-                &luascriptfunctions::setNavigationState,
-                "table",
-                "Set the navigation state. The argument must be a valid Navigation State."
-            },
-            {
-                "saveNavigationState",
-                &luascriptfunctions::saveNavigationState,
-                "string, [string]",
-                "Save the current navigation state to a file with the path given by the "
-                "first argument. The optoinal second argument is the scene graph node to "
-                "use as reference frame. By default, the reference frame will picked "
-                "based on whether the orbital navigator is currently following the "
-                "anchor node rotation. If it is, the anchor will be chosen as reference "
-                "frame. If not, the reference frame will be set to the scene graph root."
-            },
-            {
-                "loadNavigationState",
-                &luascriptfunctions::loadNavigationState,
-                "string",
-                "Load a navigation state from file. The file should be a lua file "
-                "returning the navigation state as a table formatted as a "
-                "Navigation State, such as the output files of saveNavigationState."
-            },
-            {
-                "retargetAnchor",
-                &luascriptfunctions::retargetAnchor,
-                "void",
-                "Reset the camera direction to point at the anchor node"
-            },
-            {
-                "retargetAim",
-                &luascriptfunctions::retargetAim,
-                "void",
-                "Reset the camera direction to point at the aim node"
-            },
-            {
-                "bindJoystickAxis",
-                &luascriptfunctions::bindJoystickAxis,
-                "name, axis, axisType [, isInverted, joystickType, isSticky, sensitivity]",
-                "Finds the input joystick with the given 'name' and binds the axis "
-                "identified by the second argument to be used as the type identified by "
-                "the third argument. If 'isInverted' is 'true', the axis value is "
-                "inverted. 'joystickType' is if the joystick behaves more like a "
-                "joystick or a trigger, where the first is the default. If 'isSticky' is "
-                "'true', the value is calculated relative to the previous value. If "
-                "'sensitivity' is given then that value will affect the sensitivity of "
-                "the axis together with the global sensitivity."
-            },
-            {
-                "bindJoystickAxisProperty",
-                &luascriptfunctions::bindJoystickAxisProperty,
-                "name, axis, propertyUri [, min, max, isInverted, isSticky, sensitivity, "
-                "isRemote]",
-                "Finds the input joystick with the given 'name' and binds the axis "
-                "identified by the second argument to be bound to the property "
-                "identified by the third argument. 'min' and 'max' is the minimum and "
-                "the maximum allowed value for the given property and the axis value is "
-                "rescaled from [-1, 1] to [min, max], default is [0, 1]. If 'isInverted' "
-                "is 'true', the axis value is inverted. The last argument determines "
-                "whether the property change is going to be executed locally or "
-                "remotely, where the latter is the default."
-            },
-            {
-                "joystickAxis",
-                &luascriptfunctions::joystickAxis,
-                "name, axis",
-                "Finds the input joystick with the given 'name' and returns the joystick "
-                "axis information for the passed axis. The information that is returned "
-                "is the current axis binding as a string, whether the values are "
-                "inverted as bool, the joystick type as a string, whether the axis is "
-                "sticky as bool, the sensitivity as number, the property uri bound to "
-                "the axis as string (empty is type is not Property), the min and max "
-                "values for the property as numbers and whether the property change will "
-                "be executed remotly as bool."
-            },
-            {
-                "setAxisDeadZone",
-                &luascriptfunctions::setJoystickAxisDeadzone,
-                "name, axis, float",
-                "Finds the input joystick with the given 'name' and sets the deadzone "
-                "for a particular joystick axis, which means that any input less than "
-                "this value is completely ignored."
-            },
-            {
-                "bindJoystickButton",
-                &luascriptfunctions::bindJoystickButton,
-                "name, button, string [, string, string, bool]",
-                "Finds the input joystick with the given 'name' and binds a Lua script "
-                "given by the third argument to be executed when the joystick button "
-                "identified by the second argument is triggered. The fifth argument "
-                "determines when the script should be executed, this defaults to "
-                "'Press', which means that the script is run when the user presses the "
-                "button. The fourth arguemnt is the documentation of the script in the "
-                "third argument. The sixth argument determines whether the command is "
-                "going to be executable locally or remotely, where the latter is the "
-                "default."
-            },
-            {
-                "clearJoystickButton",
-                &luascriptfunctions::clearJoystickButton,
-                "name, button",
-                "Finds the input joystick with the given 'name' and removes all commands "
-                "that are currently bound to the button identified by the second argument."
-            },
-            {
-                "joystickButton",
-                &luascriptfunctions::joystickButton,
-                "name, button",
-                "Finds the input joystick with the given 'name' and returns the script "
-                "that is currently bound to be executed when the provided button is "
-                "pressed."
-            },
-            {
-                "addGlobalRotation",
-                &luascriptfunctions::addGlobalRotation,
-                "double, double",
-                "Directly adds to the global rotation of the camera"
-            },
-            {
-                "addLocalRotation",
-                &luascriptfunctions::addLocalRotation,
-                "double, double",
-                "Directly adds to the local rotation of the camera"
-            },
-            {
-                "addTruckMovement",
-                &luascriptfunctions::addTruckMovement,
-                "double, double",
-                "Directly adds to the truck movement of the camera"
-            },
-            {
-                "addLocalRoll",
-                &luascriptfunctions::addLocalRoll,
-                "double, double",
-                "Directly adds to the local roll of the camera"
-            },
-            {
-                "addGlobalRoll",
-                &luascriptfunctions::addGlobalRoll,
-                "double, double",
-                "Directly adds to the global roll of the camera"
-            }
+            codegen::lua::LoadNavigationState,
+            codegen::lua::GetNavigationState,
+            codegen::lua::SetNavigationState,
+            codegen::lua::SaveNavigationState,
+            codegen::lua::RetargetAnchor,
+            codegen::lua::RetargetAim,
+            codegen::lua::BindJoystickAxis,
+            codegen::lua::BindJoystickAxisProperty,
+            codegen::lua::JoystickAxis,
+            codegen::lua::SetJoystickAxisDeadZone,
+            codegen::lua::JoystickAxisDeadzone,
+            codegen::lua::BindJoystickButton,
+            codegen::lua::ClearJoystickButton,
+            codegen::lua::JoystickButton,
+            codegen::lua::AddGlobalRotation,
+            codegen::lua::AddLocalRotation,
+            codegen::lua::AddTruckMovement,
+            codegen::lua::AddLocalRoll,
+            codegen::lua::AddGlobalRoll,
+            codegen::lua::TriggerIdleBehavior
         }
     };
 }

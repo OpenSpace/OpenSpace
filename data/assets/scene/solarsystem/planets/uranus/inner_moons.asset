@@ -59,7 +59,7 @@ local innerMoons = {
       Spice = parentSpice
     },
     Spice = "BIANCA",
-    Radii = { 51000, 51000, 51000 },
+    Radii = { 64000, 46000, 46000 },
     Tags = tags,
     TrailTags = trailTags,
     GUI = {

@@ -37,6 +37,7 @@ public:
     Tile::Status tileStatus(const TileIndex& index) override final;
     TileDepthTransform depthTransform() override final;
     void update() override final;
+    int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 };

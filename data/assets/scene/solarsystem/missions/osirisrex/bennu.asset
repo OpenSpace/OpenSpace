@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local models = asset.syncedResource({
   Name = "Bennu Models",
@@ -9,15 +9,6 @@ local models = asset.syncedResource({
 })
 
 local BENNU_BODY = "2101955"
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-}
 
 local Bennu = {
   Identifier = "Bennu",
@@ -34,7 +25,9 @@ local Bennu = {
     Type = "RenderableModel",
     Body = BENNU_BODY,
     GeometryFile = models .. "Bennu_v20_200k_an.obj",
-    LightSources = LightSources,
+    LightSources = {
+      sun.LightSource
+    },
     SpecularIntensity = 0.0
   },
   GUI = {

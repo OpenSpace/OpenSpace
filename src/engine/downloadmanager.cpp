@@ -133,9 +133,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         return nullptr;
     }
 
-    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(
-        file.filename().string()
-    );
+    auto future = std::make_shared<FileFuture>(file.filename().string());
     errno = 0;
 #ifdef WIN32
     FILE* fp;
@@ -245,7 +243,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
-        // NOLINTNEXTLINE
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace"); // NOLINT
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void*>(&file));
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback); // NOLINT
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L); // NOLINT

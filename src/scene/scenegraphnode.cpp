@@ -715,8 +715,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady() && _renderable->isEnabled() &&
-        _renderable->matchesRenderBinMask(data.renderBinMask);
+        _renderable->isReady() && _renderable->matchesRenderBinMask(data.renderBinMask);
 
     if (!visible) {
         return;

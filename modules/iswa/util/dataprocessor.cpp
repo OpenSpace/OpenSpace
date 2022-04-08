@@ -232,7 +232,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
                 _histNormValues
             );
             //unnormalize histMin, histMax
-            std::unique_ptr<Histogram> newHist = std::make_unique<Histogram>(
+            auto newHist = std::make_unique<Histogram>(
                 std::min(min, normalizeWithStandardScore(
                     unNormHistMin,
                     mean,
