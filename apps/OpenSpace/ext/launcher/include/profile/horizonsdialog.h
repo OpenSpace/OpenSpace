@@ -95,7 +95,7 @@ private:
     bool handleRequest();
     std::string constructUrl();
     openspace::HorizonsFile handleAnswer(nlohmann::json& answer);
-    bool handleResult(openspace::HorizonsFile::ResultCode& result);
+    bool handleResult(openspace::HorizonsResultCode& result);
 
     openspace::HorizonsFile _horizonsFile;
 #endif // OPENSPACE_MODULE_SPACE_ENABLED

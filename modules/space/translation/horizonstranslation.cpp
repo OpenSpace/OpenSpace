@@ -180,13 +180,13 @@ void HorizonsTranslation::loadData() {
 }
 
 bool HorizonsTranslation::readHorizonsTextFile(HorizonsFile& horizonsFile) {
-    HorizonsFile::HorizonsResult result = HorizonsFile::readFile(horizonsFile.file());
-    if (result.errorCode != HorizonsFile::ResultCode::Valid) {
+    HorizonsResult result = readHorizonsFile(horizonsFile.file());
+    if (result.errorCode != HorizonsResultCode::Valid) {
         horizonsFile.displayErrorMessage(result.errorCode);
         return false;
     }
 
-    for (HorizonsFile::HorizonsKeyframe& keyframe : result.data) {
+    for (HorizonsKeyframe& keyframe : result.data) {
         // Search if the keyframe already exist in the timeline
         auto it = std::find_if(
             _timeline.keyframes().begin(),

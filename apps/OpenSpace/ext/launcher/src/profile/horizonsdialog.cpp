@@ -738,8 +738,8 @@ bool HorizonsDialog::handleRequest() {
     }
 
     _horizonsFile = std::move(file);
-    openspace::HorizonsFile::ResultCode result =
-        openspace::HorizonsFile::isValidHorizonsFile(_horizonsFile.file());
+    openspace::HorizonsResultCode result =
+        openspace::isValidHorizonsFile(_horizonsFile.file());
 
     bool isValid = handleResult(result);
 
@@ -764,12 +764,12 @@ bool HorizonsDialog::handleRequest() {
 
 std::string HorizonsDialog::constructUrl() {
     // Construct url for request
-    openspace::HorizonsFile::Type type;
+    openspace::HorizonsType type;
     if (_typeCombo->currentIndex() == 0) {
-        type = openspace::HorizonsFile::Type::Vector;
+        type = openspace::HorizonsType::Vector;
     }
     else if (_typeCombo->currentIndex() == 1) {
-        type = openspace::HorizonsFile::Type::Observer;
+        type = openspace::HorizonsType::Observer;
     }
     else {
         _errorMsg->setText("Invalid Horizons type");
@@ -843,7 +843,7 @@ std::string HorizonsDialog::constructUrl() {
         return "";
     }
 
-    return openspace::HorizonsFile::constructUrl(
+    return openspace::constructHorizonsUrl(
         type,
         command,
         center,
@@ -860,11 +860,11 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
         _latestHorizonsError = *it;
     }
 
-    openspace::HorizonsFile::ResultCode isValid =
-        openspace::HorizonsFile::isValidAnswer(answer);
-    if (isValid != openspace::HorizonsFile::ResultCode::Valid &&
-        isValid != openspace::HorizonsFile::ResultCode::MultipleObserverStations &&
-        isValid != openspace::HorizonsFile::ResultCode::ErrorTimeRange)
+    openspace::HorizonsResultCode isValid =
+        openspace::isValidHorizonsAnswer(answer);
+    if (isValid != openspace::HorizonsResultCode::Valid &&
+        isValid != openspace::HorizonsResultCode::MultipleObserverStations &&
+        isValid != openspace::HorizonsResultCode::ErrorTimeRange)
     {
         // Special case with MultipleObserverStations since it is detected as an error
         // but could be fixed by parsing the matches and let user choose
@@ -914,9 +914,9 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
     return openspace::HorizonsFile(filePath, *result);
 }
 
-bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
+bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
     switch (result) {
-        case openspace::HorizonsFile::ResultCode::Valid: {
+        case openspace::HorizonsResultCode::Valid: {
             // If the request worked then delete the corresponding error file if it exist
             std::filesystem::path validFile(_horizonsFile.file());
 
@@ -930,7 +930,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             }
             return true;
         }
-        case openspace::HorizonsFile::ResultCode::Empty: {
+        case openspace::HorizonsResultCode::Empty: {
             _errorMsg->setText("The horizons file is empty");
             if (!_latestHorizonsError.empty()) {
                 std::string msg = fmt::format(
@@ -940,7 +940,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             }
             break;
         }
-        case openspace::HorizonsFile::ResultCode::ErrorSize: {
+        case openspace::HorizonsResultCode::ErrorSize: {
             std::string msg = fmt::format(
                 "Time range '{}' to '{}' with step size '{} {}' is too big, try to "
                 "increase the step size and/or decrease the time range",
@@ -953,14 +953,14 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             styleLabel(_stepLabel, true);
             break;
         }
-        case openspace::HorizonsFile::ResultCode::ErrorSpan:
+        case openspace::HorizonsResultCode::ErrorSpan:
             appendLog(
                 "Step size is too big, exceeds available time span for target",
                 HorizonsDialog::LogLevel::Error
             );
             styleLabel(_stepLabel, true);
             break;
-        case openspace::HorizonsFile::ResultCode::ErrorTimeRange: {
+        case openspace::HorizonsResultCode::ErrorTimeRange: {
             std::string msg = fmt::format(
                 "Time range is outside the valid range for target '{}'", _targetName
             );
@@ -985,7 +985,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             _importTimeButton->show();
             break;
         }
-        case openspace::HorizonsFile::ResultCode::ErrorNoObserver: {
+        case openspace::HorizonsResultCode::ErrorNoObserver: {
             std::string msg = fmt::format(
                 "No match was found for observer '{}'", _observerName
             );
@@ -999,7 +999,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             styleLabel(_centerLabel, true);
             break;
         }
-        case openspace::HorizonsFile::ResultCode::ErrorObserverTargetSame: {
+        case openspace::HorizonsResultCode::ErrorObserverTargetSame: {
             std::string msg = fmt::format(
                 "The observer '{}' and target '{}' are the same. Please use another "
                 "observer for the current target.", _observerName, _targetName
@@ -1009,7 +1009,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             styleLabel(_centerLabel, true);
             break;
         }
-        case openspace::HorizonsFile::ResultCode::ErrorNoData: {
+        case openspace::HorizonsResultCode::ErrorNoData: {
             std::string msg = fmt::format(
                 "There is not enough data to compute the state of target '{}' in "
                 "relation to the observer '{}' for the time range '{}' to '{}'. Try to "
@@ -1019,7 +1019,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             appendLog(msg, HorizonsDialog::LogLevel::Error);
             break;
         }
-        case openspace::HorizonsFile::ResultCode::MultipleObserverStations: {
+        case openspace::HorizonsResultCode::MultipleObserverStations: {
             std::string msg = fmt::format(
                 "Multiple matching observer stations were found for observer '{}'. ",
                 _observerName
@@ -1060,7 +1060,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             _chooseObserverCombo->show();
             break;
         }
-        case openspace::HorizonsFile::ResultCode::MultipleObserver: {
+        case openspace::HorizonsResultCode::MultipleObserver: {
             std::string msg = fmt::format(
                 "Multiple matches were found for observer '{}'", _observerName
             );
@@ -1093,7 +1093,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             _chooseObserverCombo->show();
             break;
         }
-        case openspace::HorizonsFile::ResultCode::ErrorNoTarget: {
+        case openspace::HorizonsResultCode::ErrorNoTarget: {
             std::string msg = fmt::format(
                 "No match was found for target '{}'", _targetName
             );
@@ -1107,7 +1107,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             styleLabel(_targetLabel, true);
             break;
         }
-        case openspace::HorizonsFile::ResultCode::MultipleTarget: {
+        case openspace::HorizonsResultCode::MultipleTarget: {
             // Case Small Bodies:
             // Line before data: Matching small-bodies
             // Format: Record #, Epoch-yr, >MATCH DESIG<, Primary Desig, Name
@@ -1149,7 +1149,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::ResultCode& result) {
             _chooseTargetCombo->show();
             break;
         }
-        case openspace::HorizonsFile::ResultCode::UnknownError: {
+        case openspace::HorizonsResultCode::UnknownError: {
             appendLog("Unknown error", LogLevel::Error);
             if (!_latestHorizonsError.empty()) {
                 std::string msg = fmt::format(

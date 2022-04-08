@@ -60,46 +60,46 @@ namespace openspace {
  * 2. Change "Range units" to "kilometers (km)" instead of "astronomical units (au)"
  * 3. Check the "Suppress range-rate" option
  */
+enum class HorizonsResultCode {
+    Valid,
+    Empty,
+
+    // Erros caught by the error field in the json output
+    ErrorSize,
+    ErrorSpan,
+    ErrorTimeRange,
+    ErrorNoObserver,
+    ErrorObserverTargetSame,
+    ErrorNoData,
+    MultipleObserverStations,
+
+    // Erros/problems NOT caught by the error field in the json output
+    MultipleObserver,
+    ErrorNoTarget,
+    MultipleTarget,
+
+    UnknownError
+};
+
+enum class HorizonsType {
+    Observer, // Default
+    Vector,   // Default for sending for new data
+    Invalid   // If errors or empty etc
+};
+
+struct HorizonsKeyframe {
+    double time;            // J2000 seconds
+    glm::dvec3 position;    // GALACTIC cartesian coordinates in meters
+};
+
+struct HorizonsResult {
+    HorizonsType type = HorizonsType::Invalid;
+    HorizonsResultCode errorCode = HorizonsResultCode::UnknownError;
+    std::vector<HorizonsKeyframe> data = std::vector<HorizonsKeyframe>();
+};
+
 class HorizonsFile {
 public:
-    enum class ResultCode {
-        Valid,
-        Empty,
-
-        // Erros caught by the error field in the json output
-        ErrorSize,
-        ErrorSpan,
-        ErrorTimeRange,
-        ErrorNoObserver,
-        ErrorObserverTargetSame,
-        ErrorNoData,
-        MultipleObserverStations,
-
-        // Erros/problems NOT caught by the error field in the json output
-        MultipleObserver,
-        ErrorNoTarget,
-        MultipleTarget,
-
-        UnknownError
-    };
-
-    enum class Type {
-        Observer, // Default
-        Vector,   // Default for sending for new data
-        Invalid   // If errors or empty etc
-    };
-
-    struct HorizonsKeyframe {
-        double time;            // J2000 seconds
-        glm::dvec3 position;    // GALACTIC cartesian coordinates in meters
-    };
-
-    struct HorizonsResult {
-        Type type = Type::Invalid;
-        ResultCode errorCode = ResultCode::UnknownError;
-        std::vector<HorizonsKeyframe> data = std::vector<HorizonsKeyframe>();
-    };
-
     HorizonsFile() = default;
     HorizonsFile(std::filesystem::path file);
     HorizonsFile(std::filesystem::path filePath, const std::string& result);
@@ -108,16 +108,8 @@ public:
     const std::filesystem::path& file() const;
     std::filesystem::path& file();
 
-    static std::string constructUrl(Type type, const std::string& target,
-        const std::string& observer, const std::string& startTime,
-        const std::string& stopTime, const std::string& stepSize,
-        const std::string& unit);
-    static ResultCode isValidAnswer(const nlohmann::json& answer);
-    static ResultCode isValidHorizonsFile(std::filesystem::path file);
-    static HorizonsResult readFile(std::filesystem::path file);
-
     bool hasFile() const;
-    void displayErrorMessage(const ResultCode code) const;
+    void displayErrorMessage(const HorizonsResultCode code) const;
 
 
     std::vector<std::string> parseMatches(const std::string& startPhrase,
@@ -127,11 +119,20 @@ public:
         const std::string& altStartPhrase = "", bool hasTime = true) const;
 
 private:
-    static HorizonsResult readVectorFile(std::filesystem::path file);
-    static HorizonsResult readObserverFile(std::filesystem::path file);
-
     std::filesystem::path _file;
 };
+
+// Free functions
+std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
+    const std::string& observer, const std::string& startTime,
+    const std::string& stopTime, const std::string& stepSize,
+    const std::string& unit);
+HorizonsResultCode isValidHorizonsAnswer(const nlohmann::json& answer);
+HorizonsResultCode isValidHorizonsFile(std::filesystem::path file);
+HorizonsResult readHorizonsFile(std::filesystem::path file);
+
+HorizonsResult readHorizonsVectorFile(std::filesystem::path file);
+HorizonsResult readHorizonsObserverFile(std::filesystem::path file);
 
 } // namespace openspace
 
