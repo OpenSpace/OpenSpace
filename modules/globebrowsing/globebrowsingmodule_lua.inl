@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <openspace/util/collisionhelper.h>
 
 namespace {
@@ -375,7 +376,7 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
  * eye postion will be used instead
  */
 [[codegen::luawrap]] std::tuple<double, double, double> 
-getGeoPositionForCamera(std::optional<bool> useEyePosition) 
+getGeoPositionForCamera(bool useEyePosition = false) 
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -391,47 +392,20 @@ getGeoPositionForCamera(std::optional<bool> useEyePosition)
 
 
     const SceneGraphNode* anchor =
-        global::navigationHandler->orbitalNavigator().anchorNode(); //focus vs anchor
+        global::navigationHandler->orbitalNavigator().anchorNode();
     const glm::dmat4 inverseModelTransform = glm::inverse(anchor->modelTransform());
     
     glm::dvec3 target;
 
-    //TODO - 04-08-2022 @micahnyc - adjust this to use the camera lookat
+    ///@TODO (04-08-2022, micahnyc)
+    //adjust this to use the camera lookat
     //once we fix this calculation, then we just add true to the function call in the asset 
-    if (useEyePosition.value_or(false)) {
-
+    if (useEyePosition) {
         const glm::dvec3 anchorPos = anchor->worldPosition();
         const glm::dvec3 cameraDir = ghoul::viewDirection(camera->rotationQuaternion());
-        //try3
-        //double stepSize = 1000.f;
-        //float distanceAfterStep = globe->boundingSphere() * 1.1;
-        //glm::dvec3 lastStep;
-        //for (int numSteps = 0; distanceAfterStep > globe->boundingSphere(); numSteps++) {
-        //    lastStep = cameraPosition + (stepSize * numSteps) * cameraDir;
-        //    distanceAfterStep = glm::distance(lastStep, anchorPos);
-        //    if (numSteps > 5000) {
-        //        break;
-        //    }
-        //}
-        //target = lastStep;
-
-        //broken try1
         const double anchorToCameraDistance = glm::distance(anchorPos, cameraPosition);
         const double anchorToPosDistance = glm::distance(anchorPos + globe->boundingSphere(), cameraPosition);
         target = cameraPosition + anchorToPosDistance * cameraDir;
-
-        //try2
-        //glm::dvec3 lookAtPos = cameraPosition + 0.99*globe->boundingSphere() * cameraDir;        
-        //bool didCollide = openspace::collision::lineSphereIntersection(cameraPosition, lookAtPos, 
-        //    anchorPos, globe->boundingSphere(), target);
-        //if (didCollide) {
-        //    //cameraPosition = intersectionPoint;
-        //    //all good
-        //}
-        //else {
-        //    ///HADNDLDLLELELELELE
-        //    return { 0,0,0 };
-        //}
     }
     else {
         target = glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));

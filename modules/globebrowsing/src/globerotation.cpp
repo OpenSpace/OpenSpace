@@ -113,7 +113,7 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     _globe.onChange([this]() {
         findGlobe();
         setUpdateVariables();
-        });
+    });
     addProperty(_globe);
 
     _latitude = p.latitude.value_or(_latitude);
