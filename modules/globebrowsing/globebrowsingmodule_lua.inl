@@ -396,12 +396,13 @@ getGeoPositionForCamera(std::optional<bool> useEyePosition)
     
     glm::dvec3 target;
 
+    //TODO - 04-08-2022 @micahnyc - adjust this to use the camera lookat
+    //once we fix this calculation, then we just add true to the function call in the asset 
     if (useEyePosition.value_or(false)) {
 
         const glm::dvec3 anchorPos = anchor->worldPosition();
         const glm::dvec3 cameraDir = ghoul::viewDirection(camera->rotationQuaternion());
-
-           //try3
+        //try3
         //double stepSize = 1000.f;
         //float distanceAfterStep = globe->boundingSphere() * 1.1;
         //glm::dvec3 lastStep;
@@ -414,7 +415,7 @@ getGeoPositionForCamera(std::optional<bool> useEyePosition)
         //}
         //target = lastStep;
 
-
+        //broken try1
         const double anchorToCameraDistance = glm::distance(anchorPos, cameraPosition);
         const double anchorToPosDistance = glm::distance(anchorPos + globe->boundingSphere(), cameraPosition);
         target = cameraPosition + anchorToPosDistance * cameraDir;
