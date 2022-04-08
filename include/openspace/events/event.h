@@ -73,6 +73,7 @@ struct Event {
         LayerAdded,
         LayerRemoved,
         SessionRecordingPlayback,
+        PointJwstRequested,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -374,6 +375,22 @@ struct EventSessionRecordingPlayback : public Event {
 
     EventSessionRecordingPlayback(State state_);
     const State state;
+};
+
+/**
+ * This event is created when a request for pointing the JWST model to a Ra Dec coordinate
+ * in the sky is issued. The event contains information about the sky coordinate to point
+ * the JWST towards.
+ *
+ * \param Ra The Ra part of the sky coordinate in decimal degrees to point the JWST to
+ * \param Dec The Dec part of the sky coordinate in decimal degrees to point the JWST to
+ */
+struct EventPointJwstRequested : public Event {
+    static const Type Type = Event::Type::PointJwstRequested;
+
+    EventPointJwstRequested(double ra_, double dec_);
+    const double ra;
+    const double dec;
 };
 
 /**

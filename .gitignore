@@ -40,3 +40,5 @@ customization.lua
 # The COMMIT info is generated everytime CMake is run
 COMMIT.md
 *_codegen.cpp
+# SkyBrowser Module downloaded data
+/modules/skybrowser/wwtimagedata

@@ -7,7 +7,7 @@ local horizons = asset.syncedResource({
   Name = "JWST Horizons",
   Type = "HttpSynchronization",
   Identifier = "jwst_horizons",
-  Version = 2
+  Version = 3
 })
 
 local kernels = asset.syncedResource({
@@ -17,11 +17,6 @@ local kernels = asset.syncedResource({
   Version = 1
 })
 
--- (malej 2021-10-04) In general, there is no trajectery data of JWST for the scheduled
--- launch in December 2021, no horizons and no SPICE. Instead data from the 2018 launch
--- is used, old data from an old launch time that never happened because of delays.
--- If we can get our hands on the 2021 launch data, the jwst assets will be updated.
-
 -- Trail of JWST relative the Earth for the first month after launch
 -- Makes histroy of trail to stay at Earth, that a trail relative to L2 won't
 local JWSTTrailLaunch = {
@@ -29,26 +24,25 @@ local JWSTTrailLaunch = {
   Parent = earthTransforms.EarthCenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 14:06:03",
-    End = "2018 NOV 01"
+    Start = "2021 DEC 25 12:50:00",
+    End = "2022 JAN 25"
   },
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "horizons_jwst_launch.dat",
+      HorizonsTextFile = horizons .. "horizons_jwst_launch.hrz",
     },
     Color = { 0.9, 0.9, 0.0 },
-    StartTime = "2018 OCT 01 14:06:00",
-    EndTime = "2018 NOV 01",
-    SampleInterval = 60
+    StartTime = "2021 DEC 25 12:50:00",
+    EndTime = "2022 JAN 25",
+    SampleInterval = 60 -- Sample rate of once per minute
   },
   GUI = {
     Name = "JWST Launch Trail",
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
-      James Webb Space Telescope Launch Trail relative to Earth based on Horizons data from the
-      2018 launch.
+      James Webb Space Telescope Launch Trail relative to Earth.
     ]],
   }
 }
@@ -60,56 +54,51 @@ local JWSTTrailOrbit = {
   Parent = transforms.L2.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 NOV 01 00:00:00",
-    End = "2024 OCT 01"
+    Start = "2022 JAN 25",
+    End = "2024 JAN 22"
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "horizons_jwst_orbit.dat",
+      HorizonsTextFile = horizons .. "horizons_jwst_orbit.hrz",
     },
     Color = { 0.9, 0.9, 0.0 },
     Period = 182.621099, -- About 6 months
-    Resolution = 4383 -- About a sample rate of once per hour
+    Resolution = 183 -- About a sample rate of once per day
   },
   GUI = {
     Name = "JWST Orbit Trail",
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
-      James Webb Space Telescope Orbit Trail relative to L2 based on Horizons data from the
-      2018 launch.
+      James Webb Space Telescope Orbit Trail relative to L2.
     ]],
   }
 }
 
--- JPL Horizons doesn't have data of JWST relative to the Sun,
--- instead a SPICE kernel with data from 2020 to 2024 is used.
--- However, this SPICE kernel is (somehow) based on the horizons
--- data of the 2018 launch anyway. Which mean that this kernel doesn't
--- have any data of the launch, just the orbit.
 local JWSTSunTrail = {
   Identifier = "JWSTSunTrail",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 JAN 25",
+    End = "2024 JAN 22"
+  },
   Renderable = {
-    Enabled = false,
     Type = "RenderableTrailOrbit",
     Translation = {
-      Type = "SpiceTranslation",
-      Target = "JWST",
-      Observer = "SSB",
-      Kernels = kernels .. "jwst_horizons_20200101_20240101_v01.bsp"
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = horizons .. "horizons_jwst_sun.hrz",
     },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,
-    Resolution = 1000
+    Resolution = 365 -- About a sample rate of once per day
   },
   GUI = {
     Name = "JWST Sun Trail",
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
-      James Webb Space Telescope Trail relative to the Sun based on Horizons data from the
-      2018 launch.
+      James Webb Space Telescope Trail relative to the Sun.
     ]],
   }
 }
@@ -119,13 +108,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTTrailOrbit)
   openspace.addSceneGraphNode(JWSTSunTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTSunTrail)
   openspace.removeSceneGraphNode(JWSTTrailOrbit)
   openspace.removeSceneGraphNode(JWSTTrailLaunch)
 end)
-    
+
 asset.export(JWSTTrailLaunch)
 asset.export(JWSTTrailOrbit)
 asset.export(JWSTSunTrail)
