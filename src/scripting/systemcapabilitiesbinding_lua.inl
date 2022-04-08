@@ -34,7 +34,7 @@ namespace {
     OS os = CpuCap.operatingSystem();
 
     switch (os) {
-        case OS::Windows10:
+        case OS::Windows10or11:
         case OS::WindowsServer2016:
         case OS::WindowsVista:
         case OS::WindowsServer2008:
@@ -95,7 +95,7 @@ namespace {
 }
 
 // Returns the L2 associativity.
-[[codegen::luawrap]] int l2Associativity() {
+[[codegen::luawrap("L2Associativity")]] int l2Associativity() {
     int assoc = static_cast<int>(CpuCap.L2Associativity());
     return assoc;
 }

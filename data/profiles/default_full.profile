@@ -35,6 +35,7 @@
   ],
   "assets": [
     "base",
+    "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/jupiter/major_moons",

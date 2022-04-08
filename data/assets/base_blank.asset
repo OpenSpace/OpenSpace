@@ -5,12 +5,15 @@ local propertyHelper = asset.require("util/property_helper")
 -- Specifying which other assets should be loaded in this scene
 asset.require("spice/base")
 
--- Load default key bindings applicable to most scenes
 asset.require("dashboard/default_dashboard")
+-- Load default key bindings applicable to most scenes
 asset.require("util/default_keybindings")
 
 -- Load web gui
 local webGui = asset.require("util/webgui")
+
+-- Scale the different UI components based on the operating system's DPI scaling value
+asset.require("util/dpiscaling")
 
 local toggle_trails = {
   Identifier = "os_default.toggle_trails",

@@ -100,7 +100,7 @@ if(OS_LINUX)
     -fno-rtti                       # Disable real-time type information
     -fno-threadsafe-statics         # Don't generate thread-safe statics
     -fvisibility-inlines-hidden     # Give hidden visibility to inlined class member functions
-    -std=gnu++11                    # Use the C++11 language standard including GNU extensions
+    -std=gnu++14                    # Use the C++14 language standard including GNU extensions
     -Wsign-compare                  # Warn about mixed signed/unsigned type comparisons
     )
   list(APPEND CEF_COMPILER_FLAGS_DEBUG
@@ -259,7 +259,7 @@ if(OS_MACOSX)
     -fno-threadsafe-statics         # Don't generate thread-safe statics
     -fobjc-call-cxx-cdtors          # Call the constructor/destructor of C++ instance variables in ObjC objects
     -fvisibility-inlines-hidden     # Give hidden visibility to inlined class member functions
-    -std=gnu++11                    # Use the C++11 language standard including GNU extensions
+    -std=gnu++14                    # Use the C++14 language standard including GNU extensions
     -Wno-narrowing                  # Don't warn about type narrowing
     -Wsign-compare                  # Warn about mixed signed/unsigned type comparisons
     )
@@ -456,12 +456,10 @@ if(OS_WINDOWS)
   # List of CEF binary files.
   set(CEF_BINARY_FILES
     chrome_elf.dll
-    d3dcompiler_43.dll
     d3dcompiler_47.dll
     libcef.dll
     libEGL.dll
     libGLESv2.dll
-    natives_blob.bin
     snapshot_blob.bin
     v8_context_snapshot.bin
     #swiftshader
@@ -469,11 +467,9 @@ if(OS_WINDOWS)
 
   # List of CEF resource files.
   set(CEF_RESOURCE_FILES
-    cef.pak
-    cef_100_percent.pak
-    cef_200_percent.pak
-    cef_extensions.pak
-    devtools_resources.pak
+    chrome_100_percent.pak
+    chrome_200_percent.pak
+    resources.pak
     icudtl.dat
     locales
     )

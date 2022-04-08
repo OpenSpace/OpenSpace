@@ -270,7 +270,7 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());
-    _program->setUniform("color", glm::vec4(_lineColor.value(), _opacity));
+    _program->setUniform("color", glm::vec4(_lineColor.value(), opacity()));
 
     // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

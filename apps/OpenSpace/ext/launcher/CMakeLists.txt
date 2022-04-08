@@ -42,6 +42,13 @@ set(HEADER_FILES
   include/profile/timedialog.h
   include/profile/profileedit.h
   include/profile/propertiesdialog.h
+  include/sgctedit/displaywindowunion.h
+  include/sgctedit/filesupport.h
+  include/sgctedit/monitorbox.h
+  include/sgctedit/orientation.h
+  include/sgctedit/orientationdialog.h
+  include/sgctedit/sgctedit.h
+  include/sgctedit/windowcontrol.h
 )
 
 set(SOURCE_FILES
@@ -62,6 +69,13 @@ set(SOURCE_FILES
   src/profile/timedialog.cpp
   src/profile/profileedit.cpp
   src/profile/propertiesdialog.cpp
+  src/sgctedit/sgctedit.cpp
+  src/sgctedit/displaywindowunion.cpp
+  src/sgctedit/filesupport.cpp
+  src/sgctedit/monitorbox.cpp
+  src/sgctedit/orientation.cpp
+  src/sgctedit/orientationdialog.cpp
+  src/sgctedit/windowcontrol.cpp
 )
 
 set(HEADER_SOURCE
@@ -79,6 +93,13 @@ set(HEADER_SOURCE
   include/profile/timedialog.h
   include/profile/profileedit.h
   include/profile/propertiesdialog.h
+  include/sgctedit/displaywindowunion.h
+  include/sgctedit/filesupport.h
+  include/sgctedit/monitorbox.h
+  include/sgctedit/orientation.h
+  include/sgctedit/orientationdialog.h
+  include/sgctedit/sgctedit.h
+  include/sgctedit/windowcontrol.h
 )
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets REQUIRED)
@@ -110,7 +131,13 @@ endif()
 
 add_library(openspace-ui-launcher STATIC ${HEADER_FILES} ${SOURCE_FILES} ${MOC_FILES} ${RESOURCE_FILES})
 set_openspace_compile_settings(openspace-ui-launcher)
-target_include_directories(openspace-ui-launcher PUBLIC include)
+target_include_directories(
+  openspace-ui-launcher
+  PUBLIC
+  include
+  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/include
+  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/sgct/ext/glm
+)
 target_link_libraries(
   openspace-ui-launcher
   PUBLIC

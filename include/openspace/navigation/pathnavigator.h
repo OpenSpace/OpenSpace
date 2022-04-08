@@ -59,6 +59,7 @@ public:
     const Path* currentPath() const;
     double speedScale() const;
     double arrivalDistanceFactor() const;
+    float linearRotationSpeedFactor() const;
 
     bool hasCurrentPath() const;
     bool hasFinished() const;
@@ -103,6 +104,7 @@ private:
     properties::FloatProperty _speedScale;
     properties::BoolProperty _applyIdleBehaviorOnFinish;
     properties::DoubleProperty _arrivalDistanceFactor;
+    properties::FloatProperty _linearRotationSpeedFactor;
     properties::DoubleProperty _minValidBoundingSphere;
     properties::StringListProperty _relevantNodeTags;
 

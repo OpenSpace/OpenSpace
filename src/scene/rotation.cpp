@@ -66,12 +66,6 @@ ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
 
 Rotation::Rotation() : properties::PropertyOwner({ "Rotation" }) {}
 
-// @TODO (abock, 2021-03-25)  This constructor can probably die since it doesn't do any
-// above the default constructor
-Rotation::Rotation(const ghoul::Dictionary&)
-    : properties::PropertyOwner({ "Rotation" })
-{}
-
 void Rotation::requireUpdate() {
     _needsUpdate = true;
 }
