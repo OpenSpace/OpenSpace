@@ -11,7 +11,7 @@ local point_jwst = {
       return
     end
 
-    function mathSign(number)
+    local function mathSign(number)
       local res = 0
       if number > 0 then
         res = 1
@@ -21,18 +21,18 @@ local point_jwst = {
       return res
     end
 
-    function normalize(v)
+    local function length(v)
+      return math.sqrt(v[1]*v[1] + v[2]*v[2]+ v[3]*v[3])
+    end
+
+    local function normalize(v)
       local l = length(v)
       v[1] = v[1] / l
       v[2] = v[2] / l
       v[3] = v[3] / l
     end
 
-    function length(v)
-      return math.sqrt(v[1]*v[1] + v[2]*v[2]+ v[3]*v[3])
-    end
-
-    function applyMatrix(m, v)
+    local function applyMatrix(m, v)
       local res = { 0.0, 0.0, 0.0 }
       res[1] = m[1]*v[1] + m[2]*v[2] + m[3]*v[3] -- ax + by + cz
       res[2] = m[4]*v[1] + m[5]*v[2] + m[6]*v[3] -- dx + ey + fz
@@ -40,7 +40,7 @@ local point_jwst = {
       return res
     end
 
-    function convertRaDec(ra, dec)
+    local function convertRaDec(ra, dec)
       -- J2000 Galactic reference frame
       -- Equatorial coordinates of the Galactic north pole
       local A0 = math.rad(192.8595)
@@ -69,7 +69,7 @@ local point_jwst = {
       return rGalactic
     end
 
-    function calculateJWSTAngles(c)
+    local function calculateJWSTAngles(c)
       -- Normalize
       normalize(c)
 
