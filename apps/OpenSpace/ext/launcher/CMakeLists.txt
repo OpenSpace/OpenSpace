@@ -30,10 +30,12 @@ set(HEADER_FILES
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
+  include/profile/assetedit.h
   include/profile/assettreeitem.h
   include/profile/assettreemodel.h
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
+  include/profile/horizonsdialog.h
   include/profile/scriptlogdialog.h
   include/profile/line.h
   include/profile/marknodesdialog.h
@@ -57,10 +59,12 @@ set(SOURCE_FILES
   src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp
   src/profile/assetsdialog.cpp
+  src/profile/assetedit.cpp
   src/profile/assettreeitem.cpp
   src/profile/assettreemodel.cpp
   src/profile/cameradialog.cpp
   src/profile/deltatimesdialog.cpp
+  src/profile/horizonsdialog.cpp
   src/profile/scriptlogdialog.cpp
   src/profile/line.cpp
   src/profile/marknodesdialog.cpp
@@ -83,9 +87,11 @@ set(HEADER_SOURCE
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
+  include/profile/assetedit.h
   include/profile/assettreemodel.h
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
+  include/profile/horizonsdialog.h
   include/profile/scriptlogdialog.h
   include/profile/marknodesdialog.h
   include/profile/metadialog.h
@@ -102,13 +108,13 @@ set(HEADER_SOURCE
   include/sgctedit/windowcontrol.h
 )
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets Network REQUIRED)
 set(MOC_FILES "")
 set(RESOURCE_FILES "")
 set(LIBRARIES "")
 
 if (${QT_VERSION_MAJOR} EQUAL 5)
-  find_package(Qt5 COMPONENTS Widgets)
+  find_package(Qt5 COMPONENTS Core Widgets Network)
   qt5_wrap_cpp(
     MOC_FILES
     ${HEADER_SOURCE}
@@ -116,7 +122,7 @@ if (${QT_VERSION_MAJOR} EQUAL 5)
   qt5_add_resources(RESOURCE_FILES resources/resources.qrc)
   set(LIBRARIES )
 elseif (${QT_VERSION_MAJOR} EQUAL 6)
-  find_package(Qt6 COMPONENTS Widgets REQUIRED)
+  find_package(Qt6 COMPONENTS Core Widgets Network REQUIRED)
 
   qt6_wrap_cpp(
     MOC_FILES
@@ -142,7 +148,11 @@ target_link_libraries(
   openspace-ui-launcher
   PUBLIC
     openspace-core
-    Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets
+    openspace-module-collection
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Network
 )
 
 if (MSVC)

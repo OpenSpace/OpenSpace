@@ -22,25 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___HORIZONSTRANSLATION___H__
-#define __OPENSPACE_MODULE_SPACE___HORIZONSTRANSLATION___H__
+#ifndef __OPENSPACE_MODULE_SPACE___HORIZONSFILE___H__
+#define __OPENSPACE_MODULE_SPACE___HORIZONSFILE___H__
 
-#include <openspace/scene/translation.h>
-
-#include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/util/timeline.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/lua/luastate.h>
-#include <modules/space/horizonsfile.h>
-#include <memory>
+#include <openspace/json.h>
+#include <ghoul/glm.h>
+#include <filesystem>
+#include <string>
+#include <vector>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-
 /**
- * The HorizonsTranslation is based on text files generated from NASA JPL HORIZONS Website
+ * A Horizons file is a text file generated from NASA JPL HORIZONS Website
  * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector
  * and Observer as Horizons data table
  *
@@ -66,31 +60,80 @@ namespace documentation { struct Documentation; }
  * 2. Change "Range units" to "kilometers (km)" instead of "astronomical units (au)"
  * 3. Check the "Suppress range-rate" option
  */
-class HorizonsTranslation : public Translation {
+enum class HorizonsResultCode {
+    Valid,
+    Empty,
+
+    // Erros caught by the error field in the json output
+    ErrorSize,
+    ErrorSpan,
+    ErrorTimeRange,
+    ErrorNoObserver,
+    ErrorObserverTargetSame,
+    ErrorNoData,
+    MultipleObserverStations,
+
+    // Erros/problems NOT caught by the error field in the json output
+    MultipleObserver,
+    ErrorNoTarget,
+    MultipleTarget,
+
+    UnknownError
+};
+
+enum class HorizonsType {
+    Observer, // Default
+    Vector,   // Default for sending for new data
+    Invalid   // If errors or empty etc
+};
+
+struct HorizonsKeyframe {
+    double time;            // J2000 seconds
+    glm::dvec3 position;    // GALACTIC cartesian coordinates in meters
+};
+
+struct HorizonsResult {
+    HorizonsType type = HorizonsType::Invalid;
+    HorizonsResultCode errorCode = HorizonsResultCode::UnknownError;
+    std::vector<HorizonsKeyframe> data = std::vector<HorizonsKeyframe>();
+};
+
+class HorizonsFile {
 public:
-    HorizonsTranslation();
-    HorizonsTranslation(const ghoul::Dictionary& dictionary);
+    HorizonsFile() = default;
+    HorizonsFile(std::filesystem::path file);
+    HorizonsFile(std::filesystem::path filePath, const std::string& result);
 
-    glm::dvec3 position(const UpdateData& data) const override;
+    void setFile(std::filesystem::path file);
+    const std::filesystem::path& file() const;
+    std::filesystem::path& file();
 
-    static documentation::Documentation Documentation();
+    bool hasFile() const;
+    void displayErrorMessage(const HorizonsResultCode code) const;
+
+
+    std::vector<std::string> parseMatches(const std::string& startPhrase,
+        const std::string& endPhrase, const std::string& altStartPhrase = "") const;
+    std::pair<std::string, std::string> parseValidTimeRange(
+        const std::string& startPhrase, const std::string& endPhrase,
+        const std::string& altStartPhrase = "", bool hasTime = true) const;
 
 private:
-    struct CacheKeyframe {
-        double timestamp;
-        glm::dvec3 position;
-    };
-
-    void loadData();
-    bool readHorizonsTextFile(HorizonsFile& horizonsFile);
-    bool loadCachedFile(const std::filesystem::path& file);
-    void saveCachedFile(const std::filesystem::path& file) const;
-
-    properties::StringListProperty _horizonsTextFiles;
-    ghoul::lua::LuaState _state;
-    Timeline<glm::dvec3> _timeline;
+    std::filesystem::path _file;
 };
+
+// Free functions
+std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
+    const std::string& observer, const std::string& startTime,
+    const std::string& stopTime, const std::string& stepSize,
+    const std::string& unit);
+HorizonsResultCode isValidHorizonsAnswer(const nlohmann::json& answer);
+HorizonsResultCode isValidHorizonsFile(std::filesystem::path file);
+HorizonsResult readHorizonsFile(std::filesystem::path file);
+
+HorizonsResult readHorizonsVectorFile(std::filesystem::path file);
+HorizonsResult readHorizonsObserverFile(std::filesystem::path file);
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___HORIZONSTRANSLATION___H__
+#endif // __OPENSPACE_MODULE_SPACE___HORIZONSFILE___H__
