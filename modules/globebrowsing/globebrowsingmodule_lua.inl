@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#include <openspace/util/collisionhelper.h>
 
 namespace {
 
@@ -374,7 +375,7 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
  * eye postion will be used instead
  */
 [[codegen::luawrap]] std::tuple<double, double, double> 
-getGeoPositionForCamera(std::optional<std::bool> useEyePosition) 
+getGeoPositionForCamera(std::optional<bool> useEyePosition) 
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -387,39 +388,64 @@ getGeoPositionForCamera(std::optional<std::bool> useEyePosition)
     Camera* camera = global::navigationHandler->camera();
 
     glm::dvec3 cameraPosition = camera->positionVec3();
+
+
     const SceneGraphNode* anchor =
         global::navigationHandler->orbitalNavigator().anchorNode(); //focus vs anchor
     const glm::dmat4 inverseModelTransform = glm::inverse(anchor->modelTransform());
-    glm::dvec3 intersectionPoint;
+    
+    glm::dvec3 target;
 
-    if (eyePosition.value_or(false)) {
+    if (useEyePosition.value_or(false)) {
+
         const glm::dvec3 anchorPos = anchor->worldPosition();
         const glm::dvec3 cameraDir = ghoul::viewDirection(camera->rotationQuaternion());
 
-//        const double anchorToPosDistance = glm::log(glm::distance(anchorPos, cameraPosition)) * eyeDistance.value_or(500);
-       //const double anchorToPosDistance = 
-        glm::dvec3 lookAtPos = cameraPosition + globe->boundingSphere() * cameraDir;
-        bool didCollide = openspace::collision::lineSphereIntersection(cameraPosition, lookAtPos, anchorPos, globe->boundingSphere(), intersectionPoint);
-        if (didCollide) {
-            //cameraPosition = intersectionPoint;
-            //all good
-        }
-        else {
-            ///HADNDLDLLELELELELE
-            return ghoul::lua::luaError(L, "Cant find place for tower");
-        }
+           //try3
+        //double stepSize = 1000.f;
+        //float distanceAfterStep = globe->boundingSphere() * 1.1;
+        //glm::dvec3 lastStep;
+        //for (int numSteps = 0; distanceAfterStep > globe->boundingSphere(); numSteps++) {
+        //    lastStep = cameraPosition + (stepSize * numSteps) * cameraDir;
+        //    distanceAfterStep = glm::distance(lastStep, anchorPos);
+        //    if (numSteps > 5000) {
+        //        break;
+        //    }
+        //}
+        //target = lastStep;
+
+
+        const double anchorToCameraDistance = glm::distance(anchorPos, cameraPosition);
+        const double anchorToPosDistance = glm::distance(anchorPos + globe->boundingSphere(), cameraPosition);
+        target = cameraPosition + anchorToPosDistance * cameraDir;
+
+        //try2
+        //glm::dvec3 lookAtPos = cameraPosition + 0.99*globe->boundingSphere() * cameraDir;        
+        //bool didCollide = openspace::collision::lineSphereIntersection(cameraPosition, lookAtPos, 
+        //    anchorPos, globe->boundingSphere(), target);
+        //if (didCollide) {
+        //    //cameraPosition = intersectionPoint;
+        //    //all good
+        //}
+        //else {
+        //    ///HADNDLDLLELELELELE
+        //    return { 0,0,0 };
+        //}
     }
-//    const glm::dvec3 cameraPositionModelSpace =
-//glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+    else {
+        target = glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+    }
+
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
-        intersectionPoint
+        target
     );
 
     const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
         posHandle.centerToReferenceSurface
     );
-    const double altitude = glm::length(intersectionPoint -
-                                  posHandle.centerToReferenceSurface);
+    const double altitude = glm::length(
+        target - posHandle.centerToReferenceSurface
+    );
 
     return { glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude };
 }
