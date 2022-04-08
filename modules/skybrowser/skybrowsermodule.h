@@ -108,7 +108,6 @@ protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
 
 private:
-    properties::BoolProperty _allowMouseInteraction;
     properties::BoolProperty _allowCameraRotation;
     properties::DoubleProperty _cameraRotationSpeed;
     properties::DoubleProperty _targetAnimationSpeed;

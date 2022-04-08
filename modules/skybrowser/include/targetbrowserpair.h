@@ -54,11 +54,8 @@ public:
     void startFading(float goal, float fadeTime);
     void incrementallyFade();
     // Mouse interaction
-    bool checkMouseIntersection(const glm::vec2& mousePosition);
-    glm::vec2 selectedScreenSpacePosition() const;
     void startFinetuningTarget();
     void fineTuneTarget(const glm::vec2& startMouse, const glm::vec2& translation);
-    void translateSelected(const glm::vec2& start, const glm::vec2& translation);
     void synchronizeAim();
 
     // Browser
@@ -115,9 +112,6 @@ public:
 private:
     void aimTargetGalactic(glm::dvec3 direction);
 
-    // Selection
-    ScreenSpaceSkyBrowser* _selected = nullptr;
-    
     // Target and browser
     RenderableSkyTarget* _targetRenderable = nullptr;
     ScreenSpaceSkyBrowser* _browser = nullptr;

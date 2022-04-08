@@ -34,8 +34,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <glm/gtx/string_cast.hpp>
-
 
 namespace {
     constexpr const char _loggerCat[] = "SkyBrowserModule";
@@ -407,7 +405,7 @@ namespace {
     std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
     // Determine starting point on screen for the target
-    glm::vec3 positionBrowser = { -1.f, -0.5f, -2.1f };
+    glm::vec3 positionBrowser = { -3.f, -3.f, -2.1f };
     glm::vec3 positionTarget = { 0.9f, 0.4f, -2.1f };
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
     std::string guiPath = "/Sky Browser";
@@ -682,7 +680,6 @@ namespace {
         glm::vec2 startScreenSpace = skybrowser::pixelToScreenSpace2d(start);
         glm::vec2 endScreenSpace = skybrowser::pixelToScreenSpace2d(end);
         glm::vec2 translation = endScreenSpace - startScreenSpace;
-        LINFO(glm::to_string(translation));
         pair->fineTuneTarget(startScreenSpace, translation);
     }
 }

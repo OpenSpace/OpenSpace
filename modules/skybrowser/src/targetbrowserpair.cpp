@@ -85,16 +85,6 @@ void TargetBrowserPair::aimTargetGalactic(glm::dvec3 direction) {
     );
 }
 
-bool TargetBrowserPair::checkMouseIntersection(const glm::vec2& mousePosition) {
-    _selected = _browser->isIntersecting(mousePosition) ? _browser : nullptr;
-
-    return _selected;
-}
-
-glm::vec2 TargetBrowserPair::selectedScreenSpacePosition() const {
-    return _selected->screenSpacePosition();
-}
-
 void TargetBrowserPair::startFinetuningTarget() {
     _startTargetPosition = _targetNode->worldPosition();
 }
@@ -118,20 +108,6 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& startMouse,
 
     glm::dvec3 translationWorld = endWorld - startWorld;
     aimTargetGalactic(_startTargetPosition + translationWorld);
-}
-
-void TargetBrowserPair::translateSelected(const glm::vec2& start, 
-                                            const glm::vec2& trans)
-{
-    if (this && _selected) {
-        std::string id = _selected->identifier();
-        openspace::global::scriptEngine->queueScript(
-            "openspace.skybrowser.translateScreenSpaceRenderable(\"" + id + "\","
-            + std::to_string(start.x) + "," + std::to_string(start.y) + ","
-            + std::to_string(trans.x) + "," + std::to_string(trans.y) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
 }
 
 void TargetBrowserPair::synchronizeAim() {
@@ -192,10 +168,6 @@ std::string TargetBrowserPair::targetRenderableId() const {
 
 std::string TargetBrowserPair::targetNodeId() const {
     return _targetNode->identifier();
-}
-
-std::string TargetBrowserPair::selectedId() {
-    return _selected->identifier();
 }
 
 glm::vec2 TargetBrowserPair::size() const {

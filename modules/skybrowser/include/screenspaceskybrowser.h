@@ -78,7 +78,7 @@ private:
     bool _textureDimensionsIsDirty = false;
     bool _sizeIsDirty = false;
 
-    glm::vec2 _size = glm::vec2(1.f, 0.8f);
+    glm::vec2 _size = glm::vec2(1.f, 1.f);
 };
 } // namespace openspace
 

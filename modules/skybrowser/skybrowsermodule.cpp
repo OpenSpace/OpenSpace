@@ -39,13 +39,6 @@
 #include "skybrowsermodule_lua.inl"
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo AllowInteractionInfo = {
-        "AllowMouseInteraction",
-        "Allow Mouse Interaction",
-        "Toggles if it is possible to interact with the sky browser and sky targets with "
-        "the mouse or not."
-    };
-    
     constexpr const openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow Camera Rotation",
@@ -73,8 +66,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
-        // [[codegen::verbatim(AllowInteractionInfo.description)]]
-        std::optional<bool> allowMouseInteraction;
 
         // [[codegen::verbatim(AllowRotationInfo.description)]]
         std::optional<bool> allowCameraRotation;
@@ -95,13 +86,11 @@ namespace {
 namespace openspace {
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
-    , _allowMouseInteraction(AllowInteractionInfo, true)
     , _allowCameraRotation(AllowRotationInfo, true)
     , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
     , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
     , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
 {
-    addProperty(_allowMouseInteraction);
     addProperty(_allowCameraRotation);
     addProperty(_cameraRotationSpeed);
     addProperty(_targetAnimationSpeed);
@@ -110,75 +99,15 @@ SkyBrowserModule::SkyBrowserModule()
     // Set callback functions
     global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
         [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
-            if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
-                return false;
-            }
-
             if (action == MouseAction::Press) {      
                 _cameraRotation.stop();
-                if (_mouseOnPair) {
-                    handleMouseClick(button);
-                    return true;
-                }
                 return false; 
-            }
-            else if (_interactionMode != MouseInteraction::Hover && 
-                     action == MouseAction::Release) {
-             
-                _interactionMode = MouseInteraction::Hover;
-                return true;
             }
             else {
                 return false;
             }
         }
     );
-
-    if (global::windowDelegate->isMaster()) {
-        global::callback::mousePosition->emplace(global::callback::mousePosition->begin(),
-            [&](double x, double y) {
-                if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
-                    return false;
-                }
-
-                glm::vec2 pixel{ static_cast<float>(x), static_cast<float>(y) };
-                _mousePosition = skybrowser::pixelToScreenSpace2d(pixel);
-                glm::vec2 translation = _mousePosition - _startMousePosition;
-
-                switch (_interactionMode) {
-                    case MouseInteraction::Hover:
-                        setSelectedObject();
-                        break;
-                    case MouseInteraction::Drag:
-                        _mouseOnPair->translateSelected(_startDragPosition, translation);
-                        break;
-                    case MouseInteraction::FineTune:
-                        _mouseOnPair->fineTuneTarget(
-                            _startDragPosition, 
-                            translation
-                        );
-                        break;
-                    default:
-                        setSelectedObject();
-                        break;
-                    }
-                return false;
-            }
-        );
-
-        global::callback::mouseScrollWheel->emplace_back(
-            [&](double, double scroll) -> bool {
-                if (!_isCameraInSolarSystem || !_mouseOnPair || !_allowMouseInteraction) {
-                    return false;
-                }
-                // If mouse is on browser or target, apply zoom
-                _mouseOnPair->setVerticalFovWithScroll(
-                    static_cast<float>(scroll)
-                );
-                return true;
-            }
-        );
-    }
 
     global::callback::preSync->emplace_back([this]() {
         // Disable browser and targets when camera is outside of solar system
@@ -254,42 +183,6 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     // Create data handler dynamically to avoid the linking error that
     // came up when including the include file in the module header file
     _dataHandler = std::make_unique<WwtDataHandler>();
-}
-
-void SkyBrowserModule::setSelectedObject() {
-    if (_interactionMode != MouseInteraction::Hover) {
-        return;
-    }
-    // Save old selection for removing highlight
-    TargetBrowserPair* previousPair = _mouseOnPair;
-
-    // Find and save what mouse is currently hovering on
-    auto it = std::find_if(
-        _targetsBrowsers.begin(),
-        _targetsBrowsers.end(),
-        [&] (const std::unique_ptr<TargetBrowserPair> &pair) {      
-            return pair->checkMouseIntersection(_mousePosition) && 
-                   !pair->isUsingRadiusAzimuthElevation();
-        });
-
-    if (it == _targetsBrowsers.end()) {
-        _mouseOnPair = nullptr;
-    }
-    else {
-        _mouseOnPair = it->get();
-    }
-
-    // Selection has changed
-    if (previousPair != _mouseOnPair) {
-        // Remove highlight
-        if (previousPair) {
-            previousPair->removeHighlight(_highlightAddition);
-        }
-        // Add highlight to new selection
-        if (_mouseOnPair) {
-            _mouseOnPair->highlight(_highlightAddition);
-        }
-    }
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId, const std::string& browserId) {
@@ -375,26 +268,6 @@ void SkyBrowserModule::loadImages(const std::string& root,
 
 int SkyBrowserModule::nLoadedImages() {
     return _dataHandler->nLoadedImages();
-}
-
-void SkyBrowserModule::handleMouseClick(const MouseButton& button) {
-    setSelectedBrowser(_mouseOnPair->browserId());
-
-    if (button == MouseButton::Left) {
-        _startMousePosition = _mousePosition;
-        _startDragPosition = _mouseOnPair->selectedScreenSpacePosition();
-
-        // If it's not resize mode, it's drag mode
-        _interactionMode = MouseInteraction::Drag;
-    }
-    // Fine tuning mode of target
-    else if (button == MouseButton::Right) {
-        // Change view (by moving target) within browser if right mouse 
-        // click on browser
-        _startMousePosition = _mousePosition;
-        _startTargetPosition = _mouseOnPair->targetNode()->worldPosition();
-        _interactionMode = MouseInteraction::FineTune;
-    }
 }
 
 const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWwtDataHandler() const {
