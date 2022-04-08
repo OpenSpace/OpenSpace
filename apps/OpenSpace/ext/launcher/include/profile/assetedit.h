@@ -22,50 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ASSETS___H__
-#define __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
+#define __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
 
 #include <QDialog>
+#include <filesystem>
+#include <string>
 
-#include "assettreemodel.h"
+namespace openspace { class Asset; }
 
-class QTextEdit;
-class QTreeView;
+class QBoxLayout;
+class QComboBox;
+class QLabel;
+class QLineEdit;
+class QWidget;
 
-class AssetsDialog final : public QDialog {
+class AssetEdit : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for assets class
-     *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
-     * \param assetBasePath The path to the folder in which all of the assets are living
-     * \param userAssetBasePath The path to the folder in which the users' assets are
-     *        living
-     * \param parent Pointer to parent Qt widget
+     * Constructor for AssetEdit class
      */
-    AssetsDialog(QWidget* parent, openspace::Profile* profile,
-        const std::string& assetBasePath, const std::string& userAssetBasePath);
+    AssetEdit(QWidget* parent);
 
 private slots:
-    void parseSelections();
-    void selected(const QModelIndex&);
+    //void openComponent();
+
+    //void openHorizonsFile();
+    void openHorizons();
+
+    void approved();
 
 private:
     void createWidgets();
-    /**
-     * Creates a text summary of all assets and their paths
-     *
-     * \return the #std::string summary
-     */
-    QString createTextSummary();
-    void openAssetEditor();
 
-    openspace::Profile* _profile = nullptr;
-    AssetTreeModel _assetTreeModel;
-    QTreeView* _assetTree = nullptr;
-    QTextEdit* _summary = nullptr;
+    QBoxLayout* _layout = nullptr;
+    QLineEdit* _nameEdit = nullptr;
+    //QComboBox* _components = nullptr;
+
+    //std::filesystem::path _horizonsFile;
+    //QLineEdit* _horizonsFileEdit = nullptr;
+
+    QLabel* _errorMsg = nullptr;
+
+    // List of all the supported components
+    /*QStringList _supportedComponents = {
+        "Choose Component",
+        "Horizons Translation"
+    };*/
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
