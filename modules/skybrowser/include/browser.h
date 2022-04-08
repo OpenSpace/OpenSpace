@@ -22,12 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
-
-#include <openspace/rendering/screenspacerenderable.h>
+#ifndef __OPENSPACE_MODULE_SKYBROWSER___BROWSER___H__
+#define __OPENSPACE_MODULE_SKYBROWSER___BROWSER___H__
 
 #include <modules/webbrowser/include/webrenderhandler.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/triggerproperty.h>
@@ -57,28 +56,38 @@ namespace ghoul::opengl { class Texture; }
 namespace openspace {
 
 class BrowserInstance;
-class ScreenSpaceRenderHandler;
+class RenderHandler;
 class WebKeyboardHandler;
 
-class ScreenSpaceBrowser : public ScreenSpaceRenderable {
+class Browser {
 public:
-    ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceBrowser() = default;
+    explicit Browser(const ghoul::Dictionary& dictionary);
+    virtual ~Browser();
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    bool initializeGL();
+    bool deinitializeGL();
 
-    void render() override;
-    void update() override;
-    bool isReady() const override;
+    void render();
+    void update();
+    bool isReady() const;
+
+    void updateBrowserSize();
+
+    glm::vec2 browserPixelDimensions() const;    
+    float browserRatio() const;
+    void setCallbackDimensions(const std::function<void(const glm::dvec2&)>& function);
 
 protected:
-    properties::Vec2Property _dimensions;
-    std::unique_ptr<BrowserInstance> _browserInstance;
+    properties::Vec2Property _browserPixeldimensions;
+    properties::StringProperty _url;
+    properties::TriggerProperty _reload;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+   
+    void executeJavascript(const std::string& script) const;
 
 private:
-    class ScreenSpaceRenderHandler : public WebRenderHandler {
+    class RenderHandler : public WebRenderHandler {
     public:
         void draw() override;
         void render() override;
@@ -86,19 +95,15 @@ private:
         void setTexture(GLuint t);
     };
 
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-
-private:
-    void bindTexture() override;
-
-    properties::StringProperty _url;
-    properties::TriggerProperty _reload;
-
+    std::unique_ptr<BrowserInstance> _browserInstance;
+    CefRefPtr<RenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    
+
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;
+    bool _shouldReload = false;
 };
+
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+#endif // __OPENSPACE_MODULE_SKYBROWSER___BROWSER___H__

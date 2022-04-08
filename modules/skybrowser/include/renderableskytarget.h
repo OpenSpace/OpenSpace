@@ -22,83 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+#ifndef __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYTARGET___H__
+#define __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYTARGET___H__
 
-#include <openspace/rendering/screenspacerenderable.h>
+#include <modules/base/rendering/renderableplane.h>
 
-#include <modules/webbrowser/include/webrenderhandler.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#endif // __clang__
-
-#include <include/cef_client.h>
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
-
-namespace ghoul::opengl { class Texture; }
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
-class BrowserInstance;
-class ScreenSpaceRenderHandler;
-class WebKeyboardHandler;
+class ScreenSpaceSkyBrowser;
 
-class ScreenSpaceBrowser : public ScreenSpaceRenderable {
+class RenderableSkyTarget : public RenderablePlane {
 public:
-    ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceBrowser() = default;
+    explicit RenderableSkyTarget(const ghoul::Dictionary& dictionary);
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+    void bindTexture() override; // Empty function but has to be defined
 
-    void render() override;
-    void update() override;
-    bool isReady() const override;
+    glm::ivec3 borderColor() const;
+    float opacity() const;
+    double animationSpeed() const;
+    double stopAnimationThreshold() const;
 
-protected:
-    properties::Vec2Property _dimensions;
-    std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    void setDimensions(glm::vec2 dimensions);
+    void setColor(glm::ivec3 color);
+    void setOpacity(float opacity);
+    void setVerticalFov(double fov);
 
-private:
-    class ScreenSpaceRenderHandler : public WebRenderHandler {
-    public:
-        void draw() override;
-        void render() override;
-
-        void setTexture(GLuint t);
-    };
-
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
+    // Display
+    void highlight(const glm::ivec3& addition);
+    void removeHighlight(const glm::ivec3& removal);
 
 private:
-    void bindTexture() override;
+    // Properties
+    properties::FloatProperty _crossHairSize;
+    properties::FloatProperty _showRectangleThreshold;
+    properties::FloatProperty _lineWidth;
+    properties::DoubleProperty _stopAnimationThreshold;
+    properties::DoubleProperty _animationSpeed;
 
-    properties::StringProperty _url;
-    properties::TriggerProperty _reload;
+    double _verticalFov = 10.0;
 
-    CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    
-    bool _isUrlDirty = false;
-    bool _isDimensionsDirty = false;
+    glm::ivec3 _borderColor = glm::ivec3(230);
+    glm::vec2 _dimensions = glm::vec2(1.f);
 };
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+#endif // __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYTARGET___H__

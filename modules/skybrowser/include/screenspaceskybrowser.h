@@ -22,83 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+#ifndef __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
+#define __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
+#include <modules/skybrowser/include/wwtcommunicator.h>
 
-#include <modules/webbrowser/include/webrenderhandler.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/triggerproperty.h>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#endif // __clang__
-
-#include <include/cef_client.h>
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
-
-namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-class BrowserInstance;
-class ScreenSpaceRenderHandler;
-class WebKeyboardHandler;
-
-class ScreenSpaceBrowser : public ScreenSpaceRenderable {
+class ScreenSpaceSkyBrowser : public ScreenSpaceRenderable, public WwtCommunicator
+{
 public:
-    ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceBrowser() = default;
+    explicit ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
+    ~ScreenSpaceSkyBrowser();
 
     bool initializeGL() override;
     bool deinitializeGL() override;
-
+    glm::mat4 scaleMatrix() override;
     void render() override;
     void update() override;
-    bool isReady() const override;
 
-protected:
-    properties::Vec2Property _dimensions;
-    std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    float opacity() const;
+    glm::vec2 size() const;
+
+    void setVerticalFovWithScroll(float scroll);
+    void setOpacity(float opacity);
+    void setScreenSpaceSize(const glm::vec2& newSize);
+    void updateScreenSpaceSize();
+
+    glm::dvec2 fineTuneVector(glm::dvec2 drag);
+    void setIdInBrowser();
+
+    void updateTextureResolution();
+
+    // Copies rendered
+    void addRenderCopy(const glm::vec3& raePosition, int nCopies);
+    void removeRenderCopy();
+    std::vector<std::pair<std::string, glm::dvec3>> renderCopies();
+    void moveRenderCopy(int i, glm::vec3 raePosition);
 
 private:
-    class ScreenSpaceRenderHandler : public WebRenderHandler {
-    public:
-        void draw() override;
-        void render() override;
+    properties::FloatProperty _textureQuality;
+    properties::BoolProperty _renderOnlyOnMaster;
+    std::vector<std::unique_ptr<properties::Vec3Property>> _renderCopies;
 
-        void setTexture(GLuint t);
-    };
-
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-
-private:
     void bindTexture() override;
 
-    properties::StringProperty _url;
-    properties::TriggerProperty _reload;
+    // Flags
+    bool _isSyncedWithWwt = false;
+    bool _textureDimensionsIsDirty = false;
+    bool _sizeIsDirty = false;
 
-    CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    
-    bool _isUrlDirty = false;
-    bool _isDimensionsDirty = false;
+    glm::vec2 _size = glm::vec2(1.f, 1.f);
 };
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+#endif // __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__

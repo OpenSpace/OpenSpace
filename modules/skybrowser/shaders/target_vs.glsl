@@ -21,84 +21,32 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ #version __CONTEXT__
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+ #include "PowerScaling/powerScaling_vs.hglsl"
 
-#include <openspace/rendering/screenspacerenderable.h>
+ layout(location = 0) in vec4 in_position;
+ layout(location = 1) in vec2 in_st;
 
-#include <modules/webbrowser/include/webrenderhandler.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/triggerproperty.h>
+ out vec4 vs_gPosition;
+ out vec3 vs_gNormal;
+ out float vs_screenSpaceDepth;
+ out vec2 vs_st;
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
+ uniform mat4 modelViewProjectionTransform;
+ uniform mat4 modelViewTransform;
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#endif // __clang__
+ void main() {
+     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+     vec4 positionClipSpace = modelViewProjectionTransform * position;
+     vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-#include <include/cef_client.h>
+     gl_Position = positionScreenSpace;
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__
+     // G-Buffer
+     vs_gNormal = vec3(0.0);
+     vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;
 
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
-
-namespace ghoul::opengl { class Texture; }
-
-namespace openspace {
-
-class BrowserInstance;
-class ScreenSpaceRenderHandler;
-class WebKeyboardHandler;
-
-class ScreenSpaceBrowser : public ScreenSpaceRenderable {
-public:
-    ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceBrowser() = default;
-
-    bool initializeGL() override;
-    bool deinitializeGL() override;
-
-    void render() override;
-    void update() override;
-    bool isReady() const override;
-
-protected:
-    properties::Vec2Property _dimensions;
-    std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-private:
-    class ScreenSpaceRenderHandler : public WebRenderHandler {
-    public:
-        void draw() override;
-        void render() override;
-
-        void setTexture(GLuint t);
-    };
-
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-
-private:
-    void bindTexture() override;
-
-    properties::StringProperty _url;
-    properties::TriggerProperty _reload;
-
-    CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    
-    bool _isUrlDirty = false;
-    bool _isDimensionsDirty = false;
-};
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+     vs_st = in_st;
+     vs_screenSpaceDepth = positionScreenSpace.w;
+ }

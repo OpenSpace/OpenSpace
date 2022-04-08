@@ -22,83 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+#ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
+#define __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 
-#include <openspace/rendering/screenspacerenderable.h>
+#include <modules/skybrowser/ext/tinyxml2/tinyxml2.h>
+#include <modules/space/speckloader.h>
+#include <openspace/documentation/documentation.h>
+#include <unordered_map>
 
-#include <modules/webbrowser/include/webrenderhandler.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/triggerproperty.h>
+namespace openspace::documentation { struct Documentation; }
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#endif // __clang__
-
-#include <include/cef_client.h>
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
-
-namespace ghoul::opengl { class Texture; }
+namespace openspace::wwt {
+    const std::string Thumbnail = "Thumbnail";
+    const std::string Name = "Name";
+    const std::string ImageSet = "ImageSet";
+    const std::string Dec = "Dec";
+    const std::string RA = "RA";
+    const std::string Undefined = "";
+    const std::string Folder = "Folder";
+    const std::string Place = "Place";
+    const std::string ThumbnailUrl = "ThumbnailUrl";
+    const std::string Url = "Url";
+    const std::string Credits = "Credits";
+    const std::string CreditsUrl = "CreditsUrl";
+    const std::string ZoomLevel = "ZoomLevel";
+    const std::string DataSetType = "DataSetType";
+    const std::string Sky = "Sky";
+} // namespace openspace::wwt
 
 namespace openspace {
 
-class BrowserInstance;
-class ScreenSpaceRenderHandler;
-class WebKeyboardHandler;
+struct ImageData {
+    std::string name = wwt::Undefined;
+    std::string thumbnailUrl = wwt::Undefined;
+    std::string imageUrl = wwt::Undefined;
+    std::string credits = wwt::Undefined;
+    std::string creditsUrl = wwt::Undefined;
+    std::string collection = wwt::Undefined;
+    bool hasCelestialCoords = false;
+    float fov = 0.f;
+    glm::dvec2 equatorialSpherical = glm::dvec2(0.0);
+    glm::dvec3 equatorialCartesian = glm::dvec3(0.0);
+};
 
-class ScreenSpaceBrowser : public ScreenSpaceRenderable {
+class WwtDataHandler {
 public:
-    ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceBrowser() = default;
+    WwtDataHandler() = default;
+    ~WwtDataHandler();
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
-
-    void render() override;
-    void update() override;
-    bool isReady() const override;
-
-protected:
-    properties::Vec2Property _dimensions;
-    std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    void loadImages(const std::string& root, const std::filesystem::path& directory);
+    int nLoadedImages() const;
+    const ImageData& getImage(int i) const;
 
 private:
-    class ScreenSpaceRenderHandler : public WebRenderHandler {
-    public:
-        void draw() override;
-        void render() override;
+    void saveImageFromNode(tinyxml2::XMLElement* node, std::string collection);
+    void saveImagesFromXml(tinyxml2::XMLElement* root, std::string collection);
 
-        void setTexture(GLuint t);
-    };
-
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-
-private:
-    void bindTexture() override;
-
-    properties::StringProperty _url;
-    properties::TriggerProperty _reload;
-
-    CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    
-    bool _isUrlDirty = false;
-    bool _isDimensionsDirty = false;
+    // Images
+    std::vector<ImageData> _images;
+    std::vector<tinyxml2::XMLDocument*> _xmls;
 };
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+#endif // __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
+
