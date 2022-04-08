@@ -144,14 +144,14 @@ public:
     /**
      * Sets a relative time from profile.
      */
-    void setTimeRelativeFromProfile(const std::string& setTime);
+    static void setTimeRelativeFromProfile(const std::string& setTime);
 
     /**
      * Sets an absolute time from profile.
      * \param setTime a string containing time to set, which must be a valid
      * ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS
      */
-    void setTimeAbsoluteFromProfile(const std::string& setTime);
+    static void setTimeAbsoluteFromProfile(const std::string& setTime);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the
