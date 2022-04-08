@@ -928,7 +928,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             if (std::filesystem::is_regular_file(errorFile)) {
                 std::filesystem::remove(errorFile);
             }
-            return true;
+            break;
         }
         case openspace::HorizonsResultCode::Empty: {
             _errorMsg->setText("The horizons file is empty");
@@ -938,6 +938,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 );
                 appendLog(msg, LogLevel::Error);
             }
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::ErrorSize: {
@@ -951,6 +953,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             styleLabel(_startLabel, true);
             styleLabel(_endLabel, true);
             styleLabel(_stepLabel, true);
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::ErrorSpan:
@@ -959,6 +963,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 HorizonsDialog::LogLevel::Error
             );
             styleLabel(_stepLabel, true);
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         case openspace::HorizonsResultCode::ErrorTimeRange: {
             std::string msg = fmt::format(
@@ -974,7 +980,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
-                return false;
+                break;
             }
 
             msg = fmt::format(
@@ -983,6 +989,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
             _importTimeButton->show();
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::ErrorNoObserver: {
@@ -997,6 +1005,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
             styleLabel(_centerLabel, true);
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::ErrorObserverTargetSame: {
@@ -1007,6 +1017,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             appendLog(msg, HorizonsDialog::LogLevel::Error);
             styleLabel(_targetLabel, true);
             styleLabel(_centerLabel, true);
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::ErrorNoData: {
@@ -1017,6 +1029,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 _targetName, _observerName, _startTime, _endTime
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::MultipleObserverStations: {
@@ -1047,7 +1061,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
-                return false;
+                break;
             }
             _chooseObserverCombo->clear();
             for (const std::string& station : matchingstations) {
@@ -1058,6 +1072,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             }
             _chooseObserverCombo->setCurrentIndex(0);
             _chooseObserverCombo->show();
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::MultipleObserver: {
@@ -1080,7 +1096,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     );
                     appendLog(msg, LogLevel::Error);
                 }
-                return false;
+                break;
             }
             _chooseObserverCombo->clear();
             for (const std::string& observer : matchingObservers) {
@@ -1091,6 +1107,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             }
             _chooseObserverCombo->setCurrentIndex(0);
             _chooseObserverCombo->show();
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::ErrorNoTarget: {
@@ -1105,6 +1123,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
             styleLabel(_targetLabel, true);
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::MultipleTarget: {
@@ -1136,7 +1156,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
-                return false;
+                break;
             }
             _chooseTargetCombo->clear();
             for (const std::string& target : matchingTargets) {
@@ -1147,6 +1167,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             }
             _chooseTargetCombo->setCurrentIndex(0);
             _chooseTargetCombo->show();
+
+            std::filesystem::remove(_horizonsFile.file());
             break;
         }
         case openspace::HorizonsResultCode::UnknownError: {
@@ -1158,7 +1180,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 appendLog(msg, LogLevel::Error);
             }
             _errorMsg->setText("An unknown error occured");
-            return false;
+            break;
         }
         default: {
             if (!_latestHorizonsError.empty()) {
@@ -1171,8 +1193,6 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
     }
-
-    std::filesystem::remove(_horizonsFile.file());
-    return false;
+    return result == openspace::HorizonsResultCode::Valid;
 }
 #endif // OPENSPACE_MODULE_SPACE_ENABLED

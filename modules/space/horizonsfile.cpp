@@ -75,12 +75,13 @@ namespace {
             return "";
         }
 
-        size_t startPos = 0;
-        while ((startPos = string.find(from, startPos)) != std::string::npos) {
-            string.replace(startPos, from.length(), to);
+        size_t pos = string.find(from);
+        while (pos != std::string::npos) {
+            string.replace(pos, from.length(), to);
 
             // In case 'to' contains 'from', ex replacing 'x' with 'yx'
-            startPos += to.length();
+            size_t offset = pos + to.length();
+            pos = string.find(from, offset);
         }
         return string;
     }
@@ -726,6 +727,33 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
     return std::vector<std::string>();
 }
 
+// Parse the valid time range from the horizons file
+// Example of how it can look (MRO):
+// Trajectory files (from MRO Nav., JPL)      Start (TDB)         End (TDB)
+// --------------------------------------  -----------------  -----------------
+// mro_cruise                              2005-Aug-12 12:42  2006-Mar-10 22:06
+// mro_ab                                  2006-Mar-10 22:06  2006-Sep-12 06:40
+// misc reconstruction(mro_psp1 - 61)      2006-Sep-12 06:40  2022-Jan-01 01:01
+// mro_psp_rec                             2022-Jan-01 01:01  2022-Jan-30 22:40
+// mro_psp                                 2022-Jan-30 22:40  2022-Apr-04 02:27
+// *******************************************************************************
+//
+// Another example (Gaia):
+// Trajectory name                                    Start         Stop
+// --------------------------------------------    -----------  -----------
+// ORB1_20220201_000001                            2013-Dec-19  2026-Sep-14
+// *******************************************************************************
+//
+// Another example (Tesla):
+// Trajectory name                       Start (TDB)          Stop (TDB)
+// --------------------------------   -----------------  -----------------
+// tesla_s10                          2018-Feb-07 03:00  2090-Jan-01 00:00
+//
+// So the number of trajectory files can differ and they can have time info or not.
+// The first row is parsed for both the start and end time.
+// All other lines are only parsed for the end time and updates the previously parsed end
+// time. Assumes that there are no gaps in the data coverage and that the files are sorted
+// in respect to time.
 std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
                                                            const std::string& startPhrase,
                                                              const std::string& endPhrase,
@@ -765,6 +793,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
     // There will be one empty line before the list of time ranges, skip
     std::getline(fileStream, line);
 
+    // In the first file parse both start and end time
     // From the first line get the start time
     std::string startTime, endTime;
     std::getline(fileStream, line);
@@ -802,6 +831,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
         return { "", "" };
     }
 
+    // In the other lines only parse the end time and update it
     // Get the end time from the last trajectery
     while (fileStream.good()) {
         if (line.find(endPhrase) != std::string::npos || line.empty() || line == " ") {
