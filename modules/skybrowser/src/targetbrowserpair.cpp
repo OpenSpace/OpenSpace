@@ -41,8 +41,8 @@
 
 namespace openspace {
 
-TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode, 
-                                        ScreenSpaceSkyBrowser* browser)
+TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
+                                     ScreenSpaceSkyBrowser* browser)
     : _targetNode(targetNode), _browser(browser)
 {
     ghoul_assert(browser != nullptr, "Sky browser is null pointer!");
@@ -75,7 +75,7 @@ void TargetBrowserPair::aimTargetGalactic(glm::dvec3 direction) {
     std::string id = _targetNode->identifier();
     // Uris for properties
     std::string positionUri = "Scene." + id + ".Translation.Position";
-    glm::dvec3 positionCelestial = glm::normalize(direction) * 
+    glm::dvec3 positionCelestial = glm::normalize(direction) *
         skybrowser::CelestialSphereRadius;
     std::string setValue = "openspace.setPropertyValueSingle('";
 
@@ -89,15 +89,15 @@ void TargetBrowserPair::startFinetuningTarget() {
     _startTargetPosition = _targetNode->worldPosition();
 }
 
-// The fine tune of the target is a way to "drag and drop" the target with right click 
-// drag on the sky browser window. This is to be able to drag the target around when it 
+// The fine tune of the target is a way to "drag and drop" the target with right click
+// drag on the sky browser window. This is to be able to drag the target around when it
 // has a very small field of view
 void TargetBrowserPair::fineTuneTarget(const glm::vec2& startMouse,
                                        const glm::vec2& translation)
 {
     glm::vec2 fineTune = _browser->fineTuneVector(translation);
     glm::vec2 endMouse = startMouse + fineTune;
-    
+
     // Translation world
     glm::dvec3 startWorld = skybrowser::localCameraToGalactic(
         glm::vec3(startMouse, skybrowser::ScreenSpaceZ)
@@ -290,7 +290,7 @@ void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd)
     _fovAnimation = skybrowser::Animation(_browser->verticalFov(), fovEnd, fovTime);
 
     // Target animation
-    glm::dvec3 start = glm::normalize(_targetNode->worldPosition()) * 
+    glm::dvec3 start = glm::normalize(_targetNode->worldPosition()) *
         skybrowser::CelestialSphereRadius;
     double targetSpeed = module->targetAnimationSpeed();
     double angle = skybrowser::angleBetweenVectors(start, galacticCoords);
@@ -354,7 +354,7 @@ void TargetBrowserPair::incrementallyFade()
         _targetRenderable->setOpacity(_fadeTarget.getNewValue());
     }
 }
-    
+
 bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {
     return lhs._targetNode == rhs._targetNode && lhs._browser == rhs._browser;
 }
@@ -362,4 +362,5 @@ bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {
 bool operator!=(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {
     return !(lhs == rhs);
 }
+
 } // namespace openspace

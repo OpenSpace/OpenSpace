@@ -233,12 +233,22 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     // Read all data in one go
     std::vector<CacheKeyframe> cacheKeyframes;
     cacheKeyframes.reserve(nKeyframes);
-    fileStream.read(reinterpret_cast<char*>(cacheKeyframes.data()), sizeof(CacheKeyframe) * nKeyframes);
+    fileStream.read(
+        reinterpret_cast<char*>(cacheKeyframes.data()),
+        sizeof(CacheKeyframe) * nKeyframes
+    );
 
     // Extract the data from the cache Keyframe vector
     for (int i = 0; i < nKeyframes; ++i) {
         // Add keyframe in timeline
-        _timeline.addKeyframe(std::move(cacheKeyframes[i].timestamp), std::move(cacheKeyframes[i].position));
+        _timeline.addKeyframe(
+            std::move(cacheKeyframes[i].timestamp),
+            {
+                cacheKeyframes[i].position[0],
+                cacheKeyframes[i].position[1],
+                cacheKeyframes[i].position[2]
+            }
+        );
     }
 
     return fileStream.good();
@@ -271,7 +281,9 @@ void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) cons
     for (int i = 0; i < nKeyframes; i++) {
         CacheKeyframe cacheKeyframe;
         cacheKeyframe.timestamp = keyframes[i].timestamp;
-        cacheKeyframe.position = keyframes[i].data;
+        cacheKeyframe.position[0] = keyframes[i].data.x;
+        cacheKeyframe.position[1] = keyframes[i].data.y;
+        cacheKeyframe.position[2] = keyframes[i].data.z;
 
         cachKeyframes.push_back(cacheKeyframe);
     }
@@ -279,8 +291,8 @@ void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) cons
     // Write of entire vector will only work if the data is plain old data type,
     // is_pod is depricated in C++20 and replaced with both is_trivial and
     // is_standard_layout
-    assert(std::is_trivial<CacheKeyframe>::value);
-    assert(std::is_standard_layout<CacheKeyframe>::value);
+    static_assert(std::is_trivial_v<CacheKeyframe>);
+    static_assert(std::is_standard_layout_v<CacheKeyframe>);
 
     // Write data
     fileStream.write(

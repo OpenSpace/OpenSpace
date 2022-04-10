@@ -224,7 +224,7 @@ std::string ExoplanetsModule::exoplanetsDataPath() const {
 
 std::string ExoplanetsModule::lookUpTablePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
-    
+
     return absPath(
         fmt::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
     ).string();

@@ -46,7 +46,7 @@ public:
     // Target & Browser
     void initialize();
     // Highlighting
-    void removeHighlight(const glm::ivec3& color); 
+    void removeHighlight(const glm::ivec3& color);
     void highlight(const glm::ivec3& color);
     // Animation
     void startAnimation(glm::dvec3 coordsEnd, double fovEnd);
@@ -91,11 +91,11 @@ public:
     std::string targetNodeId() const;
     std::string selectedId();
     glm::vec2 size() const;
-    
+
     SceneGraphNode* targetNode() const;
     ScreenSpaceSkyBrowser* browser() const;
     const std::deque<int>& selectedImages() const;
-    
+
     // WorldWide Telescope image handling
     void setImageOrder(int i, int order);
     void selectImage(const ImageData& image, int i);
@@ -104,10 +104,8 @@ public:
     void setImageOpacity(int i, float opacity);
     void hideChromeInterface(bool shouldHide);
 
-    friend bool operator==(const TargetBrowserPair& lhs, 
-                           const TargetBrowserPair& rhs);
-    friend bool operator!=(const TargetBrowserPair& lhs, 
-                           const TargetBrowserPair& rhs);
+    friend bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs);
+    friend bool operator!=(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs);
 
 private:
     void aimTargetGalactic(glm::dvec3 direction);
@@ -127,7 +125,7 @@ private:
 
     // Dragging
     glm::dvec3 _startTargetPosition = glm::dvec3(0.0);
-    
+
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     glm::ivec3 _borderColor = glm::ivec3(255);
     glm::vec2 _dimensions = glm::vec2(0.5f);

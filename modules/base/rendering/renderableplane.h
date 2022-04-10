@@ -68,15 +68,15 @@ protected:
     virtual void bindTexture();
     virtual void unbindTexture();
     void createPlane();
-    
+
     properties::OptionProperty _blendMode;
     properties::BoolProperty _mirrorBackside;
     properties::BoolProperty _billboard;
     properties::FloatProperty _size;
     properties::Vec3Property _multiplyColor;
-    
+
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    
+
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;
 

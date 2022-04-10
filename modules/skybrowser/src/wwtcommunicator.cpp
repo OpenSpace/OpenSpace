@@ -41,7 +41,7 @@ WwtCommunicator::WwtCommunicator(const ghoul::Dictionary& dictionary)
 
 WwtCommunicator::~WwtCommunicator() {}
 
-void WwtCommunicator::displayImage(const std::string& url, int i) {   
+void WwtCommunicator::displayImage(const std::string& url, int i) {
     // Ensure there are no duplicates
     auto it = std::find(_selectedImages.begin(), _selectedImages.end(), i);
     if (it == _selectedImages.end()) {
@@ -177,7 +177,7 @@ void WwtCommunicator::hideChromeInterface(bool shouldHide) {
 }
 
 void WwtCommunicator::update() {
-    Browser::update();        
+    Browser::update();
     // Cap how messages are passed
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::chrono::system_clock::duration timeSinceLastUpdate = now - _lastUpdateTime;
@@ -225,9 +225,9 @@ double WwtCommunicator::verticalFov() const {
 }
 
 // WWT messages
-ghoul::Dictionary WwtCommunicator::moveCameraMessage(const glm::dvec2& celestCoords, 
-                                                     double fov, double roll, 
-                                                     bool shouldMoveInstantly) 
+ghoul::Dictionary WwtCommunicator::moveCameraMessage(const glm::dvec2& celestCoords,
+                                                     double fov, double roll,
+                                                     bool shouldMoveInstantly)
 {
     using namespace std::string_literals;
     ghoul::Dictionary msg;
@@ -261,8 +261,8 @@ ghoul::Dictionary WwtCommunicator::setForegroundMessage(const std::string& name)
     return msg;
 }
 
-ghoul::Dictionary WwtCommunicator::addImageMessage(const std::string& id, 
-                                                   const std::string& url) 
+ghoul::Dictionary WwtCommunicator::addImageMessage(const std::string& id,
+                                                   const std::string& url)
 {
     using namespace std::string_literals;
     ghoul::Dictionary msg;
@@ -284,8 +284,8 @@ ghoul::Dictionary WwtCommunicator::removeImageMessage(const std::string& imageId
     return msg;
 }
 
-ghoul::Dictionary WwtCommunicator::setImageOpacityMessage(const std::string& imageId, 
-                                                          double opacity) 
+ghoul::Dictionary WwtCommunicator::setImageOpacityMessage(const std::string& imageId,
+                                                          double opacity)
 {
     using namespace std::string_literals;
     ghoul::Dictionary msg;
@@ -297,7 +297,8 @@ ghoul::Dictionary WwtCommunicator::setImageOpacityMessage(const std::string& ima
     return msg;
 }
 
-ghoul::Dictionary WwtCommunicator::setLayerOrderMessage(const std::string& id, int order) {
+ghoul::Dictionary WwtCommunicator::setLayerOrderMessage(const std::string& id, int order)
+{
     // The lower the layer order, the more towards the back the image is placed
     // 0 is the background
     using namespace std::string_literals;
@@ -311,4 +312,5 @@ ghoul::Dictionary WwtCommunicator::setLayerOrderMessage(const std::string& id, i
 
     return msg;
 }
+
 } // namespace openspace

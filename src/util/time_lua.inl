@@ -81,7 +81,7 @@ namespace {
                                               std::optional<double> interpolationDuration)
 {
     using namespace openspace;
-    
+
     double interp = interpolationDuration.value_or(
         global::timeManager->defaultDeltaTimeInterpolationDuration()
     );

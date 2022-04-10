@@ -81,9 +81,14 @@ void Browser::RenderHandler::setTexture(GLuint t) {
 
 Browser::Browser(const ghoul::Dictionary& dictionary)
     : _url(UrlInfo)
-    , _browserPixeldimensions(DimensionsInfo, glm::vec2(500.f), glm::vec2(10.f), glm::vec2(3000.f))
+    , _browserPixeldimensions(
+        DimensionsInfo,
+        glm::vec2(500.f),
+        glm::vec2(10.f),
+        glm::vec2(3000.f)
+    )
     , _reload(ReloadInfo)
-{ 
+{
     if (dictionary.hasValue<std::string>(UrlInfo.identifier)) {
         _url = dictionary.value<std::string>(UrlInfo.identifier);
     }
@@ -110,7 +115,7 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
         webBrowser->addBrowser(_browserInstance.get());
-    } 
+    }
 }
 
 Browser::~Browser() {}
@@ -120,7 +125,7 @@ bool Browser::initializeGL() {
         glm::uvec3(glm::ivec2(_browserPixeldimensions.value()), 1),
         GL_TEXTURE_2D
     );
-       
+
     _renderHandler->setTexture(*_texture);
 
     _browserInstance->initialize();
@@ -163,7 +168,7 @@ void Browser::update() {
     }
     if (_isDimensionsDirty) {
         if (_browserPixeldimensions.value().x > 0 &&
-            _browserPixeldimensions.value().y > 0) 
+            _browserPixeldimensions.value().y > 0)
         {
             _browserInstance->reshape(_browserPixeldimensions.value());
             _isDimensionsDirty = false;
@@ -173,7 +178,7 @@ void Browser::update() {
     if (_shouldReload) {
         _browserInstance->reloadBrowser();
         _shouldReload = false;
-    }  
+    }
 }
 
 bool Browser::isReady() const {

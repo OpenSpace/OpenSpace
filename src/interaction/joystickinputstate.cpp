@@ -49,8 +49,8 @@ float JoystickInputStates::axis(const std::string& joystickName, int axis) const
             }
         );
 
-        // If multiple joysticks are connected, we might get values outside the -1,1 range by
-        // summing them up
+        // If multiple joysticks are connected, we might get values outside the -1,1 range
+        // by summing them up
         glm::clamp(res, -1.f, 1.f);
         return res;
     }
@@ -69,7 +69,9 @@ float JoystickInputStates::axis(const std::string& joystickName, int axis) const
     return state->axes[axis];
 }
 
-bool JoystickInputStates::button(const std::string& joystickName, int button, JoystickAction action) const {
+bool JoystickInputStates::button(const std::string& joystickName, int button,
+                                 JoystickAction action) const
+{
     ghoul_precondition(button >= 0, "button must be 0 or positive");
 
     if (joystickName.empty()) {

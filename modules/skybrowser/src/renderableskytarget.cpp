@@ -54,8 +54,8 @@ namespace {
         "CrosshairSize",
         "Crosshair Size",
         "Determines the size of the crosshair. The size is determined in fov (degrees). "
-    }; 
-    
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo RectangleThresholdInfo =
     {
         "RectangleThreshold",

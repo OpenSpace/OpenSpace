@@ -73,7 +73,7 @@ public:
     void removeHighlight(const glm::ivec3& removal);
     void updateBorderColor();
     void updateAim();
-    
+
 protected:
     void setIdInBrowser(const std::string& id);
 
@@ -97,7 +97,7 @@ private:
     ghoul::Dictionary removeImageMessage(const std::string& id);
     ghoul::Dictionary setImageOpacityMessage(const std::string& id, double opacity);
     ghoul::Dictionary setLayerOrderMessage(const std::string& id, int version);
-    
+
     bool _isSyncedWithWwt = false;
     bool _borderColorIsDirty = false;
     bool _equatorialAimIsDirty = false;

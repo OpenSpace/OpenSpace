@@ -79,7 +79,7 @@ namespace {
         // [[codegen::verbatim(BrowserSpeedInfo.description)]]
         std::optional<double> browserSpeed;
     };
-    
+
     #include "skybrowsermodule_codegen.cpp"
 } // namespace
 
@@ -99,9 +99,9 @@ SkyBrowserModule::SkyBrowserModule()
     // Set callback functions
     global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
         [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
-            if (action == MouseAction::Press) {      
+            if (action == MouseAction::Press) {
                 _cameraRotation.stop();
-                return false; 
+                return false;
             }
             else {
                 return false;
@@ -121,7 +121,7 @@ SkyBrowserModule::SkyBrowserModule()
             // Camera moved into the solar system
             _isFading = true;
             _goal = Transparency::Transparent;
-            
+
             float transparency = [](Transparency goal) {
                 switch (goal) {
                 case Transparency::Transparent:
@@ -146,7 +146,7 @@ SkyBrowserModule::SkyBrowserModule()
         }
         if (_isCameraInSolarSystem) {
             std::for_each(
-                _targetsBrowsers.begin(), 
+                _targetsBrowsers.begin(),
                 _targetsBrowsers.end(),
                 [&](const std::unique_ptr<TargetBrowserPair>& pair) {
                     pair->synchronizeAim();
@@ -157,14 +157,14 @@ SkyBrowserModule::SkyBrowserModule()
         if (_cameraRotation.isAnimating() && _allowCameraRotation) {
             incrementallyRotateCamera();
         }
-    }); 
-} 
+    });
+}
 
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     // Register ScreenSpaceRenderable
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable = 
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
 
@@ -179,22 +179,24 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Register ScreenSpaceSkyTarget
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
-    
+
     // Create data handler dynamically to avoid the linking error that
     // came up when including the include file in the module header file
     _dataHandler = std::make_unique<WwtDataHandler>();
 }
 
-void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId, const std::string& browserId) {
-    if (!global::renderEngine->scene()) { 
-        return; 
+void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
+                                            const std::string& browserId)
+{
+    if (!global::renderEngine->scene()) {
+        return;
     }
 
     SceneGraphNode* target = global::renderEngine->scene()->sceneGraphNode(targetId);
     ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(
         global::renderEngine->screenSpaceRenderable(browserId)
     );
-    
+
     // Ensure pair has both target and browser
     if (browser && target) {
         _targetsBrowsers.push_back(std::make_unique<TargetBrowserPair>(target, browser));
@@ -208,7 +210,7 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
     }
 
     auto it = std::remove_if(
-        _targetsBrowsers.begin(), 
+        _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
             return *found == *(pair.get());
@@ -225,7 +227,7 @@ void SkyBrowserModule::lookAtTarget(const std::string& id) {
         startRotatingCamera(pair->targetDirectionGalactic());
     }
 }
-    
+
 void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
     _hoverCircle = circle;
 }
@@ -238,11 +240,11 @@ void SkyBrowserModule::moveHoverCircle(int i) {
         // Make circle visible
         _hoverCircle->renderable()->property("Enabled")->set(true);
 
-        // Set the exact target position 
-        // Move it slightly outside of the celestial sphere so it doesn't overlap with 
+        // Set the exact target position
+        // Move it slightly outside of the celestial sphere so it doesn't overlap with
         // the target
         glm::dvec3 pos = skybrowser::equatorialToGalactic(image.equatorialCartesian);
-        pos *= skybrowser::CelestialSphereRadius * 1.1; 
+        pos *= skybrowser::CelestialSphereRadius * 1.1;
         // Uris for properties
         std::string id = _hoverCircle->identifier();
         std::string positionUri = "Scene." + id + ".Translation.Position";
@@ -261,8 +263,9 @@ void SkyBrowserModule::disableHoverCircle() {
     }
 }
 
-void SkyBrowserModule::loadImages(const std::string& root, 
-                                  const std::filesystem::path& directory) {
+void SkyBrowserModule::loadImages(const std::string& root,
+                                  const std::filesystem::path& directory)
+{
     _dataHandler->loadImages(root, directory);
 }
 
@@ -284,7 +287,7 @@ int SkyBrowserModule::nPairs() {
 
 TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) {
     auto it = std::find_if(
-        _targetsBrowsers.begin(), 
+        _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
             bool foundBrowser = pair->browserId() == id;
@@ -308,18 +311,17 @@ void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
     double time = angle / _cameraRotationSpeed;
     _cameraRotation = skybrowser::Animation(start, endAnimation, time);
     _cameraRotation.start();
-}   
+}
 
 void SkyBrowserModule::incrementallyRotateCamera() {
-    if(_cameraRotation.isAnimating()) {
+    if (_cameraRotation.isAnimating()) {
         glm::dmat4 rotMat = _cameraRotation.getRotationMatrix();
         // Rotate
         global::navigationHandler->camera()->rotate(glm::quat_cast(rotMat));
     }
 }
 
-void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal) 
-{    
+void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal) {
      bool isAllFinished = true;
      for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
          if (pair->isEnabled()) {

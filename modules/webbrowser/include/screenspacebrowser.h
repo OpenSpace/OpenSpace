@@ -95,7 +95,7 @@ private:
     properties::TriggerProperty _reload;
 
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    
+
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;
 };

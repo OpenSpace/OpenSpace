@@ -73,7 +73,7 @@ public:
 
     void updateBrowserSize();
 
-    glm::vec2 browserPixelDimensions() const;    
+    glm::vec2 browserPixelDimensions() const;
     float browserRatio() const;
     void setCallbackDimensions(const std::function<void(const glm::dvec2&)>& function);
 
@@ -83,7 +83,7 @@ protected:
     properties::TriggerProperty _reload;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-   
+
     void executeJavascript(const std::string& script) const;
 
 private:

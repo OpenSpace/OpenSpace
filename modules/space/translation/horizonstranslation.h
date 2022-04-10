@@ -78,7 +78,7 @@ public:
 private:
     struct CacheKeyframe {
         double timestamp;
-        glm::dvec3 position;
+        std::array<double, 3> position;
     };
 
     void loadData();

@@ -696,7 +696,9 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
             matches.push_back(line);
             break;
         }
-        else if (!altStartPhrase.empty() && line.find(altStartPhrase) != std::string::npos) {
+        else if (!altStartPhrase.empty() &&
+                 line.find(altStartPhrase) != std::string::npos)
+        {
             matches.push_back(line);
             break;
         }
@@ -778,7 +780,9 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
         if (line.find(startPhrase) != std::string::npos) {
             break;
         }
-        else if (!altStartPhrase.empty() && line.find(altStartPhrase) != std::string::npos) {
+        else if (!altStartPhrase.empty() &&
+                 line.find(altStartPhrase) != std::string::npos)
+        {
             break;
         }
 

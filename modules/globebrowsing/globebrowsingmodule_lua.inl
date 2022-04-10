@@ -355,7 +355,7 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
 {
     using namespace openspace;
     using namespace globebrowsing;
-    
+
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
         throw ghoul::lua::LuaError("Unknown globe identifier: " + globeIdentifier);
@@ -372,17 +372,18 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
 
 /**
  * Get geographic coordinates of the camera position in latitude, longitude, and altitude
- * (degrees and meters). If the optional bool paramater is specified, the camera 
+ * (degrees and meters). If the optional bool paramater is specified, the camera
  * eye postion will be used instead
  */
-[[codegen::luawrap]] std::tuple<double, double, double> 
-getGeoPositionForCamera(bool useEyePosition = false) 
+[[codegen::luawrap]] std::tuple<double, double, double>
+getGeoPositionForCamera(bool useEyePosition = false)
 {
     using namespace openspace;
     using namespace globebrowsing;
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-    const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();//focus vs anchor
+    // focus vs anchor
+    const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
     if (!globe) {
         throw ghoul::lua::LuaError("Focus node must be a RenderableGlobe");
     }
@@ -394,17 +395,21 @@ getGeoPositionForCamera(bool useEyePosition = false)
     const SceneGraphNode* anchor =
         global::navigationHandler->orbitalNavigator().anchorNode();
     const glm::dmat4 inverseModelTransform = glm::inverse(anchor->modelTransform());
-    
+
     glm::dvec3 target;
 
-    ///@TODO (04-08-2022, micahnyc)
-    //adjust this to use the camera lookat
-    //once we fix this calculation, then we just add true to the function call in the asset 
+    // @TODO (04-08-2022, micahnyc)
+    // adjust this to use the camera lookat
+    // once we fix this calculation, then we just add true to the function call in the
+    // asset
     if (useEyePosition) {
         const glm::dvec3 anchorPos = anchor->worldPosition();
         const glm::dvec3 cameraDir = ghoul::viewDirection(camera->rotationQuaternion());
         const double anchorToCameraDistance = glm::distance(anchorPos, cameraPosition);
-        const double anchorToPosDistance = glm::distance(anchorPos + globe->boundingSphere(), cameraPosition);
+        const double anchorToPosDistance = glm::distance(
+            anchorPos + globe->boundingSphere(),
+            cameraPosition
+        );
         target = cameraPosition + anchorToPosDistance * cameraDir;
     }
     else {

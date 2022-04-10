@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 
 #include <modules/skybrowser/skybrowsermodule.h>
@@ -30,10 +31,10 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionaryjsonformatter.h> 
+#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <ghoul/opengl/texture.h>
 #include <optional>
-#include <glm/gtx/color_space.hpp> 
+#include <glm/gtx/color_space.hpp>
 #include <random>
 
 namespace {
@@ -58,7 +59,8 @@ namespace {
         "RenderOnlyOnMaster",
         "Render Only On Master",
         "Render the interactive sky browser only on the master node (this setting won't "
-        "affect the copies). This setting allows mouse interactions in a dome environment."
+        "affect the copies). This setting allows mouse interactions in a dome "
+        "environment."
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -77,7 +79,7 @@ glm::ivec3 randomBorderColor(glm::ivec3 highlight) {
     std::random_device rd;
     // Hue is in the unit degrees [0, 360]
     std::uniform_real_distribution<float> hue(0.f, 360.f);
-   
+
     // Value in saturation are in the unit percent [0,1]
     float value = 0.9f; // Brightness
     float saturation = 0.5f;
@@ -88,7 +90,7 @@ glm::ivec3 randomBorderColor(glm::ivec3 highlight) {
         rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
         highlighted = rgbColor + highlight;
     } while (highlighted.x < 255 && highlighted.y < 255 && highlighted.z < 255);
-   
+
     return rgbColor;
 }
 
@@ -115,7 +117,7 @@ namespace openspace {
 
     _textureQuality.onChange([this]() {
         _textureDimensionsIsDirty = true;
-    });        
+    });
 
     // Ensure that the browser is placed at the z-coordinate of the screen space plane
     glm::vec2 screenPosition = _cartesianPosition.value();
@@ -124,7 +126,7 @@ namespace openspace {
     if (global::windowDelegate->isMaster()) {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         _borderColor = randomBorderColor(module->highlight());
-    } 
+    }
     _scale = _size.y * 0.5;
 }
 
@@ -157,7 +159,7 @@ glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(glm::dvec2 drag) {
     glm::dvec2 result = - convertToScreenSpace * resultRelativeOs;
     return result;
 }
-    
+
 void ScreenSpaceSkyBrowser::setIdInBrowser() {
     WwtCommunicator::setIdInBrowser(identifier());
 }
@@ -166,9 +168,9 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     // Scale texture depending on the height of the window
     // Set texture size to the actual pixel size it covers
     glm::vec2 pixels = glm::vec2(global::windowDelegate->currentSubwindowSize());
-           
+
     // If the scale is 1, it covers half the window. Hence multiplication with 2
-    float newResY = pixels.y * 2.f * _scale; 
+    float newResY = pixels.y * 2.f * _scale;
     float ratio = _size.x / _size.y;
     float newResX = newResY * ratio;
     glm::vec2 newSize = glm::vec2(newResX , newResY) * _textureQuality.value();
@@ -188,7 +190,7 @@ void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCop
         info.identifier = id.c_str();
         _renderCopies.push_back(
             std::make_unique<properties::Vec3Property>(
-                info, 
+                info,
                 position,
                 glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
                 glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
@@ -212,9 +214,9 @@ std::vector<std::pair<std::string, glm::dvec3>>  ScreenSpaceSkyBrowser::renderCo
         _renderCopies.begin(),
         _renderCopies.end(),
         [&](const std::unique_ptr<properties::Vec3Property>& copy) {
-            std::pair<std::string, glm::dvec3> pair = { 
-                copy.get()->identifier(), 
-                glm::dvec3(copy.get()->value()) 
+            std::pair<std::string, glm::dvec3> pair = {
+                copy.get()->identifier(),
+                glm::dvec3(copy.get()->value())
             };
             vec.push_back(pair);
         });
@@ -230,7 +232,7 @@ void ScreenSpaceSkyBrowser::moveRenderCopy(int i, glm::vec3 raePosition) {
 bool ScreenSpaceSkyBrowser::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
     WwtCommunicator::deinitializeGL();
-       
+
     return true;
 }
 
@@ -318,7 +320,7 @@ void ScreenSpaceSkyBrowser::setOpacity(float opacity) {
     _opacity = opacity;
 }
 
-void ScreenSpaceSkyBrowser::setScreenSpaceSize(const glm::vec2& newSize) {   
+void ScreenSpaceSkyBrowser::setScreenSpaceSize(const glm::vec2& newSize) {
     _size = newSize;
     _sizeIsDirty = true;
 }

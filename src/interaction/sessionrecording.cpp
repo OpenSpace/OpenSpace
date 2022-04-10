@@ -238,7 +238,7 @@ bool SessionRecording::startRecording(const std::string& filename) {
         _timestampRecordStarted = global::windowDelegate->applicationTime();
 
         // Record the current delta time as the first property to save in the file.
-        // This needs to be saved as a baseline whether or not it changes during recording.
+        // This needs to be saved as a baseline whether or not it changes during recording
         _timestamps3RecordStarted = {
             _timestampRecordStarted,
             0.0,

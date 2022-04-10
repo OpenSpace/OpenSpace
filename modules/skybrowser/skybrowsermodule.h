@@ -72,7 +72,7 @@ public:
     void setSelectedBrowser(const std::string& id);
     void setSelectedObject(); // Manage mouse interactions
     void setHoverCircle(SceneGraphNode* circle);
-   
+
     // Rotation, animation, placement
     void lookAtTarget(const std::string& id);
     void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
@@ -81,19 +81,19 @@ public:
     void incrementallyAnimateTargets();
     double targetAnimationSpeed() const;
     double browserAnimationSpeed() const;
-   
+
     bool isCameraInSolarSystem() const;
     bool isSelectedPairFacingCamera();
     bool isSelectedPairUsingRae();
 
-    // Managing the target browser pairs 
+    // Managing the target browser pairs
     void removeTargetBrowserPair(const std::string& browserId);
     void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
     // Hover circle
     void moveHoverCircle(int i);
     void disableHoverCircle();
-    
+
     // Image collection handling
     void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages();
@@ -104,7 +104,7 @@ public:
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
 
-protected: 
+protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
 
 private:
@@ -122,7 +122,7 @@ private:
 
     // Fading
     Transparency _goal = Transparency::Opaque;
-    
+
     // Flags
     bool _isCameraInSolarSystem = true; // Visualization modes
     bool _isFading = false;
@@ -135,12 +135,13 @@ private:
     glm::dvec3 _startTargetPosition;
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
-    skybrowser::Animation<glm::dvec3> _cameraRotation = 
+    skybrowser::Animation<glm::dvec3> _cameraRotation =
         skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
-    
+
     // Data handler for the image collections
-    std::unique_ptr<WwtDataHandler> _dataHandler;    
+    std::unique_ptr<WwtDataHandler> _dataHandler;
 };
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
