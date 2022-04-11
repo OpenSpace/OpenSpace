@@ -48,7 +48,7 @@ namespace {
     struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {
         // The SPICE name of the spacecraft from which the projection is performed
         std::string spacecraft;
-        
+
         // The SPICE name of the instrument that is used to project the image onto this
         // RenderablePlaneProjection
         std::string instrument;

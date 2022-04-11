@@ -50,7 +50,7 @@ public:
 private:
     void bindTexture() override;
     void unbindTexture() override;
-    
+
     spout::SpoutReceiverPropertyProxy _spoutReceiver;
 };
 

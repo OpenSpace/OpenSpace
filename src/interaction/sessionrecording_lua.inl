@@ -46,7 +46,7 @@ namespace {
  */
 [[codegen::luawrap]] void startRecordingAscii(std::string recordFilePath) {
     using namespace openspace;
-    
+
     if (recordFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
@@ -74,7 +74,7 @@ namespace {
                                                                 bool loop = false)
 {
     using namespace openspace;
-    
+
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
@@ -94,7 +94,7 @@ namespace {
  */
 [[codegen::luawrap]] void startPlaybackApplicationTime(std::string file) {
     using namespace openspace;
-    
+
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
@@ -115,7 +115,7 @@ namespace {
  */
 [[codegen::luawrap]] void startPlaybackRecordedTime(std::string file, bool loop = false) {
     using namespace openspace;
-    
+
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
@@ -134,7 +134,7 @@ namespace {
  */
 [[codegen::luawrap]] void startPlaybackSimulationTime(std::string file) {
     using namespace openspace;
-    
+
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }

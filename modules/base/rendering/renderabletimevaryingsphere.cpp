@@ -44,7 +44,7 @@
 
 namespace {
     constexpr const char* ProgramName = "Timevarying Sphere";
-    
+
     constexpr const std::array<const char*, 5> UniformNames = {
         "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
         "mirrorTexture"
@@ -308,7 +308,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
             const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-            if (logDistCamera > startLogFadeDistance && 
+            if (logDistCamera > startLogFadeDistance &&
                 logDistCamera < stopLogFadeDistance)
             {
                 const float fadeFactor = glm::clamp(
@@ -404,7 +404,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     }
 
     std::sort(
-        _files.begin(), _files.end(), 
+        _files.begin(), _files.end(),
         [](const FileData& a, const FileData& b) {
             return a.time < b.time;
         }
@@ -436,7 +436,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             // true => We stepped forward to a time represented by another state
             (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
         {
-            updateActiveTriggerTimeIndex(currentTime); 
+            updateActiveTriggerTimeIndex(currentTime);
             _sphereIsDirty = true;
         } // else {we're still in same state as previous frame (no changes needed)}
     }
@@ -500,7 +500,7 @@ void RenderableTimeVaryingSphere::computeSequenceEndTime() {
 }
 
 void RenderableTimeVaryingSphere::loadTexture() {
-    if (_activeTriggerTimeIndex != -1) { 
+    if (_activeTriggerTimeIndex != -1) {
         _texture = _files[_activeTriggerTimeIndex].texture.get();
     }
 }

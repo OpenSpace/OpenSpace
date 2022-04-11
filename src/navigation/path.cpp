@@ -440,7 +440,8 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
         bool isSame = (n->identifier() == node->identifier());
         // If the nodes are in the very same position, they are probably representing
         // the same object
-        isSame |= glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
+        isSame |=
+            glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
 
         if (isSame) {
             continue;

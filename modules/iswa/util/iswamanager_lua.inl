@@ -78,7 +78,7 @@ namespace {
 // Remove a Screen Space Cygnets.
 [[codegen::luawrap]] void removeScreenSpaceCygnet(int id) {
     using namespace openspace;
-    
+
     std::map<int, std::shared_ptr<CygnetInfo>> cygnetInformation =
         IswaManager::ref().cygnetInformation();
     if (cygnetInformation.find(id) == cygnetInformation.end()) {
@@ -103,7 +103,7 @@ namespace {
 // Remove a group of Cygnets.
 [[codegen::luawrap]] void removeGroup(std::string name) {
     using namespace openspace;
-    
+
     std::map<std::string, std::shared_ptr<IswaBaseGroup>> groups =
         IswaManager::ref().groups();
     if (groups.find(name) != groups.end()) {

@@ -238,7 +238,7 @@ bool SessionRecording::startRecording(const std::string& filename) {
         _timestampRecordStarted = global::windowDelegate->applicationTime();
 
         // Record the current delta time as the first property to save in the file.
-        // This needs to be saved as a baseline whether or not it changes during recording.
+        // This needs to be saved as a baseline whether or not it changes during recording
         _timestamps3RecordStarted = {
             _timestampRecordStarted,
             0.0,
@@ -927,6 +927,19 @@ void SessionRecording::saveScriptKeyframeAscii(Timestamps& times,
 {
     std::stringstream keyframeLine = std::stringstream();
     saveHeaderAscii(times, HeaderScriptAscii, keyframeLine);
+    // Erase all \r (from windows newline), and all \n from line endings and replace with
+    // ';' so that lua will treat them as separate lines. This is done in order to treat
+    // a multi-line script as a single line in the file.
+    size_t startPos = sm._script.find("\r", 0);
+    while (startPos != std::string::npos) {
+        sm._script.erase(startPos, 1);
+        startPos = sm._script.find("\r", startPos);
+    }
+    startPos = sm._script.find("\n", 0);
+    while (startPos != std::string::npos) {
+        sm._script.replace(startPos, 1, ";");
+        startPos = sm._script.find("\n", startPos);
+    }
     sm.write(keyframeLine);
     saveKeyframeToFile(keyframeLine.str(), file);
 }

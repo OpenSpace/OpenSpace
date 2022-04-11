@@ -15,43 +15,9 @@ local kernels = asset.syncedResource({
   Version = 1
 })
 
-local L2Small = {
-  Identifier = "L2Small",
+local L2Position = {
+  Identifier = "L2Position",
   Parent = transforms.SolarSystemBarycenter.Identifier,
-  Renderable = {
-    Type = "RenderablePlaneImageLocal",
-    RenderBinMode = "Opaque",
-    Billboard = true,
-    Size = 400E4,
-    Texture = circle .. "circle.png",
-    BlendMode = "Additive"
-  },
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "392", -- L2
-      Observer = "SSB",
-      Kernels = kernels .. "L2_de431.bsp"
-    }
-  },
-  Tag = { "lagrange_points_earth_l2_small" },
-  GUI = {
-    Name = "Small L2",
-    Path = "/Solar System/Planets/Earth/Lagrange points",
-  }
-}
-
-local L2 = {
-  Identifier = "L2",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
-  Renderable = {
-    Type = "RenderablePlaneImageLocal",
-    RenderBinMode = "Opaque",
-    Billboard = true,
-    Size = 700E5,
-    Texture = circle .. "circle.png",
-    BlendMode = "Additive"
-  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -62,6 +28,43 @@ local L2 = {
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
   GUI = {
+    Name = "L2 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Hidden = true
+  }
+}
+
+local L2Small = {
+  Identifier = "L2Small",
+  Parent = L2Position.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    RenderBinMode = "Opaque",
+    Billboard = true,
+    Size = 400E4,
+    Texture = circle .. "circle.png",
+    BlendMode = "Additive"
+  },
+  Tag = { "lagrange_points_earth_l2_small" },
+  GUI = {
+    Name = "L2 Small",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+  }
+}
+
+local L2 = {
+  Identifier = "L2",
+  Parent = L2Position.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    RenderBinMode = "Opaque",
+    Billboard = true,
+    Size = 700E5,
+    Texture = circle .. "circle.png",
+    BlendMode = "Additive"
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
+  GUI = {
     Name = "L2",
     Path = "/Solar System/Planets/Earth/Lagrange points",
   }
@@ -69,11 +72,11 @@ local L2 = {
 
 local L2SmallLabel = {
   Identifier = "L2SmallLabel",
-  Parent = L2.Identifier,
+  Parent = L2Position.Identifier,
   Renderable = {
     Type = "RenderableLabels",
     Text = "L2",
-    FontSize = 20.0,
+    FontSize = 50.0,
     Size = 6.0,
     MinMaxSize = { 1.0, 100.0 },
     OrientationOption = "Camera View Direction",
@@ -82,7 +85,7 @@ local L2SmallLabel = {
   },
   Tag = { "lagrange_points_earth_l2_small" },
   GUI = {
-    Name = "Small L2 Label",
+    Name = "L2 Small Label",
     Path = "/Solar System/Planets/Earth/Lagrange points",
     Description = "Small label for L2"
   }
@@ -90,11 +93,11 @@ local L2SmallLabel = {
 
 local L2Label = {
   Identifier = "L2Label",
-  Parent = L2.Identifier,
+  Parent = L2Position.Identifier,
   Renderable = {
     Type = "RenderableLabels",
     Text = "L2",
-    FontSize = 20,
+    FontSize = 50,
     Size = 7.5,
     MinMaxSize = { 1.0, 100.0},
     OrientationOption = "Camera View Direction",
@@ -127,6 +130,7 @@ local L2SunLine = {
 }
 
 local nodes = {
+  L2Position,
   L2Small,
   L2,
   L2SunLine,
@@ -139,7 +143,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
@@ -149,7 +153,6 @@ end)
 for i, node in ipairs(nodes) do
   asset.export(node)
 end
-
 
 
 asset.meta = {

@@ -813,7 +813,7 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped
-            
+
         // Detect which DPI scaling to use
         // 1. If there is a GUI window, use the GUI window's content scale value
         const Window* dpiWindow = nullptr;
@@ -1017,10 +1017,10 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
         }
         else {
             std::filesystem::path c = absPath(config);
-            
+
             std::filesystem::path cj = c;
             cj.replace_extension(".json");
-            
+
             std::filesystem::path cx = c;
             cx.replace_extension(".xml");
 

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 namespace {
- 
+
 // Returns true if a camera path is currently running, and false otherwise.
 [[codegen::luawrap]] bool isFlying() {
     using namespace openspace;
