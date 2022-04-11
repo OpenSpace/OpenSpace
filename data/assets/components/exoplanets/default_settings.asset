@@ -1,21 +1,13 @@
 asset.onInitialize(function () 
-  local settings = {
-    Enabled = true,
-    ShowComparisonCircle = false,
-    ShowHabitableZone = true,
-    UseOptimisticZone = true,
-    HabitableZoneOpacity = 0.1
-  }
-
-  for propKey, value in pairs(settings) do 
-    -- TODO: how to not override potential settings in cfg?
-    local p = "Modules.Exoplanets." .. propKey;
-    openspace.setPropertyValueSingle(p, value)
-  end
+  openspace.setPropertyValueSingle("Modules.Exoplanets.Enabled", true)
+  openspace.setPropertyValueSingle("Modules.Exoplanets.ShowComparisonCircle", false)
+  openspace.setPropertyValueSingle("Modules.Exoplanets.ShowHabitableZone", true)
+  openspace.setPropertyValueSingle("Modules.Exoplanets.UseOptimisticZone", true)
+  openspace.setPropertyValueSingle("Modules.Exoplanets.HabitableZoneOpacity", 0.1)
 end)
 
 asset.meta = {
-  Name = "Exolanet Default Settings",
+  Name = "Exoplanet Default Settings",
   Version = "1.0",
   Description = [[ Some default settings related to the exoplanet module ]],
   Author = "OpenSpace Team",
