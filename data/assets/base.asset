@@ -6,6 +6,7 @@ asset.require("./base_blank")
 
 -- Optional components
 asset.require("components/exoplanets/exoplanets")
+asset.require("components/skybrowser/skybrowser")
 
 -- Specifying which other assets should be loaded in this scene
 asset.require("scene/solarsystem/sun/sun")
