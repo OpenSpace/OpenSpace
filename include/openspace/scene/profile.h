@@ -86,7 +86,7 @@ public:
         std::string documentation;
         std::string name;
         std::string guiPath;
-        bool isLocal;
+        bool isLocal = false;
         std::string script;
     };
 
@@ -101,7 +101,7 @@ public:
             Relative
         };
 
-        Type type;
+        Type type = Type::Absolute;
         std::string value;
     };
 
@@ -111,7 +111,7 @@ public:
         std::string anchor;
         std::optional<std::string> aim;
         std::string referenceFrame;
-        glm::dvec3 position;
+        glm::dvec3 position = glm::dvec3(0.0);
         std::optional<glm::dvec3> up;
         std::optional<double> yaw;
         std::optional<double> pitch;
@@ -121,8 +121,8 @@ public:
         static constexpr const char* Type = "goToGeo";
 
         std::string anchor;
-        double latitude;
-        double longitude;
+        double latitude = 0.0;
+        double longitude = 0.0;
         std::optional<double> altitude;
     };
 

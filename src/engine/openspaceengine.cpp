@@ -170,7 +170,7 @@ void OpenSpaceEngine::registerPathTokens() {
         using Override = ghoul::filesystem::FileSystem::Override;
         FileSys.registerPathToken(
             std::move(fullKey),
-            std::move(path.second),
+            path.second,
             Override(overrideBase || overrideTemporary)
         );
     }
