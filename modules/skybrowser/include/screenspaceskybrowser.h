@@ -35,8 +35,7 @@
 
 namespace openspace {
 
-class ScreenSpaceSkyBrowser : public ScreenSpaceRenderable, public WwtCommunicator
-{
+class ScreenSpaceSkyBrowser : public ScreenSpaceRenderable, public WwtCommunicator {
 public:
     explicit ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceSkyBrowser();
@@ -52,18 +51,18 @@ public:
 
     void setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
-    void setScreenSpaceSize(const glm::vec2& newSize);
+    void setScreenSpaceSize(glm::vec2 newSize);
     void updateScreenSpaceSize();
 
-    glm::dvec2 fineTuneVector(glm::dvec2 drag);
-    void setIdInBrowser();
+    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
+    void setIdInBrowser() const;
 
     void updateTextureResolution();
 
     // Copies rendered
     void addRenderCopy(const glm::vec3& raePosition, int nCopies);
     void removeRenderCopy();
-    std::vector<std::pair<std::string, glm::dvec3>> renderCopies();
+    std::vector<std::pair<std::string, glm::dvec3>> renderCopies() const;
     void moveRenderCopy(int i, glm::vec3 raePosition);
 
 private:
@@ -80,6 +79,7 @@ private:
 
     glm::vec2 _size = glm::vec2(1.f, 1.f);
 };
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__

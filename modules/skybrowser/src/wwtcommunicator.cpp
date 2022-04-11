@@ -24,11 +24,11 @@
 
 #include <modules/skybrowser/include/wwtcommunicator.h>
 
-#include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <modules/skybrowser/include/utility.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
+#include <modules/webbrowser/webbrowsermodule.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
 
 namespace {
     constexpr const char* _loggerCat = "WwtCommunicator";
@@ -37,7 +37,8 @@ namespace {
 namespace openspace {
 
 WwtCommunicator::WwtCommunicator(const ghoul::Dictionary& dictionary)
-    : Browser(dictionary) {}
+    : Browser(dictionary)
+{}
 
 WwtCommunicator::~WwtCommunicator() {}
 
@@ -57,13 +58,13 @@ void WwtCommunicator::removeSelectedImage(int i) {
     // Remove from selected list
     auto it = std::find(_selectedImages.begin(), _selectedImages.end(), i);
 
-    if (it != std::end(_selectedImages)) {
+    if (it != _selectedImages.end()) {
         _selectedImages.erase(it);
         sendMessageToWwt(removeImageMessage(std::to_string(i)));
     }
 }
 
-void WwtCommunicator::sendMessageToWwt(const ghoul::Dictionary& msg) {
+void WwtCommunicator::sendMessageToWwt(const ghoul::Dictionary& msg) const {
     std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
     executeJavascript(script);
 }
@@ -72,8 +73,7 @@ const std::deque<int>& WwtCommunicator::getSelectedImages() const {
     return _selectedImages;
 }
 
-void WwtCommunicator::setTargetRoll(double roll)
-{
+void WwtCommunicator::setTargetRoll(double roll) {
     _targetRoll = roll;
 }
 
@@ -82,12 +82,10 @@ void WwtCommunicator::setVerticalFov(double vfov) {
     _equatorialAimIsDirty = true;
 }
 
-void WwtCommunicator::setWebpageBorderColor(glm::ivec3 color) {
-    std::string stringColor = std::to_string(color.x) + ","
-        + std::to_string(color.y) + "," + std::to_string(color.z);
-    std::string script = "document.body.style.backgroundColor = 'rgb("
-        + stringColor + ")';";
-    executeJavascript(script);
+void WwtCommunicator::setWebpageBorderColor(glm::ivec3 color) const {
+    std::string stringColor = fmt::format("{},{},{}", color.x, color.y, color.z);
+    std::string scr = "document.body.style.backgroundColor = 'rgb(" + stringColor + ")';";
+    executeJavascript(scr);
 }
 
 void WwtCommunicator::setIsSyncedWithWwt(bool isSynced) {
@@ -104,31 +102,26 @@ void WwtCommunicator::setBorderColor(glm::ivec3 color) {
     _borderColorIsDirty = true;
 }
 
-void WwtCommunicator::highlight(const glm::ivec3& addition) {
+void WwtCommunicator::highlight(const glm::ivec3& addition) const {
     setWebpageBorderColor(_borderColor + addition);
 }
 
-void WwtCommunicator::removeHighlight(const glm::ivec3& removal) {
+void WwtCommunicator::removeHighlight(const glm::ivec3& removal) const {
     setWebpageBorderColor(_borderColor - removal);
 }
 
-void WwtCommunicator::updateBorderColor() {
+void WwtCommunicator::updateBorderColor() const {
     setWebpageBorderColor(_borderColor);
 }
 
-void WwtCommunicator::updateAim() {
+void WwtCommunicator::updateAim() const {
     // Message WorldWide Telescope current view
-    ghoul::Dictionary message = moveCameraMessage(
-        _equatorialAim,
-        _verticalFov,
-        _targetRoll
-    );
-    sendMessageToWwt(message);
+    ghoul::Dictionary msg = moveCameraMessage(_equatorialAim, _verticalFov, _targetRoll);
+    sendMessageToWwt(msg);
 }
 
 glm::dvec2 WwtCommunicator::fieldsOfView() const {
     glm::dvec2 browserFov = glm::dvec2(verticalFov() * browserRatio(), verticalFov());
-
     return browserFov;
 }
 
@@ -142,20 +135,16 @@ glm::dvec2 WwtCommunicator::equatorialAim() const {
 
 void WwtCommunicator::setImageOrder(int i, int order) {
     // Find in selected images list
-    auto current = std::find(
-        _selectedImages.begin(),
-        _selectedImages.end(),
-        i
-    );
-    auto target = std::begin(_selectedImages) + order;
+    auto current = std::find(_selectedImages.begin(), _selectedImages.end(), i);
+    auto target = _selectedImages.begin() + order;
 
     // Make sure the image was found in the list
-    if (current != std::end(_selectedImages) && target != std::end(_selectedImages)) {
+    if (current != _selectedImages.end() && target != _selectedImages.end()) {
         // Swap the two images
         std::iter_swap(current, target);
     }
 
-    int reverseOrder = _selectedImages.size() - order - 1;
+    int reverseOrder = static_cast<int>(_selectedImages.size()) - order - 1;
     ghoul::Dictionary message = setLayerOrderMessage(std::to_string(i), reverseOrder);
     sendMessageToWwt(message);
 }
@@ -165,12 +154,12 @@ void WwtCommunicator::loadImageCollection(const std::string& collection) {
     _hasLoadedImages = true;
 }
 
-void WwtCommunicator::setImageOpacity(int i, float opacity) {
+void WwtCommunicator::setImageOpacity(int i, float opacity) const {
     ghoul::Dictionary msg = setImageOpacityMessage(std::to_string(i), opacity);
     sendMessageToWwt(msg);
 }
 
-void WwtCommunicator::hideChromeInterface(bool shouldHide) {
+void WwtCommunicator::hideChromeInterface(bool shouldHide) const {
     std::string script = "sendMessageToWWT({event : \"modify_settings\", "
         "settings : [[\"hideAllChrome\", true]], target: \"app\"});";
     executeJavascript(script);
@@ -195,23 +184,11 @@ void WwtCommunicator::update() {
     }
 }
 
-void WwtCommunicator::render() {
-    Browser::render();
-}
-
-void WwtCommunicator::initializeGL() {
-    Browser::initializeGL();
-}
-
-void WwtCommunicator::deinitializeGL() {
-    Browser::deinitializeGL();
-}
-
 void WwtCommunicator::setHasLoadedImages(bool isLoaded) {
     _hasLoadedImages = isLoaded;
 }
 
-void WwtCommunicator::setIdInBrowser(const std::string& id) {
+void WwtCommunicator::setIdInBrowser(const std::string& id) const {
     // Send ID to it's browser
     executeJavascript("setId('" + id + "')");
 }
@@ -227,73 +204,72 @@ double WwtCommunicator::verticalFov() const {
 // WWT messages
 ghoul::Dictionary WwtCommunicator::moveCameraMessage(const glm::dvec2& celestCoords,
                                                      double fov, double roll,
-                                                     bool shouldMoveInstantly)
+                                                     bool shouldMoveInstantly) const
 {
     using namespace std::string_literals;
+    
     ghoul::Dictionary msg;
-
     msg.setValue("event", "center_on_coordinates"s);
     msg.setValue("ra", celestCoords.x);
     msg.setValue("dec", celestCoords.y);
     msg.setValue("fov", fov);
     msg.setValue("roll", roll);
     msg.setValue("instant", shouldMoveInstantly);
-
     return msg;
 }
 
-ghoul::Dictionary WwtCommunicator::loadCollectionMessage(const std::string& url) {
+ghoul::Dictionary WwtCommunicator::loadCollectionMessage(const std::string& url) const {
     using namespace std::string_literals;
+    
     ghoul::Dictionary msg;
     msg.setValue("event", "load_image_collection"s);
     msg.setValue("url", url);
     msg.setValue("loadChildFolders", true);
-
     return msg;
 }
 
-ghoul::Dictionary WwtCommunicator::setForegroundMessage(const std::string& name) {
+ghoul::Dictionary WwtCommunicator::setForegroundMessage(const std::string& name) const {
     using namespace std::string_literals;
+    
     ghoul::Dictionary msg;
     msg.setValue("event", "set_foreground_by_name"s);
     msg.setValue("name", name);
-
     return msg;
 }
 
 ghoul::Dictionary WwtCommunicator::addImageMessage(const std::string& id,
-                                                   const std::string& url)
+                                                   const std::string& url) const
 {
     using namespace std::string_literals;
+    
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_create"s);
     msg.setValue("id", id);
     msg.setValue("url", url);
     msg.setValue("mode", "preloaded"s);
     msg.setValue("goto", false);
-
     return msg;
 }
 
-ghoul::Dictionary WwtCommunicator::removeImageMessage(const std::string& imageId) {
+ghoul::Dictionary WwtCommunicator::removeImageMessage(const std::string& imageId) const {
     using namespace std::string_literals;
+    
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_remove"s);
     msg.setValue("id", imageId);
-
     return msg;
 }
 
 ghoul::Dictionary WwtCommunicator::setImageOpacityMessage(const std::string& imageId,
-                                                          double opacity)
+                                                          double opacity) const
 {
     using namespace std::string_literals;
+    
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_set"s);
     msg.setValue("id", imageId);
     msg.setValue("setting", "opacity"s);
     msg.setValue("value", opacity);
-
     return msg;
 }
 
@@ -302,6 +278,7 @@ ghoul::Dictionary WwtCommunicator::setLayerOrderMessage(const std::string& id, i
     // The lower the layer order, the more towards the back the image is placed
     // 0 is the background
     using namespace std::string_literals;
+    
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_order"s);
     msg.setValue("id", id);
@@ -309,7 +286,6 @@ ghoul::Dictionary WwtCommunicator::setLayerOrderMessage(const std::string& id, i
     msg.setValue("version", messageCounter);
 
     messageCounter++;
-
     return msg;
 }
 

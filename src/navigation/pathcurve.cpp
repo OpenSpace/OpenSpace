@@ -79,7 +79,7 @@ void PathCurve::initializeParameterData() {
 
     // Evenly space out parameter intervals
     _curveParameterSteps.reserve(_nSegments + 1);
-    for (int i = 0; i <= _nSegments; i++) {
+    for (unsigned int i = 0; i <= _nSegments; i++) {
         _curveParameterSteps.push_back(static_cast<double>(i));
     }
 
