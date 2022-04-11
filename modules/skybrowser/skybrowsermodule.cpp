@@ -39,6 +39,12 @@
 #include "skybrowsermodule_lua.inl"
 
 namespace {
+    constexpr const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Decides if the GUI for this module should be enabled."
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow Camera Rotation",
@@ -66,6 +72,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
 
         // [[codegen::verbatim(AllowRotationInfo.description)]]
         std::optional<bool> allowCameraRotation;
@@ -85,12 +93,14 @@ namespace {
 
 namespace openspace {
 SkyBrowserModule::SkyBrowserModule()
-    : OpenSpaceModule(SkyBrowserModule::Name)
+    : OpenSpaceModule(Name)
+    , _enabled(EnabledInfo)
     , _allowCameraRotation(AllowRotationInfo, true)
     , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
     , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
     , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
 {
+    addProperty(_enabled);
     addProperty(_allowCameraRotation);
     addProperty(_cameraRotationSpeed);
     addProperty(_targetAnimationSpeed);
@@ -163,16 +173,15 @@ SkyBrowserModule::SkyBrowserModule()
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    // Register ScreenSpaceRenderable
+    _enabled = p.enabled.value_or(true);
+
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
 
-
     // Register ScreenSpaceSkyBrowser
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 
-    // Register ScreenSpaceRenderable
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
