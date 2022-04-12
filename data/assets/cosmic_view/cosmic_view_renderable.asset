@@ -8,6 +8,7 @@ local CosmicLifePoints = {
     Opacity = 0.65,
     File = asset.localResource("C:/code/datafiles/MDS_APD_float.speck"),
     Texture = asset.localResource("C:/code/datafiles/point3A.png"),
+    ColorMap = asset.localResource("C:/code/datafiles/MDS_color_lineage_17.cmap"),
     Unit = "Km",
     ScaleFactor = 30.0,
     EnablePixelSizeControl = true

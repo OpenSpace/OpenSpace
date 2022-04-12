@@ -68,9 +68,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<double> createDataSlice(); // look at this 
-
-    void readColorMapFile();
+    std::vector<double> createDataSlice();
 
     bool _dataIsDirty = true;
     bool _hasSpriteTexture = false;
@@ -80,13 +78,14 @@ private:
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
+    properties::BoolProperty _useLinearFiltering;
 
     std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(
         modelViewProjectionTransform, color, alphaValue, scaleFactor,
-        spriteTexture
+        spriteTexture, hasColorMap
     ) _uniformCache;
 
     std::filesystem::path _speckFile;
@@ -95,9 +94,7 @@ private:
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     speck::Dataset _dataset;
-    std::vector<glm::vec4> _colorMapData;
-
-    //int _nValuesPerAstronomicalObject = 0;
+    speck::ColorMap _colorMapData;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

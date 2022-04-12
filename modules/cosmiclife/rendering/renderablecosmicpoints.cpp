@@ -50,9 +50,9 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableCosmicPoints";
 
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr const std::array<const char*, 6> UniformNames = {
         "modelViewProjectionTransform", "color", "alphaValue", "scaleFactor",
-        "spriteTexture"
+        "spriteTexture", "hasColorMap"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
@@ -78,6 +78,13 @@ namespace {
         "ColorMap",
         "Color Map File",
         "The path to the color map file of the astronomical object."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
+        "UseLinearFiltering",
+        "Use Linear Filtering",
+        "Determines whether the provided color map should be sampled nearest neighbor "
+        "(=off) or linearly (=on)"
     };
 
     struct [[codegen::Dictionary(RenderablePoints)]] Parameters {
@@ -107,6 +114,9 @@ namespace {
 
         // [[codegen::verbatim(ColorMapInfo.description)]]
         std::optional<std::string> colorMap;
+
+        // [[codegen::verbatim(UseLinearFiltering.description)]]
+        std::optional<bool> useLinearFiltering;
     };
 #include "renderablecosmicpoints_codegen.cpp"
 }  // namespace
@@ -127,6 +137,7 @@ RenderableCosmicPoints::RenderableCosmicPoints(const ghoul::Dictionary& dictiona
         glm::vec3(1.f)
     )
     , _spriteTexturePath(SpriteTextureInfo)
+    , _useLinearFiltering(UseLinearFiltering, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -160,12 +171,16 @@ RenderableCosmicPoints::RenderableCosmicPoints(const ghoul::Dictionary& dictiona
     }
 
     if (p.colorMap.has_value()) {
-        _colorMapFile = absPath(*p.colorMap);
+        _colorMapFile = absPath(*p.colorMap).string();
         _hasColorMapFile = true;
     }
 
     _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
     addProperty(_scaleFactor);
+
+    _useLinearFiltering = p.useLinearFiltering.value_or(_useLinearFiltering);
+    _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
+    addProperty(_useLinearFiltering);
 }
 
 bool RenderableCosmicPoints::isReady() const {
@@ -178,7 +193,8 @@ void RenderableCosmicPoints::initialize() {
     _dataset = speck::data::loadFileWithCache(_speckFile);
 
     if (_hasColorMapFile) {
-         readColorMapFile();
+         //readColorMapFile();
+        _colorMapData = speck::color::loadFileWithCache(_colorMapFile);
     }
 }
 
@@ -243,6 +259,7 @@ void RenderableCosmicPoints::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
+    _program->setUniform(_uniformCache.hasColorMap, _hasColorMapFile);
 
     if (_hasSpriteTexture) {
         ghoul::opengl::TextureUnit spriteTextureUnit;
@@ -267,6 +284,7 @@ void RenderableCosmicPoints::update(const UpdateData&) {
         LDEBUG("Regenerating data");
 
         std::vector<double> slice = createDataSlice();
+        int size = static_cast<int>(slice.size());
 
         if (_vao == 0) {
             glGenVertexArrays(1, &_vao);
@@ -277,12 +295,7 @@ void RenderableCosmicPoints::update(const UpdateData&) {
 
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            slice.size() * sizeof(double),
-            slice.data(),
-            GL_STATIC_DRAW
-        );
+        glBufferData(GL_ARRAY_BUFFER, size * sizeof(double), slice.data(), GL_STATIC_DRAW);
         GLint positionAttrib = _program->attributeLocation("in_position");
 
         if (_hasColorMapFile) {
@@ -338,60 +351,33 @@ void RenderableCosmicPoints::update(const UpdateData&) {
     }
 }
 
-void RenderableCosmicPoints::readColorMapFile() {
-    std::ifstream file(_colorMapFile);
-    if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Failed to open Color Map file {}", _colorMapFile
-        ));
-    }
-
-    std::size_t numberOfColors = 0;
-
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        // std::streampos position = file.tellg();
-        std::getline(file, line);
-
-        if (line[0] == '#' || line.empty()) {
-            continue;
-        }
-
-        // Initial number of colors
-        std::locale loc;
-        if (std::isdigit(line[0], loc)) {
-            std::string::size_type sz;
-            numberOfColors = std::stoi(line, &sz);
-            break;
-        }
-        else if (file.eof()) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Failed to load colors from Color Map file {}", _colorMapFile
-            ));
-        }
-    }
-
-    for (size_t i = 0; i < numberOfColors; ++i) {
-        std::getline(file, line);
-        std::stringstream str(line);
-
-        glm::vec4 color;
-        str >> color.r >> color.g >> color.b >> color.a;
-
-        _colorMapData.push_back(color);
-    }
-}
-
 std::vector<double> RenderableCosmicPoints::createDataSlice() {
+    if (_dataset.entries.empty()) {
+        return std::vector<double>();
+    }
+
     std::vector<double> slice;
     if (_hasColorMapFile) {
         slice.reserve(8 * _dataset.entries.size()); // reserve: Increase the capacity of the vector
     }
     else {
         slice.reserve(4 * _dataset.entries.size());
+    }
+
+    // Finds the colorrange for the chosen column (static at the moment)
+    float minColorIdx = std::numeric_limits<float>::max();
+    float maxColorIdx = -std::numeric_limits<float>::max();
+    for (const speck::Dataset::Entry& e : _dataset.entries) {
+        if (e.data.size() > 0) {
+            // TODO: make this dynamic
+            float color = e.data[15]; // Detta get vilken column vi anpassar färgen efter
+            minColorIdx = std::min(color, minColorIdx);
+            maxColorIdx = std::max(color, maxColorIdx);
+        }
+        else {
+            minColorIdx = 0;
+            maxColorIdx = 0;
+        }
     }
 
     double maxRadius = 0.0;
@@ -402,26 +388,67 @@ std::vector<double> RenderableCosmicPoints::createDataSlice() {
         double scale = toMeter(_unit);
         p *= scale;
 
-        const double r = glm::length(p);
+        const double r = glm::length(p); // längden på vectorn p (positionen)
         maxRadius = std::max(maxRadius, r);
 
         glm::dvec4 position(p, 1.0);
 
-        if (_hasColorMapFile) {
-            for (int j = 0; j < 4; ++j) {
-                slice.push_back(position[j]);
-            }
-            for (int j = 0; j < 4; ++j) {
-                slice.push_back(_colorMapData[colorIndex][j]);
-            }
+        for (int j = 0; j < 4; ++j) {
+            slice.push_back(position[j]);
         }
-        else {
-            for (int j = 0; j < 4; ++j) {
-                slice.push_back(position[j]);
+
+        if (_hasColorMapFile) {
+            float colorColumn = e.data[15]; // Detta get vilken column vi anpassar färgen efter
+
+            // TODO: make dynamic
+            float cmax, cmin;
+            cmax = maxColorIdx; // Max value of datavar used for the index color
+            cmin = minColorIdx; // Min value of datavar used for the index color
+
+            if (_useLinearFiltering) {
+                float valueT = (colorColumn - cmin) / (cmax - cmin); // in [0, 1)
+                valueT = std::clamp(valueT, 0.f, 1.f);
+
+                const float idx = valueT * (_colorMapData.entries.size() - 1);
+                const int floorIdx = static_cast<int>(std::floor(idx));
+                const int ceilIdx = static_cast<int>(std::ceil(idx));
+
+                const glm::vec4 floorColor = _colorMapData.entries[floorIdx];
+                const glm::vec4 ceilColor = _colorMapData.entries[ceilIdx];
+
+                if (floorColor != ceilColor) {
+                    const glm::vec4 c = floorColor + idx * (ceilColor - floorColor);
+                    slice.push_back(c.r);
+                    slice.push_back(c.g);
+                    slice.push_back(c.b);
+                    slice.push_back(c.a);
+                }
+                else {
+                    slice.push_back(floorColor.r);
+                    slice.push_back(floorColor.g);
+                    slice.push_back(floorColor.b);
+                    slice.push_back(floorColor.a);
+                }
+            }
+            else {
+                float ncmap = static_cast<float>(_colorMapData.entries.size());
+                float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
+                    (ncmap - 2.f) / (cmax - cmin) : 0;
+                int colorIndex = static_cast<int>(
+                    (colorColumn - cmin) * normalization + 1.f
+                    );
+                colorIndex = colorIndex < 0 ? 0 : colorIndex;
+                colorIndex = colorIndex >= ncmap ?
+                    static_cast<int>(ncmap - 1.f) : colorIndex;
+
+                for (int j = 0; j < 4; ++j) {
+                    slice.push_back(_colorMapData.entries[colorIndex][j]);
+                }
             }
         }
 
-        colorIndex = (colorIndex == static_cast<int>(_colorMapData.size() - 1)) ?
+        // QUESTION
+        colorIndex = (colorIndex == static_cast<int>(_colorMapData.entries.size() - 1)) ?
             0 :
             colorIndex + 1;
     }
