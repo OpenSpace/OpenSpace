@@ -70,6 +70,10 @@ if (WIN32)
   option(USE_SANDBOX OFF)
 endif ()
 
+if (LINUX)
+  option(USE_SANDBOX OFF)
+endif ()
+
 # Add this project's cmake/ directory to the module path.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(cef_support)
@@ -203,6 +207,18 @@ if (OS_WINDOWS)
   # Add the custom manifest files to the executable.
   add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
 endif (OS_WINDOWS)
+
+if (OS_LINUX)
+  message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
+  set_openspace_cef_target_out_dir()
+  add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
+  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
+  add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
+  # Logical target used to link the libcef library.
+  add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
+  target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  # Add the custom manifest files to the executable.
+endif (OS_LINUX)
 
 set_property(TARGET ${CEF_HELPER_TARGET} PROPERTY FOLDER "Helper")
 
