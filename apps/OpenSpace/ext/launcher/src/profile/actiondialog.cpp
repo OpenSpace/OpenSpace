@@ -488,6 +488,12 @@ void ActionDialog::actionRemove() {
             _actionData.erase(_actionData.begin() + i);
             delete _actionWidgets.list->takeItem(static_cast<int>(i));
             clearActionFields();
+
+            _keybindingWidgets.action->clear();
+            for (const Profile::Action& action : _actionData) {
+                _keybindingWidgets.action->addItem(QString::fromStdString(action.identifier));
+            }
+            clearKeybindingFields();
             return;
         }
     }
@@ -587,6 +593,13 @@ void ActionDialog::actionSaved() {
     action->script = _actionWidgets.script->toPlainText().toStdString();
 
     updateListItem(_actionWidgets.list->currentItem(), *action);
+
+    // Update the list of actions available in the action chooser
+    _keybindingWidgets.action->clear();
+    for (const Profile::Action& action : _actionData) {
+        _keybindingWidgets.action->addItem(QString::fromStdString(action.identifier));
+    }
+    clearKeybindingFields();
     clearActionFields();
 }
 
