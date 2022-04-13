@@ -24,29 +24,31 @@
 
 #include <modules/skybrowser/include/targetbrowserpair.h>
 
-#include <modules/skybrowser/include/screenspaceskybrowser.h>
-#include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/renderableskytarget.h>
+#include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <modules/skybrowser/skybrowsermodule.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/camera/camera.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/assert.h>
 #include <glm/gtc/constants.hpp>
 #include <functional>
+#include <chrono>
 
 namespace openspace {
 
 TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
                                      ScreenSpaceSkyBrowser* browser)
-    : _targetNode(targetNode), _browser(browser)
+    : _targetNode(targetNode)
+    , _browser(browser)
 {
-    ghoul_assert(browser != nullptr, "Sky browser is null pointer!");
-    ghoul_assert(targetNode != nullptr, "Sky target is null pointer!");
+    ghoul_assert(browser, "Sky browser is null pointer");
+    ghoul_assert(targetNode, "Sky target is null pointer");
 
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
 }
@@ -73,14 +75,15 @@ void TargetBrowserPair::highlight(const glm::ivec3& color) {
 
 void TargetBrowserPair::aimTargetGalactic(glm::dvec3 direction) {
     std::string id = _targetNode->identifier();
-    // Uris for properties
-    std::string positionUri = "Scene." + id + ".Translation.Position";
     glm::dvec3 positionCelestial = glm::normalize(direction) *
         skybrowser::CelestialSphereRadius;
-    std::string setValue = "openspace.setPropertyValueSingle('";
 
+    std::string script = fmt::format(
+        "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
+        id, ghoul::to_string(positionCelestial)
+    );
     openspace::global::scriptEngine->queueScript(
-        setValue + positionUri + "', " + ghoul::to_string(positionCelestial) + ");",
+        script,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
@@ -123,8 +126,7 @@ void TargetBrowserPair::setEnabled(bool enable) {
     _targetRenderable->property("Enabled")->set(false);
 }
 
-void TargetBrowserPair::setOpacity(float opacity)
-{
+void TargetBrowserPair::setOpacity(float opacity) {
     _browser->property("Opacity")->set(opacity);
     _targetRenderable->property("Opacity")->set(opacity);
 }
@@ -188,7 +190,6 @@ void TargetBrowserPair::selectImage(const ImageData& image, int i) {
 
     // If the image has coordinates, move the target
     if (image.hasCelestialCoords) {
-
         // Animate the target to the image coordinate position
         // unlock();
         glm::dvec3 galactic = skybrowser::equatorialToGalactic(image.equatorialCartesian);
@@ -212,7 +213,7 @@ void TargetBrowserPair::hideChromeInterface(bool shouldHide) {
     _browser->hideChromeInterface(shouldHide);
 }
 
-void TargetBrowserPair::sendIdToBrowser() {
+void TargetBrowserPair::sendIdToBrowser() const {
     _browser->setIdInBrowser();
 }
 
@@ -220,8 +221,7 @@ void TargetBrowserPair::updateBrowserSize() {
     _browser->updateBrowserSize();
 }
 
-std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::renderCopies()
-{
+std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::renderCopies() const {
     return _browser->renderCopies();
 }
 
@@ -303,12 +303,11 @@ void TargetBrowserPair::centerTargetOnScreen() {
     // Get camera direction in celestial spherical coordinates
     glm::dvec3 viewDirection = skybrowser::cameraDirectionGalactic();
     // Keep the current fov
-    float currentFov = verticalFov();
+    double currentFov = verticalFov();
     startAnimation(viewDirection, currentFov);
 }
 
-double TargetBrowserPair::targetRoll()
-{
+double TargetBrowserPair::targetRoll() {
     // To remove the lag effect when moving the camera while having a locked
        // target, send the locked coordinates to wwt
     glm::dvec3 normal = glm::normalize(
@@ -345,8 +344,7 @@ ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
     return _browser;
 }
 
-void TargetBrowserPair::incrementallyFade()
-{
+void TargetBrowserPair::incrementallyFade() {
     if (_fadeBrowser.isAnimating()) {
         _browser->setOpacity(_fadeBrowser.getNewValue());
     }

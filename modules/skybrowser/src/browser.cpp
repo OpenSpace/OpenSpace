@@ -45,13 +45,13 @@ namespace {
     const openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
-        "The URL to load"
+        "The URL to load."
     };
 
     const openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Reload the web browser"
+        "Reload the web browser."
     };
 
     struct [[codegen::Dictionary(Browser)]] Parameters {
@@ -92,6 +92,7 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     if (dictionary.hasValue<std::string>(UrlInfo.identifier)) {
         _url = dictionary.value<std::string>(UrlInfo.identifier);
     }
+    
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _url = p.url.value_or(_url);
@@ -133,7 +134,7 @@ bool Browser::initializeGL() {
     return isReady();
 }
 
-bool Browser::deinitializeGL() {
+void Browser::deinitializeGL() {
     _renderHandler->setTexture(0);
 
     _texture = nullptr;
@@ -150,15 +151,12 @@ bool Browser::deinitializeGL() {
     else {
         LWARNING("Could not find WebBrowserModule");
     }
-
-    return true;
 }
 
 void Browser::render() {
-    if (!_renderHandler->isTextureReady()) {
-        return;
+    if (_renderHandler->isTextureReady()) {
+        _renderHandler->updateTexture();
     }
-    _renderHandler->updateTexture();
 }
 
 void Browser::update() {
@@ -186,7 +184,7 @@ bool Browser::isReady() const {
 }
 
 glm::vec2 Browser::browserPixelDimensions() const {
-    return _browserPixeldimensions.value();
+    return _browserPixeldimensions;
 }
 
 // Updates the browser size to match the size of the texture
@@ -196,14 +194,12 @@ void Browser::updateBrowserSize() {
 
 float Browser::browserRatio() const {
     return static_cast<float>(_texture->dimensions().x) /
-        static_cast<float>(_texture->dimensions().y);
+           static_cast<float>(_texture->dimensions().y);
 }
 
-void Browser::setCallbackDimensions(
-                                const std::function<void(const glm::dvec2&)>& function)
-{
+void Browser::setCallbackDimensions(const std::function<void(const glm::dvec2&)>& func) {
     _browserPixeldimensions.onChange([&]() {
-        function(_browserPixeldimensions.value());
+        func(_browserPixeldimensions.value());
     });
 }
 
@@ -221,4 +217,5 @@ void Browser::executeJavascript(const std::string& script) const {
         );
     }
 }
+
 } // namespace openspace

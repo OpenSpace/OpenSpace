@@ -117,11 +117,6 @@ void RenderablePlaneProjection::deinitializeGL() {
 }
 
 void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
-    bool active = ImageSequencer::ref().isInstrumentActive(
-        data.time.j2000Seconds(),
-        _instrument
-    );
-
     if (!_hasImage) {
         return;
     }
@@ -239,8 +234,8 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     );
     // The apparent position, CN+S, makes image align best with target
 
-    glm::vec3 projection[4];
-    std::fill(std::begin(projection), std::end(projection), glm::vec3(0.f));
+    std::array<glm::vec3, 4> projection;
+    std::fill(projection.begin(), projection.end(), glm::vec3(0.f));
     for (size_t j = 0; j < bounds.size(); ++j) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(
             frame,

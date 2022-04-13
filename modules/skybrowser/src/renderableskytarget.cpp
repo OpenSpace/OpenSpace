@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <modules/skybrowser/include/renderableskytarget.h>
 
 #include <modules/skybrowser/skybrowsermodule.h>
@@ -30,17 +31,16 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/helper.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-#pragma optimize("", off)
 namespace {
     constexpr const char* _loggerCat = "RenderableSkyTarget";
 
@@ -49,11 +49,10 @@ namespace {
         Additive
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo crossHairSizeInfo =
-    {
+    constexpr const openspace::properties::Property::PropertyInfo crossHairSizeInfo = {
         "CrosshairSize",
         "Crosshair Size",
-        "Determines the size of the crosshair. The size is determined in fov (degrees). "
+        "Determines the size of the crosshair. The size is determined in fov (degrees)."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo RectangleThresholdInfo =
@@ -106,27 +105,32 @@ namespace {
 } //namespace
 
 namespace openspace {
-    RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
-        : RenderablePlane(dictionary)
-        , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)
-        , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
-        , _stopAnimationThreshold(AnimationThresholdInfo, 5.0f, 1.f, 10.f)
-        , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
-        , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
-        , _borderColor(220, 220, 220)
-        {
-        // Handle target dimension property
-        const Parameters p = codegen::bake<Parameters>(dictionary);
-        _crossHairSize = p.crossHairSize.value_or(_crossHairSize);
-        _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
-        _stopAnimationThreshold = p.crossHairSize.value_or(_stopAnimationThreshold);
-        _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
 
-        addProperty(_crossHairSize);
-        addProperty(_showRectangleThreshold);
-        addProperty(_stopAnimationThreshold);
-        addProperty(_animationSpeed);
-        addProperty(_lineWidth);
+RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
+    : RenderablePlane(dictionary)
+    , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)
+    , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
+    , _stopAnimationThreshold(AnimationThresholdInfo, 5.0f, 1.f, 10.f)
+    , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
+    , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
+    , _borderColor(220, 220, 220)
+{
+    // Handle target dimension property
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    
+    _crossHairSize = p.crossHairSize.value_or(_crossHairSize);
+    addProperty(_crossHairSize);
+    
+    _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
+    addProperty(_showRectangleThreshold);
+    
+    _stopAnimationThreshold = p.crossHairSize.value_or(_stopAnimationThreshold);
+    addProperty(_stopAnimationThreshold);
+    
+    _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
+    addProperty(_animationSpeed);
+
+    addProperty(_lineWidth);
 }
 
 void RenderableSkyTarget::bindTexture() {}
@@ -150,10 +154,6 @@ void RenderableSkyTarget::initializeGL() {
     );
 }
 
-void RenderableSkyTarget::deinitializeGL() {
-    RenderablePlane::deinitializeGL();
-}
-
 void RenderableSkyTarget::setColor(glm::ivec3 color) {
     _borderColor = std::move(color);
 }
@@ -162,10 +162,9 @@ glm::ivec3 RenderableSkyTarget::borderColor() const {
     return _borderColor;
 }
 
-
 void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
-    bool showRectangle = _verticalFov > _showRectangleThreshold;
+    const bool showRectangle = _verticalFov > _showRectangleThreshold;
 
     glm::vec4 color = { glm::vec3(_borderColor) / 255.f, _opacity.value() };
 
@@ -208,11 +207,15 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelViewTransform =
         data.camera.combinedViewMatrix() * modelTransform;
 
-    _shader->setUniform("modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+    _shader->setUniform(
+        "modelViewProjectionTransform",
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+    );
 
-    _shader->setUniform("modelViewTransform",
-        glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform)));
+    _shader->setUniform(
+        "modelViewTransform",
+        glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform))
+    );
 
     _shader->setUniform("multiplyColor", _multiplyColor);
 
@@ -234,11 +237,6 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     }
 
     _shader->deactivate();
-}
-
-void RenderableSkyTarget::update(const UpdateData& data) {
-    RenderablePlane::update(data);
-
 }
 
 void RenderableSkyTarget::setDimensions(glm::vec2 dimensions) {
@@ -274,4 +272,5 @@ void RenderableSkyTarget::setOpacity(float opacity) {
 void RenderableSkyTarget::setVerticalFov(double fov) {
     _verticalFov = fov;
 }
+
 } // namespace openspace

@@ -28,15 +28,14 @@
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/documentation/documentation.h>
 #include <deque>
-#include <chrono>
 
 namespace openspace {
 
+struct ImageData;
+class SceneGraphNode;
 class ScreenSpaceSkyBrowser;
 class RenderableSkyTarget;
 class ScreenSpaceRenderable;
-class ImageData;
-class SceneGraphNode;
 
 class TargetBrowserPair {
 public:
@@ -59,9 +58,9 @@ public:
     void synchronizeAim();
 
     // Browser
-    void sendIdToBrowser();
+    void sendIdToBrowser() const;
     void updateBrowserSize();
-    std::vector<std::pair<std::string, glm::dvec3>> renderCopies();
+    std::vector<std::pair<std::string, glm::dvec3>> renderCopies() const;
 
     // Target
     void centerTargetOnScreen();
@@ -89,7 +88,6 @@ public:
     std::string browserId() const;
     std::string targetRenderableId() const;
     std::string targetNodeId() const;
-    std::string selectedId();
     glm::vec2 size() const;
 
     SceneGraphNode* targetNode() const;
@@ -116,8 +114,8 @@ private:
     SceneGraphNode* _targetNode = nullptr;
 
     // Animation
-    skybrowser::Animation<float> _fadeBrowser = skybrowser::Animation(0.f, 0.f, 0.0);
-    skybrowser::Animation<float> _fadeTarget = skybrowser::Animation(0.f, 0.f, 0.0);
+    skybrowser::Animation<float> _fadeBrowser = skybrowser::Animation(0.f, 0.f, 0.f);
+    skybrowser::Animation<float> _fadeTarget = skybrowser::Animation(0.f, 0.f, 0.f);
     skybrowser::Animation<double> _fovAnimation = skybrowser::Animation(0.0, 0.0, 0.0);
     skybrowser::Animation<glm::dvec3> _moveTarget =
         skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
