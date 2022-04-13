@@ -84,7 +84,7 @@ std::shared_ptr<NetworkEngine::Peer> NetworkEngine::peer(size_t id) {
 	return it->second;
 }
 
-void NetworkEngine::disconnect(Peer& peer) {    
+void NetworkEngine::disconnect(Peer& peer) {
 	if (isConnected(peer)) {
 		_nConnections -= 1;
 	}

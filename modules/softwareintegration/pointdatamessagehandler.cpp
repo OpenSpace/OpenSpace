@@ -110,8 +110,6 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
 
     renderable.setValue("DataStorageKey", key);
 
-
-
     ghoul::Dictionary gui;
     gui.setValue("Name", guiName);
     gui.setValue("Path", "/Software Integration"s);
@@ -146,20 +144,29 @@ void PointDataMessageHandler::handleColorMessage(const std::vector<char>& messag
     const std::string identifier = readString(message, messageOffset);
     const glm::vec3 color = readColor(message, messageOffset);
 
-    // Get color of renderable
-    const Renderable* r = renderable(identifier);
-    if (!r) {
-        LWARNING(fmt::format("No renderable with identifier '{}' was found", identifier));
-        return;
-    }
+    // Get renderable
+    auto r = getRenderable(identifier);
+    if (!r) return;
 
+    // Get color of renderable
     properties::Property* colorProperty = r->property("Color");
     std::any propertyAny = colorProperty->get();
     glm::vec3 propertyColor = std::any_cast<glm::vec3>(propertyAny);
+    
+    if (propertyColor != glm::vec3(0, 0, 0)) {
+        LWARNING(fmt::format("propertyColor '{}'", propertyColor));
+    }
 
     // Update color of renderable
     if (propertyColor != color) {
-        colorProperty->set(color);
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Color', {}, 1);",
+            identifier, ghoul::to_string(color)
+        );
+        openspace::global::scriptEngine->queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
@@ -168,20 +175,25 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
     const std::string identifier = readString(message, messageOffset);
     const float opacity = readFloatValue(message, messageOffset);
 
-    // Get opacity of renderable
-    const Renderable* r = renderable(identifier);
-    if (!r) {
-        LWARNING(fmt::format("No renderable with identifier '{}' was found", identifier));
-        return;
-    }
+    // Get renderable
+    auto r = getRenderable(identifier);
+    if (!r) return;
 
+    // Get opacity of renderable
     properties::Property* opacityProperty = r->property("Opacity");
     auto propertyAny = opacityProperty->get();
     float propertyOpacity = std::any_cast<float>(propertyAny);
 
     // Update opacity of renderable
     if (propertyOpacity != opacity) {
-        opacityProperty->set(opacity);
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Opacity', {});",
+            identifier, ghoul::to_string(opacity)
+        );
+        openspace::global::scriptEngine->queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
@@ -190,39 +202,50 @@ void PointDataMessageHandler::handlePointSizeMessage(const std::vector<char>& me
     const std::string identifier = readString(message, messageOffset);
     float size = readFloatValue(message, messageOffset);
 
-    // Get size of renderable
-    const Renderable* r = renderable(identifier);
-    if (!r) {
-        LWARNING(fmt::format("No renderable with identifier '{}' was found", identifier));
-        return;
-    }
+    // Get renderable
+    auto r = getRenderable(identifier);
+    if (!r) return;
 
+    // Get size of renderable
     properties::Property* sizeProperty = r->property("Size");
     auto propertyAny = sizeProperty->get();
     float propertySize = std::any_cast<float>(propertyAny);
 
     // Update size of renderable
     if (propertySize != size) {
-        sizeProperty->set(size);
+    // TODO: Add to script when the "send back to glue" stuff is done
+    // "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {}, 1);",
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {});",
+            identifier, ghoul::to_string(size)
+        );
+        openspace::global::scriptEngine->queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
 void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& message) {
     int messageOffset = 0;
     const std::string identifier = readString(message, messageOffset);
-    std::string visibility;
-    visibility.push_back(message[messageOffset]);
+    std::string visibilityMessage;
+    visibilityMessage.push_back(message[messageOffset]);
+
+    // Get renderable
+    auto r = getRenderable(identifier);
+    if (!r) return;
 
     // Toggle visibility of renderable
-    const Renderable* r = renderable(identifier);
-    if (!r) {
-        LWARNING(fmt::format("No renderable with identifier '{}' was found", identifier));
-        return;
-    }
-
-    bool boolValue = (visibility == "F") ? false : true;
-    properties::Property* visibilityProperty = r->property("ToggleVisibility");
-    visibilityProperty->set(boolValue);
+    const bool visability = visibilityMessage == "T";
+    std::string script = fmt::format(
+        "openspace.setPropertyValueSingle('Scene.{}.Renderable.ToggleVisibility', {}, 1);",
+        identifier, ghoul::to_string(visability)
+    );
+    openspace::global::scriptEngine->queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void PointDataMessageHandler::preSyncUpdate() {
@@ -265,14 +288,21 @@ std::string formatUpdateMessage(std::string_view messageType,
     return fmt::format("{}{}{}", messageType, lengthOfSubject, subject);
 }
 
+const Renderable* PointDataMessageHandler::getRenderable(const std::string& identifier) const {
+    const Renderable* r = renderable(identifier);
+    if (!r) {
+        LERROR(fmt::format("No renderable with identifier '{}' was found", identifier));
+        return nullptr;
+    };
+    return r;
+}
+
 void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& identifier,
                                                           SoftwareConnection& connection)
 {
-    const Renderable* aRenderable = renderable(identifier);
-    if (!aRenderable) {
-        LERROR(fmt::format("Renderable with identifier '{}' doesn't exist", identifier));
-        return;
-    }
+    // Get renderable
+    auto aRenderable = getRenderable(identifier);
+    if (!aRenderable) return;
 
     if (!connection.isConnected()) {
         LERROR(fmt::format(

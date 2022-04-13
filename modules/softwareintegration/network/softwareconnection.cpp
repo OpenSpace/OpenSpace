@@ -24,7 +24,6 @@
 
 #include <modules/softwareintegration/network/softwareconnection.h>
 
-#include <openspace/rendering/renderable.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>

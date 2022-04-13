@@ -54,13 +54,11 @@ public:
 	void stop();
 	void update();
 
-protected:
+private:
 	void disconnect(Peer& peer);
 	void handleNewPeers();
 	void handlePeer(size_t id);
 	void handlePeerMessage(PeerMessage peerMessage);
-
-private:
 	void eventLoop();
 
 	bool isConnected(const Peer& peer) const;

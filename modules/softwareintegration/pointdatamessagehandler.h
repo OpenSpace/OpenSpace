@@ -31,6 +31,8 @@
 
 namespace openspace {
 
+class Renderable;
+
 class PointDataMessageHandler {
 public:
     void handlePointDataMessage(const std::vector<char>& message,
@@ -43,6 +45,8 @@ public:
     void preSyncUpdate();
 
 private:
+    const Renderable* getRenderable(const std::string& identifier) const;
+
     void subscribeToRenderableUpdates(const std::string& identifier,
         SoftwareConnection& connection);
 
