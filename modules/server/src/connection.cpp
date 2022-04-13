@@ -34,6 +34,7 @@
 #include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
 #include <modules/server/include/topics/shortcuttopic.h>
+#include <modules/server/include/topics/skybrowsertopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
 #include <modules/server/include/topics/timetopic.h>
 #include <modules/server/include/topics/topic.h>
@@ -69,6 +70,7 @@ namespace {
     constexpr const char* TriggerPropertyTopicKey = "trigger";
     constexpr const char* BounceTopicKey = "bounce";
     constexpr const char* FlightControllerTopicKey = "flightcontroller";
+    constexpr const char* SkyBrowserKey = "skybrowser";
 } // namespace
 
 namespace openspace {
@@ -109,6 +111,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
     _topicFactory.registerClass<FlightControllerTopic>(FlightControllerTopicKey);
     _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
+    _topicFactory.registerClass<SkyBrowserTopic>(SkyBrowserKey);
 }
 
 void Connection::handleMessage(const std::string& message) {

@@ -434,7 +434,7 @@ namespace {
     glm::vec3 positionTarget = glm::vec3(0.9f, 0.4f, -2.1f);
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
     std::string guiPath = "/Sky Browser";
-    std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
+    std::string url = "http://wwt.openspaceproject.com/";
     double fov = 70.0;
     double size = skybrowser::sizeFromFov(fov, galacticTarget);
 
