@@ -188,13 +188,12 @@ bool Path::hasReachedEnd() const {
         return true;
     }
 
-    constexpr const double RotationEpsilon = 0.0001;
     bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
-    bool isRotationFinished = glm::all(glm::equal(
+    bool isRotationFinished = ghoul::isSameOrientation(
         _prevPose.rotation,
         _end.rotation(),
-        RotationEpsilon
-    ));
+        glm::epsilon<double>()
+    );
 
     return isPositionFinished && isRotationFinished;
 }
