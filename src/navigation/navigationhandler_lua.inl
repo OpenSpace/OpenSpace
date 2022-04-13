@@ -354,6 +354,14 @@ joystickAxis(std::string joystickName, int axis)
     }
 }
 
+/**
+ * Return the complete list of connected joysticks
+ */
+[[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
+    using namespace openspace;
+    return global::navigationHandler->listAllJoysticks();
+}
+
 #include "navigationhandler_lua_codegen.cpp"
 
 } // namespace
