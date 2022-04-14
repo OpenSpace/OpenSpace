@@ -207,6 +207,71 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 }
 #endif // WIN32
 
+void checkJoystickStatus() {
+    using namespace interaction;
+
+    for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
+        ZoneScopedN("Joystick state");
+
+        JoystickInputState& state = global::joystickInputStates->at(i);
+
+        int present = glfwJoystickPresent(i);
+        if (present == GLFW_FALSE) {
+            state.isConnected = false;
+            continue;
+        }
+
+        if (!state.isConnected) {
+            // Joystick was added
+            state.isConnected = true;
+            state.name = glfwGetJoystickName(i);
+
+            std::fill(state.axes.begin(), state.axes.end(), 0.f);
+            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
+
+            // Check axes and buttons
+            glfwGetJoystickAxes(i, &state.nAxes);
+            glfwGetJoystickButtons(i, &state.nButtons);
+        }
+
+        const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
+        state.axes.resize(state.nAxes);
+        std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
+
+        const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
+        state.buttons.resize(state.nButtons);
+
+        for (int j = 0; j < state.nButtons; ++j) {
+            const bool currentlyPressed = buttons[j] == GLFW_PRESS;
+
+            if (currentlyPressed) {
+                switch (state.buttons[j]) {
+                case JoystickAction::Idle:
+                case JoystickAction::Release:
+                    state.buttons[j] = JoystickAction::Press;
+                    break;
+                case JoystickAction::Press:
+                case JoystickAction::Repeat:
+                    state.buttons[j] = JoystickAction::Repeat;
+                    break;
+                }
+            }
+            else {
+                switch (state.buttons[j]) {
+                case JoystickAction::Idle:
+                case JoystickAction::Release:
+                    state.buttons[j] = JoystickAction::Idle;
+                    break;
+                case JoystickAction::Press:
+                case JoystickAction::Repeat:
+                    state.buttons[j] = JoystickAction::Release;
+                    break;
+                }
+            }
+        }
+    }
+}
+
 //
 //  Init function
 //
@@ -320,86 +385,7 @@ void mainInitFunc(GLFWwindow*) {
     }
 
     // Query joystick status, those connected before start up
-    using namespace interaction;
-
-    for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
-        ZoneScopedN("Joystick state");
-
-        JoystickInputState& state = global::joystickInputStates->at(i);
-
-        int present = glfwJoystickPresent(i);
-        if (present == GLFW_FALSE) {
-            state.isConnected = false;
-            continue;
-        }
-
-        if (!state.isConnected) {
-            // Joystick was added
-            state.isConnected = true;
-            state.name = glfwGetJoystickName(i);
-
-            std::fill(state.axes.begin(), state.axes.end(), 0.f);
-            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
-
-            // Check axes and buttons
-            glfwGetJoystickAxes(i, &state.nAxes);
-            if (state.nAxes > JoystickInputState::MaxAxes) {
-                LWARNING(fmt::format(
-                    "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
-                    "All excess axes are ignored",
-                    state.name, state.nAxes, JoystickInputState::MaxAxes
-                ));
-            }
-            glfwGetJoystickButtons(i, &state.nButtons);
-            if (state.nButtons > JoystickInputState::MaxButtons) {
-                LWARNING(fmt::format(
-                    "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
-                    "supported. All excess buttons are ignored",
-                    state.name, state.nButtons, JoystickInputState::MaxButtons
-                ));
-            }
-        }
-
-        const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
-        if (state.nAxes > JoystickInputState::MaxAxes) {
-            state.nAxes = JoystickInputState::MaxAxes;
-        }
-        std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
-
-        const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-        if (state.nButtons > JoystickInputState::MaxButtons) {
-            state.nButtons = JoystickInputState::MaxButtons;
-        }
-
-        for (int j = 0; j < state.nButtons; ++j) {
-            const bool currentlyPressed = buttons[j] == GLFW_PRESS;
-
-            if (currentlyPressed) {
-                switch (state.buttons[j]) {
-                case JoystickAction::Idle:
-                case JoystickAction::Release:
-                    state.buttons[j] = JoystickAction::Press;
-                    break;
-                case JoystickAction::Press:
-                case JoystickAction::Repeat:
-                    state.buttons[j] = JoystickAction::Repeat;
-                    break;
-                }
-            }
-            else {
-                switch (state.buttons[j]) {
-                case JoystickAction::Idle:
-                case JoystickAction::Release:
-                    state.buttons[j] = JoystickAction::Idle;
-                    break;
-                case JoystickAction::Press:
-                case JoystickAction::Repeat:
-                    state.buttons[j] = JoystickAction::Release;
-                    break;
-                }
-            }
-        }
-    }
+    checkJoystickStatus();
 
     LTRACE("main::mainInitFunc(end)");
 }
@@ -419,86 +405,7 @@ void mainPreSyncFunc() {
     }
 
     // Query joystick status, those connected at run time
-    using namespace interaction;
-
-    for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
-        ZoneScopedN("Joystick state");
-
-        JoystickInputState& state = global::joystickInputStates->at(i);
-
-        int present = glfwJoystickPresent(i);
-        if (present == GLFW_FALSE) {
-            state.isConnected = false;
-            continue;
-        }
-
-        if (!state.isConnected) {
-            // Joystick was added
-            state.isConnected = true;
-            state.name = glfwGetJoystickName(i);
-
-            std::fill(state.axes.begin(), state.axes.end(), 0.f);
-            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
-
-            // Check axes and buttons
-            glfwGetJoystickAxes(i, &state.nAxes);
-            if (state.nAxes > JoystickInputState::MaxAxes) {
-                LWARNING(fmt::format(
-                    "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
-                    "All excess axes are ignored",
-                    state.name, state.nAxes, JoystickInputState::MaxAxes
-                ));
-            }
-            glfwGetJoystickButtons(i, &state.nButtons);
-            if (state.nButtons > JoystickInputState::MaxButtons) {
-                LWARNING(fmt::format(
-                    "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
-                    "supported. All excess buttons are ignored",
-                    state.name, state.nButtons, JoystickInputState::MaxButtons
-                ));
-            }
-        }
-
-        const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
-        if (state.nAxes > JoystickInputState::MaxAxes) {
-            state.nAxes = JoystickInputState::MaxAxes;
-        }
-        std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
-
-        const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-        if (state.nButtons > JoystickInputState::MaxButtons) {
-            state.nButtons = JoystickInputState::MaxButtons;
-        }
-
-        for (int j = 0; j < state.nButtons; ++j) {
-            const bool currentlyPressed = buttons[j] == GLFW_PRESS;
-
-            if (currentlyPressed) {
-                switch (state.buttons[j]) {
-                    case JoystickAction::Idle:
-                    case JoystickAction::Release:
-                        state.buttons[j] = JoystickAction::Press;
-                        break;
-                    case JoystickAction::Press:
-                    case JoystickAction::Repeat:
-                        state.buttons[j] = JoystickAction::Repeat;
-                        break;
-                }
-            }
-            else {
-                switch (state.buttons[j]) {
-                    case JoystickAction::Idle:
-                    case JoystickAction::Release:
-                        state.buttons[j] = JoystickAction::Idle;
-                        break;
-                    case JoystickAction::Press:
-                    case JoystickAction::Repeat:
-                        state.buttons[j] = JoystickAction::Release;
-                        break;
-                }
-            }
-        }
-    }
+    checkJoystickStatus();
 
     LTRACE("main::mainPreSyncFunc(end)");
 }
