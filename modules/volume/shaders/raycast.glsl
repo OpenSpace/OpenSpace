@@ -31,8 +31,9 @@ uniform int nClips_#{id};
 uniform vec3 clipNormals_#{id}[8];
 uniform vec2 clipOffsets_#{id}[8];
 
-uniform float opacity_#{id} = 10.0;
-
+uniform float brightness_#{id} = 1.0;
+// unitless factor that multiplies with the brightness [0,1] to achieve desired visuals.
+const float sampling_interval_reference_factor = 500;
 
 // Normalization factor x for radius r [0, 1].
 // value *= 1/(r^x)
@@ -78,8 +79,8 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
         vec3 backColor = color.rgb;
         vec3 backAlpha = color.aaa;
 
-        backColor *= stepSize*opacity_#{id} * clipAlpha;
-        backAlpha *= stepSize*opacity_#{id} * clipAlpha;
+        backColor *= stepSize * brightness_#{id} * sampling_interval_reference_factor * clipAlpha;
+        backAlpha *= stepSize * brightness_#{id} * sampling_interval_reference_factor * clipAlpha;
 
         backColor = clamp(backColor, 0.0, 1.0);
         backAlpha = clamp(backAlpha, 0.0, 1.0);
