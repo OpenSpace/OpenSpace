@@ -67,7 +67,7 @@ public:
 
 private:
     properties::FloatProperty _textureQuality;
-    properties::BoolProperty _renderOnlyOnMaster;
+    properties::BoolProperty _isHidden;
     std::vector<std::unique_ptr<properties::Vec3Property>> _renderCopies;
 
     void bindTexture() override;

@@ -430,7 +430,7 @@ namespace {
     std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
     // Determine starting point on screen for the target
-    glm::vec3 positionBrowser = glm::vec3(-3.f, -3.f, -2.1f);
+    glm::vec3 positionBrowser = glm::vec3(0.f, 0.f, -2.1f);
     glm::vec3 positionTarget = glm::vec3(0.9f, 0.4f, -2.1f);
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
     std::string guiPath = "/Sky Browser";

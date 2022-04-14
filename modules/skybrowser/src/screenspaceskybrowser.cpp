@@ -55,20 +55,19 @@ namespace {
         "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo RenderOnMasterInfo = {
-        "RenderOnlyOnMaster",
-        "Render Only On Master",
-        "Render the interactive sky browser only on the master node (this setting won't "
-        "affect the copies). This setting allows mouse interactions in a dome "
-        "environment."
+    constexpr const openspace::properties::Property::PropertyInfo IsHiddenInfo = {
+        "IsHidden",
+        "Is hidden",
+        "If checked, the browser will be not be displayed. If it is not checked, it will "
+        "be."
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
 
-        // [[codegen::verbatim(RenderOnMasterInfo.description)]]
-        std::optional<bool> renderOnlyOnMaster;
+        // [[codegen::verbatim(IsHiddenInfo.description)]]
+        std::optional<bool> isHidden;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -100,20 +99,20 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     : ScreenSpaceRenderable(dictionary)
     , WwtCommunicator(dictionary)
     , _textureQuality(TextureQualityInfo, 0.5f, 0.25f, 1.f)
-    , _renderOnlyOnMaster(RenderOnMasterInfo, false)
+    , _isHidden(IsHiddenInfo, true)
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textureQuality = p.textureQuality.value_or(_textureQuality);
-    _renderOnlyOnMaster = p.renderOnlyOnMaster.value_or(_renderOnlyOnMaster);
+    _isHidden = p.isHidden.value_or(_isHidden);
 
+    addProperty(_isHidden);
     addProperty(_url);
     addProperty(_browserPixeldimensions);
     addProperty(_reload);
     addProperty(_textureQuality);
-    addProperty(_renderOnlyOnMaster);
 
     _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 
@@ -237,12 +236,7 @@ bool ScreenSpaceSkyBrowser::deinitializeGL() {
 void ScreenSpaceSkyBrowser::render() {
     WwtCommunicator::render();
 
-    // If the sky browser only should be rendered on master, don't use the
-    // global rotation
-    if (_renderOnlyOnMaster && global::windowDelegate->isMaster()) {
-        draw(translationMatrix() * localRotationMatrix() * scaleMatrix());
-    }
-    else if (!_renderOnlyOnMaster) {
+    if (!_isHidden) {
         draw(
             globalRotationMatrix() *
             translationMatrix() *
