@@ -137,6 +137,9 @@ if (OS_MACOSX)
   list(APPEND WEBBROWSER_HELPER_SOURCES src/processhelpermac.cpp)
 endif()
 set(WEBBROWSER_HELPER_SOURCES_WINDOWS src/processhelperwindows.cpp)
+if (OS_LINUX)
+  list(APPEND WEBBROWSER_HELPER_SOURCES src/processhelperwindows.cpp)
+endif()
 APPEND_PLATFORM_SOURCES(WEBBROWSER_HELPER_SOURCES)
 
 set(WEBBROWSER_RESOURCES_MAC_SOURCES_MACOSX
@@ -217,7 +220,6 @@ if (OS_LINUX)
   # Logical target used to link the libcef library.
   add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
   target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-  # Add the custom manifest files to the executable.
 endif (OS_LINUX)
 
 set_property(TARGET ${CEF_HELPER_TARGET} PROPERTY FOLDER "Helper")
