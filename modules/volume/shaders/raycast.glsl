@@ -33,7 +33,7 @@ uniform vec2 clipOffsets_#{id}[8];
 
 uniform float brightness_#{id} = 1.0;
 // unitless factor that multiplies with the brightness [0,1] to achieve desired visuals.
-const float sampling_interval_reference_factor = 500;
+const float sampling_interval_reference_factor = 500.0;
 
 // Normalization factor x for radius r [0, 1].
 // value *= 1/(r^x)
