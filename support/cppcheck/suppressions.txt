@@ -1,6 +1,5 @@
+passedByValue
 useStlAlgorithm
+unknownMacro
 unreadVariable
 unusedFunction
-
-shadowFunction:modules/globebrowsing/src/tileprovider.cpp
-syntaxError:src/scene/profile.cpp:44

@@ -699,7 +699,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     catch (const PathCurve::TooShortPathError& e) {
         LINFO("Already at the requested target");
         // Rethrow e, so the pathnavigator can handle it as well
-        throw e;
+        throw;
     }
     catch (const PathCurve::InsufficientPrecisionError&) {
         // There wasn't enough precision to represent the full curve in world
