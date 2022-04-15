@@ -139,7 +139,7 @@ endif()
 set(WEBBROWSER_HELPER_SOURCES_WINDOWS src/processhelperwindows.cpp)
 if (OS_LINUX)
   list(APPEND WEBBROWSER_HELPER_SOURCES src/processhelperlinux.cpp)
-  set(WEBBROWSER_HELPER_SOURCES_LINUX src/processhelperwindows.cpp)
+  set(WEBBROWSER_HELPER_SOURCES_LINUX src/processhelperlinux.cpp)
 endif()
 APPEND_PLATFORM_SOURCES(WEBBROWSER_HELPER_SOURCES)
 

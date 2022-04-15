@@ -56,7 +56,7 @@ function(run_cef_platform_config cef_root cef_target module_path)
     run_cef_windows_config("${cef_target}" "${cef_root}" "${module_path}")
   endif ()
   if (OS_LINUX)
-    run_cef_linux_config("${cef_target}")
+    run_cef_linux_config("${cef_target}" "${cef_root}")
   endif ()
 endfunction ()
 
@@ -140,7 +140,7 @@ function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
   add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
 endfunction ()
 
-function(run_cef_linux_config CEF_ROOT)
+function(run_cef_linux_config CEF_TARGET CEF_ROOT)
   # Executable target.
   add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
   target_link_libraries(${CEF_TARGET} PUBLIC libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
