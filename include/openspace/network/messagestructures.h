@@ -386,7 +386,7 @@ struct ScriptMessage {
     ScriptMessage(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
-    virtual ~ScriptMessage() {};
+    virtual ~ScriptMessage() {}
 
     std::string _script;
     double _timestamp = 0.0;
