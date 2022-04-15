@@ -139,12 +139,11 @@ function (set_openspace_compile_settings target)
     "-Wunused-exception-parameter"
     "-Wunused-macros"
     "-Wunused-result"
-    "-Wused-but-marked-unused"
     "-Wvariadic-macros"
     "-Wvla"
     "-Wzero-as-null-pointer-constant"
     
-    "-Wno-attributes=codegen::"
+    "-Wno-attributes"
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
   )

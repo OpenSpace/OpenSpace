@@ -208,7 +208,7 @@ void AssetManager::update() {
         const auto it = std::find_if(
             _assets.cbegin(),
             _assets.cend(),
-            [&path](const std::unique_ptr<Asset>& asset) { return asset->path() == path; }
+            [&path](const std::unique_ptr<Asset>& a) { return a->path() == path; }
         );
         if (it == _assets.cend()) {
             LWARNING(fmt::format("Tried to remove unknown asset {}. Skipping", asset));

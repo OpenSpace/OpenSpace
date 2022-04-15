@@ -490,8 +490,8 @@ void ActionDialog::actionRemove() {
             clearActionFields();
 
             _keybindingWidgets.action->clear();
-            for (const Profile::Action& action : _actionData) {
-                _keybindingWidgets.action->addItem(QString::fromStdString(action.identifier));
+            for (const Profile::Action& a : _actionData) {
+                _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
             }
             clearKeybindingFields();
             return;
@@ -596,8 +596,8 @@ void ActionDialog::actionSaved() {
 
     // Update the list of actions available in the action chooser
     _keybindingWidgets.action->clear();
-    for (const Profile::Action& action : _actionData) {
-        _keybindingWidgets.action->addItem(QString::fromStdString(action.identifier));
+    for (const Profile::Action& a : _actionData) {
+        _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
     }
     clearKeybindingFields();
     clearActionFields();
