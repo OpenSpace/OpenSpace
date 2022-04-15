@@ -143,7 +143,7 @@ function (set_openspace_compile_settings target)
     "-Wvla"
     "-Wzero-as-null-pointer-constant"
     
-    "-Wno-attributes"
+    "-Wno-attributes=codegen::"
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
   )
@@ -179,7 +179,7 @@ function (set_openspace_compile_settings target)
     "-Wvla"
     "-Wzero-as-null-pointer-constant"
     
-    "-Wno-attributes=codegen::"
+    "-Wno-attributes"
     "-Wno-deprecated-copy"
     "-Wno-float-equal"
     "-Wno-long-long"
