@@ -1054,10 +1054,8 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
     bool parsingStatusOk = true;
 
     if (_recordingDataMode == DataMode::Binary) {
-        unsigned char frameType;
-
         while (parsingStatusOk) {
-            frameType = readFromPlayback<unsigned char>(_playbackFile);
+            unsigned char frameType = readFromPlayback<unsigned char>(_playbackFile);
             // Check if have reached EOF
             if (!_playbackFile) {
                 LINFO(fmt::format(
@@ -1507,7 +1505,7 @@ bool SessionRecording::playbackScript() {
         _playbackLineNum
     );
 
-    success = checkIfScriptUsesScenegraphNode(kf._script);
+    success &= checkIfScriptUsesScenegraphNode(kf._script);
 
     if (success) {
         success = addKeyframe(
@@ -2257,8 +2255,7 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     inputFstream.close();
 }
 
-std::string SessionRecording::convertFile(std::string filename, int depth)
-{
+std::string SessionRecording::convertFile(std::string filename, int depth) {
     std::string conversionOutFilename = filename;
     std::ifstream conversionInFile;
     std::stringstream conversionInStream;
@@ -2364,10 +2361,8 @@ bool SessionRecording::convertEntries(std::string& inFilename,
     std::string lineParsing;
 
     if (mode == DataMode::Binary) {
-        unsigned char frameType;
-
         while (conversionStatusOk) {
-            frameType = readFromPlayback<unsigned char>(inStream);
+            unsigned char frameType = readFromPlayback<unsigned char>(inStream);
             // Check if have reached EOF
             if (!inStream) {
                 LINFO(fmt::format(

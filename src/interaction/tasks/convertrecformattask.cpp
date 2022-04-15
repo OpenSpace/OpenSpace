@@ -187,7 +187,6 @@ void ConvertRecFormatTask::convertToAscii() {
     datamessagestructures::TimeKeyframe   tkf;
     datamessagestructures::ScriptMessage  skf;
     int lineNum = 1;
-    unsigned char frameType;
     _oFile.open(_outFilePath, std::ifstream::app);
     char tmpType = SessionRecording::DataFormatAsciiTag;
     _oFile.write(&tmpType, 1);
@@ -195,7 +194,7 @@ void ConvertRecFormatTask::convertToAscii() {
 
     bool fileReadOk = true;
     while (fileReadOk) {
-        frameType = readFromPlayback<unsigned char>(_iFile);
+        unsigned char frameType = readFromPlayback<unsigned char>(_iFile);
         // Check if have reached EOF
         if (!_iFile) {
             LINFO(fmt::format(

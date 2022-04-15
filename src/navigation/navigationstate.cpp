@@ -141,32 +141,24 @@ CameraPose NavigationState::cameraPose() const {
 }
 
 ghoul::Dictionary NavigationState::dictionary() const {
-    constexpr const char* KeyAnchor = "Anchor";
-    constexpr const char* KeyAim = "Aim";
-    constexpr const char* KeyPosition = "Position";
-    constexpr const char* KeyUp = "Up";
-    constexpr const char* KeyYaw = "Yaw";
-    constexpr const char* KeyPitch = "Pitch";
-    constexpr const char* KeyReferenceFrame = "ReferenceFrame";
-
     ghoul::Dictionary cameraDict;
-    cameraDict.setValue(KeyPosition, position);
-    cameraDict.setValue(KeyAnchor, anchor);
+    cameraDict.setValue("Position", position);
+    cameraDict.setValue("Anchor", anchor);
 
     if (anchor != referenceFrame) {
-        cameraDict.setValue(KeyReferenceFrame, referenceFrame);
+        cameraDict.setValue("ReferenceFrame", referenceFrame);
     }
     if (!aim.empty()) {
-        cameraDict.setValue(KeyAim, aim);
+        cameraDict.setValue("Aim", aim);
     }
     if (up.has_value()) {
-        cameraDict.setValue(KeyUp, *up);
+        cameraDict.setValue("Up", *up);
 
         if (std::abs(yaw) > Epsilon) {
-            cameraDict.setValue(KeyYaw, yaw);
+            cameraDict.setValue("Yaw", yaw);
         }
         if (std::abs(pitch) > Epsilon) {
-            cameraDict.setValue(KeyPitch, pitch);
+            cameraDict.setValue("Pitch", pitch);
         }
     }
 
