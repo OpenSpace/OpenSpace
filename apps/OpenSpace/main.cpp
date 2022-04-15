@@ -28,6 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -810,6 +811,36 @@ void setSgctDelegateFunctions() {
         vec2 scale = currentWindow->scale();
         return glm::vec2(scale.x, scale.y);
     };
+    sgctDelegate.osDpiScaling = []() {
+        ZoneScoped
+
+        // Detect which DPI scaling to use
+        // 1. If there is a GUI window, use the GUI window's content scale value
+        const Window* dpiWindow = nullptr;
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->hasTag("GUI")) {
+                dpiWindow = window.get();
+                break;
+            }
+        }
+
+        // 2. If there isn't a GUI window, use the first window's value
+        if (!dpiWindow) {
+            dpiWindow = Engine::instance().windows().front().get();
+        }
+
+        glm::vec2 scale = glm::vec2(1.f, 1.f);
+        glfwGetWindowContentScale(dpiWindow->windowHandle(), &scale.x, &scale.y);
+
+        if (scale.x != scale.y) {
+            LWARNING(fmt::format(
+                "Non-square window scaling detected ({0}x{1}), using {0}x{0} instead",
+                scale.x, scale.y
+            ));
+        }
+
+        return scale.x;
+    };
     sgctDelegate.hasGuiWindow = []() {
         ZoneScoped
 
@@ -986,10 +1017,10 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
         }
         else {
             std::filesystem::path c = absPath(config);
-            
+
             std::filesystem::path cj = c;
             cj.replace_extension(".json");
-            
+
             std::filesystem::path cx = c;
             cx.replace_extension(".xml");
 

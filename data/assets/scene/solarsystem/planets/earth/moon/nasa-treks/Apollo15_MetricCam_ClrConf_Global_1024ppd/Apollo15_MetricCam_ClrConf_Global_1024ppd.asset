@@ -1,0 +1,17 @@
+local globeIdentifier = asset.require("scene/solarsystem/planets/earth/moon/moon").Moon.Identifier
+
+local layer = {
+  Identifier = "Apollo15_MetricCam_ClrConf_Global_1024ppd",
+  Name = "Apollo 15 Metric Cam DEM, Colorized Confidence",
+  FilePath = asset.localResource("Apollo15_MetricCam_ClrConf_Global_1024ppd.wms")
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+end)
+
+asset.export("layer", layer)

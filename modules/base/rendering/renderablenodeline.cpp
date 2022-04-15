@@ -212,7 +212,7 @@ void RenderableNodeLine::updateVertexData() {
                 _start.value(), _end.value()
             )
         );
-        
+
         return;
     }
 

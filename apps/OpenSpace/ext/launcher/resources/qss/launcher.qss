@@ -145,6 +145,29 @@ DeltaTimesDialog  QListWidget {
 /*
  * Camera
  */
- CameraDialog  QLabel#error-message {
+CameraDialog  QLabel#error-message {
   min-width: 10em;
+}
+
+/*
+ * Horizons dialog
+ */
+QPlainTextEdit#log {
+  font-family: Courier;
+}
+
+QComboBox#mono {
+  font-family: Courier;
+}
+
+QLabel#thin {
+  font-weight: normal;
+}
+
+QLabel#error {
+  color: rgb(221, 17, 17);
+}
+
+QLabel#normal {
+  color: rgb(0, 0, 0);
 }

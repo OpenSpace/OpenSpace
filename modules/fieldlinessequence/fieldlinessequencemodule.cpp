@@ -74,7 +74,8 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     factory->registerClass<RenderableMovingFieldlines>("RenderableMovingFieldlines");
 }
 
-std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const {
+std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
+{
     return {
         OsflsCreationTask::documentation(),
         RenderableFieldlinesSequence::Documentation()

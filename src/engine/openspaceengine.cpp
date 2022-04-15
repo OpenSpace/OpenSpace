@@ -170,7 +170,7 @@ void OpenSpaceEngine::registerPathTokens() {
         using Override = ghoul::filesystem::FileSystem::Override;
         FileSys.registerPathToken(
             std::move(fullKey),
-            std::move(path.second),
+            path.second,
             Override(overrideBase || overrideTemporary)
         );
     }
@@ -1659,8 +1659,14 @@ void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
 
 void setCameraFromProfile(const Profile& p) {
     if (!p.camera.has_value()) {
-        throw ghoul::RuntimeError("No 'camera' entry exists in the startup profile");
+        // If the camera is not specified, we want to set it to a sensible default value
+        interaction::NavigationState nav;
+        nav.anchor = "Root";
+        nav.referenceFrame = "Root";
+        global::navigationHandler->setNavigationStateNextFrame(nav);
+        return;
     }
+
     std::visit(
         overloaded{
             [](const Profile::CameraNavState& navStateProfile) {

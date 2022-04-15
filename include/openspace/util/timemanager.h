@@ -167,7 +167,7 @@ private:
     bool _shouldSetTime = false;
     Time _timeNextFrame;
 
-    bool _timelineChanged;
+    bool _timelineChanged = false;
 
     double _latestConsumedTimestamp = -std::numeric_limits<double>::max();
     int _nextCallbackHandle = 0;

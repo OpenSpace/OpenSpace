@@ -135,7 +135,10 @@ PathNavigator::PathNavigator()
         { static_cast<int>(Path::Type::AvoidCollision), "AvoidCollision" },
         { static_cast<int>(Path::Type::ZoomOutOverview), "ZoomOutOverview" },
         { static_cast<int>(Path::Type::Linear), "Linear" },
-        { static_cast<int>(Path::Type::AvoidCollisionWithLookAt), "AvoidCollisionWithLookAt"}
+        {
+            static_cast<int>(Path::Type::AvoidCollisionWithLookAt),
+            "AvoidCollisionWithLookAt"
+        }
     });
     addProperty(_defaultPathType);
 
@@ -199,6 +202,16 @@ void PathNavigator::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
     if (!hasCurrentPath() || !_isPlaying) {
+        return;
+    }
+
+    if (!_currentPath->startPoint().node() || !_currentPath->endPoint().node()) {
+        LERROR(
+            "One of the scene graph nodes used in an active camera path "
+            "was removed. Aborting path"
+        );
+        abortPath();
+        global::navigationHandler->orbitalNavigator().setFocusNode("Root", false);
         return;
     }
 

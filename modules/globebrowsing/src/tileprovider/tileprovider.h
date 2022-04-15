@@ -86,7 +86,7 @@ struct TileProvider : public properties::PropertyOwner {
     void deinitialize();
 
     virtual Tile tile(const TileIndex& tileIndex) = 0;
-    
+
     /**
      * Returns the status of a <code>Tile</code>. The <code>Tile::Status</code>
      * corresponds the <code>Tile</code> that would be returned if the function
@@ -94,7 +94,7 @@ struct TileProvider : public properties::PropertyOwner {
      * this point in time.
      */
     virtual Tile::Status tileStatus(const TileIndex& index) = 0;
-    
+
     /**
      * Get the associated depth transform for this TileProvider. This is necessary for
      * TileProviders serving height map data, in order to correcly map pixel values to

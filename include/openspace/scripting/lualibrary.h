@@ -46,7 +46,7 @@ struct LuaLibrary {
         /// The name of the function
         std::string name;
         /// The function pointer that is executed if the function is called
-        lua_CFunction function;
+        lua_CFunction function = nullptr;
         struct Argument {
             /// The name of the arguments
             std::string name;

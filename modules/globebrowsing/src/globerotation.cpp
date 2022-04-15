@@ -110,6 +110,11 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _globe = p.globe;
+    _globe.onChange([this]() {
+        findGlobe();
+        setUpdateVariables();
+    });
+    addProperty(_globe);
 
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { setUpdateVariables(); });

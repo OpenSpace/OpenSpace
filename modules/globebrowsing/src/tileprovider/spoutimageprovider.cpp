@@ -197,7 +197,7 @@ void SpoutImageProvider::update() {
             return;
         }
     }
-    
+
     spoutReceiver->updateReceiver();
 #endif // OPENSPACE_HAS_SPOUT
 }

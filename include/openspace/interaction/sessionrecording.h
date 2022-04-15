@@ -492,7 +492,8 @@ public:
     /**
      * Reads header information from a session recording file
      *
-     * \param stringstream reference to ifstream that contains the session recording file data
+     * \param stringstream reference to ifstream that contains the session recording file
+     *        data
      * \param readLen_chars number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */

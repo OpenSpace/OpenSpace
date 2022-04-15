@@ -41,20 +41,20 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
-#include <functional> 
+#include <functional>
 #include <optional>
 #include <sys/stat.h>
 #include <thread>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableFluxNodes";
-    
+
     constexpr const std::array<const char*, 29> UniformNames = {
-        "streamColor", "nodeSize", "proximityNodesSize", 
+        "streamColor", "nodeSize", "proximityNodesSize",
         "thresholdFlux", "colorMode", "filterLower", "filterUpper", "scalingMode",
         "colorTableRange", "domainLimZ", "nodeSkip", "nodeSkipDefault", "nodeSkipEarth",
         "nodeSkipMethod", "nodeSkipFluxThreshold", "nodeSkipRadiusThreshold",
-        "fluxColorAlpha", "earthPos", "distanceThreshold", "time", "maxNodeDistanceSize", 
+        "fluxColorAlpha", "earthPos", "distanceThreshold", "time", "maxNodeDistanceSize",
         "usingCameraPerspective", "drawCircles", "drawHollow", "useGaussian",
         "perspectiveDistanceFactor", "minMaxNodeSize", "usingPulse",
         "usingGaussianPulse"
@@ -149,7 +149,7 @@ namespace {
         "Skipping Nodes By Flux",
         "Select nodes to skip depending on flux value."
     };
-    constexpr openspace::properties::Property::PropertyInfo 
+    constexpr openspace::properties::Property::PropertyInfo
                                                            RadiusNodeSkipThresholdInfo = {
         "SkippingNodesByRadius",
         "Skipping Nodes By Radius",
@@ -170,7 +170,7 @@ namespace {
         "Max Node Distance Size",
         "The maximum size of the nodes at a certin distance."
     };
-    constexpr openspace::properties::Property::PropertyInfo 
+    constexpr openspace::properties::Property::PropertyInfo
                                                           CameraPerspectiveEnabledInfo = {
         "CameraPerspectiveEnabled",
         "Use Camera perspective",
@@ -193,7 +193,7 @@ namespace {
         "Using fragment shader to draw nodes with Gaussian filter for alpha value."
 
     };
-    constexpr openspace::properties::Property::PropertyInfo 
+    constexpr openspace::properties::Property::PropertyInfo
                                                          PerspectiveDistanceFactorInfo = {
         "PerspectiveDistanceFactor",
         "Perspective Distance factor",
@@ -283,12 +283,12 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     _colorTablePath = p.colorTablePath;
     _transferFunction = std::make_unique<TransferFunction>(_colorTablePath);
     _colorTableRange = p.colorTableRange.value_or(_colorTableRange);
-    
+
     _binarySourceFolderPath = p.sourceFolder;
     if (std::filesystem::is_directory(_binarySourceFolderPath)) {
         // Extract all file paths from the provided folder
         namespace fs = std::filesystem;
-        for (const fs::directory_entry& e : 
+        for (const fs::directory_entry& e :
             fs::directory_iterator(_binarySourceFolderPath))
         {
             if (e.is_regular_file()) {
@@ -303,8 +303,8 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
         }
     }
     else {
-        LERROR(fmt::format("Source folder {} is not a valid directory", 
-            _binarySourceFolderPath
+        LERROR(fmt::format(
+            "Source folder {} is not a valid directory", _binarySourceFolderPath
         ));
     }
 
@@ -339,7 +339,7 @@ void RenderableFluxNodes::initialize() {
     loadNodeData(_goesEnergyBins.option().value);
     computeSequenceEndTime();
 }
-    
+
 void RenderableFluxNodes::initializeGL() {
     // Setup shader program
     _shaderProgram = global::renderEngine->buildRenderProgram(
@@ -353,7 +353,7 @@ void RenderableFluxNodes::initializeGL() {
     _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
-      
+
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
     glGenBuffers(1, &_vertexColorBuffer);
@@ -450,7 +450,7 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
 
 void RenderableFluxNodes::setupProperties() {
     addProperty(_goesEnergyBins);
-        
+
     addPropertySubOwner(_styleGroup);
     addPropertySubOwner(_streamGroup);
     addPropertySubOwner(_nodesAmountGroup);
@@ -537,8 +537,8 @@ void RenderableFluxNodes::populateStartTimes() {
             break;
         }
         //if no file extention but word "time" in file name
-        else if (filePath.find("time") != std::string::npos && 
-                    filePath.find(".") == std::string::npos) 
+        else if (filePath.find("time") != std::string::npos &&
+                    filePath.find(".") == std::string::npos)
         {
             break;
         }
@@ -553,8 +553,8 @@ void RenderableFluxNodes::populateStartTimes() {
 
     if (timeFile.empty()) {
         LERROR(
-            "Could not find a metadata file with time steps, " 
-            "such as a csv, dat, txt or no file extention with 'time' in filename"
+            "Could not find a metadata file with time steps, such as a csv, dat, txt or "
+            "no file extention with 'time' in filename"
         );
     }
 
@@ -566,7 +566,7 @@ void RenderableFluxNodes::populateStartTimes() {
 
     std::string line;
     // gets only first line to "remove" header
-    std::getline(tfs, line);    
+    std::getline(tfs, line);
     std::stringstream s;
     s << line;
 
@@ -640,7 +640,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         LWARNING("Could not find scene graph node 'Earth'");
     }
     glm::vec3 earthPos = earthNode->worldPosition() * data.modelTransform.rotation;
-    
+
     _shaderProgram->setUniform(_uniformCache.streamColor, _streamColor);
     _shaderProgram->setUniform(_uniformCache.nodeSize, _nodeSize);
     _shaderProgram->setUniform(_uniformCache.thresholdFlux, _thresholdFlux);
@@ -659,7 +659,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _fluxNodeskipThreshold
     );
     _shaderProgram->setUniform(
-        _uniformCache.nodeSkipRadiusThreshold, 
+        _uniformCache.nodeSkipRadiusThreshold,
         _radiusNodeSkipThreshold
     );
     _shaderProgram->setUniform(_uniformCache.fluxColorAlpha, _fluxColorAlpha);
@@ -672,11 +672,11 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         global::windowDelegate->applicationTime()
     );
     _shaderProgram->setUniform(
-        _uniformCache.maxNodeDistanceSize, 
+        _uniformCache.maxNodeDistanceSize,
         _maxNodeDistanceSize
     );
     _shaderProgram->setUniform(
-        _uniformCache.usingCameraPerspective, 
+        _uniformCache.usingCameraPerspective,
         _cameraPerspectiveEnabled
     );
     _shaderProgram->setUniform(_uniformCache.drawCircles, _drawingCircles);
@@ -684,20 +684,20 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform(_uniformCache.useGaussian, _gaussianAlphaFilter);
 
     _shaderProgram->setUniform(
-        _uniformCache.perspectiveDistanceFactor, 
+        _uniformCache.perspectiveDistanceFactor,
         _perspectiveDistanceFactor
     );
     _shaderProgram->setUniform(_uniformCache.minMaxNodeSize, _minMaxNodeSize);
     _shaderProgram->setUniform(_uniformCache.usingPulse, _pulseEnabled);
     _shaderProgram->setUniform(
-        _uniformCache.usingGaussianPulse, 
+        _uniformCache.usingGaussianPulse,
         _gaussianPulseEnabled
     );
-        
+
     glm::vec3 cameraPos = data.camera.positionVec3() * data.modelTransform.rotation;
-    
+
     _shaderProgram->setUniform("cameraPos", cameraPos);
-    
+
     if (_colorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
         ghoul::opengl::TextureUnit textureUnit;
         textureUnit.activate();
@@ -776,8 +776,8 @@ void RenderableFluxNodes::update(const UpdateData& data) {
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(
-            *_shaderProgram, 
-            _uniformCache, 
+            *_shaderProgram,
+            _uniformCache,
             UniformNames
         );
     }

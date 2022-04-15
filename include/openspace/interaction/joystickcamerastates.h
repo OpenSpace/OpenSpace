@@ -115,14 +115,14 @@ private:
     struct JoystickCameraState {
         std::string joystickName;
 
-        // We use an array for the axes and a map for the buttons since the axis are going to
-        // be accessed much more often and thus have to be more efficient. And storing a few
-        // extra AxisInformation that are not used will not matter that much; finding an axis
-        // location in a potential map each frame, however, would
+        // We use an array for the axes and a map for the buttons since the axis are going
+        // to be accessed much more often and thus have to be more efficient. And storing
+        // a few extra AxisInformation that are not used will not matter that much;
+        // finding an axis location in a potential map each frame, however, would
         std::array<AxisInformation, JoystickInputState::MaxAxes> axisMapping;
 
-        // This array is used to store the old axis values from the previous frame,
-        // it is used to calculate the difference in the values in the case of a sticky axis
+        // This array is used to store the old axis values from the previous frame, it is
+        // used to calculate the difference in the values in the case of a sticky axis
         std::array<float, JoystickInputState::MaxAxes> prevAxisValues;
 
         struct ButtonInformation {

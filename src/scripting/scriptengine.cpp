@@ -425,39 +425,40 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 "Module '{}' did not provide a documentation in script file {}",
                 library.name, script
             ));
+            lua_pop(state, 1);
+            continue;
         }
-        else {
-            lua_pushnil(state);
-            while (lua_next(state, -2)) {
-                ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
-                try {
-                    const Parameters p = codegen::bake<Parameters>(d);
 
-                    LuaLibrary::Function func;
-                    func.name = p.name;
-                    for (const std::pair<const std::string, std::string>& p : p.arguments)
-                    {
-                        LuaLibrary::Function::Argument arg;
-                        arg.name = p.first;
-                        arg.type = p.second;
-                        func.arguments.push_back(arg);
-                    }
-                    func.returnType = p.returnValue.value_or(func.returnType);
-                    func.helpText = p.documentation.value_or(func.helpText);
-                    library.documentations.push_back(std::move(func));
+        lua_pushnil(state);
+        while (lua_next(state, -2)) {
+            ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
+            try {
+                const Parameters p = codegen::bake<Parameters>(d);
+
+                LuaLibrary::Function func;
+                func.name = p.name;
+                for (const std::pair<const std::string, std::string>& pair : p.arguments)
+                {
+                    LuaLibrary::Function::Argument arg;
+                    arg.name = pair.first;
+                    arg.type = pair.second;
+                    func.arguments.push_back(arg);
                 }
-                catch (const documentation::SpecificationError& e) {
-                    for (const documentation::TestResult::Offense& o : e.result.offenses)
-                    {
-                        LERRORC(o.offender, ghoul::to_string(o.reason));
-                    }
-                    for (const documentation::TestResult::Warning& w : e.result.warnings)
-                    {
-                        LWARNINGC(w.offender, ghoul::to_string(w.reason));
-                    }
-                }
-                lua_pop(state, 1);
+                func.returnType = p.returnValue.value_or(func.returnType);
+                func.helpText = p.documentation.value_or(func.helpText);
+                library.documentations.push_back(std::move(func));
             }
+            catch (const documentation::SpecificationError& e) {
+                for (const documentation::TestResult::Offense& o : e.result.offenses)
+                {
+                    LERRORC(o.offender, ghoul::to_string(o.reason));
+                }
+                for (const documentation::TestResult::Warning& w : e.result.warnings)
+                {
+                    LWARNINGC(w.offender, ghoul::to_string(w.reason));
+                }
+            }
+            lua_pop(state, 1);
         }
         lua_pop(state, 1);
     }
