@@ -39,7 +39,7 @@ namespace openspace::globebrowsing {
  */
 class RangedTime {
 public:
-    RangedTime() {};
+    RangedTime() {}
 
     /*
      * Constructor that accepts an ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for an

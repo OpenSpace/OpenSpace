@@ -1037,7 +1037,7 @@ void OctreeManager::sliceNodeLodCache(OctreeNode& node) {
         std::vector<float> tmpCol;
         std::vector<float> tmpVel;
         // Ordered map contain the MAX_STARS_PER_NODE brightest stars in all children!
-        for (auto const &[absMag, placement] : node.magOrder) {
+        for (auto const& [absMag, placement] : node.magOrder) {
             auto posBegin = node.posData.begin() + placement * POS_SIZE;
             auto colBegin = node.colData.begin() + placement * COL_SIZE;
             auto velBegin = node.velData.begin() + placement * VEL_SIZE;

@@ -99,7 +99,7 @@ void DataProcessorText::addDataValues(const std::string& data,
 
     // for each data point
     while (getline(memorystream, line)) {
-        if (line.find("#") == 0) {
+        if (!line.empty() && line[0] == '#') {
             continue;
         }
 
@@ -171,7 +171,7 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
 
     int numValues = 0;
     while (getline(memorystream, line)) {
-        if (line.find("#") == 0) {
+        if (!line.empty() && line[0] == '#') {
             continue;
         }
 
