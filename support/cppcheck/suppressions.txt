@@ -1,5 +1,7 @@
+missingInclude
 passedByValue
 useStlAlgorithm
 unknownMacro
 unreadVariable
 unusedFunction
+unusedStructMember
