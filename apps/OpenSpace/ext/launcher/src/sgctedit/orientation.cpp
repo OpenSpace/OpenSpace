@@ -25,35 +25,32 @@
 #include "sgctedit/orientation.h"
 
 #include "sgctedit/orientationdialog.h"
+#include <QCheckBox>
+#include <QLayout>
+#include <QPushButton>
 
-Orientation::Orientation()
-    : _orientationDialog(_orientationValue, this)
-{
+Orientation::Orientation() {
     _layoutOrientationFull = new QHBoxLayout;
-    {
-        QVBoxLayout* layoutOrientationControls = new QVBoxLayout;
-        QPushButton* orientationButton = new QPushButton("Global Orientation");
-        _checkBoxVsync = new QCheckBox("VSync All Windows", this);
-        _checkBoxVsync->setToolTip(
-            "If enabled, the server will frame lock and wait for all client nodes"
-        );
-        layoutOrientationControls->addWidget(_checkBoxVsync);
-        orientationButton->setToolTip(
-            "Opens a separate dialog for setting the pitch, "
-            "yaw, and roll of the camera\n(the orientation applies to all viewports)"
-        );
-        orientationButton->setFocusPolicy(Qt::NoFocus);
-        layoutOrientationControls->addWidget(orientationButton);
-        _layoutOrientationFull->addStretch(1);
-        _layoutOrientationFull->addLayout(layoutOrientationControls);
-        _layoutOrientationFull->addStretch(1);
-        connect(
-            orientationButton,
-            &QPushButton::released,
-            this,
-            &Orientation::orientationDialog
-        );
-    }
+    QVBoxLayout* layoutOrientationControls = new QVBoxLayout;
+    QPushButton* orientationButton = new QPushButton("Global Orientation");
+    _checkBoxVsync = new QCheckBox("VSync All Windows", this);
+    _checkBoxVsync->setToolTip(
+        "If enabled, the server will frame lock and wait for all client nodes"
+    );
+    layoutOrientationControls->addWidget(_checkBoxVsync);
+    orientationButton->setToolTip(
+        "Opens a separate dialog for setting the pitch, "
+        "yaw, and roll of the camera\n(the orientation applies to all viewports)"
+    );
+    orientationButton->setFocusPolicy(Qt::NoFocus);
+    layoutOrientationControls->addWidget(orientationButton);
+    _layoutOrientationFull->addStretch(1);
+    _layoutOrientationFull->addLayout(layoutOrientationControls);
+    _layoutOrientationFull->addStretch(1);
+    connect(
+        orientationButton, &QPushButton::released,
+        this, &Orientation::orientationDialog
+    );
 }
 
 void Orientation::addControlsToParentLayout(QVBoxLayout* parentLayout) {
@@ -61,6 +58,7 @@ void Orientation::addControlsToParentLayout(QVBoxLayout* parentLayout) {
 }
 
 void Orientation::orientationDialog() {
+    OrientationDialog _orientationDialog(_orientationValue, this);
     _orientationDialog.exec();
 }
 

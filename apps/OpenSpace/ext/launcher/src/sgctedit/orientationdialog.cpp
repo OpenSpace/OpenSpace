@@ -25,6 +25,9 @@
 #include "sgctedit/orientationdialog.h"
 
 #include "sgctedit/displaywindowunion.h"
+#include <sgct/config.h>
+#include <QLineEdit>
+#include <ghoul/glm.h>
 
 OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     : QDialog(parent)
@@ -36,18 +39,20 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     _linePitch = new QLineEdit;
     _lineRoll = new QLineEdit;
     _lineYaw = new QLineEdit;
-    _linePitch->setText(QString::number(_orientationValue.x));
-    _lineRoll->setText(QString::number(_orientationValue.z));
-    _lineYaw->setText(QString::number(_orientationValue.y));
+    _linePitch->setText(QString::number(glm::degrees(_orientationValue.x)));
+    _lineRoll->setText(QString::number(glm::degrees(_orientationValue.z)));
+    _lineYaw->setText(QString::number(glm::degrees(_orientationValue.y)));
     {
         QDoubleValidator* validatorPitch = new QDoubleValidator(-90.0, 90.0, 15);
-        QDoubleValidator* validatorRoll = new QDoubleValidator(-360.0, 360.0, 15);
-        QDoubleValidator* validatorYaw = new QDoubleValidator(-180.0, 180.0, 15);
         validatorPitch->setNotation(QDoubleValidator::StandardNotation);
-        validatorRoll->setNotation(QDoubleValidator::StandardNotation);
-        validatorYaw->setNotation(QDoubleValidator::StandardNotation);
         _linePitch->setValidator(validatorPitch);
+        
+        QDoubleValidator* validatorRoll = new QDoubleValidator(-360.0, 360.0, 15);
+        validatorRoll->setNotation(QDoubleValidator::StandardNotation);
         _lineRoll->setValidator(validatorRoll);
+
+        QDoubleValidator* validatorYaw = new QDoubleValidator(-180.0, 180.0, 15);
+        validatorYaw->setNotation(QDoubleValidator::StandardNotation);
         _lineYaw->setValidator(validatorYaw);
     }
     {
@@ -63,6 +68,7 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         layoutPitch->addWidget(labelPitch);
         layoutPitch->addWidget(_linePitch);
         layoutWindow->addLayout(layoutPitch);
+
         QLabel* labelRoll = new QLabel;
         labelRoll ->setText("Roll: ");
         QHBoxLayout* layoutRoll = new QHBoxLayout;
@@ -75,6 +81,7 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         layoutRoll->addWidget(labelRoll);
         layoutRoll->addWidget(_lineRoll);
         layoutWindow->addLayout(layoutRoll);
+
         QLabel* labelYaw = new QLabel;
         labelYaw ->setText("Yaw: ");
         QHBoxLayout* layoutYaw = new QHBoxLayout;
@@ -86,6 +93,7 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         _lineYaw->setToolTip(yawTip);
         layoutYaw->addWidget(labelYaw);
         layoutYaw->addWidget(_lineYaw);
+
         layoutWindow->addLayout(layoutYaw);
     }
     {
@@ -101,19 +109,15 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         layoutButtonBox->addWidget(buttonCancel);
         layoutButtonBox->addStretch(1);
         connect(buttonSave, &QPushButton::released, this, &OrientationDialog::ok);
-        connect(buttonCancel, &QPushButton::released, this, &OrientationDialog::cancel);
+        connect(buttonCancel, &QPushButton::released, this, &OrientationDialog::reject);
         layoutWindow->addLayout(layoutButtonBox);
     }
 }
 
 void OrientationDialog::ok() {
-    _orientationValue.x = _linePitch->text().toFloat() / 180.0 * glm::pi<float>();
-    _orientationValue.y = _lineYaw->text().toFloat() / 180.0 * glm::pi<float>();
-    _orientationValue.z = _lineRoll->text().toFloat() / 180.0 * glm::pi<float>();
+    _orientationValue.x = glm::radians(_linePitch->text().toFloat());
+    _orientationValue.y = glm::radians(_lineYaw->text().toFloat());
+    _orientationValue.z = glm::radians(_lineRoll->text().toFloat());
     _orientationValue.w = 1.0;
     accept();
-}
-
-void OrientationDialog::cancel() {
-    reject();
 }
