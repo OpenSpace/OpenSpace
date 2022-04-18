@@ -29,32 +29,44 @@
 namespace {
     constexpr float MarginFractionOfWidgetSize = 0.05f;
     constexpr int WindowOpacity = 170;
+
+    QRectF computeUnion(const std::vector<QRect>& monitorResolutions) {
+        QRectF res = { 0.f, 0.f, 0.f, 0.f };
+        for (const QRect& m : monitorResolutions) {
+            res |= m;
+        }
+        return res;
+    }
 } // namespace
 
-MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-                       unsigned int nWindows, const std::array<QColor, 4>& winColors)
+MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolutions,
+                       unsigned int nWindows, const std::array<QColor, 4>& windowColors)
     : _monitorWidgetSize(widgetDims)
-    , _monitorResolution(std::move(monitorResolution))
+    , _monitorResolutions(std::move(monitorResolutions))
     , _nWindows(nWindows)
-    , _colorsForWindows(winColors)
+    , _colorsForWindows(windowColors)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     
-    determineMonitorArrangement();
+    QRectF monitorArrangement = computeUnion(_monitorResolutions);
+    float aspectRatio = monitorArrangement.width() / monitorArrangement.height();
     
-    float borderMargin = MarginFractionOfWidgetSize * 2.f;
-    if (_monitorArrangementAspectRatio > 1.0) {
-        borderMargin *= _monitorWidgetSize.width();
-        _monitorWidgetSize.setHeight(_monitorWidgetSize.width()
-            / _monitorArrangementAspectRatio + borderMargin);
+    if (aspectRatio > 1.0) {
+        float borderMargin =
+            2.f * MarginFractionOfWidgetSize * _monitorWidgetSize.width();
+        _monitorWidgetSize.setHeight(
+            _monitorWidgetSize.width() / aspectRatio + borderMargin
+        );
     }
     else {
-        borderMargin *= _monitorWidgetSize.height();
-        _monitorWidgetSize.setWidth(_monitorWidgetSize.height()
-            * _monitorArrangementAspectRatio + borderMargin);
+        float borderMargin =
+            2.f * MarginFractionOfWidgetSize * _monitorWidgetSize.height();
+        _monitorWidgetSize.setWidth(
+            _monitorWidgetSize.height() * aspectRatio + borderMargin
+        );
     }
     setFixedSize(_monitorWidgetSize.width(), _monitorWidgetSize.height());
-    mapMonitorResolutionToWidgetCoordinates();
+    mapMonitorResolutionToWidgetCoordinates(monitorArrangement);
     update();
 }
 
@@ -134,94 +146,68 @@ void MonitorBox::windowDimensionsChanged(unsigned int mIdx, unsigned int wIdx,
     update();
 }
 
-void MonitorBox::determineMonitorArrangement() {
-    for (const QRect& m : _monitorResolution) {
-        if (m.x() < _negativeCorrectionOffsets.x()) {
-            _negativeCorrectionOffsets.setX(m.x());
-        }
-        if (m.y() < _negativeCorrectionOffsets.y()) {
-            _negativeCorrectionOffsets.setY(m.y());
-        }
+void MonitorBox::mapMonitorResolutionToWidgetCoordinates(QRectF monitorArrangement) {
+    float aspectRatio = monitorArrangement.width() / monitorArrangement.height();
 
-        if ((m.x() + m.width() - _negativeCorrectionOffsets.x()) >
-            _monitorArrangementDimensions.width())
-        {
-            _monitorArrangementDimensions.setWidth(
-                m.x() + m.width() - _negativeCorrectionOffsets.x()
-            );
-        }
-        if ((m.y() + m.height() - _negativeCorrectionOffsets.y()) >
-            _monitorArrangementDimensions.height())
-        {
-            _monitorArrangementDimensions.setHeight(
-                m.y() + m.height() - _negativeCorrectionOffsets.y()
-            );
-        }
-    }
-    _monitorArrangementAspectRatio =
-        _monitorArrangementDimensions.width() / _monitorArrangementDimensions.height();
-}
-
-void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
-    std::vector<QSizeF> offsets;
-    if (_monitorArrangementAspectRatio >= 1.f) {
-        offsets = computeScaledResolutionLandscape(_monitorArrangementDimensions.width());
-    }
-    else {
-        offsets = computeScaledResolutionPortrait(_monitorArrangementDimensions.height());
-    }
+    std::vector<QSizeF> offsets =
+        aspectRatio >= 1.f ?
+        computeScaledResolutionLandscape(monitorArrangement, monitorArrangement.width()) :
+        computeScaledResolutionPortrait(monitorArrangement, monitorArrangement.height());
     
-    for (size_t i = 0; i < _monitorResolution.size(); ++i) {
+    for (size_t i = 0; i < _monitorResolutions.size(); ++i) {
         _monitorDimensionsScaled.emplace_back(
             offsets[i].width(),
             offsets[i].height(),
-            _monitorResolution[i].width() * _monitorScaleFactor,
-            _monitorResolution[i].height() * _monitorScaleFactor
+            _monitorResolutions[i].width() * _monitorScaleFactor,
+            _monitorResolutions[i].height() * _monitorScaleFactor
         );
     }
 }
 
-std::vector<QSizeF> MonitorBox::computeScaledResolutionLandscape(float maxWidth) {
+std::vector<QSizeF> MonitorBox::computeScaledResolutionLandscape(
+                                                                QRectF monitorArrangement,
+                                                                           float maxWidth)
+{
     std::vector<QSizeF> offsets;
 
     float marginWidget = _monitorWidgetSize.width() * MarginFractionOfWidgetSize;
     float virtualWidth =
         _monitorWidgetSize.width() * (1.f - MarginFractionOfWidgetSize * 2.f);
     _monitorScaleFactor = virtualWidth / maxWidth;
-    float newHeight = virtualWidth / _monitorArrangementAspectRatio;
 
-    for (size_t i = 0; i < _monitorResolution.size(); ++i) {
-        float x =
-            marginWidget + (_monitorResolution[i].x() - _negativeCorrectionOffsets.x()) *
-            _monitorScaleFactor;
+    float aspectRatio = monitorArrangement.width() / monitorArrangement.height();
+    float newHeight = virtualWidth / aspectRatio;
+
+    for (const QRect& res : _monitorResolutions) {
+        float x = marginWidget + (res.x() - monitorArrangement.x()) * _monitorScaleFactor;
         float y =
             marginWidget +
             (_monitorWidgetSize.height() - newHeight - marginWidget) / 4.f +
-            (_monitorResolution[i].y() - _negativeCorrectionOffsets.y()) *
-            _monitorScaleFactor;
+            (res.y() - monitorArrangement.y()) * _monitorScaleFactor;
         offsets.emplace_back(x, y);
     }
 
     return offsets;
 }
 
-std::vector<QSizeF> MonitorBox::computeScaledResolutionPortrait(float maxHeight) {
+std::vector<QSizeF> MonitorBox::computeScaledResolutionPortrait(QRectF monitorArrangement,
+                                                                float maxHeight)
+{
     std::vector<QSizeF> offsets;
     
     float marginWidget = _monitorWidgetSize.height() * MarginFractionOfWidgetSize;
-    float virtualHeight = _monitorWidgetSize.height()
-        * (1.0 - MarginFractionOfWidgetSize * 2.0);
+    float virtualHeight =
+        _monitorWidgetSize.height() * (1.f - MarginFractionOfWidgetSize * 2.f);
     _monitorScaleFactor = virtualHeight / maxHeight;
-    float newWidth = virtualHeight * _monitorArrangementAspectRatio;
+    
+    float aspectRatio = monitorArrangement.width() / monitorArrangement.height();
+    float newWidth = virtualHeight * aspectRatio;
 
-    for (size_t i = 0; i < _monitorResolution.size(); ++i) {
+    for (const QRect& res : _monitorResolutions) {
         float x = marginWidget +
             (_monitorWidgetSize.width() - newWidth - marginWidget) / 4.f +
-            (_monitorResolution[i].x() - _negativeCorrectionOffsets.x()) *
-            _monitorScaleFactor;
-        float y =
-            marginWidget + (_monitorResolution[i].y() - _negativeCorrectionOffsets.y()) *
-            _monitorScaleFactor;
+            (res.x() - monitorArrangement.x()) * _monitorScaleFactor;
+        float y = marginWidget + (res.y() - monitorArrangement.y()) * _monitorScaleFactor;
         offsets.emplace_back(x, y);
     }
     

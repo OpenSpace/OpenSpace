@@ -46,8 +46,8 @@ public:
      *                  this array matches the window indexing used elsewhere in the
      *                  class. This allows for a unique color for each window.
      */
-    MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-        unsigned int nWindows, const std::array<QColor, 4>& winColors);
+    MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolutions,
+        unsigned int nWindows, const std::array<QColor, 4>& windowColors);
 
     /**
      * Sets the number of windows to be displayed
@@ -73,17 +73,13 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    void determineMonitorArrangement();
-    void mapMonitorResolutionToWidgetCoordinates();
-    std::vector<QSizeF> computeScaledResolutionLandscape(float maxWidth);
-    std::vector<QSizeF> computeScaledResolutionPortrait(float maxHeight);
+    void mapMonitorResolutionToWidgetCoordinates(QRectF monitorArrangement);
+    std::vector<QSizeF> computeScaledResolutionLandscape(QRectF monitorArrangement, float maxWidth);
+    std::vector<QSizeF> computeScaledResolutionPortrait(QRectF monitorArrangement, float maxHeight);
 
     QRectF _monitorWidgetSize;
-    float _monitorArrangementAspectRatio = 1.f;
-    QSizeF _monitorArrangementDimensions = { 0.0, 0.0 };
-    const std::vector<QRect> _monitorResolution;
+    const std::vector<QRect> _monitorResolutions;
     std::vector<QRectF> _monitorDimensionsScaled;
-    QRectF _negativeCorrectionOffsets = { 0.f, 0.f, 0.f, 0.f };
     std::array<QRectF, 4> _windowRendering = {
         QRectF{ 0.f, 0.f, 0.f, 0.f },
         QRectF{ 0.f, 0.f, 0.f, 0.f },
