@@ -95,16 +95,17 @@ private slots:
     void apply();
 
 private:
-    void addDisplayLayout(QHBoxLayout* layout);
     void createWidgets();
+    std::optional<unsigned int> findGuiWindow() const;
+    void saveConfigToSgctFormat();
+    void saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win);
 
     std::shared_ptr<MonitorBox> _monBox = nullptr;
     std::vector<QRect> _monitorSizeList;
     QVBoxLayout* _displayLayout = nullptr;
     QFrame* _displayFrame = nullptr;
-    std::shared_ptr<DisplayWindowUnion> _displayWidget = nullptr;
+    std::unique_ptr<DisplayWindowUnion> _displayWidget = nullptr;
     QRect _monitorWidgetSize = { 0, 0, 500, 500 };
-    //FileSupport* _fileSupportWidget = nullptr;
     Orientation* _orientationWidget = nullptr;
     sgct::config::Cluster& _cluster;
     std::vector<sgct::config::Window>& _windowList;
@@ -117,14 +118,6 @@ private:
         QColor(0x44, 0xAF, 0x69),
         QColor(0xF8, 0x33, 0x3C)
     };
-
-    std::optional<unsigned int> findGuiWindow() const;
-    void saveConfigToSgctFormat();
-    void saveCluster();
-    void saveWindows();
-    void saveUser();
-    sgct::config::Window generateWindow(const WindowControl& wCtrl) const;
-    void saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win);
 
     QHBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;

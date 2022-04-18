@@ -146,8 +146,7 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
 
 void SgctEdit::createWidgets() {
     QVBoxLayout* layoutMainV = new QVBoxLayout;
-    QHBoxLayout* layoutMainH = new QHBoxLayout;
-    _orientationWidget = new Orientation();
+    _orientationWidget = new Orientation;
     {
         _monBox = std::make_shared<MonitorBox>(
             _monitorWidgetSize,
@@ -160,17 +159,28 @@ void SgctEdit::createWidgets() {
         layoutMonBox->addWidget(_monBox.get());
         layoutMonBox->addStretch(1);
         layoutMainV->addLayout(layoutMonBox);
-        addDisplayLayout(layoutMainH);
+
+        // Add Display Layout
+        _displayLayout = new QVBoxLayout;
+        _displayWidget = std::make_unique<DisplayWindowUnion>(
+            *_monBox,
+            _monitorSizeList,
+            _nMaxWindows,
+            _colorsForWindows
+        );
+        _displayFrame = new QFrame;
+        _displayLayout->addWidget(_displayWidget.get());
+        _displayFrame->setLayout(_displayLayout);
+        _displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+        layoutMainV->addWidget(_displayFrame);
     }
     {
-        layoutMainV->addLayout(layoutMainH);
         _orientationWidget->addControlsToParentLayout(layoutMainV);
 
         QFrame* bottomBorder = new QFrame;
         bottomBorder->setFrameShape(QFrame::HLine);
         layoutMainV->addWidget(bottomBorder);
 
-        QVBoxLayout* layoutFullVertical = new QVBoxLayout;
         _saveButton = new QPushButton("Save As");
         _saveButton->setToolTip("Save configuration changes (opens file chooser dialog)");
         _saveButton->setFocusPolicy(Qt::NoFocus);
@@ -183,15 +193,13 @@ void SgctEdit::createWidgets() {
         _applyButton->setToolTip("Apply configuration changes without saving to file");
         _applyButton->setFocusPolicy(Qt::NoFocus);
         connect(_applyButton, &QPushButton::released, this, &SgctEdit::apply);
-        {
-            QHBoxLayout* layoutButtonBox = new QHBoxLayout;
-            layoutButtonBox->addStretch(1);
-            layoutButtonBox->addWidget(_cancelButton);
-            layoutButtonBox->addWidget(_saveButton);
-            layoutButtonBox->addWidget(_applyButton);
-            layoutFullVertical->addLayout(layoutButtonBox);
-        }
-        layoutMainV->addLayout(layoutFullVertical);
+
+        QHBoxLayout* layoutButtonBox = new QHBoxLayout;
+        layoutButtonBox->addStretch(1);
+        layoutButtonBox->addWidget(_cancelButton);
+        layoutButtonBox->addWidget(_saveButton);
+        layoutButtonBox->addWidget(_applyButton);
+        layoutMainV->addLayout(layoutButtonBox);
     }
     setLayout(layoutMainV);
 }
@@ -199,21 +207,6 @@ void SgctEdit::createWidgets() {
 SgctEdit::~SgctEdit() {
     delete _orientationWidget;
     delete _displayLayout;
-}
-
-void SgctEdit::addDisplayLayout(QHBoxLayout* layout) {
-    _displayLayout = new QVBoxLayout;
-    _displayWidget = std::make_shared<DisplayWindowUnion>(
-        _monBox,
-        _monitorSizeList,
-        _nMaxWindows,
-        _colorsForWindows
-    );
-    _displayFrame = new QFrame;
-    _displayLayout->addWidget(_displayWidget.get());
-    _displayFrame->setLayout(_displayLayout);
-    _displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-    layout->addWidget(_displayFrame);
 }
 
 bool SgctEdit::wasSaved() const {
@@ -244,33 +237,6 @@ void SgctEdit::save() {
     }
 }
 
-void SgctEdit::saveCluster() {
-    if (!_orientationWidget) {
-        return;
-    }
-
-    sgct::config::Scene initScene;
-    initScene.orientation = _orientationWidget->orientationValue();
-    _cluster.nodes.clear();
-    sgct::config::Node tmpNode;
-    tmpNode.address = "localhost";
-    tmpNode.port = 20401;
-    _cluster.nodes.push_back(tmpNode);
-    _cluster.masterAddress = "localhost";
-    _cluster.scene = std::move(initScene);
-    _cluster.firmSync = _orientationWidget->vsyncValue();
-}
-
-void SgctEdit::saveUser() {
-    if (!_orientationWidget) {
-        return;
-    }
-    sgct::config::User user;
-    user.eyeSeparation = 0.065f;
-    user.position = { 0.f, 0.f, 4.f };
-    _cluster.users.push_back(user);
-}
-
 std::optional<unsigned int> SgctEdit::findGuiWindow() const {
     for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
         if (_displayWidget->windowControls()[w]->isGuiWindow()) {
@@ -280,51 +246,17 @@ std::optional<unsigned int> SgctEdit::findGuiWindow() const {
     return std::nullopt;
 }
 
-void SgctEdit::saveWindows() {
-    unsigned int windowIndex = 0;
-    for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
-        std::shared_ptr<WindowControl> wCtrl = _displayWidget->windowControls()[w];
-        sgct::config::Window tmpWindow = generateWindow(*wCtrl);
-        tmpWindow.viewports.push_back(generateViewport());
-        tmpWindow.viewports.back().projection = saveProjectionInformation(*wCtrl);
-        tmpWindow.isDecorated = wCtrl->isDecorated();
-        tmpWindow.isFullScreen = isWindowFullscreen(
-            _monitorSizeList[wCtrl->monitorNum()],
-            wCtrl->windowSize()
-        );
-        if (tmpWindow.isFullScreen) {
-            tmpWindow.monitor = wCtrl->monitorNum();
-        }
-        saveWindowsWebGui(windowIndex, tmpWindow);
-        if (!wCtrl->windowName().empty()) {
-            tmpWindow.name = wCtrl->windowName();
-        }
-        tmpWindow.id = windowIndex++;
-        _windowList.push_back(tmpWindow);
-    }
-}
-
-sgct::config::Window SgctEdit::generateWindow(const WindowControl& wCtrl) const {
-    sgct::config::Window tmpWindow;
-    tmpWindow.size = wCtrl.windowSize();
-    tmpWindow.pos = {
-        _monitorSizeList[wCtrl.monitorNum()].x() + wCtrl.windowPos().x,
-        _monitorSizeList[wCtrl.monitorNum()].y() + wCtrl.windowPos().y,
-    };
-    return tmpWindow;
-}
-
 void SgctEdit::saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win) {
     win.viewports.back().isTracked = true;
     std::optional<unsigned int> webGuiWindowIndex = findGuiWindow();
     bool isOneOfWindowsSetAsWebGui = webGuiWindowIndex.has_value();
     if (isOneOfWindowsSetAsWebGui) {
-        if (wIdx == webGuiWindowIndex.value()) {
+        if (wIdx == *webGuiWindowIndex) {
             win.viewports.back().isTracked = false;
             win.tags.push_back("GUI");
         }
-        win.draw2D = (wIdx == webGuiWindowIndex.value());
-        win.draw3D = !(win.draw2D.value());
+        win.draw2D = (wIdx == *webGuiWindowIndex);
+        win.draw3D = !(win.draw2D.value_or(true));
     }
 }
 
@@ -337,14 +269,68 @@ void SgctEdit::apply() {
     if (!std::filesystem::is_directory(absPath(userCfgTempDir))) {
         std::filesystem::create_directories(absPath(userCfgTempDir));
     }
-    _saveTarget = userCfgTempDir + "/" + "apply-without-saving.json";
+    _saveTarget = userCfgTempDir + "/apply-without-saving.json";
     saveConfigToSgctFormat();
     _saveSelected = true;
     accept();
 }
 
 void SgctEdit::saveConfigToSgctFormat() {
-    saveCluster();
-    saveWindows();
-    saveUser();
+    //
+    // Save cluster
+    if (!_orientationWidget) {
+        return;
+    }
+
+    sgct::config::Scene scene;
+    scene.orientation = _orientationWidget->orientationValue();
+    _cluster.scene = std::move(scene);
+
+    {
+        sgct::config::Node node;
+        node.address = "localhost";
+        node.port = 20401;
+        _cluster.nodes = { node };
+    }
+    _cluster.masterAddress = "localhost";
+    _cluster.firmSync = _orientationWidget->vsyncValue();
+
+    //
+    // Save Windows
+    unsigned int windowIndex = 0;
+    for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
+        WindowControl* wCtrl = _displayWidget->windowControls()[w];
+        
+        sgct::config::Window window;
+        window.size = wCtrl->windowSize();
+        window.pos = {
+            _monitorSizeList[wCtrl->monitorNum()].x() + wCtrl->windowPos().x,
+            _monitorSizeList[wCtrl->monitorNum()].y() + wCtrl->windowPos().y,
+        };
+        window.viewports.push_back(generateViewport());
+        window.viewports.back().projection = saveProjectionInformation(*wCtrl);
+        window.isDecorated = wCtrl->isDecorated();
+        window.isFullScreen = isWindowFullscreen(
+            _monitorSizeList[wCtrl->monitorNum()],
+            wCtrl->windowSize()
+        );
+        if (window.isFullScreen) {
+            window.monitor = wCtrl->monitorNum();
+        }
+        saveWindowsWebGui(windowIndex, window);
+        if (!wCtrl->windowName().empty()) {
+            window.name = wCtrl->windowName();
+        }
+        window.id = windowIndex++;
+        _windowList.push_back(window);
+    }
+
+    //
+    // Save User
+    {
+        sgct::config::User user;
+        user.eyeSeparation = 0.065f;
+        user.position = { 0.f, 0.f, 4.f };
+        _cluster.users = { user };
+    }
 }

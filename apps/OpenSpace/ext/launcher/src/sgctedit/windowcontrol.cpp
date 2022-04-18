@@ -28,35 +28,37 @@
 #include "sgctedit/displaywindowunion.h"
 #include "sgctedit/monitorbox.h"
 
-const std::string ProjectionTypeNames[5] = {"Planar", "Fisheye", "Spherical Mirror",
-    "Cylindrical", "Equirectangular"};
-QList<QString> ProjectionTypes = {
-    QString::fromStdString(ProjectionTypeNames[static_cast<int>(
-        WindowControl::ProjectionIndeces::Planar)]),
-    QString::fromStdString(ProjectionTypeNames[static_cast<int>(
-        WindowControl::ProjectionIndeces::Fisheye)]),
-    QString::fromStdString(ProjectionTypeNames[static_cast<int>(
-        WindowControl::ProjectionIndeces::SphericalMirror)]),
-    QString::fromStdString(ProjectionTypeNames[static_cast<int>(
-        WindowControl::ProjectionIndeces::Cylindrical)]),
-    QString::fromStdString(ProjectionTypeNames[static_cast<int>(
-        WindowControl::ProjectionIndeces::Equirectangular)])
-};
-const QList<QString> QualityTypes = {
-    "Low (256)",
-    "Medium (512)",
-    "High (1K)",
-    "1.5K (1536)",
-    "2K (2048)",
-    "4K (4096)",
-    "8K (8192)",
-    "16K (16384)",
-    "32K (32768)",
-    "64K (65536)"
-};
+namespace {
+    const std::string ProjectionTypeNames[5] = { "Planar", "Fisheye", "Spherical Mirror",
+        "Cylindrical", "Equirectangular" };
+    QList<QString> ProjectionTypes = {
+        QString::fromStdString(ProjectionTypeNames[static_cast<int>(
+            WindowControl::ProjectionIndeces::Planar)]),
+        QString::fromStdString(ProjectionTypeNames[static_cast<int>(
+            WindowControl::ProjectionIndeces::Fisheye)]),
+        QString::fromStdString(ProjectionTypeNames[static_cast<int>(
+            WindowControl::ProjectionIndeces::SphericalMirror)]),
+        QString::fromStdString(ProjectionTypeNames[static_cast<int>(
+            WindowControl::ProjectionIndeces::Cylindrical)]),
+        QString::fromStdString(ProjectionTypeNames[static_cast<int>(
+            WindowControl::ProjectionIndeces::Equirectangular)])
+    };
+    const QList<QString> QualityTypes = {
+        "Low (256)",
+        "Medium (512)",
+        "High (1K)",
+        "1.5K (1536)",
+        "2K (2048)",
+        "4K (4096)",
+        "8K (8192)",
+        "16K (16384)",
+        "32K (32768)",
+        "64K (65536)"
+    };
+} // namespace
 
 WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
-                             std::vector<QRect>& monitorDims,
+                             const std::vector<QRect>& monitorDims,
                              const QColor& winColor, QWidget *parent)
     : QWidget(parent)
     , _monIndex(monitorIndex)

@@ -49,8 +49,8 @@ public:
      * \param winColor A  QColor object for this window's unique color
     */
     WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
-        std::vector<QRect>& monitorDims, const QColor& winColor,
-        QWidget *parent);
+        const std::vector<QRect>& monitorDims, const QColor& winColor,
+        QWidget* parent);
     ~WindowControl();
     /**
      * Sets callback function to be invoked when a window's setting changes
@@ -217,7 +217,7 @@ private:
     unsigned int _index = 0;
     bool _aspectRatioLocked = false;
     bool _FovLocked = true;
-    std::vector<QRect>& _monitorResolutions;
+    const std::vector<QRect>& _monitorResolutions;
     int _maxWindowSizePixels = 10000;
     const QColor& _colorForWindow;
     QVBoxLayout* _layoutFullWindow = nullptr;

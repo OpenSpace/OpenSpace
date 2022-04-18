@@ -32,37 +32,34 @@
 #include <QScreen>
 #include <string>
 
-DisplayWindowUnion::DisplayWindowUnion(std::shared_ptr<MonitorBox> monitorRenderBox,
-                 std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
-                 const std::array<QColor, 4>& winColors)
-    : _monBox(monitorRenderBox)
+DisplayWindowUnion::DisplayWindowUnion(MonitorBox& monitorRenderBox,
+                                       const std::vector<QRect>& monitorSizeList,
+                                       unsigned int nMaxWindows,
+                                       const std::array<QColor, 4>& winColors)
+    : _monitorBox(monitorRenderBox)
     , _monitorResolutions(monitorSizeList)
     , _nMaxWindows(nMaxWindows)
     , _winColors(winColors)
 {
     _addWindowButton = new QPushButton("Add Window");
     _removeWindowButton = new QPushButton("Remove Window");
-    //Add all window controls (some will be hidden from GUI initially)
+    // Add all window controls (some will be hidden from GUI initially)
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         initializeWindowControl();
     }
     connect(
-        _addWindowButton,
-        &QPushButton::clicked,
-        this,
-        &DisplayWindowUnion::addWindow
+        _addWindowButton, &QPushButton::clicked,
+        this, &DisplayWindowUnion::addWindow
     );
     connect(
-        _removeWindowButton,
-        &QPushButton::clicked,
-        this,
-        &DisplayWindowUnion::removeWindow
+        _removeWindowButton, &QPushButton::clicked,
+        this, &DisplayWindowUnion::removeWindow
     );
     initializeLayout();
 }
 
 void DisplayWindowUnion::initializeLayout() {
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    QVBoxLayout* layout = new QVBoxLayout;
     {
         QHBoxLayout* layoutMonButton = new QHBoxLayout;
         _removeWindowButton->setToolTip(
@@ -84,13 +81,12 @@ void DisplayWindowUnion::initializeLayout() {
 
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         QVBoxLayout* layoutForNextWindow = _windowControl[i]->initializeLayout();
-        _winCtrlLayouts.push_back(layoutForNextWindow);
-        QWidget* layoutWrapper = new QWidget();
+        QWidget* layoutWrapper = new QWidget;
         layoutWrapper->setLayout(layoutForNextWindow);
         _layoutWindowWrappers.push_back(layoutWrapper);
         layoutWindows->addWidget(layoutWrapper);
         if (i < (_nMaxWindows - 1)) {
-            QFrame* frameForNextWindow = new QFrame();
+            QFrame* frameForNextWindow = new QFrame;
             frameForNextWindow->setFrameShape(QFrame::VLine);
             _frameBorderLines.push_back(frameForNextWindow);
             layoutWindows->addWidget(frameForNextWindow);
@@ -99,10 +95,16 @@ void DisplayWindowUnion::initializeLayout() {
     _nWindowsDisplayed = 1;
     showWindows();
     layout->addLayout(layoutWindows);
+    setLayout(layout);
 }
 
-std::vector<std::shared_ptr<WindowControl>> DisplayWindowUnion::windowControls() const {
-    return _windowControl;
+std::vector<WindowControl*> DisplayWindowUnion::windowControls() const {
+    std::vector<WindowControl*> res;
+    res.reserve(_windowControl.size());
+    for (const std::unique_ptr<WindowControl>& winCtrl : _windowControl) {
+        res.push_back(winCtrl.get());
+    }
+    return res;
 }
 
 unsigned int DisplayWindowUnion::nWindows() const {
@@ -133,47 +135,48 @@ void DisplayWindowUnion::showWindows() {
     }
     _removeWindowButton->setEnabled(_nWindowsDisplayed > 1);
     _addWindowButton->setEnabled(_nWindowsDisplayed != _nMaxWindows);
-    for (std::shared_ptr<WindowControl> w : _windowControl) {
+    for (const std::unique_ptr<WindowControl>& w : _windowControl) {
         w->showWindowLabel(_nWindowsDisplayed > 1);
     }
-    _monBox->setNumWindowsDisplayed(_nWindowsDisplayed);
+    _monitorBox.setNumWindowsDisplayed(_nWindowsDisplayed);
 }
 
 void DisplayWindowUnion::initializeWindowControl() {
-    if (_nWindowsAllocated < _nMaxWindows) {
-        unsigned int monitorNumForThisWindow = 0;
-        if (_nMaxWindows > 3 && _nWindowsAllocated >= 2) {
-            monitorNumForThisWindow = 1;
+    if (_nWindowsAllocated >= _nMaxWindows) {
+        return;
+    }
+
+    const unsigned int monitorNumForThisWindow =
+        (_nMaxWindows > 3 && _nWindowsAllocated >= 2) ? 1 : 0;
+
+    std::unique_ptr<WindowControl> ctrl = std::make_unique<WindowControl>(
+        monitorNumForThisWindow,
+        _nWindowsAllocated,
+        _monitorResolutions,
+        _winColors[_nWindowsAllocated],
+        this
+    );
+    WindowControl* ctrlPtr = ctrl.get();
+    _windowControl.push_back(std::move(ctrl));
+    
+    ctrlPtr->setWindowChangeCallback(
+        [this](int monIndex, int winIndex, const QRectF& newDims) {
+            _monitorBox.windowDimensionsChanged(monIndex, winIndex, newDims);
         }
-        _windowControl.push_back(
-            std::make_shared<WindowControl>(
-                monitorNumForThisWindow,
-                _nWindowsAllocated,
-                _monitorResolutions,
-                _winColors[_nWindowsAllocated],
-                this
-            )
-        );
-        _windowControl.back()->setWindowChangeCallback(
-            [this](int monIndex, int winIndex, const QRectF& newDims) {
-                _monBox->windowDimensionsChanged(monIndex, winIndex, newDims);
-            }
-        );
-        _windowControl.back()->setWebGuiChangeCallback(
-            [this](unsigned int winIndex) {
-                for (unsigned int w = 0; w < _nMaxWindows; ++w) {
-                    if (w != winIndex) {
-                        _windowControl[w]->uncheckWebGuiOption();
-                    }
+    );
+    ctrlPtr->setWebGuiChangeCallback(
+        [this](unsigned int winIndex) {
+            for (unsigned int w = 0; w < _nMaxWindows; ++w) {
+                if (w != winIndex) {
+                    _windowControl[w]->uncheckWebGuiOption();
                 }
             }
-        );
-        _monBox->mapWindowResolutionToWidgetCoordinates(
-            monitorNumForThisWindow,
-            _nWindowsAllocated,
-            _windowControl.back()->dimensions()
-        );
-        _nWindowsAllocated++;
-    }
+        }
+    );
+    _monitorBox.mapWindowResolutionToWidgetCoordinates(
+        monitorNumForThisWindow,
+        _nWindowsAllocated,
+        _windowControl.back()->dimensions()
+    );
+    _nWindowsAllocated++;
 }
-

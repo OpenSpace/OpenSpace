@@ -74,7 +74,7 @@ private slots:
     void orientationDialog();
 
 private:
-    sgct::quat _orientationValue = {0.f, 0.f, 0.f, 0.f};
+    sgct::quat _orientationValue = { 0.f, 0.f, 0.f, 0.f };
     OrientationDialog _orientationDialog;
     QHBoxLayout* _layoutOrientationFull = nullptr;
     QCheckBox* _checkBoxVsync = nullptr;

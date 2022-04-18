@@ -21,27 +21,19 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #ifndef __OPENSPACE_UI_LAUNCHER___DISPLAYWINDOWUNION___H__
 #define __OPENSPACE_UI_LAUNCHER___DISPLAYWINDOWUNION___H__
 
 #include <QWidget>
 
-#include "windowcontrol.h"
 #include "monitorbox.h"
-#include <QCheckBox>
-#include <QComboBox>
-#include <QIntValidator>
-#include <QLabel>
-#include <QLayout>
-#include <QLineEdit>
-#include <QPainter>
-#include <QPainterPath>
-#include <QPoint>
-#include <QPushButton>
-#include <QTextBrowser>
-#include <QVector>
+#include "windowcontrol.h"
 #include <memory>
 #include <vector>
+
+class QFrame;
+class QVBoxLayout;
 
 class DisplayWindowUnion : public QWidget {
 Q_OBJECT
@@ -58,21 +50,23 @@ public:
      * \param winColors An array of QColor objects for window colors. The indexing of
      *                  this array matches the window indexing used elsewhere in the
      *                  class. This allows for a unique color for each window.
-    */
-    DisplayWindowUnion(std::shared_ptr<MonitorBox> monitorRenderBox,
-        std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
+     */
+    DisplayWindowUnion(MonitorBox& monitorRenderBox,
+        const std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
         const std::array<QColor, 4>& winColors);
+    
     /**
      * Returns a vector of pointers to all WindowControl objects for all windows
      *
      * \return vector of pointers of WindowControl objects
-    */
-    std::vector<std::shared_ptr<WindowControl>> windowControls() const;
+     */
+    std::vector<WindowControl*> windowControls() const;
+    
     /**
      * Returns the current number of windows
      *
      * \return the currently-selected number of windows in unsigned int
-    */
+     */
     unsigned int nWindows() const;
 
 private slots:
@@ -83,20 +77,20 @@ private:
     void initializeWindowControl();
     void initializeLayout();
     void showWindows();
-    std::shared_ptr<MonitorBox> _monBox;
-    std::vector<QRect>& _monitorResolutions;
+
+    MonitorBox& _monitorBox;
+    const std::vector<QRect>& _monitorResolutions;
+    const unsigned int _nMaxWindows = 3;
+    const std::array<QColor, 4>& _winColors;
+
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
-    unsigned int _nMaxWindows = 3;
-    const std::array<QColor, 4>& _winColors;
-    std::vector<std::shared_ptr<WindowControl>> _windowControl;
+    std::vector<std::unique_ptr<WindowControl>> _windowControl;
     QPushButton* _addWindowButton = nullptr;
     QPushButton* _removeWindowButton = nullptr;
     unsigned int _monitorIdx = 0;
-    std::vector<QVBoxLayout*> _winCtrlLayouts;
     std::vector<QWidget*> _layoutWindowWrappers;
     std::vector<QFrame*> _frameBorderLines;
-    QFrame* _borderFrame = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___DISPLAYWINDOWUNION___H__
