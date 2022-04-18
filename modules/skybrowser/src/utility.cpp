@@ -173,9 +173,9 @@ glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate) {
 glm::dvec2 fovWindow() {
     // OpenSpace FOV
     glm::dvec2 windowDim = glm::dvec2(global::windowDelegate->currentWindowSize());
-    double windowRatio = windowDim.y / windowDim.x;
+    double ratio = windowDim.y / windowDim.x;
     double hFov = global::windowDelegate->getHorizFieldOfView();
-    glm::dvec2 OpenSpaceFOV = glm::dvec2(hFov, hFov * windowRatio);
+    glm::dvec2 OpenSpaceFOV = glm::dvec2(hFov, hFov * ratio);
     return OpenSpaceFOV;
 }
 

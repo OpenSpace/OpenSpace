@@ -208,6 +208,8 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
+            // true => we were not in an interval the previous frame but now we are
+            _activeTriggerTimeIndex == -1 ||
             // true => We stepped back to a time represented by another state
             currentTime < _startTimes[_activeTriggerTimeIndex] ||
             // true => We stepped forward to a time represented by another state

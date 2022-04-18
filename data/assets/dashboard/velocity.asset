@@ -1,8 +1,8 @@
 local item = {
   Type = "DashboardItemVelocity",
-  Identifier = "GlobeLocation",
+  Identifier = "CameraVelocity",
   Simplification = true,
-  GuiName = "Velocity"
+  GuiName = "Camera Velocity"
 }
 
 asset.onInitialize(function()

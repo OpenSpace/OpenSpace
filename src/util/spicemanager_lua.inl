@@ -58,7 +58,7 @@ namespace {
         openspace::SpiceManager::ref().spiceBodies(includeBuiltIn);
 
     std::map<std::string, std::string> res;
-    for (const std::pair<const int, std::string>& p : bodies) {
+    for (const std::pair<int, std::string>& p : bodies) {
         res[std::to_string(p.first)] = p.second;
     }
     return res;

@@ -119,7 +119,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
 
     std::array<std::string, 3> variables = reader.gridVariableNames();
 
-    if (variables.size() == 3 && _autoDomainBounds) {
+    if (_autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
             reader.minValue(variables[0]),
             reader.minValue(variables[1]),

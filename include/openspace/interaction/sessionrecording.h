@@ -81,7 +81,7 @@ public:
         std::string substringReplacement;
         ScriptSubstringReplace(std::string found, std::string replace)
             : substringFound(found)
-            , substringReplacement(replace) {};
+            , substringReplacement(replace) {}
     };
 
     static const size_t FileHeaderVersionLength = 5;
@@ -858,7 +858,7 @@ public:
 
             _script.erase();
             _script = temp.data();
-        };
+        }
     };
 
 protected:

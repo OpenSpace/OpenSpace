@@ -205,6 +205,16 @@ void PathNavigator::updateCamera(double deltaTime) {
         return;
     }
 
+    if (!_currentPath->startPoint().node() || !_currentPath->endPoint().node()) {
+        LERROR(
+            "One of the scene graph nodes used in an active camera path "
+            "was removed. Aborting path"
+        );
+        abortPath();
+        global::navigationHandler->orbitalNavigator().setFocusNode("Root", false);
+        return;
+    }
+
     // Prevent long delta times due to e.g. computations from other actions to cause
     // really big jumps in the motion along the path
     // OBS! Causes problems if the general FPS is lower than 10, but then the user should

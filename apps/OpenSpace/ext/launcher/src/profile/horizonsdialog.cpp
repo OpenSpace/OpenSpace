@@ -120,7 +120,7 @@ void HorizonsDialog::typeOnChange(int index) {
     }
 }
 
-void HorizonsDialog::downloadProgress(qint64 value, qint64 total) {
+void HorizonsDialog::downloadProgress(int value, int total) {
     if (total < 0) {
         _downloadProgress->setRange(0, 0);
         return;

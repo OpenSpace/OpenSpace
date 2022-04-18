@@ -520,34 +520,25 @@ bool RenderableFluxNodes::isReady() const {
 
 void RenderableFluxNodes::populateStartTimes() {
     std::string timeFile;
-    std::string fileType;
     for (const std::string& filePath : _binarySourceFiles) {
-        timeFile = filePath;
-
         if (filePath.substr(filePath.find_last_of(".") + 1) == "csv") {
-            fileType = "csv";
+            timeFile = filePath;
             break;
         }
         else if (filePath.substr(filePath.find_last_of(".") + 1) == "dat") {
-            fileType = "dat";
+            timeFile = filePath;
             break;
         }
         else if (filePath.substr(filePath.find_last_of(".") + 1) == "txt") {
-            fileType = "txt";
+            timeFile = filePath;
             break;
         }
         //if no file extention but word "time" in file name
         else if (filePath.find("time") != std::string::npos &&
                     filePath.find(".") == std::string::npos)
         {
+            timeFile = filePath;
             break;
-        }
-        else {
-            LERROR(fmt::format("Error in file type or naming of file '{}'. ",
-                "Time meta file supports csv, dat, txt or without file extention ",
-                "(but then have to include 'time' in filename)", filePath
-            ));
-            timeFile.clear();
         }
     }
 
@@ -750,6 +741,8 @@ void RenderableFluxNodes::update(const UpdateData& data) {
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
+            // true => we were not in an interval the previous frame but now we are
+            _activeTriggerTimeIndex == -1 ||
             // true => We stepped back to a time represented by another state
             currentTime < _startTimes[_activeTriggerTimeIndex] ||
             // true => We stepped forward to a time represented by another state

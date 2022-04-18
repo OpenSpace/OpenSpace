@@ -76,11 +76,12 @@ public:
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
+    void setTransferFunction(std::shared_ptr<openspace::TransferFunction> 
+        transferFunction);
 
     void setStepSize(float stepSize);
-    float opacity() const;
-    void setOpacity(float opacity);
+    float brightness() const;
+    void setBrightness(float brightness);
     float rNormalization() const;
     void setRNormalization(float rNormalization);
     float rUpperBound() const;
@@ -98,7 +99,7 @@ private:
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
     glm::mat4 _modelTransform = glm::mat4(1.f);
-    float _opacity = 20.f;
+    float _brightness = 1.f;
     float _rNormalization = 0.f;
     float _rUpperBound = 1.f;
 

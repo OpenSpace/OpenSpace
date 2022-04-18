@@ -232,7 +232,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
 
     // Read all data in one go
     std::vector<CacheKeyframe> cacheKeyframes;
-    cacheKeyframes.reserve(nKeyframes);
+    cacheKeyframes.resize(nKeyframes);
     fileStream.read(
         reinterpret_cast<char*>(cacheKeyframes.data()),
         sizeof(CacheKeyframe) * nKeyframes

@@ -428,6 +428,9 @@ ghoul::Dictionary toParameter(const Event& e) {
             d.setValue(
                 "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
             );
+            d.setValue(
+                "Payload", std::string(static_cast<const CustomEvent&>(e).payload)
+            );
             break;
         default:
             break;
@@ -608,7 +611,7 @@ EventPointJwstRequested::EventPointJwstRequested(double ra_, double dec_)
     , dec(dec_)
 {}
 
-CustomEvent::CustomEvent(std::string_view subtype_, const void* payload_)
+CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)
     : Event(Type)
     , subtype(subtype_)
     , payload(payload_)
