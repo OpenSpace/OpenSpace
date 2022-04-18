@@ -296,7 +296,11 @@ TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) const {
             return foundBrowser || foundTarget || foundTargetNode;
         }
     );
-    return it != _targetsBrowsers.end() ? it->get() : nullptr;
+    TargetBrowserPair* found = it != _targetsBrowsers.end() ? it->get() : nullptr;
+    if (found == nullptr) {
+        LINFO("Identifier " + id + " not found.");
+    }
+    return found;
 }
 
 void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
@@ -420,7 +424,8 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::RemoveRenderCopy,
             codegen::lua::StartFinetuningTarget,
             codegen::lua::FinetuneTargetPosition,
-            codegen::lua::ScrollOverBrowser
+            codegen::lua::ScrollOverBrowser,
+            codegen::lua::LoadingImageCollectionComplete
         }
     };
 }

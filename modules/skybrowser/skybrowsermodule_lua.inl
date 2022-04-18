@@ -51,14 +51,18 @@ namespace {
     if (module->isCameraInSolarSystem()) {
         TargetBrowserPair* selected = module->getPair(module->selectedBrowserId());
         if (selected) {
+            if (!selected->isImageCollectionLoaded()) {
+                LINFO("Image collection is not yet loaded to AAS WorldWide Telescope");
+                return;
+            }
             const ImageData& image = module->getWwtDataHandler()->getImage(imageIndex);
             // Load image into browser
             std::string str = image.name;
+            // Check if character is ASCII - if it isn't, remove
             str.erase(
                 std::remove_if(
                     str.begin(), str.end(),
                     [](char c) {
-                        // Check if character is ASCII - if it isn't, remove
                         return c < 0 || c >= 128;
                     }
                 ),
@@ -708,6 +712,27 @@ namespace {
         glm::vec2 endScreenSpace = skybrowser::pixelToScreenSpace2d(endPosition);
         glm::vec2 translation = endScreenSpace - startScreenSpace;
         pair->fineTuneTarget(startScreenSpace, translation);
+    }
+}
+
+/**
+ * Sets the image collection as loaded in the sky browser
+ */
+[[codegen::luawrap]] void loadingImageCollectionComplete(std::string identifier) {
+    using namespace openspace;
+
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    TargetBrowserPair* pair = module->getPair(identifier);
+    if (pair) {
+        LINFO("Image collection is loaded in Screen Space Sky Browser " + identifier);
+        pair->setImageCollectionIsLoaded(true);
+        // Add all selected images to WorldWide Telescope
+        const std::deque<int>& images = pair->selectedImages();
+        std::for_each(images.rbegin(), images.rend(), [&](int index) {
+            const ImageData& image = module->getWwtDataHandler()->getImage(index);
+            // Index of image is used as layer ID as it is unique in the image data set
+            pair->browser()->addImageLayerToWwt(image.imageUrl, index);
+        });
     }
 }
 

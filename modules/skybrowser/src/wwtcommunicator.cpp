@@ -42,16 +42,20 @@ WwtCommunicator::WwtCommunicator(const ghoul::Dictionary& dictionary)
 
 WwtCommunicator::~WwtCommunicator() {}
 
-void WwtCommunicator::displayImage(const std::string& url, int i) {
+void WwtCommunicator::selectImage(const std::string& url, int i) {
     // Ensure there are no duplicates
     auto it = std::find(_selectedImages.begin(), _selectedImages.end(), i);
     if (it == _selectedImages.end()) {
         // Push newly selected image to front
         _selectedImages.push_front(i);
-        // Index of image is used as layer ID as it is unique in the image data set
-        sendMessageToWwt(addImageMessage(std::to_string(i), url));
-        sendMessageToWwt(setImageOpacityMessage(std::to_string(i), 1.0));
+        addImageLayerToWwt(url, i);
     }
+}
+
+void WwtCommunicator::addImageLayerToWwt(const std::string& url, int i) {
+    // Index of image is used as layer ID as it is unique in the image data set
+    sendMessageToWwt(addImageMessage(std::to_string(i), url));
+    sendMessageToWwt(setImageOpacityMessage(std::to_string(i), 1.0));
 }
 
 void WwtCommunicator::removeSelectedImage(int i) {
@@ -125,8 +129,8 @@ glm::dvec2 WwtCommunicator::fieldsOfView() const {
     return browserFov;
 }
 
-bool WwtCommunicator::hasLoadedImages() const {
-    return _hasLoadedImages;
+bool WwtCommunicator::isImageCollectionLoaded() const {
+    return _isImageCollectionLoaded;
 }
 
 glm::dvec2 WwtCommunicator::equatorialAim() const {
@@ -150,8 +154,9 @@ void WwtCommunicator::setImageOrder(int i, int order) {
 }
 
 void WwtCommunicator::loadImageCollection(const std::string& collection) {
-    sendMessageToWwt(loadCollectionMessage(collection));
-    _hasLoadedImages = true;
+    if (!_isImageCollectionLoaded) {
+        sendMessageToWwt(loadCollectionMessage(collection));
+    }
 }
 
 void WwtCommunicator::setImageOpacity(int i, float opacity) const {
@@ -166,7 +171,6 @@ void WwtCommunicator::hideChromeInterface(bool shouldHide) const {
 }
 
 void WwtCommunicator::update() {
-    Browser::update();
     // Cap how messages are passed
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::chrono::system_clock::duration timeSinceLastUpdate = now - _lastUpdateTime;
@@ -180,12 +184,16 @@ void WwtCommunicator::update() {
             updateBorderColor();
             _borderColorIsDirty = false;
         }
+        if (_shouldReload) {
+            _isImageCollectionLoaded = false;
+        }
         _lastUpdateTime = std::chrono::system_clock::now();
     }
+    Browser::update();
 }
 
-void WwtCommunicator::setHasLoadedImages(bool isLoaded) {
-    _hasLoadedImages = isLoaded;
+void WwtCommunicator::setImageCollectionIsLoaded(bool isLoaded) {
+    _isImageCollectionLoaded = isLoaded;
 }
 
 void WwtCommunicator::setIdInBrowser(const std::string& id) const {

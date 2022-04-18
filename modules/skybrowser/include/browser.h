@@ -86,6 +86,9 @@ protected:
 
     void executeJavascript(const std::string& script) const;
 
+    bool _isUrlDirty = false;
+    bool _isDimensionsDirty = false;
+    bool _shouldReload = false;
 private:
     class RenderHandler : public WebRenderHandler {
     public:
@@ -98,10 +101,6 @@ private:
     std::unique_ptr<BrowserInstance> _browserInstance;
     CefRefPtr<RenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-
-    bool _isUrlDirty = false;
-    bool _isDimensionsDirty = false;
-    bool _shouldReload = false;
 };
 
 } // namespace openspace

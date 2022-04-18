@@ -186,7 +186,7 @@ const std::deque<int>& TargetBrowserPair::selectedImages() const {
 
 void TargetBrowserPair::selectImage(const ImageData& image, int i) {
     // Load image into browser
-    _browser->displayImage(image.imageUrl, i);
+    _browser->selectImage(image.imageUrl, i);
 
     // If the image has coordinates, move the target
     if (image.hasCelestialCoords) {
@@ -195,6 +195,10 @@ void TargetBrowserPair::selectImage(const ImageData& image, int i) {
         glm::dvec3 galactic = skybrowser::equatorialToGalactic(image.equatorialCartesian);
         startAnimation(galactic * skybrowser::CelestialSphereRadius, image.fov);
     }
+}
+
+void TargetBrowserPair::addImageLayerToWwt(const std::string& url, int i) {
+    _browser->addImageLayerToWwt(url, i);
 }
 
 void TargetBrowserPair::removeSelectedImage(int i) {
@@ -223,6 +227,10 @@ void TargetBrowserPair::updateBrowserSize() {
 
 std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::renderCopies() const {
     return _browser->renderCopies();
+}
+
+bool TargetBrowserPair::isImageCollectionLoaded() {
+    return _browser->isImageCollectionLoaded();
 }
 
 void TargetBrowserPair::setIsSyncedWithWwt(bool isSynced) {
@@ -255,6 +263,10 @@ void TargetBrowserPair::setScreenSpaceSize(const glm::vec2& dimensions) {
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
     _browser->setVerticalFovWithScroll(scroll);
+}
+
+void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
+    _browser->setImageCollectionIsLoaded(isLoaded);
 }
 
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {

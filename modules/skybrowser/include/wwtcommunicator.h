@@ -44,21 +44,22 @@ public:
     void update();
 
     // WorldWide Telescope communication
-    void displayImage(const std::string& url, int i);
+    void selectImage(const std::string& url, int i);
+    void addImageLayerToWwt(const std::string& url, int i);
     void removeSelectedImage(int i);
     void setImageOrder(int i, int order);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity) const;
     void hideChromeInterface(bool shouldHide) const;
 
-    bool hasLoadedImages() const;
+    bool isImageCollectionLoaded() const;
     double verticalFov() const;
     glm::ivec3 borderColor() const;
     glm::dvec2 equatorialAim() const;
     glm::dvec2 fieldsOfView() const;
     const std::deque<int>& getSelectedImages() const;
 
-    void setHasLoadedImages(bool isLoaded);
+    void setImageCollectionIsLoaded(bool isLoaded);
     void setVerticalFov(double vfov);
     void setIsSyncedWithWwt(bool isSynced);
     void setEquatorialAim(glm::dvec2 equatorial);
@@ -78,7 +79,7 @@ protected:
     glm::ivec3 _borderColor = glm::ivec3(70);
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     double _targetRoll = 0.0;
-    bool _hasLoadedImages = false;
+    bool _isImageCollectionLoaded = false;
     std::deque<int> _selectedImages;
 
 private:

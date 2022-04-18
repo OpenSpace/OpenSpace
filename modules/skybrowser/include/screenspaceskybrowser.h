@@ -48,15 +48,14 @@ public:
 
     float opacity() const;
     glm::vec2 size() const;
+    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
 
     void setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
     void setScreenSpaceSize(glm::vec2 newSize);
-    void updateScreenSpaceSize();
-
-    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     void setIdInBrowser() const;
 
+    void updateScreenSpaceSize();
     void updateTextureResolution();
 
     // Copies rendered

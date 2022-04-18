@@ -61,6 +61,7 @@ public:
     void sendIdToBrowser() const;
     void updateBrowserSize();
     std::vector<std::pair<std::string, glm::dvec3>> renderCopies() const;
+    bool isImageCollectionLoaded();
 
     // Target
     void centerTargetOnScreen();
@@ -79,6 +80,7 @@ public:
     void setBorderColor(const glm::ivec3& color);
     void setScreenSpaceSize(const glm::vec2& dimensions);
     void setVerticalFovWithScroll(float scroll);
+    void setImageCollectionIsLoaded(bool isLoaded);
 
     double verticalFov() const;
     glm::ivec3 borderColor() const;
@@ -97,6 +99,7 @@ public:
     // WorldWide Telescope image handling
     void setImageOrder(int i, int order);
     void selectImage(const ImageData& image, int i);
+    void addImageLayerToWwt(const std::string& url, int i);
     void removeSelectedImage(int i);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity);
