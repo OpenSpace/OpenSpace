@@ -61,32 +61,34 @@ public:
     */
     SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
         sgct::config::Cluster& cluster, const QList<QScreen*>& screenList,
-        const std::string userConfigPath);
+        std::string userConfigPath);
+
     ~SgctEdit();
+
     /**
      * Used to determine if the window configuration was saved to file, or canceled
      *
      * \return true if configuration was saved to file
     */
     bool wasSaved() const;
+
     /**
      * Returns the saved filename
      *
      * \return saved filename in std::string
     */
-    std::string saveFilename();
+    std::string saveFilename() const;
 
 private:
     void addDisplayLayout(QHBoxLayout* layout);
     void createWidgets();
-    void systemMonitorConfiguration(const QList<QScreen*>& screenList);
 
     std::shared_ptr<MonitorBox> _monBox = nullptr;
     std::vector<QRect> _monitorSizeList;
     QVBoxLayout* _displayLayout = nullptr;
     QFrame* _displayFrame = nullptr;
     std::shared_ptr<DisplayWindowUnion> _displayWidget = nullptr;
-    QRect _monitorWidgetSize = {0, 0, 500, 500};
+    QRect _monitorWidgetSize = { 0, 0, 500, 500 };
     FileSupport* _fileSupportWidget = nullptr;
     Orientation* _orientationWidget = nullptr;
     sgct::config::Cluster& _cluster;

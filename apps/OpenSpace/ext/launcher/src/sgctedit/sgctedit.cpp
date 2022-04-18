@@ -23,22 +23,19 @@
  ****************************************************************************************/
 
 #include "sgctedit/sgctedit.h"
+
 #include <QFileDialog>
 
 SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
                    sgct::config::Cluster& cluster, const QList<QScreen*>& screenList,
-                   const std::string userConfigPath)
+                   std::string userConfigPath)
     : QDialog(parent)
     , _cluster(cluster)
     , _windowList(windowList)
-    , _userConfigPath(userConfigPath)
+    , _userConfigPath(std::move(userConfigPath))
 {
-    systemMonitorConfiguration(screenList);
     setWindowTitle("Window Configuration Editor");
-    createWidgets();
-}
-
-void SgctEdit::systemMonitorConfiguration(const QList<QScreen*>& screenList) {
+    
     size_t nScreensManaged = std::min(static_cast<int>(screenList.length()), 2);
     for (unsigned int s = 0; s < static_cast<unsigned int>(nScreensManaged); ++s) {
         int actualWidth = std::max(
@@ -49,18 +46,26 @@ void SgctEdit::systemMonitorConfiguration(const QList<QScreen*>& screenList) {
             screenList[s]->size().height(),
             screenList[s]->availableGeometry().height()
         );
-        _monitorSizeList.push_back({
+        _monitorSizeList.emplace_back(
             screenList[s]->availableGeometry().x(),
             screenList[s]->availableGeometry().y(),
             actualWidth,
             actualHeight
-        });
+        );
     }
     _nMaxWindows = (_monitorSizeList.size() == 1) ? 3 : 4;
+
+    createWidgets();
+}
+
+SgctEdit::~SgctEdit() {
+    delete _orientationWidget;
+    delete _fileSupportWidget;
+    delete _displayLayout;
 }
 
 void SgctEdit::createWidgets() {
-    QVBoxLayout* layoutMainV = new QVBoxLayout(this);
+    QVBoxLayout* layoutMainV = new QVBoxLayout;
     QHBoxLayout* layoutMainH = new QHBoxLayout;
     _orientationWidget = new Orientation();
     {
@@ -81,11 +86,11 @@ void SgctEdit::createWidgets() {
         layoutMainV->addLayout(layoutMainH);
         _orientationWidget->addControlsToParentLayout(layoutMainV);
 
-        QFrame* bottomBorder = new QFrame();
+        QFrame* bottomBorder = new QFrame;
         bottomBorder->setFrameShape(QFrame::HLine);
         layoutMainV->addWidget(bottomBorder);
 
-        SgctConfigElements sgctCfg = {_windowList, _cluster};
+        SgctConfigElements sgctCfg = { _windowList, _cluster };
         UserConfigurationElements userCfg = {
             _monitorSizeList,
             _displayWidget,
@@ -95,18 +100,18 @@ void SgctEdit::createWidgets() {
         _fileSupportWidget = new FileSupport(
             layoutMainV,
             userCfg,
-            sgctCfg,
-            [this](bool accepted) {
-                if (accepted) {
-                    _saveSelected = true;
-                    accept();
-                }
-                else {
-                    reject();
-                }
+            sgctCfg
+        );
+        connect(
+            _fileSupportWidget, &FileSupport::accept,
+            [this]() {
+                _saveSelected = true;
+                accept();
             }
         );
+        connect(_fileSupportWidget, &FileSupport::reject, this, &SgctEdit::reject);
     }
+    setLayout(layoutMainV);
 }
 
 void SgctEdit::addDisplayLayout(QHBoxLayout* layout) {
@@ -128,12 +133,6 @@ bool SgctEdit::wasSaved() const {
     return _saveSelected;
 }
 
-std::string SgctEdit::saveFilename() {
+std::string SgctEdit::saveFilename() const {
     return _fileSupportWidget->saveFilename();
-}
-
-SgctEdit::~SgctEdit() {
-    delete _orientationWidget;
-    delete _fileSupportWidget;
-    delete _displayLayout;
 }

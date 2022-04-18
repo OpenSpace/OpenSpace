@@ -75,31 +75,29 @@ public:
      * \param parentLayout Qt vertical (QVBoxLayout) layout where controls are added
      * \param cfgElements struct of elements needed to read user settings from GUI
      * \param sgctElements struct of the window and cluster objects needed for saving
-     * \param finishedCallback function to be called when user has selected to either
-     *        save changes to file, apply and run without saving, or cancel
      */
     FileSupport(QVBoxLayout* parentLayout, UserConfigurationElements& cfgElements,
-        SgctConfigElements& sgctElements, std::function<void(bool)> finishedCallback);
-    std::string saveFilename();
+        SgctConfigElements& sgctElements);
+    
+    std::string saveFilename() const;
+
+signals:
+    void accept();
+    void reject();
 
 private slots:
-    void cancel();
     void save();
     void apply();
 
 private:
-    bool isWindowFullscreen(unsigned int monitorIdx, sgct::ivec2 wDims);
-    std::optional<unsigned int> findGuiWindow();
+    void createWidgets(QVBoxLayout* layout);
+
+    std::optional<unsigned int> findGuiWindow() const;
     void saveConfigToSgctFormat();
     void saveCluster();
     void saveWindows();
     void saveUser();
-    ProjectionOptions saveProjectionInformation(
-        std::shared_ptr<WindowControl> winControl);
-    ProjectionOptions saveProjectionSpout(std::shared_ptr<WindowControl> winControl);
-    ProjectionOptions saveProjectionNoSpout(std::shared_ptr<WindowControl> winControl);
-    sgct::config::Viewport generateViewport();
-    sgct::config::Window saveWindowsDimensions(std::shared_ptr<WindowControl> wCtrl);
+    sgct::config::Window generateWindow(const WindowControl& wCtrl) const;
     void saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win);
 
     QHBoxLayout* _layoutButtonBox = nullptr;
@@ -111,7 +109,6 @@ private:
     std::vector<QRect>& _monitors;
     sgct::config::Cluster& _cluster;
     std::vector<sgct::config::Window>& _windowList;
-    std::function<void(bool)> _finishedCallback;
     const std::string _userConfigPath;
     std::string _saveTarget;
 };
