@@ -28,7 +28,6 @@
 #include <QDialog>
 
 #include <sgctedit/displaywindowunion.h>
-#include <sgctedit/filesupport.h>
 #include <sgctedit/monitorbox.h>
 #include <sgctedit/orientation.h>
 #include <QApplication>
@@ -40,6 +39,18 @@
 #include <vector>
 
 class QWidget;
+
+using ProjectionOptions = std::variant<
+    sgct::config::NoProjection,
+    sgct::config::CylindricalProjection,
+    sgct::config::EquirectangularProjection,
+    sgct::config::FisheyeProjection,
+    sgct::config::PlanarProjection,
+    sgct::config::ProjectionPlane,
+    sgct::config::SphericalMirrorProjection,
+    sgct::config::SpoutOutputProjection,
+    sgct::config::SpoutFlatProjection
+>;
 
 class SgctEdit final : public QDialog {
 Q_OBJECT
@@ -79,6 +90,10 @@ public:
     */
     std::string saveFilename() const;
 
+private slots:
+    void save();
+    void apply();
+
 private:
     void addDisplayLayout(QHBoxLayout* layout);
     void createWidgets();
@@ -89,7 +104,7 @@ private:
     QFrame* _displayFrame = nullptr;
     std::shared_ptr<DisplayWindowUnion> _displayWidget = nullptr;
     QRect _monitorWidgetSize = { 0, 0, 500, 500 };
-    FileSupport* _fileSupportWidget = nullptr;
+    //FileSupport* _fileSupportWidget = nullptr;
     Orientation* _orientationWidget = nullptr;
     sgct::config::Cluster& _cluster;
     std::vector<sgct::config::Window>& _windowList;
@@ -102,6 +117,20 @@ private:
         QColor(0x44, 0xAF, 0x69),
         QColor(0xF8, 0x33, 0x3C)
     };
+
+    std::optional<unsigned int> findGuiWindow() const;
+    void saveConfigToSgctFormat();
+    void saveCluster();
+    void saveWindows();
+    void saveUser();
+    sgct::config::Window generateWindow(const WindowControl& wCtrl) const;
+    void saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win);
+
+    QHBoxLayout* _layoutButtonBox = nullptr;
+    QPushButton* _saveButton = nullptr;
+    QPushButton* _cancelButton = nullptr;
+    QPushButton* _applyButton = nullptr;
+    std::string _saveTarget;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
