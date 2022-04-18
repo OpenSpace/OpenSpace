@@ -150,24 +150,31 @@ CameraDialog  QLabel#error-message {
 }
 
 /*
+ * ScriptlogDialog
+ */
+ScriptlogDialog  QListWidget {
+  min-width: 60em;
+}
+
+/*
  * Horizons dialog
  */
-QPlainTextEdit#log {
+HorizonsDialog  QPlainTextEdit#log {
   font-family: Courier;
 }
 
-QComboBox#mono {
+HorizonsDialog  QComboBox#mono {
   font-family: Courier;
 }
 
-QLabel#thin {
+HorizonsDialog  QLabel#thin {
   font-weight: normal;
 }
 
-QLabel#error {
+HorizonsDialog  QLabel#error {
   color: rgb(221, 17, 17);
 }
 
-QLabel#normal {
+HorizonsDialog  QLabel#normal {
   color: rgb(0, 0, 0);
 }
