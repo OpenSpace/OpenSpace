@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LRO Narrow Angle Camera, Mosaic Apollo 17 layer from NASA/Treks for Moon]]
   }
-  

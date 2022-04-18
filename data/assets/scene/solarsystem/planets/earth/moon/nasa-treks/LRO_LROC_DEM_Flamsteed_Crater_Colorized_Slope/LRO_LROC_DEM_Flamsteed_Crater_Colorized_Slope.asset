@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LRO LROC DEM, Flamsteed Crater, Colorized Slope layer from NASA/Treks for Moon]]
   }
-  

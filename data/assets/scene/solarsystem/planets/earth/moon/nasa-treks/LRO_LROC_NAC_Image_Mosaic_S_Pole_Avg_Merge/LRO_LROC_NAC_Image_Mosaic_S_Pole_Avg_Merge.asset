@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LRO LROC NAC Image Mosaic, S Pole, Avg Merge layer from NASA/Treks for Moon]]
   }
-  

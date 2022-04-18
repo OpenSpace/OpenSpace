@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
     License = 'NASA/Treks',
     Description = [[MEX HRSC, Martian Path Eastern Section DEM layer from NASA/Treks for Mars]]
   }
-  

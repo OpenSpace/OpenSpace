@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LRO and Kaguya Multi Instruments 1895.21mpp, 3He Most Likely layer from NASA/Treks for Moon]]
   }
-  

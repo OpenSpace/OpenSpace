@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LROC NAC Uncontrolled Mosaic of Region Inside Schrodinger Crater, 50cm/px layer from NASA/Treks for Moon]]
   }
-  

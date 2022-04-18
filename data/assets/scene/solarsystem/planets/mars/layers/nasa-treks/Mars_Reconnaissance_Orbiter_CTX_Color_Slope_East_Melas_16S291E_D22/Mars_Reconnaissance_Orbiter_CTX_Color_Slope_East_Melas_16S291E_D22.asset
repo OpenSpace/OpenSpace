@@ -33,4 +33,3 @@ Slopes were derived using the Python script called gdal_baseline_slope.py: https
     License = 'NASA/Treks',
     Description = [[Mars Reconnaissance Orbiter CTX, Color Slope East Melas 16S291E_D22 layer from NASA/Treks for Mars]]
   }
-  

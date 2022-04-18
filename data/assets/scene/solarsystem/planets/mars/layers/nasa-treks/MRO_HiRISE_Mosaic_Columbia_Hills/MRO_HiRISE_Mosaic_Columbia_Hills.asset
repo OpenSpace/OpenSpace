@@ -42,4 +42,3 @@ incorrect projection without the specified standard parallel, which then produce
     License = 'NASA/Treks',
     Description = [[MRO HiRISE, Mosaic Columbia Hills layer from NASA/Treks for Mars]]
   }
-  

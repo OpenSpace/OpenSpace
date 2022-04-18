@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
     License = 'NASA/Treks',
     Description = [[Mars Express HRSC, Viking 2 Landing Site Mosaic layer from NASA/Treks for Mars]]
   }
-  

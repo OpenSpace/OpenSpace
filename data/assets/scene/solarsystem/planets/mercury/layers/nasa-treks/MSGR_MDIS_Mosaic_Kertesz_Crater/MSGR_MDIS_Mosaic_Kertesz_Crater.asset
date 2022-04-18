@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mercury/mercur
     License = 'NASA/Treks',
     Description = [[MSGR MDIS Mosaic, Kertesz Crater layer from NASA/Treks for Mercury]]
   }
-  

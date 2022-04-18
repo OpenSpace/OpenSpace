@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
     License = 'NASA/Treks',
     Description = [[MRO CTX, East Melas Hillshade layer from NASA/Treks for Mars]]
   }
-  

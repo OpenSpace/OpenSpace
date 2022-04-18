@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LRO LOLA DEM, N Pole, 87.5 deg, Hillshade layer from NASA/Treks for Moon]]
   }
-  

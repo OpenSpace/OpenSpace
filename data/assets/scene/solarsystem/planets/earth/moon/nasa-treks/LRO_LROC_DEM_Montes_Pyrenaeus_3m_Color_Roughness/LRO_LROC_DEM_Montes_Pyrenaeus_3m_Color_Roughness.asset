@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LRO LROC DEM, Montes Pyrenaeus, 3m Color Roughness layer from NASA/Treks for Moon]]
   }
-  

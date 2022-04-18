@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LRO Diviner Surface Temperature Mosaic 128ppd, Colorized layer from NASA/Treks for Moon]]
   }
-  

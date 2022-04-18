@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LRO LROC DEM, Mare Crisium, 15m Color Roughness Hazard layer from NASA/Treks for Moon]]
   }
-  

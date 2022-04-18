@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
     License = 'NASA/Treks',
     Description = [[MRO HiRISE, Mosaic Opportunity layer from NASA/Treks for Mars]]
   }
-  

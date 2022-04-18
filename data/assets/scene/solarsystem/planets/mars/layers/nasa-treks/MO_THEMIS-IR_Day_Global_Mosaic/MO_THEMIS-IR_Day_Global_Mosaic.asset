@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
     License = 'NASA/Treks',
     Description = [[MO THEMIS-IR Day, Global Mosaic layer from NASA/Treks for Mars]]
   }
-  

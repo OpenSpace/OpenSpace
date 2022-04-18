@@ -26,4 +26,3 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
     License = 'NASA/Treks',
     Description = [[LOLA and TC Stereo DEM Merge 512ppd, Shade layer from NASA/Treks for Moon]]
   }
-  
