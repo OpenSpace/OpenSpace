@@ -53,7 +53,7 @@ public:
      */
     DisplayWindowUnion(MonitorBox& monitorRenderBox,
         const std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
-        const std::array<QColor, 4>& winColors);
+        const std::array<QColor, 4>& windowColors);
     
     /**
      * Returns a vector of pointers to all WindowControl objects for all windows
@@ -81,7 +81,7 @@ private:
     MonitorBox& _monitorBox;
     const std::vector<QRect>& _monitorResolutions;
     const unsigned int _nMaxWindows = 3;
-    const std::array<QColor, 4>& _winColors;
+    const std::array<QColor, 4>& _windowColors;
 
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;

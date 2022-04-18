@@ -27,18 +27,9 @@
 
 #include <QWidget>
 
-#include "windowcontrol.h"
 #include <QColor>
-#include <QIntValidator>
-#include <QLineEdit>
-#include <QPainter>
-#include <QPainterPath>
-#include <QPoint>
-#include <QVector>
-#include <algorithm>
 #include <array>
 #include <vector>
-#include <iostream>
 
 class MonitorBox : public QWidget {
 Q_OBJECT
@@ -54,33 +45,29 @@ public:
      * \param winColors An array of QColor objects for window colors. The indexing of
      *                  this array matches the window indexing used elsewhere in the
      *                  class. This allows for a unique color for each window.
-    */
+     */
     MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
         unsigned int nWindows, const std::array<QColor, 4>& winColors);
-    /**
-     * Maps window resolution into the scaled resolution of the display widget
-     *
-     * \param mIdx The zero-based monitor index (primary monitor is 0)
-     * \param wIdx The zero-based window index
-     * \param winDimensions Dimensions (pixels) of window to be mapped in QRect
-    */
-    void mapWindowResolutionToWidgetCoordinates(unsigned int mIdx, unsigned int wIdx,
-        const QRectF& winDimensions);
+
     /**
      * Sets the number of windows to be displayed
      *
      * \param nWindows Number of windows to be displayed
-    */
+     */
     void setNumWindowsDisplayed(unsigned int nWindows);
+    
+public slots:
     /**
-     * Called when window dimensions or monitor location have changed, requiring redraw
+     * Called when window dimensions or monitor location have changed, requiring redraw.
+     * This will also map the window resolution into the scaled resolution of the display
+     * widget.
      *
      * \param mIdx The zero-based monitor index (primary monitor is 0)
      * \param wIdx The zero-based window index
      * \param newDimensions Dimensions (pixels) of window to be mapped in QRect
-    */
+     */
     void windowDimensionsChanged(unsigned int mIdx, unsigned int wIdx,
-            const QRectF& newDimensions);
+        const QRectF& newDimensions);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -88,39 +75,24 @@ protected:
 private:
     void determineMonitorArrangement();
     void mapMonitorResolutionToWidgetCoordinates();
-    void paintWidgetBorder(QPainter& painter, int width, int height);
-    void paintMonitorBackgrounds(QPainter& painter);
-    void paintWindow(QPainter& painter, size_t winIdx);
-    void paintWindowBeyondBounds(QPainter& painter, unsigned int winIdx);
-    void paintWindowNumber(QPainter& painter, unsigned int winIdx);
-    void setPenSpecificToWindow(QPainter& painter, unsigned int windowIdx,
-        bool visibleBorder);
-    void computeScaledResolutionLandscape(float aspectRatio, float maxWidth);
-    void computeScaledResolutionPortrait(float aspectRatio, float maxHeight);
+    std::vector<QSizeF> computeScaledResolutionLandscape(float maxWidth);
+    std::vector<QSizeF> computeScaledResolutionPortrait(float maxHeight);
 
-    unsigned int _maxNumMonitors = 2;
     QRectF _monitorWidgetSize;
-    QRectF _monitorBoundaryRect;
-    unsigned int _nMonitors = 1;
     float _monitorArrangementAspectRatio = 1.f;
     QSizeF _monitorArrangementDimensions = { 0.0, 0.0 };
-    std::vector<QRect> _monitorResolution;
+    const std::vector<QRect> _monitorResolution;
     std::vector<QRectF> _monitorDimensionsScaled;
-    QRectF _negativeCorrectionOffsets = {0.f, 0.f, 0.f, 0.f};
-    std::vector<QRectF> _windowResolutions;
-    std::vector<QRectF> _windowRendering = {
-        {0.f, 0.f, 0.f, 0.f},
-        {0.f, 0.f, 0.f, 0.f},
-        {0.f, 0.f, 0.f, 0.f},
-        {0.f, 0.f, 0.f, 0.f}
+    QRectF _negativeCorrectionOffsets = { 0.f, 0.f, 0.f, 0.f };
+    std::array<QRectF, 4> _windowRendering = {
+        QRectF{ 0.f, 0.f, 0.f, 0.f },
+        QRectF{ 0.f, 0.f, 0.f, 0.f },
+        QRectF{ 0.f, 0.f, 0.f, 0.f },
+        QRectF{ 0.f, 0.f, 0.f, 0.f }
     };
     unsigned int _nWindows = 1;
     const std::array<QColor, 4> _colorsForWindows;
-    int _alphaWindowOpacity = 170;
     float _monitorScaleFactor = 1.0;
-    bool _showLabel = false;
-    float _marginWidget = 5.0;
-    std::vector<QSizeF> _monitorOffsets;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___MONITORBOX___H__

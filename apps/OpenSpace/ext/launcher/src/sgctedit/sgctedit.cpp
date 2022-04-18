@@ -43,7 +43,7 @@ namespace {
 
     ProjectionOptions saveProjectionNoSpout(const WindowControl& winControl) {
         switch (winControl.projectionSelectedIndex()) {
-            case WindowControl::ProjectionIndeces::Fisheye:
+            case WindowControl::ProjectionIndices::Fisheye:
                 {
                     sgct::config::FisheyeProjection projection;
                     projection.quality = winControl.qualitySelectedValue();
@@ -51,26 +51,26 @@ namespace {
                     projection.tilt = 0.f;
                     return projection;
                 }
-            case WindowControl::ProjectionIndeces::SphericalMirror:
+            case WindowControl::ProjectionIndices::SphericalMirror:
                 {
                     sgct::config::SphericalMirrorProjection projection;
                     projection.quality = winControl.qualitySelectedValue();
                     return projection;
                 }
-            case WindowControl::ProjectionIndeces::Cylindrical:
+            case WindowControl::ProjectionIndices::Cylindrical:
                 {
                     sgct::config::CylindricalProjection projection;
                     projection.quality = winControl.qualitySelectedValue();
                     projection.heightOffset = winControl.heightOffset();
                     return projection;
                 }
-            case WindowControl::ProjectionIndeces::Equirectangular:
+            case WindowControl::ProjectionIndices::Equirectangular:
                 {
                     sgct::config::EquirectangularProjection projection;
                     projection.quality = winControl.qualitySelectedValue();
                     return projection;
                 }
-            case WindowControl::ProjectionIndeces::Planar:
+            case WindowControl::ProjectionIndices::Planar:
             default:
                 {
                     // The negative values for left & down are due to SGCT's convention
@@ -87,11 +87,11 @@ namespace {
     ProjectionOptions saveProjectionSpout(const WindowControl& winControl) {
         sgct::config::SpoutOutputProjection projection;
         switch (winControl.projectionSelectedIndex()) {
-            case WindowControl::ProjectionIndeces::Fisheye:
+            case WindowControl::ProjectionIndices::Fisheye:
                 projection.mapping
                     = sgct::config::SpoutOutputProjection::Mapping::Fisheye;
                 break;
-            case WindowControl::ProjectionIndeces::Equirectangular:
+            case WindowControl::ProjectionIndices::Equirectangular:
             default:
                 projection.mapping
                     = sgct::config::SpoutOutputProjection::Mapping::Equirectangular;

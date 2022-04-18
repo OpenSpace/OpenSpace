@@ -35,11 +35,11 @@
 DisplayWindowUnion::DisplayWindowUnion(MonitorBox& monitorRenderBox,
                                        const std::vector<QRect>& monitorSizeList,
                                        unsigned int nMaxWindows,
-                                       const std::array<QColor, 4>& winColors)
+                                       const std::array<QColor, 4>& windowColors)
     : _monitorBox(monitorRenderBox)
     , _monitorResolutions(monitorSizeList)
     , _nMaxWindows(nMaxWindows)
-    , _winColors(winColors)
+    , _windowColors(windowColors)
 {
     _addWindowButton = new QPushButton("Add Window");
     _removeWindowButton = new QPushButton("Remove Window");
@@ -153,18 +153,19 @@ void DisplayWindowUnion::initializeWindowControl() {
         monitorNumForThisWindow,
         _nWindowsAllocated,
         _monitorResolutions,
-        _winColors[_nWindowsAllocated],
+        _windowColors[_nWindowsAllocated],
         this
     );
     WindowControl* ctrlPtr = ctrl.get();
     _windowControl.push_back(std::move(ctrl));
     
-    ctrlPtr->setWindowChangeCallback(
-        [this](int monIndex, int winIndex, const QRectF& newDims) {
-            _monitorBox.windowDimensionsChanged(monIndex, winIndex, newDims);
-        }
+    connect(
+        ctrlPtr, &WindowControl::windowChanged,
+        &_monitorBox, &MonitorBox::windowDimensionsChanged
     );
-    ctrlPtr->setWebGuiChangeCallback(
+
+    connect(
+        ctrlPtr, &WindowControl::webGuiChanged,
         [this](unsigned int winIndex) {
             for (unsigned int w = 0; w < _nMaxWindows; ++w) {
                 if (w != winIndex) {
@@ -173,7 +174,8 @@ void DisplayWindowUnion::initializeWindowControl() {
             }
         }
     );
-    _monitorBox.mapWindowResolutionToWidgetCoordinates(
+
+    _monitorBox.windowDimensionsChanged(
         monitorNumForThisWindow,
         _nWindowsAllocated,
         _windowControl.back()->dimensions()
