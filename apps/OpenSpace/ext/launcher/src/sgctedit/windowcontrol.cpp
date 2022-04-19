@@ -27,6 +27,7 @@
 #include <ghoul/fmt.h>
 #include "sgctedit/displaywindowunion.h"
 #include "sgctedit/monitorbox.h"
+#include <QGridLayout>
 
 namespace {
     const QList<QString> MonitorNames = {
@@ -53,8 +54,8 @@ namespace {
         { 150.f, 150.f, 1280.f, 720.f }
     };
 
-    constexpr int LineEditWidthFixedWinSize = 50;
-    constexpr int LineEditWidthFixedFov = 80;
+    constexpr int LineEditWidthFixedWindowSize = 50;
+    //constexpr int LineEditWidthFixedFov = 80;
     constexpr float DefaultFovH = 80.f;
     constexpr float DefaultFovV = 50.534f;
     constexpr float DefaultHeightOffset = 0.f;
@@ -79,9 +80,9 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
                              const std::vector<QRect>& monitorDims,
                              const QColor& winColor, QWidget* parent)
     : QWidget(parent)
-    , _monIndex(monitorIndex)
-    , _monIndexDefault(monitorIndex)
-    , _index(windowIndex)
+    , _monitorIndex(monitorIndex)
+    , _monitorIndexDefault(monitorIndex)
+    , _windowIndex(windowIndex)
     , _monitorResolutions(monitorDims)
     , _colorForWindow(winColor)
     , _lockIcon(":/images/outline_locked.png")
@@ -92,191 +93,188 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
 }
 
 void WindowControl::createWidgets() {
-    QVBoxLayout* layout = new QVBoxLayout;
+    //    Column 0   Column 1   Column 2   Column 3   Column 4   Column 5 * Column 6 *
+    //  *----------*----------*----------*----------*----------*----------*----------*
+    //  |                                   Window {n}                               | R0
+    //  | Name     * [ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo] | R1
+    //  | Monitor  * DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD> | R2
+    //  | Size     * [xxxxxx] *    x     * [yyyyyyy] *   px    *  <lock>  *          | R3
+    //  | Offset   * [xxxxxx] *    ,     * [yyyyyyy] *   px    *          *          | R4
+    //  | <Set to Fullscreen                                                       > | R5
+    //  | [] Window Decoration                                                       | R6
+    //  | [] UI only in this window                                                  | R7
+    //  | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Detail component~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ | R8
+    //  *----------*----------*----------*----------*----------*----------*----------*
+
+    QGridLayout* layout = new QGridLayout;
+    layout->setColumnStretch(6, 1);
     
     {
-        _labelWinNum = new QLabel;
-        _labelWinNum->setText("Window " + QString::number(_index + 1));
+        _labelWinNum = new QLabel("Window " + QString::number(_windowIndex + 1));
         QString colorStr = QString::fromStdString(
             fmt::format("QLabel {{ color : #{:02x}{:02x}{:02x}; }}",
                 _colorForWindow.red(), _colorForWindow.green(), _colorForWindow.blue())
         );
         _labelWinNum->setStyleSheet(colorStr);
-
-        QHBoxLayout* layoutWinNum = new QHBoxLayout;
-        layoutWinNum->addStretch(1);
-        layoutWinNum->addWidget(_labelWinNum);
-        layoutWinNum->addStretch(1);
-        layout->addLayout(layoutWinNum);
+        layout->addWidget(_labelWinNum, 0, 0, 1, 7, Qt::AlignCenter);
     }
     {
-        QHBoxLayout* layoutName = new QHBoxLayout;
         QString tip = "Enter a name for the window (displayed in title bar)";
 
-        QLabel* labelName = new QLabel(this);
-        labelName->setText("Name: ");
+        QLabel* labelName = new QLabel("Name");
         labelName->setToolTip(tip);
-        layoutName->addWidget(labelName);
+        layout->addWidget(labelName, 1, 0);
 
         _windowName = new QLineEdit;
-        _windowName->setFixedWidth(160);
         _windowName->setToolTip(tip);
-        layoutName->addWidget(_windowName);
-
-        layoutName->addStretch(1);
-        layout->addLayout(layoutName);
+        layout->addWidget(_windowName, 1, 1, 1, 6);
     }
     if (_monitorResolutions.size() > 1) {
-        QHBoxLayout* layoutMonitorNum = new QHBoxLayout;
         QString tip = "Select monitor where this window is located";
 
-        QLabel* labelLocation = new QLabel;
-        labelLocation->setText("Monitor: ");
+        QLabel* labelLocation = new QLabel("Monitor");
         labelLocation->setToolTip(tip);
-        layoutMonitorNum->addWidget(labelLocation);
+        layout->addWidget(labelLocation, 2, 0);
 
         _comboMonitorSelect = new QComboBox;
         _comboMonitorSelect->addItems(monitorNames(_monitorResolutions));
-        _comboMonitorSelect->setCurrentIndex(_monIndexDefault);
+        _comboMonitorSelect->setCurrentIndex(_monitorIndexDefault);
         _comboMonitorSelect->setToolTip(tip);
-        layoutMonitorNum->addWidget(_comboMonitorSelect);
+        layout->addWidget(_comboMonitorSelect, 2, 1, 1, 6);
         connect(
             _comboMonitorSelect, qOverload<int>(&QComboBox::currentIndexChanged),
             this, &WindowControl::onMonitorChanged
         );
-        layoutMonitorNum->addStretch(1);
-        layout->addLayout(layoutMonitorNum);
     }
     {
-        QHBoxLayout* layoutSize = new QHBoxLayout;
-
-        QLabel* labelSize = new QLabel;
+        QLabel* labelSize = new QLabel("Size");
         labelSize->setToolTip("Enter window width & height in pixels");
-        labelSize->setText("Size:");
         labelSize->setFixedWidth(55);
-        layoutSize->addWidget(labelSize);
+        layout->addWidget(labelSize, 3, 0);
 
         _sizeX = new QLineEdit;
         _sizeX->setValidator(new QIntValidator(10, MaxWindowSizePixels, this));
-        _sizeX->setFixedWidth(LineEditWidthFixedWinSize);
+        _sizeX->setFixedWidth(LineEditWidthFixedWindowSize);
         _sizeX->setToolTip("Enter window width (pixels)");
-        layoutSize->addWidget(_sizeX);
+        layout->addWidget(_sizeX, 3, 1);
         connect(_sizeX, &QLineEdit::textChanged, this, &WindowControl::onSizeXChanged);
 
-        QLabel* labelDelim = new QLabel;
-        labelDelim->setText("x");
-        labelDelim->setFixedWidth(9);
-        layoutSize->addWidget(labelDelim);
+        QLabel* labelDelim = new QLabel("x");
+        labelDelim->setSizePolicy(
+            QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum)
+        );
+        layout->addWidget(labelDelim, 3, 2);
 
         _sizeY = new QLineEdit;
         _sizeY->setValidator(new QIntValidator(10, MaxWindowSizePixels, this));
-        _sizeY->setFixedWidth(LineEditWidthFixedWinSize);
+        _sizeY->setFixedWidth(LineEditWidthFixedWindowSize);
         _sizeY->setToolTip("Enter window height (pixels)");
-        layoutSize->addWidget(_sizeY);
+        layout->addWidget(_sizeY, 3, 3, Qt::AlignLeft);
         connect(_sizeY, &QLineEdit::textChanged, this, &WindowControl::onSizeYChanged);
 
-        QLabel* labelUnit = new QLabel;
-        labelUnit->setText(" px");
-        layoutSize->addWidget(labelUnit);
+        QLabel* labelUnit = new QLabel("px");
+        labelUnit->setSizePolicy(
+            QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum)
+        );
+        layout->addWidget(labelUnit, 3, 4, Qt::AlignLeft);
 
         _buttonLockAspectRatio = new QPushButton;
         _buttonLockAspectRatio->setIcon(_unlockIcon);
         _buttonLockAspectRatio->setFocusPolicy(Qt::NoFocus);
         _buttonLockAspectRatio->setToolTip("Locks/Unlocks size aspect ratio");
-        layoutSize->addWidget(_buttonLockAspectRatio);
+        layout->addWidget(_buttonLockAspectRatio, 3, 5, Qt::AlignLeft);
         connect(
             _buttonLockAspectRatio, &QPushButton::released,
             this, &WindowControl::onAspectRatioLockClicked
         );
-
-        layoutSize->addStretch(1);
-        layout->addLayout(layoutSize);
     }
     {
-        QHBoxLayout* layoutOffset = new QHBoxLayout;
         std::string baseTip =
             "Enter {} location of window's upper left corner from monitor's {} (pixels)";
 
-        QLabel* labelOffset = new QLabel(this);
-        labelOffset->setToolTip(QString::fromStdString(fmt::format(
-            baseTip, "x,y", "upper-left corner origin")));
-        labelOffset->setText("Offset:");
+        QLabel* labelOffset = new QLabel("Offset");
+        labelOffset->setToolTip(
+            "Enter x,y location of window's upper left corner from monitor's upper-left "
+            "corner origin (pixels)"
+        );
         labelOffset->setFixedWidth(55);
-        layoutOffset->addWidget(labelOffset);
+        layout->addWidget(labelOffset, 4, 0);
 
         _offsetX = new QLineEdit;
-        _offsetX->setValidator(new QIntValidator(-MaxWindowSizePixels, MaxWindowSizePixels, this));
-        _offsetX->setToolTip(QString::fromStdString(fmt::format(
-            baseTip, "x", "left side")));
-        _offsetX->setFixedWidth(LineEditWidthFixedWinSize);
-        layoutOffset->addWidget(_offsetX);
+        _offsetX->setValidator(
+            new QIntValidator(-MaxWindowSizePixels, MaxWindowSizePixels, this)
+        );
+        _offsetX->setToolTip(
+            "Enter x location of window's upper left corner from monitor's left side "
+            "(pixels)"
+        );
+        _offsetX->setFixedWidth(LineEditWidthFixedWindowSize);
+        layout->addWidget(_offsetX, 4, 1);
         connect(_offsetX, &QLineEdit::textChanged, this, &WindowControl::onOffsetXChanged);
 
-        QLabel* labelComma = new QLabel(this);
-        labelComma->setText(",");
-        labelComma->setFixedWidth(9);
-        layoutOffset->addWidget(labelComma);
+        QLabel* labelComma = new QLabel(",");
+        labelComma->setSizePolicy(
+            QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum
+        ));
+        layout->addWidget(labelComma, 4, 2);
 
         _offsetY = new QLineEdit;
-        _offsetY->setValidator(new QIntValidator(-MaxWindowSizePixels, MaxWindowSizePixels, this));
-        _offsetY->setToolTip(QString::fromStdString(fmt::format(
-            baseTip, "y", "top edge")));
-        _offsetY->setFixedWidth(LineEditWidthFixedWinSize);
-        layoutOffset->addWidget(_offsetY);
-        connect(_offsetY, &QLineEdit::textChanged, this, &WindowControl::onOffsetYChanged);
+        _offsetY->setValidator(
+            new QIntValidator(-MaxWindowSizePixels, MaxWindowSizePixels, this)
+        );
+        _offsetY->setToolTip(
+            "Enter y location of window's upper left corner from monitor's top edge "
+            "(pixels)"
+        );
+        _offsetY->setFixedWidth(LineEditWidthFixedWindowSize);
+        layout->addWidget(_offsetY, 4, 3, Qt::AlignLeft);
+        connect(
+            _offsetY, &QLineEdit::textChanged,
+            this, &WindowControl::onOffsetYChanged
+        );
 
-        QLabel* labelUnit = new QLabel(this);
-        labelUnit->setText(" px");
-        layoutOffset->addWidget(labelUnit);
-
-        layoutOffset->addStretch(1);
-        layout->addLayout(layoutOffset);
+        QLabel* labelUnit = new QLabel("px");
+        labelUnit->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
+        layout->addWidget(labelUnit, 4, 4, Qt::AlignLeft);
     }
     {
-        QHBoxLayout* layoutCheckboxesFull1 = new QHBoxLayout;
-        QVBoxLayout* layoutCheckboxesFull2 = new QVBoxLayout;
-        QHBoxLayout* layoutFullscreenButton = new QHBoxLayout;
-        _fullscreenButton = new QPushButton;
-        _fullscreenButton->setText("Set to Fullscreen");
-        _fullscreenButton->setToolTip(
+        QPushButton* setFullscreen = new QPushButton("Set to Fullscreen");
+        setFullscreen->setToolTip(
             "If enabled, the window will be created in an exclusive fullscreen mode. The "
             "size of this\nwindow will be set to the screen resolution, and the window "
             "decoration automatically disabled."
         );
-        _fullscreenButton->setFocusPolicy(Qt::NoFocus);
-        layoutFullscreenButton->addWidget(_fullscreenButton);
+        setFullscreen->setFocusPolicy(Qt::NoFocus);
+        layout->addWidget(setFullscreen, 5, 0, 1, 7);
         connect(
-            _fullscreenButton, &QPushButton::released,
+            setFullscreen, &QPushButton::released,
             this, &WindowControl::onFullscreenClicked
         );
-        layoutFullscreenButton->addStretch(1);
-        layoutCheckboxesFull2->addLayout(layoutFullscreenButton);
-        QHBoxLayout* layoutCBoxWindowDecor = new QHBoxLayout;
-        _checkBoxWindowDecor = new QCheckBox("Window Decoration", this);
-        _checkBoxWindowDecor->setCheckState(Qt::CheckState::Checked);
+
+        _checkBoxWindowDecor = new QCheckBox("Window Decoration");
+        _checkBoxWindowDecor->setChecked(true);
         _checkBoxWindowDecor->setToolTip(
             "If enabled, the window will not have a border frame or title bar, and no\n "
             "controls for minimizing/maximizing, resizing, or closing the window."
         );
-        layoutCBoxWindowDecor->addWidget(_checkBoxWindowDecor);
-        layoutCBoxWindowDecor->addStretch(1);
-        layoutCheckboxesFull2->addLayout(layoutCBoxWindowDecor);
-        QHBoxLayout* _layoutCBoxWebGui = new QHBoxLayout;
-        _checkBoxWebGui = new QCheckBox("WebGUI only this window");
+        layout->addWidget(_checkBoxWindowDecor, 6, 0, 1, 7);
+        
+        _checkBoxWebGui = new QCheckBox("UI only in this window");
         _checkBoxWebGui->setToolTip(
             "If enabled, the window will be dedicated solely to displaying the GUI "
             "controls, and will not\nrender any 3D content. All other window(s) will "
             "render in 3D but will not have GUI controls."
         );
-        _layoutCBoxWebGui->addWidget(_checkBoxWebGui);
+        layout->addWidget(_checkBoxWebGui, 7, 0, 1, 7);
         connect(
             _checkBoxWebGui, &QCheckBox::stateChanged,
             this, &WindowControl::onWebGuiSelection
         );
-        _layoutCBoxWebGui->addStretch(1);
-        layoutCheckboxesFull2->addLayout(_layoutCBoxWebGui);
+    }
+    {
         QVBoxLayout* layoutProjectionGroup = new QVBoxLayout;
         QHBoxLayout* layoutComboProjection = new QHBoxLayout;
+        
         _comboProjection = new QComboBox;
         _comboProjection->addItems(ProjectionTypes);
         _comboProjection->setToolTip("Select from the supported window projection types");
@@ -285,6 +283,7 @@ void WindowControl::createWidgets() {
             _comboProjection, qOverload<int>(&QComboBox::currentIndexChanged),
             this, &WindowControl::onProjectionChanged
         );
+        
         _buttonLockFov = new QPushButton;
         _buttonLockFov->setIcon(_lockIcon);
         _buttonLockFov->setToolTip(
@@ -297,12 +296,18 @@ void WindowControl::createWidgets() {
             _buttonLockFov, &QPushButton::released,
             this, &WindowControl::onFovLockClicked
         );
+        
         layoutComboProjection->addStretch(1);
         layoutProjectionGroup->addLayout(layoutComboProjection);
+        
         QFrame* borderProjectionGroup = new QFrame;
-        borderProjectionGroup->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-        borderProjectionGroup->setLayout(layoutProjectionGroup);
         borderProjectionGroup->setVisible(true);
+        borderProjectionGroup->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+        borderProjectionGroup->setSizePolicy(
+            QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed)
+        );
+        borderProjectionGroup->setLayout(layoutProjectionGroup);
+        
         QHBoxLayout* layoutCBoxSpoutOutput = new QHBoxLayout;
         _checkBoxSpoutOutput = new QCheckBox("Spout Output");
         _checkBoxSpoutOutput->setToolTip(
@@ -318,74 +323,82 @@ void WindowControl::createWidgets() {
             _checkBoxSpoutOutput, &QCheckBox::stateChanged,
             this, &WindowControl::onSpoutSelection
         );
+        
         layoutCBoxSpoutOutput->addStretch(1);
         layoutProjectionGroup->addLayout(layoutCBoxSpoutOutput);
+        
         QHBoxLayout* layoutComboQuality = new QHBoxLayout;
-        _labelQuality = new QLabel;
-        _labelQuality->setText("Quality:");
+        
+        _labelQuality = new QLabel("Quality");
         QString qualityTip = "Determines the pixel resolution of the projection "
             "rendering. The higher resolution,\nthe better the rendering quality, but at "
             "the expense of increased rendering times.";
         _labelQuality->setToolTip(qualityTip);
         layoutComboQuality->addWidget(_labelQuality);
+        
         _comboQuality = new QComboBox;
         _comboQuality->addItems(QualityTypes);
         _comboQuality->setToolTip(qualityTip);
         layoutComboQuality->addWidget(_comboQuality);
+        
         layoutComboQuality->addStretch(1);
+        
         layoutProjectionGroup->addLayout(layoutComboQuality);
+        
         QHBoxLayout* layoutFovH = new QHBoxLayout;
-        _labelFovH = new QLabel;
-        _labelFovH->setText("Horizontal FOV:");
+        _labelFovH = new QLabel("Horizontal FOV");
         QString hfovTip = "The total horizontal field of view of the viewport (degrees). "
             "Internally,\nthe values for 'left' & 'right' will each be half this value.";
         _labelFovH->setToolTip(hfovTip);
+        layoutFovH->addWidget(_labelFovH);
+
+        layoutFovH->addStretch(1);
+
         _lineFovH = new QLineEdit(QString::number(DefaultFovH));
+        _lineFovH->setEnabled(false);
         _lineFovH->setValidator(new QDoubleValidator(-180.0, 180.0, 10, this));
         _lineFovH->setToolTip(hfovTip);
-        layoutFovH->addWidget(_labelFovH);
-        layoutFovH->addStretch(1);
         layoutFovH->addWidget(_lineFovH);
+        
         QHBoxLayout* layoutFovV = new QHBoxLayout;
-        _labelFovV = new QLabel;
-        _labelFovV->setText("Vertical FOV:");
+        _labelFovV = new QLabel("Vertical FOV");
         QString vfovTip = "The total vertical field of view of the viewport (degrees). "
             "Internally,\nthe values for 'up' & 'down' will each be half this value.";
         _labelFovV->setToolTip(vfovTip);
+        layoutFovV->addWidget(_labelFovV);
+        
+        layoutFovV->addStretch(1);
+        
         _lineFovV = new QLineEdit(QString::number(DefaultFovV));
+        _lineFovV->setEnabled(false);
         _lineFovV->setValidator(new QDoubleValidator(-90.0, 90.0, 10, this));
         _lineFovV->setToolTip(vfovTip);
-        layoutFovV->addWidget(_labelFovV);
-        layoutFovV->addStretch(1);
         layoutFovV->addWidget(_lineFovV);
-        _lineFovH->setFixedWidth(LineEditWidthFixedFov);
-        _lineFovV->setFixedWidth(LineEditWidthFixedFov);
-        _lineFovH->setEnabled(false);
-        _lineFovV->setEnabled(false);
+        
         layoutProjectionGroup->addLayout(layoutFovH);
         layoutProjectionGroup->addLayout(layoutFovV);
+        
         QHBoxLayout* layoutHeightOffset = new QHBoxLayout;
-        _labelHeightOffset = new QLabel;
-        _labelHeightOffset->setText("Height Offset:");
+        _labelHeightOffset = new QLabel("Height Offset");
         QString heightTip = "Offsets the height from which the cylindrical projection "
             "is generated.\nThis is, in general, only necessary if the user position is "
             "offset and\ncountering that offset is desired in order to continue producing"
             "\na 'standard' cylindrical projection.";
         _labelHeightOffset->setToolTip(heightTip);
+        layoutHeightOffset->addWidget(_labelHeightOffset);
+
         _lineHeightOffset = new QLineEdit(QString::number(DefaultHeightOffset));
         _lineHeightOffset->setValidator(new QDoubleValidator(-1000000.0, 1000000.0, 12, this));
         _lineHeightOffset->setToolTip(heightTip);
-        layoutHeightOffset->addWidget(_labelHeightOffset);
         layoutHeightOffset->addWidget(_lineHeightOffset);
+        
         layoutHeightOffset->addStretch(1);
+        
         layoutProjectionGroup->addLayout(layoutHeightOffset);
-        layoutCheckboxesFull2->addWidget(borderProjectionGroup);
-        layoutCheckboxesFull1->addLayout(layoutCheckboxesFull2);
-        layoutCheckboxesFull1->addStretch(1);
-        layout->addLayout(layoutCheckboxesFull1);
+        
+        layout->addWidget(borderProjectionGroup, 8, 0, 1, 7);
     }
 
-    layout->addStretch(1);
 
     _comboProjection->setCurrentIndex(0);
     onProjectionChanged(static_cast<unsigned int>(ProjectionIndices::Planar));
@@ -396,34 +409,32 @@ void WindowControl::createWidgets() {
 void WindowControl::resetToDefaults() {
     determineIdealWindowSize();
     _windowName->clear();
-    _monIndex = _monIndexDefault;
+    _monitorIndex = _monitorIndexDefault;
     if (_monitorResolutions.size() > 1) {
-        _comboMonitorSelect->setCurrentIndex(_monIndexDefault);
+        _comboMonitorSelect->setCurrentIndex(_monitorIndexDefault);
     }
-    _checkBoxWindowDecor->setCheckState(Qt::CheckState::Checked);
-    _checkBoxWebGui->setCheckState(Qt::CheckState::Unchecked);
-    onWebGuiSelection(_checkBoxWebGui->checkState());
-    _checkBoxSpoutOutput->setCheckState(Qt::CheckState::Unchecked);
-    onSpoutSelection(_checkBoxSpoutOutput->checkState());
+    _checkBoxWindowDecor->setChecked(true);
+    _checkBoxWebGui->setChecked(false);
+    _checkBoxSpoutOutput->setChecked(false);
     _comboProjection->setCurrentIndex(static_cast<int>(ProjectionIndices::Planar));
     onProjectionChanged(_comboProjection->currentIndex());
     _lineFovH->setText(QString::number(DefaultFovH));
     _lineFovV->setText(QString::number(DefaultFovV));
     _lineHeightOffset->setText(QString::number(DefaultHeightOffset));
     _comboQuality->setCurrentIndex(2);
-    emit windowChanged(_monIndex, _index, _windowDims);
+    emit windowChanged(_monitorIndex, _windowIndex, _windowDims);
 }
 
 void WindowControl::determineIdealWindowSize() {
     constexpr float IdealScaleVerticalLines = 2.f / 3.f;
     constexpr int PrimaryMonitorIdx = 0;
 
-    _windowDims = DefaultWindowSizes[_index];
+    _windowDims = DefaultWindowSizes[_windowIndex];
     _offsetX->setText(QString::number(_windowDims.x()));
     _offsetY->setText(QString::number(_windowDims.y()));
     float newHeight =
-        static_cast<float>(_monitorResolutions[PrimaryMonitorIdx].height())
-        * IdealScaleVerticalLines;
+        static_cast<float>(_monitorResolutions[PrimaryMonitorIdx].height()) *
+        IdealScaleVerticalLines;
     float newWidth = newHeight * IdealAspectRatio;
     _windowDims.setHeight(newHeight);
     _windowDims.setWidth(newWidth);
@@ -444,7 +455,7 @@ void WindowControl::onSizeXChanged(const QString& newText) {
         _sizeY->blockSignals(false);
         _windowDims.setHeight(updatedHeight);
     }
-    emit windowChanged(_monIndex, _index, _windowDims);
+    emit windowChanged(_monitorIndex, _windowIndex, _windowDims);
     if (_fovLocked) {
         updatePlanarLockedFov();
     }
@@ -459,7 +470,7 @@ void WindowControl::onSizeYChanged(const QString& newText) {
         _sizeX->blockSignals(false);
         _windowDims.setWidth(updatedWidth);
     }
-    emit windowChanged(_monIndex, _index, _windowDims);
+    emit windowChanged(_monitorIndex, _windowIndex, _windowDims);
     if (_fovLocked) {
         updatePlanarLockedFov();
     }
@@ -470,7 +481,7 @@ void WindowControl::onOffsetXChanged(const QString& newText) {
     try {
         _windowDims.setX(newText.toInt());
         _windowDims.setWidth(prevWidth);
-        emit windowChanged(_monIndex, _index, _windowDims);
+        emit windowChanged(_monitorIndex, _windowIndex, _windowDims);
     }
     catch (const std::exception&) {
         // The QIntValidator ensures that the range is a +/- integer. However, it's 
@@ -484,7 +495,7 @@ void WindowControl::onOffsetYChanged(const QString& newText) {
     try {
         _windowDims.setY(newText.toInt());
         _windowDims.setHeight(prevHeight);
-        emit windowChanged(_monIndex, _index, _windowDims);
+        emit windowChanged(_monitorIndex, _windowIndex, _windowDims);
     }
     catch (const std::exception&) {
         // See comment in onOffsetXChanged
@@ -494,19 +505,19 @@ void WindowControl::onOffsetYChanged(const QString& newText) {
 void WindowControl::onFullscreenClicked() {
     _offsetX->setText("0");
     _offsetY->setText("0");
-    _sizeX->setText(QString::number(_monitorResolutions[_monIndex].width()));
-    _sizeY->setText(QString::number(_monitorResolutions[_monIndex].height()));
-    _checkBoxWindowDecor->setCheckState(Qt::Unchecked);
+    _sizeX->setText(QString::number(_monitorResolutions[_monitorIndex].width()));
+    _sizeY->setText(QString::number(_monitorResolutions[_monitorIndex].height()));
+    _checkBoxWindowDecor->setChecked(false);
 }
 
-void WindowControl::onWebGuiSelection(int selectionState) {
-    if (selectionState == Qt::Checked) {
-        emit webGuiChanged(_index);
+void WindowControl::onWebGuiSelection() {
+    if (_checkBoxWebGui->isChecked()) {
+        emit webGuiChanged(_windowIndex);
     }
 }
 
-void WindowControl::onSpoutSelection(int selectionState) {
-    if (selectionState != Qt::Checked) {
+void WindowControl::onSpoutSelection() {
+    if (!_checkBoxSpoutOutput->isChecked()) {
         return;
     }
 
@@ -524,8 +535,8 @@ void WindowControl::onSpoutSelection(int selectionState) {
 }
 
 void WindowControl::onMonitorChanged(int newSelection) {
-    _monIndex = newSelection;
-    emit windowChanged(_monIndex, _index, _windowDims);
+    _monitorIndex = newSelection;
+    emit windowChanged(_monitorIndex, _windowIndex, _windowDims);
 }
 
 void WindowControl::onProjectionChanged(int newSelection) {
@@ -582,7 +593,7 @@ void WindowControl::updatePlanarLockedFov() {
 }
 
 void WindowControl::uncheckWebGuiOption() {
-    _checkBoxWebGui->setCheckState(Qt::Unchecked);
+    _checkBoxWebGui->setChecked(false);
 }
 
 QRectF WindowControl::dimensions() const {
@@ -608,15 +619,15 @@ sgct::ivec2 WindowControl::windowPos() const {
 }
 
 bool WindowControl::isDecorated() const {
-    return (_checkBoxWindowDecor->checkState() == Qt::Checked);
+    return _checkBoxWindowDecor->isChecked();
 }
 
 bool WindowControl::isGuiWindow() const {
-    return (_checkBoxWebGui->checkState() == Qt::Checked);
+    return _checkBoxWebGui->isChecked();
 }
 
 bool WindowControl::isSpoutSelected() const {
-    return (_checkBoxSpoutOutput->checkState() == Qt::Checked);
+    return _checkBoxSpoutOutput->isChecked();
 }
 
 WindowControl::ProjectionIndices WindowControl::projectionSelectedIndex() const {
@@ -641,5 +652,5 @@ float WindowControl::heightOffset() const {
 }
 
 unsigned int WindowControl::monitorNum() const {
-    return _monIndex;
+    return _monitorIndex;
 }

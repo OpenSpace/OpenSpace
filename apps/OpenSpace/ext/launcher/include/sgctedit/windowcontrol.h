@@ -183,8 +183,8 @@ private slots:
     void onMonitorChanged(int newSelection);
     void onProjectionChanged(int newSelection);
     void onFullscreenClicked();
-    void onSpoutSelection(int selectionState);
-    void onWebGuiSelection(int selectionState);
+    void onSpoutSelection();
+    void onWebGuiSelection();
     void onAspectRatioLockClicked();
     void onFovLockClicked();
 
@@ -196,9 +196,9 @@ private:
     static constexpr float IdealAspectRatio = 16.f / 9.f;
     float _aspectRatioSize = IdealAspectRatio;
 
-    unsigned int _monIndex = 0;
-    unsigned int _monIndexDefault = 0;
-    unsigned int _index = 0;
+    unsigned int _monitorIndex = 0;
+    unsigned int _monitorIndexDefault = 0;
+    unsigned int _windowIndex = 0;
     bool _aspectRatioLocked = false;
     bool _fovLocked = true;
     const std::vector<QRect>& _monitorResolutions;
@@ -211,7 +211,6 @@ private:
     QPushButton* _buttonLockAspectRatio = nullptr;
     QPushButton* _buttonLockFov = nullptr;
     QRectF _windowDims;
-    QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;
     QCheckBox* _checkBoxWebGui = nullptr;
     QCheckBox* _checkBoxSpoutOutput = nullptr;

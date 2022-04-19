@@ -48,18 +48,13 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList
 void DisplayWindowUnion::createWidgets() {
     // Add all window controls (some will be hidden from GUI initially)
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
-        if (_nWindowsAllocated >= _nMaxWindows) {
-            return;
-        }
-
-        const unsigned int monitorNumForThisWindow =
-            (_nMaxWindows > 3 && _nWindowsAllocated >= 2) ? 1 : 0;
+        const unsigned int monitorNumForThisWindow = (_nMaxWindows > 3 && i >= 2) ? 1 : 0;
 
         WindowControl* ctrl = new WindowControl(
             monitorNumForThisWindow,
-            _nWindowsAllocated,
+            i,
             _monitorResolutions,
-            _windowColors[_nWindowsAllocated],
+            _windowColors[i],
             this
         );
         _windowControl.push_back(ctrl);
@@ -79,34 +74,12 @@ void DisplayWindowUnion::createWidgets() {
                 }
             }
         );
-
-        emit windowChanged(
-            monitorNumForThisWindow,
-            _nWindowsAllocated,
-            _windowControl.back()->dimensions()
-        );
-
-        _nWindowsAllocated++;
     }
 
-
-    
-
-
-    QVBoxLayout* layout = new QVBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout;
+    layout->setSizeConstraint(QLayout::SizeConstraint::SetMinimumSize);
     {
-        QHBoxLayout* layoutMonButton = new QHBoxLayout;
-
-        _addWindowButton = new QPushButton("Add Window");
-        _addWindowButton->setToolTip(QString::fromStdString(fmt::format(
-            "Add a window to the configuration (up to {} windows allowed)", _nMaxWindows
-        )));
-        _addWindowButton->setFocusPolicy(Qt::NoFocus);
-        connect(
-            _addWindowButton, &QPushButton::clicked,
-            this, &DisplayWindowUnion::addWindow
-        );
-
+        QBoxLayout* layoutMonButton = new QHBoxLayout;
         _removeWindowButton = new QPushButton("Remove Window");
         _removeWindowButton->setFocusPolicy(Qt::NoFocus);
         _removeWindowButton->setToolTip(
@@ -117,12 +90,22 @@ void DisplayWindowUnion::createWidgets() {
             this, &DisplayWindowUnion::removeWindow
         );
         layoutMonButton->addWidget(_removeWindowButton);
+
         layoutMonButton->addStretch(1);
+
+        _addWindowButton = new QPushButton("Add Window");
+        _addWindowButton->setToolTip(QString::fromStdString(fmt::format(
+            "Add a window to the configuration (up to {} windows allowed)", _nMaxWindows
+        )));
+        _addWindowButton->setFocusPolicy(Qt::NoFocus);
+        connect(
+            _addWindowButton, &QPushButton::clicked,
+            this, &DisplayWindowUnion::addWindow
+        );
         layoutMonButton->addWidget(_addWindowButton);
         layout->addLayout(layoutMonButton);
     }
-    QHBoxLayout* layoutWindows = new QHBoxLayout;
-    layout->addStretch();
+    QBoxLayout* layoutWindows = new QHBoxLayout;
 
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         layoutWindows->addWidget(_windowControl[i]);
@@ -135,6 +118,7 @@ void DisplayWindowUnion::createWidgets() {
     }
     _nWindowsDisplayed = 0;
     layout->addLayout(layoutWindows);
+    layout->addStretch();
     setLayout(layout);
 }
 
