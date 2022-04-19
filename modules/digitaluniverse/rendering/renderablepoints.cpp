@@ -359,7 +359,7 @@ void RenderablePoints::readColorMapFile() {
         // std::streampos position = file.tellg();
         std::getline(file, line);
 
-        if (line[0] == '#' || line.empty()) {
+        if (line.empty() || line[0] == '#') {
             continue;
         }
 

@@ -26,16 +26,14 @@
 #define __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
 
 #include <QDialog>
-#include <QListWidget>
+
+class QLineEdit;
+class QListWidget;
+class QPushButton;
 
 class ScriptlogDialog final : public QDialog {
 Q_OBJECT
 public:
-    /**
-     * Constructor for ScriptlogDialog class
-     *
-     * \param parent Pointer to parent Qt widget
-     */
     ScriptlogDialog(QWidget* parent);
 
 signals:
@@ -46,8 +44,13 @@ private slots:
 
 private:
     void createWidgets();
+    void loadScriptFile();
+    void updateScriptList();
 
     QListWidget* _scriptlogList = nullptr;
+    QLineEdit* _filter = nullptr;
+    QPushButton* _reloadFile = nullptr;
+    std::vector<std::string> _scripts;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__

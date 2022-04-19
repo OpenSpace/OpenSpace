@@ -39,7 +39,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableNodeLine";
     constexpr const char* ProgramName = "NodeLineProgram";
     constexpr const char* Root = "Root";
 

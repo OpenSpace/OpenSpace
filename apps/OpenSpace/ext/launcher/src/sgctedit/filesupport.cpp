@@ -202,16 +202,12 @@ ProjectionOptions FileSupport::saveProjectionNoSpout(
                 projection.tilt = 0.f;
                 return projection;
             }
-            break;
-
         case WindowControl::ProjectionIndeces::SphericalMirror:
             {
                 sgct::config::SphericalMirrorProjection projection;
                 projection.quality = winControl->qualitySelectedValue();
                 return projection;
             }
-            break;
-
         case WindowControl::ProjectionIndeces::Cylindrical:
             {
                 sgct::config::CylindricalProjection projection;
@@ -219,16 +215,12 @@ ProjectionOptions FileSupport::saveProjectionNoSpout(
                 projection.heightOffset = winControl->heightOffset();
                 return projection;
             }
-            break;
-
         case WindowControl::ProjectionIndeces::Equirectangular:
             {
                 sgct::config::EquirectangularProjection projection;
                 projection.quality = winControl->qualitySelectedValue();
                 return projection;
             }
-            break;
-
         case WindowControl::ProjectionIndeces::Planar:
         default:
             {
@@ -240,7 +232,6 @@ ProjectionOptions FileSupport::saveProjectionNoSpout(
                 projection.fov.down = -projection.fov.up;
                 return projection;
             }
-            break;
     }
 }
 

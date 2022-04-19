@@ -337,7 +337,8 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
         const double tScaled = ghoul::cubicEaseInOut((t - t1) / (t2 - t1));
         lookAtPos = ghoul::interpolateLinear(tScaled, startNodePos, endNodePos);
     }
-    else if (t > t2) {
+    else {
+        // (t > t2)
         // Compute a position in front of the camera at the end orientation
         const double inFrontDistance = glm::distance(endPos, endNodePos);
         const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
@@ -529,7 +530,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         return Waypoint();
     }
 
-    glm::dvec3 targetPos = glm::dvec3(0.0);
+    glm::dvec3 targetPos;
     if (info.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
         // Convert to world coordinates
@@ -545,7 +546,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
-        glm::dvec3 stepDir = glm::dvec3(0.0);
+        glm::dvec3 stepDir;
         if (type == Path::Type::Linear) {
             // If linear path, compute position along line form start to end point
             glm::dvec3 endNodePos = targetNode->worldPosition();
@@ -699,7 +700,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     catch (const PathCurve::TooShortPathError& e) {
         LINFO("Already at the requested target");
         // Rethrow e, so the pathnavigator can handle it as well
-        throw e;
+        throw;
     }
     catch (const PathCurve::InsufficientPrecisionError&) {
         // There wasn't enough precision to represent the full curve in world

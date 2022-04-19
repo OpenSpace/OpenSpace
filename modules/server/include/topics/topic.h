@@ -33,7 +33,7 @@ class Connection;
 
 class Topic {
 public:
-    Topic() {};
+    Topic() {}
     virtual ~Topic();
 
     void initialize(Connection* connection, size_t topicId);
