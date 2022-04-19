@@ -1,0 +1,70 @@
+local propertyHelper = asset.require("../property_helper")
+local joystickHelper = asset.require("./joystick_helper")
+
+local function numItems(iTable)
+  local counter = 0
+  for k, v in ipairs(iTable) do
+    counter = counter + 1
+  end
+  return counter
+end
+
+asset.onInitialize(function()
+  local joysticks = openspace.navigation.listAllJoysticks()
+  local numJoysticks = numItems(joysticks)
+  local joystick = ""
+
+  -- Is any connected?
+  if numJoysticks == 0 then
+    openspace.printWarning("Could not find any connected joysticks")
+    return
+  end
+
+  -- when only one joystick is connected
+  if numJoysticks == 1 then
+    local joyStickName = joysticks[1]
+    if joyStickName ~= "3Dconnexion KMJ Emulator" then -- Skip the SpaceMouse emulator
+      joystick = joyStickName
+    end
+  -- When two joystics are connected, make sure the second one is not the SpaceMouse emulator
+  -- If so then it is essentially only one connected
+  elseif numJoysticks == 2 then
+    local onlyOne = false
+    for _, joyStickName in ipairs(joysticks) do
+      if joyStickName == "3Dconnexion KMJ Emulator" then -- Skip the SpaceMouse emulator
+        onlyOne = true
+      else
+        joystick = joyStickName
+      end
+    end
+
+    if onlyOne == false then
+      openspace.printWarning("Cannot auto detect and add several joysticks")
+      return
+    end
+  else
+    openspace.printWarning("Cannot auto detect and add several joysticks")
+    return
+  end
+
+  if joystick == "" then
+    openspace.printWarning("Could not find any connected joysticks")
+    return
+  end
+
+  if joystick == "Wireless Controller" then
+    openspace.asset.add("./util/joysticks/ps4")
+  elseif joystick == "Xbox Controller" then
+    openspace.asset.add("./util/joysticks/xbox")
+  elseif joystick == "Wireless Xbox Controller" then
+    openspace.asset.add("./util/joysticks/xbox-wireless")
+  elseif joystick == "SpaceNavigator" then
+    openspace.asset.add("./util/joysticks/space-mouse-compact")
+  elseif joystick == "SpaceMouse Enterprise" then
+    openspace.asset.add("./util/joysticks/space-mouse-enterprise")
+  elseif joystick == "3Dconnexion Universal Receiver" then
+    openspace.printWarning("SpaceMouse in wireless mode cannot be automatically detected and added. Please add the matching asset file manually.")
+  else
+    openspace.printWarning("Could not find a matching asset for joystick: " .. joystick)
+  end
+end)
