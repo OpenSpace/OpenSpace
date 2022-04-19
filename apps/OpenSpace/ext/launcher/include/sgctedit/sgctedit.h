@@ -29,7 +29,7 @@
 
 #include <sgctedit/displaywindowunion.h>
 #include <sgctedit/monitorbox.h>
-#include <sgctedit/orientation.h>
+#include <sgctedit/settingswidget.h>
 #include <QApplication>
 #include <QColor>
 #include <QLayout>
@@ -106,7 +106,7 @@ private:
     QFrame* _displayFrame = nullptr;
     std::unique_ptr<DisplayWindowUnion> _displayWidget = nullptr;
     QRect _monitorWidgetSize = { 0, 0, 500, 500 };
-    Orientation* _orientationWidget = nullptr;
+    SettingsWidget* _settingsWidget = nullptr;
     sgct::config::Cluster& _cluster;
     std::vector<sgct::config::Window>& _windowList;
     const std::string _userConfigPath;

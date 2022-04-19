@@ -146,7 +146,7 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
 
 void SgctEdit::createWidgets() {
     QVBoxLayout* layoutMainV = new QVBoxLayout;
-    _orientationWidget = new Orientation;
+    _settingsWidget = new SettingsWidget;
     {
         _monBox = std::make_shared<MonitorBox>(
             _monitorWidgetSize,
@@ -175,7 +175,7 @@ void SgctEdit::createWidgets() {
         layoutMainV->addWidget(_displayFrame);
     }
     {
-        layoutMainV->addWidget(_orientationWidget);
+        layoutMainV->addWidget(_settingsWidget);
 
         QFrame* bottomBorder = new QFrame;
         bottomBorder->setFrameShape(QFrame::HLine);
@@ -205,7 +205,7 @@ void SgctEdit::createWidgets() {
 }
 
 SgctEdit::~SgctEdit() {
-    delete _orientationWidget;
+    delete _settingsWidget;
     delete _displayLayout;
 }
 
@@ -278,12 +278,12 @@ void SgctEdit::apply() {
 void SgctEdit::saveConfigToSgctFormat() {
     //
     // Save cluster
-    if (!_orientationWidget) {
+    if (!_settingsWidget) {
         return;
     }
 
     sgct::config::Scene scene;
-    scene.orientation = _orientationWidget->orientationValue();
+    scene.orientation = _settingsWidget->orientationValue();
     _cluster.scene = std::move(scene);
 
     {
@@ -293,7 +293,7 @@ void SgctEdit::saveConfigToSgctFormat() {
         _cluster.nodes = { node };
     }
     _cluster.masterAddress = "localhost";
-    _cluster.firmSync = _orientationWidget->vsyncValue();
+    _cluster.firmSync = _settingsWidget->vsyncValue();
 
     //
     // Save Windows

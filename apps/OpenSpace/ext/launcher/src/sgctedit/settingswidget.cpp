@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "sgctedit/orientation.h"
+#include "sgctedit/settingswidget.h"
 
 #include "sgctedit/orientationdialog.h"
 #include <QCheckBox>
 #include <QPushButton>
 #include <QVBoxLayout>
 
-Orientation::Orientation() {
+SettingsWidget::SettingsWidget() {
     QBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     
@@ -57,10 +57,10 @@ Orientation::Orientation() {
     setLayout(layout);
 }
 
-sgct::quat Orientation::orientationValue() const {
+sgct::quat SettingsWidget::orientationValue() const {
     return _orientationValue;
 }
 
-bool Orientation::vsyncValue() const {
+bool SettingsWidget::vsyncValue() const {
     return (_checkBoxVsync->checkState() == Qt::Checked);
 }

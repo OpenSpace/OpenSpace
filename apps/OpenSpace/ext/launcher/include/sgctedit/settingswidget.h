@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
-#define __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
+#define __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
 
 #include <QWidget>
 
@@ -31,14 +31,14 @@
 
 class QCheckBox;
 
-class Orientation : public QWidget {
+class SettingsWidget : public QWidget {
 Q_OBJECT
 public:
     /**
      * Constructor for Orientation class, which manages the overall control layout
      * including monitorBox, multiple WindowControl columns, and additional controls
      */
-    Orientation();
+    SettingsWidget();
    
     /**
      * Gets the user-provided x,y,z orientation values (degrees)
@@ -59,4 +59,4 @@ private:
     QCheckBox* _checkBoxVsync = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
+#endif // __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
