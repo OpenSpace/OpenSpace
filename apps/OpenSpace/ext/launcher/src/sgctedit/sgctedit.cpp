@@ -135,8 +135,8 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
         _monitorSizeList.emplace_back(
             screenList[s]->availableGeometry().x(),
             screenList[s]->availableGeometry().y(),
-            actualWidth,
-            actualHeight
+            static_cast<int>(actualWidth * screenList[s]->devicePixelRatio()),
+            static_cast<int>(actualHeight * screenList[s]->devicePixelRatio())
         );
     }
     _nMaxWindows = (_monitorSizeList.size() == 1) ? 3 : 4;
