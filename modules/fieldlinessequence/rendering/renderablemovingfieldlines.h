@@ -52,15 +52,16 @@ public:
         double getTimeToEndKeyFrame();
         void setStartPoint(double timeToRecon, size_t indexOfReconnection);
 
-        //std::pair<double, size_t> startPositionValues;
         std::vector<FieldlinesState::Fieldline>& keyFrames;
+        FieldlinesState::Fieldline temporaryInterpolationKeyFrame;
+
         double timeSinceInterpolation = 0.0;
         double timeInterpolationNominator = 0.0;
         bool forward = true;
         // this will be true when the traverser moves to a topology change
         // signals that it is ready to swap with its partner
-        bool shouldSwap = false;
-        bool hasSwapped = false;
+        bool shouldUseTemporaryKeyFrame = false;
+        bool hasTemporaryKeyFrame = false;
         std::vector<FieldlinesState::Fieldline>::iterator backKeyFrame;
         std::vector<FieldlinesState::Fieldline>::iterator frontKeyFrame;
 

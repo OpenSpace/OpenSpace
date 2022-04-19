@@ -54,7 +54,7 @@ public:
         // Path lines are visible even outside birth- and death time.
         double birthTime;   // Number of seconds from simulation start to when fieldline starts
         double deathTime;   // Number of seconds from simulation start to when fieldline ends
-        // iterator to the point of reconnection on the PathLine
+        // index where dayside reconnection happnens on the PathLine
         size_t daysideReconnectionStart;
         //std::vector<glm::vec3>::const_iterator daysideReconnectionStart;
         //float lifetime; // for when multiple cdf-files come into play ?

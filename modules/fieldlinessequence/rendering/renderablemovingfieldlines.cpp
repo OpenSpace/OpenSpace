@@ -272,12 +272,16 @@ namespace openspace {
             // point of reconnection and set the startpoint of it
             if (timeToReconTrav1 > timeToReconTrav2) {
                 _traversers[traverserIndex].setStartPoint(timeToReconTrav2, mf.pathLines.first.daysideReconnectionStart);
-                std::cout << "trav2 has shorter time\n";
             }
             else {
                 _traversers[traverserIndex + 1].setStartPoint(timeToReconTrav1, mf.pathLines.second.daysideReconnectionStart);
-                std::cout << "trav1 has shorter time\n";
             }
+
+            // initialize the temporary key frame for each traverser
+            _traversers[traverserIndex].temporaryInterpolationKeyFrame.vertices = std::vector(_nPointsOnFieldlines, glm::vec3{});
+            _traversers[traverserIndex + 1].temporaryInterpolationKeyFrame.vertices = std::vector(_nPointsOnFieldlines, glm::vec3{});
+            //_traversers[traverserIndex + 1].temporaryInterpolationKeyFrame.vertices.reserve(_nPointsOnFieldlines);
+
             traverserIndex += 2;
         }
 
@@ -654,7 +658,6 @@ namespace openspace {
 
         const double previousTime = data.previousFrameTime.j2000Seconds();
         const double currentTime = data.time.j2000Seconds();
-        //const double dt = currentTime - previousTime;
 
         moveLines(currentTime, previousTime);
 
@@ -669,7 +672,8 @@ namespace openspace {
     void RenderableMovingFieldlines::moveLine(const double dt,
         const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
-        GLsizei nVertices) {
+        GLsizei nVertices) 
+    {
         bool forward = std::signbit(dt) ? false : true;
         traverser.forward = forward;
         traverser.timeSinceInterpolation += dt;
@@ -677,12 +681,15 @@ namespace openspace {
         // if passing next or previous key frame
         bool passNext = forward ?
             traverser.timeSinceInterpolation >
-            traverser.backKeyFrame->timeToNextKeyFrame :
-        traverser.timeSinceInterpolation < 0;
+            traverser.timeInterpolationNominator :
+        traverser.timeSinceInterpolation < 0.0;
 
         if (passNext) {
-            if (traverser.hasSwapped) {
-                //traverser.hasSwapped = false;
+
+            if (traverser.hasTemporaryKeyFrame) {
+                traverser.hasTemporaryKeyFrame = false;
+                // Empty the vector without deallocating memory
+                //traverser.temporaryInterpolationKeyFrame.vertices.resize(0);
             }
 
             traverser.advanceKeyFrames();
@@ -706,10 +713,24 @@ namespace openspace {
             traverser.timeInterpolationNominator;
 
         for (size_t fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
-            glm::vec3 currentPosition =
-                traverser.backKeyFrame->vertices[fieldlineVertex];
-            glm::vec3 nextPosition =
-                traverser.frontKeyFrame->vertices[fieldlineVertex];
+            glm::vec3 currentPosition, nextPosition;
+            if (forward) {
+                currentPosition = traverser.hasTemporaryKeyFrame ?
+                    traverser.temporaryInterpolationKeyFrame.vertices[fieldlineVertex] :
+                    traverser.backKeyFrame->vertices[fieldlineVertex];
+
+                nextPosition = 
+                    traverser.frontKeyFrame->vertices[fieldlineVertex];
+            }
+            else {
+                currentPosition = 
+                    traverser.backKeyFrame->vertices[fieldlineVertex];
+
+                nextPosition = traverser.hasTemporaryKeyFrame ?
+                    traverser.temporaryInterpolationKeyFrame.vertices[fieldlineVertex] :
+                    traverser.frontKeyFrame->vertices[fieldlineVertex];
+            }
+
             _renderedLines[fieldlineVertex + lineStart] =
                 lerp(currentPosition, nextPosition, normalizedTime);
 
@@ -751,17 +772,22 @@ namespace openspace {
                 _traversers[lineIndex].frontKeyFrame->topology;
             bool isNewTopology2 = _traversers[lineIndex + 1].backKeyFrame->topology !=
                 _traversers[lineIndex + 1].frontKeyFrame->topology;
+            bool isNewTopology = isNewTopology1 || isNewTopology2;
+
+            bool hasTemporaryKeyFrame1 = _traversers[lineIndex].hasTemporaryKeyFrame;
+            bool hasTemporaryKeyFrame2 = _traversers[lineIndex + 1].hasTemporaryKeyFrame;
+            bool hasTemporaryKeyFrame = hasTemporaryKeyFrame1 || hasTemporaryKeyFrame2;
 
             // if there is a topology change vertices should be swapped
-            if (isNewTopology1 || isNewTopology2) {
+            if (isNewTopology && !hasTemporaryKeyFrame) {
 
                 // The traverser that has not reached the reconnection point
                 // should advance its next key frame and change the time to next
                 // key frame accordingly
-                if (isNewTopology1 && !_traversers[lineIndex].hasSwapped) {
+                if (isNewTopology1 && !hasTemporaryKeyFrame1) {
                     _traversers[lineIndex + 1].skipKeyFrame(FieldlinesState::Fieldline::Topology::Open);
                 }
-                else if (isNewTopology2 && !_traversers[lineIndex + 1].hasSwapped) {
+                else if (isNewTopology2 && !hasTemporaryKeyFrame2) {
                     _traversers[lineIndex].skipKeyFrame(FieldlinesState::Fieldline::Topology::Open);
                 }
 
@@ -777,29 +803,49 @@ namespace openspace {
 
 
                 bool isMovingForward = _traversers[lineIndex].forward;
-                bool hasSwapped = _traversers[lineIndex].hasSwapped && _traversers[lineIndex + 1].hasSwapped;
-
                 // Swaps vertices in key frames between each pair of traversers to get smooth topology changes
-                if (isMovingForward && !hasSwapped) {
+                if (isMovingForward) {
+
                     // Iterator to the index of vertex on the keyframe,
                     // used to find the point on the pathline where the vertex swap should be
                     auto itToIndex1 = _traversers[lineIndex].backKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
                     auto itToIndex2 = _traversers[lineIndex + 1].backKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
 
-                    std::swap_ranges(itToIndex1, _traversers[lineIndex].backKeyFrame->vertices.end(), itToIndex2);
-                    _traversers[lineIndex].hasSwapped = true;
-                    _traversers[lineIndex + 1].hasSwapped = true;
+                    std::copy(_traversers[lineIndex].backKeyFrame->vertices.begin(), _traversers[lineIndex].backKeyFrame->vertices.end(), _traversers[lineIndex].temporaryInterpolationKeyFrame.vertices.begin());
+
+                    std::copy(_traversers[lineIndex + 1].backKeyFrame->vertices.begin(), _traversers[lineIndex + 1].backKeyFrame->vertices.end(), _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.vertices.begin());
+                    
+                    std::swap_ranges(_traversers[lineIndex].temporaryInterpolationKeyFrame.vertices.begin() + _nPointsOnFieldlines / 2
+                        , _traversers[lineIndex].temporaryInterpolationKeyFrame.vertices.end(), 
+                        _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.vertices.begin() + _nPointsOnFieldlines / 2);
+
+
+                    //std::copy(_traversers[lineIndex].backKeyFrame->vertices.begin(), itToIndex1, _traversers[lineIndex].temporaryInterpolationKeyFrame.vertices.begin());
+                    //std::copy(itToIndex2, _traversers[lineIndex + 1].backKeyFrame->vertices.end(), _traversers[lineIndex].temporaryInterpolationKeyFrame.vertices.end());
+                    //_traversers[lineIndex].temporaryInterpolationKeyFrame.timeToNextKeyFrame = _traversers[lineIndex].backKeyFrame->timeToNextKeyFrame;
+                    //_traversers[lineIndex].temporaryInterpolationKeyFrame.topology = _traversers[lineIndex].backKeyFrame->topology;
+
+                    //std::copy(_traversers[lineIndex+ 1].backKeyFrame->vertices.begin(), itToIndex2, _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.vertices.begin());
+                    //std::copy(itToIndex1, _traversers[lineIndex].backKeyFrame->vertices.end(), _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.vertices.end());
+                    //_traversers[lineIndex + 1].temporaryInterpolationKeyFrame.timeToNextKeyFrame = _traversers[lineIndex + 1].backKeyFrame->timeToNextKeyFrame;
+                    //_traversers[lineIndex + 1].temporaryInterpolationKeyFrame.topology = _traversers[lineIndex + 1].backKeyFrame->topology;
+
+                    //std::swap_ranges(itToIndex1, _traversers[lineIndex].backKeyFrame->vertices.end(), itToIndex2);
+                    _traversers[lineIndex].hasTemporaryKeyFrame = true;
+                    _traversers[lineIndex + 1].hasTemporaryKeyFrame = true;
                 }
+
+                // TODO: DETTA FUNKAR FAN INTE LOL
                 // Swap back if moving backwards
-                else if (!isMovingForward && hasSwapped) {
+                else if (!isMovingForward && hasTemporaryKeyFrame) {
                     // Iterator to the index of vertex on the keyframe,
                     // used to find the point on the pathline where the vertex swap should be
                     auto itToIndex1 = _traversers[lineIndex].frontKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
                     auto itToIndex2 = _traversers[lineIndex + 1].frontKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
 
                     std::swap_ranges(itToIndex1, _traversers[lineIndex].frontKeyFrame->vertices.end(), itToIndex2);
-                    _traversers[lineIndex].hasSwapped = false;
-                    _traversers[lineIndex + 1].hasSwapped = false;
+                    _traversers[lineIndex].hasTemporaryKeyFrame = false;
+                    _traversers[lineIndex + 1].hasTemporaryKeyFrame = false;
                 }
             }
 
@@ -1017,7 +1063,8 @@ namespace openspace {
 
     void RenderableMovingFieldlines::PathLineTraverser::advanceKeyFrames() {
         if (forward) {
-            timeSinceInterpolation -= backKeyFrame->timeToNextKeyFrame;
+            //timeSinceInterpolation -= backKeyFrame->timeToNextKeyFrame;
+            timeSinceInterpolation -= timeInterpolationNominator;
             timeInterpolationNominator = frontKeyFrame->timeToNextKeyFrame;
             backKeyFrame = frontKeyFrame;
             ++frontKeyFrame;
@@ -1025,7 +1072,8 @@ namespace openspace {
         else {
             frontKeyFrame = backKeyFrame;
             --backKeyFrame;
-            timeSinceInterpolation += backKeyFrame->timeToNextKeyFrame;
+            //timeSinceInterpolation += backKeyFrame->timeToNextKeyFrame;
+            timeSinceInterpolation += timeInterpolationNominator;
             timeInterpolationNominator = backKeyFrame->timeToNextKeyFrame;
         }
     }
@@ -1037,17 +1085,17 @@ namespace openspace {
     */
     void RenderableMovingFieldlines::PathLineTraverser::skipKeyFrame(
         FieldlinesState::Fieldline::Topology desiredTopology) {
-        timeInterpolationNominator = 0.0;
+        //timeInterpolationNominator = 0.0;
         if (forward) {
             while (frontKeyFrame->topology != desiredTopology) {
-                timeInterpolationNominator += (frontKeyFrame - 1)->timeToNextKeyFrame;
                 ++frontKeyFrame;
+                timeInterpolationNominator += (frontKeyFrame - 1)->timeToNextKeyFrame;
             }
         }
         else {
             while (backKeyFrame->topology != desiredTopology) {
-                timeInterpolationNominator += backKeyFrame->timeToNextKeyFrame;
                 --backKeyFrame;
+                timeInterpolationNominator += backKeyFrame->timeToNextKeyFrame;
             }
         }
     }
@@ -1065,25 +1113,17 @@ namespace openspace {
         if (backKeyFrame == keyFrames.begin())
             return true;
 
-        // check if we are further away than the other fieldline in the pair
-        // used to keep in sync
-        //if ((currentKeyFrame - keyFrames.begin() == startPositionValues.second &&
-        //    timeSinceInterpolation < startPositionValues.first) || 
-        //    currentKeyFrame - keyFrames.begin() < startPositionValues.second) {
-        //    return true;
-        //}
-
         return false;
     }
 
     double RenderableMovingFieldlines::PathLineTraverser::getTimeToReconnectionPoint(size_t indexOfReconnection) {
-        double totalTime = 0;
+        double totalTime = 0.0;
         // iterates over vertices on pathline to indexOfReconnection 
         // and sums up the time to get there
         for (size_t i = 0; i < indexOfReconnection; ++i) {
             totalTime += keyFrames[i].timeToNextKeyFrame;
         }
-
+        
         return totalTime;
     }
 
@@ -1092,20 +1132,16 @@ namespace openspace {
     */
     void RenderableMovingFieldlines::PathLineTraverser::setStartPoint(double otherTraverserTimeToReconnection, size_t indexOfReconnection) {
         double currentTraverserTimeSinceRecon = 0;
-        for (size_t i = indexOfReconnection - 1; i != 0; --i) {
-            currentTraverserTimeSinceRecon += keyFrames[i].timeToNextKeyFrame;
+        for (size_t i = 0; i < indexOfReconnection; ++i) {
+            size_t ind = indexOfReconnection - i - 1;
+            currentTraverserTimeSinceRecon += keyFrames[ind].timeToNextKeyFrame;
 
             if (currentTraverserTimeSinceRecon >= otherTraverserTimeToReconnection) {
-                // to get a position between keyframes
+                // To get the proper position between keyframes
                 timeSinceInterpolation = currentTraverserTimeSinceRecon - otherTraverserTimeToReconnection;
-                //timeSinceInterpolation = keyFrames[i].timeToNextKeyFrame - timeSinceInterpolation;
-                //timeSinceInterpolation = keyFrames[i].timeToNextKeyFrame - timeSinceInterpolation - 4.1f;
-                backKeyFrame = keyFrames.begin() + i;
+                backKeyFrame = keyFrames.begin() + ind - 1; // -1 because we go backwards?
                 frontKeyFrame = backKeyFrame + 1;
 
-                // Potentially used for starting position, when backing so the field line
-                // wouldn't traverse away and keep the pair in sync
-                //startPositionValues = std::make_pair(i, timeSinceInterpolation);
                 break;
             }
         }

@@ -234,8 +234,9 @@ namespace openspace::fls {
 
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)
-            state.addMatchingPathLines(std::move(pathLine1), lengthToConcatenation1,
-                std::move(pathLine2), lengthToConcatenation2, birthTime);
+            // - 1 because arrays start at 0
+            state.addMatchingPathLines(std::move(pathLine1), lengthToConcatenation1 - 1,
+                std::move(pathLine2), lengthToConcatenation2 - 1, birthTime);
             //state.addMatchingPathLines(std::move(pathLine1), concatenationPointPathLine1,
             //    std::move(pathLine2), concatenationPointPathLine2);
 
