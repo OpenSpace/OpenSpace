@@ -40,8 +40,10 @@ namespace {
 } // namespace
 
 MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolutions,
-                       unsigned int nWindows, const std::array<QColor, 4>& windowColors)
-    : _monitorWidgetSize(widgetDims)
+                       unsigned int nWindows, const std::array<QColor, 4>& windowColors,
+                       QWidget* parent)
+    : QWidget(parent)
+    , _monitorWidgetSize(widgetDims)
     , _monitorResolutions(std::move(monitorResolutions))
     , _nWindows(nWindows)
     , _colorsForWindows(windowColors)
@@ -81,7 +83,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     //
     // Draw window out-of-bounds region(s) first
-    for (unsigned int i = 0; i < _nWindows; ++i) {
+    for (int i = 0; i < _nWindows; ++i) {
         painter.setBrush(Qt::BDiagPattern);
         painter.setPen(QPen(_colorsForWindows[i], 0));
         painter.drawRect(_windowRendering[i]);
@@ -112,7 +114,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     // Draw window number(s) first for darker contrast, then window(s) over both
     // out-of-bounds and monitors
-    for (unsigned int i = 0; i < _nWindows; ++i) {
+    for (int i = 0; i < _nWindows; ++i) {
         QPointF textPos = QPointF(
             _windowRendering[i].left() + 5.0,
             _windowRendering[i].bottom() - 5.0
@@ -124,7 +126,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     //
     // Paint window
-    for (unsigned int i = 0; i < _nWindows; ++i) {
+    for (int i = 0; i < _nWindows; ++i) {
         painter.setPen(QPen(_colorsForWindows[i], 1));
         painter.drawRect(_windowRendering[i]);
         
@@ -214,7 +216,7 @@ std::vector<QSizeF> MonitorBox::computeScaledResolutionPortrait(QRectF monitorAr
     return offsets;
 }
 
-void MonitorBox::setNumWindowsDisplayed(unsigned int nWindows) {
+void MonitorBox::nWindowsDisplayedChanged(int nWindows) {
     if (_nWindows != nWindows) {
         _nWindows = nWindows;
         update();

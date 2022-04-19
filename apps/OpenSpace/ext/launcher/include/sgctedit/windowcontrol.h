@@ -53,21 +53,13 @@ public:
         const std::vector<QRect>& monitorDims, const QColor& winColor,
         QWidget* parent);
     
-    ~WindowControl();
-    
     /**
      * Makes the window label at top of a window control column visible
      *
      * \param bool Shows the window label if true
      */
     void showWindowLabel(bool show);
-    
-    /**
-     * Initializes the layout of a window controls column, returning the Qt layout object
-     *
-     * \return the QVBoxLayout object that contains the entire windows control column
-     */
-    QVBoxLayout* initializeLayout();
+  
     
     /**
      * Returns the dimensions of the window
@@ -197,12 +189,9 @@ private slots:
     void onFovLockClicked();
 
 private:
-    void createWidgets(QWidget* parent);
+    void createWidgets();
     void determineIdealWindowSize();
-    QString resolutionLabelText(QRect resolution);
     void updatePlanarLockedFov();
-
-    QList<QString> _monitorNames = { "Primary", "Secondary" };
 
     static constexpr float IdealAspectRatio = 16.f / 9.f;
     float _aspectRatioSize = IdealAspectRatio;
@@ -214,7 +203,6 @@ private:
     bool _fovLocked = true;
     const std::vector<QRect>& _monitorResolutions;
     QColor _colorForWindow;
-    QVBoxLayout* _layoutFullWindow = nullptr;
     QLabel* _labelWinNum = nullptr;
     QLineEdit* _sizeX = nullptr;
     QLineEdit* _sizeY = nullptr;

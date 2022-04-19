@@ -122,7 +122,7 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
 {
     setWindowTitle("Window Configuration Editor");
     
-    size_t nScreensManaged = std::min(static_cast<int>(screenList.length()), 2);
+    size_t nScreensManaged = std::min(static_cast<int>(screenList.length()), 4);
     for (unsigned int s = 0; s < static_cast<unsigned int>(nScreensManaged); ++s) {
         int actualWidth = std::max(
             screenList[s]->size().width(),
@@ -152,28 +152,40 @@ void SgctEdit::createWidgets() {
     }
     _settingsWidget = new SettingsWidget(orientation, this);
     {
-        _monitorBox = std::make_shared<MonitorBox>(
+        _monitorBox = new MonitorBox(
             _monitorWidgetSize,
             _monitorSizeList,
             _nMaxWindows,
-            _colorsForWindows
+            _colorsForWindows,
+            this
         );
         QHBoxLayout* layoutMonBox = new QHBoxLayout;
         layoutMonBox->addStretch(1);
-        layoutMonBox->addWidget(_monitorBox.get());
+        layoutMonBox->addWidget(_monitorBox);
         layoutMonBox->addStretch(1);
         layoutMainV->addLayout(layoutMonBox);
 
         // Add Display Layout
         _displayLayout = new QVBoxLayout;
-        _displayWidget = std::make_unique<DisplayWindowUnion>(
-            *_monitorBox,
+        _displayWidget = new DisplayWindowUnion(
+            //*_monitorBox,
             _monitorSizeList,
             _nMaxWindows,
-            _colorsForWindows
+            _colorsForWindows,
+            this
         );
+        connect(
+            _displayWidget, &DisplayWindowUnion::windowChanged,
+            _monitorBox, &MonitorBox::windowDimensionsChanged
+        );
+        connect(
+            _displayWidget, &DisplayWindowUnion::nWindowsChanged,
+            _monitorBox, &MonitorBox::nWindowsDisplayedChanged
+        );
+        _displayWidget->addWindow();
+
         _displayFrame = new QFrame;
-        _displayLayout->addWidget(_displayWidget.get());
+        _displayLayout->addWidget(_displayWidget);
         _displayFrame->setLayout(_displayLayout);
         _displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
         layoutMainV->addWidget(_displayFrame);

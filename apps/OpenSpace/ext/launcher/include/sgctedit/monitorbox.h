@@ -45,17 +45,12 @@ public:
      * \param winColors An array of QColor objects for window colors. The indexing of
      *                  this array matches the window indexing used elsewhere in the
      *                  class. This allows for a unique color for each window.
+     * \param parent The parent which to which this MonitorBox belongs
      */
     MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolutions,
-        unsigned int nWindows, const std::array<QColor, 4>& windowColors);
+        unsigned int nWindows, const std::array<QColor, 4>& windowColors,
+        QWidget* parent = nullptr);
 
-    /**
-     * Sets the number of windows to be displayed
-     *
-     * \param nWindows Number of windows to be displayed
-     */
-    void setNumWindowsDisplayed(unsigned int nWindows);
-    
 public slots:
     /**
      * Called when window dimensions or monitor location have changed, requiring redraw.
@@ -68,6 +63,8 @@ public slots:
      */
     void windowDimensionsChanged(unsigned int mIdx, unsigned int wIdx,
         const QRectF& newDimensions);
+
+    void nWindowsDisplayedChanged(int newCount);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -88,7 +85,7 @@ private:
         QRectF{ 0.f, 0.f, 0.f, 0.f },
         QRectF{ 0.f, 0.f, 0.f, 0.f }
     };
-    unsigned int _nWindows = 1;
+    int _nWindows = 1;
     const std::array<QColor, 4> _colorsForWindows;
     float _monitorScaleFactor = 1.0;
 };

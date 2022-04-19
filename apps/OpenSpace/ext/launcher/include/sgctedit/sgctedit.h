@@ -100,11 +100,11 @@ private:
     void saveConfigToSgctFormat();
     void saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win);
 
-    std::shared_ptr<MonitorBox> _monitorBox = nullptr;
+    MonitorBox* _monitorBox = nullptr;
     std::vector<QRect> _monitorSizeList;
     QVBoxLayout* _displayLayout = nullptr;
     QFrame* _displayFrame = nullptr;
-    std::unique_ptr<DisplayWindowUnion> _displayWidget = nullptr;
+    DisplayWindowUnion* _displayWidget = nullptr;
     QRect _monitorWidgetSize = { 0, 0, 500, 500 };
     SettingsWidget* _settingsWidget = nullptr;
     sgct::config::Cluster& _cluster;
@@ -124,6 +124,8 @@ private:
     QPushButton* _cancelButton = nullptr;
     QPushButton* _applyButton = nullptr;
     std::string _saveTarget;
+
+
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__

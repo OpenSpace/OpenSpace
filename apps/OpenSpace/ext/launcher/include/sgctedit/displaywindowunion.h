@@ -42,7 +42,6 @@ public:
      * Constructor for DisplayWindowUnion class, which manages the overall control layout
      * including monitorBox, multiple WindowControl columns, and additional controls
      *
-     * \param monitorRenderBox pointer to the MonitorBox object
      * \param monitorSizeList A vector containing QRect objects containing pixel dims
      *                        of each monitor
      * \param nMaxWindows The maximum number of windows allowed (depends on the number
@@ -50,10 +49,11 @@ public:
      * \param winColors An array of QColor objects for window colors. The indexing of
      *                  this array matches the window indexing used elsewhere in the
      *                  class. This allows for a unique color for each window.
+     * \param parent The parent to which this widget belongs
      */
-    DisplayWindowUnion(MonitorBox& monitorRenderBox,
-        const std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
-        const std::array<QColor, 4>& windowColors);
+    DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
+        unsigned int nMaxWindows, const std::array<QColor, 4>& windowColors,
+        QWidget* parent = nullptr);
     
     /**
      * Returns a vector of pointers to all WindowControl objects for all windows
@@ -69,27 +69,28 @@ public:
      */
     unsigned int nWindows() const;
 
-private slots:
+signals:
+    void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
+    void nWindowsChanged(int newCount);
+
+public slots:
     void addWindow();
     void removeWindow();
 
 private:
-    void initializeWindowControl();
-    void initializeLayout();
+    void createWidgets();
     void showWindows();
 
-    MonitorBox& _monitorBox;
     const std::vector<QRect>& _monitorResolutions;
     const unsigned int _nMaxWindows = 3;
     const std::array<QColor, 4>& _windowColors;
 
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
-    std::vector<std::unique_ptr<WindowControl>> _windowControl;
+    std::vector<WindowControl*> _windowControl;
     QPushButton* _addWindowButton = nullptr;
     QPushButton* _removeWindowButton = nullptr;
     unsigned int _monitorIdx = 0;
-    std::vector<QWidget*> _layoutWindowWrappers;
     std::vector<QFrame*> _frameBorderLines;
 };
 
