@@ -139,6 +139,7 @@ void TargetBrowserPair::initialize() {
     _targetRenderable->setColor(_browser->borderColor());
     _targetRenderable->setDimensions(_browser->screenSpaceDimensions());
     _browser->updateBorderColor();
+    _browser->hideChromeInterface(true);
 }
 
 glm::ivec3 TargetBrowserPair::borderColor() const {
