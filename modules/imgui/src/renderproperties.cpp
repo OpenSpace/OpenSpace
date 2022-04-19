@@ -170,10 +170,10 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    bool selectionChanged = false;
-    std::set<std::string> newSelected;
-
     if (ImGui::TreeNode(name.c_str())) {
+        bool selectionChanged = false;
+        std::set<std::string> newSelected;
+       
         std::set<std::string> selected = p->value();
         const std::vector<std::string>& options = p->options();
 

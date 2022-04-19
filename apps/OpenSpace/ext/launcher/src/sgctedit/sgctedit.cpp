@@ -52,8 +52,8 @@ void SgctEdit::systemMonitorConfiguration(const QList<QScreen*>& screenList) {
         _monitorSizeList.push_back({
             screenList[s]->availableGeometry().x(),
             screenList[s]->availableGeometry().y(),
-            actualWidth,
-            actualHeight
+            static_cast<int>(actualWidth * screenList[s]->devicePixelRatio()),
+            static_cast<int>(actualHeight * screenList[s]->devicePixelRatio())
         });
     }
     _nMaxWindows = (_monitorSizeList.size() == 1) ? 3 : 4;

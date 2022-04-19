@@ -163,16 +163,16 @@ namespace {
 
     std::vector<ghoul::Dictionary> res;
     const std::vector<interaction::Action>& actions = global::actionManager->actions();
-    for (const interaction::Action& action : actions) {
+    for (const interaction::Action& a : actions) {
         ghoul::Dictionary d;
-        d.setValue("Identifier", action.identifier);
-        d.setValue("Command", action.command);
-        d.setValue("Name", action.name);
-        d.setValue("Documentation", action.documentation);
-        d.setValue("GuiPath", action.guiPath);
+        d.setValue("Identifier", a.identifier);
+        d.setValue("Command", a.command);
+        d.setValue("Name", a.name);
+        d.setValue("Documentation", a.documentation);
+        d.setValue("GuiPath", a.guiPath);
         d.setValue(
             "Synchronization",
-            action.synchronization == interaction::Action::IsSynchronized::Yes
+            a.synchronization == interaction::Action::IsSynchronized::Yes
         );
 
         res.push_back(d);

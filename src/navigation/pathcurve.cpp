@@ -35,11 +35,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "PathCurve";
-
-    constexpr const double LengthEpsilon =
-        100.0 * std::numeric_limits<double>::epsilon();
-
+    constexpr const double LengthEpsilon = 100.0 * std::numeric_limits<double>::epsilon();
 } // namespace
 
 namespace openspace::interaction {

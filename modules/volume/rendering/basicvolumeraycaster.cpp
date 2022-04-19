@@ -137,7 +137,7 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     program.setUniform("nClips_" + id, nClips);
     program.setUniform("clipNormals_" + id, clipNormals);
     program.setUniform("clipOffsets_" + id, clipOffsets);
-    program.setUniform("opacity_" + id, opacity());
+    program.setUniform("brightness_" + id, brightness());
     program.setUniform("rNormalization_" + id, _rNormalization);
     program.setUniform("rUpperBound_" + id, _rUpperBound);
 }
@@ -197,12 +197,12 @@ void BasicVolumeRaycaster::setStepSize(float stepSize) {
     _stepSize = stepSize;
 }
 
-void BasicVolumeRaycaster::setOpacity(float opacity) {
-    _opacity = opacity;
+void BasicVolumeRaycaster::setBrightness(float brightness) {
+    _brightness = brightness;
 }
 
-float BasicVolumeRaycaster::opacity() const {
-    return _opacity;
+float BasicVolumeRaycaster::brightness() const {
+    return _brightness;
 }
 
 void BasicVolumeRaycaster::setRNormalization(float rNormalization) {

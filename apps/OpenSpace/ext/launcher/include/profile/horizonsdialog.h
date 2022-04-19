@@ -58,7 +58,7 @@ public:
 private slots:
     void openSaveAs();
     void typeOnChange(int index);
-    void downloadProgress(qint64 ist, qint64 max);
+    void downloadProgress(int value, int max);
     void importTimeRange();
 
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
