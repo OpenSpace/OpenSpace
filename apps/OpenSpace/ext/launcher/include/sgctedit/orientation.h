@@ -30,7 +30,6 @@
 #include <sgct/math.h>
 
 class QCheckBox;
-class QHBoxLayout;
 
 class Orientation : public QWidget {
 Q_OBJECT
@@ -41,13 +40,6 @@ public:
      */
     Orientation();
    
-    /**
-     * Add Orientation controls to the parent layout
-     *
-     * \param parentLayout the layout to which the Orientation's controls will be added
-     */
-    void addControlsToParentLayout(QVBoxLayout* parentLayout);
-  
     /**
      * Gets the user-provided x,y,z orientation values (degrees)
      *
@@ -62,12 +54,8 @@ public:
      */
     bool vsyncValue() const;
 
-private slots:
-    void orientationDialog();
-
 private:
     sgct::quat _orientationValue = { 0.f, 0.f, 0.f, 0.f };
-    QHBoxLayout* _layoutOrientationFull = nullptr;
     QCheckBox* _checkBoxVsync = nullptr;
 };
 

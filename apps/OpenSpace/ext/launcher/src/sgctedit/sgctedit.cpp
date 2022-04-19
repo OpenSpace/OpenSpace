@@ -175,7 +175,7 @@ void SgctEdit::createWidgets() {
         layoutMainV->addWidget(_displayFrame);
     }
     {
-        _orientationWidget->addControlsToParentLayout(layoutMainV);
+        layoutMainV->addWidget(_orientationWidget);
 
         QFrame* bottomBorder = new QFrame;
         bottomBorder->setFrameShape(QFrame::HLine);

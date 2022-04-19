@@ -26,40 +26,35 @@
 
 #include "sgctedit/orientationdialog.h"
 #include <QCheckBox>
-#include <QLayout>
 #include <QPushButton>
+#include <QVBoxLayout>
 
 Orientation::Orientation() {
-    _layoutOrientationFull = new QHBoxLayout;
-    QVBoxLayout* layoutOrientationControls = new QVBoxLayout;
-    QPushButton* orientationButton = new QPushButton("Global Orientation");
-    _checkBoxVsync = new QCheckBox("VSync All Windows", this);
+    QBoxLayout* layout = new QVBoxLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
+    
+    _checkBoxVsync = new QCheckBox("VSync All Windows");
     _checkBoxVsync->setToolTip(
         "If enabled, the server will frame lock and wait for all client nodes"
     );
-    layoutOrientationControls->addWidget(_checkBoxVsync);
+    layout->addWidget(_checkBoxVsync);
+    
+    QPushButton* orientationButton = new QPushButton("Global Orientation");
     orientationButton->setToolTip(
         "Opens a separate dialog for setting the pitch, "
         "yaw, and roll of the camera\n(the orientation applies to all viewports)"
     );
     orientationButton->setFocusPolicy(Qt::NoFocus);
-    layoutOrientationControls->addWidget(orientationButton);
-    _layoutOrientationFull->addStretch(1);
-    _layoutOrientationFull->addLayout(layoutOrientationControls);
-    _layoutOrientationFull->addStretch(1);
+    layout->addWidget(orientationButton);
     connect(
         orientationButton, &QPushButton::released,
-        this, &Orientation::orientationDialog
+        [this]() {
+            OrientationDialog _orientationDialog(_orientationValue, this);
+            _orientationDialog.exec();
+        }
     );
-}
 
-void Orientation::addControlsToParentLayout(QVBoxLayout* parentLayout) {
-    parentLayout->addLayout(_layoutOrientationFull);
-}
-
-void Orientation::orientationDialog() {
-    OrientationDialog _orientationDialog(_orientationValue, this);
-    _orientationDialog.exec();
+    setLayout(layout);
 }
 
 sgct::quat Orientation::orientationValue() const {
