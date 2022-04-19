@@ -61,7 +61,6 @@ public:
 
     void setImageCollectionIsLoaded(bool isLoaded);
     void setVerticalFov(double vfov);
-    void setIsSyncedWithWwt(bool isSynced);
     void setEquatorialAim(glm::dvec2 equatorial);
     void setBorderColor(glm::ivec3 color);
     void setTargetRoll(double roll);
@@ -97,7 +96,6 @@ private:
     ghoul::Dictionary setImageOpacityMessage(const std::string& id, double opacity) const;
     ghoul::Dictionary setLayerOrderMessage(const std::string& id, int version);
 
-    bool _isSyncedWithWwt = false;
     bool _borderColorIsDirty = false;
     bool _equatorialAimIsDirty = false;
     int messageCounter = 0;

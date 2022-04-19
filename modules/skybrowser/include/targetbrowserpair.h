@@ -74,7 +74,6 @@ public:
 
     void setEnabled(bool enable);
     void setOpacity(float opacity);
-    void setIsSyncedWithWwt(bool isSynced);
     void setVerticalFov(double vfov);
     void setEquatorialAim(const glm::dvec2& aim);
     void setBorderColor(const glm::ivec3& color);

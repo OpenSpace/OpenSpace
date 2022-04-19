@@ -233,10 +233,6 @@ bool TargetBrowserPair::isImageCollectionLoaded() {
     return _browser->isImageCollectionLoaded();
 }
 
-void TargetBrowserPair::setIsSyncedWithWwt(bool isSynced) {
-    _browser->setIsSyncedWithWwt(isSynced);
-}
-
 void TargetBrowserPair::setVerticalFov(double vfov) {
     _browser->setVerticalFov(vfov);
     _targetRenderable->setVerticalFov(vfov);

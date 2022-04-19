@@ -217,7 +217,6 @@ namespace {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
-        pair->setIsSyncedWithWwt(true);
         pair->initialize();
     }
 }

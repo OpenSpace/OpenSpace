@@ -92,10 +92,6 @@ void WwtCommunicator::setWebpageBorderColor(glm::ivec3 color) const {
     executeJavascript(scr);
 }
 
-void WwtCommunicator::setIsSyncedWithWwt(bool isSynced) {
-    _isSyncedWithWwt = isSynced;
-}
-
 void WwtCommunicator::setEquatorialAim(glm::dvec2 equatorial) {
     _equatorialAim = std::move(equatorial);
     _equatorialAimIsDirty = true;
