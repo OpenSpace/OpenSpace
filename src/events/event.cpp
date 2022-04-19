@@ -173,7 +173,10 @@ void log(int i, const EventSessionRecordingPlayback& e) {
 
 void log(int i, const EventPointJwstRequested& e) {
     ghoul_assert(e.type == EventPointJwstRequested::Type, "Wrong type");
-    LINFO(fmt::format("[{}] PointJwstRequested: Ra: {}, Dec: {}", i, e.ra, e.dec));
+    LINFO(fmt::format(
+        "[{}] PointJwstRequested: Ra: {}, Dec: {}, Duration: {}", i, e.ra, e.dec,
+        e.duration
+    ));
 }
 
 void log(int i, const CustomEvent& e) {
@@ -423,6 +426,7 @@ ghoul::Dictionary toParameter(const Event& e) {
         case Event::Type::PointJwstRequested:
             d.setValue("Ra", static_cast<const EventPointJwstRequested&>(e).ra);
             d.setValue("Dec", static_cast<const EventPointJwstRequested&>(e).dec);
+            d.setValue("Duration", static_cast<const EventPointJwstRequested&>(e).duration);
             break;
         case Event::Type::Custom:
             d.setValue(
@@ -605,10 +609,11 @@ EventSessionRecordingPlayback::EventSessionRecordingPlayback(State state_)
     , state(state_)
 {}
 
-EventPointJwstRequested::EventPointJwstRequested(double ra_, double dec_)
+EventPointJwstRequested::EventPointJwstRequested(double ra_, double dec_, double duration_)
     : Event(Type)
     , ra(ra_)
     , dec(dec_)
+    , duration(duration_)
 {}
 
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)

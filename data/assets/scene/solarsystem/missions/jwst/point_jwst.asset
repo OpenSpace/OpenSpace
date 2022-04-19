@@ -1,12 +1,15 @@
 local point_jwst = {
   Identifier = "event.jwst.point",
   Name = "Point JWST",
+
   Command = [[
     local ra
     local dec
+    local duration
     if is_declared("args") then
       ra = args.Ra
       dec = args.Dec
+      duration = args.Duration
     else
       return
     end
@@ -128,7 +131,7 @@ local point_jwst = {
     openspace.setPropertyValueSingle(
       'Scene.JWSTModel.Rotation.Rotation',
       { JWSTAngles[1], JWSTAngles[2],  0.0},
-      3.0
+      duration
     )
   ]],
   Documentation = [[
