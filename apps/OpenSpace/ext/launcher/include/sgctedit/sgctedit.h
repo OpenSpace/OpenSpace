@@ -100,7 +100,7 @@ private:
     void saveConfigToSgctFormat();
     void saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win);
 
-    std::shared_ptr<MonitorBox> _monBox = nullptr;
+    std::shared_ptr<MonitorBox> _monitorBox = nullptr;
     std::vector<QRect> _monitorSizeList;
     QVBoxLayout* _displayLayout = nullptr;
     QFrame* _displayFrame = nullptr;

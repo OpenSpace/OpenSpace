@@ -38,7 +38,7 @@ public:
      * Constructor for Orientation class, which manages the overall control layout
      * including monitorBox, multiple WindowControl columns, and additional controls
      */
-    SettingsWidget();
+    SettingsWidget(sgct::quat orientation, QWidget* parent = nullptr);
    
     /**
      * Gets the user-provided x,y,z orientation values (degrees)

@@ -74,8 +74,10 @@ protected:
 
 private:
     void mapMonitorResolutionToWidgetCoordinates(QRectF monitorArrangement);
-    std::vector<QSizeF> computeScaledResolutionLandscape(QRectF monitorArrangement, float maxWidth);
-    std::vector<QSizeF> computeScaledResolutionPortrait(QRectF monitorArrangement, float maxHeight);
+    std::vector<QSizeF> computeScaledResolutionLandscape(QRectF monitorArrangement,
+        float maxWidth);
+    std::vector<QSizeF> computeScaledResolutionPortrait(QRectF monitorArrangement,
+        float maxHeight);
 
     QRectF _monitorWidgetSize;
     const std::vector<QRect> _monitorResolutions;

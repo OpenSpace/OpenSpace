@@ -146,9 +146,13 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
 
 void SgctEdit::createWidgets() {
     QVBoxLayout* layoutMainV = new QVBoxLayout;
-    _settingsWidget = new SettingsWidget;
+    sgct::quat orientation = { 0.f, 0.f, 0.f, 0.f };
+    if (_cluster.scene.has_value() && _cluster.scene->orientation.has_value()) {
+        orientation = *_cluster.scene->orientation;
+    }
+    _settingsWidget = new SettingsWidget(orientation, this);
     {
-        _monBox = std::make_shared<MonitorBox>(
+        _monitorBox = std::make_shared<MonitorBox>(
             _monitorWidgetSize,
             _monitorSizeList,
             _nMaxWindows,
@@ -156,14 +160,14 @@ void SgctEdit::createWidgets() {
         );
         QHBoxLayout* layoutMonBox = new QHBoxLayout;
         layoutMonBox->addStretch(1);
-        layoutMonBox->addWidget(_monBox.get());
+        layoutMonBox->addWidget(_monitorBox.get());
         layoutMonBox->addStretch(1);
         layoutMainV->addLayout(layoutMonBox);
 
         // Add Display Layout
         _displayLayout = new QVBoxLayout;
         _displayWidget = std::make_unique<DisplayWindowUnion>(
-            *_monBox,
+            *_monitorBox,
             _monitorSizeList,
             _nMaxWindows,
             _colorsForWindows
@@ -205,7 +209,6 @@ void SgctEdit::createWidgets() {
 }
 
 SgctEdit::~SgctEdit() {
-    delete _settingsWidget;
     delete _displayLayout;
 }
 

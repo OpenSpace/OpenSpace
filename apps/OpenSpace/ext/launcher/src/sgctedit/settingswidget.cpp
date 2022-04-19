@@ -29,7 +29,10 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-SettingsWidget::SettingsWidget() {
+SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
+    : QWidget(parent)
+    , _orientationValue(std::move(orientation))
+{
     QBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     
@@ -62,5 +65,5 @@ sgct::quat SettingsWidget::orientationValue() const {
 }
 
 bool SettingsWidget::vsyncValue() const {
-    return (_checkBoxVsync->checkState() == Qt::Checked);
+    return _checkBoxVsync->isChecked();
 }
