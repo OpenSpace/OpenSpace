@@ -42,7 +42,8 @@ public:
 		std::thread thread;
 
 		SoftwareConnection connection;
-		SoftwareConnection::Status status;
+		std::list<std::string> sceneGraphNodes;	// TODO: Change to std::unordered_set?
+		bool disconnecting;
 	};
 
 	struct PeerMessage {
@@ -55,13 +56,15 @@ public:
 	void update();
 
 private:
-	void disconnect(Peer& peer);
+	void disconnect(std::shared_ptr<Peer> peer);
 	void handleNewPeers();
-	void handlePeer(size_t id);
+	void peerEventLoop(size_t id);
 	void handlePeerMessage(PeerMessage peerMessage);
 	void eventLoop();
 
-	bool isConnected(const Peer& peer) const;
+	bool isConnected(const std::shared_ptr<Peer> peer) const;
+
+	void removeSceneGraphNode(const std::string &identifier);
 
 	std::shared_ptr<Peer> peer(size_t id);
 

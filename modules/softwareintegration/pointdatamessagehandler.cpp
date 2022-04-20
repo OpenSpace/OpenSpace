@@ -38,13 +38,14 @@
 #include <iomanip>
 
 namespace {
-    constexpr const char* _loggerCat = "SoftwareIntegration";
+    constexpr const char* _loggerCat = "PDatMessHand";
 } // namespace
 
 namespace openspace {
 
 void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& message,
-                                                     SoftwareConnection& connection)
+                                                     SoftwareConnection& connection,
+                                                     std::list<std::string>& sceneGraphNodes)
 {
     int messageOffset = 0;
 
@@ -52,6 +53,7 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     // in the message. If the order is not the same, the global variable
     // 'message offset' will be wrong
     const std::string identifier = readString(message, messageOffset);
+    sceneGraphNodes.push_back(identifier);
     const glm::vec3 color = readColor(message, messageOffset);
     const float opacity = readFloatValue(message, messageOffset);
     const float size = readFloatValue(message, messageOffset);
@@ -238,6 +240,7 @@ void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& me
 
     // Toggle visibility of renderable
     const bool visability = visibilityMessage == "T";
+    LWARNING(fmt::format("visability={}", visability));
     std::string script = fmt::format(
         "openspace.setPropertyValueSingle('Scene.{}.Renderable.ToggleVisibility', {}, 1);",
         identifier, ghoul::to_string(visability)

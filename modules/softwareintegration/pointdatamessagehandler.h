@@ -36,7 +36,7 @@ class Renderable;
 class PointDataMessageHandler {
 public:
     void handlePointDataMessage(const std::vector<char>& message,
-        SoftwareConnection& connection);
+        SoftwareConnection& connection, std::list<std::string>& sceneGraphNodes);
     void handleColorMessage(const std::vector<char>& message);
     void handleOpacityMessage(const std::vector<char>& message);
     void handlePointSizeMessage(const std::vector<char>& message);

@@ -29,7 +29,7 @@
 
 
 namespace {
-	constexpr const char* _loggerCat = "SoftwareIntegration_SyncableDataStorage";
+	constexpr const char* _loggerCat = "SyncableDataStorage";
 } // namespace
 
 namespace openspace {
@@ -83,12 +83,12 @@ void SyncableDataStorage::decode(SyncBuffer* syncBuffer) {
 void SyncableDataStorage::postSync(bool isMaster) {
 	if (isMaster) {
 		if (_storage.size() > 0) {
-			LWARNING(fmt::format("SyncableDataStorage.size() (MASTER): {}", _storage.size()));
+			// LWARNING(fmt::format("SyncableDataStorage.size() (MASTER): {}", _storage.size()));
 		}
 	}
 	else {
 		if (_storage.size() > 0) {
-			LWARNING(fmt::format("SyncableDataStorage.size() (CLIENT): {}", _storage.size()));
+			// LWARNING(fmt::format("SyncableDataStorage.size() (CLIENT): {}", _storage.size()));
 		}
 	}
 }

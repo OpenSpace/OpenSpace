@@ -35,7 +35,7 @@ namespace {
 
 namespace openspace {
 
-const float SoftwareConnection::ProtocolVersion = 1.0;
+const std::string SoftwareConnection::ProtocolVersion = "1.0";
 
 std::map<std::string, SoftwareConnection::MessageType> SoftwareConnection::mapSIMPTypeToMessageType {
     {"CONN", MessageType::Connection},
@@ -69,6 +69,8 @@ bool SoftwareConnection::isConnectedOrConnecting() const {
 }
 
 bool SoftwareConnection::sendMessage(std::string message) {
+    LDEBUG(fmt::format("In SoftwareConnection::sendMessage()", 0));
+
     if (_isListening) {
         if (!_socket->put<char>(message.data(), message.size())) {
             return false;
@@ -99,10 +101,9 @@ ghoul::io::TcpSocket* SoftwareConnection::socket() {
  * @return SoftwareConnection::Message 
  */
 SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
-    // LWARNING("SoftwareConnection::receiveMessageFromSoftware()");
-    // if (global::windowDelegate->isMaster()) {
-    // }
-    
+
+    // LDEBUG(fmt::format("t{}: receiveMessageFromSoftware()", std::this_thread::get_id()));
+
     // Header consists of version (3 char), message type (4 char) & subject size (9 char)
     size_t headerSize = 16 * sizeof(char);
 
@@ -110,23 +111,35 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
     std::vector<char> headerBuffer(headerSize);
     std::vector<char> subjectBuffer;
 
+    // TODO: Thread stops here and wait
+    LDEBUG(fmt::format("t{}: Trying to receive header", std::this_thread::get_id()));
     // Receive the header data
+    // bool headerSuccess = _socket->get(headerBuffer.data(), headerSize);
+    // LDEBUG(fmt::format("t{}: Right after '_socket->get(headerBuffer.data(), headerSize)'", std::this_thread::get_id()));
+    // LDEBUG(fmt::format("t{}: receiveMessageFromSoftware() - headerSuccess: {}", std::this_thread::get_id(), headerSuccess));
     if (!_socket->get(headerBuffer.data(), headerSize)) {
-        LERROR("Failed to read header from socket. Disconnecting.");
+        LERROR(fmt::format("t{}: Failed to read header from socket. Disconnecting.", std::this_thread::get_id()));
         throw SoftwareConnectionLostError();
     }
+
+    // TODO: REMOVE ====
+    std::string headerBufferStr;
+    for (int i = 0; i < 16; i++) {
+        headerBufferStr.push_back(headerBuffer[i]);
+    }
+    LDEBUG(fmt::format("t{}: headerBufferStr: {}", std::this_thread::get_id(), headerBufferStr));
+    // =========
 
     // Read and convert version number: Byte 0-2
     std::string version;
     for (int i = 0; i < 3; i++) {
         version.push_back(headerBuffer[i]);
     }
-    const uint32_t protocolVersionIn = std::stoi(version);
+    const std::string protocolVersionIn = version;
 
     // Make sure that header matches the protocol version
     if (protocolVersionIn != ProtocolVersion) {
-        LERROR(fmt::format(
-            "Protocol versions do not match. Remote version: {}, Local version: {}",
+        LERROR(fmt::format("Protocol versions do not match. Remote version: {}, Local version: {}",
             protocolVersionIn,
             ProtocolVersion
         ));
@@ -147,13 +160,16 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
     const size_t subjectSize = std::stoi(subjectSizeIn);
 
     // Receive the message data
-    subjectBuffer.resize(subjectSize);
-    if (!_socket->get(subjectBuffer.data(), subjectSize)) {
-        LERROR("Failed to read message from socket. Disconnecting.");
-        throw SoftwareConnectionLostError();
+    if (mapSIMPTypeToMessageType[type] != MessageType::Disconnection) {
+        subjectBuffer.resize(subjectSize);
+        bool subjectSuccess = _socket->get(subjectBuffer.data(), subjectSize);
+        if (!subjectSuccess) {
+            LERROR("Failed to read message from socket. Disconnecting.");
+            throw SoftwareConnectionLostError();
+        }
     }
 
-    // And delegate decoding depending on message type
+    // Delegate decoding depending on message type
     if (mapSIMPTypeToMessageType.count(type) != 0) {
         if (mapSIMPTypeToMessageType[type] == MessageType::Color
             || mapSIMPTypeToMessageType[type] == MessageType::Opacity

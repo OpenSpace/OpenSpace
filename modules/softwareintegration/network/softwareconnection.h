@@ -32,11 +32,6 @@ namespace openspace {
 
 class SoftwareConnection {
 public:
-    enum class Status : uint32_t {
-        Disconnected = 0,
-        Connecting
-    };
-
     enum class MessageType : uint32_t {
         Connection = 0,
         ReadPointData,
@@ -85,7 +80,8 @@ public:
 
     SoftwareConnection::Message receiveMessageFromSoftware();
 
-    static const float ProtocolVersion;
+    // static const float ProtocolVersion;
+    static const std::string ProtocolVersion;
 
 private:
     bool _isListening = true;
