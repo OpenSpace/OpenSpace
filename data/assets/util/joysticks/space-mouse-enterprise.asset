@@ -37,6 +37,13 @@ asset.onInitialize(function()
   local controller = SpaceMouse;
   local name = "SpaceMouse Enterprise";
 
+  openspace.navigation.setAxisDeadZone(name, controller.Push[1], 0.1)
+  openspace.navigation.setAxisDeadZone(name, controller.Push[2], 0.1)
+  openspace.navigation.setAxisDeadZone(name, controller.Twist[1], 0.1)
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt[2], 0.1)
+  openspace.navigation.setAxisDeadZone(name, controller.Push[3], 0.1)
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt[1], 0.1)
+
   openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X");
   openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y");
   openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true);
