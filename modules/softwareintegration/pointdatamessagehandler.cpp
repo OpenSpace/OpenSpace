@@ -239,11 +239,10 @@ void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& me
     if (!r) return;
 
     // Toggle visibility of renderable
-    const bool visability = visibilityMessage == "T";
-    LWARNING(fmt::format("visability={}", visability));
+    const std::string visability = visibilityMessage == "T" ? "true" : "false";
     std::string script = fmt::format(
-        "openspace.setPropertyValueSingle('Scene.{}.Renderable.ToggleVisibility', {}, 1);",
-        identifier, ghoul::to_string(visability)
+        "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {});",
+        identifier, visability
     );
     openspace::global::scriptEngine->queueScript(
         script,
