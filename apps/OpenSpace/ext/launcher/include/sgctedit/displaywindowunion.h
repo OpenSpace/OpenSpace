@@ -56,19 +56,12 @@ public:
         QWidget* parent = nullptr);
     
     /**
-     * Returns a vector of pointers to all WindowControl objects for all windows
+     * Returns a vector of pointers to the WindowControl objects for all visible windows.
      *
      * \return vector of pointers of WindowControl objects
      */
     std::vector<WindowControl*> windowControls() const;
     
-    /**
-     * Returns the current number of windows
-     *
-     * \return the currently-selected number of windows in unsigned int
-     */
-    unsigned int nWindows() const;
-
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
     void nWindowsChanged(int newCount);

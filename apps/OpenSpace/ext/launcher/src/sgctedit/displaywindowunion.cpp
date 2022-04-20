@@ -123,11 +123,12 @@ void DisplayWindowUnion::createWidgets() {
 }
 
 std::vector<WindowControl*> DisplayWindowUnion::windowControls() const {
-    return _windowControl;
-}
-
-unsigned int DisplayWindowUnion::nWindows() const {
-    return _nWindowsDisplayed;
+    std::vector<WindowControl*> res;
+    res.reserve(_nWindowsDisplayed);
+    for (unsigned int i = 0; i < _nWindowsDisplayed; ++i) {
+        res.push_back(_windowControl[i]);
+    }
+    return res;
 }
 
 void DisplayWindowUnion::addWindow() {

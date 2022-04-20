@@ -34,6 +34,7 @@
 #include <QColor>
 #include <QLayout>
 #include <QScreen>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -48,35 +49,24 @@ public:
      * configuration editor
      *
      * \param parent The Qt QWidget parent object
-     * \param windowList vector of sgct::config::Window objects which will be modified
-     *                   by the user settings, and then used for writing to file in
-     *                   the launcher code
-     * \param cluster reference to sgct::config::Cluster object that contains sgct
-     *                objects that will be modified by the window configuration settings
-     * \param screenList A QList containing a QScreen object for each monitor in the
-     *                   system
      * \param userConfigPath A string containing the file path of the user config
      *                       directory where all window configs are stored
-    */
-    SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
-        sgct::config::Cluster& cluster, const QList<QScreen*>& screenList,
-        std::string userConfigPath);
-
-    ~SgctEdit();
-
-    /**
-     * Used to determine if the window configuration was saved to file, or canceled
-     *
-     * \return true if configuration was saved to file
-    */
-    bool wasSaved() const;
+     */
+    SgctEdit(QWidget* parent, std::string userConfigPath);
 
     /**
      * Returns the saved filename
      *
      * \return saved filename in std::string
-    */
-    std::string saveFilename() const;
+     */
+    std::filesystem::path saveFilename() const;
+
+    /**
+     * Returns the generated Cluster object.
+     * 
+     * \return The generated Cluster object
+     */
+    sgct::config::Cluster cluster() const;
 
 private slots:
     void save();
@@ -84,20 +74,16 @@ private slots:
 
 private:
     void createWidgets();
-    std::optional<unsigned int> findGuiWindow() const;
+    WindowControl* findGuiWindow() const;
     void saveConfigToSgctFormat();
 
     MonitorBox* _monitorBox = nullptr;
     std::vector<QRect> _monitorSizeList;
-    QVBoxLayout* _displayLayout = nullptr;
-    QFrame* _displayFrame = nullptr;
     DisplayWindowUnion* _displayWidget = nullptr;
     QRect _monitorWidgetSize = { 0, 0, 500, 500 };
     SettingsWidget* _settingsWidget = nullptr;
-    sgct::config::Cluster& _cluster;
-    std::vector<sgct::config::Window>& _windowList;
+    sgct::config::Cluster _cluster;
     const std::string _userConfigPath;
-    bool _saveSelected = false;
     unsigned int _nMaxWindows = 3;
     const std::array<QColor, 4> _colorsForWindows = {
         QColor(0x2B, 0x9E, 0xC3),

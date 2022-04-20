@@ -143,7 +143,7 @@ namespace {
         }
     }
 
-    void saveWindowConfig(QWidget* parent, const std::string& path,
+    void saveWindowConfig(QWidget* parent, const std::filesystem::path& path,
                           sgct::config::Cluster& cluster)
     {
         std::ofstream outFile;
@@ -576,40 +576,18 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 }
 
 void LauncherWindow::openWindowEditor() {
-    QList<QScreen*> screenList = qApp->screens();
-    if (screenList.length() == 0) {
-        LERRORC(
-            "LauncherWindow",
-            "Error: Qt reports no screens/monitors available"
-        );
-        return;
-    }
-    sgct::config::Cluster cluster;
-    std::vector<sgct::config::Window> windowList;
-    SgctEdit editor(this, windowList, cluster, screenList, _userConfigPath);
-    editor.exec();
-    if (editor.wasSaved()) {
-        std::string ext = ".json";
-        std::string savePath = editor.saveFilename();
-        if (savePath.size() >= ext.size()
-            && !(savePath.substr(savePath.size() - ext.size()).compare(ext) == 0))
-        {
-            savePath += ext;
-        }
-        if (cluster.nodes.size() == 0) {
-            cluster.nodes.push_back(sgct::config::Node());
-        }
-        for (auto w : windowList) {
-            cluster.nodes[0].windows.push_back(w);
-        }
+    //sgct::config::Cluster cluster;
+    //std::vector<sgct::config::Window> windowList;
+    SgctEdit editor(this, /*windowList, cluster, */_userConfigPath);
+    int ret = editor.exec();
+    if (ret == QDialog::DialogCode::Accepted) {
+        sgct::config::Cluster cluster = editor.cluster();
+
+        std::filesystem::path savePath = editor.saveFilename();
         saveWindowConfig(this, savePath, cluster);
-        //Truncate path to convert this back to path relative to _userConfigPath
-        savePath = savePath.substr(_userConfigPath.size());
-        populateWindowConfigsList(savePath);
-    }
-    else {
-        const std::string current = _windowConfigBox->currentText().toStdString();
-        populateWindowConfigsList(current);
+        // Truncate path to convert this back to path relative to _userConfigPath
+        std::string p = savePath.string().substr(_userConfigPath.size());
+        populateWindowConfigsList(p);
     }
 }
 

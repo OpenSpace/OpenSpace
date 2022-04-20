@@ -28,14 +28,11 @@
 #include <QFileDialog>
 #include <filesystem>
 
-SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
-                   sgct::config::Cluster& cluster, const QList<QScreen*>& screenList,
-                   std::string userConfigPath)
+SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
     : QDialog(parent)
-    , _cluster(cluster)
-    , _windowList(windowList)
     , _userConfigPath(std::move(userConfigPath))
 {
+    QList<QScreen*> screenList = qApp->screens();
     setWindowTitle("Window Configuration Editor");
     
     size_t nScreensManaged = std::min(static_cast<int>(screenList.length()), 4);
@@ -61,14 +58,13 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
 }
 
 void SgctEdit::createWidgets() {
-    QVBoxLayout* layoutMainV = new QVBoxLayout;
-    layoutMainV->setSizeConstraint(QLayout::SetFixedSize);
+    QBoxLayout* layout = new QVBoxLayout;
+    layout->setSizeConstraint(QLayout::SetFixedSize);
 
     sgct::quat orientation = { 0.f, 0.f, 0.f, 0.f };
     if (_cluster.scene.has_value() && _cluster.scene->orientation.has_value()) {
         orientation = *_cluster.scene->orientation;
     }
-    _settingsWidget = new SettingsWidget(orientation, this);
     {
         _monitorBox = new MonitorBox(
             _monitorWidgetSize,
@@ -77,14 +73,12 @@ void SgctEdit::createWidgets() {
             _colorsForWindows,
             this
         );
-        QHBoxLayout* layoutMonBox = new QHBoxLayout;
-        layoutMonBox->addStretch(1);
-        layoutMonBox->addWidget(_monitorBox);
-        layoutMonBox->addStretch(1);
-        layoutMainV->addLayout(layoutMonBox);
+        layout->addWidget(_monitorBox, 0, Qt::AlignCenter);
 
-        // Add Display Layout
-        _displayLayout = new QVBoxLayout;
+        QFrame* displayFrame = new QFrame;
+        displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+
+        QBoxLayout* displayLayout = new QVBoxLayout;
         _displayWidget = new DisplayWindowUnion(
             _monitorSizeList,
             _nMaxWindows,
@@ -100,52 +94,47 @@ void SgctEdit::createWidgets() {
             _monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
         _displayWidget->addWindow();
-
-        _displayFrame = new QFrame;
-        _displayLayout->addWidget(_displayWidget);
-        _displayFrame->setLayout(_displayLayout);
-        _displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-        layoutMainV->addWidget(_displayFrame);
+        displayLayout->addWidget(_displayWidget);
+        displayFrame->setLayout(displayLayout);
+        
+        layout->addWidget(displayFrame);
     }
+    
+    _settingsWidget = new SettingsWidget(orientation, this);
+    layout->addWidget(_settingsWidget);
+    
     {
-        layoutMainV->addWidget(_settingsWidget);
+        QHBoxLayout* layoutButtonBox = new QHBoxLayout;
+        layoutButtonBox->addStretch(1);
 
         QFrame* bottomBorder = new QFrame;
         bottomBorder->setFrameShape(QFrame::HLine);
-        layoutMainV->addWidget(bottomBorder);
+        layout->addWidget(bottomBorder);
 
-        _saveButton = new QPushButton("Save As");
-        _saveButton->setToolTip("Save configuration changes (opens file chooser dialog)");
-        _saveButton->setFocusPolicy(Qt::NoFocus);
-        connect(_saveButton, &QPushButton::released, this, &SgctEdit::save);
         _cancelButton = new QPushButton("Cancel");
-        _cancelButton->setToolTip("Cancel changes");
+        _cancelButton->setToolTip("Cancel changes.");
         _cancelButton->setFocusPolicy(Qt::NoFocus);
         connect(_cancelButton, &QPushButton::released, this, &SgctEdit::reject);
+        layoutButtonBox->addWidget(_cancelButton);
+
+        _saveButton = new QPushButton("Save As");
+        _saveButton->setToolTip("Save configuration changes.");
+        _saveButton->setFocusPolicy(Qt::NoFocus);
+        connect(_saveButton, &QPushButton::released, this, &SgctEdit::save);
+        layoutButtonBox->addWidget(_saveButton);
+
         _applyButton = new QPushButton("Apply Without Saving");
-        _applyButton->setToolTip("Apply configuration changes without saving to file");
+        _applyButton->setToolTip("Apply configuration changes without saving to file.");
         _applyButton->setFocusPolicy(Qt::NoFocus);
         connect(_applyButton, &QPushButton::released, this, &SgctEdit::apply);
-
-        QHBoxLayout* layoutButtonBox = new QHBoxLayout;
-        layoutButtonBox->addStretch(1);
-        layoutButtonBox->addWidget(_cancelButton);
-        layoutButtonBox->addWidget(_saveButton);
         layoutButtonBox->addWidget(_applyButton);
-        layoutMainV->addLayout(layoutButtonBox);
+
+        layout->addLayout(layoutButtonBox);
     }
-    setLayout(layoutMainV);
+    setLayout(layout);
 }
 
-SgctEdit::~SgctEdit() {
-    delete _displayLayout;
-}
-
-bool SgctEdit::wasSaved() const {
-    return _saveSelected;
-}
-
-std::string SgctEdit::saveFilename() const {
+std::filesystem::path SgctEdit::saveFilename() const {
     return _saveTarget;
 }
 
@@ -154,28 +143,27 @@ void SgctEdit::save() {
         this,
         "Save Window Configuration File",
         QString::fromStdString(_userConfigPath),
-        "Window Configuration (*.json);;(*.json)",
+        "Window Configuration (*.json)",
         nullptr
 #ifdef __linux__
-        // Linux in Qt5 and Qt6 is crashed when trying to access the native dialog here
+        // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
         , QFileDialog::DontUseNativeDialog
 #endif
     );
     if (!fileName.isEmpty()) {
         _saveTarget = fileName.toStdString();
         saveConfigToSgctFormat();
-        _saveSelected = true;
         accept();
     }
 }
 
-std::optional<unsigned int> SgctEdit::findGuiWindow() const {
-    for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
-        if (_displayWidget->windowControls()[w]->isGuiWindow()) {
-            return w;
+WindowControl* SgctEdit::findGuiWindow() const {
+    for (WindowControl* ctrl : _displayWidget->windowControls()) {
+        if (ctrl->isGuiWindow()) {
+            return ctrl;
         }
     }
-    return std::nullopt;
+    return nullptr;
 }
 
 void SgctEdit::apply() {
@@ -189,59 +177,50 @@ void SgctEdit::apply() {
     }
     _saveTarget = userCfgTempDir + "/apply-without-saving.json";
     saveConfigToSgctFormat();
-    _saveSelected = true;
     accept();
 }
 
 void SgctEdit::saveConfigToSgctFormat() {
-    //
-    // Save cluster
-    if (!_settingsWidget) {
-        return;
-    }
+    sgct::config::Cluster cluster;
 
     sgct::config::Scene scene;
     scene.orientation = _settingsWidget->orientationValue();
-    _cluster.scene = std::move(scene);
+    cluster.scene = std::move(scene);
 
-    {
-        sgct::config::Node node;
-        node.address = "localhost";
-        node.port = 20401;
-        _cluster.nodes = { node };
-    }
-    _cluster.masterAddress = "localhost";
-    _cluster.firmSync = _settingsWidget->vsyncValue();
+    cluster.masterAddress = "localhost";
+    cluster.firmSync = _settingsWidget->vsyncValue();
 
-    //
+    sgct::config::Node node;
+    node.address = "localhost";
+    node.port = 20401;
+
     // Save Windows
     unsigned int windowIndex = 0;
-    for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
-        WindowControl* wCtrl = _displayWidget->windowControls()[w];
-        
+    for (WindowControl* wCtrl : _displayWidget->windowControls()) {
         sgct::config::Window window = wCtrl->generateWindowInformation();
 
-        std::optional<unsigned int> webGuiWindowIndex = findGuiWindow();
-        bool isOneOfWindowsSetAsWebGui = webGuiWindowIndex.has_value();
-        if (isOneOfWindowsSetAsWebGui) {
-            if (windowIndex == *webGuiWindowIndex) {
-                window.viewports.back().isTracked = false;
-                window.tags.push_back("GUI");
-            }
-            window.draw2D = (windowIndex == *webGuiWindowIndex);
-            window.draw3D = !window.draw2D;
+        WindowControl* webGuiWindow = findGuiWindow();
+        if (webGuiWindow && wCtrl == webGuiWindow) {
+            window.viewports.back().isTracked = false;
+            window.tags.push_back("GUI");
+            window.draw2D = true;
+            window.draw3D = false;
         }
 
         window.id = windowIndex++;
-        _windowList.push_back(window);
+        node.windows.push_back(window);
     }
 
-    //
-    // Save User
-    {
-        sgct::config::User user;
-        user.eyeSeparation = 0.065f;
-        user.position = { 0.f, 0.f, 4.f };
-        _cluster.users = { user };
-    }
+    cluster.nodes.push_back(node);
+
+    sgct::config::User user;
+    user.eyeSeparation = 0.065f;
+    user.position = { 0.f, 0.f, 4.f };
+    cluster.users = { user };
+
+    _cluster = std::move(cluster);
+}
+
+sgct::config::Cluster SgctEdit::cluster() const {
+    return _cluster;
 }

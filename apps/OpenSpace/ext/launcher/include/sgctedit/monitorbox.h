@@ -47,7 +47,7 @@ public:
      *                  class. This allows for a unique color for each window.
      * \param parent The parent which to which this MonitorBox belongs
      */
-    MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolutions,
+    MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolutions,
         unsigned int nWindows, const std::array<QColor, 4>& windowColors,
         QWidget* parent = nullptr);
 
@@ -70,14 +70,13 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    void mapMonitorResolutionToWidgetCoordinates(QRectF monitorArrangement);
+    void mapMonitorResolutionToWidgetCoordinates(QRectF monitorArrangement,
+        const std::vector<QRect>& monitorResolutions);
     std::vector<QSizeF> computeScaledResolutionLandscape(QRectF monitorArrangement,
-        float maxWidth);
+        float maxWidth, const std::vector<QRect>& monitorResolutions);
     std::vector<QSizeF> computeScaledResolutionPortrait(QRectF monitorArrangement,
-        float maxHeight);
+        float maxHeight, const std::vector<QRect>& monitorResolutions);
 
-    QRectF _monitorWidgetSize;
-    const std::vector<QRect> _monitorResolutions;
     std::vector<QRectF> _monitorDimensionsScaled;
     std::array<QRectF, 4> _windowRendering = {
         QRectF{ 0.f, 0.f, 0.f, 0.f },

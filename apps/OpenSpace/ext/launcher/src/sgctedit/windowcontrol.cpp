@@ -527,8 +527,7 @@ void WindowControl::resetToDefaults() {
     _offsetX->setText(QString::number(_windowDimensions.x()));
     _offsetY->setText(QString::number(_windowDimensions.y()));
     float newHeight =
-        static_cast<float>(_monitorResolutions[PrimaryMonitorIdx].height()) *
-        IdealScaleVerticalLines;
+        _monitorResolutions[PrimaryMonitorIdx].height() * IdealScaleVerticalLines;
     float newWidth = newHeight * IdealAspectRatio;
     _windowDimensions.setHeight(newHeight);
     _windowDimensions.setWidth(newWidth);
@@ -558,36 +557,6 @@ void WindowControl::resetToDefaults() {
 
 void WindowControl::showWindowLabel(bool show) {
     _windowNumber->setVisible(show);
-}
-
-sgct::config::Window WindowControl::generateWindowInformation() const {
-    sgct::config::Window window;
-    window.size = { _sizeX->text().toInt(), _sizeY->text().toInt() };
-    QRect resolution = _monitorResolutions[_monitor->currentIndex()];
-    window.pos = {
-        resolution.x() + _offsetX->text().toInt(),
-        resolution.y() + _offsetY->text().toInt()
-    };
-
-    sgct::config::Viewport vp;
-    vp.isTracked = true;
-    vp.position = { 0.f, 0.f };
-    vp.size = { 1.f, 1.f };
-    vp.projection = generateProjectionInformation();
-    window.viewports.push_back(vp);
-    
-    window.isDecorated = _windowDecoration->isChecked();
-    window.isFullScreen = 
-        resolution.width() == window.size.x && resolution.height() == window.size.y;
-
-    if (window.isFullScreen) {
-        window.monitor = _monitor->currentIndex();
-    }
-
-    if (!_windowName->text().isEmpty()) {
-        window.name = _windowName->text().toStdString();
-    }
-    return window;
 }
 
 sgct::config::Projections WindowControl::generateProjectionInformation() const {
@@ -659,6 +628,33 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
         default:
             throw ghoul::MissingCaseException();
     }
+}
+
+sgct::config::Window WindowControl::generateWindowInformation() const {
+    sgct::config::Window window;
+    window.size = { _sizeX->text().toInt(), _sizeY->text().toInt() };
+    QRect resolution = _monitorResolutions[_monitor->currentIndex()];
+    window.pos = {
+        resolution.x() + _offsetX->text().toInt(),
+        resolution.y() + _offsetY->text().toInt()
+    };
+
+    sgct::config::Viewport vp;
+    vp.isTracked = true;
+    vp.position = { 0.f, 0.f };
+    vp.size = { 1.f, 1.f };
+    vp.projection = generateProjectionInformation();
+    window.viewports.push_back(vp);
+    
+    window.isDecorated = _windowDecoration->isChecked();
+    if (window.isFullScreen) {
+        window.monitor = _monitor->currentIndex();
+    }
+
+    if (!_windowName->text().isEmpty()) {
+        window.name = _windowName->text().toStdString();
+    }
+    return window;
 }
 
 void WindowControl::onSizeXChanged(const QString& newText) {
