@@ -40,18 +40,6 @@
 
 class QWidget;
 
-using ProjectionOptions = std::variant<
-    sgct::config::NoProjection,
-    sgct::config::CylindricalProjection,
-    sgct::config::EquirectangularProjection,
-    sgct::config::FisheyeProjection,
-    sgct::config::PlanarProjection,
-    sgct::config::ProjectionPlane,
-    sgct::config::SphericalMirrorProjection,
-    sgct::config::SpoutOutputProjection,
-    sgct::config::SpoutFlatProjection
->;
-
 class SgctEdit final : public QDialog {
 Q_OBJECT
 public:
@@ -98,7 +86,6 @@ private:
     void createWidgets();
     std::optional<unsigned int> findGuiWindow() const;
     void saveConfigToSgctFormat();
-    void saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win);
 
     MonitorBox* _monitorBox = nullptr;
     std::vector<QRect> _monitorSizeList;

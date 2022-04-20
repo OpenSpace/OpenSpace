@@ -285,12 +285,12 @@ void WindowControl::createWidgets(const QColor& windowColor) {
             "Planar", "Fisheye", "Spherical Mirror", "Cylindrical", "Equirectangular"
         });
         _projectionType->setToolTip("Select from the supported window projection types.");
+        _projectionType->setCurrentIndex(0);
         projectionLayout->addWidget(_projectionType);
         connect(
             _projectionType, qOverload<int>(&QComboBox::currentIndexChanged),
             this, &WindowControl::onProjectionChanged
         );
-        _projectionType->setCurrentIndex(0);
 
         _planar.widget = createPlanarWidget();
         projectionLayout->addWidget(_planar.widget);
@@ -306,6 +306,9 @@ void WindowControl::createWidgets(const QColor& windowColor) {
 
         _equirectangular.widget = createEquirectangularWidget();
         projectionLayout->addWidget(_equirectangular.widget);
+
+        // We need to trigger this once to ensure that all of the defaults are correct
+        onProjectionChanged(0);
 
         projectionGroup->setLayout(projectionLayout);
         layout->addWidget(projectionGroup, 8, 0, 1, 7);
@@ -557,6 +560,107 @@ void WindowControl::showWindowLabel(bool show) {
     _windowNumber->setVisible(show);
 }
 
+sgct::config::Window WindowControl::generateWindowInformation() const {
+    sgct::config::Window window;
+    window.size = { _sizeX->text().toInt(), _sizeY->text().toInt() };
+    QRect resolution = _monitorResolutions[_monitor->currentIndex()];
+    window.pos = {
+        resolution.x() + _offsetX->text().toInt(),
+        resolution.y() + _offsetY->text().toInt()
+    };
+
+    sgct::config::Viewport vp;
+    vp.isTracked = true;
+    vp.position = { 0.f, 0.f };
+    vp.size = { 1.f, 1.f };
+    vp.projection = generateProjectionInformation();
+    window.viewports.push_back(vp);
+    
+    window.isDecorated = _windowDecoration->isChecked();
+    window.isFullScreen = 
+        resolution.width() == window.size.x && resolution.height() == window.size.y;
+
+    if (window.isFullScreen) {
+        window.monitor = _monitor->currentIndex();
+    }
+
+    if (!_windowName->text().isEmpty()) {
+        window.name = _windowName->text().toStdString();
+    }
+    return window;
+}
+
+sgct::config::Projections WindowControl::generateProjectionInformation() const {
+    ProjectionIndices type =
+        static_cast<WindowControl::ProjectionIndices>(_projectionType->currentIndex());
+
+    const bool isSpoutFisheye =
+        type == ProjectionIndices::Fisheye && _fisheye.spoutOutput->isChecked();
+    const bool isSpoutEquirectangular =
+        type == ProjectionIndices::Equirectangular &&
+        _equirectangular.spoutOutput->isChecked();
+
+    using namespace sgct::config;
+    switch (type) {
+        case ProjectionIndices::Fisheye:
+            if (isSpoutFisheye) {
+                SpoutOutputProjection projection;
+                projection.mapping = SpoutOutputProjection::Mapping::Fisheye;
+                projection.quality = QualityValues[_fisheye.quality->currentIndex()];
+                projection.mappingSpoutName = "OpenSpace";
+                return projection;
+            }
+            else {
+                FisheyeProjection projection;
+                projection.quality = QualityValues[_fisheye.quality->currentIndex()];
+                projection.fov = 180.f;
+                projection.tilt = 0.f;
+                return projection;
+            }
+        case ProjectionIndices::SphericalMirror:
+            {
+                SphericalMirrorProjection projection;
+                projection.quality =
+                    QualityValues[_sphericalMirror.quality->currentIndex()];
+                return projection;
+            }
+        case ProjectionIndices::Cylindrical:
+            {
+                CylindricalProjection projection;
+                projection.quality = QualityValues[_cylindrical.quality->currentIndex()];
+                projection.heightOffset = _cylindrical.heightOffset->text().toFloat();
+                return projection;
+            }
+        case ProjectionIndices::Equirectangular:
+            if (isSpoutEquirectangular) {
+                SpoutOutputProjection projection;
+                projection.mapping = SpoutOutputProjection::Mapping::Equirectangular;
+                projection.quality =
+                    QualityValues[_equirectangular.quality->currentIndex()];
+                projection.mappingSpoutName = "OpenSpace";
+                return projection;
+            }
+            else {
+                EquirectangularProjection projection;
+                projection.quality =
+                    QualityValues[_equirectangular.quality->currentIndex()];
+                return projection;
+            }
+        case ProjectionIndices::Planar:
+            {
+                // The negative values for left & down are due to SGCT's convention
+                PlanarProjection projection;
+                projection.fov.right = _planar.fovH->text().toFloat() / 2.0;
+                projection.fov.left = -projection.fov.right;
+                projection.fov.up = _planar.fovV->text().toFloat() / 2.0;
+                projection.fov.down = -projection.fov.up;
+                return projection;
+            }
+        default:
+            throw ghoul::MissingCaseException();
+    }
+}
+
 void WindowControl::onSizeXChanged(const QString& newText) {
     _windowDimensions.setWidth(newText.toInt());
     if (_aspectRatioLocked) {
@@ -669,74 +773,6 @@ void WindowControl::uncheckWebGuiOption() {
     _webGui->setChecked(false);
 }
 
-QRectF WindowControl::dimensions() const {
-    return _windowDimensions;
-}
-
-std::string WindowControl::windowName() const {
-    return _windowName->text().toStdString();
-}
-
-sgct::ivec2 WindowControl::windowSize() const {
-    return { _sizeX->text().toInt(), _sizeY->text().toInt() };
-}
-
-sgct::ivec2 WindowControl::windowPos() const {
-    return { _offsetX->text().toInt(), _offsetY->text().toInt() };
-}
-
-bool WindowControl::isDecorated() const {
-    return _windowDecoration->isChecked();
-}
-
 bool WindowControl::isGuiWindow() const {
     return _webGui->isChecked();
-}
-
-bool WindowControl::isSpoutSelected() const {
-    ProjectionIndices selected =
-        static_cast<ProjectionIndices>(_projectionType->currentIndex());
-    switch (selected) {
-        case ProjectionIndices::Fisheye:
-            return _fisheye.spoutOutput->isChecked();
-        case ProjectionIndices::Equirectangular:
-            return _equirectangular.spoutOutput->isChecked();
-        default:
-            return false;
-    }
-}
-
-WindowControl::ProjectionIndices WindowControl::projectionSelectedIndex() const {
-    return static_cast<WindowControl::ProjectionIndices>(_projectionType->currentIndex());
-}
-
-int WindowControl::qualitySelectedValue() const {
-    ProjectionIndices selected =
-        static_cast<ProjectionIndices>(_projectionType->currentIndex());
-    switch (selected) {
-        case ProjectionIndices::Fisheye:
-            return QualityValues[_fisheye.quality->currentIndex()];
-        case ProjectionIndices::Cylindrical:
-            return QualityValues[_cylindrical.quality->currentIndex()];
-        case ProjectionIndices::Equirectangular:
-            return QualityValues[_equirectangular.quality->currentIndex()];
-        default:
-            throw ghoul::MissingCaseException();
-    }
-}
-
-float WindowControl::fovH() const {
-    return _planar.fovH->text().toFloat();
-}
-
-float WindowControl::fovV() const {
-    return _planar.fovV->text().toFloat();
-}
-
-float WindowControl::heightOffset() const {
-    return _cylindrical.heightOffset->text().toFloat();
-}
-
-unsigned int WindowControl::monitorNum() const {
-    return _monitor->currentIndex();
 }

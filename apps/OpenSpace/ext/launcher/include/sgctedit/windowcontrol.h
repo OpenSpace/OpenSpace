@@ -58,117 +58,26 @@ public:
      * \param bool Shows the window label if true
      */
     void showWindowLabel(bool show);
-  
-    
+
     /**
-     * Returns the dimensions of the window
-     *
-     * \return the QRectF object that contains the windows dimensions
+     * Function called in order to disable/uncheck the WebGUI checkbox option
      */
-    QRectF dimensions() const;
-    
+    void uncheckWebGuiOption();
+
     /**
-     * Returns the title name of the window
-     *
-     * \return the std::string of the window name
+     * Resets all controls for this window to default settings
      */
-    std::string windowName() const;
-    
-    /**
-     * Returns the user-entered window size width, height from the text line objects
-     *
-     * \return the user-entered window size in sgct::ivec2 object
-     */
-    sgct::ivec2 windowSize() const;
-    
-    /**
-     * Returns the user-entered window position in x,y pixles from the text line objects
-     *
-     * \return the user-entered window position in sgct::ivec2 object
-     */
-    sgct::ivec2 windowPos() const;
-    
-    /**
-     * Returns bool for if the window control checkbox is set to be decorated
-     *
-     * \return bool for if window decoration is enabled
-     */
-    bool isDecorated() const;
-    
-    /**
-     * Returns bool for if the window control checkbox spout selection is enabled
-     *
-     * \return bool for if window has spout enabled
-     */
-    bool isSpoutSelected() const;
-    
+    void resetToDefaults();
+
+
     /**
      * Returns bool for if the window control checkbox for WebGUI is enabled
      *
      * \return bool for if window has WebGUI enabled
      */
     bool isGuiWindow() const;
-    
-    /**
-     * Function called in order to disable/uncheck the WebGUI checkbox option
-     */
-    void uncheckWebGuiOption();
-    
-    /**
-     * Returns index number of the selected window quality value. This is an index into
-     * the QualityValues array
-     *
-     * \return index int into the QualityValues array
-     */
-    int qualitySelectedValue() const;
-    
-    /**
-     * Returns index number of the monitor that this window is assigned to
-     *
-     * \return int index of monitor
-     */
-    unsigned int monitorNum() const;
-    
-    /**
-     * Returns the user-entered horizontal field-of-view (planar projection only)
-     *
-     * \return float value of horizontal FOV
-     */
-    float fovH() const;
-    
-    /**
-     * Returns the user-entered vertical field-of-view (planar projection only)
-     *
-     * \return float value of vertical FOV
-     */
-    float fovV() const;
-    
-    /**
-     * Returns the user-entered height offset (cylindrical projection only)
-     *
-     * \return float value of height offset
-     */
-    float heightOffset() const;
-    
-    enum class ProjectionIndices {
-        Planar = 0,
-        Fisheye,
-        SphericalMirror,
-        Cylindrical,
-        Equirectangular
-    };
-    
-    /**
-     * Returns the user-selected window projection type
-     *
-     * \return ProjectionIndices enum of the projection type
-     */
-    ProjectionIndices projectionSelectedIndex() const;
-    
-    /**
-     * Resets all controls for this window to default settings
-     */
-    void resetToDefaults();
+
+    sgct::config::Window generateWindowInformation() const;
 
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
@@ -185,6 +94,14 @@ private slots:
     void onFovLockClicked();
 
 private:
+    enum class ProjectionIndices {
+        Planar = 0,
+        Fisheye,
+        SphericalMirror,
+        Cylindrical,
+        Equirectangular
+    };
+
     void createWidgets(const QColor& windowColor);
     QWidget* createPlanarWidget();
     QWidget* createFisheyeWidget();
@@ -192,6 +109,7 @@ private:
     QWidget* createCylindricalWidget();
     QWidget* createEquirectangularWidget();
 
+    sgct::config::Projections generateProjectionInformation() const;
     void updatePlanarLockedFov();
 
     static constexpr float IdealAspectRatio = 16.f / 9.f;

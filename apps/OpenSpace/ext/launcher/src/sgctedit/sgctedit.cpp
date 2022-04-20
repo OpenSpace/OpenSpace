@@ -28,90 +28,6 @@
 #include <QFileDialog>
 #include <filesystem>
 
-namespace {
-    bool isWindowFullscreen(QRect monitor, const sgct::ivec2& wDims) {
-        return (monitor.width() == wDims.x && monitor.height() == wDims.y);
-    }
-
-    sgct::config::Viewport generateViewport() {
-        sgct::config::Viewport vp;
-        vp.isTracked = true;
-        vp.position = { 0.f, 0.f };
-        vp.size = { 1.f, 1.f };
-        return vp;
-    }
-
-    ProjectionOptions saveProjectionNoSpout(const WindowControl& winControl) {
-        switch (winControl.projectionSelectedIndex()) {
-            case WindowControl::ProjectionIndices::Fisheye:
-                {
-                    sgct::config::FisheyeProjection projection;
-                    projection.quality = winControl.qualitySelectedValue();
-                    projection.fov = 180.f;
-                    projection.tilt = 0.f;
-                    return projection;
-                }
-            case WindowControl::ProjectionIndices::SphericalMirror:
-                {
-                    sgct::config::SphericalMirrorProjection projection;
-                    projection.quality = winControl.qualitySelectedValue();
-                    return projection;
-                }
-            case WindowControl::ProjectionIndices::Cylindrical:
-                {
-                    sgct::config::CylindricalProjection projection;
-                    projection.quality = winControl.qualitySelectedValue();
-                    projection.heightOffset = winControl.heightOffset();
-                    return projection;
-                }
-            case WindowControl::ProjectionIndices::Equirectangular:
-                {
-                    sgct::config::EquirectangularProjection projection;
-                    projection.quality = winControl.qualitySelectedValue();
-                    return projection;
-                }
-            case WindowControl::ProjectionIndices::Planar:
-            default:
-                {
-                    // The negative values for left & down are due to SGCT's convention
-                    sgct::config::PlanarProjection projection;
-                    projection.fov.right = winControl.fovH() / 2.0;
-                    projection.fov.left = -projection.fov.right;
-                    projection.fov.up = winControl.fovV() / 2.0;
-                    projection.fov.down = -projection.fov.up;
-                    return projection;
-                }
-        }
-    }
-
-    ProjectionOptions saveProjectionSpout(const WindowControl& winControl) {
-        sgct::config::SpoutOutputProjection projection;
-        switch (winControl.projectionSelectedIndex()) {
-            case WindowControl::ProjectionIndices::Fisheye:
-                projection.mapping
-                    = sgct::config::SpoutOutputProjection::Mapping::Fisheye;
-                break;
-            case WindowControl::ProjectionIndices::Equirectangular:
-            default:
-                projection.mapping
-                    = sgct::config::SpoutOutputProjection::Mapping::Equirectangular;
-                break;
-        }
-        projection.quality = winControl.qualitySelectedValue();
-        projection.mappingSpoutName = "OpenSpace";
-        return projection;
-    }
-
-    ProjectionOptions saveProjectionInformation(const WindowControl& winControl) {
-        if (winControl.isSpoutSelected()) {
-            return saveProjectionSpout(winControl);
-        }
-        else {
-            return saveProjectionNoSpout(winControl);
-        }
-    }
-} // namespace
-
 SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
                    sgct::config::Cluster& cluster, const QList<QScreen*>& screenList,
                    std::string userConfigPath)
@@ -170,7 +86,6 @@ void SgctEdit::createWidgets() {
         // Add Display Layout
         _displayLayout = new QVBoxLayout;
         _displayWidget = new DisplayWindowUnion(
-            //*_monitorBox,
             _monitorSizeList,
             _nMaxWindows,
             _colorsForWindows,
@@ -263,20 +178,6 @@ std::optional<unsigned int> SgctEdit::findGuiWindow() const {
     return std::nullopt;
 }
 
-void SgctEdit::saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win) {
-    win.viewports.back().isTracked = true;
-    std::optional<unsigned int> webGuiWindowIndex = findGuiWindow();
-    bool isOneOfWindowsSetAsWebGui = webGuiWindowIndex.has_value();
-    if (isOneOfWindowsSetAsWebGui) {
-        if (wIdx == *webGuiWindowIndex) {
-            win.viewports.back().isTracked = false;
-            win.tags.push_back("GUI");
-        }
-        win.draw2D = (wIdx == *webGuiWindowIndex);
-        win.draw3D = !(win.draw2D.value_or(true));
-    }
-}
-
 void SgctEdit::apply() {
     std::string userCfgTempDir = _userConfigPath;
     if (userCfgTempDir.back() != '/') {
@@ -318,26 +219,19 @@ void SgctEdit::saveConfigToSgctFormat() {
     for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
         WindowControl* wCtrl = _displayWidget->windowControls()[w];
         
-        sgct::config::Window window;
-        window.size = wCtrl->windowSize();
-        window.pos = {
-            _monitorSizeList[wCtrl->monitorNum()].x() + wCtrl->windowPos().x,
-            _monitorSizeList[wCtrl->monitorNum()].y() + wCtrl->windowPos().y,
-        };
-        window.viewports.push_back(generateViewport());
-        window.viewports.back().projection = saveProjectionInformation(*wCtrl);
-        window.isDecorated = wCtrl->isDecorated();
-        window.isFullScreen = isWindowFullscreen(
-            _monitorSizeList[wCtrl->monitorNum()],
-            wCtrl->windowSize()
-        );
-        if (window.isFullScreen) {
-            window.monitor = wCtrl->monitorNum();
+        sgct::config::Window window = wCtrl->generateWindowInformation();
+
+        std::optional<unsigned int> webGuiWindowIndex = findGuiWindow();
+        bool isOneOfWindowsSetAsWebGui = webGuiWindowIndex.has_value();
+        if (isOneOfWindowsSetAsWebGui) {
+            if (windowIndex == *webGuiWindowIndex) {
+                window.viewports.back().isTracked = false;
+                window.tags.push_back("GUI");
+            }
+            window.draw2D = (windowIndex == *webGuiWindowIndex);
+            window.draw3D = !window.draw2D;
         }
-        saveWindowsWebGui(windowIndex, window);
-        if (!wCtrl->windowName().empty()) {
-            window.name = wCtrl->windowName();
-        }
+
         window.id = windowIndex++;
         _windowList.push_back(window);
     }
