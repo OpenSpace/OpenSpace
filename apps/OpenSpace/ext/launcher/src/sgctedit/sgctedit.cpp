@@ -146,6 +146,8 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
 
 void SgctEdit::createWidgets() {
     QVBoxLayout* layoutMainV = new QVBoxLayout;
+    layoutMainV->setSizeConstraint(QLayout::SetFixedSize);
+
     sgct::quat orientation = { 0.f, 0.f, 0.f, 0.f };
     if (_cluster.scene.has_value() && _cluster.scene->orientation.has_value()) {
         orientation = *_cluster.scene->orientation;

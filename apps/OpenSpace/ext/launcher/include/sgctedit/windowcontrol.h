@@ -49,9 +49,8 @@ public:
      * \param monitorDims Vector of monitor dimensions in QRect form
      * \param winColor A QColor object for this window's unique color
     */
-    WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
-        const std::vector<QRect>& monitorDims, const QColor& winColor,
-        QWidget* parent);
+    WindowControl(int monitorIndex, int windowIndex,
+        const std::vector<QRect>& monitorDims, const QColor& winColor, QWidget* parent);
     
     /**
      * Makes the window label at top of a window control column visible
@@ -180,51 +179,70 @@ private slots:
     void onSizeYChanged(const QString& newText);
     void onOffsetXChanged(const QString& newText);
     void onOffsetYChanged(const QString& newText);
-    void onMonitorChanged(int newSelection);
     void onProjectionChanged(int newSelection);
     void onFullscreenClicked();
-    void onSpoutSelection();
-    void onWebGuiSelection();
     void onAspectRatioLockClicked();
     void onFovLockClicked();
 
 private:
-    void createWidgets();
-    void determineIdealWindowSize();
+    void createWidgets(const QColor& windowColor);
+    QWidget* createPlanarWidget();
+    QWidget* createFisheyeWidget();
+    QWidget* createSphericalMirrorWidget();
+    QWidget* createCylindricalWidget();
+    QWidget* createEquirectangularWidget();
+
     void updatePlanarLockedFov();
 
     static constexpr float IdealAspectRatio = 16.f / 9.f;
     float _aspectRatioSize = IdealAspectRatio;
 
-    unsigned int _monitorIndex = 0;
-    unsigned int _monitorIndexDefault = 0;
-    unsigned int _windowIndex = 0;
+    const int _monitorIndexDefault = 0;
+    int _windowIndex = 0;
     bool _aspectRatioLocked = false;
     bool _fovLocked = true;
     const std::vector<QRect>& _monitorResolutions;
-    QColor _colorForWindow;
-    QLabel* _labelWinNum = nullptr;
+    QRectF _windowDimensions;
+    
+    QLabel* _windowNumber = nullptr;
+    QLineEdit* _windowName = nullptr;
+    QComboBox* _monitor = nullptr;
     QLineEdit* _sizeX = nullptr;
     QLineEdit* _sizeY = nullptr;
     QLineEdit* _offsetX = nullptr;
     QLineEdit* _offsetY = nullptr;
-    QPushButton* _buttonLockAspectRatio = nullptr;
-    QPushButton* _buttonLockFov = nullptr;
-    QRectF _windowDims;
-    QCheckBox* _checkBoxWindowDecor = nullptr;
-    QCheckBox* _checkBoxWebGui = nullptr;
-    QCheckBox* _checkBoxSpoutOutput = nullptr;
-    QComboBox* _comboMonitorSelect = nullptr;
-    QComboBox* _comboProjection = nullptr;
-    QComboBox* _comboQuality = nullptr;
-    QLabel* _labelQuality = nullptr;
-    QLabel* _labelFovH = nullptr;
-    QLineEdit* _lineFovH = nullptr;
-    QLabel* _labelFovV = nullptr;
-    QLineEdit* _lineFovV = nullptr;
-    QLabel* _labelHeightOffset = nullptr;
-    QLineEdit* _lineHeightOffset = nullptr;
-    QLineEdit* _windowName = nullptr;
+    QCheckBox* _windowDecoration = nullptr;
+    QCheckBox* _webGui = nullptr;
+    QComboBox* _projectionType = nullptr;
+
+    struct {
+        QWidget* widget = nullptr;
+        QLineEdit* fovH = nullptr;
+        QLineEdit* fovV = nullptr;
+    } _planar;
+
+    struct {
+        QWidget* widget = nullptr;
+        QComboBox* quality = nullptr;
+        QCheckBox* spoutOutput = nullptr;
+    } _fisheye;
+
+    struct {
+        QWidget* widget = nullptr;
+        QComboBox* quality = nullptr;
+    } _sphericalMirror;
+
+    struct {
+        QWidget* widget = nullptr;
+        QComboBox* quality = nullptr;
+        QLineEdit* heightOffset = nullptr;
+    } _cylindrical;
+
+    struct {
+        QWidget* widget = nullptr;
+        QComboBox* quality = nullptr;
+        QCheckBox* spoutOutput = nullptr;
+    } _equirectangular;
 
     const QIcon _lockIcon;
     const QIcon _unlockIcon;
