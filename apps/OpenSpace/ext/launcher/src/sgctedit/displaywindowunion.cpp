@@ -33,22 +33,21 @@
 #include <string>
 
 DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
-                                       unsigned int nMaxWindows,
+                                       int nMaxWindows,
                                        const std::array<QColor, 4>& windowColors,
                                        QWidget* parent)
     : QWidget(parent)
     , _monitorResolutions(monitorSizeList)
-    , _nMaxWindows(nMaxWindows)
     , _windowColors(windowColors)
 {
-    createWidgets();
+    createWidgets(nMaxWindows);
     showWindows();
 }
 
-void DisplayWindowUnion::createWidgets() {
+void DisplayWindowUnion::createWidgets(int nMaxWindows) {
     // Add all window controls (some will be hidden from GUI initially)
-    for (unsigned int i = 0; i < _nMaxWindows; ++i) {
-        const unsigned int monitorNumForThisWindow = (_nMaxWindows > 3 && i >= 2) ? 1 : 0;
+    for (unsigned int i = 0; i < nMaxWindows; ++i) {
+        const unsigned int monitorNumForThisWindow = (nMaxWindows > 3 && i >= 2) ? 1 : 0;
 
         WindowControl* ctrl = new WindowControl(
             monitorNumForThisWindow,
@@ -67,7 +66,7 @@ void DisplayWindowUnion::createWidgets() {
         connect(
             ctrl, &WindowControl::webGuiChanged,
             [this](unsigned int winIndex) {
-                for (unsigned int w = 0; w < _nMaxWindows; ++w) {
+                for (size_t w = 0; w < _windowControl.size(); ++w) {
                     if (w != winIndex) {
                         _windowControl[w]->uncheckWebGuiOption();
                     }
@@ -95,7 +94,7 @@ void DisplayWindowUnion::createWidgets() {
 
         _addWindowButton = new QPushButton("Add Window");
         _addWindowButton->setToolTip(QString::fromStdString(fmt::format(
-            "Add a window to the configuration (up to {} windows allowed)", _nMaxWindows
+            "Add a window to the configuration (up to {} windows allowed)", nMaxWindows
         )));
         _addWindowButton->setFocusPolicy(Qt::NoFocus);
         connect(
@@ -107,9 +106,9 @@ void DisplayWindowUnion::createWidgets() {
     }
     QBoxLayout* layoutWindows = new QHBoxLayout;
 
-    for (unsigned int i = 0; i < _nMaxWindows; ++i) {
+    for (int i = 0; i < nMaxWindows; ++i) {
         layoutWindows->addWidget(_windowControl[i]);
-        if (i < (_nMaxWindows - 1)) {
+        if (i < (nMaxWindows - 1)) {
             QFrame* frameForNextWindow = new QFrame;
             frameForNextWindow->setFrameShape(QFrame::VLine);
             _frameBorderLines.push_back(frameForNextWindow);
@@ -132,7 +131,7 @@ std::vector<WindowControl*> DisplayWindowUnion::windowControls() const {
 }
 
 void DisplayWindowUnion::addWindow() {
-    if (_nWindowsDisplayed < _nMaxWindows) {
+    if (_nWindowsDisplayed < _windowControl.size()) {
         _windowControl[_nWindowsDisplayed]->resetToDefaults();
         _nWindowsDisplayed++;
         showWindows();
@@ -154,7 +153,7 @@ void DisplayWindowUnion::showWindows() {
         _frameBorderLines[i]->setVisible(i < (_nWindowsDisplayed - 1));
     }
     _removeWindowButton->setEnabled(_nWindowsDisplayed > 1);
-    _addWindowButton->setEnabled(_nWindowsDisplayed != _nMaxWindows);
+    _addWindowButton->setEnabled(_nWindowsDisplayed != _windowControl.size());
     for (WindowControl* w : _windowControl) {
         w->showWindowLabel(_nWindowsDisplayed > 1);
     }

@@ -28,36 +28,37 @@
 #include <QFileDialog>
 #include <filesystem>
 
+namespace {
+    constexpr QRect MonitorWidgetSize = { 0, 0, 500, 500 };
+    constexpr int MaxNumberWindows = 4;
+} // namespace
+
 SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
     : QDialog(parent)
     , _userConfigPath(std::move(userConfigPath))
 {
-    QList<QScreen*> screenList = qApp->screens();
+    QList<QScreen*> screens = qApp->screens();
     setWindowTitle("Window Configuration Editor");
     
-    size_t nScreensManaged = std::min(static_cast<int>(screenList.length()), 4);
-    for (unsigned int s = 0; s < static_cast<unsigned int>(nScreensManaged); ++s) {
-        int actualWidth = std::max(
-            screenList[s]->size().width(),
-            screenList[s]->availableGeometry().width()
-        );
-        int actualHeight = std::max(
-            screenList[s]->size().height(),
-            screenList[s]->availableGeometry().height()
-        );
-        _monitorSizeList.emplace_back(
-            screenList[s]->availableGeometry().x(),
-            screenList[s]->availableGeometry().y(),
-            static_cast<int>(actualWidth * screenList[s]->devicePixelRatio()),
-            static_cast<int>(actualHeight * screenList[s]->devicePixelRatio())
+    size_t nScreensManaged = std::min(static_cast<int>(screens.length()), 4);
+    std::vector<QRect> monitorSizes;
+    for (size_t s = 0; s < nScreensManaged; ++s) {
+        QSize size = screens[s]->size();
+        QRect geometry = screens[s]->availableGeometry();
+        int actualWidth = std::max(size.width(), geometry.width());
+        int actualHeight = std::max(size.height(), geometry.height());
+        monitorSizes.emplace_back(
+            geometry.x(),
+            geometry.y(),
+            static_cast<int>(actualWidth * screens[s]->devicePixelRatio()),
+            static_cast<int>(actualHeight * screens[s]->devicePixelRatio())
         );
     }
-    _nMaxWindows = (_monitorSizeList.size() == 1) ? 3 : 4;
 
-    createWidgets();
+    createWidgets(monitorSizes);
 }
 
-void SgctEdit::createWidgets() {
+void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
     QBoxLayout* layout = new QVBoxLayout;
     layout->setSizeConstraint(QLayout::SetFixedSize);
 
@@ -66,34 +67,35 @@ void SgctEdit::createWidgets() {
         orientation = *_cluster.scene->orientation;
     }
     {
-        _monitorBox = new MonitorBox(
-            _monitorWidgetSize,
-            _monitorSizeList,
-            _nMaxWindows,
+        MonitorBox* monitorBox = new MonitorBox(
+            MonitorWidgetSize,
+            monitorSizes,
+            MaxNumberWindows,
             _colorsForWindows,
             this
         );
-        layout->addWidget(_monitorBox, 0, Qt::AlignCenter);
+        layout->addWidget(monitorBox, 0, Qt::AlignCenter);
 
         QFrame* displayFrame = new QFrame;
         displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
         QBoxLayout* displayLayout = new QVBoxLayout;
         _displayWidget = new DisplayWindowUnion(
-            _monitorSizeList,
-            _nMaxWindows,
+            monitorSizes,
+            MaxNumberWindows,
             _colorsForWindows,
             this
         );
         connect(
             _displayWidget, &DisplayWindowUnion::windowChanged,
-            _monitorBox, &MonitorBox::windowDimensionsChanged
+            monitorBox, &MonitorBox::windowDimensionsChanged
         );
         connect(
             _displayWidget, &DisplayWindowUnion::nWindowsChanged,
-            _monitorBox, &MonitorBox::nWindowsDisplayedChanged
+            monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
         _displayWidget->addWindow();
+        
         displayLayout->addWidget(_displayWidget);
         displayFrame->setLayout(displayLayout);
         
@@ -157,15 +159,6 @@ void SgctEdit::save() {
     }
 }
 
-WindowControl* SgctEdit::findGuiWindow() const {
-    for (WindowControl* ctrl : _displayWidget->windowControls()) {
-        if (ctrl->isGuiWindow()) {
-            return ctrl;
-        }
-    }
-    return nullptr;
-}
-
 void SgctEdit::apply() {
     std::string userCfgTempDir = _userConfigPath;
     if (userCfgTempDir.back() != '/') {
@@ -199,8 +192,7 @@ void SgctEdit::saveConfigToSgctFormat() {
     for (WindowControl* wCtrl : _displayWidget->windowControls()) {
         sgct::config::Window window = wCtrl->generateWindowInformation();
 
-        WindowControl* webGuiWindow = findGuiWindow();
-        if (webGuiWindow && wCtrl == webGuiWindow) {
+        if (wCtrl->isGuiWindow()) {
             window.viewports.back().isTracked = false;
             window.tags.push_back("GUI");
             window.draw2D = true;

@@ -73,18 +73,13 @@ private slots:
     void apply();
 
 private:
-    void createWidgets();
-    WindowControl* findGuiWindow() const;
+    void createWidgets(const std::vector<QRect>& monitorSizes);
     void saveConfigToSgctFormat();
 
-    MonitorBox* _monitorBox = nullptr;
-    std::vector<QRect> _monitorSizeList;
     DisplayWindowUnion* _displayWidget = nullptr;
-    QRect _monitorWidgetSize = { 0, 0, 500, 500 };
     SettingsWidget* _settingsWidget = nullptr;
     sgct::config::Cluster _cluster;
     const std::string _userConfigPath;
-    unsigned int _nMaxWindows = 3;
     const std::array<QColor, 4> _colorsForWindows = {
         QColor(0x2B, 0x9E, 0xC3),
         QColor(0xFC, 0xAB, 0x10),
@@ -97,8 +92,6 @@ private:
     QPushButton* _cancelButton = nullptr;
     QPushButton* _applyButton = nullptr;
     std::string _saveTarget;
-
-
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__

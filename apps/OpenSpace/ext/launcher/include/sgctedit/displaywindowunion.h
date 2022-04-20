@@ -52,7 +52,7 @@ public:
      * \param parent The parent to which this widget belongs
      */
     DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
-        unsigned int nMaxWindows, const std::array<QColor, 4>& windowColors,
+        int nMaxWindows, const std::array<QColor, 4>& windowColors,
         QWidget* parent = nullptr);
     
     /**
@@ -71,11 +71,10 @@ public slots:
     void removeWindow();
 
 private:
-    void createWidgets();
+    void createWidgets(int nMaxWindows);
     void showWindows();
 
-    const std::vector<QRect>& _monitorResolutions;
-    const unsigned int _nMaxWindows = 3;
+    std::vector<QRect> _monitorResolutions;
     const std::array<QColor, 4>& _windowColors;
 
     unsigned int _nWindowsDisplayed = 0;

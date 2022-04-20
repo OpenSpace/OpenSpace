@@ -119,7 +119,7 @@ private:
     int _windowIndex = 0;
     bool _aspectRatioLocked = false;
     bool _fovLocked = true;
-    const std::vector<QRect>& _monitorResolutions;
+    std::vector<QRect> _monitorResolutions;
     QRectF _windowDimensions;
     
     QLabel* _windowNumber = nullptr;
