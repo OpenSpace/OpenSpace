@@ -50,9 +50,10 @@ namespace {
 
     constexpr const openspace::properties::Property::PropertyInfo RenderCopyInfo = {
         "RenderCopy",
-        "RAE Position Of A Copy Of The Sky Browser",
+        "Position Of A Copy Of The Sky Browser",
         "Render a copy of this sky browser at an additional position. This copy will not "
-        "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates."
+        "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates "
+        "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo IsHiddenInfo = {
@@ -116,15 +117,26 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
     _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 
-    // Ensure that the browser is placed at the z-coordinate of the screen space plane
-    glm::vec2 screenPosition = _cartesianPosition.value();
-    _cartesianPosition = glm::vec3(screenPosition, skybrowser::ScreenSpaceZ);
-
     if (global::windowDelegate->isMaster()) {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         _borderColor = randomBorderColor(module->highlight());
     }
     _scale = _size.y * 0.5f;
+
+    _useRadiusAzimuthElevation.onChange([this]() {
+        std::for_each(
+            _renderCopies.begin(), 
+            _renderCopies.end(), 
+            [this](std::unique_ptr<properties::Vec3Property>& copy) {
+            if (_useRadiusAzimuthElevation) {
+                *copy = sphericalToRae(cartesianToSpherical(copy.get()->value()));
+
+            }
+            else {
+                *copy = sphericalToCartesian(raeToSpherical(copy.get()->value()));
+            }
+        });
+    });
 }
 
 ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
@@ -188,8 +200,8 @@ void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCop
             std::make_unique<properties::Vec3Property>(
                 info,
                 position,
-                glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
-                glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
+                glm::vec3(-4.f, -4.f, -10.f),
+                glm::vec3(4.f, 4.f, glm::half_pi<float>())
             )
         );
         addProperty(_renderCopies.back().get());
@@ -247,15 +259,22 @@ void ScreenSpaceSkyBrowser::render() {
 
     // Render a copy that is not interactive
     for (const std::unique_ptr<properties::Vec3Property>& copy : _renderCopies) {
-        glm::vec3 spherical = sphericalToCartesian(raeToSpherical(copy.get()->value()));
-        glm::mat4 localRotation = glm::inverse(glm::lookAt(
-            glm::vec3(0.f),
-            glm::normalize(spherical),
-            glm::vec3(0.f, 1.f, 0.f)
-        ));
+        glm::vec3 coordinates = copy.get()->value();
+        if (_useRadiusAzimuthElevation) {
+            coordinates = sphericalToCartesian(raeToSpherical(coordinates));
+        }
+        glm::mat4 localRotation = glm::mat4(1.f);
+        if (_faceCamera) {
+            localRotation = glm::inverse(glm::lookAt(
+                glm::vec3(0.f),
+                glm::normalize(coordinates),
+                glm::vec3(0.f, 1.f, 0.f)
+            ));
+        }
+
         draw(
             globalRotationMatrix() *
-            glm::translate(glm::mat4(1.f), spherical) *
+            glm::translate(glm::mat4(1.f), coordinates) *
             localRotation *
             scaleMatrix()
         );
