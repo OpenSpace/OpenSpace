@@ -129,7 +129,8 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     openspace::global::scriptEngine->queueScript(
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + identifier + "')"
-        "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
+        "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+        "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)", // Reload WebGUI so that SoftwareIntegration GUI appears
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
