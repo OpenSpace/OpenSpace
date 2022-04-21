@@ -22,62 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
-#define __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
+#define __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__
 
 #include <QWidget>
 
-#include <sgctedit/orientationdialog.h>
-#include <sgct/config.h>
 #include <sgct/math.h>
-#include <QCheckBox>
-#include <QLayout>
-#include <QPushButton>
 
-class Orientation : public QWidget {
+class QCheckBox;
+
+class SettingsWidget : public QWidget {
 Q_OBJECT
 public:
     /**
      * Constructor for Orientation class, which manages the overall control layout
      * including monitorBox, multiple WindowControl columns, and additional controls
-     *
-     * \param monitorRenderBox pointer to the MonitorBox object
-     * \param monitorSizeList A vector containing QRect objects containing pixel dims
-     *                        of each monitor
-     * \param nMaxWindows The maximum number of windows allowed (depends on the number
-     *                    of monitors in the system)
-     * \param winColors An array of QColor objects for window colors. The indexing of
-     *                  this array matches the window indexing used elsewhere in the
-     *                  class. This allows for a unique color for each window.
-    */
-    Orientation();
-    /**
-     * Add Orientation controls to the parent layout
-     *
-     * \param parentLayout the layout to which the Orientation's controls will be added
-    */
-    void addControlsToParentLayout(QVBoxLayout* parentLayout);
+     */
+    SettingsWidget(sgct::quat orientation, QWidget* parent = nullptr);
+   
     /**
      * Gets the user-provided x,y,z orientation values (degrees)
      *
      * \return the orientation angles provided in sgct::quat object
-    */
-    sgct::quat orientationValue() const;
+     */
+    sgct::quat orientation() const;
+   
     /**
      * Gets the value for if VSync is enabled
      *
      * \return true if the VSync option is checked/enabled
-    */
-    bool vsyncValue() const;
-
-private slots:
-    void orientationDialog();
+     */
+    bool vsync() const;
 
 private:
-    sgct::quat _orientationValue = {0.f, 0.f, 0.f, 0.f};
-    OrientationDialog _orientationDialog;
-    QHBoxLayout* _layoutOrientationFull = nullptr;
+    sgct::quat _orientationValue = { 0.f, 0.f, 0.f, 0.f };
     QCheckBox* _checkBoxVsync = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
+#endif // __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__

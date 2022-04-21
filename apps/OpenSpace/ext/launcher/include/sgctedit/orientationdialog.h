@@ -27,10 +27,9 @@
 
 #include <QDialog>
 
-#include <sgct/config.h>
-#include <QLineEdit>
-#include <glm/gtc/constants.hpp>
+#include <sgct/math.h>
 
+class QLineEdit;
 class QWidget;
 
 class OrientationDialog : public QDialog {
@@ -42,11 +41,10 @@ public:
      *
      * \param orientation x,y,z angles in degrees contained in sgct::quat object
      * \param parent pointer to Qt QWidget parent object
-    */
+     */
     OrientationDialog(sgct::quat& orientation, QWidget* parent);
 
 private slots:
-    void cancel();
     void ok();
 
 private:
