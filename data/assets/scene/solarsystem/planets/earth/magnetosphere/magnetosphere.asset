@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms_magnetosphere")
 local transferFunction = asset.localResource("./CMR-illuminance2.txt")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 local fieldlinesDirectory = asset.syncedResource({
   Name = "Magnetosphere 2012 event",
@@ -11,6 +12,8 @@ local fieldlinesDirectory = asset.syncedResource({
 local earthMagnetosphere = {
   Identifier = "EarthMagnetosphere",
   Parent = transforms.GSMReferenceFrame.Identifier,
+   -- Grabs a value from earths ellipsoid. 1.05 just to make it somewhat bigger than earth
+  InteractionSphere = earthAsset.Earth.Renderable.Radii[1] * 1.05,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = fieldlinesDirectory,
@@ -39,11 +42,11 @@ local earthMagnetosphere = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(earthMagnetosphere)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(earthMagnetosphere)
 end)
-  
+
 asset.export(earthMagnetosphere)
 
 
