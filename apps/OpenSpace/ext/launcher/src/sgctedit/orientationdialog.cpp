@@ -39,10 +39,11 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     QGridLayout* layoutWindow = new QGridLayout;
 
     {
-        QLabel* labelPitch = new QLabel("Pitch: ");
         QString pitchTip = "Pitch or elevation: negative numbers tilt the camera "
             "downwards; positive numbers tilt upwards.\nThe allowed range is [-90, 90]. "
             "Internally, this corresponds to the x value in the quaternion.";
+
+        QLabel* labelPitch = new QLabel("Pitch");
         labelPitch->setToolTip(pitchTip);
         layoutWindow->addWidget(labelPitch, 0, 0);
         
@@ -55,10 +56,11 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         layoutWindow->addWidget(_linePitch, 0, 1);
     }
     {
-        QLabel* labelRoll = new QLabel("Roll: ");
         QString rollTip = "Roll or bank: negative numbers rotate the camera counter-"
             "clockwise; positive numbers clockwise.\nThe allowed range is [-180, 180]. "
             "Internally, this corresponds to the z value in the quaternion.";
+
+        QLabel* labelRoll = new QLabel("Roll");
         labelRoll->setToolTip(rollTip);
         layoutWindow->addWidget(labelRoll, 1, 0);
         
@@ -71,18 +73,19 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         layoutWindow->addWidget(_lineRoll, 1, 1);
     }
     {
-        QLabel* labelYaw = new QLabel;
-        labelYaw ->setText("Yaw: ");
         QString yawTip = "Yaw, heading, or azimuth: negative numbers pan the camera "
             "to the left; positive numbers pan to the\nright. The allowed range is "
             "[-360, 360]. Internally, this corresponds to the y value in the quaternion.";
+
+        QLabel* labelYaw = new QLabel;
+        labelYaw ->setText("Yaw");
         labelYaw->setToolTip(yawTip);
         layoutWindow->addWidget(labelYaw, 2, 0);
 
         _lineYaw = new QLineEdit;
         _lineYaw->setText(QString::number(glm::degrees(_orientationValue.y)));
         _lineYaw->setToolTip(yawTip);
-        QDoubleValidator* validatorYaw = new QDoubleValidator(-180.0, 180.0, 15);
+        QDoubleValidator* validatorYaw = new QDoubleValidator(-180.0, 180.0, 15, this);
         validatorYaw->setNotation(QDoubleValidator::StandardNotation);
         _lineYaw->setValidator(validatorYaw);
         layoutWindow->addWidget(_lineYaw, 2, 1);

@@ -41,7 +41,7 @@
 
 class QWidget;
 
-class SgctEdit final : public QDialog {
+class SgctEdit : public QDialog {
 Q_OBJECT
 public:
     /**

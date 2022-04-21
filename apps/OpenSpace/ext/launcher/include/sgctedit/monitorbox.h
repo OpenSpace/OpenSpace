@@ -70,12 +70,10 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    void mapMonitorResolutionToWidgetCoordinates(QRectF monitorArrangement,
-        const std::vector<QRect>& monitorResolutions);
-    std::vector<QSizeF> computeScaledResolutionLandscape(QRectF monitorArrangement,
-        float maxWidth, const std::vector<QRect>& monitorResolutions);
-    std::vector<QSizeF> computeScaledResolutionPortrait(QRectF monitorArrangement,
-        float maxHeight, const std::vector<QRect>& monitorResolutions);
+    std::vector<QSizeF> computeScaledResolutionLandscape(QRectF arrangement,
+        const std::vector<QRect>& resolutions);
+    std::vector<QSizeF> computeScaledResolutionPortrait(QRectF arrangement,
+        const std::vector<QRect>& resolutions);
 
     std::vector<QRectF> _monitorDimensionsScaled;
     std::array<QRectF, 4> _windowRendering = {

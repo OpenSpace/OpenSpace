@@ -37,14 +37,15 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList
                                        const std::array<QColor, 4>& windowColors,
                                        QWidget* parent)
     : QWidget(parent)
-    , _monitorResolutions(monitorSizeList)
-    , _windowColors(windowColors)
 {
-    createWidgets(nMaxWindows);
+    createWidgets(nMaxWindows, monitorSizeList, windowColors);
     showWindows();
 }
 
-void DisplayWindowUnion::createWidgets(int nMaxWindows) {
+void DisplayWindowUnion::createWidgets(int nMaxWindows,
+                                       std::vector<QRect> monitorResolutions,
+                                       std::array<QColor, 4> windowColors)
+{
     // Add all window controls (some will be hidden from GUI initially)
     for (unsigned int i = 0; i < nMaxWindows; ++i) {
         const unsigned int monitorNumForThisWindow = (nMaxWindows > 3 && i >= 2) ? 1 : 0;
@@ -52,8 +53,8 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows) {
         WindowControl* ctrl = new WindowControl(
             monitorNumForThisWindow,
             i,
-            _monitorResolutions,
-            _windowColors[i],
+            monitorResolutions,
+            windowColors[i],
             this
         );
         _windowControl.push_back(ctrl);
@@ -104,8 +105,8 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows) {
         layoutMonButton->addWidget(_addWindowButton);
         layout->addLayout(layoutMonButton);
     }
-    QBoxLayout* layoutWindows = new QHBoxLayout;
 
+    QBoxLayout* layoutWindows = new QHBoxLayout;
     for (int i = 0; i < nMaxWindows; ++i) {
         layoutWindows->addWidget(_windowControl[i]);
         if (i < (nMaxWindows - 1)) {
@@ -115,7 +116,6 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows) {
             layoutWindows->addWidget(frameForNextWindow);
         }
     }
-    _nWindowsDisplayed = 0;
     layout->addLayout(layoutWindows);
     layout->addStretch();
     setLayout(layout);

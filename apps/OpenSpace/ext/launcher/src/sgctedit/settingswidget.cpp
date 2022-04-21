@@ -36,7 +36,7 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     QBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     
-    _checkBoxVsync = new QCheckBox("VSync All Windows");
+    _checkBoxVsync = new QCheckBox("Enable VSync");
     _checkBoxVsync->setToolTip(
         "If enabled, the server will frame lock and wait for all client nodes"
     );
@@ -44,8 +44,8 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     
     QPushButton* orientationButton = new QPushButton("Global Orientation");
     orientationButton->setToolTip(
-        "Opens a separate dialog for setting the pitch, "
-        "yaw, and roll of the camera\n(the orientation applies to all viewports)"
+        "Opens a separate dialog for setting the pitch, yaw, and roll of the camera\n"
+        "(the orientation applies to all viewports)"
     );
     orientationButton->setFocusPolicy(Qt::NoFocus);
     layout->addWidget(orientationButton);
@@ -60,10 +60,10 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     setLayout(layout);
 }
 
-sgct::quat SettingsWidget::orientationValue() const {
+sgct::quat SettingsWidget::orientation() const {
     return _orientationValue;
 }
 
-bool SettingsWidget::vsyncValue() const {
+bool SettingsWidget::vsync() const {
     return _checkBoxVsync->isChecked();
 }

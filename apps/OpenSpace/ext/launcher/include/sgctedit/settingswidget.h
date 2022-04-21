@@ -45,14 +45,14 @@ public:
      *
      * \return the orientation angles provided in sgct::quat object
      */
-    sgct::quat orientationValue() const;
+    sgct::quat orientation() const;
    
     /**
      * Gets the value for if VSync is enabled
      *
      * \return true if the VSync option is checked/enabled
      */
-    bool vsyncValue() const;
+    bool vsync() const;
 
 private:
     sgct::quat _orientationValue = { 0.f, 0.f, 0.f, 0.f };

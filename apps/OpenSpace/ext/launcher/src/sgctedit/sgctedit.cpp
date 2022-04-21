@@ -177,11 +177,20 @@ void SgctEdit::saveConfigToSgctFormat() {
     sgct::config::Cluster cluster;
 
     sgct::config::Scene scene;
-    scene.orientation = _settingsWidget->orientationValue();
+    scene.orientation = _settingsWidget->orientation();
     cluster.scene = std::move(scene);
 
     cluster.masterAddress = "localhost";
-    cluster.firmSync = _settingsWidget->vsyncValue();
+
+    if (_settingsWidget->vsync()) {
+        sgct::config::Settings::Display display;
+        display.swapInterval = 1;
+        
+        sgct::config::Settings settings;
+        settings.display = display;
+
+        cluster.settings = settings;
+    }
 
     sgct::config::Node node;
     node.address = "localhost";

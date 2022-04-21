@@ -71,17 +71,15 @@ public slots:
     void removeWindow();
 
 private:
-    void createWidgets(int nMaxWindows);
+    void createWidgets(int nMaxWindows, std::vector<QRect> monitorResolutions,
+        std::array<QColor, 4> windowColors);
     void showWindows();
 
-    std::vector<QRect> _monitorResolutions;
-    const std::array<QColor, 4>& _windowColors;
-
     unsigned int _nWindowsDisplayed = 0;
+
     std::vector<WindowControl*> _windowControl;
     QPushButton* _addWindowButton = nullptr;
     QPushButton* _removeWindowButton = nullptr;
-    unsigned int _monitorIdx = 0;
     std::vector<QFrame*> _frameBorderLines;
 };
 

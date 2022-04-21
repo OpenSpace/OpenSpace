@@ -318,9 +318,6 @@ void WindowControl::createWidgets(const QColor& windowColor) {
 }
 
 QWidget* WindowControl::createPlanarWidget() {
-    //
-    // Planar widget
-    //
     //    Column 0   Column 1   Column 2
     //  *----------*----------*----------*
     //  |   HFOV   * [oooooo] *   Lock   *  Row 0
@@ -373,9 +370,6 @@ QWidget* WindowControl::createPlanarWidget() {
 }
 
 QWidget* WindowControl::createFisheyeWidget() {
-    //
-    // Fisheye widget
-    //
     //    Column 0   Column 1
     //  *----------*----------*
     //  | Quality  * [DDDDD>] *  Row 0
@@ -410,9 +404,6 @@ QWidget* WindowControl::createFisheyeWidget() {
 }
 
 QWidget* WindowControl::createSphericalMirrorWidget() {
-    //
-    // Spherical Mirror widget
-    //
     //    Column 0   Column 1
     //  *----------*----------*
     //  | Quality  * [DDDDD>] *  Row 0
@@ -437,9 +428,6 @@ QWidget* WindowControl::createSphericalMirrorWidget() {
 }
 
 QWidget* WindowControl::createCylindricalWidget() {
-    //
-    // Cylindrical widget
-    //
     //    Column 0   Column 1
     //  *----------*----------*
     //  | Quality  * [DDDDD>] *  Row 0
@@ -481,9 +469,6 @@ QWidget* WindowControl::createCylindricalWidget() {
 }
 
 QWidget* WindowControl::createEquirectangularWidget() {
-    //
-    // Equirectangular widget
-    //
     //    Column 0   Column 1
     //  *----------*----------*
     //  | Quality  * [DDDDD>] *  Row 0
