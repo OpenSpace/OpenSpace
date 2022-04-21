@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___OSTIME___H__
-#define __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__
 
 #include <QDialog>
 
@@ -65,4 +65,4 @@ private:
     QLineEdit* _relativeEdit = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#endif // __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__

@@ -33,7 +33,7 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     : QWidget(parent)
     , _orientationValue(std::move(orientation))
 {
-    QBoxLayout* layout = new QVBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     
     _checkBoxVsync = new QCheckBox("Enable VSync");
@@ -56,8 +56,6 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
             _orientationDialog.exec();
         }
     );
-
-    setLayout(layout);
 }
 
 sgct::quat SettingsWidget::orientation() const {

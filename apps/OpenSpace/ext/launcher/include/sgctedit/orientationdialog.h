@@ -32,7 +32,7 @@
 class QLineEdit;
 class QWidget;
 
-class OrientationDialog : public QDialog {
+class OrientationDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -44,10 +44,9 @@ public:
      */
     OrientationDialog(sgct::quat& orientation, QWidget* parent);
 
-private slots:
-    void ok();
-
 private:
+    void ok();
+    
     QLineEdit* _linePitch = nullptr;
     QLineEdit* _lineRoll = nullptr;
     QLineEdit* _lineYaw = nullptr;

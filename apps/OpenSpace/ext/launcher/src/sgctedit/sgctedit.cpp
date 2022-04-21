@@ -68,7 +68,7 @@ SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
 }
 
 void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
-    QBoxLayout* layout = new QVBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setSizeConstraint(QLayout::SetFixedSize);
 
     sgct::quat orientation = { 0.f, 0.f, 0.f, 0.f };
@@ -88,7 +88,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
         QFrame* displayFrame = new QFrame;
         displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
-        QBoxLayout* displayLayout = new QVBoxLayout;
+        QBoxLayout* displayLayout = new QVBoxLayout(displayFrame);
         _displayWidget = new DisplayWindowUnion(
             monitorSizes,
             MaxNumberWindows,
@@ -106,7 +106,6 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
         _displayWidget->addWindow();
         
         displayLayout->addWidget(_displayWidget);
-        displayFrame->setLayout(displayLayout);
         
         layout->addWidget(displayFrame);
     }
@@ -142,7 +141,6 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
 
         layout->addLayout(layoutButtonBox);
     }
-    setLayout(layout);
 }
 
 std::filesystem::path SgctEdit::saveFilename() const {

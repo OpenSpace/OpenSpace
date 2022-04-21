@@ -38,7 +38,7 @@ class SettingsWidget;
 class QBoxLayout;
 class QWidget;
 
-class SgctEdit : public QDialog {
+class SgctEdit final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -65,13 +65,12 @@ public:
      */
     sgct::config::Cluster cluster() const;
 
-private slots:
-    void save();
-    void apply();
-
 private:
     void createWidgets(const std::vector<QRect>& monitorSizes);
     void saveConfigToSgctFormat();
+
+    void save();
+    void apply();
 
     DisplayWindowUnion* _displayWidget = nullptr;
     SettingsWidget* _settingsWidget = nullptr;

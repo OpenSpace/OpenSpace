@@ -41,8 +41,7 @@ class QTextEdit;
 class ActionDialog final : public QDialog {
 Q_OBJECT
 public:
-    ActionDialog(QWidget* parent,
-        std::vector<openspace::Profile::Action>* actions,
+    ActionDialog(QWidget* parent, std::vector<openspace::Profile::Action>* actions,
         std::vector<openspace::Profile::Keybinding>* keybindings);
 
 private:

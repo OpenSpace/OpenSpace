@@ -77,7 +77,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
         );
     }
 
-    QBoxLayout* layout = new QVBoxLayout;
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setSizeConstraint(QLayout::SizeConstraint::SetMinimumSize);
     {
         QBoxLayout* layoutMonButton = new QHBoxLayout;
@@ -119,7 +119,6 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
     }
     layout->addLayout(layoutWindows);
     layout->addStretch();
-    setLayout(layout);
 }
 
 std::vector<WindowControl*> DisplayWindowUnion::windowControls() const {

@@ -39,7 +39,7 @@ namespace {
     constexpr const int CameraTypeGeo = 1;
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     bool inNumericalRange(QLineEdit* le, float min, float max) {
         QString s = le->text();

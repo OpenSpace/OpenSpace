@@ -24,8 +24,8 @@
 
 #include "profile/assettreeitem.h"
 
-AssetTreeItem::AssetTreeItem(const std::vector<QVariant>& data, AssetTreeItem* parentItem)
-    : _itemData(data)
+AssetTreeItem::AssetTreeItem(std::vector<QVariant> data, AssetTreeItem* parentItem)
+    : _itemData(std::move(data))
     , _parentItem(parentItem)
 {}
 
@@ -35,12 +35,12 @@ AssetTreeItem::~AssetTreeItem() {
     }
 }
 
-AssetTreeItem* AssetTreeItem::child(int row) {
-    if (row < 0 || row >= static_cast<int>(_childItems.size())) {
-        return nullptr;
+AssetTreeItem* AssetTreeItem::child(int row) const {
+    if (row >= 0 && row < static_cast<int>(_childItems.size())) {
+        return _childItems.at(row);
     }
     else {
-        return _childItems.at(row);
+        return nullptr;
     }
 }
 
@@ -67,11 +67,11 @@ int AssetTreeItem::columnCount() const {
 }
 
 QVariant AssetTreeItem::data(int column) const {
-    if (column < 0 || column >= static_cast<int>(_itemData.size())) {
-        return QVariant();
+    if (column >= 0 && column < static_cast<int>(_itemData.size())) {
+        return _itemData.at(column);
     }
     else {
-        return _itemData.at(column);
+        return QVariant();
     }
 }
 
@@ -96,11 +96,11 @@ void AssetTreeItem::setChecked(bool set) {
 }
 
 bool AssetTreeItem::isAsset() const {
-    return (childCount() == 0);
+    return childCount() == 0;
 }
 
 bool AssetTreeItem::isCategory() const {
-    return (childCount() > 0);
+    return childCount() > 0;
 }
 
 void AssetTreeItem::setExistsInFilesystem(bool fileExists) {

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
-#define __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___MARKNODESDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___MARKNODESDIALOG___H__
 
 #include <QDialog>
 
@@ -51,14 +51,12 @@ public:
      */
     void keyPressEvent(QKeyEvent* evt) override;
 
-private slots:
-    void listItemSelected();
+private:
+    void createWidgets();
+
     void listItemAdded();
     void listItemRemove();
     void parseSelections();
-
-private:
-    void createWidgets();
 
     std::vector<QListWidgetItem*> _markedNodesListItems;
     std::vector<std::string>* _markedNodes;
@@ -67,7 +65,6 @@ private:
     QListWidget* _list = nullptr;
     QPushButton* _removeButton = nullptr;
     QLineEdit* _newNode = nullptr;
-
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___MARKNODESDIALOG___H__

@@ -31,7 +31,7 @@
 #include <array>
 #include <vector>
 
-class MonitorBox : public QWidget {
+class MonitorBox final : public QWidget {
 Q_OBJECT
 public:
     /**
@@ -51,7 +51,6 @@ public:
         unsigned int nWindows, const std::array<QColor, 4>& windowColors,
         QWidget* parent = nullptr);
 
-public slots:
     /**
      * Called when window dimensions or monitor location have changed, requiring redraw.
      * This will also map the window resolution into the scaled resolution of the display
@@ -64,6 +63,11 @@ public slots:
     void windowDimensionsChanged(unsigned int mIdx, unsigned int wIdx,
         const QRectF& newDimensions);
 
+    /**
+     * Called when the number of windows that should be displayed changes.
+     * 
+     * \param newCount The new number of windows included
+     */
     void nWindowsDisplayedChanged(int newCount);
 
 protected:
