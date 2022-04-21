@@ -27,13 +27,12 @@
 
 #include <QWidget>
 
-#include "monitorbox.h"
-#include "windowcontrol.h"
-#include <memory>
 #include <vector>
 
 class QFrame;
+class QPushButton;
 class QVBoxLayout;
+class WindowControl;
 
 class DisplayWindowUnion : public QWidget {
 Q_OBJECT

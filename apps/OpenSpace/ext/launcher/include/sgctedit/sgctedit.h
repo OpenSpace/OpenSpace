@@ -27,18 +27,15 @@
 
 #include <QDialog>
 
-#include <sgctedit/displaywindowunion.h>
-#include <sgctedit/monitorbox.h>
-#include <sgctedit/settingswidget.h>
-#include <QApplication>
+#include <sgct/config.h>
 #include <QColor>
-#include <QLayout>
-#include <QScreen>
+#include <array>
 #include <filesystem>
-#include <memory>
 #include <string>
-#include <vector>
 
+class DisplayWindowUnion;
+class SettingsWidget;
+class QBoxLayout;
 class QWidget;
 
 class SgctEdit : public QDialog {
@@ -87,7 +84,7 @@ private:
         QColor(0xF8, 0x33, 0x3C)
     };
 
-    QHBoxLayout* _layoutButtonBox = nullptr;
+    QBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;
     QPushButton* _cancelButton = nullptr;
     QPushButton* _applyButton = nullptr;

@@ -24,8 +24,17 @@
 
 #include "sgctedit/sgctedit.h"
 
+#include <sgctedit/displaywindowunion.h>
+#include <sgctedit/monitorbox.h>
+#include <sgctedit/settingswidget.h>
+#include <sgctedit/windowcontrol.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <QApplication>
 #include <QFileDialog>
+#include <QFrame>
+#include <QPushButton>
+#include <QScreen>
+#include <QVBoxLayout>
 #include <filesystem>
 
 namespace {
@@ -40,9 +49,9 @@ SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
     QList<QScreen*> screens = qApp->screens();
     setWindowTitle("Window Configuration Editor");
     
-    size_t nScreensManaged = std::min(static_cast<int>(screens.length()), 4);
+    int nScreensManaged = std::min(static_cast<int>(screens.length()), 4);
     std::vector<QRect> monitorSizes;
-    for (size_t s = 0; s < nScreensManaged; ++s) {
+    for (int s = 0; s < nScreensManaged; ++s) {
         QSize size = screens[s]->size();
         QRect geometry = screens[s]->availableGeometry();
         int actualWidth = std::max(size.width(), geometry.width());

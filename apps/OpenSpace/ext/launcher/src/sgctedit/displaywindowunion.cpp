@@ -24,12 +24,13 @@
 
 #include "sgctedit/displaywindowunion.h"
 
-#include <ghoul/fmt.h>
-#include "sgctedit/monitorbox.h"
 #include "sgctedit/windowcontrol.h"
-#include <QApplication>
-#include <QMainWindow>
-#include <QScreen>
+#include <ghoul/fmt.h>
+#include <QColor>
+#include <QFrame>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <array>
 #include <string>
 
 DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,

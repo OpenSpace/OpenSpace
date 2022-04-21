@@ -28,7 +28,13 @@
 #include <ghoul/fmt.h>
 #include "sgctedit/displaywindowunion.h"
 #include "sgctedit/monitorbox.h"
+#include <QCheckBox>
+#include <QComboBox>
 #include <QGridLayout>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QPushButton>
 
 namespace {
     std::array<std::string, 4> MonitorNames = {

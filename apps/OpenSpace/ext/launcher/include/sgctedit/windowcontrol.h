@@ -28,13 +28,13 @@
 #include <QWidget>
 
 #include <sgct/config.h>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QLabel>
-#include <QLayout>
-#include <QLineEdit>
-#include <QPushButton>
+#include <QIcon>
 #include <vector>
+
+class QCheckBox;
+class QComboBox;
+class QLabel;
+class QLineEdit;
 
 class WindowControl : public QWidget {
 Q_OBJECT
@@ -48,7 +48,7 @@ public:
      * \param windowIndex The zero-based window index
      * \param monitorDims Vector of monitor dimensions in QRect form
      * \param winColor A QColor object for this window's unique color
-    */
+     */
     WindowControl(int monitorIndex, int windowIndex,
         const std::vector<QRect>& monitorDims, const QColor& winColor, QWidget* parent);
     
