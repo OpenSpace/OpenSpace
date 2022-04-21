@@ -82,7 +82,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
-  ${OPENSPACE_BASE_DIR}/src/network/parallelserver.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
@@ -262,7 +261,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/waypoint.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructureshelper.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.h

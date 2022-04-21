@@ -25,6 +25,7 @@
 #include "profile/actiondialog.h"
 
 #include "profile/line.h"
+#include "profile/scriptlogdialog.h"
 #include <openspace/util/keys.h>
 #include <ghoul/fmt.h>
 #include <ghoul/misc/assert.h>
@@ -81,7 +82,7 @@ void ActionDialog::createWidgets() {
     //  |                      | Name          | [oooooooooooo] |    Row 2
     //  |                      | GUI Path      | [oooooooooooo] |    Row 3
     //  |                      | Documentation | [oooooooooooo] |    Row 4
-    //  |                      | Is Local      | []             |    Row 5
+    //  |                      | Is Local      | [] [choosescr] |    Row 5
     //  |                      | Script        | [oooooooooooo] |    Row 6
     //  *----------------------*---------------*----------------*
     //  | [+] [-]              |               | [Save] [Cancel]|    Row 7
@@ -204,6 +205,17 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
     );
     _actionWidgets.isLocal->setEnabled(false);
     layout->addWidget(_actionWidgets.isLocal, 5, 2);
+
+    _actionWidgets.chooseScripts = new QPushButton("Choose Scripts");
+    _actionWidgets.chooseScripts->setToolTip(
+        "Press this button to choose scripts for your action from the logs/scriptlog.txt"
+    );
+    connect(
+        _actionWidgets.chooseScripts, &QPushButton::clicked,
+        this, &ActionDialog::chooseScripts
+    );
+    _actionWidgets.chooseScripts->setEnabled(false);
+    layout->addWidget(_actionWidgets.chooseScripts, 5, 2, Qt::AlignRight);
 
     layout->addWidget(new QLabel("Script"), 6, 1);
     _actionWidgets.script = new QTextEdit;
@@ -476,6 +488,12 @@ void ActionDialog::actionRemove() {
             _actionData.erase(_actionData.begin() + i);
             delete _actionWidgets.list->takeItem(static_cast<int>(i));
             clearActionFields();
+
+            _keybindingWidgets.action->clear();
+            for (const Profile::Action& a : _actionData) {
+                _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
+            }
+            clearKeybindingFields();
             return;
         }
     }
@@ -499,6 +517,7 @@ void ActionDialog::actionSelected() {
         _actionWidgets.documentation->setEnabled(true);
         _actionWidgets.isLocal->setChecked(action->isLocal);
         _actionWidgets.isLocal->setEnabled(true);
+        _actionWidgets.chooseScripts->setEnabled(true);
         _actionWidgets.script->setText(QString::fromStdString(action->script));
         _actionWidgets.script->setEnabled(true);
         _actionWidgets.addButton->setEnabled(false);
@@ -574,6 +593,13 @@ void ActionDialog::actionSaved() {
     action->script = _actionWidgets.script->toPlainText().toStdString();
 
     updateListItem(_actionWidgets.list->currentItem(), *action);
+
+    // Update the list of actions available in the action chooser
+    _keybindingWidgets.action->clear();
+    for (const Profile::Action& a : _actionData) {
+        _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
+    }
+    clearKeybindingFields();
     clearActionFields();
 }
 
@@ -589,6 +615,7 @@ void ActionDialog::clearActionFields() {
     _actionWidgets.documentation->setEnabled(false);
     _actionWidgets.isLocal->setChecked(false);
     _actionWidgets.isLocal->setEnabled(false);
+    _actionWidgets.chooseScripts->setEnabled(false);
     _actionWidgets.script->clear();
     _actionWidgets.script->setEnabled(false);
     _actionWidgets.saveButtons->setEnabled(false);
@@ -602,6 +629,16 @@ void ActionDialog::actionRejected() {
     }
 
     clearActionFields();
+}
+
+void ActionDialog::chooseScripts() {
+    ScriptlogDialog d(this);
+    connect(&d, &ScriptlogDialog::scriptsSelected, this, &ActionDialog::appendScriptsToTextfield);
+    d.exec();
+}
+
+void ActionDialog::appendScriptsToTextfield(std::string scripts) {
+    _actionWidgets.script->append(QString::fromStdString(std::move(scripts)));
 }
 
 Profile::Keybinding* ActionDialog::selectedKeybinding() {

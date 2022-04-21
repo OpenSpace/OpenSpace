@@ -896,24 +896,24 @@ bool TimeManager::isPlayingBackSessionRecording() const {
 }
 
 void TimeManager::setTimeFromProfile(const Profile& p) {
-    Time t;
-
     if (p.time.has_value()) {
         switch (p.time.value().type) {
-        case Profile::Time::Type::Relative:
-            t.setTimeRelativeFromProfile(p.time.value().value);
-            break;
+            case Profile::Time::Type::Relative:
+                Time::setTimeRelativeFromProfile(p.time.value().value);
+                break;
 
-        case Profile::Time::Type::Absolute:
-            t.setTimeAbsoluteFromProfile(p.time.value().value);
-            break;
+            case Profile::Time::Type::Absolute:
+                Time::setTimeAbsoluteFromProfile(p.time.value().value);
+                break;
 
-        default:
-            throw ghoul::MissingCaseException();
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
     else {
-        throw ghoul::RuntimeError("No 'time' entry exists in the startup profile");
+        // No value was specified so we are using 'now' instead
+        std::string now = std::string(Time::now().UTC());
+        Time::setTimeAbsoluteFromProfile(now);
     }
 }
 

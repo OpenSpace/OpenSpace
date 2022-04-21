@@ -45,11 +45,11 @@ public:
 
     virtual void preRaycast(const RenderData& /*renderData*/,
         const DeferredcastData& /*deferredData*/,
-        ghoul::opengl::ProgramObject& /*program*/) {};
+        ghoul::opengl::ProgramObject& /*program*/) {}
 
     virtual void postRaycast(const RenderData& /*renderData*/,
         const DeferredcastData& /*deferredData*/,
-        ghoul::opengl::ProgramObject& /*program*/) {};
+        ghoul::opengl::ProgramObject& /*program*/) {}
 
     virtual std::filesystem::path deferredcastVSPath() const = 0;
 

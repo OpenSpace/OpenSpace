@@ -69,7 +69,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
         "Speed Scale",
-        "Scale factor that the speed will be mulitplied with during path traversal. "
+        "Scale factor that the speed will be multiplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
         "value is larger than or smaller than one."
     };
@@ -88,6 +88,14 @@ namespace {
         "when creating a camera path. The factor will be multipled with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
         "object."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RotationSpeedFactorInfo = {
+        "RotationSpeedFactor",
+        "Rotation Speed Factor (Linear Path)",
+        "Affects how fast the camera rotates to the target rotation during a linear "
+        "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
+        "seconds. A value of 2 means twice that fast, and so on."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo =
@@ -119,6 +127,7 @@ PathNavigator::PathNavigator()
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
     , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
+    , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 1.f, 0.1f, 2.f)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
@@ -126,7 +135,10 @@ PathNavigator::PathNavigator()
         { static_cast<int>(Path::Type::AvoidCollision), "AvoidCollision" },
         { static_cast<int>(Path::Type::ZoomOutOverview), "ZoomOutOverview" },
         { static_cast<int>(Path::Type::Linear), "Linear" },
-        { static_cast<int>(Path::Type::AvoidCollisionWithLookAt), "AvoidCollisionWithLookAt"}
+        {
+            static_cast<int>(Path::Type::AvoidCollisionWithLookAt),
+            "AvoidCollisionWithLookAt"
+        }
     });
     addProperty(_defaultPathType);
 
@@ -134,6 +146,7 @@ PathNavigator::PathNavigator()
     addProperty(_speedScale);
     addProperty(_applyIdleBehaviorOnFinish);
     addProperty(_arrivalDistanceFactor);
+    addProperty(_linearRotationSpeedFactor);
     addProperty(_minValidBoundingSphere);
 
     _relevantNodeTags = std::vector<std::string>{
@@ -166,6 +179,10 @@ double PathNavigator::arrivalDistanceFactor() const {
     return _arrivalDistanceFactor;
 }
 
+float PathNavigator::linearRotationSpeedFactor() const {
+    return _linearRotationSpeedFactor;
+}
+
 bool PathNavigator::hasCurrentPath() const {
     return _currentPath != nullptr;
 }
@@ -185,6 +202,16 @@ void PathNavigator::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
     if (!hasCurrentPath() || !_isPlaying) {
+        return;
+    }
+
+    if (!_currentPath->startPoint().node() || !_currentPath->endPoint().node()) {
+        LERROR(
+            "One of the scene graph nodes used in an active camera path "
+            "was removed. Aborting path"
+        );
+        abortPath();
+        global::navigationHandler->orbitalNavigator().setFocusNode("Root", false);
         return;
     }
 

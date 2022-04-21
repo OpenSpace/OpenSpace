@@ -135,12 +135,12 @@ private:
     UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,
         resolution) _writeDownscaledVolumeUniformCache;
 
-    GLint _defaultFBO;
-    GLuint _screenQuad;
-    GLuint _vertexPositionBuffer;
-    GLuint _exitColorTexture;
-    GLuint _exitDepthTexture;
-    GLuint _exitFramebuffer;
+    GLint _defaultFBO = 0;
+    GLuint _screenQuad = 0;
+    GLuint _vertexPositionBuffer = 0;
+    GLuint _exitColorTexture = 0;
+    GLuint _exitDepthTexture = 0;
+    GLuint _exitFramebuffer = 0;
 
     struct {
         GLuint colorTexture;

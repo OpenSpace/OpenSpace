@@ -215,16 +215,16 @@ namespace {
         std::string path;
 
         // [[codegen::verbatim(SegmentQualityInfo.description)]]
-        double segmentQuality;
+        int segmentQuality;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<double> lineWidth;
+        std::optional<float> lineWidth;
 
         // [[codegen::verbatim(LineColorInfo.description)]]
         glm::dvec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(TrailFadeInfo.description)]]
-        std::optional<double> trailFade;
+        std::optional<float> trailFade;
 
         // [[codegen::verbatim(StartRenderIdxInfo.description)]]
         std::optional<int> startRenderIdx;
@@ -374,7 +374,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _path = p.path;
     _path.onChange(_reinitializeTrailBuffers);
 
-    _segmentQuality = p.segmentQuality;
+    _segmentQuality = static_cast<unsigned int>(p.segmentQuality);
     _segmentQuality.onChange(_reinitializeTrailBuffers);
 
     _appearance.lineColor = p.color;
@@ -451,7 +451,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     }
 
     _programObject->activate();
-    _programObject->setUniform(_uniformCache.opacity, _opacity);
+    _programObject->setUniform(_uniformCache.opacity, opacity());
     _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
 
     glm::dmat4 modelTransform =

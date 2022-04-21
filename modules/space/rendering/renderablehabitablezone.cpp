@@ -150,7 +150,7 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.width, _width);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(_uniformCache.conservativeBounds, _conservativeBounds);
     _shader->setUniform(_uniformCache.showOptimistic, _showOptimistic);
 

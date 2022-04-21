@@ -81,7 +81,7 @@ public:
         std::string substringReplacement;
         ScriptSubstringReplace(std::string found, std::string replace)
             : substringFound(found)
-            , substringReplacement(replace) {};
+            , substringReplacement(replace) {}
     };
 
     static const size_t FileHeaderVersionLength = 5;
@@ -492,7 +492,8 @@ public:
     /**
      * Reads header information from a session recording file
      *
-     * \param stringstream reference to ifstream that contains the session recording file data
+     * \param stringstream reference to ifstream that contains the session recording file
+     *        data
      * \param readLen_chars number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */
@@ -857,7 +858,7 @@ public:
 
             _script.erase();
             _script = temp.data();
-        };
+        }
     };
 
 protected:

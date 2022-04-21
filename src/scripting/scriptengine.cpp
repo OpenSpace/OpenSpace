@@ -425,39 +425,40 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 "Module '{}' did not provide a documentation in script file {}",
                 library.name, script
             ));
+            lua_pop(state, 1);
+            continue;
         }
-        else {
-            lua_pushnil(state);
-            while (lua_next(state, -2)) {
-                ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
-                try {
-                    const Parameters p = codegen::bake<Parameters>(d);
 
-                    LuaLibrary::Function func;
-                    func.name = p.name;
-                    for (const std::pair<const std::string, std::string>& p : p.arguments)
-                    {
-                        LuaLibrary::Function::Argument arg;
-                        arg.name = p.first;
-                        arg.type = p.second;
-                        func.arguments.push_back(arg);
-                    }
-                    func.returnType = p.returnValue.value_or(func.returnType);
-                    func.helpText = p.documentation.value_or(func.helpText);
-                    library.documentations.push_back(std::move(func));
+        lua_pushnil(state);
+        while (lua_next(state, -2)) {
+            ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
+            try {
+                const Parameters p = codegen::bake<Parameters>(d);
+
+                LuaLibrary::Function func;
+                func.name = p.name;
+                for (const std::pair<const std::string, std::string>& pair : p.arguments)
+                {
+                    LuaLibrary::Function::Argument arg;
+                    arg.name = pair.first;
+                    arg.type = pair.second;
+                    func.arguments.push_back(arg);
                 }
-                catch (const documentation::SpecificationError& e) {
-                    for (const documentation::TestResult::Offense& o : e.result.offenses)
-                    {
-                        LERRORC(o.offender, ghoul::to_string(o.reason));
-                    }
-                    for (const documentation::TestResult::Warning& w : e.result.warnings)
-                    {
-                        LWARNINGC(w.offender, ghoul::to_string(w.reason));
-                    }
-                }
-                lua_pop(state, 1);
+                func.returnType = p.returnValue.value_or(func.returnType);
+                func.helpText = p.documentation.value_or(func.helpText);
+                library.documentations.push_back(std::move(func));
             }
+            catch (const documentation::SpecificationError& e) {
+                for (const documentation::TestResult::Offense& o : e.result.offenses)
+                {
+                    LERRORC(o.offender, ghoul::to_string(o.reason));
+                }
+                for (const documentation::TestResult::Warning& w : e.result.warnings)
+                {
+                    LWARNINGC(w.offender, ghoul::to_string(w.reason));
+                }
+            }
+            lua_pop(state, 1);
         }
         lua_pop(state, 1);
     }
@@ -600,7 +601,7 @@ void ScriptEngine::preSync(bool isMaster) {
         return;
     }
 
-    std::lock_guard guard(_slaveScriptsMutex);
+    std::lock_guard guard(_clientScriptsMutex);
     while (!_incomingScripts.empty()) {
         QueueItem item = std::move(_incomingScripts.front());
         _incomingScripts.pop();
@@ -634,14 +635,14 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     ZoneScoped
 
-    std::lock_guard guard(_slaveScriptsMutex);
+    std::lock_guard guard(_clientScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
     for (size_t i = 0; i < nScripts; ++i) {
         std::string script;
         syncBuffer->decode(script);
-        _slaveScriptQueue.push(std::move(script));
+        _clientScriptQueue.push(std::move(script));
     }
 }
 
@@ -663,11 +664,11 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        std::lock_guard guard(_slaveScriptsMutex);
-        while (!_slaveScriptQueue.empty()) {
+        std::lock_guard guard(_clientScriptsMutex);
+        while (!_clientScriptQueue.empty()) {
             try {
-                runScript(_slaveScriptQueue.front());
-                _slaveScriptQueue.pop();
+                runScript(_clientScriptQueue.front());
+                _clientScriptQueue.pop();
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);

@@ -61,10 +61,10 @@ public:
     };
 
     struct MemoryFile {
-        char* buffer;
-        size_t size;
+        char* buffer = nullptr;
+        size_t size = 0;
         std::string format;
-        bool corrupted;
+        bool corrupted = false;
     };
 
     BooleanType(UseMultipleThreads);

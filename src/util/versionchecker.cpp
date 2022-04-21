@@ -44,7 +44,7 @@ VersionChecker::~VersionChecker() {
 void VersionChecker::requestLatestVersion(const std::string& url) {
     using GCC = ghoul::systemcapabilities::GeneralCapabilitiesComponent;
     std::string operatingSystem = SysCap.component<GCC>().operatingSystemString();
-    
+
     // Need to escape non-http characters when passing the operating system in the url
     for (size_t i = 0; i < operatingSystem.size(); i++) {
         if (operatingSystem[i] == ' ') {

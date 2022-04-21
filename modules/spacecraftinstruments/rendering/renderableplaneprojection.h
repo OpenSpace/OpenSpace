@@ -86,8 +86,6 @@ private:
         std::string frame;
         std::string node;
     } _target;
-    std::string _name = "ImagePlane";
-    bool _moving = false;
     bool _hasImage = false;
 };
 

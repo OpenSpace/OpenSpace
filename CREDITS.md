@@ -1,15 +1,15 @@
 # Core Team
 Alexander Bock
+Emma Broman
 Emil Axelsson
+Gene Payne
 Kalle Bladin
 Jonathas Costa
-Gene Payne
-Emma Broman
-Jonas Strandstedt
-Micah Acinapura
-Michal Marcinkowski
 Malin Ejdbo
 Elon Olsson
+Micah Acinapura
+Jonas Strandstedt
+Michal Marcinkowski
 Joakim Kilby
 Lovisa Hassler
 Mikael Petterson 
@@ -23,6 +23,8 @@ Erik Broberg
 Jonathan Bosson
 Michael Nilsson
 Jonathan Franzen
+ChristianAdamsson
+Emilie Ho
 Karin Reidarman
 Hans-Christian Helltegen
 Anton Arbring
@@ -39,15 +41,16 @@ Michael Sjöström
 Michael Novén
 Christoffer Särevall
 
-
 # Community Support
 Anteige
 arfon
 DavidLaidlaw
+ethanejohnsons
 johnriedel
 mik3caprio
 mingenuity
 nbartzokas
 nealmcb
 noahdasanaike
+PTrottier
 sa5bke

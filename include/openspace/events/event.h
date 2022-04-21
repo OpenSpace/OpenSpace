@@ -56,7 +56,7 @@ struct Event {
     //     return a dictionary with these parameters. This dictionary is passed to actions
     //     if they are triggered by events
     //  6. Add the new enum entry into the `toString` and `fromString` methods
-    enum class Type {
+    enum class Type : uint8_t {
         SceneGraphNodeAdded,
         SceneGraphNodeRemoved,
         ParallelConnection,
@@ -73,6 +73,7 @@ struct Event {
         LayerAdded,
         LayerRemoved,
         SessionRecordingPlayback,
+        PointJwstRequested,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -377,6 +378,22 @@ struct EventSessionRecordingPlayback : public Event {
 };
 
 /**
+ * This event is created when a request for pointing the JWST model to a Ra Dec coordinate
+ * in the sky is issued. The event contains information about the sky coordinate to point
+ * the JWST towards.
+ *
+ * \param Ra The Ra part of the sky coordinate in decimal degrees to point the JWST to
+ * \param Dec The Dec part of the sky coordinate in decimal degrees to point the JWST to
+ */
+struct EventPointJwstRequested : public Event {
+    static const Type Type = Event::Type::PointJwstRequested;
+
+    EventPointJwstRequested(double ra_, double dec_);
+    const double ra;
+    const double dec;
+};
+
+/**
  * A custom event type that can be used in a pinch when no explicit event type is
  * available. This should only be used in special circumstances and it should be
  * transitioned to a specific event type, if it is deemed to be useful.
@@ -384,10 +401,10 @@ struct EventSessionRecordingPlayback : public Event {
 struct CustomEvent : public Event {
     static const Type Type = Event::Type::Custom;
 
-    CustomEvent(std::string_view subtype_, const void* payload_);
+    CustomEvent(std::string_view subtype_, std::string_view payload_);
 
     const tstring subtype;
-    const void* payload = nullptr;
+    const tstring payload;
 };
 
 } // namespace openspace::events

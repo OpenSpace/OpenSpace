@@ -158,7 +158,7 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
         [url](const std::string& err) {
             LDEBUGC(
                 "ScreenSpaceImageOnline",
-                "Download to memory failer for screen space image: " + err
+                "Download to memory failed for screen space image: " + err
             );
         }
     );

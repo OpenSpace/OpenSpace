@@ -40,6 +40,7 @@
 #include <QPushButton>
 #include <QTextBrowser>
 #include <QVector>
+#include <memory>
 #include <vector>
 
 class DisplayWindowUnion : public QWidget {

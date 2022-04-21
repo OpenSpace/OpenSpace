@@ -274,7 +274,10 @@ joystickAxis(std::string joystickName, int axis)
  * currently bound to the button identified by the second argument.
  */
 [[codegen::luawrap]] void clearJoystickButton(std::string joystickName, int button) {
-    openspace::global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
+    openspace::global::navigationHandler->clearJoystickButtonCommand(
+        joystickName,
+        button
+    );
 }
 
 /**

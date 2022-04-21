@@ -80,7 +80,7 @@ void SingleImageProvider::reset() {
     if (_filePath.value().empty()) {
         return;
     }
-    
+
     _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath, 2);
     if (!_tileTexture) {
         throw ghoul::RuntimeError(

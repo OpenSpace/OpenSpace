@@ -78,7 +78,10 @@ void JoystickCameraStates::updateStateFromInput(
 
             if ((t.joystickType == JoystickType::JoystickLike &&
                  std::abs(value) <= t.deadzone) ||
-                (t.joystickType == JoystickType::TriggerLike && value <= -1.f + t.deadzone))
+                (
+                    t.joystickType == JoystickType::TriggerLike &&
+                    value <= -1.f + t.deadzone
+                ))
             {
                 continue;
             }
@@ -150,8 +153,10 @@ void JoystickCameraStates::updateStateFromInput(
                     localRotation.second.y += value;
                     break;
                 case AxisType::Property:
-                    std::string script = fmt::format("openspace.setPropertyValue('{}', {});",
-                        t.propertyUri, value);
+                    std::string script = fmt::format(
+                        "openspace.setPropertyValue('{}', {});",
+                        t.propertyUri, value
+                    );
 
                     global::scriptEngine->queueScript(
                         script,
@@ -173,7 +178,9 @@ void JoystickCameraStates::updateStateFromInput(
                 if (active) {
                     global::scriptEngine->queueScript(
                         it->second.command,
-                        scripting::ScriptEngine::RemoteScripting(it->second.synchronization)
+                        scripting::ScriptEngine::RemoteScripting(
+                            it->second.synchronization
+                        )
                     );
                 }
             }

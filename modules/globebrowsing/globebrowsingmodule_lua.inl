@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/collisionhelper.h>
+
 namespace {
 
 /**
@@ -353,7 +355,7 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
 {
     using namespace openspace;
     using namespace globebrowsing;
-    
+
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
         throw ghoul::lua::LuaError("Unknown globe identifier: " + globeIdentifier);
@@ -370,33 +372,58 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
 
 /**
  * Get geographic coordinates of the camera position in latitude, longitude, and altitude
- * (degrees and meters).
+ * (degrees and meters). If the optional bool paramater is specified, the camera
+ * eye postion will be used instead
  */
-[[codegen::luawrap]] std::tuple<double, double, double> getGeoPositionForCamera() {
+[[codegen::luawrap]] std::tuple<double, double, double>
+getGeoPositionForCamera(bool useEyePosition = false)
+{
     using namespace openspace;
     using namespace globebrowsing;
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
+    // focus vs anchor
     const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
     if (!globe) {
         throw ghoul::lua::LuaError("Focus node must be a RenderableGlobe");
     }
+    Camera* camera = global::navigationHandler->camera();
 
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    glm::dvec3 cameraPosition = camera->positionVec3();
+
+
     const SceneGraphNode* anchor =
         global::navigationHandler->orbitalNavigator().anchorNode();
     const glm::dmat4 inverseModelTransform = glm::inverse(anchor->modelTransform());
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+
+    glm::dvec3 target;
+
+    // @TODO (04-08-2022, micahnyc)
+    // adjust this to use the camera lookat
+    // once we fix this calculation, then we just add true to the function call in the
+    // asset
+    if (useEyePosition) {
+        const glm::dvec3 anchorPos = anchor->worldPosition();
+        const glm::dvec3 cameraDir = ghoul::viewDirection(camera->rotationQuaternion());
+        const double anchorToPosDistance = glm::distance(
+            anchorPos + globe->boundingSphere(),
+            cameraPosition
+        );
+        target = cameraPosition + anchorToPosDistance * cameraDir;
+    }
+    else {
+        target = glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+    }
+
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
-        cameraPositionModelSpace
+        target
     );
 
     const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
         posHandle.centerToReferenceSurface
     );
     const double altitude = glm::length(
-        cameraPositionModelSpace - posHandle.centerToReferenceSurface
+        target - posHandle.centerToReferenceSurface
     );
 
     return { glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude };
