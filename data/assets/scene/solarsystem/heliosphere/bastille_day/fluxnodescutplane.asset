@@ -19,6 +19,9 @@ local TexturesPathMeridial = asset.syncedResource({
 local EquatorialCutplane = {
   Identifier = "EquatorialCutplane-bastille-day-2000",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 695700000.0,
   Transform = {
     Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
   },
@@ -41,6 +44,9 @@ local EquatorialCutplane = {
 local MeridialCutplane = {
   Identifier = "MeridialCutplane-bastille-day-2000",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 695700000,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
