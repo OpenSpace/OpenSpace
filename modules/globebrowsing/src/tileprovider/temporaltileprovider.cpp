@@ -507,7 +507,9 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
     It nextNext = next != _folder.files.end() ? next + 1 : curr;
 
     if (next == _folder.files.end()) {
-        curr = next = nextNext = _folder.files.end() - 1;
+        curr = _folder.files.end() - 1;
+        next = curr;
+        nextNext = curr;
     }
 
     It prev = curr != _folder.files.begin() ? curr - 1 : curr;
@@ -521,7 +523,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
         (time.j2000Seconds() - curr->first) / (next->first - curr->first)
     );
 
-    _interpolateTileProvider->factor = std::min(std::max(factor, 0.f), 1.f);
+    _interpolateTileProvider->factor = std::clamp(factor, 0.f, 1.f);
 
     return _interpolateTileProvider.get();
 }
