@@ -70,7 +70,7 @@ namespace {
         "Color Table/Transfer Function to use for 'By Quantity' coloring."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
-        "Uniform",
+        "Uniform Color",
         "Uniform Line Color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'."
     };
@@ -105,9 +105,9 @@ namespace {
         "Valid radial range. [Min, Max]"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
-        "Color",
-        "Color",
-        "Color of particles."
+        "FlowColor",
+        "Flow Color",
+        "Color of particles flow direction indication."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
@@ -197,6 +197,9 @@ namespace {
         // Set to true if you are streaming data during runtime
         std::optional<bool> loadAtRuntime;
 
+        // [[codegen::verbatim(ColorUniformInfo.description)]]
+        std::optional<glm::vec4> color [[codegen::color()]];
+
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters
         std::optional<std::vector<std::string>> colorTablePaths;
@@ -214,6 +217,9 @@ namespace {
         // Enables flow, showing the direction, but not accurate speed, that particles
         // would be traveling
         std::optional<bool> flowEnabled;
+
+        // [[codegen::verbatim(FlowColorInfo.description)]]
+        std::optional<glm::vec4> flowColor;
 
         // [[codegen::verbatim(MaskingEnabledInfo.description)]]
         std::optional<bool> maskingEnabled;
@@ -380,16 +386,25 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             "{} contains no {} files", sourcePath.string(), fileTypeString
         ));
     }
-
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
+    _flowColor = p.flowColor.value_or(_flowColor);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _modelStr = p.simulationModel.value_or(_modelStr);
     _seedPointDirectory = p.seedPointDirectory.value_or(_seedPointDirectory);
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
-    _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
+    if (p.colorTablePaths.has_value()) {
+        _colorTablePaths = p.colorTablePaths.value();
+    }
+    else {
+        // Set a default color table, just in case the (optional) user defined paths are
+        // corrupt or not provided
+        _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
+    }
+    
+    _colorUniform = p.color.value_or(_colorUniform);
 
     _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
     _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
@@ -442,38 +457,44 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 }
 
 void RenderableFieldlinesSequence::initialize() {
-    // Set a default color table, just in case the (optional) user defined paths are
-    // corrupt or not provided
-    _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
     _transferFunction = std::make_unique<TransferFunction>(
         absPath(_colorTablePaths[0]).string()
+    );
+}
+
+void RenderableFieldlinesSequence::initializeGL() {
+    // Setup shader program
+    _shaderProgram = global::renderEngine->buildRenderProgram(
+        "FieldlinesSequence",
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
 
     // Extract source file type specific information from dictionary
     // & get states from source
     switch (_inputFileType) {
-        case SourceFileType::Cdf:
-            if (!getStatesFromCdfFiles()) {
-                return;
-            }
-            break;
-        case SourceFileType::Json:
-            if (!loadJsonStatesIntoRAM()) {
-                return;
-            }
-            break;
-        case SourceFileType::Osfls:
-            if (_loadingStatesDynamically) {
-                if (!prepareForOsflsStreaming()) {
-                    return;
-                }
-            }
-            else {
-                loadOsflsStatesIntoRAM();
-            }
-            break;
-        default:
+    case SourceFileType::Cdf:
+        if (!getStatesFromCdfFiles()) {
             return;
+        }
+        break;
+    case SourceFileType::Json:
+        if (!loadJsonStatesIntoRAM()) {
+            return;
+        }
+        break;
+    case SourceFileType::Osfls:
+        if (_loadingStatesDynamically) {
+            if (!prepareForOsflsStreaming()) {
+                return;
+            }
+        }
+        else {
+            loadOsflsStatesIntoRAM();
+        }
+        break;
+    default:
+        return;
     }
 
     // No need to store source paths in memory if they are already in RAM
@@ -489,17 +510,7 @@ void RenderableFieldlinesSequence::initialize() {
 
     computeSequenceEndTime();
     setModelDependentConstants();
-
     setupProperties();
-}
-
-void RenderableFieldlinesSequence::initializeGL() {
-    // Setup shader program
-    _shaderProgram = global::renderEngine->buildRenderProgram(
-        "FieldlinesSequence",
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
-    );
 
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -631,6 +642,7 @@ void RenderableFieldlinesSequence::setupProperties() {
         // Each quantity should have its own color table and color table range
         // no more, no less
         _colorTablePaths.resize(nExtraQuantities, _colorTablePaths.back());
+        _colorTablePath = _colorTablePaths[0];
         _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
         _maskingRanges.resize(nExtraQuantities, _maskingRanges.back());
     }
@@ -641,7 +653,6 @@ void RenderableFieldlinesSequence::setupProperties() {
         // Set defaults
         _colorQuantity = _colorQuantityTemp;
         _colorQuantityMinMax = _colorTableRanges[_colorQuantity];
-        _colorTablePath = _colorTablePaths[0];
 
         _maskingQuantity = _maskingQuantityTemp;
         _maskingMinMax = _maskingRanges[_colorQuantity];
@@ -660,7 +671,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
 
         _colorTablePath.onChange([this]() {
             _transferFunction->setPath(_colorTablePath);
-            _colorTablePaths[_colorQuantity] = _colorTablePath;
+            //_colorTablePaths[_colorQuantity] = _colorTablePath;
         });
 
         _colorQuantityMinMax.onChange([this]() {
@@ -819,7 +830,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
             continue;
         }
 
-        std::ifstream seedFile(spFile.path());
+        std::ifstream seedFile(spFile);
         if (!seedFile.good()) {
             LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();
@@ -848,7 +859,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
         size_t dateAndTimeSeperator = name.find_last_of('_');
         std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
-        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    //8 for yyyymmdd
+        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
         std::string dateAndTime = date + time;
 
         // add outVec as value and time stamp as int as key
@@ -953,10 +964,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         textureUnit.activate();
         _transferFunction->bind(); // Calls update internally
         _shaderProgram->setUniform("colorTable", textureUnit);
-        _shaderProgram->setUniform(
-            "colorTableRange",
-            _colorTableRanges[_colorQuantity]
-        );
+        _shaderProgram->setUniform("colorTableRange", _colorTableRanges[_colorQuantity]);
     }
 
     if (_maskingEnabled) {
@@ -994,7 +1002,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 #endif
 
     glMultiDrawArrays(
-        GL_LINE_STRIP, //_drawingOutputType,
+        GL_LINE_STRIP,
         _states[_activeStateIndex].lineStart().data(),
         _states[_activeStateIndex].lineCount().data(),
         static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
@@ -1048,7 +1056,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     }
     else {
         // Not in interval => set everything to false
-        _activeTriggerTimeIndex   = -1;
+        _activeTriggerTimeIndex = -1;
         mustLoadNewStateFromDisk = false;
         needUpdate = false;
     }

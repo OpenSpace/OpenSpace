@@ -1,0 +1,214 @@
+local transforms = asset.require('../../planets/earth/magnetosphere/transforms_magnetosphere.asset')
+
+-- Specifying transfer functions
+local transferFunctions = asset.syncedResource({
+  Name = "Fieldlines Transfer Functions",
+  Type = "HttpSynchronization",
+  Identifier = "sun_earth_event-fieldlines-transferfunctions",
+  Version = 1
+})
+
+-- Specifying transfer functions
+local fieldlineData  = asset.syncedResource({
+  Name = "Fieldlines Data",
+  Type = "HttpSynchronization",
+  Identifier = "sun_earth_event-fieldlines-data",
+  Version = 1
+})
+
+local batsrusTemperatureColorTable = transferFunctions .. "/batsrus_temperature.txt"
+local batsrusDensityColorTable = transferFunctions .. "/batsrus_density.txt"
+local batsrusCurrentColorTable = transferFunctions .. "/batsrus_current2.txt"
+local batsrusVelocityColorTable = transferFunctions .. "/batsrus_velocity.txt"
+local batsrusTopologyColorTable = transferFunctions .. "/batsrus_topology.txt"
+
+BATSRUSPaths = {
+  MagneticOpenClosed = fieldlineData .. "/batsrus/lutz_july_event/downsampled4/magnetic_fieldlines/open-closed/",
+  VelocityFlowlinesUpstream = fieldlineData .. "/batsrus/lutz_july_event/downsampled4/velocity_flowlines/upstream/",
+  AsherStaticSeeds = fieldlineData .. "/batsrus/asher_static_seeds/downsampled4/"
+}
+
+----------------------LUTZ's JULY TRACES-------------------------
+local BatsrusJ12OpenClosed = {
+  Identifier = "FL_BATSRUS_J12_OpenClosed",
+  Parent = transforms.GSMReferenceFrame.Identifier,
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    -- TracingMethod = "PreTracedBinary",
+    SourceFolder = BATSRUSPaths.MagneticOpenClosed,
+    InputFileType = "Osfls",
+    -- StartStateOffset = 1908,
+    -- StateStepSize = 100,
+    -- MaxNumStates = 12,
+    Color = { 0.7, 0.4, 0.0, 0.6 }, -- Default color
+    ColorMethod = "By Quantity", -- Color by Quantity
+    ColorQuantity = 0, -- Temprature
+    ColorTablePaths = {
+      batsrusTemperatureColorTable,
+      batsrusDensityColorTable,
+      batsrusCurrentColorTable,
+      batsrusVelocityColorTable,
+      batsrusTopologyColorTable,
+    },
+    ColorTableRanges = {
+      { 0, 100000000 },
+      { 0, 60 },
+      { -0.015, 0.015 },
+      { 150, 900 },
+      { 0, 3 },
+    },
+    --[[ ExtraMinMaxLimits = {
+      { 0, 1000000000 },
+      { -1, 150 },
+      { -0.2, 0.2 },
+      { 0, 6000 },
+      { 0, 3 },
+    },
+    RadialDomainLimits = { 0, 350 },
+    CartesianDomainLimits = {
+      { -400, 60 },
+      { -80, 80 },
+      { -100, 100 }
+    }, ]]
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingQuantity", 4) -- Topology
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMinLimit", "2.5")
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMaxLimit", "3.0")
+    MaskingEnabled = true,
+    MaskingQuantity = 4, -- Topology
+    MaskingRanges = {{2.5, 3.0}}, -- Closed only
+    LoadAtRuntime = true
+  },
+  GUI = {
+    Name = "Fieldlines BATSRUS J12 Open/Closed",
+    Path = "/Solar System/Heliosphere"
+  }
+}
+
+--------------------- VELOCITY FLOWLINES ------------------------
+local BatsrusJ12FlowLines = {
+  Identifier = "FL_BATSRUS_J12_FlowLines",
+  Parent = transforms.GSMReferenceFrame.Identifier,
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    -- TracingMethod = "PreTracedBinary",
+    SourceFolder = BATSRUSPaths.VelocityFlowlinesUpstream,
+    InputFileType = "Osfls",
+    -- StartStateOffset = 650,
+    -- StateStepSize = 100,
+    -- MaxNumStates = 12,
+    ColorMethod = "By Quantity", -- Color by Quantity
+    ColorQuantity = 3, -- Velocity
+    Color = { 0.7, 0.4, 0.0, 0.12 }, -- Default color
+    ColorTablePaths = {
+      batsrusTemperatureColorTable,
+      batsrusDensityColorTable,
+      batsrusCurrentColorTable,
+      batsrusVelocityColorTable,
+      batsrusTopologyColorTable,
+    },
+    ColorTableRanges = {
+      { 0, 100000000 },
+      { 0, 60 },
+      { -0.015, 0.015 },
+      { 150, 900 },
+      { 0, 3 },
+    },
+    --[[ ExtraMinMaxLimits = {
+      { 0, 1000000000 },
+      { -1, 150 },
+      { -0.2, 0.2 },
+      { 0, 6000 },
+      { 0, 3 },
+    },
+    RadialDomainLimits = { 0, 350 },
+    CartesianDomainLimits = { { -400, 60 }, { -80, 80 }, { -100, 100 } }, ]]
+    LoadAtRuntime = true
+  },
+  GUI = {
+    Name = "Fieldlines BATSRUS J12 Flowlines",
+    Path = "/Solar System/Heliosphere"
+  }
+}
+
+--------------------- VELOCITY FLOWLINES ------------------------
+local BatsrusAsherStaticSeedsFlowLines = {
+  Identifier = "FL_BATSRUS_ASHER_STATIC_SSEDS_FlowLines",
+  Parent = transforms.GSMReferenceFrame.Identifier,
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    -- TracingMethod = "PreTracedBinary",
+    SourceFolder = BATSRUSPaths.AsherStaticSeeds,
+    InputFileType = "Osfls",
+    Enabled = false,
+    -- StartStateOffset = 650,
+    -- StateStepSize = 100,
+    -- MaxNumStates = 12,
+    ColorTablePaths = {
+      batsrusTemperatureColorTable,
+      batsrusDensityColorTable,
+      batsrusCurrentColorTable,
+      batsrusVelocityColorTable,
+      batsrusTopologyColorTable,
+    },
+   ColorTableRanges = {
+      { 0, 100000000 },
+      { 0, 60 },
+      { -0.015, 0.015 },
+      { 150, 900 },
+      { 0, 3 },
+    },
+    --[[ ExtraMinMaxLimits = {
+      { 0, 1000000000 },
+      { -1, 150 },
+      { -0.2, 0.2 },
+      { 0, 6000 },
+      { 0, 3 },
+    },
+    RadialDomainLimits = { 0, 350 },
+    CartesianDomainLimits = { { -400, 60 }, { -80, 80 }, { -100, 100 } }, ]]
+    LoadAtRuntime = true
+  },
+  GUI = {
+    Name = "Fieldlines BATSRUS Asher Static",
+    Path = "/Solar System/Heliosphere"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(BatsrusJ12OpenClosed)
+  openspace.addSceneGraphNode(BatsrusJ12FlowLines)
+  openspace.addSceneGraphNode(BatsrusAsherStaticSeedsFlowLines)
+
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Color.colorMethod", 1) -- Color by Quantity
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Color.colorQuantity", 4) -- Topology
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Domain.limitsY", { -30.61, 30.61 })
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Domain.limitsY", { -30.61, 30.61 })
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.maskingEnabled", true)
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingQuantity", 4) -- Topology
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMinLimit", "2.5")
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMaxLimit", "3.0")
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorMethod", 1) -- Color by Quantity
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorQuantity", 3) -- Velocity
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorQuantityMin", "75")
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorQuantityMax", "350")
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.uniform", { 1, 1, 1, 0.12 })
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSize", 2)
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSize", 2)
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSpacing", 60)
+  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.speed", 20)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(BatsrusJ12OpenClosed)
+  openspace.removeSceneGraphNode(BatsrusJ12FlowLines)
+  openspace.removeSceneGraphNode(BatsrusAsherStaticSeedsFlowLines)
+end)
+
+asset.meta = {
+  Name = "Fieldlines from Batsrus model of 2012 event",
+  Version = "1.0",
+  Description = "Magnetic fieldlines from Batsrus model for a 2012 CME event",
+  Author = "CCMC",
+  URL = "",
+  License = "CC-BY"
+}

@@ -1,0 +1,54 @@
+asset.require("./sun_earth_2012_fieldlines_enlil")
+asset.require("./sun_earth_2012_fieldlines_batsrus")
+asset.require("./sun_earth_2012_fieldlines_pfss")
+
+
+-- local sceneHelper = asset.require('util/scene_helper')
+-- local Keybindings = {
+--     {
+--         Key = "p",
+--         Command =
+-- 	  		"openspace.setPropertyValueSingle('Scene.FL_PFSS.Renderable.Color.uniform', { 0.35, 0.51, 0.875, 0.22 })".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_PFSS.Renderable.Flow.color', { 1, 0.9, 1, 0.74 })".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_PFSS.Renderable.Flow.particleSize', 5)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_PFSS.Renderable.Flow.particleSpacing', 250)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_PFSS.Renderable.Flow.speed', 75.0)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_PFSS.Renderable.Flow.reversed', true)".. 
+-- 	   		"openspace.setPropertyValue('Scene.FL_ENLIL*.Renderable.Color.colorMethod', 1)".. 
+-- 	   		"openspace.setPropertyValue('Scene.FL_ENLIL*.Renderable.Color.colorQuantityMax', '225000')".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_ENLIL_earth.Renderable.Flow.color', { 1, 1, 1, 1.0 })".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_ENLIL_earth.Renderable.Flow.particleSize', 5)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_ENLIL_earth.Renderable.Flow.particleSpacing', 25)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_ENLIL_earth.Renderable.Flow.speed', 25.0)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_ENLIL_earth.Renderable.Flow.reversed', true)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Color.colorMethod', 1) ".. -- Color by Quantity
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Color.colorQuantity', 4) "..  -- Topology
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Domain.limitsY', { -30.61, 30.61 })".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Domain.limitsY', { -30.61, 30.61 })".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_OpenClosed.Renderable.maskingEnabled', true)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingQuantity', 4) "..  -- Topology
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMinLimit', '2.5')".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMaxLimit', '3.0')".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorMethod', 1) "..  -- Color by Quantity
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorQuantity', 3)"..   -- Velocity
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorQuantityMin', '75')".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorQuantityMax', '350')".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.uniform', { 1, 1, 1, 0.12 })".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSize', 2)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSize', 2)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSpacing', 60)".. 
+-- 	   		"openspace.setPropertyValueSingle('Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.speed', 20)",
+--         Documentation = "Setup various variables for 2012 fieldline scene",
+--         Name = "Setup 2012 fieldlines",
+--         GuiPath = "/CCMC/2012",
+--         Local = false
+--     }
+-- }
+
+-- asset.onInitialize(function ()
+-- 	sceneHelper.bindKeys(Keybindings)
+-- end)
+
+-- asset.onDeinitialize(function ()
+-- 	sceneHelper.unbindKeys(Keybindings)
+-- end)
