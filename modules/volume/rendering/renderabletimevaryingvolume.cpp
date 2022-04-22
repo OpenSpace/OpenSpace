@@ -106,7 +106,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BrightnessInfo = {
         "Brightness",
         "Brightness",
-        "The volume renderers general brightness."
+        "The volume renderer's general brightness."
     };
 
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
