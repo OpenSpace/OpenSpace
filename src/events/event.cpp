@@ -171,10 +171,10 @@ void log(int i, const EventSessionRecordingPlayback& e) {
     LINFO(fmt::format("[{}] SessionRecordingPlayback: {}", i, state));
 }
 
-void log(int i, const EventPointJwstRequested& e) {
-    ghoul_assert(e.type == EventPointJwstRequested::Type, "Wrong type");
+void log(int i, const EventPointSpacecraft& e) {
+    ghoul_assert(e.type == EventPointSpacecraft::Type, "Wrong type");
     LINFO(fmt::format(
-        "[{}] PointJwstRequested: Ra: {}, Dec: {}, Duration: {}", i, e.ra, e.dec,
+        "[{}] PointSpacecraft: Ra: {}, Dec: {}, Duration: {}", i, e.ra, e.dec,
         e.duration
     ));
 }
@@ -203,7 +203,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::LayerAdded: return "LayerAdded";
         case Event::Type::LayerRemoved: return "LayerRemoved";
         case Event::Type::SessionRecordingPlayback: return "SessionRecordingPlayback";
-        case Event::Type::PointJwstRequested: return "PointJwstRequested";
+        case Event::Type::PointSpacecraft: return "PointSpacecraft";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -259,8 +259,8 @@ Event::Type fromString(std::string_view str) {
     else if (str == "SessionRecordingPlayback") {
         return Event::Type::SessionRecordingPlayback;
     }
-    else if (str == "PointJwstRequested") {
-        return Event::Type::PointJwstRequested;
+    else if (str == "PointSpacecraft") {
+        return Event::Type::PointSpacecraft;
     }
     else if (str == "Custom") {
         return Event::Type::Custom;
@@ -423,10 +423,10 @@ ghoul::Dictionary toParameter(const Event& e) {
                     break;
             }
             break;
-        case Event::Type::PointJwstRequested:
-            d.setValue("Ra", static_cast<const EventPointJwstRequested&>(e).ra);
-            d.setValue("Dec", static_cast<const EventPointJwstRequested&>(e).dec);
-            d.setValue("Duration", static_cast<const EventPointJwstRequested&>(e).duration);
+        case Event::Type::PointSpacecraft:
+            d.setValue("Ra", static_cast<const EventPointSpacecraft&>(e).ra);
+            d.setValue("Dec", static_cast<const EventPointSpacecraft&>(e).dec);
+            d.setValue("Duration", static_cast<const EventPointSpacecraft&>(e).duration);
             break;
         case Event::Type::Custom:
             d.setValue(
@@ -494,8 +494,8 @@ void logAllEvents(const Event* e) {
             case Event::Type::SessionRecordingPlayback:
                 log(i, *static_cast<const EventSessionRecordingPlayback*>(e));
                 break;
-            case Event::Type::PointJwstRequested:
-                log(i, *static_cast<const EventPointJwstRequested*>(e));
+            case Event::Type::PointSpacecraft:
+                log(i, *static_cast<const EventPointSpacecraft*>(e));
                 break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
@@ -609,7 +609,7 @@ EventSessionRecordingPlayback::EventSessionRecordingPlayback(State state_)
     , state(state_)
 {}
 
-EventPointJwstRequested::EventPointJwstRequested(double ra_, double dec_, double duration_)
+EventPointSpacecraft::EventPointSpacecraft(double ra_, double dec_, double duration_)
     : Event(Type)
     , ra(ra_)
     , dec(dec_)
