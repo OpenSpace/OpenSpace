@@ -36,7 +36,7 @@ class QComboBox;
 class QLabel;
 class QLineEdit;
 
-class WindowControl : public QWidget {
+class WindowControl final : public QWidget {
 Q_OBJECT
 public:
     /**
@@ -83,16 +83,6 @@ signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
     void webGuiChanged(int windowIndex);
 
-private slots:
-    void onSizeXChanged(const QString& newText);
-    void onSizeYChanged(const QString& newText);
-    void onOffsetXChanged(const QString& newText);
-    void onOffsetYChanged(const QString& newText);
-    void onProjectionChanged(int newSelection);
-    void onFullscreenClicked();
-    void onAspectRatioLockClicked();
-    void onFovLockClicked();
-
 private:
     enum class ProjectionIndices {
         Planar = 0,
@@ -108,6 +98,15 @@ private:
     QWidget* createSphericalMirrorWidget();
     QWidget* createCylindricalWidget();
     QWidget* createEquirectangularWidget();
+
+    void onSizeXChanged(const QString& newText);
+    void onSizeYChanged(const QString& newText);
+    void onOffsetXChanged(const QString& newText);
+    void onOffsetYChanged(const QString& newText);
+    void onProjectionChanged(int newSelection);
+    void onFullscreenClicked();
+    void onAspectRatioLockClicked();
+    void onFovLockClicked();
 
     sgct::config::Projections generateProjectionInformation() const;
     void updatePlanarLockedFov();

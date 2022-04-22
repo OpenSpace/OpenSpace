@@ -31,7 +31,7 @@
 
 class QCheckBox;
 
-class SettingsWidget : public QWidget {
+class SettingsWidget final : public QWidget {
 Q_OBJECT
 public:
     /**

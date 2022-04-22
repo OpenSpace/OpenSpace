@@ -104,7 +104,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
     //  | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~Detail components~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ | R8
     //  *----------*----------*----------*----------*----------*----------*----------*
 
-    QGridLayout* layout = new QGridLayout;
+    QGridLayout* layout = new QGridLayout(this);
     layout->setColumnStretch(6, 1);
     layout->setRowStretch(8, 1);
     
@@ -284,7 +284,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
 
         //
         // Projection combobox
-        QBoxLayout* projectionLayout = new QVBoxLayout;
+        QBoxLayout* projectionLayout = new QVBoxLayout(projectionGroup);
 
         _projectionType = new QComboBox;
         _projectionType->addItems({
@@ -316,11 +316,8 @@ void WindowControl::createWidgets(const QColor& windowColor) {
         // We need to trigger this once to ensure that all of the defaults are correct
         onProjectionChanged(0);
 
-        projectionGroup->setLayout(projectionLayout);
         layout->addWidget(projectionGroup, 8, 0, 1, 7);
     }
-
-    setLayout(layout);
 }
 
 QWidget* WindowControl::createPlanarWidget() {
@@ -331,30 +328,30 @@ QWidget* WindowControl::createPlanarWidget() {
     //  *----------*----------*----------*
 
     QWidget* widget = new QWidget;
-    QGridLayout* planarLayout = new QGridLayout;
+    QGridLayout* layout = new QGridLayout(widget);
 
     QLabel* fovH = new QLabel("Horizontal FOV");
     QString hfovTip = "The total horizontal field of view of the viewport (degrees).";
     fovH->setToolTip(hfovTip);
-    planarLayout->addWidget(fovH, 0, 0);
+    layout->addWidget(fovH, 0, 0);
 
     _planar.fovH = new QLineEdit(QString::number(DefaultFovH));
     _planar.fovH->setEnabled(false);
     _planar.fovH->setValidator(new QDoubleValidator(-180.0, 180.0, 10, this));
     _planar.fovH->setToolTip(hfovTip);
-    planarLayout->addWidget(_planar.fovH, 0, 1);
+    layout->addWidget(_planar.fovH, 0, 1);
 
     QLabel* fovV = new QLabel("Vertical FOV");
     QString vfovTip = "The total vertical field of view of the viewport (degrees). "
         "Internally,\nthe values for 'up' & 'down' will each be half this value.";
     fovV->setToolTip(vfovTip);
-    planarLayout->addWidget(fovV, 1, 0);
+    layout->addWidget(fovV, 1, 0);
 
     _planar.fovV = new QLineEdit(QString::number(DefaultFovV));
     _planar.fovV->setEnabled(false);
     _planar.fovV->setValidator(new QDoubleValidator(-90.0, 90.0, 10, this));
     _planar.fovV->setToolTip(vfovTip);
-    planarLayout->addWidget(_planar.fovV, 1, 1);
+    layout->addWidget(_planar.fovV, 1, 1);
 
     QPushButton* lockFov = new QPushButton;
     lockFov->setIcon(_lockIcon);
@@ -363,7 +360,7 @@ QWidget* WindowControl::createPlanarWidget() {
         "based on the provided aspect ratio."
     );
     lockFov->setFocusPolicy(Qt::NoFocus);
-    planarLayout->addWidget(lockFov, 0, 2, 2, 1);
+    layout->addWidget(lockFov, 0, 2, 2, 1);
     connect(
         lockFov, &QPushButton::released,
         [this, lockFov]() {
@@ -371,7 +368,6 @@ QWidget* WindowControl::createPlanarWidget() {
         }
     );
     connect(lockFov, &QPushButton::released, this, &WindowControl::onFovLockClicked);
-    widget->setLayout(planarLayout);
     return widget;
 }
 
@@ -383,19 +379,19 @@ QWidget* WindowControl::createFisheyeWidget() {
     //  *----------*----------*
     
     QWidget* widget = new QWidget;
-    QGridLayout* fisheyeLayout = new QGridLayout;
+    QGridLayout* layout = new QGridLayout(widget);
     QLabel* qualityFisheye = new QLabel("Quality");
     QString qualityTip = "Determines the pixel resolution of the projection rendering. "
         "The higher resolution,\nthe better the rendering quality, but at the expense of "
         "increased rendering times.";
     qualityFisheye->setToolTip(qualityTip);
-    fisheyeLayout->addWidget(qualityFisheye, 0, 0);
+    layout->addWidget(qualityFisheye, 0, 0);
 
     _fisheye.quality = new QComboBox;
     _fisheye.quality->addItems(QualityTypes);
     _fisheye.quality->setToolTip(qualityTip);
     _fisheye.quality->setCurrentIndex(2);
-    fisheyeLayout->addWidget(_fisheye.quality, 0, 1);
+    layout->addWidget(_fisheye.quality, 0, 1);
 
     _fisheye.spoutOutput = new QCheckBox("Spout Output");
     _fisheye.spoutOutput->setToolTip(
@@ -404,8 +400,7 @@ QWidget* WindowControl::createFisheyeWidget() {
         "system. Spout makes it possible to make the rendered\nimages available to other "
         "real-time applications on the same machine for further processing."
     );
-    fisheyeLayout->addWidget(_fisheye.spoutOutput, 1, 0, 1, 2);
-    widget->setLayout(fisheyeLayout);
+    layout->addWidget(_fisheye.spoutOutput, 1, 0, 1, 2);
     return widget;
 }
 
@@ -415,21 +410,20 @@ QWidget* WindowControl::createSphericalMirrorWidget() {
     //  | Quality  * [DDDDD>] *  Row 0
     //  *----------*----------*
     QWidget* widget = new QWidget;
-    QGridLayout* sphericalMirrorLayout = new QGridLayout;
+    QGridLayout* layout = new QGridLayout(widget);
 
     QLabel* qualitySphericalMirror = new QLabel("Quality");
     QString qualityTip = "Determines the pixel resolution of the projection rendering. "
         "The higher resolution,\nthe better the rendering quality, but at the expense of "
         "increased rendering times.";
     qualitySphericalMirror->setToolTip(qualityTip);
-    sphericalMirrorLayout->addWidget(qualitySphericalMirror, 0, 0);
+    layout->addWidget(qualitySphericalMirror, 0, 0);
 
     _sphericalMirror.quality = new QComboBox;
     _sphericalMirror.quality->addItems(QualityTypes);
     _sphericalMirror.quality->setToolTip(qualityTip);
     _sphericalMirror.quality->setCurrentIndex(2);
-    sphericalMirrorLayout->addWidget(_sphericalMirror.quality, 0, 1);
-    widget->setLayout(sphericalMirrorLayout);
+    layout->addWidget(_sphericalMirror.quality, 0, 1);
     return widget;
 }
 
@@ -440,20 +434,20 @@ QWidget* WindowControl::createCylindricalWidget() {
     //  | HOffset  * [oooooo] *  Row 1
     //  *----------*----------*
     QWidget* widget = new QWidget;
-    QGridLayout* cylindricalLayout = new QGridLayout;
+    QGridLayout* layout = new QGridLayout(widget);
 
     QLabel* qualityCylindrical = new QLabel("Quality");
     QString qualityTip = "Determines the pixel resolution of the projection rendering. "
         "The higher resolution,\nthe better the rendering quality, but at the expense of "
         "increased rendering times.";
     qualityCylindrical->setToolTip(qualityTip);
-    cylindricalLayout->addWidget(qualityCylindrical, 0, 0);
+    layout->addWidget(qualityCylindrical, 0, 0);
 
     _cylindrical.quality = new QComboBox;
     _cylindrical.quality->addItems(QualityTypes);
     _cylindrical.quality->setToolTip(qualityTip);
     _cylindrical.quality->setCurrentIndex(2);
-    cylindricalLayout->addWidget(_cylindrical.quality, 0, 1);
+    layout->addWidget(_cylindrical.quality, 0, 1);
 
     QLabel* heightOffset = new QLabel("Height Offset");
     QString heightTip = "Offsets the height from which the cylindrical projection is "
@@ -461,16 +455,15 @@ QWidget* WindowControl::createCylindricalWidget() {
         "and\ncountering that offset is desired in order to continue producing\na "
         "'standard' cylindrical projection.";
     heightOffset->setToolTip(heightTip);
-    cylindricalLayout->addWidget(heightOffset);
+    layout->addWidget(heightOffset);
 
     _cylindrical.heightOffset = new QLineEdit(QString::number(DefaultHeightOffset));
     _cylindrical.heightOffset->setValidator(
         new QDoubleValidator(-1000000.0, 1000000.0, 12, this)
     );
     _cylindrical.heightOffset->setToolTip(heightTip);
-    cylindricalLayout->addWidget(_cylindrical.heightOffset);
+    layout->addWidget(_cylindrical.heightOffset);
 
-    widget->setLayout(cylindricalLayout);
     return widget;
 }
 
@@ -481,19 +474,19 @@ QWidget* WindowControl::createEquirectangularWidget() {
     //  | [] Spout Output     *  Row 1
     //  *----------*----------*
     QWidget* widget = new QWidget;
-    QGridLayout* equirectangularLayout = new QGridLayout;
+    QGridLayout* layout = new QGridLayout(widget);
     QLabel* qualityEquirectangular = new QLabel("Quality");
     QString qualityTip = "Determines the pixel resolution of the projection rendering. "
         "The higher resolution,\nthe better the rendering quality, but at the expense of "
         "increased rendering times.";
     qualityEquirectangular->setToolTip(qualityTip);
-    equirectangularLayout->addWidget(qualityEquirectangular, 0, 0);
+    layout->addWidget(qualityEquirectangular, 0, 0);
 
     _equirectangular.quality = new QComboBox;
     _equirectangular.quality->addItems(QualityTypes);
     _equirectangular.quality->setToolTip(qualityTip);
     _equirectangular.quality->setCurrentIndex(2);
-    equirectangularLayout->addWidget(_equirectangular.quality, 0, 1);
+    layout->addWidget(_equirectangular.quality, 0, 1);
 
     _equirectangular.spoutOutput = new QCheckBox("Spout Output");
     _equirectangular.spoutOutput->setToolTip(
@@ -502,9 +495,8 @@ QWidget* WindowControl::createEquirectangularWidget() {
         "system. Spout makes it possible to make the rendered\nimages available to other "
         "real-time applications on the same machine for further processing."
     );
-    equirectangularLayout->addWidget(_equirectangular.spoutOutput, 1, 0, 1, 2);
+    layout->addWidget(_equirectangular.spoutOutput, 1, 0, 1, 2);
 
-    widget->setLayout(equirectangularLayout);
     return widget;
 }
 

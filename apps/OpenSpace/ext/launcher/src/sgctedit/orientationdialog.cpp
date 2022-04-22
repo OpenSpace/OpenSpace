@@ -36,7 +36,7 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     , _orientationValue(orientation)
 {
     setWindowTitle("Global Orientation");
-    QGridLayout* layoutWindow = new QGridLayout;
+    QGridLayout* layoutWindow = new QGridLayout(this);
 
     {
         QString pitchTip = "Pitch or elevation: negative numbers tilt the camera "
@@ -98,8 +98,6 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         connect(buttons, &QDialogButtonBox::rejected, this, &OrientationDialog::reject);
         layoutWindow->addWidget(buttons, 3, 0, 1, 2);
     }
-
-    setLayout(layoutWindow);
 }
 
 void OrientationDialog::ok() {

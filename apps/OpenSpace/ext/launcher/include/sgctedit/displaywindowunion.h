@@ -34,7 +34,7 @@ class QPushButton;
 class QVBoxLayout;
 class WindowControl;
 
-class DisplayWindowUnion : public QWidget {
+class DisplayWindowUnion final : public QWidget {
 Q_OBJECT
 public:
     /**
@@ -60,14 +60,35 @@ public:
      * \return vector of pointers of WindowControl objects
      */
     std::vector<WindowControl*> windowControls() const;
-    
-signals:
-    void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
-    void nWindowsChanged(int newCount);
 
-public slots:
+    /**
+     * When called will add a new window to the set of windows, which will, in turn, send
+     * out all of the corresponding signals described below.
+     */
     void addWindow();
+
+    /**
+     * When called will remove the last window from the set of windows, which will, in
+     * turn, send out all of the corresponding signals described below.
+     */
     void removeWindow();
+
+signals:
+    /**
+     * This signal is emitted when a windowhas changed.
+     * 
+     * \param monitorIndex The 0-based index of the monitor to which the window belongs to
+     * \param windowIndex The 0-based index of the window that was changed
+     * \param newDimensions The pixel sizes of the window after the change
+     */
+    void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
+
+    /**
+     * This signal is emitted when the total number of windows has changed.
+     * 
+     * \param newCount The new total number of windows
+     */
+    void nWindowsChanged(int newCount);
 
 private:
     void createWidgets(int nMaxWindows, std::vector<QRect> monitorResolutions,

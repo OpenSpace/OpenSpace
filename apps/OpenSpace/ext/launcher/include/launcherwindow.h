@@ -37,7 +37,7 @@ namespace openspace::configuration { struct Configuration; }
 class QComboBox;
 class QLabel;
 
-class LauncherWindow : public QMainWindow {
+class LauncherWindow final : public QMainWindow {
 Q_OBJECT
 public:
     /**
