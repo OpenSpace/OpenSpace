@@ -78,7 +78,9 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
     }
 
     QBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSizeConstraint(QLayout::SizeConstraint::SetMinimumSize);
+
     {
         QBoxLayout* layoutMonButton = new QHBoxLayout;
         _removeWindowButton = new QPushButton("Remove Window");
@@ -107,7 +109,14 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
         layout->addLayout(layoutMonButton);
     }
 
+    QFrame* line = new QFrame;
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    layout->addWidget(line);
+
     QBoxLayout* layoutWindows = new QHBoxLayout;
+    layoutWindows->setContentsMargins(0, 0, 0, 0);
+    layoutWindows->setSpacing(0);
     for (int i = 0; i < nMaxWindows; ++i) {
         layoutWindows->addWidget(_windowControl[i]);
         if (i < (nMaxWindows - 1)) {

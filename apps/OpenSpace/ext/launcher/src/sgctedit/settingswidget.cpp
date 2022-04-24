@@ -38,7 +38,7 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     
     _checkBoxVsync = new QCheckBox("Enable VSync");
     _checkBoxVsync->setToolTip(
-        "If enabled, the server will frame lock and wait for all client nodes"
+        "If enabled the framerate will be locked to the refresh rate of the monitor"
     );
     layout->addWidget(_checkBoxVsync);
     

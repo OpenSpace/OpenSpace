@@ -33,8 +33,10 @@
 
 class QCheckBox;
 class QComboBox;
+class QDoubleSpinBox;
 class QLabel;
 class QLineEdit;
+class QSpinBox;
 
 class WindowControl final : public QWidget {
 Q_OBJECT
@@ -99,10 +101,10 @@ private:
     QWidget* createCylindricalWidget();
     QWidget* createEquirectangularWidget();
 
-    void onSizeXChanged(const QString& newText);
-    void onSizeYChanged(const QString& newText);
-    void onOffsetXChanged(const QString& newText);
-    void onOffsetYChanged(const QString& newText);
+    void onSizeXChanged(int newValue);
+    void onSizeYChanged(int newValue);
+    void onOffsetXChanged(int newValue);
+    void onOffsetYChanged(int newValue);
     void onProjectionChanged(int newSelection);
     void onFullscreenClicked();
     void onAspectRatioLockClicked();
@@ -124,18 +126,18 @@ private:
     QLabel* _windowNumber = nullptr;
     QLineEdit* _windowName = nullptr;
     QComboBox* _monitor = nullptr;
-    QLineEdit* _sizeX = nullptr;
-    QLineEdit* _sizeY = nullptr;
-    QLineEdit* _offsetX = nullptr;
-    QLineEdit* _offsetY = nullptr;
+    QSpinBox* _sizeX = nullptr;
+    QSpinBox* _sizeY = nullptr;
+    QSpinBox* _offsetX = nullptr;
+    QSpinBox* _offsetY = nullptr;
     QCheckBox* _windowDecoration = nullptr;
     QCheckBox* _webGui = nullptr;
     QComboBox* _projectionType = nullptr;
 
     struct {
         QWidget* widget = nullptr;
-        QLineEdit* fovH = nullptr;
-        QLineEdit* fovV = nullptr;
+        QDoubleSpinBox* fovH = nullptr;
+        QDoubleSpinBox* fovV = nullptr;
     } _planar;
 
     struct {
@@ -152,7 +154,7 @@ private:
     struct {
         QWidget* widget = nullptr;
         QComboBox* quality = nullptr;
-        QLineEdit* heightOffset = nullptr;
+        QDoubleSpinBox* heightOffset = nullptr;
     } _cylindrical;
 
     struct {
