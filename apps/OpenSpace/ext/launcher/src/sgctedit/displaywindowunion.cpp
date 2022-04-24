@@ -64,17 +64,6 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
             ctrl, &WindowControl::windowChanged,
             this, &DisplayWindowUnion::windowChanged
         );
-
-        connect(
-            ctrl, &WindowControl::webGuiChanged,
-            [this](unsigned int winIndex) {
-                for (size_t w = 0; w < _windowControl.size(); ++w) {
-                    if (w != winIndex) {
-                        _windowControl[w]->uncheckWebGuiOption();
-                    }
-                }
-            }
-        );
     }
 
     QBoxLayout* layout = new QVBoxLayout(this);

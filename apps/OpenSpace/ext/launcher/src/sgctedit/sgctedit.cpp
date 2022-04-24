@@ -32,6 +32,7 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QFrame>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QScreen>
 #include <QVBoxLayout>
@@ -40,6 +41,30 @@
 namespace {
     constexpr QRect MonitorWidgetSize = { 0, 0, 500, 500 };
     constexpr int MaxNumberWindows = 4;
+
+    // Returns true if the windows are not ordered correctly. 'Correct' in this means that
+    // there is a smaller window defined before a bigger one
+    // This check is only necessary until
+    // https://github.com/OpenSpace/OpenSpace/issues/507
+    // is fixed
+    bool hasWindowIssues(const sgct::config::Cluster& cluster) {
+        sgct::ivec2 size = {
+            std::numeric_limits<int>::max(),
+            std::numeric_limits<int>::max()
+        };
+        for (const sgct::config::Window& window : cluster.nodes.front().windows) {
+            if (window.size.x <= size.x && window.size.y <= size.y) {
+                size = window.size;
+            }
+            else {
+                // The window size is bigger than a previous one, so we gotta bail
+                return true;
+            }
+        }
+
+        // We got to the end without running into any problems, so we are golden
+        return false;
+    }
 } // namespace
 
 SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
@@ -148,6 +173,23 @@ std::filesystem::path SgctEdit::saveFilename() const {
 }
 
 void SgctEdit::save() {
+    sgct::config::Cluster cluster = generateConfiguration();
+    if (hasWindowIssues(cluster)) {
+        int ret = QMessageBox::warning(
+            this,
+            "Window Sizes Incompatible",
+            "Window sizes for multiple windows have to be strictly ordered, meaning that "
+            "the size of window 1 has to be bigger in each dimension than window 2, "
+            "window 2 has to be bigger than window 3 (if it exists), and window 3 has to "
+            "be bigger than window 4.\nOtherwise, rendering errors might occur.\n\nAre "
+            "you sure you want to continue?",
+            QMessageBox::StandardButtons(QMessageBox::Yes || QMessageBox::No)
+        );
+        if (ret == QMessageBox::No) {
+            return;
+        }
+    }
+
     QString fileName = QFileDialog::getSaveFileName(
         this,
         "Save Window Configuration File",
@@ -161,12 +203,29 @@ void SgctEdit::save() {
     );
     if (!fileName.isEmpty()) {
         _saveTarget = fileName.toStdString();
-        saveConfigToSgctFormat();
+        _cluster = std::move(cluster);
         accept();
     }
 }
 
 void SgctEdit::apply() {
+    sgct::config::Cluster cluster = generateConfiguration();
+    if (hasWindowIssues(cluster)) {
+        int ret = QMessageBox::warning(
+            this,
+            "Window Sizes Incompatible",
+            "Window sizes for multiple windows have to be strictly ordered, meaning that "
+            "the size of window 1 has to be bigger in each dimension than window 2, "
+            "window 2 has to be bigger than window 3 (if it exists), and window 3 has to "
+            "be bigger than window 4.\nOtherwise, rendering errors might occur.\n\nAre "
+            "you sure you want to continue?",
+            QMessageBox::Yes | QMessageBox::No
+        );
+        if (ret == QMessageBox::No) {
+            return;
+        }
+    }
+
     std::string userCfgTempDir = _userConfigPath;
     if (userCfgTempDir.back() != '/') {
         userCfgTempDir += '/';
@@ -176,11 +235,11 @@ void SgctEdit::apply() {
         std::filesystem::create_directories(absPath(userCfgTempDir));
     }
     _saveTarget = userCfgTempDir + "/apply-without-saving.json";
-    saveConfigToSgctFormat();
+    _cluster = std::move(cluster);
     accept();
 }
 
-void SgctEdit::saveConfigToSgctFormat() {
+sgct::config::Cluster SgctEdit::generateConfiguration() const {
     sgct::config::Cluster cluster;
 
     sgct::config::Scene scene;
@@ -208,15 +267,17 @@ void SgctEdit::saveConfigToSgctFormat() {
     for (WindowControl* wCtrl : _displayWidget->windowControls()) {
         sgct::config::Window window = wCtrl->generateWindowInformation();
 
-        if (wCtrl->isGuiWindow()) {
-            window.viewports.back().isTracked = false;
-            window.tags.push_back("GUI");
-            window.draw2D = true;
-            window.draw3D = false;
-        }
-
         window.id = windowIndex++;
-        node.windows.push_back(window);
+        node.windows.push_back(std::move(window));
+    }
+
+    if (_settingsWidget->showUiOnFirstWindow()) {
+        sgct::config::Window& window = node.windows.front();
+        window.viewports.back().isTracked = false;
+        window.tags.push_back("GUI");
+        window.draw2D = true;
+        window.draw3D = false;
+        window.isResizable = false;
     }
 
     cluster.nodes.push_back(node);
@@ -226,7 +287,7 @@ void SgctEdit::saveConfigToSgctFormat() {
     user.position = { 0.f, 0.f, 4.f };
     cluster.users = { user };
 
-    _cluster = std::move(cluster);
+    return cluster;
 }
 
 sgct::config::Cluster SgctEdit::cluster() const {

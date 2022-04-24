@@ -62,28 +62,14 @@ public:
     void showWindowLabel(bool show);
 
     /**
-     * Function called in order to disable/uncheck the WebGUI checkbox option
-     */
-    void uncheckWebGuiOption();
-
-    /**
      * Resets all controls for this window to default settings
      */
     void resetToDefaults();
-
-
-    /**
-     * Returns bool for if the window control checkbox for WebGUI is enabled
-     *
-     * \return bool for if window has WebGUI enabled
-     */
-    bool isGuiWindow() const;
 
     sgct::config::Window generateWindowInformation() const;
 
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
-    void webGuiChanged(int windowIndex);
 
 private:
     enum class ProjectionIndices {
@@ -131,7 +117,6 @@ private:
     QSpinBox* _offsetX = nullptr;
     QSpinBox* _offsetY = nullptr;
     QCheckBox* _windowDecoration = nullptr;
-    QCheckBox* _webGui = nullptr;
     QComboBox* _projectionType = nullptr;
 
     struct {
