@@ -137,7 +137,8 @@ bool TargetBrowserPair::isEnabled() const {
 
 void TargetBrowserPair::initialize() {
     _targetRenderable->setColor(_browser->borderColor());
-    _targetRenderable->setDimensions(_browser->screenSpaceDimensions());
+    glm::vec2 dim = _browser->screenSpaceDimensions();
+    _targetRenderable->setRatio(dim.x / dim.y);
     _browser->updateBorderColor();
     _browser->hideChromeInterface(true);
 }
@@ -255,7 +256,7 @@ void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
 
 void TargetBrowserPair::setScreenSpaceSize(const glm::vec2& dimensions) {
     _browser->setScreenSpaceSize(dimensions);
-    _targetRenderable->setDimensions(dimensions);
+    _targetRenderable->setRatio(dimensions.x/dimensions.y);
 }
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {

@@ -50,7 +50,7 @@ public:
     double animationSpeed() const;
     double stopAnimationThreshold() const;
 
-    void setDimensions(glm::vec2 dimensions);
+    void setRatio(float ratio);
     void setColor(glm::ivec3 color);
     void setOpacity(float opacity);
     void setVerticalFov(double fov);
@@ -70,7 +70,7 @@ private:
     double _verticalFov = 10.0;
 
     glm::ivec3 _borderColor = glm::ivec3(230);
-    glm::vec2 _dimensions = glm::vec2(1.f);
+    float _ratio = 1.f;
 };
 } // namespace openspace
 

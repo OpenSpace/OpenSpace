@@ -32,7 +32,7 @@ in vec4 vs_position;
 uniform float crossHairSize;
 uniform bool showRectangle;
 uniform float lineWidth;
-uniform vec2 dimensions;
+uniform float ratio;
 uniform vec4 lineColor;
 uniform float fov;
 
@@ -67,23 +67,22 @@ float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    float ratio = dimensions.y / dimensions.x;
     float rectangle = 0.0;
     float maxWwtFov = 70;
 
     float crosshair = createCrosshair(lineWidth, ratio, vs_st);
     float crossHairHeight = crossHairSize/maxWwtFov;
     float crossHairWidth = crossHairHeight * ratio;
-    float crossHairBox = createFilledRectangle(crossHairHeight, crossHairWidth, vs_st);
+    float crossHairBox = createFilledRectangle(crossHairWidth, crossHairHeight, vs_st);
     crosshair *= crossHairBox;
 
     if (showRectangle) {
-      float height = (fov * 0.5)/maxWwtFov;
-      float width = height * ratio;
-      float outerEdge = createFilledRectangle(height, width, vs_st);
       float lineWidthX = lineWidth * 2 * VerticalThickness;
       float lineWidthY = lineWidth * 2;
-      float innerEdge = createFilledRectangle(height-lineWidthX, width-lineWidthY, vs_st);
+      float height = ((fov * 0.5)/maxWwtFov)-lineWidthX;
+      float width = (height * ratio) - lineWidthY;
+      float outerEdge = createFilledRectangle(width, height, vs_st);
+      float innerEdge = createFilledRectangle(width-lineWidthY, height-lineWidthX, vs_st);
       rectangle = outerEdge - innerEdge;
     }
 
