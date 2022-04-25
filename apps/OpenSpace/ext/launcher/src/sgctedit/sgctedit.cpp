@@ -277,7 +277,6 @@ sgct::config::Cluster SgctEdit::generateConfiguration() const {
         window.tags.push_back("GUI");
         window.draw2D = true;
         window.draw3D = false;
-        window.isResizable = false;
     }
 
     cluster.nodes.push_back(node);

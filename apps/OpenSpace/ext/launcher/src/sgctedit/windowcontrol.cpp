@@ -127,28 +127,28 @@ void WindowControl::createWidgets(const QColor& windowColor) {
         _windowName->setToolTip(tip);
         layout->addWidget(_windowName, 1, 1, 1, 7);
     }
-    if (_monitorResolutions.size() > 1) {
-        QString tip = "The monitor where this window is located.";
+    QString tip = "The monitor where this window is located.";
 
+    _monitor = new QComboBox;
+    _monitor->addItems(monitorNames(_monitorResolutions));
+    _monitor->setCurrentIndex(_monitorIndexDefault);
+    _monitor->setToolTip(tip);
+    connect(
+        _monitor, qOverload<int>(&QComboBox::currentIndexChanged),
+        [this]() {
+            emit windowChanged(
+                _monitor->currentIndex(),
+                _windowIndex,
+                _windowDimensions
+            );
+        }
+    );
+    if (_monitorResolutions.size() > 1) {
         QLabel* labelLocation = new QLabel("Monitor");
         labelLocation->setToolTip(tip);
         layout->addWidget(labelLocation, 2, 0);
 
-        _monitor = new QComboBox;
-        _monitor->addItems(monitorNames(_monitorResolutions));
-        _monitor->setCurrentIndex(_monitorIndexDefault);
-        _monitor->setToolTip(tip);
         layout->addWidget(_monitor, 2, 1, 1, 7);
-        connect(
-            _monitor, qOverload<int>(&QComboBox::currentIndexChanged),
-            [this]() {
-                emit windowChanged(
-                    _monitor->currentIndex(),
-                    _windowIndex,
-                    _windowDimensions
-                );
-            }
-        );
     }
     {
         QLabel* size = new QLabel("Size");

@@ -98,7 +98,7 @@ elseif (${QT_VERSION_MAJOR} EQUAL 6)
 
   qt6_wrap_cpp(
     MOC_FILES
-    ${HEADER_SOURCE}
+    ${HEADER_FILES}
   )
   qt6_add_resources(RESOURCE_FILES resources/resources.qrc)
 elseif (NOT DEFINED QT_VERSION_MAJOR)
