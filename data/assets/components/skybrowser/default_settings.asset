@@ -1,5 +1,5 @@
 asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Modules.SkyBrowser.Enabled", false)
+  openspace.setPropertyValueSingle("Modules.SkyBrowser.Enabled", true)
   -- More settings are available, but for now using the default values
 end)
 
