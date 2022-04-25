@@ -1,5 +1,6 @@
-local habitableZoneTextures =
-    asset.require("../habitable_zones/habitable_zone_textures").TexturesPath
+local habitableZoneTextures = asset.require(
+  "scene/milkyway/habitable_zones/habitable_zone_textures"
+).TexturesPath
 
 local sunTextures = asset.syncedResource({
   Type = "HttpSynchronization",
@@ -25,7 +26,7 @@ asset.onInitialize(function ()
   local hzTexture = habitableZoneTextures .. "hot_to_cold_faded.png"
 
   -- Set the default textures used for the exoplanet system creation
-  -- (Check if already set, to not override value in config file)
+  -- (Check if already set, to not override value set in another file)
   local p = "Modules.Exoplanets.StarTexture";
   if (openspace.getPropertyValue(p) == "") then
     openspace.setPropertyValueSingle(p, starTexture)
