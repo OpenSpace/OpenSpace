@@ -385,7 +385,7 @@ struct EventSessionRecordingPlayback : public Event {
  *
  * \param Ra The Ra part of the sky coordinate in decimal degrees to point towards
  * \param Dec The Dec part of the sky coordinate in decimal degrees to point towards
- * \param Duration The duration of time in seconds that the telescope should redirect
+ * \param Duration The duration of time in seconds that the spacecraft should redirect
  *        itself to the coordinate. Default is 3 seconds
  */
 struct EventPointSpacecraft : public Event {

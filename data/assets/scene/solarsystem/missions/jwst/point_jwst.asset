@@ -1,7 +1,6 @@
 local point_jwst = {
   Identifier = "event.jwst.point",
   Name = "Point JWST",
-
   Command = [[
     local ra
     local dec
@@ -141,14 +140,14 @@ asset.onInitialize(function()
   openspace.action.registerAction(point_jwst)
 
   openspace.event.registerEventAction(
-    "PointJwstRequested",
+    "PointSpacecraft",
     point_jwst.Identifier
   )
 end)
 
 asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
-    "PointJwstRequested",
+    "PointSpacecraft",
     point_jwst.Identifier
   )
 
