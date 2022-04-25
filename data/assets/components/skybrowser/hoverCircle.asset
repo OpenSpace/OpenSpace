@@ -13,6 +13,10 @@ local circle = {
     Texture = asset.localResource("circle.png") -- TODO: Make synced resource
   },
   GUI = {
+    Name = "Hover Circle",
+    Description = [[A circular marker that shows the position on the night sky 
+      of the object hovered in the sky browser UI. The circle will hide/show up 
+      dynamically, depending on the interaction with the items in the UI. ]],
     Path = "/SkyBrowser"
   }
 }
@@ -31,8 +35,8 @@ asset.export(circle)
 asset.meta = {
   Name = "SkyBrowser Hover Circle",
   Version = "1.0",
-  Description = [[ Includes a circular marker that shows the position on the night sky 
-    of the object hovered in the sky browser GUI. ]],
+  Description = [[Includes a circular marker that shows the position on the night sky 
+    of the object hovered in the sky browser UI. ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
