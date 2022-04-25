@@ -2,7 +2,7 @@
 
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local ringImage = asset.syncedResource({
+local imageFolder = asset.syncedResource({
   Name = "Hover Circle Image",
   Type = "HttpSynchronization",
   Identifier = "misc_ring_image",
@@ -17,7 +17,7 @@ local circle = {
     Size = 3.0E15,
     Origin = "Center",
     Billboard = true,
-    Texture = ringImage
+    Texture = imageFolder .. "ring.png"
   },
   GUI = {
     Name = "Hover Circle",
