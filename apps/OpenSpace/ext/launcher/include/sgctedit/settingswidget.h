@@ -30,6 +30,7 @@
 #include <sgct/math.h>
 
 class QCheckBox;
+class QLabel;
 
 class SettingsWidget final : public QWidget {
 Q_OBJECT
@@ -54,9 +55,17 @@ public:
      */
     bool vsync() const;
 
+    /**
+     * Gets whether the UI should be restricted to the first window
+     * 
+     * \return true if the UI should only be on the first window
+     */
+    bool showUiOnFirstWindow() const;
+
 private:
     sgct::quat _orientationValue = { 0.f, 0.f, 0.f, 0.f };
     QCheckBox* _checkBoxVsync = nullptr;
+    QCheckBox* _showUiOnFirstWindow = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SETTINGSWIDGET___H__

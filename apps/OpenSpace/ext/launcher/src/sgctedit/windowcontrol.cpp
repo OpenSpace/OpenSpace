@@ -127,28 +127,28 @@ void WindowControl::createWidgets(const QColor& windowColor) {
         _windowName->setToolTip(tip);
         layout->addWidget(_windowName, 1, 1, 1, 7);
     }
-    if (_monitorResolutions.size() > 1) {
-        QString tip = "The monitor where this window is located.";
+    QString tip = "The monitor where this window is located.";
 
+    _monitor = new QComboBox;
+    _monitor->addItems(monitorNames(_monitorResolutions));
+    _monitor->setCurrentIndex(_monitorIndexDefault);
+    _monitor->setToolTip(tip);
+    connect(
+        _monitor, qOverload<int>(&QComboBox::currentIndexChanged),
+        [this]() {
+            emit windowChanged(
+                _monitor->currentIndex(),
+                _windowIndex,
+                _windowDimensions
+            );
+        }
+    );
+    if (_monitorResolutions.size() > 1) {
         QLabel* labelLocation = new QLabel("Monitor");
         labelLocation->setToolTip(tip);
         layout->addWidget(labelLocation, 2, 0);
 
-        _monitor = new QComboBox;
-        _monitor->addItems(monitorNames(_monitorResolutions));
-        _monitor->setCurrentIndex(_monitorIndexDefault);
-        _monitor->setToolTip(tip);
         layout->addWidget(_monitor, 2, 1, 1, 7);
-        connect(
-            _monitor, qOverload<int>(&QComboBox::currentIndexChanged),
-            [this]() {
-                emit windowChanged(
-                    _monitor->currentIndex(),
-                    _windowIndex,
-                    _windowDimensions
-                );
-            }
-        );
     }
     {
         QLabel* size = new QLabel("Size");
@@ -277,22 +277,6 @@ void WindowControl::createWidgets(const QColor& windowColor) {
             "controls for minimizing/maximizing, resizing, or closing the window"
         );
         layout->addWidget(_windowDecoration, 5, 0, 1, 8);
-        
-        _webGui = new QCheckBox("Show user interface only in this window");
-        _webGui->setToolTip(
-            "If enabled, the window will be dedicated solely to displaying the GUI "
-            "controls, and will not\nrender any other content. All other window(s) will "
-            "render normally but will not have GUI controls"
-        );
-        layout->addWidget(_webGui, 6, 0, 1, 8);
-        connect(
-            _webGui, &QCheckBox::stateChanged,
-            [this]() {
-                if (_webGui->isChecked()) {
-                    emit webGuiChanged(_windowIndex);
-                }
-            }
-        );
     }
     {
         QFrame* projectionGroup = new QFrame;
@@ -626,7 +610,6 @@ void WindowControl::resetToDefaults() {
         _monitor->setCurrentIndex(_monitorIndexDefault);
     }
     _windowDecoration->setChecked(true);
-    _webGui->setChecked(false);
     _fisheye.spoutOutput->setChecked(false);
     _equirectangular.spoutOutput->setChecked(false);
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Planar));
@@ -836,12 +819,4 @@ void WindowControl::updatePlanarLockedFov() {
         _planar.fovH->setValue(DefaultFovH);
         _planar.fovV->setValue(std::min(DefaultFovV / ratio, 180.f));
     }
-}
-
-void WindowControl::uncheckWebGuiOption() {
-    _webGui->setChecked(false);
-}
-
-bool WindowControl::isGuiWindow() const {
-    return _webGui->isChecked();
 }

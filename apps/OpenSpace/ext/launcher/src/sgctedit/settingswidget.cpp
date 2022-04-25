@@ -36,6 +36,17 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     
+    _showUiOnFirstWindow = new QCheckBox("Show only user interface on the first window");
+    _showUiOnFirstWindow->setChecked(false);
+    _showUiOnFirstWindow->setToolTip(
+        "If enabled the first window is marked as a GUI window resulting in the user "
+        "interface only being shown on that window and the rendering is suppressed on "
+        "this first window. The remaining windows will render normally but they will not "
+        "show the user interface"
+    );
+    layout->addWidget(_showUiOnFirstWindow);
+
+
     _checkBoxVsync = new QCheckBox("Enable VSync");
     _checkBoxVsync->setToolTip(
         "If enabled the framerate will be locked to the refresh rate of the monitor"
@@ -64,4 +75,8 @@ sgct::quat SettingsWidget::orientation() const {
 
 bool SettingsWidget::vsync() const {
     return _checkBoxVsync->isChecked();
+}
+
+bool SettingsWidget::showUiOnFirstWindow() const {
+    return _showUiOnFirstWindow->isChecked();
 }

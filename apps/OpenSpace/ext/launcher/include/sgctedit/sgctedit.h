@@ -67,7 +67,7 @@ public:
 
 private:
     void createWidgets(const std::vector<QRect>& monitorSizes);
-    void saveConfigToSgctFormat();
+    sgct::config::Cluster generateConfiguration() const;
 
     void save();
     void apply();
