@@ -65,11 +65,11 @@ public:
     virtual ~Browser();
 
     bool initializeGL();
-    bool deinitializeGL();
+    void deinitializeGL();
+    bool isReady() const;
 
     void render();
     void update();
-    bool isReady() const;
 
     void updateBrowserSize();
 

@@ -23,117 +23,212 @@
  ****************************************************************************************/
 
 #include "sgctedit/sgctedit.h"
+
+#include <sgctedit/displaywindowunion.h>
+#include <sgctedit/monitorbox.h>
+#include <sgctedit/settingswidget.h>
+#include <sgctedit/windowcontrol.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <QApplication>
 #include <QFileDialog>
+#include <QFrame>
+#include <QPushButton>
+#include <QScreen>
+#include <QVBoxLayout>
+#include <filesystem>
 
-SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
-                   sgct::config::Cluster& cluster, const QList<QScreen*>& screenList,
-                   const std::string userConfigPath)
+namespace {
+    constexpr QRect MonitorWidgetSize = { 0, 0, 500, 500 };
+    constexpr int MaxNumberWindows = 4;
+} // namespace
+
+SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
     : QDialog(parent)
-    , _cluster(cluster)
-    , _windowList(windowList)
-    , _userConfigPath(userConfigPath)
+    , _userConfigPath(std::move(userConfigPath))
 {
-    systemMonitorConfiguration(screenList);
+    QList<QScreen*> screens = qApp->screens();
     setWindowTitle("Window Configuration Editor");
-    createWidgets();
+    
+    int nScreensManaged = std::min(static_cast<int>(screens.length()), 4);
+    std::vector<QRect> monitorSizes;
+    for (int s = 0; s < nScreensManaged; ++s) {
+        QSize size = screens[s]->size();
+        QRect geometry = screens[s]->availableGeometry();
+        int actualWidth = std::max(size.width(), geometry.width());
+        int actualHeight = std::max(size.height(), geometry.height());
+        monitorSizes.emplace_back(
+            geometry.x(),
+            geometry.y(),
+            static_cast<int>(actualWidth * screens[s]->devicePixelRatio()),
+            static_cast<int>(actualHeight * screens[s]->devicePixelRatio())
+        );
+    }
+
+    createWidgets(monitorSizes);
 }
 
-void SgctEdit::systemMonitorConfiguration(const QList<QScreen*>& screenList) {
-    size_t nScreensManaged = std::min(static_cast<int>(screenList.length()), 2);
-    for (unsigned int s = 0; s < static_cast<unsigned int>(nScreensManaged); ++s) {
-        int actualWidth = std::max(
-            screenList[s]->size().width(),
-            screenList[s]->availableGeometry().width()
-        );
-        int actualHeight = std::max(
-            screenList[s]->size().height(),
-            screenList[s]->availableGeometry().height()
-        );
-        _monitorSizeList.push_back({
-            screenList[s]->availableGeometry().x(),
-            screenList[s]->availableGeometry().y(),
-            actualWidth,
-            actualHeight
-        });
-    }
-    _nMaxWindows = (_monitorSizeList.size() == 1) ? 3 : 4;
-}
+void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
+    QBoxLayout* layout = new QVBoxLayout(this);
+    layout->setSizeConstraint(QLayout::SetFixedSize);
 
-void SgctEdit::createWidgets() {
-    QVBoxLayout* layoutMainV = new QVBoxLayout(this);
-    QHBoxLayout* layoutMainH = new QHBoxLayout;
-    _orientationWidget = new Orientation();
-    {
-        _monBox = std::make_shared<MonitorBox>(
-            _monitorWidgetSize,
-            _monitorSizeList,
-            _nMaxWindows,
-            _colorsForWindows
-        );
-        QHBoxLayout* layoutMonBox = new QHBoxLayout;
-        layoutMonBox->addStretch(1);
-        layoutMonBox->addWidget(_monBox.get());
-        layoutMonBox->addStretch(1);
-        layoutMainV->addLayout(layoutMonBox);
-        addDisplayLayout(layoutMainH);
+    sgct::quat orientation = { 0.f, 0.f, 0.f, 0.f };
+    if (_cluster.scene.has_value() && _cluster.scene->orientation.has_value()) {
+        orientation = *_cluster.scene->orientation;
     }
     {
-        layoutMainV->addLayout(layoutMainH);
-        _orientationWidget->addControlsToParentLayout(layoutMainV);
+        MonitorBox* monitorBox = new MonitorBox(
+            MonitorWidgetSize,
+            monitorSizes,
+            MaxNumberWindows,
+            _colorsForWindows,
+            this
+        );
+        layout->addWidget(monitorBox, 0, Qt::AlignCenter);
 
-        QFrame* bottomBorder = new QFrame();
+        QFrame* displayFrame = new QFrame;
+        displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+
+        QBoxLayout* displayLayout = new QVBoxLayout(displayFrame);
+        _displayWidget = new DisplayWindowUnion(
+            monitorSizes,
+            MaxNumberWindows,
+            _colorsForWindows,
+            this
+        );
+        connect(
+            _displayWidget, &DisplayWindowUnion::windowChanged,
+            monitorBox, &MonitorBox::windowDimensionsChanged
+        );
+        connect(
+            _displayWidget, &DisplayWindowUnion::nWindowsChanged,
+            monitorBox, &MonitorBox::nWindowsDisplayedChanged
+        );
+        _displayWidget->addWindow();
+        
+        displayLayout->addWidget(_displayWidget);
+        
+        layout->addWidget(displayFrame);
+    }
+    
+    _settingsWidget = new SettingsWidget(orientation, this);
+    layout->addWidget(_settingsWidget);
+    
+    {
+        QHBoxLayout* layoutButtonBox = new QHBoxLayout;
+        layoutButtonBox->addStretch(1);
+
+        QFrame* bottomBorder = new QFrame;
         bottomBorder->setFrameShape(QFrame::HLine);
-        layoutMainV->addWidget(bottomBorder);
+        layout->addWidget(bottomBorder);
 
-        SgctConfigElements sgctCfg = {_windowList, _cluster};
-        UserConfigurationElements userCfg = {
-            _monitorSizeList,
-            _displayWidget,
-            _orientationWidget,
-            _userConfigPath
-        };
-        _fileSupportWidget = new FileSupport(
-            layoutMainV,
-            userCfg,
-            sgctCfg,
-            [this](bool accepted) {
-                if (accepted) {
-                    _saveSelected = true;
-                    accept();
-                }
-                else {
-                    reject();
-                }
-            }
-        );
+        _cancelButton = new QPushButton("Cancel");
+        _cancelButton->setToolTip("Cancel changes.");
+        _cancelButton->setFocusPolicy(Qt::NoFocus);
+        connect(_cancelButton, &QPushButton::released, this, &SgctEdit::reject);
+        layoutButtonBox->addWidget(_cancelButton);
+
+        _saveButton = new QPushButton("Save As");
+        _saveButton->setToolTip("Save configuration changes.");
+        _saveButton->setFocusPolicy(Qt::NoFocus);
+        connect(_saveButton, &QPushButton::released, this, &SgctEdit::save);
+        layoutButtonBox->addWidget(_saveButton);
+
+        _applyButton = new QPushButton("Apply Without Saving");
+        _applyButton->setToolTip("Apply configuration changes without saving to file.");
+        _applyButton->setFocusPolicy(Qt::NoFocus);
+        connect(_applyButton, &QPushButton::released, this, &SgctEdit::apply);
+        layoutButtonBox->addWidget(_applyButton);
+
+        layout->addLayout(layoutButtonBox);
     }
 }
 
-void SgctEdit::addDisplayLayout(QHBoxLayout* layout) {
-    _displayLayout = new QVBoxLayout;
-    _displayWidget = std::make_shared<DisplayWindowUnion>(
-        _monBox,
-        _monitorSizeList,
-        _nMaxWindows,
-        _colorsForWindows
+std::filesystem::path SgctEdit::saveFilename() const {
+    return _saveTarget;
+}
+
+void SgctEdit::save() {
+    QString fileName = QFileDialog::getSaveFileName(
+        this,
+        "Save Window Configuration File",
+        QString::fromStdString(_userConfigPath),
+        "Window Configuration (*.json)",
+        nullptr
+#ifdef __linux__
+        // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
+        , QFileDialog::DontUseNativeDialog
+#endif
     );
-    _displayFrame = new QFrame;
-    _displayLayout->addWidget(_displayWidget.get());
-    _displayFrame->setLayout(_displayLayout);
-    _displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-    layout->addWidget(_displayFrame);
+    if (!fileName.isEmpty()) {
+        _saveTarget = fileName.toStdString();
+        saveConfigToSgctFormat();
+        accept();
+    }
 }
 
-bool SgctEdit::wasSaved() const {
-    return _saveSelected;
+void SgctEdit::apply() {
+    std::string userCfgTempDir = _userConfigPath;
+    if (userCfgTempDir.back() != '/') {
+        userCfgTempDir += '/';
+    }
+    userCfgTempDir += "temp";
+    if (!std::filesystem::is_directory(absPath(userCfgTempDir))) {
+        std::filesystem::create_directories(absPath(userCfgTempDir));
+    }
+    _saveTarget = userCfgTempDir + "/apply-without-saving.json";
+    saveConfigToSgctFormat();
+    accept();
 }
 
-std::string SgctEdit::saveFilename() {
-    return _fileSupportWidget->saveFilename();
+void SgctEdit::saveConfigToSgctFormat() {
+    sgct::config::Cluster cluster;
+
+    sgct::config::Scene scene;
+    scene.orientation = _settingsWidget->orientation();
+    cluster.scene = std::move(scene);
+
+    cluster.masterAddress = "localhost";
+
+    if (_settingsWidget->vsync()) {
+        sgct::config::Settings::Display display;
+        display.swapInterval = 1;
+        
+        sgct::config::Settings settings;
+        settings.display = display;
+
+        cluster.settings = settings;
+    }
+
+    sgct::config::Node node;
+    node.address = "localhost";
+    node.port = 20401;
+
+    // Save Windows
+    unsigned int windowIndex = 0;
+    for (WindowControl* wCtrl : _displayWidget->windowControls()) {
+        sgct::config::Window window = wCtrl->generateWindowInformation();
+
+        if (wCtrl->isGuiWindow()) {
+            window.viewports.back().isTracked = false;
+            window.tags.push_back("GUI");
+            window.draw2D = true;
+            window.draw3D = false;
+        }
+
+        window.id = windowIndex++;
+        node.windows.push_back(window);
+    }
+
+    cluster.nodes.push_back(node);
+
+    sgct::config::User user;
+    user.eyeSeparation = 0.065f;
+    user.position = { 0.f, 0.f, 4.f };
+    cluster.users = { user };
+
+    _cluster = std::move(cluster);
 }
 
-SgctEdit::~SgctEdit() {
-    delete _orientationWidget;
-    delete _fileSupportWidget;
-    delete _displayLayout;
+sgct::config::Cluster SgctEdit::cluster() const {
+    return _cluster;
 }

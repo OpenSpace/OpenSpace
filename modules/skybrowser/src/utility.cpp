@@ -21,12 +21,13 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <modules/skybrowser/include/utility.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/camera/camera.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <cmath>
 
@@ -51,10 +52,9 @@ glm::dvec2 cartesianToSpherical(const glm::dvec3& coord) {
     double ra = atan2(coord.y, coord.x);
     double dec = atan2(coord.z, glm::sqrt((coord.x * coord.x) + (coord.y * coord.y)));
 
-    ra = ra > 0 ? ra : ra + (2.0 * glm::pi<double>());
+    ra = ra > 0 ? ra : ra + glm::two_pi<double>();
 
-    glm::dvec2 celestialCoords{ ra, dec };
-
+    glm::dvec2 celestialCoords = glm::dvec2(ra, dec);
     return glm::degrees(celestialCoords);
 }
 
@@ -78,7 +78,6 @@ glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords) {
     double tanY = coords.y / coords.z;
 
     glm::dvec3 screenSpace = glm::dvec3(zCoord * tanX, zCoord * tanY, zCoord);
-
     return screenSpace;
 }
 
@@ -88,7 +87,7 @@ glm::dvec3 localCameraToGalactic(const glm::dvec3& coords) {
     glm::dmat4 camMat = glm::inverse(
         global::navigationHandler->camera()->combinedViewMatrix()
     );
-    // Subtract gamera position to get the view direction
+    // Subtract camera position to get the view direction
     glm::dvec3 galactic = glm::dvec3(camMat * coordsVec4) - camPos;
 
     return glm::normalize(galactic) * skybrowser::CelestialSphereRadius;
@@ -99,7 +98,6 @@ glm::dvec3 localCameraToEquatorial(const glm::dvec3& coords) {
     // projected onto the celestial sphere
     glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
     glm::dvec3 galactic = camPos + skybrowser::localCameraToGalactic(coords);
-
     return skybrowser::galacticToEquatorial(galactic);
 }
 
@@ -114,7 +112,6 @@ glm::dvec3 galacticToLocalCamera(const glm::dvec3& coords) {
     // Transform vector to camera's local coordinate system
     glm::dmat4 camMat = global::navigationHandler->camera()->combinedViewMatrix();
     glm::dvec3 viewDirectionLocal = camMat * glm::dvec4(coords, 1.0);
-
     return glm::normalize(viewDirectionLocal);
 }
 
@@ -155,7 +152,7 @@ bool isCoordinateInView(const glm::dvec3& equatorial) {
     double r = static_cast<float>(windowRatio());
 
     bool isCoordInView = abs(coordsScreen.x) < r && abs(coordsScreen.y) < 1.f &&
-                                coordsScreen.z < 0;
+                         coordsScreen.z < 0;
 
     return isCoordInView;
 }
@@ -164,9 +161,9 @@ bool isCoordinateInView(const glm::dvec3& equatorial) {
 glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate) {
     glm::vec2 size = glm::vec2(global::windowDelegate->currentWindowSize());
     // Change origin to middle of the window
-    glm::vec2 screenSpacePos = mouseCoordinate - (size / 2.0f);
+    glm::vec2 screenSpacePos = mouseCoordinate - (size / 2.f);
     // Ensure the upper right corner is positive on the y axis
-    screenSpacePos *= glm::vec2(1.0f, -1.0f);
+    screenSpacePos *= glm::vec2(1.f, -1.f);
     // Transform pixel coordinates to screen space coordinates [-1,1][-ratio, ratio]
     screenSpacePos /= (0.5f * size.y);
     return screenSpacePos;
@@ -176,9 +173,9 @@ glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate) {
 glm::dvec2 fovWindow() {
     // OpenSpace FOV
     glm::dvec2 windowDim = glm::dvec2(global::windowDelegate->currentWindowSize());
-    double windowRatio = windowDim.y / windowDim.x;
+    double ratio = windowDim.y / windowDim.x;
     double hFov = global::windowDelegate->getHorizFieldOfView();
-    glm::dvec2 OpenSpaceFOV = glm::dvec2(hFov, hFov * windowRatio);
+    glm::dvec2 OpenSpaceFOV = glm::dvec2(hFov, hFov * ratio);
     return OpenSpaceFOV;
 }
 
@@ -200,6 +197,7 @@ glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3&
     glm::dvec3 rotationAxis = glm::normalize(glm::cross(start, end));
     return glm::rotate(rotationAngle, rotationAxis);
 }
+
 double sizeFromFov(double fov, glm::dvec3 worldPosition) {
 
     // Calculate the size with trigonometry
@@ -218,7 +216,7 @@ float Animation<float>::getNewValue() {
     }
     else {
         float percentage = static_cast<float>(percentageSpent());
-        float diff = (_goal - _start) * easeOutExpo(percentage);
+        float diff = static_cast<float>((_goal - _start) * easeOutExpo(percentage));
         return _start + diff;
     }
 }
@@ -238,6 +236,7 @@ glm::dmat4 Animation<glm::dvec3>::getRotationMatrix() {
     if (!isAnimating()) {
         return glm::dmat4(1.0);
     }
+    
     double percentage = easeInOutSine(percentageSpent());
     double increment = percentage - _lastPercentage;
     _lastPercentage = percentage;

@@ -405,7 +405,6 @@ getGeoPositionForCamera(bool useEyePosition = false)
     if (useEyePosition) {
         const glm::dvec3 anchorPos = anchor->worldPosition();
         const glm::dvec3 cameraDir = ghoul::viewDirection(camera->rotationQuaternion());
-        const double anchorToCameraDistance = glm::distance(anchorPos, cameraPosition);
         const double anchorToPosDistance = glm::distance(
             anchorPos + globe->boundingSphere(),
             cameraPosition

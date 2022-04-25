@@ -56,7 +56,7 @@ struct Event {
     //     return a dictionary with these parameters. This dictionary is passed to actions
     //     if they are triggered by events
     //  6. Add the new enum entry into the `toString` and `fromString` methods
-    enum class Type {
+    enum class Type : uint8_t {
         SceneGraphNodeAdded,
         SceneGraphNodeRemoved,
         ParallelConnection,
@@ -401,10 +401,10 @@ struct EventPointJwstRequested : public Event {
 struct CustomEvent : public Event {
     static const Type Type = Event::Type::Custom;
 
-    CustomEvent(std::string_view subtype_, const void* payload_);
+    CustomEvent(std::string_view subtype_, std::string_view payload_);
 
     const tstring subtype;
-    const void* payload = nullptr;
+    const tstring payload;
 };
 
 } // namespace openspace::events

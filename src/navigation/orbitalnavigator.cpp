@@ -304,12 +304,12 @@ OrbitalNavigator::Friction::Friction()
 OrbitalNavigator::IdleBehavior::IdleBehavior()
     : properties::PropertyOwner({ "IdleBehavior" })
     , apply(ApplyIdleBehaviorInfo, false)
-    , defaultBehavior(IdleBehaviorInfo)
     , shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
     , idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f)
-    , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
     , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
+    , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
     , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
+    , defaultBehavior(IdleBehaviorInfo)
 {
     addProperty(apply);
     using Behavior = IdleBehavior::Behavior;

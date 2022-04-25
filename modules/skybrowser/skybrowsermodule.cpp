@@ -88,12 +88,13 @@ namespace {
         std::optional<double> browserSpeed;
     };
 
-    #include "skybrowsermodule_codegen.cpp"
+#include "skybrowsermodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
+
 SkyBrowserModule::SkyBrowserModule()
-    : OpenSpaceModule(Name)
+    : OpenSpaceModule(SkyBrowserModule::Name)
     , _enabled(EnabledInfo)
     , _allowCameraRotation(AllowRotationInfo, true)
     , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
@@ -108,18 +109,17 @@ SkyBrowserModule::SkyBrowserModule()
 
     // Set callback functions
     global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
-        [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
+        [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
             if (action == MouseAction::Press) {
                 _cameraRotation.stop();
-                return false;
             }
-            else {
-                return false;
-            }
+            return false;
         }
     );
 
     global::callback::preSync->emplace_back([this]() {
+        constexpr double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
+
         // Disable browser and targets when camera is outside of solar system
         bool camWasInSolarSystem = _isCameraInSolarSystem;
         glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
@@ -134,11 +134,9 @@ SkyBrowserModule::SkyBrowserModule()
 
             float transparency = [](Transparency goal) {
                 switch (goal) {
-                case Transparency::Transparent:
-                    return 0.f;
-
-                case Transparency::Opaque:
-                    return 1.f;
+                    case Transparency::Transparent:  return 0.f;
+                    case Transparency::Opaque:       return 1.f;
+                    default:                         throw ghoul::MissingCaseException();
                 }
             }(_goal);
 
@@ -222,6 +220,8 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
+            // should this be?
+            // found == pair.get()
             return *found == *(pair.get());
         }
     );
@@ -256,11 +256,13 @@ void SkyBrowserModule::moveHoverCircle(int i) {
         pos *= skybrowser::CelestialSphereRadius * 1.1;
         // Uris for properties
         std::string id = _hoverCircle->identifier();
-        std::string positionUri = "Scene." + id + ".Translation.Position";
-        std::string setValue = "openspace.setPropertyValueSingle('";
 
-        openspace::global::scriptEngine->queueScript(
-            setValue + positionUri + "', " + ghoul::to_string(pos) + ");",
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
+            id, ghoul::to_string(pos)
+        );
+        global::scriptEngine->queueScript(
+            script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
@@ -278,7 +280,7 @@ void SkyBrowserModule::loadImages(const std::string& root,
     _dataHandler->loadImages(root, directory);
 }
 
-int SkyBrowserModule::nLoadedImages() {
+int SkyBrowserModule::nLoadedImages() const {
     return _dataHandler->nLoadedImages();
 }
 
@@ -290,27 +292,22 @@ std::vector<std::unique_ptr<TargetBrowserPair>>& SkyBrowserModule::getPairs() {
     return _targetsBrowsers;
 }
 
-int SkyBrowserModule::nPairs() {
+int SkyBrowserModule::nPairs() const {
     return static_cast<int>(_targetsBrowsers.size());
 }
 
-TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) {
+TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) const {
     auto it = std::find_if(
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
-            bool foundBrowser = pair->browserId() == id;
-            bool foundTarget = pair->targetRenderableId() == id;
-            bool foundTargetNode = pair->targetNodeId() == id;
+            const bool foundBrowser = pair->browserId() == id;
+            const bool foundTarget = pair->targetRenderableId() == id;
+            const bool foundTargetNode = pair->targetNodeId() == id;
             return foundBrowser || foundTarget || foundTargetNode;
         }
     );
-    if (it == std::end(_targetsBrowsers)) {
-        return nullptr;
-    }
-    else {
-        return it->get();
-    }
+    return it != _targetsBrowsers.end() ? it->get() : nullptr;
 }
 
 void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
@@ -325,7 +322,6 @@ void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
 void SkyBrowserModule::incrementallyRotateCamera() {
     if (_cameraRotation.isAnimating()) {
         glm::dmat4 rotMat = _cameraRotation.getRotationMatrix();
-        // Rotate
         global::navigationHandler->camera()->rotate(glm::quat_cast(rotMat));
     }
 }
@@ -380,14 +376,9 @@ std::string SkyBrowserModule::selectedBrowserId() const {
     return _selectedBrowser;
 }
 
-std::string SkyBrowserModule::selectedTargetId() {
+std::string SkyBrowserModule::selectedTargetId() const {
     TargetBrowserPair* found = getPair(_selectedBrowser);
-    if (found) {
-        return found->targetRenderableId();
-    }
-    else {
-        return "";
-    }
+    return found ? found->targetRenderableId() : "";
 }
 
 glm::ivec3 SkyBrowserModule::highlight() const {
@@ -398,24 +389,14 @@ bool SkyBrowserModule::isCameraInSolarSystem() const {
     return _isCameraInSolarSystem;
 }
 
-bool SkyBrowserModule::isSelectedPairUsingRae() {
+bool SkyBrowserModule::isSelectedPairUsingRae() const {
     TargetBrowserPair* found = getPair(_selectedBrowser);
-    if (found) {
-        return found->isUsingRadiusAzimuthElevation();
-    }
-    else {
-        return false;
-    }
+    return found ? found->isUsingRadiusAzimuthElevation() : false;
 }
 
-bool SkyBrowserModule::isSelectedPairFacingCamera() {
+bool SkyBrowserModule::isSelectedPairFacingCamera() const {
     TargetBrowserPair* found = getPair(_selectedBrowser);
-    if (found) {
-        return found->isFacingCamera();
-    }
-    else {
-        return false;
-    }
+    return found ? found->isFacingCamera() : false;
 }
 
 scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {

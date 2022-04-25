@@ -72,31 +72,31 @@ namespace {
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
+
+    glm::ivec3 randomBorderColor(glm::ivec3 highlight) {
+        // Generate a random border color with sufficient lightness and a n
+        std::random_device rd;
+        // Hue is in the unit degrees [0, 360]
+        std::uniform_real_distribution<float> hue(0.f, 360.f);
+
+        // Value in saturation are in the unit percent [0,1]
+        float value = 0.9f; // Brightness
+        float saturation = 0.5f;
+        glm::ivec3 rgbColor;
+        glm::ivec3 highlighted;
+        do {
+            glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
+            rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
+            highlighted = rgbColor + highlight;
+        } while (highlighted.x < 255 && highlighted.y < 255 && highlighted.z < 255);
+
+        return rgbColor;
+    }
 } // namespace
-
-glm::ivec3 randomBorderColor(glm::ivec3 highlight) {
-    // Generate a random border color with sufficient lightness and a n
-    std::random_device rd;
-    // Hue is in the unit degrees [0, 360]
-    std::uniform_real_distribution<float> hue(0.f, 360.f);
-
-    // Value in saturation are in the unit percent [0,1]
-    float value = 0.9f; // Brightness
-    float saturation = 0.5f;
-    glm::ivec3 rgbColor;
-    glm::ivec3 highlighted;
-    do {
-        glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
-        rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
-        highlighted = rgbColor + highlight;
-    } while (highlighted.x < 255 && highlighted.y < 255 && highlighted.z < 255);
-
-    return rgbColor;
-}
 
 namespace openspace {
 
-    ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
+ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , WwtCommunicator(dictionary)
     , _textureQuality(TextureQualityInfo, 0.5f, 0.25f, 1.f)
@@ -115,9 +115,7 @@ namespace openspace {
     addProperty(_textureQuality);
     addProperty(_renderOnlyOnMaster);
 
-    _textureQuality.onChange([this]() {
-        _textureDimensionsIsDirty = true;
-    });
+    _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 
     // Ensure that the browser is placed at the z-coordinate of the screen space plane
     glm::vec2 screenPosition = _cartesianPosition.value();
@@ -127,12 +125,11 @@ namespace openspace {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         _borderColor = randomBorderColor(module->highlight());
     }
-    _scale = _size.y * 0.5;
+    _scale = _size.y * 0.5f;
 }
 
 ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-
     if (module && module->getPair(identifier())) {
         module->removeTargetBrowserPair(identifier());
     }
@@ -145,7 +142,7 @@ bool ScreenSpaceSkyBrowser::initializeGL() {
     return true;
 }
 
-glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(glm::dvec2 drag) {
+glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(const glm::dvec2& drag) {
     // Fine tuning of target
     glm::dvec2 wwtFov = fieldsOfView();
     glm::dvec2 openSpaceFOV = skybrowser::fovWindow();
@@ -155,12 +152,12 @@ glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(glm::dvec2 drag) {
     glm::dvec2 resultRelativeOs = angleResult / openSpaceFOV;
 
     // Convert to screen space coordinate system
-    glm::dvec2 convertToScreenSpace{ (2.f * skybrowser::windowRatio()), 2.f };
-    glm::dvec2 result = - convertToScreenSpace * resultRelativeOs;
+    glm::dvec2 convertToScreenSpace = glm::dvec2((2.f * skybrowser::windowRatio()), 2.f);
+    glm::dvec2 result = -convertToScreenSpace * resultRelativeOs;
     return result;
 }
 
-void ScreenSpaceSkyBrowser::setIdInBrowser() {
+void ScreenSpaceSkyBrowser::setIdInBrowser() const {
     WwtCommunicator::setIdInBrowser(identifier());
 }
 
@@ -181,7 +178,7 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
 }
 
 void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCopies) {
-    int start = _renderCopies.size();
+    size_t start = _renderCopies.size();
     for (int i = 0; i < nCopies; i++) {
         openspace::properties::Property::PropertyInfo info = RenderCopyInfo;
         float azimuth = i * glm::two_pi<float>() / nCopies;
@@ -201,15 +198,16 @@ void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCop
 }
 
 void ScreenSpaceSkyBrowser::removeRenderCopy() {
-    if (_renderCopies.size() > 0) {
+    if (!_renderCopies.empty()) {
         removeProperty(_renderCopies.back().get());
         _renderCopies.pop_back();
     }
 }
 
-std::vector<std::pair<std::string, glm::dvec3>>  ScreenSpaceSkyBrowser::renderCopies()
+std::vector<std::pair<std::string, glm::dvec3>>
+ScreenSpaceSkyBrowser::renderCopies() const
 {
-    std::vector<std::pair<std::string, glm::dvec3>>  vec;
+    std::vector<std::pair<std::string, glm::dvec3>> vec;
     std::for_each(
         _renderCopies.begin(),
         _renderCopies.end(),
@@ -219,20 +217,20 @@ std::vector<std::pair<std::string, glm::dvec3>>  ScreenSpaceSkyBrowser::renderCo
                 glm::dvec3(copy.get()->value())
             };
             vec.push_back(pair);
-        });
+        }
+    );
     return vec;
 }
 
 void ScreenSpaceSkyBrowser::moveRenderCopy(int i, glm::vec3 raePosition) {
-    if (i < _renderCopies.size() && i >= 0) {
-        _renderCopies[i].get()->set(raePosition);
+    if (i < static_cast<int>(_renderCopies.size()) && i >= 0) {
+        *_renderCopies[i].get() = raePosition;
     }
 }
 
 bool ScreenSpaceSkyBrowser::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
     WwtCommunicator::deinitializeGL();
-
     return true;
 }
 
@@ -242,13 +240,9 @@ void ScreenSpaceSkyBrowser::render() {
     // If the sky browser only should be rendered on master, don't use the
     // global rotation
     if (_renderOnlyOnMaster && global::windowDelegate->isMaster()) {
-        draw(
-            translationMatrix() *
-            localRotationMatrix() *
-            scaleMatrix()
-        );
+        draw(translationMatrix() * localRotationMatrix() * scaleMatrix());
     }
-    else if(!_renderOnlyOnMaster) {
+    else if (!_renderOnlyOnMaster) {
         draw(
             globalRotationMatrix() *
             translationMatrix() *
@@ -305,9 +299,8 @@ void ScreenSpaceSkyBrowser::bindTexture() {
 
 glm::mat4 ScreenSpaceSkyBrowser::scaleMatrix() {
     // To ensure the plane has the right ratio
-    // The _scale tells us how much of the windows height the
-    // browser covers: e.g. a browser that covers 0.25 of the
-    // height of the window will have scale = 0.25
+    // The _scale tells us how much of the windows height the browser covers: e.g. a
+    // browser that covers 0.25 of the height of the window will have scale = 0.25
 
     glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
@@ -320,8 +313,8 @@ void ScreenSpaceSkyBrowser::setOpacity(float opacity) {
     _opacity = opacity;
 }
 
-void ScreenSpaceSkyBrowser::setScreenSpaceSize(const glm::vec2& newSize) {
-    _size = newSize;
+void ScreenSpaceSkyBrowser::setScreenSpaceSize(glm::vec2 newSize) {
+    _size = std::move(newSize);
     _sizeIsDirty = true;
 }
 
@@ -337,4 +330,5 @@ float ScreenSpaceSkyBrowser::opacity() const {
 glm::vec2 ScreenSpaceSkyBrowser::size() const {
     return _size;
 }
+
 } // namespace openspace

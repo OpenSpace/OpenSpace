@@ -546,7 +546,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
         std::streampos position = fileStream.tellg();
         std::getline(fileStream, line);
 
-        if (line[0] == '#' || line.empty()) {
+        if (line.empty() || line[0] == '#') {
             continue;
         }
 

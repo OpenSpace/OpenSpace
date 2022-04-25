@@ -1026,7 +1026,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Update SSBO with one insert per chunk/node.
         // The key in map holds the offset index.
-        for (const auto &[offset, subData] : updateData) {
+        for (const auto& [offset, subData] : updateData) {
             // We don't need to fill chunk with zeros for SSBOs!
             // Just check if we have any values to update.
             if (!subData.empty()) {

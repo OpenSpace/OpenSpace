@@ -326,7 +326,6 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
         entry.data.resize(nDataValues);
         for (int i = 0; i < nDataValues; i += 1) {
             str >> entry.data[i];
-            bool isGood = str.good();
             allZero &= (entry.data[i] == 0.0);
 
             if (!str.good()) {

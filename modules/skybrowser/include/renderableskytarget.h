@@ -42,10 +42,8 @@ public:
     explicit RenderableSkyTarget(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
-    void deinitializeGL() override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-    void bindTexture() override; // Empty function but has to be defined
+    void bindTexture() override;
 
     glm::ivec3 borderColor() const;
     float opacity() const;

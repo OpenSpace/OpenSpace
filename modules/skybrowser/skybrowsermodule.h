@@ -41,7 +41,7 @@ class ScreenSpaceImageLocal;
 class WwtDataHandler;
 class TargetBrowserPair;
 class SceneGraphNode;
-class ImageData;
+struct ImageData;
 
 enum class Transparency {
     Transparent,
@@ -51,26 +51,24 @@ enum class Transparency {
 enum class MouseInteraction {
     Hover,
     Drag,
-    FineTune,
+    FineTune
 };
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SkyBrowser";
-    const double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
 
     SkyBrowserModule();
 
     std::vector<std::unique_ptr<TargetBrowserPair>>& getPairs();
-    int nPairs();
-    TargetBrowserPair* getPair(const std::string& id);
+    int nPairs() const;
+    TargetBrowserPair* getPair(const std::string& id) const;
     const std::unique_ptr<WwtDataHandler>& getWwtDataHandler() const;
     std::string selectedBrowserId() const;
-    std::string selectedTargetId();
+    std::string selectedTargetId() const;
     glm::ivec3 highlight() const;
 
     void setSelectedBrowser(const std::string& id);
-    void setSelectedObject(); // Manage mouse interactions
     void setHoverCircle(SceneGraphNode* circle);
 
     // Rotation, animation, placement
@@ -83,8 +81,8 @@ public:
     double browserAnimationSpeed() const;
 
     bool isCameraInSolarSystem() const;
-    bool isSelectedPairFacingCamera();
-    bool isSelectedPairUsingRae();
+    bool isSelectedPairFacingCamera() const;
+    bool isSelectedPairUsingRae() const;
 
     // Managing the target browser pairs
     void removeTargetBrowserPair(const std::string& browserId);
@@ -96,10 +94,7 @@ public:
 
     // Image collection handling
     void loadImages(const std::string& root, const std::filesystem::path& directory);
-    int nLoadedImages();
-
-    // Mouse interaction
-    void handleMouseClick(const MouseButton& button);
+    int nLoadedImages() const;
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -129,7 +124,6 @@ private:
     bool _isFading = false;
 
     // Mouse interaction
-    MouseInteraction _interactionMode;
     glm::vec2 _mousePosition; // Current mouse position in screen space coordinates
     glm::vec2 _startMousePosition;
     glm::vec2 _startDragPosition;

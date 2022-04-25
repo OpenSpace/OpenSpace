@@ -405,7 +405,18 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
     std::vector<std::pair<int, std::string>> bodies;
 
     constexpr const int Frnmln = 33;
-    SPICEINT_CELL(idset, 8192);
+    static SpiceInt idsetBuffer[SPICE_CELL_CTRLSZ + 8192];
+    static SpiceCell idset = {
+        SPICE_INT,
+        0,
+        8192,
+        0,
+        SPICETRUE,
+        SPICEFALSE,
+        SPICEFALSE,
+        &idsetBuffer,
+        &(idsetBuffer[SPICE_CELL_CTRLSZ])
+    };
 
     SpiceChar frname[Frnmln];
 

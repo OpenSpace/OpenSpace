@@ -27,10 +27,10 @@
 
 #include <modules/skybrowser/include/browser.h>
 
-#include <openspace/properties/vector/ivec3property.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/vector/dvec2property.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/documentation/documentation.h>
+#include <openspace/properties/vector/ivec3property.h>
 #include <deque>
 
 namespace openspace {
@@ -42,17 +42,14 @@ public:
     ~WwtCommunicator();
 
     void update();
-    void render();
-    void initializeGL();
-    void deinitializeGL();
 
     // WorldWide Telescope communication
     void displayImage(const std::string& url, int i);
     void removeSelectedImage(int i);
     void setImageOrder(int i, int order);
     void loadImageCollection(const std::string& collection);
-    void setImageOpacity(int i, float opacity);
-    void hideChromeInterface(bool shouldHide);
+    void setImageOpacity(int i, float opacity) const;
+    void hideChromeInterface(bool shouldHide) const;
 
     bool hasLoadedImages() const;
     double verticalFov() const;
@@ -68,14 +65,14 @@ public:
     void setBorderColor(glm::ivec3 color);
     void setTargetRoll(double roll);
 
-    void highlight(const glm::ivec3& addition);
+    void highlight(const glm::ivec3& addition) const;
     // The removal parameter decides what will be removed from the border color
-    void removeHighlight(const glm::ivec3& removal);
-    void updateBorderColor();
-    void updateAim();
+    void removeHighlight(const glm::ivec3& removal) const;
+    void updateBorderColor() const;
+    void updateAim() const;
 
 protected:
-    void setIdInBrowser(const std::string& id);
+    void setIdInBrowser(const std::string& id) const;
 
     double _verticalFov = 10.0f;
     glm::ivec3 _borderColor = glm::ivec3(70);
@@ -85,17 +82,18 @@ protected:
     std::deque<int> _selectedImages;
 
 private:
-    void setWebpageBorderColor(glm::ivec3 color);
-    void sendMessageToWwt(const ghoul::Dictionary& msg);
+    void setWebpageBorderColor(glm::ivec3 color) const;
+    void sendMessageToWwt(const ghoul::Dictionary& msg) const;
 
     // WorldWide Telescope messages
     ghoul::Dictionary moveCameraMessage(const glm::dvec2& celestCoords, double fov,
-        double roll, bool shouldMoveInstantly = true);
-    ghoul::Dictionary loadCollectionMessage(const std::string& url);
-    ghoul::Dictionary setForegroundMessage(const std::string& name);
-    ghoul::Dictionary addImageMessage(const std::string& id, const std::string& url);
-    ghoul::Dictionary removeImageMessage(const std::string& id);
-    ghoul::Dictionary setImageOpacityMessage(const std::string& id, double opacity);
+        double roll, bool shouldMoveInstantly = true) const;
+    ghoul::Dictionary loadCollectionMessage(const std::string& url) const;
+    ghoul::Dictionary setForegroundMessage(const std::string& name) const;
+    ghoul::Dictionary addImageMessage(const std::string& id,
+        const std::string& url) const;
+    ghoul::Dictionary removeImageMessage(const std::string& id) const;
+    ghoul::Dictionary setImageOpacityMessage(const std::string& id, double opacity) const;
     ghoul::Dictionary setLayerOrderMessage(const std::string& id, int version);
 
     bool _isSyncedWithWwt = false;

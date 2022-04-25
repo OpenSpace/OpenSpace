@@ -35,11 +35,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "PathCurve";
-
-    constexpr const double LengthEpsilon =
-        100.0 * std::numeric_limits<double>::epsilon();
-
+    constexpr const double LengthEpsilon = 100.0 * std::numeric_limits<double>::epsilon();
 } // namespace
 
 namespace openspace::interaction {
@@ -79,7 +75,7 @@ void PathCurve::initializeParameterData() {
 
     // Evenly space out parameter intervals
     _curveParameterSteps.reserve(_nSegments + 1);
-    for (int i = 0; i <= _nSegments; i++) {
+    for (unsigned int i = 0; i <= _nSegments; i++) {
         _curveParameterSteps.push_back(static_cast<double>(i));
     }
 
