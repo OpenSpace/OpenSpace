@@ -25,6 +25,7 @@
 #include "modules/server/include/topics/skybrowsertopic.h"
 
 #include <modules/server/include/connection.h>
+#include <modules/server/servermodule.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
 #include <openspace/engine/moduleengine.h>
@@ -38,7 +39,6 @@ namespace {
     constexpr const char* EventKey = "event";
     constexpr const char* SubscribeEvent = "start_subscription";
     constexpr const char* UnsubscribeEvent = "stop_subscription";
-    constexpr const std::chrono::milliseconds TimeUpdateInterval(25);
 } // namespace
 
 using nlohmann::json;
@@ -47,7 +47,12 @@ namespace openspace {
 
 SkyBrowserTopic::SkyBrowserTopic()
     : _lastUpdateTime(std::chrono::system_clock::now())
-{}
+{
+    ServerModule* module = global::moduleEngine->module<ServerModule>();
+    if (module) {
+        _skyBrowserUpdateTime = std::chrono::milliseconds(module->skyBrowserUpdateTime());
+    }
+}
 
 SkyBrowserTopic::~SkyBrowserTopic() {
     if (_targetDataCallbackHandle != UnsetOnChangeHandle) {
@@ -73,7 +78,7 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
 
     _targetDataCallbackHandle = global::timeManager->addTimeChangeCallback([this]() {
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-        if (now - _lastUpdateTime > TimeUpdateInterval) {
+        if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
             sendBrowserData();
             _lastUpdateTime = std::chrono::system_clock::now();
         }

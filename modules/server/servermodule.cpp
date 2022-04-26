@@ -72,6 +72,10 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
     return si->get();
 }
 
+int ServerModule::skyBrowserUpdateTime() const {
+    return _skyBrowserUpdate;
+}
+
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     global::callback::preSync->emplace_back([this]() {
         ZoneScopedN("ServerModule")
@@ -109,6 +113,12 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
         if (serverInterface) {
             _interfaces.push_back(std::move(serverInterface));
         }
+    }
+    // Ylva Selling, 2022-04-26 hasValue<int> doesn't find the variable
+    if (configuration.hasValue<double>("SkyBrowserUpdateTime")) {
+        _skyBrowserUpdate = static_cast<int>(
+            configuration.value<double>("SkyBrowserUpdateTime")
+        );
     }
 }
 

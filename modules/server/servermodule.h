@@ -55,6 +55,8 @@ public:
 
     ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
 
+    int skyBrowserUpdateTime() const;
+
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
@@ -76,6 +78,7 @@ private:
     std::vector<ConnectionData> _connections;
     std::vector<std::unique_ptr<ServerInterface>> _interfaces;
     properties::PropertyOwner _interfaceOwner;
+    int _skyBrowserUpdate = 100;
 };
 
 } // namespace openspace
