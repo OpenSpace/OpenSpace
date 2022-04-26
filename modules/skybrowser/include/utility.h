@@ -236,15 +236,6 @@ private:
         return timeSpent().count() / _animationTime.count();
     }
 
-    double easeOutExpo(double x) {
-        double epsilon = std::numeric_limits<double>::epsilon();
-        return std::abs(x - 1.0) < epsilon ? 1.0 : 1.0 - pow(2.0, -10.0 * x);
-    }
-
-    double easeInOutSine(double x) {
-        return -(cos(glm::pi<double>() * x) - 1.0) / 2.0;
-    }
-
     // Animation
     bool _isStarted = false;
     double _lastPercentage = 0;
