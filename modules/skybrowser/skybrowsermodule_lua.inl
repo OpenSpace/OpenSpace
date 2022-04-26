@@ -735,6 +735,20 @@ namespace {
     }
 }
 
+/**
+ * Show or hide all targets and browsers
+ * \param identifier Identifier of the sky browser
+ * \param show Sets if the targets and browsers should be enabled or disabled
+ */
+[[codegen::luawrap]] void showAllTargetsAndBrowsers(bool show) {
+    using namespace openspace;
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+    for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
+        pair->setEnabled(show);
+    }
+}
+
 #include "skybrowsermodule_lua_codegen.cpp"
 
 } // namespace

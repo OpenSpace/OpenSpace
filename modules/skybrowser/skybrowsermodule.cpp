@@ -434,7 +434,8 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::StartFinetuningTarget,
             codegen::lua::FinetuneTargetPosition,
             codegen::lua::ScrollOverBrowser,
-            codegen::lua::LoadingImageCollectionComplete
+            codegen::lua::LoadingImageCollectionComplete,
+            codegen::lua::ShowAllTargetsAndBrowsers
         }
     };
 }

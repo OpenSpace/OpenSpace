@@ -123,7 +123,7 @@ void TargetBrowserPair::synchronizeAim() {
 
 void TargetBrowserPair::setEnabled(bool enable) {
     _browser->setEnabled(enable);
-    _targetRenderable->property("Enabled")->set(false);
+    _targetRenderable->property("Enabled")->set(enable);
 }
 
 void TargetBrowserPair::setOpacity(float opacity) {
