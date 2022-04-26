@@ -63,21 +63,6 @@ namespace {
         "be rendered in the target."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
-        "AnimationSpeed",
-        "Animation Speed",
-        "The factor which is multiplied with the animation speed of the target."
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo AnimationThresholdInfo =
-    {
-        "AnimationThreshold",
-        "Animation Threshold",
-        "The threshold for when the target is determined to have appeared at its "
-        "destination. Angle in radians between the destination and the target position "
-        "in equatorial Cartesian coordinate system."
-    };
-
     constexpr const openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -90,12 +75,6 @@ namespace {
 
         // [[codegen::verbatim(RectangleThresholdInfo.description)]]
         std::optional<float> rectangleThreshold;
-
-        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
-        std::optional<double> animationSpeed;
-
-        // [[codegen::verbatim(AnimationThresholdInfo.description)]]
-        std::optional<float> animationThreshold;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -110,25 +89,17 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)
     , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
-    , _stopAnimationThreshold(AnimationThresholdInfo, 5.0f, 1.f, 10.f)
-    , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
     , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
     , _borderColor(220, 220, 220)
 {
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    
+
     _crossHairSize = p.crossHairSize.value_or(_crossHairSize);
     addProperty(_crossHairSize);
-    
+
     _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
     addProperty(_showRectangleThreshold);
-    
-    _stopAnimationThreshold = p.crossHairSize.value_or(_stopAnimationThreshold);
-    addProperty(_stopAnimationThreshold);
-    
-    _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
-    addProperty(_animationSpeed);
 
     addProperty(_lineWidth);
 }
@@ -255,14 +226,6 @@ void RenderableSkyTarget::removeHighlight(const glm::ivec3& removal) {
 
 float RenderableSkyTarget::opacity() const {
     return _opacity;
-}
-
-double RenderableSkyTarget::animationSpeed() const {
-    return _animationSpeed;
-}
-
-double RenderableSkyTarget::stopAnimationThreshold() const {
-    return _stopAnimationThreshold * 0.0001;
 }
 
 void RenderableSkyTarget::setOpacity(float opacity) {

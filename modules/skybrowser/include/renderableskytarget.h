@@ -47,8 +47,6 @@ public:
 
     glm::ivec3 borderColor() const;
     float opacity() const;
-    double animationSpeed() const;
-    double stopAnimationThreshold() const;
 
     void setRatio(float ratio);
     void setColor(glm::ivec3 color);
@@ -64,8 +62,6 @@ private:
     properties::FloatProperty _crossHairSize;
     properties::FloatProperty _showRectangleThreshold;
     properties::FloatProperty _lineWidth;
-    properties::DoubleProperty _stopAnimationThreshold;
-    properties::DoubleProperty _animationSpeed;
 
     double _verticalFov = 10.0;
 
