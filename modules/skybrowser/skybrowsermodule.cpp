@@ -435,7 +435,8 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::FinetuneTargetPosition,
             codegen::lua::ScrollOverBrowser,
             codegen::lua::LoadingImageCollectionComplete,
-            codegen::lua::ShowAllTargetsAndBrowsers
+            codegen::lua::ShowAllTargetsAndBrowsers,
+            codegen::lua::PointSpaceCraft
         }
     };
 }

@@ -27,6 +27,7 @@
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
@@ -755,6 +756,20 @@ namespace {
     for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
         pair->setEnabled(show);
     }
+}
+
+/**
+ * Point spacecraft to the equatorial coordinates the target points to
+ * \param identifier Identifier of the sky browser
+ */
+[[codegen::luawrap]] void pointSpaceCraft(std::string identifier) {
+    using namespace openspace;
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    TargetBrowserPair* pair = module->getPair(identifier);
+    glm::dvec2 equatorial = pair->targetDirectionEquatorial();
+    global::eventEngine->publishEvent<events::EventPointSpacecraft>(
+        equatorial.x, equatorial.y
+    );
 }
 
 #include "skybrowsermodule_lua_codegen.cpp"
