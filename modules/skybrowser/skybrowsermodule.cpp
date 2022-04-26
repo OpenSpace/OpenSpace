@@ -298,7 +298,7 @@ TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) const {
     );
     TargetBrowserPair* found = it != _targetsBrowsers.end() ? it->get() : nullptr;
     if (found == nullptr) {
-        LINFO("Identifier " + id + " not found.");
+        LINFO(fmt::format("Identifier '{}' not found", id));
     }
     return found;
 }
