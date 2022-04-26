@@ -51,7 +51,6 @@ public:
     void startAnimation(glm::dvec3 coordsEnd, double fovEnd);
     void incrementallyAnimateToCoordinate();
     void startFading(float goal, float fadeTime);
-    void incrementallyFade();
     // Mouse interaction
     void startFinetuningTarget();
     void fineTuneTarget(const glm::vec2& startMouse, const glm::vec2& translation);

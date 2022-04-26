@@ -43,11 +43,6 @@ class TargetBrowserPair;
 class SceneGraphNode;
 struct ImageData;
 
-enum class Transparency {
-    Transparent,
-    Opaque
-};
-
 enum class MouseInteraction {
     Hover,
     Drag,
@@ -75,7 +70,6 @@ public:
     void lookAtTarget(const std::string& id);
     void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
     void incrementallyRotateCamera();
-    void incrementallyFadeBrowserTargets(Transparency goal);
     void incrementallyAnimateTargets();
     double targetAnimationSpeed() const;
     double browserAnimationSpeed() const;
@@ -116,12 +110,8 @@ private:
     SceneGraphNode* _hoverCircle = nullptr;
     std::string _selectedBrowser = ""; // Currently selected browser
 
-    // Fading
-    Transparency _goal = Transparency::Opaque;
-
     // Flags
     bool _isCameraInSolarSystem = true; // Visualization modes
-    bool _isFading = false;
 
     // Mouse interaction
     glm::vec2 _mousePosition; // Current mouse position in screen space coordinates
