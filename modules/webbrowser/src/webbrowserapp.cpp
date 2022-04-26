@@ -42,7 +42,9 @@ void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
 void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
                                                   CefRefPtr<CefCommandLine> commandLine)
 {
-    commandLine->AppendSwitch("ignore-gpu-blacklist");
+    commandLine->AppendSwitch("--enable-gpu-rasterization");
+    commandLine->AppendSwitch("--use-gl=desktop");
+    commandLine->AppendSwitch("ignore-gpu-blocklist");
     commandLine->AppendSwitch("log-gpu-control-list-decisions");
     commandLine->AppendSwitch("use-mock-keychain");
     commandLine->AppendSwitch("enable-begin-frame-scheduling");
