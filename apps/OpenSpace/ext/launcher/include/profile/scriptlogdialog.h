@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
-#define __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___SCRIPTLOGDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___SCRIPTLOGDIALOG___H__
 
 #include <QDialog>
 
@@ -39,12 +39,12 @@ public:
 signals:
     void scriptsSelected(std::string script);
 
-private slots:
-    void saveChosenScripts();
-
 private:
     void createWidgets();
+    
     void loadScriptFile();
+    void saveChosenScripts();
+    
     void updateScriptList();
 
     QListWidget* _scriptlogList = nullptr;
@@ -53,4 +53,4 @@ private:
     std::vector<std::string> _scripts;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
+#endif // __OPENSPACE_UI_LAUNCHER___SCRIPTLOGDIALOG___H__

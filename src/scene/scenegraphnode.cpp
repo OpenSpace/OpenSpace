@@ -49,8 +49,7 @@
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
 
-    constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo = {
         "ComputeScreenSpaceData",
         "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
@@ -63,24 +62,28 @@ namespace {
         "The x,y position in screen space. Can be used for placing GUI elements",
         openspace::properties::Property::Visibility::Hidden
     };
+    
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
         "Determines if the node is currently visible on screen",
         openspace::properties::Property::Visibility::Hidden
     };
+    
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
         "The distance from the camera to the node surface",
         openspace::properties::Property::Visibility::Hidden
     };
+    
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
         "The screen size of the radius of the node",
         openspace::properties::Property::Visibility::Hidden
     };
+    
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "VisibilityDistance",

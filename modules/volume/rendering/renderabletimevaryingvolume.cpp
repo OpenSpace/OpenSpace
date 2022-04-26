@@ -106,7 +106,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BrightnessInfo = {
         "Brightness",
         "Brightness",
-        "The volumes general brightness."
+        "The volume renderer's general brightness."
     };
 
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
@@ -163,7 +163,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
-    , _brightness(BrightnessInfo, 0.1f, 0.f, 1.f)
+    , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -193,10 +193,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     _stepSize = p.stepSize.value_or(_stepSize);
 
-    if (p.brightness.has_value()) {
-        _brightness = *p.brightness;
-    }
-
+    _brightness = p.brightness.value_or(_brightness);
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
     _secondsAfter = p.secondsAfter;
 
@@ -211,6 +208,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     }
 
     addProperty(_brightness);
+    addProperty(_opacity);
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
