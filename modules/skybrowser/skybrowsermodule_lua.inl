@@ -655,22 +655,25 @@ namespace {
  * Takes an identifier to a sky browser and adds a rendered copy to it.
  * \param raePosition Position in radius, azimuth, elevation coordinates
  * \param nCopies Number of copies
+ * \param position Position of first copy, which depends on if RAE or Cartesian coordinates
+ * are checked
  */
 [[codegen::luawrap]] void addRenderCopy(std::string identifier,
                                         int numberOfCopies = 1,
-                     glm::vec3 radiusAzimuthElevationPosition = glm::vec3(2.1f, 0.f, 0.f))
+                     glm::vec3 position = glm::vec3(2.1f, 0.f, 0.f))
 {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
-        pair->browser()->addRenderCopy(radiusAzimuthElevationPosition, numberOfCopies);
+        pair->browser()->addRenderCopy(position, numberOfCopies);
     }
 }
 
 /**
  * Takes an identifier to a sky browser and removes the latest added rendered copy to it.
+ * \param identifier Identifier of the sky browser
  */
 [[codegen::luawrap]] void removeRenderCopy(std::string identifier) {
     using namespace openspace;
@@ -684,6 +687,7 @@ namespace {
 
 /**
  * Starts the fine-tuning of the target rendered copy to it.
+ * \param identifier Identifier of the sky browser
  */
 [[codegen::luawrap]] void startFinetuningTarget(std::string identifier) {
     using namespace openspace;
@@ -697,6 +701,9 @@ namespace {
 
 /**
  * Finetunes the target depending on a mouse drag. rendered copy to it.
+ * \param identifier Identifier of the sky browser
+ * \param startPosition Start position of the mouse click drag for the fine tune vector 
+ * \param endPosition End position of the mouse click drag for the fine tune vector 
  */
 [[codegen::luawrap]] void finetuneTargetPosition(std::string identifier,
                                                  glm::vec2 startPosition,
@@ -716,6 +723,7 @@ namespace {
 
 /**
  * Sets the image collection as loaded in the sky browser
+ * \param identifier Identifier of the sky browser
  */
 [[codegen::luawrap]] void loadingImageCollectionComplete(std::string identifier) {
     using namespace openspace;
