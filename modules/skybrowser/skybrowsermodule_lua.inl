@@ -448,7 +448,7 @@ namespace {
         "Url = '" + url + "',"
         "FaceCamera = false,"
         "CartesianPosition = " + ghoul::to_string(positionBrowser) +
-        "}";
+     "}";
 
     const std::string target = "{"
         "Identifier = '" + idTarget + "',"
@@ -458,9 +458,9 @@ namespace {
             "Translation = {"
                 "Type = 'StaticTranslation',"
                 "Position = {"
-                        + std::to_string(galacticTarget.x) + ", "
-                        + std::to_string(galacticTarget.y) + ", "
-                        + std::to_string(galacticTarget.z) + ", "
+                    + std::to_string(galacticTarget.x) + ", "
+                    + std::to_string(galacticTarget.y) + ", "
+                    + std::to_string(galacticTarget.z) + ", "
                 "},"
             "},"
             "Rotation = {"
@@ -478,7 +478,7 @@ namespace {
             "Opacity = 0.99"
         "},"
         "GUI = {"
-          "Name = 'Sky Target', "
+          "Name = '" + nameTarget + "', "
           "Path = '/SkyBrowser', "
         "}"
     "}";

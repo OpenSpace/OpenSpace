@@ -37,7 +37,7 @@ uniform vec4 lineColor;
 uniform float fov;
 
 uniform bool additiveBlending;
-uniform float opacity = 1.0;
+uniform float opacity;
 uniform vec3 multiplyColor;
 
 // A factor which states how much thicker vertical lines are rendered than horizontal

@@ -46,11 +46,9 @@ public:
     void bindTexture() override;
 
     glm::ivec3 borderColor() const;
-    float opacity() const;
 
     void setRatio(float ratio);
     void setColor(glm::ivec3 color);
-    void setOpacity(float opacity);
     void setVerticalFov(double fov);
 
     // Display

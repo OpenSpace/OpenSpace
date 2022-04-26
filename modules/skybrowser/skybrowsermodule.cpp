@@ -126,35 +126,25 @@ SkyBrowserModule::SkyBrowserModule()
         _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
         bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
 
-        // Visualization mode changed. Start fading
-        if (vizModeChanged && !_isCameraInSolarSystem) {
-            // Camera moved into the solar system
-            _isFading = true;
-            _goal = Transparency::Transparent;
+        // Visualization mode changed. Start fading in/out
+        if (vizModeChanged) {
+            constexpr float FadeDuration = 2.f;
 
-            float transparency = [](Transparency goal) {
-                switch (goal) {
-                    case Transparency::Transparent:  return 0.f;
-                    case Transparency::Opaque:       return 1.f;
-                    default:                         throw ghoul::MissingCaseException();
+            if (camWasInSolarSystem) { // Camera moved out of the solar system => fade out
+                for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
+                    pair->startFading(0.f, FadeDuration);
                 }
-            }(_goal);
 
-            std::for_each(
-                _targetsBrowsers.begin(),
-                _targetsBrowsers.end(),
-                [&](const std::unique_ptr<TargetBrowserPair>& pair) {
-                    pair->startFading(transparency, 2.f);
+                // Also hide the hover circle
+                disableHoverCircle();
+            }
+            else { // Camera moved into the solar system => fade in
+                for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
+                    pair->startFading(1.f, FadeDuration);
                 }
-            );
+            }
+        }
 
-            // Also hide the hover circle
-            disableHoverCircle();
-        }
-        // Fade pairs if the camera moved in or out the solar system
-        if (_isFading) {
-            incrementallyFadeBrowserTargets(_goal);
-        }
         if (_isCameraInSolarSystem) {
             std::for_each(
                 _targetsBrowsers.begin(),
@@ -359,28 +349,6 @@ void SkyBrowserModule::incrementallyRotateCamera() {
         glm::dmat4 rotMat = _cameraRotation.getRotationMatrix();
         global::navigationHandler->camera()->rotate(glm::quat_cast(rotMat));
     }
-}
-
-void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal) {
-     bool isAllFinished = true;
-     for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
-         if (pair->isEnabled()) {
-             bool isPairFinished = pair->hasFinishedFading();
-             if (!isPairFinished) {
-                 pair->incrementallyFade();
-             }
-             else if (isPairFinished && goal == Transparency::Transparent) {
-                 pair->setEnabled(false);
-                 pair->setOpacity(1.0);
-             }
-             isAllFinished &= isPairFinished;
-         }
-     }
-
-     // The transition is over when the fade is finished
-     if (isAllFinished) {
-         _isFading = false;
-     }
 }
 
 void SkyBrowserModule::incrementallyAnimateTargets() {

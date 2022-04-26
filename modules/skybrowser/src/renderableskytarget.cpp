@@ -137,10 +137,10 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
     const bool showRectangle = _verticalFov > _showRectangleThreshold;
 
-    glm::vec4 color = { glm::vec3(_borderColor) / 255.f, _opacity.value() };
+    glm::vec4 color = { glm::vec3(_borderColor) / 255.f, 1.0 };
 
     _shader->activate();
-    _shader->setUniform("opacity", _opacity);
+    _shader->setUniform("opacity", opacity());
 
     _shader->setUniform("crossHairSize", _crossHairSize);
     _shader->setUniform("showRectangle", showRectangle);
@@ -222,14 +222,6 @@ void RenderableSkyTarget::highlight(const glm::ivec3& addition) {
 
 void RenderableSkyTarget::removeHighlight(const glm::ivec3& removal) {
     _borderColor -= removal;
-}
-
-float RenderableSkyTarget::opacity() const {
-    return _opacity;
-}
-
-void RenderableSkyTarget::setOpacity(float opacity) {
-    _opacity = opacity;
 }
 
 void RenderableSkyTarget::setVerticalFov(double fov) {

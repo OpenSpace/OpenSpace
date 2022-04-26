@@ -289,10 +289,16 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate() {
 }
 
 void TargetBrowserPair::startFading(float goal, float fadeTime) {
-    _fadeTarget = skybrowser::Animation(_targetRenderable->opacity(), goal, fadeTime);
-    _fadeBrowser = skybrowser::Animation(_browser->opacity(), goal, fadeTime);
-    _fadeTarget.start();
-    _fadeBrowser.start();
+    const std::string script = fmt::format(
+        "openspace.setPropertyValueSingle('Scene.{0}.Renderable.Fade', {2}, {3});"
+        "openspace.setPropertyValueSingle('ScreenSpace.{1}.Fade', {2}, {3});",
+        _targetNode->identifier(), _browser->identifier(), goal, fadeTime
+    );
+
+    openspace::global::scriptEngine->queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd) {
@@ -356,15 +362,6 @@ SceneGraphNode* TargetBrowserPair::targetNode() const {
 
 ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
     return _browser;
-}
-
-void TargetBrowserPair::incrementallyFade() {
-    if (_fadeBrowser.isAnimating()) {
-        _browser->setOpacity(_fadeBrowser.getNewValue());
-    }
-    if (_fadeTarget.isAnimating()) {
-        _targetRenderable->setOpacity(_fadeTarget.getNewValue());
-    }
 }
 
 bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {

@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <ghoul/misc/easing.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <cmath>
 
@@ -216,7 +217,7 @@ float Animation<float>::getNewValue() {
     }
     else {
         float percentage = static_cast<float>(percentageSpent());
-        float diff = static_cast<float>((_goal - _start) * easeOutExpo(percentage));
+        float diff = static_cast<float>((_goal - _start) * ghoul::exponentialEaseOut(percentage));
         return _start + diff;
     }
 }
@@ -227,7 +228,7 @@ double Animation<double>::getNewValue() {
     }
     else {
         double percentage = percentageSpent();
-        double diff = (_goal - _start) * easeOutExpo(percentage);
+        double diff = (_goal - _start) * ghoul::exponentialEaseOut(percentage);
         return _start + diff;
     }
 }
@@ -237,7 +238,7 @@ glm::dmat4 Animation<glm::dvec3>::getRotationMatrix() {
         return glm::dmat4(1.0);
     }
 
-    double percentage = easeInOutSine(percentageSpent());
+    double percentage = ghoul::sineEaseInOut(percentageSpent());
     double increment = percentage - _lastPercentage;
     _lastPercentage = percentage;
 
@@ -256,7 +257,7 @@ glm::dvec3 Animation<glm::dvec3>::getNewValue() {
     glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
         glm::normalize(_start),
         glm::normalize(_goal),
-        easeOutExpo(percentageSpent())
+        ghoul::exponentialEaseOut(percentageSpent())
     );
     // Rotate direction
     return glm::dvec3(rotMat * glm::dvec4(_start, 1.0));;
