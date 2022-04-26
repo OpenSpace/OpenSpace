@@ -4,9 +4,11 @@ local point_jwst = {
   Command = [[
     local ra
     local dec
+    local duration
     if is_declared("args") then
       ra = args.Ra
       dec = args.Dec
+      duration = args.Duration
     else
       return
     end
@@ -47,6 +49,8 @@ local point_jwst = {
       local D0 = math.rad(27.1284)
       -- Galactic longitude of the equatorial north pole
       local L0 = math.rad(122.9320)
+      -- distance = 9.2E15 m (set to size of view sphere)
+      local distance = 9.2E15
 
       -- (Ra, Dec) -> (a, d)
       local a = math.rad(ra)
@@ -61,9 +65,9 @@ local point_jwst = {
 
       -- Convert to cartesian
       local rGalactic = {
-        math.cos(b) * math.cos(l),
-        math.cos(b) * math.sin(l),
-        math.sin(b)
+        distance * math.cos(b) * math.cos(l),
+        distance * math.cos(b) * math.sin(l),
+        distance * math.sin(b)
       }
 
       return rGalactic
@@ -100,11 +104,9 @@ local point_jwst = {
     end
 
     local coordinates = convertRaDec(ra, dec)
-
     local JWSTPosition = openspace.worldPosition('JWSTModel')
     local JWSTRotation = openspace.worldRotation('JWSTRotation')
-    openspace.printInfo(JWSTPosition)
-    openspace.printInfo(JWSTRotation)
+
     local JWSTtoCoord = {
       coordinates[1] - JWSTPosition[1],
       coordinates[2] - JWSTPosition[2],
@@ -113,11 +115,6 @@ local point_jwst = {
 
     local JWSTtoCoordRotated = applyMatrix(JWSTRotation, JWSTtoCoord)
     local JWSTAngles = calculateJWSTAngles(JWSTtoCoordRotated)
-
-    -- Check non 0
-    if JWSTAngles[1] == 0 and JWSTAngles[2] == 0 then
-      return
-    end
 
     -- Check if the new angle violate the sunshield
     -- -45 deg to 5 deg is valid in x rotation
@@ -128,7 +125,7 @@ local point_jwst = {
     openspace.setPropertyValueSingle(
       'Scene.JWSTModel.Rotation.Rotation',
       { JWSTAngles[1], JWSTAngles[2],  0.0},
-      3.0
+      duration
     )
   ]],
   Documentation = [[
@@ -143,14 +140,14 @@ asset.onInitialize(function()
   openspace.action.registerAction(point_jwst)
 
   openspace.event.registerEventAction(
-    "PointJwstRequested",
+    "PointSpacecraft",
     point_jwst.Identifier
   )
 end)
 
 asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
-    "PointJwstRequested",
+    "PointSpacecraft",
     point_jwst.Identifier
   )
 
