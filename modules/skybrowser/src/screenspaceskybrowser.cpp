@@ -125,8 +125,8 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
     _useRadiusAzimuthElevation.onChange([this]() {
         std::for_each(
-            _renderCopies.begin(), 
-            _renderCopies.end(), 
+            _renderCopies.begin(),
+            _renderCopies.end(),
             [this](std::unique_ptr<properties::Vec3Property>& copy) {
             if (_useRadiusAzimuthElevation) {
                 *copy = sphericalToRae(cartesianToSpherical(copy.get()->value()));

@@ -236,7 +236,7 @@ glm::dmat4 Animation<glm::dvec3>::getRotationMatrix() {
     if (!isAnimating()) {
         return glm::dmat4(1.0);
     }
-    
+
     double percentage = easeInOutSine(percentageSpent());
     double increment = percentage - _lastPercentage;
     _lastPercentage = percentage;

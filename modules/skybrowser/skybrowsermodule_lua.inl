@@ -44,7 +44,7 @@ namespace {
  */
 [[codegen::luawrap]] void selectImage(int imageIndex) {
     using namespace openspace;
-   
+
     // Load image
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
@@ -88,7 +88,7 @@ namespace {
  */
 [[codegen::luawrap]] void setHoverCircle(std::string identifier) {
     using namespace openspace;
-    
+
     SceneGraphNode* circle = global::renderEngine->scene()->sceneGraphNode(identifier);
     global::moduleEngine->module<SkyBrowserModule>()->setHoverCircle(circle);
 }
@@ -98,7 +98,7 @@ namespace {
  */
 [[codegen::luawrap]] void moveCircleToHoverImage(int imageIndex) {
     using namespace openspace;
-    
+
     global::moduleEngine->module<SkyBrowserModule>()->moveHoverCircle(imageIndex);
 }
 
@@ -107,7 +107,7 @@ namespace {
  */
 [[codegen::luawrap]] void disableHoverCircle() {
     using namespace openspace;
-    
+
     global::moduleEngine->module<SkyBrowserModule>()->disableHoverCircle();
 }
 
@@ -137,7 +137,7 @@ namespace {
  */
 [[codegen::luawrap]] void loadImagesToWWT(std::string identifier) {
     using namespace openspace;
-    
+
     // Load images from url
     LINFO("Connection established to WorldWide Telescope application in " + identifier);
     LINFO("Loading image collections to " + identifier);
@@ -160,7 +160,7 @@ namespace {
  */
 [[codegen::luawrap]] void startSetup() {
     using namespace openspace;
-    
+
     // This is called when the sky_browser website is connected to OpenSpace
     // Set all border colors to the border color in the master node
     if (global::windowDelegate->isMaster()) {
@@ -193,7 +193,7 @@ namespace {
  */
 [[codegen::luawrap]] void sendOutIdsToBrowsers() {
     using namespace openspace;
-    
+
     // This is called when the sky_browser website is connected to OpenSpace
     // Send out identifiers to the browsers
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -211,7 +211,7 @@ namespace {
  */
 [[codegen::luawrap]] void initializeBrowser(std::string identifier) {
     using namespace openspace;
-    
+
     // Initialize browser with ID and its corresponding target
     LINFO("Initializing sky browser " + identifier);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -245,7 +245,7 @@ namespace {
  */
 [[codegen::luawrap]] ghoul::Dictionary getListOfImages() {
     using namespace openspace;
-    
+
     // Send image list to GUI
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
@@ -292,7 +292,7 @@ namespace {
  */
 [[codegen::luawrap]] ghoul::Dictionary getTargetData() {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     ghoul::Dictionary data;
 
@@ -372,7 +372,7 @@ namespace {
  */
 [[codegen::luawrap]] void adjustCamera(std::string id) {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     if (module->isCameraInSolarSystem()) {
         module->lookAtTarget(id);
@@ -387,7 +387,7 @@ namespace {
                                                  float opacity)
 {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
@@ -401,7 +401,7 @@ namespace {
  */
 [[codegen::luawrap]] void centerTargetOnScreen(std::string identifier) {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
@@ -415,7 +415,7 @@ namespace {
  */
 [[codegen::luawrap]] void setSelectedBrowser(std::string identifier) {
     using namespace openspace;
-    
+
     global::moduleEngine->module<SkyBrowserModule>()->setSelectedBrowser(identifier);
 }
 
@@ -424,7 +424,7 @@ namespace {
  */
 [[codegen::luawrap]] void createTargetBrowserPair() {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     int noOfPairs = module->nPairs();
@@ -510,7 +510,7 @@ namespace {
  */
 [[codegen::luawrap]] void removeTargetBrowserPair(std::string identifier) {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* found = module->getPair(identifier);
     if (found) {
@@ -543,7 +543,7 @@ namespace {
                                                          float translationY)
 {
     using namespace openspace;
-    
+
     ScreenSpaceRenderable* renderable =
         global::renderEngine->screenSpaceRenderable(identifier);
 
@@ -562,7 +562,7 @@ namespace {
                                                        int imageIndex)
 {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     const ImageData& image = module->getWwtDataHandler()->getImage(imageIndex);
 
@@ -581,7 +581,7 @@ namespace {
                                            double declination)
 {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
@@ -597,7 +597,7 @@ namespace {
                                          float verticalFieldOfView)
 {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
@@ -611,7 +611,7 @@ namespace {
  */
 [[codegen::luawrap]] void scrollOverBrowser(std::string identifier, float scroll) {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
@@ -627,7 +627,7 @@ namespace {
                                          int blue)
 {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
@@ -643,7 +643,7 @@ namespace {
                                              float sizeY)
 {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
@@ -661,7 +661,7 @@ namespace {
                      glm::vec3 radiusAzimuthElevationPosition = glm::vec3(2.1f, 0.f, 0.f))
 {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
@@ -674,7 +674,7 @@ namespace {
  */
 [[codegen::luawrap]] void removeRenderCopy(std::string identifier) {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
@@ -687,7 +687,7 @@ namespace {
  */
 [[codegen::luawrap]] void startFinetuningTarget(std::string identifier) {
     using namespace openspace;
-    
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {

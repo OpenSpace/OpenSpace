@@ -211,7 +211,7 @@ ghoul::Dictionary WwtCommunicator::moveCameraMessage(const glm::dvec2& celestCoo
                                                      bool shouldMoveInstantly) const
 {
     using namespace std::string_literals;
-    
+
     ghoul::Dictionary msg;
     msg.setValue("event", "center_on_coordinates"s);
     msg.setValue("ra", celestCoords.x);
@@ -224,7 +224,7 @@ ghoul::Dictionary WwtCommunicator::moveCameraMessage(const glm::dvec2& celestCoo
 
 ghoul::Dictionary WwtCommunicator::loadCollectionMessage(const std::string& url) const {
     using namespace std::string_literals;
-    
+
     ghoul::Dictionary msg;
     msg.setValue("event", "load_image_collection"s);
     msg.setValue("url", url);
@@ -234,7 +234,7 @@ ghoul::Dictionary WwtCommunicator::loadCollectionMessage(const std::string& url)
 
 ghoul::Dictionary WwtCommunicator::setForegroundMessage(const std::string& name) const {
     using namespace std::string_literals;
-    
+
     ghoul::Dictionary msg;
     msg.setValue("event", "set_foreground_by_name"s);
     msg.setValue("name", name);
@@ -245,7 +245,7 @@ ghoul::Dictionary WwtCommunicator::addImageMessage(const std::string& id,
                                                    const std::string& url) const
 {
     using namespace std::string_literals;
-    
+
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_create"s);
     msg.setValue("id", id);
@@ -257,7 +257,7 @@ ghoul::Dictionary WwtCommunicator::addImageMessage(const std::string& id,
 
 ghoul::Dictionary WwtCommunicator::removeImageMessage(const std::string& imageId) const {
     using namespace std::string_literals;
-    
+
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_remove"s);
     msg.setValue("id", imageId);
@@ -268,7 +268,7 @@ ghoul::Dictionary WwtCommunicator::setImageOpacityMessage(const std::string& ima
                                                           double opacity) const
 {
     using namespace std::string_literals;
-    
+
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_set"s);
     msg.setValue("id", imageId);
@@ -282,7 +282,7 @@ ghoul::Dictionary WwtCommunicator::setLayerOrderMessage(const std::string& id, i
     // The lower the layer order, the more towards the back the image is placed
     // 0 is the background
     using namespace std::string_literals;
-    
+
     ghoul::Dictionary msg;
     msg.setValue("event", "image_layer_order"s);
     msg.setValue("id", id);

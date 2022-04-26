@@ -207,21 +207,21 @@ public:
     {
         _animationTime = std::chrono::milliseconds(static_cast<int>(time * 1000));
     }
-    
+
     void start() {
         _isStarted = true;
         _startTime = std::chrono::system_clock::now();
     }
-    
+
     void stop() {
         _isStarted = false;
     }
-    
+
     bool isAnimating() const {
         bool timeLeft = timeSpent().count() < _animationTime.count() ? true : false;
         return timeLeft && _isStarted;
     }
-    
+
     T getNewValue();
     glm::dmat4 getRotationMatrix();
 
@@ -231,7 +231,7 @@ private:
         std::chrono::duration<double, std::milli> timeSpent = now - _startTime;
         return timeSpent;
     }
-    
+
     double percentageSpent() const {
         return timeSpent().count() / _animationTime.count();
     }
