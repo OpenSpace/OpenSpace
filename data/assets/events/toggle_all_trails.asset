@@ -1,4 +1,4 @@
-local action = asset.require("actions/toggle_all_trails")
+local action = asset.require("actions/trails/toggle_all_trails")
 
 asset.onInitialize(function()
   openspace.event.registerEventAction(
