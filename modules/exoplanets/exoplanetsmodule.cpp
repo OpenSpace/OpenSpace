@@ -51,6 +51,12 @@
 #include "exoplanetsmodule_lua.inl"
 
 namespace {
+    constexpr const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Decides if the GUI for this module should be enabled."
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo DataFolderInfo = {
         "DataFolder",
         "Data Folder",
@@ -139,6 +145,9 @@ namespace {
     constexpr const char LookupTableFileName[] = "lookup.txt";
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+
         // [[codegen::verbatim(DataFolderInfo.description)]]
         std::optional<std::filesystem::path> dataFolder [[codegen::directory()]];
 
@@ -181,6 +190,7 @@ using namespace exoplanets;
 
 ExoplanetsModule::ExoplanetsModule()
     : OpenSpaceModule(Name)
+    , _enabled(EnabledInfo)
     , _exoplanetsDataFolder(DataFolderInfo)
     , _bvColorMapPath(BvColorMapInfo)
     , _starTexturePath(StarTextureInfo)
@@ -191,9 +201,11 @@ ExoplanetsModule::ExoplanetsModule()
     , _showComparisonCircle(ShowComparisonCircleInfo, false)
     , _showHabitableZone(ShowHabitableZoneInfo, true)
     , _useOptimisticZone(UseOptimisticZoneInfo, true)
-    , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.0f, 1.0f)
+    , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.f, 1.f)
 {
     _exoplanetsDataFolder.setReadOnly(true);
+
+    addProperty(_enabled);
 
     addProperty(_exoplanetsDataFolder);
     addProperty(_bvColorMapPath);
@@ -272,6 +284,8 @@ float ExoplanetsModule::habitableZoneOpacity() const {
 
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
+
+    _enabled = p.enabled.value_or(true);
 
     if (p.dataFolder.has_value()) {
         _exoplanetsDataFolder = p.dataFolder.value().string();

@@ -231,10 +231,14 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
 
 
     global::callback::preSync->push_back([&]() {
+        if (!_touchActive) {
+            return;
+        }
+
         _touch.setCamera(global::navigationHandler->camera());
         _touch.setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
 
-        if (processNewInput() && global::windowDelegate->isMaster() && _touchActive) {
+        if (processNewInput() && global::windowDelegate->isMaster()) {
             _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
         }
         else if (_touchPoints.empty()) {

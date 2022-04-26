@@ -139,8 +139,9 @@ AssetTreeModel::AssetTreeModel(QObject* parent)
     : QAbstractItemModel(parent)
 {
     _rootItem = std::make_unique<AssetTreeItem>(
-        std::vector<QVariant>{
-            QString::fromStdString(Header1), QString::fromStdString(Header2)
+        std::vector<QVariant> {
+            QString::fromStdString(Header1),
+            QString::fromStdString(Header2)
         }
     );
 }
@@ -162,7 +163,7 @@ void AssetTreeModel::importModelData(const std::string& assetBasePath,
     }
 }
 
-AssetTreeItem* AssetTreeModel::getItem(const QModelIndex& index) const {
+AssetTreeItem* AssetTreeModel::item(const QModelIndex& index) const {
     if (index.isValid()) {
         AssetTreeItem* item = static_cast<AssetTreeItem*>(index.internalPointer());
         if (item) {
@@ -173,46 +174,46 @@ AssetTreeItem* AssetTreeModel::getItem(const QModelIndex& index) const {
 }
 
 bool AssetTreeModel::isChecked(QModelIndex& index) const {
-    AssetTreeItem* item = getItem(index);
-    const int isChecked = item->data(1).toInt();
+    AssetTreeItem* i = item(index);
+    const int isChecked = i->data(1).toInt();
     return isChecked == Qt::Checked;
 }
 
 bool AssetTreeModel::isAsset(QModelIndex& index) const {
-    AssetTreeItem* item = getItem(index);
-    return item->isAsset();
+    AssetTreeItem* i = item(index);
+    return i->isAsset();
 }
 
 bool AssetTreeModel::inFilesystem(QModelIndex& index) const {
-    AssetTreeItem* item = getItem(index);
-    return item->doesExistInFilesystem();
+    AssetTreeItem* i = item(index);
+    return i->doesExistInFilesystem();
 }
 
 int AssetTreeModel::childCount(QModelIndex& index) const {
-    return getItem(index)->childCount();
+    return item(index)->childCount();
 }
 
 QString AssetTreeModel::name(QModelIndex& index) const {
-    return getItem(index)->name();
+    return item(index)->name();
 }
 
 void AssetTreeModel::setName(QModelIndex& index, QString name) {
-    getItem(index)->setData(0, name);
+    item(index)->setData(0, name);
 }
 
 void AssetTreeModel::setChecked(QModelIndex& index, bool checked) {
-    getItem(index)->setData(1, checked ? Qt::Checked : Qt::Unchecked);
+    item(index)->setData(1, checked ? Qt::Checked : Qt::Unchecked);
 }
 
 void AssetTreeModel::setExistenceInFilesystem(QModelIndex& index, bool fileExists) {
-    getItem(index)->setExistsInFilesystem(fileExists);
+    item(index)->setExistsInFilesystem(fileExists);
 }
 
 AssetTreeItem* AssetTreeModel::child(int row) const {
     QModelIndex i = index(row, 0);
-    int nKids = childCount(i);
-    if (row < nKids) {
-        return getItem(i)->child(row);
+    const int nChildren = childCount(i);
+    if (row < nChildren) {
+        return item(i)->child(row);
     }
     return nullptr;
 }
@@ -224,7 +225,7 @@ QModelIndex AssetTreeModel::index(int row, int column, const QModelIndex& parent
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
-    AssetTreeItem* parentItem = getItem(parent);
+    AssetTreeItem* parentItem = item(parent);
     if (!parentItem) {
         return QModelIndex();
     }
@@ -250,7 +251,7 @@ QModelIndex AssetTreeModel::parent(const QModelIndex& index) const {
         return QModelIndex();
     }
 
-    AssetTreeItem* childItem = getItem(index);
+    AssetTreeItem* childItem = item(index);
     AssetTreeItem* parentItem = childItem ? childItem->parent() : nullptr;
     if (parentItem == _rootItem.get() || !parentItem) {
         return QModelIndex();
@@ -260,11 +261,11 @@ QModelIndex AssetTreeModel::parent(const QModelIndex& index) const {
 }
 
 AssetTreeItem* AssetTreeModel::assetItem(const QModelIndex& index) {
-    return getItem(index);
+    return item(index);
 }
 
 int AssetTreeModel::rowCount(const QModelIndex& parent) const {
-    const AssetTreeItem* parentItem = getItem(parent);
+    const AssetTreeItem* parentItem = item(parent);
     return parentItem ? parentItem->childCount() : 0;
 }
 
@@ -289,12 +290,7 @@ QVariant AssetTreeModel::data(const QModelIndex& index, int role) const {
     }
 
     if (role == Qt::ForegroundRole) {
-        if (item->doesExistInFilesystem()) {
-            return QVariant(QColor(Qt::black));
-        }
-        else {
-            return QVariant(QColor(Qt::red));
-        }
+        return item->doesExistInFilesystem() ? QColor(Qt::black) : QColor(Qt::red);
     }
     else if (role == Qt::DisplayRole) {
         return item->data(index.column());
@@ -345,7 +341,7 @@ QVariant AssetTreeModel::headerData(int section, Qt::Orientation orientation,
 }
 
 void AssetTreeModel::getSelectedAssets(std::vector<std::string>& outputPaths,
-                                    std::vector<AssetTreeItem*>& outputItems)
+                                       std::vector<AssetTreeItem*>& outputItems)
 {
     parseChildrenForSelected(_rootItem.get(), outputPaths, outputItems, "");
 }

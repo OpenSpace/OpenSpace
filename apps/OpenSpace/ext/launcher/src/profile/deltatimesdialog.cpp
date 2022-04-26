@@ -41,14 +41,14 @@
 #include <iostream>
 
 namespace {
-    constexpr const int MaxNumberOfKeys = 30;
+    constexpr int MaxNumberOfKeys = 30;
 
     struct TimeInterval {
         uint64_t secondsPerInterval;
         std::string intervalName;
     };
 
-    std::array<TimeInterval, 7> TimeIntervals = {
+    const std::array<TimeInterval, 7> TimeIntervals = {
         TimeInterval{ 31536000, "year" },
         TimeInterval{ 18144000, "month" },
         TimeInterval{ 604800, "week" },
@@ -98,17 +98,16 @@ DeltaTimesDialog::DeltaTimesDialog(QWidget* parent, std::vector<double>* deltaTi
 
 void DeltaTimesDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
-    {
-        _listWidget = new QListWidget;
-        connect(
-            _listWidget, &QListWidget::itemSelectionChanged,
-            this, &DeltaTimesDialog::listItemSelected
-        );
-        _listWidget->setAutoScroll(true);
-        _listWidget->setLayoutMode(QListView::SinglePass);
-        layout->addWidget(_listWidget);
-    }
 
+    _listWidget = new QListWidget;
+    connect(
+        _listWidget, &QListWidget::itemSelectionChanged,
+        this, &DeltaTimesDialog::listItemSelected
+    );
+    _listWidget->setAutoScroll(true);
+    _listWidget->setLayoutMode(QListView::SinglePass);
+    layout->addWidget(_listWidget);
+    
     {
         QBoxLayout* buttonLayout = new QHBoxLayout;
         _addButton = new QPushButton("Add Entry");
@@ -128,10 +127,10 @@ void DeltaTimesDialog::createWidgets() {
         buttonLayout->addStretch();
         layout->addLayout(buttonLayout);
     }
-    {
-        _adjustLabel = new QLabel("Set Simulation Time Increment for key");
-        layout->addWidget(_adjustLabel);
-    }
+
+    _adjustLabel = new QLabel("Set Simulation Time Increment for key");
+    layout->addWidget(_adjustLabel);
+    
     {
         QBoxLayout* box = new QHBoxLayout;
         _seconds = new QLineEdit;
@@ -184,7 +183,7 @@ void DeltaTimesDialog::createWidgets() {
 }
 
 std::string DeltaTimesDialog::createSummaryForDeltaTime(size_t idx, bool forListView) {
-    int k = (idx%10 == 9) ? 0 : idx%10 + 1;
+    int k = (idx % 10 == 9) ? 0 : idx % 10 + 1;
     k = (idx == 0) ? 1 : k;
     std::string key = std::to_string(k);
 
@@ -204,9 +203,7 @@ std::string DeltaTimesDialog::createSummaryForDeltaTime(size_t idx, bool forList
 
     if (forListView) {
         s += fmt::format(
-            "\t{}\t{}",
-            std::to_string(_deltaTimesData.at(idx)),
-            timeDescription(_deltaTimesData.at(idx))
+            "\t{}\t{}", _deltaTimesData.at(idx), timeDescription(_deltaTimesData.at(idx))
         );
     }
     return s;
@@ -252,9 +249,7 @@ void DeltaTimesDialog::valueChanged(const QString& text) {
     else {
         int value = text.toDouble();
         if (value != 0) {
-            _value->setText(QString::fromStdString(
-                timeDescription(text.toDouble()))
-            );
+            _value->setText(QString::fromStdString(timeDescription(text.toDouble())));
             _errorMsg->setText("");
         }
     }
@@ -296,15 +291,13 @@ void DeltaTimesDialog::addDeltaTimeValue() {
 
 void DeltaTimesDialog::saveDeltaTimeValue() {
     QListWidgetItem* item = _listWidget->currentItem();
-    if (item != nullptr) {
+    if (item && !_deltaTimesData.empty()) {
         int index = _listWidget->row(item);
-        if (_deltaTimesData.size() > 0) {
-            _deltaTimesData.at(index) = _seconds->text().toDouble();
-            std::string summary = createSummaryForDeltaTime(index, true);
-            _listWidget->item(index)->setText(QString::fromStdString(summary));
-            transitionEditMode(index, false);
-            _editModeNewItem = false;
-        }
+        _deltaTimesData.at(index) = _seconds->text().toDouble();
+        std::string summary = createSummaryForDeltaTime(index, true);
+        _listWidget->item(index)->setText(QString::fromStdString(summary));
+        transitionEditMode(index, false);
+        _editModeNewItem = false;
     }
 }
 

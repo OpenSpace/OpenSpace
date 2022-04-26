@@ -25,7 +25,6 @@
 #include "profile/assetsdialog.h"
 
 #include "profile/assetedit.h"
-
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <ghoul/fmt.h>
@@ -38,8 +37,8 @@
 #include <QTreeView>
 
 namespace {
-    bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model,
-                                       int rows, QModelIndex parent)
+    bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model, int rows,
+                                       QModelIndex parent)
     {
         bool isExpanded = false;
 
@@ -144,7 +143,7 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
         heading->setObjectName("heading");
         container->addWidget(heading, 0, 0);
 
-        QPushButton* newAssetButton = new QPushButton("New Asset", this);
+        QPushButton* newAssetButton = new QPushButton("New Asset");
         connect(
             newAssetButton, &QPushButton::released,
             this, &AssetsDialog::openAssetEditor

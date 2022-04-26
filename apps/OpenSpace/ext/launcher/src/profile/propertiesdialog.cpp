@@ -183,7 +183,7 @@ void PropertiesDialog::listItemSelected() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
-    if (_propertyData.size() > 0) {
+    if (!_propertyData.empty()) {
         Profile::Property& p = _propertyData[index];
         if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
             _commandCombo->setCurrentIndex(0);
@@ -211,21 +211,21 @@ bool PropertiesDialog::isLineEmpty(int index) {
 void PropertiesDialog::listItemAdded() {
     int currentListSize = _list->count();
 
-     if ((currentListSize == 1) && (isLineEmpty(0))) {
-         // Special case where list is "empty" but really has one line that is blank.
-         // This is done because QListWidget does not seem to like having its sole
-         // remaining item being removed.
-         _propertyData.at(0) = Blank;
-         _list->item(0)->setText("  (Enter details below & click 'Save')");
-         _list->setCurrentRow(0);
-         transitionToEditMode();
-     }
-     else {
-         _propertyData.push_back(Blank);
-         _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
-         //Scroll down to that blank line highlighted
-         _list->setCurrentRow(_list->count() - 1);
-     }
+    if ((currentListSize == 1) && (isLineEmpty(0))) {
+        // Special case where list is "empty" but really has one line that is blank.
+        // This is done because QListWidget does not seem to like having its sole
+        // remaining item being removed.
+        _propertyData.at(0) = Blank;
+        _list->item(0)->setText("  (Enter details below & click 'Save')");
+        _list->setCurrentRow(0);
+        transitionToEditMode();
+    }
+    else {
+        _propertyData.push_back(Blank);
+        _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
+        //Scroll down to that blank line highlighted
+        _list->setCurrentRow(_list->count() - 1);
+    }
 
     // Blank-out the 2 text fields, set combo box to index 0
     _commandCombo->setCurrentIndex(0);
@@ -243,7 +243,7 @@ void PropertiesDialog::listItemSave() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
-    if (_propertyData.size() > 0) {
+    if (!_propertyData.empty()) {
         if (_commandCombo->currentIndex() == 0) {
             _propertyData[index].setType =
                 Profile::Property::SetType::SetPropertyValueSingle;
@@ -262,12 +262,12 @@ void PropertiesDialog::listItemSave() {
 bool PropertiesDialog::areRequiredFormsFilled() {
     bool requiredFormsFilled = true;
     QString errors;
-    if (_propertyEdit->text().length() == 0) {
+    if (_propertyEdit->text().isEmpty()) {
         errors += "Missing property name";
         requiredFormsFilled = false;
     }
-    if (_valueEdit->text().length() == 0) {
-        if (errors.length() > 0) {
+    if (_valueEdit->text().isEmpty()) {
+        if (!errors.isEmpty()) {
             errors += ", ";
         }
         errors += "Missing value";
@@ -280,34 +280,30 @@ bool PropertiesDialog::areRequiredFormsFilled() {
 void PropertiesDialog::listItemCancelSave() {
     listItemSelected();
     transitionFromEditMode();
-    if (_editModeNewItem) {
-        if (_propertyData.size() > 0) {
-            if (_propertyData.back().name.length() == 0 ||
-                _propertyData.back().value.length() == 0)
-            {
-                listItemRemove();
-            }
-        }
+    if (_editModeNewItem && !_propertyData.empty() &&
+        (_propertyData.back().name.empty() || _propertyData.back().value.empty()))
+    {
+        listItemRemove();
     }
     _editModeNewItem = false;
 }
 
 void PropertiesDialog::listItemRemove() {
-    if (_list->count() > 0) {
-        if (_list->currentRow() >= 0 && _list->currentRow() < _list->count()) {
-            if (_list->count() == 1) {
-                //Special case where last remaining item is being removed (QListWidget
-                // doesn't like the final item being removed so instead clear it)
-                _propertyData.at(0) = Blank;
-                _list->item(0)->setText("");
-            }
-            else {
-                int index = _list->currentRow();
-                if (index >= 0 && index < _list->count()) {
-                    delete _list->takeItem(index);
-                    if (_propertyData.size() > 0) {
-                        _propertyData.erase(_propertyData.begin() + index);
-                    }
+    if (_list->count() > 0 &&
+       (_list->currentRow() >= 0 && _list->currentRow() < _list->count()))
+    {
+        if (_list->count() == 1) {
+            // Special case where last remaining item is being removed (QListWidget
+            // doesn't like the final item being removed so instead clear it)
+            _propertyData.at(0) = Blank;
+            _list->item(0)->setText("");
+        }
+        else {
+            int index = _list->currentRow();
+            if (index >= 0 && index < _list->count()) {
+                delete _list->takeItem(index);
+                if (_propertyData.size() > 0) {
+                    _propertyData.erase(_propertyData.begin() + index);
                 }
             }
         }
@@ -370,11 +366,9 @@ void PropertiesDialog::keyPressEvent(QKeyEvent* evt) {
         }
         return;
     }
-    else if (evt->key() == Qt::Key_Escape) {
-        if (_editModeNewItem) {
-            listItemCancelSave();
-            return;
-        }
+    else if (evt->key() == Qt::Key_Escape && _editModeNewItem) {
+        listItemCancelSave();
+        return;
     }
     QDialog::keyPressEvent(evt);
 }
@@ -405,49 +399,52 @@ void PropertiesDialog::selectLineFromScriptLog() {
 
     QDialog dialog;
 
-    connect(&dialog, &QDialog::finished, [this, comboBox](int result) {
-        if (result == QDialog::Rejected) {
-            return;
+    connect(
+        &dialog, &QDialog::finished,
+        [this, comboBox](int result) {
+            if (result == QDialog::Rejected) {
+                return;
+            }
+
+            QString text = comboBox->currentText();
+            if (!text.startsWith("openspace.setPropertyValue")) {
+                return;
+            }
+
+            // We have a string that is of the form:
+            // openspace.setPropertyValue('prop', value);
+
+            if (text.startsWith("openspace.setPropertyValueSingle")) {
+                _commandCombo->setCurrentIndex(0);
+                std::string_view prefix = "openspace.setPropertyValueSingle";
+                text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
+            }
+            else {
+                // command == "openspace.setPropertyValue"
+                _commandCombo->setCurrentIndex(1);
+                std::string_view prefix = "openspace.setPropertyValue";
+                text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
+            }
+
+            // Remove everything past the closing brace
+            text = text.left(text.indexOf(")"));
+            QStringList textList = text.split(",");
+
+            if (textList.size() < 2) {
+                return;
+            }
+
+            // Remove the string markers around the property
+            QString property = textList[0].mid(1, textList[0].size() - 2);
+
+            textList.removeFirst();
+            QString value = textList.join(",");
+
+
+            _propertyEdit->setText(property.trimmed());
+            _valueEdit->setText(value.trimmed());
         }
-
-        QString text = comboBox->currentText();
-        if (!text.startsWith("openspace.setPropertyValue")) {
-            return;
-        }
-
-        // We have a string that is of the form:
-        // openspace.setPropertyValue('prop', value);
-
-        if (text.startsWith("openspace.setPropertyValueSingle")) {
-            _commandCombo->setCurrentIndex(0);
-            std::string_view prefix = "openspace.setPropertyValueSingle";
-            text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
-        }
-        else {
-            // command == "openspace.setPropertyValue"
-            _commandCombo->setCurrentIndex(1);
-            std::string_view prefix = "openspace.setPropertyValue";
-            text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
-        }
-
-        // Remove everything past the closing brace
-        text = text.left(text.indexOf(")"));
-        QStringList textList = text.split(",");
-
-        if (textList.size() < 2) {
-            return;
-        }
-
-        // Remove the string markers around the property
-        QString property = textList[0].mid(1, textList[0].size() - 2);
-
-        textList.removeFirst();
-        QString value = textList.join(",");
-
-
-        _propertyEdit->setText(property.trimmed());
-        _valueEdit->setText(value.trimmed());
-    });
+    );
 
     QLayout* layout = new QVBoxLayout;
     QLabel* label = new QLabel("Select a line from the Script Log to add");
