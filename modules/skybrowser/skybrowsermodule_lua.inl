@@ -99,7 +99,7 @@ namespace {
 [[codegen::luawrap]] void moveCircleToHoverImage(int imageIndex) {
     using namespace openspace;
 
-    global::moduleEngine->module<SkyBrowserModule>()->moveHoverCircle(imageIndex);
+    global::moduleEngine->module<SkyBrowserModule>()->moveHoverCircle(imageIndex, false);
 }
 
 /**
@@ -108,7 +108,7 @@ namespace {
 [[codegen::luawrap]] void disableHoverCircle() {
     using namespace openspace;
 
-    global::moduleEngine->module<SkyBrowserModule>()->disableHoverCircle();
+    global::moduleEngine->module<SkyBrowserModule>()->disableHoverCircle(false);
 }
 
 /**

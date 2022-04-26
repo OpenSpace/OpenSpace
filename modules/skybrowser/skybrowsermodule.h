@@ -89,8 +89,8 @@ public:
     void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
     // Hover circle
-    void moveHoverCircle(int i);
-    void disableHoverCircle();
+    void moveHoverCircle(int i, bool useScript = true);
+    void disableHoverCircle(bool useScript = true);
 
     // Image collection handling
     void loadImages(const std::string& root, const std::filesystem::path& directory);

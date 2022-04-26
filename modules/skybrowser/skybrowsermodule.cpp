@@ -108,7 +108,7 @@ SkyBrowserModule::SkyBrowserModule()
 
     global::callback::preSync->emplace_back([this]() {
         constexpr double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
-        
+
         // Disable browser and targets when camera is outside of solar system
         bool camWasInSolarSystem = _isCameraInSolarSystem;
         glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
@@ -136,6 +136,9 @@ SkyBrowserModule::SkyBrowserModule()
                     pair->startFading(transparency, 2.f);
                 }
             );
+
+            // Also hide the hover circle
+            disableHoverCircle();
         }
         // Fade pairs if the camera moved in or out the solar system
         if (_isFading) {
@@ -230,23 +233,39 @@ void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
     _hoverCircle = circle;
 }
 
-void SkyBrowserModule::moveHoverCircle(int i) {
+void SkyBrowserModule::moveHoverCircle(int i, bool useScript) {
     const ImageData& image = _dataHandler->getImage(i);
 
     // Only move and show circle if the image has coordinates
     if (_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem) {
-        // Make circle visible
-        _hoverCircle->renderable()->property("Enabled")->set(true);
+        const std::string id = _hoverCircle->identifier();
+
+        // Show the circle
+        if (useScript) {
+            const std::string script = fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
+                id
+            );
+            global::scriptEngine->queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+        else {
+            Renderable* renderable = _hoverCircle->renderable();
+            if (renderable) {
+                renderable->property("Fade")->set(1.f);
+            }
+        }
 
         // Set the exact target position
         // Move it slightly outside of the celestial sphere so it doesn't overlap with
         // the target
         glm::dvec3 pos = skybrowser::equatorialToGalactic(image.equatorialCartesian);
         pos *= skybrowser::CelestialSphereRadius * 1.1;
-        // Uris for properties
-        std::string id = _hoverCircle->identifier();
 
-        std::string script = fmt::format(
+        // Note that the position can only be set through the script engine
+        const std::string script = fmt::format(
             "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
             id, ghoul::to_string(pos)
         );
@@ -257,9 +276,21 @@ void SkyBrowserModule::moveHoverCircle(int i) {
     }
 }
 
-void SkyBrowserModule::disableHoverCircle() {
+void SkyBrowserModule::disableHoverCircle(bool useScript) {
     if (_hoverCircle && _hoverCircle->renderable()) {
-        _hoverCircle->renderable()->property("Enabled")->set(false);
+        if (useScript) {
+            const std::string script = fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
+                _hoverCircle->identifier()
+            );
+            global::scriptEngine->queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+        else {
+            _hoverCircle->renderable()->property("Fade")->set(0.f);
+        }
     }
 }
 
@@ -330,7 +361,6 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal) {
              else if (isPairFinished && goal == Transparency::Transparent) {
                  pair->setEnabled(false);
                  pair->setOpacity(1.0);
-
              }
              isAllFinished &= isPairFinished;
          }
