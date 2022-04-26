@@ -5,6 +5,9 @@ local travelSpeedIndicator = {
   Identifier = "TravelSpeedIndicator-2000",
   --SunIAU adds an extra rotation. Using barycenter, then offsetting to SunIAU
   Parent =  sunTransforms.SolarSystemBarycenter.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 695700000.0,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",

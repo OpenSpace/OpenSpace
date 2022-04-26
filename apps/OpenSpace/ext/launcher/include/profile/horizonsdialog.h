@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___HORIZONS___H__
-#define __OPENSPACE_UI_LAUNCHER___HORIZONS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___HORIZONSDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___HORIZONSDIALOG___H__
+
+#include <QDialog>
 
 #include <openspace/json.h>
-#include <QDialog>
 #include <filesystem>
 #include <string>
 
@@ -43,27 +44,12 @@ class QNetworkReply;
 class QPlainTextEdit;
 class QProgressBar;
 
-class HorizonsDialog : public QDialog {
+class HorizonsDialog final : public QDialog {
 Q_OBJECT
 public:
-    /**
-     * Constructor for HorizonsDialog class
-     */
-    HorizonsDialog(QWidget* parent);
+    explicit HorizonsDialog(QWidget* parent);
 
-#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     std::filesystem::path file() const;
-#endif // OPENSPACE_MODULE_SPACE_ENABLED
-
-private slots:
-    void openSaveAs();
-    void typeOnChange(int index);
-    void downloadProgress(int value, int max);
-    void importTimeRange();
-
-#ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    void approved();
-#endif // OPENSPACE_MODULE_SPACE_ENABLED
 
 private:
     enum class LogLevel {
@@ -82,8 +68,14 @@ private:
     };
 
     void createWidgets();
-    void cleanAllWidgets();
-    void styleLabel(QLabel* label, bool isDirty);
+
+    void openSaveAs();
+    void typeOnChange(int index);
+    void downloadProgress(int value, int max);
+    void importTimeRange();
+
+    void approved();
+
     bool isValidInput();
     nlohmann::json sendRequest(const std::string& url);
     nlohmann::json handleReply(QNetworkReply* reply);
@@ -133,4 +125,4 @@ private:
     std::string _latestHorizonsError;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___HORIZONS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___HORIZONSDIALOG___H__

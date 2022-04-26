@@ -178,3 +178,12 @@ HorizonsDialog  QLabel#error {
 HorizonsDialog  QLabel#normal {
   color: rgb(0, 0, 0);
 }
+
+/*
+ * SGCT
+ */
+WindowControl QLabel#info {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 8pt;
+}

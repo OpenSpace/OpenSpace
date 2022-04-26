@@ -12,6 +12,9 @@ local textureSourcePath = asset.syncedResource({
 local EUVLayer = {
   Identifier = "EUV-Layer-bastille-day-2000",
   Parent = transforms.SunIAU.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 696000000,
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Size = 6.96E8, -- Slightly bigger than the sun renderable,
