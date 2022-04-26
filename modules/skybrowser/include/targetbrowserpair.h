@@ -90,6 +90,7 @@ public:
     std::string targetRenderableId() const;
     std::string targetNodeId() const;
     glm::vec2 size() const;
+    float browserRatio() const;
 
     SceneGraphNode* targetNode() const;
     ScreenSpaceSkyBrowser* browser() const;

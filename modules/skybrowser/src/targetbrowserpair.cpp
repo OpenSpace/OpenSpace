@@ -178,6 +178,10 @@ glm::vec2 TargetBrowserPair::size() const {
     return _browser->size();
 }
 
+float TargetBrowserPair::browserRatio() const {
+    return _browser->browserRatio();
+}
+
 double TargetBrowserPair::verticalFov() const {
     return _browser->verticalFov();
 }
