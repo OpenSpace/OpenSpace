@@ -29,8 +29,8 @@ local SpaceMouse = {
   Twist = {5}, -- left/right
   Tilt = {4, 3}, -- left/right, back/forth
 
-  LeftButton = 0,
-  RightButton = 1
+  -- Buttons on the Enterprise version of the SpaceMouse is not detectable, use regular
+  -- keybindings instead, for more information see our wiki page.
 }
 
 asset.onInitialize(function()
@@ -51,18 +51,4 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y");
   openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom");
   openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X");
-
-  openspace.navigation.bindJoystickButton(
-    name,
-    controller.LeftButton,
-    joystickHelper.permaBindLocalRoll(name, controller.Tilt[1]),
-    "Switch to local roll mode"
-  )
-
-  openspace.navigation.bindJoystickButton(
-    name,
-    controller.RightButton,
-    joystickHelper.permaBindGlobalRoll(name, controller.Tilt[1]),
-    "Switch to global roll mode"
-  )
 end)
