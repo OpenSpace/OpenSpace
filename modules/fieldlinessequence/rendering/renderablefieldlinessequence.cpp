@@ -473,28 +473,28 @@ void RenderableFieldlinesSequence::initializeGL() {
     // Extract source file type specific information from dictionary
     // & get states from source
     switch (_inputFileType) {
-    case SourceFileType::Cdf:
-        if (!getStatesFromCdfFiles()) {
-            return;
-        }
-        break;
-    case SourceFileType::Json:
-        if (!loadJsonStatesIntoRAM()) {
-            return;
-        }
-        break;
-    case SourceFileType::Osfls:
-        if (_loadingStatesDynamically) {
-            if (!prepareForOsflsStreaming()) {
+        case SourceFileType::Cdf:
+            if (!getStatesFromCdfFiles()) {
                 return;
             }
-        }
-        else {
-            loadOsflsStatesIntoRAM();
-        }
-        break;
-    default:
-        return;
+            break;
+        case SourceFileType::Json:
+            if (!loadJsonStatesIntoRAM()) {
+                return;
+            }
+            break;
+        case SourceFileType::Osfls:
+            if (_loadingStatesDynamically) {
+                if (!prepareForOsflsStreaming()) {
+                    return;
+                }
+            }
+            else {
+                loadOsflsStatesIntoRAM();
+            }
+            break;
+        default:
+            return;
     }
 
     // No need to store source paths in memory if they are already in RAM
@@ -671,7 +671,6 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
 
         _colorTablePath.onChange([this]() {
             _transferFunction->setPath(_colorTablePath);
-            //_colorTablePaths[_colorQuantity] = _colorTablePath;
         });
 
         _colorQuantityMinMax.onChange([this]() {

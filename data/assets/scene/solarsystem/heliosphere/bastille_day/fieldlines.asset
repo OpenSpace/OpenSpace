@@ -68,7 +68,6 @@ end)
 
 asset.export(fieldlines)
 
-
 asset.meta = {
   Name = "Predictive Science Inc. Fieldlines Bastille Day",
   Version = "1.0",

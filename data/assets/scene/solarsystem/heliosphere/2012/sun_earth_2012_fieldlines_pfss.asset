@@ -1,6 +1,5 @@
-local transforms = asset.require('../../sun/transforms_heliosphere.asset')
+local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere.asset')
 
--- Specifying transfer functions
 local transferFunctions = asset.syncedResource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
@@ -8,7 +7,6 @@ local transferFunctions = asset.syncedResource({
   Version = 1
 })
 
--- Specifying transfer functions
 local fieldlineData  = asset.syncedResource({
   Name = "Fieldlines Data",
   Type = "HttpSynchronization",
@@ -16,12 +14,12 @@ local fieldlineData  = asset.syncedResource({
   Version = 1
 })
 
-local pfssTransitionColorTable = transferFunctions .. "/pfss_transition.txt";
-local pfssTopologyColorTable = transferFunctions .. "/pfss_topology.txt";
-local pfssBsignColorTable = transferFunctions .. "/pfss_bsign.txt";
+local pfssTransitionColorTable = transferFunctions .. "pfss_transition.txt"
+local pfssTopologyColorTable = transferFunctions .. "pfss_topology.txt"
+local pfssBsignColorTable = transferFunctions .. "pfss_bsign.txt"
 
-PFSSPaths = {
-  SolarSoft = fieldlineData .. "/pfss/leilas_solar_soft_july_12_2012/"
+local PFSSPaths = {
+  SolarSoft = fieldlineData .. "leilas_solar_soft_july_12_2012/"
 }
 
 local PFSS = {
@@ -29,48 +27,35 @@ local PFSS = {
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    -- TracingMethod = "PreTracedBinary",
     SourceFolder = PFSSPaths.SolarSoft,
     InputFileType = "Osfls",
-    -- StartStateOffset = 515,
-    -- StateStepSize = 100,
-    -- MaxNumStates = 55,
     Color = {0.35, 0.51, 0.875, 0.22},
     FlowColor = { 1, 0.9, 1, 0.74 },
     ColorTablePaths = {
-      --pfssTransitionColorTable,
       pfssTopologyColorTable,
       pfssBsignColorTable,
     },
     ColorTableRanges = {
-      --{0, 1},
       { 0, 2 },
       { -1, 1 },
     },
-    --ExtraMinMaxLimits = {
-    --  --{-1, 1},
-    --  { 0, 2 },
-    --  { -1, 1 },
-    --},
-    --Color = {
-    --  Uniform = {0.3861, 1.0, 0.92174, 0.18644}
-    --},
-    --RadialDomainLimits = { 0, 50 },
-    --CartesianDomainLimits = {
-    --  { -50, 50 },
-    --  { -50, 50 },
-    --  { -50, 50 }
-    --},
+
     LoadAtRuntime = true
   },
-    GUI = {
-      Name = "Fieldlines PFSS",
-      Path = "/Solar System/Heliosphere"
-    }
+  GUI = {
+    Name = "Fieldlines PFSS",
+    Path = "/Solar System/Heliosphere"
+  }
 }
 
 asset.onInitialize(function ()
+  if not openspace.directoryExists(PFSSPaths.SolarSoft) then
+    openspace.printInfo("Extracting " .. "Fieldlines from PFSS model of 2012 event")
+    openspace.unzipFile(fieldlineData .. "leilas_solar_soft_july_12_2012.zip", PFSSPaths.SolarSoft, true)
+  end
+
   openspace.addSceneGraphNode(PFSS)
+
   -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.color", { 1, 0.9, 1, 0.74 })
   -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSize", 5)
   -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSpacing", 250)

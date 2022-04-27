@@ -1,48 +1,44 @@
-local transforms = asset.require('../../planets/earth/magnetosphere/transforms_magnetosphere.asset')
+local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere.asset')
 
 -- Specifying transfer functions
 local transferFunctions = asset.syncedResource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
-  Identifier = "sun_earth_event-fieldlines-transferfunctions",
+  Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
   Version = 1
 })
 
 -- Specifying transfer functions
-local fieldlineData  = asset.syncedResource({
+local fieldlineData = asset.syncedResource({
   Name = "Fieldlines Data",
   Type = "HttpSynchronization",
-  Identifier = "sun_earth_event-fieldlines-data",
+  Identifier = "sun_earth_event_july_2012-batsrus",
   Version = 1
 })
 
-local batsrusTemperatureColorTable = transferFunctions .. "/batsrus_temperature.txt"
-local batsrusDensityColorTable = transferFunctions .. "/batsrus_density.txt"
-local batsrusCurrentColorTable = transferFunctions .. "/batsrus_current2.txt"
-local batsrusVelocityColorTable = transferFunctions .. "/batsrus_velocity.txt"
-local batsrusTopologyColorTable = transferFunctions .. "/batsrus_topology.txt"
+local batsrusTemperatureColorTable = transferFunctions .. "batsrus_temperature.txt"
+local batsrusDensityColorTable = transferFunctions .. "batsrus_density.txt"
+local batsrusCurrentColorTable = transferFunctions .. "batsrus_current2.txt"
+local batsrusVelocityColorTable = transferFunctions .. "batsrus_velocity.txt"
+local batsrusTopologyColorTable = transferFunctions .. "batsrus_topology.txt"
 
-BATSRUSPaths = {
-  MagneticOpenClosed = fieldlineData .. "/batsrus/lutz_july_event/downsampled4/magnetic_fieldlines/open-closed/",
-  VelocityFlowlinesUpstream = fieldlineData .. "/batsrus/lutz_july_event/downsampled4/velocity_flowlines/upstream/",
-  AsherStaticSeeds = fieldlineData .. "/batsrus/asher_static_seeds/downsampled4/"
+local unzippedDataDestination = {
+  openClosed = fieldlineData .. "magnetic_fieldlines-open_closed",
+  velocityFlow = fieldlineData .. "velocity_flowlines-upstream",
+  asherStatic = fieldlineData .. "ashers_static_seeds"
 }
-
 ----------------------LUTZ's JULY TRACES-------------------------
 local BatsrusJ12OpenClosed = {
   Identifier = "FL_BATSRUS_J12_OpenClosed",
   Parent = transforms.GSMReferenceFrame.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    -- TracingMethod = "PreTracedBinary",
-    SourceFolder = BATSRUSPaths.MagneticOpenClosed,
+    SourceFolder = unzippedDataDestination.openClosed,
     InputFileType = "Osfls",
-    -- StartStateOffset = 1908,
-    -- StateStepSize = 100,
-    -- MaxNumStates = 12,
+
     Color = { 0.7, 0.4, 0.0, 0.6 }, -- Default color
     ColorMethod = "By Quantity", -- Color by Quantity
-    ColorQuantity = 0, -- Temprature
+    ColorQuantity = 0, -- Temperature
     ColorTablePaths = {
       batsrusTemperatureColorTable,
       batsrusDensityColorTable,
@@ -57,22 +53,6 @@ local BatsrusJ12OpenClosed = {
       { 150, 900 },
       { 0, 3 },
     },
-    --[[ ExtraMinMaxLimits = {
-      { 0, 1000000000 },
-      { -1, 150 },
-      { -0.2, 0.2 },
-      { 0, 6000 },
-      { 0, 3 },
-    },
-    RadialDomainLimits = { 0, 350 },
-    CartesianDomainLimits = {
-      { -400, 60 },
-      { -80, 80 },
-      { -100, 100 }
-    }, ]]
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingQuantity", 4) -- Topology
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMinLimit", "2.5")
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMaxLimit", "3.0")
     MaskingEnabled = true,
     MaskingQuantity = 4, -- Topology
     MaskingRanges = {{2.5, 3.0}}, -- Closed only
@@ -90,12 +70,9 @@ local BatsrusJ12FlowLines = {
   Parent = transforms.GSMReferenceFrame.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    -- TracingMethod = "PreTracedBinary",
-    SourceFolder = BATSRUSPaths.VelocityFlowlinesUpstream,
+    SourceFolder = unzippedDataDestination.velocityFlow,
     InputFileType = "Osfls",
-    -- StartStateOffset = 650,
-    -- StateStepSize = 100,
-    -- MaxNumStates = 12,
+
     ColorMethod = "By Quantity", -- Color by Quantity
     ColorQuantity = 3, -- Velocity
     Color = { 0.7, 0.4, 0.0, 0.12 }, -- Default color
@@ -113,15 +90,6 @@ local BatsrusJ12FlowLines = {
       { 150, 900 },
       { 0, 3 },
     },
-    --[[ ExtraMinMaxLimits = {
-      { 0, 1000000000 },
-      { -1, 150 },
-      { -0.2, 0.2 },
-      { 0, 6000 },
-      { 0, 3 },
-    },
-    RadialDomainLimits = { 0, 350 },
-    CartesianDomainLimits = { { -400, 60 }, { -80, 80 }, { -100, 100 } }, ]]
     LoadAtRuntime = true
   },
   GUI = {
@@ -136,13 +104,10 @@ local BatsrusAsherStaticSeedsFlowLines = {
   Parent = transforms.GSMReferenceFrame.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
-    -- TracingMethod = "PreTracedBinary",
-    SourceFolder = BATSRUSPaths.AsherStaticSeeds,
+    SourceFolder = unzippedDataDestination.asherStatic,
     InputFileType = "Osfls",
+
     Enabled = false,
-    -- StartStateOffset = 650,
-    -- StateStepSize = 100,
-    -- MaxNumStates = 12,
     ColorTablePaths = {
       batsrusTemperatureColorTable,
       batsrusDensityColorTable,
@@ -157,15 +122,6 @@ local BatsrusAsherStaticSeedsFlowLines = {
       { 150, 900 },
       { 0, 3 },
     },
-    --[[ ExtraMinMaxLimits = {
-      { 0, 1000000000 },
-      { -1, 150 },
-      { -0.2, 0.2 },
-      { 0, 6000 },
-      { 0, 3 },
-    },
-    RadialDomainLimits = { 0, 350 },
-    CartesianDomainLimits = { { -400, 60 }, { -80, 80 }, { -100, 100 } }, ]]
     LoadAtRuntime = true
   },
   GUI = {
@@ -175,33 +131,32 @@ local BatsrusAsherStaticSeedsFlowLines = {
 }
 
 asset.onInitialize(function ()
+  if not openspace.directoryExists(unzippedDataDestination.openClosed) then
+    openspace.printInfo("Extracting " .. "Fieldlines from Batsrus model of 2012 event")
+    openspace.unzipFile(fieldlineData .. "magnetic_fieldlines-open_closed.zip", unzippedDataDestination.openClosed, true)
+  end
+  if not openspace.directoryExists(unzippedDataDestination.velocityFlow) then
+    openspace.printInfo("Extracting " .. "Fieldlines from Batsrus model of 2012 event")
+    openspace.unzipFile(fieldlineData .. "velocity_flowlines-upstream.zip", unzippedDataDestination.velocityFlow, true)
+  end
+  if not openspace.directoryExists(unzippedDataDestination.asherStatic) then
+    openspace.printInfo("Extracting " .. "Fieldlines from Batsrus model of 2012 event")
+    openspace.unzipFile(fieldlineData .. "ashers_static_seeds.zip", unzippedDataDestination.asherStatic, true)
+  end
+
   openspace.addSceneGraphNode(BatsrusJ12OpenClosed)
   openspace.addSceneGraphNode(BatsrusJ12FlowLines)
   openspace.addSceneGraphNode(BatsrusAsherStaticSeedsFlowLines)
 
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Color.colorMethod", 1) -- Color by Quantity
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Color.colorQuantity", 4) -- Topology
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Domain.limitsY", { -30.61, 30.61 })
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Domain.limitsY", { -30.61, 30.61 })
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.maskingEnabled", true)
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingQuantity", 4) -- Topology
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMinLimit", "2.5")
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_OpenClosed.Renderable.Masking.maskingMaxLimit", "3.0")
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorMethod", 1) -- Color by Quantity
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorQuantity", 3) -- Velocity
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorQuantityMin", "75")
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.colorQuantityMax", "350")
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Color.uniform", { 1, 1, 1, 0.12 })
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSize", 2)
   -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSize", 2)
   -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSpacing", 60)
   -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.speed", 20)
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(BatsrusJ12OpenClosed)
-  openspace.removeSceneGraphNode(BatsrusJ12FlowLines)
   openspace.removeSceneGraphNode(BatsrusAsherStaticSeedsFlowLines)
+  openspace.removeSceneGraphNode(BatsrusJ12FlowLines)
+  openspace.removeSceneGraphNode(BatsrusJ12OpenClosed)
 end)
 
 asset.meta = {
