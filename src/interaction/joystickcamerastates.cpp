@@ -167,7 +167,7 @@ void JoystickCameraStates::updateStateFromInput(
             }
         }
 
-        int nButtons = joystickInputStates.numAxes(joystickInputState.name);
+        int nButtons = joystickInputStates.numButtons(joystickInputState.name);
         for (int i = 0; i < nButtons; ++i) {
             auto itRange = joystick->buttonMapping.equal_range(i);
             for (auto it = itRange.first; it != itRange.second; ++it) {
