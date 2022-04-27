@@ -168,8 +168,16 @@ glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(const glm::dvec2& drag) {
     return result;
 }
 
+bool ScreenSpaceSkyBrowser::isInitialized() const {
+    return _isInitialized;
+}
+
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
     WwtCommunicator::setIdInBrowser(identifier());
+}
+
+void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {
+    _isInitialized = isInitialized;
 }
 
 void ScreenSpaceSkyBrowser::updateTextureResolution() {

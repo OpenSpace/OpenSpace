@@ -114,7 +114,7 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& startMouse,
 }
 
 void TargetBrowserPair::synchronizeAim() {
-    if (!_moveTarget.isAnimating()) {
+    if (!_moveTarget.isAnimating() && _browser->isInitialized()) {
         _browser->setEquatorialAim(targetDirectionEquatorial());
         _browser->setTargetRoll(targetRoll());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
@@ -141,6 +141,7 @@ void TargetBrowserPair::initialize() {
     _targetRenderable->setRatio(dim.x / dim.y);
     _browser->updateBorderColor();
     _browser->hideChromeInterface(true);
+    _browser->setIsInitialized(true);
 }
 
 glm::ivec3 TargetBrowserPair::borderColor() const {
