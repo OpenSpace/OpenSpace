@@ -144,8 +144,7 @@ namespace {
     LINFO("Loading image collections to " + identifier);
 
     // Load the collections here because we know that the browser can execute javascript
-    std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/"
-                        "wwt-web-client/master/assets/webclient-explore-root.wtml";
+    std::string root = "https://data.openspaceproject.com/wwt/1/imagecollection.wtml";
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
@@ -252,8 +251,7 @@ namespace {
 
     // If no data has been loaded yet, download the data from the web!
     if (module->nLoadedImages() == 0) {
-        std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/"
-                            "wwt-web-client/master/assets/webclient-explore-root.wtml";
+        std::string root = "https://data.openspaceproject.com/wwt/1/imagecollection.wtml";
 
         std::filesystem::path directory = absPath("${MODULE_SKYBROWSER}/wwtimagedata/");
         module->loadImages(root, directory);
