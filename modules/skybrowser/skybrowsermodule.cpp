@@ -146,13 +146,9 @@ SkyBrowserModule::SkyBrowserModule()
         }
 
         if (_isCameraInSolarSystem) {
-            std::for_each(
-                _targetsBrowsers.begin(),
-                _targetsBrowsers.end(),
-                [&](const std::unique_ptr<TargetBrowserPair>& pair) {
-                    pair->synchronizeAim();
-                }
-            );
+            for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
+                pair->synchronizeAim();
+            }
             incrementallyAnimateTargets();
         }
         if (_cameraRotation.isAnimating() && _allowCameraRotation) {
