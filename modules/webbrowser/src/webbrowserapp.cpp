@@ -44,6 +44,8 @@ void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
 {
     commandLine->AppendSwitch("--enable-gpu-rasterization");
     commandLine->AppendSwitch("--use-gl=desktop");
+    commandLine->AppendSwitch("--enable-webgl2-compute-context");
+    commandLine->AppendSwitch("--enable-webgl-image-chromium");
     commandLine->AppendSwitch("ignore-gpu-blocklist");
     commandLine->AppendSwitch("log-gpu-control-list-decisions");
     commandLine->AppendSwitch("use-mock-keychain");
