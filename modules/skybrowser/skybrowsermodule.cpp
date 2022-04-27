@@ -45,6 +45,15 @@ namespace {
         "Decides if the GUI for this module should be enabled."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo
+        ShowTitleInGuiBrowserInfo =
+    {
+        "ShowTitleInGuiBrowser",
+        "Show Title in Gui Browser",
+        "If true, the title fo the currently selected browser is shown in the WebGUI "
+        "browser."
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow Camera Rotation",
@@ -96,12 +105,14 @@ namespace openspace {
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
     , _enabled(EnabledInfo)
+    , _showTitleInGuiBrowser(ShowTitleInGuiBrowserInfo, true)
     , _allowCameraRotation(AllowRotationInfo, true)
     , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
     , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
     , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
 {
     addProperty(_enabled);
+    addProperty(_showTitleInGuiBrowser);
     addProperty(_allowCameraRotation);
     addProperty(_cameraRotationSpeed);
     addProperty(_targetAnimationSpeed);
