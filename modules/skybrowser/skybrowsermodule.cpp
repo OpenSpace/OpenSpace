@@ -87,6 +87,13 @@ namespace {
         "panel is minimized."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo InverseZoomInfo = {
+        "InverseZoomDirection",
+        "Inverse Zoom Direction",
+        "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
+        "inversed."
+    };
+
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -105,6 +112,9 @@ namespace {
 
         // [[codegen::verbatim(HideWithGuiInfo.description)]]
         std::optional<bool> hideTargetsBrowsersGui;
+
+        // [[codegen::verbatim(InverseZoomInfo.description)]]
+        std::optional<bool> inverseZoomDirection;
     };
 
 #include "skybrowsermodule_codegen.cpp"
@@ -121,6 +131,7 @@ SkyBrowserModule::SkyBrowserModule()
     , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
     , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
     , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
+    , _inverseZoomDirection(InverseZoomInfo, false)
 {
     addProperty(_enabled);
     addProperty(_showTitleInGuiBrowser);
@@ -129,6 +140,7 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_targetAnimationSpeed);
     addProperty(_browserAnimationSpeed);
     addProperty(_hideTargetsBrowsersWithGui);
+    addProperty(_inverseZoomDirection);
 
     // Set callback functions
     global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
