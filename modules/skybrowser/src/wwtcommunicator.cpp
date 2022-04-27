@@ -48,7 +48,11 @@ void WwtCommunicator::selectImage(const std::string& url, int i) {
     if (it == _selectedImages.end()) {
         // Push newly selected image to front
         _selectedImages.push_front(i);
-        addImageLayerToWwt(url, i);
+
+        // If wwt has not loaded the collection yet, wait with passing the message
+        if (_isImageCollectionLoaded) {
+            addImageLayerToWwt(url, i);
+        }
     }
 }
 

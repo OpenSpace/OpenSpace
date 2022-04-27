@@ -52,10 +52,6 @@ namespace {
     if (module->isCameraInSolarSystem()) {
         TargetBrowserPair* selected = module->getPair(module->selectedBrowserId());
         if (selected) {
-            if (!selected->isImageCollectionLoaded()) {
-                LINFO("Image collection is not yet loaded to AAS WorldWide Telescope");
-                return;
-            }
             const ImageData& image = module->getWwtDataHandler()->getImage(imageIndex);
             // Load image into browser
             std::string str = image.name;
