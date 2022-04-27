@@ -2,14 +2,6 @@ local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
 local initializeAll = false
 
-local function numItems(iTable)
-  local counter = 0
-  for k, v in ipairs(iTable) do
-    counter = counter + 1
-  end
-  return counter
-end
-
 -- Add the asset cooresponding to the joystick name
 local function addJoystickAsset(joystick)
   if joystick == "Wireless Controller" then
@@ -31,7 +23,7 @@ end
 
 asset.onInitialize(function()
   local rawJoysticks = openspace.navigation.listAllJoysticks()
-  local numJoysticks = numItems(rawJoysticks)
+  local numJoysticks = #rawJoysticks
   local joystick = ""
 
   -- Remove the SpaceMouse emulator if it exists

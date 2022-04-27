@@ -87,7 +87,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
      *        if empty the max number of axes for all joysticks are returned
      * \return The number of axes for the joystick with the given name
      */
-    int numAxes(const std::string& joystickName) const;
+    int numAxes(const std::string& joystickName = "") const;
 
     /**
      * This function return the number of buttons the joystick with the given name has
@@ -96,7 +96,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
      *        if empty the max number of buttons for all joysticks are returned
      * \return The number of buttons for the joystick with the given name
      */
-    int numButtons(const std::string& joystickName) const;
+    int numButtons(const std::string& joystickName = "") const;
 
     /**
      * This function adds the contributions of all connected joysticks for the provided

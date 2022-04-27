@@ -116,9 +116,9 @@ asset.onInitialize(function()
     name,
     controller.X,
     [[
-      "openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
-      "openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
-      "openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
     ]],
     "Switch target to Earth"
   )

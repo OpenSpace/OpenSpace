@@ -246,26 +246,26 @@ void checkJoystickStatus() {
 
             if (currentlyPressed) {
                 switch (state.buttons[j]) {
-                case JoystickAction::Idle:
-                case JoystickAction::Release:
-                    state.buttons[j] = JoystickAction::Press;
-                    break;
-                case JoystickAction::Press:
-                case JoystickAction::Repeat:
-                    state.buttons[j] = JoystickAction::Repeat;
-                    break;
+                    case JoystickAction::Idle:
+                    case JoystickAction::Release:
+                        state.buttons[j] = JoystickAction::Press;
+                        break;
+                    case JoystickAction::Press:
+                    case JoystickAction::Repeat:
+                        state.buttons[j] = JoystickAction::Repeat;
+                        break;
                 }
             }
             else {
                 switch (state.buttons[j]) {
-                case JoystickAction::Idle:
-                case JoystickAction::Release:
-                    state.buttons[j] = JoystickAction::Idle;
-                    break;
-                case JoystickAction::Press:
-                case JoystickAction::Repeat:
-                    state.buttons[j] = JoystickAction::Release;
-                    break;
+                    case JoystickAction::Idle:
+                    case JoystickAction::Release:
+                        state.buttons[j] = JoystickAction::Idle;
+                        break;
+                    case JoystickAction::Press:
+                    case JoystickAction::Repeat:
+                        state.buttons[j] = JoystickAction::Release;
+                        break;
                 }
             }
         }
