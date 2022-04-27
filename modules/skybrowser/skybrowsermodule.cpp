@@ -50,7 +50,7 @@ namespace {
     {
         "ShowTitleInGuiBrowser",
         "Show Title in Gui Browser",
-        "If true, the title fo the currently selected browser is shown in the WebGUI "
+        "If true, the name of the currently selected sky browser is shown in the WebGUI "
         "browser."
     };
 
