@@ -130,7 +130,6 @@ void SkyBrowserTopic::sendBrowserData() {
             target.setValue("color", pair->borderColor());
             target.setValue("cartesianDirection", cartesian);
             target.setValue("ratio", static_cast<double>(pair->browserRatio()));
-            target.setValue("isImageCollectionLoaded", pair->isImageCollectionLoaded());
             target.setValue("isFacingCamera", pair->isFacingCamera());
             target.setValue("isUsingRae", pair->isUsingRadiusAzimuthElevation());
             target.setValue("selectedImages", selectedImagesVector);
