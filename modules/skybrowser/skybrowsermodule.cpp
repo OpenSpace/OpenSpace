@@ -154,6 +154,13 @@ SkyBrowserModule::SkyBrowserModule()
         if (_cameraRotation.isAnimating() && _allowCameraRotation) {
             incrementallyRotateCamera();
         }
+
+        // Trigger callbacks (should maybe have a check to see if update is needed)
+        using K = CallbackHandle;
+        using V = CallbackFunction;
+        for (const std::pair<K, V>& it : _preSyncCallbacks) {
+            it.second(); // call function
+        }
     });
 }
 
@@ -395,6 +402,31 @@ bool SkyBrowserModule::isSelectedPairUsingRae() const {
 bool SkyBrowserModule::isSelectedPairFacingCamera() const {
     TargetBrowserPair* found = getPair(_selectedBrowser);
     return found ? found->isFacingCamera() : false;
+}
+
+SkyBrowserModule::CallbackHandle SkyBrowserModule::addPreSyncCallback(
+                                                                     CallbackFunction cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _preSyncCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void SkyBrowserModule::removePreSyncCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _preSyncCallbacks.begin(),
+        _preSyncCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, CallbackFunction>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _preSyncCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _preSyncCallbacks.erase(it);
 }
 
 scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {

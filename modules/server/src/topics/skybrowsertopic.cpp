@@ -32,7 +32,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
-#include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -56,7 +55,8 @@ SkyBrowserTopic::SkyBrowserTopic()
 
 SkyBrowserTopic::~SkyBrowserTopic() {
     if (_targetDataCallbackHandle != UnsetOnChangeHandle) {
-        global::timeManager->removeTimeChangeCallback(_targetDataCallbackHandle);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        module->removePreSyncCallback(_targetDataCallbackHandle);
     }
 }
 
@@ -76,13 +76,14 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    _targetDataCallbackHandle = global::timeManager->addTimeChangeCallback([this]() {
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    _targetDataCallbackHandle = module->addPreSyncCallback([this]() {
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
         if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
             sendBrowserData();
             _lastUpdateTime = std::chrono::system_clock::now();
         }
-        });
+    });
 }
 
 void SkyBrowserTopic::sendBrowserData() {
