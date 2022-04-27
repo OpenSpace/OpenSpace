@@ -105,6 +105,7 @@ private:
     properties::BoolProperty _enabled;
     properties::BoolProperty _showTitleInGuiBrowser;
     properties::BoolProperty _allowCameraRotation;
+    properties::BoolProperty _hideTargetsBrowsersWithGui;
     properties::DoubleProperty _cameraRotationSpeed;
     properties::DoubleProperty _targetAnimationSpeed;
     properties::DoubleProperty _browserAnimationSpeed;

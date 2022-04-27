@@ -80,6 +80,13 @@ namespace {
         "This determines the speed of the animation of the field of view in the browser."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo HideWithGuiInfo = {
+        "HideTargetsBrowsersWithGui",
+        "Hide Targets And Browsers With GUI",
+        "If checked, the targets and browsers will be disabled when the sky browser "
+        "panel is minimized."
+    };
+
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -95,6 +102,9 @@ namespace {
 
         // [[codegen::verbatim(BrowserSpeedInfo.description)]]
         std::optional<double> browserSpeed;
+
+        // [[codegen::verbatim(HideWithGuiInfo.description)]]
+        std::optional<bool> hideTargetsBrowsersGui;
     };
 
 #include "skybrowsermodule_codegen.cpp"
@@ -110,6 +120,7 @@ SkyBrowserModule::SkyBrowserModule()
     , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
     , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
     , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
+    , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
 {
     addProperty(_enabled);
     addProperty(_showTitleInGuiBrowser);
@@ -117,6 +128,7 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_cameraRotationSpeed);
     addProperty(_targetAnimationSpeed);
     addProperty(_browserAnimationSpeed);
+    addProperty(_hideTargetsBrowsersWithGui);
 
     // Set callback functions
     global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
