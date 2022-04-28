@@ -15,6 +15,9 @@ local sunRadius = 6.957E8
 local fieldlines = {
   Identifier = "MAS-MHD-Fieldlines-bastille-day-2000",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 1/695700000,
   Transform = {
     Scale = {
       Type = "StaticScale",

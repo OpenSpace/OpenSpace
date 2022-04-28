@@ -505,6 +505,13 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
 
     It curr = next != _folder.files.begin() ? next - 1 : next;
     It nextNext = next != _folder.files.end() ? next + 1 : curr;
+
+    if (next == _folder.files.end()) {
+        curr = _folder.files.end() - 1;
+        next = curr;
+        nextNext = curr;
+    }
+
     It prev = curr != _folder.files.begin() ? curr - 1 : curr;
 
     _interpolateTileProvider->t1 = retrieveTileProvider(Time(curr->first));
@@ -512,14 +519,11 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
     _interpolateTileProvider->future = retrieveTileProvider(Time(nextNext->first));
     _interpolateTileProvider->before = retrieveTileProvider(Time(prev->first));
 
-    _interpolateTileProvider->factor = static_cast<float>(
-        (time.j2000Seconds() - curr->first) /
-        (next->first - curr->first)
+    float factor = static_cast<float>(
+        (time.j2000Seconds() - curr->first) / (next->first - curr->first)
     );
 
-    if (_interpolateTileProvider->factor > 1.f) {
-        _interpolateTileProvider->factor = 1.f;
-    }
+    _interpolateTileProvider->factor = std::clamp(factor, 0.f, 1.f);
 
     return _interpolateTileProvider.get();
 }

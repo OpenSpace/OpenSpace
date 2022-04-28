@@ -131,7 +131,9 @@ namespace {
         "independently from the Opacity value selected by the user. This value should "
         "not be directly manipulated through a user interface, but instead used by other "
         "components of the system programmatically",
-        openspace::properties::Property::Visibility::Developer
+        // The Developer mode should be used once the properties in the UI listen to this
+        // openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
