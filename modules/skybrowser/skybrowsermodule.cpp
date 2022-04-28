@@ -254,12 +254,11 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
             // should this be?
             // found == pair.get()
-            return *found == *(pair.get());
+            return found == pair.get();
         }
     );
 
     _targetsBrowsers.erase(it, _targetsBrowsers.end());
-    _mouseOnPair = nullptr;
 }
 
 void SkyBrowserModule::lookAtTarget(const std::string& id) {

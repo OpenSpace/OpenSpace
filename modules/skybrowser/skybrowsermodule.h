@@ -43,12 +43,6 @@ class TargetBrowserPair;
 class SceneGraphNode;
 struct ImageData;
 
-enum class MouseInteraction {
-    Hover,
-    Drag,
-    FineTune
-};
-
 class SkyBrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SkyBrowser";
@@ -115,19 +109,12 @@ private:
 
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
-    TargetBrowserPair* _mouseOnPair = nullptr;
     SceneGraphNode* _hoverCircle = nullptr;
     std::string _selectedBrowser = ""; // Currently selected browser
     int _uniqueIdentifierCounter = 0;
 
     // Flags
     bool _isCameraInSolarSystem = true; // Visualization modes
-
-    // Mouse interaction
-    glm::vec2 _mousePosition; // Current mouse position in screen space coordinates
-    glm::vec2 _startMousePosition;
-    glm::vec2 _startDragPosition;
-    glm::dvec3 _startTargetPosition;
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
     skybrowser::Animation<glm::dvec3> _cameraRotation =
