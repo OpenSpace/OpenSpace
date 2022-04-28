@@ -79,13 +79,15 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     }
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    _targetDataCallbackHandle = module->addPreSyncCallback([this]() {
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-        if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
-            sendBrowserData();
-            _lastUpdateTime = std::chrono::system_clock::now();
+    _targetDataCallbackHandle = module->addPreSyncCallback(
+        [this]() {
+            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+            if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
+                sendBrowserData();
+                _lastUpdateTime = std::chrono::system_clock::now();
+            }
         }
-    });
+    );
 }
 
 void SkyBrowserTopic::sendBrowserData() {
@@ -93,9 +95,6 @@ void SkyBrowserTopic::sendBrowserData() {
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     ghoul::Dictionary data;
-
-    // The current viewport data for OpenSpace
-    ghoul::Dictionary openSpace;
 
     // Set general data
     data.setValue("selectedBrowserId", module->selectedBrowserId());

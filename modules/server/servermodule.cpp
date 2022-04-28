@@ -73,7 +73,7 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
 }
 
 int ServerModule::skyBrowserUpdateTime() const {
-    return _skyBrowserUpdate;
+    return _skyBrowserUpdateTime;
 }
 
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
@@ -114,9 +114,8 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
             _interfaces.push_back(std::move(serverInterface));
         }
     }
-    // Ylva Selling, 2022-04-26 hasValue<int> doesn't find the variable
     if (configuration.hasValue<double>("SkyBrowserUpdateTime")) {
-        _skyBrowserUpdate = static_cast<int>(
+        _skyBrowserUpdateTime = static_cast<int>(
             configuration.value<double>("SkyBrowserUpdateTime")
         );
     }

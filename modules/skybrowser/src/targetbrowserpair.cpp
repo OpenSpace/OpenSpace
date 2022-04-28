@@ -296,7 +296,7 @@ void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
 
 void TargetBrowserPair::setScreenSpaceSize(const glm::vec2& dimensions) {
     _browser->setScreenSpaceSize(dimensions);
-    _targetRenderable->setRatio(dimensions.x/dimensions.y);
+    _targetRenderable->setRatio(dimensions.x / dimensions.y);
 }
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
@@ -331,7 +331,7 @@ void TargetBrowserPair::startFading(float goal, float fadeTime) {
         _targetNode->identifier(), _browser->identifier(), goal, fadeTime
     );
 
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         script,
         scripting::ScriptEngine::RemoteScripting::Yes
     );

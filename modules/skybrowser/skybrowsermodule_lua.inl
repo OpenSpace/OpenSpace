@@ -452,10 +452,10 @@ namespace {
         "Transform = {"
             "Translation = {"
                 "Type = 'StaticTranslation',"
-                "Position = {"
-                    + std::to_string(galacticTarget.x) + ", "
-                    + std::to_string(galacticTarget.y) + ", "
-                    + std::to_string(galacticTarget.z) + ", "
+                "Position = {" +
+                    std::to_string(galacticTarget.x) + ", " +
+                    std::to_string(galacticTarget.y) + ", " +
+                    std::to_string(galacticTarget.z) + ", " +
                 "},"
             "},"
             "Rotation = {"
@@ -653,9 +653,8 @@ namespace {
  * \param position Position of first copy, which depends on if RAE or Cartesian coordinates
  * are checked
  */
-[[codegen::luawrap]] void addRenderCopy(std::string identifier,
-                                        int numberOfCopies = 1,
-                     glm::vec3 position = glm::vec3(2.1f, 0.f, 0.f))
+[[codegen::luawrap]] void addRenderCopy(std::string identifier, int numberOfCopies = 1,
+                                        glm::vec3 position = glm::vec3(2.1f, 0.f, 0.f)) 
 {
     using namespace openspace;
 
@@ -730,11 +729,14 @@ namespace {
         pair->setImageCollectionIsLoaded(true);
         // Add all selected images to WorldWide Telescope
         const std::deque<int>& images = pair->selectedImages();
-        std::for_each(images.rbegin(), images.rend(), [&](int index) {
-            const ImageData& image = module->getWwtDataHandler()->getImage(index);
-            // Index of image is used as layer ID as it is unique in the image data set
-            pair->browser()->addImageLayerToWwt(image.imageUrl, index);
-        });
+        std::for_each(
+            images.rbegin(), images.rend(),
+            [&](int index) {
+                const ImageData& image = module->getWwtDataHandler()->getImage(index);
+                // Index of image is used as layer ID as it is unique in the image data set
+                pair->browser()->addImageLayerToWwt(image.imageUrl, index);
+            }
+        );
     }
 }
 
@@ -762,8 +764,9 @@ namespace {
     TargetBrowserPair* pair = module->getPair(identifier);
     glm::dvec2 equatorial = pair->targetDirectionEquatorial();
     global::eventEngine->publishEvent<events::EventPointSpacecraft>(
-        equatorial.x, equatorial.y
-    );
+        equatorial.x,
+        equatorial.y
+        );
 }
 
 #include "skybrowsermodule_lua_codegen.cpp"

@@ -89,6 +89,7 @@ protected:
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;
     bool _shouldReload = false;
+
 private:
     class RenderHandler : public WebRenderHandler {
     public:

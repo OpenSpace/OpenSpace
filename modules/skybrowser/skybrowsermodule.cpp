@@ -193,7 +193,7 @@ SkyBrowserModule::SkyBrowserModule()
         // Trigger callbacks (should maybe have a check to see if update is needed)
         using K = CallbackHandle;
         using V = CallbackFunction;
-        for (const std::pair<K, V>& it : _preSyncCallbacks) {
+        for (const std::pair<const K, V>& it : _preSyncCallbacks) {
             it.second(); // call function
         }
     });

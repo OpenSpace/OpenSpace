@@ -123,20 +123,21 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     }
     _scale = _size.y * 0.5f;
 
-    _useRadiusAzimuthElevation.onChange([this]() {
-        std::for_each(
-            _renderCopies.begin(),
-            _renderCopies.end(),
-            [this](std::unique_ptr<properties::Vec3Property>& copy) {
-            if (_useRadiusAzimuthElevation) {
-                *copy = sphericalToRae(cartesianToSpherical(copy.get()->value()));
+    _useRadiusAzimuthElevation.onChange(
+        [this]() {
+            std::for_each(
+                _renderCopies.begin(),
+                _renderCopies.end(),
+                [this](std::unique_ptr<properties::Vec3Property>& copy) {
+                    if (_useRadiusAzimuthElevation) {
+                        *copy = sphericalToRae(cartesianToSpherical(copy->value()));
 
-            }
-            else {
-                *copy = sphericalToCartesian(raeToSpherical(copy.get()->value()));
-            }
+                    }
+                    else {
+                        *copy = sphericalToCartesian(raeToSpherical(copy->value()));
+                    }
+                });
         });
-    });
 }
 
 ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
@@ -232,8 +233,8 @@ ScreenSpaceSkyBrowser::renderCopies() const
         _renderCopies.end(),
         [&](const std::unique_ptr<properties::Vec3Property>& copy) {
             std::pair<std::string, glm::dvec3> pair = {
-                copy.get()->identifier(),
-                glm::dvec3(copy.get()->value())
+                copy->identifier(),
+                glm::dvec3(copy->value())
             };
             vec.push_back(pair);
         }
@@ -267,7 +268,7 @@ void ScreenSpaceSkyBrowser::render() {
 
     // Render a copy that is not interactive
     for (const std::unique_ptr<properties::Vec3Property>& copy : _renderCopies) {
-        glm::vec3 coordinates = copy.get()->value();
+        glm::vec3 coordinates = copy->value();
         if (_useRadiusAzimuthElevation) {
             coordinates = sphericalToCartesian(raeToSpherical(coordinates));
         }
