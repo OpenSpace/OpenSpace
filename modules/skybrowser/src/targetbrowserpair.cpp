@@ -198,7 +198,6 @@ void TargetBrowserPair::selectImage(const ImageData& image, int i) {
     // If the image has coordinates, move the target
     if (image.hasCelestialCoords) {
         // Animate the target to the image coordinate position
-        // unlock();
         glm::dvec3 galactic = skybrowser::equatorialToGalactic(image.equatorialCartesian);
         startAnimation(galactic * skybrowser::CelestialSphereRadius, image.fov);
     }
@@ -330,7 +329,7 @@ void TargetBrowserPair::centerTargetOnScreen() {
 
 double TargetBrowserPair::targetRoll() {
     // To remove the lag effect when moving the camera while having a locked
-       // target, send the locked coordinates to wwt
+    // target, send the locked coordinates to wwt
     glm::dvec3 normal = glm::normalize(
         _targetNode->worldPosition() -
         global::navigationHandler->camera()->positionVec3()
@@ -343,10 +342,6 @@ double TargetBrowserPair::targetRoll() {
     );
     glm::dvec3 up = glm::normalize(glm::cross(normal, right));
     return skybrowser::targetRoll(up, normal);
-}
-
-bool TargetBrowserPair::hasFinishedFading() const {
-    return !_fadeBrowser.isAnimating() && !_fadeTarget.isAnimating();
 }
 
 bool TargetBrowserPair::isFacingCamera() const {

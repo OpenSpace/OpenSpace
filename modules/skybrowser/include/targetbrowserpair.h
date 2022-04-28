@@ -66,7 +66,6 @@ public:
     void centerTargetOnScreen();
     double targetRoll();
 
-    bool hasFinishedFading() const;
     bool isFacingCamera() const;
     bool isUsingRadiusAzimuthElevation() const;
     bool isEnabled() const;
@@ -116,8 +115,6 @@ private:
     SceneGraphNode* _targetNode = nullptr;
 
     // Animation
-    skybrowser::Animation<float> _fadeBrowser = skybrowser::Animation(0.f, 0.f, 0.f);
-    skybrowser::Animation<float> _fadeTarget = skybrowser::Animation(0.f, 0.f, 0.f);
     skybrowser::Animation<double> _fovAnimation = skybrowser::Animation(0.0, 0.0, 0.0);
     skybrowser::Animation<glm::dvec3> _moveTarget =
         skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
