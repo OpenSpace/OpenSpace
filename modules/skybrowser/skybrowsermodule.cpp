@@ -239,6 +239,7 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
     if (browser && target) {
         _targetsBrowsers.push_back(std::make_unique<TargetBrowserPair>(target, browser));
     }
+    _uniqueIdentifierCounter++;
 }
 
 void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
@@ -423,6 +424,10 @@ std::string SkyBrowserModule::selectedTargetId() const {
 
 glm::ivec3 SkyBrowserModule::highlight() const {
     return _highlightAddition;
+}
+
+int SkyBrowserModule::uniqueIdentifierCounter() const {
+    return _uniqueIdentifierCounter;
 }
 
 bool SkyBrowserModule::isCameraInSolarSystem() const {

@@ -422,11 +422,11 @@ namespace {
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-    int noOfPairs = module->nPairs();
-    std::string nameBrowser = "Sky Browser " + std::to_string(noOfPairs);
-    std::string nameTarget = "Sky Target " + std::to_string(noOfPairs);
-    std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
-    std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
+    int uniqueIdentifier = module->uniqueIdentifierCounter();
+    std::string nameBrowser = "Sky Browser " + std::to_string(uniqueIdentifier);
+    std::string nameTarget = "Sky Target " + std::to_string(uniqueIdentifier);
+    std::string idBrowser = "SkyBrowser" + std::to_string(uniqueIdentifier);
+    std::string idTarget = "SkyTarget" + std::to_string(uniqueIdentifier);
     // Determine starting point on screen for the target
     glm::vec3 positionBrowser = glm::vec3(0.f, 0.f, -2.1f);
     glm::vec3 positionTarget = glm::vec3(0.9f, 0.4f, -2.1f);

@@ -64,6 +64,7 @@ public:
     std::string selectedBrowserId() const;
     std::string selectedTargetId() const;
     glm::ivec3 highlight() const;
+    int uniqueIdentifierCounter() const;
 
     void setSelectedBrowser(const std::string& id);
     void setHoverCircle(SceneGraphNode* circle);
@@ -117,6 +118,7 @@ private:
     TargetBrowserPair* _mouseOnPair = nullptr;
     SceneGraphNode* _hoverCircle = nullptr;
     std::string _selectedBrowser = ""; // Currently selected browser
+    int _uniqueIdentifierCounter = 0;
 
     // Flags
     bool _isCameraInSolarSystem = true; // Visualization modes
