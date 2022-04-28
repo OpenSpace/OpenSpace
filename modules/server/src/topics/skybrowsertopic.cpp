@@ -107,49 +107,25 @@ void SkyBrowserTopic::sendBrowserData() {
         ghoul::Dictionary targets;
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();
-            // Convert deque to vector so ghoul can read it
-            std::vector<int> selectedImagesVector;
-            const std::deque<int> selectedImages = pair->selectedImages();
-            std::for_each(
-                selectedImages.begin(),
-                selectedImages.end(),
-                [&](int i) {
-                    selectedImagesVector.push_back(i);
-                }
-            );
-
-            glm::dvec2 spherical = pair->targetDirectionEquatorial();
-            glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
-
-            ghoul::Dictionary target;
-            // Set ("Key", value)
-            target.setValue("id", id);
-            target.setValue("name", pair->browserGuiName());
-            target.setValue("fov", static_cast<double>(pair->verticalFov()));
-            target.setValue("ra", spherical.x);
-            target.setValue("dec", spherical.y);
-            target.setValue("roll", pair->targetRoll());
-            target.setValue("color", pair->borderColor());
-            target.setValue("cartesianDirection", cartesian);
-            target.setValue("ratio", static_cast<double>(pair->browserRatio()));
-            target.setValue("isFacingCamera", pair->isFacingCamera());
-            target.setValue("isUsingRae", pair->isUsingRadiusAzimuthElevation());
-            target.setValue("selectedImages", selectedImagesVector);
-
-            std::vector<std::pair<std::string, glm::dvec3>> copies = pair->renderCopies();
-            ghoul::Dictionary copiesData;
-            for (size_t i = 0; i < copies.size(); i++) {
-                copiesData.setValue(copies[i].first, copies[i].second);
-            }
-            // Set table for the current target
-            target.setValue("renderCopies", copiesData);
+            ghoul::Dictionary target = pair->dataAsDictionary();
             targets.setValue(id, target);
         }
         data.setValue("browsers", targets);
     }
+
     std::string jsonString = ghoul::formatJson(data);
-    json jsonData = json::parse(jsonString.begin(), jsonString.end());
-    _connection->sendJson(wrappedPayload(jsonData));
+
+    // Only send message if data actually changed
+    if (jsonString != _lastUpdateJsonString) {
+        json jsonData = json::parse(jsonString.begin(), jsonString.end());
+        _connection->sendJson(wrappedPayload(jsonData));
+    }
+
+    // @TODO (2022-04-28, emmbr) The message is stills ent every time the camera moves,
+    // because this changes the "roll" parameter of the browser. This is the update that
+    // occurs most often. Maybe it could be separated into it's own topic?
+
+    _lastUpdateJsonString = jsonString;
 }
 
 } // namespace openspace

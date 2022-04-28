@@ -191,6 +191,42 @@ const std::deque<int>& TargetBrowserPair::selectedImages() const {
     return _browser->getSelectedImages();
 }
 
+ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
+    // Convert deque to vector so ghoul can read it
+    std::vector<int> selectedImagesVector;
+    const std::deque<int> selectedImagesDeque = selectedImages();
+    for (int i : selectedImagesDeque) {
+        selectedImagesVector.push_back(i);
+    }
+
+    glm::dvec2 spherical = targetDirectionEquatorial();
+    glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
+
+    ghoul::Dictionary res;
+    res.setValue("id", browserId());
+    res.setValue("name", browserGuiName());
+    res.setValue("fov", static_cast<double>(verticalFov()));
+    res.setValue("ra", spherical.x);
+    res.setValue("dec", spherical.y);
+    res.setValue("roll", targetRoll());
+    res.setValue("color", borderColor());
+    res.setValue("cartesianDirection", cartesian);
+    res.setValue("ratio", static_cast<double>(browserRatio()));
+    res.setValue("isFacingCamera", isFacingCamera());
+    res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
+    res.setValue("selectedImages", selectedImagesVector);
+
+    std::vector<std::pair<std::string, glm::dvec3>> copies = renderCopies();
+    ghoul::Dictionary copiesData;
+    for (size_t i = 0; i < copies.size(); i++) {
+        copiesData.setValue(copies[i].first, copies[i].second);
+    }
+    // Set table for the current target
+    res.setValue("renderCopies", copiesData);
+
+    return res;
+}
+
 void TargetBrowserPair::selectImage(const ImageData& image, int i) {
     // Load image into browser
     _browser->selectImage(image.imageUrl, i);
@@ -327,7 +363,7 @@ void TargetBrowserPair::centerTargetOnScreen() {
     startAnimation(viewDirection, currentFov);
 }
 
-double TargetBrowserPair::targetRoll() {
+double TargetBrowserPair::targetRoll() const {
     // To remove the lag effect when moving the camera while having a locked
     // target, send the locked coordinates to wwt
     glm::dvec3 normal = glm::normalize(

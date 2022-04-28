@@ -29,6 +29,8 @@
 #include <openspace/documentation/documentation.h>
 #include <deque>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 
 struct ImageData;
@@ -64,7 +66,7 @@ public:
 
     // Target
     void centerTargetOnScreen();
-    double targetRoll();
+    double targetRoll() const;
 
     bool isFacingCamera() const;
     bool isUsingRadiusAzimuthElevation() const;
@@ -93,6 +95,8 @@ public:
     SceneGraphNode* targetNode() const;
     ScreenSpaceSkyBrowser* browser() const;
     const std::deque<int>& selectedImages() const;
+
+    ghoul::Dictionary dataAsDictionary() const;
 
     // WorldWide Telescope image handling
     void setImageOrder(int i, int order);
