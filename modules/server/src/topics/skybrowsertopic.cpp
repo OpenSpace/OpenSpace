@@ -56,7 +56,9 @@ SkyBrowserTopic::SkyBrowserTopic()
 SkyBrowserTopic::~SkyBrowserTopic() {
     if (_targetDataCallbackHandle != UnsetOnChangeHandle) {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        module->removePreSyncCallback(_targetDataCallbackHandle);
+        if (module) {
+            module->removePreSyncCallback(_targetDataCallbackHandle);
+        }
     }
 }
 
