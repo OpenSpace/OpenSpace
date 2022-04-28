@@ -121,9 +121,10 @@ void SkyBrowserTopic::sendBrowserData() {
         _connection->sendJson(wrappedPayload(jsonData));
     }
 
-    // @TODO (2022-04-28, emmbr) The message is stills ent every time the camera moves,
-    // because this changes the "roll" parameter of the browser. This is the update that
-    // occurs most often. Maybe it could be separated into it's own topic?
+    // @TODO (2022-04-28, emmbr) The message is still sent very often; every time the
+    // camera moves or the time is changes, because this changes the "roll" parameter
+    // of the browser. This is the update that occurs most often. Maybe it could be
+    // separated into it's own topic?
 
     _lastUpdateJsonString = jsonString;
 }
