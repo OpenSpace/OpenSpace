@@ -64,12 +64,14 @@ public:
     void addRenderCopy(const glm::vec3& raePosition, int nCopies);
     void removeRenderCopy();
     std::vector<std::pair<std::string, glm::dvec3>> renderCopies() const;
+    std::vector<std::pair<std::string, bool>> showRenderCopies() const;
     void moveRenderCopy(int i, glm::vec3 raePosition);
 
 private:
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
     std::vector<std::unique_ptr<properties::Vec3Property>> _renderCopies;
+    std::vector<std::unique_ptr<properties::BoolProperty>> _showRenderCopies;
 
     void bindTexture() override;
 

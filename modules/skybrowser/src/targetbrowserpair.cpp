@@ -211,9 +211,14 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("opacities", _browser->opacities());
         
     std::vector<std::pair<std::string, glm::dvec3>> copies = renderCopies();
+    std::vector<std::pair<std::string, bool>> showCopies = _browser->showRenderCopies();
     ghoul::Dictionary copiesData;
     for (size_t i = 0; i < copies.size(); i++) {
-        copiesData.setValue(copies[i].first, copies[i].second);
+        ghoul::Dictionary copy;
+        copy.setValue("position", copies[i].second);
+        copy.setValue("show", showCopies[i].second);
+        copy.setValue("idShowProperty", showCopies[i].first);
+        copiesData.setValue(copies[i].first, copy);
     }
     // Set table for the current target
     res.setValue("renderCopies", copiesData);

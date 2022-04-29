@@ -56,6 +56,12 @@ namespace {
         "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo RenderCopyShowInfo = {
+        "ShowRenderCopy",
+        "Show Render Copy",
+        "Show the render copy."
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo IsHiddenInfo = {
         "IsHidden",
         "Is hidden",
@@ -203,8 +209,8 @@ void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCop
         openspace::properties::Property::PropertyInfo info = RenderCopyInfo;
         float azimuth = i * glm::two_pi<float>() / nCopies;
         glm::vec3 position = raePosition + glm::vec3(0.f, azimuth, 0.f);
-        std::string id = "RenderCopy" + std::to_string(start + i);
-        info.identifier = id.c_str();
+        std::string idRenderCopy = "RenderCopy" + std::to_string(start + i);
+        info.identifier = idRenderCopy.c_str();
         _renderCopies.push_back(
             std::make_unique<properties::Vec3Property>(
                 info,
@@ -213,7 +219,17 @@ void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCop
                 glm::vec3(4.f, 4.f, glm::half_pi<float>())
             )
         );
+        openspace::properties::Property::PropertyInfo showInfo = RenderCopyShowInfo;
+        std::string idRenderCopyVisible = "ShowRenderCopy" + std::to_string(start + i);
+        showInfo.identifier = idRenderCopyVisible.c_str();
+        _showRenderCopies.push_back(
+            std::make_unique<properties::BoolProperty>(
+                showInfo,
+                true
+                )
+        );
         addProperty(_renderCopies.back().get());
+        addProperty(_showRenderCopies.back().get());
     }
 }
 
@@ -228,19 +244,24 @@ std::vector<std::pair<std::string, glm::dvec3>>
 ScreenSpaceSkyBrowser::renderCopies() const
 {
     std::vector<std::pair<std::string, glm::dvec3>> vec;
-    std::for_each(
-        _renderCopies.begin(),
-        _renderCopies.end(),
-        [&](const std::unique_ptr<properties::Vec3Property>& copy) {
-            std::pair<std::string, glm::dvec3> pair = {
-                copy->identifier(),
-                glm::dvec3(copy->value())
-            };
-            vec.push_back(pair);
-        }
-    );
+    using vec3Property = std::unique_ptr<properties::Vec3Property>;
+    for (const vec3Property& copy : _renderCopies) {
+        vec.push_back({ copy->identifier(), copy->value() });
+    }
     return vec;
 }
+
+std::vector<std::pair<std::string, bool>>
+ScreenSpaceSkyBrowser::showRenderCopies() const 
+{
+    std::vector<std::pair<std::string, bool>> vec;
+    using boolProperty = std::unique_ptr<properties::BoolProperty>;
+    for (const boolProperty& copy : _showRenderCopies) {
+        vec.push_back({copy->identifier(), copy->value()});
+    }
+    return vec;
+}
+
 
 void ScreenSpaceSkyBrowser::moveRenderCopy(int i, glm::vec3 raePosition) {
     if (i < static_cast<int>(_renderCopies.size()) && i >= 0) {
@@ -266,27 +287,29 @@ void ScreenSpaceSkyBrowser::render() {
         );
     }
 
-    // Render a copy that is not interactive
-    for (const std::unique_ptr<properties::Vec3Property>& copy : _renderCopies) {
-        glm::vec3 coordinates = copy->value();
-        if (_useRadiusAzimuthElevation) {
-            coordinates = sphericalToCartesian(raeToSpherical(coordinates));
-        }
-        glm::mat4 localRotation = glm::mat4(1.f);
-        if (_faceCamera) {
-            localRotation = glm::inverse(glm::lookAt(
-                glm::vec3(0.f),
-                glm::normalize(coordinates),
-                glm::vec3(0.f, 1.f, 0.f)
-            ));
-        }
+    // Render the display copies
+    for (size_t i = 0; i < _renderCopies.size(); i++) {
+        if (_showRenderCopies[i]->value()) {
+            glm::vec3 coordinates = _renderCopies[i]->value();
+            if (_useRadiusAzimuthElevation) {
+                coordinates = sphericalToCartesian(raeToSpherical(coordinates));
+            }
+            glm::mat4 localRotation = glm::mat4(1.f);
+            if (_faceCamera) {
+                localRotation = glm::inverse(glm::lookAt(
+                    glm::vec3(0.f),
+                    glm::normalize(coordinates),
+                    glm::vec3(0.f, 1.f, 0.f)
+                ));
+            }
 
-        draw(
-            globalRotationMatrix() *
-            glm::translate(glm::mat4(1.f), coordinates) *
-            localRotation *
-            scaleMatrix()
-        );
+            draw(
+                globalRotationMatrix() *
+                glm::translate(glm::mat4(1.f), coordinates) *
+                localRotation *
+                scaleMatrix()
+            );
+        }
     }
 }
 
