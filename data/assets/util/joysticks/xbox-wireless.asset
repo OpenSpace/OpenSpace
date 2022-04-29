@@ -23,34 +23,32 @@ local joystickHelper = asset.require("./joystick_helper")
 --       The latter is called a sticky axis, when the values don't go back to 0.
 -- Seventh parameter is the sensitivity for the axis
 
-local PS4Controller = {
+local XBoxController = {
   LeftThumbStick = { 0 , 1 },
-  RightThumbStick = { 2, 5 },
-  L2 = 3,
-  R2 = 4,
-  Cross = 1,
-  Circle = 2,
-  Square = 0,
-  Triangle = 3,
-  L1 = 4,
-  R1 = 5,
-  Share = 8,
-  Options = 9,
-  PS = 12,
-  LeftStickButton = 10,
-  RightStickButton = 11,
-  TouchPad = 13,
+  RightThumbStick = { 2, 3 },
+  LeftTrigger = 4,
+  RightTrigger = 5,
+  A = 0,
+  B = 1,
+  X = 2,
+  Y = 3,
+  LB = 4,
+  RB = 5,
+  Select = 6,
+  Start = 7,
+  LeftStickButton = 8,
+  RightStickButton = 9,
   DPad = {
-    Up = 14,
-    Right = 15,
-    Down = 16,
-    Left = 17
+    Up = 10,
+    Right = 11,
+    Down = 12,
+    Left = 13
   }
 }
 
 asset.onInitialize(function()
-  local controller = PS4Controller;
-  local name = "Wireless Controller";
+  local controller = XBoxController;
+  local name = "Wireless Xbox Controller";
 
   local deadzoneJoysticks = 0.15
   local deadzoneTriggers = 0.05
@@ -58,38 +56,38 @@ asset.onInitialize(function()
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[2], deadzoneJoysticks)
   openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick[1], deadzoneJoysticks)
   openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick[2], deadzoneJoysticks)
-  openspace.navigation.setAxisDeadZone(name, controller.L2, deadzoneTriggers)
-  openspace.navigation.setAxisDeadZone(name, controller.R2, deadzoneTriggers)
+  openspace.navigation.setAxisDeadZone(name, controller.LeftTrigger, deadzoneTriggers)
+  openspace.navigation.setAxisDeadZone(name, controller.RightTrigger, deadzoneTriggers)
 
   openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[1], "Orbit X");
   openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[2], "Orbit Y", true);
   openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[1], "Pan X", true);
   openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[2], "Pan Y", true);
-  openspace.navigation.bindJoystickAxis(name, controller.L2, "Zoom Out", false, "TriggerLike");
-  openspace.navigation.bindJoystickAxis(name, controller.R2, "Zoom In", false, "TriggerLike");
+  openspace.navigation.bindJoystickAxis(name, controller.LeftTrigger, "Zoom Out", false, "TriggerLike");
+  openspace.navigation.bindJoystickAxis(name, controller.RightTrigger, "Zoom In", false, "TriggerLike");
 
   openspace.navigation.bindJoystickButton(
     name,
-    controller.L1,
+    controller.LB,
     joystickHelper.bindLocalRoll(name, controller.RightThumbStick[1]),
     "Switch to local roll mode"
   )
   openspace.navigation.bindJoystickButton(
     name,
-    controller.L1,
+    controller.LB,
     joystickHelper.unbindRoll(name, controller.RightThumbStick[1]),
     "Switch back to normal mode",
     "Release"
   )
   openspace.navigation.bindJoystickButton(
     name,
-    controller.R1,
+    controller.RB,
     joystickHelper.bindGlobalRoll(name, controller.RightThumbStick[1]),
     "Switch to global roll mode"
   )
   openspace.navigation.bindJoystickButton(
     name,
-    controller.R1,
+    controller.RB,
     joystickHelper.unbindRoll(name, controller.RightThumbStick[1]),
     "Switch back to normal mode",
     "Release"
@@ -97,13 +95,13 @@ asset.onInitialize(function()
 
   openspace.navigation.bindJoystickButton(
     name,
-    controller.Cross,
+    controller.A,
     propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
     "Toggle zoom friction"
   )
   openspace.navigation.bindJoystickButton(
     name,
-    controller.Circle,
+    controller.B,
     propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
     "Toggle rotational friction"
   )
@@ -116,7 +114,7 @@ asset.onInitialize(function()
 
   openspace.navigation.bindJoystickButton(
     name,
-    controller.Square,
+    controller.X,
     [[
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
@@ -126,7 +124,7 @@ asset.onInitialize(function()
   )
   openspace.navigation.bindJoystickButton(
     name,
-    controller.Triangle,
+    controller.Y,
     [[
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
       openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Mars");
