@@ -101,6 +101,12 @@ namespace {
         "pointed to where the target is aiming."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo ImageCollectionInfo = {
+       "WwtImageCollectionUrl",
+       "AAS WorldWide Telescope Image Collection Url",
+       "The url of the image collection which is loaded into AAS WorldWide Telescope."
+    };
+
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -125,6 +131,9 @@ namespace {
 
         // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
         std::optional<double> spaceCraftAnimationTime;
+
+        // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
+        std::optional<std::string> wwtImageCollectionUrl;
     };
 
 #include "skybrowsermodule_codegen.cpp"
@@ -143,6 +152,8 @@ SkyBrowserModule::SkyBrowserModule()
     , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
     , _inverseZoomDirection(InverseZoomInfo, false)
     , _spaceCraftAnimationTime(SpaceCraftTimeInfo, 2.0, 0.0, 10.0)
+    , _wwtImageCollectionUrl(ImageCollectionInfo, 
+        "https://data.openspaceproject.com/wwt/1/imagecollection.wtml")
 {
     addProperty(_enabled);
     addProperty(_showTitleInGuiBrowser);
@@ -153,6 +164,8 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_hideTargetsBrowsersWithGui);
     addProperty(_inverseZoomDirection);
     addProperty(_spaceCraftAnimationTime);
+    addProperty(_wwtImageCollectionUrl);
+    _wwtImageCollectionUrl.setReadOnly(true);
 
     // Set callback functions
     global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
@@ -421,6 +434,10 @@ double SkyBrowserModule::spaceCraftAnimationTime() const {
     return _spaceCraftAnimationTime;
 }
 
+std::string SkyBrowserModule::wwtImageCollectionUrl() const {
+    return _wwtImageCollectionUrl;
+}
+
 void SkyBrowserModule::setSelectedBrowser(const std::string& id) {
     TargetBrowserPair* found = getPair(id);
     if (found) {
@@ -519,7 +536,8 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::ScrollOverBrowser,
             codegen::lua::LoadingImageCollectionComplete,
             codegen::lua::ShowAllTargetsAndBrowsers,
-            codegen::lua::PointSpaceCraft
+            codegen::lua::PointSpaceCraft,
+            codegen::lua::GetWwtImageCollectionUrl
         }
     };
 }

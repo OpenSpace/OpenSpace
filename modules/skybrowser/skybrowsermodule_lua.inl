@@ -140,13 +140,11 @@ namespace {
     LINFO("Loading image collections to " + identifier);
 
     // Load the collections here because we know that the browser can execute javascript
-    std::string root = "https://data.openspaceproject.com/wwt/1/imagecollection.wtml";
-
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
         pair->hideChromeInterface(true);
-        pair->loadImageCollection(root);
+        pair->loadImageCollection(module->wwtImageCollectionUrl());
     }
 }
 
@@ -234,6 +232,17 @@ namespace {
 }
 
 /**
+ * Returns the AAS WorldWide Telescope image collection url.
+ */
+[[codegen::luawrap]] ghoul::Dictionary getWwtImageCollectionUrl() {
+    using namespace openspace;
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    ghoul::Dictionary url;
+    url.setValue("url", module->wwtImageCollectionUrl());
+    return url;
+}
+
+/**
  * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
  * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
@@ -244,13 +253,11 @@ namespace {
 
     // Send image list to GUI
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-
+    std::string url = module->wwtImageCollectionUrl();
     // If no data has been loaded yet, download the data from the web!
     if (module->nLoadedImages() == 0) {
-        std::string root = "https://data.openspaceproject.com/wwt/1/imagecollection.wtml";
-
         std::filesystem::path directory = absPath("${MODULE_SKYBROWSER}/wwtimagedata/");
-        module->loadImages(root, directory);
+        module->loadImages(url, directory);
     }
 
     // Create Lua table to send to the GUI

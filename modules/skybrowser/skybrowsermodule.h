@@ -33,6 +33,7 @@
 #include <openspace/util/mouse.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <fstream>
 
 namespace openspace {
@@ -71,6 +72,7 @@ public:
     double targetAnimationSpeed() const;
     double browserAnimationSpeed() const;
     double spaceCraftAnimationTime() const;
+    std::string wwtImageCollectionUrl() const;
 
     bool isCameraInSolarSystem() const;
     bool isSelectedPairFacingCamera() const;
@@ -107,6 +109,7 @@ private:
     properties::DoubleProperty _targetAnimationSpeed;
     properties::DoubleProperty _browserAnimationSpeed;
     properties::DoubleProperty _spaceCraftAnimationTime;
+    properties::StringProperty _wwtImageCollectionUrl;
     glm::ivec3 _highlightAddition = glm::ivec3(35); // Highlight object when mouse hovers
 
     // The browsers and targets
