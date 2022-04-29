@@ -187,18 +187,11 @@ double TargetBrowserPair::verticalFov() const {
     return _browser->verticalFov();
 }
 
-const std::deque<int>& TargetBrowserPair::selectedImages() const {
-    return _browser->getSelectedImages();
+std::vector<int> TargetBrowserPair::selectedImages() const {
+    return _browser->selectedImages();
 }
 
 ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
-    // Convert deque to vector so ghoul can read it
-    std::vector<int> selectedImagesVector;
-    const std::deque<int> selectedImagesDeque = selectedImages();
-    for (int i : selectedImagesDeque) {
-        selectedImagesVector.push_back(i);
-    }
-
     glm::dvec2 spherical = targetDirectionEquatorial();
     glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
 
@@ -214,8 +207,9 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("ratio", static_cast<double>(browserRatio()));
     res.setValue("isFacingCamera", isFacingCamera());
     res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
-    res.setValue("selectedImages", selectedImagesVector);
-
+    res.setValue("selectedImages", selectedImages());
+    res.setValue("opacities", _browser->opacities());
+        
     std::vector<std::pair<std::string, glm::dvec3>> copies = renderCopies();
     ghoul::Dictionary copiesData;
     for (size_t i = 0; i < copies.size(); i++) {

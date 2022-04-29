@@ -94,7 +94,7 @@ public:
 
     SceneGraphNode* targetNode() const;
     ScreenSpaceSkyBrowser* browser() const;
-    const std::deque<int>& selectedImages() const;
+    std::vector<int> selectedImages() const;
 
     ghoul::Dictionary dataAsDictionary() const;
 

@@ -49,15 +49,17 @@ public:
     void removeSelectedImage(int i);
     void setImageOrder(int i, int order);
     void loadImageCollection(const std::string& collection);
-    void setImageOpacity(int i, float opacity) const;
+    void setImageOpacity(int i, float opacity);
     void hideChromeInterface(bool shouldHide) const;
 
     bool isImageCollectionLoaded() const;
+
     double verticalFov() const;
     glm::ivec3 borderColor() const;
     glm::dvec2 equatorialAim() const;
     glm::dvec2 fieldsOfView() const;
-    const std::deque<int>& getSelectedImages() const;
+    std::vector<int> selectedImages() const;
+    std::vector<double> opacities() const;
 
     void setImageCollectionIsLoaded(bool isLoaded);
     void setVerticalFov(double vfov);
@@ -73,13 +75,14 @@ public:
 
 protected:
     void setIdInBrowser(const std::string& id) const;
+    std::deque<std::pair<int, double>>::iterator findSelectedImage(int i);
 
     double _verticalFov = 10.0f;
     glm::ivec3 _borderColor = glm::ivec3(70);
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     double _targetRoll = 0.0;
     bool _isImageCollectionLoaded = false;
-    std::deque<int> _selectedImages;
+    std::deque<std::pair<int, double>> _selectedImages;
 
 private:
     void setWebpageBorderColor(glm::ivec3 color) const;

@@ -44,10 +44,11 @@ WwtCommunicator::~WwtCommunicator() {}
 
 void WwtCommunicator::selectImage(const std::string& url, int i) {
     // Ensure there are no duplicates
-    auto it = std::find(_selectedImages.begin(), _selectedImages.end(), i);
+    auto it = findSelectedImage(i);
+
     if (it == _selectedImages.end()) {
         // Push newly selected image to front
-        _selectedImages.push_front(i);
+        _selectedImages.push_front(std::pair<int, double>(i, 1.0));
 
         // If wwt has not loaded the collection yet, wait with passing the message
         if (_isImageCollectionLoaded) {
@@ -64,7 +65,7 @@ void WwtCommunicator::addImageLayerToWwt(const std::string& url, int i) {
 
 void WwtCommunicator::removeSelectedImage(int i) {
     // Remove from selected list
-    auto it = std::find(_selectedImages.begin(), _selectedImages.end(), i);
+    auto it = findSelectedImage(i);
 
     if (it != _selectedImages.end()) {
         _selectedImages.erase(it);
@@ -77,8 +78,20 @@ void WwtCommunicator::sendMessageToWwt(const ghoul::Dictionary& msg) const {
     executeJavascript(script);
 }
 
-const std::deque<int>& WwtCommunicator::getSelectedImages() const {
-    return _selectedImages;
+std::vector<int> WwtCommunicator::selectedImages() const {
+    std::vector<int> selectedImagesVector;
+    for (const std::pair<int, double>& image : _selectedImages) {
+        selectedImagesVector.push_back(image.first);
+    }
+    return selectedImagesVector;
+}
+
+std::vector<double> WwtCommunicator::opacities() const {
+    std::vector<double> opacities;
+    for (const std::pair<int, double>& image : _selectedImages) {
+        opacities.push_back(image.second);
+    }
+    return opacities;
 }
 
 void WwtCommunicator::setTargetRoll(double roll) {
@@ -133,13 +146,21 @@ bool WwtCommunicator::isImageCollectionLoaded() const {
     return _isImageCollectionLoaded;
 }
 
+std::deque<std::pair<int, double>>::iterator WwtCommunicator::findSelectedImage(int i) {
+    auto it = std::find_if(_selectedImages.begin(), _selectedImages.end(),
+        [i](std::pair<int, double>& pair) {
+            return (pair.first == i);
+        });
+    return it;
+}
+
 glm::dvec2 WwtCommunicator::equatorialAim() const {
     return _equatorialAim;
 }
 
 void WwtCommunicator::setImageOrder(int i, int order) {
     // Find in selected images list
-    auto current = std::find(_selectedImages.begin(), _selectedImages.end(), i);
+    auto current = findSelectedImage(i);
     auto target = _selectedImages.begin() + order;
 
     // Make sure the image was found in the list
@@ -159,7 +180,10 @@ void WwtCommunicator::loadImageCollection(const std::string& collection) {
     }
 }
 
-void WwtCommunicator::setImageOpacity(int i, float opacity) const {
+void WwtCommunicator::setImageOpacity(int i, float opacity) {
+    auto it = findSelectedImage(i);
+    it->second = opacity;
+
     ghoul::Dictionary msg = setImageOpacityMessage(std::to_string(i), opacity);
     sendMessageToWwt(msg);
 }

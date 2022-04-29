@@ -321,16 +321,6 @@ namespace {
 
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();
-            // Convert deque to vector so ghoul can read it
-            std::vector<int> selectedImagesVector;
-            const std::deque<int> selectedImages = pair->selectedImages();
-            std::for_each(
-                selectedImages.begin(),
-                selectedImages.end(),
-                [&](int i) {
-                    selectedImagesVector.push_back(i);
-                }
-            );
 
             glm::dvec2 spherical = pair->targetDirectionEquatorial();
             glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
@@ -340,7 +330,7 @@ namespace {
             target.setValue("id", id);
             target.setValue("name", pair->browserGuiName());
             target.setValue("FOV", static_cast<double>(pair->verticalFov()));
-            target.setValue("selectedImages", selectedImagesVector);
+            target.setValue("selectedImages", pair->selectedImages());
             target.setValue("cartesianDirection", cartesian);
             target.setValue("ra", spherical.x);
             target.setValue("dec", spherical.y);
@@ -728,7 +718,7 @@ namespace {
         LINFO("Image collection is loaded in Screen Space Sky Browser " + identifier);
         pair->setImageCollectionIsLoaded(true);
         // Add all selected images to WorldWide Telescope
-        const std::deque<int>& images = pair->selectedImages();
+        const std::vector<int>& images = pair->selectedImages();
         std::for_each(
             images.rbegin(), images.rend(),
             [&](int index) {
