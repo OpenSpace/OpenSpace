@@ -19,7 +19,7 @@ local function getScaleAction(identifier, scale, name, speed)
     Name = actionString .. " " .. name,
     Command = getScaleCommand(identifier, scale, speed),
     Documentation = "Scales " .. name .. " to " .. scale .. "x",
-    GuiPath = "/SolarSystem",
+    GuiPath = "/Solar System/Scale",
     IsLocal = true
   }
   return action
@@ -44,7 +44,7 @@ else
   end
 end
 ]],
-  GuiPath = "/SolarSystem",
+  GuiPath = "/Solar System/Scale",
   Documentation = "Toggle the scale of " .. name,
   IsLocal = true
   }

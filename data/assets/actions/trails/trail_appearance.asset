@@ -6,7 +6,7 @@ local enable_trail_fading = {
     openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", true);
   ]],
   Documentation = "Set orbits to fade out towards the end",
-  GuiPath = "/Trails",
+  GuiPath = "/Trails/Appearance",
   IsLocal = true
 }
 asset.export("enable_trail_fading", enable_trail_fading.Identifier)
@@ -19,7 +19,7 @@ local disable_trail_fading = {
     openspace.setPropertyValue("Scene.*trail.Renderable.Appearance.EnableFade", false);
   ]],
   Documentation = "Sets trails not to fade out torwards end",
-  GuiPath = "/Trails",
+  GuiPath = "/Trails/Appearance",
   IsLocal = true
 }
 asset.export("disable_trail_fading", disable_trail_fading.Identifier)
@@ -46,7 +46,7 @@ local toggle_trail_fading = {
     end
   ]],
   Documentation = "Toggle trails to fade out towards the end for all trails in the Scene",
-  GuiPath = "/Trails",
+  GuiPath = "/Trails/Appearance",
   IsLocal = true
 }
 asset.export("toggle_trail_fading", toggle_trail_fading.Identifier)
@@ -72,7 +72,7 @@ local function getHighlightAction(identifierString, value, nameString)
     Name = actionString .. " " .. nameString .. " Trail",
     Command = getHightlightCommand(identifierString, value),
     Documentation = "Animates the trail fade of " .. nameString .. "'s Trail for effect",
-    GuiPath = "/Trails",
+    GuiPath = "/Trails/Appearance",
     IsLocal = true
   }
   return action
@@ -83,14 +83,20 @@ local function getToggleHighlightAction(identifierString, value, nameString)
     Identifier = "os.toggle_" .. identifierString .. "_trail_highlight",
     Name = "Toggle " .. nameString .. " Trail Highlight",
     Command = [[
-local fadeValue = openspace.getPropertyValue("]] .. identifierString .. [[.Renderable.Appearance.Fade")
-if (fadeValue > 1) then
-  ]] .. getHightlightCommand(identifierString, 1, nameString) .. "\n" .. [[
+local list = openspace.getProperty("]] .. identifierString .. [[.Renderable.Appearance.Fade");
+if ( (#list == 0) ) then
+  openspace.printWarning("No planets to resize");
 else
-  ]] .. getHightlightCommand(identifierString, value, nameString) .. "\n" .. [[
+  local prop = list[1];
+  local fadeValue = openspace.getPropertyValue(prop)
+  if (fadeValue > 1) then
+    ]] .. getHightlightCommand(identifierString, 1, nameString) .. "\n" .. [[
+  else
+    ]] .. getHightlightCommand(identifierString, value, nameString) .. "\n" .. [[
+  end
 end]],
     Documentation = "Animates the trail fade of " .. nameString .. "'s trail for effect",
-    GuiPath = "/Trails",
+    GuiPath = "/Trails/Appearance",
     IsLocal = true
   }
   return action
