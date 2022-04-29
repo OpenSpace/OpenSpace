@@ -70,6 +70,7 @@ public:
     void incrementallyAnimateTargets();
     double targetAnimationSpeed() const;
     double browserAnimationSpeed() const;
+    double spaceCraftAnimationTime() const;
 
     bool isCameraInSolarSystem() const;
     bool isSelectedPairFacingCamera() const;
@@ -105,6 +106,7 @@ private:
     properties::DoubleProperty _cameraRotationSpeed;
     properties::DoubleProperty _targetAnimationSpeed;
     properties::DoubleProperty _browserAnimationSpeed;
+    properties::DoubleProperty _spaceCraftAnimationTime;
     glm::ivec3 _highlightAddition = glm::ivec3(35); // Highlight object when mouse hovers
 
     // The browsers and targets

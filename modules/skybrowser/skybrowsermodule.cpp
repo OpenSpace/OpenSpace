@@ -94,6 +94,13 @@ namespace {
         "inversed."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo SpaceCraftTimeInfo = {
+        "SpaceCraftAnimationTime",
+        "Space Craft Animation Time",
+        "Sets the duration (in seconds) of the animation of the space craft when it is "
+        "pointed to where the target is aiming."
+    };
+
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -115,6 +122,9 @@ namespace {
 
         // [[codegen::verbatim(InverseZoomInfo.description)]]
         std::optional<bool> inverseZoomDirection;
+
+        // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
+        std::optional<double> spaceCraftAnimationTime;
     };
 
 #include "skybrowsermodule_codegen.cpp"
@@ -132,6 +142,7 @@ SkyBrowserModule::SkyBrowserModule()
     , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
     , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
     , _inverseZoomDirection(InverseZoomInfo, false)
+    , _spaceCraftAnimationTime(SpaceCraftTimeInfo, 2.0, 0.0, 10.0)
 {
     addProperty(_enabled);
     addProperty(_showTitleInGuiBrowser);
@@ -141,6 +152,7 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_browserAnimationSpeed);
     addProperty(_hideTargetsBrowsersWithGui);
     addProperty(_inverseZoomDirection);
+    addProperty(_spaceCraftAnimationTime);
 
     // Set callback functions
     global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
@@ -403,6 +415,10 @@ double SkyBrowserModule::targetAnimationSpeed() const {
 
 double SkyBrowserModule::browserAnimationSpeed() const {
     return _browserAnimationSpeed;
+}
+
+double SkyBrowserModule::spaceCraftAnimationTime() const {
+    return _spaceCraftAnimationTime;
 }
 
 void SkyBrowserModule::setSelectedBrowser(const std::string& id) {

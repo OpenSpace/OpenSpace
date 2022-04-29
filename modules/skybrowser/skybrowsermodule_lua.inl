@@ -755,7 +755,8 @@ namespace {
     glm::dvec2 equatorial = pair->targetDirectionEquatorial();
     global::eventEngine->publishEvent<events::EventPointSpacecraft>(
         equatorial.x,
-        equatorial.y
+        equatorial.y,
+        module->spaceCraftAnimationTime()
         );
 }
 
