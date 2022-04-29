@@ -33,6 +33,44 @@
 
 namespace openspace::interaction {
 
+int JoystickInputStates::numAxes(const std::string& joystickName) const {
+    if (joystickName.empty()) {
+        int maxNumAxes = -1;
+        for (auto it = begin(); it < end(); ++it) {
+            if (it->nAxes > maxNumAxes) {
+                maxNumAxes = it->nAxes;
+            }
+        }
+        return maxNumAxes;
+    }
+
+    for (auto it = begin(); it < end(); ++it) {
+        if (it->name == joystickName) {
+            return it->nAxes;
+        }
+    }
+    return -1;
+}
+
+int JoystickInputStates::numButtons(const std::string& joystickName) const {
+    if (joystickName.empty()) {
+        int maxNumButtons = -1;
+        for (auto it = begin(); it < end(); ++it) {
+            if (it->nButtons > maxNumButtons) {
+                maxNumButtons = it->nButtons;
+            }
+        }
+        return maxNumButtons;
+    }
+
+    for (auto it = begin(); it < end(); ++it) {
+        if (it->name == joystickName) {
+            return it->nButtons;
+        }
+    }
+    return -1;
+}
+
 float JoystickInputStates::axis(const std::string& joystickName, int axis) const {
     ghoul_precondition(axis >= 0, "axis must be 0 or positive");
 
