@@ -224,12 +224,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 #else
     strcpy(buffer, value.c_str());
 #endif
-    bool hasNewValue = ImGui::InputText(
-        name.c_str(),
-        buffer,
-        bufferSize,
-        ImGuiInputTextFlags_EnterReturnsTrue
-    );
+    bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
@@ -262,13 +257,8 @@ void renderListProperty(const std::string& name, const std::string& fullIdentifi
 #else
     strcpy(buffer, value.c_str());
 #endif
-    bool hasNewValue = ImGui::InputText(
-        name.c_str(),
-        buffer,
-        bufferSize,
-        ImGuiInputTextFlags_EnterReturnsTrue
-    );
-
+    
+    bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
     if (hasNewValue) {
         std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');
         std::string script = "{";
