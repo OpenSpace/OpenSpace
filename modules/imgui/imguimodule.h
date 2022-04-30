@@ -37,6 +37,7 @@
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
+#include <modules/imgui/include/guiscenecomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -77,42 +78,41 @@ private:
     void renderFrame(float deltaTime, const glm::vec2& windowSize,
         const glm::vec2& dpiScaling, const glm::vec2& mousePos,
         uint32_t mouseButtonsPressed);
-    //void render();
 
     properties::BoolProperty _isEnabled;
     properties::BoolProperty _isCollapsed;
 
-    gui::GuiHelpComponent _help;
-    gui::GuiFilePathComponent _filePath;
-    gui::GuiGIBSComponent _gibs;
-    gui::GuiGlobeBrowsingComponent _globeBrowsing;
-
     gui::GuiPropertyComponent _sceneProperty;
     gui::GuiPropertyComponent _property;
-    gui::GuiMemoryComponent _memoryComponent;
-
     gui::GuiSpaceTimeComponent _spaceTime;
-    gui::GuiMissionComponent _mission;
-    gui::GuiActionComponent _actions;
     gui::GuiJoystickComponent _joystick;
+    gui::GuiActionComponent _actions;
     gui::GuiParallelComponent _parallel;
+    gui::GuiGlobeBrowsingComponent _globeBrowsing;
+    gui::GuiGIBSComponent _gibs;
+    gui::GuiMissionComponent _mission;
+    gui::GuiMemoryComponent _memoryComponent;
+    gui::GuiSceneComponent _sceneView;
+    gui::GuiFilePathComponent _filePath;
+    gui::GuiHelpComponent _help;
 
     properties::BoolProperty _showHelpText;
     properties::FloatProperty _helpTextDelay;
 
     // The ordering of this array determines the order of components in the in-game menu
-    static constexpr int nComponents = 12;
+    static constexpr int nComponents = 13;
     std::array<gui::GuiComponent*, nComponents> _components = {
         &_sceneProperty,
         &_property,
-        & _spaceTime,
-        & _joystick,
-        & _actions,
-        & _parallel,
-        & _globeBrowsing,
-        & _gibs,
-        & _mission,
+        &_spaceTime,
+        &_joystick,
+        &_actions,
+        &_parallel,
+        &_globeBrowsing,
+        &_gibs,
+        &_mission,
         &_memoryComponent,
+        &_sceneView,
         &_filePath,
         &_help
     };

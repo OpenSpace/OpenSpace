@@ -36,6 +36,7 @@ set(HEADER_FILES
   include/guimissioncomponent.h
   include/guiparallelcomponent.h
   include/guipropertycomponent.h
+  include/guiscenecomponent.h
   include/guispacetimecomponent.h
   include/imgui_include.h
   include/renderproperties.h
@@ -54,6 +55,7 @@ set(SOURCE_FILES
   src/guimissioncomponent.cpp
   src/guiparallelcomponent.cpp
   src/guipropertycomponent.cpp
+  src/guiscenecomponent.cpp
   src/guispacetimecomponent.cpp
   src/renderproperties.cpp
 )
