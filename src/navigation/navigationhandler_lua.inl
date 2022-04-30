@@ -155,6 +155,7 @@ namespace {
         // Otherwise we can just select the next one
         global::navigationHandler->orbitalNavigator().setFocusNode(*(it + 1));
     }
+    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
 /**
