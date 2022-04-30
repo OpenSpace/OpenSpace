@@ -200,6 +200,12 @@ void GuiPropertyComponent::setPropertyOwners(
     _propertyOwners = std::move(propertyOwners);
 }
 
+void GuiPropertyComponent::setPropertyOwnerFunction(
+                            std::function<std::vector<properties::PropertyOwner*>()> func)
+{
+    _propertyOwnerFunction = std::move(func);
+}
+
 void GuiPropertyComponent::setVisibility(properties::Property::Visibility visibility) {
     _visibility = visibility;
 }
@@ -284,7 +290,8 @@ void GuiPropertyComponent::render() {
     _isCollapsed = ImGui::IsWindowCollapsed();
     using namespace properties;
 
-    std::vector<properties::PropertyOwner*> owners = _propertyOwners;
+    std::vector<properties::PropertyOwner*> owners =
+        _propertyOwnerFunction ? _propertyOwnerFunction() : _propertyOwners;
 
     std::sort(
         owners.begin(),

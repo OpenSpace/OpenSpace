@@ -49,6 +49,8 @@ public:
         UseTreeLayout useTree = UseTreeLayout::No);
 
     void setPropertyOwners(std::vector<properties::PropertyOwner*> propertyOwners);
+    void setPropertyOwnerFunction(
+        std::function<std::vector<properties::PropertyOwner*>()> func);
 
     void setVisibility(properties::Property::Visibility visibility);
 
@@ -61,6 +63,7 @@ protected:
     properties::Property::Visibility _visibility = properties::Property::Visibility::User;
 
     std::vector<properties::PropertyOwner*> _propertyOwners;
+    std::function<std::vector<properties::PropertyOwner*>()> _propertyOwnerFunction;
 
     properties::BoolProperty _useTreeLayout;
     properties::StringListProperty _treeOrdering;

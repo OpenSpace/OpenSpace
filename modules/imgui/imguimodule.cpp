@@ -283,17 +283,18 @@ ImGUIModule::ImGUIModule()
 void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
     LDEBUGC("ImGUIModule", "Initializing GUI");
 
-    const Scene* scene = global::renderEngine->scene();
-    const std::vector<SceneGraphNode*>& nodes = scene ?
-        scene->allSceneGraphNodes() :
-        std::vector<SceneGraphNode*>();
-
-    _sceneProperty.setPropertyOwners(
-        std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end())
+    _sceneProperty.setPropertyOwnerFunction(
+        []() {
+            const Scene* scene = global::renderEngine->scene();
+            const std::vector<SceneGraphNode*>& nodes = scene ?
+                scene->allSceneGraphNodes() :
+                std::vector<SceneGraphNode*>();
+            
+            return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
+        }
     );
 
     _property.setPropertyOwners({
-        global::renderEngine->scene(),
         global::screenSpaceRootPropertyOwner,
         global::moduleEngine,
         global::navigationHandler,
