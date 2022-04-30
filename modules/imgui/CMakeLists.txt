@@ -25,7 +25,6 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  include/gui.h
   include/guiactioncomponent.h
   include/guicomponent.h
   include/guifilepathcomponent.h
@@ -38,14 +37,12 @@ set(HEADER_FILES
   include/guiparallelcomponent.h
   include/guipropertycomponent.h
   include/guispacetimecomponent.h
-  include/guiiswacomponent.h
   include/imgui_include.h
   include/renderproperties.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  src/gui.cpp
   src/guiactioncomponent.cpp
   src/guicomponent.cpp
   src/guifilepathcomponent.cpp
@@ -58,7 +55,6 @@ set(SOURCE_FILES
   src/guiparallelcomponent.cpp
   src/guipropertycomponent.cpp
   src/guispacetimecomponent.cpp
-  src/guiiswacomponent.cpp
   src/renderproperties.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

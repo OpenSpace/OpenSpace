@@ -25,21 +25,15 @@
 #include <modules/imgui/include/guispacetimecomponent.h>
 
 #include <modules/imgui/imguimodule.h>
-#include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/scripting/scriptengine.h>
-
-#include <numeric>
 
 namespace {
     const ImVec2 Size = ImVec2(350, 500);

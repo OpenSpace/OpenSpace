@@ -43,16 +43,12 @@ namespace openspace::gui {
 
 class GuiPropertyComponent : public GuiComponent {
 public:
-    using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
-
     BooleanType(UseTreeLayout);
 
-    GuiPropertyComponent(std::string identifier, std::string guiName = "",
+    GuiPropertyComponent(std::string identifier, std::string guiName,
         UseTreeLayout useTree = UseTreeLayout::No);
 
-    // This is the function that evaluates to the list of Propertyowners that this
-    // component should render
-    void setSource(SourceFunction function);
+    void setPropertyOwners(std::vector<properties::PropertyOwner*> propertyOwners);
 
     void setVisibility(properties::Property::Visibility visibility);
 
@@ -64,7 +60,7 @@ protected:
 
     properties::Property::Visibility _visibility = properties::Property::Visibility::User;
 
-    SourceFunction _function;
+    std::vector<properties::PropertyOwner*> _propertyOwners;
 
     properties::BoolProperty _useTreeLayout;
     properties::StringListProperty _treeOrdering;

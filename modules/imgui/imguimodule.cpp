@@ -24,10 +24,11 @@
 
 #include <modules/imgui/imguimodule.h>
 
+#include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
@@ -35,53 +36,17 @@
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <modules/imgui/imguimodule.h>
-#include <modules/imgui/include/imgui_include.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/mission/missionmanager.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <filesystem>
-#include <modules/imgui/include/guiactioncomponent.h>
-#include <modules/imgui/include/guifilepathcomponent.h>
-#include <modules/imgui/include/guigibscomponent.h>
-#include <modules/imgui/include/guiglobebrowsingcomponent.h>
-#include <modules/imgui/include/guihelpcomponent.h>
-#include <modules/imgui/include/guiiswacomponent.h>
-#include <modules/imgui/include/guijoystickcomponent.h>
-#include <modules/imgui/include/guimemorycomponent.h>
-#include <modules/imgui/include/guimissioncomponent.h>
-#include <modules/imgui/include/guiparallelcomponent.h>
-#include <modules/imgui/include/guipropertycomponent.h>
-#include <modules/imgui/include/guispacetimecomponent.h>
-#include <openspace/properties/property.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
-#include <openspace/util/touch.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <array>
+
+// #define SHOW_IMGUI_HELPERS
 
 namespace {
     constexpr const char* _loggerCat = "GUI";
-    constexpr const char* configurationFile = "imgui.ini";
     constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
     constexpr const float FontSize = 14.f;
-
-    char* iniFileBuffer = nullptr;
 
     ImFont* captionFont = nullptr;
 
@@ -107,13 +72,11 @@ namespace {
             script = fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
                     Type = 'ScreenSpaceImageLocal',\
-                    TexturePath = openspace.absPath('{}'),\
-                    Identifier = '{}',\
-                    Name = '{}'\
+                    TexturePath = openspace.absPath('{0}'),\
+                    Identifier = '{1}',\
+                    Name = '{1}'\
                 }});",
-                texturePath,
-                identifier,
-                identifier
+                texturePath, identifier
             );
         }
 
@@ -138,12 +101,11 @@ namespace {
             script = fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
                     Type = 'ScreenSpaceImageOnline',\
-                    URL = '{}',\
-                    Identifier = '{}',\
-                    Name = '{}'\
+                    URL = '{0}',\
+                    Identifier = '{1}',\
+                    Name = '{1}'\
                 }});",
                 texturePath,
-                identifier,
                 identifier
             );
         }
@@ -192,10 +154,10 @@ ImGUIModule::ImGUIModule()
     : OpenSpaceModule(Name)
     , _isEnabled(EnabledInfo, false)
     , _isCollapsed(CollapsedInfo, false)
-    , _sceneProperty("SceneProperties", "Scene", gui::GuiPropertyComponent::UseTreeLayout::Yes)
-    , _property("Property", "Settings")
+    , _sceneProperty("Scene", "Scene", gui::GuiPropertyComponent::UseTreeLayout::Yes)
+    , _property("Settings", "Settings")
     , _showHelpText(ShowHelpInfo, true)
-    , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
+    , _helpTextDelay(HelpTextDelayInfo, 1.f, 0.f, 10.f)
 {
     addProperty(_isEnabled);
     addProperty(_isCollapsed);
@@ -230,28 +192,27 @@ ImGUIModule::ImGUIModule()
     global::callback::draw2D->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
+        if (!_isEnabled) {
+            return;
+        }
+
         WindowDelegate& delegate = *global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
             const glm::ivec2 windowSize = delegate.currentSubwindowSize();
-            const glm::ivec2 resolution = delegate.currentDrawBufferResolution();
-
             if (windowSize.x <= 0 || windowSize.y <= 0) {
                 return;
             }
 
+            const glm::ivec2 resolution = delegate.currentDrawBufferResolution();
             const double dt = std::max(delegate.averageDeltaTime(), 0.0);
-            // We don't do any collection of immediate mode user interface, so it
-            // is fine to open and close a frame immediately
-            startFrame(
+            renderFrame(
                 static_cast<float>(dt),
                 glm::vec2(windowSize),
                 resolution / windowSize,
                 _mousePosition,
                 _mouseButtons
             );
-
-            endFrame();
         }
     });
 
@@ -259,13 +220,7 @@ ImGUIModule::ImGUIModule()
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
             ZoneScopedN("ImGUI")
 
-            // A list of all the windows that can show up by themselves
-            if (_isEnabled || _property.isEnabled()) {
-                return keyCallback(key, mod, action);
-            }
-            else {
-                return false;
-            }
+            return _isEnabled ? keyCallback(key, mod, action) : false;
         }
     );
 
@@ -273,13 +228,7 @@ ImGUIModule::ImGUIModule()
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
             ZoneScopedN("ImGUI")
 
-            // A list of all the windows that can show up by themselves
-            if (_isEnabled || _property.isEnabled()) {
-                return charCallback(codepoint, modifier);
-            }
-            else {
-                return false;
-            }
+            return _isEnabled ? charCallback(codepoint, modifier) : false;
         }
     );
 
@@ -300,13 +249,7 @@ ImGUIModule::ImGUIModule()
                 _mouseButtons &= ~(1 << static_cast<int>(button));
             }
 
-            // A list of all the windows that can show up by themselves
-            if (_isEnabled || _property.isEnabled()) {
-                return mouseButtonCallback(button, action);
-            }
-            else {
-                return false;
-            }
+            return _isEnabled ? mouseButtonCallback(button, action) : false;
         }
     );
 
@@ -314,13 +257,7 @@ ImGUIModule::ImGUIModule()
         [&](double, double posY) -> bool {
             ZoneScopedN("ImGUI")
 
-            // A list of all the windows that can show up by themselves
-            if (_isEnabled || _property.isEnabled()) {
-                return mouseWheelCallback(posY);
-            }
-            else {
-                return false;
-            }
+            return _isEnabled ? mouseWheelCallback(posY) : false;
         }
     );
 
@@ -346,36 +283,27 @@ ImGUIModule::ImGUIModule()
 void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
     LDEBUGC("ImGUIModule", "Initializing GUI");
 
-    _property.setSource(
-        []() -> std::vector<properties::PropertyOwner*> {
-            return {
-                global::renderEngine->scene(),
-                global::screenSpaceRootPropertyOwner,
-                global::moduleEngine,
-                global::navigationHandler,
-                global::sessionRecording,
-                global::timeManager,
-                global::renderEngine,
-                global::parallelPeer,
-                global::luaConsole,
-                global::dashboard
-            };
-        }
+    const Scene* scene = global::renderEngine->scene();
+    const std::vector<SceneGraphNode*>& nodes = scene ?
+        scene->allSceneGraphNodes() :
+        std::vector<SceneGraphNode*>();
+
+    _sceneProperty.setPropertyOwners(
+        std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end())
     );
 
-    _sceneProperty.setSource(
-        []() {
-            const Scene* scene = global::renderEngine->scene();
-            const std::vector<SceneGraphNode*>& nodes = scene ?
-                scene->allSceneGraphNodes() :
-                std::vector<SceneGraphNode*>();
-
-            return std::vector<properties::PropertyOwner*>(
-                nodes.begin(),
-                nodes.end()
-                );
-        }
-    );
+    _property.setPropertyOwners({
+        global::renderEngine->scene(),
+        global::screenSpaceRootPropertyOwner,
+        global::moduleEngine,
+        global::navigationHandler,
+        global::sessionRecording,
+        global::timeManager,
+        global::renderEngine,
+        global::parallelPeer,
+        global::luaConsole,
+        global::dashboard
+    });
 }
 
 void ImGUIModule::internalDeinitialize() {
@@ -386,25 +314,18 @@ void ImGUIModule::internalDeinitialize() {
     for (gui::GuiComponent* comp : _components) {
         comp->deinitialize();
     }
-
-    delete iniFileBuffer;
 }
 
-
 void ImGUIModule::internalInitializeGL() {
-    std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(
-        configurationFile,
-        ""
-    );
+    std::filesystem::path file = FileSys.cacheManager()->cachedFilename("imgui.ini", "");
+    LDEBUG(fmt::format("Using {} as ImGUI cache location", file));
 
-    LDEBUG(fmt::format("Using {} as ImGUI cache location", cachedFile));
-
-    iniFileBuffer = new char[cachedFile.string().size() + 1];
+    _iniFileBuffer.resize(file.string().size() + 1);
 
 #ifdef WIN32
-    strcpy_s(iniFileBuffer, cachedFile.string().size() + 1, cachedFile.string().c_str());
+    strcpy_s(_iniFileBuffer.data(), file.string().size() + 1, file.string().c_str());
 #else
-    strcpy(iniFileBuffer, cachedFile.c_str());
+    strcpy(_iniFileBuffer.data(), file.c_str());
 #endif
 
     int nWindows = global::windowDelegate->nWindows();
@@ -415,7 +336,7 @@ void ImGUIModule::internalInitializeGL() {
         ImGui::SetCurrentContext(_contexts[i]);
 
         ImGuiIO& io = ImGui::GetIO();
-        io.IniFilename = iniFileBuffer;
+        io.IniFilename = _iniFileBuffer.data();
         io.DeltaTime = 1.f / 60.f;
         io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
         io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
@@ -510,9 +431,8 @@ void ImGUIModule::internalInitializeGL() {
 
     {
         unsigned char* texData;
-        glm::ivec2 texSize = glm::ivec2(0);
+        glm::ivec2 texSize = glm::ivec2(0, 0);
         for (int i = 0; i < nWindows; ++i) {
-            //_contexts[i] = ImGui::CreateContext();
             ImGui::SetCurrentContext(_contexts[i]);
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
@@ -521,7 +441,7 @@ void ImGUIModule::internalInitializeGL() {
             texData,
             glm::uvec3(texSize.x, texSize.y, 1),
             GL_TEXTURE_2D
-            );
+        );
         _fontTexture->setName("Gui Text");
         _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         _fontTexture->uploadTexture();
@@ -555,6 +475,7 @@ void ImGUIModule::internalInitializeGL() {
         sizeof(ImDrawVert),
         nullptr
     );
+    
     glEnableVertexAttribArray(uvAttrib);
     glVertexAttribPointer(
         uvAttrib,
@@ -562,8 +483,9 @@ void ImGUIModule::internalInitializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv)) // NOLINT
+        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
     );
+    
     glEnableVertexAttribArray(colorAttrib);
     glVertexAttribPointer(
         colorAttrib,
@@ -571,7 +493,7 @@ void ImGUIModule::internalInitializeGL() {
         GL_UNSIGNED_BYTE,
         GL_TRUE,
         sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col)) // NOLINT
+        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col))
     );
     glBindVertexArray(0);
 
@@ -593,9 +515,9 @@ void ImGUIModule::internalDeinitializeGL() {
     }
 }
 
-void ImGUIModule::startFrame(float deltaTime, const glm::vec2& windowSize,
-    const glm::vec2& dpiScaling, const glm::vec2& mousePos,
-    uint32_t mouseButtonsPressed)
+void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
+                             const glm::vec2& dpiScaling, const glm::vec2& mousePos,
+                             uint32_t mouseButtonsPressed)
 {
     const int iWindow = global::windowDelegate->currentWindowId();
     ImGui::SetCurrentContext(_contexts[iWindow]);
@@ -611,43 +533,78 @@ void ImGUIModule::startFrame(float deltaTime, const glm::vec2& windowSize,
     io.MouseDown[1] = mouseButtonsPressed & (1 << 1);
 
     ImGui::NewFrame();
-}
 
-void ImGUIModule::endFrame() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    if (_isEnabled) {
-        render();
+   //
+   // Render
+   ImGui::SetNextWindowCollapsed(_isCollapsed);
 
-        for (gui::GuiComponent* comp : _components) {
-            if (comp->isEnabled()) {
-                comp->render();
-            }
+   ImGui::Begin("OpenSpace GUI", nullptr);
+
+   _isCollapsed = ImGui::IsWindowCollapsed();
+
+   for (gui::GuiComponent* comp : _components) {
+       bool enabled = comp->isEnabled();
+       ImGui::Checkbox(comp->guiName().c_str(), &enabled);
+       comp->setEnabled(enabled);
+   }
+
+   // Render and Update property visibility
+   // Fragile! Keep this in sync with properties::Property::Visibility
+   using V = properties::Property::Visibility;
+   int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
+
+   // Array is sorted by importance
+   std::array<const char*, 4> items = { "User", "Developer", "Hidden", "All" };
+   ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
+
+   _currentVisibility = static_cast<V>(t);
+   _property.setVisibility(_currentVisibility);
+
+#ifdef SHOW_IMGUI_HELPERS
+   ImGui::Checkbox("ImGUI Internals", &_showInternals);
+   if (_showInternals) {
+       ImGui::Begin("Style Editor");
+       ImGui::ShowStyleEditor();
+       ImGui::End();
+
+       ImGui::Begin("Test Window");
+       ImGui::ShowDemoWindow();
+       ImGui::End();
+
+       ImGui::Begin("Metrics Window");
+       ImGui::ShowMetricsWindow();
+       ImGui::End();
+   }
+#endif
+
+   ImGui::End();
+
+
+    for (gui::GuiComponent* comp : _components) {
+        if (comp->isEnabled()) {
+            comp->render();
         }
     }
 
     ImGui::Render();
-
-    if (!_isEnabled) {
-        return;
-    }
 
     // Drawing
     ImDrawData* drawData = ImGui::GetDrawData();
 
     // Avoid rendering when minimized, scale coordinates for retina displays
     // (screen coordinates != framebuffer coordinates)
-    ImGuiIO& io = ImGui::GetIO();
-    GLsizei fb_width = static_cast<GLsizei>(
+    GLsizei fbWidth = static_cast<GLsizei>(
         io.DisplaySize.x * io.DisplayFramebufferScale.x
-        );
-    GLsizei fb_height = static_cast<GLsizei>(
+    );
+    GLsizei fbHeight = static_cast<GLsizei>(
         io.DisplaySize.y * io.DisplayFramebufferScale.y
-        );
-    if (fb_width == 0 || fb_height == 0) {
+    );
+    if (fbWidth == 0 || fbHeight == 0) {
         return;
     }
     drawData->ScaleClipRects(io.DisplayFramebufferScale);
@@ -668,12 +625,12 @@ void ImGUIModule::endFrame() {
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;
     const float height = ImGui::GetIO().DisplaySize.y;
-    glViewport(0, 0, fb_width, fb_height);
+    glViewport(0, 0, fbWidth, fbHeight);
     const glm::mat4 ortho(
-        2.f / width, 0.0f, 0.0f, 0.f,
-        0.0f, 2.0f / -height, 0.0f, 0.f,
-        0.0f, 0.0f, -1.0f, 0.0f,
-        -1.0f, 1.0f, 0.0f, 1.0f
+        2.f / width, 0.f, 0.f, 0.f,
+        0.f, 2.f / -height, 0.f, 0.f,
+        0.f, 0.f, -1.f, 0.f,
+        -1.f, 1.f, 0.f, 1.f
     );
     _program->activate();
 
@@ -716,7 +673,7 @@ void ImGUIModule::endFrame() {
                 );
                 glScissor(
                     static_cast<int>(pcmd->ClipRect.x),
-                    static_cast<int>(fb_height - pcmd->ClipRect.w),
+                    static_cast<int>(fbHeight - pcmd->ClipRect.w),
                     static_cast<int>(pcmd->ClipRect.z - pcmd->ClipRect.x),
                     static_cast<int>(pcmd->ClipRect.w - pcmd->ClipRect.y)
                 );
@@ -748,7 +705,6 @@ bool ImGUIModule::mouseWheelCallback(double position) {
     if (consumeEvent) {
         io.MouseWheel = static_cast<float>(position);
     }
-
     return consumeEvent;
 }
 
@@ -795,11 +751,9 @@ bool ImGUIModule::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
 bool ImGUIModule::charCallback(unsigned int character, KeyModifier) {
     ImGuiIO& io = ImGui::GetIO();
     bool consumeEvent = io.WantCaptureKeyboard;
-
     if (consumeEvent) {
         io.AddInputCharacter(static_cast<unsigned short>(character));
     }
-
     return consumeEvent;
 }
 
@@ -830,13 +784,13 @@ bool ImGUIModule::touchUpdatedCallback(TouchInput input) {
         _validTouchStates.cend(),
         [&](const TouchInput& state) {
             return state.fingerId == input.fingerId &&
-                state.touchDeviceId == input.touchDeviceId;
+                   state.touchDeviceId == input.touchDeviceId;
         }
     );
 
     if (it == _validTouchStates.cbegin()) {
         glm::vec2 windowPos = input.currentWindowCoordinates();
-        io.MousePos = { windowPos.x, windowPos.y };
+        io.MousePos = ImVec2(windowPos.x, windowPos.y);
         io.MouseClicked[0] = true;
         return true;
     }
@@ -856,7 +810,7 @@ void ImGUIModule::touchExitCallback(TouchInput input) {
         _validTouchStates.cend(),
         [&](const TouchInput& state) {
             return state.fingerId == input.fingerId &&
-                state.touchDeviceId == input.touchDeviceId;
+                   state.touchDeviceId == input.touchDeviceId;
         }
     );
 
@@ -868,114 +822,9 @@ void ImGUIModule::touchExitCallback(TouchInput input) {
     _validTouchStates.erase(found);
     if (_validTouchStates.empty()) {
         glm::vec2 windowPos = input.currentWindowCoordinates();
-        io.MousePos = { windowPos.x, windowPos.y };
+        io.MousePos = ImVec2(windowPos.x, windowPos.y);
         io.MouseClicked[0] = false;
     }
-}
-
-
-void ImGUIModule::render() {
-    ImGui::SetNextWindowCollapsed(_isCollapsed);
-
-    ImGui::Begin("OpenSpace GUI", nullptr);
-
-    _isCollapsed = ImGui::IsWindowCollapsed();
-
-    for (gui::GuiComponent* comp : _components) {
-        bool enabled = comp->isEnabled();
-        ImGui::Checkbox(comp->guiName().c_str(), &enabled);
-        comp->setEnabled(enabled);
-    }
-
-    renderAndUpdatePropertyVisibility();
-
-    static const int addImageBufferSize = 256;
-    static char identifierBuffer[addImageBufferSize];
-    static char addImageLocalBuffer[addImageBufferSize];
-    static char addImageOnlineBuffer[addImageBufferSize];
-
-    ImGui::InputText(
-        "Identifier for Local/Online Images",
-        identifierBuffer,
-        addImageBufferSize
-    );
-
-    bool addImageLocal = ImGui::InputText(
-        "Add Local Image",
-        addImageLocalBuffer,
-        addImageBufferSize,
-        ImGuiInputTextFlags_EnterReturnsTrue
-    );
-    if (addImageLocal) {
-        addScreenSpaceRenderableLocal(
-            std::string(identifierBuffer),
-            std::string(addImageLocalBuffer)
-        );
-    }
-
-    bool addImageOnline = ImGui::InputText(
-        "Add Online Image",
-        addImageOnlineBuffer,
-        addImageBufferSize,
-        ImGuiInputTextFlags_EnterReturnsTrue
-    );
-
-    if (addImageOnline) {
-        addScreenSpaceRenderableOnline(
-            std::string(identifierBuffer),
-            std::string(addImageOnlineBuffer)
-        );
-    }
-
-    bool addDashboard = ImGui::Button("Add New Dashboard");
-    if (addDashboard) {
-        global::scriptEngine->queueScript(
-            "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-
-    bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
-    if (addDashboardCopy) {
-        global::scriptEngine->queueScript(
-            "openspace.addScreenSpaceRenderable({ "
-            "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
-            "});",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-
-#ifdef SHOW_IMGUI_HELPERS
-    ImGui::Checkbox("ImGUI Internals", &_showInternals);
-    if (_showInternals) {
-        ImGui::Begin("Style Editor");
-        ImGui::ShowStyleEditor();
-        ImGui::End();
-
-        ImGui::Begin("Test Window");
-        ImGui::ShowDemoWindow();
-        ImGui::End();
-
-        ImGui::Begin("Metrics Window");
-        ImGui::ShowMetricsWindow();
-        ImGui::End();
-    }
-#endif
-
-    ImGui::End();
-}
-
-void ImGUIModule::renderAndUpdatePropertyVisibility() {
-    // Fragile! Keep this in sync with properties::Property::Visibility
-    using V = properties::Property::Visibility;
-    int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
-
-    // Array is sorted by importance
-    std::array<const char*, 4> items = { "User", "Developer", "Hidden", "All" };
-    ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
-
-    _currentVisibility = static_cast<V>(t);
-    _property.setVisibility(_currentVisibility);
 }
 
 } // namespace openspace

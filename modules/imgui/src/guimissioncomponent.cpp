@@ -25,13 +25,10 @@
 #include <modules/imgui/include/guimissioncomponent.h>
 
 #include <modules/imgui/imguimodule.h>
-#include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/util/timerange.h>
-#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 
 namespace {
@@ -99,9 +96,7 @@ GuiMissionComponent::GuiMissionComponent()
 {}
 
 void GuiMissionComponent::render() {
-    if (!global::missionManager->hasCurrentMission()) {
-        return;
-    }
+
 
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
@@ -112,8 +107,13 @@ void GuiMissionComponent::render() {
 
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    const Mission& currentMission = global::missionManager->currentMission();
-    renderMission(currentMission);
+    if (global::missionManager->hasCurrentMission()) {
+        const Mission& currentMission = global::missionManager->currentMission();
+        renderMission(currentMission);
+    }
+    else {
+        ImGui::Text("%s", "No mission loaded");
+    }
 
     ImGui::End();
 }

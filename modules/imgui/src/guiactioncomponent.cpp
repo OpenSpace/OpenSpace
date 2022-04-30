@@ -25,20 +25,17 @@
 #include <modules/imgui/include/guiactioncomponent.h>
 
 #include <modules/imgui/imguimodule.h>
-#include <modules/imgui/include/gui.h>
+#include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
 #include <set>
-
-#include <modules/imgui/include/imgui_include.h>
 
 namespace openspace::gui {
 
 GuiActionComponent::GuiActionComponent()
-    : GuiComponent("Shortcuts", "Shortcuts")
+    : GuiComponent("Actions", "Actions")
 {}
 
 void GuiActionComponent::render() {
@@ -94,6 +91,7 @@ void GuiActionComponent::render() {
             ImGui::Text("(%s)", "local");
         }
     }
+    ImGui::End();
 }
 
 } // namespace openspace::gui

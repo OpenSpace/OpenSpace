@@ -27,20 +27,17 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/guiactioncomponent.h>
 #include <modules/imgui/include/guifilepathcomponent.h>
 #include <modules/imgui/include/guigibscomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 #include <modules/imgui/include/guihelpcomponent.h>
-#include <modules/imgui/include/guiiswacomponent.h>
 #include <modules/imgui/include/guijoystickcomponent.h>
 #include <modules/imgui/include/guimemorycomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
-#include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/keys.h>
@@ -56,19 +53,6 @@ struct ImGuiContext;
 
 namespace openspace {
 
-namespace detail {
-    constexpr int nComponents() {
-        const int nRegularComponents = 12;
-        int totalComponents = nRegularComponents;
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-        ++totalComponents;
-#endif
-
-        return totalComponents;
-    }
-} // namespace detail
-
 class ImGUIModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "ImGUI";
@@ -80,6 +64,7 @@ public:
     void internalInitializeGL() override;
     void internalDeinitializeGL() override;
 
+private:
     bool mouseButtonCallback(MouseButton button, MouseAction action);
     bool mouseWheelCallback(double position);
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
@@ -89,17 +74,10 @@ public:
     bool touchUpdatedCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
 
-    void startFrame(float deltaTime, const glm::vec2& windowSize,
+    void renderFrame(float deltaTime, const glm::vec2& windowSize,
         const glm::vec2& dpiScaling, const glm::vec2& mousePos,
         uint32_t mouseButtonsPressed);
-    void endFrame();
-
-    void render();
-
-    //gui::GUI gui;
-
-private:
-    void renderAndUpdatePropertyVisibility();
+    //void render();
 
     properties::BoolProperty _isEnabled;
     properties::BoolProperty _isCollapsed;
@@ -115,32 +93,26 @@ private:
 
     gui::GuiSpaceTimeComponent _spaceTime;
     gui::GuiMissionComponent _mission;
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    gui::GuiIswaComponent _iswa;
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
     gui::GuiActionComponent _actions;
     gui::GuiJoystickComponent _joystick;
     gui::GuiParallelComponent _parallel;
-
 
     properties::BoolProperty _showHelpText;
     properties::FloatProperty _helpTextDelay;
 
     // The ordering of this array determines the order of components in the in-game menu
-    std::array<gui::GuiComponent*, detail::nComponents()> _components = {
+    static constexpr int nComponents = 12;
+    std::array<gui::GuiComponent*, nComponents> _components = {
         &_sceneProperty,
         &_property,
-        &_memoryComponent,
-        &_spaceTime,
-        &_mission,
-        &_parallel,
-        &_gibs,
-        &_globeBrowsing,
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-        & _iswa,
-#endif
+        & _spaceTime,
+        & _joystick,
         & _actions,
-        &_joystick,
+        & _parallel,
+        & _globeBrowsing,
+        & _gibs,
+        & _mission,
+        &_memoryComponent,
         &_filePath,
         &_help
     };
@@ -152,10 +124,6 @@ private:
     UniformCache(tex, ortho) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
 
-#ifdef SHOW_IMGUI_HELPERS
-    bool _showInternals = false;
-#endif // SHOW_IMGUI_HELPERS
-
     properties::Property::Visibility _currentVisibility =
         properties::Property::Visibility::Developer;
 
@@ -163,6 +131,7 @@ private:
 
     std::vector<TouchInput> _validTouchStates;
 
+    std::vector<char> _iniFileBuffer;
 
     glm::vec2 _mousePosition = glm::vec2(0.f);
     uint32_t _mouseButtons = 0;
