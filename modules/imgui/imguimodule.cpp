@@ -47,32 +47,20 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         LDEBUGC("ImGUIModule", "Initializing GUI");
         gui.initialize();
 
-        gui._globalProperty.setSource(
-            []() {
-            std::vector<properties::PropertyOwner*> res = {
-                global::navigationHandler,
-                global::sessionRecording,
-                global::timeManager,
-                global::renderEngine,
-                global::parallelPeer,
-                global::luaConsole,
-                global::dashboard
-            };
-            return res;
-        }
-        );
-
-        gui._screenSpaceProperty.setSource(
-            []() {
-                return global::screenSpaceRootPropertyOwner->propertySubOwners();
-            }
-        );
-
-        gui._moduleProperty.setSource(
-            []() {
-                std::vector<properties::PropertyOwner*> v;
-                v.push_back(global::moduleEngine);
-                return v;
+        gui._property.setSource(
+            []() -> std::vector<properties::PropertyOwner*> {
+                return {
+                    global::renderEngine->scene(),
+                    global::screenSpaceRootPropertyOwner,
+                    global::moduleEngine,
+                    global::navigationHandler,
+                    global::sessionRecording,
+                    global::timeManager,
+                    global::renderEngine,
+                    global::parallelPeer,
+                    global::luaConsole,
+                    global::dashboard
+                };
             }
         );
 
@@ -83,34 +71,6 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                     scene->allSceneGraphNodes() :
                     std::vector<SceneGraphNode*>();
 
-                return std::vector<properties::PropertyOwner*>(
-                    nodes.begin(),
-                    nodes.end()
-                );
-            }
-        );
-
-        gui._featuredProperties.setSource(
-            []() {
-                std::vector<SceneGraphNode*> nodes =
-                    global::renderEngine->scene()->allSceneGraphNodes();
-
-                nodes.erase(
-                    std::remove_if(
-                        nodes.begin(),
-                        nodes.end(),
-                        [](SceneGraphNode* n) {
-                            const std::vector<std::string>& tags = n->tags();
-                            const auto it = std::find(
-                                tags.begin(),
-                                tags.end(),
-                                "GUI.Interesting"
-                            );
-                            return it == tags.end();
-                        }
-                    ),
-                    nodes.end()
-                );
                 return std::vector<properties::PropertyOwner*>(
                     nodes.begin(),
                     nodes.end()
@@ -173,7 +133,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             ZoneScopedN("ImGUI")
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() ||gui._sceneProperty.isEnabled()) {
+            if (gui.isEnabled() || gui._property.isEnabled()) {
                 return gui.keyCallback(key, mod, action);
             }
             else {
@@ -187,7 +147,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             ZoneScopedN("ImGUI")
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._sceneProperty.isEnabled()) {
+            if (gui.isEnabled() || gui._property.isEnabled()) {
                 return gui.charCallback(codepoint, modifier);
             }
             else {
@@ -214,7 +174,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             }
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._sceneProperty.isEnabled()) {
+            if (gui.isEnabled() || gui._property.isEnabled()) {
                 return gui.mouseButtonCallback(button, action);
             }
             else {
@@ -228,7 +188,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             ZoneScopedN("ImGUI")
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._sceneProperty.isEnabled()) {
+            if (gui.isEnabled() || gui._property.isEnabled()) {
                 return gui.mouseWheelCallback(posY);
             }
             else {

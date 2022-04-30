@@ -63,7 +63,7 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 15;
+        const int nRegularComponents = 12;
         int totalComponents = nRegularComponents;
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -101,16 +101,14 @@ public:
 
     void render() override;
 
-//protected:
+protected:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
     GuiGIBSComponent _gibs;
     GuiGlobeBrowsingComponent _globeBrowsing;
 
-    GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _sceneProperty;
-    GuiPropertyComponent _screenSpaceProperty;
-    GuiPropertyComponent _moduleProperty;
+    GuiPropertyComponent _property;
     GuiMemoryComponent _memoryComponent;
 
     GuiSpaceTimeComponent _spaceTime;
@@ -121,7 +119,6 @@ public:
     GuiActionComponent _actions;
     GuiJoystickComponent _joystick;
     GuiParallelComponent _parallel;
-    GuiPropertyComponent _featuredProperties;
 
 
     properties::BoolProperty _showHelpText;
@@ -133,10 +130,7 @@ private:
     // The ordering of this array determines the order of components in the in-game menu
     std::array<GuiComponent*, detail::nComponents()> _components = {
         &_sceneProperty,
-        &_screenSpaceProperty,
-        &_featuredProperties,
-        &_globalProperty,
-        &_moduleProperty,
+        &_property,
         &_memoryComponent,
         &_spaceTime,
         &_mission,

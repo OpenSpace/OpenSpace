@@ -143,18 +143,8 @@ void CaptionText(const char* text) {
 
 GUI::GUI()
     : GuiComponent("Main")
-    , _globalProperty("Global", "Global Properties")
-    , _sceneProperty(
-        "SceneProperties", "Scene Properties",
-        GuiPropertyComponent::UseTreeLayout::Yes
-    )
-    , _screenSpaceProperty("ScreenSpaceProperties", "ScreenSpace Properties")
-    , _moduleProperty("ModuleProperties", "Module Properties")
-    , _featuredProperties(
-        "FeaturedProperties",
-        "Featured Properties",
-        GuiPropertyComponent::UseTreeLayout::No
-    )
+    , _sceneProperty("SceneProperties", "Scene", GuiPropertyComponent::UseTreeLayout::Yes)
+    , _property("Property", "Settings")
     , _showHelpText(ShowHelpInfo, true)
     , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
 {
@@ -786,11 +776,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
     ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
 
     _currentVisibility = static_cast<V>(t);
-    _globalProperty.setVisibility(_currentVisibility);
-    _moduleProperty.setVisibility(_currentVisibility);
-    _sceneProperty.setVisibility(_currentVisibility);
-    _screenSpaceProperty.setVisibility(_currentVisibility);
-    _featuredProperties.setVisibility(_currentVisibility);
+    _property.setVisibility(_currentVisibility);
 }
 
 } // namespace openspace::gui
