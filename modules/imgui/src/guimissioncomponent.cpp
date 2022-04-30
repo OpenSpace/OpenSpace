@@ -24,6 +24,7 @@
 
 #include <modules/imgui/include/guimissioncomponent.h>
 
+#include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
@@ -61,7 +62,7 @@ namespace {
             openspace::Time startTime = openspace::Time(range.start);
             openspace::Time endTime  = openspace::Time(range.end);
 
-            openspace::gui::CaptionText("Mission Progress");
+            openspace::CaptionText("Mission Progress");
 
             ImGui::Text("%s", std::string(startTime.UTC()).c_str());
             ImGui::SameLine();
@@ -79,7 +80,7 @@ namespace {
             ImGui::SameLine();
             ImGui::Text("%s", std::string(endTime.UTC()).c_str());
 
-            openspace::gui::CaptionText("Phases");
+            openspace::CaptionText("Phases");
 
             for (const openspace::Mission& m : mission.phases()) {
                 renderMission(m);

@@ -24,12 +24,14 @@
 
 #include <modules/imgui/include/guiactioncomponent.h>
 
+#include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/gui.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
+#include <set>
 
 #include <modules/imgui/include/imgui_include.h>
 

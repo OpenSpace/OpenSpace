@@ -24,6 +24,7 @@
 
 #include <modules/imgui/include/guispacetimecomponent.h>
 
+#include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
