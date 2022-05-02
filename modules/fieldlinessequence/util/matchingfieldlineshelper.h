@@ -39,12 +39,6 @@ namespace openspace {
     class FieldlinesState;
 
     namespace fls {
-        //Simon: Test to see if we can edit our seedpoints
-        struct pointsWithEigVec {
-            std::vector<glm::vec3> cPoints;
-            std::vector<glm::vec3> eigVals;
-            std::vector<glm::vec3> eigVecs;
-        };
 
         bool convertCdfToMatchingFieldlinesState(
             FieldlinesState& state, 
@@ -62,73 +56,3 @@ namespace openspace {
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___MOVINGFIELDLINEHELPER___H__
-
-
-
-
-    /*
-    Will get the point and eigenvector and then return a position
-    moved a small step (epsilon) in the eigenvectors direction
-        TODO: get the eigenvector of the points
-    */
-//glm::vec3 moveSeedpointInEigenvectorDirection(const glm::vec3& const pointInSpace, const glm::vec3& const eigenvector, const float& direction)
-//{
-//    glm::vec3 step = eigenvector * FLT_EPSILON * direction;
-//    glm::vec3 movedPoint = pointInSpace + step;
-//
-//    return glm::vec3(movedPoint.x, movedPoint.y, movedPoint.z);
-//}
-
-/*
-    Test function that can be extracted and divided into several functions.
-    Used to push the eigenvectors and critpoints into a struct with vectors
-    where matching index means they are in cooperation with eachother.
-*/
-//openspace::fls::pointsWithEigVec getCriticalPoints() {
-//    openspace::fls::pointsWithEigVec result;
-//    std::ifstream cpFile("C:/Users/HEM/Documents/Liu/Data_Fieldlines/DataProcessing/Processed_data/test_criticalpoints.txt");
-//    std::ifstream eigValFile("C:/Users/HEM/Documents/Liu/Data_Fieldlines/DataProcessing/Processed_data/test_eigvalues");
-//    std::ifstream eigVecFile("C:/Users/HEM/Documents/Liu/Data_Fieldlines/DataProcessing/Processed_data/test_eigvectors");
-//
-//    result.cPoints = getDataFromFileIntoVectorvec3f(cpFile);
-//    result.eigVals = getDataFromFileIntoVectorvec3f(eigValFile);
-//    result.eigVecs = getDataFromFileIntoVectorvec3f(eigVecFile);
-//
-//    return result;
-//}
-
-/*
-    Takes a file with three values per row and will return a vector of three
-    dimensional points as floats
-*/
-//std::vector<glm::vec3> getDataFromFileIntoVectorvec3f(std::ifstream& file) {
-//    std::vector<glm::vec3> result;
-//    std::string line{};
-//
-//    while (file >> line) {
-//        std::string s;
-//        std::vector<float> toAssemble;
-//        for (int i = 0; i < line.substr().length(); ++i) {
-//            s = line.substr(i, line.find(" "));
-//            toAssemble.push_back(std::stof(s));
-//        }
-//        result.push_back({ toAssemble[0], toAssemble[1], toAssemble[2] });
-//    }
-//
-//    return result;
-//}
-
-////tracing from a seedpoint and having it as finish point
-//ccmc::Fieldline uPerpBPathLine;
-//uPerpBPathLine = tracer.unidirectionalTrace(
-//    tracingVar,
-//    seed.x,
-//    seed.y,
-//    seed.z,
-//    ccmc::Tracer::Direction::REVERSE
-//).reverseOrder();
-////this code will trace backwards in the magnetic field 
-////from a given seedpoint 
-////without reverseOrder() the fieldline will move backwards as time porgresses
-////forward. With bidirectionalTrace() a flowline can be traced in both directions
-////from the given seedpoint.

@@ -44,6 +44,7 @@ public:
         Topology topology;
         std::vector<glm::vec3> vertices;
         double timeToNextKeyFrame;
+        std::vector<float> lengths;
     };
 
     struct PathLine {
@@ -79,7 +80,7 @@ public:
     const std::vector<GLsizei>& lineCount() const;
     const std::vector<GLint>& lineStart() const;
     const std::vector<PathLine>& allPathLines() const;
-    const std::vector<MatchingFieldlines>& getAllMatchingFieldlines() const;
+    const std::vector<MatchingFieldlines>& getAllMatchingFieldlines() const; //allmmafhing
 
     fls::Model model() const;
     size_t nExtraQuantities() const;
@@ -111,7 +112,9 @@ public:
     //    std::vector<glm::vec3>::const_iterator reconPathLine2);
     void addMatchingKeyFrames(
         const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2, 
-        const double time1, const double time2, size_t matchingFieldlinesId);
+        const double time1, const double time2, 
+        const std::vector<float>&& length1, const std::vector<float>&& length2,
+        size_t matchingFieldlinesId);
 
     void initializeRenderedMatchingFieldlines();
 
@@ -137,8 +140,6 @@ private:
     std::vector<GLsizei> _lineCount;
     // Vertices for all rendered fieldlines
     std::vector<glm::vec3> _vertexPositions;
-
-
 
     std::vector<PathLine> _allPathLines;    // replaces _fieldLinesPerPath
 };

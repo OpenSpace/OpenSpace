@@ -40,6 +40,8 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
+using keyFrameIt = std::vector<FieldlinesState::Fieldline>::iterator;
+
 class RenderableMovingFieldlines : public Renderable {
 public:
     struct PathLineTraverser {
@@ -56,14 +58,14 @@ public:
         FieldlinesState::Fieldline temporaryInterpolationKeyFrame;
 
         double timeSinceInterpolation = 0.0;
-        double timeInterpolationNominator = 0.0;
+        double timeInterpolationDenominator = 0.0;
         bool forward = true;
         // this will be true when the traverser moves to a topology change
         // signals that it is ready to swap with its partner
         bool shouldUseTemporaryKeyFrame = false;
         bool hasTemporaryKeyFrame = false;
-        std::vector<FieldlinesState::Fieldline>::iterator backKeyFrame;
-        std::vector<FieldlinesState::Fieldline>::iterator frontKeyFrame;
+        keyFrameIt backKeyFrame;
+        keyFrameIt frontKeyFrame;
 
     };
 
@@ -91,6 +93,14 @@ private:
         const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
         GLsizei nVertices);
+    void createTemporaryKeyFrame(
+        std::vector<glm::vec3>::iterator firstHalfStartIt,
+        std::vector<glm::vec3>::iterator firstHalfEndIt,
+        std::vector<glm::vec3>::iterator secondHalfStartIt,
+        std::vector<glm::vec3>::iterator secondHalfEndIt,
+        float firstHalfLength,
+        float secondHalfLength,
+        FieldlinesState::Fieldline& temporaryInterpolationKeyFrame);
 
     enum class ColorMethod {
         Uniform = 0,

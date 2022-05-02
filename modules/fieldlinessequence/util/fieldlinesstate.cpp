@@ -446,21 +446,6 @@ void FieldlinesState::addPathLine(const std::vector<glm::vec3> line, const int i
     _allPathLines.push_back(pl);
 }
 
-//void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLine1,
-//    std::vector<glm::vec3>::const_iterator reconPathLine1, 
-//    const std::vector<glm::vec3>&& pathLine2, 
-//    std::vector<glm::vec3>::const_iterator reconPathLine2)
-//{
-//    MatchingFieldlines m;
-//    PathLine pl1, pl2;
-//    pl1.line = pathLine1;
-//    pl1.daysideReconnectionStart = reconPathLine1;
-//    pl2.line = pathLine2;
-//    pl2.daysideReconnectionStart = reconPathLine2;
-//    m.pathLines = std::make_pair(pl1, pl2);
-//    _allMatchingFieldlines.push_back(m);
-//}
-
 void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLine1,
     size_t reconPathLine1,
     const std::vector<glm::vec3>&& pathLine2,
@@ -470,6 +455,7 @@ void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLi
 {
     MatchingFieldlines m;
     PathLine pl1, pl2;
+
     pl1.line = pathLine1;
     pl1.daysideReconnectionStart = reconPathLine1;
     pl2.line = pathLine2;
@@ -478,27 +464,42 @@ void FieldlinesState::addMatchingPathLines(const std::vector<glm::vec3>&& pathLi
     pl1.birthTime = time;
     pl2.birthTime = time;
 
-
     m.pathLines = std::make_pair(pl1, pl2);
+
     _allMatchingFieldlines.push_back(m);
 }
 
 void FieldlinesState::addMatchingKeyFrames(
     const std::vector<glm::vec3>&& keyFrame1, const std::vector<glm::vec3>&& keyFrame2,
-    const double time1, const double time2, size_t matchingFieldlinesId) {
+    const double time1, const double time2, const std::vector<float>&& length1, const std::vector<float>&& length2,
+    size_t matchingFieldlinesId) {
     
     Fieldline f1, f2;
 
-    for (int i = 0; i < keyFrame1.size(); ++i) {
+    // convert vertices from RE to meters and place in key frame objects
+    for (size_t i = 0; i < keyFrame1.size(); ++i) {
         glm::vec3 v1, v2;
         v1 = keyFrame1[i] * fls::ReToMeter;
         v2 = keyFrame2[i] * fls::ReToMeter;
         f1.vertices.push_back(v1);
         f2.vertices.push_back(v2);
+
+        // compute accumilated length over the fieldline
+        if (i == 0) {
+            f1.lengths.push_back(0.0f);
+            f2.lengths.push_back(0.0f);
+        }
+        if (i > 0) {
+            f1.lengths.push_back(f1.lengths[i-1] + glm::distance(f1.vertices[i], f1.vertices[i-1]));
+            f2.lengths.push_back(f2.lengths[i-1] + glm::distance(f2.vertices[i], f2.vertices[i-1]));
+        }
     }
 
     f1.timeToNextKeyFrame = time1;
     f2.timeToNextKeyFrame = time2;
+
+    f1.lengths = length1;
+    f2.lengths = length2;
 
     // Elon: check if even correct. Probably will need both front and back to be < 1.5f
     // to be considered closed. 1.5 is just a number from thin air

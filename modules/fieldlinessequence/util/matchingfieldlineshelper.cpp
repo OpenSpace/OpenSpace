@@ -15,11 +15,6 @@ namespace openspace::fls {
 
     using seedPointPair = std::pair<glm::vec3, glm::vec3>;
 
-    struct SplitPathlines{
-        FieldlinesState::MatchingFieldlines imfAndClosed;
-        FieldlinesState::MatchingFieldlines open;
-    };
-
     // DECLARATIONS
 
     ccmc::Fieldline traceAndCreateMappedPathLine(const std::string& tracingVar,
@@ -42,6 +37,7 @@ namespace openspace::fls {
     );
 
     void traceAndCreateKeyFrame(std::vector<glm::vec3>& keyFrame,
+        std::vector<float>& lengths,
         const glm::vec3& seedPoint,
         ccmc::Kameleon* kameleon,
         float innerbounds,
@@ -243,9 +239,11 @@ namespace openspace::fls {
             for (size_t j = 0; j < pathLine1.size(); ++j) {
 
                 std::vector<glm::vec3> keyFrame1;
-                traceAndCreateKeyFrame(keyFrame1, pathLine1[j], kameleon, innerBoundaryLimit, nPointsOnFieldlines);
+                std::vector<float> keyFrameLength1;
+                traceAndCreateKeyFrame(keyFrame1, keyFrameLength1, pathLine1[j], kameleon, innerBoundaryLimit, nPointsOnFieldlines);
                 std::vector<glm::vec3> keyFrame2;
-                traceAndCreateKeyFrame(keyFrame2, pathLine2[j], kameleon, innerBoundaryLimit, nPointsOnFieldlines);
+                std::vector<float> keyFrameLength2;
+                traceAndCreateKeyFrame(keyFrame2, keyFrameLength2, pathLine2[j], kameleon, innerBoundaryLimit, nPointsOnFieldlines);
 
                 // timeToNextKeyFrame is -1 if at last path line vertex
                 // Vi vill tracea tid baklänges för den pathline del som räknats ut baklänges
@@ -271,12 +269,13 @@ namespace openspace::fls {
                 }
 
                 state.addMatchingKeyFrames(std::move(keyFrame1), std::move(keyFrame2), 
-                    timeToNextKeyFrame1, timeToNextKeyFrame2, i);
+                    timeToNextKeyFrame1, timeToNextKeyFrame2, std::move(keyFrameLength1), std::move(keyFrameLength2), i);
 
                 deathTime1 += timeToNextKeyFrame1;
                 deathTime2 += timeToNextKeyFrame2;
             }
 
+            // TODO: Make it work dynamically
             state.setDeathTimes(-26000 + i*50, -26000 + i*50 , i);
         }
         bool isSuccessful = state.getAllMatchingFieldlines().size() > 0;
@@ -292,6 +291,7 @@ namespace openspace::fls {
     /// <param name="innerBoundaryLimit"></param>
     /// <param name="nPointsOnFieldlines">how many points to be created in the trace</param>
     void traceAndCreateKeyFrame(std::vector<glm::vec3>& keyFrame,
+        std::vector<float>& lengths,
         const glm::vec3& seedPoint,
         ccmc::Kameleon* kameleon,
         float innerBoundaryLimit,
@@ -319,6 +319,8 @@ namespace openspace::fls {
             fieldline.interpolate(1, nPointsOnFieldlines);
         const std::vector<ccmc::Point3f>& fieldlinePositions =
             mappedFieldline.getPositions();
+
+
         for (const ccmc::Point3f& pt : fieldlinePositions) {
             keyFrame.emplace_back(pt.component1, pt.component2, pt.component3);
         }
