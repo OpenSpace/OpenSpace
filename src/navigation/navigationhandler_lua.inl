@@ -128,6 +128,36 @@ namespace {
     openspace::global::navigationHandler->orbitalNavigator().startRetargetAim();
 }
 
+// Picks the next node from the interesting nodes out of the profile and selects that. If
+// the current anchor is not an interesting node, the first will be selected
+[[codegen::luawrap]] void targetNextInterestingAnchor() {
+    using namespace openspace;
+    if (global::profile->markNodes.empty()) {
+        LWARNINGC(
+            "targetNextInterestingAnchor",
+            "Profile does not define any interesting nodes"
+        );
+        return;
+    }
+    const std::vector<std::string>& markNodes = global::profile->markNodes;
+
+    std::string currAnchor =
+        global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
+    
+    auto it = std::find(markNodes.begin(), markNodes.end(), currAnchor);
+    if (it == markNodes.end() || ((it + 1) == markNodes.end())) {
+        // We want to use the first node either if 
+        //  1. The current node is not an interesting node
+        //  2. The current node is the last interesting node
+        global::navigationHandler->orbitalNavigator().setFocusNode(markNodes.front());
+    }
+    else {
+        // Otherwise we can just select the next one
+        global::navigationHandler->orbitalNavigator().setFocusNode(*(it + 1));
+    }
+    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+}
+
 /**
  * Finds the input joystick with the given 'name' and binds the axis identified by the
  * second argument to be used as the type identified by the third argument. If

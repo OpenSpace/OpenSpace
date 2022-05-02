@@ -25,7 +25,11 @@ local object = {
     ScaleFactor = 540.9,
     FadeInDistances = { 1000.0, 10000.0 }, -- Fade in value in the same unit as "Unit"
     BillboardMinMaxSize = { 0.0, 11.1 },
-    EnablePixelSizeControl = true
+    EnablePixelSizeControl = true,
+    ColorMap = speck .. "viridis.cmap",
+    ColorOption = { "redshift", "Tlookback", "distMpc" },
+    ColorRange = { { 0.102, 7.085 }, { 1.4, 13.0 }, { 440.5, 8852.099609 } },
+    UseColorMap = false
   },
   GUI = {
     Name = "Quasars",

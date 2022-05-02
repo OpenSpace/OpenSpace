@@ -29,7 +29,7 @@
 
 namespace openspace::gui {
 
-GuiFilePathComponent::GuiFilePathComponent() : GuiComponent("FilePath", "File Path") {}
+GuiFilePathComponent::GuiFilePathComponent() : GuiComponent("FilePaths", "File Paths") {}
 
 void GuiFilePathComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
