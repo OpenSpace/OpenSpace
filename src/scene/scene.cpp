@@ -879,6 +879,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "Returns a list of property identifiers that match the passed regular "
                 "expression"
             },
+            codegen::lua::AddCustomProperty,
+            codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,
             codegen::lua::RemoveSceneGraphNode,
             codegen::lua::RemoveSceneGraphNodesFromRegex,
