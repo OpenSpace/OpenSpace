@@ -1053,7 +1053,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
         const double r = glm::length(p);
         maxRadius = std::max(maxRadius, r);
 
-        if (_hasColorMapFile) {
+        if (_hasColorMapFile && _useColorMap && !_colorMap.entries.empty()) {
             for (int j = 0; j < 4; ++j) {
                 result.push_back(position[j]);
             }
