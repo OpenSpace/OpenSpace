@@ -956,7 +956,7 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
         p->onChange(
             [p, script = *onChange]() {
                 using namespace ghoul::lua;
-                LuaState s(LuaState::IncludeStandardLibrary::No);
+                LuaState s;
                 openspace::global::scriptEngine->initializeLuaState(s);
                 ghoul::lua::push(s, p->value());
                 lua_setglobal(s, "value");
@@ -991,9 +991,14 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
     // to have a factory function for this but right now this is the only place where that
     // factory would be used.
 
+    const char* gui =
+        guiName.has_value() && !guiName->empty() ?
+        guiName->c_str() :
+        identifier.c_str();
+
     properties::Property::PropertyInfo info = {
             identifier.c_str(),
-            guiName.has_value() ? guiName->c_str() : identifier.c_str(),
+            gui,
             description.has_value() ? description->c_str() : ""
     };
     if (type == "DMat2Property") {
