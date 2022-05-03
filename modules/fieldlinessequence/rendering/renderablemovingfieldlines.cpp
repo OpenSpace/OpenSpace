@@ -244,7 +244,6 @@ namespace openspace {
         }
     }
 
-    // TODO: VI BEHÖVER FÅ DENNA FUNKTIONEN ATT FUNGERA MED MATCHING FIELDLINES
     void RenderableMovingFieldlines::initialize() {
         // Set a default color table, just in case the (optional) user defined paths are
         // corrupt or not provided
@@ -396,7 +395,7 @@ namespace openspace {
             /************ SWITCH MOVING/MATCHING HERE ****************/
             //isSuccessful = fls::convertCdfToMovingFieldlinesState(
             isSuccessful = fls::convertCdfToMatchingFieldlinesState(
-                /*********************************************************/
+            /*********************************************************/
                 _fieldlineState,
                 kameleon.get(),
                 seedPoints,
@@ -609,29 +608,6 @@ namespace openspace {
             }
         }
 
-        // oldChris 
-        // Code used for movingfieldlines
-        //if (_renderFlowLine) {
-        //    std::vector<int> flowLengths;
-        //    std::vector<int> flowStarts;
-        //    // start is the 
-        //    int start = lineStarts.back() + _nPointsOnFieldlines;
-        //    const std::vector<FieldlinesState::PathLine> allPaths =
-        //        _fieldlineState.allPathLines();
-        //    for (int i = 0; i < allPaths.size(); i++) {
-        //        flowLengths.push_back(_nPointsOnPathLine);
-        //        flowStarts.push_back(start);
-        //        start += _nPointsOnPathLine;
-        //    }
-
-        //    for (int flowLen : flowLengths) {
-        //        lineLengths.push_back(flowLen);
-        //    }
-        //    for (int flowStart : flowStarts) {
-        //        lineStarts.push_back(flowStart);
-        //    }
-        //}
-
         // Something like this is needed for fieldline fade to work. This doesn't though...
         //glEnable(GL_BLEND); 
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
@@ -781,103 +757,37 @@ namespace openspace {
             // if there is a topology change vertices should be swapped
             if (isNewTopology && !hasTemporaryKeyFrame) {
 
+                // TODO: implement this function to make it work both forwards and backwards
+                // desiredTopology = decideTopology()
+
                 // The traverser that has not reached the reconnection point
                 // should advance its next key frame and change the time to next
                 // key frame accordingly
                 if (isNewTopology1 && !hasTemporaryKeyFrame1) {
-                    _traversers[lineIndex + 1].skipKeyFrame(FieldlinesState::Fieldline::Topology::Open); // fixa
+                    _traversers[lineIndex + 1].skipKeyFrame(FieldlinesState::Fieldline::Topology::Open);
                 }
                 else if (isNewTopology2 && !hasTemporaryKeyFrame2) {
                     _traversers[lineIndex].skipKeyFrame(FieldlinesState::Fieldline::Topology::Open);
                 }
 
-                /**********************************************************************\
-                |   Find the index of reconnection and the vertex by                   |
-                |   using the currentKeyFramevertex                                    |
-                |   to compare when finding it on the keyframe at reconnection         |
-                |   Might want to use this to find optimal swap point instead of       |
-                |   just splitting in the middle                                       |
-                \**********************************************************************/
-                //const ptrdiff_t index1 = _traversers[lineIndex].backKeyFrame - _traversers[lineIndex].keyFrames.begin();
-                //const ptrdiff_t index2 = _traversers[lineIndex + 1].backKeyFrame - _traversers[lineIndex + 1].keyFrames.begin();
-
-
                 bool isMovingForward = _traversers[lineIndex].forward;
-                // Swaps vertices in key frames between each pair of traversers to get smooth topology changes
                 if (isMovingForward) {
 
-                    // Iterator to the index of vertex on the keyframe,
-                    // used to find the point on the pathline where the vertex swap should be
-                    //std::vector<glm::vec3>::iterator itToIndex1 = 
-                    //    _traversers[lineIndex].backKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
-                    //std::vector<glm::vec3>::iterator itToIndex2 = 
-                    //    _traversers[lineIndex + 1].backKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
-                    //
-                    ////float fieldlineVertexLength1 = _traversers[lineIndex].frontKeyFrame->lengths[1];
-                    ////float fieldlineVertexLength2 = _traversers[lineIndex + 1].frontKeyFrame->lengths[1];
-
-                    //std::vector<glm::vec3>::iterator currentVertexIt =
-                    //    _traversers[lineIndex].temporaryInterpolationKeyFrame.vertices.begin();
-
-                    //float traveresedLength = 0.0f;
-
-                    /************** TEMPORARY KEY FRAME AT THE RENDERED KEY FRAME ******/
                     std::vector<glm::vec3>::iterator renderIt = _renderedLines.begin();
 
-                    //std::copy( renderIt + (lineIndex * _nPointsOnFieldlines),
-                    //    renderIt + (lineIndex * _nPointsOnFieldlines + _nPointsOnFieldlines / 2),
-                    //    _traversers[lineIndex].temporaryInterpolationKeyFrame.vertices.begin());
-
-                    //std::copy( renderIt + (lineIndex * _nPointsOnFieldlines + _nPointsOnFieldlines / 2),
-                    //    renderIt + ((lineIndex + 1) * _nPointsOnFieldlines),
-                    //    _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.vertices.begin() + _nPointsOnFieldlines / 2);
-
-                    //std::copy(renderIt + ((lineIndex + 1) * _nPointsOnFieldlines),
-                    //    renderIt + ((lineIndex + 1) * _nPointsOnFieldlines + _nPointsOnFieldlines / 2),
-                    //    _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.vertices.begin());
-
-                    //std::copy(renderIt + ((lineIndex + 1) * _nPointsOnFieldlines + _nPointsOnFieldlines / 2),
-                    //    renderIt + ((lineIndex + 2) * _nPointsOnFieldlines),
-                    //    _traversers[lineIndex].temporaryInterpolationKeyFrame.vertices.begin() + _nPointsOnFieldlines / 2);
-
-                    float lengthRender1FirstHalf = 0.0f;
-                    float lengthRender1SecondHalf = 0.0f;
-                    float lengthRender2FirstHalf = 0.0f;
-                    float lengthRender2SecondHalf = 0.0f;
-                    for (size_t i = 1; i < _nPointsOnFieldlines / 2; ++i) {
-
-                        lengthRender1FirstHalf += 
-                            glm::distance(_renderedLines[(lineIndex)*_nPointsOnFieldlines + i],
-                            _renderedLines[(lineIndex)*_nPointsOnFieldlines + i - 1]);
-                        lengthRender1SecondHalf +=
-                            glm::distance(_renderedLines[(lineIndex)*_nPointsOnFieldlines + _nPointsOnFieldlines/2 + i],
-                                _renderedLines[(lineIndex)*_nPointsOnFieldlines + i - 1]);
-
-                        lengthRender2FirstHalf +=
-                            glm::distance(_renderedLines[(lineIndex + 1)*_nPointsOnFieldlines + i],
-                                _renderedLines[(lineIndex + 1)*_nPointsOnFieldlines + i - 1]);
-                        lengthRender2SecondHalf +=
-                            glm::distance(_renderedLines[(lineIndex + 1)*_nPointsOnFieldlines + _nPointsOnFieldlines / 2 + i],
-                                _renderedLines[(lineIndex + 1)*_nPointsOnFieldlines + i - 1]);
-                    }
-
-                    createTemporaryKeyFrame(
-                        renderIt + (lineIndex * _nPointsOnFieldlines),
-                        renderIt + (lineIndex * _nPointsOnFieldlines + _nPointsOnFieldlines / 2),
-                        renderIt + ((lineIndex + 1) * _nPointsOnFieldlines + _nPointsOnFieldlines / 2),
-                        renderIt + ((lineIndex + 2) * _nPointsOnFieldlines), 
-                        lengthRender1FirstHalf,
-                        lengthRender2SecondHalf,
+                    updateTemporaryKeyFrame(
+                        renderIt + lineStart1,
+                        renderIt + (lineStart1 + _nPointsOnFieldlines / 2),
+                        renderIt + (lineStart2 + _nPointsOnFieldlines / 2),
+                        renderIt + (lineStart2 + _nPointsOnFieldlines),
                         _traversers[lineIndex].temporaryInterpolationKeyFrame
                     );
 
-                    createTemporaryKeyFrame(
-                        renderIt + ((lineIndex + 1) * _nPointsOnFieldlines),
-                        renderIt + ((lineIndex + 1) * _nPointsOnFieldlines + _nPointsOnFieldlines / 2),
-                        renderIt + (lineIndex * _nPointsOnFieldlines + _nPointsOnFieldlines / 2),
-                        renderIt + ((lineIndex + 1) * _nPointsOnFieldlines),
-                        lengthRender2FirstHalf,
-                        lengthRender1SecondHalf,
+                    updateTemporaryKeyFrame(
+                        renderIt + (lineStart2),
+                        renderIt + (lineStart2 + _nPointsOnFieldlines / 2),
+                        renderIt + (lineStart1 + _nPointsOnFieldlines / 2),
+                        renderIt + (lineStart2),
                         _traversers[lineIndex + 1].temporaryInterpolationKeyFrame
                     );
 
@@ -886,19 +796,6 @@ namespace openspace {
 
                     _traversers[lineIndex].hasTemporaryKeyFrame = true;
                     _traversers[lineIndex + 1].hasTemporaryKeyFrame = true;
-                }
-
-                // TODO: DETTA FUNKAR FAN INTE LOL
-                // Swap back if moving backwards
-                else if (!isMovingForward && hasTemporaryKeyFrame) {
-                    // Iterator to the index of vertex on the keyframe,
-                    // used to find the point on the pathline where the vertex swap should be
-                    auto itToIndex1 = _traversers[lineIndex].frontKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
-                    auto itToIndex2 = _traversers[lineIndex + 1].frontKeyFrame->vertices.begin() + _nPointsOnFieldlines / 2;
-
-                    std::swap_ranges(itToIndex1, _traversers[lineIndex].frontKeyFrame->vertices.end(), itToIndex2);
-                    _traversers[lineIndex].hasTemporaryKeyFrame = false;
-                    _traversers[lineIndex + 1].hasTemporaryKeyFrame = false;
                 }
             }
 
@@ -972,7 +869,7 @@ namespace openspace {
             data.push_back({ vertPos[i], -1.f });
             data[i].w = _debugTopologyColor[i];
         }
-        /// ////////////////////////////////////////
+
         if (_renderFlowLine) {
 
             // convert all vertices from Re to meter and add to data
@@ -987,17 +884,7 @@ namespace openspace {
                         data.push_back({ element * fls::ReToMeter, -1.f });
                     });
             }
-
-            // oldChris
-            //const std::vector<FieldlinesState::PathLine>& allPaths =
-            //    _fieldlineState.allPathLines();
-            //for (int i = 0; i < allPaths.size(); ++i) {
-            //    for (int j = 0; j < allPaths[i].line.size(); ++j) {
-            //        data.push_back({ allPaths[i].line[j] * fls::ReToMeter, -1.f });
-            //    }
-            //}
         }
-        /// ////////////////////////////////////////
 
         glBufferData(
             GL_ARRAY_BUFFER,
@@ -1171,60 +1058,95 @@ namespace openspace {
         return false;
     }
 
-    void RenderableMovingFieldlines::createTemporaryKeyFrame(
-        std::vector<glm::vec3>::iterator firstHalfStartIt,
-        std::vector<glm::vec3>::iterator firstHalfEndIt,
-        std::vector<glm::vec3>::iterator secondHalfStartIt,
-        std::vector<glm::vec3>::iterator secondHalfEndIt,
-        float firstHalfLength,
-        float secondHalfLength,
+    /**
+    * Updates vertex position in the traverser's temporary key frame.
+    * The temporary key frame consists of two halfs of different rendered lines.
+    * 
+    * firstLineBeginIt and firstLineEndIt spans half a rendered fieldline.
+    * secondLineBeginIt and secondLineEndIt spans half of another rendered fieldline
+    * with a different topology than the first.
+    * temporaryInterpolationKeyFrame is a reference to the traverser's variable and 
+    * holds the resulting temporary key frame.
+    */
+    void RenderableMovingFieldlines::updateTemporaryKeyFrame(
+        std::vector<glm::vec3>::iterator firstLineBeginIt, 
+        std::vector<glm::vec3>::iterator firstLineEndIt,
+        std::vector<glm::vec3>::iterator secondLineBeginIt,
+        std::vector<glm::vec3>::iterator secondLineEndIt,
         FieldlinesState::Fieldline& temporaryInterpolationKeyFrame)
     {
         // calculate mean distance between vertices
-        float gapLength = glm::distance(*(firstHalfEndIt-1), *secondHalfStartIt);
-        float keyFrameLength = firstHalfLength + secondHalfLength + gapLength;
-        float vertexDistance = keyFrameLength / _nPointsOnFieldlines;
+        float firstLength = calculateFieldlineLength(firstLineBeginIt, firstLineEndIt);
+        float secondLength = calculateFieldlineLength(secondLineBeginIt, secondLineEndIt);
+        float topologyChangeGapLength = glm::distance(*(firstLineEndIt-1), *secondLineBeginIt);
+        float totalLineLength = firstLength + secondLength + topologyChangeGapLength;
+
+        float desiredVertexSpacing = totalLineLength / _nPointsOnFieldlines;
 
         // key frames starts and end at set positions
-        temporaryInterpolationKeyFrame.vertices[0] = *firstHalfStartIt;
-        temporaryInterpolationKeyFrame.vertices[_nPointsOnFieldlines - 1] = *(secondHalfEndIt - 1);
+        temporaryInterpolationKeyFrame.vertices[0] = *firstLineBeginIt;
+        temporaryInterpolationKeyFrame.vertices[_nPointsOnFieldlines - 1] = *(secondLineEndIt - 1);
         
-        std::vector<glm::vec3>::iterator it = firstHalfStartIt + 1;
-        size_t temporaryIndex = 1;
-        float temporaryKeyFrameLength = 0.0f;
-        float currentItLength = 0.0f;
+        std::vector<glm::vec3>::iterator it = (firstLineBeginIt + 1);
+        size_t temporaryKeyFrameIndex = 1;
+
+        float traversedDistanceTemporaryKeyFrame = 0.0f;
+        float traversedDistanceLine = 0.0f;
 
         // interpolate to find new vertex positions
-        while (it != secondHalfEndIt && temporaryIndex < _nPointsOnFieldlines - 1) {
+        // sets one new temporary key frame position per iteration
+        while (it != secondLineEndIt && temporaryKeyFrameIndex < _nPointsOnFieldlines - 1) {
 
-            std::vector<glm::vec3>::iterator backIt = it == secondHalfStartIt ?
-                backIt = firstHalfEndIt - 1 : it - 1;
+            std::vector<glm::vec3>::iterator backIt = it == secondLineBeginIt ?
+                backIt = (firstLineEndIt - 1) : (it - 1);   // needed for the gap
 
-            float numerator = temporaryKeyFrameLength + vertexDistance - currentItLength;
-            float denominator = glm::distance(*backIt, *it);
+            float distanceSinceLastLineVertex = 
+                traversedDistanceTemporaryKeyFrame + desiredVertexSpacing - traversedDistanceLine;
+            float lineVertexDistance = glm::distance(*backIt, *it);
+            float interpolationParameter = distanceSinceLastLineVertex / lineVertexDistance;
 
-            temporaryKeyFrameLength += vertexDistance;
+            traversedDistanceTemporaryKeyFrame += desiredVertexSpacing;
 
-            float interpolationParameter = numerator / denominator;
-
+            // moves the line iterator
             while (interpolationParameter > 1.f) {
-                currentItLength += denominator;
-                numerator -= denominator;
+                traversedDistanceLine += lineVertexDistance;
+                distanceSinceLastLineVertex -= lineVertexDistance;
                 ++it;
-                backIt = it - 1;
+                backIt = (it - 1);
 
-                if (it == firstHalfEndIt) {
-                    it = secondHalfStartIt;
+                if (it == secondLineEndIt) {
+                    goto exit;
                 }
 
-                denominator = glm::distance(*backIt, *it);
-                interpolationParameter = numerator / denominator;
+                // traverses through the gap
+                if (it == firstLineEndIt) {
+                    it = secondLineBeginIt;
+                }
+
+                lineVertexDistance = glm::distance(*backIt, *it);
+                interpolationParameter = distanceSinceLastLineVertex / lineVertexDistance;
             }
 
-            glm::vec3 position = lerp(*backIt, *it, interpolationParameter);
-            temporaryInterpolationKeyFrame.vertices[temporaryIndex] = position;
-            ++temporaryIndex;
+            // sets temporary key frame vertex position
+            temporaryInterpolationKeyFrame.vertices[temporaryKeyFrameIndex] = 
+                lerp(*backIt, *it, interpolationParameter);
+
+            ++temporaryKeyFrameIndex;
         }
+    exit:;
+    }
+
+    float RenderableMovingFieldlines::calculateFieldlineLength(
+        std::vector<glm::vec3>::iterator beginIt,
+        std::vector<glm::vec3>::iterator endIt) 
+    {
+        std::vector<glm::vec3>::iterator it = beginIt + 1;
+        float length = 0.0f;
+        while (it != endIt) {
+            length += glm::distance(*(it - 1), *it);
+            ++it;
+        }
+        return length;
     }
 
     double RenderableMovingFieldlines::PathLineTraverser::getTimeToReconnectionPoint(size_t indexOfReconnection) {

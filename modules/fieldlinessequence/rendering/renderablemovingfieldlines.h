@@ -93,14 +93,15 @@ private:
         const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
         GLsizei nVertices);
-    void createTemporaryKeyFrame(
-        std::vector<glm::vec3>::iterator firstHalfStartIt,
-        std::vector<glm::vec3>::iterator firstHalfEndIt,
-        std::vector<glm::vec3>::iterator secondHalfStartIt,
-        std::vector<glm::vec3>::iterator secondHalfEndIt,
-        float firstHalfLength,
-        float secondHalfLength,
+    void updateTemporaryKeyFrame(
+        std::vector<glm::vec3>::iterator firstLineBeginIt,
+        std::vector<glm::vec3>::iterator firstLineEndIt,
+        std::vector<glm::vec3>::iterator secondLineBeginIt,
+        std::vector<glm::vec3>::iterator secondLineEndIt,
         FieldlinesState::Fieldline& temporaryInterpolationKeyFrame);
+    float calculateFieldlineLength(
+        std::vector<glm::vec3>::iterator beginIt, 
+        std::vector<glm::vec3>::iterator endIt);
 
     enum class ColorMethod {
         Uniform = 0,
@@ -153,8 +154,8 @@ private:
     std::vector<glm::vec3> _seedPoints;
     // Extra variables such as rho, p or t
     std::vector<std::string> _extraVars;
-    size_t _nPointsOnPathLine;
-    size_t _nPointsOnFieldlines;
+    size_t _nPointsOnPathLine = 200;
+    size_t _nPointsOnFieldlines = 100;
     // which tracing vaiable to trace. 'b' for fieldline is default
     std::string _tracingVariable = "u_perp_b";
 
