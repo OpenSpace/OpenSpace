@@ -50,7 +50,7 @@ namespace {
 
     constexpr const openspace::properties::Property::PropertyInfo RenderCopyInfo = {
         "RenderCopy",
-        "Position Of A Copy Of The Sky Browser",
+        "Position of a Copy of the Sky Browser",
         "Render a copy of this sky browser at an additional position. This copy will not "
         "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates "
         "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates."
@@ -64,7 +64,7 @@ namespace {
 
     constexpr const openspace::properties::Property::PropertyInfo IsHiddenInfo = {
         "IsHidden",
-        "Is hidden",
+        "Is Hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
         "be."
     };
@@ -252,7 +252,7 @@ ScreenSpaceSkyBrowser::renderCopies() const
 }
 
 std::vector<std::pair<std::string, bool>>
-ScreenSpaceSkyBrowser::showRenderCopies() const 
+ScreenSpaceSkyBrowser::showRenderCopies() const
 {
     std::vector<std::pair<std::string, bool>> vec;
     using boolProperty = std::unique_ptr<properties::BoolProperty>;

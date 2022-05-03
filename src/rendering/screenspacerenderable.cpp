@@ -73,7 +73,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CartesianPositionInfo = {
         "CartesianPosition",
-        "Cartesian coordinates",
+        "Cartesian Coordinates",
         "This value determines the position of this screen space plane in Cartesian "
         "three-dimensional coordinates (meters)."
     };
@@ -88,7 +88,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
-        "Scale value",
+        "Scale Value",
         "This value determines a scale factor for the plane. The default size of a plane "
         "is determined by the concrete instance and reflects, for example, the size of "
         "the image being displayed."
@@ -96,7 +96,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
         "Rotation",
-        "Local rotation",
+        "Local Rotation",
         "An euler rotation (x, y, z) to apply to the plane."
     };
 
