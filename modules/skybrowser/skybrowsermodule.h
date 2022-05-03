@@ -58,7 +58,6 @@ public:
     const std::unique_ptr<WwtDataHandler>& getWwtDataHandler() const;
     std::string selectedBrowserId() const;
     std::string selectedTargetId() const;
-    glm::ivec3 highlight() const;
     int uniqueIdentifierCounter() const;
 
     void setSelectedBrowser(const std::string& id);
@@ -110,7 +109,6 @@ private:
     properties::DoubleProperty _browserAnimationSpeed;
     properties::DoubleProperty _spaceCraftAnimationTime;
     properties::StringProperty _wwtImageCollectionUrl;
-    glm::ivec3 _highlightAddition = glm::ivec3(35); // Highlight object when mouse hovers
 
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;

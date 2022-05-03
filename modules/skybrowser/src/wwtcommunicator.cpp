@@ -119,14 +119,6 @@ void WwtCommunicator::setBorderColor(glm::ivec3 color) {
     _borderColorIsDirty = true;
 }
 
-void WwtCommunicator::highlight(const glm::ivec3& addition) const {
-    setWebpageBorderColor(_borderColor + addition);
-}
-
-void WwtCommunicator::removeHighlight(const glm::ivec3& removal) const {
-    setWebpageBorderColor(_borderColor - removal);
-}
-
 void WwtCommunicator::updateBorderColor() const {
     setWebpageBorderColor(_borderColor);
 }

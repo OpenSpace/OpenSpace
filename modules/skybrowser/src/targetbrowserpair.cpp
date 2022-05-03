@@ -63,16 +63,6 @@ void TargetBrowserPair::setImageOrder(int i, int order) {
     _browser->setImageOrder(i, order);
 }
 
-void TargetBrowserPair::removeHighlight(const glm::ivec3& color) {
-    _targetRenderable->removeHighlight(color);
-    _browser->removeHighlight(color);
-}
-
-void TargetBrowserPair::highlight(const glm::ivec3& color) {
-    _browser->highlight(color);
-    _targetRenderable->highlight(color);
-}
-
 void TargetBrowserPair::aimTargetGalactic(glm::dvec3 direction) {
     std::string id = _targetNode->identifier();
     glm::dvec3 positionCelestial = glm::normalize(direction) *
@@ -280,7 +270,6 @@ void TargetBrowserPair::setVerticalFov(double vfov) {
 }
 
 void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
-    _equatorialAim = aim;
     aimTargetGalactic(
         skybrowser::equatorialToGalactic(skybrowser::sphericalToCartesian(aim))
     );
@@ -288,7 +277,6 @@ void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
 }
 
 void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
-    _borderColor = color;
     _targetRenderable->setColor(color);
     _browser->setBorderColor(color);
 }

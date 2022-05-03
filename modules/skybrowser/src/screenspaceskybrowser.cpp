@@ -79,7 +79,7 @@ namespace {
 
 #include "screenspaceskybrowser_codegen.cpp"
 
-    glm::ivec3 randomBorderColor(glm::ivec3 highlight) {
+    glm::ivec3 randomBorderColor() {
         // Generate a random border color with sufficient lightness and a n
         std::random_device rd;
         // Hue is in the unit degrees [0, 360]
@@ -88,13 +88,8 @@ namespace {
         // Value in saturation are in the unit percent [0,1]
         float value = 0.9f; // Brightness
         float saturation = 0.5f;
-        glm::ivec3 rgbColor;
-        glm::ivec3 highlighted;
-        do {
-            glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
-            rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
-            highlighted = rgbColor + highlight;
-        } while (highlighted.x < 255 && highlighted.y < 255 && highlighted.z < 255);
+        glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
+        glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
 
         return rgbColor;
     }
@@ -125,7 +120,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
     if (global::windowDelegate->isMaster()) {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        _borderColor = randomBorderColor(module->highlight());
+        _borderColor = randomBorderColor();
     }
     _scale = _size.y * 0.5f;
 

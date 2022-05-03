@@ -67,9 +67,6 @@ public:
     void setBorderColor(glm::ivec3 color);
     void setTargetRoll(double roll);
 
-    void highlight(const glm::ivec3& addition) const;
-    // The removal parameter decides what will be removed from the border color
-    void removeHighlight(const glm::ivec3& removal) const;
     void updateBorderColor() const;
     void updateAim() const;
 

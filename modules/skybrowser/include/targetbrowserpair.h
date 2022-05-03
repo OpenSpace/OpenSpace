@@ -46,9 +46,7 @@ public:
 
     // Target & Browser
     void initialize();
-    // Highlighting
-    void removeHighlight(const glm::ivec3& color);
-    void highlight(const glm::ivec3& color);
+
     // Animation
     void startAnimation(glm::dvec3 coordsEnd, double fovEnd);
     void incrementallyAnimateToCoordinate();
@@ -126,10 +124,6 @@ private:
 
     // Dragging
     glm::dvec3 _startTargetPosition = glm::dvec3(0.0);
-
-    glm::dvec2 _equatorialAim = glm::dvec2(0.0);
-    glm::ivec3 _borderColor = glm::ivec3(255);
-    glm::vec2 _dimensions = glm::vec2(0.5f);
 };
 
 } // namespace openspace

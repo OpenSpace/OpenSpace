@@ -454,10 +454,6 @@ std::string SkyBrowserModule::selectedTargetId() const {
     return found ? found->targetRenderableId() : "";
 }
 
-glm::ivec3 SkyBrowserModule::highlight() const {
-    return _highlightAddition;
-}
-
 int SkyBrowserModule::uniqueIdentifierCounter() const {
     return _uniqueIdentifierCounter;
 }
