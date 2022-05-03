@@ -24,6 +24,7 @@
 
 #include <modules/softwareintegration/network/softwareconnection.h>
 
+#include <modules/softwareintegration/simp.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>
@@ -35,25 +36,12 @@ namespace {
 
 namespace openspace {
 
-const std::string SoftwareConnection::ProtocolVersion = "1.0";
-
-std::map<std::string, SoftwareConnection::MessageType> SoftwareConnection::mapSIMPTypeToMessageType {
-    {"CONN", MessageType::Connection},
-    {"PDAT", MessageType::ReadPointData},
-    {"RSGN", MessageType::RemoveSceneGraphNode},
-    {"UPCO", MessageType::Color},
-    {"UPOP", MessageType::Opacity},
-    {"UPSI", MessageType::Size},
-    {"TOVI", MessageType::Visibility},
-    {"DISC", MessageType::Disconnection},
-};
-
-SoftwareConnection::Message::Message(SoftwareConnection::MessageType type, std::vector<char> content)
+SoftwareConnection::Message::Message(simp::MessageType type, std::vector<char> content)
     : type{ type }, content{ std::move(content) }
 {}
 
-SoftwareConnection::SoftwareConnectionLostError::SoftwareConnectionLostError()
-    : ghoul::RuntimeError("Software connection lost", "SoftwareConnection")
+SoftwareConnection::SoftwareConnectionLostError::SoftwareConnectionLostError(const std::string& msg)
+    : ghoul::RuntimeError(fmt::format("{}{}", "Software connection lost", msg), "SoftwareConnection")
 {}
 
 SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
@@ -87,6 +75,7 @@ bool SoftwareConnection::sendMessage(std::string message) {
 
 void SoftwareConnection::disconnect() {
     if (_socket) {
+        sendMessage(simp::formatDisconnectionMessage());
         _socket->disconnect();
     }
 }
@@ -101,49 +90,32 @@ ghoul::io::TcpSocket* SoftwareConnection::socket() {
  * @return SoftwareConnection::Message 
  */
 SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
-
-    // LDEBUG(fmt::format("t{}: receiveMessageFromSoftware()", std::this_thread::get_id()));
-
-    // Header consists of version (3 char), message type (4 char) & subject size (9 char)
-    size_t headerSize = 16 * sizeof(char);
+    // Header consists of version (3 char), message type (4 char) & subject size (15 char)
+    size_t headerSize = 22 * sizeof(char);
 
     // Create basic buffer for receiving first part of message
     std::vector<char> headerBuffer(headerSize);
     std::vector<char> subjectBuffer;
 
-    // TODO: Thread stops here and wait
-    LDEBUG(fmt::format("t{}: Trying to receive header", std::this_thread::get_id()));
     // Receive the header data
-    // bool headerSuccess = _socket->get(headerBuffer.data(), headerSize);
-    // LDEBUG(fmt::format("t{}: Right after '_socket->get(headerBuffer.data(), headerSize)'", std::this_thread::get_id()));
-    // LDEBUG(fmt::format("t{}: receiveMessageFromSoftware() - headerSuccess: {}", std::this_thread::get_id(), headerSuccess));
     if (!_socket->get(headerBuffer.data(), headerSize)) {
-        LERROR(fmt::format("t{}: Failed to read header from socket. Disconnecting.", std::this_thread::get_id()));
-        throw SoftwareConnectionLostError();
+        throw SoftwareConnectionLostError("Failed to read header from socket. Disconnecting.");
     }
-
-    // TODO: REMOVE ====
-    std::string headerBufferStr;
-    for (int i = 0; i < 16; i++) {
-        headerBufferStr.push_back(headerBuffer[i]);
-    }
-    LDEBUG(fmt::format("t{}: headerBufferStr: {}", std::this_thread::get_id(), headerBufferStr));
-    // =========
 
     // Read and convert version number: Byte 0-2
     std::string version;
     for (int i = 0; i < 3; i++) {
         version.push_back(headerBuffer[i]);
     }
-    const std::string protocolVersionIn = version;
+    const float protocolVersionIn = std::stof(version);
 
     // Make sure that header matches the protocol version
-    if (protocolVersionIn != ProtocolVersion) {
-        LERROR(fmt::format("Protocol versions do not match. Remote version: {}, Local version: {}",
+    if (abs(protocolVersionIn - simp::ProtocolVersion) >= FLT_EPSILON) {
+        throw SoftwareConnectionLostError(fmt::format(
+            "Protocol versions do not match. Remote version: {}, Local version: {}",
             protocolVersionIn,
-            ProtocolVersion
+            simp::ProtocolVersion
         ));
-        throw SoftwareConnectionLostError();
     }
 
     // Read message type: Byte 3-6
@@ -152,39 +124,43 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
         type.push_back(headerBuffer[i]);
     }
 
-    // Read and convert message size: Byte 7-15
+    // Read and convert message size: Byte 7-22
     std::string subjectSizeIn;
-    for (int i = 7; i < 16; i++) {
+    for (int i = 7; i < 22; i++) {
         subjectSizeIn.push_back(headerBuffer[i]);
     }
     const size_t subjectSize = std::stoi(subjectSizeIn);
 
+    std::string rawHeader;
+    for (int i = 0; i < 22; i++) {
+        rawHeader.push_back(headerBuffer[i]);
+    }
+    LDEBUG(fmt::format("Message received with header: {}", rawHeader));
+
+    auto typeEnum = simp::getMessageType(type);
+
     // Receive the message data
-    if (mapSIMPTypeToMessageType[type] != MessageType::Disconnection) {
+    if (typeEnum != simp::MessageType::Disconnection) {
         subjectBuffer.resize(subjectSize);
-        bool subjectSuccess = _socket->get(subjectBuffer.data(), subjectSize);
-        if (!subjectSuccess) {
-            LERROR("Failed to read message from socket. Disconnecting.");
-            throw SoftwareConnectionLostError();
+        if (!_socket->get(subjectBuffer.data(), subjectSize)) {
+            throw SoftwareConnectionLostError("Failed to read message from socket. Disconnecting.");
         }
     }
 
     // Delegate decoding depending on message type
-    if (mapSIMPTypeToMessageType.count(type) != 0) {
-        if (mapSIMPTypeToMessageType[type] == MessageType::Color
-            || mapSIMPTypeToMessageType[type] == MessageType::Opacity
-            || mapSIMPTypeToMessageType[type] == MessageType::Size
-            || mapSIMPTypeToMessageType[type] == MessageType::Visibility
-        ) {
-            _isListening = false;
-        }
+    if (typeEnum == simp::MessageType::Color
+        || typeEnum == simp::MessageType::Opacity
+        || typeEnum == simp::MessageType::Size
+        || typeEnum == simp::MessageType::Visibility
+    ) {
+        _isListening = false;
+    }
 
-        return Message(mapSIMPTypeToMessageType[type], subjectBuffer);
-    }
-    else {
+    if (typeEnum == simp::MessageType::Unknown) {
         LERROR(fmt::format("Unsupported message type: {}. Disconnecting...", type));
-        return Message(MessageType::Disconnection, subjectBuffer);
     }
+
+    return Message(typeEnum, subjectBuffer);
 }
 
 } // namespace openspace

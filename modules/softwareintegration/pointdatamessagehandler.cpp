@@ -25,6 +25,7 @@
 #include <modules/softwareintegration/pointdatamessagehandler.h>
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
+#include <modules/softwareintegration/simp.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/query/query.h>
@@ -216,8 +217,8 @@ void PointDataMessageHandler::handlePointSizeMessage(const std::vector<char>& me
 
     // Update size of renderable
     if (propertySize != size) {
-    // TODO: Add to script when the "send back to glue" stuff is done
-    // "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {}, 1);",
+        // TODO: Add to script when the "send back to glue" stuff is done
+        // "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {}, 1);",
         std::string script = fmt::format(
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {});",
             identifier, ghoul::to_string(size)
@@ -274,23 +275,6 @@ void PointDataMessageHandler::preSyncUpdate() {
     }
 }
 
-std::string formatUpdateMessage(std::string_view messageType,
-                                std::string_view identifier, std::string_view value)
-{
-    const int lengthOfIdentifier = static_cast<int>(identifier.length());
-    const int lengthOfValue = static_cast<int>(value.length());
-    std::string subject = fmt::format(
-        "{}{}{}{}", lengthOfIdentifier, identifier, lengthOfValue, value
-    );
-
-    // Format length of subject to always be 4 digits
-    std::ostringstream os;
-    os << std::setfill('0') << std::setw(4) << subject.length();
-    const std::string lengthOfSubject = os.str();
-
-    return fmt::format("{}{}{}", messageType, lengthOfSubject, subject);
-}
-
 const Renderable* PointDataMessageHandler::getRenderable(const std::string& identifier) const {
     const Renderable* r = renderable(identifier);
     if (!r) {
@@ -323,7 +307,7 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& id
     // Update color of renderable
     auto updateColor = [colorProperty, identifier, &connection]() {
         const std::string value = colorProperty->getStringValue();
-        const std::string message = formatUpdateMessage("UPCO", identifier, value);
+        const std::string message = simp::formatUpdateMessage(simp::MessageType::Color, identifier, value);
         connection.sendMessage(message);
     };
     if (colorProperty) {
@@ -333,7 +317,7 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& id
     // Update opacity of renderable
     auto updateOpacity = [opacityProperty, identifier, &connection]() {
         const std::string value = opacityProperty->getStringValue();
-        const std::string message = formatUpdateMessage("UPOP", identifier, value);
+        const std::string message = simp::formatUpdateMessage(simp::MessageType::Opacity, identifier, value);
         connection.sendMessage(message);
     };
     if (opacityProperty) {
@@ -343,7 +327,7 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& id
     // Update size of renderable
     auto updateSize = [sizeProperty, identifier, &connection]() {
         const std::string value = sizeProperty->getStringValue();
-        const std::string message = formatUpdateMessage("UPSI", identifier, value);
+        const std::string message = simp::formatUpdateMessage(simp::MessageType::Size, identifier, value);
         connection.sendMessage(message);
     };
     if (sizeProperty) {
@@ -352,28 +336,10 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& id
 
     // Toggle visibility of renderable
     auto toggleVisibility = [visibilityProperty, identifier, &connection]() {
-        const int lengthOfIdentifier = static_cast<int>(identifier.length());
-
         bool isVisible = visibilityProperty->getStringValue() == "true";
         std::string_view visibilityFlag = isVisible ? "T" : "F";
 
-        const std::string subject = fmt::format(
-            "{}{}{}", lengthOfIdentifier, identifier, visibilityFlag
-        );
-        // We don't need a lengthOfValue here because it will always be 1 character
-
-        // @TODO (emmbr 2021-02-02) make sure this message has the same format as the
-        // others, so the 'formatUpdateMessage(..)' function can be used here
-
-        // Format length of subject to always be 4 digits
-        std::ostringstream os;
-        os << std::setfill('0') << std::setw(4) << subject.length();
-        const std::string lengthOfSubject = os.str();
-
-        const std::string_view messageType = "TOVI";
-        const std::string message = fmt::format(
-            "{}{}{}", messageType, lengthOfSubject, subject
-        );
+        const std::string message = simp::formatUpdateMessage(simp::MessageType::Visibility, identifier, visibilityFlag);
         connection.sendMessage(message);
     };
     if (visibilityProperty) {

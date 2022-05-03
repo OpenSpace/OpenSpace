@@ -22,76 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
+#include <modules/softwareintegration/simp.h>
 
-#include <modules/softwareintegration/network/softwareconnection.h>
-#include <modules/softwareintegration/pointdatamessagehandler.h>
-#include <openspace/util/concurrentqueue.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+
+#include <iomanip>
+
+namespace {
+    constexpr const char* _loggerCat = "SoftwareIntegrationMessageFormat";
+} // namespace
 
 namespace openspace {
 
-class NetworkEngine {
-public:
-	NetworkEngine(const int port = 4700);
+namespace simp {
 
-	struct Peer {
-		enum class Status : uint32_t {
-			Disconnected = 0,
-			Connected
-		};
+MessageType getMessageType(const std::string& type) {
+    if (_messageTypeFromSIMPType.count(type) == 0) return MessageType::Unknown;
+    return _messageTypeFromSIMPType.at(type);
+}
 
-		size_t id;
-		std::string name;
-		std::thread thread;
+std::string getSIMPType(const MessageType& type){
+    for (auto [key, messageType] : _messageTypeFromSIMPType) {
+        if (messageType == type) return key;
+    }
+    return "";
+}
 
-		SoftwareConnection connection;
-		std::list<std::string> sceneGraphNodes;	// TODO: Change to std::unordered_set?
-		Status status;
-	};
+std::string formatLengthOfSubject(size_t lengthOfSubject) {
+    // Format length of subject to always be 15 digits
+    std::ostringstream os;
+    os << std::setfill('0') << std::setw(15) << lengthOfSubject;
+    return os.str();
+}
 
-	struct PeerMessage {
-		size_t peerId;
-		SoftwareConnection::Message message;
-	};
+std::string formatUpdateMessage(MessageType messageType,
+                                std::string_view identifier,
+                                std::string_view value)
+{
+    const int lengthOfIdentifier = static_cast<int>(identifier.length());
+    const int lengthOfValue = static_cast<int>(value.length());
+    std::string subject = fmt::format(
+        "{}{}{}{}", lengthOfIdentifier, identifier, lengthOfValue, value
+    );
 
-	void start();
-	void stop();
-	void update();
+    const std::string lengthOfSubject = formatLengthOfSubject(subject.length());
 
-private:
-	void disconnect(std::shared_ptr<Peer> peer);
-	void handleNewPeers();
-	void peerEventLoop(size_t id);
-	void handlePeerMessage(PeerMessage peerMessage);
-	void eventLoop();
+    return fmt::format("{}{}{}{}", ProtocolVersion, getSIMPType(messageType), lengthOfSubject, subject);
+}
 
-	bool isConnected(const std::shared_ptr<Peer> peer) const;
+std::string formatConnectionMessage(std::string_view software) {
+    std::string subject = fmt::format(
+        "{}", software
+    );
 
-	void removeSceneGraphNode(const std::string &identifier);
+    const std::string lengthOfSubject = formatLengthOfSubject(subject.length());
 
-	std::shared_ptr<Peer> peer(size_t id);
+    return fmt::format("{}{}{}{}", ProtocolVersion, "CONN", lengthOfSubject, subject);
+}
 
-	std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
-	mutable std::mutex _peerListMutex;
-		
-	ghoul::io::TcpSocketServer _socketServer;
-	size_t _nextConnectionId = 1;
-	std::atomic_size_t _nConnections = 0;
-	std::thread _serverThread;
-	std::thread _eventLoopThread;
-	
-    std::atomic_bool _shouldStop = false;
+std::string formatDisconnectionMessage() {
+    const std::string lengthOfSubject = formatLengthOfSubject(0);
+    return fmt::format("{}{}{}", ProtocolVersion, "DISC", lengthOfSubject);
+}
 
-	const int _port;
-
-    // Message handlers
-	PointDataMessageHandler _pointDataMessageHandler;
-
-	ConcurrentQueue<PeerMessage> _incomingMessages;
-};
+} // namespace simp
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__

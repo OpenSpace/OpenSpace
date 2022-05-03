@@ -24,6 +24,7 @@
 
 #include <modules/softwareintegration/network/networkengine.h>
 
+#include <modules/softwareintegration/simp.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -52,6 +53,10 @@ void NetworkEngine::start() {
 }
 
 void NetworkEngine::stop() {
+    for (auto [id, peer] : _peers) {
+		disconnect(peer);
+	}
+    
 	_shouldStop = true;
 	_socketServer.close();
 
@@ -68,10 +73,7 @@ void NetworkEngine::update() {
 }
 
 bool NetworkEngine::isConnected(const std::shared_ptr<Peer> peer) const {
-	std::lock_guard<std::mutex> lock(_peerListMutex);
-	size_t count = _peers.count(peer->id);
-	LDEBUG(fmt::format("t{}: isConnected() - _peers.count(peer.id): {}", std::this_thread::get_id(), count));
-	return count != 0;
+  return peer->status == Peer::Status::Connected;
 }
 
 std::shared_ptr<NetworkEngine::Peer> NetworkEngine::peer(size_t id) {
@@ -81,25 +83,24 @@ std::shared_ptr<NetworkEngine::Peer> NetworkEngine::peer(size_t id) {
 	return it->second;
 }
 
-void NetworkEngine::disconnect(std::shared_ptr<Peer> peer) {    
-	// std::lock_guard<std::mutex> lock(_peerListMutex);
+void NetworkEngine::disconnect(std::shared_ptr<Peer> peer) {
 	if (peer == nullptr) return;
-	if (!isConnected(peer)) return;
+	if (!isConnected(peer)) return; // Already disconnected
 
+	--_nConnections;
+	peer->status = Peer::Status::Disconnected;
 	peer->connection.disconnect();
-	auto sgnIterator = peer->sceneGraphNodes.begin();
-	while (sgnIterator != peer->sceneGraphNodes.end()) {
-		LDEBUG(fmt::format("t{}: disconnect() - removing SGN '{}'", std::this_thread::get_id(), *sgnIterator));
-		removeSceneGraphNode(*sgnIterator);
-		peer->sceneGraphNodes.erase(sgnIterator);
-		++sgnIterator;
-	}
 
-	LDEBUG(fmt::format("t{}: disconnect() - pre thread.join()", std::this_thread::get_id()));
-	peer->thread.join(); // TODO: FIX - this triggers a message to be sent to Glue???
+	// auto sgnIterator = peer->sceneGraphNodes.begin();
+	// while (sgnIterator != peer->sceneGraphNodes.end()) {
+	// 	LDEBUG(fmt::format("t{}: disconnect() - removing SGN '{}'", std::this_thread::get_id(), *sgnIterator));
+	// 	removeSceneGraphNode(*sgnIterator);
+	// 	peer->sceneGraphNodes.erase(sgnIterator);
+	// 	++sgnIterator;
+	// }
+
+	peer->thread.join();
 	_peers.erase(peer->id);
-	_nConnections -= 1;
-	// _shouldStop = true;
 }
 
 void NetworkEngine::eventLoop() {
@@ -120,25 +121,21 @@ void NetworkEngine::handleNewPeers() {
 
 		socket->startStreams();
 
-		const size_t id = _nextConnectionId++;
 		std::shared_ptr<Peer> p = std::make_shared<Peer>(Peer{
-			id,
+			_nextConnectionId++,
 			"",
 			{},
 			SoftwareConnection(std::move(socket)),
 			{},
-			false,
+			Peer::Status::Connected
 		});
 		auto [it, peerInserted] = _peers.emplace(p->id, p);
 		if (peerInserted){
-			// it->first == p->id;
-			// it->second == p;
 			// The thread 'it.first->second->thread' will run 'peerEventLoop()' as fast as it can until stopped
 			it->second->thread = std::thread(
-				[this, id] () {
-				peerEventLoop(id);
+				[this, &p] () {
+				peerEventLoop(p->id);
 			}); 
-			// it.first->second->isConnected = true;
 
 		}
 	}
@@ -150,34 +147,23 @@ void NetworkEngine::peerEventLoop(size_t id) {
 	while (!_shouldStop) {
 		std::shared_ptr<Peer> p = peer(id);
 
-		// bool pConnectedOrConnecting = p->connection.isConnectedOrConnecting();
-		// LINFO(fmt::format("t{}: pConnectedOrConnecting: {}", std::this_thread::get_id(), pConnectedOrConnecting));
-		if (!p || !p->connection.isConnectedOrConnecting() || p->disconnecting) return;
+		if (!p || !p->connection.isConnectedOrConnecting()
+				|| p->status == Peer::Status::Disconnected) {
+			break;
+		}
 
 		try {
-			LINFO(fmt::format("t{}: peerEventLoop() - new message from p->id: {}", std::this_thread::get_id(), p->id));
 			SoftwareConnection::Message m = p->connection.receiveMessageFromSoftware();
 
-			if (m.type == SoftwareConnection::mapSIMPTypeToMessageType["DISC"])
-			{
-				p->disconnecting = true;
-			}
-
 			_incomingMessages.push({ id, m });
-
-			LINFO(fmt::format("t{}: peerEventLoop() - message received, m.type: {}", 
-				std::this_thread::get_id(), 
-				static_cast<uint32_t>(m.type)
-			));
 		}
-		catch (const SoftwareConnection::SoftwareConnectionLostError&) {
-			// std::lock_guard<std::mutex> lock(_peerListMutex);
-			LERROR(fmt::format("t{}: Connection lost to {} with peer id {}", p->name, p->id));
-			disconnect(peer(id));
-			return;
+		catch (const SoftwareConnection::SoftwareConnectionLostError& err) {
+			if (p->status == Peer::Status::Connected) {
+				LERROR(fmt::format("Connection lost to {}: {}", p->id, err.message));
+				disconnect(p);
+			}
+			break;
 		}
-
-		std::this_thread::sleep_for(1s); // TODO: Change this?
 	}
 }
 
@@ -189,31 +175,24 @@ void NetworkEngine::handlePeerMessage(PeerMessage peerMessage) {
 		return;
 	}
 
-	const SoftwareConnection::MessageType messageType = peerMessage.message.type;
+	const simp::MessageType messageType = peerMessage.message.type;
 	std::vector<char>& message = peerMessage.message.content;
 
-	int s = static_cast<int>(messageType);
-
 	switch (messageType) {
-	case SoftwareConnection::MessageType::Disconnection:
-	{
-		LDEBUG(fmt::format("t{}: handlePeerMessage() - Disconnecting peerId {}", std::this_thread::get_id(), peerId));
-		disconnect(peerPtr);
-		LDEBUG(fmt::format("t{}: handlePeerMessage() - _peers.size()={}, _shouldStop={}", std::this_thread::get_id(), _peers.size(), _shouldStop));
-		break;
-	}
-	case SoftwareConnection::MessageType::Connection:
+	case simp::MessageType::Connection:
 	{
 		const std::string software{ message.begin(), message.end() };
 		LINFO(fmt::format("OpenSpace has connected with {} through socket", software));
+		// Send back message to software to complete handshake
+		peerPtr->connection.sendMessage(simp::formatConnectionMessage(software));
 		break;
 	}
-	case SoftwareConnection::MessageType::ReadPointData: {
+	case simp::MessageType::ReadPointData: {
 		LDEBUG("Message recieved.. Point Data");
         _pointDataMessageHandler.handlePointDataMessage(message, peerPtr->connection, peerPtr->sceneGraphNodes);
 		break;
 	}
-	case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
+	case simp::MessageType::RemoveSceneGraphNode: {
 		const std::string identifier(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. Delete SGN: {}", identifier));
 		removeSceneGraphNode(identifier);
@@ -228,32 +207,37 @@ void NetworkEngine::handlePeerMessage(PeerMessage peerMessage) {
 		}
 		break;
 	}
-	case SoftwareConnection::MessageType::Color: {
+	case simp::MessageType::Color: {
 		const std::string colorMessage(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. New Color: {}", colorMessage));
 
 		_pointDataMessageHandler.handleColorMessage(message);
 		break;
 	}
-	case SoftwareConnection::MessageType::Opacity: {
+	case simp::MessageType::Opacity: {
 		const std::string opacityMessage(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. New Opacity: {}", opacityMessage));
 
 		_pointDataMessageHandler.handleOpacityMessage(message);
 		break;
 	}
-	case SoftwareConnection::MessageType::Size: {
+	case simp::MessageType::Size: {
 		const std::string sizeMessage(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. New Size: {}", sizeMessage));
 
 		_pointDataMessageHandler.handlePointSizeMessage(message);
 		break;
 	}
-	case SoftwareConnection::MessageType::Visibility: {
+	case simp::MessageType::Visibility: {
 		const std::string visibilityMessage(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. New Visibility: {}", visibilityMessage));
 
 		_pointDataMessageHandler.handleVisiblityMessage(message);
+		break;
+	}
+	case simp::MessageType::Disconnection: {
+		LDEBUG(fmt::format("Message recieved.. Disconnect peer: {}", peerPtr->id));
+        disconnect(peerPtr);
 		break;
 	}
 	default:

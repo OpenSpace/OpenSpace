@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/pointdatamessagehandler.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/simp.h
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/syncabledatastorage.h
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.h
@@ -36,6 +37,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/pointdatamessagehandler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/simp.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/syncabledatastorage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.cpp

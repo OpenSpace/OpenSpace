@@ -22,46 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWARECONNECTION___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWARECONNECTION___H__
-
-#include <openspace/network/messagestructures.h>
-#include <modules/softwareintegration/simp.h>
-#include <ghoul/io/socket/tcpsocket.h>
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__
 
 namespace openspace {
 
-class SoftwareConnection {
-public:
-    struct Message {
-        Message() = default;
-        Message(simp::MessageType type, std::vector<char> content);
+namespace simp {
 
-        simp::MessageType type;
-        std::vector<char> content;
-    };
-
-    class SoftwareConnectionLostError : public ghoul::RuntimeError {
-    public:
-        explicit SoftwareConnectionLostError(const std::string& msg);
-    };
-
-    SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
-
-    bool isConnected() const;
-    bool isConnectedOrConnecting() const;
-    bool sendMessage(std::string message);
-    void disconnect();
-
-    ghoul::io::TcpSocket* socket();
-
-    SoftwareConnection::Message receiveMessageFromSoftware();
-
-private:
-    bool _isListening = true;
-    std::unique_ptr<ghoul::io::TcpSocket> _socket;
+enum class MessageType : uint32_t {
+    Connection = 0,
+    ReadPointData,
+    RemoveSceneGraphNode,
+    Color,
+    Opacity,
+    Size,
+    Visibility,
+    Disconnection,
+    Unknown
 };
+
+const std::map<std::string, MessageType> _messageTypeFromSIMPType {
+    {"CONN", MessageType::Connection},
+    {"PDAT", MessageType::ReadPointData},
+    {"RSGN", MessageType::RemoveSceneGraphNode},
+    {"UPCO", MessageType::Color},
+    {"UPOP", MessageType::Opacity},
+    {"UPSI", MessageType::Size},
+    {"TOVI", MessageType::Visibility},
+    {"DISC", MessageType::Disconnection},
+};
+
+MessageType getMessageType(const std::string& type);
+
+std::string getSIMPType(const MessageType& type);
+
+const float ProtocolVersion = 1.5;
+
+std::string formatLengthOfSubject(size_t lengthOfSubject);
+
+std::string formatUpdateMessage(MessageType messageType,
+                                std::string_view identifier,
+                                std::string_view value);
+    
+std::string formatConnectionMessage(std::string_view value);
+
+std::string formatDisconnectionMessage();
+
+} // namespace simp
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__
