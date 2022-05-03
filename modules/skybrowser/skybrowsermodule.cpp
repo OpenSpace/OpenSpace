@@ -76,13 +76,13 @@ namespace {
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
-        "Field Of View Animation Speed",
+        "Field of View Animation Speed",
         "This determines the speed of the animation of the field of view in the browser."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo HideWithGuiInfo = {
         "HideTargetsBrowsersWithGui",
-        "Hide Targets And Browsers With GUI",
+        "Hide Targets and Browsers with GUI",
         "If checked, the targets and browsers will be disabled when the sky browser "
         "panel is minimized."
     };
@@ -152,7 +152,7 @@ SkyBrowserModule::SkyBrowserModule()
     , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
     , _inverseZoomDirection(InverseZoomInfo, false)
     , _spaceCraftAnimationTime(SpaceCraftTimeInfo, 2.0, 0.0, 10.0)
-    , _wwtImageCollectionUrl(ImageCollectionInfo, 
+    , _wwtImageCollectionUrl(ImageCollectionInfo,
         "https://data.openspaceproject.com/wwt/1/imagecollection.wtml")
 {
     addProperty(_enabled);

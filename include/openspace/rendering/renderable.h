@@ -114,7 +114,7 @@ protected:
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
-    /// Returns the full opacity constructed from the _opactiy and _fade property values
+    /// Returns the full opacity constructed from the _opacity and _fade property values
     float opacity() const;
 
     double _boundingSphere = 0.0;

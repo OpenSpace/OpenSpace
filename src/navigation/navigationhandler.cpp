@@ -617,7 +617,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::AddLocalRoll,
             codegen::lua::AddGlobalRoll,
             codegen::lua::TriggerIdleBehavior,
-            codegen::lua::ListAllJoysticks
+            codegen::lua::ListAllJoysticks,
+            codegen::lua::TargetNextInterestingAnchor
         }
     };
 }

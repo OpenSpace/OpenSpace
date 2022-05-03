@@ -159,7 +159,6 @@ void GuiParallelComponent::renderHost() {
     }
 }
 
-
 void GuiParallelComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
