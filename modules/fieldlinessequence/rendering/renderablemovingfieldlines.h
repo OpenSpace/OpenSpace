@@ -48,11 +48,12 @@ public:
         PathLineTraverser(std::vector<FieldlinesState::Fieldline>& fieldlines_);
         void advanceKeyFrames();
         void skipKeyFrame(FieldlinesState::Fieldline::Topology desiredTopology);
+        FieldlinesState::Fieldline::Topology decideTopology();
         bool isAtEnd() const;
         bool isAtStart() const;
         double getTimeToReconnectionPoint(size_t indexOfReconnection);
         double getTimeToEndKeyFrame();
-        void setStartPoint(double timeToRecon, size_t indexOfReconnection);
+        void setStartPoint(double timeToRecon, size_t indexOfReconnection); 
 
         std::vector<FieldlinesState::Fieldline>& keyFrames;
         FieldlinesState::Fieldline temporaryInterpolationKeyFrame;

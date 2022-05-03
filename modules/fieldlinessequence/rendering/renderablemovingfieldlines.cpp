@@ -757,20 +757,20 @@ namespace openspace {
             // if there is a topology change vertices should be swapped
             if (isNewTopology && !hasTemporaryKeyFrame) {
 
-                // TODO: implement this function to make it work both forwards and backwards
-                // desiredTopology = decideTopology()
+                bool isMovingForward = _traversers[lineIndex].forward;
 
                 // The traverser that has not reached the reconnection point
                 // should advance its next key frame and change the time to next
                 // key frame accordingly
                 if (isNewTopology1 && !hasTemporaryKeyFrame1) {
-                    _traversers[lineIndex + 1].skipKeyFrame(FieldlinesState::Fieldline::Topology::Open);
+                    FieldlinesState::Fieldline::Topology desiredTopology = _traversers[lineIndex].decideTopology();
+                    _traversers[lineIndex + 1].skipKeyFrame(desiredTopology);
                 }
                 else if (isNewTopology2 && !hasTemporaryKeyFrame2) {
-                    _traversers[lineIndex].skipKeyFrame(FieldlinesState::Fieldline::Topology::Open);
+                    FieldlinesState::Fieldline::Topology desiredTopology = _traversers[lineIndex + 1].decideTopology();
+                    _traversers[lineIndex].skipKeyFrame(desiredTopology);
                 }
 
-                bool isMovingForward = _traversers[lineIndex].forward;
                 if (isMovingForward) {
 
                     std::vector<glm::vec3>::iterator renderIt = _renderedLines.begin();
@@ -1040,6 +1040,22 @@ namespace openspace {
                 timeInterpolationDenominator += backKeyFrame->timeToNextKeyFrame;
             }
         }
+    }
+
+    FieldlinesState::Fieldline::Topology 
+        RenderableMovingFieldlines::PathLineTraverser::decideTopology() {
+
+            FieldlinesState::Fieldline::Topology newTopology = this->forward ?
+            frontKeyFrame->topology : backKeyFrame->topology;
+
+            switch (newTopology) {
+            case FieldlinesState::Fieldline::Topology::Imf:
+                return FieldlinesState::Fieldline::Topology::Closed;
+            case FieldlinesState::Fieldline::Topology::Closed:
+                return FieldlinesState::Fieldline::Topology::Imf;
+            case FieldlinesState::Fieldline::Topology::Open:
+                return FieldlinesState::Fieldline::Topology::Open;
+            }
     }
 
     // Will be phased out in the future
