@@ -3,7 +3,7 @@ local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms"
 local sun = asset.require("scene/solarsystem/sun/sun")
 
 local models = asset.syncedResource({
-  Name = "Mars 2020 Kernels",
+  Name = "Perseverance Model",
   Type = "HttpSynchronization",
   Identifier = "perseverance_models",
   Version = 2
