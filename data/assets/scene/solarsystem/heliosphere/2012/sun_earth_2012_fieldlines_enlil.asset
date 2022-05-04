@@ -3,14 +3,14 @@ local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere.a
 local transferFunctions = asset.syncedResource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
-  Identifier = "sun_earth_event-fieldlines-transferfunctions",
+  Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
   Version = 1
 })
 
 local fieldlineData  = asset.syncedResource({
   Name = "Fieldlines Data",
   Type = "HttpSynchronization",
-  Identifier = "sun_earth_event-fieldlines-data",
+  Identifier = "sun_earth_event_july_2012-enlil",
   Version = 1
 })
 
@@ -24,6 +24,11 @@ local unzippedDataDestination = {
   Lat4011AU2 = fieldlineData .. "011AU_lat4_2/",
   Earth = fieldlineData .. "earth/",
   StereoA = fieldlineData .. "stereoa/"
+}
+
+local colorRanges = {
+  { 0, 1000000 },
+  { 100, 2000 }
 }
 
 local ENLILSliceEqPlane11AU1 = {
@@ -41,10 +46,7 @@ local ENLILSliceEqPlane11AU1 = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = {
-      { 0, 1000000 },
-      { 100, 2000 }
-    },
+    ColorTableRanges = colorRanges,
     LoadAtRuntime = true
   },
   GUI = {
@@ -68,10 +70,7 @@ local ENLILSliceEqPlane11AU2 = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = {
-      { 0, 1000000 },
-      { 100, 2000 }
-    },
+    ColorTableRanges = colorRanges,
     LoadAtRuntime = true
   },
   GUI = {
@@ -95,10 +94,7 @@ local ENLILSliceLat411AU1 = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = {
-      { 0, 1000000 },
-      { 100, 2000 }
-    },
+    ColorTableRanges = colorRanges,
     LoadAtRuntime = true
   },
   GUI = {
@@ -122,10 +118,7 @@ local ENLILSliceLat411AU2 = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = {
-      { 0, 1000000 },
-      { 100, 2000 }
-    },
+    ColorTableRanges = colorRanges,
     LoadAtRuntime = true
   },
   GUI = {
@@ -146,10 +139,7 @@ local ENLILEarth = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = {
-      { 0, 1000000 },
-      { 100, 2000 }
-    },
+    ColorTableRanges = colorRanges,
     LoadAtRuntime = true
   },
   GUI = {
@@ -170,10 +160,12 @@ local ENLILStereoA = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = {
-      { 0, 1000000 },
-      { 100, 2000 }
-    },
+    ColorTableRanges = colorRanges,
+    FlowEnabled = true,
+    ReversedFlow = true,
+    ParticleSize = 5,
+    ParticleSpacing = 25,
+    FlowSpeed = 25,
     LoadAtRuntime = true
   },
   GUI = {
@@ -215,11 +207,6 @@ asset.onInitialize(function ()
   openspace.addSceneGraphNode(ENLILEarth)
   openspace.addSceneGraphNode(ENLILStereoA)
 
-  -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.color", { 1, 1, 1, 1.0 })
-  -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.particleSize", 5)
-  -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.particleSpacing", 25)
-  -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.speed", 25.0)
-  -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.reversed", true)
 end)
 
 asset.onDeinitialize(function ()

@@ -70,7 +70,7 @@ namespace {
         "Color Table/Transfer Function to use for 'By Quantity' coloring."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
-        "Uniform Color",
+        "Color",
         "Uniform Line Color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'."
     };
@@ -220,6 +220,18 @@ namespace {
 
         // [[codegen::verbatim(FlowColorInfo.description)]]
         std::optional<glm::vec4> flowColor;
+
+        // [[codegen::verbatim(FlowReversedInfo.description)]]
+        std::optional<bool> reversedFlow;
+
+        // [[codegen::verbatim(FlowParticleSizeInfo.description)]]
+        std::optional<int> particleSize;
+
+        // [[codegen::verbatim(FlowParticleSpacingInfo.description)]]
+        std::optional<int> particleSpacing;
+
+        // [[codegen::verbatim(FlowSpeedInfo.description)]]
+        std::optional<int> flowSpeed;
 
         // [[codegen::verbatim(MaskingEnabledInfo.description)]]
         std::optional<bool> maskingEnabled;
@@ -389,6 +401,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
     _flowColor = p.flowColor.value_or(_flowColor);
+    _flowReversed = p.reversedFlow.value_or(_flowReversed);
+    _flowParticleSize = p.particleSize.value_or(_flowParticleSize);
+    _flowParticleSpacing = p.particleSpacing.value_or(_flowParticleSpacing);
+    _flowSpeed = p.flowSpeed.value_or(_flowSpeed);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _modelStr = p.simulationModel.value_or(_modelStr);

@@ -27,6 +27,14 @@ local unzippedDataDestination = {
   velocityFlow = fieldlineData .. "velocity_flowlines-upstream",
   asherStatic = fieldlineData .. "ashers_static_seeds"
 }
+
+local colorRanges = {
+  { 0, 100000000 },
+  { 0, 60 },
+  { -0.015, 0.015 },
+  { 150, 900 },
+  { 0, 3 },
+}
 ----------------------LUTZ's JULY TRACES-------------------------
 local BatsrusJ12OpenClosed = {
   Identifier = "FL_BATSRUS_J12_OpenClosed",
@@ -35,7 +43,6 @@ local BatsrusJ12OpenClosed = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.openClosed,
     InputFileType = "Osfls",
-
     Color = { 0.7, 0.4, 0.0, 0.6 }, -- Default color
     ColorMethod = "By Quantity", -- Color by Quantity
     ColorQuantity = 0, -- Temperature
@@ -46,16 +53,10 @@ local BatsrusJ12OpenClosed = {
       batsrusVelocityColorTable,
       batsrusTopologyColorTable,
     },
-    ColorTableRanges = {
-      { 0, 100000000 },
-      { 0, 60 },
-      { -0.015, 0.015 },
-      { 150, 900 },
-      { 0, 3 },
-    },
+    ColorTableRanges = colorRanges,
     MaskingEnabled = true,
     MaskingQuantity = 4, -- Topology
-    MaskingRanges = {{2.5, 3.0}}, -- Closed only
+    MaskingRanges = { {2.5, 3.0} }, -- Corresponds to closed fieldlines only
     LoadAtRuntime = true
   },
   GUI = {
@@ -72,7 +73,6 @@ local BatsrusJ12FlowLines = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.velocityFlow,
     InputFileType = "Osfls",
-
     ColorMethod = "By Quantity", -- Color by Quantity
     ColorQuantity = 3, -- Velocity
     Color = { 0.7, 0.4, 0.0, 0.12 }, -- Default color
@@ -83,13 +83,7 @@ local BatsrusJ12FlowLines = {
       batsrusVelocityColorTable,
       batsrusTopologyColorTable,
     },
-    ColorTableRanges = {
-      { 0, 100000000 },
-      { 0, 60 },
-      { -0.015, 0.015 },
-      { 150, 900 },
-      { 0, 3 },
-    },
+    ColorTableRanges = colorRanges,
     LoadAtRuntime = true
   },
   GUI = {
@@ -98,16 +92,15 @@ local BatsrusJ12FlowLines = {
   }
 }
 
---------------------- VELOCITY FLOWLINES ------------------------
+--------------------- Ashers seedpoints ------------------------
 local BatsrusAsherStaticSeedsFlowLines = {
   Identifier = "FL_BATSRUS_ASHER_STATIC_SSEDS_FlowLines",
   Parent = transforms.GSMReferenceFrame.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.asherStatic,
-    InputFileType = "Osfls",
-
     Enabled = false,
+    InputFileType = "Osfls",
     ColorTablePaths = {
       batsrusTemperatureColorTable,
       batsrusDensityColorTable,
@@ -115,13 +108,7 @@ local BatsrusAsherStaticSeedsFlowLines = {
       batsrusVelocityColorTable,
       batsrusTopologyColorTable,
     },
-   ColorTableRanges = {
-      { 0, 100000000 },
-      { 0, 60 },
-      { -0.015, 0.015 },
-      { 150, 900 },
-      { 0, 3 },
-    },
+   ColorTableRanges = colorRanges,
     LoadAtRuntime = true
   },
   GUI = {
@@ -148,9 +135,6 @@ asset.onInitialize(function ()
   openspace.addSceneGraphNode(BatsrusJ12FlowLines)
   openspace.addSceneGraphNode(BatsrusAsherStaticSeedsFlowLines)
 
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSize", 2)
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.particleSpacing", 60)
-  -- openspace.setPropertyValueSingle("Scene.FL_BATSRUS_J12_FlowLines.Renderable.Flow.speed", 20)
 end)
 
 asset.onDeinitialize(function ()
