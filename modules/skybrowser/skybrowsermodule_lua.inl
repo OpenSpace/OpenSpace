@@ -343,7 +343,6 @@ namespace {
             target.setValue("dec", spherical.y);
             target.setValue("roll", pair->targetRoll());
             target.setValue("color", pair->borderColor());
-            target.setValue("size", glm::dvec2(pair->size()));
             std::vector<std::pair<std::string, glm::dvec3>> copies = pair->renderCopies();
             ghoul::Dictionary copiesData;
             for (size_t i = 0; i < copies.size(); i++) {
@@ -631,15 +630,14 @@ namespace {
  * Sets the screen space size of the sky browser to the numbers specified by the input
  * [x, y].
  */
-[[codegen::luawrap]] void setScreenSpaceSize(std::string identifier, float sizeX,
-                                             float sizeY)
+[[codegen::luawrap]] void setBrowserRatio(std::string identifier, float ratio)
 {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
-        pair->setScreenSpaceSize(glm::vec2(sizeX, sizeY));
+        pair->setBrowserRatio(ratio);
     }
 }
 

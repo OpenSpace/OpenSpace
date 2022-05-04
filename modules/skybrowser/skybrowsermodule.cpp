@@ -525,7 +525,7 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::SetBorderColor,
             codegen::lua::TranslateScreenSpaceRenderable,
             codegen::lua::AddRenderCopy,
-            codegen::lua::SetScreenSpaceSize,
+            codegen::lua::SetBrowserRatio,
             codegen::lua::RemoveRenderCopy,
             codegen::lua::StartFinetuningTarget,
             codegen::lua::FinetuneTargetPosition,

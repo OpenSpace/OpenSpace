@@ -47,17 +47,15 @@ public:
     void update() override;
 
     float opacity() const;
-    glm::vec2 size() const;
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
 
     void setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
-    void setScreenSpaceSize(glm::vec2 newSize);
+    void setRatio(float ratio);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
 
-    void updateScreenSpaceSize();
     void updateTextureResolution();
 
     // Copies rendered
@@ -78,10 +76,10 @@ private:
     // Flags
     bool _isSyncedWithWwt = false;
     bool _textureDimensionsIsDirty = false;
-    bool _sizeIsDirty = false;
+    bool _ratioIsDirty = false;
     bool _isInitialized = false;
 
-    glm::vec2 _size = glm::vec2(1.f, 1.f);
+    float _ratio = 1.f;
 };
 
 } // namespace openspace

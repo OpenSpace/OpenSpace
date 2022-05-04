@@ -122,7 +122,10 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         _borderColor = randomBorderColor();
     }
-    _scale = _size.y * 0.5f;
+
+    _scale.onChange([this]() {
+        updateTextureResolution();
+        });
 
     _useRadiusAzimuthElevation.onChange(
         [this]() {
@@ -189,8 +192,7 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
 
     // If the scale is 1, it covers half the window. Hence multiplication with 2
     float newResY = pixels.y * 2.f * _scale;
-    float ratio = _size.x / _size.y;
-    float newResX = newResY * ratio;
+    float newResX = newResY * _ratio;
     glm::vec2 newSize = glm::vec2(newResX , newResY) * _textureQuality.value();
 
     _browserPixeldimensions = glm::ivec2(newSize);
@@ -316,9 +318,9 @@ void ScreenSpaceSkyBrowser::update() {
         updateTextureResolution();
         _textureDimensionsIsDirty = false;
     }
-    if (_sizeIsDirty) {
-        updateScreenSpaceSize();
-        _sizeIsDirty = false;
+    if (_ratioIsDirty) {
+        updateTextureResolution();
+        _ratioIsDirty = false;
     }
 
     WwtCommunicator::update();
@@ -353,22 +355,13 @@ void ScreenSpaceSkyBrowser::setOpacity(float opacity) {
     _opacity = opacity;
 }
 
-void ScreenSpaceSkyBrowser::setScreenSpaceSize(glm::vec2 newSize) {
-    _size = std::move(newSize);
-    _sizeIsDirty = true;
-}
-
-void ScreenSpaceSkyBrowser::updateScreenSpaceSize() {
-    _scale = abs(_size.y) * 0.5f;
-    updateTextureResolution();
+void ScreenSpaceSkyBrowser::setRatio(float ratio) {
+    _ratio = ratio;
+    _ratioIsDirty = true;
 }
 
 float ScreenSpaceSkyBrowser::opacity() const {
     return _opacity;
-}
-
-glm::vec2 ScreenSpaceSkyBrowser::size() const {
-    return _size;
 }
 
 } // namespace openspace

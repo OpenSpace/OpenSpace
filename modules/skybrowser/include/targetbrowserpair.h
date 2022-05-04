@@ -75,7 +75,7 @@ public:
     void setVerticalFov(double vfov);
     void setEquatorialAim(const glm::dvec2& aim);
     void setBorderColor(const glm::ivec3& color);
-    void setScreenSpaceSize(const glm::vec2& dimensions);
+    void setBrowserRatio(float ratio);
     void setVerticalFovWithScroll(float scroll);
     void setImageCollectionIsLoaded(bool isLoaded);
 
@@ -87,7 +87,6 @@ public:
     std::string browserId() const;
     std::string targetRenderableId() const;
     std::string targetNodeId() const;
-    glm::vec2 size() const;
     float browserRatio() const;
 
     SceneGraphNode* targetNode() const;

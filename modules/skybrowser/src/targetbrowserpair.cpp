@@ -165,10 +165,6 @@ std::string TargetBrowserPair::targetNodeId() const {
     return _targetNode->identifier();
 }
 
-glm::vec2 TargetBrowserPair::size() const {
-    return _browser->size();
-}
-
 float TargetBrowserPair::browserRatio() const {
     return _browser->browserRatio();
 }
@@ -282,9 +278,9 @@ void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
     _browser->setBorderColor(color);
 }
 
-void TargetBrowserPair::setScreenSpaceSize(const glm::vec2& dimensions) {
-    _browser->setScreenSpaceSize(dimensions);
-    _targetRenderable->setRatio(dimensions.x / dimensions.y);
+void TargetBrowserPair::setBrowserRatio(float ratio) {
+    _browser->setRatio(ratio);
+    _targetRenderable->setRatio(ratio);
 }
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
