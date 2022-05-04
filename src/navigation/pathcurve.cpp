@@ -35,11 +35,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "PathCurve";
-
-    constexpr const double LengthEpsilon =
-        100.0 * std::numeric_limits<double>::epsilon();
-
+    constexpr const double LengthEpsilon = 100.0 * std::numeric_limits<double>::epsilon();
 } // namespace
 
 namespace openspace::interaction {
@@ -79,7 +75,7 @@ void PathCurve::initializeParameterData() {
 
     // Evenly space out parameter intervals
     _curveParameterSteps.reserve(_nSegments + 1);
-    for (int i = 0; i <= _nSegments; i++) {
+    for (unsigned int i = 0; i <= _nSegments; i++) {
         _curveParameterSteps.push_back(static_cast<double>(i));
     }
 
@@ -113,7 +109,9 @@ void PathCurve::initializeParameterData() {
             double s = sStart + arcLength(uStart, u);
             // Identify samples that are indistinguishable due to precision limitations
             if (std::abs(s - _parameterSamples.back().s) < LengthEpsilon) {
-                throw InsufficientPrecisionError("Insufficient precision due to path length");
+                throw InsufficientPrecisionError(
+                    "Insufficient precision due to path length"
+                );
             }
             _parameterSamples.push_back({ u, s });
         }
@@ -241,7 +239,7 @@ double PathCurve::arcLength(double lowerLimit, double upperLimit) const {
 
 glm::dvec3 PathCurve::interpolate(double u) const {
     const double max = _curveParameterSteps.back();
-    ghoul_assert(u >= 0 && u <= max, "Interpolation variable must be in range [0,_nSegments]");
+    ghoul_assert(u >= 0 && u <= max, "Interpolation variable must be in [0, _nSegments]");
 
     if (u <= 0.0) {
         return _points[1];

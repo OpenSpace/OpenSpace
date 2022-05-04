@@ -48,7 +48,7 @@ std::vector<std::byte> SyncEngine::encodeSyncables() {
     return data;
 }
 
-// Should be called on sgct slaves
+// Should be called on sgct clients
 void SyncEngine::decodeSyncables(std::vector<std::byte> data) {
     _syncBuffer.setData(std::move(data));
     for (Syncable* syncable : _syncables) {

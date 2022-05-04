@@ -265,7 +265,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     );
 
     _shader->setUniform(_uniformCache.shadowColor, _shadowColor);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));

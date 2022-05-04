@@ -54,11 +54,11 @@ namespace {
  * builtInFrames. Returns User loaded frames if !builtInFrames.
  */
 [[codegen::luawrap]] std::map<std::string, std::string> spiceBodies(bool includeBuiltIn) {
-    std::vector<std::pair<int, std::string>> bodies = 
+    std::vector<std::pair<int, std::string>> bodies =
         openspace::SpiceManager::ref().spiceBodies(includeBuiltIn);
 
     std::map<std::string, std::string> res;
-    for (const std::pair<const int, std::string>& p : bodies) {
+    for (const std::pair<int, std::string>& p : bodies) {
         res[std::to_string(p.first)] = p.second;
     }
     return res;
@@ -93,7 +93,7 @@ namespace {
                                          std::string frame, std::string date)
 {
     using namespace openspace;
- 
+
     const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
     glm::dvec3 position = SpiceManager::ref().targetPosition(
         target,

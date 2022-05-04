@@ -25,8 +25,8 @@
 -- First - Name of the joystick that should be bound
 -- Second - Which axis should be bound of this joystick
 -- Third - The property uri
--- Fourth - (optional) The smallest value that you wnat to allow this property on the joystick
--- Fifth - (optional) The largest value that you wnat to allow this property on the joystick
+-- Fourth - (optional) The smallest value that you want to allow this property on the joystick
+-- Fifth - (optional) The largest value that you want to allow this property on the joystick
 -- Sixth - (optional) Determines whether the axis should be inverted
 -- Seventh - (optional) Should this property change be sent to other connected remote sessions
 

@@ -49,7 +49,9 @@ void MarkNodesDialog::createWidgets() {
     _list = new QListWidget;
     connect(
         _list, &QListWidget::itemSelectionChanged,
-        this, &MarkNodesDialog::listItemSelected
+        [this]() {
+            _removeButton->setEnabled(true);
+        }
     );
     _list->setAlternatingRowColors(true);
     _list->setMovement(QListView::Free);
@@ -77,10 +79,7 @@ void MarkNodesDialog::createWidgets() {
         box->addWidget(_newNode);
 
         QPushButton* addButton = new QPushButton("Add new");
-        connect(
-            addButton, &QPushButton::clicked,
-            this, &MarkNodesDialog::listItemAdded
-        );
+        connect(addButton, &QPushButton::clicked, this, &MarkNodesDialog::listItemAdded);
         box->addWidget(addButton);
         layout->addLayout(box);
     }
@@ -88,20 +87,13 @@ void MarkNodesDialog::createWidgets() {
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-        QObject::connect(
+        connect(
             buttons, &QDialogButtonBox::accepted,
             this, &MarkNodesDialog::parseSelections
         );
-        QObject::connect(
-            buttons, &QDialogButtonBox::rejected,
-            this, &MarkNodesDialog::reject
-        );
+        connect(buttons, &QDialogButtonBox::rejected, this, &MarkNodesDialog::reject);
         layout->addWidget(buttons);
     }
-}
-
-void MarkNodesDialog::listItemSelected() {
-    _removeButton->setEnabled(true);
 }
 
 void MarkNodesDialog::listItemAdded() {
@@ -151,12 +143,11 @@ void MarkNodesDialog::parseSelections() {
 }
 
 void MarkNodesDialog::keyPressEvent(QKeyEvent* evt) {
-   if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
-        if (_newNode->text().length() > 0 && _newNode->hasFocus()) {
-            listItemAdded();
-            return;
-        }
-    }
+   if ((evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) &&
+       (!_newNode->text().isEmpty() && _newNode->hasFocus()))
+   {
+        listItemAdded();
+        return;
+}
     QDialog::keyPressEvent(evt);
 }
-

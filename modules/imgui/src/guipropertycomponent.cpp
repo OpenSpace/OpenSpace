@@ -194,8 +194,16 @@ GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string g
     addProperty(_ignoreHiddenHint);
 }
 
-void GuiPropertyComponent::setSource(SourceFunction function) {
-    _function = std::move(function);
+void GuiPropertyComponent::setPropertyOwners(
+                                   std::vector<properties::PropertyOwner*> propertyOwners)
+{
+    _propertyOwners = std::move(propertyOwners);
+}
+
+void GuiPropertyComponent::setPropertyOwnerFunction(
+                            std::function<std::vector<properties::PropertyOwner*>()> func)
+{
+    _propertyOwnerFunction = std::move(func);
 }
 
 void GuiPropertyComponent::setVisibility(properties::Property::Visibility visibility) {
@@ -282,182 +290,167 @@ void GuiPropertyComponent::render() {
     _isCollapsed = ImGui::IsWindowCollapsed();
     using namespace properties;
 
-    if (_function) {
-        std::vector<properties::PropertyOwner*> owners = _function();
+    std::vector<properties::PropertyOwner*> owners =
+        _propertyOwnerFunction ? _propertyOwnerFunction() : _propertyOwners;
 
-        std::sort(
+    std::sort(
+        owners.begin(),
+        owners.end(),
+        [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
+            return lhs->guiName() < rhs->guiName();
+        }
+    );
+
+    if (_useTreeLayout) {
+        for (properties::PropertyOwner* owner : owners) {
+            ghoul_assert(
+                dynamic_cast<SceneGraphNode*>(owner),
+                "When using the tree layout, all owners must be SceneGraphNodes"
+            );
+            (void)owner; // using [[maybe_unused]] in the for loop gives an error
+        }
+
+        // Sort:
+        // if guigrouping, sort by name and shortest first, but respect the user specified
+        // ordering then all w/o guigroup
+        const std::vector<std::string>& ordering = _treeOrdering;
+        std::stable_sort(
             owners.begin(),
             owners.end(),
-            [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
-                return lhs->guiName() < rhs->guiName();
-            }
-        );
+            [&ordering](PropertyOwner* lhs, PropertyOwner* rhs) {
+                std::string lhsGroup = dynamic_cast<SceneGraphNode*>(lhs)->guiPath();
+                std::string rhsGroup = dynamic_cast<SceneGraphNode*>(rhs)->guiPath();
 
-        if (_useTreeLayout) {
-            for (properties::PropertyOwner* owner : owners) {
-                ghoul_assert(
-                    dynamic_cast<SceneGraphNode*>(owner),
-                    "When using the tree layout, all owners must be SceneGraphNodes"
-                );
-                (void)owner; // using [[maybe_unused]] in the for loop gives an error
-            }
+                if (lhsGroup.empty()) {
+                    return false;
+                }
+                if (rhsGroup.empty()) {
+                    return true;
+                }
 
-            // Sort:
-            // if guigrouping, sort by name and shortest first, but respect the user
-            // specified ordering
-            // then all w/o guigroup
-            const std::vector<std::string>& ordering = _treeOrdering;
-            std::stable_sort(
-                owners.begin(),
-                owners.end(),
-                [&ordering](PropertyOwner* lhs, PropertyOwner* rhs) {
-                    std::string lhsGroup = dynamic_cast<SceneGraphNode*>(lhs)->guiPath();
-                    std::string rhsGroup = dynamic_cast<SceneGraphNode*>(rhs)->guiPath();
+                if (ordering.empty()) {
+                    return lhsGroup < rhsGroup;
+                }
 
-                    if (lhsGroup.empty()) {
-                        return false;
-                    }
-                    if (rhsGroup.empty()) {
-                        return true;
-                    }
+                std::vector<std::string> lhsToken = ghoul::tokenizeString(lhsGroup, '/');
+                // The first token is always empty
+                auto lhsIt = std::find(ordering.begin(), ordering.end(), lhsToken[1]);
 
-                    if (ordering.empty()) {
-                        return lhsGroup < rhsGroup;
-                    }
+                std::vector<std::string> rhsToken = ghoul::tokenizeString(rhsGroup, '/');
+                // The first token is always empty
+                auto rhsIt = std::find(ordering.begin(), ordering.end(), rhsToken[1]);
 
-                    std::vector<std::string> lhsToken = ghoul::tokenizeString(
-                        lhsGroup,
-                        '/'
-                    );
-                    // The first token is always empty
-                    auto lhsIt = std::find(ordering.begin(), ordering.end(), lhsToken[1]);
-
-                    std::vector<std::string> rhsToken = ghoul::tokenizeString(
-                        rhsGroup,
-                        '/'
-                    );
-                    // The first token is always empty
-                    auto rhsIt = std::find(ordering.begin(), ordering.end(), rhsToken[1]);
-
-                    if (lhsIt != ordering.end() && rhsIt != ordering.end()) {
-                        if (lhsToken[1] != rhsToken[1]) {
-                            // If both top-level groups are in the ordering list, the
-                            // order of the iterators gives us the order of the groups
-                            return lhsIt < rhsIt;
-                        }
-                        else {
-                            return lhsGroup < rhsGroup;
-                        }
-                    }
-                    else if (lhsIt != ordering.end() && rhsIt == ordering.end()) {
-                        // If only one of them is in the list, we have a sorting
-                        return true;
-                    }
-                    else if (lhsIt == ordering.end() && rhsIt != ordering.end()) {
-                        return false;
+                if (lhsIt != ordering.end() && rhsIt != ordering.end()) {
+                    if (lhsToken[1] != rhsToken[1]) {
+                        // If both top-level groups are in the ordering list, the
+                        // order of the iterators gives us the order of the groups
+                        return lhsIt < rhsIt;
                     }
                     else {
                         return lhsGroup < rhsGroup;
                     }
                 }
-            );
-        }
-
-        // If the owners list is empty, we wnat to do the normal thing (-> nothing)
-        // Otherwise, check if the first owner has a GUI group
-        // This makes the assumption that the tree layout is only used if the owners are
-        // SceenGraphNodes (checked above)
-        const bool noGuiGroups = owners.empty() ||
-                                 (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
-                       dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
-
-        auto renderProp = [&](properties::PropertyOwner* pOwner) {
-            const int count = nVisibleProperties(
-                pOwner->propertiesRecursive(),
-                _visibility
-            );
-
-            if (count == 0) {
-                return;
-            }
-
-            auto header = [&]() -> bool {
-                if (owners.size() > 1) {
-                    // Create a header in case we have multiple owners
-                    return ImGui::CollapsingHeader(pOwner->guiName().c_str());
-                }
-                else if (!pOwner->identifier().empty()) {
-                    // If the owner has a name, print it first
-                    ImGui::Text("%s", pOwner->guiName().c_str());
-                    ImGui::Spacing();
+                else if (lhsIt != ordering.end() && rhsIt == ordering.end()) {
+                    // If only one of them is in the list, we have a sorting
                     return true;
+                }
+                else if (lhsIt == ordering.end() && rhsIt != ordering.end()) {
+                    return false;
                 }
                 else {
-                    // Otherwise, do nothing
-                    return true;
+                    return lhsGroup < rhsGroup;
                 }
-            };
+            }
+        );
+    }
 
-            if (header()) {
-                renderPropertyOwner(pOwner);
+    // If the owners list is empty, we wnat to do the normal thing (-> nothing)
+    // Otherwise, check if the first owner has a GUI group
+    // This makes the assumption that the tree layout is only used if the owners are
+    // SceenGraphNodes (checked above)
+    const bool noGuiGroups = owners.empty() ||
+                             (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
+                       dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
+
+    auto renderProp = [&](properties::PropertyOwner* pOwner) {
+        const int count = nVisibleProperties(pOwner->propertiesRecursive(), _visibility);
+
+        if (count == 0) {
+            return;
+        }
+
+        auto header = [&]() -> bool {
+            if (owners.size() > 1) {
+                // Create a header in case we have multiple owners
+                return ImGui::CollapsingHeader(pOwner->guiName().c_str());
+            }
+            else if (!pOwner->identifier().empty()) {
+                // If the owner has a name, print it first
+                ImGui::Text("%s", pOwner->guiName().c_str());
+                ImGui::Spacing();
+                return true;
+            }
+            else {
+                // Otherwise, do nothing
+                return true;
             }
         };
 
-        if (!_useTreeLayout || noGuiGroups) {
-            if (!_ignoreHiddenHint) {
-                // Remove all of the nodes that we want hidden first
-                owners.erase(
-                    std::remove_if(
-                        owners.begin(),
-                        owners.end(),
-                        [](properties::PropertyOwner* p) {
-                            SceneGraphNode* s = dynamic_cast<SceneGraphNode*>(p);
-                            return s && s->hasGuiHintHidden();
-                        }
-                    ),
-                    owners.end()
-                );
-            }
-            std::for_each(owners.begin(), owners.end(), renderProp);
+        if (header()) {
+            renderPropertyOwner(pOwner);
         }
-        else { // _useTreeLayout && gui groups exist
-            TreeNode root("");
+    };
 
-            for (properties::PropertyOwner* pOwner : owners) {
-                // We checked above that pOwner is a SceneGraphNode
-                SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
-                if (!_ignoreHiddenHint && nOwner->hasGuiHintHidden()) {
-                    continue;
-                }
-                const std::string guiPath = nOwner->guiPath();
-                if (guiPath.empty()) {
-                    // We know that we are done now since we stable_sort:ed them above
-                    break;
-                }
-                std::vector<std::string> paths = ghoul::tokenizeString(
-                    guiPath.substr(1),
-                    '/'
-                );
+    if (!_useTreeLayout || noGuiGroups) {
+        if (!_ignoreHiddenHint) {
+            // Remove all of the nodes that we want hidden first
+            owners.erase(
+                std::remove_if(
+                    owners.begin(),
+                    owners.end(),
+                    [](properties::PropertyOwner* p) {
+                        SceneGraphNode* s = dynamic_cast<SceneGraphNode*>(p);
+                        return s && s->hasGuiHintHidden();
+                    }
+                ),
+                owners.end()
+            );
+        }
+        std::for_each(owners.begin(), owners.end(), renderProp);
+    }
+    else { // _useTreeLayout && gui groups exist
+        TreeNode root("");
 
-                addPathToTree(root, paths, nOwner);
+        for (properties::PropertyOwner* pOwner : owners) {
+            // We checked above that pOwner is a SceneGraphNode
+            SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
+            if (!_ignoreHiddenHint && nOwner->hasGuiHintHidden()) {
+                continue;
+            }
+            const std::string gui = nOwner->guiPath();
+            if (gui.empty()) {
+                // We know that we are done now since we stable_sort:ed them above
+                break;
+            }
+            std::vector<std::string> paths = ghoul::tokenizeString(gui.substr(1), '/');
+            addPathToTree(root, paths, nOwner);
+        }
+
+        simplifyTree(root);
+
+        renderTree(root, renderProp);
+
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
+
+        for (properties::PropertyOwner* pOwner : owners) {
+            // We checked above that pOwner is a SceneGraphNode
+            SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
+
+            if (!nOwner->guiPath().empty()) {
+                continue;
             }
 
-            simplifyTree(root);
-
-            renderTree(root, renderProp);
-
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-
-            for (properties::PropertyOwner* pOwner : owners) {
-                // We checked above that pOwner is a SceneGraphNode
-                SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
-
-                if (!nOwner->guiPath().empty()) {
-                    continue;
-                }
-
-                renderProp(pOwner);
-            }
+            renderProp(pOwner);
         }
     }
 

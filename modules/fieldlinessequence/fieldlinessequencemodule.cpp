@@ -67,7 +67,8 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
 }
 
-std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const {
+std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
+{
     return {
         RenderableFieldlinesSequence::Documentation()
     };

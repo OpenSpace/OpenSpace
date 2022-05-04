@@ -48,7 +48,7 @@ public:
 
 private:
     properties::StringProperty _filePath;
-  
+
     std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
     Tile _tile;
 };

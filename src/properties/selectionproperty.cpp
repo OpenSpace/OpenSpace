@@ -190,7 +190,7 @@ bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) {
             changed = true;
         }
         else {
-            it++;
+            ++it;
         }
     }
     return changed;

@@ -67,13 +67,9 @@ public:
 protected:
     virtual void bindTexture();
     virtual void unbindTexture();
-
-protected:
-    properties::OptionProperty _blendMode;
-
-private:
     void createPlane();
 
+    properties::OptionProperty _blendMode;
     properties::BoolProperty _billboard;
     properties::BoolProperty _mirrorBackside;
     properties::FloatProperty _size;
@@ -84,6 +80,7 @@ private:
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;
 
+private:
     bool _planeIsDirty = false;
 };
 

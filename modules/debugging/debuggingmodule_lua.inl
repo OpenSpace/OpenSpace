@@ -63,7 +63,7 @@ std::string makeIdentifier(std::string s) {
     const interaction::Path* currentPath =
         global::navigationHandler->pathNavigator().currentPath();
 
-        // Parent node. Note that we only render one path at a time, so remove the previously
+    // Parent node. Note that we only render one path at a time, so remove the previously
     // rendered one, if any
     std::string addParentScript = fmt::format(
         "if openspace.hasSceneGraphNode('{0}') then "

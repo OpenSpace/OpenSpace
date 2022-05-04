@@ -1,4 +1,13 @@
-local transforms = asset.require("../transforms")
+local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+local model = asset.syncedResource({
+  Name = "Deimos Model",
+  Type = "HttpSynchronization",
+  Identifier = "deimos_model",
+  Version = 1
+})
 
 local kernels = asset.syncedResource({
   Name = "Mars Spice Kernels",
@@ -25,10 +34,17 @@ local Deimos = {
     }
   },
   Renderable = {
-    Type = "RenderableGlobe",
-    Radii = { 15000, 12200, 11000 },
-    SegmentsPerPatch = 90,
-    Layers = {}
+    Type = "RenderableModel",
+    GeometryFile = model .. "/Deimos_1_1000.glb",
+    ModelScale = 'Kilometer',
+    RotationVector = { 180, 0, 180 },
+    AmbientIntensity = 0.02,
+    SpecularIntensity = 0.0,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
   },
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
@@ -74,11 +90,10 @@ asset.export(Deimos)
 asset.export(DeimosTrail)
 
 
-
 asset.meta = {
   Name = "Deimos",
-  Version = "1.1",
-  Description = [[ RenderableGlobe and Trail for Deimos.]],
+  Version = "1.0",
+  Description = [[ RenderableModel and Trail for Deimos.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -48,6 +48,46 @@ namespace {
     global::eventEngine->unregisterEventAction(type, action, filter);
 }
 
+/**
+ * Returns the list of registered events.
+ */
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> registeredEvents() {
+    using namespace openspace;
+    
+    std::vector<EventEngine::ActionInfo> actions =
+        global::eventEngine->registeredActions();
+
+    std::vector<ghoul::Dictionary> result;
+    result.reserve(actions.size());
+    for (const EventEngine::ActionInfo& ai : actions) {
+        ghoul::Dictionary d;
+        d.setValue("Identifier", static_cast<int>(ai.id));
+        d.setValue("Type", std::string(events::toString(ai.type)));
+        d.setValue("Enabled", ai.isEnabled);
+        d.setValue("Action", ai.action);
+        if (ai.filter.has_value()) {
+            d.setValue("Filter", *ai.filter);
+        }
+        result.push_back(d);
+
+    }
+    return result;
+}
+
+/**
+ * Enables the event with the provided identifier.
+ */
+[[codegen::luawrap]] void enableEvent(int identifier) {
+    openspace::global::eventEngine->enableEvent(static_cast<uint32_t>(identifier));
+}
+
+/**
+ * Disables the event with the provided identifier.
+ */
+[[codegen::luawrap]] void disableEvent(int identifier) {
+    openspace::global::eventEngine->disableEvent(static_cast<uint32_t>(identifier));
+}
+
 #include "eventengine_lua_codegen.cpp"
 
 } // namespace

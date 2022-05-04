@@ -143,11 +143,9 @@ bool DataCygnet::updateTexture() {
                 ghoul::opengl::Texture::WrappingMode::ClampToEdge
             );
 
-            if (texture) {
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                _textures[option] = std::move(texture);
-            }
+            texture->uploadTexture();
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+            _textures[option] = std::move(texture);
         }
         else {
             _textures[option]->setPixelData(values);

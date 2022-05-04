@@ -57,9 +57,11 @@ namespace {
  * unsynchronized, if the parameter is not provided, all versions for the specified http
  * resource are removed.
  */
-[[codegen::luawrap]] void unsyncResource(std::string identifier, std::optional<int> version) {
+[[codegen::luawrap]] void unsyncResource(std::string identifier,
+                                         std::optional<int> version)
+{
     using namespace openspace;
-    
+
     const SyncModule* module = global::moduleEngine->module<SyncModule>();
     std::filesystem::path sync = absPath(module->synchronizationRoot());
     std::filesystem::path base = sync / "http" / identifier;

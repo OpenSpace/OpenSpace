@@ -24,232 +24,183 @@
 
 #include "sgctedit/monitorbox.h"
 
-constexpr float MarginFractionOfWidgetSize = 0.05f;
+#include <QPainter>
 
-MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-                       unsigned int nWindows, const std::array<QColor, 4>& winColors)
-    : _monitorWidgetSize(widgetDims)
-    , _monitorResolution(monitorResolution)
+namespace {
+    constexpr float MarginFractionOfWidgetSize = 0.05f;
+    constexpr int WindowOpacity = 170;
+
+    QRectF computeUnion(const std::vector<QRect>& monitorResolutions) {
+        QRectF res = { 0.f, 0.f, 0.f, 0.f };
+        for (const QRect& m : monitorResolutions) {
+            res |= m;
+        }
+        return res;
+    }
+} // namespace
+
+MonitorBox::MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolutions,
+                       unsigned int nWindows, const std::array<QColor, 4>& windowColors,
+                       QWidget* parent)
+    : QWidget(parent)
     , _nWindows(nWindows)
-    , _colorsForWindows(winColors)
+    , _colorsForWindows(windowColors)
 {
-    _nMonitors = static_cast<unsigned int>(monitorResolution.size());
-    _showLabel = (_nMonitors > 1);
-    determineMonitorArrangement();
-    this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    float borderMargin = MarginFractionOfWidgetSize * 2.f;
-    if (_monitorArrangementAspectRatio > 1.0) {
-        borderMargin *= _monitorWidgetSize.width();
-        _monitorWidgetSize.setHeight(_monitorWidgetSize.width()
-            / _monitorArrangementAspectRatio + borderMargin);
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    
+    QRectF monitorArrangement = computeUnion(monitorResolutions);
+    
+    const float aspectRatio = monitorArrangement.width() / monitorArrangement.height();
+    if (aspectRatio > 1.0) {
+        float borderMargin = 2.f * MarginFractionOfWidgetSize * widgetDims.width();
+        widgetDims.setHeight(widgetDims.width() / aspectRatio + borderMargin);
     }
     else {
-        borderMargin *= _monitorWidgetSize.height();
-        _monitorWidgetSize.setWidth(_monitorWidgetSize.height()
-            * _monitorArrangementAspectRatio + borderMargin);
+        float borderMargin = 2.f * MarginFractionOfWidgetSize * widgetDims.height();
+        widgetDims.setWidth(widgetDims.height() * aspectRatio + borderMargin);
     }
-    this->setFixedSize(_monitorWidgetSize.width(), _monitorWidgetSize.height());
-    mapMonitorResolutionToWidgetCoordinates();
+    setFixedSize(widgetDims.width(), widgetDims.height());
+    
+    //
+    // Map monitor resolution to widget coordinates
+    std::vector<QSizeF> offsets =
+        aspectRatio >= 1.f ?
+        computeScaledResolutionLandscape(monitorArrangement, monitorResolutions) :
+        computeScaledResolutionPortrait(monitorArrangement, monitorResolutions);
+
+    for (size_t i = 0; i < monitorResolutions.size(); ++i) {
+        _monitorDimensionsScaled.emplace_back(
+            offsets[i].width(),
+            offsets[i].height(),
+            monitorResolutions[i].width() * _monitorScaleFactor,
+            monitorResolutions[i].height() * _monitorScaleFactor
+        );
+    }
 }
 
-void MonitorBox::paintEvent(QPaintEvent* event) {
-    Q_UNUSED(event)
+void MonitorBox::paintEvent(QPaintEvent*) {
     QPainter painter(this);
-    QPen pen = painter.pen();
-    painter.setPen(pen);
-    paintWidgetBorder(painter, width(), height());
-    //Draw window out-of-bounds region(s) first
-    for (unsigned int i = 0; i < _nWindows; ++i) {
-        paintWindowBeyondBounds(painter, i);
-    }
-    //Draw & fill monitors over the out-of-bounds regions
-    paintMonitorBackgrounds(painter);
-    //Draw window number(s) first for darker contrast, then window(s) over both
-    //out-of-bounds and monitors
-    for (unsigned int i = 0; i < _nWindows; ++i) {
-        paintWindowNumber(painter, i);
-    }
-    for (unsigned int i = 0; i < _nWindows; ++i) {
-        paintWindow(painter, i);
-    }
-}
 
-void MonitorBox::paintWidgetBorder(QPainter& painter, int width, int height) {
+    //
+    // Draw widget border
     constexpr int Radius = 10;
     painter.setPen(QPen(Qt::gray, 4));
-    painter.drawRoundedRect(0, 0, width - 1, height - 1, Radius, Radius);
-}
+    painter.drawRoundedRect(0, 0, width() - 1, height() - 1, Radius, Radius);
 
-void MonitorBox::paintMonitorBackgrounds(QPainter& painter) {
+    //
+    // Draw window out-of-bounds region(s) first
+    for (int i = 0; i < _nWindows; ++i) {
+        painter.setBrush(Qt::BDiagPattern);
+        painter.setPen(QPen(_colorsForWindows[i], 0));
+        painter.drawRect(_windowRendering[i]);
+    }
+
+    // Draw & fill monitors over the out-of-bounds regions
     painter.setPen(QPen(Qt::black, 2));
-    QFont f("Arial");
-    f.setPixelSize(24);
-    painter.setFont(f);
-    for (unsigned int i = 0; i < _nMonitors; ++i) {
-        if (i <= _monitorDimensionsScaled.size()) {
-            painter.drawRect(_monitorDimensionsScaled[i]);
-            QColor fillColor("#DDDDDD");
-            QBrush brush(fillColor);
-            brush.setStyle(Qt::SolidPattern);
-            painter.fillRect(_monitorDimensionsScaled[i], brush);
-            if (_showLabel) {
-                QPointF textPos = QPointF(
-                    _monitorDimensionsScaled[i].left() + 4,
-                    _monitorDimensionsScaled[i].top() + 24
-                );
-                if (i == 0) {
-                    painter.drawText(textPos, "Primary");
-                }
-            }
+    painter.setBrush(Qt::NoBrush);
+
+    for (size_t i = 0; i < _monitorDimensionsScaled.size(); ++i) {
+        const QColor Grey = QColor(0xDD, 0xDD, 0xDD);
+
+        painter.drawRect(_monitorDimensionsScaled[i]);
+        painter.fillRect(_monitorDimensionsScaled[i], QBrush(Grey, Qt::SolidPattern));
+
+        if (_monitorDimensionsScaled.size() > 1 && i == 0) {
+            // We only want to render the "Primary" if there are multiple windows
+            QPointF textPos = QPointF(
+                _monitorDimensionsScaled[i].left() + 4.0,
+                _monitorDimensionsScaled[i].top() + 24.0
+            );
+            QFont f("Arial");
+            f.setPixelSize(24);
+            painter.setFont(f);
+            painter.drawText(textPos, "Primary");
         }
     }
-}
 
-void MonitorBox::paintWindowBeyondBounds(QPainter& painter, unsigned int winIdx) {
-    painter.setBrush(Qt::BDiagPattern);
-    setPenSpecificToWindow(painter, winIdx, false);
-    if (winIdx <= _windowRendering.size()) {
-        painter.drawRect(_windowRendering[winIdx]);
+    // Draw window number(s) first for darker contrast, then window(s) over both
+    // out-of-bounds and monitors
+    for (int i = 0; i < _nWindows; ++i) {
+        QPointF p = QPointF(
+            _windowRendering[i].left() + 5.0,
+            _windowRendering[i].bottom() - 5.0
+        );
+        p.setX(std::clamp(p.x(), 0.0, static_cast<double>(size().width()) - 10.0));
+        p.setY(std::clamp(p.y(), 20.0, static_cast<double>(size().height())));
+        painter.drawText(p, QString::number(i + 1));
     }
-    setPenSpecificToWindow(painter, winIdx, true);
-    painter.setBrush(Qt::NoBrush);
-}
 
-void MonitorBox::paintWindow(QPainter& painter, size_t winIdx) {
-    setPenSpecificToWindow(painter, static_cast<unsigned int>(winIdx), true);
-    if (winIdx <= _windowRendering.size()) {
-        painter.drawRect(_windowRendering[winIdx]);
-        QColor fillColor = _colorsForWindows[winIdx];
-        fillColor.setAlpha(_alphaWindowOpacity);
-        QBrush brush(fillColor);
-        brush.setStyle(Qt::SolidPattern);
-        painter.fillRect(_windowRendering[winIdx], brush);
+    //
+    // Paint window
+    for (int i = 0; i < _nWindows; ++i) {
+        painter.setPen(QPen(_colorsForWindows[i], 1));
+        painter.drawRect(_windowRendering[i]);
+        
+        QColor fillColor = _colorsForWindows[i];
+        fillColor.setAlpha(WindowOpacity);
+        painter.fillRect(_windowRendering[i], QBrush(fillColor, Qt::SolidPattern));
     }
-}
-
-void MonitorBox::paintWindowNumber(QPainter& painter, unsigned int winIdx) {
-    QPointF textPos = QPointF(_windowRendering[winIdx].left() + 5,
-        _windowRendering[winIdx].bottom() - 5);
-    textPos.setX(std::clamp(textPos.x(), 0.0, _monitorWidgetSize.width() - 10));
-    textPos.setY(std::clamp(textPos.y(), 20.0, _monitorWidgetSize.height()));
-    painter.drawText(textPos, QString::fromStdString(std::to_string(winIdx + 1)));
-}
-
-void MonitorBox::setPenSpecificToWindow(QPainter& painter, unsigned int windowIdx,
-                                        bool visibleBorder)
-{
-    int penWidth = (visibleBorder) ? 1 : -1;
-    painter.setPen(QPen(_colorsForWindows[windowIdx], penWidth));
 }
 
 void MonitorBox::windowDimensionsChanged(unsigned int mIdx, unsigned int wIdx,
                                          const QRectF& newDimensions)
 {
-    mapWindowResolutionToWidgetCoordinates(mIdx, wIdx, newDimensions);
-}
-
-void MonitorBox::determineMonitorArrangement() {
-    for (const QRect& m : _monitorResolution) {
-        if (m.x() < _negativeCorrectionOffsets.x()) {
-            _negativeCorrectionOffsets.setX(m.x());
-        }
-        if (m.y() < _negativeCorrectionOffsets.y()) {
-            _negativeCorrectionOffsets.setY(m.y());
-        }
-    }
-    for (const QRect& m : _monitorResolution) {
-        if ((m.x() + m.width() - _negativeCorrectionOffsets.x())
-            > _monitorArrangementDimensions.width())
-        {
-            _monitorArrangementDimensions.setWidth(
-                m.x() + m.width() - _negativeCorrectionOffsets.x());
-        }
-        if ((m.y() + m.height() - _negativeCorrectionOffsets.y())
-            > _monitorArrangementDimensions.height())
-        {
-            _monitorArrangementDimensions.setHeight(
-                m.y() + m.height() - _negativeCorrectionOffsets.y());
-        }
-    }
-    _monitorArrangementAspectRatio = _monitorArrangementDimensions.width()
-        / _monitorArrangementDimensions.height();
-}
-
-void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
-    if (_monitorArrangementAspectRatio >= 1.0) {
-        computeScaledResolutionLandscape(
-            _monitorArrangementAspectRatio,
-            _monitorArrangementDimensions.width()
-        );
-    }
-    else {
-        computeScaledResolutionPortrait(
-            _monitorArrangementAspectRatio,
-            _monitorArrangementDimensions.height()
-        );
-    }
-    for (size_t m = 0; m < _monitorResolution.size(); ++m) {
-        _monitorDimensionsScaled.push_back({
-            _monitorOffsets[m].width(),
-            _monitorOffsets[m].height(),
-            _monitorResolution[m].width() * _monitorScaleFactor,
-            _monitorResolution[m].height() * _monitorScaleFactor,
-        });
-    }
+    _windowRendering[wIdx] = {
+        _monitorDimensionsScaled[mIdx].x() + newDimensions.left() * _monitorScaleFactor,
+        _monitorDimensionsScaled[mIdx].y() + newDimensions.top() * _monitorScaleFactor,
+        newDimensions.width() * _monitorScaleFactor,
+        newDimensions.height() * _monitorScaleFactor
+    };
     update();
 }
 
-void MonitorBox::computeScaledResolutionLandscape(float aspectRatio, float maxWidth) {
-    _marginWidget = _monitorWidgetSize.width() * MarginFractionOfWidgetSize;
-    float virtualWidth = _monitorWidgetSize.width()
-        * (1.0 - MarginFractionOfWidgetSize * 2.0);
-    _monitorScaleFactor = virtualWidth / maxWidth;
-    float newHeight = virtualWidth / aspectRatio;
-    for (size_t m = 0; m < _monitorResolution.size(); ++m) {
-        _monitorOffsets.push_back({
-            _marginWidget + (_monitorResolution[m].x() - _negativeCorrectionOffsets.x())
-                * _monitorScaleFactor,
-            _marginWidget + (_monitorWidgetSize.height() - newHeight - _marginWidget) / 4.0
-                + (_monitorResolution[m].y() - _negativeCorrectionOffsets.y())
-                * _monitorScaleFactor
-        });
+std::vector<QSizeF> MonitorBox::computeScaledResolutionLandscape(QRectF arrangement,
+                                                    const std::vector<QRect>& resolutions)
+{
+    std::vector<QSizeF> offsets;
+
+    float marginWidget = size().width() * MarginFractionOfWidgetSize;
+    float virtualWidth = size().width() * (1.f - MarginFractionOfWidgetSize * 2.f);
+    _monitorScaleFactor = virtualWidth / arrangement.width();
+
+    const float aspectRatio = arrangement.width() / arrangement.height();
+    const float newHeight = virtualWidth / aspectRatio;
+
+    for (const QRect& res : resolutions) {
+        float x = marginWidget + (res.x() - arrangement.x()) * _monitorScaleFactor;
+        float y = marginWidget + (size().height() - newHeight - marginWidget) / 4.f +
+            (res.y() - arrangement.y()) * _monitorScaleFactor;
+        offsets.emplace_back(x, y);
     }
+
+    return offsets;
 }
 
-void MonitorBox::computeScaledResolutionPortrait(float aspectRatio, float maxHeight) {
-    _marginWidget = _monitorWidgetSize.height() * MarginFractionOfWidgetSize;
-    float virtualHeight = _monitorWidgetSize.height()
-        * (1.0 - MarginFractionOfWidgetSize * 2.0);
-    _monitorScaleFactor = virtualHeight / maxHeight;
-    float newWidth = virtualHeight * aspectRatio;
-    for (size_t m = 0; m < _monitorResolution.size(); ++m) {
-        _monitorOffsets.push_back({
-            _marginWidget + (_monitorWidgetSize.width() - newWidth - _marginWidget) / 4.0
-                + (_monitorResolution[m].x() - _negativeCorrectionOffsets.x())
-                * _monitorScaleFactor,
-            _marginWidget + (_monitorResolution[m].y() - _negativeCorrectionOffsets.y())
-                * _monitorScaleFactor
-        });
+std::vector<QSizeF> MonitorBox::computeScaledResolutionPortrait(QRectF arrangement,
+                                                    const std::vector<QRect>& resolutions)
+{
+    std::vector<QSizeF> offsets;
+    
+    float marginWidget = size().height() * MarginFractionOfWidgetSize;
+    float virtualHeight = size().height() * (1.f - MarginFractionOfWidgetSize * 2.f);
+    _monitorScaleFactor = virtualHeight / arrangement.height();
+    
+    const float aspectRatio = arrangement.width() / arrangement.height();
+    const float newWidth = virtualHeight * aspectRatio;
+
+    for (const QRect& res : resolutions) {
+        float x = marginWidget + (size().width() - newWidth - marginWidget) / 4.f +
+            (res.x() - arrangement.x()) * _monitorScaleFactor;
+        float y = marginWidget + (res.y() - arrangement.y()) * _monitorScaleFactor;
+        offsets.emplace_back(x, y);
     }
+    
+    return offsets;
 }
 
-void MonitorBox::setNumWindowsDisplayed(unsigned int nWindows) {
+void MonitorBox::nWindowsDisplayedChanged(int nWindows) {
     if (_nWindows != nWindows) {
         _nWindows = nWindows;
         update();
     }
-}
-
-void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int mIdx,
-                                                        unsigned int wIdx,
-                                                        const QRectF& winDimensions)
-{
-    QRectF wF = winDimensions;
-    _windowRendering[wIdx] = {
-        _monitorDimensionsScaled[mIdx].x() + wF.left() * _monitorScaleFactor,
-        _monitorDimensionsScaled[mIdx].y() + wF.top() * _monitorScaleFactor,
-        wF.width() * _monitorScaleFactor,
-        wF.height() * _monitorScaleFactor
-    };
-    update();
 }

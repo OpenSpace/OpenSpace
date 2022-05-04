@@ -1,0 +1,35 @@
+local image = asset.require("./orion_image").image
+
+local OrionImage = {
+  Identifier = "OrionImage",
+  Type = "ScreenSpaceImageLocal",
+  Name = "Orion Nebula",
+  UseRadiusAzimuthElevation = true,
+  FaceCamera = false,
+  RadiusAzimuthElevation = { 1.0, 0.5, 0.0 },
+  UsePerspectiveProjection = false,
+  Opacity = 1.0,
+  TexturePath = image .. "orion-nebula.png",
+  Tag = { "mission_jwst_target" },
+  Description = [[
+    Image of the Orion Nebula by Bill Schoening/NOIRLab/NSF/AURA.
+  ]],
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(OrionImage)
+end)
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(OrionImage)
+end)
+
+asset.export(OrionImage)
+
+asset.meta = {
+  Name = "Orion Nebula Image",
+  Version = "1.0",
+  Description = "Screenspace image of the Orion Nebula",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

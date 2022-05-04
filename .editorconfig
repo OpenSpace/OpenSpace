@@ -9,7 +9,3 @@ charset = utf-8
 indent_style = space
 indent_size = 4
 insert_final_newline = true
-
-# overwrite default settings here, for instance like this:
-# [*.cpp]
-# indent_style = tabs

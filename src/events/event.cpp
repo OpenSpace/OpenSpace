@@ -171,6 +171,14 @@ void log(int i, const EventSessionRecordingPlayback& e) {
     LINFO(fmt::format("[{}] SessionRecordingPlayback: {}", i, state));
 }
 
+void log(int i, const EventPointSpacecraft& e) {
+    ghoul_assert(e.type == EventPointSpacecraft::Type, "Wrong type");
+    LINFO(fmt::format(
+        "[{}] PointSpacecraft: Ra: {}, Dec: {}, Duration: {}", i, e.ra, e.dec,
+        e.duration
+    ));
+}
+
 void log(int i, const CustomEvent& e) {
     ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
     LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
@@ -195,6 +203,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::LayerAdded: return "LayerAdded";
         case Event::Type::LayerRemoved: return "LayerRemoved";
         case Event::Type::SessionRecordingPlayback: return "SessionRecordingPlayback";
+        case Event::Type::PointSpacecraft: return "PointSpacecraft";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -249,6 +258,9 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "SessionRecordingPlayback") {
         return Event::Type::SessionRecordingPlayback;
+    }
+    else if (str == "PointSpacecraft") {
+        return Event::Type::PointSpacecraft;
     }
     else if (str == "Custom") {
         return Event::Type::Custom;
@@ -411,9 +423,17 @@ ghoul::Dictionary toParameter(const Event& e) {
                     break;
             }
             break;
+        case Event::Type::PointSpacecraft:
+            d.setValue("Ra", static_cast<const EventPointSpacecraft&>(e).ra);
+            d.setValue("Dec", static_cast<const EventPointSpacecraft&>(e).dec);
+            d.setValue("Duration", static_cast<const EventPointSpacecraft&>(e).duration);
+            break;
         case Event::Type::Custom:
             d.setValue(
                 "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
+            );
+            d.setValue(
+                "Payload", std::string(static_cast<const CustomEvent&>(e).payload)
             );
             break;
         default:
@@ -473,6 +493,9 @@ void logAllEvents(const Event* e) {
                 break;
             case Event::Type::SessionRecordingPlayback:
                 log(i, *static_cast<const EventSessionRecordingPlayback*>(e));
+                break;
+            case Event::Type::PointSpacecraft:
+                log(i, *static_cast<const EventPointSpacecraft*>(e));
                 break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
@@ -586,7 +609,14 @@ EventSessionRecordingPlayback::EventSessionRecordingPlayback(State state_)
     , state(state_)
 {}
 
-CustomEvent::CustomEvent(std::string_view subtype_, const void* payload_)
+EventPointSpacecraft::EventPointSpacecraft(double ra_, double dec_, double duration_)
+    : Event(Type)
+    , ra(ra_)
+    , dec(dec_)
+    , duration(duration_)
+{}
+
+CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)
     : Event(Type)
     , subtype(subtype_)
     , payload(payload_)

@@ -24,19 +24,21 @@
 
 #include "profile/assetsdialog.h"
 
+#include "profile/assetedit.h"
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <ghoul/fmt.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QTextEdit>
 #include <QTreeView>
 
 namespace {
-    bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model,
-                                       int rows, QModelIndex parent)
+    bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model, int rows,
+                                       QModelIndex parent)
     {
         bool isExpanded = false;
 
@@ -134,9 +136,22 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
 
     QBoxLayout* layout = new QVBoxLayout(this);
     {
+        QGridLayout* container = new QGridLayout;
+        container->setColumnStretch(1, 1);
+
         QLabel* heading = new QLabel("Select assets from /data/assets");
         heading->setObjectName("heading");
-        layout->addWidget(heading);
+        container->addWidget(heading, 0, 0);
+
+        QPushButton* newAssetButton = new QPushButton("New Asset");
+        connect(
+            newAssetButton, &QPushButton::released,
+            this, &AssetsDialog::openAssetEditor
+        );
+        newAssetButton->setCursor(Qt::PointingHandCursor);
+        newAssetButton->setDefault(false);
+        container->addWidget(newAssetButton, 0, 2);
+        layout->addLayout(container);
     }
     {
         _assetTree = new QTreeView;
@@ -222,6 +237,11 @@ QString AssetsDialog::createTextSummary() {
         summary += QString::fromStdString(s);
     }
     return summary;
+}
+
+void AssetsDialog::openAssetEditor() {
+    AssetEdit editor(this);
+    editor.exec();
 }
 
 void AssetsDialog::parseSelections() {

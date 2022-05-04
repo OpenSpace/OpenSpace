@@ -185,7 +185,7 @@ namespace {
 
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
-        
+
         // Which variable in CDF file to trace. b is default for fieldline
         std::optional<std::string> tracingVariable;
 
@@ -207,11 +207,11 @@ namespace {
         // [[codegen::verbatim(ColorQuantityInfo.description)]]
         std::optional<int> colorQuantity;
 
-        // List of ranges for which their corresponding parameters values will be 
+        // List of ranges for which their corresponding parameters values will be
         // colorized by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> colorTableRanges;
 
-        // Enables flow, showing the direction, but not accurate speed, that particles 
+        // Enables flow, showing the direction, but not accurate speed, that particles
         // would be traveling
         std::optional<bool> flowEnabled;
 
@@ -221,7 +221,7 @@ namespace {
         // [[codegen::verbatim(MaskingQuantityInfo.description)]]
         std::optional<int> maskingQuantity;
 
-        // List of ranges for which their corresponding parameters values will be 
+        // List of ranges for which their corresponding parameters values will be
         // masked by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> maskingRanges;
 

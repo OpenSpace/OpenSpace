@@ -52,12 +52,14 @@ asset.onInitialize(function()
   local controller = PS4Controller;
   local name = "Wireless Controller";
 
-  openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[1], 0.15)
-  openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[2], 0.15)
-  openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick[1], 0.15)
-  openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick[2], 0.15)
-  openspace.navigation.setAxisDeadZone(name, controller.L2, 0.05)
-  openspace.navigation.setAxisDeadZone(name, controller.R2, 0.05)
+  local deadzoneJoysticks = 0.15
+  local deadzoneTriggers = 0.05
+  openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[1], deadzoneJoysticks)
+  openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[2], deadzoneJoysticks)
+  openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick[1], deadzoneJoysticks)
+  openspace.navigation.setAxisDeadZone(name, controller.RightThumbStick[2], deadzoneJoysticks)
+  openspace.navigation.setAxisDeadZone(name, controller.L2, deadzoneTriggers)
+  openspace.navigation.setAxisDeadZone(name, controller.R2, deadzoneTriggers)
 
   openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[1], "Orbit X");
   openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[2], "Orbit Y", true);
@@ -116,9 +118,9 @@ asset.onInitialize(function()
     name,
     controller.Square,
     [[
-      "openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
-      "openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
-      "openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
     ]],
     "Switch target to Earth"
   )

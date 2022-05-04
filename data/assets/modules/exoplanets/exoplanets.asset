@@ -1,0 +1,3 @@
+asset.require("./default_settings")
+asset.require("./exoplanets_data")
+asset.require("./exoplanets_textures")

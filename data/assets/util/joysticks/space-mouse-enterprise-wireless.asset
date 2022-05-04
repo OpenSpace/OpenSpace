@@ -1,0 +1,54 @@
+local propertyHelper = asset.require("../property_helper")
+local joystickHelper = asset.require("./joystick_helper")
+
+-- Allowed values for the third parameter of bindJoystickAxis:
+-- "None"
+-- "Orbit X"
+-- "Orbit Y"
+-- "Zoom" -- both in and out
+-- "Zoom In"
+-- "Zoom Out"
+-- "LocalRoll X"
+-- "LocalRoll Y"
+-- "GlobalRoll X"
+-- "GlobalRoll Y"
+-- "Pan X"
+-- "Pan Y"
+-- Fourth parameter determines whether the axis should be inverted
+-- Fifth parameter determines whether the axis behaves like a joystick or a Trigger.
+--       Allowed values are "JoystickLike" and "TriggerLike", the first one is the default
+-- Sixth parameters determins if the axis should be "Sticky" or not.
+--       The axis values can either go back to 0 when the joystick is released or it can
+--       stay at the value it was before the joystick was released.
+--       The latter is called a sticky axis, when the values don't go back to 0.
+--       This version of the SpaceMouse is NOT Sticky.
+-- Seventh parameter is the sensitivity for the axis
+
+local SpaceMouse = {
+  Push = {0, 1, 2}, -- left/right, back/forth, up/down
+  Twist = {5}, -- left/right
+  Tilt = {4, 3}, -- left/right, back/forth
+
+  -- Buttons on the Enterprise version of the SpaceMouse is not detectable, use regular
+  -- keybindings instead, for more information see our wiki page.
+}
+
+asset.onInitialize(function()
+  local controller = SpaceMouse;
+  local name = "3Dconnexion Universal Receiver";
+
+  local deadzone = 0.15
+  openspace.navigation.setAxisDeadZone(name, controller.Push[1], deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Push[2], deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Twist[1], deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt[2], deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Push[3], deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt[1], deadzone)
+
+  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X");
+  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y");
+  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true);
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y");
+  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom");
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X");
+end)

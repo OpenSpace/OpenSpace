@@ -67,6 +67,12 @@ namespace {
     return static_cast<int>(screenshotNumber);
 }
 
+// Extracts the DPI scaling for either the GUI window or if there is no dedicated GUI
+// window, the first window.
+[[codegen::luawrap]] float dpiScaling() {
+    return openspace::global::windowDelegate->osDpiScaling();
+}
+
 #include "renderengine_lua_codegen.cpp"
 
 } // namespace
