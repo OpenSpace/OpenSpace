@@ -51,6 +51,8 @@ public:
     void startAnimation(glm::dvec3 coordsEnd, double fovEnd);
     void incrementallyAnimateToCoordinate();
     void startFading(float goal, float fadeTime);
+    void stopAnimations();
+
     // Mouse interaction
     void startFinetuningTarget();
     void fineTuneTarget(const glm::vec2& startMouse, const glm::vec2& translation);
@@ -117,7 +119,7 @@ private:
 
     // Animation
     skybrowser::Animation<double> _fovAnimation = skybrowser::Animation(0.0, 0.0, 0.0);
-    skybrowser::Animation<glm::dvec3> _moveTarget =
+    skybrowser::Animation<glm::dvec3> _targetAnimation =
         skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
     bool _targetIsAnimating = false;
 

@@ -765,6 +765,17 @@ namespace {
         );
 }
 
+/**
+ * Stop animations
+ * \param identifier Identifier of the sky browser
+ */
+[[codegen::luawrap]] void stopAnimations(std::string identifier) {
+    using namespace openspace;
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    TargetBrowserPair* pair = module->getPair(identifier);
+    pair->stopAnimations();
+}
+
 #include "skybrowsermodule_lua_codegen.cpp"
 
 } // namespace

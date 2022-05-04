@@ -545,7 +545,8 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::LoadingImageCollectionComplete,
             codegen::lua::ShowAllTargetsAndBrowsers,
             codegen::lua::PointSpaceCraft,
-            codegen::lua::GetWwtImageCollectionUrl
+            codegen::lua::GetWwtImageCollectionUrl,
+            codegen::lua::StopAnimations
         }
     };
 }

@@ -104,7 +104,7 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& startMouse,
 }
 
 void TargetBrowserPair::synchronizeAim() {
-    if (!_moveTarget.isAnimating() && _browser->isInitialized()) {
+    if (!_targetAnimation.isAnimating() && _browser->isInitialized()) {
         _browser->setEquatorialAim(targetDirectionEquatorial());
         _browser->setTargetRoll(targetRoll());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
@@ -293,12 +293,12 @@ void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
 
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {
     // Animate the target before the field of view starts to animate
-    if (_moveTarget.isAnimating()) {
-        aimTargetGalactic(_moveTarget.getNewValue());
+    if (_targetAnimation.isAnimating()) {
+        aimTargetGalactic(_targetAnimation.getNewValue());
     }
-    else if (!_moveTarget.isAnimating() && _targetIsAnimating) {
+    else if (!_targetAnimation.isAnimating() && _targetIsAnimating) {
         // Set the finished position
-        aimTargetGalactic(_moveTarget.getNewValue());
+        aimTargetGalactic(_targetAnimation.getNewValue());
         _fovAnimation.start();
         _targetIsAnimating = false;
     }
@@ -321,6 +321,11 @@ void TargetBrowserPair::startFading(float goal, float fadeTime) {
     );
 }
 
+void TargetBrowserPair::stopAnimations() {
+    _fovAnimation.stop();
+    _targetAnimation.stop();
+}
+
 void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     double fovSpeed = module->browserAnimationSpeed();
@@ -334,8 +339,8 @@ void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd)
         skybrowser::CelestialSphereRadius;
     double targetSpeed = module->targetAnimationSpeed();
     double angle = skybrowser::angleBetweenVectors(start, galacticCoords);
-    _moveTarget = skybrowser::Animation(start, galacticCoords, angle / targetSpeed);
-    _moveTarget.start();
+    _targetAnimation = skybrowser::Animation(start, galacticCoords, angle / targetSpeed);
+    _targetAnimation.start();
     _targetIsAnimating = true;
 }
 
