@@ -826,7 +826,6 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
 std::unordered_map<std::string, std::vector<glm::vec3>>
     extractSeedPointsFromFiles(std::filesystem::path filePath)
 {
-    std::vector<std::string> files;
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
     if (!std::filesystem::is_directory(filePath)) {
