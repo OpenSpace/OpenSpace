@@ -198,6 +198,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("isFacingCamera", isFacingCamera());
     res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
     res.setValue("selectedImages", selectedImages());
+    res.setValue("scale", static_cast<double>(_browser->scale()));
     res.setValue("opacities", _browser->opacities());
         
     std::vector<std::pair<std::string, glm::dvec3>> copies = renderCopies();

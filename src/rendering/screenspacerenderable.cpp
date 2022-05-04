@@ -436,6 +436,10 @@ float ScreenSpaceRenderable::depth() {
         cartesianToSpherical(_cartesianPosition).x;
 }
 
+float ScreenSpaceRenderable::scale() const {
+    return _scale;
+}
+
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 

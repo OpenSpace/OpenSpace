@@ -74,6 +74,7 @@ public:
     bool isFacingCamera() const;
     void setEnabled(bool isEnabled);
     float depth();
+    float scale() const;
 
     // Screen space functionality in these coords: [-1,1][-ratio,ratio]
     glm::vec2 screenSpacePosition();
