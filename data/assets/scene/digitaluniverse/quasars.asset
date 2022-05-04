@@ -12,6 +12,13 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
+local colormaps = asset.syncedResource({
+  Name = "Quasars Colormap",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_quasars_colormap",
+  Version = 1
+})
+
 local object = {
   Identifier = "Quasars",
   Renderable = {
@@ -26,7 +33,7 @@ local object = {
     FadeInDistances = { 1000.0, 10000.0 }, -- Fade in value in the same unit as "Unit"
     BillboardMinMaxSize = { 0.0, 11.1 },
     EnablePixelSizeControl = true,
-    ColorMap = speck .. "viridis.cmap",
+    ColorMap = colormaps .. "viridis.cmap",
     ColorOption = { "redshift", "Tlookback", "distMpc" },
     ColorRange = { { 0.102, 7.085 }, { 1.4, 13.0 }, { 440.5, 8852.099609 } },
     UseColorMap = false

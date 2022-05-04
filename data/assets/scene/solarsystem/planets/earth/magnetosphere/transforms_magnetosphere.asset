@@ -24,11 +24,11 @@ local GSMReferenceFrame = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GSMReferenceFrame)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GSMReferenceFrame)
 end)
-  
+
 asset.export(GSMReferenceFrame)
 
 
