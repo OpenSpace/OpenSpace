@@ -48,18 +48,18 @@ namespace {
         "frame rate."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo RenderCopyInfo = {
-        "RenderCopy",
-        "Position of a Copy of the Sky Browser",
-        "Render a copy of this sky browser at an additional position. This copy will not "
+    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
+        "DisplayCopy",
+        "Display Copy Position",
+        "Display a copy of this sky browser at an additional position. This copy will not "
         "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates "
         "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo RenderCopyShowInfo = {
-        "ShowRenderCopy",
-        "Show Render Copy",
-        "Show the render copy."
+    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
+        "ShowDisplayCopy",
+        "Show Display Copy",
+        "Show the display copy."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo IsHiddenInfo = {
@@ -130,8 +130,8 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _useRadiusAzimuthElevation.onChange(
         [this]() {
             std::for_each(
-                _renderCopies.begin(),
-                _renderCopies.end(),
+                _displayCopies.begin(),
+                _displayCopies.end(),
                 [this](std::unique_ptr<properties::Vec3Property>& copy) {
                     if (_useRadiusAzimuthElevation) {
                         *copy = sphericalToRae(cartesianToSpherical(copy->value()));
@@ -200,15 +200,15 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     _objectSize = glm::ivec3(_texture->dimensions());
 }
 
-void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCopies) {
-    size_t start = _renderCopies.size();
+void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
+    size_t start = _displayCopies.size();
     for (int i = 0; i < nCopies; i++) {
-        openspace::properties::Property::PropertyInfo info = RenderCopyInfo;
+        openspace::properties::Property::PropertyInfo info = DisplayCopyInfo;
         float azimuth = i * glm::two_pi<float>() / nCopies;
         glm::vec3 position = raePosition + glm::vec3(0.f, azimuth, 0.f);
-        std::string idRenderCopy = "RenderCopy" + std::to_string(start + i);
-        info.identifier = idRenderCopy.c_str();
-        _renderCopies.push_back(
+        std::string idDisplayCopy = "DisplayCopy" + std::to_string(start + i);
+        info.identifier = idDisplayCopy.c_str();
+        _displayCopies.push_back(
             std::make_unique<properties::Vec3Property>(
                 info,
                 position,
@@ -216,54 +216,47 @@ void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCop
                 glm::vec3(4.f, 4.f, glm::half_pi<float>())
             )
         );
-        openspace::properties::Property::PropertyInfo showInfo = RenderCopyShowInfo;
-        std::string idRenderCopyVisible = "ShowRenderCopy" + std::to_string(start + i);
-        showInfo.identifier = idRenderCopyVisible.c_str();
-        _showRenderCopies.push_back(
+        openspace::properties::Property::PropertyInfo showInfo = DisplayCopyShowInfo;
+        std::string idDisplayCopyVisible = "ShowDisplayCopy" + std::to_string(start + i);
+        showInfo.identifier = idDisplayCopyVisible.c_str();
+        _showDisplayCopies.push_back(
             std::make_unique<properties::BoolProperty>(
                 showInfo,
                 true
                 )
         );
-        addProperty(_renderCopies.back().get());
-        addProperty(_showRenderCopies.back().get());
+        addProperty(_displayCopies.back().get());
+        addProperty(_showDisplayCopies.back().get());
     }
 }
 
-void ScreenSpaceSkyBrowser::removeRenderCopy() {
-    if (!_renderCopies.empty()) {
-        removeProperty(_renderCopies.back().get());
-        _renderCopies.pop_back();
+void ScreenSpaceSkyBrowser::removeDisplayCopy() {
+    if (!_displayCopies.empty()) {
+        removeProperty(_displayCopies.back().get());
+        _displayCopies.pop_back();
     }
 }
 
 std::vector<std::pair<std::string, glm::dvec3>>
-ScreenSpaceSkyBrowser::renderCopies() const
+ScreenSpaceSkyBrowser::displayCopies() const
 {
     std::vector<std::pair<std::string, glm::dvec3>> vec;
     using vec3Property = std::unique_ptr<properties::Vec3Property>;
-    for (const vec3Property& copy : _renderCopies) {
+    for (const vec3Property& copy : _displayCopies) {
         vec.push_back({ copy->identifier(), copy->value() });
     }
     return vec;
 }
 
 std::vector<std::pair<std::string, bool>>
-ScreenSpaceSkyBrowser::showRenderCopies() const
+ScreenSpaceSkyBrowser::showDisplayCopies() const
 {
     std::vector<std::pair<std::string, bool>> vec;
     using boolProperty = std::unique_ptr<properties::BoolProperty>;
-    for (const boolProperty& copy : _showRenderCopies) {
+    for (const boolProperty& copy : _showDisplayCopies) {
         vec.push_back({copy->identifier(), copy->value()});
     }
     return vec;
-}
-
-
-void ScreenSpaceSkyBrowser::moveRenderCopy(int i, glm::vec3 raePosition) {
-    if (i < static_cast<int>(_renderCopies.size()) && i >= 0) {
-        *_renderCopies[i].get() = raePosition;
-    }
 }
 
 bool ScreenSpaceSkyBrowser::deinitializeGL() {
@@ -285,9 +278,9 @@ void ScreenSpaceSkyBrowser::render() {
     }
 
     // Render the display copies
-    for (size_t i = 0; i < _renderCopies.size(); i++) {
-        if (_showRenderCopies[i]->value()) {
-            glm::vec3 coordinates = _renderCopies[i]->value();
+    for (size_t i = 0; i < _displayCopies.size(); i++) {
+        if (_showDisplayCopies[i]->value()) {
+            glm::vec3 coordinates = _displayCopies[i]->value();
             if (_useRadiusAzimuthElevation) {
                 coordinates = sphericalToCartesian(raeToSpherical(coordinates));
             }

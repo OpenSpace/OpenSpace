@@ -59,17 +59,16 @@ public:
     void updateTextureResolution();
 
     // Copies rendered
-    void addRenderCopy(const glm::vec3& raePosition, int nCopies);
-    void removeRenderCopy();
-    std::vector<std::pair<std::string, glm::dvec3>> renderCopies() const;
-    std::vector<std::pair<std::string, bool>> showRenderCopies() const;
-    void moveRenderCopy(int i, glm::vec3 raePosition);
+    void addDisplayCopy(const glm::vec3& raePosition, int nCopies);
+    void removeDisplayCopy();
+    std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
+    std::vector<std::pair<std::string, bool>> showDisplayCopies() const;
 
 private:
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
-    std::vector<std::unique_ptr<properties::Vec3Property>> _renderCopies;
-    std::vector<std::unique_ptr<properties::BoolProperty>> _showRenderCopies;
+    std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
+    std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 
     void bindTexture() override;
 

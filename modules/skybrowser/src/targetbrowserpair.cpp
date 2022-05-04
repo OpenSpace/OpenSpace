@@ -197,8 +197,8 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("scale", static_cast<double>(_browser->scale()));
     res.setValue("opacities", _browser->opacities());
         
-    std::vector<std::pair<std::string, glm::dvec3>> copies = renderCopies();
-    std::vector<std::pair<std::string, bool>> showCopies = _browser->showRenderCopies();
+    std::vector<std::pair<std::string, glm::dvec3>> copies = displayCopies();
+    std::vector<std::pair<std::string, bool>> showCopies = _browser->showDisplayCopies();
     ghoul::Dictionary copiesData;
     for (size_t i = 0; i < copies.size(); i++) {
         ghoul::Dictionary copy;
@@ -208,7 +208,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
         copiesData.setValue(copies[i].first, copy);
     }
     // Set table for the current target
-    res.setValue("renderCopies", copiesData);
+    res.setValue("displayCopies", copiesData);
 
     return res;
 }
@@ -253,8 +253,8 @@ void TargetBrowserPair::updateBrowserSize() {
     _browser->updateBrowserSize();
 }
 
-std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::renderCopies() const {
-    return _browser->renderCopies();
+std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::displayCopies() const {
+    return _browser->displayCopies();
 }
 
 bool TargetBrowserPair::isImageCollectionLoaded() {

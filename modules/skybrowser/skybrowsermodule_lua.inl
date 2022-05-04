@@ -343,13 +343,13 @@ namespace {
             target.setValue("dec", spherical.y);
             target.setValue("roll", pair->targetRoll());
             target.setValue("color", pair->borderColor());
-            std::vector<std::pair<std::string, glm::dvec3>> copies = pair->renderCopies();
+            std::vector<std::pair<std::string, glm::dvec3>> copies = pair->displayCopies();
             ghoul::Dictionary copiesData;
             for (size_t i = 0; i < copies.size(); i++) {
                 copiesData.setValue(copies[i].first, copies[i].second);
             }
             // Set table for the current target
-            target.setValue("renderCopies", copiesData);
+            target.setValue("displayCopies", copiesData);
             data.setValue(id, target);
         }
     }
@@ -648,7 +648,7 @@ namespace {
  * \param position Position of first copy, which depends on if RAE or Cartesian coordinates
  * are checked
  */
-[[codegen::luawrap]] void addRenderCopy(std::string identifier, int numberOfCopies = 1,
+[[codegen::luawrap]] void addDisplayCopy(std::string identifier, int numberOfCopies = 1,
                                         glm::vec3 position = glm::vec3(2.1f, 0.f, 0.f)) 
 {
     using namespace openspace;
@@ -656,7 +656,7 @@ namespace {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
-        pair->browser()->addRenderCopy(position, numberOfCopies);
+        pair->browser()->addDisplayCopy(position, numberOfCopies);
     }
 }
 
@@ -664,13 +664,13 @@ namespace {
  * Takes an identifier to a sky browser and removes the latest added rendered copy to it.
  * \param identifier Identifier of the sky browser
  */
-[[codegen::luawrap]] void removeRenderCopy(std::string identifier) {
+[[codegen::luawrap]] void removeDisplayCopy(std::string identifier) {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->getPair(identifier);
     if (pair) {
-        pair->browser()->removeRenderCopy();
+        pair->browser()->removeDisplayCopy();
     }
 }
 

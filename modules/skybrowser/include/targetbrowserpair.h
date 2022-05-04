@@ -59,7 +59,7 @@ public:
     // Browser
     void sendIdToBrowser() const;
     void updateBrowserSize();
-    std::vector<std::pair<std::string, glm::dvec3>> renderCopies() const;
+    std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
     bool isImageCollectionLoaded();
 
     // Target
