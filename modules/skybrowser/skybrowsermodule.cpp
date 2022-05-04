@@ -228,6 +228,18 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     _enabled = p.enabled.value_or(true);
+    _allowCameraRotation = p.allowCameraRotation.value_or(_allowCameraRotation);
+    _cameraRotationSpeed = p.cameraRotSpeed.value_or(_cameraRotationSpeed);
+    _targetAnimationSpeed = p.targetSpeed.value_or(_targetAnimationSpeed);
+    _browserAnimationSpeed = p.browserSpeed.value_or(_browserAnimationSpeed);
+    _inverseZoomDirection = p.inverseZoomDirection.value_or(_inverseZoomDirection);
+    _wwtImageCollectionUrl = p.wwtImageCollectionUrl.value_or(_wwtImageCollectionUrl);
+    _hideTargetsBrowsersWithGui = p.hideTargetsBrowsersGui.value_or(
+        _hideTargetsBrowsersWithGui
+    );
+    _spaceCraftAnimationTime = p.spaceCraftAnimationTime.value_or(
+        _spaceCraftAnimationTime
+    );
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
