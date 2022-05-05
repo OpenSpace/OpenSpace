@@ -371,21 +371,24 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    _path = p.path;
-    _path.onChange(_reinitializeTrailBuffers);
+    addProperty(_opacity);
 
     _segmentQuality = static_cast<unsigned int>(p.segmentQuality);
     _segmentQuality.onChange(_reinitializeTrailBuffers);
+    addProperty(_segmentQuality);
 
     _appearance.lineColor = p.color;
     _appearance.lineFade = p.trailFade.value_or(20.f);
     _appearance.lineWidth = p.lineWidth.value_or(2.f);
     addPropertySubOwner(_appearance);
 
+    _path = p.path;
+    _path.onChange(_reinitializeTrailBuffers);
+    addProperty(_path);
+
     _startRenderIdx = p.startRenderIdx.value_or(0);
 
     _sizeRender = p.renderSize.value_or(0u);
-
 }
 
 void RenderableOrbitalKepler::initializeGL() {
