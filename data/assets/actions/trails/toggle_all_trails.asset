@@ -30,18 +30,18 @@ local toggle_trails = {
   Command = [[
     local capList = openspace.getProperty("*Trail.Renderable.Fade");
     local list = openspace.getProperty("*trail.Renderable.Fade");
-    if ( (#capList == 0) and (#list == 0) ) then
+    if (#capList == 0) and (#list == 0) then
       openspace.printWarning("No trails to toggle");
     else
       local prop;
-      if (#capList > 0) then
+      if #capList > 0 then
         prop = capList[1];
       else
         prop = list[1];
       end
       local currentFade = openspace.getPropertyValue(prop);
       local newFade = 0;
-      if (currentFade < 1) then
+      if currentFade < 1 then
         newFade = 1;
       end
       openspace.setPropertyValue("Scene.*Trail.Renderable.Fade", newFade, 2);
@@ -55,13 +55,13 @@ local toggle_trails = {
 asset.export("toggle_trails", toggle_trails.Identifier)
 
 asset.onInitialize(function()
-    openspace.action.registerAction(fade_up_trails)
-    openspace.action.registerAction(fade_down_trails)
-    openspace.action.registerAction(toggle_trails)
+  openspace.action.registerAction(fade_up_trails)
+  openspace.action.registerAction(fade_down_trails)
+  openspace.action.registerAction(toggle_trails)
 end)
 
 asset.onDeinitialize(function()
-    openspace.action.removeAction(fade_up_trails)
-    openspace.action.removeAction(fade_down_trails)
-    openspace.action.removeAction(toggle_trails)
+  openspace.action.removeAction(toggle_trails)
+  openspace.action.removeAction(fade_down_trails)
+  openspace.action.removeAction(fade_up_trails)
 end)

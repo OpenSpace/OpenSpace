@@ -31,16 +31,16 @@ local function getToggleScaleAction(identifier, scale, name, speedup, speedown)
     Name = "Toggle " .. name .. " Scale",
     Command = [[
 local list = openspace.getProperty("]] .. identifier .. [[.Scale.Scale");
-if ( (#list == 0) ) then
+if #list == 0 then
   openspace.printWarning("No planets to resize");
 else
   local prop = list[1];
   local currentScale = openspace.getPropertyValue(prop);
   local newScale = 1;
   if (currentScale == 1) then
-    ]] .. getScaleCommand(identifier, scale, speedup) .. "\n" .. [[
+    ]] .. getScaleCommand(identifier, scale, speedup) .. [[\n
   else
-    ]] .. getScaleCommand(identifier, 1, speedown) .. "\n" .. [[
+    ]] .. getScaleCommand(identifier, 1, speedown) .. [[\n
   end
 end
 ]],
@@ -109,19 +109,19 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(grow_planets)
-  openspace.action.removeAction(shrink_planets)
-  openspace.action.removeAction(toggle_planet_scale)
-
-  openspace.action.removeAction(grow_inner_planets)
-  openspace.action.removeAction(shrink_inner_planets)
-  openspace.action.removeAction(toggle_inner_planet_scale)
-
-  openspace.action.removeAction(grow_outter_planets)
-  openspace.action.removeAction(shrink_outter_planets)
-  openspace.action.removeAction(toggle_outter_planet_scale)
-
-  openspace.action.removeAction(grow_moon)
-  openspace.action.removeAction(shrink_moon)
   openspace.action.removeAction(toggle_moon_scale)
+  openspace.action.removeAction(shrink_moon)
+  openspace.action.removeAction(grow_moon)
+
+  openspace.action.removeAction(toggle_outter_planet_scale)
+  openspace.action.removeAction(shrink_outter_planets)
+  openspace.action.removeAction(grow_outter_planets)
+
+  openspace.action.removeAction(toggle_inner_planet_scale)
+  openspace.action.removeAction(shrink_inner_planets)
+  openspace.action.removeAction(grow_inner_planets)
+
+  openspace.action.removeAction(toggle_planet_scale)
+  openspace.action.removeAction(shrink_planets)
+  openspace.action.removeAction(grow_planets)
 end)

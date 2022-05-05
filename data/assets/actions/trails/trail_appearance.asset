@@ -30,11 +30,11 @@ local toggle_trail_fading = {
   Command = [[
     local capList = openspace.getProperty("*Trail.Renderable.Appearance.EnableFade")
     local list = openspace.getProperty("*trail.Renderable.Appearance.EnableFade")
-    if ( (#capList == 0) and (#list == 0) ) then
+    if (#capList == 0) and (#list == 0) then
       openspace.printWarning("No trails to toggle");
     else
       local prop;
-      if (#capList > 0) then
+      if #capList > 0 then
         prop = capList[1];
       else
         prop = list[1];
@@ -53,7 +53,7 @@ asset.export("toggle_trail_fading", toggle_trail_fading.Identifier)
 
 local function getHightlightCommand(identifierString, value)
   local easeFunction = "QuinticEaseOut"
-  if (value > 1) then
+  if value > 1 then
     easeFunction = "QuinticEaseIn"
   end
   local command = 'openspace.setPropertyValue("'
@@ -64,14 +64,14 @@ end
 
 local function getHighlightAction(identifierString, value, nameString)
   local actionString = 'Dehighlight'
-  if (value > 1) then
+  if value > 1 then
     actionString = 'Highlight'
   end
   local action = {
     Identifier = "os." .. actionString .. identifierString .. "_trail",
     Name = actionString .. " " .. nameString .. " Trail",
     Command = getHightlightCommand(identifierString, value),
-    Documentation = "Animates the trail fade of " .. nameString .. "'s Trail for effect",
+    Documentation = "Animates the trail fade of " .. nameString .. "'s Trail",
     GuiPath = "/Trails/Appearance",
     IsLocal = true
   }
@@ -84,18 +84,18 @@ local function getToggleHighlightAction(identifierString, value, nameString)
     Name = "Toggle " .. nameString .. " Trail Highlight",
     Command = [[
 local list = openspace.getProperty("]] .. identifierString .. [[.Renderable.Appearance.Fade");
-if ( (#list == 0) ) then
+if #list == 0 then
   openspace.printWarning("No planets to resize");
 else
   local prop = list[1];
   local fadeValue = openspace.getPropertyValue(prop)
-  if (fadeValue > 1) then
+  if fadeValue > 1 then
     ]] .. getHightlightCommand(identifierString, 1, nameString) .. "\n" .. [[
   else
     ]] .. getHightlightCommand(identifierString, value, nameString) .. "\n" .. [[
   end
 end]],
-    Documentation = "Animates the trail fade of " .. nameString .. "'s trail for effect",
+    Documentation = "Animates the trail fade of " .. nameString .. "'s trail",
     GuiPath = "/Trails/Appearance",
     IsLocal = true
   }
@@ -145,19 +145,19 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(enable_trail_fading)
-  openspace.action.removeAction(disable_trail_fading)
-  openspace.action.removeAction(toggle_trail_fading)
+  openspace.action.removeAction(toggle_outter_trail_highlight)
+  openspace.action.removeAction(dehighlight_outter_trails)
+  openspace.action.removeAction(highlight_outter_trails)
+
+  openspace.action.removeAction(highlight_inner_trails)
+  openspace.action.removeAction(dehighlight_inner_trails)
+  openspace.action.removeAction(toggle_inner_trail_highlight)
 
   openspace.action.removeAction(highlight_earth_trail)
   openspace.action.removeAction(dehighlight_earth_trail)
   openspace.action.removeAction(toggle_earth_trail_highlight)
 
-  openspace.action.removeAction(highlight_inner_trails)
-  openspace.action.removeAction(dehighlight_inner_trails)
-  openspace.action.removeAction(toggle_inner_trail_highlight)
-  
-  openspace.action.removeAction(highlight_outter_trails)
-  openspace.action.removeAction(dehighlight_outter_trails)
-  openspace.action.removeAction(toggle_outter_trail_highlight)
+  openspace.action.removeAction(toggle_trail_fading)
+  openspace.action.removeAction(disable_trail_fading)
+  openspace.action.removeAction(enable_trail_fading)
 end)

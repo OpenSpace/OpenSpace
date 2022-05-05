@@ -13,8 +13,6 @@ local toggle_trails = {
   IsLocal = false,
 } 
 
-asset.export(toggle_trails);
-
 asset.onInitialize(funciton()
   openspace.registerAction(toggle_trails)
 end)
@@ -22,3 +20,5 @@ end)
 asset.onDeinitialize(function()
   openspace.removeAction(toggle_trails)
 end)
+
+asset.export(toggle_trails);
