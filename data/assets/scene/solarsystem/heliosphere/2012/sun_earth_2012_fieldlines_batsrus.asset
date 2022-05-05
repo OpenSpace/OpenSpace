@@ -35,10 +35,14 @@ local colorRanges = {
   { 150, 900 },
   { 0, 3 },
 }
+
+local interactionSphere = 6380000  -- A value slightly bigger than earth radius
+
 ----------------------LUTZ's JULY TRACES-------------------------
 local BatsrusJ12OpenClosed = {
   Identifier = "FL_BATSRUS_J12_OpenClosed",
   Parent = transforms.GSMReferenceFrame.Identifier,
+  InteractionSphere = interactionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.openClosed,
@@ -69,6 +73,7 @@ local BatsrusJ12OpenClosed = {
 local BatsrusJ12FlowLines = {
   Identifier = "FL_BATSRUS_J12_FlowLines",
   Parent = transforms.GSMReferenceFrame.Identifier,
+  InteractionSphere = interactionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.velocityFlow,
@@ -96,6 +101,7 @@ local BatsrusJ12FlowLines = {
 local BatsrusAsherStaticSeedsFlowLines = {
   Identifier = "FL_BATSRUS_ASHER_STATIC_SSEDS_FlowLines",
   Parent = transforms.GSMReferenceFrame.Identifier,
+  InteractionSphere = interactionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.asherStatic,

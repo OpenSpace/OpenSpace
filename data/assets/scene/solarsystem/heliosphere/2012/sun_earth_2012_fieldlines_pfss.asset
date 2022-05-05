@@ -25,6 +25,7 @@ local PFSSPaths = {
 local PFSS = {
   Identifier = "FL_PFSS",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  InteractionSphere = 695700000,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = PFSSPaths.SolarSoft,
