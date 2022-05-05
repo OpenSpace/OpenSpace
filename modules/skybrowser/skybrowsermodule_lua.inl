@@ -112,9 +112,6 @@ namespace {
  * Takes an identifier to a sky browser or a sky target, an image index and the order
  * which it should have in the selected image list. The image is then changed to have this
  * order.
- * \param id Identifier
- * \param i Image index
- * \param order Order of image
  */
 [[codegen::luawrap]] void setImageLayerOrder(std::string identifier, int imageIndex,
                                              int imageOrder)
@@ -290,7 +287,7 @@ namespace {
 
 /**
  * Returns a table of data regarding the current view and the sky browsers and targets.
- * \return Dictionary of data regarding the current targets
+ * returns a table of data regarding the current targets.
  */
 [[codegen::luawrap]] ghoul::Dictionary getTargetData() {
     using namespace openspace;
@@ -642,11 +639,10 @@ namespace {
 }
 
 /**
- * Takes an identifier to a sky browser and adds a rendered copy to it.
- * \param raePosition Position in radius, azimuth, elevation coordinates
- * \param nCopies Number of copies
- * \param position Position of first copy, which depends on if RAE or Cartesian coordinates
- * are checked
+ * Takes an identifier to a sky browser and adds a rendered copy to it. The first argument
+ * is the position of the first copy. The position is in RAE or Cartesian coordinates, 
+ * depending on if 'Use Radius Azimuth Elevation' is checked. The second argument is the 
+ * number of copies. If RAE is used, they will be evenly spread out on the azimuth. 
  */
 [[codegen::luawrap]] void addDisplayCopy(std::string identifier, int numberOfCopies = 1,
                                         glm::vec3 position = glm::vec3(2.1f, 0.f, 0.f)) 
@@ -662,7 +658,6 @@ namespace {
 
 /**
  * Takes an identifier to a sky browser and removes the latest added rendered copy to it.
- * \param identifier Identifier of the sky browser
  */
 [[codegen::luawrap]] void removeDisplayCopy(std::string identifier) {
     using namespace openspace;
@@ -676,7 +671,6 @@ namespace {
 
 /**
  * Starts the fine-tuning of the target rendered copy to it.
- * \param identifier Identifier of the sky browser
  */
 [[codegen::luawrap]] void startFinetuningTarget(std::string identifier) {
     using namespace openspace;
@@ -689,10 +683,9 @@ namespace {
 }
 
 /**
- * Finetunes the target depending on a mouse drag. rendered copy to it.
- * \param identifier Identifier of the sky browser
- * \param startPosition Start position of the mouse click drag for the fine tune vector 
- * \param endPosition End position of the mouse click drag for the fine tune vector 
+ * Finetunes the target depending on a mouse drag. rendered copy to it. First argument
+ * is the identifier of the sky browser, second is the start position of the drag
+ * and third is the end position of the drag.
  */
 [[codegen::luawrap]] void finetuneTargetPosition(std::string identifier,
                                                  glm::vec2 startPosition,
@@ -711,8 +704,8 @@ namespace {
 }
 
 /**
- * Sets the image collection as loaded in the sky browser
- * \param identifier Identifier of the sky browser
+ * Sets the image collection as loaded in the sky browser. Takes an identifier to the sky 
+ * browser.
  */
 [[codegen::luawrap]] void loadingImageCollectionComplete(std::string identifier) {
     using namespace openspace;
@@ -736,9 +729,8 @@ namespace {
 }
 
 /**
- * Show or hide all targets and browsers
- * \param identifier Identifier of the sky browser
- * \param show Sets if the targets and browsers should be enabled or disabled
+ * Show or hide all targets and browsers. Takes a boolean that sets it to either be shown
+ * or not.
  */
 [[codegen::luawrap]] void showAllTargetsAndBrowsers(bool show) {
     using namespace openspace;
@@ -750,8 +742,8 @@ namespace {
 }
 
 /**
- * Point spacecraft to the equatorial coordinates the target points to
- * \param identifier Identifier of the sky browser
+ * Point spacecraft to the equatorial coordinates the target points to. Takes an 
+ * identifier to a sky browser.
  */
 [[codegen::luawrap]] void pointSpaceCraft(std::string identifier) {
     using namespace openspace;
@@ -766,8 +758,7 @@ namespace {
 }
 
 /**
- * Stop animations
- * \param identifier Identifier of the sky browser
+ * Stop animations. Takes an identifier to a sky browser.
  */
 [[codegen::luawrap]] void stopAnimations(std::string identifier) {
     using namespace openspace;
