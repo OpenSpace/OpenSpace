@@ -50,7 +50,7 @@ namespace {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     if (module->isCameraInSolarSystem()) {
-        TargetBrowserPair* selected = module->getPair(module->selectedBrowserId());
+        TargetBrowserPair* selected = module->pair(module->selectedBrowserId());
         if (selected) {
             const ImageData& image = module->getWwtDataHandler()->getImage(imageIndex);
             // Load image into browser
@@ -119,7 +119,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->setImageOrder(imageIndex, imageOrder);
     }
@@ -138,7 +138,7 @@ namespace {
 
     // Load the collections here because we know that the browser can execute javascript
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->hideChromeInterface(true);
         pair->loadImageCollection(module->wwtImageCollectionUrl());
@@ -206,7 +206,7 @@ namespace {
     // Initialize browser with ID and its corresponding target
     LINFO("Initializing sky browser " + identifier);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->initialize();
     }
@@ -377,7 +377,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->setImageOpacity(imageIndex, opacity);
     }
@@ -391,7 +391,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->centerTargetOnScreen();
     }
@@ -500,7 +500,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* found = module->getPair(identifier);
+    TargetBrowserPair* found = module->pair(identifier);
     if (found) {
         std::string browser = found->browserId();
         std::string target = found->targetNodeId();
@@ -554,7 +554,7 @@ namespace {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     const ImageData& image = module->getWwtDataHandler()->getImage(imageIndex);
 
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->removeSelectedImage(imageIndex);
     }
@@ -571,7 +571,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->setEquatorialAim(glm::dvec2(rightAscension, declination));
     }
@@ -587,7 +587,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->setVerticalFov(verticalFieldOfView);
     }
@@ -601,7 +601,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->setVerticalFovWithScroll(scroll);
     }
@@ -617,7 +617,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->setBorderColor(glm::ivec3(red, green, blue));
     }
@@ -632,7 +632,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->setBrowserRatio(ratio);
     }
@@ -650,7 +650,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->browser()->addDisplayCopy(position, numberOfCopies);
     }
@@ -663,7 +663,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->browser()->removeDisplayCopy();
     }
@@ -676,7 +676,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->startFinetuningTarget();
     }
@@ -694,7 +694,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         glm::vec2 startScreenSpace = skybrowser::pixelToScreenSpace2d(startPosition);
         glm::vec2 endScreenSpace = skybrowser::pixelToScreenSpace2d(endPosition);
@@ -711,7 +711,7 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         LINFO("Image collection is loaded in Screen Space Sky Browser " + identifier);
         pair->setImageCollectionIsLoaded(true);
@@ -748,7 +748,7 @@ namespace {
 [[codegen::luawrap]] void pointSpaceCraft(std::string identifier) {
     using namespace openspace;
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     glm::dvec2 equatorial = pair->targetDirectionEquatorial();
     global::eventEngine->publishEvent<events::EventPointSpacecraft>(
         equatorial.x,
@@ -763,7 +763,7 @@ namespace {
 [[codegen::luawrap]] void stopAnimations(std::string identifier) {
     using namespace openspace;
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->getPair(identifier);
+    TargetBrowserPair* pair = module->pair(identifier);
     pair->stopAnimations();
 }
 

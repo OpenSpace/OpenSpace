@@ -54,7 +54,7 @@ public:
 
     std::vector<std::unique_ptr<TargetBrowserPair>>& getPairs();
     int nPairs() const;
-    TargetBrowserPair* getPair(const std::string& id) const;
+    TargetBrowserPair* pair(const std::string& id) const;
     const std::unique_ptr<WwtDataHandler>& getWwtDataHandler() const;
     std::string selectedBrowserId() const;
     std::string selectedTargetId() const;

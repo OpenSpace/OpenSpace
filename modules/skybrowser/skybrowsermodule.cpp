@@ -280,7 +280,7 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
 }
 
 void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
-    TargetBrowserPair* found = getPair(id);
+    TargetBrowserPair* found = pair(id);
     if (!found) {
         return;
     }
@@ -299,9 +299,9 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
 }
 
 void SkyBrowserModule::lookAtTarget(const std::string& id) {
-    TargetBrowserPair* pair = getPair(id);
-    if (pair) {
-        startRotatingCamera(pair->targetDirectionGalactic());
+    TargetBrowserPair* found = pair(id);
+    if (found) {
+        startRotatingCamera(found->targetDirectionGalactic());
     }
 }
 
@@ -392,7 +392,7 @@ int SkyBrowserModule::nPairs() const {
     return static_cast<int>(_targetsBrowsers.size());
 }
 
-TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) const {
+TargetBrowserPair* SkyBrowserModule::pair(const std::string& id) const {
     auto it = std::find_if(
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
@@ -451,7 +451,7 @@ std::string SkyBrowserModule::wwtImageCollectionUrl() const {
 }
 
 void SkyBrowserModule::setSelectedBrowser(const std::string& id) {
-    TargetBrowserPair* found = getPair(id);
+    TargetBrowserPair* found = pair(id);
     if (found) {
         _selectedBrowser = id;
     }
@@ -462,7 +462,7 @@ std::string SkyBrowserModule::selectedBrowserId() const {
 }
 
 std::string SkyBrowserModule::selectedTargetId() const {
-    TargetBrowserPair* found = getPair(_selectedBrowser);
+    TargetBrowserPair* found = pair(_selectedBrowser);
     return found ? found->targetRenderableId() : "";
 }
 
@@ -475,12 +475,12 @@ bool SkyBrowserModule::isCameraInSolarSystem() const {
 }
 
 bool SkyBrowserModule::isSelectedPairUsingRae() const {
-    TargetBrowserPair* found = getPair(_selectedBrowser);
+    TargetBrowserPair* found = pair(_selectedBrowser);
     return found ? found->isUsingRadiusAzimuthElevation() : false;
 }
 
 bool SkyBrowserModule::isSelectedPairFacingCamera() const {
-    TargetBrowserPair* found = getPair(_selectedBrowser);
+    TargetBrowserPair* found = pair(_selectedBrowser);
     return found ? found->isFacingCamera() : false;
 }
 

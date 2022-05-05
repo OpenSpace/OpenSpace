@@ -146,7 +146,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
 ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    if (module && module->getPair(identifier())) {
+    if (module && module->pair(identifier())) {
         module->removeTargetBrowserPair(identifier());
     }
 }
