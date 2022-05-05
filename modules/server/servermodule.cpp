@@ -72,6 +72,10 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
     return si->get();
 }
 
+int ServerModule::skyBrowserUpdateTime() const {
+    return _skyBrowserUpdateTime;
+}
+
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     global::callback::preSync->emplace_back([this]() {
         ZoneScopedN("ServerModule")
@@ -109,6 +113,11 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
         if (serverInterface) {
             _interfaces.push_back(std::move(serverInterface));
         }
+    }
+    if (configuration.hasValue<double>("SkyBrowserUpdateTime")) {
+        _skyBrowserUpdateTime = static_cast<int>(
+            configuration.value<double>("SkyBrowserUpdateTime")
+        );
     }
 }
 

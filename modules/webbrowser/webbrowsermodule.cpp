@@ -140,11 +140,6 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         _enabled = dictionary.value<bool>("Enabled");
     }
 
-    const bool isMaster = global::windowDelegate->isMaster();
-    if (!_enabled || (!isMaster)) {
-        return;
-    }
-
     LDEBUG(fmt::format("CEF using web helper executable: {}", _webHelperLocation));
     _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
     LDEBUG("Starting CEF... done!");
