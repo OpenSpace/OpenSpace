@@ -55,6 +55,8 @@ public:
     void highlight(const glm::ivec3& addition);
     void removeHighlight(const glm::ivec3& removal);
 
+    static documentation::Documentation Documentation();
+
 private:
     // Properties
     properties::FloatProperty _crossHairSize;

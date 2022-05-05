@@ -104,7 +104,7 @@ public:
     void removeSelectedImage(int i);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity);
-    void hideChromeInterface(bool shouldHide);
+    void hideChromeInterface();
 
     friend bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs);
     friend bool operator!=(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs);

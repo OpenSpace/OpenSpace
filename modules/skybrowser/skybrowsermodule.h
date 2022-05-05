@@ -93,7 +93,7 @@ public:
     void removePreSyncCallback(CallbackHandle handle);
 
     scripting::LuaLibrary luaLibrary() const override;
-    //std::vector<documentation::Documentation> documentations() const override;
+    std::vector<documentation::Documentation> documentations() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;

@@ -50,7 +50,7 @@ public:
     void setImageOrder(int i, int order);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity);
-    void hideChromeInterface(bool shouldHide) const;
+    void hideChromeInterface() const;
 
     bool isImageCollectionLoaded() const;
 

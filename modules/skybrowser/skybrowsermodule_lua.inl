@@ -140,7 +140,7 @@ namespace {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->hideChromeInterface(true);
+        pair->hideChromeInterface();
         pair->loadImageCollection(module->wwtImageCollectionUrl());
     }
 }
@@ -640,12 +640,12 @@ namespace {
 
 /**
  * Takes an identifier to a sky browser and adds a rendered copy to it. The first argument
- * is the position of the first copy. The position is in RAE or Cartesian coordinates, 
- * depending on if 'Use Radius Azimuth Elevation' is checked. The second argument is the 
- * number of copies. If RAE is used, they will be evenly spread out on the azimuth. 
+ * is the position of the first copy. The position is in RAE or Cartesian coordinates,
+ * depending on if 'Use Radius Azimuth Elevation' is checked. The second argument is the
+ * number of copies. If RAE is used, they will be evenly spread out on the azimuth.
  */
 [[codegen::luawrap]] void addDisplayCopy(std::string identifier, int numberOfCopies = 1,
-                                        glm::vec3 position = glm::vec3(2.1f, 0.f, 0.f)) 
+                                        glm::vec3 position = glm::vec3(2.1f, 0.f, 0.f))
 {
     using namespace openspace;
 
@@ -704,7 +704,7 @@ namespace {
 }
 
 /**
- * Sets the image collection as loaded in the sky browser. Takes an identifier to the sky 
+ * Sets the image collection as loaded in the sky browser. Takes an identifier to the sky
  * browser.
  */
 [[codegen::luawrap]] void loadingImageCollectionComplete(std::string identifier) {
@@ -742,7 +742,7 @@ namespace {
 }
 
 /**
- * Point spacecraft to the equatorial coordinates the target points to. Takes an 
+ * Point spacecraft to the equatorial coordinates the target points to. Takes an
  * identifier to a sky browser.
  */
 [[codegen::luawrap]] void pointSpaceCraft(std::string identifier) {
