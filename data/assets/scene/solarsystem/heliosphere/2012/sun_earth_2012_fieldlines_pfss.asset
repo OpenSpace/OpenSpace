@@ -14,6 +14,15 @@ local fieldlineData  = asset.syncedResource({
   Version = 1
 })
 
+local darkenSun = {
+  Documentation = "Makes the Sun turn black",
+  GuiPath = "2012July",
+  Identifier = "2012july.dark_sun",
+  IsLocal = false,
+  Name = "Dark sun",
+  Command = "local textureMultiplier = openspace.getPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\");\nif(textureMultiplier < 0.01) then\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 1.0, 1);\nelse\nopenspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Multiplier\", 0.0, 1)\nend"
+}
+
 local pfssTransitionColorTable = transferFunctions .. "pfss_transition.txt"
 local pfssTopologyColorTable = transferFunctions .. "pfss_topology.txt"
 local pfssBsignColorTable = transferFunctions .. "pfss_bsign.txt"
@@ -54,6 +63,8 @@ local PFSS = {
 }
 
 asset.onInitialize(function ()
+  openspace.action.registerAction(darkenSun)
+
   if not openspace.directoryExists(PFSSPaths.SolarSoft) then
     openspace.printInfo("Extracting " .. "Fieldlines from PFSS model of 2012 event")
     openspace.unzipFile(fieldlineData .. "leilas_solar_soft.zip", PFSSPaths.SolarSoft, true)
@@ -70,6 +81,8 @@ end)
 
 asset.onDeinitialize(function ()
   openspace.removeSceneGraphNode(PFSS)
+  openspace.action.removeAction(darkenSun)
+
 end)
 
 asset.meta = {
