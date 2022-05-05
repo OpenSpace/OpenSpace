@@ -41,7 +41,7 @@ asset.export(MercuryBarycenterTrail)
 asset.meta = {
   Name = "Mercury Trail",
   Version = "1.1",
-  Description = [[ Barycenter trail for Mercury. Data from NASA Spice (see
+  Description = [[ Trail for Mercury's Barycenter. Data from NASA Spice (see
     base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

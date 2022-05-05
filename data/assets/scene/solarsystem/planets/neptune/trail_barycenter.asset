@@ -41,7 +41,7 @@ asset.export(NeptuneBarycenterTrail)
 asset.meta = {
   Name = "Neptune Trail",
   Version = "1.1",
-  Description = [[ Barycenter trail of Neptune. Data from NASA Spice (see base spice asset)]],
+  Description = [[ Trail of Neptune's Barycenter. Data from NASA Spice (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

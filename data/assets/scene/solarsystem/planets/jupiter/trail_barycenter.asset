@@ -40,7 +40,7 @@ asset.export(JupiterBarycenterTrail)
 asset.meta = {
   Name = "Jupiter Trail",
   Version = "1.1",
-  Description = [[ Barycenter Trail of Jupiter as observed by the Sun. Data from NASA Spice (see
+  Description = [[ Trail of Jupiter's Barycenter as observed by the Sun. Data from NASA Spice (see
       base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
