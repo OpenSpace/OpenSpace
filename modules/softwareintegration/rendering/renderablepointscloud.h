@@ -30,6 +30,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/optionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <optional>
@@ -64,24 +65,28 @@ protected:
     bool _isDirty = true;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
-    UniformCache(modelViewTransform, modelViewProjectionTransform,
-        color, opacity, size) _uniformCache;
+    UniformCache(color, opacity, size, modelMatrix, cameraUp,
+        cameraViewProjectionMatrix, eyePosition, sizeOption) _uniformCache;
 
     properties::BoolProperty _isVisible;
     properties::FloatProperty _size;
     properties::Vec3Property _color;
-
-    std::vector<glm::vec3> _pointData;
+    properties::OptionProperty _sizeOption;
+    
     std::vector<float> _fullData;
     std::vector<float> _slicedData;
 
     std::optional<std::string> _dataStorageKey = std::nullopt;
 
-    int _nPoints = 0; // TODO: CHANGE TO size_t?
     int _nValuesPerPoint = 0;
 
     GLuint _vertexArrayObjectID = 0;
     GLuint _vertexBufferObjectID = 0;
+
+    enum SizeOption {
+        Uniform = 0,
+        NonUniform = 1
+    };
 };
 
 }// namespace openspace

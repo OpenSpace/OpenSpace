@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,27 +25,29 @@
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-in float vs_depthClipSpace;
-in vec4 vs_positionViewSpace;
+in vec2 coords;
+flat in float ge_screenSpaceDepth;
+in vec4 ge_positionViewSpace;
 
 uniform vec3 color;
 uniform float opacity;
 
 Fragment getFragment() {
+    if (opacity < 0.01) discard;
 
-    float radius = 0.5;
-    float distance = length(gl_PointCoord - vec2(radius));
+    const float radius = 0.5;
+    float d = length(coords - radius);
+    if (d > 0.5) discard;
 
-    if (distance > pow(radius, 2))
-        discard;
+    // calculate distance from the origin point
+    float circle = smoothstep(radius, radius - (radius * 0.3), d);
 
     Fragment frag;
-    frag.color     = vec4(color, opacity);
-    frag.depth     = vs_depthClipSpace;
-    frag.gPosition = vs_positionViewSpace;
-
-    // There is no normal here
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+    frag.color = vec4(color, opacity) * vec4(circle);
+    frag.depth = ge_screenSpaceDepth;
+    frag.gPosition = ge_positionViewSpace;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.disableLDR2HDR = true;
 
     return frag;
 }

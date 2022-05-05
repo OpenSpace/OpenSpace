@@ -41,8 +41,9 @@
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
-    constexpr const std::array<const char*, 5> UniformNames = {
-        "modelViewTransform", "MVPTransform", "color", "opacity", "size",
+    constexpr const std::array<const char*, 8> UniformNames = {
+        "color", "opacity", "size", "modelMatrix", "cameraUp",
+        "cameraViewProjectionMatrix", "eyePosition", "sizeOption"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -76,6 +77,12 @@ namespace {
         "big datasets with lots of points."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
+        "SizeOption",
+        "Size Option",
+        "This value determines how the size of the data points are rendered."
+    };
+
     struct [[codegen::Dictionary(RenderablePointsCloud)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color;
@@ -91,6 +98,13 @@ namespace {
 
         // [[codegen::verbatim(DataStorageKeyInfo.description)]]
         std::optional<std::string> dataStorageKey;
+
+        enum class SizeOption {
+            Uniform,
+            NonUniform
+        };
+        // [[codegen::verbatim(SizeOptionInfo.description)]]
+        std::optional<SizeOption> sizeOption;
     };
 #include "renderablepointscloud_codegen.cpp"
 } // namespace
@@ -106,6 +120,7 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _size(SizeInfo, 1.f, 0.f, 150.f)
     , _isVisible(ToggleVisibilityInfo, true)
+    , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -113,23 +128,9 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    // If the data is passed explicitly, use that one. If not, check if a key to data
-    // stored in the module's centralized memory was included
-    if (p.data.has_value()) {
-        ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(DataInfo.identifier);
-        _pointData.reserve(d.size());
-
-        for (int i = 0; i < static_cast<int>(d.size()); ++i) {
-            const std::string key = std::to_string(i + 1);
-            _pointData.push_back(d.value<glm::dvec3>(key));
-        }
-        _nValuesPerPoint = 3;
-        _nPoints = static_cast<int>(_pointData.size());
-    }
-    else if (p.dataStorageKey.has_value()) {
-        _nValuesPerPoint = 3;
-        _dataStorageKey = p.dataStorageKey.value();
-    }
+    // Check if a key to data stored in the module's centralized memory was included
+    _nValuesPerPoint = 3;
+    _dataStorageKey = p.dataStorageKey.value();
 
     _size = p.size.value_or(_size);
     addProperty(_size);
@@ -138,6 +139,23 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     addProperty(_isVisible);
 
     addProperty(_opacity);
+
+    _sizeOption.addOptions({
+        { SizeOption::Uniform, "Uniform" },
+        { SizeOption::NonUniform, "NonUniform" }
+    });
+    if (p.sizeOption.has_value()) {
+        switch (*p.sizeOption) {
+            case Parameters::SizeOption::Uniform:
+                _sizeOption = SizeOption::Uniform;
+                break;
+            case Parameters::SizeOption::NonUniform:
+                _sizeOption = SizeOption::NonUniform;
+                break;
+        }
+    }
+    _sizeOption.onChange([&] { _isDirty = true; });
+    addProperty(_sizeOption);
 }
 
 bool RenderablePointsCloud::isReady() const {
@@ -152,7 +170,8 @@ void RenderablePointsCloud::initializeGL() {
     _shaderProgram = global::renderEngine->buildRenderProgram(
         "PointsCloud",
         absPath("${MODULE_SOFTWAREINTEGRATION}/shaders/point_vs.glsl"),
-        absPath("${MODULE_SOFTWAREINTEGRATION}/shaders/point_fs.glsl")
+        absPath("${MODULE_SOFTWAREINTEGRATION}/shaders/point_fs.glsl"),
+        absPath("${MODULE_SOFTWAREINTEGRATION}/shaders/point_ge.glsl")
     );
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
@@ -179,31 +198,40 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     if (!_isVisible) {
         return;
     }
-
+    
     _shaderProgram->activate();
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    glm::dvec3 eyePosition = glm::dvec3(
+        glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+    _shaderProgram->setUniform(_uniformCache.eyePosition, eyePosition);
 
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+    _shaderProgram->setUniform(_uniformCache.cameraUp, cameraUp);
 
-    _shaderProgram->setUniform(_uniformCache.modelViewTransform, modelViewTransform);
+    glm::dmat4 modelMatrix =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
+    _shaderProgram->setUniform(_uniformCache.modelMatrix, modelMatrix);
+
+    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+    glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
+                                            data.camera.combinedViewMatrix();
     _shaderProgram->setUniform(
-        _uniformCache.modelViewProjectionTransform,
-        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
+        _uniformCache.cameraViewProjectionMatrix,
+        cameraViewProjectionMatrix
     );
 
     _shaderProgram->setUniform(_uniformCache.color, _color);
     _shaderProgram->setUniform(_uniformCache.opacity, _opacity);
     _shaderProgram->setUniform(_uniformCache.size, _size);
+    _shaderProgram->setUniform(_uniformCache.sizeOption, _sizeOption);
 
     // Changes GL state:
     glEnablei(GL_BLEND, 0);
-    glDepthMask(false);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex
+    glDepthMask(false);
 
     glBindVertexArray(_vertexArrayObjectID);
     const GLsizei nPoints = static_cast<GLsizei>(_fullData.size() / _nValuesPerPoint);
@@ -295,7 +323,7 @@ void RenderablePointsCloud::createDataSlice() {
 }
 
 void RenderablePointsCloud::loadData() {
-    if (_pointData.empty() && !_dataStorageKey.has_value()) {
+    if (!_dataStorageKey.has_value()) {
         LWARNING("No point data found");
         return;
     }
@@ -303,25 +331,9 @@ void RenderablePointsCloud::loadData() {
     // @TODO: potentially combine point data with additional data about the points,
     // such as luminosity
 
-    if (!_pointData.empty()) {
-        int dataSize = static_cast<int>(_pointData.size());
-        std::vector<float> values;
-        values.reserve(_nValuesPerPoint * _nPoints);
-
-        for (int i = 0; i < dataSize; i++) {
-            for (int j = 0; j < _nValuesPerPoint; j++) {
-                values.push_back(_pointData[i][j]);
-            }
-        }
-
-        _fullData.insert(_fullData.end(), values.begin(), values.end());
-    }
-    else {
-        // Fetch data from module's centralized storage
-        auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-        _fullData = module->fetchData(_dataStorageKey.value());
-        _nPoints = _fullData.size();
-    }
+    // Fetch data from module's centralized storage
+    auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
+    _fullData = module->fetchData(_dataStorageKey.value());
 
     _isDirty = true;
 }
