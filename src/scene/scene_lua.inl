@@ -997,9 +997,9 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
         identifier.c_str();
 
     properties::Property::PropertyInfo info = {
-            identifier.c_str(),
-            gui,
-            description.has_value() ? description->c_str() : ""
+        identifier.c_str(),
+        gui,
+        description.has_value() ? description->c_str() : ""
     };
     if (type == "DMat2Property") {
         createCustomProperty<properties::DMat2Property>(info, std::move(onChange));

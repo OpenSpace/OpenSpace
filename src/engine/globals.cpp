@@ -351,7 +351,7 @@ void create() {
     ghoul_assert(userPropertyOwner, "No userPropertyOwner");
     currentPos += sizeof(properties::PropertyOwner);
 #else // ^^^ WIN32 / !WIN32 vvv
-    userPropertyOwner = new properties::PropertyOwner({ "ScreenSpace" });
+    userPropertyOwner = new properties::PropertyOwner({ "UserProperties" });
 #endif // WIN32
 
 #ifdef WIN32
