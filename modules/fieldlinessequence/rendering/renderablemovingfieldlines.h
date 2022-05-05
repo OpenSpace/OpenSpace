@@ -48,7 +48,7 @@ public:
         PathLineTraverser(std::vector<FieldlinesState::Fieldline>& fieldlines_);
         void advanceKeyFrames();
         void skipKeyFrame(FieldlinesState::Fieldline::Topology desiredTopology);
-        FieldlinesState::Fieldline::Topology decideTopology();
+        FieldlinesState::Fieldline::Topology nextTopology();
         bool isAtEnd() const;
         bool isAtStart() const;
         double getTimeToReconnectionPoint(size_t indexOfReconnection);
@@ -94,6 +94,11 @@ private:
         const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
         GLsizei nVertices);
+    void findOptimalSwapIndex(
+        const FieldlinesState::Fieldline& fieldline1,
+        const FieldlinesState::Fieldline& fieldline2,
+        int& index1,
+        int& index2);
     void updateTemporaryKeyFrame(
         std::vector<glm::vec3>::iterator firstLineBeginIt,
         std::vector<glm::vec3>::iterator firstLineEndIt,
@@ -103,6 +108,7 @@ private:
     float calculateFieldlineLength(
         std::vector<glm::vec3>::iterator beginIt, 
         std::vector<glm::vec3>::iterator endIt);
+    FieldlinesState::Fieldline::Topology matchingTopology(FieldlinesState::Fieldline::Topology topology);
 
     enum class ColorMethod {
         Uniform = 0,

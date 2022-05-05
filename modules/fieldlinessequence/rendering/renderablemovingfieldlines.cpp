@@ -716,7 +716,6 @@ namespace openspace {
         }
     }
 
-
     void RenderableMovingFieldlines::moveLines(const double currentTime, const double previousTime) {
 
         double dt = currentTime - previousTime;
@@ -762,14 +761,19 @@ namespace openspace {
                 // The traverser that has not reached the reconnection point
                 // should advance its next key frame and change the time to next
                 // key frame accordingly
+                FieldlinesState::Fieldline::Topology nextTopology1, nextTopology2;
+
                 if (isNewTopology1 && !hasTemporaryKeyFrame1) {
-                    FieldlinesState::Fieldline::Topology desiredTopology = _traversers[lineIndex].decideTopology();
-                    _traversers[lineIndex + 1].skipKeyFrame(desiredTopology);
+                    nextTopology2 = _traversers[lineIndex + 1].nextTopology();
+                    nextTopology1 = matchingTopology(nextTopology2);
                 }
                 else if (isNewTopology2 && !hasTemporaryKeyFrame2) {
-                    FieldlinesState::Fieldline::Topology desiredTopology = _traversers[lineIndex + 1].decideTopology();
-                    _traversers[lineIndex].skipKeyFrame(desiredTopology);
+                    nextTopology1 = _traversers[lineIndex].nextTopology();
+                    nextTopology2 = matchingTopology(nextTopology1);
                 }
+
+                _traversers[lineIndex].skipKeyFrame(nextTopology1);
+                _traversers[lineIndex + 1].skipKeyFrame(nextTopology2);
 
                 if (isMovingForward) {
 
@@ -784,15 +788,18 @@ namespace openspace {
                     );
 
                     updateTemporaryKeyFrame(
-                        renderIt + (lineStart2),
+                        renderIt + lineStart2,
                         renderIt + (lineStart2 + _nPointsOnFieldlines / 2),
                         renderIt + (lineStart1 + _nPointsOnFieldlines / 2),
                         renderIt + (lineStart2),
                         _traversers[lineIndex + 1].temporaryInterpolationKeyFrame
                     );
 
+                    // is not safe for reverse simulation time
                     _traversers[lineIndex].timeInterpolationDenominator -= _traversers[lineIndex].timeSinceInterpolation;
                     _traversers[lineIndex + 1].timeInterpolationDenominator -= _traversers[lineIndex + 1].timeSinceInterpolation;
+                    _traversers[lineIndex].timeSinceInterpolation = 0;
+                    _traversers[lineIndex + 1].timeSinceInterpolation = 0;
 
                     _traversers[lineIndex].hasTemporaryKeyFrame = true;
                     _traversers[lineIndex + 1].hasTemporaryKeyFrame = true;
@@ -1025,37 +1032,81 @@ namespace openspace {
     */
     void RenderableMovingFieldlines::PathLineTraverser::skipKeyFrame(
         FieldlinesState::Fieldline::Topology desiredTopology) {
-        //timeInterpolationNominator = 0.0;
+
         if (forward) {
             while ( frontKeyFrame->topology != desiredTopology) {
                 ++frontKeyFrame;
-                if (frontKeyFrame == this->keyFrames.end()) break;
                 timeInterpolationDenominator += (frontKeyFrame - 1)->timeToNextKeyFrame;
+                if (frontKeyFrame == this->keyFrames.end() - 1) break;
             }
         }
         else {
             while ( backKeyFrame->topology != desiredTopology) {
                 --backKeyFrame;
-                if (backKeyFrame == this->keyFrames.begin()) break;
                 timeInterpolationDenominator += backKeyFrame->timeToNextKeyFrame;
+                if (backKeyFrame == this->keyFrames.begin()) break;
             }
         }
     }
 
+    /**
+    * Returns the most numerous topology of the next five key frames.
+    */
     FieldlinesState::Fieldline::Topology 
-        RenderableMovingFieldlines::PathLineTraverser::decideTopology() {
+        RenderableMovingFieldlines::PathLineTraverser::nextTopology() {
 
-            FieldlinesState::Fieldline::Topology newTopology = this->forward ?
-            frontKeyFrame->topology : backKeyFrame->topology;
+        FieldlinesState::Fieldline::Topology oldTopology = this->forward ?
+            this->backKeyFrame->topology : this->frontKeyFrame->topology;
 
-            switch (newTopology) {
-            case FieldlinesState::Fieldline::Topology::Imf:
-                return FieldlinesState::Fieldline::Topology::Closed;
-            case FieldlinesState::Fieldline::Topology::Closed:
-                return FieldlinesState::Fieldline::Topology::Imf;
-            case FieldlinesState::Fieldline::Topology::Open:
-                return FieldlinesState::Fieldline::Topology::Open;
+        keyFrameIt it = this->forward ?
+            this->frontKeyFrame : this->backKeyFrame;
+
+        // decide which is the next topology based on 5 future key frames
+        int imf = 0;
+        int closed = 0;
+        int open = 0;
+
+        int counter = 0;
+        while (counter < 5) {
+            bool isLastKeyFrame = this->forward ?
+                it == this->keyFrames.end() : it == this->keyFrames.begin();
+
+            if (isLastKeyFrame && this->forward) {
+                break;
             }
+
+            bool isNewTopology = it->topology != oldTopology;
+            if (isNewTopology) {
+                switch (it->topology) {
+                case FieldlinesState::Fieldline::Topology::Imf :
+                    ++imf;
+                    break;
+                case FieldlinesState::Fieldline::Topology::Closed :
+                    ++closed;
+                    break;
+                case FieldlinesState::Fieldline::Topology::Open :
+                    ++open;
+                    break;
+                }
+                ++counter;
+            }
+            if (isLastKeyFrame && !this->forward) {
+                break;
+            }
+            it = this->forward ? it + 1 : it - 1;
+        }
+
+        int maxCount = std::max({imf, closed, open});
+
+        if (maxCount == imf) {
+            return FieldlinesState::Fieldline::Topology::Imf;
+        }
+        else if (maxCount == open) {
+            return FieldlinesState::Fieldline::Topology::Open;
+        }
+        else if (maxCount == closed) {
+            return FieldlinesState::Fieldline::Topology::Closed;
+        }
     }
 
     // Will be phased out in the future
@@ -1072,6 +1123,15 @@ namespace openspace {
             return true;
 
         return false;
+    }
+
+    void RenderableMovingFieldlines::findOptimalSwapIndex(
+        const FieldlinesState::Fieldline& fieldline1, 
+        const FieldlinesState::Fieldline& fieldline2,
+        int& index1,
+        int& index2) 
+    {
+        
     }
 
     /**
@@ -1163,6 +1223,22 @@ namespace openspace {
             ++it;
         }
         return length;
+    }
+
+    /**
+    * Returns what topology the matching fieldline should have 
+    * in regards to the input topology.
+    */
+    FieldlinesState::Fieldline::Topology RenderableMovingFieldlines::matchingTopology(
+        FieldlinesState::Fieldline::Topology topology) {
+        switch (topology) {
+        case FieldlinesState::Fieldline::Topology::Imf:
+            return FieldlinesState::Fieldline::Topology::Closed;
+        case FieldlinesState::Fieldline::Topology::Open:
+            return FieldlinesState::Fieldline::Topology::Open;
+        case FieldlinesState::Fieldline::Topology::Closed:
+            return FieldlinesState::Fieldline::Topology::Imf;
+        }
     }
 
     double RenderableMovingFieldlines::PathLineTraverser::getTimeToReconnectionPoint(size_t indexOfReconnection) {
