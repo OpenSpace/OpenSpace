@@ -9,21 +9,45 @@ local horizons = asset.syncedResource({
   Version = 3
 })
 
+local kernels = asset.syncedResource({
+  Name = "JWST Kernel",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_kernels",
+  Version = 2
+})
+
+local launchTime = "2021 DEC 25 12:20:00"
+local detachTime = "2021 DEC 25 12:50:00"
+local L2orbitInsertionTime = "2022 JAN 25 00:00:00"
+
 local JWSTPosition = {
   Identifier = "JWSTPosition",
-  Parent = earthTransforms.EarthCenter.Identifier,
+  Parent = earthTransforms.EarthIAU.Identifier,
   Transform = {
     Translation = {
       Type = "TimelineTranslation",
       ShouldInterpolate = false,
       Keyframes = {
-        ["2021 DEC 25 12:50:00"] = {
-          Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "horizons_jwst_launch.hrz",
+        [launchTime] = {
+          Type = 'SpiceTranslation',
+          Target = '170', -- JWST
+          Observer = 'EARTH',
+          Frame = 'IAU_EARTH',
+          Kernels = { kernels .. "webb.bsp" }
         },
-        ["2022 JAN 25 00:00:00"] = {
-          Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "horizons_jwst_orbit.hrz",
+        [detachTime] = {
+          Type = 'SpiceTranslation',
+          Target = '170', -- JWST
+          Observer = 'EARTH',
+          Frame = 'GALACTIC',
+          Kernels = { kernels .. "webb.bsp" }
+        },
+        [L2orbitInsertionTime] = {
+          Type = 'SpiceTranslation',
+          Target = '170', -- JWST
+          Observer = '392', -- L2
+          Frame = 'GALACTIC',
+          Kernels = { kernels .. "webb.bsp" }
         }
       }
     },
@@ -64,7 +88,14 @@ local JWSTRotation = {
 -- Reparent the JWSTPosition node when the data changes at 25 Jan 2022
 asset.onInitialize(function()
   openspace.scriptScheduler.loadScheduledScript(
-    "2022 JAN 25 00:00:00",
+    detachTime,
+    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
+    [[openspace.setParent("JWSTPosition", "EarthIAU")]],
+    "",
+    1 -- Not default group, never clear this script
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    L2orbitInsertionTime,
     [[openspace.setParent("JWSTPosition", "L2")]],
     [[openspace.setParent("JWSTPosition", "EarthCenter")]],
     "",
@@ -72,16 +103,19 @@ asset.onInitialize(function()
   )
 
   openspace.addSceneGraphNode(JWSTPosition)
+  openspace.addSceneGraphNode(BufferRotation)
   openspace.addSceneGraphNode(JWSTRotation)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTRotation)
+  openspace.removeSceneGraphNode(BufferRotation)
   openspace.removeSceneGraphNode(JWSTPosition)
   openspace.scriptScheduler.clear(1)
 end)
 
 asset.export(JWSTPosition)
+asset.export(BufferRotation)
 asset.export(JWSTRotation)
 
 

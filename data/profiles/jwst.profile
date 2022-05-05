@@ -46,7 +46,7 @@
       "identifier": "profile.set.jwst_launch",
       "is_local": false,
       "name": "Set to JWST launch time",
-      "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:50:00');"
+      "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:20:01');"
     },
     {
       "documentation": "Toggle JWST trail relative to the Sun",
@@ -319,7 +319,7 @@
   ],
   "time": {
     "type": "absolute",
-    "value": "2021-12-25T12:50:00"
+    "value": "2021-12-25T12:20:01"
   },
   "version": {
     "major": 1,
