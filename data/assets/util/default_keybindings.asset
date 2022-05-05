@@ -199,14 +199,13 @@ local toggle_planet_labels = {
   Key = "l"
 }
 
-local trailAction = asset.require("actions/trails/toggle_trails_planets_moons").toggle_trails
+
 
 local Actions = {
   toggle_native_ui,toggle_shutdown,take_screenshot,toggle_pause_interpolated,toggle_pause_immediate,
   toggle_rotation_friction,toggle_zoom_friction,toggle_roll_friction,fade_to_black,
   toggle_main_gui,toggle_overlays,toggle_master_rendering,next_delta_step_interpolate,
-  next_delta_step_immediate,previous_delta_step_interpolate,previous_delta_step_immediate,
-  toggle_planet_labels
+  next_delta_step_immediate,previous_delta_step_interpolate,previous_delta_step_immediate
 }
 
 asset.onInitialize(function()
@@ -214,8 +213,6 @@ asset.onInitialize(function()
     openspace.action.registerAction(action)
     openspace.bindKey(action.Key, action.Identifier)
   end
-  -- The trails key is bound separate because the action is already registered
-  openspace.bindKey("h", trailAction.Identifier)
   -- The take screenshot function is a bit special since we want to bind two keys to that action
   openspace.bindKey("PRINT_SCREEN", take_screenshot.Identifier)
 end)
