@@ -62,6 +62,7 @@ asset.require("scene/digitaluniverse/voids")
 
 
 asset.require("customization/globebrowsing")
+asset.require("util/default_actions")
 
 asset.onInitialize(function ()
   openspace.globebrowsing.loadWMSServersFromFile(

@@ -1,0 +1,3 @@
+asset.require("actions/trails/toggle_all_trails");
+asset.require("actions/trails/toggle_trails_planets_moons");
+asset.require("actions/planets/planet_lighting");
