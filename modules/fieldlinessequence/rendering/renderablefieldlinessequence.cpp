@@ -219,7 +219,7 @@ namespace {
         std::optional<bool> flowEnabled;
 
         // [[codegen::verbatim(FlowColorInfo.description)]]
-        std::optional<glm::vec4> flowColor;
+        std::optional<glm::vec4> flowColor [[codegen::color()]];
 
         // [[codegen::verbatim(FlowReversedInfo.description)]]
         std::optional<bool> reversedFlow;
@@ -419,7 +419,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         // corrupt or not provided
         _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
     }
-    
+
     _colorUniform = p.color.value_or(_colorUniform);
 
     _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
