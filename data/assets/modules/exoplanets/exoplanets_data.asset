@@ -9,7 +9,7 @@ local colormaps = asset.syncedResource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
-  Version = 2
+  Version = 3
 })
 
 asset.onInitialize(function () 
