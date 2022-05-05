@@ -485,9 +485,9 @@ void ActionDialog::actionRemove() {
 
     for (size_t i = 0; i < _actionData.size(); ++i) {
         if (_actionData[i].identifier == action->identifier) {
+            clearActionFields();
             _actionData.erase(_actionData.begin() + i);
             delete _actionWidgets.list->takeItem(static_cast<int>(i));
-            clearActionFields();
 
             _keybindingWidgets.action->clear();
             for (const Profile::Action& a : _actionData) {
@@ -661,9 +661,9 @@ void ActionDialog::keybindingRemove() {
         if (_keybindingsData[i].key == keybinding->key &&
             _keybindingsData[i].action == keybinding->action)
         {
+            clearKeybindingFields();
             _keybindingsData.erase(_keybindingsData.begin() + i);
             delete _keybindingWidgets.list->takeItem(static_cast<int>(i));
-            clearKeybindingFields();
             return;
         }
     }

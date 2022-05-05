@@ -83,19 +83,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
         "BufferTime",
         "Buffer Time",
-        "" // @TODO Missing documentation
+        "This is the number of seconds that received keyframes are buffered before they "
+        "get applied to the rendering. A higher value leads to smoother rendering, "
+        "particularly when the internet connection is unstable, but also leads to higher "
+        "delay."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
         "TimeKeyframeInterval",
         "Time keyframe interval",
-        "" // @TODO Missing documentation
+        "Determines how often the information about the simulation time is sent (in "
+        "seconds). Lower values mean more accurate representation of the time, but also "
+        "require higher internet bandwidth."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
         "CameraKeyframeInterval",
         "Camera Keyframe interval",
-        "" // @TODO Missing documentation
+        "Determines how often the information about the camera position and orientation "
+        "is sent (in seconds). Lower values mean more accurate representation of the "
+        "time, but also more internet traffic"
     };
 } // namespace
 

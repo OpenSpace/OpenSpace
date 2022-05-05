@@ -34,14 +34,11 @@ local fieldlines = {
       asset.localResource("transferfunctions/density-fieldlines.txt"),
       asset.localResource("transferfunctions/velocity-fieldlines.txt")
     },
-    ColorTableMinMax = {
+    ColorTableRanges = {
       { 0, 1000000 },
       { 100, 2000 }
     },
     SimulationModel = "mas",
-    Color = {
-      Uniform = { 0.0, 0.725, 0.75, 1.0 }
-    }
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
@@ -70,7 +67,6 @@ asset.onDeinitialize(function ()
 end)
 
 asset.export(fieldlines)
-
 
 asset.meta = {
   Name = "Predictive Science Inc. Fieldlines Bastille Day",

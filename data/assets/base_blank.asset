@@ -15,18 +15,11 @@ local webGui = asset.require("util/webgui")
 -- Scale the different UI components based on the operating system's DPI scaling value
 asset.require("util/dpiscaling")
 
+-- Load the images required for the launcher to show up
+asset.require("util/launcher_images")
+
 asset.onInitialize(function ()
   webGui.setCefRoute("onscreen")
-
   openspace.setDefaultGuiSorting()
-
   openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.100000)
-end)
-
-asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_trails)
-  openspace.clearKey(toggle_trails.Key)
-
-  openspace.action.removeAction(toggle_planet_labels)
-  openspace.clearKey(toggle_planet_labels.Key)
 end)

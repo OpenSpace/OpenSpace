@@ -22,34 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_IMGUI___GUIISWACOMPONENT___H__
-#define __OPENSPACE_MODULE_IMGUI___GUIISWACOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUISCENECOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUISCENECOMPONENT___H__
 
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+#include <modules/imgui/include/guicomponent.h>
 
-#include <modules/imgui/include/guipropertycomponent.h>
-
-#include <map>
+namespace openspace { class SceneGraphNode; }
 
 namespace openspace::gui {
 
-class GuiIswaComponent : public GuiPropertyComponent {
+class GuiSceneComponent : public GuiComponent {
 public:
-    GuiIswaComponent();
+    GuiSceneComponent();
 
     void render() override;
-
-private:
-    bool _gmData = false;
-    bool _gmImage = false;
-    bool _ionData = false;
-    std::vector<int> _cdfOptions;
-    std::map<std::string, int> _cdfOptionsMap;
 };
 
 } // namespace openspace::gui
 
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-
-
-#endif // __OPENSPACE_MODULE_IMGUI___GUIISWACOMPONENT___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUISCENECOMPONENT___H__

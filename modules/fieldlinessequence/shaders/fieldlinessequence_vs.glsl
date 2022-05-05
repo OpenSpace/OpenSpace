@@ -54,8 +54,8 @@ uniform vec2      domainLimR;
 
 // Inputs
 layout(location = 0) in vec3 in_position;        // Should be provided in meters
-layout(location = 1) in float in_color_scalar;   // The extra value used to color lines. Location must correspond to _VA_COLOR in renderablefieldlinessequence.h
-layout(location = 2) in float in_masking_scalar; // The extra value used to mask out parts of lines. Location must correspond to _VA_MASKING in renderablefieldlinessequence.h
+layout(location = 1) in float in_color_scalar;   // The extra value used to color lines.
+layout(location = 2) in float in_masking_scalar; // The extra value used to mask out parts of lines.
 
 // These should correspond to the enum 'ColorMethod' in renderablefieldlinesequence.cpp
 const int uniformColor     = 0;
