@@ -180,7 +180,7 @@ void WwtCommunicator::setImageOpacity(int i, float opacity) {
     sendMessageToWwt(msg);
 }
 
-void WwtCommunicator::hideChromeInterface(bool shouldHide) const {
+void WwtCommunicator::hideChromeInterface() const {
     std::string script = "sendMessageToWWT({event : \"modify_settings\", "
         "settings : [[\"hideAllChrome\", true]], target: \"app\"});";
     executeJavascript(script);

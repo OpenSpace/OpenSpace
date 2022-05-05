@@ -97,6 +97,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation ScreenSpaceSkyBrowser::Documentation() {
+    return codegen::doc<Parameters>("skybrowser_screenspaceskybrowser");
+}
+
 ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , WwtCommunicator(dictionary)

@@ -509,6 +509,13 @@ void SkyBrowserModule::removePreSyncCallback(CallbackHandle handle) {
     _preSyncCallbacks.erase(it);
 }
 
+std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {
+    return {
+        RenderableSkyTarget::Documentation(),
+        ScreenSpaceSkyBrowser::Documentation()
+    };
+}
+
 scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
     return {
         "skybrowser",

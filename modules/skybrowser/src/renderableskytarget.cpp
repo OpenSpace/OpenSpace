@@ -85,6 +85,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation RenderableSkyTarget::Documentation() {
+    return codegen::doc<Parameters>("skybrowser_renderableskytarget");
+}
+
 RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)

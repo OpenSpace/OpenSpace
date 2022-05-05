@@ -64,6 +64,8 @@ public:
     std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
     std::vector<std::pair<std::string, bool>> showDisplayCopies() const;
 
+    static documentation::Documentation Documentation();
+
 private:
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;

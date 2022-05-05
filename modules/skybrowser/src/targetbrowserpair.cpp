@@ -130,7 +130,7 @@ void TargetBrowserPair::initialize() {
     glm::vec2 dim = _browser->screenSpaceDimensions();
     _targetRenderable->setRatio(dim.x / dim.y);
     _browser->updateBorderColor();
-    _browser->hideChromeInterface(true);
+    _browser->hideChromeInterface();
     _browser->setIsInitialized(true);
 }
 
@@ -196,7 +196,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("selectedImages", selectedImages());
     res.setValue("scale", static_cast<double>(_browser->scale()));
     res.setValue("opacities", _browser->opacities());
-        
+
     std::vector<std::pair<std::string, glm::dvec3>> copies = displayCopies();
     std::vector<std::pair<std::string, bool>> showCopies = _browser->showDisplayCopies();
     ghoul::Dictionary copiesData;
@@ -241,8 +241,8 @@ void TargetBrowserPair::setImageOpacity(int i, float opacity) {
     _browser->setImageOpacity(i, opacity);
 }
 
-void TargetBrowserPair::hideChromeInterface(bool shouldHide) {
-    _browser->hideChromeInterface(shouldHide);
+void TargetBrowserPair::hideChromeInterface() {
+    _browser->hideChromeInterface();
 }
 
 void TargetBrowserPair::sendIdToBrowser() const {
