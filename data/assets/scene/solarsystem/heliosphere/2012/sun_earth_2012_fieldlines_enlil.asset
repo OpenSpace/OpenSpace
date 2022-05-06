@@ -43,7 +43,6 @@ local colorRanges = {
 
 local interactionSphere = 695700000
 
-
 local ENLILSliceEqPlane11AU1 = {
   Identifier = "FL_ENLIL_slice_eqPlane_011AU_1",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
@@ -52,7 +51,6 @@ local ENLILSliceEqPlane11AU1 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU1,
     InputFileType = "Osfls",
-
     Color = { 0.4, 0.15, 0.4, 0.6 },
     ColorMethod = "By Quantity", -- Color by Quantity
     ColorQuantity = 1, -- Velocity
@@ -60,8 +58,7 @@ local ENLILSliceEqPlane11AU1 = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = colorRanges,
-    LoadAtRuntime = true
+    ColorTableRanges = colorRanges
   },
   GUI = {
     Name = "Fieldlines ENLIL Slice Equatorial Plane 0.11 AU 1",
@@ -77,7 +74,6 @@ local ENLILSliceEqPlane11AU2 = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.EqPlane011AU2,
     InputFileType = "Osfls",
-
     Color = { 0.4, 0.15, 0.4, 0.6 },
     ColorMethod = "By Quantity", -- Color by Quantity
     ColorQuantity = 1, -- Velocity
@@ -85,8 +81,7 @@ local ENLILSliceEqPlane11AU2 = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = colorRanges,
-    LoadAtRuntime = true
+    ColorTableRanges = colorRanges
   },
   GUI = {
     Name = "Fieldlines ENLIL Slice Equatorial Plane 0.11 AU 2",
@@ -110,8 +105,7 @@ local ENLILSliceLat411AU1 = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = colorRanges,
-    LoadAtRuntime = true
+    ColorTableRanges = colorRanges
   },
   GUI = {
     Name = "Fieldlines ENLIL Slice Latitude 4 0.11 AU 1",
@@ -135,8 +129,7 @@ local ENLILSliceLat411AU2 = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = colorRanges,
-    LoadAtRuntime = true
+    ColorTableRanges = colorRanges
   },
   GUI = {
     Name = "Fieldlines ENLIL Slice Latitude 4 0.11 AU 2",
@@ -157,8 +150,7 @@ local ENLILEarth = {
       enlilDensityColorTable,
       enlilVelocityColorTable,
     },
-    ColorTableRanges = colorRanges,
-    LoadAtRuntime = true
+    ColorTableRanges = colorRanges
   },
   GUI = {
     Name = "Fieldlines ENLIL Earth",

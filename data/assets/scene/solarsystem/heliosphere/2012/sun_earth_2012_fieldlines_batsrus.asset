@@ -1,15 +1,13 @@
 local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere.asset')
 asset.require('scene/solarsystem/heliosphere/2012/reset_loop_action.asset')
 
--- Specifying transfer functions
 local transferFunctions = asset.syncedResource({
   Name = "Fieldlines Transfer Functions",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-fieldlines_transferfunctions",
-  Version = 1
+  Version = 2
 })
 
--- Specifying transfer functions
 local fieldlineData = asset.syncedResource({
   Name = "Fieldlines Data BATSRUS",
   Type = "HttpSynchronization",
@@ -97,8 +95,7 @@ local BatsrusJ12FlowLines = {
       batsrusVelocityColorTable,
       batsrusTopologyColorTable,
     },
-    ColorTableRanges = colorRanges,
-    LoadAtRuntime = true
+    ColorTableRanges = colorRanges
   },
   GUI = {
     Name = "Fieldlines BATSRUS J12 Flowlines",
@@ -123,8 +120,7 @@ local BatsrusAsherStaticSeedsFlowLines = {
       batsrusVelocityColorTable,
       batsrusTopologyColorTable,
     },
-   ColorTableRanges = colorRanges,
-    LoadAtRuntime = true
+   ColorTableRanges = colorRanges
   },
   GUI = {
     Name = "Fieldlines BATSRUS Asher Static",
