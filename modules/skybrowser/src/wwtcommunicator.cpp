@@ -200,10 +200,10 @@ void WwtCommunicator::update() {
             updateBorderColor();
             _borderColorIsDirty = false;
         }
-        if (_shouldReload) {
-            _isImageCollectionLoaded = false;
-        }
         _lastUpdateTime = std::chrono::system_clock::now();
+    }
+    if (_shouldReload) {
+        _isImageCollectionLoaded = false;
     }
     Browser::update();
 }
