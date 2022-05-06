@@ -11,7 +11,7 @@ local transferFunctions = asset.syncedResource({
 
 -- Specifying transfer functions
 local fieldlineData = asset.syncedResource({
-  Name = "Fieldlines Data",
+  Name = "Fieldlines Data BATSRUS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-batsrus",
   Version = 1

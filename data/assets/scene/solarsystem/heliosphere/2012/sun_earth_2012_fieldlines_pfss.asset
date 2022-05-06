@@ -8,7 +8,7 @@ local transferFunctions = asset.syncedResource({
 })
 
 local fieldlineData  = asset.syncedResource({
-  Name = "Fieldlines Data",
+  Name = "Fieldlines Data PFSS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-pfss",
   Version = 1
