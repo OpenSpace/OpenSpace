@@ -38,9 +38,9 @@ else
   local currentScale = openspace.getPropertyValue(prop);
   local newScale = 1;
   if (currentScale == 1) then
-    ]] .. getScaleCommand(identifier, scale, speedup) .. [[\n
+    ]] .. getScaleCommand(identifier, scale, speedup) .. [[
   else
-    ]] .. getScaleCommand(identifier, 1, speedown) .. [[\n
+    ]] .. getScaleCommand(identifier, 1, speedown) .. [[
   end
 end
 ]],
