@@ -464,7 +464,14 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _dataFile = std::make_unique<File>(_filePath.value());
     _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
-    _filePath.onChange([this]() { _dataIsDirty = true; });
+    _filePath.onChange([this]() {
+        if (std::filesystem::exists(_filePath.value())) {
+            _dataIsDirty = true;
+        }
+        else {
+            LWARNING(fmt::format("File not found: {}", _filePath));
+        }
+    });
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
