@@ -637,10 +637,12 @@ void SessionRecording::cleanUpPlayback() {
             _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
         if (_keyframesCamera.size() > 0) {
             const SceneGraphNode* n = scene->sceneGraphNode(
-                _keyframesCamera[p].focusNode);
+                _keyframesCamera[p].focusNode
+            );
             if (n) {
                 global::navigationHandler->orbitalNavigator().setFocusNode(
-                    n->identifier());
+                    n->identifier()
+                );
             }
         }
     }
