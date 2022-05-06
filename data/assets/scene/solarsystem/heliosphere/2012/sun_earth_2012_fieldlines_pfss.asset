@@ -54,7 +54,6 @@ local PFSS = {
       { 0, 2 },
       { -1, 1 },
     },
-    LoadAtRuntime = true
   },
   GUI = {
     Name = "Fieldlines PFSS",

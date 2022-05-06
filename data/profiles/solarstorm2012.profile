@@ -2,7 +2,9 @@
   "assets": [
     "base",
     "dashboard/default_dashboard",
-    "scene/solarsystem/heliosphere/2012/sun_earth_2012_fieldlines"
+    "scene/solarsystem/heliosphere/2012/sun_earth_2012_fieldlines",
+    "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
+    "scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere"
   ],
   "camera": {
     "altitude": 294000000000.0,
@@ -76,6 +78,11 @@
     {
       "name": "Scene.SunGlare.Renderable.Enabled",
       "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.EarthMagnetosphere.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
       "value": "false"
     }
   ],
