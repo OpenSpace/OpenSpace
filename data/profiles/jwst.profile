@@ -49,6 +49,14 @@
       "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:20:01');"
     },
     {
+      "documentation": "Set the time to the detach time of JWST",
+      "gui_path": "/JWST",
+      "identifier": "profile.set.jwst_detach",
+      "is_local": false,
+      "name": "Set to JWST detach time",
+      "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:50:00');"
+    },
+    {
       "documentation": "Toggle JWST trail relative to the Sun",
       "gui_path": "/JWST",
       "identifier": "profile.toggle.sun_trail",
@@ -213,6 +221,11 @@
     },
     {
       "name": "Scene.JWSTTrailLaunch.Renderable.Appearance.EnableFade",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTTrailCruise.Renderable.Appearance.EnableFade",
       "type": "setPropertyValueSingle",
       "value": "false"
     },

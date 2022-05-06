@@ -3,13 +3,6 @@ local earthTransforms = asset.require("scene/solarsystem/planets/earth/transform
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
-local horizons = asset.syncedResource({
-  Name = "JWST Horizons",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_horizons",
-  Version = 3
-})
-
 local kernels = asset.syncedResource({
   Name = "JWST Kernel",
   Type = "HttpSynchronization",

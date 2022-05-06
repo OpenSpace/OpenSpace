@@ -2,13 +2,6 @@ local earthTransforms = asset.require("scene/solarsystem/planets/earth/transform
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
-local horizons = asset.syncedResource({
-  Name = "JWST Horizons",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_horizons",
-  Version = 3
-})
-
 local kernels = asset.syncedResource({
   Name = "JWST Kernel",
   Type = "HttpSynchronization",
@@ -103,19 +96,16 @@ asset.onInitialize(function()
   )
 
   openspace.addSceneGraphNode(JWSTPosition)
-  openspace.addSceneGraphNode(BufferRotation)
   openspace.addSceneGraphNode(JWSTRotation)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTRotation)
-  openspace.removeSceneGraphNode(BufferRotation)
   openspace.removeSceneGraphNode(JWSTPosition)
   openspace.scriptScheduler.clear(1)
 end)
 
 asset.export(JWSTPosition)
-asset.export(BufferRotation)
 asset.export(JWSTRotation)
 
 
