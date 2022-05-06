@@ -2,7 +2,7 @@
   "actions": [
     {
       "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
+      "gui_path": "/Solar System/Earth",
       "identifier": "profile.toggle.satellitetrails",
       "is_local": false,
       "name": "Toggle satellite trails",
