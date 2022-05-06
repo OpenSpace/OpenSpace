@@ -45,7 +45,8 @@
     "scene/solarsystem/planets/saturn/major_moons",
     "scene/solarsystem/planets/saturn/minor_moons",
     "scene/solarsystem/planets/uranus/major_moons",
-    "scene/solarsystem/planets/uranus/minor_moons"
+    "scene/solarsystem/planets/uranus/minor_moons",
+    "scene/milkyway/objects/orionnebula/orionnebula"
   ],
   "camera": {
     "altitude": 17000000.0,

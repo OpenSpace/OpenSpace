@@ -15,6 +15,10 @@ asset.onInitialize(function()
   openspace.action.registerAction(undo_event_fade)
 end)
 
+asset.onDeinitialize(function()
+  openspace.action.removeAction(undo_event_fade)
+end)
+
 asset.meta = {
   Name = "Actions - Undo All Event Fading",
   Version = "1.0",
