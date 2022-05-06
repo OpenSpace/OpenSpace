@@ -579,6 +579,10 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
     }
     _states.push_back(newState);
     _nStates = _startTimes.size();
+    if (_nStates == 1) {
+        // loading dynamicaly is not nessesary if only having one set in the sequence 
+        _loadingStatesDynamically = false;
+    }
     _activeStateIndex = 0;
     return true;
 }
@@ -1044,9 +1048,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     bool needUpdate = false;
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
-                              (currentTime < _sequenceEndTime) ||
-                               _nStates == 1;
-
+                              (currentTime < _sequenceEndTime);
+    
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
@@ -1068,6 +1071,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
                 _activeStateIndex = _activeTriggerTimeIndex;
             }
         } // else {we're still in same state as previous frame (no changes needed)}
+    }
+    // if only one state
+    else if (_nStates == 1) {
+        _activeTriggerTimeIndex = 0;
+        _activeStateIndex = 0;
+        if (!_hasBeenUpdated) {
+            updateVertexPositionBuffer();
+        }
+        _hasBeenUpdated = true;
     }
     else {
         // Not in interval => set everything to false
