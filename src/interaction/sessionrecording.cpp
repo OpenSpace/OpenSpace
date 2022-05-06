@@ -342,7 +342,7 @@ void SessionRecording::stopRecording() {
     }
     // Close the recording file
     _recordFile.close();
-    _cleanupNeeded = true;
+    _cleanupNeededRecording = true;
 }
 
 bool SessionRecording::startPlayback(std::string& filename,
@@ -602,7 +602,7 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
 
 void SessionRecording::handlePlaybackEnd() {
     _state = SessionState::Idle;
-    _cleanupNeeded = true;
+    _cleanupNeededPlayback = true;
     global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
         events::EventSessionRecordingPlayback::State::Finished
     );
@@ -633,23 +633,31 @@ void SessionRecording::cleanUpPlayback() {
     ghoul_assert(camera != nullptr, "Camera must not be nullptr");
     Scene* scene = camera->parent()->scene();
     if (!_timeline.empty()) {
-        if (_timeline.size() > 0) {
-            unsigned int p =
-                _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
-            if (_keyframesCamera.size() > 0) {
-                const SceneGraphNode* n = scene->sceneGraphNode(
-                    _keyframesCamera[p].focusNode);
-                if (n) {
-                    global::navigationHandler->orbitalNavigator().setFocusNode(
-                        n->identifier());
-                }
+        unsigned int p =
+            _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
+        if (_keyframesCamera.size() > 0) {
+            const SceneGraphNode* n = scene->sceneGraphNode(
+                _keyframesCamera[p].focusNode
+            );
+            if (n) {
+                global::navigationHandler->orbitalNavigator().setFocusNode(
+                    n->identifier()
+                );
             }
         }
     }
 
     _playbackFile.close();
+    cleanUpTimelinesAndKeyframes();
+    _cleanupNeededPlayback = false;
+}
 
-    // Clear all timelines and keyframes
+void SessionRecording::cleanUpRecording() {
+    cleanUpTimelinesAndKeyframes();
+    _cleanupNeededRecording = false;
+}
+
+void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _timeline.clear();
     _keyframesCamera.clear();
     _keyframesTime.clear();
@@ -669,8 +677,6 @@ void SessionRecording::cleanUpPlayback() {
     _playbackPauseOffset = 0.0;
     _playbackLoopMode = false;
     _playbackForceSimTimeAtStart = false;
-
-    _cleanupNeeded = false;
 }
 
 void SessionRecording::writeToFileBuffer(unsigned char* buf,
@@ -987,8 +993,11 @@ void SessionRecording::preSynchronization() {
     else if (isPlayingBack()) {
         moveAheadInTime();
     }
-    else if (_cleanupNeeded) {
+    else if (_cleanupNeededPlayback) {
         cleanUpPlayback();
+    }
+    else if (_cleanupNeededRecording) {
+        cleanUpRecording();
     }
 
     // Handle callback(s) for change in idle/record/playback state
