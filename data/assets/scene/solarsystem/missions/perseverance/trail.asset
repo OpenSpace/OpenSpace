@@ -48,7 +48,7 @@ local PerseveranceNode = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2020 JUL 30 12:52:43.643",
-    End = "2021 FEB 18 20:44:58.828"
+    End = "2021 FEB 18 20:43:48"
   }
 }
 
@@ -83,12 +83,12 @@ local PerseveranceTrailMars = {
     Translation = {
       Type = "SpiceTranslation",
       Target = perseverance_id,
-      Observer = "MARS",
+      Observer = "MARS BARYCENTER",
       Kernels = m2020_kernels
     },
     Color = { 0.7, 0.9, 0.6 },
     StartTime = approachMars,
-    EndTime = endTime,
+    EndTime = "2021 FEB 18 20:43:48",
     SampleInterval = 100,
     Enabled = false
   },
