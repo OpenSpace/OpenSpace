@@ -756,10 +756,9 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::DirectoryExists,
             codegen::lua::WalkDirectory,
             codegen::lua::WalkDirectoryFiles,
-            codegen::lua::WalkDirectoryFolder,
+            codegen::lua::WalkDirectoryFolders,
             codegen::lua::DirectoryForPath,
-            codegen::lua::UnzipFile,
-            codegen::lua::SaveLastChangeToProfile
+            codegen::lua::UnzipFile
         }
     };
     addLibrary(lib);

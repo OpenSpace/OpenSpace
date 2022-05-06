@@ -43,7 +43,7 @@ end]]
   return commandString
 end
 
-local function getIlluminationAction(node, global)
+local function getIlluminationAction(node, node_lower, global)
   local actionString = "_standard_illumination"
   local actionName = "Standard Illumination"
   local actionCommand = getIlluminationCommand(node, global)
@@ -54,7 +54,7 @@ local function getIlluminationAction(node, global)
   end
 
   local action = {
-    Identifier = "os." .. string.gsub(node, "%s+", "") .. actionString,
+    Identifier = "os." .. string.gsub(node_lower, "%s+", "") .. actionString,
     Name = node .. " " .. actionName,
     Command = actionCommand,
     Documentation = "Enables " .. string.lower(actionName) .. " for" .. node,
@@ -64,34 +64,34 @@ local function getIlluminationAction(node, global)
   return action
 end
 
-local current_focus_global = getIlluminationAction("Current Focus", true)
+local current_focus_global = getIlluminationAction("Current Focus", "current_focus", true)
 asset.export("current_focus_global", current_focus_global.Identifier)
-local current_focus_standard = getIlluminationAction("Current Focus", false)
+local current_focus_standard = getIlluminationAction("Current Focus", "current_focus", false)
 asset.export("current_focus_standard", current_focus_standard.Identifier)
 
-local earth_global = getIlluminationAction("Earth", true)
+local earth_global = getIlluminationAction("Earth", "earth", true)
 asset.export("earth_global", earth_global.Identifier)
-local earth_standard = getIlluminationAction("Earth", false)
+local earth_standard = getIlluminationAction("Earth", "earth", false)
 asset.export("earth_standard", earth_standard.Identifier)
 
-local mars_global = getIlluminationAction("Mars", true)
+local mars_global = getIlluminationAction("Mars", "mars", true)
 asset.export("mars_global", mars_global.Identifier)
-local mars_standard = getIlluminationAction("Mars", false)
+local mars_standard = getIlluminationAction("Mars", "mars", false)
 asset.export("mars_standard", mars_standard.Identifier)
 
-local venus_global = getIlluminationAction("Venus", true)
+local venus_global = getIlluminationAction("Venus", "venus", true)
 asset.export("venus_global", venus_global.Identifier)
-local venus_standard = getIlluminationAction("Venus", false)
+local venus_standard = getIlluminationAction("Venus", "venus", false)
 asset.export("venus_standard", venus_standard.Identifier)
 
-local titan_global = getIlluminationAction("Titan", true)
+local titan_global = getIlluminationAction("Titan", "titan", true)
 asset.export("titan_global", titan_global.Identifier)
-local titan_standard = getIlluminationAction("Titan", false)
+local titan_standard = getIlluminationAction("Titan", "titan", false)
 asset.export("titan_standard", titan_standard.Identifier)
 
-local saturn_global = getIlluminationAction("Saturn", true)
+local saturn_global = getIlluminationAction("Saturn", "saturn", true)
 asset.export("saturn_global", saturn_global.Identifier)
-local saturn_standard = getIlluminationAction("Saturn", false)
+local saturn_standard = getIlluminationAction("Saturn", "saturn", false)
 asset.export("titan_standard", saturn_standard.Identifier)
 
 
