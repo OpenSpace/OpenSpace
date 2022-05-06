@@ -29,6 +29,17 @@ namespace openspace {
 
 namespace simp {
 
+const float ProtocolVersion = 1.6;
+
+const char SEP = ';';
+
+enum class ErrorCode : uint32_t {
+    ReachedEndBeforeSeparator = 0,
+    OffsetLargerThanMessageSize,
+    InvalidDimensionality,
+    Generic,
+};
+
 enum class MessageType : uint32_t {
     Connection = 0,
     ReadPointData,
@@ -52,11 +63,18 @@ const std::map<std::string, MessageType> _messageTypeFromSIMPType {
     {"DISC", MessageType::Disconnection},
 };
 
+class SimpError : public ghoul::RuntimeError {
+public:
+ ErrorCode errorCode;
+ explicit SimpError(const ErrorCode _errorCode, const std::string& msg);
+};
+
+bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset);
+
 MessageType getMessageType(const std::string& type);
 
 std::string getSIMPType(const MessageType& type);
 
-const float ProtocolVersion = 1.5;
 
 std::string formatLengthOfSubject(size_t lengthOfSubject);
 

@@ -99,7 +99,7 @@ void NetworkEngine::disconnect(std::shared_ptr<Peer> peer) {
 	// 	++sgnIterator;
 	// }
 
-	peer->thread.join();
+	if (peer->thread.joinable()) peer->thread.join();
 	_peers.erase(peer->id);
 }
 

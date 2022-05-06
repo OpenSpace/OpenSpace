@@ -50,11 +50,13 @@ private:
     void subscribeToRenderableUpdates(const std::string& identifier,
         SoftwareConnection& connection);
 
-    float readFloatValue(const std::vector<char>& message, int& offset);
-    glm::vec3 readColor(const std::vector<char>& message, int& offset);
-    std::string readString(const std::vector<char>& message, int& offset);
-    std::vector<float> readFloatData(const std::vector<char>& message,
-        int nValues, int& offset);
+    float readFloatValue(const std::vector<char>& message, size_t& offset);
+    int readIntValue(const std::vector<char>& message, size_t& offset);
+    glm::vec4 readColor(const std::vector<char>& message, size_t& offset);
+    std::string readString(const std::vector<char>& message, size_t& offset);
+    std::vector<float> readPointData(
+        const std::vector<char>& message, size_t& offset, int nPoints, int dimensionality
+    );
 
     std::unordered_map<std::string, std::function<void()>> _onceNodeExistsCallbacks;
 };

@@ -37,6 +37,28 @@ namespace openspace {
 
 namespace simp {
 
+SimpError::SimpError(const ErrorCode _errorCode, const std::string& msg)
+    : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(_errorCode), msg), "Software Integration Messaging Protocol error")
+{}
+
+bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset) {
+    if (offset >= message.size()) {
+        throw SimpError(
+            ErrorCode::OffsetLargerThanMessageSize,
+            "Unexpectedly reached the end of the message..."
+        );
+    }
+
+    if (message.size() > 0 && offset == message.size() - 1 && message[offset] != SEP) {
+        throw SimpError(
+            ErrorCode::ReachedEndBeforeSeparator,
+            "Reached end of message before reading separator character..."
+        );
+    }
+
+    return offset != 0 && message[offset] == SEP && message[offset - 1] != '\\';
+}
+
 MessageType getMessageType(const std::string& type) {
     if (_messageTypeFromSIMPType.count(type) == 0) return MessageType::Unknown;
     return _messageTypeFromSIMPType.at(type);

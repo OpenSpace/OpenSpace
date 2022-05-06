@@ -48,40 +48,34 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
                                                      SoftwareConnection& connection,
                                                      std::list<std::string>& sceneGraphNodes)
 {
-    int messageOffset = 0;
+    size_t messageOffset = 0;
 
-    // The following order of creating variables is the exact order they are received
-    // in the message. If the order is not the same, the global variable
-    // 'message offset' will be wrong
-    const std::string identifier = readString(message, messageOffset);
-    sceneGraphNodes.push_back(identifier);
-    const glm::vec3 color = readColor(message, messageOffset);
-    const float opacity = readFloatValue(message, messageOffset);
-    const float size = readFloatValue(message, messageOffset);
-    const std::string guiName = readString(message, messageOffset);
+    std::string identifier;
+    glm::vec4 color;
+    float opacity;
+    float size;
+    std::string guiName;
+    int nPoints;
+    int dimensionality;
+    std::vector<float> points;
 
-    // 9 first bytes is the length of the data
-    const int lengthOffset = messageOffset + 9;
-    std::string length;
-    for (int i = messageOffset; i < lengthOffset; i++) {
-        length.push_back(message[i]);
-        messageOffset++;
+    try {
+        // The following order of creating variables is the exact order they are received
+        // in the message. If the order is not the same, the global variable
+        // 'message offset' will be wrong
+        identifier = readString(message, messageOffset);
+        sceneGraphNodes.push_back(identifier);
+        color = readColor(message, messageOffset);
+        opacity = readFloatValue(message, messageOffset);
+        size = readFloatValue(message, messageOffset);
+        guiName = readString(message, messageOffset);
+        nPoints = readIntValue(message, messageOffset);
+        dimensionality = readIntValue(message, messageOffset);
+        points.reserve(nPoints * dimensionality);
+        points = readPointData(message, messageOffset, nPoints, dimensionality);
     }
-
-    const int nPoints = stoi(length);
-
-    const std::vector<float> xCoordinates = readFloatData(message, nPoints, messageOffset);
-    const std::vector<float> yCoordinates = readFloatData(message, nPoints, messageOffset);
-    const std::vector<float> zCoordinates = readFloatData(message, nPoints, messageOffset);
-
-    // Do some simple checking to make sure the data was loaded correctly
-    // @TODO make this check more clever to avoid trying to read all data
-    // if something goes wrong
-    bool equalSize = (xCoordinates.size() == yCoordinates.size()) &&
-        (xCoordinates.size() == zCoordinates.size());
-
-    if (!equalSize || (nPoints != xCoordinates.size())) {
-        LERROR("Something went wrong when loading the data!");
+    catch (const simp::SimpError& err) {
+        LERROR(fmt::format("Error when reading point data message: {}", err.message));
         return;
     }
 
@@ -90,26 +84,14 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     // Create a renderable
     ghoul::Dictionary renderable;
     renderable.setValue("Type", "RenderablePointsCloud"s);
-    renderable.setValue("Color", static_cast<glm::dvec3>(color));
+    renderable.setValue("Color", static_cast<glm::dvec3>(glm::vec3{color.r, color.g, color.b}));
     renderable.setValue("Opacity", static_cast<double>(opacity));
     renderable.setValue("Size", static_cast<double>(size));
-
-    const int nValues = nPoints * 3;
-
-    std::vector<float> dataSet;
-    dataSet.reserve(nValues);
-    for (int i = 0; i < nPoints; i++)
-    {
-        float x = xCoordinates[i];
-        float y = yCoordinates[i];
-        float z = zCoordinates[i];
-        dataSet.insert(dataSet.end(), { x, y, z });
-    }
 
     // Use the renderable identifier as the data key
     const std::string key = identifier;
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-    module->storeData(key, std::move(dataSet));
+    module->storeData(key, std::move(points));
 
     renderable.setValue("DataStorageKey", key);
 
@@ -144,7 +126,7 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
 }
 
 void PointDataMessageHandler::handleColorMessage(const std::vector<char>& message) {
-    int messageOffset = 0;
+    size_t messageOffset = 0;
     const std::string identifier = readString(message, messageOffset);
     const glm::vec3 color = readColor(message, messageOffset);
 
@@ -175,7 +157,7 @@ void PointDataMessageHandler::handleColorMessage(const std::vector<char>& messag
 }
 
 void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& message) {
-    int messageOffset = 0;
+    size_t messageOffset = 0;
     const std::string identifier = readString(message, messageOffset);
     const float opacity = readFloatValue(message, messageOffset);
 
@@ -202,7 +184,7 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
 }
 
 void PointDataMessageHandler::handlePointSizeMessage(const std::vector<char>& message) {
-    int messageOffset = 0;
+    size_t messageOffset = 0;
     const std::string identifier = readString(message, messageOffset);
     float size = readFloatValue(message, messageOffset);
 
@@ -231,7 +213,7 @@ void PointDataMessageHandler::handlePointSizeMessage(const std::vector<char>& me
 }
 
 void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& message) {
-    int messageOffset = 0;
+    size_t messageOffset = 0;
     const std::string identifier = readString(message, messageOffset);
     std::string visibilityMessage;
     visibilityMessage.push_back(message[messageOffset]);
@@ -284,9 +266,10 @@ const Renderable* PointDataMessageHandler::getRenderable(const std::string& iden
     return r;
 }
 
-void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& identifier,
-                                                          SoftwareConnection& connection)
-{
+void PointDataMessageHandler::subscribeToRenderableUpdates(
+    const std::string& identifier,
+    SoftwareConnection& connection
+) {
     // Get renderable
     auto aRenderable = getRenderable(identifier);
     if (!aRenderable) return;
@@ -347,118 +330,133 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& id
     }
 }
 
-float PointDataMessageHandler::readFloatValue(const std::vector<char>& message,
-                                              int& offset)
-{
-    std::string length;
-    length.push_back(message[offset]);
-    offset++;
+int PointDataMessageHandler::readIntValue(const std::vector<char>& message, size_t& offset) {
+    std::string string_value;
+    int value;
 
-    int lengthOfValue = stoi(length);
-    std::string value;
-    int counter = 0;
-    while (counter != lengthOfValue) {
-        value.push_back(message[offset]);
-        offset++;
-        counter++;
-    }
-    return std::stof(value);
-}
-
-glm::vec3 PointDataMessageHandler::readColor(const std::vector<char>& message,
-                                             int& offset)
-{
-    std::string lengthOfColor; // Not used for now, but sent in message
-    lengthOfColor.push_back(message[offset]);
-    offset++;
-    lengthOfColor.push_back(message[offset]);
-    offset++;
-
-    // Color is recieved in a string-format of (redValue, greenValue, blueValue)
-    // Therefore, we have to iterate through the message and ignore characters
-    // "( , )" and separate the values in the string
-    std::string red;
-    while (message[offset] != ',') {
-        if (message[offset] == '(') {
-            offset++;
-        }
-        else {
-            red.push_back(message[offset]);
-            offset++;
-        }
-    }
-    offset++;
-
-    std::string green;
-    while (message[offset] != ',') {
-        green.push_back(message[offset]);
+    while (!simp::isEndOfCurrentValue(message, offset)) {
+        string_value.push_back(message[offset]);
         offset++;
     }
-    offset++;
 
-    std::string blue;
-    while (message[offset] != ')') {
-        blue.push_back(message[offset]);
-        offset++;
+    try {
+        value = std::stoi(string_value, nullptr, 16);
     }
-    offset++;
-
-    // Convert red, green, blue strings to floats
-    float r = std::stof(red);
-    float g = std::stof(green);
-    float b = std::stof(blue);
-
-    return glm::vec3(r, g, b);
-}
-
-std::string PointDataMessageHandler::readString(const std::vector<char>& message,
-                                                int& offset)
-{
-    std::string length;
-    length.push_back(message[offset]);
-    offset++;
-    length.push_back(message[offset]);
-    offset++;
-
-    int lengthOfValue = stoi(length);
-    std::string value;
-    int counter = 0;
-    while (counter != lengthOfValue) {
-        value.push_back(message[offset]);
-        offset++;
-        counter++;
+    catch(std::exception &err) {
+        throw simp::SimpError(
+            simp::ErrorCode::Generic,
+            fmt::format("Error when trying to parse the integer {}: {}", string_value, err.what())
+        );
     }
 
+    ++offset;
     return value;
 }
 
-std::vector<float> PointDataMessageHandler::readFloatData(const std::vector<char>& message,
-                                                         int nValues, int& offset)
-{
-    std::vector<float> data;
+float PointDataMessageHandler::readFloatValue(const std::vector<char>& message, size_t& offset) {
+    std::string string_value;
+    float value;
 
-    for (int counter = 0; counter < nValues; ++counter) {
-        std::string value;
-        while (message[offset] != ',') {
-            value.push_back(message[offset]);
-            offset++;
-        }
-
-        try {
-            float dataValue = stof(value);
-            data.push_back(dataValue);
-        }
-        catch (const std::invalid_argument& ia) {
-            LERROR(fmt::format(
-                "Error reading value {}. Invalid argument: {} ", counter + 1, ia.what()
-            ));
-            return std::vector<float>();
-        }
-
+    while (!simp::isEndOfCurrentValue(message, offset)) {
+        string_value.push_back(message[offset]);
         offset++;
     }
 
-    return data;
+    try {
+        // long l;
+
+        // l = std::strtol(string_value.data(), (char**)NULL, 16);
+        // value = (float)l;
+        value = std::stof(string_value);
+
+        // if ((*s == '0') && ((*s == 'X') || (*s == 'x'))) {
+        //     unsigned long ul = strtoul(d, NULL, 16);
+        //     return  (float) ul;
+        // }
+        // double d = atof(s, NULL);
+        // return (float) d;
+    }
+    catch(std::exception &err) {
+        throw simp::SimpError(
+            simp::ErrorCode::Generic,
+            fmt::format("Error when trying to parse the float {}: {}", string_value, err.what())
+        );
+    }
+
+    ++offset;
+    return value;
+}
+
+glm::vec4 PointDataMessageHandler::readColor(const std::vector<char>& message, size_t& offset) {
+    if (message[offset] != '[') {
+        throw simp::SimpError(
+            simp::ErrorCode::Generic,
+            fmt::format("Expected to read '[', got {} in 'readColor'", message[offset])
+        );
+    }
+    ++offset;
+
+    float r = readFloatValue(message, offset);
+    float g = readFloatValue(message, offset);
+    float b = readFloatValue(message, offset);
+    float a = readFloatValue(message, offset);
+
+    if (message[offset] != ']') {
+        throw simp::SimpError(
+            simp::ErrorCode::Generic,
+            fmt::format("Expected to read ']', got {} in 'readColor'", message[offset])
+        );
+    }
+    ++offset;
+
+    ++offset;
+    return { r, g, b, a };
+}
+
+std::string PointDataMessageHandler::readString(const std::vector<char>& message, size_t& offset) {
+    std::string value;
+    while (!simp::isEndOfCurrentValue(message, offset)) {
+        value.push_back(message[offset]);
+        ++offset;
+    }
+
+    ++offset;
+    return value;
+}
+
+std::vector<float> PointDataMessageHandler::readPointData(
+    const std::vector<char>& message,
+    size_t& offset,
+    int nPoints,
+    int dimensionality
+) {
+    std::vector<float> result;
+    result.reserve(nPoints * dimensionality);
+
+    while (!simp::isEndOfCurrentValue(message, offset)) {
+        if (message[offset] != '[') {
+            throw simp::SimpError(
+                simp::ErrorCode::Generic,
+                fmt::format("Expected to read '[', got {} in 'readPointData'", message[offset])
+            );
+        }
+        ++offset;
+
+        for (int i = 0; i < dimensionality; ++i) {
+            result.push_back(readFloatValue(message, offset));
+        }
+
+        if (message[offset] != ']') {
+            throw simp::SimpError(
+                simp::ErrorCode::Generic,
+                fmt::format("Expected to read ']', got {} in 'readPointData'", message[offset])
+            );
+        }
+        ++offset;
+    }
+
+    ++offset;
+    return result;
 }
 
 } // namespace openspace
