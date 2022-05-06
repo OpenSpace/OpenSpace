@@ -92,7 +92,7 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     if (dictionary.hasValue<std::string>(UrlInfo.identifier)) {
         _url = dictionary.value<std::string>(UrlInfo.identifier);
     }
-    
+
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _url = p.url.value_or(_url);

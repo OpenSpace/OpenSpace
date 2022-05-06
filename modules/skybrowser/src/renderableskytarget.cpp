@@ -63,21 +63,6 @@ namespace {
         "be rendered in the target."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
-        "AnimationSpeed",
-        "Animation Speed",
-        "The factor which is multiplied with the animation speed of the target."
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo AnimationThresholdInfo =
-    {
-        "AnimationThreshold",
-        "Animation Threshold",
-        "The threshold for when the target is determined to have appeared at its "
-        "destination. Angle in radians between the destination and the target position "
-        "in equatorial Cartesian coordinate system."
-    };
-
     constexpr const openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -91,12 +76,6 @@ namespace {
         // [[codegen::verbatim(RectangleThresholdInfo.description)]]
         std::optional<float> rectangleThreshold;
 
-        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
-        std::optional<double> animationSpeed;
-
-        // [[codegen::verbatim(AnimationThresholdInfo.description)]]
-        std::optional<float> animationThreshold;
-
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
     };
@@ -106,29 +85,25 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation RenderableSkyTarget::Documentation() {
+    return codegen::doc<Parameters>("skybrowser_renderableskytarget");
+}
+
 RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)
     , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
-    , _stopAnimationThreshold(AnimationThresholdInfo, 5.0f, 1.f, 10.f)
-    , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
     , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
     , _borderColor(220, 220, 220)
 {
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    
+
     _crossHairSize = p.crossHairSize.value_or(_crossHairSize);
     addProperty(_crossHairSize);
-    
+
     _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
     addProperty(_showRectangleThreshold);
-    
-    _stopAnimationThreshold = p.crossHairSize.value_or(_stopAnimationThreshold);
-    addProperty(_stopAnimationThreshold);
-    
-    _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
-    addProperty(_animationSpeed);
 
     addProperty(_lineWidth);
 }
@@ -166,15 +141,15 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
     const bool showRectangle = _verticalFov > _showRectangleThreshold;
 
-    glm::vec4 color = { glm::vec3(_borderColor) / 255.f, _opacity.value() };
+    glm::vec4 color = { glm::vec3(_borderColor) / 255.f, 1.0 };
 
     _shader->activate();
-    _shader->setUniform("opacity", _opacity);
+    _shader->setUniform("opacity", opacity());
 
     _shader->setUniform("crossHairSize", _crossHairSize);
     _shader->setUniform("showRectangle", showRectangle);
     _shader->setUniform("lineWidth", _lineWidth * 0.0001f);
-    _shader->setUniform("dimensions", _dimensions);
+    _shader->setUniform("ratio", _ratio);
     _shader->setUniform("lineColor", color);
     _shader->setUniform("fov", static_cast<float>(_verticalFov));
 
@@ -239,10 +214,10 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
-void RenderableSkyTarget::setDimensions(glm::vec2 dimensions) {
+void RenderableSkyTarget::setRatio(float ratio) {
     // To avoid flooring of the size of the target, multiply by factor of 100
     // Object size is really the pixel size so this calculation is not exact
-    _dimensions = glm::ivec2(dimensions * 100.f);
+    _ratio = ratio;
 }
 
 void RenderableSkyTarget::highlight(const glm::ivec3& addition) {
@@ -251,22 +226,6 @@ void RenderableSkyTarget::highlight(const glm::ivec3& addition) {
 
 void RenderableSkyTarget::removeHighlight(const glm::ivec3& removal) {
     _borderColor -= removal;
-}
-
-float RenderableSkyTarget::opacity() const {
-    return _opacity;
-}
-
-double RenderableSkyTarget::animationSpeed() const {
-    return _animationSpeed;
-}
-
-double RenderableSkyTarget::stopAnimationThreshold() const {
-    return _stopAnimationThreshold * 0.0001;
-}
-
-void RenderableSkyTarget::setOpacity(float opacity) {
-    _opacity = opacity;
 }
 
 void RenderableSkyTarget::setVerticalFov(double fov) {

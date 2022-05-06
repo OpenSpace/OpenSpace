@@ -68,11 +68,6 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
     return std::unique_ptr<ResourceSynchronization>(sync);
 }
 
-std::string ResourceSynchronization::generateUid(const ghoul::Dictionary& dictionary) {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    return fmt::format("{}/{}", p.type, p.identifier);
-}
-
 ResourceSynchronization::ResourceSynchronization(
                                                 std::filesystem::path synchronizationRoot)
     : _synchronizationRoot(std::move(synchronizationRoot))

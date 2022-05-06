@@ -48,32 +48,38 @@ namespace {
         "frame rate."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo RenderCopyInfo = {
-        "RenderCopy",
-        "RAE Position Of A Copy Of The Sky Browser",
-        "Render a copy of this sky browser at an additional position. This copy will not "
-        "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates."
+    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
+        "DisplayCopy",
+        "Display Copy Position",
+        "Display a copy of this sky browser at an additional position. This copy will not "
+        "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates "
+        "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo RenderOnMasterInfo = {
-        "RenderOnlyOnMaster",
-        "Render Only On Master",
-        "Render the interactive sky browser only on the master node (this setting won't "
-        "affect the copies). This setting allows mouse interactions in a dome "
-        "environment."
+    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
+        "ShowDisplayCopy",
+        "Show Display Copy",
+        "Show the display copy."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo IsHiddenInfo = {
+        "IsHidden",
+        "Is Hidden",
+        "If checked, the browser will be not be displayed. If it is not checked, it will "
+        "be."
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
 
-        // [[codegen::verbatim(RenderOnMasterInfo.description)]]
-        std::optional<bool> renderOnlyOnMaster;
+        // [[codegen::verbatim(IsHiddenInfo.description)]]
+        std::optional<bool> isHidden;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
 
-    glm::ivec3 randomBorderColor(glm::ivec3 highlight) {
+    glm::ivec3 randomBorderColor() {
         // Generate a random border color with sufficient lightness and a n
         std::random_device rd;
         // Hue is in the unit degrees [0, 360]
@@ -82,13 +88,8 @@ namespace {
         // Value in saturation are in the unit percent [0,1]
         float value = 0.9f; // Brightness
         float saturation = 0.5f;
-        glm::ivec3 rgbColor;
-        glm::ivec3 highlighted;
-        do {
-            glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
-            rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
-            highlighted = rgbColor + highlight;
-        } while (highlighted.x < 255 && highlighted.y < 255 && highlighted.z < 255);
+        glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
+        glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
 
         return rgbColor;
     }
@@ -96,41 +97,60 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation ScreenSpaceSkyBrowser::Documentation() {
+    return codegen::doc<Parameters>("skybrowser_screenspaceskybrowser");
+}
+
 ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , WwtCommunicator(dictionary)
     , _textureQuality(TextureQualityInfo, 0.5f, 0.25f, 1.f)
-    , _renderOnlyOnMaster(RenderOnMasterInfo, false)
+    , _isHidden(IsHiddenInfo, true)
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textureQuality = p.textureQuality.value_or(_textureQuality);
-    _renderOnlyOnMaster = p.renderOnlyOnMaster.value_or(_renderOnlyOnMaster);
+    _isHidden = p.isHidden.value_or(_isHidden);
 
+    addProperty(_isHidden);
     addProperty(_url);
     addProperty(_browserPixeldimensions);
     addProperty(_reload);
     addProperty(_textureQuality);
-    addProperty(_renderOnlyOnMaster);
 
     _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 
-    // Ensure that the browser is placed at the z-coordinate of the screen space plane
-    glm::vec2 screenPosition = _cartesianPosition.value();
-    _cartesianPosition = glm::vec3(screenPosition, skybrowser::ScreenSpaceZ);
-
     if (global::windowDelegate->isMaster()) {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        _borderColor = randomBorderColor(module->highlight());
+        _borderColor = randomBorderColor();
     }
-    _scale = _size.y * 0.5f;
+
+    _scale.onChange([this]() {
+        updateTextureResolution();
+        });
+
+    _useRadiusAzimuthElevation.onChange(
+        [this]() {
+            std::for_each(
+                _displayCopies.begin(),
+                _displayCopies.end(),
+                [this](std::unique_ptr<properties::Vec3Property>& copy) {
+                    if (_useRadiusAzimuthElevation) {
+                        *copy = sphericalToRae(cartesianToSpherical(copy->value()));
+
+                    }
+                    else {
+                        *copy = sphericalToCartesian(raeToSpherical(copy->value()));
+                    }
+                });
+        });
 }
 
 ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    if (module && module->getPair(identifier())) {
+    if (module && module->pair(identifier())) {
         module->removeTargetBrowserPair(identifier());
     }
 }
@@ -157,8 +177,16 @@ glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(const glm::dvec2& drag) {
     return result;
 }
 
+bool ScreenSpaceSkyBrowser::isInitialized() const {
+    return _isInitialized;
+}
+
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
     WwtCommunicator::setIdInBrowser(identifier());
+}
+
+void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {
+    _isInitialized = isInitialized;
 }
 
 void ScreenSpaceSkyBrowser::updateTextureResolution() {
@@ -168,8 +196,7 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
 
     // If the scale is 1, it covers half the window. Hence multiplication with 2
     float newResY = pixels.y * 2.f * _scale;
-    float ratio = _size.x / _size.y;
-    float newResX = newResY * ratio;
+    float newResX = newResY * _ratio;
     glm::vec2 newSize = glm::vec2(newResX , newResY) * _textureQuality.value();
 
     _browserPixeldimensions = glm::ivec2(newSize);
@@ -177,55 +204,63 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     _objectSize = glm::ivec3(_texture->dimensions());
 }
 
-void ScreenSpaceSkyBrowser::addRenderCopy(const glm::vec3& raePosition, int nCopies) {
-    size_t start = _renderCopies.size();
+void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
+    size_t start = _displayCopies.size();
     for (int i = 0; i < nCopies; i++) {
-        openspace::properties::Property::PropertyInfo info = RenderCopyInfo;
+        openspace::properties::Property::PropertyInfo info = DisplayCopyInfo;
         float azimuth = i * glm::two_pi<float>() / nCopies;
         glm::vec3 position = raePosition + glm::vec3(0.f, azimuth, 0.f);
-        std::string id = "RenderCopy" + std::to_string(start + i);
-        info.identifier = id.c_str();
-        _renderCopies.push_back(
+        std::string idDisplayCopy = "DisplayCopy" + std::to_string(start + i);
+        info.identifier = idDisplayCopy.c_str();
+        _displayCopies.push_back(
             std::make_unique<properties::Vec3Property>(
                 info,
                 position,
-                glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
-                glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
+                glm::vec3(-4.f, -4.f, -10.f),
+                glm::vec3(4.f, 4.f, glm::half_pi<float>())
             )
         );
-        addProperty(_renderCopies.back().get());
+        openspace::properties::Property::PropertyInfo showInfo = DisplayCopyShowInfo;
+        std::string idDisplayCopyVisible = "ShowDisplayCopy" + std::to_string(start + i);
+        showInfo.identifier = idDisplayCopyVisible.c_str();
+        _showDisplayCopies.push_back(
+            std::make_unique<properties::BoolProperty>(
+                showInfo,
+                true
+                )
+        );
+        addProperty(_displayCopies.back().get());
+        addProperty(_showDisplayCopies.back().get());
     }
 }
 
-void ScreenSpaceSkyBrowser::removeRenderCopy() {
-    if (!_renderCopies.empty()) {
-        removeProperty(_renderCopies.back().get());
-        _renderCopies.pop_back();
+void ScreenSpaceSkyBrowser::removeDisplayCopy() {
+    if (!_displayCopies.empty()) {
+        removeProperty(_displayCopies.back().get());
+        _displayCopies.pop_back();
     }
 }
 
 std::vector<std::pair<std::string, glm::dvec3>>
-ScreenSpaceSkyBrowser::renderCopies() const
+ScreenSpaceSkyBrowser::displayCopies() const
 {
     std::vector<std::pair<std::string, glm::dvec3>> vec;
-    std::for_each(
-        _renderCopies.begin(),
-        _renderCopies.end(),
-        [&](const std::unique_ptr<properties::Vec3Property>& copy) {
-            std::pair<std::string, glm::dvec3> pair = {
-                copy.get()->identifier(),
-                glm::dvec3(copy.get()->value())
-            };
-            vec.push_back(pair);
-        }
-    );
+    using vec3Property = std::unique_ptr<properties::Vec3Property>;
+    for (const vec3Property& copy : _displayCopies) {
+        vec.push_back({ copy->identifier(), copy->value() });
+    }
     return vec;
 }
 
-void ScreenSpaceSkyBrowser::moveRenderCopy(int i, glm::vec3 raePosition) {
-    if (i < static_cast<int>(_renderCopies.size()) && i >= 0) {
-        *_renderCopies[i].get() = raePosition;
+std::vector<std::pair<std::string, bool>>
+ScreenSpaceSkyBrowser::showDisplayCopies() const
+{
+    std::vector<std::pair<std::string, bool>> vec;
+    using boolProperty = std::unique_ptr<properties::BoolProperty>;
+    for (const boolProperty& copy : _showDisplayCopies) {
+        vec.push_back({copy->identifier(), copy->value()});
     }
+    return vec;
 }
 
 bool ScreenSpaceSkyBrowser::deinitializeGL() {
@@ -237,12 +272,7 @@ bool ScreenSpaceSkyBrowser::deinitializeGL() {
 void ScreenSpaceSkyBrowser::render() {
     WwtCommunicator::render();
 
-    // If the sky browser only should be rendered on master, don't use the
-    // global rotation
-    if (_renderOnlyOnMaster && global::windowDelegate->isMaster()) {
-        draw(translationMatrix() * localRotationMatrix() * scaleMatrix());
-    }
-    else if (!_renderOnlyOnMaster) {
+    if (!_isHidden) {
         draw(
             globalRotationMatrix() *
             translationMatrix() *
@@ -251,20 +281,29 @@ void ScreenSpaceSkyBrowser::render() {
         );
     }
 
-    // Render a copy that is not interactive
-    for (const std::unique_ptr<properties::Vec3Property>& copy : _renderCopies) {
-        glm::vec3 spherical = sphericalToCartesian(raeToSpherical(copy.get()->value()));
-        glm::mat4 localRotation = glm::inverse(glm::lookAt(
-            glm::vec3(0.f),
-            glm::normalize(spherical),
-            glm::vec3(0.f, 1.f, 0.f)
-        ));
-        draw(
-            globalRotationMatrix() *
-            glm::translate(glm::mat4(1.f), spherical) *
-            localRotation *
-            scaleMatrix()
-        );
+    // Render the display copies
+    for (size_t i = 0; i < _displayCopies.size(); i++) {
+        if (_showDisplayCopies[i]->value()) {
+            glm::vec3 coordinates = _displayCopies[i]->value();
+            if (_useRadiusAzimuthElevation) {
+                coordinates = sphericalToCartesian(raeToSpherical(coordinates));
+            }
+            glm::mat4 localRotation = glm::mat4(1.f);
+            if (_faceCamera) {
+                localRotation = glm::inverse(glm::lookAt(
+                    glm::vec3(0.f),
+                    glm::normalize(coordinates),
+                    glm::vec3(0.f, 1.f, 0.f)
+                ));
+            }
+
+            draw(
+                globalRotationMatrix() *
+                glm::translate(glm::mat4(1.f), coordinates) *
+                localRotation *
+                scaleMatrix()
+            );
+        }
     }
 }
 
@@ -276,9 +315,9 @@ void ScreenSpaceSkyBrowser::update() {
         updateTextureResolution();
         _textureDimensionsIsDirty = false;
     }
-    if (_sizeIsDirty) {
-        updateScreenSpaceSize();
-        _sizeIsDirty = false;
+    if (_ratioIsDirty) {
+        updateTextureResolution();
+        _ratioIsDirty = false;
     }
 
     WwtCommunicator::update();
@@ -289,7 +328,7 @@ void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     // Make scroll more sensitive the smaller the FOV
     double x = _verticalFov;
     double zoomFactor = atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
-    double zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
+    double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
     _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
 }
 
@@ -313,22 +352,13 @@ void ScreenSpaceSkyBrowser::setOpacity(float opacity) {
     _opacity = opacity;
 }
 
-void ScreenSpaceSkyBrowser::setScreenSpaceSize(glm::vec2 newSize) {
-    _size = std::move(newSize);
-    _sizeIsDirty = true;
-}
-
-void ScreenSpaceSkyBrowser::updateScreenSpaceSize() {
-    _scale = abs(_size.y) * 0.5f;
-    updateTextureResolution();
+void ScreenSpaceSkyBrowser::setRatio(float ratio) {
+    _ratio = ratio;
+    _ratioIsDirty = true;
 }
 
 float ScreenSpaceSkyBrowser::opacity() const {
     return _opacity;
-}
-
-glm::vec2 ScreenSpaceSkyBrowser::size() const {
-    return _size;
 }
 
 } // namespace openspace

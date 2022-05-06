@@ -495,14 +495,13 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::syncedResourceLua");
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            std::string uid = ResourceSynchronization::generateUid(d);
+            std::unique_ptr<ResourceSynchronization> s =
+                ResourceSynchronization::createFromDictionary(d);
+            
+            std::string uid = d.value<std::string>("Type") + "/" + s->generateUid();
             SyncItem* syncItem = nullptr;
             auto it = manager->_synchronizations.find(uid);
             if (it == manager->_synchronizations.end()) {
-                std::unique_ptr<ResourceSynchronization> s =
-                    ResourceSynchronization::createFromDictionary(d);
-
                 auto si = std::make_unique<SyncItem>();
                 si->synchronization = std::move(s);
                 si->assets.push_back(thisAsset);

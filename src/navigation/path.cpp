@@ -505,6 +505,14 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
         const glm::dvec3 targetToPrev = prevPos - nodePos;
         const glm::dvec3 targetToSun = sunPos - nodePos;
 
+        // Check against zero vectors, as this will lead to nan-values from cross product
+        if (glm::length(targetToSun) < LengthEpsilon ||
+            glm::length(targetToPrev) < LengthEpsilon)
+        {
+            // Same situation as if sun does not exist. Any direction will do
+            return glm::dvec3(0.0, 0.0, 1.0);
+        }
+
         constexpr const float defaultPositionOffsetAngle = -30.f; // degrees
         constexpr const float angle = glm::radians(defaultPositionOffsetAngle);
         const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));

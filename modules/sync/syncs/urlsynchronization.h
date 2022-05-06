@@ -73,6 +73,8 @@ public:
     /// Cancels any ongoing synchronization of this ResourceSynchronization
     void cancel() override;
 
+    std::string generateUid() override;
+
     static documentation::Documentation Documentation();
 
 private:

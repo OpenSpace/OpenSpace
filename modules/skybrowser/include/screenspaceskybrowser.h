@@ -47,37 +47,40 @@ public:
     void update() override;
 
     float opacity() const;
-    glm::vec2 size() const;
+    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
+    bool isInitialized() const;
 
     void setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
-    void setScreenSpaceSize(glm::vec2 newSize);
-    void updateScreenSpaceSize();
-
-    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
+    void setRatio(float ratio);
     void setIdInBrowser() const;
+    void setIsInitialized(bool isInitialized);
 
     void updateTextureResolution();
 
     // Copies rendered
-    void addRenderCopy(const glm::vec3& raePosition, int nCopies);
-    void removeRenderCopy();
-    std::vector<std::pair<std::string, glm::dvec3>> renderCopies() const;
-    void moveRenderCopy(int i, glm::vec3 raePosition);
+    void addDisplayCopy(const glm::vec3& raePosition, int nCopies);
+    void removeDisplayCopy();
+    std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
+    std::vector<std::pair<std::string, bool>> showDisplayCopies() const;
+
+    static documentation::Documentation Documentation();
 
 private:
     properties::FloatProperty _textureQuality;
-    properties::BoolProperty _renderOnlyOnMaster;
-    std::vector<std::unique_ptr<properties::Vec3Property>> _renderCopies;
+    properties::BoolProperty _isHidden;
+    std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
+    std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 
     void bindTexture() override;
 
     // Flags
     bool _isSyncedWithWwt = false;
     bool _textureDimensionsIsDirty = false;
-    bool _sizeIsDirty = false;
+    bool _ratioIsDirty = false;
+    bool _isInitialized = false;
 
-    glm::vec2 _size = glm::vec2(1.f, 1.f);
+    float _ratio = 1.f;
 };
 
 } // namespace openspace

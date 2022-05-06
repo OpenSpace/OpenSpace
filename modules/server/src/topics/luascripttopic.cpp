@@ -182,7 +182,8 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn) {
         callback = [this](ghoul::Dictionary data) {
             if (_connection) {
                 nlohmann::json j = data;
-                _connection->sendJson(wrappedPayload(j));
+                nlohmann::json payload = wrappedPayload(j);
+                _connection->sendJson(payload);
                 _waitingForReturnValue = false;
             }
         };
