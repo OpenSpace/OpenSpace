@@ -154,9 +154,9 @@
   ],
   "meta": {
     "author": "CCMC",
-    "description": "This profile is showing the Coronal mass ejection of the bastille day 2000-07-14. The profile is data heavy and will require a powerful GPU.",
+    "description": "This profile is showing the Coronal mass ejection of the bastille day 2000-07-14. The profile is data intensive and will require a powerful GPU.",
     "license": "MIT License",
-    "name": "Bastille day",
+    "name": "Bastille day 2000",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
