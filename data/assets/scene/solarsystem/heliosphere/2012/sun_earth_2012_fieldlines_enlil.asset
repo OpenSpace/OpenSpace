@@ -184,8 +184,7 @@ local ENLILStereoA = {
     ReversedFlow = true,
     ParticleSize = 5,
     ParticleSpacing = 25,
-    FlowSpeed = 25,
-    LoadAtRuntime = true
+    FlowSpeed = 25
   },
   GUI = {
     Name = "Fieldlines ENLIL STEREO A",
