@@ -13,16 +13,15 @@
       "port": 20401,
       "windows": [
         {
-          "name": "OpenSpace",
+          "name": "GUI",
           "pos": { "x": 50, "y": 50 },
           "size": { "x": 1280, "y": 720 },
           "stereo": "none",
-          "tags": [ "Spout" ],
+          "tags": [ "GUI" ],
           "viewports": [
             {
               "pos": { "x": 0.0, "y": 0.0 },
               "size": { "x": 1.0, "y": 1.0 },
-              "tracked": true,
               "projection": {
                 "type": "PlanarProjection",
                 "fov": {
@@ -35,15 +34,16 @@
           ]
         },
         {
-          "name": "GUI",
+          "name": "OpenSpace",
           "pos": { "x": 50, "y": 50 },
           "size": { "x": 1280, "y": 720 },
           "stereo": "none",
-          "tags": [ "GUI" ],
+          "tags": [ "Spout" ],
           "viewports": [
             {
               "pos": { "x": 0.0, "y": 0.0 },
               "size": { "x": 1.0, "y": 1.0 },
+              "tracked": true,
               "projection": {
                 "type": "PlanarProjection",
                 "fov": {
