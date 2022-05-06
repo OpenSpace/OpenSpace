@@ -216,7 +216,7 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
     messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
         std::lock_guard lock(_messageQueueMutex);
-        _messageQueue.push_back({ connection, std::move(messageString) });
+        _messageQueue.push_back({ connection, messageString });
     }
 }
 
