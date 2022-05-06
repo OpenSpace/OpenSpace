@@ -15,6 +15,7 @@ local toggle_trail = {
 
 
     local launchTrail = "JWSTTrailLaunch"
+    local cruiseTrail = "JWSTTrailCruise"
     local orbitTrail = "JWSTTrailOrbit"
 
     local visibility
@@ -29,12 +30,17 @@ local toggle_trail = {
     else
       visibility = not (
         openspace.getPropertyValue("Scene." .. launchTrail .. ".Renderable.Enabled") or
+        openspace.getPropertyValue("Scene." .. cruiseTrail .. ".Renderable.Enabled") or
         openspace.getPropertyValue("Scene." .. orbitTrail .. ".Renderable.Enabled")
       )
     end
 
     openspace.setPropertyValueSingle(
       "Scene." .. launchTrail .. ".Renderable.Enabled",
+      visibility
+    )
+    openspace.setPropertyValueSingle(
+      "Scene." .. cruiseTrail .. ".Renderable.Enabled",
       visibility
     )
     openspace.setPropertyValueSingle(

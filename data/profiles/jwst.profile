@@ -46,6 +46,14 @@
       "identifier": "profile.set.jwst_launch",
       "is_local": false,
       "name": "Set to JWST launch time",
+      "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:20:01');"
+    },
+    {
+      "documentation": "Set the time to the detach time of JWST",
+      "gui_path": "/JWST",
+      "identifier": "profile.set.jwst_detach",
+      "is_local": false,
+      "name": "Set to JWST detach time",
       "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:50:00');"
     },
     {
@@ -65,12 +73,12 @@
       "script": "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled') for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Enabled', true)"
     },
     {
-      "documentation": "Toggle JWST launch and orbit trails, not the Sun trail",
+      "documentation": "Toggle JWST launch, cruise and orbit trails, not the Sun trail",
       "gui_path": "/JWST",
       "identifier": "profile.toggle.jwst_trails",
       "is_local": false,
       "name": "Toggle JWST trail",
-      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
+      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailCruise.Renderable.Enabled', 'Scene.JWSTTrailOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
     }
   ],
   "additional_scripts": [
@@ -217,6 +225,11 @@
       "value": "false"
     },
     {
+      "name": "Scene.JWSTTrailCruise.Renderable.Appearance.EnableFade",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
       "name": "Scene.L1.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
@@ -319,7 +332,7 @@
   ],
   "time": {
     "type": "absolute",
-    "value": "2021-12-25T12:50:00"
+    "value": "2021-12-25T12:50:01"
   },
   "version": {
     "major": 1,

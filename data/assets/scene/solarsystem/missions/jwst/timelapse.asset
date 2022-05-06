@@ -13,29 +13,36 @@ local function advance(time, days, hours, minutes, seconds)
 end
 
 local launchTime = "2021-12-25T12:20:00.000"
-local dataStartTime = "2021-12-25T12:50:00.000"
+local detachTime = "2021-12-25T12:50:00.000"
 local actionsList = {}
 
 -- JWST timelapse timeline, forwards
 local function createForwardTimelapse()
   local timelapse = [[
-    -- Mission start, setup 1 sec after, reset night layer
+    -- Mission start, setup 2 sec after, reset night layer
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(dataStartTime, 0, 0, 0, 1) .. [[",
+      advance(launchTime, 0, 0, 0, 2) .. [[",
       "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
       "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)"
     )
 
-    -- Mission start, GO 2 sec after
+    -- Mission start, GO 3 sec after
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(dataStartTime, 0, 0, 0, 2) .. [[",
-      "openspace.time.interpolateDeltaTime(2)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 seconds/second\")"
+      advance(launchTime, 0, 0, 0, 3) .. [[",
+      "openspace.time.interpolateDeltaTime(5)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 5 seconds/second\")"
+    )
+
+    -- Speed up when reaching higher altitude
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 0, 0, 2, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(300)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 5 minutes/second\")"
     )
 
     -- array deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 30, 20 - 1) .. [[", -- 1 sec pre delay
+      advance(launchTime, 0, 0, 30 - 2, 20 - 40) .. [[", -- 2 min 40 sec pre delay
       "openspace.time.interpolateDeltaTime(1)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 second/second\")"
     )
@@ -49,7 +56,7 @@ local function createForwardTimelapse()
 
     -- Make night layer more visible, at around 14:00
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(dataStartTime, 0, 1, 10, 0) .. [[",
+      advance(detachTime, 0, 1, 10, 0) .. [[",
       "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 0.7)" ..
       "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", false)"
     )
@@ -253,8 +260,6 @@ local function createBackwardTimelapse()
       advance(launchTime, 0, 0, 30, 20) .. [[",
       "",
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")" ..
-      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
-      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)" ..
       "openspace.scriptScheduler.clear(0)"
     )
 
@@ -275,7 +280,7 @@ local function createBackwardTimelapse()
 
     -- Reset night layer, at around 14:00
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(dataStartTime, 0, 1, 10, 0) .. [[",
+      advance(detachTime, 0, 1, 10, 0) .. [[",
       "",
       "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
       "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)"
@@ -499,11 +504,27 @@ local function createActions()
       openspace.scriptScheduler.clear(0)
       openspace.time.setDeltaTime(1)
       openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
-      openspace.time.setTime("]] .. dataStartTime .. [[")
+      openspace.time.setTime("]] .. advance(launchTime, 0, 0, 0, 1) .. [[")
       ]] .. createForwardTimelapse() .. [[
       openspace.time.setDeltaTime(1)
     ]],
     Documentation = "Jump to the JWST launch time and play the timelapse of deployment forward",
+    GuiPath = "/JWST",
+    IsLocal = false
+  }
+
+  local playFromDetach = {
+    Identifier = "jwst.play.detach",
+    Name = "Play JWST from detach",
+    Command = [[
+      openspace.scriptScheduler.clear(0)
+      openspace.time.setDeltaTime(1)
+      openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
+      openspace.time.setTime("]] .. detachTime .. [[")
+      ]] .. createForwardTimelapse() .. [[
+      openspace.time.setDeltaTime(1)
+    ]],
+    Documentation = "Jump to the JWST detach time and play the timelapse of deployment forward",
     GuiPath = "/JWST",
     IsLocal = false
   }
@@ -582,7 +603,7 @@ local function createActions()
     IsLocal = false
   }
 
-  return {playForwards, playBackwards, clearPlay, togglePlayDirection}
+  return {playForwards, playFromDetach, playBackwards, clearPlay, togglePlayDirection}
 end
 
 local text = {
