@@ -132,7 +132,7 @@ local point_jwst = {
     Point the JWST model to a ra dec corrdinate in the sky. This action takes the Ra Dec
     sky coordinate as arguments.
   ]],
-  GuiPath = "/events/JWST",
+  GuiPath = "/JWST/Events",
   IsLocal = true
 }
 

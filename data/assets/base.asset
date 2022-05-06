@@ -21,7 +21,6 @@ asset.require("scene/solarsystem/dwarf_planets/pluto/charon/default_layers")
 asset.require("scene/milkyway/milkyway/volume")
 asset.require("scene/milkyway/constellations/constellation_art")
 asset.require("scene/milkyway/constellations/constellation_keybinds")
-asset.require("scene/milkyway/objects/orionnebula/orionnebula")
 
 asset.require("scene/digitaluniverse/2dF")
 asset.require("scene/digitaluniverse/2mass")
