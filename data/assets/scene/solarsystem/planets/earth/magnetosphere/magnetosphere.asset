@@ -11,6 +11,7 @@ local fieldlinesDirectory = asset.syncedResource({
 local earthMagnetosphere = {
   Identifier = "EarthMagnetosphere",
   Parent = transforms.GSMReferenceFrame.Identifier,
+  InteractionSphere = 6380000,  -- A value slightly bigger than earth radius
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = fieldlinesDirectory,

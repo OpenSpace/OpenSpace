@@ -107,6 +107,10 @@ private:
     // True when new state is loaded or user change which quantity used for masking out
     // line segments
     bool _shouldUpdateMaskingBuffer = false;
+    // note Elon: rework the case of only one state
+    // hasBeenUpdated only gets sets once, first iteration of update function, to 
+    // guarantee the vertext position buffer to be initialized.
+    bool _hasBeenUpdated = false;
 
     // Active index of _states. If(==-1)=>no state available for current time. Always the
     // same as _activeTriggerTimeIndex if(_loadingStatesDynamically==true), else

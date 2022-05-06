@@ -579,6 +579,10 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
     }
     _states.push_back(newState);
     _nStates = _startTimes.size();
+    if (_nStates == 1) {
+        // loading dynamicaly is not nessesary if only having one set in the sequence 
+        _loadingStatesDynamically = false;
+    }
     _activeStateIndex = 0;
     return true;
 }
@@ -826,7 +830,6 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
 std::unordered_map<std::string, std::vector<glm::vec3>>
     extractSeedPointsFromFiles(std::filesystem::path filePath)
 {
-    std::vector<std::string> files;
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
     if (!std::filesystem::is_directory(filePath)) {
@@ -1046,7 +1049,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
-
+    
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
@@ -1068,6 +1071,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
                 _activeStateIndex = _activeTriggerTimeIndex;
             }
         } // else {we're still in same state as previous frame (no changes needed)}
+    }
+    // if only one state
+    else if (_nStates == 1) {
+        _activeTriggerTimeIndex = 0;
+        _activeStateIndex = 0;
+        if (!_hasBeenUpdated) {
+            updateVertexPositionBuffer();
+        }
+        _hasBeenUpdated = true;
     }
     else {
         // Not in interval => set everything to false
@@ -1105,14 +1117,16 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         _newStateIsReady = false;
     }
 
-    if (_shouldUpdateColorBuffer) {
-        updateVertexColorBuffer();
-        _shouldUpdateColorBuffer = false;
-    }
+    if (_colorMethod == 1) { //By quantity
+        if (_shouldUpdateColorBuffer) {
+            updateVertexColorBuffer();
+            _shouldUpdateColorBuffer = false;
+        }
 
-    if (_shouldUpdateMaskingBuffer) {
-        updateVertexMaskingBuffer();
-        _shouldUpdateMaskingBuffer = false;
+        if (_shouldUpdateMaskingBuffer) {
+            updateVertexMaskingBuffer();
+            _shouldUpdateMaskingBuffer = false;
+        }
     }
 }
 
@@ -1132,6 +1146,9 @@ void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTi
     else {
         _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
     }
+    if (_nStates == 1) {
+        _activeTriggerTimeIndex = 0;
+    }
 }
 
 // Reading state from disk. Must be thread safe
@@ -1150,6 +1167,7 @@ void unbindGL() {
 }
 
 void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
+    if (_activeStateIndex == -1) { return; }
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
@@ -1169,6 +1187,7 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
 }
 
 void RenderableFieldlinesSequence::updateVertexColorBuffer() {
+    if (_activeStateIndex == -1) { return; }
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
@@ -1194,6 +1213,7 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
 }
 
 void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
+    if (_activeStateIndex == -1) { return; }
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexMaskingBuffer);
 

@@ -1,4 +1,5 @@
 local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere.asset')
+asset.require('scene/solarsystem/heliosphere/2012/reset_loop_action.asset')
 
 -- Specifying transfer functions
 local transferFunctions = asset.syncedResource({
@@ -10,11 +11,20 @@ local transferFunctions = asset.syncedResource({
 
 -- Specifying transfer functions
 local fieldlineData = asset.syncedResource({
-  Name = "Fieldlines Data",
+  Name = "Fieldlines Data BATSRUS",
   Type = "HttpSynchronization",
   Identifier = "sun_earth_event_july_2012-batsrus",
   Version = 1
 })
+
+local loop = {
+  Documentation = "Sets time to start of data, sets higher delta time and loops back from start, when at end of data.",
+  GuiPath = "2012July",
+  Identifier = "2012july.loop_batsrus",
+  IsLocal = false,
+  Name = "Loop BATSRUS",
+  Command = "openspace.scriptScheduler.clear();\nopenspace.time.setDeltaTime(1400);\nopenspace.time.setTime('2012-JUL-14 06:00:00.00');\nlocal StarttimescriptBatsrusLoop = \"openspace.time.setTime('2012 JUL 14 06:00:00')\";\nopenspace.scriptScheduler.loadScheduledScript('2012 JUL 16 07:30:00', StarttimescriptBatsrusLoop);"
+}
 
 local batsrusTemperatureColorTable = transferFunctions .. "batsrus_temperature.txt"
 local batsrusDensityColorTable = transferFunctions .. "batsrus_density.txt"
@@ -35,10 +45,14 @@ local colorRanges = {
   { 150, 900 },
   { 0, 3 },
 }
+
+local interactionSphere = 6380000  -- A value slightly bigger than earth radius
+
 ----------------------LUTZ's JULY TRACES-------------------------
 local BatsrusJ12OpenClosed = {
   Identifier = "FL_BATSRUS_J12_OpenClosed",
   Parent = transforms.GSMReferenceFrame.Identifier,
+  InteractionSphere = interactionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.openClosed,
@@ -56,8 +70,7 @@ local BatsrusJ12OpenClosed = {
     ColorTableRanges = colorRanges,
     MaskingEnabled = true,
     MaskingQuantity = 4, -- Topology
-    MaskingRanges = { {2.5, 3.0} }, -- Corresponds to closed fieldlines only
-    LoadAtRuntime = true
+    MaskingRanges = { {2.5, 3.0} } -- Corresponds to closed fieldlines only
   },
   GUI = {
     Name = "Fieldlines BATSRUS J12 Open/Closed",
@@ -69,6 +82,7 @@ local BatsrusJ12OpenClosed = {
 local BatsrusJ12FlowLines = {
   Identifier = "FL_BATSRUS_J12_FlowLines",
   Parent = transforms.GSMReferenceFrame.Identifier,
+  InteractionSphere = interactionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.velocityFlow,
@@ -96,6 +110,7 @@ local BatsrusJ12FlowLines = {
 local BatsrusAsherStaticSeedsFlowLines = {
   Identifier = "FL_BATSRUS_ASHER_STATIC_SSEDS_FlowLines",
   Parent = transforms.GSMReferenceFrame.Identifier,
+  InteractionSphere = interactionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = unzippedDataDestination.asherStatic,
@@ -118,6 +133,8 @@ local BatsrusAsherStaticSeedsFlowLines = {
 }
 
 asset.onInitialize(function ()
+  openspace.action.registerAction(loop)
+
   if not openspace.directoryExists(unzippedDataDestination.openClosed) then
     openspace.printInfo("Extracting " .. "Fieldlines from Batsrus model of 2012 event")
     openspace.unzipFile(fieldlineData .. "magnetic_fieldlines-open_closed.zip", unzippedDataDestination.openClosed, true)
@@ -141,6 +158,8 @@ asset.onDeinitialize(function ()
   openspace.removeSceneGraphNode(BatsrusAsherStaticSeedsFlowLines)
   openspace.removeSceneGraphNode(BatsrusJ12FlowLines)
   openspace.removeSceneGraphNode(BatsrusJ12OpenClosed)
+
+  openspace.action.removeAction(loop)
 end)
 
 asset.meta = {
