@@ -319,6 +319,9 @@ void ScreenSpaceSkyBrowser::update() {
         updateTextureResolution();
         _ratioIsDirty = false;
     }
+    if (_shouldReload) {
+        _isInitialized = false;
+    }
 
     WwtCommunicator::update();
     ScreenSpaceRenderable::update();
