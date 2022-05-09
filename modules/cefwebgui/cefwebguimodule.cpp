@@ -67,6 +67,13 @@ namespace {
         "Gui Scale",
         "GUI scale multiplier."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
+        "Visibility",
+        "Visibility",
+        "Hides or displays different settings in the GUI depending on how advanced they "
+        "are."
+    };
 } // namespace
 
 namespace openspace {
@@ -78,12 +85,22 @@ CefWebGuiModule::CefWebGuiModule()
     , _reload(ReloadInfo)
     , _url(GuiUrlInfo, "")
     , _guiScale(GuiScaleInfo, 1.f, 0.1f, 3.f)
+    , _visibility(VisibilityInfo)
 {
     addProperty(_enabled);
     addProperty(_visible);
     addProperty(_reload);
     addProperty(_url);
     addProperty(_guiScale);
+    addProperty(_visibility);
+
+    using Visibility = openspace::properties::Property::Visibility;
+    _visibility.addOptions({
+    { static_cast<int>(Visibility::All), "All"},
+    { static_cast<int>(Visibility::User), "User"},
+    { static_cast<int>(Visibility::Developer), "Developer"},
+    { static_cast<int>(Visibility::Hidden), "Hidden"},
+        });
 }
 
 void CefWebGuiModule::startOrStopGui() {
