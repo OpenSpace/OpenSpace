@@ -22,117 +22,118 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/softwareintegration/syncabledatastorage.h>
+#include <modules/softwareintegration/syncablefloatdatastorage.h>
 #include <openspace/util/syncbuffer.h>
 
 #include <ghoul/logging/logmanager.h>
 
 
 namespace {
-	constexpr const char* _loggerCat = "SyncableDataStorage";
+	constexpr const char* _loggerCat = "SyncableFloatDataStorage";
 } // namespace
 
 namespace openspace {
 
 /* ============== SyncEngine functions ============== */
-void SyncableDataStorage::encode(SyncBuffer* syncBuffer) {
+void SyncableFloatDataStorage::encode(SyncBuffer* syncBuffer) {
 	std::lock_guard guard(_mutex);
 	
-	size_t nDatasets = _storage.size();
-	syncBuffer->encode(nDatasets);
+	size_t nDataEntries = _storage.size();
+	syncBuffer->encode(nDataEntries);
 
-	for (const auto& [key, points] : _storage) {
+	for (const auto& [key, dataEntry] : _storage) {
 		syncBuffer->encode(key);
 
-		// Go trough all points. Structured as "x, y, z, x, y, z, x, y, ..."
-		size_t nPoints = points.size();
-		syncBuffer->encode(nPoints);
-		for (auto value : points) {
+		// Go trough all data in data entry. 
+		// Sequentially structured (ex: x1, y1, z1, x2, y2, z2...)
+		size_t nItemsInDataEntry = dataEntry.size();
+		syncBuffer->encode(nItemsInDataEntry);
+		for (auto value : dataEntry) {
 			syncBuffer->encode(value);
 		}
 	}
 }
 
-void SyncableDataStorage::decode(SyncBuffer* syncBuffer) {
+void SyncableFloatDataStorage::decode(SyncBuffer* syncBuffer) {
 	std::lock_guard guard(_mutex);
 	
-	size_t nDatasets;
-	syncBuffer->decode(nDatasets);
+	size_t nDataEntries;
+	syncBuffer->decode(nDataEntries);
 
-	for (size_t i = 0; i < nDatasets; ++i) {
+	for (size_t i = 0; i < nDataEntries; ++i) {
 		std::string key;
 		syncBuffer->decode(key);
 
-		size_t nPoints;
-		syncBuffer->decode(nPoints);
+		size_t nItemsInDataEntry;
+		syncBuffer->decode(nItemsInDataEntry);
 		
 		// TODO: Change to a glm::fvec3 so we can use an overload 
 		// of decode(glm::fvec3) instead of using a for-loop over floats?
-		std::vector<float> points;
-		points.reserve(nPoints);
-		for (size_t j = 0; j < nPoints; ++j) {
+		std::vector<float> dataEntry;
+        dataEntry.reserve(nItemsInDataEntry);
+		for (size_t j = 0; j < nItemsInDataEntry; ++j) {
 			float value;
 			syncBuffer->decode(value);
-			points.push_back(value);
+            dataEntry.push_back(value);
 		}
 
-		_storage[key] = points;
+		_storage[key] = dataEntry;
 	}
 }
 
-void SyncableDataStorage::postSync(bool isMaster) {
+void SyncableFloatDataStorage::postSync(bool isMaster) {
 	if (isMaster) {
 		if (_storage.size() > 0) {
-			// LWARNING(fmt::format("SyncableDataStorage.size() (MASTER): {}", _storage.size()));
+			// LWARNING(fmt::format("SyncableFloatDataStorage.size() (MASTER): {}", _storage.size()));
 		}
 	}
 	else {
 		if (_storage.size() > 0) {
-			// LWARNING(fmt::format("SyncableDataStorage.size() (CLIENT): {}", _storage.size()));
+			// LWARNING(fmt::format("SyncableFloatDataStorage.size() (CLIENT): {}", _storage.size()));
 		}
 	}
 }
 /* ================================================== */
 
 /* =============== Utility functions ================ */
-SyncableDataStorage::Iterator SyncableDataStorage::erase(SyncableDataStorage::Iterator pos) {
+SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::erase(SyncableFloatDataStorage::Iterator pos) {
 	return _storage.erase(pos);
 }
-SyncableDataStorage::Iterator SyncableDataStorage::erase(const SyncableDataStorage::Iterator first, const SyncableDataStorage::Iterator last) {
+SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::erase(const SyncableFloatDataStorage::Iterator first, const SyncableFloatDataStorage::Iterator last) {
 	return _storage.erase(first, last);
 }
-size_t SyncableDataStorage::erase(const SyncableDataStorage::Key& key) {
+size_t SyncableFloatDataStorage::erase(const SyncableFloatDataStorage::Key& key) {
 	return _storage.erase(key);
 }
 
-std::pair<SyncableDataStorage::Iterator, bool> SyncableDataStorage::emplace(SyncableDataStorage::Key key, SyncableDataStorage::Value value) {
+std::pair<SyncableFloatDataStorage::Iterator, bool> SyncableFloatDataStorage::emplace(SyncableFloatDataStorage::Key key, SyncableFloatDataStorage::Value value) {
 	return _storage.emplace(key, value);
 }
 
-SyncableDataStorage::Value& SyncableDataStorage::at(const SyncableDataStorage::Key& key) {
+SyncableFloatDataStorage::Value& SyncableFloatDataStorage::at(const SyncableFloatDataStorage::Key& key) {
 	return _storage.at(key);
 }
-const SyncableDataStorage::Value& SyncableDataStorage::at(const SyncableDataStorage::Key& key) const {
+const SyncableFloatDataStorage::Value& SyncableFloatDataStorage::at(const SyncableFloatDataStorage::Key& key) const {
 	return _storage.at(key);
 }
 
-SyncableDataStorage::Iterator SyncableDataStorage::find(const SyncableDataStorage::Key& key) {
+SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::find(const SyncableFloatDataStorage::Key& key) {
 	return _storage.find(key);
 }
 /* ================================================== */
 
 /* =================== Iterators ==================== */
-SyncableDataStorage::Iterator SyncableDataStorage::end() noexcept {
+SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::end() noexcept {
 	return _storage.end();
 }
 		
-SyncableDataStorage::Iterator SyncableDataStorage::begin() noexcept {
+SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::begin() noexcept {
 	return _storage.begin();
 }
 /* ================================================== */
 
 /* =============== Operator overloads =============== */
-SyncableDataStorage::Value& SyncableDataStorage::operator[](SyncableDataStorage::Key&& key) {
+SyncableFloatDataStorage::Value& SyncableFloatDataStorage::operator[](SyncableFloatDataStorage::Key&& key) {
 	return _storage[key];
 }
 /* ================================================== */

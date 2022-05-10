@@ -35,6 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <fstream>
 #include <optional>
 
@@ -42,9 +43,10 @@ namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
     constexpr const std::array<const char*, 8> UniformNames = {
-        "color", "opacity", "size", "modelMatrix", "cameraUp",
-        "cameraViewProjectionMatrix", "eyePosition", "sizeOption"
+        "color", "opacity", "size", "modelMatrix",
+        "cameraUp", "cameraViewProjectionMatrix", "eyePosition", "sizeOption"
     };
+    //"colorMapTexture",
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
@@ -73,14 +75,31 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DataStorageKeyInfo = {
         "DataStorageKey",
         "Data Storage Key",
-        "Key used to access a dataset in the module's centralized storage. Used for "
-        "big datasets with lots of points."
+        "Key used to access a dataset in the module's centralized storage, which is synced to all nodes."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
+        "Identifier",
+        "Identifier",
+        "Identifier used as part of key to access data in syncable central storage."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option",
         "This value determines how the size of the data points are rendered."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorMapEnabledInfo = {
+        "ColorMapEnabled",
+        "ColorMap Enabled",
+        "Boolean to determine whether to use colormap or not."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LoadNewColorMapInfo = {
+        "LoadNewColorMap",
+        "Load New ColorMap",
+        "Boolean to determine whether to load new colormap or not."
     };
 
     struct [[codegen::Dictionary(RenderablePointsCloud)]] Parameters {
@@ -98,6 +117,15 @@ namespace {
 
         // [[codegen::verbatim(DataStorageKeyInfo.description)]]
         std::optional<std::string> dataStorageKey;
+
+        // [[codegen::verbatim(IdentifierInfo.description)]]
+        std::optional<std::string> identifier;
+
+        // [[codegen::verbatim(ColorMapEnabledInfo.description)]]
+        std::optional<std::string> colorMapEnabled;
+
+        // [[codegen::verbatim(LoadNewColorMapInfo.description)]]
+        std::optional<std::string> loadNewColorMap;
 
         enum class SizeOption {
             Uniform,
@@ -121,6 +149,8 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _size(SizeInfo, 1.f, 0.f, 150.f)
     , _isVisible(ToggleVisibilityInfo, true)
     , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _colorMapEnabled(ColorMapEnabledInfo, false)
+    , _loadNewColorMap(LoadNewColorMapInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -132,6 +162,8 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _nValuesPerPoint = 3;
     _dataStorageKey = p.dataStorageKey.value();
 
+    _identifier = p.identifier.value();
+
     _size = p.size.value_or(_size);
     addProperty(_size);
 
@@ -139,6 +171,10 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     addProperty(_isVisible);
 
     addProperty(_opacity);
+
+    addProperty(_colorMapEnabled);
+
+    addProperty(_loadNewColorMap);
 
     _sizeOption.addOptions({
         { SizeOption::Uniform, "Uniform" },
@@ -198,7 +234,7 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     if (!_isVisible) {
         return;
     }
-    
+
     _shaderProgram->activate();
 
     glm::dvec3 eyePosition = glm::dvec3(
@@ -223,7 +259,17 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
         cameraViewProjectionMatrix
     );
 
-    _shaderProgram->setUniform(_uniformCache.color, _color);
+    if (_loadNewColorMap) loadColorMap();
+
+    if (_colorMapEnabled && _colorMapTexture) {
+        // TODO: Set _colorMapTexture in shader. A trasnfer function similar to
+        // 'bv2rgb' in C:\OpenSpace\SoftwareIntegration\modules\space\shaders\star_fs.glsl
+        // should probably be used.
+    }
+    else {
+        _shaderProgram->setUniform(_uniformCache.color, _color);
+    }
+
     _shaderProgram->setUniform(_uniformCache.opacity, _opacity);
     _shaderProgram->setUniform(_uniformCache.size, _size);
     _shaderProgram->setUniform(_uniformCache.sizeOption, _sizeOption);
@@ -336,6 +382,45 @@ void RenderablePointsCloud::loadData() {
     _fullData = module->fetchData(_dataStorageKey.value());
 
     _isDirty = true;
+}
+
+void RenderablePointsCloud::loadColorMap() {
+    if (!_identifier.has_value()) {
+        LWARNING("No data storage identifier found");
+        return;
+    }
+    
+    // Fetch data from module's centralized storage
+    auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
+    std::vector<float> colorMap = module->fetchData(_identifier.value() + "-ColorMap");
+    
+    if (colorMap.empty()) {
+        LWARNING("There was an issue trying to fetch the colormap data from the syncable storage.");
+        return;
+    }
+
+    int width = colorMap.size();
+    uint8_t* values = new uint8_t[width];
+
+    int i = 0;
+    while (i < width) {
+        values[i++] = static_cast<uint8_t>(colorMap[i] * 255);
+        values[i++] = static_cast<uint8_t>(colorMap[i] * 255);
+        values[i++] = static_cast<uint8_t>(colorMap[i] * 255);
+        values[i++] = static_cast<uint8_t>(colorMap[i] * 255);
+    }
+    
+    GLenum type = GL_TEXTURE_1D;
+    _colorMapTexture = std::make_unique<ghoul::opengl::Texture>(
+        values,
+        glm::uvec3(width, 1, 1),
+        type,
+        ghoul::opengl::Texture::Format::RGBA
+    );
+
+    _isDirty = true;
+    _loadNewColorMap = false;
+    _colorMapEnabled = true;
 }
 
 } // namespace openspace

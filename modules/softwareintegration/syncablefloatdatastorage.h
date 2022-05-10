@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEDATASTORAGE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEDATASTORAGE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
 
 #include <openspace/util/syncable.h>
 #include <mutex>
@@ -42,7 +42,7 @@ namespace openspace {
  * ((T&) t).method();
  *
  */
-class SyncableDataStorage : public Syncable {
+class SyncableFloatDataStorage : public Syncable {
 public:
 	/* ====================== Types ===================== */
 	typedef std::string Key;
@@ -91,4 +91,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEDATASTORAGE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__

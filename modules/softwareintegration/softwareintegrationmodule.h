@@ -28,7 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <modules/softwareintegration/network/networkengine.h>
-#include <modules/softwareintegration/syncabledatastorage.h>
+#include <modules/softwareintegration/syncablefloatdatastorage.h>
 #include <openspace/documentation/documentation.h>
 
 namespace openspace {
@@ -54,7 +54,7 @@ private:
     NetworkEngine* _server;
 
     // Centralized storage for datasets
-    SyncableDataStorage _syncableDataStorage;
+    SyncableFloatDataStorage _syncableFloatDataStorage;
 };
 
 } // namespace openspace

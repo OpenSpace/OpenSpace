@@ -87,9 +87,10 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     renderable.setValue("Color", static_cast<glm::dvec3>(glm::vec3{color.r, color.g, color.b}));
     renderable.setValue("Opacity", static_cast<double>(opacity));
     renderable.setValue("Size", static_cast<double>(size));
+    renderable.setValue("Identifier", identifier);
 
     // Use the renderable identifier as the data key
-    const std::string key = identifier;
+    const std::string key = identifier + "-DataPoints";
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
     module->storeData(key, std::move(points));
 
@@ -138,22 +139,56 @@ void PointDataMessageHandler::handleColorMessage(const std::vector<char>& messag
     properties::Property* colorProperty = r->property("Color");
     std::any propertyAny = colorProperty->get();
     glm::vec3 propertyColor = std::any_cast<glm::vec3>(propertyAny);
-    
+
     if (propertyColor != glm::vec3(0, 0, 0)) {
         LWARNING(fmt::format("propertyColor '{}'", propertyColor));
     }
 
     // Update color of renderable
     if (propertyColor != color) {
-        std::string script = fmt::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Color', {}, 1);",
+        std::string colorScript = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Color', {});",
             identifier, ghoul::to_string(color)
         );
+
+        std::string disableColorMapScript = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColorMapEnabled', {});",
+            identifier, false
+        );
+
         openspace::global::scriptEngine->queueScript(
-            script,
+            colorScript,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        openspace::global::scriptEngine->queueScript(
+            disableColorMapScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
+}
+
+void PointDataMessageHandler::handleColorMapMessage(const std::vector<char>& message) {
+    size_t messageOffset = 0;
+    const std::string identifier = readString(message, messageOffset);
+    const std::vector<float> colorMap = readColorMap(message, messageOffset);
+
+     // Use the renderable identifier as the data key
+     const std::string key = identifier + "-ColorMap";
+     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
+     module->storeData(key, std::move(colorMap));
+
+     // Get renderable
+     auto r = getRenderable(identifier);
+     if (!r) return;
+
+     std::string script = fmt::format(
+         "openspace.setPropertyValueSingle('Scene.{}.Renderable.LoadNewColorMap', {});",
+         identifier, true
+     );
+     openspace::global::scriptEngine->queueScript(
+         script,
+         scripting::ScriptEngine::RemoteScripting::Yes
+     );
 }
 
 void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& message) {
@@ -333,14 +368,17 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(
 int PointDataMessageHandler::readIntValue(const std::vector<char>& message, size_t& offset) {
     std::string string_value;
     int value;
+    bool isHex = false;
 
     while (!simp::isEndOfCurrentValue(message, offset)) {
-        string_value.push_back(message[offset]);
+        char c = message[offset];
+        if (c == 'x' || c == 'X') isHex = true;
+        string_value.push_back(c);
         offset++;
     }
 
     try {
-        value = std::stoi(string_value, nullptr, 16);
+        value = std::stoi(string_value, nullptr, isHex ? 16 : 10);
     }
     catch(std::exception &err) {
         throw simp::SimpError(
@@ -387,7 +425,26 @@ float PointDataMessageHandler::readFloatValue(const std::vector<char>& message, 
     return value;
 }
 
-glm::vec4 PointDataMessageHandler::readColor(const std::vector<char>& message, size_t& offset) {
+std::vector<float> PointDataMessageHandler::readColorMap(const std::vector<char>& message,
+                                                         size_t& offset) {
+    std::vector<float> colorMap;
+    while (message[offset] != simp::SEP) {
+        glm::vec4 color = readSingleColor(message, offset);
+        
+        // ColorMap should be stored in a sequential vector 
+        // of floats for syncing between nodes and when 
+        // loaded to as a texture in the shader.
+        colorMap.push_back(color[0]);
+        colorMap.push_back(color[1]);
+        colorMap.push_back(color[2]);
+        colorMap.push_back(color[3]);
+    }
+    
+    offset++;
+    return colorMap;
+}
+
+glm::vec4 PointDataMessageHandler::readSingleColor(const std::vector<char>& message, size_t& offset) {
     if (message[offset] != '[') {
         throw simp::SimpError(
             simp::ErrorCode::Generic,
@@ -409,8 +466,14 @@ glm::vec4 PointDataMessageHandler::readColor(const std::vector<char>& message, s
     }
     ++offset;
 
-    ++offset;
     return { r, g, b, a };
+}
+
+glm::vec4 PointDataMessageHandler::readColor(const std::vector<char>& message, size_t& offset) {
+    glm::vec4 color = readSingleColor(message, offset);
+ 
+    ++offset;
+    return color;
 }
 
 std::string PointDataMessageHandler::readString(const std::vector<char>& message, size_t& offset) {

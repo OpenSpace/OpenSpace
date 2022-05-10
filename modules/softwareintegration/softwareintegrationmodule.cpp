@@ -56,14 +56,13 @@ SoftwareIntegrationModule::~SoftwareIntegrationModule() {
 }
 
 void SoftwareIntegrationModule::storeData(const std::string& key,
-                                          const std::vector<float> data)
-{
-    _syncableDataStorage.emplace(key, std::move(data));
+                                          const std::vector<float> data) {
+    _syncableFloatDataStorage.emplace(key, std::move(data));
 }
 
 std::vector<float> SoftwareIntegrationModule::fetchData(const std::string& key) {
-    auto it = _syncableDataStorage.find(key);
-    if (it == _syncableDataStorage.end()) {
+    auto it = _syncableFloatDataStorage.find(key);
+    if (it == _syncableFloatDataStorage.end()) {
         LERROR(fmt::format(
             "Could not find data with key '{}' in the temporary data storage", key
         ));
@@ -71,7 +70,7 @@ std::vector<float> SoftwareIntegrationModule::fetchData(const std::string& key) 
     }
 
     std::vector<float> data = it->second;
-    _syncableDataStorage.erase(it);
+    _syncableFloatDataStorage.erase(it);
 
     return std::move(data);
 }
@@ -106,7 +105,7 @@ SoftwareIntegrationModule::documentations() const
 }
 
 std::vector<Syncable*> SoftwareIntegrationModule::getSyncables() {
-    return { &_syncableDataStorage };
+    return { &_syncableFloatDataStorage };
 }
 
 } // namespace openspace

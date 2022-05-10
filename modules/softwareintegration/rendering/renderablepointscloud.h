@@ -38,7 +38,10 @@
 namespace openspace::documentation { struct Documentation; }
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -60,6 +63,7 @@ public:
 protected:
     void createDataSlice();
     void loadData();
+    void loadColorMap();
 
     bool _hasPointData = false;
     bool _isDirty = true;
@@ -75,8 +79,12 @@ protected:
     
     std::vector<float> _fullData;
     std::vector<float> _slicedData;
+    std::unique_ptr<ghoul::opengl::Texture> _colorMapTexture;
 
     std::optional<std::string> _dataStorageKey = std::nullopt;
+    std::optional<std::string> _identifier = std::nullopt;
+    properties::BoolProperty _colorMapEnabled;
+    properties::BoolProperty _loadNewColorMap;
 
     int _nValuesPerPoint = 0;
 

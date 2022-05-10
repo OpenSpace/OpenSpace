@@ -38,6 +38,7 @@ public:
     void handlePointDataMessage(const std::vector<char>& message,
         SoftwareConnection& connection, std::list<std::string>& sceneGraphNodes);
     void handleColorMessage(const std::vector<char>& message);
+    void handleColorMapMessage(const std::vector<char>& message);
     void handleOpacityMessage(const std::vector<char>& message);
     void handlePointSizeMessage(const std::vector<char>& message);
     void handleVisiblityMessage(const std::vector<char>& message);
@@ -52,11 +53,13 @@ private:
 
     float readFloatValue(const std::vector<char>& message, size_t& offset);
     int readIntValue(const std::vector<char>& message, size_t& offset);
+    glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset);
     glm::vec4 readColor(const std::vector<char>& message, size_t& offset);
     std::string readString(const std::vector<char>& message, size_t& offset);
     std::vector<float> readPointData(
         const std::vector<char>& message, size_t& offset, int nPoints, int dimensionality
     );
+    std::vector<float> readColorMap(const std::vector<char>& message, size_t& offset);
 
     std::unordered_map<std::string, std::function<void()>> _onceNodeExistsCallbacks;
 };

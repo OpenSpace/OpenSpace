@@ -214,6 +214,13 @@ void NetworkEngine::handlePeerMessage(PeerMessage peerMessage) {
 		_pointDataMessageHandler.handleColorMessage(message);
 		break;
 	}
+    case simp::MessageType::ColorMap: {
+        const std::string colorMapMessage(message.begin(), message.end());
+        LDEBUG(fmt::format("Message recieved.. New ColorMap"));
+
+        _pointDataMessageHandler.handleColorMapMessage(message);
+        break;
+    }
 	case simp::MessageType::Opacity: {
 		const std::string opacityMessage(message.begin(), message.end());
 		LDEBUG(fmt::format("Message recieved.. New Opacity: {}", opacityMessage));
