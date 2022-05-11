@@ -1192,6 +1192,8 @@ void OpenSpaceEngine::preSynchronization() {
     if (_isRenderingFirstFrame) {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
+
+        global::scriptEngine->runScriptFile(absPath("${SCRIPTS}/developer_settings.lua"));
     }
 
     // Handle callback(s) for change in engine mode
