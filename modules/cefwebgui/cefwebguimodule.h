@@ -55,6 +55,7 @@ private:
     properties::TriggerProperty _reload;
     properties::StringProperty _url;
     properties::OptionProperty _visibility;
+    properties::BoolProperty _showHiddenSceneGraphNodes;
     properties::FloatProperty _guiScale;
     std::unique_ptr<BrowserInstance> _instance;
 
