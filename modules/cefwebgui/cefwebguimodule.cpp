@@ -96,10 +96,9 @@ CefWebGuiModule::CefWebGuiModule()
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
-    { static_cast<int>(Visibility::All), "All"},
     { static_cast<int>(Visibility::User), "User"},
     { static_cast<int>(Visibility::Developer), "Developer"},
-    { static_cast<int>(Visibility::Hidden), "Hidden"},
+    { static_cast<int>(Visibility::Hidden), "Everything"},
         });
 }
 
