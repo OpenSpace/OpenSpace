@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/property.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -103,6 +104,8 @@ public:
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
+    properties::Property::Visibility visibility() const;
+    bool showHiddenSceneGraphNodes() const;
     void toggleShutdownMode();
 
     Mode currentMode() const;

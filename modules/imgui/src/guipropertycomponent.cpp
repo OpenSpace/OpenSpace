@@ -26,6 +26,8 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <modules/imgui/include/renderproperties.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/misc.h>
 #include <algorithm>
@@ -59,15 +61,17 @@ namespace {
         "the hidden hints are followed."
     };
 
-    int nVisibleProperties(const std::vector<openspace::properties::Property*>& props,
-        openspace::properties::Property::Visibility visibility)
+    int nVisibleProperties(const std::vector<openspace::properties::Property*>& props)
     {
+        using Visibility = openspace::properties::Property::Visibility;
+        Visibility visibilityFilter = openspace::global::openSpaceEngine->visibility();
+
         return static_cast<int>(std::count_if(
             props.begin(),
             props.end(),
-            [visibility](openspace::properties::Property* p) {
+            [visibilityFilter](openspace::properties::Property* p) {
                 using V = openspace::properties::Property::Visibility;
-                return static_cast<std::underlying_type_t<V>>(visibility) >=
+                return static_cast<std::underlying_type_t<V>>(visibilityFilter) >=
                        static_cast<std::underlying_type_t<V>>(p->visibility());
             }
         ));
@@ -187,11 +191,9 @@ GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string g
     : GuiComponent(std::move(identifier), std::move(guiName))
     , _useTreeLayout(UseTreeInfo, useTree)
     , _treeOrdering(OrderingInfo)
-    , _ignoreHiddenHint(IgnoreHiddenInfo)
 {
     addProperty(_useTreeLayout);
     addProperty(_treeOrdering);
-    addProperty(_ignoreHiddenHint);
 }
 
 void GuiPropertyComponent::setPropertyOwners(
@@ -206,10 +208,6 @@ void GuiPropertyComponent::setPropertyOwnerFunction(
     _propertyOwnerFunction = std::move(func);
 }
 
-void GuiPropertyComponent::setVisibility(properties::Property::Visibility visibility) {
-    _visibility = visibility;
-}
-
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
     using namespace properties;
 
@@ -217,12 +215,12 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
         return;
     }
 
-    const int nThisProperty = nVisibleProperties(owner->properties(), _visibility);
+    const int nThisProperty = nVisibleProperties(owner->properties());
     ImGui::PushID(owner->identifier().c_str());
     const std::vector<PropertyOwner*>& subOwners = owner->propertySubOwners();
     for (PropertyOwner* subOwner : subOwners) {
         const std::vector<Property*>& properties = subOwner->propertiesRecursive();
-        int count = nVisibleProperties(properties, _visibility);
+        int count = nVisibleProperties(properties);
         if (count == 0) {
             continue;
         }
@@ -286,6 +284,7 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowBgAlpha(0.75f);
     ImGui::Begin(guiName().c_str(), &v);
     _isEnabled = v;
+    bool showHiddenNode = openspace::global::openSpaceEngine->showHiddenSceneGraphNodes();
 
     _isCollapsed = ImGui::IsWindowCollapsed();
     using namespace properties;
@@ -373,11 +372,13 @@ void GuiPropertyComponent::render() {
                        dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
 
     auto renderProp = [&](properties::PropertyOwner* pOwner) {
-        const int count = nVisibleProperties(pOwner->propertiesRecursive(), _visibility);
+        const int count = nVisibleProperties(pOwner->propertiesRecursive());
 
         if (count == 0) {
             return;
         }
+
+        
 
         auto header = [&]() -> bool {
             if (owners.size() > 1) {
@@ -402,7 +403,7 @@ void GuiPropertyComponent::render() {
     };
 
     if (!_useTreeLayout || noGuiGroups) {
-        if (!_ignoreHiddenHint) {
+        if (!showHiddenNode) {
             // Remove all of the nodes that we want hidden first
             owners.erase(
                 std::remove_if(
@@ -424,7 +425,7 @@ void GuiPropertyComponent::render() {
         for (properties::PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode
             SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
-            if (!_ignoreHiddenHint && nOwner->hasGuiHintHidden()) {
+            if (!showHiddenNode && nOwner->hasGuiHintHidden()) {
                 continue;
             }
             const std::string gui = nOwner->guiPath();
@@ -491,7 +492,9 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
 
     // Check if the visibility of the property is high enough to be displayed
     using V = properties::Property::Visibility;
-    const auto v = static_cast<std::underlying_type_t<V>>(_visibility);
+    using Visibility = openspace::properties::Property::Visibility;
+    Visibility visibilityFilter = openspace::global::openSpaceEngine->visibility();
+    const auto v = static_cast<std::underlying_type_t<V>>(visibilityFilter);
     const auto propV = static_cast<std::underlying_type_t<V>>(prop->visibility());
     if (v >= propV) {
         auto it = FunctionMapping.find(prop->className());

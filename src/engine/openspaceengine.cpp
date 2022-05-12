@@ -1619,6 +1619,14 @@ void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     global::syncEngine->decodeSyncables(std::move(data));
 }
 
+properties::Property::Visibility openspace::OpenSpaceEngine::visibility() const {
+    return static_cast<properties::Property::Visibility>(_visibility.value());
+}
+
+bool openspace::OpenSpaceEngine::showHiddenSceneGraphNodes() const {
+    return _showHiddenSceneGraphNodes;
+}
+
 void OpenSpaceEngine::toggleShutdownMode() {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it

@@ -42,7 +42,6 @@ namespace openspace::gui {
 GuiParallelComponent::GuiParallelComponent()
     : GuiPropertyComponent("Parallel", "Parallel Connection")
 {
-    setVisibility(properties::Property::Visibility::Always);
 }
 
 void GuiParallelComponent::renderDisconnected() {
