@@ -67,19 +67,6 @@ namespace {
         "Gui Scale",
         "GUI scale multiplier."
     };
-
-    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
-        "Visibility",
-        "Visibility",
-        "Hides or displays different settings in the GUI depending on how advanced they "
-        "are."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
-        "ShowHiddenSceneGraphNodes",
-        "Show Hidden Scene Graph Nodes",
-        "If checked, hidden scene graph nodes are visible in the UI"
-    };
 } // namespace
 
 namespace openspace {
@@ -91,23 +78,12 @@ CefWebGuiModule::CefWebGuiModule()
     , _reload(ReloadInfo)
     , _url(GuiUrlInfo, "")
     , _guiScale(GuiScaleInfo, 1.f, 0.1f, 3.f)
-    , _visibility(VisibilityInfo)
-    , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
 {
     addProperty(_enabled);
     addProperty(_visible);
     addProperty(_reload);
     addProperty(_url);
     addProperty(_guiScale);
-    addProperty(_visibility);
-    addProperty(_showHiddenSceneGraphNodes);
-
-    using Visibility = openspace::properties::Property::Visibility;
-    _visibility.addOptions({
-    { static_cast<int>(Visibility::User), "User"},
-    { static_cast<int>(Visibility::Developer), "Developer"},
-    { static_cast<int>(Visibility::Hidden), "Everything"},
-        });
 }
 
 void CefWebGuiModule::startOrStopGui() {

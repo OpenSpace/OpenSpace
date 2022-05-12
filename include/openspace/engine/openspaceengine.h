@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/profile.h>
@@ -137,6 +138,8 @@ private:
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     properties::BoolProperty _printEvents;
+    properties::OptionProperty _visibility;
+    properties::BoolProperty _showHiddenSceneGraphNodes;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;

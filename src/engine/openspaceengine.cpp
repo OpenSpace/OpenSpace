@@ -124,6 +124,19 @@ namespace {
         "If this is enabled, all events that are propagated through the system are "
         "printed to the log."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
+        "Visibility",
+        "Visibility",
+        "Hides or displays different settings in the GUI depending on how advanced they "
+        "are."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
+        "ShowHiddenSceneGraphNodes",
+        "Show Hidden Scene Graph Nodes",
+        "If checked, hidden scene graph nodes are visible in the UI"
+    };
 } // namespace
 
 namespace openspace {
@@ -133,6 +146,8 @@ class Scene;
 OpenSpaceEngine::OpenSpaceEngine()
     : properties::PropertyOwner({ "OpenSpaceEngine" })
     , _printEvents(PrintEventsInfo, false)
+    , _visibility(VisibilityInfo)
+    , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
 {
     FactoryManager::initialize();
     FactoryManager::ref().addFactory<Renderable>("Renderable");
@@ -149,6 +164,15 @@ OpenSpaceEngine::OpenSpaceEngine()
     TransformationManager::initialize();
 
     addProperty(_printEvents);
+    addProperty(_visibility);
+    addProperty(_showHiddenSceneGraphNodes);
+
+    using Visibility = openspace::properties::Property::Visibility;
+    _visibility.addOptions({
+    { static_cast<int>(Visibility::User), "User"},
+    { static_cast<int>(Visibility::Developer), "Developer"},
+    { static_cast<int>(Visibility::Hidden), "Everything"},
+        });
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT

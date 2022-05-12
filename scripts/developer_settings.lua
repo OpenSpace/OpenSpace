@@ -1,4 +1,4 @@
 if(os.getenv("OPENSPACE_DEVELOPER"))
 then
-   openspace.setPropertyValueSingle('Modules.CefWebGui.Visibility', 4)
+   openspace.setPropertyValueSingle('OpenSpaceEngine.Visibility', 4)
 end 

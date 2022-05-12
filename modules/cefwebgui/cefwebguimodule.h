@@ -33,7 +33,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
 
 namespace openspace {
 
@@ -54,8 +53,6 @@ private:
     properties::BoolProperty _visible;
     properties::TriggerProperty _reload;
     properties::StringProperty _url;
-    properties::OptionProperty _visibility;
-    properties::BoolProperty _showHiddenSceneGraphNodes;
     properties::FloatProperty _guiScale;
     std::unique_ptr<BrowserInstance> _instance;
 
