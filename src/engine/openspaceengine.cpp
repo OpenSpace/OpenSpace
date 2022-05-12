@@ -118,7 +118,7 @@ namespace {
         }
     }
 
-    openspace::properties::Property::PropertyInfo PrintEventsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PrintEventsInfo = {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
@@ -131,7 +131,8 @@ namespace openspace {
 class Scene;
 
 OpenSpaceEngine::OpenSpaceEngine()
-    : _printEvents(PrintEventsInfo, false)
+    : properties::PropertyOwner({ "OpenSpaceEngine" })
+    , _printEvents(PrintEventsInfo, false)
 {
     FactoryManager::initialize();
     FactoryManager::ref().addFactory<Renderable>("Renderable");
@@ -146,6 +147,8 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     SpiceManager::initialize();
     TransformationManager::initialize();
+
+    addProperty(_printEvents);
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT

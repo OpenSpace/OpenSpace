@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/profile.h>
@@ -63,7 +64,7 @@ struct CommandlineArguments {
     std::string configurationOverride;
 };
 
-class OpenSpaceEngine {
+class OpenSpaceEngine : public properties::PropertyOwner {
 public:
     // A mode that specifies which part of the system is currently in control.
     // The mode can be used to limit certain features, like setting time, navigation
