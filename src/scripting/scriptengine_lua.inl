@@ -183,9 +183,9 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
  * default value for this parameter is "false". The third argument determines whether the
  * table that is returned is sorted. The default value for this parameter is "false".
  */
-[[codegen::luawrap]] std::vector<std::string> walkDirectoryFolder(std::string path,
-                                                                  bool recursive = false,
-                                                                  bool sorted = false)
+[[codegen::luawrap]] std::vector<std::string> walkDirectoryFolders(std::string path,
+                                                                   bool recursive = false,
+                                                                   bool sorted = false)
 {
     namespace fs = std::filesystem;
     return walkCommon(
@@ -238,82 +238,6 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
 
     if (deleteSource && std::filesystem::is_regular_file(source)) {
         std::filesystem::remove(source);
-    }
-}
-
-// Saves the last entry from the script log to the current profile.
-[[codegen::luawrap]] void saveLastChangeToProfile() {
-    using namespace openspace;
-    std::string asset = global::configuration->asset;
-    std::filesystem::path logFilePath = absPath(global::configuration->scriptLog);
-    std::ifstream logfile(logFilePath);
-    std::string actualLastLine;
-    std::string lastLine;
-    std::string line;
-    // add check for log file
-    if (!logfile.good()) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Could not open scriptlog {}", logFilePath
-        ));
-    }
-    while (std::getline(logfile, line)) {
-        actualLastLine = lastLine;
-        lastLine = line;
-    }
-
-    if (actualLastLine.find("openspace.setPropertyValue") == std::string::npos) {
-        throw ghoul::lua::LuaError("Only property value changes can be saved");
-    }
-
-    std::string dataString = "${ASSETS}/";
-    std::filesystem::path assetPath = absPath(fmt::format(
-        "{}{}.scene", dataString, asset
-    ));
-    std::filesystem::path tempAssetPath = absPath(fmt::format(
-        "{}{}.scene.tmp", dataString, asset
-    ));
-    std::string strReplace = "--customizationsend";
-    std::string strNew = fmt::format("{}\n{}", actualLastLine, strReplace);
-    std::ifstream filein(assetPath);
-    std::ofstream fileout(tempAssetPath);
-    if (!filein) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Could not open profile {}", assetPath
-        ));
-    }
-    if (!fileout) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Could not open tmp profile {}", tempAssetPath
-        ));
-    }
-
-    bool found = false;
-    while (std::getline(filein, line)) {
-        if (line == strReplace) {
-            line = strNew;
-            found = true;
-        }
-        line += "\n";
-        fileout << line;
-    }
-    filein.close();
-    fileout.close();
-    if (found) {
-        if (std::filesystem::is_regular_file(assetPath)) {
-            std::filesystem::remove(assetPath);
-        }
-        int success = rename(tempAssetPath.string().c_str(), assetPath.string().c_str());
-        if (success != 0) {
-            throw ghoul::lua::LuaError(fmt::format(
-                "Error renaming file {} to {}", tempAssetPath, assetPath
-            ));
-        }
-        if (std::filesystem::is_regular_file(tempAssetPath)) {
-            std::filesystem::remove(tempAssetPath);
-        }
-    }
-    else {
-        throw ghoul::lua::LuaError("Can not save to built in profiles");
     }
 }
 

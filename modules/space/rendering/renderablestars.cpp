@@ -619,7 +619,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _colorOption.onChange([&] { _dataIsDirty = true; });
     addProperty(_colorOption);
 
-    _colorTexturePath.onChange([&] { _colorTextureIsDirty = true; });
+    _colorTexturePath.onChange([&] {
+        if (std::filesystem::exists(_colorTexturePath.value())) {
+            _colorTextureIsDirty = true;
+        }
+        else {
+            LWARNING(fmt::format("File not found: {}", _colorTexturePath));
+        }
+    });
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
     addProperty(_colorTexturePath);
 
@@ -632,7 +639,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_otherDataRange);
 
     addProperty(_otherDataColorMapPath);
-    _otherDataColorMapPath.onChange([&]() { _otherDataColorMapIsDirty = true; });
+    _otherDataColorMapPath.onChange([&]() {
+        if (std::filesystem::exists(_otherDataColorMapPath.value())) {
+            _otherDataColorMapIsDirty = true;
+        }
+        else {
+            LWARNING(fmt::format("File not found: {}", _otherDataColorMapPath));
+        }
+    });
 
     _staticFilterValue = p.staticFilter;
     _staticFilterReplacementValue =

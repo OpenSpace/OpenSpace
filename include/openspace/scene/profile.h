@@ -86,7 +86,7 @@ public:
         std::string documentation;
         std::string name;
         std::string guiPath;
-        bool isLocal;
+        bool isLocal = false;
         std::string script;
     };
 

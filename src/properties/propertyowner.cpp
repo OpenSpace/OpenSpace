@@ -56,7 +56,7 @@ namespace {
 
         constexpr std::string_view propertiesText = "\"properties\": [";
         //constexpr const std::array<char, 16> propertiesText = { "\"properties\": [" };
-        buf.insert(buf.end(), propertiesText.begin(), propertiesText.end() - 1);
+        buf.insert(buf.end(), propertiesText.begin(), propertiesText.end());
         //json << "\"properties\": [";
         const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
@@ -103,7 +103,7 @@ namespace {
         buf.insert(
             buf.end(),
             propertyOwnersText.begin(),
-            propertyOwnersText.end() - 1
+            propertyOwnersText.end()
         );
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {

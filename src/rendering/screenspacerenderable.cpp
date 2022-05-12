@@ -73,7 +73,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CartesianPositionInfo = {
         "CartesianPosition",
-        "Cartesian coordinates",
+        "Cartesian Coordinates",
         "This value determines the position of this screen space plane in Cartesian "
         "three-dimensional coordinates (meters)."
     };
@@ -88,7 +88,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
-        "Scale value",
+        "Scale Value",
         "This value determines a scale factor for the plane. The default size of a plane "
         "is determined by the concrete instance and reflects, for example, the size of "
         "the image being displayed."
@@ -96,7 +96,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
         "Rotation",
-        "Local rotation",
+        "Local Rotation",
         "An euler rotation (x, y, z) to apply to the plane."
     };
 
@@ -131,7 +131,9 @@ namespace {
         "independently from the Opacity value selected by the user. This value should "
         "not be directly manipulated through a user interface, but instead used by other "
         "components of the system programmatically",
-        openspace::properties::Property::Visibility::Developer
+        // The Developer mode should be used once the properties in the UI listen to this
+        // openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
@@ -432,6 +434,10 @@ float ScreenSpaceRenderable::depth() {
     return _useRadiusAzimuthElevation ?
         _raePosition.value().x :
         cartesianToSpherical(_cartesianPosition).x;
+}
+
+float ScreenSpaceRenderable::scale() const {
+    return _scale;
 }
 
 void ScreenSpaceRenderable::createShaders() {

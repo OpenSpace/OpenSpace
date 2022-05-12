@@ -81,7 +81,7 @@ public:
         std::string substringReplacement;
         ScriptSubstringReplace(std::string found, std::string replace)
             : substringFound(found)
-            , substringReplacement(replace) {};
+            , substringReplacement(replace) {}
     };
 
     static const size_t FileHeaderVersionLength = 5;
@@ -681,6 +681,8 @@ protected:
     double getNextTimestamp();
     double getPrevTimestamp();
     void cleanUpPlayback();
+    void cleanUpRecording();
+    void cleanUpTimelinesAndKeyframes();
     bool convertEntries(std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
@@ -740,7 +742,8 @@ protected:
 
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
 
-    bool _cleanupNeeded = false;
+    bool _cleanupNeededRecording = false;
+    bool _cleanupNeededPlayback = false;
     const std::string scriptReturnPrefix = "return ";
 
     std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
@@ -858,7 +861,7 @@ public:
 
             _script.erase();
             _script = temp.data();
-        };
+        }
     };
 
 protected:

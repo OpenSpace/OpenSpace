@@ -56,7 +56,7 @@ struct Event {
     //     return a dictionary with these parameters. This dictionary is passed to actions
     //     if they are triggered by events
     //  6. Add the new enum entry into the `toString` and `fromString` methods
-    enum class Type {
+    enum class Type : uint8_t {
         SceneGraphNodeAdded,
         SceneGraphNodeRemoved,
         ParallelConnection,
@@ -73,7 +73,7 @@ struct Event {
         LayerAdded,
         LayerRemoved,
         SessionRecordingPlayback,
-        PointJwstRequested,
+        PointSpacecraft,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -378,19 +378,23 @@ struct EventSessionRecordingPlayback : public Event {
 };
 
 /**
- * This event is created when a request for pointing the JWST model to a Ra Dec coordinate
- * in the sky is issued. The event contains information about the sky coordinate to point
- * the JWST towards.
+ * This event is created when a request for pointing a spacecraft towards a Ra Dec
+ * coordinate in the sky is issued. The event contains information about the sky
+ * coordinate to point the spacecraft towards, and an optional argument for the duration
+ * it should do the pointing.
  *
- * \param Ra The Ra part of the sky coordinate in decimal degrees to point the JWST to
- * \param Dec The Dec part of the sky coordinate in decimal degrees to point the JWST to
+ * \param Ra The Ra part of the sky coordinate in decimal degrees to point towards
+ * \param Dec The Dec part of the sky coordinate in decimal degrees to point towards
+ * \param Duration The duration of time in seconds that the spacecraft should redirect
+ *        itself to the coordinate. Default is 3 seconds
  */
-struct EventPointJwstRequested : public Event {
-    static const Type Type = Event::Type::PointJwstRequested;
+struct EventPointSpacecraft : public Event {
+    static const Type Type = Event::Type::PointSpacecraft;
 
-    EventPointJwstRequested(double ra_, double dec_);
+    EventPointSpacecraft(double ra_, double dec_, double duration_ = 3.0);
     const double ra;
     const double dec;
+    const double duration;
 };
 
 /**
@@ -401,10 +405,10 @@ struct EventPointJwstRequested : public Event {
 struct CustomEvent : public Event {
     static const Type Type = Event::Type::Custom;
 
-    CustomEvent(std::string_view subtype_, const void* payload_);
+    CustomEvent(std::string_view subtype_, std::string_view payload_);
 
     const tstring subtype;
-    const void* payload = nullptr;
+    const tstring payload;
 };
 
 } // namespace openspace::events

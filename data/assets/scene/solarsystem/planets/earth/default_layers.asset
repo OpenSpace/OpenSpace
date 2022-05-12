@@ -18,8 +18,8 @@ asset.require("./layers/heightlayers/blue_marble_height")
 local heightLayer = asset.require("./layers/heightlayers/terrain_tileset")
 
 -- Night layers
-asset.require("./layers/nightlayers/earth_night_texture")
 local nightLayer = asset.require("./layers/nightlayers/earth_at_night_2012")
+asset.require("./layers/nightlayers/earth_night_texture")
 asset.require("./layers/nightlayers/earth_at_night_temporal")
 
 -- Overlays

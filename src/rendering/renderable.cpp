@@ -278,6 +278,7 @@ void Renderable::setRenderBinFromOpacity() {
 
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this]() { setRenderBinFromOpacity(); });
+    _fade.onChange([this]() { setRenderBinFromOpacity(); });
 }
 
 float Renderable::opacity() const {

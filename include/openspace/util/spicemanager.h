@@ -856,7 +856,7 @@ public:
         };
 
         /// The shape of the returned field of view
-        Shape shape;
+        Shape shape = Shape::Rectangle;
 
         /// The name of the reference frame in which the #bounds are defined
         std::string frameName;

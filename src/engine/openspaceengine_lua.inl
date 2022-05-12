@@ -104,12 +104,6 @@ namespace {
             LTRACEC("OpenSpaceEngine", fmt::format("waiting {}", future->errorMessage));
         }
     }
-
-    if (!future || !future->isFinished) {
-        throw ghoul::lua::LuaError(
-            future ? "Download failed: " + future->errorMessage : "Download failed"
-        );
-    }
 }
 
 } // namespace

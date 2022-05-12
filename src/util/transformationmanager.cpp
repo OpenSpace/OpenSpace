@@ -101,9 +101,9 @@ glm::dmat3 TransformationManager::kameleonTransformationMatrix(
     ccmc::Position out1;
     ccmc::Position out2;
 
-    _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in0, &out0);
-    _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in1, &out1);
-    _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in2, &out2);
+    ccmc::Kameleon::_cxform(from.c_str(), to.c_str(), ephemerisTime, &in0, &out0);
+    ccmc::Kameleon::_cxform(from.c_str(), to.c_str(), ephemerisTime, &in1, &out1);
+    ccmc::Kameleon::_cxform(from.c_str(), to.c_str(), ephemerisTime, &in2, &out2);
 
     return glm::dmat3(
         out0.c0, out0.c1, out0.c2,

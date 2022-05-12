@@ -34,6 +34,7 @@
 #include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
 #include <modules/server/include/topics/shortcuttopic.h>
+#include <modules/server/include/topics/skybrowsertopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
 #include <modules/server/include/topics/timetopic.h>
 #include <modules/server/include/topics/topic.h>
@@ -69,14 +70,13 @@ namespace {
     constexpr const char* TriggerPropertyTopicKey = "trigger";
     constexpr const char* BounceTopicKey = "bounce";
     constexpr const char* FlightControllerTopicKey = "flightcontroller";
+    constexpr const char* SkyBrowserKey = "skybrowser";
 } // namespace
 
 namespace openspace {
 
-Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
-                       std::string address,
-                       bool authorized,
-                       const std::string& password)
+Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
+                       bool authorized, const std::string& password)
     : _socket(std::move(s))
     , _address(std::move(address))
     , _isAuthorized(authorized)
@@ -109,6 +109,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
     _topicFactory.registerClass<FlightControllerTopic>(FlightControllerTopicKey);
     _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
+    _topicFactory.registerClass<SkyBrowserTopic>(SkyBrowserKey);
 }
 
 void Connection::handleMessage(const std::string& message) {
@@ -118,14 +119,16 @@ void Connection::handleMessage(const std::string& message) {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
             handleJson(j);
-        } catch (const std::domain_error& e) {
+        }
+        catch (const std::domain_error& e) {
             LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
         }
-        } catch (const std::out_of_range& e) {
-            LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
-        }
-        catch (const std::exception& e) {
-            LERROR(e.what());
+    }
+    catch (const std::out_of_range& e) {
+        LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
+    }
+    catch (const std::exception& e) {
+        LERROR(e.what());
     } catch (...) {
         if (!isAuthorized()) {
             _socket->disconnect();
@@ -174,10 +177,7 @@ void Connection::handleJson(const nlohmann::json& json) {
         // The topic id is not registered: Initialize a new topic.
         auto typeJson = json.find(MessageKeyType);
         if (typeJson == json.end() || !typeJson->is_string()) {
-            LERROR(fmt::format(
-                "A type must be specified (`{}`) as a string when "
-                "a new topic is initialized", MessageKeyType
-            ));
+            LERROR("Type must be specified as a string when a new topic is initialized");
             return;
         }
         std::string type = *typeJson;
@@ -188,7 +188,7 @@ void Connection::handleJson(const nlohmann::json& json) {
         }
 
         std::unique_ptr<Topic> topic = std::unique_ptr<Topic>(_topicFactory.create(type));
-        topic->initialize(this, topicId);
+        topic->initialize(shared_from_this(), topicId);
         topic->handleJson(*payloadJson);
         if (!topic->isDone()) {
             _topics.emplace(topicId, std::move(topic));
@@ -200,7 +200,7 @@ void Connection::handleJson(const nlohmann::json& json) {
             return;
         }
 
-        // Dispatch the message to the existing topic.
+        // Dispatch the message to the existing topic
         Topic& topic = *topicIt->second;
         topic.handleJson(*payloadJson);
         if (topic.isDone()) {

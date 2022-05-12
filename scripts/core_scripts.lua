@@ -68,7 +68,7 @@ end
 
 openspace.setDefaultGuiSorting = function()
     openspace.setPropertyValueSingle(
-        'Modules.ImGUI.Main.SceneProperties.Ordering',
+        'Modules.ImGUI.Scene.Ordering',
         {
             "Solar System", "Milky Way", "Universe", "Other"
         }
@@ -76,7 +76,7 @@ openspace.setDefaultGuiSorting = function()
 end
 
 openspace.rebindKey = function(oldKey, newKey)
-    local t = openspace.getKeyBinding(oldKey)
+    local t = openspace.keyBindings(oldKey)
     openspace.clearKey(oldKey)
     for _, v in pairs(t) do
         openspace.bindKey(newKey, v)

@@ -50,7 +50,7 @@
     },
     {
       "documentation": "Toggles the trails of the minor moons",
-      "gui_path": "/Solar System",
+      "gui_path": "/Trails",
       "identifier": "profile.toggle.minor_trails",
       "is_local": false,
       "name": "Toggle minor trails",

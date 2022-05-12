@@ -74,6 +74,8 @@ protected:
     properties::BoolProperty _useOptimisticZone;
 
     properties::FloatProperty _habitableZoneOpacity;
+
+    properties::BoolProperty _enabled;
 };
 
 } // namespace openspace

@@ -4,13 +4,13 @@ local texturesPath = asset.syncedResource({
   Name = "Earth Textures",
   Type = "HttpSynchronization",
   Identifier = "earth_textures",
-  Version = 2
+  Version = 3
 })
 
 local layer = {
   Identifier = "Earth_Night_Texture",
   Name = "Earth Night Texture",
-  FilePath = texturesPath .. "earth_night.jpg",
+  FilePath = texturesPath .. "earth_night.png",
   Description = [[ Earth's city lights are clearly visible from space ]]
 }
 

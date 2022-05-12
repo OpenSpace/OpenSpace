@@ -63,16 +63,6 @@ void TargetBrowserPair::setImageOrder(int i, int order) {
     _browser->setImageOrder(i, order);
 }
 
-void TargetBrowserPair::removeHighlight(const glm::ivec3& color) {
-    _targetRenderable->removeHighlight(color);
-    _browser->removeHighlight(color);
-}
-
-void TargetBrowserPair::highlight(const glm::ivec3& color) {
-    _browser->highlight(color);
-    _targetRenderable->highlight(color);
-}
-
 void TargetBrowserPair::aimTargetGalactic(glm::dvec3 direction) {
     std::string id = _targetNode->identifier();
     glm::dvec3 positionCelestial = glm::normalize(direction) *
@@ -114,7 +104,7 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& startMouse,
 }
 
 void TargetBrowserPair::synchronizeAim() {
-    if (!_moveTarget.isAnimating()) {
+    if (!_targetAnimation.isAnimating() && _browser->isInitialized()) {
         _browser->setEquatorialAim(targetDirectionEquatorial());
         _browser->setTargetRoll(targetRoll());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
@@ -123,7 +113,7 @@ void TargetBrowserPair::synchronizeAim() {
 
 void TargetBrowserPair::setEnabled(bool enable) {
     _browser->setEnabled(enable);
-    _targetRenderable->property("Enabled")->set(false);
+    _targetRenderable->property("Enabled")->set(enable);
 }
 
 void TargetBrowserPair::setOpacity(float opacity) {
@@ -137,8 +127,11 @@ bool TargetBrowserPair::isEnabled() const {
 
 void TargetBrowserPair::initialize() {
     _targetRenderable->setColor(_browser->borderColor());
-    _targetRenderable->setDimensions(_browser->screenSpaceDimensions());
+    glm::vec2 dim = _browser->screenSpaceDimensions();
+    _targetRenderable->setRatio(dim.x / dim.y);
     _browser->updateBorderColor();
+    _browser->hideChromeInterface();
+    _browser->setIsInitialized(true);
 }
 
 glm::ivec3 TargetBrowserPair::borderColor() const {
@@ -172,29 +165,68 @@ std::string TargetBrowserPair::targetNodeId() const {
     return _targetNode->identifier();
 }
 
-glm::vec2 TargetBrowserPair::size() const {
-    return _browser->size();
+float TargetBrowserPair::browserRatio() const {
+    return _browser->browserRatio();
 }
 
 double TargetBrowserPair::verticalFov() const {
     return _browser->verticalFov();
 }
 
-const std::deque<int>& TargetBrowserPair::selectedImages() const {
-    return _browser->getSelectedImages();
+std::vector<int> TargetBrowserPair::selectedImages() const {
+    return _browser->selectedImages();
+}
+
+ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
+    glm::dvec2 spherical = targetDirectionEquatorial();
+    glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
+
+    ghoul::Dictionary res;
+    res.setValue("id", browserId());
+    res.setValue("name", browserGuiName());
+    res.setValue("fov", static_cast<double>(verticalFov()));
+    res.setValue("ra", spherical.x);
+    res.setValue("dec", spherical.y);
+    res.setValue("roll", targetRoll());
+    res.setValue("color", borderColor());
+    res.setValue("cartesianDirection", cartesian);
+    res.setValue("ratio", static_cast<double>(browserRatio()));
+    res.setValue("isFacingCamera", isFacingCamera());
+    res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
+    res.setValue("selectedImages", selectedImages());
+    res.setValue("scale", static_cast<double>(_browser->scale()));
+    res.setValue("opacities", _browser->opacities());
+
+    std::vector<std::pair<std::string, glm::dvec3>> copies = displayCopies();
+    std::vector<std::pair<std::string, bool>> showCopies = _browser->showDisplayCopies();
+    ghoul::Dictionary copiesData;
+    for (size_t i = 0; i < copies.size(); i++) {
+        ghoul::Dictionary copy;
+        copy.setValue("position", copies[i].second);
+        copy.setValue("show", showCopies[i].second);
+        copy.setValue("idShowProperty", showCopies[i].first);
+        copiesData.setValue(copies[i].first, copy);
+    }
+    // Set table for the current target
+    res.setValue("displayCopies", copiesData);
+
+    return res;
 }
 
 void TargetBrowserPair::selectImage(const ImageData& image, int i) {
     // Load image into browser
-    _browser->displayImage(image.imageUrl, i);
+    _browser->selectImage(image.imageUrl, i);
 
     // If the image has coordinates, move the target
     if (image.hasCelestialCoords) {
         // Animate the target to the image coordinate position
-        // unlock();
         glm::dvec3 galactic = skybrowser::equatorialToGalactic(image.equatorialCartesian);
         startAnimation(galactic * skybrowser::CelestialSphereRadius, image.fov);
     }
+}
+
+void TargetBrowserPair::addImageLayerToWwt(const std::string& url, int i) {
+    _browser->addImageLayerToWwt(url, i);
 }
 
 void TargetBrowserPair::removeSelectedImage(int i) {
@@ -209,8 +241,8 @@ void TargetBrowserPair::setImageOpacity(int i, float opacity) {
     _browser->setImageOpacity(i, opacity);
 }
 
-void TargetBrowserPair::hideChromeInterface(bool shouldHide) {
-    _browser->hideChromeInterface(shouldHide);
+void TargetBrowserPair::hideChromeInterface() {
+    _browser->hideChromeInterface();
 }
 
 void TargetBrowserPair::sendIdToBrowser() const {
@@ -221,12 +253,12 @@ void TargetBrowserPair::updateBrowserSize() {
     _browser->updateBrowserSize();
 }
 
-std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::renderCopies() const {
-    return _browser->renderCopies();
+std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::displayCopies() const {
+    return _browser->displayCopies();
 }
 
-void TargetBrowserPair::setIsSyncedWithWwt(bool isSynced) {
-    _browser->setIsSyncedWithWwt(isSynced);
+bool TargetBrowserPair::isImageCollectionLoaded() {
+    return _browser->isImageCollectionLoaded();
 }
 
 void TargetBrowserPair::setVerticalFov(double vfov) {
@@ -235,7 +267,6 @@ void TargetBrowserPair::setVerticalFov(double vfov) {
 }
 
 void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
-    _equatorialAim = aim;
     aimTargetGalactic(
         skybrowser::equatorialToGalactic(skybrowser::sphericalToCartesian(aim))
     );
@@ -243,28 +274,31 @@ void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
 }
 
 void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
-    _borderColor = color;
     _targetRenderable->setColor(color);
     _browser->setBorderColor(color);
 }
 
-void TargetBrowserPair::setScreenSpaceSize(const glm::vec2& dimensions) {
-    _browser->setScreenSpaceSize(dimensions);
-    _targetRenderable->setDimensions(dimensions);
+void TargetBrowserPair::setBrowserRatio(float ratio) {
+    _browser->setRatio(ratio);
+    _targetRenderable->setRatio(ratio);
 }
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
     _browser->setVerticalFovWithScroll(scroll);
 }
 
+void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
+    _browser->setImageCollectionIsLoaded(isLoaded);
+}
+
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {
     // Animate the target before the field of view starts to animate
-    if (_moveTarget.isAnimating()) {
-        aimTargetGalactic(_moveTarget.getNewValue());
+    if (_targetAnimation.isAnimating()) {
+        aimTargetGalactic(_targetAnimation.getNewValue());
     }
-    else if (!_moveTarget.isAnimating() && _targetIsAnimating) {
+    else if (!_targetAnimation.isAnimating() && _targetIsAnimating) {
         // Set the finished position
-        aimTargetGalactic(_moveTarget.getNewValue());
+        aimTargetGalactic(_targetAnimation.getNewValue());
         _fovAnimation.start();
         _targetIsAnimating = false;
     }
@@ -275,10 +309,21 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate() {
 }
 
 void TargetBrowserPair::startFading(float goal, float fadeTime) {
-    _fadeTarget = skybrowser::Animation(_targetRenderable->opacity(), goal, fadeTime);
-    _fadeBrowser = skybrowser::Animation(_browser->opacity(), goal, fadeTime);
-    _fadeTarget.start();
-    _fadeBrowser.start();
+    const std::string script = fmt::format(
+        "openspace.setPropertyValueSingle('Scene.{0}.Renderable.Fade', {2}, {3});"
+        "openspace.setPropertyValueSingle('ScreenSpace.{1}.Fade', {2}, {3});",
+        _targetNode->identifier(), _browser->identifier(), goal, fadeTime
+    );
+
+    global::scriptEngine->queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
+
+void TargetBrowserPair::stopAnimations() {
+    _fovAnimation.stop();
+    _targetAnimation.stop();
 }
 
 void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd) {
@@ -294,8 +339,8 @@ void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd)
         skybrowser::CelestialSphereRadius;
     double targetSpeed = module->targetAnimationSpeed();
     double angle = skybrowser::angleBetweenVectors(start, galacticCoords);
-    _moveTarget = skybrowser::Animation(start, galacticCoords, angle / targetSpeed);
-    _moveTarget.start();
+    _targetAnimation = skybrowser::Animation(start, galacticCoords, angle / targetSpeed);
+    _targetAnimation.start();
     _targetIsAnimating = true;
 }
 
@@ -307,9 +352,9 @@ void TargetBrowserPair::centerTargetOnScreen() {
     startAnimation(viewDirection, currentFov);
 }
 
-double TargetBrowserPair::targetRoll() {
+double TargetBrowserPair::targetRoll() const {
     // To remove the lag effect when moving the camera while having a locked
-       // target, send the locked coordinates to wwt
+    // target, send the locked coordinates to wwt
     glm::dvec3 normal = glm::normalize(
         _targetNode->worldPosition() -
         global::navigationHandler->camera()->positionVec3()
@@ -322,10 +367,6 @@ double TargetBrowserPair::targetRoll() {
     );
     glm::dvec3 up = glm::normalize(glm::cross(normal, right));
     return skybrowser::targetRoll(up, normal);
-}
-
-bool TargetBrowserPair::hasFinishedFading() const {
-    return !_fadeBrowser.isAnimating() && !_fadeTarget.isAnimating();
 }
 
 bool TargetBrowserPair::isFacingCamera() const {
@@ -342,15 +383,6 @@ SceneGraphNode* TargetBrowserPair::targetNode() const {
 
 ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
     return _browser;
-}
-
-void TargetBrowserPair::incrementallyFade() {
-    if (_fadeBrowser.isAnimating()) {
-        _browser->setOpacity(_fadeBrowser.getNewValue());
-    }
-    if (_fadeTarget.isAnimating()) {
-        _targetRenderable->setOpacity(_fadeTarget.getNewValue());
-    }
 }
 
 bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {

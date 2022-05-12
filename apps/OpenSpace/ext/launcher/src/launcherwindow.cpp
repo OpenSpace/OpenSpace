@@ -143,7 +143,7 @@ namespace {
         }
     }
 
-    void saveWindowConfig(QWidget* parent, const std::string& path,
+    void saveWindowConfig(QWidget* parent, const std::filesystem::path& path,
                           sgct::config::Cluster& cluster)
     {
         std::ofstream outFile;
@@ -395,7 +395,9 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     }
 
     _profileBox->addItem(QString::fromStdString("--- User Profiles ---"));
-    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
+    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(
+        _profileBox->model()
+    );
     model->item(_userAssetCount)->setEnabled(false);
     ++_userAssetCount;
 
@@ -410,7 +412,10 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     }
     std::sort(profiles.begin(), profiles.end());
     for (const fs::directory_entry& p : profiles) {
-        _profileBox->addItem(QString::fromStdString(p.path().stem().string()));
+        _profileBox->addItem(
+            QString::fromStdString(p.path().stem().string()),
+            QString::fromStdString(p.path().string())
+        );
     }
 
     _profileBox->addItem(QString::fromStdString("--- OpenSpace Profiles ---"));
@@ -427,16 +432,33 @@ void LauncherWindow::populateProfilesList(std::string preset) {
         profiles.push_back(path);
     }
     std::sort(profiles.begin(), profiles.end());
-    //add sorted items to list
+
+    // Add sorted items to list
     for (const fs::directory_entry& profile : profiles) {
-        _profileBox->addItem(QString::fromStdString(profile.path().stem().string()));
+        std::string abc = profile.path().string();
+        _profileBox->addItem(
+            QString::fromStdString(profile.path().stem().string()),
+            QString::fromStdString(profile.path().string())
+        );
     }
 
     // Try to find the requested profile and set it as the current one
-    const int idx = _profileBox->findText(QString::fromStdString(std::move(preset)));
-    if (idx != -1) {
-        _profileBox->setCurrentIndex(idx);
+    int idx = _profileBox->findText(QString::fromStdString(preset));
+    if (idx == -1) {
+        // We didn't find the preset, so the user probably specified a path in the
+        // configuration file that doesn't match any value in the list
+        _profileBox->addItem(QString::fromStdString("--- Configuration File ---"));
+        model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
+        model->item(_profileBox->count() - 1)->setEnabled(false);
+
+        _profileBox->addItem(
+            QString::fromStdString(preset),
+            QString::fromStdString(preset)
+        );
+        idx = _profileBox->count() - 1;
     }
+
+    _profileBox->setCurrentIndex(idx);
 }
 
 // Returns 'true' if the file was a configuration file, 'false' otherwise
@@ -471,7 +493,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
 
     bool hasXmlConfig = false;
 
-    //sort files
+    // Sort files
     std::vector<fs::directory_entry> files;
     for (const fs::directory_entry& p : fs::directory_iterator(_userConfigPath)) {
         files.push_back(p);
@@ -492,7 +514,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     model->item(_userConfigCount)->setEnabled(false);
 
     if (std::filesystem::exists(_configPath)) {
-        //sort files
+        // Sort files
         files.clear();
         for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
             files.push_back(p);
@@ -522,7 +544,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
         );
     }
 
-    //Always add the .cfg sgct default as first item
+    // Always add the .cfg sgct default as first item
     _windowConfigBox->insertItem(0, QString::fromStdString(_sgctConfigName));
     // Try to find the requested configuration file and set it as the current one. As we
     // have support for function-generated configuration files that will not be in the
@@ -534,8 +556,8 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     else {
         // Add the requested preset at the top
         _windowConfigBox->insertItem(1, QString::fromStdString(preset));
-        //Increment the user config count because there is an additional option added
-        //before the user config options
+        // Increment the user config count because there is an additional option added
+        // before the user config options
         _userConfigCount++;
         _windowConfigBox->setCurrentIndex(1);
     }
@@ -546,7 +568,6 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     std::string saveProfilePath = isUserProfile ? _userProfilePath : _profilePath;
     if (profile.empty()) {
         // If the requested profile is the empty string, then we want to create a new one
-
         p = Profile();
     }
     else {
@@ -559,13 +580,21 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         }
     }
 
-    ProfileEdit editor(*p, profile, _assetPath, _userAssetPath, saveProfilePath, _readOnlyProfiles, this);
+    ProfileEdit editor(
+        *p,
+        profile,
+        _assetPath,
+        _userAssetPath,
+        saveProfilePath,
+        _readOnlyProfiles,
+        this
+    );
     editor.exec();
     if (editor.wasSaved()) {
         if (editor.specifiedFilename() != profile) {
             saveProfilePath = _userProfilePath;
         }
-        const std::string path = saveProfilePath + editor.specifiedFilename() + ".profile";
+        std::string path = saveProfilePath + editor.specifiedFilename() + ".profile";
         saveProfile(this, path, *p);
         populateProfilesList(editor.specifiedFilename());
     }
@@ -576,40 +605,16 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 }
 
 void LauncherWindow::openWindowEditor() {
-    QList<QScreen*> screenList = qApp->screens();
-    if (screenList.length() == 0) {
-        LERRORC(
-            "LauncherWindow",
-            "Error: Qt reports no screens/monitors available"
-        );
-        return;
-    }
-    sgct::config::Cluster cluster;
-    std::vector<sgct::config::Window> windowList;
-    SgctEdit editor(this, windowList, cluster, screenList, _userConfigPath);
-    editor.exec();
-    if (editor.wasSaved()) {
-        std::string ext = ".json";
-        std::string savePath = editor.saveFilename();
-        if (savePath.size() >= ext.size()
-            && !(savePath.substr(savePath.size() - ext.size()).compare(ext) == 0))
-        {
-            savePath += ext;
-        }
-        if (cluster.nodes.size() == 0) {
-            cluster.nodes.push_back(sgct::config::Node());
-        }
-        for (auto w : windowList) {
-            cluster.nodes[0].windows.push_back(w);
-        }
+    SgctEdit editor(this, _userConfigPath);
+    int ret = editor.exec();
+    if (ret == QDialog::DialogCode::Accepted) {
+        sgct::config::Cluster cluster = editor.cluster();
+
+        std::filesystem::path savePath = editor.saveFilename();
         saveWindowConfig(this, savePath, cluster);
-        //Truncate path to convert this back to path relative to _userConfigPath
-        savePath = savePath.substr(_userConfigPath.size());
-        populateWindowConfigsList(savePath);
-    }
-    else {
-        const std::string current = _windowConfigBox->currentText().toStdString();
-        populateWindowConfigsList(current);
+        // Truncate path to convert this back to path relative to _userConfigPath
+        std::string p = savePath.string().substr(_userConfigPath.size());
+        populateWindowConfigsList(p);
     }
 }
 
@@ -618,14 +623,16 @@ bool LauncherWindow::wasLaunchSelected() const {
 }
 
 std::string LauncherWindow::selectedProfile() const {
-    return _profileBox->currentText().toStdString();
+    // The user data stores the full path to the profile
+    return _profileBox->currentData().toString().toStdString();
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {
     int idx = _windowConfigBox->currentIndex();
     if (idx == 0) {
         return _sgctConfigName;
-    } else if (idx > _userConfigCount) {
+    }
+    else if (idx > _userConfigCount) {
         return "${CONFIG}/" + _windowConfigBox->currentText().toStdString();
     }
     else {

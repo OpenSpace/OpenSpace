@@ -477,6 +477,18 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
     }
 }
 
+std::vector<std::string> NavigationHandler::listAllJoysticks() const {
+    std::vector<std::string> result;
+    result.reserve(global::joystickInputStates->size());
+
+    for (const JoystickInputState& joystickInputState : *global::joystickInputStates) {
+        if (!joystickInputState.name.empty()) {
+            result.push_back(joystickInputState.name);
+        }
+    }
+    return result;
+}
+
 void NavigationHandler::setJoystickAxisMapping(std::string joystickName, int axis,
                                                JoystickCameraStates::AxisType mapping,
                                             JoystickCameraStates::AxisInvert shouldInvert,
@@ -604,7 +616,9 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::AddTruckMovement,
             codegen::lua::AddLocalRoll,
             codegen::lua::AddGlobalRoll,
-            codegen::lua::TriggerIdleBehavior
+            codegen::lua::TriggerIdleBehavior,
+            codegen::lua::ListAllJoysticks,
+            codegen::lua::TargetNextInterestingAnchor
         }
     };
 }

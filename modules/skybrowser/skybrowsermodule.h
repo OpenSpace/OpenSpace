@@ -33,6 +33,7 @@
 #include <openspace/util/mouse.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <fstream>
 
 namespace openspace {
@@ -43,30 +44,21 @@ class TargetBrowserPair;
 class SceneGraphNode;
 struct ImageData;
 
-enum class Transparency {
-    Transparent,
-    Opaque
-};
-
-enum class MouseInteraction {
-    Hover,
-    Drag,
-    FineTune
-};
-
 class SkyBrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SkyBrowser";
+    using CallbackHandle = int;
+    using CallbackFunction = std::function<void()>;
 
     SkyBrowserModule();
 
     std::vector<std::unique_ptr<TargetBrowserPair>>& getPairs();
     int nPairs() const;
-    TargetBrowserPair* getPair(const std::string& id) const;
+    TargetBrowserPair* pair(const std::string& id) const;
     const std::unique_ptr<WwtDataHandler>& getWwtDataHandler() const;
     std::string selectedBrowserId() const;
     std::string selectedTargetId() const;
-    glm::ivec3 highlight() const;
+    int uniqueIdentifierCounter() const;
 
     void setSelectedBrowser(const std::string& id);
     void setHoverCircle(SceneGraphNode* circle);
@@ -75,10 +67,11 @@ public:
     void lookAtTarget(const std::string& id);
     void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
     void incrementallyRotateCamera();
-    void incrementallyFadeBrowserTargets(Transparency goal);
     void incrementallyAnimateTargets();
     double targetAnimationSpeed() const;
     double browserAnimationSpeed() const;
+    double spaceCraftAnimationTime() const;
+    std::string wwtImageCollectionUrl() const;
 
     bool isCameraInSolarSystem() const;
     bool isSelectedPairFacingCamera() const;
@@ -89,44 +82,42 @@ public:
     void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
     // Hover circle
-    void moveHoverCircle(int i);
-    void disableHoverCircle();
+    void moveHoverCircle(int i, bool useScript = true);
+    void disableHoverCircle(bool useScript = true);
 
     // Image collection handling
     void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages() const;
 
+    CallbackHandle addPreSyncCallback(CallbackFunction cb);
+    void removePreSyncCallback(CallbackHandle handle);
+
     scripting::LuaLibrary luaLibrary() const override;
-    //std::vector<documentation::Documentation> documentations() const override;
+    std::vector<documentation::Documentation> documentations() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
 
 private:
+    properties::BoolProperty _enabled;
+    properties::BoolProperty _showTitleInGuiBrowser;
     properties::BoolProperty _allowCameraRotation;
+    properties::BoolProperty _hideTargetsBrowsersWithGui;
+    properties::BoolProperty _inverseZoomDirection;
     properties::DoubleProperty _cameraRotationSpeed;
     properties::DoubleProperty _targetAnimationSpeed;
     properties::DoubleProperty _browserAnimationSpeed;
-    glm::ivec3 _highlightAddition = glm::ivec3(35); // Highlight object when mouse hovers
+    properties::DoubleProperty _spaceCraftAnimationTime;
+    properties::StringProperty _wwtImageCollectionUrl;
 
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
-    TargetBrowserPair* _mouseOnPair = nullptr;
     SceneGraphNode* _hoverCircle = nullptr;
     std::string _selectedBrowser = ""; // Currently selected browser
-
-    // Fading
-    Transparency _goal = Transparency::Opaque;
+    int _uniqueIdentifierCounter = 0;
 
     // Flags
     bool _isCameraInSolarSystem = true; // Visualization modes
-    bool _isFading = false;
-
-    // Mouse interaction
-    glm::vec2 _mousePosition; // Current mouse position in screen space coordinates
-    glm::vec2 _startMousePosition;
-    glm::vec2 _startDragPosition;
-    glm::dvec3 _startTargetPosition;
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
     skybrowser::Animation<glm::dvec3> _cameraRotation =
@@ -134,6 +125,10 @@ private:
 
     // Data handler for the image collections
     std::unique_ptr<WwtDataHandler> _dataHandler;
+
+    // Callbacks for tiggering topic
+    int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, CallbackFunction>> _preSyncCallbacks;
 };
 
 } // namespace openspace

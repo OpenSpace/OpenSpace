@@ -99,6 +99,7 @@ inline interaction::SessionRecording* sessionRecording;
 inline interaction::ShortcutManager* shortcutManager;
 inline properties::PropertyOwner* rootPropertyOwner;
 inline properties::PropertyOwner* screenSpaceRootPropertyOwner;
+inline properties::PropertyOwner* userPropertyOwner;
 inline scripting::ScriptEngine* scriptEngine;
 inline scripting::ScriptScheduler* scriptScheduler;
 inline Profile* profile;

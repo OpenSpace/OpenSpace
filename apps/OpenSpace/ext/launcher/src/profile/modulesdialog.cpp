@@ -54,21 +54,21 @@ ModulesDialog::ModulesDialog(QWidget* parent,
 
 void ModulesDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
-    {
-        _list = new QListWidget;
-        connect(
-            _list, &QListWidget::itemSelectionChanged,
-            this, &ModulesDialog::listItemSelected
-        );
-        _list->setAlternatingRowColors(true);
-        _list->setMovement(QListView::Free);
-        _list->setResizeMode(QListView::Adjust);
 
-        for (const Profile::Module& m : _moduleData) {
-            _list->addItem(new QListWidgetItem(createOneLineSummary(m)));
-        }
-        layout->addWidget(_list);
+    _list = new QListWidget;
+    connect(
+        _list, &QListWidget::itemSelectionChanged,
+        this, &ModulesDialog::listItemSelected
+    );
+    _list->setAlternatingRowColors(true);
+    _list->setMovement(QListView::Free);
+    _list->setResizeMode(QListView::Adjust);
+
+    for (const Profile::Module& m : _moduleData) {
+        _list->addItem(new QListWidgetItem(createOneLineSummary(m)));
     }
+    layout->addWidget(_list);
+    
     {
         QBoxLayout* box = new QHBoxLayout;
         _buttonAdd = new QPushButton("Add new");
@@ -89,12 +89,14 @@ void ModulesDialog::createWidgets() {
     {
         _moduleLabel = new QLabel("Module");
         layout->addWidget(_moduleLabel);
+        
         _moduleEdit = new QLineEdit;
         _moduleEdit->setToolTip("Name of OpenSpace module related to this profile");
         layout->addWidget(_moduleEdit);
 
         _loadedLabel = new QLabel("Command if Module is Loaded");
         layout->addWidget(_loadedLabel);
+        
         _loadedEdit = new QLineEdit;
         _loadedEdit->setToolTip(
             "Lua command(s) to execute if OpenSpace has been compiled with the module"
@@ -103,6 +105,7 @@ void ModulesDialog::createWidgets() {
 
         _notLoadedLabel = new QLabel("Command if Module is NOT Loaded");
         layout->addWidget(_notLoadedLabel);
+        
         _notLoadedEdit = new QLineEdit;
         _notLoadedEdit->setToolTip(
             "Lua command(s) to execute if the module is not present in the OpenSpace "
@@ -155,8 +158,8 @@ void ModulesDialog::createWidgets() {
 
 QString ModulesDialog::createOneLineSummary(Profile::Module m) {
     QString summary = QString::fromStdString(m.name);
-    bool hasCommandForLoaded = (m.loadedInstruction->length() > 0);
-    bool hasCommandForNotLoaded = (m.notLoadedInstruction->length() > 0);
+    bool hasCommandForLoaded = !m.loadedInstruction->empty();
+    bool hasCommandForNotLoaded = !m.notLoadedInstruction->empty();
 
     if (hasCommandForLoaded && hasCommandForNotLoaded) {
         summary += " (commands set for both loaded & not-loaded conditions)";
@@ -186,6 +189,7 @@ void ModulesDialog::listItemSelected() {
         else {
             _loadedEdit->clear();
         }
+        
         if (m.notLoadedInstruction.has_value()) {
             _notLoadedEdit->setText(QString::fromStdString(*m.notLoadedInstruction));
         }
@@ -197,14 +201,9 @@ void ModulesDialog::listItemSelected() {
 }
 
 bool ModulesDialog::isLineEmpty(int index) const {
-    bool isEmpty = true;
-    if (!_list->item(index)->text().isEmpty()) {
-        isEmpty = false;
-    }
-    if (!_moduleData.empty() && !_moduleData.at(0).name.empty()) {
-        isEmpty = false;
-    }
-    return isEmpty;
+    return
+        _list->item(index)->text().isEmpty() &&
+        _moduleData.empty() && !_moduleData.at(0).name.empty();
 }
 
 void ModulesDialog::listItemAdded() {
@@ -258,7 +257,7 @@ void ModulesDialog::listItemSave() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
-    if (_moduleData.size() > 0) {
+    if (!_moduleData.empty()) {
         _moduleData[index].name = _moduleEdit->text().toStdString();
         _moduleData[index].loadedInstruction = _loadedEdit->text().toStdString();
         _moduleData[index].notLoadedInstruction = _notLoadedEdit->text().toStdString();
@@ -277,21 +276,21 @@ void ModulesDialog::listItemCancelSave() {
 }
 
 void ModulesDialog::listItemRemove() {
-    if (_list->count() > 0) {
-        if (_list->currentRow() >= 0 && _list->currentRow() < _list->count()) {
-            if (_list->count() == 1) {
-                // Special case where last remaining item is being removed (QListWidget
-                // doesn't like the final item being removed so instead clear it)
-                _moduleData.at(0) = Blank;
-                _list->item(0)->setText("");
-            }
-            else {
-                int index = _list->currentRow();
-                if (index >= 0 && index < _list->count()) {
-                    delete _list->takeItem(index);
-                    if (!_moduleData.empty()) {
-                        _moduleData.erase(_moduleData.begin() + index);
-                    }
+    if (_list->count() > 0 &&
+        _list->currentRow() >= 0 && _list->currentRow() < _list->count())
+    {
+        if (_list->count() == 1) {
+            // Special case where last remaining item is being removed (QListWidget
+            // doesn't like the final item being removed so instead clear it)
+            _moduleData.at(0) = Blank;
+            _list->item(0)->setText("");
+        }
+        else {
+            int index = _list->currentRow();
+            if (index >= 0 && index < _list->count()) {
+                delete _list->takeItem(index);
+                if (!_moduleData.empty()) {
+                    _moduleData.erase(_moduleData.begin() + index);
                 }
             }
         }
@@ -361,4 +360,3 @@ void ModulesDialog::keyPressEvent(QKeyEvent* evt) {
     }
     QDialog::keyPressEvent(evt);
 }
-

@@ -70,8 +70,8 @@ protected:
     void createPlane();
 
     properties::OptionProperty _blendMode;
-    properties::BoolProperty _mirrorBackside;
     properties::BoolProperty _billboard;
+    properties::BoolProperty _mirrorBackside;
     properties::FloatProperty _size;
     properties::Vec3Property _multiplyColor;
 

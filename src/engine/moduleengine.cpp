@@ -94,19 +94,19 @@ void ModuleEngine::deinitialize() {
     ZoneScoped
 
     LDEBUG("Deinitializing modules");
-    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Deinitializing module '{}'", m->identifier()));
-        m->deinitialize();
-    }
 
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+        LDEBUG(fmt::format("Deinitializing module '{}'", (*mIt)->identifier()));
+        (*mIt)->deinitialize();
+    }
     LDEBUG("Finished deinitializing modules");
 
-    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Destroying module '{}'", m->identifier()));
-        m = nullptr;
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+        LDEBUG(fmt::format("Destroying module '{}'", (*mIt)->identifier()));
+        (*mIt) = nullptr;
     }
-
     LDEBUG("Finished destroying modules");
+
     _modules.clear();
 }
 
@@ -114,9 +114,9 @@ void ModuleEngine::deinitializeGL() {
     ZoneScoped
 
     LDEBUG("Deinitializing OpenGL of modules");
-    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Deinitializing OpenGL of module '{}'", m->identifier()));
-        m->deinitializeGL();
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+        LDEBUG(fmt::format("Deinitializing OpenGL of module '{}'", (*mIt)->identifier()));
+        (*mIt)->deinitializeGL();
 
     }
     LDEBUG("Finished deinitializing OpenGL of modules");
