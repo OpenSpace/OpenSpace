@@ -155,6 +155,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
 
   set_cef_targets("${CEF_ROOT}" OpenSpace)
   run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
+  set_modules_dependency_on_cef_libraries(openspace-module-collection)
 elseif ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()

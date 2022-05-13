@@ -158,3 +158,9 @@ function(run_cef_linux_config CEF_TARGET CEF_ROOT)
   # Add the custom manifest files to the executable.
   set_openspace_cef_target_out_dir()
 endfunction ()
+
+function(set_modules_dependency_on_cef_libraries LIB_DEPENDENT)
+  target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_lib) 
+  target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_dll_wrapper)
+endfunction ()
+
