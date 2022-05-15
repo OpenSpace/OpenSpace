@@ -26,6 +26,7 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(cmake/webbrowser_helpers.cmake)
 
 set(WEBBROWSER_MODULE_NAME WebBrowser)
 set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSER_MODULE_PATH")
@@ -260,6 +261,8 @@ set_folder_location(openspace_web_helper "Helper")
 # PRINT_CEF_CONFIG()
 
 target_include_directories(${webbrowser_module} SYSTEM PUBLIC ${CEF_ROOT})
+
+set_modules_dependency_on_cef_libraries(${webbrowser_module})
 
 set(deps "")
 foreach (i ${CEF_BINARY_FILES})
