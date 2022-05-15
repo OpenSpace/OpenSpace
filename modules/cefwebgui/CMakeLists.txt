@@ -23,7 +23,7 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-include(${WEBBROWSER_MODULE_PATH}/cmake/webbrowser_helpers.cmake)
+include(../webbrowser/cmake/webbrowser_helpers.cmake)
 
 set(CEFWEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "CEFWEBGUI_MODULE_PATH")
 set(CEFWEBGUI_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/web CACHE INTERNAL "CEFWEBGUI_MODULE_PATH")
