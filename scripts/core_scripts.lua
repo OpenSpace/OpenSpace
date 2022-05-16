@@ -76,7 +76,7 @@ openspace.setDefaultGuiSorting = function()
 end
 
 openspace.rebindKey = function(oldKey, newKey)
-    local t = openspace.getKeyBinding(oldKey)
+    local t = openspace.keyBindings(oldKey)
     openspace.clearKey(oldKey)
     for _, v in pairs(t) do
         openspace.bindKey(newKey, v)

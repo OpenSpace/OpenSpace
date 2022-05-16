@@ -331,7 +331,7 @@ void PathNavigator::startPath() {
 }
 
 void PathNavigator::abortPath() {
-    if (!_isPlaying) {
+    if (hasFinished()) {
         LWARNING("No camera path is playing");
         return;
     }

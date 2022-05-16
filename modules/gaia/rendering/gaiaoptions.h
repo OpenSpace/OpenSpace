@@ -27,7 +27,7 @@
 
 namespace openspace::gaia {
 
-enum RenderOption {
+enum RenderMode {
     Static = 0,
     Color = 1,
     Motion = 2

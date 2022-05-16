@@ -119,13 +119,13 @@ public:
      * call.
      */
     std::map<int, std::vector<float>> traverseData(const glm::dmat4& mvp,
-        const glm::vec2& screenSize, int& deltaStars, gaia::RenderOption option,
+        const glm::vec2& screenSize, int& deltaStars, gaia::RenderMode mode,
         float lodPixelThreshold);
 
     /**
      * Builds full render data structure by traversing all leaves in the Octree.
      */
-    std::vector<float> getAllData(gaia::RenderOption option);
+    std::vector<float> getAllData(gaia::RenderMode mode);
 
     /**
      * Removes all data from Octree, or only from a specific branch if specified.
@@ -244,7 +244,7 @@ private:
      */
     std::map<int, std::vector<float>> checkNodeIntersection(OctreeNode& node,
         const glm::dmat4& mvp, const glm::vec2& screenSize, int& deltaStars,
-        gaia::RenderOption option);
+        gaia::RenderMode mode);
 
     /**
      * Checks if specified node existed in cache, and removes it if that's the case.
@@ -258,7 +258,7 @@ private:
     /**
      * Get data in node and its descendants regardless if they are visible or not.
      */
-    std::vector<float> getNodeData(const OctreeNode& node, gaia::RenderOption option);
+    std::vector<float> getNodeData(const OctreeNode& node, gaia::RenderMode mode);
 
     /**
      * Clear data from node and its descendants and shrink vectors to deallocate memory.
@@ -285,7 +285,7 @@ private:
      * \param deltaStars keeps track of how many stars that were added.
      */
     std::vector<float> constructInsertData(const OctreeNode& node,
-        gaia::RenderOption option, int& deltaStars);
+        gaia::RenderMode mode, int& deltaStars);
 
     /**
      * Write a node to outFileStream. \param writeData defines if data should be included

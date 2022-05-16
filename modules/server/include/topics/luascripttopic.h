@@ -31,9 +31,6 @@ namespace openspace {
 
 class LuaScriptTopic : public Topic {
 public:
-    LuaScriptTopic() = default;
-    virtual ~LuaScriptTopic() = default;
-
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 

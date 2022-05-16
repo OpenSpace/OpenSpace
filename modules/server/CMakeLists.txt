@@ -43,6 +43,7 @@ set(HEADER_FILES
   include/topics/shortcuttopic.h
   include/topics/subscriptiontopic.h
   include/topics/timetopic.h
+  include/topics/skybrowsertopic.h
   include/topics/topic.h
   include/topics/triggerpropertytopic.h
   include/topics/versiontopic.h
@@ -67,6 +68,7 @@ set(SOURCE_FILES
   src/topics/shortcuttopic.cpp
   src/topics/subscriptiontopic.cpp
   src/topics/timetopic.cpp
+  src/topics/skybrowsertopic.cpp
   src/topics/topic.cpp
   src/topics/triggerpropertytopic.cpp
   src/topics/versiontopic.cpp

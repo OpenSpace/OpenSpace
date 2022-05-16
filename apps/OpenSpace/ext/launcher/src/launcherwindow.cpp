@@ -395,7 +395,9 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     }
 
     _profileBox->addItem(QString::fromStdString("--- User Profiles ---"));
-    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
+    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(
+        _profileBox->model()
+    );
     model->item(_userAssetCount)->setEnabled(false);
     ++_userAssetCount;
 
@@ -410,7 +412,10 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     }
     std::sort(profiles.begin(), profiles.end());
     for (const fs::directory_entry& p : profiles) {
-        _profileBox->addItem(QString::fromStdString(p.path().stem().string()));
+        _profileBox->addItem(
+            QString::fromStdString(p.path().stem().string()),
+            QString::fromStdString(p.path().string())
+        );
     }
 
     _profileBox->addItem(QString::fromStdString("--- OpenSpace Profiles ---"));
@@ -430,14 +435,30 @@ void LauncherWindow::populateProfilesList(std::string preset) {
 
     // Add sorted items to list
     for (const fs::directory_entry& profile : profiles) {
-        _profileBox->addItem(QString::fromStdString(profile.path().stem().string()));
+        std::string abc = profile.path().string();
+        _profileBox->addItem(
+            QString::fromStdString(profile.path().stem().string()),
+            QString::fromStdString(profile.path().string())
+        );
     }
 
     // Try to find the requested profile and set it as the current one
-    const int idx = _profileBox->findText(QString::fromStdString(std::move(preset)));
-    if (idx != -1) {
-        _profileBox->setCurrentIndex(idx);
+    int idx = _profileBox->findText(QString::fromStdString(preset));
+    if (idx == -1) {
+        // We didn't find the preset, so the user probably specified a path in the
+        // configuration file that doesn't match any value in the list
+        _profileBox->addItem(QString::fromStdString("--- Configuration File ---"));
+        model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
+        model->item(_profileBox->count() - 1)->setEnabled(false);
+
+        _profileBox->addItem(
+            QString::fromStdString(preset),
+            QString::fromStdString(preset)
+        );
+        idx = _profileBox->count() - 1;
     }
+
+    _profileBox->setCurrentIndex(idx);
 }
 
 // Returns 'true' if the file was a configuration file, 'false' otherwise
@@ -602,7 +623,8 @@ bool LauncherWindow::wasLaunchSelected() const {
 }
 
 std::string LauncherWindow::selectedProfile() const {
-    return _profileBox->currentText().toStdString();
+    // The user data stores the full path to the profile
+    return _profileBox->currentData().toString().toStdString();
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {

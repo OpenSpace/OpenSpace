@@ -1,0 +1,67 @@
+local fade_up_trails = {
+  Identifier = "os.fade_up_trails_planets_moon",
+  Name = "Show Planet and Moon Trails",
+  Command = [[
+    openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", 1, 2);
+    openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Fade", 1, 2);
+  ]],
+  Documentation = "Fade up all planet and moon trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = true
+}
+asset.export("fade_up_trails", fade_up_trails.Identifier)
+
+local fade_down_trails = {
+  Identifier = "os.fade_down_trails_planets_moon",
+  Name = "Hide Planet and Moon Trails",
+  Command = [[
+    openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", 0, 2);
+    openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Fade", 0, 2);
+  ]],
+  Documentation = "Fade down all planet and moon trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = true
+}
+asset.export("fade_down_trails", fade_down_trails.Identifier)
+
+local toggle_trails = {
+  Identifier = "os.toggle_trails_planets_moon",
+  Name = "Toggle Planet and Moon Trails",
+  Command = [[
+    local capList = openspace.getProperty("{planetTrail_solarSystem}.Renderable.Fade");
+    local list = openspace.getProperty("{moonTrail_solarSystem}.Renderable.Fade");
+    if (#capList == 0) and (#list == 0) then
+      openspace.printWarning("No trails to toggle");
+    else
+      local prop;
+      if (#capList > 0) then
+        prop = capList[1];
+      else
+        prop = list[1];
+      end
+      local currentFade = openspace.getPropertyValue(prop);
+      local newFade = 0;
+      if currentFade < 1 then
+        newFade = 1;
+      end
+      openspace.setPropertyValue("{planetTrail_solarSystem}.Renderable.Fade", newFade, 2);
+      openspace.setPropertyValue("{moonTrail_solarSystem}.Renderable.Fade", newFade, 2);
+    end
+  ]],
+  Documentation = "Toggle fade for planet and moon trails in the Scene",
+  GuiPath = "/Trails",
+  IsLocal = true
+}
+asset.export("toggle_trails", toggle_trails)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(fade_up_trails)
+  openspace.action.registerAction(fade_down_trails)
+  openspace.action.registerAction(toggle_trails)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(toggle_trails)
+  openspace.action.removeAction(fade_down_trails)
+  openspace.action.removeAction(fade_up_trails)
+end)

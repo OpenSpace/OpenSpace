@@ -117,6 +117,10 @@ void HttpSynchronization::cancel() {
     _state = State::Unsynced;
 }
 
+std::string HttpSynchronization::generateUid() {
+    return fmt::format("{}/{}", _identifier, _version);
+}
+
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     HttpMemoryDownload fileListDownload(std::move(listUrl));
     fileListDownload.onProgress([&c = _shouldCancel](int64_t, std::optional<int64_t>) {

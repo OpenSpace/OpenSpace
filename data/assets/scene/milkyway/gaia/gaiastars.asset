@@ -16,7 +16,7 @@ local colormaps = asset.syncedResource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
-  Version = 2
+  Version = 3
 })
 
 local textures = asset.syncedResource({
@@ -32,7 +32,7 @@ local GaiaStars = {
     Type = "RenderableGaiaStars",
     File = starsFolder,
     FileReaderOption = "StreamOctree",
-    RenderOption = "Motion",
+    RenderMode = "Motion",
     ShaderOption = "Point_SSBO",
     Texture = textures .. "halo.png",
     ColorMap = colormaps .. "colorbv.cmap",

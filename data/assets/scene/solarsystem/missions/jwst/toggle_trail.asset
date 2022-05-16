@@ -15,6 +15,7 @@ local toggle_trail = {
 
 
     local launchTrail = "JWSTTrailLaunch"
+    local cruiseTrail = "JWSTTrailCruise"
     local orbitTrail = "JWSTTrailOrbit"
 
     local visibility
@@ -29,12 +30,17 @@ local toggle_trail = {
     else
       visibility = not (
         openspace.getPropertyValue("Scene." .. launchTrail .. ".Renderable.Enabled") or
+        openspace.getPropertyValue("Scene." .. cruiseTrail .. ".Renderable.Enabled") or
         openspace.getPropertyValue("Scene." .. orbitTrail .. ".Renderable.Enabled")
       )
     end
 
     openspace.setPropertyValueSingle(
       "Scene." .. launchTrail .. ".Renderable.Enabled",
+      visibility
+    )
+    openspace.setPropertyValueSingle(
+      "Scene." .. cruiseTrail .. ".Renderable.Enabled",
       visibility
     )
     openspace.setPropertyValueSingle(
@@ -46,7 +52,7 @@ local toggle_trail = {
     approaching/exiting event. This action takes optional arguments to 1) determine which
     node is currently in focus and only hide JWST trail if it is in focus (as the
     'Node') and 2) the transition direction (as 'Approaching' or 'Exiting').]],
-  GuiPath = "/events/JWST",
+  GuiPath = "/JWST/Events",
   IsLocal = true
 }
 

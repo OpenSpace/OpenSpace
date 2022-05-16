@@ -41,36 +41,36 @@ local initializeAndAddNodes = function()
     },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/ISS"
+      Path = "/Solar System/Planets/Earth/Satellites/ISS"
     }
   }
 
   local parentNode = {
-     Identifier = "ISSModel",
-      Parent = iss.Identifier,
-      Transform = {
-        Rotation = {
-          Type = "FixedRotation",
-          Attached = "ISSModel",
-          XAxis = { 0.01, -1.0, 0.56 },
-          XAxisOrthogonal = true,
-          YAxis = transforms.EarthInertial.Identifier
-        }
-      },
-      Renderable = {
-        Type = "RenderableModel",
-        GeometryFile = models .. "ISS.fbx",
-        ModelScale = "Centimeter",
-        LightSources = {
-          sun.LightSource
-        },
-        PerformShading = true,
-        DisableFaceCulling = true
-      },
-      GUI = {
-        Name = "ISS Model",
-        Path = "/Solar System/Planets/Earth/Satellites/ISS"
+    Identifier = "ISSModel",
+    Parent = iss.Identifier,
+    Transform = {
+      Rotation = {
+        Type = "FixedRotation",
+        Attached = "ISSModel",
+        XAxis = { 0.01, -1.0, 0.56 },
+        XAxisOrthogonal = true,
+        YAxis = transforms.EarthInertial.Identifier
       }
+    },
+    Renderable = {
+      Type = "RenderableModel",
+      GeometryFile = models .. "ISS.fbx",
+      ModelScale = "Centimeter",
+      LightSources = {
+        sun.LightSource
+      },
+      PerformShading = true,
+      DisableFaceCulling = true
+    },
+    GUI = {
+      Name = "ISS Model",
+      Path = "/Solar System/Planets/Earth/Satellites/ISS"
+    }
   }
 
   local issTrail = {

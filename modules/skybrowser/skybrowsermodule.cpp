@@ -45,6 +45,15 @@ namespace {
         "Decides if the GUI for this module should be enabled."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo
+        ShowTitleInGuiBrowserInfo =
+    {
+        "ShowTitleInGuiBrowser",
+        "Show Title in Gui Browser",
+        "If true, the name of the currently selected sky browser is shown in the WebGUI "
+        "browser."
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow Camera Rotation",
@@ -67,8 +76,35 @@ namespace {
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
-        "Field Of View Animation Speed",
+        "Field of View Animation Speed",
         "This determines the speed of the animation of the field of view in the browser."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo HideWithGuiInfo = {
+        "HideTargetsBrowsersWithGui",
+        "Hide Targets and Browsers with GUI",
+        "If checked, the targets and browsers will be disabled when the sky browser "
+        "panel is minimized."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo InverseZoomInfo = {
+        "InverseZoomDirection",
+        "Inverse Zoom Direction",
+        "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
+        "inversed."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo SpaceCraftTimeInfo = {
+        "SpaceCraftAnimationTime",
+        "Space Craft Animation Time",
+        "Sets the duration (in seconds) of the animation of the space craft when it is "
+        "pointed to where the target is aiming."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo ImageCollectionInfo = {
+       "WwtImageCollectionUrl",
+       "AAS WorldWide Telescope Image Collection Url",
+       "The url of the image collection which is loaded into AAS WorldWide Telescope."
     };
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
@@ -86,6 +122,18 @@ namespace {
 
         // [[codegen::verbatim(BrowserSpeedInfo.description)]]
         std::optional<double> browserSpeed;
+
+        // [[codegen::verbatim(HideWithGuiInfo.description)]]
+        std::optional<bool> hideTargetsBrowsersGui;
+
+        // [[codegen::verbatim(InverseZoomInfo.description)]]
+        std::optional<bool> inverseZoomDirection;
+
+        // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
+        std::optional<double> spaceCraftAnimationTime;
+
+        // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
+        std::optional<std::string> wwtImageCollectionUrl;
     };
 
 #include "skybrowsermodule_codegen.cpp"
@@ -96,16 +144,28 @@ namespace openspace {
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
     , _enabled(EnabledInfo)
+    , _showTitleInGuiBrowser(ShowTitleInGuiBrowserInfo, true)
     , _allowCameraRotation(AllowRotationInfo, true)
     , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
     , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
     , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
+    , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
+    , _inverseZoomDirection(InverseZoomInfo, false)
+    , _spaceCraftAnimationTime(SpaceCraftTimeInfo, 2.0, 0.0, 10.0)
+    , _wwtImageCollectionUrl(ImageCollectionInfo,
+        "https://data.openspaceproject.com/wwt/1/imagecollection.wtml")
 {
     addProperty(_enabled);
+    addProperty(_showTitleInGuiBrowser);
     addProperty(_allowCameraRotation);
     addProperty(_cameraRotationSpeed);
     addProperty(_targetAnimationSpeed);
     addProperty(_browserAnimationSpeed);
+    addProperty(_hideTargetsBrowsersWithGui);
+    addProperty(_inverseZoomDirection);
+    addProperty(_spaceCraftAnimationTime);
+    addProperty(_wwtImageCollectionUrl);
+    _wwtImageCollectionUrl.setReadOnly(true);
 
     // Set callback functions
     global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
@@ -126,44 +186,40 @@ SkyBrowserModule::SkyBrowserModule()
         _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
         bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
 
-        // Visualization mode changed. Start fading
-        if (vizModeChanged && !_isCameraInSolarSystem) {
-            // Camera moved into the solar system
-            _isFading = true;
-            _goal = Transparency::Transparent;
+        // Visualization mode changed. Start fading in/out
+        if (vizModeChanged) {
+            constexpr float FadeDuration = 2.f;
 
-            float transparency = [](Transparency goal) {
-                switch (goal) {
-                    case Transparency::Transparent:  return 0.f;
-                    case Transparency::Opaque:       return 1.f;
-                    default:                         throw ghoul::MissingCaseException();
+            if (camWasInSolarSystem) { // Camera moved out of the solar system => fade out
+                for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
+                    pair->startFading(0.f, FadeDuration);
                 }
-            }(_goal);
 
-            std::for_each(
-                _targetsBrowsers.begin(),
-                _targetsBrowsers.end(),
-                [&](const std::unique_ptr<TargetBrowserPair>& pair) {
-                    pair->startFading(transparency, 2.f);
+                // Also hide the hover circle
+                disableHoverCircle();
+            }
+            else { // Camera moved into the solar system => fade in
+                for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
+                    pair->startFading(1.f, FadeDuration);
                 }
-            );
+            }
         }
-        // Fade pairs if the camera moved in or out the solar system
-        if (_isFading) {
-            incrementallyFadeBrowserTargets(_goal);
-        }
+
         if (_isCameraInSolarSystem) {
-            std::for_each(
-                _targetsBrowsers.begin(),
-                _targetsBrowsers.end(),
-                [&](const std::unique_ptr<TargetBrowserPair>& pair) {
-                    pair->synchronizeAim();
-                }
-            );
+            for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
+                pair->synchronizeAim();
+            }
             incrementallyAnimateTargets();
         }
         if (_cameraRotation.isAnimating() && _allowCameraRotation) {
             incrementallyRotateCamera();
+        }
+
+        // Trigger callbacks (should maybe have a check to see if update is needed)
+        using K = CallbackHandle;
+        using V = CallbackFunction;
+        for (const std::pair<const K, V>& it : _preSyncCallbacks) {
+            it.second(); // call function
         }
     });
 }
@@ -172,6 +228,18 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     _enabled = p.enabled.value_or(true);
+    _allowCameraRotation = p.allowCameraRotation.value_or(_allowCameraRotation);
+    _cameraRotationSpeed = p.cameraRotSpeed.value_or(_cameraRotationSpeed);
+    _targetAnimationSpeed = p.targetSpeed.value_or(_targetAnimationSpeed);
+    _browserAnimationSpeed = p.browserSpeed.value_or(_browserAnimationSpeed);
+    _inverseZoomDirection = p.inverseZoomDirection.value_or(_inverseZoomDirection);
+    _wwtImageCollectionUrl = p.wwtImageCollectionUrl.value_or(_wwtImageCollectionUrl);
+    _hideTargetsBrowsersWithGui = p.hideTargetsBrowsersGui.value_or(
+        _hideTargetsBrowsersWithGui
+    );
+    _spaceCraftAnimationTime = p.spaceCraftAnimationTime.value_or(
+        _spaceCraftAnimationTime
+    );
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -208,10 +276,11 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
     if (browser && target) {
         _targetsBrowsers.push_back(std::make_unique<TargetBrowserPair>(target, browser));
     }
+    _uniqueIdentifierCounter++;
 }
 
 void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
-    TargetBrowserPair* found = getPair(id);
+    TargetBrowserPair* found = pair(id);
     if (!found) {
         return;
     }
@@ -222,18 +291,17 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
             // should this be?
             // found == pair.get()
-            return *found == *(pair.get());
+            return found == pair.get();
         }
     );
 
     _targetsBrowsers.erase(it, _targetsBrowsers.end());
-    _mouseOnPair = nullptr;
 }
 
 void SkyBrowserModule::lookAtTarget(const std::string& id) {
-    TargetBrowserPair* pair = getPair(id);
-    if (pair) {
-        startRotatingCamera(pair->targetDirectionGalactic());
+    TargetBrowserPair* found = pair(id);
+    if (found) {
+        startRotatingCamera(found->targetDirectionGalactic());
     }
 }
 
@@ -241,23 +309,39 @@ void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
     _hoverCircle = circle;
 }
 
-void SkyBrowserModule::moveHoverCircle(int i) {
+void SkyBrowserModule::moveHoverCircle(int i, bool useScript) {
     const ImageData& image = _dataHandler->getImage(i);
 
     // Only move and show circle if the image has coordinates
     if (_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem) {
-        // Make circle visible
-        _hoverCircle->renderable()->property("Enabled")->set(true);
+        const std::string id = _hoverCircle->identifier();
+
+        // Show the circle
+        if (useScript) {
+            const std::string script = fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
+                id
+            );
+            global::scriptEngine->queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+        else {
+            Renderable* renderable = _hoverCircle->renderable();
+            if (renderable) {
+                renderable->property("Fade")->set(1.f);
+            }
+        }
 
         // Set the exact target position
         // Move it slightly outside of the celestial sphere so it doesn't overlap with
         // the target
         glm::dvec3 pos = skybrowser::equatorialToGalactic(image.equatorialCartesian);
         pos *= skybrowser::CelestialSphereRadius * 1.1;
-        // Uris for properties
-        std::string id = _hoverCircle->identifier();
 
-        std::string script = fmt::format(
+        // Note that the position can only be set through the script engine
+        const std::string script = fmt::format(
             "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
             id, ghoul::to_string(pos)
         );
@@ -268,9 +352,21 @@ void SkyBrowserModule::moveHoverCircle(int i) {
     }
 }
 
-void SkyBrowserModule::disableHoverCircle() {
+void SkyBrowserModule::disableHoverCircle(bool useScript) {
     if (_hoverCircle && _hoverCircle->renderable()) {
-        _hoverCircle->renderable()->property("Enabled")->set(false);
+        if (useScript) {
+            const std::string script = fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
+                _hoverCircle->identifier()
+            );
+            global::scriptEngine->queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+        else {
+            _hoverCircle->renderable()->property("Fade")->set(0.f);
+        }
     }
 }
 
@@ -296,7 +392,7 @@ int SkyBrowserModule::nPairs() const {
     return static_cast<int>(_targetsBrowsers.size());
 }
 
-TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) const {
+TargetBrowserPair* SkyBrowserModule::pair(const std::string& id) const {
     auto it = std::find_if(
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
@@ -307,7 +403,11 @@ TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id) const {
             return foundBrowser || foundTarget || foundTargetNode;
         }
     );
-    return it != _targetsBrowsers.end() ? it->get() : nullptr;
+    TargetBrowserPair* found = it != _targetsBrowsers.end() ? it->get() : nullptr;
+    if (found == nullptr) {
+        LINFO(fmt::format("Identifier '{}' not found", id));
+    }
+    return found;
 }
 
 void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
@@ -326,29 +426,6 @@ void SkyBrowserModule::incrementallyRotateCamera() {
     }
 }
 
-void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal) {
-     bool isAllFinished = true;
-     for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
-         if (pair->isEnabled()) {
-             bool isPairFinished = pair->hasFinishedFading();
-             if (!isPairFinished) {
-                 pair->incrementallyFade();
-             }
-             else if (isPairFinished && goal == Transparency::Transparent) {
-                 pair->setEnabled(false);
-                 pair->setOpacity(1.0);
-
-             }
-             isAllFinished &= isPairFinished;
-         }
-     }
-
-     // The transition is over when the fade is finished
-     if (isAllFinished) {
-         _isFading = false;
-     }
-}
-
 void SkyBrowserModule::incrementallyAnimateTargets() {
     for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
         if (pair->isEnabled()) {
@@ -365,8 +442,16 @@ double SkyBrowserModule::browserAnimationSpeed() const {
     return _browserAnimationSpeed;
 }
 
+double SkyBrowserModule::spaceCraftAnimationTime() const {
+    return _spaceCraftAnimationTime;
+}
+
+std::string SkyBrowserModule::wwtImageCollectionUrl() const {
+    return _wwtImageCollectionUrl;
+}
+
 void SkyBrowserModule::setSelectedBrowser(const std::string& id) {
-    TargetBrowserPair* found = getPair(id);
+    TargetBrowserPair* found = pair(id);
     if (found) {
         _selectedBrowser = id;
     }
@@ -377,12 +462,12 @@ std::string SkyBrowserModule::selectedBrowserId() const {
 }
 
 std::string SkyBrowserModule::selectedTargetId() const {
-    TargetBrowserPair* found = getPair(_selectedBrowser);
+    TargetBrowserPair* found = pair(_selectedBrowser);
     return found ? found->targetRenderableId() : "";
 }
 
-glm::ivec3 SkyBrowserModule::highlight() const {
-    return _highlightAddition;
+int SkyBrowserModule::uniqueIdentifierCounter() const {
+    return _uniqueIdentifierCounter;
 }
 
 bool SkyBrowserModule::isCameraInSolarSystem() const {
@@ -390,13 +475,45 @@ bool SkyBrowserModule::isCameraInSolarSystem() const {
 }
 
 bool SkyBrowserModule::isSelectedPairUsingRae() const {
-    TargetBrowserPair* found = getPair(_selectedBrowser);
+    TargetBrowserPair* found = pair(_selectedBrowser);
     return found ? found->isUsingRadiusAzimuthElevation() : false;
 }
 
 bool SkyBrowserModule::isSelectedPairFacingCamera() const {
-    TargetBrowserPair* found = getPair(_selectedBrowser);
+    TargetBrowserPair* found = pair(_selectedBrowser);
     return found ? found->isFacingCamera() : false;
+}
+
+SkyBrowserModule::CallbackHandle SkyBrowserModule::addPreSyncCallback(
+                                                                     CallbackFunction cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _preSyncCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void SkyBrowserModule::removePreSyncCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _preSyncCallbacks.begin(),
+        _preSyncCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, CallbackFunction>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _preSyncCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _preSyncCallbacks.erase(it);
+}
+
+std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {
+    return {
+        RenderableSkyTarget::Documentation(),
+        ScreenSpaceSkyBrowser::Documentation()
+    };
 }
 
 scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
@@ -426,12 +543,17 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::SetVerticalFov,
             codegen::lua::SetBorderColor,
             codegen::lua::TranslateScreenSpaceRenderable,
-            codegen::lua::AddRenderCopy,
-            codegen::lua::SetScreenSpaceSize,
-            codegen::lua::RemoveRenderCopy,
+            codegen::lua::AddDisplayCopy,
+            codegen::lua::SetBrowserRatio,
+            codegen::lua::RemoveDisplayCopy,
             codegen::lua::StartFinetuningTarget,
             codegen::lua::FinetuneTargetPosition,
-            codegen::lua::ScrollOverBrowser
+            codegen::lua::ScrollOverBrowser,
+            codegen::lua::LoadingImageCollectionComplete,
+            codegen::lua::ShowAllTargetsAndBrowsers,
+            codegen::lua::PointSpaceCraft,
+            codegen::lua::GetWwtImageCollectionUrl,
+            codegen::lua::StopAnimations
         }
     };
 }

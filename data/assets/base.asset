@@ -21,7 +21,6 @@ asset.require("scene/solarsystem/dwarf_planets/pluto/charon/default_layers")
 asset.require("scene/milkyway/milkyway/volume")
 asset.require("scene/milkyway/constellations/constellation_art")
 asset.require("scene/milkyway/constellations/constellation_keybinds")
-asset.require("scene/milkyway/objects/orionnebula/orionnebula")
 
 asset.require("scene/digitaluniverse/2dF")
 asset.require("scene/digitaluniverse/2mass")
@@ -60,6 +59,7 @@ asset.require("scene/digitaluniverse/tully")
 asset.require("scene/digitaluniverse/voids")
 
 asset.require("customization/globebrowsing")
+asset.require("util/default_actions")
 
 local toggle_trails = {
   Identifier = "os_default.toggle_trails",
@@ -92,10 +92,10 @@ local toggle_planet_labels = {
   Key = "l"
 }
 
+local trailAction = asset.require("actions/trails/toggle_trails_planets_moons").toggle_trails
 
 asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_trails)
-  openspace.bindKey(toggle_trails.Key, toggle_trails.Identifier)
+  openspace.bindKey("h", trailAction.Identifier)
 
   openspace.action.registerAction(toggle_planet_labels)
   openspace.bindKey(toggle_planet_labels.Key, toggle_planet_labels.Identifier)
@@ -106,7 +106,6 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_trails)
   openspace.clearKey(toggle_trails.Key)
 
   openspace.action.removeAction(toggle_planet_labels)

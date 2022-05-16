@@ -189,10 +189,12 @@ bool Path::hasReachedEnd() const {
     }
 
     bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
+
+    constexpr const double RotationEpsilon = 0.0001;
     bool isRotationFinished = ghoul::isSameOrientation(
         _prevPose.rotation,
         _end.rotation(),
-        glm::epsilon<double>()
+        RotationEpsilon
     );
 
     return isPositionFinished && isRotationFinished;
@@ -504,6 +506,14 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
         const glm::dvec3 prevPos = startPoint.position();
         const glm::dvec3 targetToPrev = prevPos - nodePos;
         const glm::dvec3 targetToSun = sunPos - nodePos;
+
+        // Check against zero vectors, as this will lead to nan-values from cross product
+        if (glm::length(targetToSun) < LengthEpsilon ||
+            glm::length(targetToPrev) < LengthEpsilon)
+        {
+            // Same situation as if sun does not exist. Any direction will do
+            return glm::dvec3(0.0, 0.0, 1.0);
+        }
 
         constexpr const float defaultPositionOffsetAngle = -30.f; // degrees
         constexpr const float angle = glm::radians(defaultPositionOffsetAngle);

@@ -73,9 +73,9 @@ namespace {
         "option is suited for bigger datasets.)"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOption",
-        "Render Option",
+    constexpr openspace::properties::Property::PropertyInfo RenderModeInfo = {
+        "RenderMode",
+        "Render Mode",
         "This value determines which predefined columns to use in rendering. If "
         "'Static' only the position of the stars is used. 'Color' uses position + color "
         "parameters and 'Motion' uses pos, color as well as velocity for the stars."
@@ -315,13 +315,13 @@ namespace {
         // [[codegen::verbatim(FileReaderOptionInfo.description)]]
         FileReader fileReaderOption;
 
-        enum class [[codegen::map(openspace::gaia::RenderOption)]] RenderOption {
+        enum class [[codegen::map(openspace::gaia::RenderMode)]] RenderMode {
             Static,
             Color,
             Motion
         };
-        // [[codegen::verbatim(RenderOptionInfo.description)]]
-        std::optional<RenderOption> renderOption;
+        // [[codegen::verbatim(RenderModeInfo.description)]]
+        std::optional<RenderMode> renderMode;
 
         enum class [[codegen::map(openspace::gaia::ShaderOption)]] ShaderOption {
             PointSSBO [[codegen::key("Point_SSBO")]],
@@ -446,7 +446,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         FileReaderOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _renderMode(RenderModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _shaderOption(ShaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2000000000) // 2 Billion stars
     , _cpuRamBudgetProperty(CpuRamBudgetInfo, 0.f, 0.f, 1.f)
@@ -464,7 +464,14 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _dataFile = std::make_unique<File>(_filePath.value());
     _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
-    _filePath.onChange([this]() { _dataIsDirty = true; });
+    _filePath.onChange([this]() {
+        if (std::filesystem::exists(_filePath.value())) {
+            _dataIsDirty = true;
+        }
+        else {
+            LWARNING(fmt::format("File not found: {}", _filePath));
+        }
+    });
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
@@ -476,16 +483,16 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     });
     _fileReaderOption = codegen::map<gaia::FileReaderOption>(p.fileReaderOption);
 
-    _renderOption.addOptions({
-        { gaia::RenderOption::Static, "Static" },
-        { gaia::RenderOption::Color, "Color" },
-        { gaia::RenderOption::Motion, "Motion" }
+    _renderMode.addOptions({
+        { gaia::RenderMode::Static, "Static" },
+        { gaia::RenderMode::Color, "Color" },
+        { gaia::RenderMode::Motion, "Motion" }
     });
-    if (p.renderOption.has_value()) {
-        _renderOption = codegen::map<gaia::RenderOption>(*p.renderOption);
+    if (p.renderMode.has_value()) {
+        _renderMode = codegen::map<gaia::RenderMode>(*p.renderMode);
     }
-    _renderOption.onChange([&]() { _buffersAreDirty = true; });
-    addProperty(_renderOption);
+    _renderMode.onChange([&]() { _buffersAreDirty = true; });
+    addProperty(_renderMode);
 
     _shaderOption.addOptions({
         { gaia::ShaderOption::PointSSBO, "Point_SSBO" },
@@ -952,13 +959,13 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     }
 
     // Traverse Octree and build a map with new nodes to render, uses mvp matrix to decide
-    const int renderOption = _renderOption;
+    const int renderOption = _renderMode;
     int deltaStars = 0;
     std::map<int, std::vector<float>> updateData = _octreeManager.traverseData(
         modelViewProjMat,
         screenSize,
         deltaStars,
-        gaia::RenderOption(renderOption),
+        gaia::RenderMode(renderOption),
         _lodPixelThreshold
     );
 
@@ -1081,7 +1088,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         }
 
         // Update Color VBO if render option is 'Color' or 'Motion'.
-        if (renderOption != gaia::RenderOption::Static) {
+        if (renderOption != gaia::RenderMode::Static) {
             glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
             float colMemoryShare = static_cast<float>(ColorSize) / _nRenderValuesPerStar;
             size_t colChunkSize = maxStarsPerNode * ColorSize;
@@ -1112,7 +1119,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             }
 
             // Update Velocity VBO if specified.
-            if (renderOption == gaia::RenderOption::Motion) {
+            if (renderOption == gaia::RenderMode::Motion) {
                 glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
                 float velMemoryShare = static_cast<float>(VelocitySize) /
                                        _nRenderValuesPerStar;
@@ -1163,7 +1170,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         _uniformCache.time,
         static_cast<float>(data.time.j2000Seconds())
     );
-    _program->setUniform(_uniformCache.renderOption, _renderOption);
+    _program->setUniform(_uniformCache.renderOption, _renderMode);
     _program->setUniform(_uniformCache.viewScaling, viewScaling);
     _program->setUniform(_uniformCache.cutOffThreshold, _cutOffThreshold);
     _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
@@ -1340,7 +1347,7 @@ void RenderableGaiaStars::checkGlErrors(const std::string& identifier) const {
 
 void RenderableGaiaStars::update(const UpdateData&) {
     const int shaderOption = _shaderOption;
-    const int renderOption = _renderOption;
+    const int renderOption = _renderMode;
 
     // Don't update anything if we are in the middle of a rebuild.
     if (_octreeManager.isRebuildOngoing()) {
@@ -1675,10 +1682,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
         LDEBUG("Regenerating buffers");
 
         // Set values per star slice depending on render option.
-        if (renderOption == gaia::RenderOption::Static) {
+        if (renderOption == gaia::RenderMode::Static) {
             _nRenderValuesPerStar = PositionSize;
         }
-        else if (renderOption == gaia::RenderOption::Color) {
+        else if (renderOption == gaia::RenderMode::Color) {
             _nRenderValuesPerStar = PositionSize + ColorSize;
         }
         else { // (renderOption == gaia::RenderOption::Motion)
@@ -1847,7 +1854,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             glBindVertexArray(_vao);
 
             switch (renderOption) {
-                case gaia::RenderOption::Static: {
+                case gaia::RenderMode::Static: {
                     glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
                     GLint positionAttrib = _program->attributeLocation("in_position");
                     glEnableVertexAttribArray(positionAttrib);
@@ -1863,7 +1870,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                     break;
                 }
-                case gaia::RenderOption::Color: {
+                case gaia::RenderMode::Color: {
                     glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
                     GLint positionAttrib = _program->attributeLocation("in_position");
                     glEnableVertexAttribArray(positionAttrib);
@@ -1891,7 +1898,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                     );
                     break;
                 }
-                case gaia::RenderOption::Motion: {
+                case gaia::RenderMode::Motion: {
                     glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
                     GLint positionAttrib = _program->attributeLocation("in_position");
                     glEnableVertexAttribArray(positionAttrib);

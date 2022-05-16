@@ -29,6 +29,8 @@
 #include <openspace/documentation/documentation.h>
 #include <deque>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 
 struct ImageData;
@@ -44,14 +46,13 @@ public:
 
     // Target & Browser
     void initialize();
-    // Highlighting
-    void removeHighlight(const glm::ivec3& color);
-    void highlight(const glm::ivec3& color);
+
     // Animation
     void startAnimation(glm::dvec3 coordsEnd, double fovEnd);
     void incrementallyAnimateToCoordinate();
     void startFading(float goal, float fadeTime);
-    void incrementallyFade();
+    void stopAnimations();
+
     // Mouse interaction
     void startFinetuningTarget();
     void fineTuneTarget(const glm::vec2& startMouse, const glm::vec2& translation);
@@ -60,25 +61,25 @@ public:
     // Browser
     void sendIdToBrowser() const;
     void updateBrowserSize();
-    std::vector<std::pair<std::string, glm::dvec3>> renderCopies() const;
+    std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
+    bool isImageCollectionLoaded();
 
     // Target
     void centerTargetOnScreen();
-    double targetRoll();
+    double targetRoll() const;
 
-    bool hasFinishedFading() const;
     bool isFacingCamera() const;
     bool isUsingRadiusAzimuthElevation() const;
     bool isEnabled() const;
 
     void setEnabled(bool enable);
     void setOpacity(float opacity);
-    void setIsSyncedWithWwt(bool isSynced);
     void setVerticalFov(double vfov);
     void setEquatorialAim(const glm::dvec2& aim);
     void setBorderColor(const glm::ivec3& color);
-    void setScreenSpaceSize(const glm::vec2& dimensions);
+    void setBrowserRatio(float ratio);
     void setVerticalFovWithScroll(float scroll);
+    void setImageCollectionIsLoaded(bool isLoaded);
 
     double verticalFov() const;
     glm::ivec3 borderColor() const;
@@ -88,19 +89,22 @@ public:
     std::string browserId() const;
     std::string targetRenderableId() const;
     std::string targetNodeId() const;
-    glm::vec2 size() const;
+    float browserRatio() const;
 
     SceneGraphNode* targetNode() const;
     ScreenSpaceSkyBrowser* browser() const;
-    const std::deque<int>& selectedImages() const;
+    std::vector<int> selectedImages() const;
+
+    ghoul::Dictionary dataAsDictionary() const;
 
     // WorldWide Telescope image handling
     void setImageOrder(int i, int order);
     void selectImage(const ImageData& image, int i);
+    void addImageLayerToWwt(const std::string& url, int i);
     void removeSelectedImage(int i);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity);
-    void hideChromeInterface(bool shouldHide);
+    void hideChromeInterface();
 
     friend bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs);
     friend bool operator!=(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs);
@@ -114,19 +118,13 @@ private:
     SceneGraphNode* _targetNode = nullptr;
 
     // Animation
-    skybrowser::Animation<float> _fadeBrowser = skybrowser::Animation(0.f, 0.f, 0.f);
-    skybrowser::Animation<float> _fadeTarget = skybrowser::Animation(0.f, 0.f, 0.f);
     skybrowser::Animation<double> _fovAnimation = skybrowser::Animation(0.0, 0.0, 0.0);
-    skybrowser::Animation<glm::dvec3> _moveTarget =
+    skybrowser::Animation<glm::dvec3> _targetAnimation =
         skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
     bool _targetIsAnimating = false;
 
     // Dragging
     glm::dvec3 _startTargetPosition = glm::dvec3(0.0);
-
-    glm::dvec2 _equatorialAim = glm::dvec2(0.0);
-    glm::ivec3 _borderColor = glm::ivec3(255);
-    glm::vec2 _dimensions = glm::vec2(0.5f);
 };
 
 } // namespace openspace

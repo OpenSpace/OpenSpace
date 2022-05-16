@@ -303,41 +303,50 @@ void OpenSpaceEngine::initialize() {
 
     // Process profile file (must be provided in configuration file)
     if (!global::configuration->profile.empty()) {
-        std::string inputProfilePath = absPath("${PROFILES}").string();
-        std::string outputScenePath = absPath("${TEMPORARY}").string();
-        std::string inputProfile = inputProfilePath + "/" + global::configuration->profile
-            + ".profile";
-        std::string inputUserProfile = absPath("${USER_PROFILES}").string() + "/" +
-            global::configuration->profile + ".profile";
+        std::filesystem::path profile;
+        if (!std::filesystem::is_regular_file(global::configuration->profile)) {
+            std::filesystem::path userCandidate = absPath(fmt::format(
+                "${{USER_PROFILES}}/{}.profile", global::configuration->profile
+            ));
+            std::filesystem::path profileCandidate = absPath(fmt::format(
+                "${{PROFILES}}/{}.profile", global::configuration->profile
+            ));
 
-        if (std::filesystem::is_regular_file(inputUserProfile)) {
-            inputProfile = inputUserProfile;
-        }
-
-        if (!std::filesystem::is_regular_file(inputProfile)) {
-            LERROR(fmt::format(
-                "Could not load profile '{}': File does not exist", inputProfile)
-            );
+            // Give the user profile priority if there are both
+            if (std::filesystem::is_regular_file(userCandidate)) {
+                profile = userCandidate;
+            }
+            else if (std::filesystem::is_regular_file(profileCandidate)) {
+                profile = profileCandidate;
+            }
+            else {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Could not load profile '{}': File does not exist",
+                    global::configuration->profile
+                ));
+            }
         }
         else {
-            // Load the profile
-            std::ifstream inFile;
-            try {
-                inFile.open(inputProfile, std::ifstream::in);
-            }
-            catch (const std::ifstream::failure& e) {
-                throw ghoul::RuntimeError(fmt::format(
-                    "Exception opening profile file for read: {} ({})",
-                    inputProfile, e.what())
-                );
-            }
-
-            std::string content(
-                (std::istreambuf_iterator<char>(inFile)),
-                std::istreambuf_iterator<char>()
-            );
-            *global::profile = Profile(content);
+            profile = global::configuration->profile;
         }
+
+        // Load the profile
+        std::ifstream inFile;
+        try {
+            inFile.open(profile, std::ifstream::in);
+        }
+        catch (const std::ifstream::failure& e) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Exception opening profile file for read: {} ({})",
+                profile, e.what())
+            );
+        }
+
+        std::string content(
+            (std::istreambuf_iterator<char>(inFile)),
+            std::istreambuf_iterator<char>()
+        );
+        *global::profile = Profile(content);
     }
 
     // Set up asset loader

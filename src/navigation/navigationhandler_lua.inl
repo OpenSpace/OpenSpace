@@ -63,25 +63,7 @@ namespace {
         state = global::navigationHandler->navigationState();
     }
 
-    ghoul::Dictionary res;
-    res.setValue("Anchor", state.anchor);
-    if (!state.aim.empty()) {
-        res.setValue("Aim", state.aim);
-    }
-    if (!state.referenceFrame.empty()) {
-        res.setValue("ReferenceFrame", state.referenceFrame);
-    }
-    res.setValue("ReferenceFrame", state.position);
-    if (state.up.has_value()) {
-        res.setValue("Up", *state.up);
-    }
-    if (state.yaw != 0) {
-        res.setValue("Up", state.yaw);
-    }
-    if (state.pitch != 0) {
-        res.setValue("Pitch", state.pitch);
-    }
-    return res;
+    return state.dictionary();
 }
 
 // Set the navigation state. The argument must be a valid Navigation State.
@@ -143,10 +125,10 @@ namespace {
 
     std::string currAnchor =
         global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
-    
+
     auto it = std::find(markNodes.begin(), markNodes.end(), currAnchor);
     if (it == markNodes.end() || ((it + 1) == markNodes.end())) {
-        // We want to use the first node either if 
+        // We want to use the first node either if
         //  1. The current node is not an interesting node
         //  2. The current node is the last interesting node
         global::navigationHandler->orbitalNavigator().setFocusNode(markNodes.front());
