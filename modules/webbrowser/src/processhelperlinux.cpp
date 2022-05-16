@@ -28,30 +28,6 @@
 
 #include "include/cef_app.h"
 #include "include/webbrowserapp.h"
-#if defined(CEF_X11)
-#include <X11/Xlib.h>
-#endif
-
-#if defined(CEF_X11)
-namespace {
-
-int XErrorHandlerImpl(Display* display, XErrorEvent* event) {
-  LOG(WARNING) << "X error received: "
-               << "type " << event->type << ", "
-               << "serial " << event->serial << ", "
-               << "error_code " << static_cast<int>(event->error_code) << ", "
-               << "request_code " << static_cast<int>(event->request_code)
-               << ", "
-               << "minor_code " << static_cast<int>(event->minor_code);
-  return 0;
-}
-
-int XIOErrorHandlerImpl(Display* display) {
-  return 0;
-}
-
-}  // namespace
-#endif  // defined(CEF_X11)
 
 // Entry point function for all processes.
 int main(int argc, char* argv[]) {
