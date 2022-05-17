@@ -1,4 +1,4 @@
-if(os.getenv("OPENSPACE_DEVELOPER"))
+if os.getenv("OPENSPACE_DEVELOPER")
 then
-   openspace.setPropertyValueSingle('OpenSpaceEngine.Visibility', 4)
-end 
+  openspace.setPropertyValueSingle('OpenSpaceEngine.PropertyVisibility', 4)
+end

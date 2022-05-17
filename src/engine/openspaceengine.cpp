@@ -126,8 +126,8 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
-        "Visibility",
-        "Visibility",
+        "PropertyVisibility",
+        "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
         "are."
     };
@@ -169,10 +169,12 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
-    { static_cast<int>(Visibility::User), "User"},
-    { static_cast<int>(Visibility::Developer), "Developer"},
-    { static_cast<int>(Visibility::Hidden), "Everything"},
-        });
+        { static_cast<int>(Visibility::NoviceUser), "Novice User"},
+        { static_cast<int>(Visibility::User), "User"},
+        { static_cast<int>(Visibility::AdvancedUser), "Advanced User"},
+        { static_cast<int>(Visibility::Developer), "Developer"},
+        { static_cast<int>(Visibility::Hidden), "Everything"},
+    });
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT

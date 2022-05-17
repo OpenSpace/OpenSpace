@@ -112,11 +112,10 @@ void OptionProperty::setValue(int value) {
 }
 
 bool OptionProperty::hasOption() const {
-    int setValue = value();
     auto it = std::find_if(
         _options.begin(),
         _options.end(),
-        [setValue](const Option& option) {
+        [setValue = value()](const Option& option) {
             return option.value == setValue;
         }
     );
@@ -125,11 +124,10 @@ bool OptionProperty::hasOption() const {
 
 
 const OptionProperty::Option& OptionProperty::option() const {
-    int setValue = value();
     auto it = std::find_if(
         _options.begin(),
         _options.end(),
-        [setValue](const Option& option) {
+        [setValue = value()](const Option& option) {
             return option.value == setValue;
         }
     );
