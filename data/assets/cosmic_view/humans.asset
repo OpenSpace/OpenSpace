@@ -1,0 +1,66 @@
+local eight = {
+    Identifier = "eight",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.945, 0.929, 0.513 },
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/patterson2012_humanPopulations_8SNPs.mMDS.noOutliers.xyz.reProjected.speck"),
+      DrawLabels = false,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/patterson2012_humanPopulations_8SNPs.mMDS.noOutliers.xyz.reProjected.label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/consensus/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "8SNP",
+      Path = "/Cosmic/Humans"
+    }
+  }
+
+  local consensus = {
+    Identifier = "consensus",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = {0.78, 0.843, 0.874 },
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/consensus/consensus_sequence_taxon.speck"),
+      DrawLabels = true,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/consensus/consensus_sequence_taxon.label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/consensus/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "One point per species",
+      Path = "/Cosmic/Consensus"
+    }
+  }
+
+  asset.onInitialize(function()
+    openspace.addSceneGraphNode(reference)
+    openspace.addSceneGraphNode(consensus)
+    end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(reference)
+    openspace.removeSceneGraphNode(consensus)
+end)
+
+asset.export(reference)
+asset.export(consensus)

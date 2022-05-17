@@ -24,17 +24,8 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-in vec4 in_position;
-in vec4 in_colormap;
-in float in_dvarScaling;
-
-flat out vec4 colorMap;
-flat out float dvarScaling;
+layout(location = 0) in vec4 in_position;
 
 void main() {
-  colorMap = in_colormap;
-  dvarScaling = in_dvarScaling;
   gl_Position = in_position;
 }

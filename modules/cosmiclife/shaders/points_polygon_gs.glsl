@@ -24,17 +24,32 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+layout(points) in;
+layout(triangle_strip, max_vertices = 63) out;
 
-in vec4 in_position;
-in vec4 in_colormap;
-in float in_dvarScaling;
+uniform int sides;
 
-flat out vec4 colorMap;
-flat out float dvarScaling;
+const float PI = 3.1415926;
 
 void main() {
-  colorMap = in_colormap;
-  dvarScaling = in_dvarScaling;
-  gl_Position = in_position;
+  vec4 v0 = gl_in[0].gl_Position;
+    
+  for (int i = sides; i > 0; --i) {
+    // Angle between each side in radians
+    float ang = 2.0 * PI / float(sides) * i;
+
+    gl_Position = v0;
+    EmitVertex();
+
+    vec4 vi = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
+    gl_Position = vi;
+    EmitVertex();
+
+    ang = 2.0 * PI / float(sides) * (i - 1);
+    vec4 vii = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
+    gl_Position = vii;
+    EmitVertex();
+
+    EndPrimitive();
+  }
 }

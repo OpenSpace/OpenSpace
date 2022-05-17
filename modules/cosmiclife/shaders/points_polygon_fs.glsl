@@ -24,17 +24,10 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+out vec4 finalColor;
 
-in vec4 in_position;
-in vec4 in_colormap;
-in float in_dvarScaling;
-
-flat out vec4 colorMap;
-flat out float dvarScaling;
+uniform vec3 polygonColor;
 
 void main() {
-  colorMap = in_colormap;
-  dvarScaling = in_dvarScaling;
-  gl_Position = in_position;
+  finalColor = vec4(polygonColor, 1.0 );
 }
