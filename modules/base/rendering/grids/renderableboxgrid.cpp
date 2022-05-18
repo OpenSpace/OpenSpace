@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -154,7 +154,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
-    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
@@ -234,6 +234,8 @@ void RenderableBoxGrid::update(const UpdateData&) {
         _varray.push_back({ v6.x, v6.y, v6.z });
         _varray.push_back({ v7.x, v7.y, v7.z });
         _varray.push_back({ v3.x, v3.y, v3.z });
+
+        setBoundingSphere(glm::length(glm::dvec3(urb)));
 
         glBindVertexArray(_vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);

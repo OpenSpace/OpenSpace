@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -130,11 +130,6 @@ void to_json(json& j, const SceneGraphNode& n) {
 
         { "subowners", n.propertySubOwners() }
     };
-/*
-    auto renderable = n.renderable();
-    if (renderable != nullptr) {
-        j["renderable"] = renderable;
-    }*/
 
     SceneGraphNode* parent = n.parent();
     if (parent) {

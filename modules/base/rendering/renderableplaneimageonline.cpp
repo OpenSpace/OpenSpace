@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,20 +52,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageOnline::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "base_renderable_plane_image_online"
+    return codegen::doc<Parameters>(
+        "base_renderable_plane_image_online",
+        RenderablePlane::Documentation()
     );
-
-    // @TODO cleanup
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderablePlane::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-    return doc;
 }
 
 RenderablePlaneImageOnline::RenderablePlaneImageOnline(
@@ -127,6 +117,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 ghoul::io::TextureReader::ref().loadTexture(
                     reinterpret_cast<void*>(imageFile.buffer),
                     imageFile.size,
+                    2,
                     imageFile.format
                 );
 

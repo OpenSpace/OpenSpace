@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ASSETS___H__
-#define __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__
 
 #include <QDialog>
 
@@ -48,18 +48,15 @@ public:
     AssetsDialog(QWidget* parent, openspace::Profile* profile,
         const std::string& assetBasePath, const std::string& userAssetBasePath);
 
-private slots:
+private:
+    void createWidgets();
+
     void parseSelections();
     void selected(const QModelIndex&);
 
-private:
-    void createWidgets();
-    /**
-     * Creates a text summary of all assets and their paths
-     *
-     * \return the #std::string summary
-     */
+    /// Creates a text summary of all assets and their paths
     QString createTextSummary();
+    void openAssetEditor();
 
     openspace::Profile* _profile = nullptr;
     AssetTreeModel _assetTreeModel;
@@ -67,4 +64,4 @@ private:
     QTextEdit* _summary = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__

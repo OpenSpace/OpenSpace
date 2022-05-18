@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,24 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/navigationstate.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ctime>
-#include <filesystem>
+namespace {
 
-namespace openspace::luascriptfunctions {
-
-int saveSettingsToProfile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 0, 2 }, "lua::saveSettingsToProfile");
-    auto [saveFilePath, overwrite] =
-        ghoul::lua::values<std::optional<std::string>, std::optional<bool>>(L);
-    overwrite = overwrite.value_or(true);
+/**
+ * Collects all changes that have been made since startup, including all property changes
+ * and assets required, requested, or removed. All changes will be added to the profile
+ * that OpenSpace was started with, and the new saved file will contain all of this
+ * information. If the argument is provided, the settings will be saved into new profile
+ * with that name. If the argument is blank, the current profile will be saved to a backup
+ * file and the original profile will be overwritten. The second argument determines if a
+ * file that already exists should be overwritten, which is 'false' by default.
+ */
+[[codegen::luawrap]] void saveSettingsToProfile(std::optional<std::string> saveFilePath,
+                                                bool overwrite = true)
+{
+    using namespace openspace;
 
     if (!saveFilePath.has_value()) {
         std::time_t t = std::time(nullptr);
@@ -76,10 +73,8 @@ int saveSettingsToProfile(lua_State* L) {
         std::filesystem::copy(sourcePath, destPath);
         saveFilePath = global::configuration->profile;
     }
-    else {
-        if (saveFilePath->empty()) {
-            return ghoul::lua::luaError(L, "Save filepath string is empty");
-        }
+    if (saveFilePath->empty()) {
+        throw ghoul::lua::LuaError("Save filepath string is empty");
     }
 
     const properties::PropertyOwner& root = *global::rootPropertyOwner;
@@ -89,14 +84,13 @@ int saveSettingsToProfile(lua_State* L) {
     global::configuration->profile = *saveFilePath;
 
     if (saveFilePath->find('/') != std::string::npos) {
-        return ghoul::lua::luaError(L, "Profile filename must not contain (/) elements");
+        throw ghoul::lua::LuaError("Profile filename must not contain (/) elements");
     }
     else if (saveFilePath->find(':') != std::string::npos) {
-        return ghoul::lua::luaError(L, "Profile filename must not contain (:) elements");
+        throw ghoul::lua::LuaError("Profile filename must not contain (:) elements");
     }
     else if (saveFilePath->find('.') != std::string::npos) {
-        return ghoul::lua::luaError(
-            L,
+        throw ghoul::lua::LuaError(
             "Only provide the filename to save without file extension"
         );
     }
@@ -109,8 +103,7 @@ int saveSettingsToProfile(lua_State* L) {
     }
 
     if (std::filesystem::is_regular_file(absFilename) && !overwrite) {
-        return ghoul::lua::luaError(
-            L,
+        throw ghoul::lua::LuaError(
             fmt::format(
                 "Unable to save profile '{}'. File of same name already exists",
                 absFilename
@@ -124,8 +117,7 @@ int saveSettingsToProfile(lua_State* L) {
         outFile.open(absFilename, std::ofstream::out);
     }
     catch (const std::ofstream::failure& e) {
-        return ghoul::lua::luaError(
-            L,
+        throw ghoul::lua::LuaError(
             fmt::format(
                 "Exception opening profile file for write: {} ({})", absFilename, e.what()
             )
@@ -136,12 +128,12 @@ int saveSettingsToProfile(lua_State* L) {
         outFile << global::profile->serialize();
     }
     catch (const std::ofstream::failure& e) {
-        return ghoul::lua::luaError(
-            L,
+        throw ghoul::lua::LuaError(
             fmt::format("Data write error to file: {} ({})", absFilename, e.what())
         );
     }
-    return 0;
 }
 
-} // namespace openspace::luascriptfunctions
+#include "profile_lua_codegen.cpp"
+
+} // namespace

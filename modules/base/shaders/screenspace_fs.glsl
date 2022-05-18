@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,13 +29,16 @@ in vec2 vs_st;
 in float vs_depth;
 
 uniform sampler2D tex;
-uniform vec3 color = vec3(1.0, 1.0, 1.0);
+uniform vec3 color = vec3(1.0);
 uniform float opacity = 1.0;
+uniform vec4 backgroundColor = vec4(0.0);
 
 Fragment getFragment() {
   Fragment frag;
 
-  frag.color = texture(tex, vs_st) * vec4(color, opacity);
+  vec4 texColor = texture(tex, vs_st) * vec4(color, opacity);
+
+  frag.color = texColor.a * texColor + (1.0 - texColor.a) * backgroundColor;
   if (frag.color.a == 0.0) {
     discard;
   }

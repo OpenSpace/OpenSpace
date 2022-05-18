@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Renderable ToyVolume";
+    constexpr const char* _loggerCat = "RenderableToyVolume";
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
@@ -140,7 +140,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
 RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initializeGL() {
-    glm::vec4 color(glm::vec3(_color), _opacity);
+    glm::vec4 color(glm::vec3(_color), opacity());
     _raycaster = std::make_unique<ToyVolumeRaycaster>(color);
     _raycaster->initialize();
 
@@ -197,7 +197,7 @@ void RenderableToyVolume::update(const UpdateData& data) {
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );
 
-        glm::vec4 color(glm::vec3(_color), _opacity);
+        glm::vec4 color(glm::vec3(_color), opacity());
 
         _raycaster->setColor(color);
         _raycaster->setStepSize(_stepSize);

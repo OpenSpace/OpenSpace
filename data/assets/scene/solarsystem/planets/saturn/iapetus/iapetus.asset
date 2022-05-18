@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Iapetus = {
   Identifier = "Iapetus",
@@ -27,7 +32,7 @@ local Iapetus = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/iapetus.labels",
+      FileName = labelsPath .. "iapetus.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 8.7,
@@ -46,7 +51,16 @@ local Iapetus = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Iapetus })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Iapetus)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Iapetus)
+end)
+  
+asset.export(Iapetus)
+
 
 
 asset.meta = {

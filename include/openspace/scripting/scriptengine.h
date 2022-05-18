@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,10 +115,10 @@ private:
 
     std::queue<QueueItem> _incomingScripts;
 
-    // Slave scripts are mutex protected since decode and rendering may
-    // happen asynchronously.
-    std::mutex _slaveScriptsMutex;
-    std::queue<std::string> _slaveScriptQueue;
+    // Client scripts are mutex protected since decode and rendering may happen
+    // asynchronously
+    std::mutex _clientScriptsMutex;
+    std::queue<std::string> _clientScriptQueue;
     std::queue<QueueItem> _masterScriptQueue;
 
     std::vector<std::string> _scriptsToSync;

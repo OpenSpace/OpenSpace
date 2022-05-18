@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -80,18 +80,21 @@ public:
         std::string name;
         std::string value;
     };
+
     struct Action {
         std::string identifier;
         std::string documentation;
         std::string name;
         std::string guiPath;
-        bool isLocal;
+        bool isLocal = false;
         std::string script;
     };
+
     struct Keybinding {
         KeyWithModifier key;
         std::string action;
     };
+
     struct Time {
         enum class Type {
             Absolute,
@@ -101,6 +104,7 @@ public:
         Type type;
         std::string value;
     };
+
     struct CameraNavState {
         static constexpr const char* Type = "setNavigationState";
 
@@ -112,6 +116,7 @@ public:
         std::optional<double> yaw;
         std::optional<double> pitch;
     };
+
     struct CameraGoToGeo {
         static constexpr const char* Type = "goToGeo";
 
@@ -120,6 +125,7 @@ public:
         double longitude;
         std::optional<double> altitude;
     };
+
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
 
     Profile() = default;

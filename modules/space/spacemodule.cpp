@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,6 +42,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/coordinateconversion.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/misc/assert.h>
@@ -73,12 +74,10 @@ SpaceModule::SpaceModule()
 }
 
 void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>(),
-        "PlanetGeometry"
-    );
+    FactoryManager::ref().addFactory<planetgeometry::PlanetGeometry>("PlanetGeometry");
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableConstellationBounds>(
@@ -92,7 +91,8 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
 
-    auto fTranslation = FactoryManager::ref().factory<Translation>();
+    ghoul::TemplateFactory<Translation>* fTranslation =
+        FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
 
     fTranslation->registerClass<KeplerTranslation>("KeplerTranslation");
@@ -100,16 +100,14 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fTranslation->registerClass<TLETranslation>("TLETranslation");
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
-    /*auto fTasks = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTasks, "No task factory existed");
-    fTasks->registerClass<volume::GenerateDebrisVolumeTask>("GenerateDebrisVolumeTask");*/
-
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
+    ghoul::TemplateFactory<Rotation>* fRotation =
+        FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
 
-    auto fGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
+    ghoul::TemplateFactory<planetgeometry::PlanetGeometry>* fGeometry =
+        FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
     ghoul_assert(fGeometry, "Planet geometry factory was not created");
     fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
 
@@ -124,6 +122,9 @@ void SpaceModule::internalDeinitializeGL() {
 
 std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
+        HorizonsTranslation::Documentation(),
+        KeplerTranslation::Documentation(),
+        planetgeometry::PlanetGeometry::Documentation(),
         RenderableConstellationBounds::Documentation(),
         RenderableFluxNodes::Documentation(),
         RenderableHabitableZone::Documentation(),
@@ -132,39 +133,21 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableSmallBody::Documentation(),
         RenderableStars::Documentation(),
         RenderableTravelSpeed::Documentation(),
+        planetgeometry::SimpleSphereGeometry::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        KeplerTranslation::Documentation(),
-        TLETranslation::Documentation(),
-        HorizonsTranslation::Documentation(),
-        planetgeometry::PlanetGeometry::Documentation(),
-        planetgeometry::SimpleSphereGeometry::Documentation()
+        TLETranslation::Documentation()
     };
 }
 
 scripting::LuaLibrary SpaceModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "space";
-    res.functions = {
+    return {
+        "space",
         {
-            "convertFromRaDec",
-            &space::luascriptfunctions::convertFromRaDec,
-            "string/double, string/double, double",
-            "Returns the cartesian world position of a ra dec coordinate with distance. "
-            "If the coordinate is given as strings the format should be ra 'XhYmZs' and "
-            "dec 'XdYmZs'. If the coordinate is given as numbers the values should be "
-            "in degrees."
-        },
-        {
-            "convertToRaDec",
-            &space::luascriptfunctions::convertToRaDec,
-            "double, double, double",
-            "Returns the formatted ra, dec strings and distance for a given cartesian "
-            "world coordinate."
+            codegen::lua::ConvertFromRaDec,
+            codegen::lua::ConvertToRaDec
         }
     };
-
-    return res;
 }
 
 } // namespace openspace

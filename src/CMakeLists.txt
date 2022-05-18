@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -42,7 +42,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
-  ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/events/event.cpp
   ${OPENSPACE_BASE_DIR}/src/events/eventengine.cpp
   ${OPENSPACE_BASE_DIR}/src/events/eventengine_lua.inl
@@ -50,14 +49,14 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/mouseinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/interaction/keyboardinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/scriptcamerastates.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/externinteraction.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
@@ -79,10 +78,10 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator_lua.inl
   ${OPENSPACE_BASE_DIR}/src/navigation/waypoint.cpp
+  ${OPENSPACE_BASE_DIR}/src/network/messagestructureshelper.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
-  ${OPENSPACE_BASE_DIR}/src/network/parallelserver.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
@@ -138,8 +137,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/volumeraycaster.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/asset.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/assetloader.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/assetmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/assetmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/lightsource.cpp
@@ -160,6 +157,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler.cpp
   ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding.cpp
+  ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/collisionhelper.cpp
@@ -178,7 +176,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/synchronizationwatcher.cpp
   ${OPENSPACE_BASE_DIR}/src/util/tstring.cpp
   ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
   ${OPENSPACE_BASE_DIR}/src/util/task.cpp
@@ -225,7 +222,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/events/event.h
   ${OPENSPACE_BASE_DIR}/include/openspace/events/eventengine.h
@@ -235,15 +231,15 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mouseinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionmonitor.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyboardinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecamerastates.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externinteraction.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.inl
@@ -265,8 +261,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/waypoint.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructureshelper.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
@@ -330,8 +326,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetlistener.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/lightsource.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/profile.h
@@ -378,7 +372,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.inl
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/synchronizationwatcher.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h

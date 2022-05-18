@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -208,15 +208,17 @@ void LuaConsole::initialize() {
     _commands.emplace_back("");
     _activeCommand = _commands.size() - 1;
 
+    const float dpi = global::windowDelegate->osDpiScaling();
+
     _font = global::fontManager->font(
         FontName,
-        EntryFontSize,
+        EntryFontSize * dpi,
         ghoul::fontrendering::FontManager::Outline::No
     );
 
     _historyFont = global::fontManager->font(
         FontName,
-        HistoryFontSize,
+        HistoryFontSize * dpi,
         ghoul::fontrendering::FontManager::Outline::No
     );
 
@@ -604,7 +606,8 @@ void LuaConsole::update() {
 
     // Update the full height and the target height.
     // Add the height of the entry line and space for a separator.
-    _fullHeight = (height + EntryFontSize + SeparatorSpace);
+    const float dpi = global::windowDelegate->osDpiScaling();
+    _fullHeight = (height + EntryFontSize * dpi + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
 
     // The first frame is going to be finished in approx 10 us, which causes a floating
@@ -657,9 +660,10 @@ void LuaConsole::render() {
     glEnable(GL_DEPTH_TEST);
 
     // Render text on top of the background
+    const float dpi = global::windowDelegate->osDpiScaling();
     glm::vec2 inputLocation = glm::vec2(
-        EntryFontSize / 2.f,
-        res.y - _currentHeight + EntryFontSize
+        EntryFontSize * dpi / 2.f,
+        res.y - _currentHeight + EntryFontSize * dpi
     );
 
     // Render the current command
@@ -748,8 +752,8 @@ void LuaConsole::render() {
     );
 
     glm::vec2 historyInputLocation = glm::vec2(
-        HistoryFontSize / 2.f,
-        res.y - HistoryFontSize * 1.5f + _fullHeight - _currentHeight
+        HistoryFontSize * dpi / 2.f,
+        res.y - HistoryFontSize * dpi * 1.5f + _fullHeight - _currentHeight
     );
 
     // @CPP: Replace with array_view
@@ -778,9 +782,10 @@ void LuaConsole::render() {
     auto locationForRightJustifiedText = [this, res](const std::string& text) {
         using namespace ghoul::fontrendering;
 
+        const float dpi = global::windowDelegate->osDpiScaling();
         const glm::vec2 loc = glm::vec2(
-            EntryFontSize / 2.f,
-            res.y - _currentHeight + EntryFontSize
+            EntryFontSize * dpi / 2.f,
+            res.y - _currentHeight + EntryFontSize * dpi
         );
 
         const glm::vec2 bbox = _font->boundingBox(text);

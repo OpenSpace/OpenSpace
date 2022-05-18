@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,8 +58,6 @@ namespace {
 
     constexpr const int RenderOptionViewDirection = 0;
     constexpr const int RenderOptionPositionNormal = 1;
-
-    constexpr const double PARSEC = 0.308567756E17;
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
@@ -132,14 +130,14 @@ namespace {
         // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
 
-        enum class Unit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
             Parsec [[codegen::key("pc")]],
             Kiloparsec [[codegen::key("Kpc")]],
-            MegaParsec [[codegen::key("Mpc")]],
+            Megaparsec [[codegen::key("Mpc")]],
             Gigaparsec [[codegen::key("Gpc")]],
-            Gigalightyears [[codegen::key("Gly")]]
+            Gigalightyear [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
 
@@ -212,33 +210,10 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_renderOption);
 
     if (p.unit.has_value()) {
-        switch (*p.unit) {
-            case Parameters::Unit::Meter:
-                _unit = Meter;
-                break;
-            case Parameters::Unit::Kilometer:
-                _unit = Kilometer;
-                break;
-            case Parameters::Unit::Parsec:
-                _unit = Parsec;
-                break;
-            case Parameters::Unit::Kiloparsec:
-                _unit = Kiloparsec;
-                break;
-            case Parameters::Unit::MegaParsec:
-                _unit = Megaparsec;
-                break;
-            case Parameters::Unit::Gigaparsec:
-                _unit = Gigaparsec;
-                break;
-            case Parameters::Unit::Gigalightyears:
-                _unit = GigalightYears;
-                break;
-        }
+        _unit = codegen::map<DistanceUnit>(*p.unit);
     }
     else {
-        LWARNING("No unit given for RenderableDUMeshes. Using meters as units.");
-        _unit = Meter;
+        _unit = DistanceUnit::Meter;
     }
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -345,7 +320,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
 
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
@@ -381,30 +356,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
                                       const glm::vec3& orthoRight,
                                       const glm::vec3& orthoUp)
 {
-    float scale = 0.f;
-    switch (_unit) {
-        case Meter:
-            scale = 1.f;
-            break;
-        case Kilometer:
-            scale = 1e3f;
-            break;
-        case Parsec:
-            scale = static_cast<float>(PARSEC);
-            break;
-        case Kiloparsec:
-            scale = static_cast<float>(1e3 * PARSEC);
-            break;
-        case Megaparsec:
-            scale = static_cast<float>(1e6 * PARSEC);
-            break;
-        case Gigaparsec:
-            scale = static_cast<float>(1e9 * PARSEC);
-            break;
-        case GigalightYears:
-            scale = static_cast<float>(306391534.73091 * PARSEC);
-            break;
-    }
+    float scale = static_cast<float>(toMeter(_unit));
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
@@ -508,6 +460,9 @@ bool RenderableDUMeshes::readSpeckFile() {
         return false;
     }
 
+    const float scale = static_cast<float>(toMeter(_unit));
+    double maxRadius = 0.0;
+
     int meshIndex = 0;
 
     // The beginning of the speck file has a header that either contains comments
@@ -588,23 +543,55 @@ bool RenderableDUMeshes::readSpeckFile() {
             // We can now read the vertices data:
             for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
                 std::getline(file, line);
-                if (line.substr(0, 1) != "}") {
-                    std::stringstream lineData(line);
-                    for (int i = 0; i < 7; ++i) {
-                        GLfloat value;
-                        lineData >> value;
-                        bool errorReading = lineData.rdstate() & std::ifstream::failbit;
-                        if (!errorReading) {
-                            mesh.vertices.push_back(value);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-                else {
+                if (line.substr(0, 1) == "}") {
                     break;
                 }
+
+                std::stringstream lineData(line);
+
+                // Try to read three values for the position
+                glm::vec3 pos;
+                bool success = true;
+                for (int i = 0; i < 3; ++i) {
+                    GLfloat value;
+                    lineData >> value;
+                    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
+                    if (errorReading) {
+                        success = false;
+                        break;
+                    }
+
+                    GLfloat scaledValue = value * scale;
+                    pos[i] = scaledValue;
+                    mesh.vertices.push_back(scaledValue);
+                }
+
+                if (!success) {
+                    LERROR(fmt::format(
+                        "Failed reading position on line {} of mesh {} in file: '{}'. "
+                        "Stopped reading mesh data", l, meshIndex, _speckFile
+                    ));
+                    break;
+                }
+
+                // Check if new max radius
+                const double r = glm::length(glm::dvec3(pos));
+                maxRadius = std::max(maxRadius, r);
+
+                // OLD CODE:
+                // (2022-03-23, emmbr)  None of our files included texture coordinates,
+                // and if they would they would still not be used by the shader
+                //for (int i = 0; i < 7; ++i) {
+                //    GLfloat value;
+                //    lineData >> value;
+                //    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
+                //    if (!errorReading) {
+                //        mesh.vertices.push_back(value);
+                //    }
+                //    else {
+                //        break;
+                //    }
+                //}
             }
 
             std::getline(file, line);
@@ -617,6 +604,8 @@ bool RenderableDUMeshes::readSpeckFile() {
         }
     }
 
+    setBoundingSphere(maxRadius);
+
     return true;
 }
 
@@ -627,35 +616,6 @@ void RenderableDUMeshes::createMeshes() {
     LDEBUG("Creating planes");
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
-        float scale = 0.f;
-        switch (_unit) {
-            case Meter:
-                scale = 1.f;
-                break;
-            case Kilometer:
-                scale = 1e3f;
-                break;
-            case Parsec:
-                scale = static_cast<float>(PARSEC);
-                break;
-            case Kiloparsec:
-                scale = static_cast<float>(1e3 * PARSEC);
-                break;
-            case Megaparsec:
-                scale = static_cast<float>(1e6 * PARSEC);
-                break;
-            case Gigaparsec:
-                scale = static_cast<float>(1e9 * PARSEC);
-                break;
-            case GigalightYears:
-                scale = static_cast<float>(306391534.73091 * PARSEC);
-                break;
-        }
-
-        for (GLfloat& v : p.second.vertices) {
-            v *= scale;
-        }
-
         for (int i = 0; i < p.second.numU; ++i) {
             GLuint vao;
             glGenVertexArrays(1, &vao);
@@ -676,29 +636,32 @@ void RenderableDUMeshes::createMeshes() {
             );
             // in_position
             glEnableVertexAttribArray(0);
-            // U and V may not be given by the user
-            if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
-                glVertexAttribPointer(
-                    0,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    sizeof(GLfloat) * 5,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
-                );
+            // (2022-03-23, emmbr) This code was actually never used. We only read three
+            // values per line and di not handle any texture cooridnates, even if there
+            // would have been some in the file
+            //// U and V may not be given by the user
+            //if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
+            //    glVertexAttribPointer(
+            //        0,
+            //        3,
+            //        GL_FLOAT,
+            //        GL_FALSE,
+            //        sizeof(GLfloat) * 5,
+            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
+            //    );
 
-                // texture coords
-                glEnableVertexAttribArray(1);
-                glVertexAttribPointer(
-                    1,
-                    2,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    sizeof(GLfloat) * 7,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
-                );
-            }
-            else { // no U and V:
+            //    // texture coords
+            //    glEnableVertexAttribArray(1);
+            //    glVertexAttribPointer(
+            //        1,
+            //        2,
+            //        GL_FLOAT,
+            //        GL_FALSE,
+            //        sizeof(GLfloat) * 7,
+            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
+            //    );
+            //}
+            //else { // no U and V:
                 glVertexAttribPointer(
                     0,
                     3,
@@ -707,7 +670,7 @@ void RenderableDUMeshes::createMeshes() {
                     0,
                     reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
                 );
-            }
+            //}
         }
 
         // Grid: we need columns

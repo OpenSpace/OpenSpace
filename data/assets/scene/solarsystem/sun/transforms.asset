@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
 
 
@@ -9,8 +8,8 @@ local SolarSystemBarycenter = {
   -- No parent; this node is attached to the scene graph root
   TimeFrame = { -- Using Spice kernels for 1850-2150
     Type = "TimeFrameInterval",
-    Start = "1850-JAN-01",
-    End = "2150-JAN-01"
+    Start = "1550-JAN-01",
+    End = "2650-JAN-22"
   },
   GUI = {
     Name = "Solar System Barycenter",
@@ -85,16 +84,33 @@ local SunECLIPJ2000 = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunCenter, SunIAU, SunECLIPJ2000 })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SolarSystemBarycenter)
+  openspace.addSceneGraphNode(SunCenter)
+  openspace.addSceneGraphNode(SunIAU)
+  openspace.addSceneGraphNode(SunECLIPJ2000)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunECLIPJ2000)
+  openspace.removeSceneGraphNode(SunIAU)
+  openspace.removeSceneGraphNode(SunCenter)
+  openspace.removeSceneGraphNode(SolarSystemBarycenter)
+end)
+    
+asset.export(SolarSystemBarycenter)
+asset.export(SunCenter)
+asset.export(SunIAU)
+asset.export(SunECLIPJ2000)
+
 
 
 asset.meta = {
   Name = "Sun Transforms",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Sun transforms: Solar System Barycenter, SUN IAU and
    SUN J2000]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"SolarSystemBarycenter", "SunIAU", "SunECLIPJ2000"}
+  License = "MIT license"
 }

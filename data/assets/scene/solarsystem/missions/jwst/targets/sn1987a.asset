@@ -1,0 +1,36 @@
+local image = asset.require("./sn1987a_image").image
+
+local SN1987aImage = {
+  Identifier = "SN1987aImage",
+  Type = "ScreenSpaceImageLocal",
+  Name = "Supernova SN 1987a",
+  UseRadiusAzimuthElevation = true,
+  FaceCamera = false,
+  RadiusAzimuthElevation = { 1.0, 0.5, 0.0 },
+  UsePerspectiveProjection = false,
+  Opacity = 1.0,
+  TexturePath = image .. "sn1987a.png",
+  Tag = { "mission_jwst_target" },
+  Description = [[
+    Image of the Supernova SN 1987a by NASA/CXC/PSU/S.Park, D.Burrows
+    & NASA/STScI/CfA/P.Challis.
+  ]],
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(SN1987aImage)
+end)
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(SN1987aImage)
+end)
+
+asset.export(SN1987aImage)
+
+asset.meta = {
+  Name = "Supernova SN 1987a Image",
+  Version = "1.0",
+  Description = "Screenspace image of the Supernova SN 1987a",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,9 @@
 
 #include <QMainWindow>
 
+#include "sgctedit/sgctedit.h"
 #include <openspace/scene/profile.h>
+#include <QApplication>
 #include <optional>
 
 namespace openspace::configuration { struct Configuration; }
@@ -35,7 +37,7 @@ namespace openspace::configuration { struct Configuration; }
 class QComboBox;
 class QLabel;
 
-class LauncherWindow : public QMainWindow {
+class LauncherWindow final : public QMainWindow {
 Q_OBJECT
 public:
     /**
@@ -82,6 +84,7 @@ private:
     void setBackgroundImage(const std::string& syncPath);
 
     void openProfileEditor(const std::string& profile, bool isUserProfile);
+    void openWindowEditor();
 
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,6 +110,11 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _globe = p.globe;
+    _globe.onChange([this]() {
+        findGlobe();
+        setUpdateVariables();
+    });
+    addProperty(_globe);
 
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { setUpdateVariables(); });
@@ -130,7 +135,7 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
 
 void GlobeRotation::findGlobe() {
     SceneGraphNode* n = sceneGraphNode(_globe);
-    if (n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
+    if (n && n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
         _globeNode = dynamic_cast<RenderableGlobe*>(n->renderable());
     }
     else {

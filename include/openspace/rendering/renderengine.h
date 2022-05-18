@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -171,12 +172,13 @@ private:
 
     ghoul::opengl::OpenGLStateCache* _openglStateCache = nullptr;
 
-    properties::BoolProperty _showOverlayOnSlaves;
+    properties::BoolProperty _showOverlayOnClients;
     properties::BoolProperty _showLog;
     properties::FloatProperty _verticalLogOffset;
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
 
+    properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;

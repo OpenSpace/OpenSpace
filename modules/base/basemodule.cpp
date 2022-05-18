@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,12 +88,10 @@ ghoul::opengl::TextureManager BaseModule::TextureManager;
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>(),
-        "ScreenSpaceRenderable"
-    );
+    FactoryManager::ref().addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
 
-    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
@@ -101,7 +99,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
     fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
 
-    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+        FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
@@ -122,7 +121,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemText>("DashboardItemText");
     fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
@@ -134,23 +134,29 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
-    fRenderable->registerClass<RenderablePlaneTimeVaryingImage>("RenderablePlaneTimeVaryingImage");
+    fRenderable->registerClass<RenderablePlaneTimeVaryingImage>(
+        "RenderablePlaneTimeVaryingImage"
+    );
     fRenderable->registerClass<RenderablePrism>("RenderablePrism");
-    fRenderable->registerClass<RenderableTimeVaryingSphere>("RenderableTimeVaryingSphere");
+    fRenderable->registerClass<RenderableTimeVaryingSphere>(
+        "RenderableTimeVaryingSphere"
+    );
     fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
 
-    auto fTranslation = FactoryManager::ref().factory<Translation>();
+    ghoul::TemplateFactory<Translation>* fTranslation =
+        FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
 
     fTranslation->registerClass<TimelineTranslation>("TimelineTranslation");
     fTranslation->registerClass<LuaTranslation>("LuaTranslation");
     fTranslation->registerClass<StaticTranslation>("StaticTranslation");
 
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
+    ghoul::TemplateFactory<Rotation>* fRotation =
+        FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
     fRotation->registerClass<ConstantRotation>("ConstantRotation");
@@ -160,7 +166,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRotation->registerClass<TimelineRotation>("TimelineRotation");
 
 
-    auto fScale = FactoryManager::ref().factory<Scale>();
+    ghoul::TemplateFactory<Scale>* fScale = FactoryManager::ref().factory<Scale>();
     ghoul_assert(fScale, "Scale factory was not created");
 
     fScale->registerClass<LuaScale>("LuaScale");
@@ -168,13 +174,15 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fScale->registerClass<StaticScale>("StaticScale");
     fScale->registerClass<TimeDependentScale>("TimeDependentScale");
 
-    auto fTimeFrame = FactoryManager::ref().factory<TimeFrame>();
+    ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
+        FactoryManager::ref().factory<TimeFrame>();
     ghoul_assert(fTimeFrame, "Scale factory was not created");
 
     fTimeFrame->registerClass<TimeFrameInterval>("TimeFrameInterval");
     fTimeFrame->registerClass<TimeFrameUnion>("TimeFrameUnion");
 
-    auto fLightSource = FactoryManager::ref().factory<LightSource>();
+    ghoul::TemplateFactory<LightSource>* fLightSource =
+        FactoryManager::ref().factory<LightSource>();
     ghoul_assert(fLightSource, "Light Source factory was not created");
 
     fLightSource->registerClass<CameraLightSource>("CameraLightSource");
@@ -193,11 +201,16 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),
         DashboardItemMission::Documentation(),
+        DashboardItemParallelConnection::Documentation(),
+        DashboardItemPropertyValue::Documentation(),
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
+        DashboardItemText::Documentation(),
         DashboardItemVelocity::Documentation(),
 
         RenderableBoxGrid::Documentation(),
+        RenderableCartesianAxes::Documentation(),
+        RenderableDisc::Documentation(),
         RenderableGrid::Documentation(),
         RenderableLabels::Documentation(),
         RenderableModel::Documentation(),
@@ -206,8 +219,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderablePlaneImageLocal::Documentation(),
         RenderablePlaneImageOnline::Documentation(),
         RenderablePlaneTimeVaryingImage::Documentation(),
+        RenderablePrism::Documentation(),
         RenderableRadialGrid::Documentation(),
-        RenderableDisc::Documentation(),
         RenderableSphere::Documentation(),
         RenderableSphericalGrid::Documentation(),
         RenderableTimeVaryingSphere::Documentation(),
@@ -237,8 +250,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),
 
-        SceneGraphLightSource::Documentation(),
         CameraLightSource::Documentation(),
+        SceneGraphLightSource::Documentation()
     };
 }
 

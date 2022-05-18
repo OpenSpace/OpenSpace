@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,7 +92,6 @@ private:
     std::filesystem::path _seedPointDirectory;
     // optional except when using json input
     std::string _modelStr;
-    fls::Model thismodel;
 
     // Used for 'runtime-states'. True when loading a new state from disk on another
     // thread.
@@ -108,6 +107,10 @@ private:
     // True when new state is loaded or user change which quantity used for masking out
     // line segments
     bool _shouldUpdateMaskingBuffer = false;
+    // note Elon: rework the case of only one state
+    // hasBeenUpdated only gets sets once, first iteration of update function, to 
+    // guarantee the vertext position buffer to be initialized.
+    bool _hasBeenUpdated = false;
 
     // Active index of _states. If(==-1)=>no state available for current time. Always the
     // same as _activeTriggerTimeIndex if(_loadingStatesDynamically==true), else

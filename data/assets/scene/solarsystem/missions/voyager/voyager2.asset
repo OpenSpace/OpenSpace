@@ -1,7 +1,13 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local models = asset.require("./model" ).modelFolder;
+local sun = asset.require("scene/solarsystem/sun/sun")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+local models = asset.syncedResource({
+  Name = "Voyager Model",
+  Type = "HttpSynchronization",
+  Identifier = "voyager_model",
+  Version = 1
+})
 
 local kernels = asset.syncedResource({
   Name = "Voyager 2 Kernels",
@@ -11,16 +17,16 @@ local kernels = asset.syncedResource({
 })
 
 local Kernels = {
-  kernels .. '/vg2_v02.tf',
-  kernels .. '/vg200022.tsc',
-  kernels .. '/Voyager_2.m05016u.merged.bsp',
-  kernels .. '/voyager_2.ST+1992_m05208u.merged.bsp',
-  kernels .. '/vgr2_jup230.bsp',
-  kernels .. '/vgr2_sat337.bsp',
-  kernels .. '/vgr2_ura083.bsp',
-  kernels .. '/vgr2_nep081.bsp',
-  kernels .. '/vgr2_super.bc',
-  kernels .. '/vgr2_super_v2.bc'
+  kernels .. "vg2_v02.tf",
+  kernels .. "vg200022.tsc",
+  kernels .. "Voyager_2.m05016u.merged.bsp",
+  kernels .. "voyager_2.ST+1992_m05208u.merged.bsp",
+  kernels .. "vgr2_jup230.bsp",
+  kernels .. "vgr2_sat337.bsp",
+  kernels .. "vgr2_ura083.bsp",
+  kernels .. "vgr2_nep081.bsp",
+  kernels .. "vgr2_super.bc",
+  kernels .. "vgr2_super_v2.bc"
 }
 
 local RotationMatrix = {
@@ -29,20 +35,6 @@ local RotationMatrix = {
   0, -1, 0
 }
 
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
-}
 
 local Voyager2 = {
   Identifier = "Voyager_2",
@@ -76,9 +68,16 @@ local Voyager2Main = {
   Parent = Voyager2.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/voyager-main.obj",
+    GeometryFile = models .. "voyager-main.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Voyager 2 Main",
@@ -91,9 +90,16 @@ local Voyager2Antenna = {
   Parent = Voyager2.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/voyager-antenna.obj",
+    GeometryFile = models .. "voyager-antenna.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Voyager 2 Antenna",
@@ -310,7 +316,7 @@ local VoyagerTrailCruiseNeptuneInf = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Voyager2,
   Voyager2Main,
   Voyager2Antenna,
@@ -323,4 +329,20 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   VoyagerTrailCruiseUranusNeptune,
   VoyagerTrailEncounterNeptune,
   VoyagerTrailCruiseNeptuneInf
-})
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

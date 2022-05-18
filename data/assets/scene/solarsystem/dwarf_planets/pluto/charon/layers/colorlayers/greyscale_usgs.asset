@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../charon").Charon.Identifier
+local globeIdentifier = asset.require("../../charon").Charon.Identifier
 
 local layer = {
   Identifier = "Greyscale_USGS",
@@ -8,6 +8,10 @@ local layer = {
 
 asset.onInitialize(function () 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)

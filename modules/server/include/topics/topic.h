@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,10 +33,9 @@ class Connection;
 
 class Topic {
 public:
-    Topic() {};
-    virtual ~Topic();
+    virtual ~Topic() = default;
 
-    void initialize(Connection* connection, size_t topicId);
+    void initialize(std::shared_ptr<Connection> connection, size_t topicId);
     nlohmann::json wrappedPayload(const nlohmann::json& payload) const;
     nlohmann::json wrappedError(std::string message = "Could not complete request.",
         int code = 500);
@@ -45,7 +44,7 @@ public:
 
 protected:
     size_t _topicId = 0;
-    Connection* _connection;
+    std::shared_ptr<Connection> _connection;
 };
 
 } // namespace openspace

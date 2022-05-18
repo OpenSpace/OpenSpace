@@ -1,0 +1,23 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://openspace.sci.utah.edu/Mars/CTX/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90.0</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <SizeX>4194304</SizeX>
+    <SizeY>2097152</SizeY>
+    <TileLevel>13</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>GEOGCS[&quot;Mars 2000&quot;, DATUM[&quot;D_Mars_2000&quot;, SPHEROID[&quot;MARS_2000_IAU_IAG&quot;,3396190.0,169.894447222361179]],PRIMEM[&quot;Greenwich&quot;0],UNIT[&quot;Decimal_Degree&quot;,0.0174532925199433]]</Projection>
+  <BlockSizeX>256</BlockSizeX>
+  <BlockSizeY>256</BlockSizeY>
+  <BandsCount>2</BandsCount>
+  <MaxConnections>10</MaxConnections>
+  <ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>
+  <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
+  <Timeout>5</Timeout>
+</GDAL_WMS>

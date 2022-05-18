@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -182,8 +182,8 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
 void DocumentationEngine::addHandlebarTemplates(std::vector<HandlebarTemplate> templates)
 {
     _handlebarTemplates.insert(
-        std::end(_handlebarTemplates),
-        std::begin(templates), std::end(templates)
+        _handlebarTemplates.end(),
+        templates.begin(), templates.end()
     );
 }
 

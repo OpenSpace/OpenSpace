@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,6 +58,8 @@ public:
     const SceneGraphNode* anchor() const;
     const Path* currentPath() const;
     double speedScale() const;
+    double arrivalDistanceFactor() const;
+    float linearRotationSpeedFactor() const;
 
     bool hasCurrentPath() const;
     bool hasFinished() const;
@@ -71,7 +73,10 @@ public:
     void pausePath();
     void continuePath();
 
+    Path::Type defaultPathType() const;
     double minValidBoundingSphere() const;
+    double findValidBoundingSphere(const SceneGraphNode* node) const;
+
     const std::vector<SceneGraphNode*>& relevantNodes();
 
     /**
@@ -81,6 +86,8 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    void handlePathEnd();
+
     /**
     * Populate list of nodes that are relevant for collision checks, etc
     */
@@ -90,11 +97,14 @@ private:
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;
+    bool _startSimulationTimeOnFinish = false;
 
     properties::OptionProperty _defaultPathType;
     properties::BoolProperty _includeRoll;
     properties::FloatProperty _speedScale;
     properties::BoolProperty _applyIdleBehaviorOnFinish;
+    properties::DoubleProperty _arrivalDistanceFactor;
+    properties::FloatProperty _linearRotationSpeedFactor;
     properties::DoubleProperty _minValidBoundingSphere;
     properties::StringListProperty _relevantNodeTags;
 

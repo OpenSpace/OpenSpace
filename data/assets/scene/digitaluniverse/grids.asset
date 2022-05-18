@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local equatorialRotationMatrix = {
   -0.05487554,  0.4941095, -0.8676661,
@@ -109,7 +108,7 @@ local eclipticLabels = {
     Enabled = false,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "/eclip.label",
+    LabelFile = speck .. "eclip.label",
     Unit = "pc",
     DrawLabels = true,
     TextColor = { 0.5, 0.5, 0.5 },
@@ -162,7 +161,7 @@ local equatorialLabels = {
     Enabled = false,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "/radec.label",
+    LabelFile = speck .. "radec.label",
     Unit = "pc",
     DrawLabels = true,
     TextColor = { 0.5, 0.5, 0.5 },
@@ -211,7 +210,7 @@ local galacticLabels = {
     Enabled = false,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "/galac.label",
+    LabelFile = speck .. "galac.label",
     Unit = "pc",
     DrawLabels = true,
     TextColor = { 0.5, 0.5, 0.5 },
@@ -237,9 +236,9 @@ local plane1ld = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/1ld.speck",
+    File = speck .. "1ld.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/1ld.label",
+    LabelFile = speck .. "1ld.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 10.3,
     TextMinMaxSize = { 0, 30 },
@@ -264,9 +263,9 @@ local plane1lm = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/1lm.speck",
+    File = speck .. "1lm.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/1lm.label",
+    LabelFile = speck .. "1lm.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 11.8,
     TextMinMaxSize = { 0, 30 },
@@ -291,9 +290,9 @@ local plane1ly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/1ly.speck",
+    File = speck .. "1ly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/1ly.label",
+    LabelFile = speck .. "1ly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 13.0,
     TextMinMaxSize = { 0, 30 },
@@ -318,9 +317,9 @@ local plane10ly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/10ly.speck",
+    File = speck .. "10ly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/10ly.label",
+    LabelFile = speck .. "10ly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 14.17,
     TextMinMaxSize = { 0, 30 },
@@ -345,9 +344,9 @@ local plane100ly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/100ly.speck",
+    File = speck .. "100ly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/100ly.label",
+    LabelFile = speck .. "100ly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 15.0,
     TextMinMaxSize = { 0, 30 },
@@ -372,9 +371,9 @@ local plane1kly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/1kly.speck",
+    File = speck .. "1kly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/1kly.label",
+    LabelFile = speck .. "1kly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 16.0,
     TextMinMaxSize = { 0, 30 },
@@ -399,9 +398,9 @@ local plane10kly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/10kly.speck",
+    File = speck .. "10kly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/10kly.label",
+    LabelFile = speck .. "10kly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 17.25,
     TextMinMaxSize = { 0, 30 },
@@ -419,9 +418,9 @@ local plane100kly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/100kly.speck",
+    File = speck .. "100kly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/100kly.label",
+    LabelFile = speck .. "100kly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 18.6,
     TextMinMaxSize = { 0, 30 },
@@ -439,9 +438,9 @@ local plane1Mly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/1Mly.speck",
+    File = speck .. "1Mly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/1Mly.label",
+    LabelFile = speck .. "1Mly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 19.6,
     TextMinMaxSize = { 0, 30 },
@@ -459,9 +458,9 @@ local plane10Mly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/10Mly.speck",
+    File = speck .. "10Mly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/10Mly.label",
+    LabelFile = speck .. "10Mly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 20.6,
     TextMinMaxSize = { 0, 30 },
@@ -479,9 +478,9 @@ local plane100Mly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/100Mly.speck",
+    File = speck .. "100Mly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/100Mly.label",
+    LabelFile = speck .. "100Mly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 21.6,
     TextMinMaxSize = { 0, 30 },
@@ -499,9 +498,9 @@ local plane20Gly = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/20Gly.speck",
+    File = speck .. "20Gly.speck",
     MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "/20Gly.label",
+    LabelFile = speck .. "20Gly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 23.6,
     TextMinMaxSize = { 0, 30 },
@@ -513,16 +512,35 @@ local plane20Gly = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  radio, oort, ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic,
-  galacticLabels, plane1ld, plane1lm, plane1ly, plane10ly, plane100ly, plane1kly,
-  plane10kly, plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly
-})
+local nodes = {
+  radio, oort, ecliptic, eclipticLabels, equatorial, equatorialLabels,
+  galactic, galacticLabels, plane1ld, plane1lm, plane1ly, plane10ly,
+  plane100ly, plane1kly, plane10kly, plane100kly, plane1Mly, plane10Mly, plane100Mly,
+  plane20Gly
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node)
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end
+
 
 
 asset.meta = {
   Name = "Grids",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Various grids for showing size reference. Included: 10,000 light year
     grid, 10 light year grid, 20 billion light year grid, 10 million light year grid,
     100 light year grid, 100 million light year grid, Ecliptic Coordinate Sphere
@@ -532,9 +550,5 @@ asset.meta = {
     1,000 light year grid, 1 million light year grid, 1 light year grid]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"RadioSphere", "OortSphere", "EclipticSphere", "EclipticSphereLabels",
-    "Equatorial", "EquatorialSphereLabels", "GalacticSphere", "GalacticSphereLabels",
-    "1ldGrid", "1lmGrid", "1lyGrid", "10lyGrid", "100lyGrid", "1klyGrid", "10klyGrid",
-    "100klyGrid", "1MlyGrid", "10MlyGrid", "100MlyGrid", "20GlyGrid"}
+  License = "AMNH Digital Universe"
 }

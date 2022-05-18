@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace {
     constexpr const int CameraTypeGeo = 1;
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     bool inNumericalRange(QLineEdit* le, float min, float max) {
         QString s = le->text();
@@ -71,13 +71,13 @@ CameraDialog::CameraDialog(QWidget* parent,
                 _navState.anchor->setText(QString::fromStdString(nav.anchor));
                 _navState.aim->setText(QString::fromStdString(*nav.aim));
                 _navState.refFrame->setText(QString::fromStdString(nav.referenceFrame));
-                _navState.positionX->setText(QString::number(nav.position.x));
-                _navState.positionY->setText(QString::number(nav.position.y));
-                _navState.positionZ->setText(QString::number(nav.position.z));
+                _navState.positionX->setText(QString::number(nav.position.x, 'g', 17));
+                _navState.positionY->setText(QString::number(nav.position.y, 'g', 17));
+                _navState.positionZ->setText(QString::number(nav.position.z, 'g', 17));
                 if (nav.up.has_value()) {
-                    _navState.upX->setText(QString::number(nav.up.value().x));
-                    _navState.upY->setText(QString::number(nav.up.value().y));
-                    _navState.upZ->setText(QString::number(nav.up.value().z));
+                    _navState.upX->setText(QString::number(nav.up.value().x, 'g', 17));
+                    _navState.upY->setText(QString::number(nav.up.value().y, 'g', 17));
+                    _navState.upZ->setText(QString::number(nav.up.value().z, 'g', 17));
                 }
                 else {
                     _navState.upX->clear();
@@ -85,13 +85,13 @@ CameraDialog::CameraDialog(QWidget* parent,
                     _navState.upZ->clear();
                 }
                 if (nav.yaw.has_value()) {
-                    _navState.yaw->setText(QString::number(*nav.yaw));
+                    _navState.yaw->setText(QString::number(*nav.yaw, 'g', 17));
                 }
                 else {
                     _navState.yaw->clear();
                 }
                 if (nav.pitch.has_value()) {
-                    _navState.pitch->setText(QString::number(*nav.pitch));
+                    _navState.pitch->setText(QString::number(*nav.pitch, 'g', 17));
                 }
                 else {
                     _navState.pitch->clear();
@@ -101,10 +101,10 @@ CameraDialog::CameraDialog(QWidget* parent,
             [this](const openspace::Profile::CameraGoToGeo& geo) {
                 _tabWidget->setCurrentIndex(CameraTypeGeo);
                 _geoState.anchor->setText(QString::fromStdString(geo.anchor));
-                _geoState.latitude->setText(QString::number(geo.latitude));
-                _geoState.longitude->setText(QString::number(geo.longitude));
+                _geoState.latitude->setText(QString::number(geo.latitude, 'g', 17));
+                _geoState.longitude->setText(QString::number(geo.longitude, 'g', 17));
                 if (geo.altitude.has_value()) {
-                    _geoState.altitude->setText(QString::number(*geo.altitude));
+                    _geoState.altitude->setText(QString::number(*geo.altitude, 'g', 17));
                 }
                 else {
                     _geoState.altitude->clear();

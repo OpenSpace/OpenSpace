@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -483,6 +483,20 @@ bool FixedRotation::initialize() {
     // No need to hold on to the data
     _constructorDictionary = {};
     return res;
+}
+
+void FixedRotation::update(const UpdateData& data) {
+    bool anyAxisIsObjectType = (
+        _xAxis.type == Axis::Type::Object ||
+        _yAxis.type == Axis::Type::Object ||
+        _zAxis.type == Axis::Type::Object
+    );
+
+    if (_attachedNode || anyAxisIsObjectType) {
+        requireUpdate();
+    }
+
+    Rotation::update(data);
 }
 
 glm::dmat3 FixedRotation::matrix(const UpdateData&) const {

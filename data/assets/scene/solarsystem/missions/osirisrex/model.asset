@@ -1,9 +1,9 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("./transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local OsirisRexKernels = asset.require('./kernels').kernels
+local OsirisRexKernels = asset.require("./kernels").kernels
 
 local models = asset.syncedResource({
   Name = "Osiris Rex Models",
@@ -13,21 +13,6 @@ local models = asset.syncedResource({
 })
 
 local BENNU_BODY = "2101955"
-
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
-}
 
 local OsirisRex = {
   Identifier = "OsirisRex",
@@ -48,8 +33,15 @@ local OsirisRex = {
   Renderable = {
     Type = "RenderableModel",
     Body = "OSIRIS-REX",
-    GeometryFile = models .. "/orx_base_resized_12_sep_2016.obj",
-    LightSources = LightSources
+    GeometryFile = models .. "orx_base_resized_12_sep_2016.obj",
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "OSIRIS REx",
@@ -74,8 +66,15 @@ local PolyCam = {
   Renderable = {
     Type = "RenderableModel",
     Body = "OSIRIS-REX",
-    GeometryFile = models .. "/orx_polycam_resized_12_sep_2016.obj",
-    LightSources = LightSources
+    GeometryFile = models .. "orx_polycam_resized_12_sep_2016.obj",
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "OCAMS POLYCAM",
@@ -89,8 +88,15 @@ local Rexis = {
   Renderable = {
     Type = "RenderableModel",
     Body = "OSIRIS-REX",
-    GeometryFile = models .. "/orx_rexis_resized_12_sep_2016.obj",
-    LightSources = LightSources
+    GeometryFile = models .. "orx_rexis_resized_12_sep_2016.obj",
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   Transform = {
     Translation = {
@@ -156,10 +162,26 @@ local PolyCamFov = {
 --   }
 -- }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes =  {
   OsirisRex,
   PolyCam,
   Rexis,
   PolyCamFov,
   -- RexisFov
-})
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Mimas = {
   Identifier = "Mimas",
@@ -22,12 +27,12 @@ local Mimas = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = 198000,
+    Radii = { 207000, 197000, 191000 },
     SegmentsPerPatch = 64,
     Layers = { },
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/mimas.labels",
+      FileName = labelsPath .. "mimas.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 7.7,
@@ -46,15 +51,23 @@ local Mimas = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Mimas })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Mimas)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Mimas)
+end)
+  
+asset.export(Mimas)
+
 
 
 asset.meta = {
   Name = "Mimas",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Mimas globe with labels.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Mimas"}
+  License = "MIT license"
 }

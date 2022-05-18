@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -24,7 +23,7 @@ local images = asset.syncedResource({
   Version = 2
 })
 
-local imagesDestination = images .. "/images"
+local imagesDestination = images .. "images"
 
 local Barycenter = {
   Identifier = "67PBarycenter",
@@ -54,7 +53,7 @@ local Comet67P = {
   },
   Renderable = {
       Type = "RenderableModelProjection",
-      GeometryFile = models .. "/67P_rotated_5_130.obj",
+      GeometryFile = models .. "67P_rotated_5_130.obj",
       Projection = {
         Sequence   = { imagesDestination },
         SequenceType = "image-sequence",
@@ -134,17 +133,26 @@ local Trail67P = {
 asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting Rosetta images")
-    openspace.unzipFile(images .. "/images_v1_v2.zip", imagesDestination, true)
+    openspace.unzipFile(images .. "images_v1_v2.zip", imagesDestination, true)
   end
 end)
 
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  Barycenter,
-  Comet67P,
-  Trail67P
-})
-
-asset.export("Barycenter", Barycenter)
-asset.export("Comet67P", Comet67P)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Barycenter)
+  openspace.addSceneGraphNode(Comet67P)
+  openspace.addSceneGraphNode(Trail67P)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Trail67P)
+  openspace.removeSceneGraphNode(Comet67P)
+  openspace.removeSceneGraphNode(Barycenter)
+end)
+    
+asset.export("Barycenter", Barycenter) -- @TODO: This double export should disappear
+asset.export(Barycenter)
+asset.export("Comet67P", Comet67P)  -- @TODO: This double export should disappear
+asset.export(Comet67P)
+asset.export(Trail67P)

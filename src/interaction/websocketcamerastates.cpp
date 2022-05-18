@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #include <openspace/interaction/websocketcamerastates.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
@@ -39,7 +38,8 @@ WebsocketCameraStates::WebsocketCameraStates(double sensitivity,
     : CameraInteractionStates(sensitivity, velocityScaleFactor)
 {}
 
-void WebsocketCameraStates::updateStateFromInput(const InputState& inputState,
+void WebsocketCameraStates::updateStateFromInput(
+                                         const WebsocketInputStates& websocketInputStates,
                                                  double deltaTime)
 {
     std::pair<bool, glm::dvec2> globalRotation = { false, glm::dvec2(0.0) };
@@ -48,14 +48,14 @@ void WebsocketCameraStates::updateStateFromInput(const InputState& inputState,
     std::pair<bool, glm::dvec2> globalRoll = { false, glm::dvec2(0.0) };
     std::pair<bool, glm::dvec2> localRotation = { false, glm::dvec2(0.0) };
 
-    if (inputState.hasWebsocketStates()) {
+    if (!websocketInputStates.empty()) {
         for (int i = 0; i < WebsocketInputState::MaxAxes; ++i) {
             AxisInformation t = _axisMapping[i];
             if (t.type == AxisType::None) {
                 continue;
             }
 
-            float value = inputState.websocketAxis(i);
+            float value = websocketInputStates.axis(i);
             bool hasValue = std::fabs(value) > t.deadzone;
 
             if (!hasValue) {

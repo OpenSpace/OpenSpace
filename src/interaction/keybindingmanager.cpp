@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,15 +29,12 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/json_helper.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/glm.h>
 #include <sstream>
 
 #include "keybindingmanager_lua.inl"
-
-namespace {
-    constexpr const char* _loggerCat = "KeyBindingManager";
-} // namespace
 
 namespace openspace::interaction {
 
@@ -146,32 +143,10 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
     return {
         "",
         {
-            {
-                "clearKeys",
-                &luascriptfunctions::clearKeys,
-                "",
-                "Clear all key bindings"
-            },
-            {
-                "clearKey",
-                &luascriptfunctions::clearKey,
-                "string or strings",
-                "Unbinds the key or keys that have been provided. This function can be "
-                "called with a single key or with an array of keys to remove all of the "
-                "provided keys at once"
-            },
-            {
-                "bindKey",
-                &luascriptfunctions::bindKey,
-                "string, string",
-                "Binds a key by name to the action identified by the second argument"
-            },
-            {
-                "getKeyBinding",
-                &luascriptfunctions::getKeyBindings,
-                "string",
-                "Returns a list of information about the keybindings for the provided key"
-            }
+            codegen::lua::BindKey,
+            codegen::lua::KeyBindings,
+            codegen::lua::ClearKey,
+            codegen::lua::ClearKeys
         }
     };
 }

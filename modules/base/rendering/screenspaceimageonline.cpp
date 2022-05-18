@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -118,6 +118,7 @@ void ScreenSpaceImageOnline::update() {
                     ghoul::io::TextureReader::ref().loadTexture(
                         reinterpret_cast<void*>(imageFile.buffer),
                         imageFile.size,
+                        2,
                         imageFile.format
                     );
 
@@ -157,7 +158,7 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
         [url](const std::string& err) {
             LDEBUGC(
                 "ScreenSpaceImageOnline",
-                "Download to memory failer for screen space image: " + err
+                "Download to memory failed for screen space image: " + err
             );
         }
     );

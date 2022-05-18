@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,6 +56,8 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 private:
     void loadTexture();
     void updatePlane(const Image& img, double currentTime);
@@ -84,8 +86,6 @@ private:
         std::string frame;
         std::string node;
     } _target;
-    std::string _name = "ImagePlane";
-    bool _moving = false;
     bool _hasImage = false;
 };
 

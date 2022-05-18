@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,6 +55,8 @@ public:
 
     ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
 
+    int skyBrowserUpdateTime() const;
+
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
@@ -76,6 +78,7 @@ private:
     std::vector<ConnectionData> _connections;
     std::vector<std::unique_ptr<ServerInterface>> _interfaces;
     properties::PropertyOwner _interfaceOwner;
+    int _skyBrowserUpdateTime = 100;
 };
 
 } // namespace openspace

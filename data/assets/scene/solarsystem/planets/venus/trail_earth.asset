@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
 
 
@@ -28,16 +27,24 @@ local VenusTrailEarth = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { VenusTrailEarth })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(VenusTrailEarth)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VenusTrailEarth)
+end)
+  
+asset.export(VenusTrailEarth)
+
 
 
 asset.meta = {
   Name = "Venus Trail from Earth",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Trail of Venus as observed by the Earth. Data from NASA
     SPICE (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"VenusTrailEarth"}
+  License = "MIT license"
 }

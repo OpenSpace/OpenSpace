@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
-#define __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTSDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTSDIALOG___H__
 
 #include <QDialog>
 
@@ -41,7 +41,9 @@ public:
      */
     AdditionalScriptsDialog(QWidget* parent, std::vector<std::string>* scripts);
 
-private slots:
+private:
+    void createWidgets();
+
     void parseScript();
     void chooseScripts();
 
@@ -52,13 +54,10 @@ private slots:
      */
     void appendScriptsToTextfield(std::string scripts);
 
-private:
-    void createWidgets();
-
     std::vector<std::string>* _scripts = nullptr;
     std::vector<std::string> _scriptsData;
     QTextEdit* _textScripts = nullptr;
     QPushButton* _chooseScriptsButton = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTSDIALOG___H__

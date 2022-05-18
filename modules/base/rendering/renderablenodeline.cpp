@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableNodeLine";
     constexpr const char* ProgramName = "NodeLineProgram";
     constexpr const char* Root = "Root";
 
@@ -117,11 +116,9 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _start = p.startNode.value_or(_start);
-    _start.onChange([&]() { validateNodes(); });
     addProperty(_start);
 
     _end = p.endNode.value_or(_end);
-    _end.onChange([&]() { validateNodes(); });
     addProperty(_end);
 
     _lineColor = p.color.value_or(_lineColor);
@@ -203,15 +200,26 @@ void RenderableNodeLine::bindGL() {
 }
 
 void RenderableNodeLine::updateVertexData() {
+    SceneGraphNode* startNode = global::renderEngine->scene()->sceneGraphNode(_start);
+    SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);
+
+    if (!startNode || !endNode) {
+        LERRORC(
+            "RenderableNodeLine",
+            fmt::format(
+                "Could not find starting '{}' or ending '{}'",
+                _start.value(), _end.value()
+            )
+        );
+
+        return;
+    }
+
     _vertexArray.clear();
 
     // Update the positions of the nodes
-    _startPos = coordinatePosFromAnchorNode(
-        global::renderEngine->scene()->sceneGraphNode(_start)->worldPosition()
-    );
-    _endPos = coordinatePosFromAnchorNode(
-        global::renderEngine->scene()->sceneGraphNode(_end)->worldPosition()
-    );
+    _startPos = coordinatePosFromAnchorNode(startNode->worldPosition());
+    _endPos = coordinatePosFromAnchorNode(endNode->worldPosition());
 
     _vertexArray.push_back(static_cast<float>(_startPos.x));
     _vertexArray.push_back(static_cast<float>(_startPos.y));
@@ -235,9 +243,11 @@ void RenderableNodeLine::updateVertexData() {
     unbindGL();
 }
 
-void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
+void RenderableNodeLine::update(const UpdateData&) {
     updateVertexData();
+}
 
+void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
     glm::dmat4 anchorTranslation(1.0);
@@ -259,7 +269,7 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());
-    _program->setUniform("color", glm::vec4(_lineColor.value(), _opacity));
+    _program->setUniform("color", glm::vec4(_lineColor.value(), opacity()));
 
     // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -276,21 +286,6 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     _program->deactivate();
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
-}
-
-void RenderableNodeLine::validateNodes() {
-    if (!global::renderEngine->scene()->sceneGraphNode(_start)) {
-        LERROR(fmt::format(
-            "There is no scenegraph node with id {}, defaults to 'Root'", _start
-        ));
-        _start = Root;
-    }
-    if (!global::renderEngine->scene()->sceneGraphNode(_end)) {
-        LERROR(fmt::format(
-            "There is no scenegraph node with id {}, defaults to 'Root'", _end
-        ));
-        _end = Root;
-    }
 }
 
 } // namespace openspace

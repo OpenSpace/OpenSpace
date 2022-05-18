@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___OSTIME___H__
-#define __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__
 
 #include <QDialog>
 
@@ -65,4 +65,4 @@ private:
     QLineEdit* _relativeEdit = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#endif // __OPENSPACE_UI_LAUNCHER___TIMEDIALOG___H__

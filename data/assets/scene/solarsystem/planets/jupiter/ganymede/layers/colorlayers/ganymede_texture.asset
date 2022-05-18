@@ -1,16 +1,27 @@
-local texturesPath = asset.require("./../../ganymede_textures").TexturesPath
-local globeIdentifier = asset.require("./../../ganymede").Ganymede.Identifier
+local globeIdentifier = asset.require("../../ganymede").Ganymede.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Ganymede Textures",
+  Type = "HttpSynchronization",
+  Identifier = "ganymede_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/ganymede.jpg",
+  FilePath = texturesPath .. "ganymede.jpg",
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
 
 
 asset.meta = {

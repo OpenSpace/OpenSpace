@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,150 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/downloadmanager.h>
-#include <openspace/engine/globals.h>
-#include <openspace/properties/triggerproperty.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <filesystem>
-
-namespace openspace::luascriptfunctions {
+namespace {
 
 /**
- * \ingroup LuaScripts
- * toggleShutdown():
- * Toggles the shutdown mode that will close the application after the countdown timer is
- * reached
+ * Toggles the shutdown mode that will close the application after the countdown timer
+ * is reached
  */
-int toggleShutdown(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::toggleShutdown");
-    global::openSpaceEngine->toggleShutdownMode();
-    return 0;
+[[codegen::luawrap]] void toggleShutdown() {
+    openspace::global::openSpaceEngine->toggleShutdownMode();
 }
 
 /**
- * \ingroup LuaScripts
- * writeDocumentation():
  * Writes out documentation files
  */
-int writeDocumentation(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::writeDocumentation");
-    global::openSpaceEngine->writeStaticDocumentation();
-    global::openSpaceEngine->writeSceneDocumentation();
-    return 0;
+[[codegen::luawrap]] void writeDocumentation() {
+    openspace::global::openSpaceEngine->writeStaticDocumentation();
+    openspace::global::openSpaceEngine->writeSceneDocumentation();
 }
 
-/**
- * \ingroup LuaScripts
- * addVirtualProperty():
- * Adds a virtual property that will set a group of properties
- */
-int addVirtualProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 5, 7 }, "lua::addVirtualProperty");
-    auto [type, name, identifier, description] =
-        ghoul::lua::values<std::string, std::string, std::string, std::string>(L);
+// Sets the folder used for storing screenshots or session recording frames
+[[codegen::luawrap]] void setScreenshotFolder(std::string newFolder) {
+    using namespace openspace;
 
-    std::unique_ptr<properties::Property> prop;
-    if (type == "BoolProperty") {
-        const bool v = ghoul::lua::value<bool>(L);
-        prop = std::make_unique<properties::BoolProperty>(
-            properties::Property::PropertyInfo {
-                identifier.c_str(),
-                name.c_str(),
-                description.c_str()
-            },
-            v
-        );
-    }
-    else if (type == "IntProperty") {
-        auto [v, min, max] = ghoul::lua::values<int, int, int>(L);
-        prop = std::make_unique<properties::IntProperty>(
-            properties::Property::PropertyInfo {
-                identifier.c_str(),
-                name.c_str(),
-                description.c_str()
-            },
-            v,
-            min,
-            max
-        );
-    }
-    else if (type == "FloatProperty") {
-        auto [v, min, max] = ghoul::lua::values<float, float, float>(L);
-        prop = std::make_unique<properties::FloatProperty>(
-            properties::Property::PropertyInfo {
-                identifier.c_str(),
-                name.c_str(),
-                description.c_str()
-            },
-            v,
-            min,
-            max
-        );
-    }
-    else if (type == "TriggerProperty") {
-        prop = std::make_unique<properties::TriggerProperty>(
-            properties::Property::PropertyInfo {
-                identifier.c_str(),
-                name.c_str(),
-                description.c_str()
-            }
-        );
-    }
-    else {
-        return ghoul::lua::luaError(L, fmt::format("Unknown property type '{}'", type));
-    }
-
-    global::virtualPropertyManager->addProperty(std::move(prop));
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * removeVirtualProperty():
- * Removes a previously added virtual property
- */
-int removeVirtualProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeVirtualProperty");
-    const std::string name = ghoul::lua::value<std::string>(L);
-
-    properties::Property* p = global::virtualPropertyManager->property(name);
-    if (p) {
-        global::virtualPropertyManager->removeProperty(p);
-    }
-    else {
-        LWARNINGC(
-            "removeVirtualProperty",
-            fmt::format("Virtual Property with name '{}' did not exist", name)
-        );
-    }
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * removeAllVirtualProperties():
- * Remove all registered virtual properties
- */
-int removeAllVirtualProperties(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAllVirtualProperties");
-
-    for (properties::Property* p : global::virtualPropertyManager->properties()) {
-        global::virtualPropertyManager->removeProperty(p);
-        delete p;
-    }
-    return 0;
-}
-
-int setScreenshotFolder(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setScreenshotFolder");
-    const std::string arg = ghoul::lua::value<std::string>(L);
-
-    std::filesystem::path folder = absPath(arg);
+    std::filesystem::path folder = absPath(newFolder);
     if (!std::filesystem::exists(folder)) {
         std::filesystem::create_directory(folder);
     }
@@ -177,107 +56,83 @@ int setScreenshotFolder(lua_State* L) {
     );
 
     global::windowDelegate->setScreenshotFolder(folder.string());
-    return 0;
 }
 
-/**
- * \ingroup LuaScripts
- * addTag()
- * Adds a Tag to a SceneGraphNode
- */
-int addTag(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTag");
-    auto [uri, tag] = ghoul::lua::values<std::string, std::string>(L);
+// Adds a Tag to a SceneGraphNode identified by the provided uri
+[[codegen::luawrap]] void addTag(std::string uri, std::string tag) {
+    using namespace openspace;
 
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        return ghoul::lua::luaError(L, fmt::format("Unknown scene graph node '{}'", uri));
+        throw ghoul::lua::LuaError(fmt::format("Unknown scene graph node '{}'", uri));
     }
 
     node->addTag(std::move(tag));
-    return 0;
 }
 
-/**
- * \ingroup LuaScripts
- * removeTag():
- * Removes a tag from a SceneGraphNode
- */
-int removeTag(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::removeTag");
-    auto [uri, tag] = ghoul::lua::values<std::string, std::string>(L);
+// Removes a tag (second argument) from a scene graph node (first argument)
+[[codegen::luawrap]] void removeTag(std::string uri, std::string tag) {
+    using namespace openspace;
 
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        return ghoul::lua::luaError(L, fmt::format("Unknown scene graph node '{}'", uri));
+        throw ghoul::lua::LuaError(fmt::format("Unknown scene graph node '{}'", uri));
     }
 
     node->removeTag(tag);
-    return 0;
 }
 
-/**
- * \ingroup LuaScripts
- * downloadFile():
- * Downloads a file from Lua interpreter
- */
-int downloadFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::downloadFile");
-    auto [uri, savePath, waitForComplete] =
-        ghoul::lua::values<std::string, std::string, std::optional<bool>>(L);
-    waitForComplete = waitForComplete.value_or(false);
+// Downloads a file from Lua interpreter
+[[codegen::luawrap]] void downloadFile(std::string url, std::string savePath,
+                                       bool waitForCompletion = false)
+{
+    using namespace openspace;
 
-    LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", uri));
+    LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", url));
     std::shared_ptr<DownloadManager::FileFuture> future =
         global::downloadManager->downloadFile(
-            uri,
+            url,
             savePath,
             DownloadManager::OverrideFile::Yes,
             DownloadManager::FailOnError::Yes,
             5
         );
 
-    if (waitForComplete) {
-        while (!future->isFinished && future->errorMessage.empty() ) {
-            //just wait
+    if (waitForCompletion) {
+        while (!future->isFinished && future->errorMessage.empty()) {
+            // just wait
             LTRACEC("OpenSpaceEngine", fmt::format("waiting {}", future->errorMessage));
         }
     }
-
-    if (!future || !future->isFinished) {
-        return ghoul::lua::luaError(
-            L,
-            future ? "Download failed: " + future->errorMessage : "Download failed"
-        );
-    }
-
-    return 0;
 }
 
+} // namespace
+
+// Closing the anoynmous namespace here to allow a unit test to access this function
+
 /**
- * \ingroup LuaScripts
- * createSingleColorImage():
- * Creates a one pixel image with a given color and returns the path to the cached file
+ * Creates a 1 pixel image with a certain color in the cache folder and returns the path
+ * to the file. If a cached file with the given name already exists, the path to that file
+ * is returned. The first argument is the name of the file, without extension. The second
+ * is the RGB color, given as {r, g, b} with values between 0 and 1.
  */
-int createSingleColorImage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createSingleColorImage");
-    auto [name, d] = ghoul::lua::values<std::string, ghoul::Dictionary>(L);
+[[codegen::luawrap]] std::filesystem::path createSingleColorImage(std::string name,
+                                                                  glm::dvec3 color)
+{
+    using namespace openspace;
 
     // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
     // Would like to clean this up with a more direct use of the Verifier in the future
     const std::string& key = "color";
     ghoul::Dictionary colorDict;
-    colorDict.setValue(key, d);
+    colorDict.setValue(key, color);
     documentation::TestResult res = documentation::Color3Verifier()(colorDict, key);
 
     if (!res.success) {
-        return ghoul::lua::luaError(
-            L,
+        throw ghoul::lua::LuaError(
             "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
         );
     }
-
-    const glm::dvec3 color = colorDict.value<glm::dvec3>(key);
 
     std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(
         name + ".ppm",
@@ -286,8 +141,7 @@ int createSingleColorImage(lua_State* L) {
     const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
         LDEBUGC("OpenSpaceEngine", fmt::format("Cached file '{}' used", fileName));
-        ghoul::lua::push(L, fileName);
-        return 1;
+        return fileName;
     }
     else {
         // Write the color to a ppm file
@@ -303,25 +157,30 @@ int createSingleColorImage(lua_State* L) {
         img[1] = static_cast<unsigned char>(255 * color.g);
         img[2] = static_cast<unsigned char>(255 * color.b);
 
-        if (ppmFile.is_open()) {
-            ppmFile << "P6" << std::endl;
-            ppmFile << width << " " << height << std::endl;
-            ppmFile << 255 << std::endl;
-            ppmFile.write(reinterpret_cast<char*>(&img[0]), size * 3);
-            ppmFile.close();
-            ghoul::lua::push(L, fileName);
-            return 1;
+        if (!ppmFile.is_open()) {
+            throw ghoul::lua::LuaError("Could not open ppm file for writing");
         }
-        else {
-            return ghoul::lua::luaError(L, "Could not open ppm file for writing.");
-        }
+
+        ppmFile << "P6" << std::endl;
+        ppmFile << width << " " << height << std::endl;
+        ppmFile << 255 << std::endl;
+        ppmFile.write(reinterpret_cast<char*>(img.data()), size * 3);
+        ppmFile.close();
+        return fileName;
     }
 }
 
-int isMaster(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isMaster");
-    ghoul::lua::push(L, global::windowDelegate->isMaster());
-    return 1;
+namespace {
+
+/**
+ * Returns whether the current OpenSpace instance is the master node of a cluster
+ * configuration. If this instance is not part of a cluster, this function also returns
+ * 'true'.
+ */
+[[codegen::luawrap]] bool isMaster() {
+    return openspace::global::windowDelegate->isMaster();
 }
 
-} // namespace openspace::luascriptfunctions
+#include "openspaceengine_lua_codegen.cpp"
+
+} // namespace

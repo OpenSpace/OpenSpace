@@ -1,5 +1,9 @@
-local assetHelper = asset.require('util/asset_helper')
-local circle = asset.require('util/circle').circle
+local circle = asset.syncedResource({
+  Name = "Circle",
+  Type = "HttpSynchronization",
+  Identifier = "circle_image",
+  Version = 1
+})
 
 local HUDFSpeck = asset.syncedResource({
   Name = "HUDF Speck",
@@ -22,9 +26,9 @@ local object = {
     Enabled = false,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
-    File = HUDFSpeck .. "/hudf.speck",
-    Texture = circle .. "/circle.png",
-    ColorMap = ColorMap .. "/hudf.cmap",
+    File = HUDFSpeck .. "hudf.speck",
+    Texture = circle .. "circle.png",
+    ColorMap = ColorMap .. "hudf.cmap",
     ColorOption = { "redshift", "proximity" },
     ColorRange = { { 0.0, 0.075 }, { 1.0, 25.0 } },
     Unit = "Mpc",
@@ -42,14 +46,22 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+  
+asset.export(object)
+
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field",
-  Version = "1.1",
+  Version = "1.2",
   Description = "Hubble Ultra Deep Field galaxy survey",
   Author = "Frank Summers (STScI), Brian Abbott (AMNH)",
-  Identifiers = {"HubbleDeepField"},
   URL = "http://www.haydenplanetarium.org/universe",
   License = [[
     Copyright (c) American Museum of Natural History. All rights reserved.<br><br>

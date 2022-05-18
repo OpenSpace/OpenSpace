@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,8 +42,12 @@ void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
 void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
                                                   CefRefPtr<CefCommandLine> commandLine)
 {
-    commandLine->AppendSwitch("disable-gpu");
-    commandLine->AppendSwitch("disable-gpu-compositing");
+    commandLine->AppendSwitch("--enable-gpu-rasterization");
+    commandLine->AppendSwitch("--use-gl=desktop");
+    commandLine->AppendSwitch("--enable-webgl2-compute-context");
+    commandLine->AppendSwitch("ignore-gpu-blocklist");
+    commandLine->AppendSwitch("log-gpu-control-list-decisions");
+    commandLine->AppendSwitch("use-mock-keychain");
     commandLine->AppendSwitch("enable-begin-frame-scheduling");
     commandLine->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
 }

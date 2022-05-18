@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,7 +84,7 @@ namespace {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size;
 
-        enum class Origin {
+        enum class [[codegen::map(Origin)]] Origin {
             LowerLeft,
             LowerRight,
             UpperLeft,
@@ -134,25 +134,7 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     _origin.setValue(Center);
 
     if (p.origin.has_value()) {
-        switch (*p.origin) {
-            case Parameters::Origin::LowerLeft:
-                _origin = LowerLeft;
-                break;
-            case Parameters::Origin::LowerRight:
-                _origin = LowerRight;
-                break;
-            case Parameters::Origin::UpperLeft:
-                _origin = UpperLeft;
-                break;
-            case Parameters::Origin::UpperRight:
-                _origin = UpperRight;
-                break;
-            case Parameters::Origin::Center:
-                _origin = Center;
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        _origin = codegen::map<Origin>(*p.origin);
     }
     else {
         _origin = Center;

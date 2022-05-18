@@ -1,7 +1,8 @@
-asset.require('./misc/military')
-asset.require('./misc/radar')
-asset.require('./misc/cubesats')
-asset.require('./misc/other')
+asset.require("./misc/military")
+asset.require("./misc/radar")
+asset.require("./misc/cubesats")
+asset.require("./misc/other")
+asset.require("./misc/active")
 
 
 asset.meta = {

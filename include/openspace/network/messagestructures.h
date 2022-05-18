@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,13 +89,13 @@ struct CameraKeyframe {
                 sizeof(_followNodeRotation)
         );
 
-        int nodeNameLength = static_cast<int>(_focusNode.size());
+        uint32_t nodeNameLength = static_cast<uint32_t>(_focusNode.size());
 
         // Add focus node
         buffer.insert(
             buffer.end(),
             reinterpret_cast<const char*>(&nodeNameLength),
-            reinterpret_cast<const char*>(&nodeNameLength) + sizeof(nodeNameLength)
+            reinterpret_cast<const char*>(&nodeNameLength) + sizeof(uint32_t)
         );
         buffer.insert(
             buffer.end(),
@@ -115,7 +115,7 @@ struct CameraKeyframe {
             reinterpret_cast<const char*>(&_timestamp),
             reinterpret_cast<const char*>(&_timestamp) + sizeof(_timestamp)
         );
-    };
+    }
 
     size_t deserialize(const std::vector<char>& buffer, size_t offset = 0) {
         int size = 0;
@@ -155,7 +155,7 @@ struct CameraKeyframe {
         offset += size;
 
         return offset;
-    };
+    }
 
     void write(std::ostream& out) const {
         out.write(
@@ -184,7 +184,7 @@ struct CameraKeyframe {
 
         // Write timestamp
         out.write(reinterpret_cast<const char*>(&_timestamp), sizeof(_timestamp));
-    };
+    }
 
     void write(std::stringstream& out) const {
         // Add camera position
@@ -206,7 +206,7 @@ struct CameraKeyframe {
             out << "- ";
         }
         out << _focusNode;
-    };
+    }
 
     void read(std::istream* in) {
         // Read position
@@ -234,7 +234,7 @@ struct CameraKeyframe {
 
         // Read timestamp
         in->read(reinterpret_cast<char*>(&_timestamp), sizeof(_timestamp));
-    };
+    }
 
     void read(std::istringstream& iss) {
         std::string rotationFollowing;
@@ -250,7 +250,7 @@ struct CameraKeyframe {
             >> rotationFollowing
             >> _focusNode;
         _followNodeRotation = (rotationFollowing == "F");
-    };
+    }
 };
 
 struct TimeKeyframe {
@@ -271,17 +271,17 @@ struct TimeKeyframe {
             reinterpret_cast<const char*>(this),
             reinterpret_cast<const char*>(this) + sizeof(TimeKeyframe)
         );
-    };
+    }
 
     size_t deserialize(const std::vector<char>& buffer, size_t offset = 0) {
         *this = *reinterpret_cast<const TimeKeyframe*>(buffer.data() + offset);
         offset += sizeof(TimeKeyframe);
         return offset;
-    };
+    }
 
     void write(std::ostream* out) const {
         out->write(reinterpret_cast<const char*>(this), sizeof(TimeKeyframe));
-    };
+    }
 
     void write(std::stringstream& out) const {
         out << ' ' << _dt;
@@ -297,11 +297,11 @@ struct TimeKeyframe {
         else {
             out << " -";
         }
-    };
+    }
 
     void read(std::istream* in) {
         in->read(reinterpret_cast<char*>(this), sizeof(TimeKeyframe));
-    };
+    }
 
     void read(std::istringstream& iss) {
         std::string paused, jump;
@@ -311,7 +311,7 @@ struct TimeKeyframe {
             >> jump;
         _paused = (paused == "P");
         _requiresTimeJump = (jump == "J");
-    };
+    }
 };
 
 struct TimeTimeline {
@@ -339,7 +339,7 @@ struct TimeTimeline {
         for (const TimeKeyframe& k : _keyframes) {
             k.serialize(buffer);
         }
-    };
+    }
 
     size_t deserialize(const std::vector<char>& buffer, size_t offset = 0) {
         int size = 0;
@@ -358,7 +358,7 @@ struct TimeTimeline {
             offset = k.deserialize(buffer, offset);
         }
         return offset;
-    };
+    }
 
     void write(std::ostream* out) const {
         out->write(reinterpret_cast<const char*>(&_clear), sizeof(bool));
@@ -368,7 +368,7 @@ struct TimeTimeline {
         for (const TimeKeyframe& k : _keyframes) {
             k.write(out);
         }
-    };
+    }
 
     void read(std::istream* in) {
         in->read(reinterpret_cast<char*>(&_clear), sizeof(bool));
@@ -378,7 +378,7 @@ struct TimeTimeline {
         for (TimeKeyframe& k : _keyframes) {
             k.read(in);
         }
-    };
+    }
 };
 
 struct ScriptMessage {
@@ -386,7 +386,7 @@ struct ScriptMessage {
     ScriptMessage(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
-    virtual ~ScriptMessage() {};
+    virtual ~ScriptMessage() {}
 
     std::string _script;
     double _timestamp = 0.0;
@@ -398,7 +398,7 @@ struct ScriptMessage {
         buffer.insert(buffer.end(), p, p + sizeof(uint32_t));
 
         buffer.insert(buffer.end(), _script.begin(), _script.end());
-    };
+    }
 
     void deserialize(const std::vector<char>& buffer) {
         const char* p = buffer.data();
@@ -417,11 +417,11 @@ struct ScriptMessage {
 
         // We can skip over the first uint32_t that encoded the length
         _script.assign(buffer.begin() + sizeof(uint32_t), buffer.end());
-    };
+    }
 
     void write(std::ostream* out) const {
         out->write(_script.c_str(), _script.size());
-    };
+    }
 
     void write(unsigned char* buf, size_t& idx, std::ofstream& file) const {
         size_t strLen = _script.size();
@@ -436,7 +436,7 @@ struct ScriptMessage {
         file.write(reinterpret_cast<char*>(buf), idx);
         //Write directly to file because some scripts can be very long
         file.write(_script.c_str(), _script.size());
-    };
+    }
 
     void write(std::stringstream& ss) const {
         unsigned int numLinesInScript = static_cast<unsigned int>(
@@ -457,7 +457,7 @@ struct ScriptMessage {
 
         _script.erase();
         _script = temp.data();
-    };
+    }
 
     void read(std::istringstream& iss) {
         int numScriptLines;
@@ -476,7 +476,7 @@ struct ScriptMessage {
                 _script.append("\n");
             }
         }
-    };
+    }
 };
 
 } // namespace openspace::messagestructures

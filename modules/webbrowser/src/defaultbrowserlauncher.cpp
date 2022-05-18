@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,7 @@ bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefF
                                            CefLifeSpanHandler::WindowOpenDisposition,
                                            bool, const CefPopupFeatures&, CefWindowInfo&,
                                            CefRefPtr<CefClient>&, CefBrowserSettings&,
+                                           CefRefPtr<CefDictionaryValue>&,
                                            bool*)
 {
     // never permit CEF popups, always launch in default browser

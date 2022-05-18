@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,6 +72,10 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
     return si->get();
 }
 
+int ServerModule::skyBrowserUpdateTime() const {
+    return _skyBrowserUpdateTime;
+}
+
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     global::callback::preSync->emplace_back([this]() {
         ZoneScopedN("ServerModule")
@@ -110,6 +114,11 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
             _interfaces.push_back(std::move(serverInterface));
         }
     }
+    if (configuration.hasValue<double>("SkyBrowserUpdateTime")) {
+        _skyBrowserUpdateTime = static_cast<int>(
+            configuration.value<double>("SkyBrowserUpdateTime")
+        );
+    }
 }
 
 void ServerModule::preSync() {
@@ -137,7 +146,7 @@ void ServerModule::preSync() {
                 continue;
             }
             socket->startStreams();
-            std::shared_ptr<Connection> connection = std::make_shared<Connection>(
+            auto connection = std::make_shared<Connection>(
                 std::move(socket),
                 address,
                 false,
@@ -207,7 +216,7 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
     messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
         std::lock_guard lock(_messageQueueMutex);
-        _messageQueue.push_back({ connection, std::move(messageString) });
+        _messageQueue.push_back({ connection, messageString });
     }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,7 +97,7 @@ bool ScreenSpaceFramebuffer::deinitializeGL() {
 
     _framebuffer->activate();
     _framebuffer->detachAll();
-    _framebuffer->deactivate();
+    ghoul::opengl::FramebufferObject::deactivate();
     removeAllRenderFunctions();
 
     return true;
@@ -122,7 +122,7 @@ void ScreenSpaceFramebuffer::render() {
         );
         global::renderEngine->openglStateCache().setViewportState(viewport);
 
-        GLint defaultFBO = _framebuffer->getActiveObject();
+        GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         _framebuffer->activate();
 
         glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -130,7 +130,7 @@ void ScreenSpaceFramebuffer::render() {
         for (const RenderFunction& renderFunction : _renderFunctions) {
             renderFunction();
         }
-        _framebuffer->deactivate();
+        ghoul::opengl::FramebufferObject::deactivate();
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -175,18 +175,17 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
 
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
-    _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(
-        resolution.x,
-        resolution.y,
-        1
-    ));
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(resolution.x, resolution.y, 1),
+        GL_TEXTURE_2D
+    );
     _objectSize = glm::ivec2(resolution);
 
     _texture->uploadTexture();
     _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
     _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
-    _framebuffer->deactivate();
+    ghoul::opengl::FramebufferObject::deactivate();
 }
 
 int ScreenSpaceFramebuffer::id() {

@@ -1,0 +1,22 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://openspace.sci.utah.edu/Mars/MolaElevation/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90.0</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <SizeX>46080</SizeX>
+    <SizeY>23040</SizeY>
+    <TileLevel>6</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <DataType>Int16</DataType>
+  <Projection>GEOGCS["GCS_Mars_2000_Sphere",DATUM["D_Mars_2000_Sphere",SPHEROID["Mars_2000_Sphere_IAU_IAG",3396190.0,0.0]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]]</Projection>
+  <BlockSizeX>360</BlockSizeX>
+  <BlockSizeY>360</BlockSizeY>
+  <BandsCount>1</BandsCount>
+  <MaxConnections>10</MaxConnections>
+  <Timeout>5</Timeout>
+</GDAL_WMS>

@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
 
 local GSMKernel = asset.localResource("../kernels/GSM.ti")
@@ -22,14 +21,22 @@ local GSMReferenceFrame = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GSMReferenceFrame })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GSMReferenceFrame)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GSMReferenceFrame)
+end)
+
+asset.export(GSMReferenceFrame)
+
 
 asset.meta = {
   Name = "Earth magnetosphere transforms",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"GSMReferenceFrame"}
+  License = "MIT license"
 }

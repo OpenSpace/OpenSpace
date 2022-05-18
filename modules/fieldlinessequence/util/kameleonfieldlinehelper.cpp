@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,7 +89,7 @@ namespace openspace::fls {
  *        vector at each line vertex
  */
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-                                 const std::unordered_map<std::string, 
+                                 const std::unordered_map<std::string,
                                  std::vector<glm::vec3>>& seedMap,
                                  double manualTimeOffset,
                                  const std::string& tracingVar,
@@ -181,8 +181,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         // We have to create a new tracer (or actually a new interpolator) for each //
         // new line, otherwise some issues occur                                    //
         //--------------------------------------------------------------------------//
-        std::unique_ptr<ccmc::Interpolator> interpolator =
-                std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+        auto interpolator = std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
         ccmc::Tracer tracer(kameleon, interpolator.get());
         tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
         ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(
@@ -235,8 +234,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
     const size_t nXtraScalars = extraScalarVars.size();
     const size_t nXtraMagnitudes = extraMagVars.size() / 3;
 
-    std::unique_ptr<ccmc::Interpolator> interpolator =
-            std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+    auto interpolator = std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
     // ------ Extract all the extraQuantities from kameleon and store in state! ------ //
     for (const glm::vec3& p : state.vertexPositions()) {
@@ -312,7 +310,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
-            (model == fls::Model::Batsrus && 
+            (model == fls::Model::Batsrus &&
                 (str == TAsPOverRho || str == "T" || str == "t"))
             )
         {

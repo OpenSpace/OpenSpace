@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,9 +54,9 @@ namespace {
         fmt::format_to(std::back_inserter(buf), replStr, "name", owner->identifier());
         buf.push_back(',');
 
-        constexpr const char propertiesText[] = "\"properties\": [";
+        constexpr std::string_view propertiesText = "\"properties\": [";
         //constexpr const std::array<char, 16> propertiesText = { "\"properties\": [" };
-        buf.insert(buf.end(), std::begin(propertiesText), std::end(propertiesText) - 1);
+        buf.insert(buf.end(), propertiesText.begin(), propertiesText.end());
         //json << "\"properties\": [";
         const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
@@ -98,12 +98,12 @@ namespace {
         buf.push_back(']');
         buf.push_back(',');
 
-        constexpr const char propertyOwnersText[] = "\"propertyOwners\": [";
+        constexpr std::string_view propertyOwnersText = "\"propertyOwners\": [";
         //json << "\"propertyOwners\": [";
         buf.insert(
             buf.end(),
-            std::begin(propertyOwnersText),
-            std::end(propertyOwnersText) - 1
+            propertyOwnersText.begin(),
+            propertyOwnersText.end()
         );
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {
@@ -399,11 +399,11 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
 void PropertyOwner::setIdentifier(std::string identifier) {
     ghoul_precondition(
         _identifier.find_first_of("\t\n ") == std::string::npos,
-        "Identifier must contain any whitespaces"
+        "Identifier must not contain any whitespaces"
     );
     ghoul_precondition(
         _identifier.find_first_of('.') == std::string::npos,
-        "Identifier must contain any whitespaces"
+        "Identifier must not contain any dots"
     );
 
     _identifier = std::move(identifier);

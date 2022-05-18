@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,7 +74,7 @@ documentation::Documentation LayerAdjustment::Documentation() {
 }
 
 LayerAdjustment::LayerAdjustment()
-    : properties::PropertyOwner({ "adjustment" })
+    : properties::PropertyOwner({ "Adjustment" })
     , _chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)

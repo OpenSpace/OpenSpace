@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,12 @@
 #include <openspace/openspace.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/systemcapabilities/systemcapabilities.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <sstream>
 
 namespace {
-    constexpr const char* _loggerCat = "VersionChecker";
+    constexpr const char _loggerCat[] = "VersionChecker";
 } // namespace
 
 namespace openspace {
@@ -40,12 +42,20 @@ VersionChecker::~VersionChecker() {
 }
 
 void VersionChecker::requestLatestVersion(const std::string& url) {
-    HttpRequest::RequestOptions opt;
-    opt.requestTimeoutSeconds = 0;
+    using GCC = ghoul::systemcapabilities::GeneralCapabilitiesComponent;
+    std::string operatingSystem = SysCap.component<GCC>().operatingSystemString();
+
+    // Need to escape non-http characters when passing the operating system in the url
+    for (size_t i = 0; i < operatingSystem.size(); i++) {
+        if (operatingSystem[i] == ' ') {
+            operatingSystem.erase(i, 1);
+            operatingSystem.insert(i, "%20");
+        }
+    }
 
     std::string fullUrl = fmt::format(
-        "{}?client_version={}&commit_hash={}",
-        url, OPENSPACE_VERSION_NUMBER, OPENSPACE_GIT_COMMIT
+        "{}?client_version={}&commit_hash={}&operating_system={}",
+        url, OPENSPACE_VERSION_NUMBER, OPENSPACE_GIT_COMMIT, operatingSystem
     );
 
     if (_request) {
@@ -54,8 +64,8 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
         _request = nullptr;
     }
 
-    _request = std::make_unique<AsyncHttpMemoryDownload>(std::move(fullUrl));
-    _request->start(opt);
+    _request = std::make_unique<HttpMemoryDownload>(std::move(fullUrl));
+    _request->start();
 }
 
 void VersionChecker::cancel() {

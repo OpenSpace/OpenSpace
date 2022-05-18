@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include <modules/server/include/jsonconverters.h>
 #include <modules/volume/transferfunctionhandler.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
@@ -88,8 +87,7 @@ json GetPropertyTopic::allProperties() {
                 global::renderEngine,
                 global::luaConsole,
                 global::parallelPeer,
-                global::navigationHandler,
-                global::virtualPropertyManager,
+                global::navigationHandler
             }
         }
     };

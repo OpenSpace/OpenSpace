@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -94,11 +94,11 @@ namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const char* KeyFontLight = "Light";
 
-    constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
-        "ShowOverlayOnSlaves",
-        "Show Overlay Information on Slaves",
+    constexpr openspace::properties::Property::PropertyInfo ShowOverlayClientsInfo = {
+        "ShowOverlayOnClients",
+        "Show Overlay Information on Clients",
         "If this value is enabled, the overlay information text is also automatically "
-        "rendered on the slave nodes. This values is disabled by default."
+        "rendered on client nodes. This values is disabled by default."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowLogInfo = {
@@ -128,6 +128,14 @@ namespace {
         "Shows information about the current camera state, such as friction",
         "This value determines whether the information about the current camrea state is "
         "shown on the screen"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScreenshotWindowIdsInfo = {
+        "ScreenshotWindowId",
+        "Screenshow Window Ids",
+        "The list of window identifiers whose screenshot will be taken the next time "
+        "anyone triggers a screenshot. If this list is empty (the default), all windows "
+        "will have their screenshot taken. Id's that do not exist are silently ignored."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
@@ -272,11 +280,12 @@ namespace openspace {
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner({ "RenderEngine" })
-    , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
+    , _showOverlayOnClients(ShowOverlayClientsInfo, false)
     , _showLog(ShowLogInfo, true)
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
+    , _screenshotWindowIds(ScreenshotWindowIdsInfo)
     , _applyWarping(ApplyWarpingInfo, false)
     , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
@@ -312,7 +321,7 @@ RenderEngine::RenderEngine()
     , _enabledFontColor(EnabledFontColorInfo, glm::vec4(0.2f, 0.75f, 0.2f, 1.f))
     , _disabledFontColor(DisabledFontColorInfo, glm::vec4(0.55f, 0.2f, 0.2f, 1.f))
 {
-    addProperty(_showOverlayOnSlaves);
+    addProperty(_showOverlayOnClients);
     addProperty(_showLog);
     addProperty(_verticalLogOffset);
     addProperty(_showVersionInfo);
@@ -342,6 +351,7 @@ RenderEngine::RenderEngine()
     addProperty(_value);
 
     addProperty(_globalBlackOutFactor);
+    addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
     _screenshotUseDate.onChange([this]() {
@@ -502,7 +512,7 @@ void RenderEngine::initializeGL() {
     {
         ZoneScopedN("Log")
         LINFO("Initializing Log");
-        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+        auto log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
         _log = log.get();
         ghoul::logging::LogManager::ref().addLog(std::move(log));
     }
@@ -794,7 +804,7 @@ void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
     ZoneScoped
 
     const bool isMaster = global::windowDelegate->isMaster();
-    if (isMaster || _showOverlayOnSlaves) {
+    if (isMaster || _showOverlayOnClients) {
         renderScreenLog();
         renderVersionInformation();
         renderDashboard();
@@ -1046,7 +1056,10 @@ void RenderEngine::takeScreenshot() {
         std::filesystem::create_directories(absPath("${SCREENSHOTS}"));
     }
 
-    _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);
+    _latestScreenshotNumber = global::windowDelegate->takeScreenshot(
+        _applyWarping,
+        _screenshotWindowIds
+    );
 }
 
 unsigned int RenderEngine::latestScreenshotNumber() const {
@@ -1057,27 +1070,10 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
     return {
         "",
         {
-            {
-                "addScreenSpaceRenderable",
-                &luascriptfunctions::addScreenSpaceRenderable,
-                "table",
-                "Will create a ScreenSpaceRenderable from a lua Table and add it in the "
-                "RenderEngine"
-            },
-            {
-                "removeScreenSpaceRenderable",
-                &luascriptfunctions::removeScreenSpaceRenderable,
-                "string",
-                "Given a ScreenSpaceRenderable name this script will remove it from the "
-                "renderengine"
-            },
-            {
-                "takeScreenshot",
-                &luascriptfunctions::takeScreenshot,
-                "",
-                "Take a screenshot and return the screenshot number. The screenshot will "
-                "be stored in the ${SCREENSHOTS} folder. "
-            }
+            codegen::lua::AddScreenSpaceRenderable,
+            codegen::lua::RemoveScreenSpaceRenderable,
+            codegen::lua::TakeScreenshot,
+            codegen::lua::DpiScaling
         }
     };
 }
@@ -1120,6 +1116,7 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
 
     if (it != global::screenSpaceRenderables->end()) {
         global::eventEngine->publishEvent<events::EventScreenSpaceRenderableRemoved>(s);
+        s->deinitializeGL();
         s->deinitialize();
         global::screenSpaceRootPropertyOwner->removePropertySubOwner(s);
         global::screenSpaceRenderables->erase(it);

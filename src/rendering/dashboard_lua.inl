@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,52 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-#include <ghoul/logging/logmanager.h>
+namespace {
 
-namespace openspace::luascriptfunctions {
-
-/**
- * \ingroup LuaScripts
- * addDashboardItem(table):
- */
-int addDashboardItem(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addDashboardItem");
-    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
+ // Adds a new dashboard item to the main dashboard.
+[[codegen::luawrap]] void addDashboardItem(ghoul::Dictionary dashboard) {
+    using namespace openspace;
     try {
         global::dashboard->addDashboardItem(
-            DashboardItem::createFromDictionary(std::move(d))
+            DashboardItem::createFromDictionary(std::move(dashboard))
         );
     }
     catch (const ghoul::RuntimeError& e) {
-        LERRORC("addDashboardItem", e.what());
-        return ghoul::lua::luaError(L, "Error adding dashboard item");
+        throw ghoul::lua::LuaError(fmt::format(
+            "Error adding dashboard item: {}", e.what()
+        ));
+    }
+}
+
+// Removes the dashboard item with the specified identifier.
+[[codegen::luawrap]] void removeDashboardItem(
+                                  std::variant<std::string, ghoul::Dictionary> identifier)
+{
+    std::string identifierStr;
+    if (std::holds_alternative<std::string>(identifier)) {
+        identifierStr = std::get<std::string>(identifier);
+    }
+    else {
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(identifier);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError("Passed table does not contain an Identifier");
+        }
+        identifierStr = d.value<std::string>("Identifier");
     }
 
-    return 0;
+    openspace::global::dashboard->removeDashboardItem(identifierStr);
 }
 
-/**
- * \ingroup LuaScripts
- * removeDashboardItem(string):
- */
-int removeDashboardItem(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashbordItem");
-    const std::string identifier = ghoul::lua::value<std::string>(L);
-
-    global::dashboard->removeDashboardItem(identifier);
-    return 0;
+// Removes all dashboard items from the main dashboard.
+[[codegen::luawrap]] void clearDashboardItems() {
+    openspace::global::dashboard->clearDashboardItems();
 }
 
-/**
- * \ingroup LuaScripts
- * removeDashboardItems():
- */
-int clearDashboardItems(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearDashboardItems");
-    global::dashboard->clearDashboardItems();
-    return 0;
-}
+#include "dashboard_lua_codegen.cpp"
 
-}// namespace openspace::luascriptfunctions
+} // namespace

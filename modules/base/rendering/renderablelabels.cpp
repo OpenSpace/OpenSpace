@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,6 +42,7 @@
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -53,7 +54,7 @@ namespace {
     constexpr const char* KilometerUnit = "Km";
     constexpr const char* MegameterUnit = "Mm";
     constexpr const char* GigameterUnit = "Gm";
-    constexpr const char* AstronomicalUnit = "au";
+    constexpr const char* AstronomicalUnitUnit = "au";
     constexpr const char* TerameterUnit = "Tm";
     constexpr const char* PetameterUnit = "Pm";
     constexpr const char* ParsecUnit = "pc";
@@ -63,12 +64,29 @@ namespace {
     constexpr const char* GigalightyearUnit = "Gly";
 
     enum BlendMode {
-        BlendModeNormal = 0,
-        BlendModeAdditive
+        Normal = 0,
+        Additive
     };
 
-    constexpr const int ViewDirection   = 0;
-    constexpr const int NormalDirection = 1;
+    enum Orientation {
+        ViewDirection = 0,
+        PositionNormal
+    };
+
+    enum Unit {
+        Meter = 0,
+        Kilometer,
+        Megameter,
+        Gigameter,
+        AstronomicalUnit,
+        Terameter,
+        Petameter,
+        Parsec,
+        KiloParsec,
+        MegaParsec,
+        GigaParsec,
+        GigaLightyear
+    };
 
     constexpr double PARSEC = 0.308567756E17;
 
@@ -150,7 +168,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableLabels)]] Parameters {
-        enum class BlendMode {
+        enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
             Additive
         };
@@ -158,7 +176,7 @@ namespace {
         // [[codegen::verbatim(BlendModeInfo.description)]]
         std::optional<BlendMode> blendMode;
 
-        enum class Orientation {
+        enum class [[codegen::map(Orientation)]] Orientation {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
@@ -187,7 +205,7 @@ namespace {
         // [[codegen::verbatim(TransformationMatrixInfo.description)]]
         std::optional<glm::dmat4x4> transformationMatrix;
 
-        enum class Unit {
+        enum class [[codegen::map(Unit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
             Megameter [[codegen::key("Mm")]],
@@ -246,15 +264,15 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     registerUpdateRenderBinFromOpacity();
 
     _blendMode.addOptions({
-        { BlendModeNormal, "Normal" },
-        { BlendModeAdditive, "Additive"}
+        { BlendMode::Normal, "Normal" },
+        { BlendMode::Additive, "Additive"}
     });
     _blendMode.onChange([&]() {
         switch (_blendMode) {
-            case BlendModeNormal:
+            case BlendMode::Normal:
                 setRenderBinFromOpacity();
                 break;
-            case BlendModeAdditive:
+            case BlendMode::Additive:
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
             default:
@@ -263,31 +281,17 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     });
 
     if (p.blendMode.has_value()) {
-        switch (*p.blendMode) {
-            case Parameters::BlendMode::Normal:
-                _blendMode = BlendModeNormal;
-                break;
-            case Parameters::BlendMode::Additive:
-                _blendMode = BlendModeAdditive;
-                break;
-        }
+        _blendMode = codegen::map<BlendMode>(*p.blendMode);
     }
 
     addProperty(_blendMode);
 
     _orientationOption.addOption(ViewDirection, "Camera View Direction");
-    _orientationOption.addOption(NormalDirection, "Camera Position Normal");
+    _orientationOption.addOption(PositionNormal, "Camera Position Normal");
 
-    _orientationOption = NormalDirection;
+    _orientationOption = PositionNormal;
     if (p.orientationOption.has_value()) {
-        switch (*p.orientationOption) {
-            case Parameters::Orientation::ViewDirection:
-                _orientationOption = ViewDirection;
-                break;
-            case Parameters::Orientation::PositionNormal:
-                _orientationOption = NormalDirection;
-                break;
-        }
+        _orientationOption = codegen::map<Orientation>(*p.orientationOption);
     }
     addProperty(_orientationOption);
 
@@ -329,57 +333,20 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _fadeUnitOption.addOption(Kilometer, KilometerUnit);
     _fadeUnitOption.addOption(Megameter, MegameterUnit);
     _fadeUnitOption.addOption(Gigameter, GigameterUnit);
-    _fadeUnitOption.addOption(AU, AstronomicalUnit);
+    _fadeUnitOption.addOption(AstronomicalUnit, AstronomicalUnitUnit);
     _fadeUnitOption.addOption(Terameter, TerameterUnit);
     _fadeUnitOption.addOption(Petameter, PetameterUnit);
     _fadeUnitOption.addOption(Parsec, ParsecUnit);
-    _fadeUnitOption.addOption(Kiloparsec, KiloparsecUnit);
-    _fadeUnitOption.addOption(Megaparsec, MegaparsecUnit);
-    _fadeUnitOption.addOption(Gigaparsec, GigaparsecUnit);
-    _fadeUnitOption.addOption(GigalightYears, GigalightyearUnit);
+    _fadeUnitOption.addOption(KiloParsec, KiloparsecUnit);
+    _fadeUnitOption.addOption(MegaParsec, MegaparsecUnit);
+    _fadeUnitOption.addOption(GigaParsec, GigaparsecUnit);
+    _fadeUnitOption.addOption(GigaLightyear, GigalightyearUnit);
 
     if (p.fadeUnit.has_value()) {
-        switch (*p.fadeUnit) {
-            case Parameters::Unit::Meter:
-                _fadeUnitOption = Meter;
-                break;
-            case Parameters::Unit::Kilometer:
-                _fadeUnitOption = Kilometer;
-                break;
-            case Parameters::Unit::Megameter:
-                _fadeUnitOption = Megameter;
-                break;
-            case Parameters::Unit::Gigameter:
-                _fadeUnitOption = Gigameter;
-                break;
-            case Parameters::Unit::Terameter:
-                _fadeUnitOption = Terameter;
-                break;
-            case Parameters::Unit::Petameter:
-                _fadeUnitOption = Petameter;
-                break;
-            case Parameters::Unit::AstronomicalUnit:
-                _fadeUnitOption = AU;
-                break;
-            case Parameters::Unit::Parsec:
-                _fadeUnitOption = Parsec;
-                break;
-            case Parameters::Unit::KiloParsec:
-                _fadeUnitOption = Kiloparsec;
-                break;
-            case Parameters::Unit::MegaParsec:
-                _fadeUnitOption = Megaparsec;
-                break;
-            case Parameters::Unit::GigaParsec:
-                _fadeUnitOption = Gigaparsec;
-                break;
-            case Parameters::Unit::GigaLightyear:
-                _fadeUnitOption = GigalightYears;
-                break;
-        }
+        _fadeUnitOption = codegen::map<Unit>(*p.fadeUnit);
     }
     else {
-        _fadeUnitOption = AU;
+        _fadeUnitOption = AstronomicalUnit;
     }
     addProperty(_fadeUnitOption);
 
@@ -415,12 +382,8 @@ void RenderableLabels::initializeGL() {
 void RenderableLabels::deinitializeGL() {}
 
 void RenderableLabels::render(const RenderData& data, RendererTasks&) {
-
-    //bool additiveBlending = (_blendMode == BlendModeAdditive);
-    //if (additiveBlending) {
-        glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //}
+    glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     float fadeInVariable = 1.f;
 
@@ -454,10 +417,8 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
 
     renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
 
-    //if (additiveBlending) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    //}
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 
@@ -473,7 +434,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
     glm::vec4 textColor = glm::vec4(glm::vec3(_color), 1.f);
 
     textColor.a *= fadeInVariable;
-    textColor.a *= _opacity;
+    textColor.a *= opacity();
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
 
@@ -533,14 +494,14 @@ float RenderableLabels::unit(int unit) const {
         case Kilometer: return 1e3f;
         case Megameter: return  1e6f;
         case Gigameter: return 1e9f;
-        case AU: return 149597870700.f;
+        case AstronomicalUnit: return 149597870700.f;
         case Terameter: return 1e12f;
         case Petameter: return 1e15f;
         case Parsec: return static_cast<float>(PARSEC);
-        case Kiloparsec: return static_cast<float>(1e3 * PARSEC);
-        case Megaparsec: return static_cast<float>(1e6 * PARSEC);
-        case Gigaparsec: return static_cast<float>(1e9 * PARSEC);
-        case GigalightYears: return static_cast<float>(306391534.73091 * PARSEC);
+        case KiloParsec: return static_cast<float>(1e3 * PARSEC);
+        case MegaParsec: return static_cast<float>(1e6 * PARSEC);
+        case GigaParsec: return static_cast<float>(1e9 * PARSEC);
+        case GigaLightyear: return static_cast<float>(306391534.73091 * PARSEC);
         default: throw std::logic_error("Missing case label");
     }
 }
@@ -551,14 +512,14 @@ std::string RenderableLabels::toString(int unit) const {
         case Kilometer: return KilometerUnit;
         case Megameter: return  MegameterUnit;
         case Gigameter: return GigameterUnit;
-        case AU: return AstronomicalUnit;
+        case AstronomicalUnit: return AstronomicalUnitUnit;
         case Terameter: return TerameterUnit;
         case Petameter: return PetameterUnit;
         case Parsec: return ParsecUnit;
-        case Kiloparsec: return KiloparsecUnit;
-        case Megaparsec: return MegaparsecUnit;
-        case Gigaparsec: return GigaparsecUnit;
-        case GigalightYears: return GigalightyearUnit;
+        case KiloParsec: return KiloparsecUnit;
+        case MegaParsec: return MegaparsecUnit;
+        case GigaParsec: return GigaparsecUnit;
+        case GigaLightyear: return GigalightyearUnit;
         default: throw std::logic_error("Missing case label");
     }
 }

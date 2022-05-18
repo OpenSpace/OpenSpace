@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,6 +21,9 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLEFLUXNODES___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLEFLUXNODES___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -94,14 +97,13 @@ private:
         Illuminance = 3,
     };
 
-    UniformCache(streamColor, nodeSize, proximityNodesSize, 
+    UniformCache(streamColor, nodeSize, proximityNodesSize,
         thresholdFlux, colorMode, filterLower, filterUpper, scalingMode, colorTableRange,
         domainLimZ, nodeSkip, nodeSkipDefault, nodeSkipEarth, nodeSkipMethod,
         nodeSkipFluxThreshold, nodeSkipRadiusThreshold, fluxColorAlpha,
         earthPos, distanceThreshold, time, maxNodeDistanceSize, usingCameraPerspective,
-        drawCircles, drawHollow, useGaussian, perspectiveDistanceFactor, minMaxNodeSize, 
-        usingPulse, usingGaussianPulse)
-        _uniformCache;
+        drawCircles, drawHollow, useGaussian, perspectiveDistanceFactor, minMaxNodeSize,
+        usingPulse, usingGaussianPulse) _uniformCache;
 
     std::filesystem::path _binarySourceFolderPath;
 
@@ -121,8 +123,6 @@ private:
     GLuint _vertexColorBuffer = 0;
     // OpenGL Vertex Buffer Object containing the positions to filter the nodes
     GLuint _vertexFilteringBuffer = 0;
-    // OpenGL Vertex Buffer Object containing the index of nodes
-    GLuint _vertexindexBuffer = 0;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
@@ -198,7 +198,7 @@ private:
     properties::FloatProperty _fluxNodeskipThreshold;
     //The nodeskip for values within the range of the radius threshold to Earth
     properties::IntProperty _earthNodeSkip;
-    // The Radius threshold to decide the line between 
+    // The Radius threshold to decide the line between
     //_pDefaultNodeSkip and _pAmountofNodes
     properties::FloatProperty _radiusNodeSkipThreshold;
 
@@ -211,4 +211,7 @@ private:
     properties::BoolProperty _pulseEnabled;
     properties::BoolProperty _gaussianPulseEnabled;
 };
+
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLEFLUXNODES___H__

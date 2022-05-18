@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -26,14 +26,18 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   renderableplanespout.h
+  renderablespherespout.h
   screenspacespout.h
   spoutlibrary.h
+  spoutwrapper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   renderableplanespout.cpp
+  renderablespherespout.cpp
   screenspacespout.cpp
+  spoutwrapper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

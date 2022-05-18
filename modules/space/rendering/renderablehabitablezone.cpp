@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,8 +40,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableHabitableZone";
-
     constexpr const std::array<const char*, 6> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "transferFunctionTexture",
         "conservativeBounds", "showOptimistic"
@@ -96,21 +94,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableHabitableZone::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "space_renderablehabitablezone"
+    return codegen::doc<Parameters>(
+        "space_renderablehabitablezone",
+        RenderableDisc::Documentation()
     );
-
-    // @TODO cleanup
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderableDisc::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-
-    return doc;
 }
 
 RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictionary)
@@ -163,7 +150,7 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.width, _width);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(_uniformCache.conservativeBounds, _conservativeBounds);
     _shader->setUniform(_uniformCache.showOptimistic, _showOptimistic);
 

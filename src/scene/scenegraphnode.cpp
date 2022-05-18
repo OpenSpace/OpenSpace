@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,8 +49,7 @@
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
 
-    constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo = {
         "ComputeScreenSpaceData",
         "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
@@ -63,24 +62,28 @@ namespace {
         "The x,y position in screen space. Can be used for placing GUI elements",
         openspace::properties::Property::Visibility::Hidden
     };
+
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
         "Determines if the node is currently visible on screen",
         openspace::properties::Property::Visibility::Hidden
     };
+
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
         "The distance from the camera to the node surface",
         openspace::properties::Property::Visibility::Hidden
     };
+
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
         "The screen size of the radius of the node",
         openspace::properties::Property::Visibility::Hidden
     };
+
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "VisibilityDistance",
@@ -505,8 +508,8 @@ SceneGraphNode::SceneGraphNode()
     }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
     , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
-    , _approachFactor(ApproachFactorInfo, 5.0)
-    , _reachFactor(ReachFactorInfo, 1.25)
+    , _approachFactor(ApproachFactorInfo, 5.0, 0.0, 1e4)
+    , _reachFactor(ReachFactorInfo, 1.25, 0.0, 1e4)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
     , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
     , _screenVisibility(ScreenVisibilityInfo, false)
@@ -545,8 +548,13 @@ SceneGraphNode::SceneGraphNode()
     // negative values
     //_interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
+
+    _reachFactor.setExponent(3.f);
     addProperty(_reachFactor);
+
+    _approachFactor.setExponent(3.f);
     addProperty(_approachFactor);
+
     addProperty(_showDebugSphere);
 }
 
@@ -715,8 +723,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady() && _renderable->isEnabled() &&
-        _renderable->matchesRenderBinMask(data.renderBinMask);
+        _renderable->isReady() && _renderable->matchesRenderBinMask(data.renderBinMask);
 
     if (!visible) {
         return;

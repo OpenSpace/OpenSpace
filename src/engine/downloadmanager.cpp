@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,22 +30,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/thread.h>
+#include <curl/curl.h>
 #include <chrono>
 #include <filesystem>
 #include <thread>
-
-#ifdef OPENSPACE_CURL_ENABLED
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable: 4574) // 'INCL_WINSOCK_API_TYPEDEFS' is defined to be '0'
-#endif // WIN32
-
-#include <curl/curl.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
-#endif
 
 namespace {
     constexpr const char* _loggerCat = "DownloadManager";
@@ -145,9 +133,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         return nullptr;
     }
 
-    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(
-        file.filename().string()
-    );
+    auto future = std::make_shared<FileFuture>(file.filename().string());
     errno = 0;
 #ifdef WIN32
     FILE* fp;
@@ -257,7 +243,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
-        // NOLINTNEXTLINE
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace"); // NOLINT
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void*>(&file));
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback); // NOLINT
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L); // NOLINT

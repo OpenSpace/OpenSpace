@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
 {
-    _client = new BrowserClient(_renderHandler, _keyboardHandler);
+    _client = new BrowserClient(_renderHandler.get(), _keyboardHandler.get());
 
     CefWindowInfo windowInfo;
     windowInfo.SetAsWindowless(nullptr);
@@ -62,6 +62,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
         _client.get(),
         url,
         browserSettings,
+        nullptr,
         nullptr
     );
 

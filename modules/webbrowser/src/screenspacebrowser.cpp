@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -94,8 +94,8 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     _renderHandler = new ScreenSpaceRenderHandler;
     _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
-        _renderHandler,
-        _keyboardHandler
+        _renderHandler.get(),
+        _keyboardHandler.get()
     );
 
     _url.onChange([this]() { _isUrlDirty = true; });
@@ -114,7 +114,8 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 
 bool ScreenSpaceBrowser::initializeGL() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
-         glm::uvec3(_dimensions.value(), 1.f)
+        glm::uvec3(_dimensions.value(), 1),
+        GL_TEXTURE_2D
     );
 
     _renderHandler->setTexture(*_texture);

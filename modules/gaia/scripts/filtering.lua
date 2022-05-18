@@ -1,22 +1,22 @@
 openspace.gaia.documentation = {
     {
         Name = "addClippingBox",
-        Arguments = "string, vec3, vec3",
+        Arguments = { name = "String", size = "vec3", position = "vec3" },
         Documentation = "Creates a clipping box for the Gaia renderable in the first argument"
     },
     {
         Name = "removeClippingBox",
-        Arguments = "",
+        Arguments = {},
         Documentation = ""
     },
     {
         Name = "addClippingSphere",
-        Arguments = "string, float",
+        Arguments = { name = "String", radius = "Number" },
         Documentation = "Creates a clipping sphere for the Gaia renderable in the first argument"
     },
     {
         Name = "removeClippingBox",
-        Arguments = "",
+        Arguments = {},
         Documentation = ""
     }
 }

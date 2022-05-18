@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../enceladus").Enceladus.Identifier
+local globeIdentifier = asset.require("../../enceladus").Enceladus.Identifier
 
 local layer = {
   Identifier = "Global_Mosaic_100m_HPF",
   Name = "Cassini Global Mosaic 100m HPF",
-  FilePath = mapServiceConfigs .. "/Cassini_ISS_Global_Mosaic_100m_HPF.wms",
+  FilePath = asset.localResource("global_mosaic_100m_hpf.wms"),
   Description = [[ This mosaic represents the completion of a global control network of
     Enceladus containing Cassini Imaging Science Subsystem (ISS) images. A total of
     586 images in CLR, GRN, UV3, and IR3 filters were selected for the control
@@ -13,11 +12,16 @@ local layer = {
     than 120 degrees. (Description from URL).]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
 
 
 asset.meta = {
@@ -28,6 +32,5 @@ asset.meta = {
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Enceladus/Cassini/" ..
     "Enceladus_Cassini_ISS_Global_Mosaic_100m_HPF",
-  License = "NASA/PDS",
-  Identifiers = {"Global_Mosaic_100m_HPF"}
+  License = "NASA/PDS"
 }
