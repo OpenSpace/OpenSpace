@@ -66,8 +66,11 @@ list(APPEND CEF_COMPILER_DEFINES
 
 
 # Configure use of the sandbox.
-option(USE_SANDBOX "Enable or disable use of the sandbox." ON)
-
+if (OS_LINUX)
+  option(USE_SANDBOX "Enable or disable use of the sandbox." OFF)
+else()
+  option(USE_SANDBOX "Enable or disable use of the sandbox." ON)
+endif()
 
 #
 # Linux configuration.

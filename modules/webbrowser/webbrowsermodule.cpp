@@ -48,7 +48,7 @@ namespace {
         constexpr const char* SubprocessPath =
             "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
     #else
-        constexpr const char* SubprocessPath = "";
+        constexpr const char* SubprocessPath = "OpenSpace Helper";
     #endif
 
     constexpr openspace::properties::Property::PropertyInfo

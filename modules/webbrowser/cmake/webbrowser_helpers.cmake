@@ -56,7 +56,7 @@ function(run_cef_platform_config cef_root cef_target module_path)
     run_cef_windows_config("${cef_target}" "${cef_root}" "${module_path}")
   endif ()
   if (OS_LINUX)
-    run_cef_linux_config("${cef_target}")
+    run_cef_linux_config("${cef_target}" "${cef_root}")
   endif ()
 endfunction ()
 
@@ -140,6 +140,27 @@ function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
   add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
 endfunction ()
 
-function(run_cef_linux_config CEF_ROOT)
-  message(ERROR "Linux is not yet supported for Web Browser Module.")
+function(run_cef_linux_config CEF_TARGET CEF_ROOT)
+  # Executable target.
+  add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
+  target_link_libraries(${CEF_TARGET} PUBLIC libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  include_directories(${CEF_ROOT})
+
+  add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
+
+  if (USE_SANDBOX)
+    # Logical target used to link the cef_sandbox library.
+    message(STATUS "Using CEF in Sandboxed mode.")
+    ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+    target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
+  endif ()
+
+  # Add the custom manifest files to the executable.
+  set_openspace_cef_target_out_dir()
 endfunction ()
+
+function(set_modules_dependency_on_cef_libraries LIB_DEPENDENT)
+  target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_lib) 
+  target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_dll_wrapper)
+endfunction ()
+
