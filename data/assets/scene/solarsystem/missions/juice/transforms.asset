@@ -1,4 +1,5 @@
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
 local kernels = asset.require('./kernels')
 
 local Juice = {
@@ -24,12 +25,38 @@ local Juice = {
   }
 }
 
+local GPHIO = {
+  Identifier = "GPHIO",
+  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "GANYMEDE",
+      Observer = "JUPITER BARYCENTER",
+      Kernels = kernels.Kernels
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "GPHIO",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels.Kernels
+    }
+  },
+  GUI = {
+    Name = "GPHIO",
+    Path = "/Solar System/Missions/Juice"
+  }
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Juice)
+  openspace.addSceneGraphNode(GPHIO)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GPHIO)
   openspace.removeSceneGraphNode(Juice)
 end)
 
 asset.export(Juice)
+asset.export(GPHIO)

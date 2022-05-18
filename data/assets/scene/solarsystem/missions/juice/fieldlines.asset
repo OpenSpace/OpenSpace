@@ -1,0 +1,49 @@
+local transforms = asset.require('./transforms')
+
+local data = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Ganymede Plane Simulations",
+  Identifier = "juice_ganymede_fieldlines",
+  Version = 1
+})
+
+local magnetosphere = {
+  Identifier = "GanymedeMagnetosphere",
+  Parent = transforms.GPHIO.Identifier,
+  -- Transform = {
+  --   Scale = {
+  --     Type = "StaticScale",
+  --     Scale = 1000.0
+  --   }
+  -- },
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    SourceFolder = data,
+    LineWidth = 1.0,
+    -- AlphaBlendlingEnabled = false,
+    InputFileType = "Json",
+    -- MaskingEnabled = true,
+    -- MaskingQuantity = 5,      -- corresponds to "topology"
+    -- MaskingRanges = {{-0, 0}},  --closed only
+    ColorMethod = "By Quantity",
+    ColorQuantity = 0,
+    ColorTableRanges = {{62.556353386366766, 1665.5534182835445}},
+    ColorTablePaths = { asset.localResource("CMR-illuminance2.txt") },
+    -- LoadAtRuntime = true,
+    -- ScaleToMeters = 1.0,
+    Color = { 1.0, 0.725, 0.75, 0.8 }
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Fieldlines"
+  },
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(magnetosphere)
+  
+  openspace.setPropertyValueSingle("Scene.GanymedeMagnetosphere.Renderable.DomainEnabled", false)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(magnetosphere)
+end)

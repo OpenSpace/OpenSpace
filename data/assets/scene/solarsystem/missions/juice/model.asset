@@ -61,5 +61,3 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(JuiceModel)
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { JuiceModel })

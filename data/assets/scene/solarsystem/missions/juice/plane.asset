@@ -1,0 +1,299 @@
+local transforms = asset.require('./transforms')
+
+local data = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Ganymede Plane Simulations",
+  Identifier = "juice_ganymede_plane",
+  Version = 1
+})
+
+local GanymedeRadius = 2634 * 1000
+local Size = 4.114 * GanymedeRadius
+
+local xy_n = {
+  Identifier = "Juice_XY_N",
+  Parent = transforms.GPHIO.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XY-n.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xy_t = {
+  Identifier = "Juice_XY_T",
+  Parent = transforms.GPHIO.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XY-T.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xy_u = {
+  Identifier = "Juice_XY_U",
+  Parent = transforms.GPHIO.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XY-U.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xy_utot = {
+  Identifier = "Juice_XY_Utot",
+  Parent = transforms.GPHIO.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XY-Utot.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xy_ux = {
+  Identifier = "Juice_XY_Ux",
+  Parent = transforms.GPHIO.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XY-Ux.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xy_uy = {
+  Identifier = "Juice_XY_Uy",
+  Parent = transforms.GPHIO.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XY-Uy.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xy_uz = {
+  Identifier = "Juice_XY_Uz",
+  Parent = transforms.GPHIO.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XY-Uz.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xy_n = {
+  Identifier = "Juice_XY_N",
+  Parent = transforms.GPHIO.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XY-n.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xz_n = {
+  Identifier = "Juice_XZ_N",
+  Parent = transforms.GPHIO.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi/2, -math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XZ-n.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xz_t = {
+  Identifier = "Juice_XZ_T",
+  Parent = transforms.GPHIO.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi/2, -math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XZ-T.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xz_u = {
+  Identifier = "Juice_XZ_U",
+  Parent = transforms.GPHIO.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi/2, -math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XZ-U.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xz_utot = {
+  Identifier = "Juice_XZ_Utot",
+  Parent = transforms.GPHIO.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi/2, -math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XZ-Utot.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xz_ux = {
+  Identifier = "Juice_XZ_Ux",
+  Parent = transforms.GPHIO.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi/2, -math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XZ-Ux.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xz_uy = {
+  Identifier = "Juice_XZ_Uy",
+  Parent = transforms.GPHIO.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi/2, -math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XZ-Uy.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+local xz_uz = {
+  Identifier = "Juice_XZ_Uz",
+  Parent = transforms.GPHIO.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi/2, -math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = Size,
+    Texture = data .. "XZ-Uz.png",
+    Enabled = false
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Juice/Plane"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(xy_n)
+  openspace.addSceneGraphNode(xy_t)
+  openspace.addSceneGraphNode(xy_u)
+  openspace.addSceneGraphNode(xy_utot)
+  openspace.addSceneGraphNode(xy_ux)
+  openspace.addSceneGraphNode(xy_uy)
+  openspace.addSceneGraphNode(xy_uz)
+
+  openspace.addSceneGraphNode(xz_n)
+  openspace.addSceneGraphNode(xz_t)
+  openspace.addSceneGraphNode(xz_u)
+  openspace.addSceneGraphNode(xz_utot)
+  openspace.addSceneGraphNode(xz_ux)
+  openspace.addSceneGraphNode(xz_uy)
+  openspace.addSceneGraphNode(xz_uz)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(xz_uz)
+  openspace.removeSceneGraphNode(xz_uy)
+  openspace.removeSceneGraphNode(xz_ux)
+  openspace.removeSceneGraphNode(xz_utot)
+  openspace.removeSceneGraphNode(xz_u)
+  openspace.removeSceneGraphNode(xz_t)
+  openspace.removeSceneGraphNode(xz_n)
+
+  openspace.removeSceneGraphNode(xy_uz)
+  openspace.removeSceneGraphNode(xy_uy)
+  openspace.removeSceneGraphNode(xy_ux)
+  openspace.removeSceneGraphNode(xy_utot)
+  openspace.removeSceneGraphNode(xy_u)
+  openspace.removeSceneGraphNode(xy_t)
+  openspace.removeSceneGraphNode(xy_n)
+end)

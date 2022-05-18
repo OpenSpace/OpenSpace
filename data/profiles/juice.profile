@@ -1,11 +1,38 @@
 {
+  "actions": [
+    {
+      "documentation": "Toggle trails on or off for satellites around Earth",
+      "gui_path": "/Earth",
+      "identifier": "profile.keybind.0",
+      "is_local": false,
+      "name": "Toggle satellite trails",
+      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Refocuses the camera on the ISS",
+      "gui_path": "/Earth",
+      "identifier": "profile.keybind.1",
+      "is_local": false,
+      "name": "Focus ISS",
+      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    },
+    {
+      "documentation": "Retargets the camera on Earth",
+      "gui_path": "/Earth",
+      "identifier": "profile.keybind.2",
+      "is_local": false,
+      "name": "Focus on Earth",
+      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    }
+  ],
   "additional_scripts": [
     ""
   ],
   "assets": [
     "base",
-    "scene/solarsystem/missions/juice/fov",
+    "scene/solarsystem/missions/juice/fieldlines",
     "scene/solarsystem/missions/juice/model",
+    "scene/solarsystem/missions/juice/plane",
     "scene/solarsystem/missions/juice/trail",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites"
@@ -41,28 +68,16 @@
   ],
   "keybindings": [
     {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "S",
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.keybind.0",
+      "key": "S"
     },
     {
-      "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "I",
-      "name": "Focus ISS",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.keybind.1",
+      "key": "I"
     },
     {
-      "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "HOME",
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.keybind.2",
+      "key": "HOME"
     }
   ],
   "mark_nodes": [
@@ -168,7 +183,7 @@
     {
       "name": "Scene.JuiceTrailJupiter.Renderable.Enabled",
       "type": "setPropertyValueSingle",
-      "value": "false"
+      "value": "true"
     },
     {
       "name": "Scene.JuiceTrailGanymede.Renderable.Enabled",
@@ -184,14 +199,19 @@
       "name": "Scene.JuiceNavCam.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "Scene.GanymedeMagnetosphere.Renderable.DomainEnabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {
     "type": "absolute",
-    "value": "2029-10-27T00:00:00"
+    "value": "2031-08-01T00:00:00"
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }
