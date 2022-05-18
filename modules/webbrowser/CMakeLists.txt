@@ -26,6 +26,7 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(cmake/webbrowser_helpers.cmake)
 
 set(WEBBROWSER_MODULE_NAME WebBrowser)
 set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSER_MODULE_PATH")
@@ -66,7 +67,7 @@ set(CEF_VERSION "91.1.23+g04c8d56+chromium-91.0.4472.164")
 #endif ()
 
 # CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
-if (WIN32)
+if (WIN32 OR UNIX)
   option(USE_SANDBOX OFF)
 endif ()
 
@@ -133,6 +134,10 @@ if (OS_MACOSX)
   list(APPEND WEBBROWSER_HELPER_SOURCES src/processhelpermac.cpp)
 endif()
 set(WEBBROWSER_HELPER_SOURCES_WINDOWS src/processhelperwindows.cpp)
+if (OS_LINUX)
+  list(APPEND WEBBROWSER_HELPER_SOURCES src/processhelperlinux.cpp)
+  set(WEBBROWSER_HELPER_SOURCES_LINUX src/processhelperlinux.cpp)
+endif()
 APPEND_PLATFORM_SOURCES(WEBBROWSER_HELPER_SOURCES)
 
 set(WEBBROWSER_RESOURCES_MAC_SOURCES_MACOSX
@@ -186,12 +191,9 @@ if (OS_MACOSX)
     endif ()
   endforeach()
 
-set_property(TARGET ${CEF_HELPER_TARGET_GPU} PROPERTY FOLDER "Helper")
-set_property(TARGET ${CEF_HELPER_TARGET_RENDERER} PROPERTY FOLDER "Helper")
-
-endif ()
-
-if (OS_WINDOWS)
+  set_property(TARGET ${CEF_HELPER_TARGET_GPU} PROPERTY FOLDER "Helper")
+  set_property(TARGET ${CEF_HELPER_TARGET_RENDERER} PROPERTY FOLDER "Helper")
+else()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
   add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
@@ -200,9 +202,11 @@ if (OS_WINDOWS)
   # Logical target used to link the libcef library.
   add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
   target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-  # Add the custom manifest files to the executable.
-  add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
-endif (OS_WINDOWS)
+  if (OS_WINDOWS)
+    # Add the custom manifest files to the executable.
+    add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
+  endif (OS_WINDOWS)
+endif ()
 
 set_property(TARGET ${CEF_HELPER_TARGET} PROPERTY FOLDER "Helper")
 
@@ -254,6 +258,8 @@ set_folder_location(openspace_web_helper "Helper")
 
 target_include_directories(${webbrowser_module} SYSTEM PUBLIC ${CEF_ROOT})
 
+set_modules_dependency_on_cef_libraries(${webbrowser_module})
+
 set(deps "")
 foreach (i ${CEF_BINARY_FILES})
   list(APPEND deps "${CEF_BINARY_DIR}/${i}")
@@ -262,3 +268,13 @@ foreach (j ${CEF_RESOURCE_FILES})
 list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()
 add_external_library_dependencies("${deps}")
+
+# Linux needs to have copies of CEF files in Resources/ in its build-type dir to avoid
+# the 'Couldn't mmap icu data file' runtime error
+if (UNIX)
+  file(COPY ${CEF_ROOT}/Resources/
+    DESTINATION ${CEF_ROOT}/${CMAKE_BUILD_TYPE}/
+    FILES_MATCHING PATTERN *
+  )
+endif ()
+
