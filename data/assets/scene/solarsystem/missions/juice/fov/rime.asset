@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
@@ -62,7 +61,16 @@ local Rime = {
   }
 }
 
--- assetHelper.registerSceneGraphNodesAndExport(asset, {
---   Rime,
---   RimeBase
--- })
+
+asset.onInitialize(function()
+  -- openspace.addSceneGraphNode(Rime)
+  -- openspace.addSceneGraphNode(RimeBase)
+end)
+
+asset.onDeinitialize(function()
+  -- openspace.removeSceneGraphNode(RimeBase)
+  -- openspace.removeSceneGraphNode(Rime)
+end)
+
+asset.export(Rime)
+asset.export(RimeBase)

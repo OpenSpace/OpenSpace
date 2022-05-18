@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local transforms = asset.require('./transforms')
 
@@ -51,5 +50,16 @@ local JuiceModel = {
     Path = "/Solar System/Missions/Juice"
   }
 }
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JuiceModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JuiceModel)
+end)
+
+asset.export(JuiceModel)
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { JuiceModel })

@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
@@ -205,12 +204,31 @@ local Majis = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  MajisVisnir,
-  MajisVisnirB2,
-  MajisVisnirB4,
-  MajisIr,
-  MajisIrB2,
-  MajisIrB4,
-  Majis
-})
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MajisVisnir)
+  openspace.addSceneGraphNode(MajisVisnirB2)
+  openspace.addSceneGraphNode(MajisVisnirB4)
+  openspace.addSceneGraphNode(MajisIr)
+  openspace.addSceneGraphNode(MajisIrB2)
+  openspace.addSceneGraphNode(MajisIrB4)
+  openspace.addSceneGraphNode(Majis)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Majis)
+  openspace.removeSceneGraphNode(MajisIrB4)
+  openspace.removeSceneGraphNode(MajisIrB2)
+  openspace.removeSceneGraphNode(MajisIr)
+  openspace.removeSceneGraphNode(MajisVisnirB4)
+  openspace.removeSceneGraphNode(MajisVisnirB2)
+  openspace.removeSceneGraphNode(MajisVisnir)
+end)
+
+asset.export(MajisVisnir)
+asset.export(MajisVisnirB2)
+asset.export(MajisVisnirB4)
+asset.export(MajisIr)
+asset.export(MajisIrB2)
+asset.export(MajisIrB4)
+asset.export(Majis)

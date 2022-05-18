@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
@@ -86,8 +85,19 @@ local SwiFullGCO500 = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  -- SwiCh2,
-  SwiFull,
-  -- SwiFullGCO500
-})
+
+asset.onInitialize(function()
+  -- openspace.addSceneGraphNode(SwiCh2)
+  openspace.addSceneGraphNode(SwiFull)
+  -- openspace.addSceneGraphNode(SwiFullGCO500)
+end)
+
+asset.onDeinitialize(function()
+  -- openspace.removeSceneGraphNode(SwiFullGCO500)
+  openspace.removeSceneGraphNode(SwiFull)
+  -- openspace.removeSceneGraphNode(SwiCh2)
+end)
+
+asset.export(SwiCh2)
+asset.export(SwiFull)
+asset.export(SwiFullGCO500)

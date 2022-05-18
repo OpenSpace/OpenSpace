@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
@@ -71,4 +70,18 @@ local StarOh3 = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { StarOh1, StarOh2, StarOh3 })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(StarOh1)
+  openspace.addSceneGraphNode(StarOh2)
+  openspace.addSceneGraphNode(StarOh3)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StarOh3)
+  openspace.removeSceneGraphNode(StarOh2)
+  openspace.removeSceneGraphNode(StarOh1)
+end)
+
+asset.export(StarOh1)
+asset.export(StarOh2)
+asset.export(StarOh3)

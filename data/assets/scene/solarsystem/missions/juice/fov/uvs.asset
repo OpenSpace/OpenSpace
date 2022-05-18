@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
@@ -31,4 +30,13 @@ local UVS = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { UVS })
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(UVS)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(UVS)
+end)
+
+asset.export(UVS)

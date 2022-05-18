@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
 local kernels = asset.require('../kernels')
 
@@ -40,6 +39,16 @@ local JuiceTrailGanymede = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  GanymedeBarycenter, JuiceTrailGanymede
-})
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GanymedeBarycenter)
+  openspace.addSceneGraphNode(JuiceTrailGanymede)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JuiceTrailGanymede)
+  openspace.removeSceneGraphNode(GanymedeBarycenter)
+end)
+
+asset.export(GanymedeBarycenter)
+asset.export(JuiceTrailGanymede)

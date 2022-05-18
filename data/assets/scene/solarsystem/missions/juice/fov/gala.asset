@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
@@ -32,6 +31,13 @@ local Gala = {
   }
 }
 
--- assetHelper.registerSceneGraphNodesAndExport(asset, {
---   Gala
--- })
+
+asset.onInitialize(function()
+  -- openspace.addSceneGraphNode(Gala)
+end)
+
+asset.onDeinitialize(function()
+  -- openspace.removeSceneGraphNode(Gala)
+end)
+
+asset.export(Gala)

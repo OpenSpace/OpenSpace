@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local kernels = asset.require('../kernels')
 
@@ -24,5 +23,14 @@ local JuiceTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { JuiceTrail })
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JuiceTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JuiceTrail)
+end)
+
+asset.export(JuiceTrail)
   

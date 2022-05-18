@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
@@ -60,4 +59,16 @@ local JMC2 = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { JMC1, JMC2 })
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JMC1)
+  openspace.addSceneGraphNode(JMC2)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JMC2)
+  openspace.removeSceneGraphNode(JMC1)
+end)
+
+asset.export(JMC1)
+asset.export(JMC2)
