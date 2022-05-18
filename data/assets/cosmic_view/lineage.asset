@@ -1,0 +1,308 @@
+
+local lineage_17 = {
+  Identifier = "lineage_17",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.976, 0.925, 0.141 },
+    Opacity = 1.0,
+    ScaleFactor = 15,
+    File = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.taxon.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+    DrawLabels = true,
+    LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_17_label.speck"),
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 20 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/point3A.png"),
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "17: Order",
+    Path = "/Cosmic/Linegae"
+  }
+}
+
+local lineage_18 = {
+  Identifier = "lineage_18",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 15,
+    File = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.taxon.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+    ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_18.cmap"),
+    ColorOption = { "lineage_18" },
+    ColorRange = { { 1.0, 2.0}},
+    DrawLabels = true,
+    LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_18_label.speck"),
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 20 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/point3A.png"),
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "18: Suborder",
+    Path = "/Cosmic/Linegae"
+  }
+}
+
+
+local lineage_19 = {
+  Identifier = "lineage_19",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 15,
+    File = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.taxon.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+    ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_19.cmap"),
+    ColorOption = { "lineage_19" },
+    ColorRange = { { 3.0, 7.0}},
+    DrawLabels = true,
+    LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_19_label.speck"),
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 17 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/point3A.png"),
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "19: Infraorder",
+    Path = "/Cosmic/Linegae"
+  }
+}
+
+local lineage_20 = {
+  Identifier = "lineage_20",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 15,
+    File = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.taxon.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+    ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_20.cmap"),
+    ColorOption = { "lineage_20" },
+    ColorRange = { { 8.0, 18.0}},
+    DrawLabels = true,
+    LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_20_label.speck"),
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 15 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/point3A.png"),
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "20: Parvorder",
+    Path = "/Cosmic/Linegae"
+  }
+}
+
+local lineage_21 = {
+  Identifier = "lineage_21",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 15,
+    File = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.taxon.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+    ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_21.cmap"),
+    ColorOption = { "lineage_21" },
+    ColorRange = { { 19.0, 51.0}},
+    DrawLabels = true,
+    LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_21_label.speck"),
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 13 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/point3A.png"),
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "21: Superfamily",
+    Path = "/Cosmic/Linegae"
+  }
+}
+
+
+local lineage_22 = {
+  Identifier = "lineage_22",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 15,
+    File = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.taxon.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+    ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_22.cmap"),
+    ColorOption = { "lineage_22" },
+    ColorRange = { { 24.0, 62.0}},
+    DrawLabels = true,
+    LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_22_label.speck"),
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 12 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/point3A.png"),
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "22: Family",
+    Path = "/Cosmic/Linegae"
+  }
+}
+
+local lineage_23 = {
+  Identifier = "lineage_23",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 15,
+    File = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.taxon.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+    ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_23.cmap"),
+    ColorOption = { "lineage_23" },
+    ColorRange = { { 24.0, 89.0}},
+    ExactColors = true,
+    DrawLabels = true,
+    LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_23_label.speck"),
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 12 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/point3A.png"),
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = true
+  },
+  GUI = {
+    Name = "23: Subfamily",
+    Path = "/Cosmic/Linegae"
+  }
+}
+
+local lineage_24 = {
+  Identifier = "lineage_24",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 15,
+    File = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.taxon.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+    ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_23.cmap"),
+    ColorOption = { "lineage_23" },
+    ColorRange = { { 24.0, 89.0}},
+    DrawLabels = true,
+    LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_24_label.speck"),
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 20 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/point3A.png"),
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Genus",
+    Path = "/Cosmic/Linegae"
+  }
+}
+
+local lineage = {
+  Identifier = "lineage",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 0.4,1.0,1.0 },
+    Opacity = 1.0,
+    ScaleFactor = 15,
+    File = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.taxon.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+    ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/lineage_rainbow.cmap"),
+    ColorOption = { "lineage_17","lineage_18","lineage_19","lineage_20","lineage_21","lineage_22", "lineage_23" },
+    ColorRange = { { 0.0, 1.0}, { 1.0, 2.0}, { 3.0, 7.0}, { 8, 18}, { 19.0, 51.0}, { 24.0, 62.0}, { 24.0, 89.0} },
+    DrawLabels = false,
+    LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/lineage/primates.lineage.color.primates.float_label.speck"),
+    TextColor = { 1.0, 1.0, 1.0 },
+    TextSize = 1.0,
+    TextMinMaxSize = { 0, 26 },
+    FadeLabelDistances = { 0.0, 0.5 },
+    FadeLabelWidths = { 0.001, 0.5 },
+    Unit = "Km",
+    Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/point3A.png"),
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Taxon",
+    Path = "/Cosmic/Linegae"
+  }
+}
+
+
+
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(lineage)
+    openspace.addSceneGraphNode(lineage_17)
+    openspace.addSceneGraphNode(lineage_18)
+    openspace.addSceneGraphNode(lineage_19)
+    openspace.addSceneGraphNode(lineage_20)
+    openspace.addSceneGraphNode(lineage_21)
+    openspace.addSceneGraphNode(lineage_22)
+    openspace.addSceneGraphNode(lineage_23)
+    openspace.addSceneGraphNode(lineage_24)
+    end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(lineage)
+    openspace.removeSceneGraphNode(lineage_17)
+    openspace.removeSceneGraphNode(lineage_18)
+    openspace.removeSceneGraphNode(lineage_19)
+    openspace.removeSceneGraphNode(lineage_20)
+    openspace.removeSceneGraphNode(lineage_21)
+    openspace.removeSceneGraphNode(lineage_22)
+    openspace.removeSceneGraphNode(lineage_23)
+    openspace.removeSceneGraphNode(lineage_24)
+    end)
+
+
+asset.export(lineage)
+asset.export(lineage_17)
+asset.export(lineage_18)
+asset.export(lineage_19)
+asset.export(lineage_20)
+asset.export(lineage_21)
+asset.export(lineage_22)
+asset.export(lineage_23)
+asset.export(lineage_24)

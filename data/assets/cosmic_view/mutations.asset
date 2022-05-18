@@ -1,0 +1,58 @@
+
+local Name = "Synonymous Mutations"
+local Identifier = "mutations"
+
+local mutations = {
+    Identifier = "mutations",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.4,1.0,1.0 },
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/primates.genus.interpolate.syn.lineage.averagePairwiseDiff.speck"),
+      ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/yellowpurple.cmap"),
+      ColorOption = { "synonymousDiff", "NonSynonymousDiff" },
+      ColorRange = { { 0, 140}, { 0, 20} },
+      DrawLabels = false,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/lineage_24_label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Mutation points",
+      Path = "/Cosmic/Mutations"
+    }
+  }
+
+
+  -- colorbar to understand the colors for synonynmous mutations
+  local colorbar = {
+    Identifier = Identifier,
+    Name = Name,
+    Type = "ScreenSpaceImageLocal",
+    TexturePath = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/Synonymous_mutations.png"),
+    FaceCamera = false,
+    CartesianPosition = { 1.2, -0.6, -2.0 }
+  }
+
+
+asset.onInitialize(function()
+openspace.addSceneGraphNode(mutations)
+--openspace.addScreenSpaceRenderable(colorbar);  
+end)
+
+asset.onDeinitialize(function()
+openspace.removeSceneGraphNode(mutations)
+--openspace.removeScreenSpaceRenderable(colorbar)
+end)
+
+asset.export(mutations)
+--asset.export(colorbar)

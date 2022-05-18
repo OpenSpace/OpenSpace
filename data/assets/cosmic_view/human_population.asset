@@ -1,0 +1,250 @@
+local all_human_population = {
+    Identifier = "all_human_population",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.4,1.0,1.0 },
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/human_populations_float.speck"),
+      ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/human_population.cmap"),
+      ColorOption = { "region" },
+      ColorRange = { { 1.0, 8.0} },
+      DrawLabels = false,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/human_populations_float_label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Whole human population",
+      Path = "/Cosmic/Human Population"
+    }
+  }
+
+  local human_asia = {
+    Identifier = "human_asia",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.994066749767428, 0.709927390700005, 0.180482004740675 },
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanasian.speck"),
+      DrawLabels = true,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanasian_label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Asia",
+      Path = "/Cosmic/Human Population"
+    }
+  }
+
+  local human_europe = {
+    Identifier = "human_europe",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.407664528658919, 0.000635421871269554, 0.657244390906515},
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humaneurope.speck"),
+      DrawLabels = true,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humaneurope_label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Europe",
+      Path = "/Cosmic/Human Population"
+    }
+  }
+
+  local human_oceania = {
+    Identifier = "human_oceania",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.0,0.0,1.0},
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanoceanien.speck"),
+      DrawLabels = true,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanoceanien_label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Oceanien",
+      Path = "/Cosmic/Human Population"
+    }
+  }
+
+  local human_namerica = {
+    Identifier = "human_namerica",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = {0.364,0.933,0.937 },
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanNamerica.speck"),
+      DrawLabels = true,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanNamerica_label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "North America",
+      Path = "/Cosmic/Human Population"
+    }
+  }
+
+  local human_samerica = {
+    Identifier = "human_samerica",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = {0.134691403461632, 0.658634762389973, 0.517649080313121 },
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanSamerica.speck"),
+      DrawLabels = true,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanSamerica_label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "South America",
+      Path = "/Cosmic/Human Population"
+    }
+  }
+
+  local human_africa = {
+    Identifier = "human_africa",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.247029852794072, 0.729412779637453, 0.035074447126616 },
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanafrica.speck"),
+      DrawLabels = true,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanafrica_label.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Africa",
+      Path = "/Cosmic/Human Population"
+    }
+  }
+
+  
+local human_other = {
+    Identifier = "human_other",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.7,0.016,0.15 },
+      Opacity = 1.0,
+      ScaleFactor = 15,
+      File = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanother.speck"),
+      DrawLabels = true,
+      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/humanotherlabel.speck"),
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/point3A.png"),
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Other Species",
+      Path = "/Cosmic/Human Population"
+    }
+  }
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(all_human_population)
+    openspace.addSceneGraphNode(human_asia)
+    openspace.addSceneGraphNode(human_europe)
+    openspace.addSceneGraphNode(human_oceania)
+    openspace.addSceneGraphNode(human_namerica)
+    openspace.addSceneGraphNode(human_samerica)
+    openspace.addSceneGraphNode(human_africa)
+    openspace.addSceneGraphNode(human_other)
+    end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(all_human_population)
+    openspace.removeSceneGraphNode(human_asia)
+    openspace.removeSceneGraphNode(human_europe)
+    openspace.removeSceneGraphNode(human_oceania)
+    openspace.removeSceneGraphNode(human_namerica)
+    openspace.removeSceneGraphNode(human_samerica)
+    openspace.removeSceneGraphNode(human_africa)
+    openspace.removeSceneGraphNode(human_other)
+end)
+
+asset.export(all_human_population)
+asset.export(human_asia)
+asset.export(human_europe)
+asset.export(human_oceania)
+asset.export(human_namerica)
+asset.export(human_samerica)
+asset.export(human_africa)
+asset.export(human_other)
