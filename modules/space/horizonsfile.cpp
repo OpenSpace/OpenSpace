@@ -24,6 +24,7 @@
 
 #include <modules/space/horizonsfile.h>
 
+#include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -165,6 +166,44 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     }
 
     return url;
+}
+
+json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath) {
+    // Set up HTTP request and download result
+    auto download = std::make_unique<HttpFileDownload>(
+        url,
+        filePath,
+        HttpFileDownload::Overwrite::Yes
+    );
+
+    HttpFileDownload* dl = download.get();
+    dl->start();
+
+    bool failed = false;
+    dl->wait();
+    if (!dl->hasSucceeded()) {
+        LERROR(fmt::format("Error downloading horizons file with URL {}", dl->url()));
+        failed = true;
+    }
+
+    if (failed) {
+        dl->cancel();
+    }
+
+    // Read the entire file into a string
+    constexpr auto read_size = std::size_t(4096);
+    std::ifstream stream = std::ifstream(filePath.string().data());
+    stream.exceptions(std::ios_base::badbit);
+
+    std::string answer;
+    std::string buf = std::string(read_size, '\0');
+    while (stream.read(&buf[0], read_size)) {
+        answer.append(buf, 0, stream.gcount());
+    }
+    answer.append(buf, 0, stream.gcount());
+
+    // convert to a json object
+    return json::parse(answer);
 }
 
 HorizonsResultCode isValidHorizonsAnswer(const json& answer) {

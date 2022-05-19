@@ -127,6 +127,7 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     const std::string& observer, const std::string& startTime,
     const std::string& stopTime, const std::string& stepSize,
     const std::string& unit);
+nlohmann::json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath);
 HorizonsResultCode isValidHorizonsAnswer(const nlohmann::json& answer);
 HorizonsResultCode isValidHorizonsFile(std::filesystem::path file);
 HorizonsResult readHorizonsFile(std::filesystem::path file);
