@@ -2,68 +2,8 @@ local kernels = asset.syncedResource({
   Name = "JUICE Kernels",
   Type = "HttpSynchronization",
   Identifier = "juice_kernels",
-  Version = 2
+  Version = 1
 })
-
--- From the crema 5.0 meta kernel
--- local Kernels = {
---   kernels .. '/juice_sc_sat_crema_5_0_default_20220826_20351005_f20160326_v01.bc',
---   kernels .. '/juice_sc_sat_crema_5_0_comms_20310721_20351004_f20160326_v01.bc',
---   kernels .. '/juice_sc_sat_crema_5_0_conjctn_20241027_20350420_f20160326_v01.bc',
---   kernels .. '/juice_sc_sat_crema_5_0_flybys_20240826_20341218_f20160326_v01.bc',
---   kernels .. '/juice_lpbooms_f20160326_v01.bc',
---   kernels .. '/juice_magboom_f20160326_v03.bc',
---   kernels .. '/juice_mga_zero_f20160326_v02.bc',
---   kernels .. '/juice_majis_scan_zero_f20160326_v02.bc',
---   kernels .. '/juice_swi_scan_zero_f20160326_v02.bc',
---   kernels .. '/juice_sa_crema_5_0_default_f20160326_v01.bc',
--- 
---   kernels .. '/juice_v23.tf',
---   kernels .. '/juice_sci_v08.tf',
---   kernels .. '/juice_ops_v07.tf',
---   kernels .. '/juice_dsk_surfaces_v03.tf',
---   kernels .. '/juice_roi_v01.tf',
---   kernels .. '/rssd0002.tf',
---   kernels .. '/earth_topo_050714.tf',
---   kernels .. '/earthfixediau.tf',
---   kernels .. '/estrack_v03.tf',
--- 
---   kernels .. '/juice_gala_v03.ti',
---   kernels .. '/juice_janus_v06.ti',
---   kernels .. '/juice_jmc_v02.ti',
---   kernels .. '/juice_majis_v05.ti',
---   kernels .. '/juice_navcam_v01.ti',
---   kernels .. '/juice_pep_v09.ti',
---   kernels .. '/juice_rime_v04.ti',
---   kernels .. '/juice_rpwi_v02.ti',
---   kernels .. '/juice_str_v01.ti',
---   kernels .. '/juice_swi_v07.ti',
---   kernels .. '/juice_uvs_v03.ti',
---   kernels .. '/juice_aux_v00.ti',
--- 
---   kernels .. '/naif0012.tls',
--- 
---   kernels .. '/pck00010.tpc',
---   kernels .. '/de-403-masses.tpc',
---   kernels .. '/gm_de431.tpc',
---   kernels .. '/juice_jup006.tpc',
---   kernels .. '/juice_roi_v00.tpc',
--- 
---   kernels .. '/juice_fict_20160326.tsc',
--- 
---   kernels .. '/juice_struct_v10.bsp',
---   kernels .. '/juice_cog_v00.bsp',
---   kernels .. '/juice_roi_v01.bsp',
---   kernels .. '/mar085_20200101_20400101.bsp',
---   kernels .. '/earthstns_fx_050714.bsp',
---   kernels .. '/estrack_v03.bsp',
---   kernels .. '/jup310_20200101_20500101.bsp',
---   kernels .. '/jup343_20200101_20500101.bsp',
---   kernels .. '/de432s.bsp',
---   kernels .. '/noe-5-2017-gal-a-reduced_20200101_20380902.bsp',
--- 
---   kernels .. '/juice_mat_crema_5_0_20220826_20351005_v01.bsp'
--- }
 
 -- From the crema 5.0b23_1 meta kernel
 -- + GPHIO from Ronan

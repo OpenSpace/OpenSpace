@@ -1,11 +1,13 @@
 local transforms = asset.require('./transforms')
 
-local data = asset.syncedResource({
-  Type = "HttpSynchronization",
-  Name = "Ganymede Plane Simulations",
-  Identifier = "juice_ganymede_plane",
-  Version = 1
-})
+-- local data = asset.syncedResource({
+--   Type = "HttpSynchronization",
+--   Name = "Ganymede Plane Simulations",
+--   Identifier = "juice_ganymede_plane",
+--   Version = 1
+-- })
+
+local data = asset.localResource('juice_ganymede_plane') .. '/'
 
 local GanymedeRadius = 2634 * 1000
 local Size = 4.114 * GanymedeRadius
