@@ -158,7 +158,11 @@ set(WEBBROWSER_RESOURCES_SRCS
 
 # Place Helper in separate executable
 # The naming style "<ApplicionName> Helper" is required by Chromium.
-set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+if (UNIX)
+  set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+else()
+  set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+endif()
 set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
 set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
 
@@ -269,12 +273,21 @@ list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()
 add_external_library_dependencies("${deps}")
 
-# Linux needs to have copies of CEF files in Resources/ in its build-type dir to avoid
-# the 'Couldn't mmap icu data file' runtime error
 if (UNIX)
+  # Linux needs to have copies of CEF files in Resources/ in its build-type dir to avoid
+  # the 'Couldn't mmap icu data file' runtime error
   file(COPY ${CEF_ROOT}/Resources/
     DESTINATION ${CEF_ROOT}/${CMAKE_BUILD_TYPE}/
     FILES_MATCHING PATTERN *
   )
+
+  # Rename to "OpenSpace Helper" after build & link in order to prevent GNU Make from
+  # having to deal with the space in the filename
+  ADD_CUSTOM_COMMAND(TARGET ${CEF_HELPER_TARGET} POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E rename
+                     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/${CEF_HELPER_TARGET}"
+                     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/OpenSpace Helper"
+                     COMMENT "Renaming ${CEF_HELPER_TARGET} to 'OpenSpace Helper'"
+                    )
 endif ()
 
