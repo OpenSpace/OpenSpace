@@ -40,8 +40,9 @@ public:
     SoftwareIntegrationModule();
     ~SoftwareIntegrationModule();
 
-    void storeData(const std::string& key, const std::vector<float> data);
-    std::vector<float> fetchData(const std::string& key);
+    void storeData(const std::string& key, const std::vector<float>& data);
+    const std::vector<float>& fetchData(const std::string& key);
+    bool isDataDirty(const std::string& key);
 
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -51,10 +52,12 @@ private:
     
     std::vector<Syncable*> getSyncables();
 
-    NetworkEngine* _server;
 
     // Centralized storage for datasets
     SyncableFloatDataStorage _syncableFloatDataStorage;
+
+    // Network engine
+    std::unique_ptr<NetworkEngine> _networkEngine;
 };
 
 } // namespace openspace

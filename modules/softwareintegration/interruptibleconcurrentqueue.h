@@ -22,17 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___INTERRUPTABLECONCURRENTQUEUE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___INTERRUPTABLECONCURRENTQUEUE___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <condition_variable>
+#include <mutex>
+#include <queue>
 
-layout(location = 0) in vec3 in_position;
-in float in_colormapAttributeScalar;
+namespace openspace {
 
-out float vs_colormapAttributeScalar;
+template <typename T>
+class InterruptibleConcurrentQueue {
+public:
+    T pop();
+	void interrupt();
+    void push(const T& item);
+    void push(T&& item);
 
-void main() {
-    vs_colormapAttributeScalar = in_colormapAttributeScalar;
+private:
+    std::atomic_bool _interrupted{ false };
+    std::queue<T> _queue;
+    mutable std::mutex _mutex;
+    mutable std::condition_variable _notifyForPop;
+};
 
-    gl_Position = vec4(in_position, 1.0);
-}
+
+} // namespace openspace
+
+#include "interruptibleconcurrentqueue.inl"
+
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___INTERRUPTABLECONCURRENTQUEUE___H__

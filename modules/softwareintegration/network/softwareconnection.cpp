@@ -24,11 +24,12 @@
 
 #include <modules/softwareintegration/network/softwareconnection.h>
 
-#include <modules/softwareintegration/simp.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderable.h>
 
 namespace {
     constexpr const char* _loggerCat = "SoftwareConnection";
@@ -36,52 +37,172 @@ namespace {
 
 namespace openspace {
 
-SoftwareConnection::Message::Message(simp::MessageType type, std::vector<char> content)
-    : type{ type }, content{ std::move(content) }
-{}
+std::atomic_size_t SoftwareConnection::_nextConnectionId = 1;
 
 SoftwareConnection::SoftwareConnectionLostError::SoftwareConnectionLostError(const std::string& msg)
     : ghoul::RuntimeError(fmt::format("{}{}", "Software connection lost", msg), "SoftwareConnection")
 {}
 
 SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
-    : _socket(std::move(socket))
+    : _id{ _nextConnectionId++ }, _socket{ std::move(socket) }, _sceneGraphNodes{},
+    _thread{}, _shouldStopThread{ false }
 {}
 
-bool SoftwareConnection::isConnected() const {
-    return _socket->isConnected();
-}
+SoftwareConnection::SoftwareConnection(SoftwareConnection&& sc)
+	: _id{ std::move(sc._id) }, _socket{ std::move(sc._socket) },
+    _isConnected{ sc._isConnected }, _sceneGraphNodes{ std::move(sc._sceneGraphNodes) },
+    _thread{}, _shouldStopThread{ false }
+{}
 
-bool SoftwareConnection::isConnectedOrConnecting() const {
-    return _socket->isConnected() || _socket->isConnecting();
-}
+SoftwareConnection::~SoftwareConnection() {
+    LINFO(fmt::format("Remove software connection {}", _id));
 
-bool SoftwareConnection::sendMessage(std::string message) {
-    LDEBUG(fmt::format("In SoftwareConnection::sendMessage()", 0));
+    if (!_isConnected) return;
+    _isConnected = false;
 
-    if (_isListening) {
-        if (!_socket->put<char>(message.data(), message.size())) {
-            return false;
-        }
-        LDEBUG(fmt::format("Message sent: {}", message));
-    }
-    else {
-        _isListening = true;
-        return false;
+    for (auto& identifier : _sceneGraphNodes) {
+        removePropertySubscriptions(identifier);
     }
 
-    return true;
-}
-
-void SoftwareConnection::disconnect() {
     if (_socket) {
-        sendMessage(simp::formatDisconnectionMessage());
         _socket->disconnect();
     }
 }
 
-ghoul::io::TcpSocket* SoftwareConnection::socket() {
-    return _socket.get();
+void SoftwareConnection::addPropertySubscription(
+    const std::string propertyName,
+    const std::string& identifier,
+    std::function<void()> newHandler
+) {
+    // Get renderable
+    auto r = renderable(identifier);
+    if (!r) {
+        LWARNING(fmt::format(
+            "Couldn't add property subscription. Renderable \"{}\" doesn't exist",
+            identifier
+        ));
+        return;
+    }
+
+    if (!r->hasProperty(propertyName)) {
+        LWARNING(fmt::format(
+            "Couldn't add property subscription. Property \"{}\" doesn't exist on \"{}\"",
+            propertyName, identifier
+        ));
+        return;
+    }
+
+    auto property = r->property(propertyName);
+    OnChangeHandle onChangeHandle = property->onChange(newHandler);
+
+    auto propertySubscriptions = _subscribedProperties.find(identifier);
+    if (propertySubscriptions != _subscribedProperties.end()) {
+        // At least one property have been subscribed to on this SGN
+        auto propertySubscription = propertySubscriptions->second.find(propertyName);
+        if (propertySubscription != propertySubscriptions->second.end()) {
+            // Property subscription already exists
+            removeExistingPropertySubscription(identifier, property, onChangeHandle);
+            propertySubscription->second = onChangeHandle;
+        }
+        else {
+            // Property subscription doesn't exist
+            propertySubscriptions->second.emplace(propertyName, onChangeHandle);
+        }
+    }
+    else {
+        // No properties have been subscribed to on this SGN
+        PropertySubscriptions newPropertySubscriptionMap{ { propertyName, onChangeHandle } };
+        _subscribedProperties.emplace(identifier, std::move(newPropertySubscriptionMap));
+    }
+}
+
+void SoftwareConnection::removePropertySubscriptions(const std::string& identifier) {
+    // Get renderable
+    auto r = renderable(identifier);
+    if (!r) {
+        LWARNING(fmt::format(
+            "Couldn't remove property subscriptions, renderable {} doesn't exist",
+            identifier
+        ));
+        return;
+    }
+
+    auto propertySubscriptions = _subscribedProperties.find(identifier);
+
+    if (propertySubscriptions == _subscribedProperties.end()) return;
+
+    for (auto& [propertyName, onChangeHandle] : propertySubscriptions->second) {
+        if (!r->hasProperty(propertyName)) {
+            LWARNING(fmt::format(
+                "Couldn't remove property subscription. Property \"{}\" doesn't exist on \"{}\"",
+                propertyName, identifier
+            ));
+            continue;
+        }
+
+        auto propertySubscription = propertySubscriptions->second.find(propertyName);
+        if (propertySubscription == propertySubscriptions->second.end()) continue;
+
+        auto property = r->property(propertyName);
+        removeExistingPropertySubscription(identifier, property, onChangeHandle);
+    }
+
+    _subscribedProperties.erase(propertySubscriptions);
+}
+
+void SoftwareConnection::removeExistingPropertySubscription(
+    const std::string& identifier,
+    properties::Property *property,
+    OnChangeHandle onChangeHandle
+) {
+    property->removeOnChange(onChangeHandle);
+
+    auto propertySubscriptions = _subscribedProperties.find(identifier);
+    propertySubscriptions->second.erase(property->identifier());
+}
+
+void SoftwareConnection::disconnect() {
+    _socket->disconnect();
+}
+
+bool SoftwareConnection::isConnected() const {
+    return _isConnected && _socket && _socket->isConnected();
+}
+
+bool SoftwareConnection::isConnectedOrConnecting() const {
+    return _isConnected && _socket && (_socket->isConnected() || _socket->isConnecting());
+}
+
+bool SoftwareConnection::sendMessage(const std::string& message) {
+    try {
+        if (!_socket || !isConnected()) {
+            throw SoftwareConnectionLostError("Connection lost...");
+        }
+        if (_socket->put<char>(message.data(), message.size())) {
+            LDEBUG(fmt::format("Message sent: {}", message));
+            return true;
+        }
+    }
+    catch (const SoftwareConnectionLostError& err) {
+        LERROR(fmt::format("Couldn't send message: \"{}\", due to: {}", message, err.message));
+    }
+    catch (const std::exception& err) {
+        LERROR(fmt::format("Couldn't send message: \"{}\", due to: {}", message, err.what()));
+    }
+
+    return false;
+}
+
+void SoftwareConnection::addSceneGraphNode(const std::string& identifier) {
+    _sceneGraphNodes.insert(identifier);
+}
+
+void SoftwareConnection::removeSceneGraphNode(const std::string& identifier) {
+    size_t amountRemoved = _sceneGraphNodes.erase(identifier);
+    
+    if (amountRemoved > 0) {
+        removePropertySubscriptions(identifier);
+    }
 }
 
 /**
@@ -102,15 +223,14 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
         throw SoftwareConnectionLostError("Failed to read header from socket. Disconnecting.");
     }
 
-    // Read and convert version number: Byte 0-2
-    std::string version;
+    // Read the protocol version number: Byte 0-2
+    std::string protocolVersionIn;
     for (int i = 0; i < 3; i++) {
-        version.push_back(headerBuffer[i]);
+        protocolVersionIn.push_back(headerBuffer[i]);
     }
-    const float protocolVersionIn = std::stof(version);
 
     // Make sure that header matches the protocol version
-    if (abs(protocolVersionIn - simp::ProtocolVersion) >= FLT_EPSILON) {
+    if (protocolVersionIn != simp::ProtocolVersion) {
         throw SoftwareConnectionLostError(fmt::format(
             "Protocol versions do not match. Remote version: {}, Local version: {}",
             protocolVersionIn,
@@ -131,36 +251,44 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
     }
     const size_t subjectSize = std::stoi(subjectSizeIn);
 
-    std::string rawHeader;
-    for (int i = 0; i < 22; i++) {
-        rawHeader.push_back(headerBuffer[i]);
-    }
-    LDEBUG(fmt::format("Message received with header: {}", rawHeader));
+    // TODO: Remove this
+    // std::string rawHeader;
+    // for (int i = 0; i < 22; i++) {
+    //     rawHeader.push_back(headerBuffer[i]);
+    // }
+    // LDEBUG(fmt::format("Message received with header: {}", rawHeader));
 
     auto typeEnum = simp::getMessageType(type);
 
     // Receive the message data
-    if (typeEnum != simp::MessageType::Disconnection) {
+    if (typeEnum != simp::MessageType::Disconnection && typeEnum != simp::MessageType::Unknown) {
         subjectBuffer.resize(subjectSize);
         if (!_socket->get(subjectBuffer.data(), subjectSize)) {
             throw SoftwareConnectionLostError("Failed to read message from socket. Disconnecting.");
         }
     }
 
-    // Delegate decoding depending on message type
-    if (typeEnum == simp::MessageType::Color
-        || typeEnum == simp::MessageType::Opacity
-        || typeEnum == simp::MessageType::Size
-        || typeEnum == simp::MessageType::Visibility
-    ) {
-        _isListening = false;
-    }
+    return Message{ typeEnum, subjectBuffer, type };
+}
 
-    if (typeEnum == simp::MessageType::Unknown) {
-        LERROR(fmt::format("Unsupported message type: {}. Disconnecting...", type));
-    }
+bool SoftwareConnection::shouldStopThread() {
+	return _shouldStopThread;
+}
 
-    return Message(typeEnum, subjectBuffer);
+size_t SoftwareConnection::id() {
+	return _id;
+}
+
+void SoftwareConnection::setThread(std::thread& t) {
+	_thread = std::move(t);
+}
+
+void SoftwareConnection::NetworkEngineFriends::stopThread(std::shared_ptr<SoftwareConnection> connectionPtr) {
+	connectionPtr->_shouldStopThread = true;
+	connectionPtr->disconnect();
+	if (connectionPtr->_thread.joinable()) {
+		connectionPtr->_thread.join();
+	}
 }
 
 } // namespace openspace

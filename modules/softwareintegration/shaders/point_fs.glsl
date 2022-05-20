@@ -25,25 +25,43 @@
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
+flat in float ge_colormapAttributeScalar;
 in vec2 coords;
 flat in float ge_screenSpaceDepth;
 in vec4 ge_positionViewSpace;
 
-uniform vec3 color;
+uniform vec4 color;
 uniform float opacity;
 
-Fragment getFragment() {
-    if (opacity < 0.01) discard;
+uniform float colormapMin;
+uniform float colormapMax;
+uniform bool colormapEnabled;
+uniform sampler1D colormapTexture;
 
+vec4 attributeScalarToRgb(float attributeData) {
+    // Linear interpolation
+    float t = (attributeData - colormapMin) / (colormapMax - colormapMin);
+
+    // Sample texture with interpolated value
+    return texture(colormapTexture, t);
+}
+
+Fragment getFragment() {
     const float radius = 0.5;
-    float d = length(coords - radius);
-    if (d > 0.5) discard;
+    float distance = length(coords - radius);
+    if (distance > 0.6) discard;
 
     // calculate distance from the origin point
-    float circle = smoothstep(radius, radius - (radius * 0.3), d);
+    float circle = smoothstep(radius, radius - (radius * 0.2), distance);
+
+    vec4 outputColor = vec4(color.rgb, color.a * opacity); 
+    if (colormapEnabled) {
+        vec4 colorFromColormap = attributeScalarToRgb(ge_colormapAttributeScalar);
+        outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * opacity);
+    }
 
     Fragment frag;
-    frag.color = vec4(color, opacity) * vec4(circle);
+    frag.color = outputColor * vec4(circle);
     frag.depth = ge_screenSpaceDepth;
     frag.gPosition = ge_positionViewSpace;
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);

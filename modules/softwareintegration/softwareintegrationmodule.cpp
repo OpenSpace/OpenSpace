@@ -45,34 +45,24 @@ SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {
         // The Master node will handle all communication with the external software
         // and forward it to the Client nodes
         // 4700, is the defualt port where the tcp socket will be opened to the ext. software
-        _server = new NetworkEngine();
+        _networkEngine = std::make_unique<NetworkEngine>();
     }
 }
 
 SoftwareIntegrationModule::~SoftwareIntegrationModule() {
-    if (global::windowDelegate->isMaster()) {
-        delete _server;
-    }
+    internalDeinitialize();
 }
 
-void SoftwareIntegrationModule::storeData(const std::string& key,
-                                          const std::vector<float> data) {
-    _syncableFloatDataStorage.emplace(key, std::move(data));
+void SoftwareIntegrationModule::storeData(const std::string& key, const std::vector<float>& data) {
+    _syncableFloatDataStorage.store(key, data);
 }
 
-std::vector<float> SoftwareIntegrationModule::fetchData(const std::string& key) {
-    auto it = _syncableFloatDataStorage.find(key);
-    if (it == _syncableFloatDataStorage.end()) {
-        LERROR(fmt::format(
-            "Could not find data with key '{}' in the temporary data storage", key
-        ));
-        return std::vector<float>();
-    }
+const std::vector<float>& SoftwareIntegrationModule::fetchData(const std::string& key) {
+    return _syncableFloatDataStorage.fetch(key);
+}
 
-    std::vector<float> data = it->second;
-    _syncableFloatDataStorage.erase(it);
-
-    return std::move(data);
+bool SoftwareIntegrationModule::isDataDirty(const std::string& key) {
+    return _syncableFloatDataStorage.isDirty(key);
 }
 
 void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
@@ -83,17 +73,17 @@ void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePointsCloud>("RenderablePointsCloud");
 
     if (global::windowDelegate->isMaster()) {
-        _server->start();
+        _networkEngine->start();
 
-        global::callback::preSync->emplace_back([this]() { _server->update(); });
+        global::callback::postSyncPreDraw->emplace_back([this]() {
+            if (!_networkEngine) return;
+            _networkEngine->postSync();
+        });
     }
 }
 
 void SoftwareIntegrationModule::internalDeinitialize() {
     global::syncEngine->removeSyncables(getSyncables());
-    if (global::windowDelegate->isMaster()) {
-        _server->stop();
-    }
 }
 
 std::vector<documentation::Documentation>

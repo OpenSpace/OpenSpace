@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___POINTDATAMESSAGEHANDLER___H__
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___POINTDATAMESSAGEHANDLER___H__
 
+#include <unordered_map>
+
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/softwareintegration/network/softwareconnection.h>
@@ -34,34 +36,36 @@ namespace openspace {
 class Renderable;
 
 class PointDataMessageHandler {
-public:
-    void handlePointDataMessage(const std::vector<char>& message,
-        SoftwareConnection& connection, std::list<std::string>& sceneGraphNodes);
-    void handleColorMessage(const std::vector<char>& message);
-    void handleColorMapMessage(const std::vector<char>& message);
-    void handleOpacityMessage(const std::vector<char>& message);
-    void handlePointSizeMessage(const std::vector<char>& message);
-    void handleVisiblityMessage(const std::vector<char>& message);
+    using Callback = std::function<void()>;
+    using CallbackList = std::vector<std::function<void()>>;
+    using CallbackMap = std::unordered_map<std::string, CallbackList>;
 
-    void preSyncUpdate();
+public:
+    void handlePointDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleColormapMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleAttributeDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleOpacityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleFixedPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleVisiblityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleRemoveSGNMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+
+    void postSync();
 
 private:
-    const Renderable* getRenderable(const std::string& identifier) const;
-
-    void subscribeToRenderableUpdates(const std::string& identifier,
-        SoftwareConnection& connection);
-
-    float readFloatValue(const std::vector<char>& message, size_t& offset);
-    int readIntValue(const std::vector<char>& message, size_t& offset);
-    glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset);
-    glm::vec4 readColor(const std::vector<char>& message, size_t& offset);
-    std::string readString(const std::vector<char>& message, size_t& offset);
-    std::vector<float> readPointData(
-        const std::vector<char>& message, size_t& offset, int nPoints, int dimensionality
+    const Renderable* getRenderable(const std::string& identifier);
+    void checkRenderable(
+        const std::vector<char>& message, size_t& messageOffset,
+        std::shared_ptr<SoftwareConnection> connection, std::string& identifier
     );
-    std::vector<float> readColorMap(const std::vector<char>& message, size_t& offset);
 
-    std::unordered_map<std::string, std::function<void()>> _onceNodeExistsCallbacks;
+    void subscribeToRenderableUpdates(const std::string& identifier, std::shared_ptr<SoftwareConnection> connection);
+
+    void addCallback(const std::string& identifier, const Callback& newCallback);
+
+    CallbackMap _onceNodeExistsCallbacks;
+    std::mutex _onceNodeExistsCallbacksMutex;
+    size_t _onceNodeExistsCallbacksRetries{0};
 };
 
 } // namespace openspace

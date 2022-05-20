@@ -25,15 +25,17 @@
 #ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___RENDERABLEPOINTSCLOUD___H__
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___RENDERABLEPOINTSCLOUD___H__
 
+#include <optional>
+
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/properties/optionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <optional>
 
 namespace openspace::documentation { struct Documentation; }
 
@@ -45,56 +47,69 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
+class SoftwareIntegrationModule;
+
 class RenderablePointsCloud : public Renderable {
 public:
     RenderablePointsCloud(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void render(const RenderData& data, RendererTasks&) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 protected:
-    void createDataSlice();
-    void loadData();
-    void loadColorMap();
+    void loadData(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadColormap(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadCmapAttributeData(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
 
-    bool _hasPointData = false;
-    bool _isDirty = true;
+    bool checkDataStorage();
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
-    UniformCache(color, opacity, size, modelMatrix, cameraUp,
-        cameraViewProjectionMatrix, eyePosition, sizeOption) _uniformCache;
+    UniformCache(
+        color, opacity, size, modelMatrix, cameraUp,
+        cameraViewProjectionMatrix, eyePosition, sizeOption,
+        colormapTexture, colormapMin, colormapMax, colormapEnabled
+    ) _uniformCache;
 
-    properties::BoolProperty _isVisible;
     properties::FloatProperty _size;
-    properties::Vec3Property _color;
+    properties::Vec4Property _color;
     properties::OptionProperty _sizeOption;
-    
-    std::vector<float> _fullData;
-    std::vector<float> _slicedData;
-    std::unique_ptr<ghoul::opengl::Texture> _colorMapTexture;
+    properties::FloatProperty _colormapMin;
+    properties::FloatProperty _colormapMax;
 
-    std::optional<std::string> _dataStorageKey = std::nullopt;
+    std::unique_ptr<ghoul::opengl::Texture> _colormapTexture;
+    properties::BoolProperty _colormapEnabled;
+
     std::optional<std::string> _identifier = std::nullopt;
-    properties::BoolProperty _colorMapEnabled;
-    properties::BoolProperty _loadNewColorMap;
 
-    int _nValuesPerPoint = 0;
+    bool _hasLoadedColormapAttributeData = false;
+    bool _hasLoadedColormap = false;
 
-    GLuint _vertexArrayObjectID = 0;
-    GLuint _vertexBufferObjectID = 0;
+    enum class DataSliceKey : size_t {
+        Points = 0,
+        ColormapAttributes
+    };
+    using DataSlice = std::vector<float>;
+    std::unordered_map<DataSliceKey, std::shared_ptr<DataSlice>> _dataSlices;
+    std::shared_ptr<DataSlice> getDataSlice(DataSliceKey key);
 
     enum SizeOption {
         Uniform = 0,
         NonUniform = 1
     };
+
+    struct VBOLayout {
+        glm::vec3 position;
+        float colormapAttributeData;
+    };
+    GLuint _vbo = 0;
+    GLuint _vao = 0;
 };
 
 }// namespace openspace

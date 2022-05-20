@@ -25,13 +25,31 @@
 #ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__
 
+#include <unordered_map>
+
 namespace openspace {
 
 namespace simp {
 
-const float ProtocolVersion = 1.6;
+const std::string ProtocolVersion = "1.8";
 
 const char SEP = ';';
+
+enum class MessageType : uint32_t {
+    Connection = 0,
+    PointData,
+    RemoveSceneGraphNode,
+    Color,
+    Colormap,
+    AttributeData,
+    Opacity,
+    Size,
+    Visibility,
+    Disconnection,
+    Unknown
+};
+
+namespace utils {
 
 enum class ErrorCode : uint32_t {
     ReachedEndBeforeSeparator = 0,
@@ -40,38 +58,31 @@ enum class ErrorCode : uint32_t {
     Generic,
 };
 
-enum class MessageType : uint32_t {
-    Connection = 0,
-    ReadPointData,
-    RemoveSceneGraphNode,
-    Color,
-    ColorMap,
-    Opacity,
-    Size,
-    Visibility,
-    Disconnection,
-    Unknown
-};
-
-const std::map<std::string, MessageType> _messageTypeFromSIMPType {
+const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
     {"CONN", MessageType::Connection},
-    {"PDAT", MessageType::ReadPointData},
+    {"PDAT", MessageType::PointData},
     {"RSGN", MessageType::RemoveSceneGraphNode},
-    {"UPCO", MessageType::Color},
-    {"LCOL", MessageType::ColorMap},
-    {"UPOP", MessageType::Opacity},
-    {"UPSI", MessageType::Size},
+    {"FCOL", MessageType::Color},
+    {"LCOL", MessageType::Colormap},
+    {"ATDA", MessageType::AttributeData},
+    {"FOPA", MessageType::Opacity},
+    {"FPSI", MessageType::Size},
     {"TOVI", MessageType::Visibility},
     {"DISC", MessageType::Disconnection},
 };
 
-class SimpError : public ghoul::RuntimeError {
-public:
- ErrorCode errorCode;
- explicit SimpError(const ErrorCode _errorCode, const std::string& msg);
-};
+glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset);
 
 bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset);
+
+} // namespace utils
+
+class SimpError : public ghoul::RuntimeError {
+public:
+ utils::ErrorCode errorCode;
+ explicit SimpError(const utils::ErrorCode _errorCode, const std::string& msg);
+};
+
 
 MessageType getMessageType(const std::string& type);
 
@@ -85,8 +96,32 @@ std::string formatUpdateMessage(MessageType messageType,
                                 std::string_view value);
     
 std::string formatConnectionMessage(std::string_view value);
+    
+std::string formatColorMessage(std::string_view identifier, glm::vec4 color);
 
-std::string formatDisconnectionMessage();
+std::string formatPointDataCallbackMessage(std::string_view identifier);
+
+std::string floatToHex(const float f);
+
+float hexToFloat(const std::string& f);
+
+float readFloatValue(const std::vector<char>& message, size_t& offset);
+
+int readIntValue(const std::vector<char>& message, size_t& offset);
+
+std::string readString(const std::vector<char>& message, size_t& offset);
+
+glm::vec4 readColor(const std::vector<char>& message, size_t& offset);
+
+void readPointData(
+    const std::vector<char>& message, size_t& offset, size_t nPoints,
+    size_t dimensionality, std::vector<float>& pointData
+);
+
+void readColormap(
+    const std::vector<char>& message, size_t& offset, size_t nColors,
+    std::vector<float>& colorMap
+);
 
 } // namespace simp
 

@@ -28,38 +28,85 @@
 #include <openspace/network/messagestructures.h>
 #include <modules/softwareintegration/simp.h>
 #include <ghoul/io/socket/tcpsocket.h>
+#include <openspace/properties/property.h>
+
+#include <unordered_set>
+#include <unordered_map>
 
 namespace openspace {
 
+class Renderable;
+
 class SoftwareConnection {
 public:
+    using OnChangeHandle = properties::Property::OnChangeHandle;
+    using PropertySubscriptions = std::unordered_map<std::string, properties::Property::OnChangeHandle>;
+    using SubscribedProperties = std::unordered_map<std::string, PropertySubscriptions>;
+
     struct Message {
-        Message() = default;
-        Message(simp::MessageType type, std::vector<char> content);
-
         simp::MessageType type;
-        std::vector<char> content;
+        std::vector<char> content{};
+        std::string rawMessageType{ "" };
     };
 
-    class SoftwareConnectionLostError : public ghoul::RuntimeError {
-    public:
-        explicit SoftwareConnectionLostError(const std::string& msg);
-    };
+    class SoftwareConnectionLostError;
 
-    SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
+    explicit SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
+    SoftwareConnection(SoftwareConnection&& p);
+    ~SoftwareConnection();
 
+    void disconnect();
     bool isConnected() const;
     bool isConnectedOrConnecting() const;
-    bool sendMessage(std::string message);
-    void disconnect();
+    bool sendMessage(const std::string& message);
 
-    ghoul::io::TcpSocket* socket();
+    void addPropertySubscription(
+        const std::string propertyName,
+        const std::string& identifier,
+        std::function<void()> newHandler
+    );
 
     SoftwareConnection::Message receiveMessageFromSoftware();
 
+    void addSceneGraphNode(const std::string& identifier);
+    void removeSceneGraphNode(const std::string& identifier);
+
+    size_t id();
+    size_t nConnections();
+    void setThread(std::thread& t);
+    bool shouldStopThread();
+
+    class NetworkEngineFriends {
+    private:
+        static void stopThread(std::shared_ptr<SoftwareConnection> connectionPtr);
+        friend class NetworkEngine;
+    };
+
 private:
-    bool _isListening = true;
+    void removePropertySubscriptions(const std::string& identifier);
+    void removeExistingPropertySubscription(
+        const std::string& identifier,
+        properties::Property *property,
+        OnChangeHandle onChangeHandle
+    );
+
+    SubscribedProperties _subscribedProperties;
+
+    std::unordered_set<std::string> _sceneGraphNodes;
+
+    bool _isConnected = true;
     std::unique_ptr<ghoul::io::TcpSocket> _socket;
+
+    size_t _id;
+    std::thread _thread;
+    std::atomic_bool _shouldStopThread;
+
+    static std::atomic_size_t _nextConnectionId;
+};
+
+class SoftwareConnection::SoftwareConnectionLostError : public ghoul::RuntimeError {
+public:
+    explicit SoftwareConnectionLostError(const std::string& msg);
 };
 
 } // namespace openspace

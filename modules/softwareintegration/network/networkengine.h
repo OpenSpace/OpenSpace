@@ -27,7 +27,8 @@
 
 #include <modules/softwareintegration/network/softwareconnection.h>
 #include <modules/softwareintegration/pointdatamessagehandler.h>
-#include <openspace/util/concurrentqueue.h>
+#include <modules/softwareintegration/interruptibleconcurrentqueue.h>
+#include <modules/softwareintegration/simp.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 
 namespace openspace {
@@ -35,61 +36,42 @@ namespace openspace {
 class NetworkEngine {
 public:
 	NetworkEngine(const int port = 4700);
+	~NetworkEngine();
 
-	struct Peer {
-		enum class Status : uint32_t {
-			Disconnected = 0,
-			Connected
-		};
-
-		size_t id;
-		std::string name;
-		std::thread thread;
-
-		SoftwareConnection connection;
-		std::list<std::string> sceneGraphNodes;	// TODO: Change to std::unordered_set?
-		Status status;
-	};
-
-	struct PeerMessage {
-		size_t peerId;
-		SoftwareConnection::Message message;
+	struct IncomingMessage {
+		size_t connection_id{1};
+		SoftwareConnection::Message message{ simp::MessageType::Unknown };
 	};
 
 	void start();
 	void stop();
-	void update();
+	void postSync();
 
 private:
-	void disconnect(std::shared_ptr<Peer> peer);
-	void handleNewPeers();
-	void peerEventLoop(size_t id);
-	void handlePeerMessage(PeerMessage peerMessage);
+	void handleNewSoftwareConnections();
+	void handleIncomingMessage(IncomingMessage incomingMessage);
+	void peerEventLoop(size_t connection_id);
 	void eventLoop();
 
-	bool isConnected(const std::shared_ptr<Peer> peer) const;
+	// The destuction of the object a shared_ptr is pointing to, occurs when the pointer no longer has any owners 
+	std::shared_ptr<SoftwareConnection> getSoftwareConnection(size_t id);
 
-	void removeSceneGraphNode(const std::string &identifier);
-
-	std::shared_ptr<Peer> peer(size_t id);
-
-	std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
-	mutable std::mutex _peerListMutex;
+	std::unordered_map<size_t, std::shared_ptr<SoftwareConnection>> _softwareConnections;
+	std::mutex _softwareConnectionsMutex;
 		
 	ghoul::io::TcpSocketServer _socketServer;
-	size_t _nextConnectionId = 1;
-	std::atomic_size_t _nConnections = 0;
 	std::thread _serverThread;
+    std::atomic_bool _shouldStopServerThread = false;
 	std::thread _eventLoopThread;
+    std::atomic_bool _shouldStopEventThread = false;
 	
-    std::atomic_bool _shouldStop = false;
 
 	const int _port;
 
     // Message handlers
 	PointDataMessageHandler _pointDataMessageHandler;
 
-	ConcurrentQueue<PeerMessage> _incomingMessages;
+	InterruptibleConcurrentQueue<IncomingMessage> _incomingMessages;
 };
 
 } // namespace openspace

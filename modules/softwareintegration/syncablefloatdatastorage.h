@@ -25,48 +25,45 @@
 #ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
 
-#include <openspace/util/syncable.h>
 #include <mutex>
+#include <unordered_map>
+
+#include <openspace/util/syncable.h>
 
 namespace openspace {
 
-/**
- * A double buffered implementation of the Syncable interface.
- * Users are encouraged to used this class as a default way to synchronize different
- * C++ data types using the SyncEngine.
- *
- * This class aims to handle the synchronization parts and yet act like a regular
- * instance of T. Implicit casts are supported, however, when accessing member functions
- * or variables, user may have to do explicit casts.
- *
- * ((T&) t).method();
- *
- */
 class SyncableFloatDataStorage : public Syncable {
 public:
 	/* ====================== Types ===================== */
-	typedef std::string Key;
-	typedef std::vector<float> Value;   // a dataset stored like x1, y1, z1, x2, y2 ....
-	typedef std::map<Key, Value> Storage;
-	typedef Storage::iterator Iterator;
+	struct Value {
+		// a dataset stored like x1, y1, z1, x2, y2 ....
+		std::vector<float> data;
+		bool dirty;
+		bool localDirty;
+	};
+	using ValueData = decltype(Value::data);
+	using Key = std::string;
+	using Storage = std::unordered_map<Key, Value>;
+	using Iterator = Storage::iterator;
 	/* ================================================== */
 
 	/* ============== SyncEngine functions ============== */
-	// virtual void preSync(bool isMaster) override;
 	virtual void encode(SyncBuffer* syncBuffer) override;
 	virtual void decode(SyncBuffer* syncBuffer) override;
 	virtual void postSync(bool isMaster) override;
 	/* ================================================== */
 
+	const ValueData& fetch(const Key& key);
+	bool isDirty(const Key& key);
+	void store(const Key& key, const ValueData& data);
+
+private:
 	/* =============== Utility functions ================ */
-	Iterator erase(Iterator pos);
-	Iterator erase(const Iterator first, const Iterator last);
 	size_t erase(const Key& key);
 
-	std::pair<Iterator, bool> emplace(Key key, Value value);
+	void insertAssign(Key key, const Value& value);
 
 	Value& at(const Key& key);
-	const Value& at(const Key& key) const;
 
 	Iterator find(const Key& key);
 	/* ================================================== */
@@ -77,16 +74,8 @@ public:
 	Iterator begin() noexcept;
 	/* ================================================== */
 
-	/* =============== Operator overloads =============== */
-	Value& operator[](Key&& key);
-	/* ================================================== */
-
-private:
 	std::mutex _mutex;
 	Storage _storage;
-
-	bool showMessageEncode = true;
-	bool showMessageDecode = true;
 };
 
 } // namespace openspace

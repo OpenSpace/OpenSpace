@@ -41,15 +41,20 @@ void SyncableFloatDataStorage::encode(SyncBuffer* syncBuffer) {
 	size_t nDataEntries = _storage.size();
 	syncBuffer->encode(nDataEntries);
 
-	for (const auto& [key, dataEntry] : _storage) {
+	for (auto& [key, value] : _storage) {
 		syncBuffer->encode(key);
 
-		// Go trough all data in data entry. 
-		// Sequentially structured (ex: x1, y1, z1, x2, y2, z2...)
-		size_t nItemsInDataEntry = dataEntry.size();
-		syncBuffer->encode(nItemsInDataEntry);
-		for (auto value : dataEntry) {
-			syncBuffer->encode(value);
+		syncBuffer->encode(value.dirty);
+
+		// Only encode data if it is dirty, to save bandwidth
+		if (value.dirty) {
+			// Go trough all data in data entry. 
+			// Sequentially structured as: x1, y1, z1, x2, y2, z2...
+			size_t nItemsInDataEntry = value.data.size();
+			syncBuffer->encode(nItemsInDataEntry);
+			for (auto val : value.data) {
+				syncBuffer->encode(val);
+			}
 		}
 	}
 }
@@ -64,60 +69,112 @@ void SyncableFloatDataStorage::decode(SyncBuffer* syncBuffer) {
 		std::string key;
 		syncBuffer->decode(key);
 
-		size_t nItemsInDataEntry;
-		syncBuffer->decode(nItemsInDataEntry);
-		
-		// TODO: Change to a glm::fvec3 so we can use an overload 
-		// of decode(glm::fvec3) instead of using a for-loop over floats?
-		std::vector<float> dataEntry;
-        dataEntry.reserve(nItemsInDataEntry);
-		for (size_t j = 0; j < nItemsInDataEntry; ++j) {
-			float value;
-			syncBuffer->decode(value);
-            dataEntry.push_back(value);
-		}
+		bool dirty;
+		syncBuffer->decode(dirty);
 
-		_storage[key] = dataEntry;
+		if (dirty) {
+			size_t nItemsInDataEntry;
+			syncBuffer->decode(nItemsInDataEntry);
+			
+			std::vector<float> dataEntry;
+			dataEntry.reserve(nItemsInDataEntry);
+			for (size_t j = 0; j < nItemsInDataEntry; ++j) {
+				float value;
+				syncBuffer->decode(value);
+				dataEntry.push_back(value);
+			}
+
+			insertAssign(key, Value{ dataEntry, dirty });
+		}
 	}
 }
 
 void SyncableFloatDataStorage::postSync(bool isMaster) {
 	if (isMaster) {
-		if (_storage.size() > 0) {
-			// LWARNING(fmt::format("SyncableFloatDataStorage.size() (MASTER): {}", _storage.size()));
-		}
-	}
-	else {
-		if (_storage.size() > 0) {
-			// LWARNING(fmt::format("SyncableFloatDataStorage.size() (CLIENT): {}", _storage.size()));
+		for (auto& [key, value] : _storage) {
+			if (value.dirty) {
+				value.dirty = false;
+			}
 		}
 	}
 }
 /* ================================================== */
 
+const SyncableFloatDataStorage::ValueData& SyncableFloatDataStorage::fetch(const Key& key) {
+	LDEBUG(fmt::format("Loading data from float data storage: {}", key));
+	auto it = find(key);
+    if (it == end()) {
+        LERROR(fmt::format(
+            "Could not find data with key '{}' in the centralized data storage", key
+        ));
+        return std::move(ValueData{});
+    }
+
+    it->second.localDirty = false;
+
+    return it->second.data;
+}
+
+bool SyncableFloatDataStorage::isDirty(const Key& key) {
+	auto it = find(key);
+    if (it == end()) {
+        return false;
+    }
+
+    return it->second.localDirty;
+}
+
+void SyncableFloatDataStorage::store(const Key& key, const ValueData& data) {
+	LDEBUG(fmt::format("Storing data in float data storage: {}", key));
+	Value value{ data, true, true };
+
+	auto old = find(key);
+	if (old != end()) {
+		glm::vec3 firstValueOld{};
+		for (glm::vec3::length_type i = 0; i < glm::vec3::length(); ++i) {
+			firstValueOld[i] = old->second.data[i];
+		}
+
+		LDEBUG(fmt::format(
+			"First data point: old: {}", firstValueOld
+		));
+	}
+
+    insertAssign(key, std::move(value));
+
+	auto newVal = find(key);
+	if (newVal != end()) {
+		glm::vec3 firstValueNew{};
+		for (glm::vec3::length_type i = 0; i < glm::vec3::length(); ++i) {
+			firstValueNew[i] = newVal->second.data[i];
+		}
+
+		LDEBUG(fmt::format(
+			"First data point: new {}", firstValueNew
+		));
+	}
+}
+
 /* =============== Utility functions ================ */
-SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::erase(SyncableFloatDataStorage::Iterator pos) {
-	return _storage.erase(pos);
-}
-SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::erase(const SyncableFloatDataStorage::Iterator first, const SyncableFloatDataStorage::Iterator last) {
-	return _storage.erase(first, last);
-}
 size_t SyncableFloatDataStorage::erase(const SyncableFloatDataStorage::Key& key) {
 	return _storage.erase(key);
 }
 
-std::pair<SyncableFloatDataStorage::Iterator, bool> SyncableFloatDataStorage::emplace(SyncableFloatDataStorage::Key key, SyncableFloatDataStorage::Value value) {
-	return _storage.emplace(key, value);
+void SyncableFloatDataStorage::insertAssign(Key key, const Value& value) {
+	auto it = find(key);
+	if (it == end()) {
+		_storage.emplace(key, value);
+	}
+	else {
+		it->second = value;
+	}
 }
 
-SyncableFloatDataStorage::Value& SyncableFloatDataStorage::at(const SyncableFloatDataStorage::Key& key) {
-	return _storage.at(key);
-}
-const SyncableFloatDataStorage::Value& SyncableFloatDataStorage::at(const SyncableFloatDataStorage::Key& key) const {
+SyncableFloatDataStorage::Value& SyncableFloatDataStorage::at(const Key& key) {
 	return _storage.at(key);
 }
 
-SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::find(const SyncableFloatDataStorage::Key& key) {
+SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::find(const Key& key) {
 	return _storage.find(key);
 }
 /* ================================================== */
@@ -129,12 +186,6 @@ SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::end() noexcept {
 		
 SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::begin() noexcept {
 	return _storage.begin();
-}
-/* ================================================== */
-
-/* =============== Operator overloads =============== */
-SyncableFloatDataStorage::Value& SyncableFloatDataStorage::operator[](SyncableFloatDataStorage::Key&& key) {
-	return _storage[key];
 }
 /* ================================================== */
 

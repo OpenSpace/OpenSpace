@@ -22,17 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+namespace openspace {
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+template <typename T>
+T InterruptibleConcurrentQueue<T>::pop() {
+    auto isInterruptedOrNotEmpty = [this]() {
+        if (_interrupted) return true;
+        return !_queue.empty();
+    };
 
-layout(location = 0) in vec3 in_position;
-in float in_colormapAttributeScalar;
+    std::unique_lock lock(_mutex);
 
-out float vs_colormapAttributeScalar;
+    // Block execution until interrupted or queue not empty
+    if (!isInterruptedOrNotEmpty()) {
+        _notifyForPop.wait(lock, isInterruptedOrNotEmpty);
+    }
 
-void main() {
-    vs_colormapAttributeScalar = in_colormapAttributeScalar;
+    if (_interrupted) throw ghoul::RuntimeError{""};
 
-    gl_Position = vec4(in_position, 1.0);
+    auto item = _queue.front();
+    _queue.pop();
+
+    return item;
 }
+
+template <typename T>
+void InterruptibleConcurrentQueue<T>::interrupt() {
+    _interrupted = true;
+    _notifyForPop.notify_all();
+}
+
+template <typename T>
+void InterruptibleConcurrentQueue<T>::push(const T& item) {
+    if (_interrupted) return;
+    std::unique_lock<std::mutex> mlock(_mutex);
+    _queue.push(item);
+    mlock.unlock();
+    _notifyForPop.notify_one();
+}
+
+template <typename T>
+void InterruptibleConcurrentQueue<T>::push(T&& item) {
+    if (_interrupted) return;
+    std::unique_lock<std::mutex> mlock(_mutex);
+    _queue.push(std::move(item));
+    mlock.unlock();
+    _notifyForPop.notify_one();
+}
+
+} // namespace openspace

@@ -36,17 +36,17 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <fstream>
-#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
-    constexpr const std::array<const char*, 8> UniformNames = {
-        "color", "opacity", "size", "modelMatrix",
-        "cameraUp", "cameraViewProjectionMatrix", "eyePosition", "sizeOption"
+    constexpr const std::array<const char*, 12> UniformNames = {
+        "color", "opacity", "size", "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
+        "eyePosition", "sizeOption", "colormapTexture", "colormapMin", "colormapMax",
+        "colormapEnabled"
     };
-    //"colorMapTexture",
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
@@ -60,28 +60,16 @@ namespace {
         "The size of the points."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ToggleVisibilityInfo = {
-        "ToggleVisibility",
-        "Toggle Visibility",
-        "Enables/Disables the drawing of points."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DataInfo = {
         "Data",
         "Data",
         "Data to use for the positions of the points, given in Parsec."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DataStorageKeyInfo = {
-        "DataStorageKey",
-        "Data Storage Key",
-        "Key used to access a dataset in the module's centralized storage, which is synced to all nodes."
-    };
-    
     constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
         "Identifier",
         "Identifier",
-        "Identifier used as part of key to access data in syncable central storage."
+        "Identifier used as part of key to access data in centralized central storage."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
@@ -90,44 +78,47 @@ namespace {
         "This value determines how the size of the data points are rendered."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorMapEnabledInfo = {
-        "ColorMapEnabled",
-        "ColorMap Enabled",
+    constexpr openspace::properties::Property::PropertyInfo ColormapEnabledInfo = {
+        "ColormapEnabled",
+        "Colormap Enabled",
         "Boolean to determine whether to use colormap or not."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LoadNewColorMapInfo = {
-        "LoadNewColorMap",
-        "Load New ColorMap",
-        "Boolean to determine whether to load new colormap or not."
+    constexpr openspace::properties::Property::PropertyInfo ColormapMinInfo = {
+        "ColormapMin",
+        "Colormap min",
+        "Minimum value to sample from color map."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColormapMaxInfo = {
+        "ColormapMax",
+        "Colormap max",
+        "Maximum value to sample from color map."
     };
 
     struct [[codegen::Dictionary(RenderablePointsCloud)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec4> color;
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size;
 
-        // [[codegen::verbatim(ToggleVisibilityInfo.description)]]
-        std::optional<bool> toggleVisiblity;
-
         // [[codegen::verbatim(DataInfo.description)]]
         std::optional<std::vector<glm::vec3>> data;
-
-        // [[codegen::verbatim(DataStorageKeyInfo.description)]]
-        std::optional<std::string> dataStorageKey;
 
         // [[codegen::verbatim(IdentifierInfo.description)]]
         std::optional<std::string> identifier;
 
-        // [[codegen::verbatim(ColorMapEnabledInfo.description)]]
-        std::optional<std::string> colorMapEnabled;
+        // [[codegen::verbatim(ColormapMinInfo.description)]]
+        std::optional<float> colormapMin;
 
-        // [[codegen::verbatim(LoadNewColorMapInfo.description)]]
-        std::optional<std::string> loadNewColorMap;
+        // [[codegen::verbatim(ColormapMaxInfo.description)]]
+        std::optional<float> colormapMax;
 
-        enum class SizeOption {
+        // [[codegen::verbatim(ColormapEnabledInfo.description)]]
+        std::optional<bool> colormapEnabled;
+
+        enum class SizeOption : uint32_t {
             Uniform,
             NonUniform
         };
@@ -145,12 +136,12 @@ documentation::Documentation RenderablePointsCloud::Documentation() {
 
 RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _size(SizeInfo, 1.f, 0.f, 150.f)
-    , _isVisible(ToggleVisibilityInfo, true)
+    , _color(ColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(0.f), glm::vec4(1.f), glm::vec4(.001f))
+    , _size(SizeInfo, 1.f, 0.f, 30.f, .001f)
     , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _colorMapEnabled(ColorMapEnabledInfo, false)
-    , _loadNewColorMap(LoadNewColorMapInfo, false)
+    , _colormapEnabled(ColormapEnabledInfo, false)
+    , _colormapMin(ColormapMinInfo)
+    , _colormapMax(ColormapMaxInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -158,27 +149,37 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    // Check if a key to data stored in the module's centralized memory was included
-    _nValuesPerPoint = 3;
-    _dataStorageKey = p.dataStorageKey.value();
-
     _identifier = p.identifier.value();
 
     _size = p.size.value_or(_size);
     addProperty(_size);
 
-    _isVisible = p.toggleVisiblity.value_or(_isVisible);
-    addProperty(_isVisible);
-
     addProperty(_opacity);
 
-    addProperty(_colorMapEnabled);
+    auto colormapMinMaxChecker = [this] {
+        if (_colormapMin.value() > _colormapMax.value()) {
+            auto temp = _colormapMin.value();
+            _colormapMin = _colormapMax.value();
+            _colormapMax = temp;
+        }
+    };
 
-    addProperty(_loadNewColorMap);
+    _colormapMin = p.colormapMin.value_or(_colormapMin);
+    _colormapMin.setVisibility(properties::Property::Visibility::Hidden);
+    _colormapMin.onChange(colormapMinMaxChecker);
+    addProperty(_colormapMin);
+
+    _colormapMax = p.colormapMax.value_or(_colormapMax);
+    _colormapMax.setVisibility(properties::Property::Visibility::Hidden);
+    _colormapMax.onChange(colormapMinMaxChecker);
+    addProperty(_colormapMax);
+
+    _colormapEnabled = p.colormapEnabled.value_or(_colormapEnabled);
+    addProperty(_colormapEnabled);
 
     _sizeOption.addOptions({
         { SizeOption::Uniform, "Uniform" },
-        { SizeOption::NonUniform, "NonUniform" }
+        { SizeOption::NonUniform, "Non Uniform" }
     });
     if (p.sizeOption.has_value()) {
         switch (*p.sizeOption) {
@@ -190,16 +191,11 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
                 break;
         }
     }
-    _sizeOption.onChange([&] { _isDirty = true; });
     addProperty(_sizeOption);
 }
 
 bool RenderablePointsCloud::isReady() const {
-    return _shaderProgram && (!_fullData.empty());
-}
-
-void RenderablePointsCloud::initialize() {
-    loadData();
+    return _shaderProgram && _identifier.has_value() && _identifier.value() != "";
 }
 
 void RenderablePointsCloud::initializeGL() {
@@ -214,11 +210,12 @@ void RenderablePointsCloud::initializeGL() {
 }
 
 void RenderablePointsCloud::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vertexArrayObjectID);
-    _vertexArrayObjectID = 0;
+    glDeleteBuffers(1, &_vbo);
+    _vbo = 0;
+    glDeleteVertexArrays(1, &_vao);
+    _vao = 0;
 
-    glDeleteBuffers(1, &_vertexBufferObjectID);
-    _vertexBufferObjectID = 0;
+    _colormapTexture.reset();
 
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
@@ -227,13 +224,8 @@ void RenderablePointsCloud::deinitializeGL() {
 }
 
 void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
-    if (_fullData.empty()) {
-        return;
-    }
-
-    if (!_isVisible) {
-        return;
-    }
+    auto pointDataSlice = getDataSlice(DataSliceKey::Points);
+    if (pointDataSlice->empty()) return;
 
     _shaderProgram->activate();
 
@@ -259,16 +251,27 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
         cameraViewProjectionMatrix
     );
 
-    if (_loadNewColorMap) loadColorMap();
-
-    if (_colorMapEnabled && _colorMapTexture) {
-        // TODO: Set _colorMapTexture in shader. A trasnfer function similar to
+    ghoul::opengl::TextureUnit colorUnit;
+    if (_colormapTexture) {
+        // _colormapAttributeData
+        // TODO: Set _colormapTextre in shader. A trasnfer function similar to
         // 'bv2rgb' in C:\OpenSpace\SoftwareIntegration\modules\space\shaders\star_fs.glsl
         // should probably be used.
+
+        colorUnit.activate();
+        _colormapTexture->bind();
+        _shaderProgram->setUniform(_uniformCache.colormapTexture, colorUnit);
     }
     else {
-        _shaderProgram->setUniform(_uniformCache.color, _color);
+        // We need to set the uniform to something, or the shader doesn't work
+        _shaderProgram->setUniform(_uniformCache.colormapTexture, colorUnit);
     }
+
+    _shaderProgram->setUniform(_uniformCache.colormapMin, _colormapMin);
+    _shaderProgram->setUniform(_uniformCache.colormapMax, _colormapMax);
+    _shaderProgram->setUniform(_uniformCache.colormapEnabled, _colormapEnabled);
+
+    _shaderProgram->setUniform(_uniformCache.color, _color);
 
     _shaderProgram->setUniform(_uniformCache.opacity, _opacity);
     _shaderProgram->setUniform(_uniformCache.size, _size);
@@ -279,8 +282,8 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
 
-    glBindVertexArray(_vertexArrayObjectID);
-    const GLsizei nPoints = static_cast<GLsizei>(_fullData.size() / _nValuesPerPoint);
+    glBindVertexArray(_vao);
+    const GLsizei nPoints = static_cast<GLsizei>(pointDataSlice->size() / 3);
     glDrawArrays(GL_POINTS, 0, nPoints);
 
     glBindVertexArray(0);
@@ -297,130 +300,228 @@ void RenderablePointsCloud::update(const UpdateData&) {
         ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
     }
 
-    if (!_isDirty) {
+    bool updatedDataSlices = checkDataStorage();
+
+    if (updatedDataSlices) {
+        if (_vao == 0) {
+            glGenVertexArrays(1, &_vao);
+            LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
+        }
+        if (_vbo == 0) {
+            glGenBuffers(1, &_vbo);
+            LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
+        }
+
+        glBindVertexArray(_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+        auto pointDataSlice = getDataSlice(DataSliceKey::Points);
+        auto colormapAttrDataSlice = getDataSlice(DataSliceKey::ColormapAttributes);
+
+        if (pointDataSlice->empty()) return;
+
+        // ========================== Create resulting data slice and buffer it ==========================
+        std::vector<float> bufferData;
+        bufferData.reserve(pointDataSlice->size() / 3);
+
+        for(size_t i = 0, j = 0; j < pointDataSlice->size(); ++i, j += 3) {
+            bufferData.push_back(pointDataSlice->at(j));
+            bufferData.push_back(pointDataSlice->at(j + 1));
+            bufferData.push_back(pointDataSlice->at(j + 2));
+
+            if (colormapAttrDataSlice->size() > i) {
+                bufferData.push_back(colormapAttrDataSlice->at(i));
+            }
+            else {
+                bufferData.push_back(0.0);
+            }
+        }
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            bufferData.size() * sizeof(GLfloat),
+            bufferData.data(),
+            GL_STATIC_DRAW
+        );
+        // ==============================================================================================
+
+        // ========================================= VAO stuff =========================================
+        GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * 4);
+        GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
+        glEnableVertexAttribArray(positionAttribute);
+        glVertexAttribPointer(
+            positionAttribute,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            nullptr
+        );
+
+        if (_hasLoadedColormapAttributeData) { 
+            GLint colormapScalarsAttribute = _shaderProgram->attributeLocation("in_colormapAttributeScalar");
+            glEnableVertexAttribArray(colormapScalarsAttribute);
+            glVertexAttribPointer(
+                colormapScalarsAttribute,
+                1,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<void*>(sizeof(GLfloat) * 3)
+            );
+        }
+        // ==============================================================================================
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    // This can happen if the user checks the "_colormapEnabled" checkbox in the GUI
+    auto colormapAttributeData = getDataSlice(DataSliceKey::ColormapAttributes);
+    if (_colormapEnabled.value() && (!_colormapTexture || colormapAttributeData->empty())) {
+        if (!_colormapTexture) {
+            LINFO("Color map not loaded. Has it been sent from external software?");
+        }
+        else {
+            LINFO("Color map attribute data not loaded. Has it been sent from external software?");
+        }
+        _colormapEnabled = false;
+    }
+}
+
+bool RenderablePointsCloud::checkDataStorage() {
+    if (!_identifier.has_value()) {
+        LERROR("No identifier found in renderable");
+        return false;
+    }
+
+    bool updatedDataSlices = false;
+    auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
+    std::string dataPointsKey = _identifier.value() + "-DataPoints";
+    std::string colorMapKey = _identifier.value() + "-Colormap";
+    std::string colorMapScalarsKey = _identifier.value() + "-CmapAttributeData";
+
+    if (softwareIntegrationModule->isDataDirty(dataPointsKey)) {
+        loadData(dataPointsKey, softwareIntegrationModule);
+        updatedDataSlices = true;
+    }
+    
+    if (softwareIntegrationModule->isDataDirty(colorMapKey)) {
+        loadColormap(colorMapKey, softwareIntegrationModule);
+    }
+    
+    if (softwareIntegrationModule->isDataDirty(colorMapScalarsKey)) {
+        loadCmapAttributeData(colorMapScalarsKey, softwareIntegrationModule);
+        updatedDataSlices = true;
+    }
+
+    return updatedDataSlices;
+}
+
+void RenderablePointsCloud::loadData(
+    const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule
+) {
+    // Fetch data from module's centralized storage
+    auto fullPointData = softwareIntegrationModule->fetchData(storageKey);
+
+    if (fullPointData.empty()) {
+        LWARNING("There was an issue trying to fetch the point data from the centralized storage.");
         return;
     }
 
-    LDEBUG("Regenerating data");
+    auto pointDataSlice = getDataSlice(DataSliceKey::Points);
+    pointDataSlice->clear();
+    pointDataSlice->reserve(fullPointData.size() * 3);
 
-    // @TODO (emmbr26 2021-02-11) This 'createDataSlice'step doesn't really seem
-    // necessary, but could rather be combined with the loadData() step?
-    createDataSlice();
-
-    int size = static_cast<int>(_slicedData.size());
-
-    if (_vertexArrayObjectID == 0) {
-        glGenVertexArrays(1, &_vertexArrayObjectID);
-        LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vertexArrayObjectID));
-    }
-    if (_vertexBufferObjectID == 0) {
-        glGenBuffers(1, &_vertexBufferObjectID);
-        LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vertexBufferObjectID));
-    }
-
-    glBindVertexArray(_vertexArrayObjectID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferObjectID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        size * sizeof(float),
-        _slicedData.data(),
-        GL_STATIC_DRAW
-    );
-
-    GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
-
-    glEnableVertexAttribArray(positionAttribute);
-    glVertexAttribPointer(
-        positionAttribute,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        0,
-        nullptr
-    );
-
-    glBindVertexArray(0);
-
-    _isDirty = false;
-}
-
-void RenderablePointsCloud::createDataSlice() {
-    _slicedData.clear();
-    _slicedData.reserve(4 * (_fullData.size() / _nValuesPerPoint));
-
+    // Create data slice
     auto addPosition = [&](const glm::vec4& pos) {
-        for (int j = 0; j < 4; ++j) {
-            _slicedData.push_back(pos[j]);
+        for (glm::vec4::length_type j = 0; j < glm::vec4::length() - 1; ++j) {
+            pointDataSlice->push_back(pos[j]);
         }
     };
 
-    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerPoint) {
-        glm::dvec4 transformedPos = glm::dvec4(
-            _fullData[i + 0],
-            _fullData[i + 1],
-            _fullData[i + 2],
+    for (size_t i = 0; i < fullPointData.size(); i += 3) {
+        glm::dvec4 transformedPos = {
+            fullPointData[i + 0],
+            fullPointData[i + 1],
+            fullPointData[i + 2],
             1.0
-        );
+        };
         // W-normalization
         transformedPos /= transformedPos.w;
-        transformedPos *= openspace::distanceconstants::Parsec;
+        transformedPos *= distanceconstants::Parsec;
+
         addPosition(transformedPos);
     }
 }
 
-void RenderablePointsCloud::loadData() {
-    if (!_dataStorageKey.has_value()) {
-        LWARNING("No point data found");
-        return;
-    }
-
-    // @TODO: potentially combine point data with additional data about the points,
-    // such as luminosity
-
-    // Fetch data from module's centralized storage
-    auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-    _fullData = module->fetchData(_dataStorageKey.value());
-
-    _isDirty = true;
-}
-
-void RenderablePointsCloud::loadColorMap() {
-    if (!_identifier.has_value()) {
-        LWARNING("No data storage identifier found");
-        return;
-    }
-    
-    // Fetch data from module's centralized storage
-    auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-    std::vector<float> colorMap = module->fetchData(_identifier.value() + "-ColorMap");
+void RenderablePointsCloud::loadColormap(
+    const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule
+) {
+    std::vector<float> colorMap = softwareIntegrationModule->fetchData(storageKey);
     
     if (colorMap.empty()) {
-        LWARNING("There was an issue trying to fetch the colormap data from the syncable storage.");
+        LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
         return;
     }
 
-    int width = colorMap.size();
-    uint8_t* values = new uint8_t[width];
+    size_t nValues = colorMap.size();
+    uint8_t* values = new uint8_t[nValues];
 
-    int i = 0;
-    while (i < width) {
-        values[i++] = static_cast<uint8_t>(colorMap[i] * 255);
-        values[i++] = static_cast<uint8_t>(colorMap[i] * 255);
-        values[i++] = static_cast<uint8_t>(colorMap[i] * 255);
-        values[i++] = static_cast<uint8_t>(colorMap[i] * 255);
+    for (size_t i = 0; i < nValues; ++i) {
+        values[i] = static_cast<uint8_t>(colorMap[i] * 255);
     }
     
-    GLenum type = GL_TEXTURE_1D;
-    _colorMapTexture = std::make_unique<ghoul::opengl::Texture>(
+    _colormapTexture.reset();
+    _colormapTexture = std::make_unique<ghoul::opengl::Texture>(
         values,
-        glm::uvec3(width, 1, 1),
-        type,
+        glm::size3_t(nValues / 4, 1, 1),
+        GL_TEXTURE_1D,
         ghoul::opengl::Texture::Format::RGBA
     );
+    _colormapTexture->uploadTexture();
 
-    _isDirty = true;
-    _loadNewColorMap = false;
-    _colorMapEnabled = true;
+    _hasLoadedColormap = true;
+}
+
+void RenderablePointsCloud::loadCmapAttributeData(
+    const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule
+) {
+    auto colormapAttributeData = softwareIntegrationModule->fetchData(storageKey);
+    
+    if (colormapAttributeData.empty()) {
+        LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
+        return;
+    }
+
+    auto pointDataSlice = getDataSlice(DataSliceKey::Points);
+
+    if (pointDataSlice->size() / 3 != colormapAttributeData.size()) {
+        LWARNING(fmt::format(
+            "There is a mismatch in the amount of colormap attribute scalars ({}) and the amount of points ({})",
+            colormapAttributeData.size(), pointDataSlice->size() / 3
+        ));
+        _colormapEnabled = false;
+        return;
+    }
+
+    auto colormapAttributeDataSlice = getDataSlice(DataSliceKey::ColormapAttributes);
+    colormapAttributeDataSlice->clear();
+    colormapAttributeDataSlice->reserve(colormapAttributeData.size());
+
+    for (size_t i = 0; i < (pointDataSlice->size() / 3); ++i) {
+        colormapAttributeDataSlice->push_back(colormapAttributeData[i]);
+    }
+
+    _hasLoadedColormapAttributeData = true;
+     LDEBUG("Rerendering colormap attribute data");
+}
+
+std::shared_ptr<RenderablePointsCloud::DataSlice> RenderablePointsCloud::getDataSlice(DataSliceKey key) {
+    if (!_dataSlices.count(key)) {
+        _dataSlices.insert({ key, std::make_shared<DataSlice>() });
+    }
+    return _dataSlices.at(key);
 }
 
 } // namespace openspace

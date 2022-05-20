@@ -29,10 +29,13 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
+in float vs_colormapAttributeScalar[];
+
 flat out float ge_screenSpaceDepth;
 out vec4 ge_positionViewSpace;
 
 out vec2 coords;
+out float ge_colormapAttributeScalar;
 
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
@@ -59,6 +62,8 @@ double scaleForUniform(vec3 pos) {
 }
 
 void main() {
+    ge_colormapAttributeScalar = vs_colormapAttributeScalar[0];
+
     vec3 pos = gl_in[0].gl_Position.xyz;
 
     double scaleMultiply = 1.0;
