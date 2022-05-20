@@ -423,17 +423,89 @@ void FieldlinesState::addLinesToBeRendered() {
     }
 }
 
+double FieldlinesState::daysideDeathTime(size_t index) {
+    size_t nPathlineVertices = _allMatchingFieldlines[index].pathLines.first.line.size();
+    size_t reconnectionIndex = nPathlineVertices / 2;
+
+    double time = 0;
+    for (size_t i = reconnectionIndex; i < nPathlineVertices; ++i) {
+        if (_allMatchingFieldlines[index].pathLines.first.keyFrames[i].topology !=
+            _allMatchingFieldlines[index].pathLines.first.keyFrames[i + 1].topology)
+        {
+            break;
+        }
+        
+    }
+
+    return time;
+}
+
 /**
 * Adds the first keyframe from each pathline as a fieldline to be rendered.
 * Added in the vector _vertexPositions
 */
 void FieldlinesState::initializeRenderedMatchingFieldlines() {
 
+    //deleteBadMatchingFieldlines();
+
     for (MatchingFieldlines mf : _allMatchingFieldlines) {
         addLine(mf.pathLines.first.keyFrames[0].vertices);
         addLine(mf.pathLines.second.keyFrames[0].vertices);
     }
+}
 
+// move all bad to the end and then we delete
+// hard coded, this circulates 21 vertices around the first reconnection
+void FieldlinesState::deleteBadMatchingFieldlines() { 
+
+    std::vector<size_t> indicesToRemove;
+    size_t nMatchingFieldlines = _allMatchingFieldlines.size() - 1;
+    for (size_t j = 0; j < nMatchingFieldlines; ++j) {
+        int totalTopologyChanges = 0;
+        for (size_t i = 190; i < 211; ++i) {
+            if (_allMatchingFieldlines[j].pathLines.first.keyFrames[i].topology != 
+                _allMatchingFieldlines[j].pathLines.first.keyFrames[i + 1].topology) {
+                ++totalTopologyChanges;
+            }
+        }
+
+        if (totalTopologyChanges > 2) { 
+            --j;
+            --nMatchingFieldlines;
+            std::swap(_allMatchingFieldlines[j], _allMatchingFieldlines[nMatchingFieldlines]);
+            continue;
+        }
+        totalTopologyChanges = 0;
+
+        for (size_t i = 190; i < 211; ++i) {
+            if (_allMatchingFieldlines[j].pathLines.second.keyFrames[i].topology !=
+                _allMatchingFieldlines[j].pathLines.second.keyFrames[i + 1].topology) {
+                ++totalTopologyChanges;
+            }
+        }
+
+        if (totalTopologyChanges > 2) {
+            --j;
+            --nMatchingFieldlines;
+            std::swap(_allMatchingFieldlines[j], _allMatchingFieldlines[nMatchingFieldlines]);
+        }
+    }
+
+    _allMatchingFieldlines.resize(nMatchingFieldlines - 1);
+}
+
+glm::vec3 FieldlinesState::criticalPoint(size_t i) {
+    size_t afterReconnection = 
+        _allMatchingFieldlines[i].pathLines.first.line.size() / 2;
+    size_t beforeReconnection = afterReconnection - 1;
+
+    glm::vec3 criticalPoint =
+        (_allMatchingFieldlines[i].pathLines.first.line[beforeReconnection] +
+        _allMatchingFieldlines[i].pathLines.first.line[afterReconnection] +
+        _allMatchingFieldlines[i].pathLines.first.line[beforeReconnection] +
+        _allMatchingFieldlines[i].pathLines.first.line[afterReconnection]) / 4.0f;
+
+    return fls::ReToMeter*criticalPoint;
 }
 
 void FieldlinesState::appendToExtra(size_t idx, float val) {

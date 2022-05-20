@@ -174,7 +174,6 @@ namespace openspace::fls {
             // Create pathlines (IMF and CF) for matching fieldlines
             // 11 is first part of first path line, 12 is the second part.
             // same for the second path line with 21 and 22
-            // 
             size_t firstSeedId = i * 2;
             size_t secondSeedId = i * 2 + 1;
             ccmc::Fieldline mappedPath11 = traceAndCreateMappedPathLine(tracingVar, tracer,
@@ -209,33 +208,21 @@ namespace openspace::fls {
             std::vector<glm::vec3>::const_iterator concatenationPointPathLine2 =
                 pathLine2.begin() + lengthToConcatenation2;
 
-            /*std::vector<glm::vec3> pathLine1;
-            for (const ccmc::Point3f& p : pathPositions11) {
-                pathLine1.emplace_back(p.component1, p.component2, p.component3);
-            }*/
-
-            //std::vector<glm::vec3> pathLine2;
-            //for (const ccmc::Point3f& p : pathPositions21) {
-            //    pathLine2.emplace_back(p.component1, p.component2, p.component3);
-            //}
-
             // Elon: optimizing trimming could go here
             // std::vector<float> velocities = computeVelocities(pathLine, kameleon);
             // std::vector<float> times = computeTimes(pathLine, velocities);
             // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
 
             double birthTime = birthTimes[i];
-            double deathTime1 = birthTime; // accumulates inside the loop
-            double deathTime2 = birthTime;
 
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)
             // - 1 because arrays start at 0
             state.addMatchingPathLines(std::move(pathLine1), lengthToConcatenation1 - 1,
                 std::move(pathLine2), lengthToConcatenation2 - 1, birthTime);
-            //state.addMatchingPathLines(std::move(pathLine1), concatenationPointPathLine1,
-            //    std::move(pathLine2), concatenationPointPathLine2);
-
+            
+            double timeToDaysideReconnection1 = 0.0;
+            double timeToDaysideReconnection2 = 0.0;
             for (size_t j = 0; j < pathLine1.size(); ++j) {
 
                 std::vector<glm::vec3> keyFrame1;
@@ -245,38 +232,37 @@ namespace openspace::fls {
                 std::vector<float> keyFrameLength2;
                 traceAndCreateKeyFrame(keyFrame2, keyFrameLength2, pathLine2[j], kameleon, innerBoundaryLimit, nPointsOnFieldlines);
 
-                // timeToNextKeyFrame is -1 if at last path line vertex
+                // timeToNextKeyFrame is -1 if at last pathline vertex
                 // Vi vill tracea tid baklänges för den pathline del som räknats ut baklänges
                 // Vi tror vi kan byta plats på this och next vertex
                 float timeToNextKeyFrame1;
                 float timeToNextKeyFrame2;
-                if (j <= pathLine1.size()) {
-                    timeToNextKeyFrame1 = j + 1 == pathLine1.size() ?
-                        -1.f : openspace::fls::computeTime(pathLine1[j + 1], pathLine1[j], kameleon);
-                }
-                else {
-                    timeToNextKeyFrame1 = j + 1 == pathLine1.size() ?
-                        -1.f : openspace::fls::computeTime(pathLine1[j], pathLine1[j + 1], kameleon);
-                }
 
-                if (j <= pathLine2.size()) {
-                    timeToNextKeyFrame2 = j + 1 == pathLine2.size() ?
-                        -1.f : openspace::fls::computeTime(pathLine2[j + 1], pathLine2[j], kameleon);
-                }
-                else {
-                    timeToNextKeyFrame2 = j + 1 == pathLine2.size() ?
-                        -1.f : openspace::fls::computeTime(pathLine2[j], pathLine2[j + 1], kameleon);
-                }
+                timeToNextKeyFrame1 = j + 1 == pathLine1.size() ?
+                    -1.f : openspace::fls::computeTime(pathLine1[j + 1], pathLine1[j], kameleon);
 
-                state.addMatchingKeyFrames(std::move(keyFrame1), std::move(keyFrame2), 
+                bool isBeforeReconnection = j < (pathLine1.size() / 2 - 1);
+                if (isBeforeReconnection)
+                    timeToDaysideReconnection1 += timeToNextKeyFrame1;
+
+                timeToNextKeyFrame2 = j + 1 == pathLine2.size() ?
+                    -1.f : openspace::fls::computeTime(pathLine2[j + 1], pathLine2[j], kameleon);
+
+                if (isBeforeReconnection)
+                    timeToDaysideReconnection2 += timeToNextKeyFrame2;
+
+                state.addMatchingKeyFrames(std::move(keyFrame1), std::move(keyFrame2),
                     timeToNextKeyFrame1, timeToNextKeyFrame2, std::move(keyFrameLength1), std::move(keyFrameLength2), i);
-
-                deathTime1 += timeToNextKeyFrame1;
-                deathTime2 += timeToNextKeyFrame2;
             }
 
+            double lifeTimeAfterReconnection = 10;
+            double lifeTime = timeToDaysideReconnection1 < timeToDaysideReconnection2 ?
+                timeToDaysideReconnection1 + lifeTimeAfterReconnection : 
+                timeToDaysideReconnection2 + lifeTimeAfterReconnection;
+
             // TODO: Make it work dynamically
-            state.setDeathTimes(-26000 + i*50, -26000 + i*50 , i);
+            
+            state.setDeathTimes(birthTime + lifeTime, birthTime + lifeTime, i);
         }
         bool isSuccessful = state.getAllMatchingFieldlines().size() > 0;
         return isSuccessful;

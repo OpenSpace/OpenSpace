@@ -54,6 +54,7 @@ public:
         double getTimeToReconnectionPoint(size_t indexOfReconnection);
         double getTimeToEndKeyFrame();
         void setStartPoint(double timeToRecon, size_t indexOfReconnection); 
+        bool isFalseTopologyChange() const;
 
         std::vector<FieldlinesState::Fieldline>& keyFrames;
         FieldlinesState::Fieldline temporaryInterpolationKeyFrame;
@@ -109,6 +110,10 @@ private:
         std::vector<glm::vec3>::iterator beginIt, 
         std::vector<glm::vec3>::iterator endIt);
     FieldlinesState::Fieldline::Topology matchingTopology(FieldlinesState::Fieldline::Topology topology);
+    int closestVertexToReconnection(
+        std::vector<glm::vec3>::iterator beginIt, 
+        std::vector<glm::vec3>::iterator endIt, 
+        glm::vec3 criticalPoint);
 
     enum class ColorMethod {
         Uniform = 0,

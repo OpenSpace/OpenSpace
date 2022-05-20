@@ -53,11 +53,11 @@ public:
 
         // Defines the time each fieldline is visible.
         // Path lines are visible even outside birth- and death time.
-        double birthTime;   // Number of seconds from simulation start to when fieldline starts
-        double deathTime;   // Number of seconds from simulation start to when fieldline ends
+        double birthTime;           // Number of seconds from simulation start to when fieldline starts
+        double deathTime;           // Number of seconds from simulation start to when fieldline ends
+        double reconnectionTime;    // Number of seconds from birth time to reconnection
         // index where dayside reconnection happnens on the PathLine
         size_t daysideReconnectionStart;
-        //std::vector<glm::vec3>::const_iterator daysideReconnectionStart;
         //float lifetime; // for when multiple cdf-files come into play ?
     };
 
@@ -94,6 +94,7 @@ public:
     void setTriggerTime(double t);
     void setExtraQuantityNames(std::vector<std::string> names);
     void setDeathTimes(double time1, double time2, size_t index);
+    double daysideDeathTime(size_t index);
 
     void addLinesToBeRendered();
     void addLine(std::vector<glm::vec3>& line);
@@ -116,7 +117,10 @@ public:
         const std::vector<float>&& length1, const std::vector<float>&& length2,
         size_t matchingFieldlinesId);
 
+    void deleteBadMatchingFieldlines();
+
     void initializeRenderedMatchingFieldlines();
+    glm::vec3 criticalPoint(size_t matchingFieldlineIndex);
 
 private:
     bool _isMorphable = false;
