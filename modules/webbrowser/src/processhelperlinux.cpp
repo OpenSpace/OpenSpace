@@ -22,63 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
+// Copyright (c) 2013 The Chromium Embedded Framework Authors. All rights
+// reserved. Use of this source code is governed by a BSD-style license that can
+// be found in the LICENSE file.
 
-#include <openspace/rendering/renderable.h>
+#include "include/cef_app.h"
+#include "include/webbrowserapp.h"
 
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <ghoul/glm.h>
+// Entry point function for all processes.
+int main(int argc, char* argv[]) {
+  // Provide CEF with command-line arguments.
+  CefMainArgs main_args(argc, argv);
 
-namespace ghoul::opengl { class ProgramObject; }
+  CefRefPtr<openspace::WebBrowserApp> app(new openspace::WebBrowserApp);
 
-namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-class RenderablePrism : public Renderable {
-public:
-    RenderablePrism(const ghoul::Dictionary& dictionary);
-
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-private:
-    void updateVertexData();
-    void updateBufferData();
-
-    // Properties
-    properties::IntProperty _nShapeSegments;
-    properties::IntProperty _nLines;
-    properties::FloatProperty _radius;
-    properties::FloatProperty _baseRadius;
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _lineColor;
-    properties::FloatProperty _length;
-    UniformCache(modelViewProjection, color) _uniformCache;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    GLuint _vaoId = 0;
-    GLuint _vboId = 0;
-    GLuint _iboId = 0;
-    std::vector<float> _vertexArray;
-    std::vector<uint8_t> _indexArray;
-
-    bool _prismIsDirty = false;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
+  // CEF applications have multiple sub-processes (render, GPU, etc) that share
+  // the same executable. This function checks the command-line and, if this is
+  // a sub-process, executes the appropriate logic.
+  return CefExecuteProcess(main_args, app.get(), nullptr);
+}
