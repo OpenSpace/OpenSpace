@@ -28,11 +28,14 @@
 
 layout(location = 0) in vec3 in_position;
 in float in_colormapAttributeScalar;
+in float in_linearSizeAttributeScalar;
 
 out float vs_colormapAttributeScalar;
+flat out float vs_linearSizeAttributeScalar;
 
 void main() {
     vs_colormapAttributeScalar = in_colormapAttributeScalar;
+    vs_linearSizeAttributeScalar = in_linearSizeAttributeScalar;
 
     gl_Position = vec4(in_position, 1.0);
 }

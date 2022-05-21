@@ -61,7 +61,7 @@ public:
     bool sendMessage(const std::string& message);
 
     void addPropertySubscription(
-        const std::string propertyName,
+        const std::string& propertyName,
         const std::string& identifier,
         std::function<void()> newHandler
     );
@@ -80,6 +80,16 @@ public:
     private:
         static void stopThread(std::shared_ptr<SoftwareConnection> connectionPtr);
         friend class NetworkEngine;
+    };
+
+    class PointDataMessageHandlerFriends {
+    private:
+        static void removePropertySubscription(
+            std::shared_ptr<SoftwareConnection> connectionPtr,
+            const std::string& propertyName,
+            const std::string& identifier
+        );
+        friend class PointDataMessageHandler;
     };
 
 private:

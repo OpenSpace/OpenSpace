@@ -171,7 +171,7 @@ void NetworkEngine::handleIncomingMessage(IncomingMessage incomingMessage) {
 			break;
 		}
 		case simp::MessageType::PointData: {
-			LDEBUG("Message recieved.. Point Data");
+			LDEBUG("Message recieved.. Point data");
 			_pointDataMessageHandler.handlePointDataMessage(message, connectionPtr);
 			break;
 		}
@@ -181,17 +181,17 @@ void NetworkEngine::handleIncomingMessage(IncomingMessage incomingMessage) {
 			break;
 		}
 		case simp::MessageType::Color: {
-			LDEBUG(fmt::format("Message recieved.. New Color"));
+			LDEBUG(fmt::format("Message recieved.. New color"));
 			_pointDataMessageHandler.handleFixedColorMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::Colormap: {
-			LDEBUG(fmt::format("Message recieved.. New Colormap"));
+			LDEBUG(fmt::format("Message recieved.. New colormap"));
 			_pointDataMessageHandler.handleColormapMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::AttributeData: {
-			LDEBUG(fmt::format("Message recieved.. New Colormap scalar values"));
+			LDEBUG(fmt::format("Message recieved.. New attribute data"));
 			_pointDataMessageHandler.handleAttributeDataMessage(message, connectionPtr);
 			break;
 		}
@@ -200,13 +200,18 @@ void NetworkEngine::handleIncomingMessage(IncomingMessage incomingMessage) {
 			_pointDataMessageHandler.handleOpacityMessage(message, connectionPtr);
 			break;
 		}
-		case simp::MessageType::Size: {
-			LDEBUG(fmt::format("Message recieved.. New Size"));
+		case simp::MessageType::FixedSize: {
+			LDEBUG(fmt::format("Message recieved.. New size"));
 			_pointDataMessageHandler.handleFixedPointSizeMessage(message, connectionPtr);
 			break;
 		}
+		case simp::MessageType::LinearSize: {
+			LDEBUG(fmt::format("Message recieved.. New linear size"));
+			_pointDataMessageHandler.handleLinearPointSizeMessage(message, connectionPtr);
+			break;
+		}
 		case simp::MessageType::Visibility: {
-			LDEBUG(fmt::format("Message recieved.. New Visibility"));
+			LDEBUG(fmt::format("Message recieved.. New visibility"));
 			_pointDataMessageHandler.handleVisiblityMessage(message, connectionPtr);
 			break;
 		}

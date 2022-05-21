@@ -47,6 +47,7 @@ public:
     void handleAttributeDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleOpacityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleFixedPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleLinearPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleVisiblityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleRemoveSGNMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
 

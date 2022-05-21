@@ -28,7 +28,7 @@
 flat in float ge_colormapAttributeScalar;
 in vec2 coords;
 flat in float ge_screenSpaceDepth;
-in vec4 ge_positionViewSpace;
+in float ta;
 
 uniform vec4 color;
 uniform float opacity;
@@ -39,14 +39,21 @@ uniform bool colormapEnabled;
 uniform sampler1D colormapTexture;
 
 vec4 attributeScalarToRgb(float attributeData) {
-    // Linear interpolation
     float t = (attributeData - colormapMin) / (colormapMax - colormapMin);
+
+    // Quick fix: Should look over how the texture is created.
+    // Values close to 1 and 0 are wrong when sampled from texture
+    t = mix(0.01, 0.99, t);
 
     // Sample texture with interpolated value
     return texture(colormapTexture, t);
 }
 
 Fragment getFragment() {
+    if (ta == 0.001 || opacity == 0.00001 || color.a == 0.00001) {
+        discard;
+    }
+
     const float radius = 0.5;
     float distance = length(coords - radius);
     if (distance > 0.6) discard;
@@ -57,13 +64,13 @@ Fragment getFragment() {
     vec4 outputColor = vec4(color.rgb, color.a * opacity); 
     if (colormapEnabled) {
         vec4 colorFromColormap = attributeScalarToRgb(ge_colormapAttributeScalar);
-        outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * opacity);
+        outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * color.a * opacity);
     }
 
     Fragment frag;
     frag.color = outputColor * vec4(circle);
     frag.depth = ge_screenSpaceDepth;
-    frag.gPosition = ge_positionViewSpace;
+    frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
     frag.disableLDR2HDR = true;
 

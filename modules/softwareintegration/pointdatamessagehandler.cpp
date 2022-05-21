@@ -212,6 +212,9 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
     if (usedFor == "ColormapAttributeData") {
         key += "-CmapAttributeData";
     }
+    else if (usedFor == "LinearSizeAttributeData") {
+        key += "-LinearSizeAttributeData";
+    }
     else {
         LERROR(fmt::format(
             "The received attribute data had the \"usedFor\" value {}, which is unrecognized.",
@@ -224,6 +227,15 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
 
     auto callback = [this, identifier, usedFor] {
         if (usedFor == "ColormapAttributeData") {
+            openspace::global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
+                    identifier, "true"
+                ),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+        if (usedFor == "LinearSizeAttributeData") {
             openspace::global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
@@ -304,15 +316,96 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
             // TODO: Add interpolation to script, but do not send back
             // updates to external software until the interpolation is done
             // Use this: "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {}, 1);",
-            std::string script = fmt::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {});",
-                identifier, ghoul::to_string(size)
-            );
             openspace::global::scriptEngine->queueScript(
-                script,
+                fmt::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {});",
+                    identifier, ghoul::to_string(size)
+                ),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+
+            openspace::global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
+                    identifier, "false"
+                ),
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
+    };
+    addCallback(identifier, callback);
+}
+
+void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+    size_t messageOffset = 0;
+    std::string identifier;
+
+    checkRenderable(message, messageOffset, connection, identifier);
+
+    float size;
+    float min;
+    float max;
+    try {
+        size = simp::readFloatValue(message, messageOffset);
+        min = simp::readFloatValue(message, messageOffset);
+        max = simp::readFloatValue(message, messageOffset);
+    }
+    catch (const simp::SimpError& err) {
+        LERROR(fmt::format("Error when reading linear point size message: {}", err.message));
+        return;
+    }
+
+    auto callback = [this, identifier, size, min, max] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+
+        // Get size from renderable
+        properties::Property* sizeProperty = r->property("Size");
+        auto propertyAny = sizeProperty->get();
+        float propertySize = std::any_cast<float>(propertyAny);
+
+        // Update size of renderable
+        if (propertySize != size) {
+            openspace::global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {});",
+                    identifier, ghoul::to_string(size)
+                ),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+
+        properties::Property* linearSizeMinProperty = r->property("LinearSizeMin");
+        float linearSizeMin = std::any_cast<float>(linearSizeMinProperty->get());
+        if (min != linearSizeMin) {
+            openspace::global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeMin', {});",
+                    identifier, ghoul::to_string(min)
+                ),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+
+        properties::Property* linearSizeMaxProperty = r->property("LinearSizeMax");
+        float linearSizeMax = std::any_cast<float>(linearSizeMaxProperty->get());
+        if (max != linearSizeMax) {
+            openspace::global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeMax', {});",
+                    identifier, ghoul::to_string(max)
+                ),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+
+        openspace::global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
+                identifier, "true"
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     };
     addCallback(identifier, callback);
 }
@@ -515,6 +608,13 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(
 
     // Update color of renderable
     auto updateColor = [colorProperty, identifier, connection]() {
+        if (!connection->isConnected()) {
+            SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
+                connection, "Color", identifier
+            );
+            return;
+        }
+
         glm::vec4 color = std::any_cast<glm::vec4>(colorProperty->get());
         
         const std::string message = simp::formatColorMessage(identifier, color);
@@ -526,6 +626,13 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(
 
     // Update opacity of renderable
     auto updateOpacity = [opacityProperty, identifier, connection]() {
+        if (!connection->isConnected()) {
+            SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
+                connection, "Opacity", identifier
+            );
+            return;
+        }
+
         float value = std::any_cast<float>(opacityProperty->get());
         std::string hex_value = simp::floatToHex(value);
 
@@ -538,10 +645,17 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(
 
     // Update size of renderable
     auto updateSize = [sizeProperty, identifier, connection]() {
+        if (!connection->isConnected()) {
+            SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
+                connection, "Size", identifier
+            );
+            return;
+        }
+
         float value = std::any_cast<float>(sizeProperty->get());
         std::string hex_value = simp::floatToHex(value);
 
-        const std::string message = simp::formatUpdateMessage(simp::MessageType::Size, identifier, hex_value);
+        const std::string message = simp::formatUpdateMessage(simp::MessageType::FixedSize, identifier, hex_value);
         connection->sendMessage(message);
     };
     if (sizeProperty) {
@@ -550,6 +664,13 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(
 
     // Toggle visibility of renderable
     auto toggleVisibility = [visibilityProperty, identifier, connection]() {
+        if (!connection->isConnected()) {
+            SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
+                connection, "Enabled", identifier
+            );
+            return;
+        }
+
         bool isVisible = std::any_cast<bool>(visibilityProperty->get());
         std::string_view visibilityFlag = isVisible ? "T" : "F";
 

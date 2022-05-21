@@ -31,7 +31,7 @@ namespace openspace {
 
 namespace simp {
 
-const std::string ProtocolVersion = "1.8";
+const std::string ProtocolVersion = "1.9";
 
 const char SEP = ';';
 
@@ -43,7 +43,8 @@ enum class MessageType : uint32_t {
     Colormap,
     AttributeData,
     Opacity,
-    Size,
+    FixedSize,
+    LinearSize,
     Visibility,
     Disconnection,
     Unknown
@@ -66,7 +67,8 @@ const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
     {"LCOL", MessageType::Colormap},
     {"ATDA", MessageType::AttributeData},
     {"FOPA", MessageType::Opacity},
-    {"FPSI", MessageType::Size},
+    {"FPSI", MessageType::FixedSize},
+    {"LPSI", MessageType::LinearSize},
     {"TOVI", MessageType::Visibility},
     {"DISC", MessageType::Disconnection},
 };

@@ -42,10 +42,11 @@
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
-    constexpr const std::array<const char*, 12> UniformNames = {
-        "color", "opacity", "size", "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
-        "eyePosition", "sizeOption", "colormapTexture", "colormapMin", "colormapMax",
-        "colormapEnabled"
+    constexpr const std::array<const char*, 16> UniformNames = {
+        "color", "opacity", "size", "modelMatrix", "cameraUp", "screenSize",
+        "cameraViewProjectionMatrix", "cameraPosition", "sizeOption", "colormapTexture",
+        "colormapMin", "colormapMax", "colormapEnabled", "linearSizeMin",
+        "linearSizeMax", "linearSizeEnabled"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -74,14 +75,8 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
-        "Size Option",
+        "Size option",
         "This value determines how the size of the data points are rendered."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ColormapEnabledInfo = {
-        "ColormapEnabled",
-        "Colormap Enabled",
-        "Boolean to determine whether to use colormap or not."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColormapMinInfo = {
@@ -94,6 +89,30 @@ namespace {
         "ColormapMax",
         "Colormap max",
         "Maximum value to sample from color map."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColormapEnabledInfo = {
+        "ColormapEnabled",
+        "Colormap enabled",
+        "Boolean to determine whether to use colormap or not."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LinearSizeMinInfo = {
+        "LinearSizeMin",
+        "Linear size min",
+        "Minimum value to use for linear size."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LinearSizeMaxInfo = {
+        "LinearSizeMax",
+        "Linear size max",
+        "Maximum value to use for linear size."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LinearSizeEnabledInfo = {
+        "LinearSizeEnabled",
+        "Linear size enabled",
+        "Boolean to determine whether to use linear size or not."
     };
 
     struct [[codegen::Dictionary(RenderablePointsCloud)]] Parameters {
@@ -118,6 +137,15 @@ namespace {
         // [[codegen::verbatim(ColormapEnabledInfo.description)]]
         std::optional<bool> colormapEnabled;
 
+        // [[codegen::verbatim(LinearSizeMinInfo.description)]]
+        std::optional<float> linearSizeMin;
+
+        // [[codegen::verbatim(LinearSizeMaxInfo.description)]]
+        std::optional<float> linearSizeMax;
+
+        // [[codegen::verbatim(LinearSizeEnabledInfo.description)]]
+        std::optional<bool> linearSizeEnabled;
+
         enum class SizeOption : uint32_t {
             Uniform,
             NonUniform
@@ -136,12 +164,15 @@ documentation::Documentation RenderablePointsCloud::Documentation() {
 
 RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _color(ColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(0.f), glm::vec4(1.f), glm::vec4(.001f))
-    , _size(SizeInfo, 1.f, 0.f, 30.f, .001f)
+    , _color(ColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(0.f), glm::vec4(1.f), glm::vec4(.01f))
+    , _size(SizeInfo, 1.f, 0.f, 500.f, .1f)
     , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _colormapEnabled(ColormapEnabledInfo, false)
     , _colormapMin(ColormapMinInfo)
     , _colormapMax(ColormapMaxInfo)
+    , _linearSizeMax(LinearSizeMinInfo)
+    , _linearSizeMin(LinearSizeMaxInfo)
+    , _linearSizeEnabled(LinearSizeEnabledInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -149,10 +180,16 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
+    _colormapEnabled = p.colormapEnabled.value_or(_colormapEnabled);
+    addProperty(_colormapEnabled);
+
     _identifier = p.identifier.value();
 
     _size = p.size.value_or(_size);
     addProperty(_size);
+
+    _linearSizeEnabled = p.linearSizeEnabled.value_or(_linearSizeEnabled);
+    addProperty(_linearSizeEnabled);
 
     addProperty(_opacity);
 
@@ -174,12 +211,27 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _colormapMax.onChange(colormapMinMaxChecker);
     addProperty(_colormapMax);
 
-    _colormapEnabled = p.colormapEnabled.value_or(_colormapEnabled);
-    addProperty(_colormapEnabled);
+     auto linearSizeMinMaxChecker = [this] {
+        if (_linearSizeMin.value() > _linearSizeMax.value()) {
+            auto temp = _linearSizeMin.value();
+            _linearSizeMin = _linearSizeMax.value();
+            _linearSizeMax = temp;
+        }
+    };
+
+    _linearSizeMin = p.linearSizeMin.value_or(_linearSizeMin);
+    _linearSizeMin.setVisibility(properties::Property::Visibility::Hidden);
+    _linearSizeMin.onChange(linearSizeMinMaxChecker);
+    addProperty(_linearSizeMin);
+
+    _linearSizeMax = p.linearSizeMax.value_or(_linearSizeMax);
+    _linearSizeMax.setVisibility(properties::Property::Visibility::Hidden);
+    _linearSizeMax.onChange(colormapMinMaxChecker);
+    addProperty(_linearSizeMax);
 
     _sizeOption.addOptions({
         { SizeOption::Uniform, "Uniform" },
-        { SizeOption::NonUniform, "Non Uniform" }
+        { SizeOption::NonUniform, "Non uniform" }
     });
     if (p.sizeOption.has_value()) {
         switch (*p.sizeOption) {
@@ -215,7 +267,7 @@ void RenderablePointsCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
-    _colormapTexture.reset();
+    _colormapTexture = nullptr;
 
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
@@ -229,13 +281,16 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 
     _shaderProgram->activate();
 
-    glm::dvec3 eyePosition = glm::dvec3(
-        glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
-    );
-    _shaderProgram->setUniform(_uniformCache.eyePosition, eyePosition);
+    _shaderProgram->setUniform(_uniformCache.cameraPosition, data.camera.positionVec3());
 
-    glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
-    _shaderProgram->setUniform(_uniformCache.cameraUp, cameraUp);
+    _shaderProgram->setUniform(
+        _uniformCache.cameraUp,
+        glm::vec3(data.camera.lookUpVectorWorldSpace())
+    );
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    _shaderProgram->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -243,12 +298,11 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
     _shaderProgram->setUniform(_uniformCache.modelMatrix, modelMatrix);
 
-    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
-    glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
-                                            data.camera.combinedViewMatrix();
     _shaderProgram->setUniform(
         _uniformCache.cameraViewProjectionMatrix,
-        cameraViewProjectionMatrix
+        glm::mat4(
+            glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
+        )
     );
 
     ghoul::opengl::TextureUnit colorUnit;
@@ -270,6 +324,10 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform(_uniformCache.colormapMin, _colormapMin);
     _shaderProgram->setUniform(_uniformCache.colormapMax, _colormapMax);
     _shaderProgram->setUniform(_uniformCache.colormapEnabled, _colormapEnabled);
+
+    _shaderProgram->setUniform(_uniformCache.linearSizeMin, _linearSizeMin);
+    _shaderProgram->setUniform(_uniformCache.linearSizeMax, _linearSizeMax);
+    _shaderProgram->setUniform(_uniformCache.linearSizeEnabled, _linearSizeEnabled);
 
     _shaderProgram->setUniform(_uniformCache.color, _color);
 
@@ -317,6 +375,7 @@ void RenderablePointsCloud::update(const UpdateData&) {
 
         auto pointDataSlice = getDataSlice(DataSliceKey::Points);
         auto colormapAttrDataSlice = getDataSlice(DataSliceKey::ColormapAttributes);
+        auto linearSizeAttrDataSlice = getDataSlice(DataSliceKey::LinearSizeAttributes);
 
         if (pointDataSlice->empty()) return;
 
@@ -335,6 +394,13 @@ void RenderablePointsCloud::update(const UpdateData&) {
             else {
                 bufferData.push_back(0.0);
             }
+
+            if (linearSizeAttrDataSlice->size() > i) {
+                bufferData.push_back(linearSizeAttrDataSlice->at(i));
+            }
+            else {
+                bufferData.push_back(0.0);
+            }
         }
 
         glBufferData(
@@ -346,7 +412,7 @@ void RenderablePointsCloud::update(const UpdateData&) {
         // ==============================================================================================
 
         // ========================================= VAO stuff =========================================
-        GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * 4);
+        GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * 5);
         GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
         glEnableVertexAttribArray(positionAttribute);
         glVertexAttribPointer(
@@ -370,6 +436,19 @@ void RenderablePointsCloud::update(const UpdateData&) {
                 reinterpret_cast<void*>(sizeof(GLfloat) * 3)
             );
         }
+
+        if (_hasLoadedLinearSizeAttributeData) { 
+            GLint linearSizeAttributeScalar = _shaderProgram->attributeLocation("in_linearSizeAttributeScalar");
+            glEnableVertexAttribArray(linearSizeAttributeScalar);
+            glVertexAttribPointer(
+                linearSizeAttributeScalar,
+                1,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+            );
+        }
         // ==============================================================================================
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -387,6 +466,13 @@ void RenderablePointsCloud::update(const UpdateData&) {
         }
         _colormapEnabled = false;
     }
+
+    // This can happen if the user checks the "_colormapEnabled" checkbox in the GUI
+    auto linearSizeAttributeData = getDataSlice(DataSliceKey::LinearSizeAttributes);
+    if (_linearSizeEnabled.value() && linearSizeAttributeData->empty()) {
+        LINFO("Linear size attribute data not loaded. Has it been sent from external software?");
+        _linearSizeEnabled = false;
+    }
 }
 
 bool RenderablePointsCloud::checkDataStorage() {
@@ -398,20 +484,26 @@ bool RenderablePointsCloud::checkDataStorage() {
     bool updatedDataSlices = false;
     auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
     std::string dataPointsKey = _identifier.value() + "-DataPoints";
-    std::string colorMapKey = _identifier.value() + "-Colormap";
-    std::string colorMapScalarsKey = _identifier.value() + "-CmapAttributeData";
+    std::string colormapKey = _identifier.value() + "-Colormap";
+    std::string colormapScalarsKey = _identifier.value() + "-CmapAttributeData";
+    std::string linearSizeScalarsKey = _identifier.value() + "-LinearSizeAttributeData";
 
     if (softwareIntegrationModule->isDataDirty(dataPointsKey)) {
         loadData(dataPointsKey, softwareIntegrationModule);
         updatedDataSlices = true;
     }
     
-    if (softwareIntegrationModule->isDataDirty(colorMapKey)) {
-        loadColormap(colorMapKey, softwareIntegrationModule);
+    if (softwareIntegrationModule->isDataDirty(colormapKey)) {
+        loadColormap(colormapKey, softwareIntegrationModule);
     }
     
-    if (softwareIntegrationModule->isDataDirty(colorMapScalarsKey)) {
-        loadCmapAttributeData(colorMapScalarsKey, softwareIntegrationModule);
+    if (softwareIntegrationModule->isDataDirty(colormapScalarsKey)) {
+        loadCmapAttributeData(colormapScalarsKey, softwareIntegrationModule);
+        updatedDataSlices = true;
+    }
+    
+    if (softwareIntegrationModule->isDataDirty(linearSizeScalarsKey)) {
+        loadLinearSizeAttributeData(linearSizeScalarsKey, softwareIntegrationModule);
         updatedDataSlices = true;
     }
 
@@ -471,8 +563,8 @@ void RenderablePointsCloud::loadColormap(
     for (size_t i = 0; i < nValues; ++i) {
         values[i] = static_cast<uint8_t>(colorMap[i] * 255);
     }
-    
-    _colormapTexture.reset();
+
+    _colormapTexture = nullptr;
     _colormapTexture = std::make_unique<ghoul::opengl::Texture>(
         values,
         glm::size3_t(nValues / 4, 1, 1),
@@ -515,6 +607,39 @@ void RenderablePointsCloud::loadCmapAttributeData(
 
     _hasLoadedColormapAttributeData = true;
      LDEBUG("Rerendering colormap attribute data");
+}
+
+void RenderablePointsCloud::loadLinearSizeAttributeData(
+    const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule
+) {
+    auto linearSizeAttributeData = softwareIntegrationModule->fetchData(storageKey);
+    
+    if (linearSizeAttributeData.empty()) {
+        LWARNING("There was an issue trying to fetch the linear size attribute data from the centralized storage.");
+        return;
+    }
+
+    auto pointDataSlice = getDataSlice(DataSliceKey::Points);
+
+    if (pointDataSlice->size() / 3 != linearSizeAttributeData.size()) {
+        LWARNING(fmt::format(
+            "There is a mismatch in the amount of linear size attribute scalars ({}) and the amount of points ({})",
+            linearSizeAttributeData.size(), pointDataSlice->size() / 3
+        ));
+        _colormapEnabled = false;
+        return;
+    }
+
+    auto linearSizeAttributeDataSlice = getDataSlice(DataSliceKey::LinearSizeAttributes);
+    linearSizeAttributeDataSlice->clear();
+    linearSizeAttributeDataSlice->reserve(linearSizeAttributeData.size());
+
+    for (size_t i = 0; i < (pointDataSlice->size() / 3); ++i) {
+        linearSizeAttributeDataSlice->push_back(linearSizeAttributeData[i]);
+    }
+
+    _hasLoadedLinearSizeAttributeData = true;
+     LDEBUG("Rerendering linear size attribute data");
 }
 
 std::shared_ptr<RenderablePointsCloud::DataSlice> RenderablePointsCloud::getDataSlice(DataSliceKey key) {

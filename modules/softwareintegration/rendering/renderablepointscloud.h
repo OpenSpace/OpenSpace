@@ -67,33 +67,41 @@ protected:
     void loadData(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
     void loadColormap(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
     void loadCmapAttributeData(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadLinearSizeAttributeData(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
 
     bool checkDataStorage();
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
     UniformCache(
-        color, opacity, size, modelMatrix, cameraUp,
-        cameraViewProjectionMatrix, eyePosition, sizeOption,
-        colormapTexture, colormapMin, colormapMax, colormapEnabled
+        color, opacity, size, modelMatrix, cameraUp, screenSize,
+        cameraViewProjectionMatrix, cameraPosition, sizeOption,
+        colormapTexture, colormapMin, colormapMax, colormapEnabled,
+        linearSizeMin, linearSizeMax, linearSizeEnabled
     ) _uniformCache;
 
     properties::FloatProperty _size;
     properties::Vec4Property _color;
     properties::OptionProperty _sizeOption;
-    properties::FloatProperty _colormapMin;
-    properties::FloatProperty _colormapMax;
+    properties::BoolProperty _linearSizeEnabled;
+    properties::FloatProperty _linearSizeMin;
+    properties::FloatProperty _linearSizeMax;
 
     std::unique_ptr<ghoul::opengl::Texture> _colormapTexture;
     properties::BoolProperty _colormapEnabled;
+    properties::FloatProperty _colormapMin;
+    properties::FloatProperty _colormapMax;
 
     std::optional<std::string> _identifier = std::nullopt;
 
     bool _hasLoadedColormapAttributeData = false;
     bool _hasLoadedColormap = false;
 
+    bool _hasLoadedLinearSizeAttributeData = false;
+
     enum class DataSliceKey : size_t {
         Points = 0,
-        ColormapAttributes
+        ColormapAttributes,
+        LinearSizeAttributes
     };
     using DataSlice = std::vector<float>;
     std::unordered_map<DataSliceKey, std::shared_ptr<DataSlice>> _dataSlices;

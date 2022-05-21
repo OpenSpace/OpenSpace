@@ -70,7 +70,7 @@ SoftwareConnection::~SoftwareConnection() {
 }
 
 void SoftwareConnection::addPropertySubscription(
-    const std::string propertyName,
+    const std::string& propertyName,
     const std::string& identifier,
     std::function<void()> newHandler
 ) {
@@ -101,7 +101,7 @@ void SoftwareConnection::addPropertySubscription(
         auto propertySubscription = propertySubscriptions->second.find(propertyName);
         if (propertySubscription != propertySubscriptions->second.end()) {
             // Property subscription already exists
-            removeExistingPropertySubscription(identifier, property, onChangeHandle);
+            removeExistingPropertySubscription(identifier, property, propertySubscription->second);
             propertySubscription->second = onChangeHandle;
         }
         else {
@@ -112,7 +112,7 @@ void SoftwareConnection::addPropertySubscription(
     else {
         // No properties have been subscribed to on this SGN
         PropertySubscriptions newPropertySubscriptionMap{ { propertyName, onChangeHandle } };
-        _subscribedProperties.emplace(identifier, std::move(newPropertySubscriptionMap));
+        _subscribedProperties.emplace(identifier, newPropertySubscriptionMap);
     }
 }
 
@@ -159,6 +159,42 @@ void SoftwareConnection::removeExistingPropertySubscription(
 
     auto propertySubscriptions = _subscribedProperties.find(identifier);
     propertySubscriptions->second.erase(property->identifier());
+}
+
+void SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
+    std::shared_ptr<SoftwareConnection> connectionPtr,
+    const std::string& propertyName,
+    const std::string& identifier
+) {
+    // Get renderable
+    auto r = renderable(identifier);
+    if (!r) {
+        LWARNING(fmt::format(
+            "Couldn't remove property subscription. Renderable \"{}\" doesn't exist",
+            identifier
+        ));
+        return;
+    }
+
+    if (!r->hasProperty(propertyName)) {
+        LWARNING(fmt::format(
+            "Couldn't remove property subscription. Property \"{}\" doesn't exist on \"{}\"",
+            propertyName, identifier
+        ));
+        return;
+    }
+
+    auto property = r->property(propertyName);
+
+    auto propertySubscriptions = connectionPtr->_subscribedProperties.find(identifier);
+    if (propertySubscriptions != connectionPtr->_subscribedProperties.end()) {
+        // At least one property have been subscribed to on this SGN
+        auto propertySubscription = propertySubscriptions->second.find(propertyName);
+        if (propertySubscription != propertySubscriptions->second.end()) {
+            // Property subscription already exists
+            connectionPtr->removeExistingPropertySubscription(identifier, property, propertySubscription->second);
+        }
+    }
 }
 
 void SoftwareConnection::disconnect() {
