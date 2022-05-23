@@ -1543,16 +1543,18 @@ bool SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
         std::string found;
         if (s.find("(\"") != std::string::npos) {
             std::string subj = s.substr(s.find("(\"") + 2);
-            checkForScenegraphNodeAccess_Scene(subj, found);
-            checkForScenegraphNodeAccess_Nav(subj, found);
-            if (found.length() > 0) {
-                auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), found);
-                if (it == _loadedNodes.end()) {
-                    LERROR(fmt::format(
-                        "Playback file requires scenegraph node '{}', which is "
-                        "not currently loaded", found
-                    ));
-                    return false;
+            for (std::string match : getPropertiesMatchingRegex(subj)) {
+                checkForScenegraphNodeAccess_Scene(subj, found);
+                checkForScenegraphNodeAccess_Nav(subj, found);
+                if (found.length() > 0) {
+                    auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), found);
+                    if (it == _loadedNodes.end()) {
+                        LERROR(fmt::format(
+                            "Playback file requires scenegraph node '{}', which is "
+                            "not currently loaded", found
+                        ));
+                        return false;
+                    }
                 }
             }
         }

@@ -466,8 +466,21 @@ int propertyGetValue(lua_State* L) {
  */
 int propertyGetProperty(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetProperty");
-    std::string regex = ghoul::lua::value<std::string>(L);
+    std::vector<std::string> res =
+        getPropertiesMatchingRegex(ghoul::lua::value<std::string>(L));
 
+    lua_newtable(L);
+    int number = 1;
+    for (const std::string& s : res) {
+        ghoul::lua::push(L, s);
+        lua_rawseti(L, -2, number);
+        ++number;
+    }
+    return 1;
+}
+
+std::vector<std::string> getPropertiesMatchingRegex(std::string regex)
+{
     std::string groupName;
     if (doesUriContainGroupTag(regex, groupName)) {
         // Remove group name from start of regex and replace with '*'
@@ -514,10 +527,24 @@ int propertyGetProperty(lua_State* L) {
             isLiteral = true;
         }
     }
+    
+    return findMatchesInAllProperties(
+        isLiteral,
+        propertyName,
+        nodeName,
+        groupName
+    );
+}
 
+std::vector<std::string> findMatchesInAllProperties(bool isLiteral,
+                                                    std::string propertyName,
+                                                    std::string nodeName,
+                                                    std::string groupName)
+{
     // Get all matching property uris and save to res
     std::vector<properties::Property*> props = allProperties();
     std::vector<std::string> res;
+
     for (properties::Property* prop : props) {
         // Check the regular expression for all properties
         const std::string& id = prop->fullyQualifiedIdentifier();
@@ -572,18 +599,9 @@ int propertyGetProperty(lua_State* L) {
                 continue;
             }
         }
-
         res.push_back(id);
     }
-
-    lua_newtable(L);
-    int number = 1;
-    for (const std::string& s : res) {
-        ghoul::lua::push(L, s);
-        lua_rawseti(L, -2, number);
-        ++number;
-    }
-    return 1;
+    return res;
 }
 
 }  // namespace openspace::luascriptfunctions
