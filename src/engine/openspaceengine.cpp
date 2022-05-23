@@ -169,11 +169,11 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
-        { static_cast<int>(Visibility::NoviceUser), "Novice User"},
-        { static_cast<int>(Visibility::User), "User"},
-        { static_cast<int>(Visibility::AdvancedUser), "Advanced User"},
-        { static_cast<int>(Visibility::Developer), "Developer"},
-        { static_cast<int>(Visibility::Hidden), "Everything"},
+        { static_cast<int>(Visibility::NoviceUser), "Novice User" },
+        { static_cast<int>(Visibility::User), "User" },
+        { static_cast<int>(Visibility::AdvancedUser), "Advanced User" },
+        { static_cast<int>(Visibility::Developer), "Developer" },
+        { static_cast<int>(Visibility::Hidden), "Everything" },
     });
 }
 
