@@ -1,0 +1,29 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+local layer = {
+  Identifier = "GRACE",
+  Name = "GRACE",
+  FilePath = asset.localResource("CSR_GRACE_GRACE-FO_RL06_Mascons_all-corrections_v02.ncband_1.vrt"),
+  Description = [[ image of grace]],    
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "GRACE",
+  Version = "1.1",
+  Description = [[ ]],
+  Author = "Center for Space Research",
+  URL = "http://www2.csr.utexas.edu/grace/",
+  License = "NASA"
+}

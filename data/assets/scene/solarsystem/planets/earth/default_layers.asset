@@ -14,8 +14,9 @@ asset.require("./layers/colorlayers/ghrsst_l4_g1sst_sea_surface_temperature_temp
 asset.require("./layers/colorlayers/ghrsst_l4_mur_sea_surface_temperature_temporal")
 asset.require("./layers/colorlayers/sea_surface_currents")
 asset.require("./layers/colorlayers/Ice_Velocity_Greenland")
-
-
+asset.require("./layers/colorlayers/GRACE")
+asset.require("./layers/colorlayers/ECCO")
+asset.require("./noaa-sos/overlays/currents")
 -- Height layers
 asset.require("./layers/heightlayers/blue_marble_height")
 local heightLayer = asset.require("./layers/heightlayers/terrain_tileset")

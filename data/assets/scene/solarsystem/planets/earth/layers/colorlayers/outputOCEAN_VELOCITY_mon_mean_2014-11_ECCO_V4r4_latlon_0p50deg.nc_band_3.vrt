@@ -1,0 +1,46 @@
+<VRTDataset rasterXSize="720" rasterYSize="360">
+  <SRS dataAxisToSRSAxisMapping="2,1">GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],AUTHORITY["EPSG","4326"]]</SRS>
+  <GeoTransform> -1.8000000000000000e+02,  5.0000000000000000e-01,  0.0000000000000000e+00,  9.0000000000000000e+01,  0.0000000000000000e+00, -5.0000000000000000e-01</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+    <ColorInterp>Red</ColorInterp>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">C:\Users\anne1\GRACE\ECCO\colorfile_II_evel\outputOCEAN_VELOCITY_mon_mean_2014-11_ECCO_V4r4_latlon_0p50deg.nc_band_3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="720" RasterYSize="360" DataType="Byte" BlockXSize="720" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="720" ySize="360" />
+      <DstRect xOff="0" yOff="0" xSize="720" ySize="360" />
+    </SimpleSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2">
+    <ColorInterp>Green</ColorInterp>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">C:\Users\anne1\GRACE\ECCO\colorfile_II_evel\outputOCEAN_VELOCITY_mon_mean_2014-11_ECCO_V4r4_latlon_0p50deg.nc_band_3.tif</SourceFilename>
+      <SourceBand>2</SourceBand>
+      <SourceProperties RasterXSize="720" RasterYSize="360" DataType="Byte" BlockXSize="720" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="720" ySize="360" />
+      <DstRect xOff="0" yOff="0" xSize="720" ySize="360" />
+    </SimpleSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="3">
+    <ColorInterp>Blue</ColorInterp>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">C:\Users\anne1\GRACE\ECCO\colorfile_II_evel\outputOCEAN_VELOCITY_mon_mean_2014-11_ECCO_V4r4_latlon_0p50deg.nc_band_3.tif</SourceFilename>
+      <SourceBand>3</SourceBand>
+      <SourceProperties RasterXSize="720" RasterYSize="360" DataType="Byte" BlockXSize="720" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="720" ySize="360" />
+      <DstRect xOff="0" yOff="0" xSize="720" ySize="360" />
+    </SimpleSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="4">
+    <ColorInterp>Alpha</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="0">C:\Users\anne1\GRACE\ECCO\colorfile_II_evel\outputOCEAN_VELOCITY_mon_mean_2014-11_ECCO_V4r4_latlon_0p50deg.nc_band_3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="720" RasterYSize="360" DataType="Byte" BlockXSize="720" BlockYSize="3" />
+      <SrcRect xOff="0" yOff="0" xSize="720" ySize="360" />
+      <DstRect xOff="0" yOff="0" xSize="720" ySize="360" />
+      <ScaleOffset>255</ScaleOffset>
+      <ScaleRatio>0</ScaleRatio>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>
