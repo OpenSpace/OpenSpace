@@ -95,11 +95,6 @@ private:
         const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
         GLsizei nVertices);
-    void findOptimalSwapIndex(
-        const FieldlinesState::Fieldline& fieldline1,
-        const FieldlinesState::Fieldline& fieldline2,
-        int& index1,
-        int& index2);
     void updateTemporaryKeyFrame(
         std::vector<glm::vec3>::iterator firstLineBeginIt,
         std::vector<glm::vec3>::iterator firstLineEndIt,

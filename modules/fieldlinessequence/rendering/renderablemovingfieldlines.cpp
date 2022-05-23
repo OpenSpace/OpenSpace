@@ -269,26 +269,43 @@ namespace openspace {
             double timeToReconTrav2 = _traversers[traverserIndex + 1].
                 getTimeToReconnectionPoint(mf.pathLines.second.daysideReconnectionStart);
 
-            // find out which traverser has the longest traveling time to point of
-            // reconnection and adjust the startpoint according to the shorter 
-            // traverser traveltime
-            //if (timeToReconTrav1 > timeToReconTrav2) {
-            //    _traversers[traverserIndex].setStartPoint(
-            //        timeToReconTrav2, 
-            //        mf.pathLines.first.daysideReconnectionStart);
-            //}
-            //else {
-            //    _traversers[traverserIndex + 1].setStartPoint(
-            //        timeToReconTrav1, 
-            //        mf.pathLines.second.daysideReconnectionStart);
-            //}
 
-            _traversers[traverserIndex ].setStartPoint(
-                2400,
-                _nPointsOnPathLine - 1);
-            _traversers[traverserIndex + 1].setStartPoint(
-                2400,
-                _nPointsOnPathLine - 1);
+            // hard coding for the sake of the presentation
+            if (traverserIndex < 4) {
+
+                // ---------This part works for dayside separate---------
+                // find out which traverser has the longest traveling time to point of
+                // reconnection and adjust the startpoint according to the shorter 
+                // traverser traveltime
+                if (timeToReconTrav1 > timeToReconTrav2) {
+                    _traversers[traverserIndex].setStartPoint(
+                        timeToReconTrav2, 
+                        mf.pathLines.first.daysideReconnectionStart);
+                }
+                else {
+                    _traversers[traverserIndex + 1].setStartPoint(
+                        timeToReconTrav1, 
+                        mf.pathLines.second.daysideReconnectionStart);
+                }
+            }
+            else {
+
+                // right now only hard coding for nightside is working
+                // then use this with custom number
+                _traversers[traverserIndex].setStartPoint(
+                    2400,
+                    _nPointsOnPathLine - 1);
+                _traversers[traverserIndex + 1].setStartPoint(
+                    2400,
+                    _nPointsOnPathLine - 1);
+            }
+
+            //_traversers[traverserIndex ].setStartPoint(
+            //    2400,
+            //    _nPointsOnPathLine - 1);
+            //_traversers[traverserIndex + 1].setStartPoint(
+            //    2400,
+            //    _nPointsOnPathLine - 1);
 
             // initialize the temporary key frame for each traverser
             _traversers[traverserIndex].temporaryInterpolationKeyFrame.vertices = 
@@ -405,6 +422,7 @@ namespace openspace {
                 }
 
                 /************* TEMPORARY MAGIC VALUE ****************/
+                // presentation
                 startTime = -28700.0;
                 /****************************************************/
 
@@ -625,10 +643,6 @@ namespace openspace {
             }
         }
 
-        // Something like this is needed for fieldline fade to work. This doesn't though...
-        //glEnable(GL_BLEND); 
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
-
         glMultiDrawArrays(
             GL_LINE_STRIP,
             lineStarts.data(),
@@ -800,7 +814,6 @@ namespace openspace {
 
                 if (isMovingForward) {
 
-
                     updateTemporaryKeyFrame(
                         lineBegin1,
                         lineBegin1 + reconnectionIndex1,
@@ -957,7 +970,7 @@ namespace openspace {
     */
     void RenderableMovingFieldlines::updateVertexAlphaBuffer(const double currentTime) {
 
-        constexpr const double fieldlineFadeTime = 5.0;    // seconds
+        constexpr const double fieldlineFadeTime = 15.0;    // seconds
 
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexAlphaBuffer);
@@ -1139,14 +1152,6 @@ namespace openspace {
             return true;
 
         return false;
-    }
-
-    void RenderableMovingFieldlines::findOptimalSwapIndex(
-        const FieldlinesState::Fieldline& fieldline1,
-        const FieldlinesState::Fieldline& fieldline2,
-        int& index1,
-        int& index2) {
-
     }
 
     /**

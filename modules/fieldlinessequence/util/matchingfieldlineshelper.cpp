@@ -208,13 +208,14 @@ namespace openspace::fls {
             std::vector<glm::vec3>::const_iterator concatenationPointPathLine2 =
                 pathLine2.begin() + lengthToConcatenation2;
 
-            // Elon: optimizing trimming could go here
-            // std::vector<float> velocities = computeVelocities(pathLine, kameleon);
-            // std::vector<float> times = computeTimes(pathLine, velocities);
-            // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
-
             double birthTime = birthTimes[i];
 
+            // hard coding for the sake of the presentation
+            // adjusting the nightside according to when the
+            // dayside reaches the approximal 
+            if (i >= 2) {
+                birthTime = birthTime + 495;
+            }
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)
             // - 1 because arrays start at 0
@@ -255,14 +256,24 @@ namespace openspace::fls {
                     timeToNextKeyFrame1, timeToNextKeyFrame2, std::move(keyFrameLength1), std::move(keyFrameLength2), i);
             }
 
+            double deathTime = 0;
             double lifeTimeAfterReconnection = 10;
             double lifeTime = timeToDaysideReconnection1 < timeToDaysideReconnection2 ?
                 timeToDaysideReconnection1 + lifeTimeAfterReconnection : 
                 timeToDaysideReconnection2 + lifeTimeAfterReconnection;
 
+            // for the sake of the presentation
+            // match the death of dayside to the birth of nigthside
+            if (i < 2) {
+                deathTime = birthTime + 500;
+            }
+            else {
+                deathTime = birthTime + 1900;
+            }
+
             // TODO: Make it work dynamically
-            
-            state.setDeathTimes(birthTime + lifeTime, birthTime + lifeTime, i);
+            state.setDeathTimes(deathTime, deathTime, i);
+            //state.setDeathTimes(birthTime + lifeTime, birthTime + lifeTime, i);
         }
         bool isSuccessful = state.getAllMatchingFieldlines().size() > 0;
         return isSuccessful;
