@@ -812,25 +812,25 @@ namespace openspace {
                 int reconnectionIndex1 = closestVertexToReconnection(lineBegin1, lineEnd1, criticalPoint);
                 int reconnectionIndex2 = closestVertexToReconnection(lineBegin2, lineEnd2, criticalPoint);
 
+                updateTemporaryKeyFrame(
+                    lineBegin1,
+                    lineBegin1 + reconnectionIndex1,
+                    lineBegin2 + reconnectionIndex2,
+                    lineEnd2,
+                    _traversers[lineIndex].temporaryInterpolationKeyFrame
+                );
+
+                updateTemporaryKeyFrame(
+                    lineBegin2,
+                    lineBegin2 + reconnectionIndex2,
+                    lineBegin1 + reconnectionIndex1,
+                    lineEnd1,
+                    _traversers[lineIndex + 1].temporaryInterpolationKeyFrame
+                );
+
+                // Different time calculations depending on time direction
+                // Might be some bugs left
                 if (isMovingForward) {
-
-                    updateTemporaryKeyFrame(
-                        lineBegin1,
-                        lineBegin1 + reconnectionIndex1,
-                        lineBegin2 + reconnectionIndex2,
-                        lineEnd2,
-                        _traversers[lineIndex].temporaryInterpolationKeyFrame
-                    );
-
-                    updateTemporaryKeyFrame(
-                        lineBegin2,
-                        lineBegin2 + reconnectionIndex2,
-                        lineBegin1 + reconnectionIndex1,
-                        lineEnd1,
-                        _traversers[lineIndex + 1].temporaryInterpolationKeyFrame
-                    );
-
-                    // is not safe for reverse simulation time
                     _traversers[lineIndex].timeInterpolationDenominator -= _traversers[lineIndex].timeSinceInterpolation;
                     _traversers[lineIndex + 1].timeInterpolationDenominator -= _traversers[lineIndex + 1].timeSinceInterpolation;
                     _traversers[lineIndex].timeSinceInterpolation = 0;
@@ -839,13 +839,20 @@ namespace openspace {
                     _traversers[lineIndex].hasTemporaryKeyFrame = true;
                     _traversers[lineIndex + 1].hasTemporaryKeyFrame = true;
                 }
+                else {
+                    _traversers[lineIndex].timeInterpolationDenominator = _traversers[lineIndex].timeSinceInterpolation;
+                    _traversers[lineIndex + 1].timeInterpolationDenominator = _traversers[lineIndex + 1].timeSinceInterpolation;
+
+                    _traversers[lineIndex].hasTemporaryKeyFrame = true;
+                    _traversers[lineIndex + 1].hasTemporaryKeyFrame = true;
+                }
             }
 
-            // individual delta time for each traverser
+            // Individual delta time for each traverser
             // since it might be modified depending on birth and death
             double dt1 = dt;
 
-            // checks if line would move after birth time with current dt
+            // Checks if line would move after birth time with current dt
             // and changes dt accordingly       
             bool isAfterBirth1 = currentTime >= allMatchingFieldlines[i].pathLines.first.birthTime;
             bool movesBeforeBirth1 = newTime < allMatchingFieldlines[i].pathLines.first.birthTime;
@@ -853,7 +860,7 @@ namespace openspace {
                 dt1 += allMatchingFieldlines[i].pathLines.first.birthTime - newTime;
             }
 
-            // checks if line would move after death time with current dt
+            // Checks if line would move after death time with current dt
             // and changes dt accordingly 
             bool isBeforeDeath1 = currentTime <= allMatchingFieldlines[i].pathLines.first.deathTime;
             bool movesAfterDeath1 = newTime > allMatchingFieldlines[i].pathLines.first.deathTime;
