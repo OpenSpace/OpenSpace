@@ -38,8 +38,8 @@ public:
 	struct Value {
 		// a dataset stored like x1, y1, z1, x2, y2 ....
 		std::vector<float> data;
-		bool dirty;
-		bool localDirty;
+		bool syncDirty = true;
+		bool dirty = true;
 	};
 	using ValueData = decltype(Value::data);
 	using Key = std::string;
@@ -55,6 +55,7 @@ public:
 
 	const ValueData& fetch(const Key& key);
 	bool isDirty(const Key& key);
+	bool isSyncDirty(const Key& key); 
 	void store(const Key& key, const ValueData& data);
 
 private:
@@ -76,6 +77,9 @@ private:
 
 	std::mutex _mutex;
 	Storage _storage;
+
+	bool _storageDirty = true;
+
 };
 
 } // namespace openspace

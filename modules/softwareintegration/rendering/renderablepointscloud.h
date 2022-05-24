@@ -28,7 +28,6 @@
 #include <optional>
 
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -64,10 +63,10 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    void loadData(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
-    void loadColormap(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
-    void loadCmapAttributeData(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
-    void loadLinearSizeAttributeData(const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadData(SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadColormap(SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadCmapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
 
     bool checkDataStorage();
 

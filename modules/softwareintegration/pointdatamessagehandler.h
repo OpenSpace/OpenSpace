@@ -36,8 +36,11 @@ namespace openspace {
 class Renderable;
 
 class PointDataMessageHandler {
-    using Callback = std::function<void()>;
-    using CallbackList = std::vector<std::function<void()>>;
+    struct Callback {
+        std::function<void()> function;
+        std::vector<softwareintegration::storage::Key> waitForData = {};
+    };
+    using CallbackList = std::vector<Callback>;
     using CallbackMap = std::unordered_map<std::string, CallbackList>;
 
 public:
@@ -62,7 +65,10 @@ private:
 
     void subscribeToRenderableUpdates(const std::string& identifier, std::shared_ptr<SoftwareConnection> connection);
 
-    void addCallback(const std::string& identifier, const Callback& newCallback);
+    void addCallback(
+        const std::string& identifier,
+        const Callback& newCallback
+    );
 
     CallbackMap _onceNodeExistsCallbacks;
     std::mutex _onceNodeExistsCallbacksMutex;

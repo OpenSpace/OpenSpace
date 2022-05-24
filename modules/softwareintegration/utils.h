@@ -29,6 +29,35 @@
 
 namespace openspace {
 
+namespace softwareintegration {
+
+namespace storage {
+    
+enum class Key : uint32_t {
+    DataPoints = 0,
+    Colormap,
+    ColormapAttrData,
+    LinearSizeAttrData,
+    Unknown
+};
+
+const std::unordered_map<std::string, Key> _keyStringFromKey {
+    {"DataPoints", Key::DataPoints},
+    {"Colormap", Key::Colormap},
+    {"ColormapAttributeData", Key::ColormapAttrData},
+    {"LinearSizeAttributeData", Key::LinearSizeAttrData},
+};
+
+std::string getStorageKey(const std::string& identifier, Key key);
+
+std::string getStorageKey(const std::string& identifier, const std::string& key);
+
+Key getStorageKeyEnum(const std::string& key);
+
+bool hasStorageKey(const std::string& key);
+
+} // namespace storage
+
 namespace simp {
 
 const std::string ProtocolVersion = "1.9";
@@ -50,7 +79,7 @@ enum class MessageType : uint32_t {
     Unknown
 };
 
-namespace utils {
+namespace tools {
 
 enum class ErrorCode : uint32_t {
     ReachedEndBeforeSeparator = 0,
@@ -77,12 +106,12 @@ glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset);
 
 bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset);
 
-} // namespace utils
+} // namespace tools
 
 class SimpError : public ghoul::RuntimeError {
 public:
- utils::ErrorCode errorCode;
- explicit SimpError(const utils::ErrorCode _errorCode, const std::string& msg);
+ tools::ErrorCode errorCode;
+ explicit SimpError(const tools::ErrorCode _errorCode, const std::string& msg);
 };
 
 
@@ -126,6 +155,8 @@ void readColormap(
 );
 
 } // namespace simp
+
+} // namespace softwareintegration
 
 } // namespace openspace
 

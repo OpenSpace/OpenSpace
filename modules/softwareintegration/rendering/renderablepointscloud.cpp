@@ -24,6 +24,7 @@
 
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 
+#include <modules/softwareintegration/utils.h>
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -157,6 +158,8 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+using namespace softwareintegration;
 
 documentation::Documentation RenderablePointsCloud::Documentation() {
     return codegen::doc<Parameters>("softwareintegration_renderable_pointscloud");
@@ -461,7 +464,7 @@ void RenderablePointsCloud::update(const UpdateData&) {
         if (!_colormapTexture) {
             LINFO("Color map not loaded. Has it been sent from external software?");
         }
-        else {
+        if (colormapAttributeData->empty()) {
             LINFO("Color map attribute data not loaded. Has it been sent from external software?");
         }
         _colormapEnabled = false;
@@ -483,38 +486,37 @@ bool RenderablePointsCloud::checkDataStorage() {
 
     bool updatedDataSlices = false;
     auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
-    std::string dataPointsKey = _identifier.value() + "-DataPoints";
-    std::string colormapKey = _identifier.value() + "-Colormap";
-    std::string colormapScalarsKey = _identifier.value() + "-CmapAttributeData";
-    std::string linearSizeScalarsKey = _identifier.value() + "-LinearSizeAttributeData";
+    auto dataPointsKey = storage::getStorageKey(_identifier.value(), storage::Key::DataPoints);
+    auto colormapKey = storage::getStorageKey(_identifier.value(), storage::Key::Colormap);
+    auto colormapAttrDataKey = storage::getStorageKey(_identifier.value(), storage::Key::ColormapAttrData);
+    auto linearSizeAttrDataKey = storage::getStorageKey(_identifier.value(), storage::Key::LinearSizeAttrData);
 
     if (softwareIntegrationModule->isDataDirty(dataPointsKey)) {
-        loadData(dataPointsKey, softwareIntegrationModule);
+        loadData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
     
     if (softwareIntegrationModule->isDataDirty(colormapKey)) {
-        loadColormap(colormapKey, softwareIntegrationModule);
+        loadColormap(softwareIntegrationModule);
     }
     
-    if (softwareIntegrationModule->isDataDirty(colormapScalarsKey)) {
-        loadCmapAttributeData(colormapScalarsKey, softwareIntegrationModule);
+    if (softwareIntegrationModule->isDataDirty(colormapAttrDataKey)) {
+        loadCmapAttributeData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
     
-    if (softwareIntegrationModule->isDataDirty(linearSizeScalarsKey)) {
-        loadLinearSizeAttributeData(linearSizeScalarsKey, softwareIntegrationModule);
+    if (softwareIntegrationModule->isDataDirty(linearSizeAttrDataKey)) {
+        loadLinearSizeAttributeData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
 
     return updatedDataSlices;
 }
 
-void RenderablePointsCloud::loadData(
-    const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule
-) {
+void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrationModule) {
     // Fetch data from module's centralized storage
-    auto fullPointData = softwareIntegrationModule->fetchData(storageKey);
+    std::string key = storage::getStorageKey(_identifier.value(), storage::Key::DataPoints);
+    auto fullPointData = softwareIntegrationModule->fetchData(key);
 
     if (fullPointData.empty()) {
         LWARNING("There was an issue trying to fetch the point data from the centralized storage.");
@@ -547,10 +549,9 @@ void RenderablePointsCloud::loadData(
     }
 }
 
-void RenderablePointsCloud::loadColormap(
-    const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule
-) {
-    std::vector<float> colorMap = softwareIntegrationModule->fetchData(storageKey);
+void RenderablePointsCloud::loadColormap(SoftwareIntegrationModule* softwareIntegrationModule) {
+    std::string key = storage::getStorageKey(_identifier.value(), storage::Key::Colormap);
+    auto colorMap = softwareIntegrationModule->fetchData(key);
     
     if (colorMap.empty()) {
         LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
@@ -576,10 +577,9 @@ void RenderablePointsCloud::loadColormap(
     _hasLoadedColormap = true;
 }
 
-void RenderablePointsCloud::loadCmapAttributeData(
-    const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule
-) {
-    auto colormapAttributeData = softwareIntegrationModule->fetchData(storageKey);
+void RenderablePointsCloud::loadCmapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
+    std::string key = storage::getStorageKey(_identifier.value(), storage::Key::ColormapAttrData);
+    auto colormapAttributeData = softwareIntegrationModule->fetchData(key);
     
     if (colormapAttributeData.empty()) {
         LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
@@ -606,13 +606,12 @@ void RenderablePointsCloud::loadCmapAttributeData(
     }
 
     _hasLoadedColormapAttributeData = true;
-     LDEBUG("Rerendering colormap attribute data");
+    LDEBUG("Rerendering colormap attribute data");
 }
 
-void RenderablePointsCloud::loadLinearSizeAttributeData(
-    const std::string& storageKey, SoftwareIntegrationModule* softwareIntegrationModule
-) {
-    auto linearSizeAttributeData = softwareIntegrationModule->fetchData(storageKey);
+void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
+    std::string key = storage::getStorageKey(_identifier.value(), storage::Key::LinearSizeAttrData);
+    auto linearSizeAttributeData = softwareIntegrationModule->fetchData(key);
     
     if (linearSizeAttributeData.empty()) {
         LWARNING("There was an issue trying to fetch the linear size attribute data from the centralized storage.");

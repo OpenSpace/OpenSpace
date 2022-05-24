@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWARECONNECTION___H__
 
 #include <openspace/network/messagestructures.h>
-#include <modules/softwareintegration/simp.h>
+#include <modules/softwareintegration/utils.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <openspace/properties/property.h>
 
@@ -44,7 +44,7 @@ public:
     using SubscribedProperties = std::unordered_map<std::string, PropertySubscriptions>;
 
     struct Message {
-        simp::MessageType type;
+        softwareintegration::simp::MessageType type;
         std::vector<char> content{};
         std::string rawMessageType{ "" };
     };

@@ -266,11 +266,11 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
     }
 
     // Make sure that header matches the protocol version
-    if (protocolVersionIn != simp::ProtocolVersion) {
+    if (protocolVersionIn != softwareintegration::simp::ProtocolVersion) {
         throw SoftwareConnectionLostError(fmt::format(
             "Protocol versions do not match. Remote version: {}, Local version: {}",
             protocolVersionIn,
-            simp::ProtocolVersion
+            softwareintegration::simp::ProtocolVersion
         ));
     }
 
@@ -294,10 +294,10 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
     // }
     // LDEBUG(fmt::format("Message received with header: {}", rawHeader));
 
-    auto typeEnum = simp::getMessageType(type);
+    auto typeEnum = softwareintegration::simp::getMessageType(type);
 
     // Receive the message data
-    if (typeEnum != simp::MessageType::Disconnection && typeEnum != simp::MessageType::Unknown) {
+    if (typeEnum != softwareintegration::simp::MessageType::Disconnection && typeEnum != softwareintegration::simp::MessageType::Unknown) {
         subjectBuffer.resize(subjectSize);
         if (!_socket->get(subjectBuffer.data(), subjectSize)) {
             throw SoftwareConnectionLostError("Failed to read message from socket. Disconnecting.");

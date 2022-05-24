@@ -28,7 +28,7 @@
 #include <modules/softwareintegration/network/softwareconnection.h>
 #include <modules/softwareintegration/pointdatamessagehandler.h>
 #include <modules/softwareintegration/interruptibleconcurrentqueue.h>
-#include <modules/softwareintegration/simp.h>
+#include <modules/softwareintegration/utils.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 
 namespace openspace {
@@ -40,7 +40,7 @@ public:
 
 	struct IncomingMessage {
 		size_t connection_id{1};
-		SoftwareConnection::Message message{ simp::MessageType::Unknown };
+		SoftwareConnection::Message message{ softwareintegration::simp::MessageType::Unknown };
 	};
 
 	void start();

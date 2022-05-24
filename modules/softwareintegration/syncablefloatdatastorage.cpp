@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/softwareintegration/syncablefloatdatastorage.h>
+
+#include <modules/softwareintegration/utils.h>
 #include <openspace/util/syncbuffer.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -34,125 +36,134 @@ namespace {
 
 namespace openspace {
 
+using namespace softwareintegration;
+
 /* ============== SyncEngine functions ============== */
 void SyncableFloatDataStorage::encode(SyncBuffer* syncBuffer) {
+	// ZoneScoped
+
 	std::lock_guard guard(_mutex);
+
+	syncBuffer->encode(_storageDirty);
+	if (!_storageDirty) return;
 	
 	size_t nDataEntries = _storage.size();
 	syncBuffer->encode(nDataEntries);
 
 	for (auto& [key, value] : _storage) {
+		syncBuffer->encode(value.syncDirty);
+		// Only encode data if it is dirty, to save bandwidth
+		if (!value.syncDirty) continue;
+
 		syncBuffer->encode(key);
 
-		syncBuffer->encode(value.dirty);
+		// Go trough all data in data entry. 
+		// Sequentially structured as: x1, y1, z1, x2, y2, z2...
+		size_t nItemsInDataEntry = value.data.size();
+		syncBuffer->encode(nItemsInDataEntry);
+		// syncBuffer->encode(value.data);
 
-		// Only encode data if it is dirty, to save bandwidth
-		if (value.dirty) {
-			// Go trough all data in data entry. 
-			// Sequentially structured as: x1, y1, z1, x2, y2, z2...
-			size_t nItemsInDataEntry = value.data.size();
-			syncBuffer->encode(nItemsInDataEntry);
-			for (auto val : value.data) {
-				syncBuffer->encode(val);
-			}
+		for (auto val : value.data) {
+			syncBuffer->encode(val);
 		}
+
+		value.syncDirty = false;
 	}
 }
 
 void SyncableFloatDataStorage::decode(SyncBuffer* syncBuffer) {
-	std::lock_guard guard(_mutex);
+    std::lock_guard guard(_mutex);
+
+	bool storageDirty;
+	syncBuffer->decode(storageDirty);
+	if (!storageDirty) return;
 	
 	size_t nDataEntries;
 	syncBuffer->decode(nDataEntries);
 
 	for (size_t i = 0; i < nDataEntries; ++i) {
+		bool dirty;
+		syncBuffer->decode(dirty);
+		if (!dirty) continue;
+
 		std::string key;
 		syncBuffer->decode(key);
 
-		bool dirty;
-		syncBuffer->decode(dirty);
-
-		if (dirty) {
-			size_t nItemsInDataEntry;
-			syncBuffer->decode(nItemsInDataEntry);
-			
-			std::vector<float> dataEntry;
-			dataEntry.reserve(nItemsInDataEntry);
-			for (size_t j = 0; j < nItemsInDataEntry; ++j) {
-				float value;
-				syncBuffer->decode(value);
-				dataEntry.push_back(value);
-			}
-
-			insertAssign(key, Value{ dataEntry, dirty });
+		size_t nItemsInDataEntry;
+		syncBuffer->decode(nItemsInDataEntry);
+		
+		std::vector<float> dataEntry{};
+		// dataEntry.resize(nItemsInDataEntry);
+		// syncBuffer->decode(dataEntry);
+		dataEntry.reserve(nItemsInDataEntry);
+		for (size_t j = 0; j < nItemsInDataEntry; ++j) {
+			float value;
+			syncBuffer->decode(value);
+			dataEntry.push_back(std::move(value));
 		}
+
+		insertAssign(key, Value{ dataEntry });
 	}
 }
 
 void SyncableFloatDataStorage::postSync(bool isMaster) {
+	std::lock_guard guard(_mutex);
 	if (isMaster) {
+		bool nothingDirty = true;
 		for (auto& [key, value] : _storage) {
-			if (value.dirty) {
-				value.dirty = false;
+			if (value.syncDirty) {
+				nothingDirty = false;
+				break;
 			}
+		}
+
+		if (nothingDirty) {
+			_storageDirty = false;
 		}
 	}
 }
+
 /* ================================================== */
 
 const SyncableFloatDataStorage::ValueData& SyncableFloatDataStorage::fetch(const Key& key) {
-	LDEBUG(fmt::format("Loading data from float data storage: {}", key));
+	LDEBUG(fmt::format("Loading data from float data storage: {} ms", key));
+	std::lock_guard guard(_mutex);
 	auto it = find(key);
-    if (it == end()) {
-        LERROR(fmt::format(
-            "Could not find data with key '{}' in the centralized data storage", key
-        ));
-        return std::move(ValueData{});
-    }
+	if (it == end()) {
+		LERROR(fmt::format(
+				"Could not find data with key '{}' in the centralized data storage", key
+		));
+		return ValueData{};
+	}
 
-    it->second.localDirty = false;
+	it->second.dirty = false;
 
-    return it->second.data;
+	return it->second.data;
 }
 
 bool SyncableFloatDataStorage::isDirty(const Key& key) {
 	auto it = find(key);
-    if (it == end()) {
-        return false;
-    }
+	if (it == end()) {
+		return false;
+	}
 
-    return it->second.localDirty;
+	return it->second.dirty;
+}
+
+bool SyncableFloatDataStorage::isSyncDirty(const Key& key) {
+	auto it = find(key);
+	if (it == end()) {
+		return false;
+	}
+
+	return it->second.syncDirty;
 }
 
 void SyncableFloatDataStorage::store(const Key& key, const ValueData& data) {
 	LDEBUG(fmt::format("Storing data in float data storage: {}", key));
-	Value value{ data, true, true };
-
-	auto old = find(key);
-	if (old != end()) {
-		glm::vec3 firstValueOld{};
-		for (glm::vec3::length_type i = 0; i < glm::vec3::length(); ++i) {
-			firstValueOld[i] = old->second.data[i];
-		}
-
-		LDEBUG(fmt::format(
-			"First data point: old: {}", firstValueOld
-		));
-	}
-
-    insertAssign(key, std::move(value));
-
-	auto newVal = find(key);
-	if (newVal != end()) {
-		glm::vec3 firstValueNew{};
-		for (glm::vec3::length_type i = 0; i < glm::vec3::length(); ++i) {
-			firstValueNew[i] = newVal->second.data[i];
-		}
-
-		LDEBUG(fmt::format(
-			"First data point: new {}", firstValueNew
-		));
-	}
+	std::lock_guard guard(_mutex);
+	insertAssign(key, { data });
+	_storageDirty = true;
 }
 
 /* =============== Utility functions ================ */

@@ -43,6 +43,7 @@ public:
     void storeData(const std::string& key, const std::vector<float>& data);
     const std::vector<float>& fetchData(const std::string& key);
     bool isDataDirty(const std::string& key);
+    bool isSyncDataDirty(const std::string& key);
 
     std::vector<documentation::Documentation> documentations() const override;
 

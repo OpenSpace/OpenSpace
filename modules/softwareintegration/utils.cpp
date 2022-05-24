@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/softwareintegration/simp.h>
+#include <modules/softwareintegration/utils.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
@@ -35,23 +35,68 @@ namespace {
 
 namespace openspace {
 
+namespace softwareintegration {
+
+namespace storage {
+
+    std::string getStorageKey(const std::string& identifier, Key key) {
+        auto it = std::find_if(
+            _keyStringFromKey.begin(),
+            _keyStringFromKey.end(),
+            [key](const std::pair<const std::string, Key>& p) {
+                return key == p.second;
+            }
+        );
+        if (it == _keyStringFromKey.end()) {
+            LDEBUG("Trying to get string of key that doesn't exist in syncable data storage...");
+            return "";
+        }
+        
+        return identifier + "-" + it->first;
+    }
+
+    std::string getStorageKey(const std::string& identifier, const std::string& key) {
+        if (_keyStringFromKey.count(key) == 0) {
+            LDEBUG(fmt::format(
+                "Trying to get string of key {}, which doesn't exist in syncable data storage...",
+                key
+            ));
+            return "";
+        }
+        return getStorageKey(identifier, _keyStringFromKey.at(key));
+    }
+
+    bool hasStorageKey(const std::string& key) {
+        return _keyStringFromKey.count(key) > 0;
+    }
+
+    Key getStorageKeyEnum(const std::string& key) {
+        if (hasStorageKey(key)) {
+            return _keyStringFromKey.at(key);
+        }
+
+        return Key::Unknown;
+    }
+
+} // namespace storage
+
 namespace simp {
 
-SimpError::SimpError(const utils::ErrorCode _errorCode, const std::string& msg)
+SimpError::SimpError(const tools::ErrorCode _errorCode, const std::string& msg)
     : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(_errorCode), msg), "Software Integration Messaging Protocol error")
 {}
 
-bool utils::isEndOfCurrentValue(const std::vector<char>& message, size_t offset) {
+bool tools::isEndOfCurrentValue(const std::vector<char>& message, size_t offset) {
     if (offset >= message.size()) {
         throw SimpError(
-            utils::ErrorCode::OffsetLargerThanMessageSize,
+            tools::ErrorCode::OffsetLargerThanMessageSize,
             "Unexpectedly reached the end of the message..."
         );
     }
 
     if (message.size() > 0 && offset == message.size() - 1 && message[offset] != SEP) {
         throw SimpError(
-            utils::ErrorCode::ReachedEndBeforeSeparator,
+            tools::ErrorCode::ReachedEndBeforeSeparator,
             "Reached end of message before reading separator character..."
         );
     }
@@ -60,19 +105,19 @@ bool utils::isEndOfCurrentValue(const std::vector<char>& message, size_t offset)
 }
 
 MessageType getMessageType(const std::string& type) {
-    if (utils::_messageTypeFromSIMPType.count(type) == 0) return MessageType::Unknown;
-    return utils::_messageTypeFromSIMPType.at(type);
+    if (tools::_messageTypeFromSIMPType.count(type) == 0) return MessageType::Unknown;
+    return tools::_messageTypeFromSIMPType.at(type);
 }
 
 std::string getSIMPType(const MessageType& type) {
     auto it = std::find_if(
-        utils::_messageTypeFromSIMPType.begin(),
-        utils::_messageTypeFromSIMPType.end(),
+        tools::_messageTypeFromSIMPType.begin(),
+        tools::_messageTypeFromSIMPType.end(),
         [type](const std::pair<const std::string, MessageType>& p) {
             return type == p.second;
         }
     );
-    if (it == utils::_messageTypeFromSIMPType.end()) return "UNKN";
+    if (it == tools::_messageTypeFromSIMPType.end()) return "UNKN";
     return it->first;
 }
 
@@ -144,7 +189,7 @@ int readIntValue(const std::vector<char>& message, size_t& offset) {
     int value;
     bool isHex = false;
 
-    while (!utils::isEndOfCurrentValue(message, offset)) {
+    while (!tools::isEndOfCurrentValue(message, offset)) {
         char c = message[offset];
         if (c == 'x' || c == 'X') isHex = true;
         string_value.push_back(c);
@@ -156,7 +201,7 @@ int readIntValue(const std::vector<char>& message, size_t& offset) {
     }
     catch(std::exception &err) {
         throw SimpError(
-            utils::ErrorCode::Generic,
+            tools::ErrorCode::Generic,
             fmt::format("Error when trying to parse the integer {}: {}", string_value, err.what())
         );
     }
@@ -169,7 +214,7 @@ float readFloatValue(const std::vector<char>& message, size_t& offset) {
     std::string string_value;
     float value;
 
-    while (!utils::isEndOfCurrentValue(message, offset)) {
+    while (!tools::isEndOfCurrentValue(message, offset)) {
         string_value.push_back(message[offset]);
         offset++;
     }
@@ -179,7 +224,7 @@ float readFloatValue(const std::vector<char>& message, size_t& offset) {
     }
     catch(std::exception &err) {
         throw SimpError(
-            utils::ErrorCode::Generic,
+            tools::ErrorCode::Generic,
             fmt::format("Error when trying to parse the float {}: {}", string_value, err.what())
         );
     }
@@ -193,7 +238,7 @@ void readColormap(
 ) {
     colorMap.reserve(nColors * 4);
     while (message[offset] != SEP) {
-        glm::vec4 color = utils::readSingleColor(message, offset);
+        glm::vec4 color = tools::readSingleColor(message, offset);
         
         // Colormap should be stored in a sequential vector 
         // of floats for syncing between nodes and when 
@@ -207,10 +252,10 @@ void readColormap(
     offset++;
 }
 
-glm::vec4 utils::readSingleColor(const std::vector<char>& message, size_t& offset) {
+glm::vec4 tools::readSingleColor(const std::vector<char>& message, size_t& offset) {
     if (message[offset] != '[') {
         throw SimpError(
-            utils::ErrorCode::Generic,
+            tools::ErrorCode::Generic,
             fmt::format("Expected to read '[', got {} in 'readColor'", message[offset])
         );
     }
@@ -223,7 +268,7 @@ glm::vec4 utils::readSingleColor(const std::vector<char>& message, size_t& offse
 
     if (message[offset] != ']') {
         throw SimpError(
-            utils::ErrorCode::Generic,
+            tools::ErrorCode::Generic,
             fmt::format("Expected to read ']', got {} in 'readColor'", message[offset])
         );
     }
@@ -233,14 +278,14 @@ glm::vec4 utils::readSingleColor(const std::vector<char>& message, size_t& offse
 }
 
 glm::vec4 readColor(const std::vector<char>& message, size_t& offset) {
-    glm::vec4 color = utils::readSingleColor(message, offset);
+    glm::vec4 color = tools::readSingleColor(message, offset);
     ++offset;
     return color;
 }
 
 std::string readString(const std::vector<char>& message, size_t& offset) {
     std::string value;
-    while (!utils::isEndOfCurrentValue(message, offset)) {
+    while (!tools::isEndOfCurrentValue(message, offset)) {
         value.push_back(message[offset]);
         ++offset;
     }
@@ -258,10 +303,10 @@ void readPointData(
 ) {
     pointData.reserve(nPoints * dimensionality);
 
-    while (!utils::isEndOfCurrentValue(message, offset)) {
+    while (!tools::isEndOfCurrentValue(message, offset)) {
         if (message[offset] != '[') {
             throw SimpError(
-                utils::ErrorCode::Generic,
+                tools::ErrorCode::Generic,
                 fmt::format("Expected to read '[', got {} in 'readPointData'", message[offset])
             );
         }
@@ -273,7 +318,7 @@ void readPointData(
 
         if (message[offset] != ']') {
             throw SimpError(
-                utils::ErrorCode::Generic,
+                tools::ErrorCode::Generic,
                 fmt::format("Expected to read ']', got {} in 'readPointData'", message[offset])
             );
         }
@@ -284,5 +329,7 @@ void readPointData(
 }
 
 } // namespace simp
+
+} // namespace softwareintegration
 
 } // namespace openspace

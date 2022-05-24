@@ -30,7 +30,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.h
   ${CMAKE_CURRENT_SOURCE_DIR}/network/networkengine.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/simp.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/syncablefloatdatastorage.h
   ${CMAKE_CURRENT_SOURCE_DIR}/interruptibleconcurrentqueue.h
   ${CMAKE_CURRENT_SOURCE_DIR}/interruptibleconcurrentqueue.inl
@@ -43,7 +43,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/network/networkengine.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/simp.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/syncablefloatdatastorage.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

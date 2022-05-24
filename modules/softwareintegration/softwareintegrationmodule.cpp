@@ -65,6 +65,10 @@ bool SoftwareIntegrationModule::isDataDirty(const std::string& key) {
     return _syncableFloatDataStorage.isDirty(key);
 }
 
+bool SoftwareIntegrationModule::isSyncDataDirty(const std::string& key) {
+    return _syncableFloatDataStorage.isSyncDirty(key);
+}
+
 void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
     global::syncEngine->addSyncables(getSyncables());
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

@@ -37,6 +37,8 @@ namespace {
 
 namespace openspace {
 
+using namespace softwareintegration;
+
 NetworkEngine::NetworkEngine(const int port)
 	: _port{port}
 {}

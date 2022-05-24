@@ -69,6 +69,8 @@ void main() {
     dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
 
     float scaleMultiply = 1.0e15 * size;
+
+    scaleMultiply *= 15; // TODO: FIX POINT SIZE, NOW IT'S ARBRITRARY
     
     if (linearSizeEnabled) {
         float interpolatedSizeAtt = 1.0;

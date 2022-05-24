@@ -24,7 +24,7 @@
 
 #include <modules/softwareintegration/pointdatamessagehandler.h>
 #include <modules/softwareintegration/softwareintegrationmodule.h>
-#include <modules/softwareintegration/simp.h>
+#include <modules/softwareintegration/utils.h>
 
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/engine/globals.h>
@@ -44,6 +44,8 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+using namespace softwareintegration;
 
 void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
@@ -69,7 +71,7 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     }
 
     // Use the renderable identifier as the data key
-    const std::string key = identifier + "-DataPoints";
+    const auto key = storage::getStorageKey(identifier, storage::Key::DataPoints);
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
     module->storeData(key, std::move(points));
 }
@@ -116,7 +118,7 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, callback);
+    addCallback(identifier, { callback });
 }
 
 void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -141,21 +143,13 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     }
 
     // Use the renderable identifier as the data key
-    const std::string key = identifier + "-Colormap";
+    const auto key = storage::getStorageKey(identifier, storage::Key::Colormap);
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
     module->storeData(key, std::move(colorMap));
 
-    auto callback = [this, identifier, min, max] {
+    auto colormapLimitsCallback = [this, identifier, min, max] {
         // Get renderable
         auto r = getRenderable(identifier);
-
-        openspace::global::scriptEngine->queueScript(
-            fmt::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
-                identifier, "true"
-            ),
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
 
         properties::Property* colormapMinProperty = r->property("ColormapMin");
         float colormapMin = std::any_cast<float>(colormapMinProperty->get());
@@ -181,7 +175,20 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
             );
         }
     };
-    addCallback(identifier, callback);
+    addCallback(identifier, { colormapLimitsCallback });
+
+    auto enableColormapCallback = [this, identifier] {
+        openspace::global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
+                identifier, "true"
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    };
+    // Callback 
+    std::vector<storage::Key> dataToWaitFor{ storage::Key::Colormap, storage::Key::ColormapAttrData };
+    addCallback(identifier, { enableColormapCallback, dataToWaitFor });
 }
 
 void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -207,13 +214,12 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
 
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
     // Use the renderable identifier as the data key
-    std::string key = identifier;
+    std::string key;
+    storage::Key keyEnum = storage::Key::Unknown;
 
-    if (usedFor == "ColormapAttributeData") {
-        key += "-CmapAttributeData";
-    }
-    else if (usedFor == "LinearSizeAttributeData") {
-        key += "-LinearSizeAttributeData";
+    if (storage::hasStorageKey(usedFor)) {
+        key = storage::getStorageKey(identifier, usedFor);
+        keyEnum = storage::getStorageKeyEnum(usedFor);
     }
     else {
         LERROR(fmt::format(
@@ -223,29 +229,45 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
         return;
     }
 
+    std::vector<storage::Key> allDataToWaitFor{ keyEnum };
+    switch (keyEnum) {
+        case storage::Key::ColormapAttrData : {
+            allDataToWaitFor.push_back(storage::Key::Colormap);
+            break;
+        }
+        default:
+            break;
+    }
+
     module->storeData(key, std::move(attributeData));
 
-    auto callback = [this, identifier, usedFor] {
-        if (usedFor == "ColormapAttributeData") {
-            openspace::global::scriptEngine->queueScript(
-                fmt::format(
-                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
-                    identifier, "true"
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
-        }
-        if (usedFor == "LinearSizeAttributeData") {
-            openspace::global::scriptEngine->queueScript(
-                fmt::format(
-                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
-                    identifier, "true"
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
+    auto callback = [this, identifier, keyEnum] {
+        switch (keyEnum) {
+            case storage::Key::ColormapAttrData : {
+                openspace::global::scriptEngine->queueScript(
+                    fmt::format(
+                        "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
+                        identifier, "true"
+                    ),
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+                break;
+            }
+            case storage::Key::LinearSizeAttrData : {
+                openspace::global::scriptEngine->queueScript(
+                    fmt::format(
+                        "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
+                        identifier, "true"
+                    ),
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+                break;
+            }
+            default:
+                break;
         }
     };
-    addCallback(identifier, callback);
+    addCallback(identifier, { callback, allDataToWaitFor });
 }
 
 void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -284,7 +306,7 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
             );
         }
     };
-    addCallback(identifier, callback);
+    addCallback(identifier, { callback });
 }
 
 void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -333,7 +355,7 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
             );
         }
     };
-    addCallback(identifier, callback);
+    addCallback(identifier, { callback });
 }
 
 void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -355,7 +377,7 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
         return;
     }
 
-    auto callback = [this, identifier, size, min, max] {
+    auto linearSizeCallback = [this, identifier, size, min, max] {
         // Get renderable
         auto r = getRenderable(identifier);
 
@@ -398,7 +420,10 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
+    };
+    addCallback(identifier, { linearSizeCallback });
 
+    auto enableLinearSizeCallback = [this, identifier] {
         openspace::global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
@@ -407,7 +432,13 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, callback);
+    addCallback(
+        identifier,
+        {
+            enableLinearSizeCallback, 
+            { storage::Key::LinearSizeAttrData }
+        }
+    );
 }
 
 void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -437,7 +468,7 @@ void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& me
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, callback);
+    addCallback(identifier, { callback });
 }
 
 void PointDataMessageHandler::handleRemoveSGNMessage(const std::vector<char>& message,std::shared_ptr<SoftwareConnection> connection) {
@@ -488,10 +519,23 @@ void PointDataMessageHandler::postSync() {
             auto r = getRenderable(identifier);
             if (!r) throw std::exception{};
 
+            auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
+
             auto callbacksIt = callbackList.begin();
             while (callbacksIt != callbackList.end()) {
-                auto& callback = *callbacksIt;
+                auto& [callback, waitForData] = *callbacksIt;
+
                 try {
+                    for (auto& waitFor : waitForData) {
+                        if (
+                            softwareIntegrationModule->isSyncDataDirty(
+                                storage::getStorageKey(identifier, waitFor)
+                            )
+                        ) {
+                            throw std::exception{};
+                        }
+                    }
+
                     callback();
                     callbacksIt = callbackList.erase(callbacksIt);
                 }
@@ -568,7 +612,7 @@ void PointDataMessageHandler::checkRenderable(
         auto subscriptionCallback = [this, identifier, connection] {
             subscribeToRenderableUpdates(identifier, connection);
         };
-        addCallback(identifier, subscriptionCallback);
+        addCallback(identifier, { subscriptionCallback });
     }
     else {
         subscribeToRenderableUpdates(identifier, connection);
@@ -582,7 +626,7 @@ void PointDataMessageHandler::checkRenderable(
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, reanchorCallback);
+    addCallback(identifier, { reanchorCallback });
 }
 
 void PointDataMessageHandler::subscribeToRenderableUpdates(
@@ -683,15 +727,18 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(
 
 }
 
-void PointDataMessageHandler::addCallback(const std::string& identifier, const Callback& newCallback) {
+void PointDataMessageHandler::addCallback(
+    const std::string& identifier,
+    const Callback& newCallback
+) {
     std::lock_guard guard(_onceNodeExistsCallbacksMutex);
     auto it = _onceNodeExistsCallbacks.find(identifier);
     if (it == _onceNodeExistsCallbacks.end()) {
-        CallbackList callbacks{ std::move(newCallback) };
-        _onceNodeExistsCallbacks.emplace(std::move(identifier), std::move(callbacks) );
+        CallbackList newCallbackList{ newCallback };
+        _onceNodeExistsCallbacks.emplace(identifier, newCallbackList);
     }
     else {
-        it->second.push_back(std::move(newCallback));
+        it->second.push_back(newCallback);
     }
 }
 
