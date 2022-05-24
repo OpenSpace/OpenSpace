@@ -22,7 +22,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "GRACE",
   Version = "1.1",
-  Description = [[ ]],
+  Description = [[ used gdal transformation from tif to vrt: gdaldem color-relief ,  gdalwarp -t_srs, gdal_translate -a_ullr -180 90 180 -90, gdalbuildvrt "*vrt" -te -180 -90 180 90 -addalpha "*.tif"],
   Author = "Center for Space Research",
   URL = "http://www2.csr.utexas.edu/grace/",
   License = "NASA"

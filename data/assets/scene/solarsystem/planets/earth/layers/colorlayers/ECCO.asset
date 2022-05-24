@@ -22,8 +22,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Blue Marble Next Generation (Utah)",
   Version = "1.1",
-  Description = [[ Web loaded full resolution map of Blue Marble Next Generation.
-    This map is hosted on the OpenSpace servers in Utah]],
+  Description = [[ EVEL variable in ECCO version 4.4. Used gdal transformation from tif to vrt: gdaldem color-relief ,  gdalwarp -t_srs], gdalbuildvrt "*vrt" -te -180 -90 180 90 -addalpha "*.tif"]],
   Author = "OpenSpace Team",
   URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
   License = "NASA"
