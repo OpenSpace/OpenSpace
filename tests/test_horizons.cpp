@@ -119,22 +119,22 @@ void testReadingHorizons(HorizonsType type, std::filesystem::path filePath,
     std::vector<HorizonsKeyframe> data = result.data;
     CHECK(data.size() == 3);
 
-    CHECK(data[0].time == t0);
-    CHECK(data[0].position.x == x0);
-    CHECK(data[0].position.y == y0);
-    CHECK(data[0].position.z == z0);
+    CHECK(abs(data[0].time - t0) < std::numeric_limits<double>::epsilon());
+    CHECK(abs(data[0].position.x - x0) < std::numeric_limits<double>::epsilon());
+    CHECK(abs(data[0].position.y - y0) < std::numeric_limits<double>::epsilon());
+    CHECK(abs(data[0].position.z - z0) < std::numeric_limits<double>::epsilon());
 
 
-    CHECK(data[1].time == t1);
-    CHECK(data[1].position.x == x1);
-    CHECK(data[1].position.y == y1);
-    CHECK(data[1].position.z == z1);
+    CHECK(abs(data[1].time - t1) < std::numeric_limits<double>::epsilon());
+    CHECK(abs(data[1].position.x - x1) < std::numeric_limits<double>::epsilon());
+    CHECK(abs(data[1].position.y - y1) < std::numeric_limits<double>::epsilon());
+    CHECK(abs(data[1].position.z - z1) < std::numeric_limits<double>::epsilon());
 
 
-    CHECK(data[2].time == t2);
-    CHECK(data[2].position.x == x2);
-    CHECK(data[2].position.y == y2);
-    CHECK(data[2].position.z == z2);
+    CHECK(abs(data[2].time - t2) < std::numeric_limits<double>::epsilon());
+    CHECK(abs(data[2].position.x - x2) < std::numeric_limits<double>::epsilon());
+    CHECK(abs(data[2].position.y - y2) < std::numeric_limits<double>::epsilon());
+    CHECK(abs(data[2].position.z - z2) < std::numeric_limits<double>::epsilon());
 
     // Clean up
     openspace::SpiceManager::deinitialize();
