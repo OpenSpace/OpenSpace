@@ -159,7 +159,7 @@ set(WEBBROWSER_RESOURCES_SRCS
 # Place Helper in separate executable
 # The naming style "<ApplicationName> Helper" is required by Chromium.
 set(CEF_HELPER_FILE_REQUIRES_RENAME FALSE)
-if (UNIX AND (${CMAKE_GENERATOR} STREQUAL "Unix\ Makefiles"))
+if (UNIX AND (${CMAKE_GENERATOR} STREQUAL "Unix Makefiles"))
   # Linux builds that use GNU Make cannot handle spaces in filenames. For this type
   # of build, the build file will have an underscore instead of a space, and this
   # will be renamed back to a space when the build is complete.
