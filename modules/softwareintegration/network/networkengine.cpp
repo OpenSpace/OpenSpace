@@ -214,7 +214,7 @@ void NetworkEngine::handleIncomingMessage(IncomingMessage incomingMessage) {
 		}
 		case simp::MessageType::Visibility: {
 			LDEBUG(fmt::format("Message recieved.. New visibility"));
-			_pointDataMessageHandler.handleVisiblityMessage(message, connectionPtr);
+			_pointDataMessageHandler.handleVisibilityMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::Disconnection: {

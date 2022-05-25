@@ -26,9 +26,8 @@
 
 #include <modules/softwareintegration/utils.h>
 #include <openspace/util/syncbuffer.h>
-
+#include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
-
 
 namespace {
 	constexpr const char* _loggerCat = "SyncableFloatDataStorage";
@@ -40,164 +39,188 @@ using namespace softwareintegration;
 
 /* ============== SyncEngine functions ============== */
 void SyncableFloatDataStorage::encode(SyncBuffer* syncBuffer) {
-	// ZoneScoped
+	ZoneScopedN("SyncableFloatDataStorage::encode")
 
 	std::lock_guard guard(_mutex);
-
-	syncBuffer->encode(_storageDirty);
-	if (!_storageDirty) return;
 	
-	size_t nDataEntries = _storage.size();
-	syncBuffer->encode(nDataEntries);
+	size_t nSGNs = _storage.size();
+	syncBuffer->encode(nSGNs);
 
-	for (auto& [key, value] : _storage) {
-		syncBuffer->encode(value.syncDirty);
-		// Only encode data if it is dirty, to save bandwidth
-		if (!value.syncDirty) continue;
+	for (auto& [identifier, sgnStorage] : _storage) {
+		syncBuffer->encode(identifier.size());
+		syncBuffer->encode(identifier);
 
-		syncBuffer->encode(key);
+		size_t nStorageEntries = sgnStorage.size();
+		syncBuffer->encode(nStorageEntries);
 
-		// Go trough all data in data entry. 
-		// Sequentially structured as: x1, y1, z1, x2, y2, z2...
-		size_t nItemsInDataEntry = value.data.size();
-		syncBuffer->encode(nItemsInDataEntry);
-		// syncBuffer->encode(value.data);
+		for (auto& [key, storageEntry] : sgnStorage) {
+			bool isSyncDirty = storageEntry.syncDirty;
+			syncBuffer->encode(isSyncDirty);
+			if (!isSyncDirty) continue;
 
-		for (auto val : value.data) {
-			syncBuffer->encode(val);
+			syncBuffer->encode(static_cast<uint32_t>(key));
+
+			size_t nValues = storageEntry.data.size();
+			syncBuffer->encode(nValues);
+
+			// Go trough all data in data entry. 
+			// Sequentially structured as: x1, y1, z1, x2, y2, z2...
+			for (auto val : storageEntry.data) {
+				syncBuffer->encode(val);
+			}
 		}
-
-		value.syncDirty = false;
 	}
 }
 
 void SyncableFloatDataStorage::decode(SyncBuffer* syncBuffer) {
+	ZoneScopedN("SyncableFloatDataStorage::encode")
+
     std::lock_guard guard(_mutex);
-
-	bool storageDirty;
-	syncBuffer->decode(storageDirty);
-	if (!storageDirty) return;
 	
-	size_t nDataEntries;
-	syncBuffer->decode(nDataEntries);
+	size_t nSGNs;
+	syncBuffer->decode(nSGNs);
 
-	for (size_t i = 0; i < nDataEntries; ++i) {
-		bool dirty;
-		syncBuffer->decode(dirty);
-		if (!dirty) continue;
+	for (size_t i = 0; i < nSGNs; ++i) {
+		size_t identifierLength;
+		syncBuffer->decode(identifierLength);
 
-		std::string key;
-		syncBuffer->decode(key);
+		std::string identifier;
+		identifier.resize(identifierLength);
+		syncBuffer->decode(identifier);
 
-		size_t nItemsInDataEntry;
-		syncBuffer->decode(nItemsInDataEntry);
-		
-		std::vector<float> dataEntry{};
-		// dataEntry.resize(nItemsInDataEntry);
-		// syncBuffer->decode(dataEntry);
-		dataEntry.reserve(nItemsInDataEntry);
-		for (size_t j = 0; j < nItemsInDataEntry; ++j) {
-			float value;
-			syncBuffer->decode(value);
-			dataEntry.push_back(std::move(value));
+		size_t nStorageEntries;
+		syncBuffer->decode(nStorageEntries);
+
+		for (size_t j = 0; j < nStorageEntries; ++j) {
+			bool isSyncDirty;
+			syncBuffer->decode(isSyncDirty);
+			if (!isSyncDirty) continue;
+
+			uint32_t keyRaw;
+			syncBuffer->decode(keyRaw);
+			auto key = static_cast<storage::Key>(keyRaw);
+
+			size_t nValues;
+			syncBuffer->decode(nValues);
+
+			std::vector<float> dataEntry{};
+			dataEntry.reserve(nValues);
+			for (size_t k = 0; k < nValues; ++k) {
+				float value;
+				syncBuffer->decode(value);
+				dataEntry.push_back(std::move(value));
+			}
+
+			insertAssign(identifier, key, Value{ dataEntry });
 		}
-
-		insertAssign(key, Value{ dataEntry });
 	}
 }
 
 void SyncableFloatDataStorage::postSync(bool isMaster) {
-	std::lock_guard guard(_mutex);
 	if (isMaster) {
-		bool nothingDirty = true;
-		for (auto& [key, value] : _storage) {
-			if (value.syncDirty) {
-				nothingDirty = false;
-				break;
+		std::lock_guard guard(_mutex);
+		for (auto& sgnStorage : _storage) {
+			for (auto& storageEntry : sgnStorage.second) {
+				if (storageEntry.second.syncDirty) {
+					storageEntry.second.syncDirty = false;
+				}
 			}
-		}
-
-		if (nothingDirty) {
-			_storageDirty = false;
 		}
 	}
 }
 
 /* ================================================== */
 
-const SyncableFloatDataStorage::ValueData& SyncableFloatDataStorage::fetch(const Key& key) {
-	LDEBUG(fmt::format("Loading data from float data storage: {} ms", key));
+const SyncableFloatDataStorage::ValueData& SyncableFloatDataStorage::fetch(
+	const Identifier& identifier, const storage::Key key
+) {
+	LDEBUG(fmt::format("Loading data from float data storage: {}-{}", identifier, storage::getStorageKeyString(key)));
 	std::lock_guard guard(_mutex);
-	auto it = find(key);
-	if (it == end()) {
+	if (!count(identifier)) {
 		LERROR(fmt::format(
-				"Could not find data with key '{}' in the centralized data storage", key
+			"Could not find any data for SceneGraphNode '{}' in the centralized data storage", identifier
 		));
 		return ValueData{};
 	}
 
-	it->second.dirty = false;
+	if (!count(identifier, key)) {
+		LERROR(fmt::format(
+			"SceneGraphNode {} has no data with key '{}' in the centralized data storage",
+			identifier,
+			storage::getStorageKeyString(key)
+		));
+		return ValueData{};
+	}
 
-	return it->second.data;
+	auto& value = _storage.find(identifier)->second.find(key)->second;
+
+	value.dirty = false;
+
+	return value.data;
 }
 
-bool SyncableFloatDataStorage::isDirty(const Key& key) {
-	auto it = find(key);
-	if (it == end()) {
+bool SyncableFloatDataStorage::isDirty(
+	const Identifier& identifier, const storage::Key key
+) {
+	if (!count(identifier, key)) {
 		return false;
 	}
 
-	return it->second.dirty;
+	return _storage.find(identifier)->second.find(key)->second.dirty;
 }
 
-bool SyncableFloatDataStorage::isSyncDirty(const Key& key) {
-	auto it = find(key);
-	if (it == end()) {
-		return false;
+bool SyncableFloatDataStorage::isSyncDirty(
+	const Identifier& identifier, const storage::Key key
+) {
+	if (!count(identifier, key)) {
+		return true;
 	}
 
-	return it->second.syncDirty;
+	return _storage.find(identifier)->second.find(key)->second.syncDirty;
 }
 
-void SyncableFloatDataStorage::store(const Key& key, const ValueData& data) {
-	LDEBUG(fmt::format("Storing data in float data storage: {}", key));
+void SyncableFloatDataStorage::store(
+	const Identifier& identifier, const storage::Key key, const ValueData& data
+) {
+	LDEBUG(fmt::format("Storing data in float data storage: {}-{}", identifier, storage::getStorageKeyString(key)));
 	std::lock_guard guard(_mutex);
-	insertAssign(key, { data });
-	_storageDirty = true;
+	insertAssign(identifier, key, { data });
 }
 
 /* =============== Utility functions ================ */
-size_t SyncableFloatDataStorage::erase(const SyncableFloatDataStorage::Key& key) {
-	return _storage.erase(key);
+bool SyncableFloatDataStorage::erase(const Identifier& identifier, const storage::Key key) {
+	if (count(identifier, key) == 0) return false;
+
+	auto nErased = _storage.find(identifier)->second.erase(key);
+	return nErased > 0; 
 }
 
-void SyncableFloatDataStorage::insertAssign(Key key, const Value& value) {
-	auto it = find(key);
-	if (it == end()) {
-		_storage.emplace(key, value);
+void SyncableFloatDataStorage::insertAssign(const Identifier& identifier, const storage::Key key, const Value& value) {
+	if (count(identifier)) {
+		if (count(identifier, key)) {
+			_storage.find(identifier)->second.find(key)->second = value;
+		}
+		else {
+			_storage.find(identifier)->second.emplace(key, value);
+		}
 	}
 	else {
-		it->second = value;
+		SceneStorage newSceneStorage{ { key, value } };
+		_storage.emplace(identifier, std::move(newSceneStorage));
 	}
 }
 
-SyncableFloatDataStorage::Value& SyncableFloatDataStorage::at(const Key& key) {
-	return _storage.at(key);
+size_t SyncableFloatDataStorage::count(const Identifier& identifier) {
+	return _storage.count(identifier);
 }
 
-SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::find(const Key& key) {
-	return _storage.find(key);
-}
-/* ================================================== */
+size_t SyncableFloatDataStorage::count(const Identifier& identifier, const storage::Key key) {
+	auto sceneIt = _storage.find(identifier);
+	if (sceneIt == _storage.end()) return 0;
 
-/* =================== Iterators ==================== */
-SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::end() noexcept {
-	return _storage.end();
+	return sceneIt->second.count(key);
 }
-		
-SyncableFloatDataStorage::Iterator SyncableFloatDataStorage::begin() noexcept {
-	return _storage.begin();
-}
+
 /* ================================================== */
 
 } // namespace openspace

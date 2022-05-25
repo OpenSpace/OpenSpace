@@ -40,10 +40,23 @@ public:
     SoftwareIntegrationModule();
     ~SoftwareIntegrationModule();
 
-    void storeData(const std::string& key, const std::vector<float>& data);
-    const std::vector<float>& fetchData(const std::string& key);
-    bool isDataDirty(const std::string& key);
-    bool isSyncDataDirty(const std::string& key);
+    void storeData(
+        const SyncableFloatDataStorage::Identifier& identifier,
+        const storage::Key key,
+        const std::vector<float>& data
+    );
+    const std::vector<float>& fetchData(
+        const SyncableFloatDataStorage::Identifier& identifier,
+        const storage::Key key
+    );
+    bool isDataDirty(
+        const SyncableFloatDataStorage::Identifier& identifier,
+        const storage::Key key
+    );
+    bool isSyncDataDirty(
+        const SyncableFloatDataStorage::Identifier& identifier,
+        const storage::Key key
+    );
 
     std::vector<documentation::Documentation> documentations() const override;
 

@@ -115,7 +115,44 @@ void SoftwareConnection::addPropertySubscription(
         PropertySubscriptions newPropertySubscriptionMap{ { propertyName, onChangeHandle } };
         _subscribedProperties.emplace(identifier, newPropertySubscriptionMap);
     }
+
+    // if (_subscribedProperties.count(identifier)) {
+    //     // At least one property have been subscribed to on this SGN
+    //     auto propertySubscription = _subscribedProperties.at(identifier);
+    //     if (propertySubscription.count(propertyName)) {
+    //         // Property subscription already exists
+    //         removeExistingPropertySubscription(identifier, property, propertySubscription.at(propertyName));
+    //         propertySubscription.at(propertyName)->onChangeHandle = onChangeHandle;
+    //     }
+    //     else {
+    //         // Property subscription doesn't exist
+    //         PropertySubscription newPropertySub{ onChangeHandle };
+    //         _subscribedProperties.at(identifier).emplace(
+    //             propertyName,
+    //             std::make_shared<PropertySubscription>(std::move(newPropertySub))
+    //         );
+    //     }
+    // }
+    // else {
+    //     // No properties have been subscribed to on this SGN
+    //     PropertySubscription newPropertySub{ onChangeHandle };
+    //     PropertySubscriptions newPropertySubs{{
+    //         propertyName,
+    //         std::make_shared<PropertySubscription>(std::move(newPropertySub))
+    //     }};
+    //     _subscribedProperties.emplace(identifier, std::move(newPropertySubs));
+    // }
 }
+
+// std::shared_ptr<SoftwareConnection::PropertySubscription> SoftwareConnection::getPropertySubscription(
+//     const std::string& propertyName,
+//     const std::string& identifier
+// ) {
+//     if (!_subscribedProperties.count(identifier)) return nullptr;
+//     if (!_subscribedProperties.at(identifier).count(propertyName)) return nullptr;
+
+//     return _subscribedProperties.at(identifier).at(propertyName);
+// }
 
 void SoftwareConnection::removePropertySubscriptions(const std::string& identifier) {
     // Get renderable

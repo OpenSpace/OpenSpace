@@ -71,9 +71,18 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     }
 
     // Use the renderable identifier as the data key
-    const auto key = storage::getStorageKey(identifier, storage::Key::DataPoints);
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-    module->storeData(key, std::move(points));
+    module->storeData(identifier, storage::Key::DataPoints, std::move(points));
+
+    auto reanchorCallback = [identifier] {
+        global::scriptEngine->queueScript(
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + identifier + "')"
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    };
+    addCallback(identifier, { reanchorCallback, { storage::Key::DataPoints } });
 }
 
 void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -91,7 +100,7 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
         return;
     }
 
-    auto callback = [this, identifier, color] {
+    auto callback = [this, identifier, color, connection] {
         // Get renderable
         auto r = getRenderable(identifier);
 
@@ -99,9 +108,14 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
         properties::Property* colorProperty = r->property("Color");
         glm::vec4 propertyColor = std::any_cast<glm::vec4>(colorProperty->get());
 
+        // auto propertySub = connection->getPropertySubscription(identifier, colorProperty->identifier());
+        // if (propertySub) {
+        //     propertySub->shouldSendMessage = false;
+        // }
+
         // Update color of renderable
         if (propertyColor != color) {
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.Color', {});",
                     identifier, ghoul::to_string(color)
@@ -110,7 +124,7 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
             );
         }
 
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
                 identifier, "false"
@@ -143,18 +157,22 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     }
 
     // Use the renderable identifier as the data key
-    const auto key = storage::getStorageKey(identifier, storage::Key::Colormap);
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-    module->storeData(key, std::move(colorMap));
+    module->storeData(identifier, storage::Key::Colormap, std::move(colorMap));
 
-    auto colormapLimitsCallback = [this, identifier, min, max] {
+    auto colormapLimitsCallback = [this, identifier, min, max, connection] {
         // Get renderable
         auto r = getRenderable(identifier);
 
         properties::Property* colormapMinProperty = r->property("ColormapMin");
+        // auto minPropertySub = connection->getPropertySubscription(identifier, colormapMinProperty->identifier());
+        // if (minPropertySub) {
+        //     minPropertySub->shouldSendMessage = false;
+        // }
+
         float colormapMin = std::any_cast<float>(colormapMinProperty->get());
         if (min != colormapMin) {
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapMin', {});",
                     identifier, ghoul::to_string(min)
@@ -164,9 +182,13 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
         }
 
         properties::Property* colormapMaxProperty = r->property("ColormapMax");
+        // auto maxPropertySub = connection->getPropertySubscription(identifier, colormapMaxProperty->identifier());
+        // if (maxPropertySub) {
+        //     maxPropertySub->shouldSendMessage = false;
+        // }
         float colormapMax = std::any_cast<float>(colormapMaxProperty->get());
         if (max != colormapMax) {
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapMax', {});",
                     identifier, ghoul::to_string(max)
@@ -178,7 +200,7 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     addCallback(identifier, { colormapLimitsCallback });
 
     auto enableColormapCallback = [this, identifier] {
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
                 identifier, "true"
@@ -188,7 +210,7 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     };
     // Callback 
     std::vector<storage::Key> dataToWaitFor{ storage::Key::Colormap, storage::Key::ColormapAttrData };
-    addCallback(identifier, { enableColormapCallback, dataToWaitFor });
+    addCallback(identifier, { enableColormapCallback, std::move(dataToWaitFor) });
 }
 
 void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -213,13 +235,10 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
     }
 
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-    // Use the renderable identifier as the data key
-    std::string key;
-    storage::Key keyEnum = storage::Key::Unknown;
+    storage::Key key = storage::Key::Unknown;
 
     if (storage::hasStorageKey(usedFor)) {
-        key = storage::getStorageKey(identifier, usedFor);
-        keyEnum = storage::getStorageKeyEnum(usedFor);
+        key = storage::getStorageKey(usedFor);
     }
     else {
         LERROR(fmt::format(
@@ -229,35 +248,25 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
         return;
     }
 
-    std::vector<storage::Key> allDataToWaitFor{ keyEnum };
-    switch (keyEnum) {
-        case storage::Key::ColormapAttrData : {
-            allDataToWaitFor.push_back(storage::Key::Colormap);
-            break;
-        }
-        default:
-            break;
-    }
+    module->storeData(identifier, key, std::move(attributeData));
 
-    module->storeData(key, std::move(attributeData));
-
-    std::function<void()> callback;
-    switch (keyEnum) {
+    switch (key) {
         case storage::Key::ColormapAttrData : {
-            callback = [this, identifier, keyEnum] {
-                openspace::global::scriptEngine->queueScript(
+            auto callback = [this, identifier] {
+                global::scriptEngine->queueScript(
                     fmt::format(
                         "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
                         identifier, "true"
                     ),
                     scripting::ScriptEngine::RemoteScripting::Yes
-                ); 
+                );
             };
+            addCallback(identifier, { callback, { key, storage::Key::Colormap } });
             break;
         }
-        case storage::Key::LinearSizeAttrData : {
-            callback = [this, identifier] {
-                openspace::global::scriptEngine->queueScript(
+        case storage::Key::LinearSizeAttrData: {
+            auto callback = [this, identifier] {
+                global::scriptEngine->queueScript(
                     fmt::format(
                         "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
                         identifier, "true"
@@ -265,12 +274,12 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             };
+            addCallback(identifier, { callback, { key } });
             break;
         }
         default:
             break;
     }
-    addCallback(identifier, { callback, allDataToWaitFor });
 }
 
 void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -288,7 +297,7 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
         return;
     }
 
-    auto callback = [this, identifier, opacity] {
+    auto callback = [this, identifier, opacity, connection] {
         // Get renderable
         auto r = getRenderable(identifier);
 
@@ -297,13 +306,18 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
         auto propertyAny = opacityProperty->get();
         float propertyOpacity = std::any_cast<float>(propertyAny);
 
+        // auto propertySub = connection->getPropertySubscription(identifier, opacityProperty->identifier());
+        // if (propertySub) {
+        //     propertySub->shouldSendMessage = false;
+        // }
+
         // Update opacity of renderable
         if (propertyOpacity != opacity) {
             std::string script = fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.Opacity', {});",
                 identifier, ghoul::to_string(opacity)
             );
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -327,7 +341,7 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
         return;
     }
 
-    auto callback = [this, identifier, size] {
+    auto callback = [this, identifier, size, connection] {
         // Get renderable
         auto r = getRenderable(identifier);
 
@@ -336,27 +350,32 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
         auto propertyAny = sizeProperty->get();
         float propertySize = std::any_cast<float>(propertyAny);
 
+        // auto propertySub = connection->getPropertySubscription(identifier, sizeProperty->identifier());
+        // if (propertySub) {
+        //     propertySub->shouldSendMessage = false;
+        // }
+
         // Update size of renderable
         if (propertySize != size) {
             // TODO: Add interpolation to script, but do not send back
             // updates to external software until the interpolation is done
             // Use this: "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {}, 1);",
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {});",
                     identifier, ghoul::to_string(size)
                 ),
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
-
-            openspace::global::scriptEngine->queueScript(
-                fmt::format(
-                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
-                    identifier, "false"
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
         }
+
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
+                identifier, "false"
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     };
     addCallback(identifier, { callback });
 }
@@ -391,7 +410,7 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
 
         // Update size of renderable
         if (propertySize != size) {
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {});",
                     identifier, ghoul::to_string(size)
@@ -403,7 +422,7 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
         properties::Property* linearSizeMinProperty = r->property("LinearSizeMin");
         float linearSizeMin = std::any_cast<float>(linearSizeMinProperty->get());
         if (min != linearSizeMin) {
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeMin', {});",
                     identifier, ghoul::to_string(min)
@@ -415,7 +434,7 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
         properties::Property* linearSizeMaxProperty = r->property("LinearSizeMax");
         float linearSizeMax = std::any_cast<float>(linearSizeMaxProperty->get());
         if (max != linearSizeMax) {
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeMax', {});",
                     identifier, ghoul::to_string(max)
@@ -427,7 +446,7 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
     addCallback(identifier, { linearSizeCallback });
 
     auto enableLinearSizeCallback = [this, identifier] {
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
                 identifier, "true"
@@ -444,7 +463,7 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
     );
 }
 
-void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -459,14 +478,24 @@ void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& me
         return;
     }
 
-    auto callback = [this, identifier, visibilityMessage] {
+    auto callback = [this, identifier, visibilityMessage, connection] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+
+        // Get visibility from renderable
+        // properties::Property* enabledProperty = r->property("Enabled");
+        // auto propertySub = connection->getPropertySubscription(identifier, enabledProperty->identifier());
+        // if (propertySub) {
+        //     propertySub->shouldSendMessage = false;
+        // }
+
         // Toggle visibility from renderable
         const std::string visability = visibilityMessage == "T" ? "true" : "false";
         std::string script = fmt::format(
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {});",
             identifier, visability
         );
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -491,13 +520,13 @@ void PointDataMessageHandler::handleRemoveSGNMessage(const std::vector<char>& me
 
 	if (currentAnchor == identifier) {
 		// If the deleted node is the current anchor, first change focus to the Sun
-		openspace::global::scriptEngine->queueScript(
+		global::scriptEngine->queueScript(
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun')"
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
 			scripting::ScriptEngine::RemoteScripting::Yes
 		);
 	}
-	openspace::global::scriptEngine->queueScript(
+	global::scriptEngine->queueScript(
 		"openspace.removeSceneGraphNode('" + identifier + "');",
 		scripting::ScriptEngine::RemoteScripting::Yes
 	);
@@ -530,11 +559,7 @@ void PointDataMessageHandler::postSync() {
 
                 try {
                     for (auto& waitFor : waitForData) {
-                        if (
-                            softwareIntegrationModule->isSyncDataDirty(
-                                storage::getStorageKey(identifier, waitFor)
-                            )
-                        ) {
+                        if (softwareIntegrationModule->isSyncDataDirty(identifier, waitFor)) {
                             throw std::exception{};
                         }
                     }
@@ -607,7 +632,7 @@ void PointDataMessageHandler::checkRenderable(
         node.setValue("Renderable", renderablePointsCloud);
         node.setValue("GUI", gui);
 
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + ghoul::formatLua(node) + ")"
             "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)", // Reload WebGUI so that SoftwareIntegration GUI appears
             scripting::ScriptEngine::RemoteScripting::Yes
@@ -620,16 +645,6 @@ void PointDataMessageHandler::checkRenderable(
     else {
         subscribeToRenderableUpdates(identifier, connection);
     }
-
-    auto reanchorCallback = [identifier] {
-        openspace::global::scriptEngine->queueScript(
-            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
-            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + identifier + "')"
-            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    };
-    addCallback(identifier, { reanchorCallback });
 }
 
 void PointDataMessageHandler::subscribeToRenderableUpdates(
@@ -648,86 +663,41 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(
         return;
     }
 
-    properties::Property* colorProperty = aRenderable->property("Color");
-    properties::Property* opacityProperty = aRenderable->property("Opacity");
-    properties::Property* sizeProperty = aRenderable->property("Size");
-    properties::Property* visibilityProperty = aRenderable->property("Enabled");
-
     // Update color of renderable
-    auto updateColor = [colorProperty, identifier, connection]() {
-        if (!connection->isConnected()) {
-            SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
-                connection, "Color", identifier
-            );
-            return;
-        }
-
-        glm::vec4 color = std::any_cast<glm::vec4>(colorProperty->get());
-        
-        const std::string message = simp::formatColorMessage(identifier, color);
-        connection->sendMessage(message);
-    };
+    properties::Property* colorProperty = aRenderable->property("Color");
     if (colorProperty) {
-        connection->addPropertySubscription("Color", identifier, updateColor);
+        auto updateColor = [this, colorProperty, identifier, connection]() {
+            onFixedColorChange(colorProperty, identifier, connection);
+        };
+        connection->addPropertySubscription(colorProperty->identifier(), identifier, updateColor);
     }
 
     // Update opacity of renderable
-    auto updateOpacity = [opacityProperty, identifier, connection]() {
-        if (!connection->isConnected()) {
-            SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
-                connection, "Opacity", identifier
-            );
-            return;
-        }
-
-        float value = std::any_cast<float>(opacityProperty->get());
-        std::string hex_value = simp::floatToHex(value);
-
-        const std::string message = simp::formatUpdateMessage(simp::MessageType::Opacity, identifier, hex_value);
-        connection->sendMessage(message);
-    };
+    properties::Property* opacityProperty = aRenderable->property("Opacity");
     if (opacityProperty) {
-        connection->addPropertySubscription("Opacity", identifier, updateOpacity);
+        auto updateOpacity = [this, opacityProperty, identifier, connection]() {
+            onOpacityChange(opacityProperty, identifier, connection);
+        };
+        connection->addPropertySubscription(opacityProperty->identifier(), identifier, updateOpacity);
     }
 
     // Update size of renderable
-    auto updateSize = [sizeProperty, identifier, connection]() {
-        if (!connection->isConnected()) {
-            SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
-                connection, "Size", identifier
-            );
-            return;
-        }
-
-        float value = std::any_cast<float>(sizeProperty->get());
-        std::string hex_value = simp::floatToHex(value);
-
-        const std::string message = simp::formatUpdateMessage(simp::MessageType::FixedSize, identifier, hex_value);
-        connection->sendMessage(message);
-    };
+    properties::Property* sizeProperty = aRenderable->property("Size");
     if (sizeProperty) {
-        connection->addPropertySubscription("Size", identifier, updateSize);
+        auto updateSize = [this, sizeProperty, identifier, connection] {
+            onFixedPointSizeChange(sizeProperty, identifier, connection);
+        };
+        connection->addPropertySubscription(sizeProperty->identifier(), identifier, updateSize);
     }
 
     // Toggle visibility of renderable
-    auto toggleVisibility = [visibilityProperty, identifier, connection]() {
-        if (!connection->isConnected()) {
-            SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
-                connection, "Enabled", identifier
-            );
-            return;
-        }
-
-        bool isVisible = std::any_cast<bool>(visibilityProperty->get());
-        std::string_view visibilityFlag = isVisible ? "T" : "F";
-
-        const std::string message = simp::formatUpdateMessage(simp::MessageType::Visibility, identifier, visibilityFlag);
-        connection->sendMessage(message);
-    };
+    properties::Property* visibilityProperty = aRenderable->property("Enabled");
     if (visibilityProperty) {
-        connection->addPropertySubscription("Enabled", identifier, toggleVisibility);
+        auto toggleVisibility = [this, visibilityProperty, identifier, connection] {
+            onVisibilityChange(visibilityProperty, identifier, connection);    
+        };
+        connection->addPropertySubscription(visibilityProperty->identifier(), identifier, toggleVisibility);
     }
-
 }
 
 void PointDataMessageHandler::addCallback(
@@ -743,6 +713,109 @@ void PointDataMessageHandler::addCallback(
     else {
         it->second.push_back(newCallback);
     }
+}
+
+void PointDataMessageHandler::onFixedColorChange(
+    properties::Property* property,
+    const std::string& identifier,
+    std::shared_ptr<SoftwareConnection> connection
+) {
+    if (!connection->isConnected()) {
+        SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
+            connection, property->identifier(), identifier
+        );
+        return;
+    }
+
+    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
+    // if (!propertySubscription) return;
+    // if (!propertySubscription->shouldSendMessage) {
+    //     propertySubscription->shouldSendMessage = true;
+    //     return;
+    // }
+
+    glm::vec4 color = std::any_cast<glm::vec4>(property->get());
+    
+    const std::string message = simp::formatColorMessage(identifier, color);
+    connection->sendMessage(message);
+}
+
+void PointDataMessageHandler::onOpacityChange(
+    properties::Property* property,
+    const std::string& identifier,
+    std::shared_ptr<SoftwareConnection> connection
+) {
+    if (!connection->isConnected()) {
+        SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
+            connection, property->identifier(), identifier
+        );
+        return;
+    }
+
+    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
+    // if (!propertySubscription) return;
+    // if (!propertySubscription->shouldSendMessage) {
+    //     propertySubscription->shouldSendMessage = true;
+    //     return;
+    // }
+
+    float value = std::any_cast<float>(property->get());
+    std::string hex_value = simp::floatToHex(value);
+
+    const std::string message = simp::formatUpdateMessage(simp::MessageType::Opacity, identifier, hex_value);
+    connection->sendMessage(message);
+}
+
+void PointDataMessageHandler::onFixedPointSizeChange(
+    properties::Property* property,
+    const std::string& identifier,
+    std::shared_ptr<SoftwareConnection> connection
+) {
+    if (!connection->isConnected()) {
+        SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
+            connection, property->identifier(), identifier
+        );
+        return;
+    }
+
+    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
+    // if (!propertySubscription) return;
+    // if (!propertySubscription->shouldSendMessage) {
+    //     propertySubscription->shouldSendMessage = true;
+    //     return;
+    // }
+
+    float value = std::any_cast<float>(property->get());
+    std::string hex_value = simp::floatToHex(value);
+
+    const std::string message = simp::formatUpdateMessage(simp::MessageType::FixedSize, identifier, hex_value);
+    connection->sendMessage(message);
+}
+
+void PointDataMessageHandler::onVisibilityChange(
+    properties::Property* property,
+    const std::string& identifier,
+    std::shared_ptr<SoftwareConnection> connection
+) {
+    if (!connection->isConnected()) {
+        SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
+            connection, property->identifier(), identifier
+        );
+        return;
+    }
+
+    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
+    // if (!propertySubscription) return;
+    // if (!propertySubscription->shouldSendMessage) {
+    //     propertySubscription->shouldSendMessage = true;
+    //     return;
+    // }
+
+    bool isVisible = std::any_cast<bool>(property->get());
+    std::string_view visibilityFlag = isVisible ? "T" : "F";
+
+    const std::string message = simp::formatUpdateMessage(simp::MessageType::Visibility, identifier, visibilityFlag);
+    connection->sendMessage(message);
 }
 
 } // namespace openspace

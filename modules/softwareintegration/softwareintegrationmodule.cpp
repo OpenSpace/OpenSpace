@@ -53,20 +53,33 @@ SoftwareIntegrationModule::~SoftwareIntegrationModule() {
     internalDeinitialize();
 }
 
-void SoftwareIntegrationModule::storeData(const std::string& key, const std::vector<float>& data) {
-    _syncableFloatDataStorage.store(key, data);
+void SoftwareIntegrationModule::storeData(
+        const SyncableFloatDataStorage::Identifier& identifier,
+        const storage::Key key,
+        const std::vector<float>& data
+) {
+    _syncableFloatDataStorage.store(identifier, key, data);
 }
 
-const std::vector<float>& SoftwareIntegrationModule::fetchData(const std::string& key) {
-    return _syncableFloatDataStorage.fetch(key);
+const std::vector<float>& SoftwareIntegrationModule::fetchData(
+        const SyncableFloatDataStorage::Identifier& identifier,
+        const storage::Key key
+) {
+    return _syncableFloatDataStorage.fetch(identifier, key);
 }
 
-bool SoftwareIntegrationModule::isDataDirty(const std::string& key) {
-    return _syncableFloatDataStorage.isDirty(key);
+bool SoftwareIntegrationModule::isDataDirty(
+        const SyncableFloatDataStorage::Identifier& identifier,
+        const storage::Key key
+) {
+    return _syncableFloatDataStorage.isDirty(identifier, key);
 }
 
-bool SoftwareIntegrationModule::isSyncDataDirty(const std::string& key) {
-    return _syncableFloatDataStorage.isSyncDirty(key);
+bool SoftwareIntegrationModule::isSyncDataDirty(
+        const SyncableFloatDataStorage::Identifier& identifier,
+        const storage::Key key
+) {
+    return _syncableFloatDataStorage.isSyncDirty(identifier, key);
 }
 
 void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {

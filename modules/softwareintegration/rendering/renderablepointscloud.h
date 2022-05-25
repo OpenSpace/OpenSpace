@@ -70,6 +70,10 @@ protected:
 
     bool checkDataStorage();
 
+    void checkIfColormapCanBeEnabled();
+    void checkIfLinearSizeCanBeEnabled();
+    void checkColormapMinMax();
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
     UniformCache(
         color, opacity, size, modelMatrix, cameraUp, screenSize,

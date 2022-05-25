@@ -51,7 +51,7 @@ public:
     void handleOpacityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleFixedPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleLinearPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
-    void handleVisiblityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleVisibilityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleRemoveSGNMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
 
     void postSync();
@@ -73,6 +73,27 @@ private:
     CallbackMap _onceNodeExistsCallbacks;
     std::mutex _onceNodeExistsCallbacksMutex;
     size_t _onceNodeExistsCallbacksRetries{0};
+
+    void onFixedColorChange(
+        properties::Property* property,
+        const std::string& identifier,
+        std::shared_ptr<SoftwareConnection> connection
+    );
+    void onOpacityChange(
+        properties::Property* property,
+        const std::string& identifier,
+        std::shared_ptr<SoftwareConnection> connection
+    );
+    void onFixedPointSizeChange(
+        properties::Property* property,
+        const std::string& identifier,
+        std::shared_ptr<SoftwareConnection> connection
+    );
+    void onVisibilityChange(
+        properties::Property* property,
+        const std::string& identifier,
+        std::shared_ptr<SoftwareConnection> connection
+    );
 };
 
 } // namespace openspace

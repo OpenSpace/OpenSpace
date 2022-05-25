@@ -38,8 +38,19 @@ namespace openspace {
 namespace softwareintegration {
 
 namespace storage {
+    bool hasStorageKey(const std::string& key) {
+        return _keyStringFromKey.count(key) > 0;
+    }
 
-    std::string getStorageKey(const std::string& identifier, Key key) {
+    Key getStorageKey(const std::string& key) {
+        if (hasStorageKey(key)) {
+            return _keyStringFromKey.at(key);
+        }
+
+        return Key::Unknown;
+    }
+
+    std::string getStorageKeyString(const Key key) {
         auto it = std::find_if(
             _keyStringFromKey.begin(),
             _keyStringFromKey.end(),
@@ -47,35 +58,8 @@ namespace storage {
                 return key == p.second;
             }
         );
-        if (it == _keyStringFromKey.end()) {
-            LDEBUG("Trying to get string of key that doesn't exist in syncable data storage...");
-            return "";
-        }
-        
-        return identifier + "-" + it->first;
-    }
-
-    std::string getStorageKey(const std::string& identifier, const std::string& key) {
-        if (_keyStringFromKey.count(key) == 0) {
-            LDEBUG(fmt::format(
-                "Trying to get string of key {}, which doesn't exist in syncable data storage...",
-                key
-            ));
-            return "";
-        }
-        return getStorageKey(identifier, _keyStringFromKey.at(key));
-    }
-
-    bool hasStorageKey(const std::string& key) {
-        return _keyStringFromKey.count(key) > 0;
-    }
-
-    Key getStorageKeyEnum(const std::string& key) {
-        if (hasStorageKey(key)) {
-            return _keyStringFromKey.at(key);
-        }
-
-        return Key::Unknown;
+        if (it == _keyStringFromKey.end()) return "";
+        return it->first;
     }
 
 } // namespace storage

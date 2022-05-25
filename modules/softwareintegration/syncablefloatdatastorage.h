@@ -29,8 +29,11 @@
 #include <unordered_map>
 
 #include <openspace/util/syncable.h>
+#include <modules/softwareintegration/utils.h>
 
 namespace openspace {
+
+using namespace softwareintegration;
 
 class SyncableFloatDataStorage : public Syncable {
 public:
@@ -42,9 +45,11 @@ public:
 		bool dirty = true;
 	};
 	using ValueData = decltype(Value::data);
-	using Key = std::string;
-	using Storage = std::unordered_map<Key, Value>;
+	using SceneStorage = std::unordered_map<storage::Key, Value>;
+	using Identifier = std::string;
+	using Storage = std::unordered_map<Identifier, SceneStorage>;
 	using Iterator = Storage::iterator;
+	using SceneIterator = SceneStorage::iterator;
 	/* ================================================== */
 
 	/* ============== SyncEngine functions ============== */
@@ -53,33 +58,23 @@ public:
 	virtual void postSync(bool isMaster) override;
 	/* ================================================== */
 
-	const ValueData& fetch(const Key& key);
-	bool isDirty(const Key& key);
-	bool isSyncDirty(const Key& key); 
-	void store(const Key& key, const ValueData& data);
+	const ValueData& fetch(const Identifier& identifier, const storage::Key key);
+	bool isDirty(const Identifier& identifier, const storage::Key key);
+	bool isSyncDirty(const Identifier& identifier, const storage::Key key); 
+	void store(const Identifier& identifier, const storage::Key key, const ValueData& data);
 
 private:
 	/* =============== Utility functions ================ */
-	size_t erase(const Key& key);
+	bool erase(const Identifier& identifier, const storage::Key key);
 
-	void insertAssign(Key key, const Value& value);
+	void insertAssign(const Identifier& identifier, const storage::Key key, const Value& value);
 
-	Value& at(const Key& key);
-
-	Iterator find(const Key& key);
-	/* ================================================== */
-
-	/* =================== Iterators ==================== */
-	Iterator end() noexcept;
-			
-	Iterator begin() noexcept;
+	size_t count(const Identifier& identifier, const storage::Key key);
+	size_t count(const Identifier& identifier);
 	/* ================================================== */
 
 	std::mutex _mutex;
 	Storage _storage;
-
-	bool _storageDirty = true;
-
 };
 
 } // namespace openspace

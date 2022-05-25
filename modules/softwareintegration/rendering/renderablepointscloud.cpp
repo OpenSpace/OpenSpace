@@ -28,7 +28,9 @@
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
@@ -184,6 +186,7 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     addProperty(_color);
 
     _colormapEnabled = p.colormapEnabled.value_or(_colormapEnabled);
+    _colormapEnabled.onChange([this] { checkIfColormapCanBeEnabled(); });
     addProperty(_colormapEnabled);
 
     _identifier = p.identifier.value();
@@ -192,26 +195,19 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     addProperty(_size);
 
     _linearSizeEnabled = p.linearSizeEnabled.value_or(_linearSizeEnabled);
+    _linearSizeEnabled.onChange([this] { checkIfLinearSizeCanBeEnabled(); });
     addProperty(_linearSizeEnabled);
 
     addProperty(_opacity);
 
-    auto colormapMinMaxChecker = [this] {
-        if (_colormapMin.value() > _colormapMax.value()) {
-            auto temp = _colormapMin.value();
-            _colormapMin = _colormapMax.value();
-            _colormapMax = temp;
-        }
-    };
-
     _colormapMin = p.colormapMin.value_or(_colormapMin);
     _colormapMin.setVisibility(properties::Property::Visibility::Hidden);
-    _colormapMin.onChange(colormapMinMaxChecker);
+    _colormapMin.onChange([this] { checkColormapMinMax(); });
     addProperty(_colormapMin);
 
     _colormapMax = p.colormapMax.value_or(_colormapMax);
     _colormapMax.setVisibility(properties::Property::Visibility::Hidden);
-    _colormapMax.onChange(colormapMinMaxChecker);
+    _colormapMax.onChange([this] { checkColormapMinMax(); });
     addProperty(_colormapMax);
 
      auto linearSizeMinMaxChecker = [this] {
@@ -229,7 +225,7 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
 
     _linearSizeMax = p.linearSizeMax.value_or(_linearSizeMax);
     _linearSizeMax.setVisibility(properties::Property::Visibility::Hidden);
-    _linearSizeMax.onChange(colormapMinMaxChecker);
+    _linearSizeMax.onChange(linearSizeMinMaxChecker);
     addProperty(_linearSizeMax);
 
     _sizeOption.addOptions({
@@ -457,25 +453,6 @@ void RenderablePointsCloud::update(const UpdateData&) {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
-
-    // This can happen if the user checks the "_colormapEnabled" checkbox in the GUI
-    auto colormapAttributeData = getDataSlice(DataSliceKey::ColormapAttributes);
-    if (_colormapEnabled.value() && (!_colormapTexture || colormapAttributeData->empty())) {
-        if (!_colormapTexture) {
-            LINFO("Color map not loaded. Has it been sent from external software?");
-        }
-        if (colormapAttributeData->empty()) {
-            LINFO("Color map attribute data not loaded. Has it been sent from external software?");
-        }
-        _colormapEnabled = false;
-    }
-
-    // This can happen if the user checks the "_colormapEnabled" checkbox in the GUI
-    auto linearSizeAttributeData = getDataSlice(DataSliceKey::LinearSizeAttributes);
-    if (_linearSizeEnabled.value() && linearSizeAttributeData->empty()) {
-        LINFO("Linear size attribute data not loaded. Has it been sent from external software?");
-        _linearSizeEnabled = false;
-    }
 }
 
 bool RenderablePointsCloud::checkDataStorage() {
@@ -486,26 +463,22 @@ bool RenderablePointsCloud::checkDataStorage() {
 
     bool updatedDataSlices = false;
     auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
-    auto dataPointsKey = storage::getStorageKey(_identifier.value(), storage::Key::DataPoints);
-    auto colormapKey = storage::getStorageKey(_identifier.value(), storage::Key::Colormap);
-    auto colormapAttrDataKey = storage::getStorageKey(_identifier.value(), storage::Key::ColormapAttrData);
-    auto linearSizeAttrDataKey = storage::getStorageKey(_identifier.value(), storage::Key::LinearSizeAttrData);
 
-    if (softwareIntegrationModule->isDataDirty(dataPointsKey)) {
+    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::DataPoints)) {
         loadData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
     
-    if (softwareIntegrationModule->isDataDirty(colormapKey)) {
+    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::Colormap)) {
         loadColormap(softwareIntegrationModule);
     }
     
-    if (softwareIntegrationModule->isDataDirty(colormapAttrDataKey)) {
+    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::ColormapAttrData)) {
         loadCmapAttributeData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
     
-    if (softwareIntegrationModule->isDataDirty(linearSizeAttrDataKey)) {
+    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::LinearSizeAttrData)) {
         loadLinearSizeAttributeData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
@@ -515,8 +488,7 @@ bool RenderablePointsCloud::checkDataStorage() {
 
 void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrationModule) {
     // Fetch data from module's centralized storage
-    std::string key = storage::getStorageKey(_identifier.value(), storage::Key::DataPoints);
-    auto fullPointData = softwareIntegrationModule->fetchData(key);
+    auto fullPointData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::DataPoints);
 
     if (fullPointData.empty()) {
         LWARNING("There was an issue trying to fetch the point data from the centralized storage.");
@@ -550,8 +522,7 @@ void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrat
 }
 
 void RenderablePointsCloud::loadColormap(SoftwareIntegrationModule* softwareIntegrationModule) {
-    std::string key = storage::getStorageKey(_identifier.value(), storage::Key::Colormap);
-    auto colorMap = softwareIntegrationModule->fetchData(key);
+    auto colorMap = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::Colormap);
     
     if (colorMap.empty()) {
         LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
@@ -578,8 +549,7 @@ void RenderablePointsCloud::loadColormap(SoftwareIntegrationModule* softwareInte
 }
 
 void RenderablePointsCloud::loadCmapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
-    std::string key = storage::getStorageKey(_identifier.value(), storage::Key::ColormapAttrData);
-    auto colormapAttributeData = softwareIntegrationModule->fetchData(key);
+    auto colormapAttributeData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::ColormapAttrData);
     
     if (colormapAttributeData.empty()) {
         LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
@@ -610,8 +580,7 @@ void RenderablePointsCloud::loadCmapAttributeData(SoftwareIntegrationModule* sof
 }
 
 void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
-    std::string key = storage::getStorageKey(_identifier.value(), storage::Key::LinearSizeAttrData);
-    auto linearSizeAttributeData = softwareIntegrationModule->fetchData(key);
+    auto linearSizeAttributeData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::LinearSizeAttrData);
     
     if (linearSizeAttributeData.empty()) {
         LWARNING("There was an issue trying to fetch the linear size attribute data from the centralized storage.");
@@ -646,6 +615,59 @@ std::shared_ptr<RenderablePointsCloud::DataSlice> RenderablePointsCloud::getData
         _dataSlices.insert({ key, std::make_shared<DataSlice>() });
     }
     return _dataSlices.at(key);
+}
+
+void RenderablePointsCloud::checkIfColormapCanBeEnabled() {
+    if (!global::windowDelegate->isMaster()) return;
+
+    // This can happen if the user checks the "ColormapEnabled" checkbox in the GUI
+    auto colormapAttributeData = getDataSlice(DataSliceKey::ColormapAttributes);
+    if (_colormapEnabled.value()) {
+        if ((!_colormapTexture || colormapAttributeData->empty())) {
+            if (!_colormapTexture) {
+                LINFO("Color map not loaded. Has it been sent from external software?");
+            }
+            if (colormapAttributeData->empty()) {
+                LINFO("Color map attribute data not loaded. Has it been sent from external software?");
+            }
+
+            global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
+                    _identifier.value(), "false"
+                ),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+    }
+}
+
+void RenderablePointsCloud::checkIfLinearSizeCanBeEnabled() {
+    if (!global::windowDelegate->isMaster()) return;
+
+    // This can happen if the user checks the "LinearSizeEnabled" checkbox in the GUI
+    auto linearSizeAttributeData = getDataSlice(DataSliceKey::LinearSizeAttributes);
+    if (_linearSizeEnabled.value() && linearSizeAttributeData->empty()) {
+        LINFO("Linear size attribute data not loaded. Has it been sent from external software?");
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
+                _identifier.value(), "false"
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+}
+
+void RenderablePointsCloud::checkColormapMinMax() {
+    float min = std::any_cast<float>(_colormapMin.get());
+    float max = std::any_cast<float>(_colormapMax.get());
+
+    if (min > max) {
+        float temp = min;
+        _colormapMin = max;
+        _colormapMax = temp;
+    }
 }
 
 } // namespace openspace

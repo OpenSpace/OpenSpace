@@ -40,13 +40,19 @@ class Renderable;
 class SoftwareConnection {
 public:
     using OnChangeHandle = properties::Property::OnChangeHandle;
-    using PropertySubscriptions = std::unordered_map<std::string, properties::Property::OnChangeHandle>;
-    using SubscribedProperties = std::unordered_map<std::string, PropertySubscriptions>;
+    struct PropertySubscription {
+        OnChangeHandle onChangeHandle;
+        bool shouldSendMessage{true};
+    };
+    using PropertyName = std::string;
+    using PropertySubscriptions = std::unordered_map<PropertyName, OnChangeHandle>;
+    using Identifier = std::string;
+    using SubscribedProperties = std::unordered_map<Identifier, PropertySubscriptions>;
 
     struct Message {
         softwareintegration::simp::MessageType type;
         std::vector<char> content{};
-        std::string rawMessageType{ "" };
+        std::string rawMessageType{""};
     };
 
     class SoftwareConnectionLostError;
@@ -65,6 +71,10 @@ public:
         const std::string& identifier,
         std::function<void()> newHandler
     );
+    // std::shared_ptr<PropertySubscription> getPropertySubscription(
+    //     const std::string& propertyName,
+    //     const std::string& identifier
+    // );
 
     SoftwareConnection::Message receiveMessageFromSoftware();
 

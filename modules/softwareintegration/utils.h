@@ -48,11 +48,9 @@ const std::unordered_map<std::string, Key> _keyStringFromKey {
     {"LinearSizeAttributeData", Key::LinearSizeAttrData},
 };
 
-std::string getStorageKey(const std::string& identifier, Key key);
+Key getStorageKey(const std::string& key);
 
-std::string getStorageKey(const std::string& identifier, const std::string& key);
-
-Key getStorageKeyEnum(const std::string& key);
+std::string getStorageKeyString(const Key key);
 
 bool hasStorageKey(const std::string& key);
 
