@@ -54,6 +54,11 @@ Fragment getFragment() {
         discard;
     }
 
+    // Don't show points with no value for that attribute
+    if (colormapEnabled && isnan(ge_colormapAttributeScalar)) {
+        discard;
+    }
+
     const float radius = 0.5;
     float distance = length(coords - radius);
     if (distance > 0.6) discard;

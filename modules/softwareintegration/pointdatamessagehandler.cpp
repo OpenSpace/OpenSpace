@@ -241,19 +241,22 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
 
     module->storeData(key, std::move(attributeData));
 
-    auto callback = [this, identifier, keyEnum] {
-        switch (keyEnum) {
-            case storage::Key::ColormapAttrData : {
+    std::function<void()> callback;
+    switch (keyEnum) {
+        case storage::Key::ColormapAttrData : {
+            callback = [this, identifier, keyEnum] {
                 openspace::global::scriptEngine->queueScript(
                     fmt::format(
                         "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
                         identifier, "true"
                     ),
                     scripting::ScriptEngine::RemoteScripting::Yes
-                );
-                break;
-            }
-            case storage::Key::LinearSizeAttrData : {
+                ); 
+            };
+            break;
+        }
+        case storage::Key::LinearSizeAttrData : {
+            callback = [this, identifier] {
                 openspace::global::scriptEngine->queueScript(
                     fmt::format(
                         "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
@@ -261,12 +264,12 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
                     ),
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
-                break;
-            }
-            default:
-                break;
+            };
+            break;
         }
-    };
+        default:
+            break;
+    }
     addCallback(identifier, { callback, allDataToWaitFor });
 }
 

@@ -55,7 +55,8 @@ SoftwareConnection::SoftwareConnection(SoftwareConnection&& sc)
 {}
 
 SoftwareConnection::~SoftwareConnection() {
-    LINFO(fmt::format("Remove software connection {}", _id));
+    // TODO: Destructor being called on Connection for some reason
+    LINFO(fmt::format("Removing software connection {}", _id));
 
     if (!_isConnected) return;
     _isConnected = false;
