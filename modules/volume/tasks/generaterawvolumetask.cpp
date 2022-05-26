@@ -44,7 +44,7 @@
 namespace {
     struct [[codegen::Dictionary(GenerateRawVolumeTask)]] Parameters {
         // The Lua function used to compute the cell values
-        std::string valueFunction [[codegen::annotation("A Lua expression that returns a "
+        std::optional<std::string> valueFunction [[codegen::annotation("A Lua expression that returns a "
             "function taking three numbers as arguments (x, y, z) and returning a "
             "number")]];
 
@@ -86,14 +86,17 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
     _dictionaryOutputPath = absPath(p.dictionaryOutput);
     _dimensions = p.dimensions;
     _time = p.time;
-    _valueFunctionLua = p.valueFunction;
     _lowerDomainBound = p.lowerDomainBound;
     _upperDomainBound = p.upperDomainBound;
 
     if (p.file.has_value()) {
         _file = absPath(*p.file).string();
     }
-    _hasSpeckFile = p.file.has_value();
+    if (p.valueFunction.has_value()) {
+        _valueFunctionLua = absPath(*p.valueFunction).string();
+    }
+    _hasFile = p.file.has_value();
+    _hasFunction = p.valueFunction.has_value();
 }
 
 std::string GenerateRawVolumeTask::description() {
@@ -128,7 +131,10 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
 
     glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
 
-    if (_hasSpeckFile) {
+    if (!_hasFile && !_hasFunction) {
+        std::cout << "Either a data file or a function is required to generate this volume task!" << std::endl;
+    }
+    else if (_hasFile) {
         // _dataset = speck::data::loadFileWithCache(_speckFile);
         std::ifstream data(_file);
         if (!data) {
@@ -141,7 +147,6 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         std::vector<float> flatten_volume_vector;
         std::string line;
 
-        std::cout << "Looing... " << std::endl;
         while (std::getline(data, line)) {
             flatten_volume_vector.push_back(std::stof(line));
         };
@@ -157,7 +162,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         });
 
     }
-    else {
+    else{
 
         ghoul::lua::LuaState state;
         ghoul::lua::runScript(state, _valueFunctionLua);

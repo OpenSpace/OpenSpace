@@ -52,7 +52,8 @@ private:
     std::string _valueFunctionLua;
     std::string _file;
 
-    bool _hasSpeckFile = false;
+    bool _hasFile = false;
+    bool _hasFunction = false;
 };
 
 } // namespace openspace::volume

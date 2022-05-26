@@ -7,7 +7,7 @@
 local lineage = asset.require("cosmic_view/lineage")
 
 local macaca_volume = {
-    Identifier = "test_volume",
+    Identifier = "macaca_volume",
     Parent = lineage.lineage_17.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
