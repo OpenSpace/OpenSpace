@@ -50,6 +50,9 @@ private:
     glm::vec3 _upperDomainBound = glm::vec3(0.f);
 
     std::string _valueFunctionLua;
+    std::string _file;
+
+    bool _hasSpeckFile = false;
 };
 
 } // namespace openspace::volume
