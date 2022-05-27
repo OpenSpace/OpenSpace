@@ -1,3 +1,4 @@
+local path = "C:/code"
 
 -- Speck files --
 status_file = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/movedpoints.endangered.speck")

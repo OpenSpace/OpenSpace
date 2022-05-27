@@ -31,7 +31,7 @@ local mutations = {
       FadeLabelDistances = { 0.0, 0.5 },
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",
-      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/point3A.png"),
+      Texture = asset.localResource(path .. "/Data/mutations/point3A.png"),
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
@@ -48,7 +48,7 @@ local mutations = {
     Identifier = Identifier,
     Name = Name,
     Type = "ScreenSpaceImageLocal",
-    TexturePath = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/Synonymous_mutations.png"),
+    TexturePath = asset.localResource(path .. "/Data/mutations/Synonymous_mutations.png"),
     FaceCamera = false,
     CartesianPosition = { 1.2, -0.6, -2.0 }
   }

@@ -44,9 +44,13 @@
 namespace {
     struct [[codegen::Dictionary(GenerateRawVolumeTask)]] Parameters {
         // The Lua function used to compute the cell values
-        std::string valueFunction [[codegen::annotation("A Lua expression that returns a "
+        std::optional<std::string> valueFunction [[codegen::annotation("A Lua expression that returns a "
             "function taking three numbers as arguments (x, y, z) and returning a "
             "number")]];
+
+        // The path to the SPECK file that contains information about the volume
+        // object being rendered
+        std::optional<std::string> file;
 
         // The raw volume file to export data to
         std::string rawVolumeOutput [[codegen::annotation("A valid filepath")]];
@@ -82,18 +86,26 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
     _dictionaryOutputPath = absPath(p.dictionaryOutput);
     _dimensions = p.dimensions;
     _time = p.time;
-    _valueFunctionLua = p.valueFunction;
     _lowerDomainBound = p.lowerDomainBound;
     _upperDomainBound = p.upperDomainBound;
+
+    if (p.file.has_value()) {
+        _file = absPath(*p.file).string();
+    }
+    if (p.valueFunction.has_value()) {
+        _valueFunctionLua = absPath(*p.valueFunction).string();
+    }
+    _hasFile = p.file.has_value();
+    _hasFunction = p.valueFunction.has_value();
 }
 
 std::string GenerateRawVolumeTask::description() {
     return fmt::format(
         "Generate a raw volume with dimenstions: ({}, {}, {}). For each cell, set the "
-        "value by evaluating the lua function: `{}`, with three arguments (x, y, z) "
+        "value by evaluating the file `{}` or lua function: `{}`, with three arguments (x, y, z) "
         "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into {} and "
         "dictionary with metadata to {}",
-        _dimensions.x, _dimensions.y, _dimensions.z, _valueFunctionLua,
+        _dimensions.x, _dimensions.y, _dimensions.z, _file, _valueFunctionLua,
         _lowerDomainBound.x, _lowerDomainBound.y, _lowerDomainBound.z,
         _upperDomainBound.x, _upperDomainBound.y, _upperDomainBound.z,
         _rawVolumeOutputPath, _dictionaryOutputPath
@@ -114,55 +126,89 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     volume::RawVolume<float> rawVolume(_dimensions);
     progressCallback(0.1f);
 
-    ghoul::lua::LuaState state;
-    ghoul::lua::runScript(state, _valueFunctionLua);
-
-#if (defined(NDEBUG) || defined(DEBUG))
-    ghoul::lua::verifyStackSize(state, 1);
-#endif
-
-    int functionReference = luaL_ref(state, LUA_REGISTRYINDEX);
-
-#if (defined(NDEBUG) || defined(DEBUG))
-    ghoul::lua::verifyStackSize(state, 0);
-#endif
-
-    glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
-
-
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::min();
 
-    rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
-        glm::vec3 coord = _lowerDomainBound +
-            glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
+    glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
 
-#if (defined(NDEBUG) || defined(DEBUG))
-        ghoul::lua::verifyStackSize(state, 0);
-#endif
-        lua_rawgeti(state, LUA_REGISTRYINDEX, functionReference);
+    if (!_hasFile && !_hasFunction) {
+        std::cout << "Either a data file or a function is required to generate this volume task!" << std::endl;
+    }
+    else if (_hasFile) {
+        // _dataset = speck::data::loadFileWithCache(_speckFile);
+        std::ifstream data(_file);
+        if (!data) {
+            std::cout << "Error opening output file" << std::endl;
+        };
 
-        lua_pushnumber(state, coord.x);
-        lua_pushnumber(state, coord.y);
-        lua_pushnumber(state, coord.z);
+        // Save volume values in 1D vector and get index of each coordinates (x,y,z) by:
+        // index = x + dim_x*y + dim_x*dim_y*z 
+        // coord_value = vector[ index ]
+        std::vector<float> flatten_volume_vector;
+        std::string line;
 
-#if (defined(NDEBUG) || defined(DEBUG))
-        ghoul::lua::verifyStackSize(state, 4);
-#endif
+        while (std::getline(data, line)) {
+            flatten_volume_vector.push_back(std::stof(line));
+        };
+        
 
-        if (lua_pcall(state, 3, 1, 0) != LUA_OK) {
-            return;
-        }
+        rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
+            int index = cell.x + (_dimensions.x * cell.y) + (_dimensions.x * _dimensions.y * cell.z);
+            float value = flatten_volume_vector[index];
+            rawVolume.set(cell, value);
 
-        float value = static_cast<float>(luaL_checknumber(state, 1));
-        lua_pop(state, 1);
-        rawVolume.set(cell, value);
+            minVal = std::min(minVal, value);
+            maxVal = std::max(maxVal, value);
+        });
 
-        minVal = std::min(minVal, value);
-        maxVal = std::max(maxVal, value);
-    });
+    }
+    else{
 
-    luaL_unref(state, LUA_REGISTRYINDEX, functionReference);
+        ghoul::lua::LuaState state;
+        ghoul::lua::runScript(state, _valueFunctionLua);
+
+        #if (defined(NDEBUG) || defined(DEBUG))
+            ghoul::lua::verifyStackSize(state, 1);
+        #endif
+
+        int functionReference = luaL_ref(state, LUA_REGISTRYINDEX);
+
+        #if (defined(NDEBUG) || defined(DEBUG))
+            ghoul::lua::verifyStackSize(state, 0);
+        #endif
+
+        rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
+            glm::vec3 coord = _lowerDomainBound +
+                glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
+
+        #if (defined(NDEBUG) || defined(DEBUG))
+                ghoul::lua::verifyStackSize(state, 0);
+        #endif
+            lua_rawgeti(state, LUA_REGISTRYINDEX, functionReference);
+
+            lua_pushnumber(state, coord.x);
+            lua_pushnumber(state, coord.y);
+            lua_pushnumber(state, coord.z);
+
+        #if (defined(NDEBUG) || defined(DEBUG))
+                ghoul::lua::verifyStackSize(state, 4);
+        #endif
+
+            if (lua_pcall(state, 3, 1, 0) != LUA_OK) {
+                return;
+            }
+
+            float value = static_cast<float>(luaL_checknumber(state, 1));
+            lua_pop(state, 1);
+            rawVolume.set(cell, value);
+
+            minVal = std::min(minVal, value);
+            maxVal = std::max(maxVal, value);
+        });
+
+        luaL_unref(state, LUA_REGISTRYINDEX, functionReference);
+
+    }
 
     const std::filesystem::path directory = _rawVolumeOutputPath.parent_path();
     if (!std::filesystem::is_directory(directory)) {
