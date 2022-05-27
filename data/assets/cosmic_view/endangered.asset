@@ -1,4 +1,23 @@
 
+-- Speck files --
+status_file = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/movedpoints.endangered.speck")
+trend_up_file = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_up.speck")
+trend_same_file = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_same.speck")
+trend_down_file = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_down.speck")
+
+-- Label files --
+status_label = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label.speck")
+trend_up_label = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label_up.speck")
+trend_same_label = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label_same.speck")
+trend_down_label =asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label_down.speck")
+
+-- Texture files --
+endangered_texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/point3A.png")
+trend_up_texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/up.png")
+trend_same_texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/same.png")
+trend_down_texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/down.png")
+
+
 local endangered_status = {
     Identifier = "endangered_status",
     Renderable = {
@@ -6,12 +25,12 @@ local endangered_status = {
       Color = { 0.4,1.0,1.0 },
       Opacity = 1.0,
       ScaleFactor = 15,
-      File = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname.speck"),
+      File = status_file,
       ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/redbluegreen.cmap"),
       ColorOption = { "Status" },
       ColorRange = { { 2.0, 4.0}},
       DrawLabels = true,
-      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label.speck"),
+      LabelFile = status_label,
       TextColor = { 1.0, 1.0, 1.0 },
       TextSize = 1.0,
       TextMinMaxSize = { 0, 14 },
@@ -19,13 +38,13 @@ local endangered_status = {
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",
       FadeInDistances = { 0.0, 0.1 },
-      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/point3A.png"),
+      Texture = endangered_texture,
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
     },
     GUI = {
-      Name = "Status species",
+      Name = "Status",
       Path = "/Cosmic/Endangered species"
     }
   }
@@ -37,10 +56,10 @@ local endangered_status = {
       Type = "RenderableCosmicPoints",
       Color = { 0.0, 1.0, 0.0 },
       Opacity = 1.0,
-      ScaleFactor = 20,
-      File = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_up.speck"),
+      ScaleFactor = 23,
+      File = trend_up_file,
       DrawLabels = true,
-      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label_up.speck"),
+      LabelFile = trend_up_label ,
       TextColor = { 1.0, 1.0, 1.0 },
       TextSize = 1.0,
       TextMinMaxSize = { 0, 14 },
@@ -48,14 +67,14 @@ local endangered_status = {
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",
       FadeInDistances = { 0.0, 0.1 },
-      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/up.png"),
+      Texture = trend_up_texture,
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
     },
     GUI = {
-      Name = "Trend up",
-      Path = "/Cosmic/Endangered species"
+      Name = "Up",
+      Path = "/Cosmic/Endangered species/Trend"
     }
   }
 
@@ -63,12 +82,12 @@ local endangered_status = {
     Identifier = "endangered_trend_zero",
     Renderable = {
       Type = "RenderableCosmicPoints",
-      Color = { 0.592 ,0.737, 0.9137 },
+      Color = { 0.212 ,0.733, 0.929 },
       Opacity = 1.0,
       ScaleFactor = 20,
-      File = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_same.speck"),
+      File = trend_same_file,
       DrawLabels = true,
-      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label_same.speck"),
+      LabelFile = trend_same_label ,
       TextColor = { 1.0, 1.0, 1.0 },
       TextSize = 1.0,
       TextMinMaxSize = { 0, 14 },
@@ -76,14 +95,14 @@ local endangered_status = {
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",
       FadeInDistances = { 0.0, 0.1 },
-      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/same.png"),
+      Texture = trend_same_texture,
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
     },
     GUI = {
-      Name = "Trend same",
-      Path = "/Cosmic/Endangered species"
+      Name = "Same",
+      Path = "/Cosmic/Endangered species/Trend"
     }
   }
 
@@ -93,10 +112,10 @@ local endangered_status = {
       Type = "RenderableCosmicPoints",
       Color = { 1.0, 0.0, 0.0 },
       Opacity = 1.0,
-      ScaleFactor = 20,
-      File = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_down.speck"),
+      ScaleFactor = 23,
+      File = trend_down_file,
       DrawLabels = true,
-      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label_down.speck"),
+      LabelFile = trend_down_label,
       TextColor = { 1.0, 1.0, 1.0 },
       TextSize = 1.0,
       TextMinMaxSize = { 0, 14 },
@@ -104,14 +123,14 @@ local endangered_status = {
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",
       FadeInDistances = { 0.0, 0.1 },
-      Texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/down.png"),
+      Texture = trend_down_texture,
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
     },
     GUI = {
-      Name = "Trend down",
-      Path = "/Cosmic/Endangered species"
+      Name = "Down",
+      Path = "/Cosmic/Endangered species/Trend"
     }
   }
 

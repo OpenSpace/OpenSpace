@@ -1,3 +1,13 @@
+-- Speck files --
+mutations_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/primates_full_200522/cleaned.seqid.pos.taxon.movedData.syn.lineage.pairwise.genus.variable.speck")
+
+-- Label files --
+mutations_label = asset.localResource("C:/MasterThesis_cosmicView/Scripts/primates_full_200522/genusCommonName.label.speck")
+
+-- Color map --
+color_map = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/yellowpurple.cmap")
+
+
 
 local Name = "Synonymous Mutations"
 local Identifier = "mutations"
@@ -9,12 +19,12 @@ local mutations = {
       Color = { 0.4,1.0,1.0 },
       Opacity = 1.0,
       ScaleFactor = 15,
-      File = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/primates.genus.interpolate.syn.lineage.averagePairwiseDiff.speck"),
-      ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/yellowpurple.cmap"),
+      File = mutations_file,
+      ColorMap = color_map,
       ColorOption = { "synonymousDiff", "NonSynonymousDiff" },
       ColorRange = { { 0, 140}, { 0, 20} },
       DrawLabels = false,
-      LabelFile = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/lineage_24_label.speck"),
+      LabelFile = mutations_label,
       TextColor = { 1.0, 1.0, 1.0 },
       TextSize = 1.0,
       TextMinMaxSize = { 0, 14 },
