@@ -1,22 +1,26 @@
-local path = "C:/code"
+-- Your personal path --
+local path = "C:/MasterThesis_cosmicView"
 
 -- Speck files --
-status_file = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/movedpoints.endangered.speck")
-trend_up_file = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_up.speck")
-trend_same_file = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_same.speck")
-trend_down_file = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_down.speck")
+local status_file = asset.localResource(path .. "/data/endangered/speck/all_primates_endangered.speck")
+local trend_up_file = asset.localResource(path .. "/data/endangered/speck/primates_positions_trend_up.speck")
+local trend_same_file = asset.localResource(path .. "/data/endangered/speck/primates_positions_trend_same.speck")
+local trend_down_file = asset.localResource(path .. "/data/endangered/speck/primates_positions_trend_down.speck")
 
 -- Label files --
-status_label = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label.speck")
-trend_up_label = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label_up.speck")
-trend_same_label = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label_same.speck")
-trend_down_label =asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/population_primate_positions_commonname_label_down.speck")
+local status_label = asset.localResource(path .. "/data/endangered/label/all_primates_endangered_commonname_label.speck")
+local trend_up_label = asset.localResource(path .. "/data/endangered/label/primates_commonname_trend_up_label.speck")
+local trend_same_label = asset.localResource(path .. "/data/endangered/label/primates_commonname_trend_same_label.speck")
+local trend_down_label =asset.localResource(path .. "/data/endangered/label/primates_commonname_trend_down_label.speck")
+
+-- Color maps --
+local color_map_status = asset.localResource(path .. "/data/endangered/cmap/redbluegreen.cmap")
 
 -- Texture files --
-endangered_texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/point3A.png")
-trend_up_texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/up.png")
-trend_same_texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/same.png")
-trend_down_texture = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/down.png")
+local endangered_texture = asset.localResource(path .. "/data/texture/point3A.png")
+local trend_up_texture = asset.localResource(path .. "/data/endangered/texture/up.png")
+local trend_same_texture = asset.localResource(path .. "/data/endangered/texture/same.png")
+local trend_down_texture = asset.localResource(path .. "/data/endangered/texture/down.png")
 
 
 local endangered_status = {
@@ -27,7 +31,7 @@ local endangered_status = {
       Opacity = 1.0,
       ScaleFactor = 15,
       File = status_file,
-      ColorMap = asset.localResource("C:/MasterThesis_cosmicView/Data/endangered/redbluegreen.cmap"),
+      ColorMap = color_map_status,
       ColorOption = { "Status" },
       ColorRange = { { 2.0, 4.0}},
       DrawLabels = true,

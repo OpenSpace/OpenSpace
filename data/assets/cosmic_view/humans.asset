@@ -1,36 +1,39 @@
+-- Your personal path --
+local path = "C:/MasterThesis_cosmicView"
+
 -- Speck files --
-all_humans = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/humanPopulations_allSNPs.mMDS.noOutliers.xyz.reProjected.int.moved.speck")
-south_africa_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/south.africa.speck")
-west_africa_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/west.africa.speck")
-central_africa_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/central.africa.speck")
-north_africa_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/north.africa.speck")
-europe_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/europe.speck")
-west_asia_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/west.asia.speck")
-central_asia_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/central.asia.speck")
-south_asia_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/south.asia.speck")
-south_east_asia_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/south.east.asia.speck")
-east_asia_file =  asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/east.asia.speck")
-north_east_asia_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/north.east.asia.speck")
-oceania_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/oceania.speck")
-north_america_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/north.america.speck")
-central_america_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/central.america.speck")
-south_america_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/regions/south.america.speck")
+local all_humans = asset.localResource(path .. "/data/humans/speck/all_human_continents.speck")
+local south_africa_file = asset.localResource(path .. "/data/humans/speck/regions/south_africa.speck")
+local west_africa_file = asset.localResource(path .. "/data/humans/speck/regions/west_africa.speck")
+local central_africa_file = asset.localResource(path .. "/data/humans/speck/regions/central_africa.speck")
+local north_africa_file = asset.localResource(path .. "/data/humans/speck/regions/north_africa.speck")
+local europe_file = asset.localResource(path .. "/data/humans/speck/regions/europe.speck")
+local west_asia_file = asset.localResource(path .. "/data/humans/speck/regions/west_asia.speck")
+local central_asia_file = asset.localResource(path .. "/data/humans/speck/regions/central_asia.speck")
+local south_asia_file = asset.localResource(path .. "/data/humans/speck/regions/south_asia.speck")
+local south_east_asia_file = asset.localResource(path .. "/data/humans/speck/regions/south_east_asia.speck")
+local east_asia_file =  asset.localResource(path .. "/data/humans/speck/regions/east_asia.speck")
+local north_east_asia_file = asset.localResource(path .. "/data/humans/speck/regions/north_east_asia.speck")
+local oceania_file = asset.localResource(path .. "/data/humans/speck/regions/oceania.speck")
+local north_america_file = asset.localResource(path .. "/data/humans/speck/regions/north_america.speck")
+local central_america_file = asset.localResource(path .. "/data/humans/speck/regions/central_america.speck")
+local south_america_file = asset.localResource(path .. "/data/humans/speck/regions/south_america.speck")
 
 -- Label files --
-all_humans_label =asset.localResource("C:/MasterThesis_cosmicView/Scripts/humans_170522/allSNPs.average.label.speck")
+local all_humans_label = asset.localResource(path .. "/data/humans/label/humans_regions_label.speck")
 
 -- Color maps -- 
-color_continents = asset.localResource("C:/MasterThesis_cosmicView/Data/human_population/human_continents.cmap")
+local color_continents = asset.localResource(path .. "/data/humans/cmap/human_continents.cmap")
 
 -- Texture files -- 
-human_texture = asset.localResource("C:/MasterThesis_cosmicView/Data/consensus/point3A.png")
+local human_texture = asset.localResource(path .. "/data/texture/point3A.png")
 
 -- Scale factor --
-scale_factor = 0
+local scale_factor = 0
 
 
 
-  local all = {
+local all = {
     Identifier = "all",
     Renderable = {
       Type = "RenderableCosmicPoints",

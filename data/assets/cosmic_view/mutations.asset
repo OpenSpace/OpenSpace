@@ -1,11 +1,17 @@
+-- Your personal path --
+local path = "C:/MasterThesis_cosmicView"
+
 -- Speck files --
-mutations_file = asset.localResource("C:/MasterThesis_cosmicView/Scripts/primates_full_200522/cleaned.seqid.pos.taxon.movedData.syn.lineage.pairwise.genus.variable.speck")
+local mutations_file = asset.localResource(path .. "/data/mutations/speck/primates_mutations_file.speck")
 
 -- Label files --
-mutations_label = asset.localResource("C:/MasterThesis_cosmicView/Scripts/primates_full_200522/genusCommonName.label.speck")
+local mutations_label = asset.localResource(path .. "/data/mutations/label/primates_CommonName_label.speck")
 
 -- Color map --
-color_map = asset.localResource("C:/MasterThesis_cosmicView/Data/mutations/yellowpurple.cmap")
+local color_map = asset.localResource(path .. "/data/mutations/cmap/yellowpurple.cmap")
+
+-- Textire --
+local mutations_texture = asset.localResource(path .. "/data/texture/point3A.png")
 
 
 
@@ -31,7 +37,7 @@ local mutations = {
       FadeLabelDistances = { 0.0, 0.5 },
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",
-      Texture = asset.localResource(path .. "/Data/mutations/point3A.png"),
+      Texture = mutations_texture,
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
@@ -48,7 +54,7 @@ local mutations = {
     Identifier = Identifier,
     Name = Name,
     Type = "ScreenSpaceImageLocal",
-    TexturePath = asset.localResource(path .. "/Data/mutations/Synonymous_mutations.png"),
+    TexturePath = asset.localResource(path .. "/data/mutations/Synonymous_mutations.png"),
     FaceCamera = false,
     CartesianPosition = { 1.2, -0.6, -2.0 }
   }
