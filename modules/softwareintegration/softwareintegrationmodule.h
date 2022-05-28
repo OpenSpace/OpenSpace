@@ -57,6 +57,7 @@ public:
         const SyncableFloatDataStorage::Identifier& identifier,
         const storage::Key key
     );
+    std::string getStringOfAllKeysInStorage();
 
     std::vector<documentation::Documentation> documentations() const override;
 

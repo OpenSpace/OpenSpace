@@ -39,6 +39,7 @@ class PointDataMessageHandler {
     struct Callback {
         std::function<void()> function;
         std::vector<softwareintegration::storage::Key> waitForData = {};
+        std::string description = "???"; // To help debugging. Maybe remove?
     };
     using CallbackList = std::vector<Callback>;
     using CallbackMap = std::unordered_map<std::string, CallbackList>;

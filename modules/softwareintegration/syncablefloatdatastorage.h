@@ -41,6 +41,7 @@ public:
 	struct Value {
 		// a dataset stored like x1, y1, z1, x2, y2 ....
 		std::vector<float> data;
+		bool hasEncoded = false;
 		bool syncDirty = true;
 		bool dirty = true;
 	};
@@ -62,6 +63,7 @@ public:
 	bool isDirty(const Identifier& identifier, const storage::Key key);
 	bool isSyncDirty(const Identifier& identifier, const storage::Key key); 
 	void store(const Identifier& identifier, const storage::Key key, const ValueData& data);
+	std::string getStringOfAllKeysInStorage();
 
 private:
 	/* =============== Utility functions ================ */

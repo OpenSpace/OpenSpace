@@ -115,4 +115,10 @@ std::vector<Syncable*> SoftwareIntegrationModule::getSyncables() {
     return { &_syncableFloatDataStorage };
 }
 
+
+// Helper function for debugging 
+std::string SoftwareIntegrationModule::getStringOfAllKeysInStorage() {
+	return _syncableFloatDataStorage.getStringOfAllKeysInStorage();
+}
+
 } // namespace openspace

@@ -82,7 +82,7 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { reanchorCallback, { storage::Key::DataPoints } });
+    addCallback(identifier, { reanchorCallback, { storage::Key::DataPoints }, "reanchorCallback" });
 }
 
 void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -132,7 +132,7 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { callback });
+    addCallback(identifier, { callback, {}, "handleFixedColorMessage" });
 }
 
 void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -197,7 +197,7 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
             );
         }
     };
-    addCallback(identifier, { colormapLimitsCallback });
+    addCallback(identifier, { colormapLimitsCallback, {}, "colormapLimitsCallback" });
 
     auto enableColormapCallback = [this, identifier] {
         global::scriptEngine->queueScript(
@@ -210,7 +210,7 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     };
     // Callback 
     std::vector<storage::Key> dataToWaitFor{ storage::Key::Colormap, storage::Key::ColormapAttrData };
-    addCallback(identifier, { enableColormapCallback, std::move(dataToWaitFor) });
+    addCallback(identifier, { enableColormapCallback, std::move(dataToWaitFor), "enableColormapCallback"  });
 }
 
 void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -250,6 +250,7 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
 
     module->storeData(identifier, key, std::move(attributeData));
 
+    std::string callbackDescription = "handleAttributeDataMessage, key=" + storage::getStorageKeyString(key);
     switch (key) {
         case storage::Key::ColormapAttrData : {
             auto callback = [this, identifier] {
@@ -261,7 +262,7 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             };
-            addCallback(identifier, { callback, { key, storage::Key::Colormap } });
+            addCallback(identifier, { callback, { key, storage::Key::Colormap }, callbackDescription });
             break;
         }
         case storage::Key::LinearSizeAttrData: {
@@ -274,7 +275,7 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             };
-            addCallback(identifier, { callback, { key } });
+            addCallback(identifier, { callback, { key }, callbackDescription });
             break;
         }
         default:
@@ -323,7 +324,7 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
             );
         }
     };
-    addCallback(identifier, { callback });
+    addCallback(identifier, { callback, {}, "handleOpacityMessage" });
 }
 
 void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -377,7 +378,7 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { callback });
+    addCallback(identifier, { callback, {}, "handleFixedPointSizeMessage" });
 }
 
 void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -443,7 +444,7 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
             );
         }
     };
-    addCallback(identifier, { linearSizeCallback });
+    addCallback(identifier, { linearSizeCallback, {}, "linearSizeCallback" });
 
     auto enableLinearSizeCallback = [this, identifier] {
         global::scriptEngine->queueScript(
@@ -458,7 +459,8 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
         identifier,
         {
             enableLinearSizeCallback, 
-            { storage::Key::LinearSizeAttrData }
+            { storage::Key::LinearSizeAttrData },
+            "enableLinearSizeCallback"
         }
     );
 }
@@ -480,7 +482,7 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
 
     auto callback = [this, identifier, visibilityMessage, connection] {
         // Get renderable
-        auto r = getRenderable(identifier);
+        // auto r = getRenderable(identifier);
 
         // Get visibility from renderable
         // properties::Property* enabledProperty = r->property("Enabled");
@@ -500,7 +502,7 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { callback });
+    addCallback(identifier, { callback, {}, "handleVisibilityMessage" });
 }
 
 void PointDataMessageHandler::handleRemoveSGNMessage(const std::vector<char>& message,std::shared_ptr<SoftwareConnection> connection) {
@@ -555,7 +557,7 @@ void PointDataMessageHandler::postSync() {
 
             auto callbacksIt = callbackList.begin();
             while (callbacksIt != callbackList.end()) {
-                auto& [callback, waitForData] = *callbacksIt;
+                auto& [callback, waitForData, description] = *callbacksIt;
 
                 try {
                     for (auto& waitFor : waitForData) {
@@ -572,8 +574,12 @@ void PointDataMessageHandler::postSync() {
                 }
             }
 
-            callbackMapIt = _onceNodeExistsCallbacks.erase(callbackMapIt);
-            _onceNodeExistsCallbacksRetries = 0;
+            if (callbackList.empty()) {
+                callbackMapIt = _onceNodeExistsCallbacks.erase(callbackMapIt);
+                _onceNodeExistsCallbacksRetries = 0;
+            } else {
+                callbackMapIt++;
+            }
         }
         catch(std::exception &err) {
             ++_onceNodeExistsCallbacksRetries;
@@ -640,7 +646,7 @@ void PointDataMessageHandler::checkRenderable(
         auto subscriptionCallback = [this, identifier, connection] {
             subscribeToRenderableUpdates(identifier, connection);
         };
-        addCallback(identifier, { subscriptionCallback });
+        addCallback(identifier, { subscriptionCallback, {}, "subscriptionCallback" });
     }
     else {
         subscribeToRenderableUpdates(identifier, connection);

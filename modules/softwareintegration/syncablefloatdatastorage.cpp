@@ -68,12 +68,15 @@ void SyncableFloatDataStorage::encode(SyncBuffer* syncBuffer) {
 			for (auto val : storageEntry.data) {
 				syncBuffer->encode(val);
 			}
+
+			// TODO: Maybe combine solution with syncDirty?
+			storageEntry.hasEncoded = true;
 		}
 	}
 }
 
 void SyncableFloatDataStorage::decode(SyncBuffer* syncBuffer) {
-	ZoneScopedN("SyncableFloatDataStorage::encode")
+	ZoneScopedN("SyncableFloatDataStorage::decode")
 
     std::lock_guard guard(_mutex);
 	
@@ -121,8 +124,9 @@ void SyncableFloatDataStorage::postSync(bool isMaster) {
 		std::lock_guard guard(_mutex);
 		for (auto& sgnStorage : _storage) {
 			for (auto& storageEntry : sgnStorage.second) {
-				if (storageEntry.second.syncDirty) {
+				if (storageEntry.second.syncDirty && storageEntry.second.hasEncoded) {
 					storageEntry.second.syncDirty = false;
+					storageEntry.second.hasEncoded = false;
 				}
 			}
 		}
@@ -219,6 +223,20 @@ size_t SyncableFloatDataStorage::count(const Identifier& identifier, const stora
 	if (sceneIt == _storage.end()) return 0;
 
 	return sceneIt->second.count(key);
+}
+
+// Helper function for debugging 
+std::string SyncableFloatDataStorage::getStringOfAllKeysInStorage() {
+	std::string keysString;
+	
+	for (auto [id, sceneStorage]: _storage) {
+		keysString += '(' + id + ')' + ": ";
+		for(auto [key, val]: sceneStorage) {
+			keysString += storage::getStorageKeyString(key) + " ";
+		}
+		keysString += '\n';
+	}
+	return keysString;
 }
 
 /* ================================================== */
