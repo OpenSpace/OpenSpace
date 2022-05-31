@@ -301,13 +301,6 @@ namespace openspace {
                     _nPointsOnPathLine - 1);
             }
 
-            //_traversers[traverserIndex ].setStartPoint(
-            //    2400,
-            //    _nPointsOnPathLine - 1);
-            //_traversers[traverserIndex + 1].setStartPoint(
-            //    2400,
-            //    _nPointsOnPathLine - 1);
-
             // initialize the temporary key frame for each traverser
             _traversers[traverserIndex].temporaryInterpolationKeyFrame.vertices = 
                 std::vector(_nPointsOnFieldlines, glm::vec3{});
@@ -458,11 +451,6 @@ namespace openspace {
                     ));
                 }
 
-                /************* TEMPORARY MAGIC VALUE ****************/
-                // presentation
-                startTime = -28700.0;
-                /****************************************************/
-
                 extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
                 shouldExtractSeedPoints = false;
             }
@@ -498,7 +486,6 @@ namespace openspace {
 
         return isSuccessful;
     }
-
 
     void RenderableMovingFieldlines::deinitializeGL() {
         glDeleteVertexArrays(1, &_vertexArrayObject);
@@ -926,9 +913,10 @@ namespace openspace {
             }
         }
 
-        // Update pathline alpha when checkbox is toggled
         std::vector<FieldlineVertex>::iterator pathlineIt =
             _vertexBuffer.begin() + _traversers.size() * _nPointsOnFieldlines;
+
+        // Update pathline alpha when checkbox is toggled
         bool hasToggledFlowLine = static_cast<bool>(pathlineIt->alpha) != _renderFlowLine;
         if (hasToggledFlowLine) {
             float pathlineAlpha = static_cast<float>(_renderFlowLine);

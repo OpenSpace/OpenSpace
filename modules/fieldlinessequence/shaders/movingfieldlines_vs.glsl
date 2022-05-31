@@ -30,8 +30,7 @@ uniform mat4 modelViewProjection;
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in float in_topology_scalar;
 layout(location = 2) in float in_vertex_alpha;
-
-// outs
+// Outputs
 out vec4 vs_color;
 out float vs_depth;
 

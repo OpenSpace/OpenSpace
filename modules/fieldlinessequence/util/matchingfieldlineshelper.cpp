@@ -164,7 +164,6 @@ namespace openspace::fls {
             return false;
         }
 
-
         for (size_t i = 0; i < matchingSeedPoints.size() / 2; i++) {
             std::unique_ptr<ccmc::Interpolator> interpolator =
                 std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
@@ -210,12 +209,6 @@ namespace openspace::fls {
 
             double birthTime = birthTimes[i];
 
-            // hard coding for the sake of the presentation
-            // adjusting the nightside according to when the
-            // dayside reaches the approximal 
-            if (i >= 2) {
-                birthTime = birthTime + 495;
-            }
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)
             // - 1 because arrays start at 0

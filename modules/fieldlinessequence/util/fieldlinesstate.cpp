@@ -454,6 +454,10 @@ void FieldlinesState::initializeRenderedMatchingFieldlines() {
         addLine(mf.pathLines.second.keyFrames[0].vertices);
     }
 
+    /**
+    * It should be possible to ignore the addLine function and do something like below.
+    */
+
     //if (_allMatchingFieldlines.empty()) return;
 
     //int nFieldlines = _allMatchingFieldlines.size() * 2;
