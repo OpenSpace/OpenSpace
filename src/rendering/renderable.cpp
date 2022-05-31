@@ -27,6 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
@@ -168,6 +170,14 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
     _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
+    _enabled.onChange([this]() {
+        if (isEnabled()) {
+            global::eventEngine->publishEvent<events::EventRenderableEnabled>(_parent);
+        }
+        else {
+            global::eventEngine->publishEvent<events::EventRenderableDisabled>(_parent);
+        }
+    });
 
     _opacity = p.opacity.value_or(_opacity);
     // We don't add the property here as subclasses should decide on their own whether
