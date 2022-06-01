@@ -280,7 +280,7 @@ namespace openspace {
             //    _nPointsOnPathLine - 1);
 
             //// hard coding for the sake of the smurfsaft
-            //if (traverserIndex < 4) {
+            if (traverserIndex <= _traversers.size() / 2) {
 
             //    // ---------This part works for dayside separate---------
             //    // find out which traverser has the longest traveling time to point of
@@ -296,18 +296,18 @@ namespace openspace {
                         timeToReconTrav1, 
                         mf.pathLines.second.daysideReconnectionStart);
                 }
-            //}
-            //else {
+            }
+            else {
 
-            //    // right now only hard coding for nightside is working
-            //    // then use this with custom number
-            //    _traversers[traverserIndex].setStartPoint(
-            //        2400,
-            //        _nPointsOnPathLine - 1);
-            //    _traversers[traverserIndex + 1].setStartPoint(
-            //        2400,
-            //        _nPointsOnPathLine - 1);
-            //}
+                // right now only hard coding for nightside is working
+                // then use this with custom number
+                _traversers[traverserIndex].setStartPoint(
+                    2400,
+                    _nPointsOnPathLine - 1);
+                _traversers[traverserIndex + 1].setStartPoint(
+                    2400,
+                    _nPointsOnPathLine - 1);
+            }
 
             //_traversers[traverserIndex ].setStartPoint(
             //    2400,
@@ -432,7 +432,7 @@ namespace openspace {
 
                 /************* TEMPORARY MAGIC VALUE ****************/
                 // smurfsaft
-                startTime = -28700.0;
+                //startTime = -28700.0;
                 /****************************************************/
 
                 extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
