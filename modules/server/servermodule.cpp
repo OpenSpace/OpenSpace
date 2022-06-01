@@ -50,6 +50,15 @@ ServerModule::ServerModule()
     , _interfaceOwner({"Interfaces", "Interfaces", "Server Interfaces"})
 {
     addPropertySubOwner(_interfaceOwner);
+
+    global::callback::preSync->emplace_back([this]() {
+        // Trigger callbacks
+        using K = CallbackHandle;
+        using V = CallbackFunction;
+        for (const std::pair<const K, V>& it : _preSyncCallbacks) {
+            it.second(); // call function
+        }
+    });
 }
 
 ServerModule::~ServerModule() {
@@ -231,6 +240,30 @@ void ServerModule::consumeMessages() {
         }
         _messageQueue.pop_front();
     }
+}
+
+ServerModule::CallbackHandle ServerModule::addPreSyncCallback(CallbackFunction cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _preSyncCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void ServerModule::removePreSyncCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _preSyncCallbacks.begin(),
+        _preSyncCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, CallbackFunction>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _preSyncCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _preSyncCallbacks.erase(it);
 }
 
 } // namespace openspace

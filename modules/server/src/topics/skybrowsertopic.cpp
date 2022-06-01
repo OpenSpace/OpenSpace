@@ -55,7 +55,7 @@ SkyBrowserTopic::SkyBrowserTopic()
 
 SkyBrowserTopic::~SkyBrowserTopic() {
     if (_targetDataCallbackHandle != UnsetOnChangeHandle) {
-        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        ServerModule* module = global::moduleEngine->module<ServerModule>();
         if (module) {
             module->removePreSyncCallback(_targetDataCallbackHandle);
         }
@@ -78,7 +78,7 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    ServerModule* module = global::moduleEngine->module<ServerModule>();
     _targetDataCallbackHandle = module->addPreSyncCallback(
         [this]() {
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
