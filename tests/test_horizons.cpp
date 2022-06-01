@@ -119,22 +119,22 @@ void testReadingHorizons(HorizonsType type, std::filesystem::path filePath,
     std::vector<HorizonsKeyframe> data = result.data;
     CHECK(data.size() == 3);
 
-    CHECK(abs(data[0].time - t0) < std::numeric_limits<double>::epsilon());
-    CHECK(abs(data[0].position.x - x0) < std::numeric_limits<double>::epsilon());
-    CHECK(abs(data[0].position.y - y0) < std::numeric_limits<double>::epsilon());
-    CHECK(abs(data[0].position.z - z0) < std::numeric_limits<double>::epsilon());
+    CHECK(data[0].time == Approx(t0));
+    CHECK(data[0].position.x == Approx(x0));
+    CHECK(data[0].position.y == Approx(y0));
+    CHECK(data[0].position.z == Approx(z0));
 
 
-    CHECK(abs(data[1].time - t1) < std::numeric_limits<double>::epsilon());
-    CHECK(abs(data[1].position.x - x1) < std::numeric_limits<double>::epsilon());
-    CHECK(abs(data[1].position.y - y1) < std::numeric_limits<double>::epsilon());
-    CHECK(abs(data[1].position.z - z1) < std::numeric_limits<double>::epsilon());
+    CHECK(data[1].time == Approx(t1));
+    CHECK(data[1].position.x == Approx(x1));
+    CHECK(data[1].position.y == Approx(y1));
+    CHECK(data[1].position.z == Approx(z1));
 
 
-    CHECK(abs(data[2].time - t2) < std::numeric_limits<double>::epsilon());
-    CHECK(abs(data[2].position.x - x2) < std::numeric_limits<double>::epsilon());
-    CHECK(abs(data[2].position.y - y2) < std::numeric_limits<double>::epsilon());
-    CHECK(abs(data[2].position.z - z2) < std::numeric_limits<double>::epsilon());
+    CHECK(data[2].time == Approx(t2));
+    CHECK(data[2].position.x == Approx(x2));
+    CHECK(data[2].position.y == Approx(y2));
+    CHECK(data[2].position.z == Approx(z2));
 
     // Clean up
     openspace::SpiceManager::deinitialize();
@@ -145,6 +145,7 @@ void testReadingHorizons(HorizonsType type, std::filesystem::path filePath,
 TEST_CASE("HorizonsFile: Space module", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     CHECK(true);
+    LINFOC("test_horizons", "Downloading Horizons test data ...");
 #else
     LERRORC("test_horizons", "Theese tests requires the Space module to be enabled");
     CHECK(false);
@@ -158,7 +159,7 @@ TEST_CASE("HorizonsFile: File size too large", "[horizonsfile]") {
     std::string observer = "@ssb";
     std::string target = "-74"; // MRO
     std::string start = "2005-08-13 00:00:00";
-    std::string stop = "2022-09-01 00:00:00";
+    std::string stop = "2022-07-01 00:00:00";
     std::string step = "1";
     std::string unit = "m";
     std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_1.hrz");
@@ -199,7 +200,7 @@ TEST_CASE("HorizonsFile: Time steps too large", "[horizonsfile]") {
     std::string observer = "@ssb";
     std::string target = "-74"; // MRO
     std::string start = "2005-08-13 00:00:00";
-    std::string stop = "2022-09-01 00:00:00";
+    std::string stop = "2022-07-01 00:00:00";
     std::string step = "1111111111";
     std::string unit = "d";
     std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_2.hrz");
