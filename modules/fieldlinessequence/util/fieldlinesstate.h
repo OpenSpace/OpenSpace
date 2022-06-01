@@ -44,7 +44,6 @@ public:
         Topology topology;
         std::vector<glm::vec3> vertices;
         double timeToNextKeyFrame;
-        std::vector<float> lengths;
     };
 
     struct PathLine {

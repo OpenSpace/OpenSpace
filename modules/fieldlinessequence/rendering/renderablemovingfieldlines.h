@@ -64,8 +64,9 @@ public:
         bool forward = true;
         // this will be true when the traverser moves to a topology change
         // signals that it is ready to swap with its partner
-        bool shouldUseTemporaryKeyFrame = false;
+        bool isNewTimeDirection = false;
         bool hasTemporaryKeyFrame = false;
+
         keyFrameIt backKeyFrame;
         keyFrameIt frontKeyFrame;
 

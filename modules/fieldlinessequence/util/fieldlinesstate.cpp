@@ -556,22 +556,22 @@ void FieldlinesState::addMatchingKeyFrames(
         f1.vertices.push_back(v1);
         f2.vertices.push_back(v2);
 
-        // compute accumilated length over the fieldline
-        if (i == 0) {
-            f1.lengths.push_back(0.0f);
-            f2.lengths.push_back(0.0f);
-        }
-        if (i > 0) {
-            f1.lengths.push_back(f1.lengths[i-1] + glm::distance(f1.vertices[i], f1.vertices[i-1]));
-            f2.lengths.push_back(f2.lengths[i-1] + glm::distance(f2.vertices[i], f2.vertices[i-1]));
-        }
+        //// compute accumilated length over the fieldline
+        //if (i == 0) {
+        //    f1.lengths.push_back(0.0f);
+        //    f2.lengths.push_back(0.0f);
+        //}
+        //if (i > 0) {
+        //    f1.lengths.push_back(f1.lengths[i-1] + glm::distance(f1.vertices[i], f1.vertices[i-1]));
+        //    f2.lengths.push_back(f2.lengths[i-1] + glm::distance(f2.vertices[i], f2.vertices[i-1]));
+        //}
     }
 
     f1.timeToNextKeyFrame = time1;
     f2.timeToNextKeyFrame = time2;
 
-    f1.lengths = length1;
-    f2.lengths = length2;
+    //f1.lengths = length1;
+    //f2.lengths = length2;
 
     // Elon: check if even correct. Probably will need both front and back to be < 1.5f
     // to be considered closed. 1.5 is just a number from thin air

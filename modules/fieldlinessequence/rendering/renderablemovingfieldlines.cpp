@@ -270,13 +270,22 @@ namespace openspace {
                 getTimeToReconnectionPoint(mf.pathLines.second.daysideReconnectionStart);
 
 
-            // hard coding for the sake of the presentation
-            if (traverserIndex < 4) {
+            // right now only hard coding for nightside is working
+            // then use this with custom number
+            //_traversers[traverserIndex].setStartPoint(
+            //    1000,
+            //    _nPointsOnPathLine - 1);
+            //_traversers[traverserIndex + 1].setStartPoint(
+            //    1000,
+            //    _nPointsOnPathLine - 1);
 
-                // ---------This part works for dayside separate---------
-                // find out which traverser has the longest traveling time to point of
-                // reconnection and adjust the startpoint according to the shorter 
-                // traverser traveltime
+            //// hard coding for the sake of the smurfsaft
+            //if (traverserIndex < 4) {
+
+            //    // ---------This part works for dayside separate---------
+            //    // find out which traverser has the longest traveling time to point of
+            //    // reconnection and adjust the startpoint according to the shorter 
+            //    // traverser traveltime
                 if (timeToReconTrav1 > timeToReconTrav2) {
                     _traversers[traverserIndex].setStartPoint(
                         timeToReconTrav2, 
@@ -287,18 +296,18 @@ namespace openspace {
                         timeToReconTrav1, 
                         mf.pathLines.second.daysideReconnectionStart);
                 }
-            }
-            else {
+            //}
+            //else {
 
-                // right now only hard coding for nightside is working
-                // then use this with custom number
-                _traversers[traverserIndex].setStartPoint(
-                    2400,
-                    _nPointsOnPathLine - 1);
-                _traversers[traverserIndex + 1].setStartPoint(
-                    2400,
-                    _nPointsOnPathLine - 1);
-            }
+            //    // right now only hard coding for nightside is working
+            //    // then use this with custom number
+            //    _traversers[traverserIndex].setStartPoint(
+            //        2400,
+            //        _nPointsOnPathLine - 1);
+            //    _traversers[traverserIndex + 1].setStartPoint(
+            //        2400,
+            //        _nPointsOnPathLine - 1);
+            //}
 
             //_traversers[traverserIndex ].setStartPoint(
             //    2400,
@@ -422,7 +431,7 @@ namespace openspace {
                 }
 
                 /************* TEMPORARY MAGIC VALUE ****************/
-                // presentation
+                // smurfsaft
                 startTime = -28700.0;
                 /****************************************************/
 
@@ -679,8 +688,10 @@ namespace openspace {
     void RenderableMovingFieldlines::moveLine(const double dt,
         const FieldlinesState::PathLine& pathLine,
         PathLineTraverser& traverser, GLint lineStart,
-        GLsizei nVertices) {
+        GLsizei nVertices) 
+    {
         bool forward = std::signbit(dt) ? false : true;
+
         traverser.forward = forward;
         traverser.timeSinceInterpolation += dt;
 
@@ -692,12 +703,7 @@ namespace openspace {
 
         if (passNext) {
 
-            if (traverser.hasTemporaryKeyFrame) {
-                traverser.hasTemporaryKeyFrame = false;
-                // Empty the vector without deallocating memory
-                //traverser.temporaryInterpolationKeyFrame.vertices.resize(0);
-            }
-
+            traverser.hasTemporaryKeyFrame = false;
             traverser.advanceKeyFrames();
         }
 
@@ -749,15 +755,16 @@ namespace openspace {
     void RenderableMovingFieldlines::moveLines(const double currentTime, const double previousTime) {
 
         double dt = currentTime - previousTime;
+
         bool isValidTime = abs(dt) > DBL_EPSILON;
+        bool isMovingForward = !std::signbit(dt);
+
         if (!isValidTime) {
             return;
         }
 
         const std::vector<FieldlinesState::MatchingFieldlines>& allMatchingFieldlines =
             _fieldlineState.getAllMatchingFieldlines();
-        // used to place fieldline at correct positions at birth/death
-        double newTime = currentTime + dt;
 
         size_t lineIndex = 0;
 
@@ -767,6 +774,19 @@ namespace openspace {
             int lineStart2 = _fieldlineState.lineStart()[lineIndex + 1];
             int nVertices1 = _fieldlineState.lineCount()[lineIndex];
             int nVertices2 = _fieldlineState.lineCount()[lineIndex + 1];
+
+            // Tracking change of direction is needed for temporary
+            // key frames
+            bool isNewTimeDirection = _traversers[lineIndex].forward != isMovingForward;
+            if (isNewTimeDirection) 
+            {
+                _traversers[lineIndex].isNewTimeDirection = true;
+                _traversers[lineIndex + 1].isNewTimeDirection = true;
+            }
+            else {
+                _traversers[lineIndex].isNewTimeDirection = false;
+                _traversers[lineIndex + 1].isNewTimeDirection = false;
+            }
 
             // Booleans to see if either of the traversers reached a topology change
             bool isNewTopology1 = _traversers[lineIndex].backKeyFrame->topology !=
@@ -780,9 +800,7 @@ namespace openspace {
             bool hasTemporaryKeyFrame = hasTemporaryKeyFrame1 || hasTemporaryKeyFrame2;
 
             // if there is a topology change vertices should be swapped
-            if (isNewTopology && !hasTemporaryKeyFrame) {
-
-                bool isMovingForward = _traversers[lineIndex].forward;
+            if (isNewTopology && (!hasTemporaryKeyFrame || isNewTimeDirection)) {
 
                 // The traverser that has not reached the reconnection point
                 // should advance its next key frame and change the time to next
@@ -831,8 +849,36 @@ namespace openspace {
                 // Different time calculations depending on time direction
                 // Might be some bugs left
                 if (isMovingForward) {
-                    _traversers[lineIndex].timeInterpolationDenominator -= _traversers[lineIndex].timeSinceInterpolation;
-                    _traversers[lineIndex + 1].timeInterpolationDenominator -= _traversers[lineIndex + 1].timeSinceInterpolation;
+
+                    //_traversers[lineIndex].timeInterpolationDenominator -= _traversers[lineIndex].timeSinceInterpolation;
+                    //_traversers[lineIndex + 1].timeInterpolationDenominator -= _traversers[lineIndex + 1].timeSinceInterpolation;
+
+                    if (isNewTimeDirection) {
+                        _traversers[lineIndex].timeInterpolationDenominator =
+                            _traversers[lineIndex].backKeyFrame->timeToNextKeyFrame -
+                            _traversers[lineIndex].timeSinceInterpolation;
+                        _traversers[lineIndex + 1].timeInterpolationDenominator =
+                            _traversers[lineIndex + 1].backKeyFrame->timeToNextKeyFrame -
+                            _traversers[lineIndex + 1].timeSinceInterpolation;
+
+                    }
+                    else {
+                        _traversers[lineIndex].timeInterpolationDenominator =
+                            _traversers[lineIndex].backKeyFrame->timeToNextKeyFrame -
+                            (_traversers[lineIndex].timeSinceInterpolation -
+                                _traversers[lineIndex].timeInterpolationDenominator);
+                        _traversers[lineIndex + 1].timeInterpolationDenominator =
+                            _traversers[lineIndex + 1].backKeyFrame->timeToNextKeyFrame -
+                            (_traversers[lineIndex + 1].timeSinceInterpolation -
+                                _traversers[lineIndex + 1].timeInterpolationDenominator);
+
+                    }
+
+                    //_traversers[lineIndex].timeInterpolationDenominator =
+                    //    _traversers[lineIndex].temporaryInterpolationKeyFrame.timeToNextKeyFrame;
+                    //_traversers[lineIndex + 1].timeInterpolationDenominator =
+                    //    _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.timeToNextKeyFrame;
+
                     _traversers[lineIndex].timeSinceInterpolation = 0;
                     _traversers[lineIndex + 1].timeSinceInterpolation = 0;
 
@@ -840,35 +886,77 @@ namespace openspace {
                     _traversers[lineIndex + 1].hasTemporaryKeyFrame = true;
                 }
                 else {
-                    _traversers[lineIndex].timeInterpolationDenominator = _traversers[lineIndex].timeSinceInterpolation;
-                    _traversers[lineIndex + 1].timeInterpolationDenominator = _traversers[lineIndex + 1].timeSinceInterpolation;
+
+                    if (isNewTimeDirection) {
+
+                        _traversers[lineIndex].timeInterpolationDenominator =
+                            _traversers[lineIndex].backKeyFrame->timeToNextKeyFrame -
+                            _traversers[lineIndex].temporaryInterpolationKeyFrame.timeToNextKeyFrame +
+                            _traversers[lineIndex].timeSinceInterpolation;
+
+                        _traversers[lineIndex + 1].timeInterpolationDenominator =
+                            _traversers[lineIndex + 1].backKeyFrame->timeToNextKeyFrame -
+                            _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.timeToNextKeyFrame +
+                            _traversers[lineIndex + 1].timeSinceInterpolation;
+
+                        //_traversers[lineIndex].timeSinceInterpolation = 
+                        //    _traversers[lineIndex].backKeyFrame->timeToNextKeyFrame -
+                        //    _traversers[lineIndex].temporaryInterpolationKeyFrame.timeToNextKeyFrame;
+
+                        //_traversers[lineIndex + 1].timeSinceInterpolation =
+                        //    _traversers[lineIndex + 1].backKeyFrame->timeToNextKeyFrame -
+                        //    _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.timeToNextKeyFrame;
+                    }
+                    else {
+                        _traversers[lineIndex].timeInterpolationDenominator = _traversers[lineIndex].timeSinceInterpolation;
+                        _traversers[lineIndex + 1].timeInterpolationDenominator = _traversers[lineIndex + 1].timeSinceInterpolation;
+                    }
+
+                    _traversers[lineIndex].timeSinceInterpolation =
+                        _traversers[lineIndex].timeInterpolationDenominator;
+                    _traversers[lineIndex + 1].timeSinceInterpolation =
+                        _traversers[lineIndex + 1].timeInterpolationDenominator;
 
                     _traversers[lineIndex].hasTemporaryKeyFrame = true;
                     _traversers[lineIndex + 1].hasTemporaryKeyFrame = true;
                 }
-            }
 
+                // Set how long it is from temporary key frame to next key frame
+                _traversers[lineIndex].temporaryInterpolationKeyFrame.timeToNextKeyFrame =
+                    _traversers[lineIndex].backKeyFrame->timeToNextKeyFrame -
+                    _traversers[lineIndex].timeSinceInterpolation;
+
+                _traversers[lineIndex + 1].temporaryInterpolationKeyFrame.timeToNextKeyFrame =
+                    _traversers[lineIndex + 1].backKeyFrame->timeToNextKeyFrame -
+                    _traversers[lineIndex + 1].timeSinceInterpolation;
+
+            }
+            
             // Individual delta time for each traverser
             // since it might be modified depending on birth and death
             double dt1 = dt;
 
+            bool hasShortenedDt = false;
             // Checks if line would move after birth time with current dt
             // and changes dt accordingly       
-            bool isAfterBirth1 = currentTime >= allMatchingFieldlines[i].pathLines.first.birthTime;
-            bool movesBeforeBirth1 = newTime < allMatchingFieldlines[i].pathLines.first.birthTime;
-            if (isAfterBirth1 && movesBeforeBirth1) {
-                dt1 += allMatchingFieldlines[i].pathLines.first.birthTime - newTime;
+            bool isAfterBirth1 = previousTime >= allMatchingFieldlines[i].pathLines.first.birthTime;
+            bool movesBeforeBirth1 = currentTime < allMatchingFieldlines[i].pathLines.first.birthTime;
+            if ((isAfterBirth1 && movesBeforeBirth1) || (!isAfterBirth1 && !movesBeforeBirth1)) {
+                dt1 += allMatchingFieldlines[i].pathLines.first.birthTime - currentTime;
+                hasShortenedDt = true;
             }
 
             // Checks if line would move after death time with current dt
             // and changes dt accordingly 
-            bool isBeforeDeath1 = currentTime <= allMatchingFieldlines[i].pathLines.first.deathTime;
-            bool movesAfterDeath1 = newTime > allMatchingFieldlines[i].pathLines.first.deathTime;
-            if (isBeforeDeath1 && movesAfterDeath1) {
-                dt1 += allMatchingFieldlines[i].pathLines.first.deathTime - newTime;
+            bool isBeforeDeath1 = previousTime <= allMatchingFieldlines[i].pathLines.first.deathTime;
+            bool movesAfterDeath1 = currentTime > allMatchingFieldlines[i].pathLines.first.deathTime;
+            if ((isBeforeDeath1 && movesAfterDeath1) || (!isBeforeDeath1 && !movesAfterDeath1)) {
+                dt1 += allMatchingFieldlines[i].pathLines.first.deathTime - currentTime;
+                hasShortenedDt = true;
             }
 
-            if (isAfterBirth1 && isBeforeDeath1) {
+
+            if (isAfterBirth1 && isBeforeDeath1 || hasShortenedDt) {
                 moveLine(dt1, allMatchingFieldlines[i].pathLines.first,
                     _traversers[lineIndex], lineStart1, nVertices1);
             }
@@ -878,23 +966,26 @@ namespace openspace {
             double dt2 = dt;
             ++lineIndex;
 
+            hasShortenedDt = false;
             // checks if line would move after birth time with current dt
             // and changes dt accordingly 
-            bool isAfterBirth2 = currentTime >= allMatchingFieldlines[i].pathLines.second.birthTime;
-            bool movesBeforeBirth2 = newTime < allMatchingFieldlines[i].pathLines.second.birthTime;
-            if (isAfterBirth2 && movesBeforeBirth2) {
-                dt2 += allMatchingFieldlines[i].pathLines.second.birthTime - newTime;
+            bool isAfterBirth2 = previousTime >= allMatchingFieldlines[i].pathLines.second.birthTime;
+            bool movesBeforeBirth2 = currentTime < allMatchingFieldlines[i].pathLines.second.birthTime;
+            if ((isAfterBirth2 && movesBeforeBirth2) || (!isAfterBirth2 && !movesBeforeBirth2)) {
+                dt2 += allMatchingFieldlines[i].pathLines.second.birthTime - currentTime;
+                hasShortenedDt = true;
             }
 
             // checks if line would move after death time with current dt
             // and changes dt accordingly 
-            bool isBeforeDeath2 = currentTime <= allMatchingFieldlines[i].pathLines.second.deathTime;
-            bool movesAfterDeath2 = newTime > allMatchingFieldlines[i].pathLines.second.deathTime;
-            if (isBeforeDeath2 && movesAfterDeath2) {
-                dt2 += allMatchingFieldlines[i].pathLines.second.deathTime - newTime;
+            bool isBeforeDeath2 = previousTime <= allMatchingFieldlines[i].pathLines.second.deathTime;
+            bool movesAfterDeath2 = currentTime > allMatchingFieldlines[i].pathLines.second.deathTime;
+            if ((isBeforeDeath2 && movesAfterDeath2) || (!isBeforeDeath2 && !movesAfterDeath2)) {
+                dt2 += allMatchingFieldlines[i].pathLines.second.deathTime - currentTime;
+                hasShortenedDt = true;
             }
 
-            if (isAfterBirth2 && isBeforeDeath2) {
+            if (isAfterBirth2 && isBeforeDeath2 || hasShortenedDt) {
                 moveLine(dt2, allMatchingFieldlines[i].pathLines.second,
                     _traversers[lineIndex], lineStart2, nVertices2);
             }
