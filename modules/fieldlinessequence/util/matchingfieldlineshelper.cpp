@@ -266,11 +266,11 @@ namespace openspace::fls {
 
             // for the sake of the smurfsaft
             // match the death of dayside to the birth of nigthside
-            if (i <= matchingSeedPoints.size() / 2) {
+            if (i < matchingSeedPoints.size() / 4) {
                 deathTime = birthTime + 500;
             }
             else {
-                deathTime = birthTime + 300000;
+                deathTime = birthTime + 2000;
             }
 
             //deathTime = birthTime + 480;
