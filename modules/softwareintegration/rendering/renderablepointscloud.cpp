@@ -47,7 +47,7 @@ namespace {
 
     constexpr const std::array<const char*, 16> UniformNames = {
         "color", "opacity", "size", "modelMatrix", "cameraUp", "screenSize",
-        "cameraViewProjectionMatrix", "cameraPosition", "sizeOption", "colormapTexture",
+        "cameraViewProjectionMatrix", "eyePosition", "sizeOption", "colormapTexture",
         "colormapMin", "colormapMax", "colormapEnabled", "linearSizeMin",
         "linearSizeMax", "linearSizeEnabled"
     };
@@ -280,26 +280,31 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 
     _shaderProgram->activate();
 
-    _shaderProgram->setUniform(_uniformCache.cameraPosition, data.camera.positionVec3());
+    auto eyePosition = glm::dvec3{
+        glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    };
+    _shaderProgram->setUniform(_uniformCache.eyePosition, eyePosition);
+    // _shaderProgram->setUniform(_uniformCache.cameraPosition, data.camera.positionVec3());
 
     _shaderProgram->setUniform(
         _uniformCache.cameraUp,
-        glm::vec3(data.camera.lookUpVectorWorldSpace())
+        glm::dvec3(data.camera.lookUpVectorWorldSpace())
     );
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    _shaderProgram->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
+    _shaderProgram->setUniform(_uniformCache.screenSize, glm::ivec2(viewport[2], viewport[3]));
 
-    glm::dmat4 modelMatrix =
+    auto modelMatrix = glm::dmat4{
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale)
+    };
     _shaderProgram->setUniform(_uniformCache.modelMatrix, modelMatrix);
 
     _shaderProgram->setUniform(
         _uniformCache.cameraViewProjectionMatrix,
-        glm::mat4(
+        glm::dmat4(
             glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
         )
     );
@@ -337,7 +342,7 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     // Changes GL state:
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(false);
+    glDepthMask(GL_FALSE);
 
     glBindVertexArray(_vao);
     const GLsizei nPoints = static_cast<GLsizei>(pointDataSlice->size() / 3);
@@ -347,6 +352,7 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->deactivate();
 
     // Restores GL State
+    glDepthMask(GL_TRUE);
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
 }

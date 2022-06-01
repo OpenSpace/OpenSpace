@@ -77,7 +77,7 @@ protected:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
     UniformCache(
         color, opacity, size, modelMatrix, cameraUp, screenSize,
-        cameraViewProjectionMatrix, cameraPosition, sizeOption,
+        cameraViewProjectionMatrix, eyePosition, sizeOption,
         colormapTexture, colormapMin, colormapMax, colormapEnabled,
         linearSizeMin, linearSizeMax, linearSizeEnabled
     ) _uniformCache;

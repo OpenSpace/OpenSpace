@@ -34,18 +34,19 @@ flat in float vs_linearSizeAttributeScalar[];
 
 flat out float ge_screenSpaceDepth;
 out float ta;
+out vec4 ge_positionViewSpace;
 
 out vec2 coords;
 out float ge_colormapAttributeScalar;
 
-uniform dvec3 cameraPosition;
-uniform vec3 cameraUp;
+uniform dvec3 eyePosition;
+uniform dvec3 cameraUp;
 uniform float size;
 uniform int sizeOption;
-uniform vec2 screenSize;
+uniform ivec2 screenSize;
 
 uniform dmat4 modelMatrix;
-uniform mat4 cameraViewProjectionMatrix;
+uniform dmat4 cameraViewProjectionMatrix;
 
 uniform float linearSizeMin;
 uniform float linearSizeMax;
@@ -56,8 +57,39 @@ uniform bool linearSizeEnabled;
 const int SizeCompositionOptionUniform = 0;
 const int SizeCompositionOptionNonUniform = 1;
 
-const float minBillboardSize = 0.0;
-const float maxBillboardSize = 100.0;
+const float maxSize = 1000.0;
+
+dvec4 z_normalization_d(dvec4 v_in) {
+    dvec4 v_out = v_in;
+    v_out.z = 0;
+    return v_out;
+}
+
+dvec4[4] getCorners(dvec4 center, dvec3 right, dvec3 up) {
+    // Saving matrix multiplication:
+    dvec4 centerClip = cameraViewProjectionMatrix * center;
+    dvec4 rightClip = cameraViewProjectionMatrix * dvec4(right, 0.0);
+    dvec4 upClip = cameraViewProjectionMatrix * dvec4(up, 0.0);
+
+    dvec4 lowerLeft = z_normalization_d(centerClip - rightClip - upClip);
+    dvec4 lowerRight = z_normalization_d(centerClip + rightClip - upClip);
+    dvec4 upperLeft = z_normalization_d(centerClip + upClip - rightClip);
+    dvec4 upperRight = z_normalization_d(centerClip + upClip + rightClip);
+
+    return dvec4[4](lowerLeft, lowerRight, upperLeft, upperRight);
+}
+
+dvec4[2] getTwoCorners(dvec4 center, dvec3 right, dvec3 up) {
+    // Saving matrix multiplication:
+    dvec4 centerClip = cameraViewProjectionMatrix * center;
+    dvec4 rightClip = cameraViewProjectionMatrix * dvec4(right, 0.0);
+    dvec4 upClip = cameraViewProjectionMatrix * dvec4(up, 0.0);
+
+    dvec4 lowerLeft = z_normalization_d(centerClip - rightClip - upClip);
+    dvec4 upperRight = z_normalization_d(centerClip + upClip + rightClip);
+
+    return dvec4[2](lowerLeft, upperRight);
+}
 
 void main() {
     ge_colormapAttributeScalar = vs_colormapAttributeScalar[0];
@@ -66,12 +98,10 @@ void main() {
 
     vec3 pos = gl_in[0].gl_Position.xyz;
 
-    dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
+    dvec4 modelPos = modelMatrix * dvec4(pos, 1.0);
 
-    float scaleMultiply = 1.0e15 * size;
+    double scaleMultiply = 1.0e17 * size;
 
-    scaleMultiply *= 15; // TODO: FIX POINT SIZE, NOW IT'S ARBRITRARY
-    
     if (linearSizeEnabled) {
         float interpolatedSizeAtt = 1.0;
         float colormapAttributeScalar = vs_linearSizeAttributeScalar[0];
@@ -89,94 +119,125 @@ void main() {
 
         scaleMultiply *= interpolatedSizeAtt;
     }
-    
-    vec3 normal = vec3(normalize(cameraPosition - dpos.xyz));
-    vec3 newRight = normalize(cross(cameraUp, normal));
-    vec3 newUp = cross(normal, newRight);
+
+    dvec3 normal = normalize(eyePosition - modelPos.xyz);
+    dvec3 newRight = normalize(cross(cameraUp, normal));
+    dvec3 newUp = cross(normal, newRight);
 
     if (sizeOption == SizeCompositionOptionUniform) {
-        double distCamera = length(cameraPosition - dpos.xyz);
-        scaleMultiply *= (float(distCamera) / 1.0e19);
+        double distanceToPoint = length(eyePosition - modelPos.xyz);
+        scaleMultiply *= distanceToPoint / 1.0e20;
     }
 
-    vec3 scaledRight = scaleMultiply * newRight * 0.5;
-    vec3 scaledUp = scaleMultiply * newUp * 0.5;
+    dvec3 scaledRight = scaleMultiply * newRight * 0.5;
+    dvec3 scaledUp = scaleMultiply * newUp * 0.5;
 
+    ge_screenSpaceDepth = float(modelPos.w);
+    ge_positionViewSpace = vec4(modelPos);
+    
     {
-        scaleMultiply *= exp(size * size);
-        
-        vec4 initialPosition = z_normalization(
-            cameraViewProjectionMatrix * 
-            vec4(
-                vec3(dpos.xyz) - scaledRight - scaledUp, dpos.w
-            )
-        );
+        dvec4 corners[2] = getTwoCorners(modelPos, scaledRight, scaledUp);
 
-        ge_screenSpaceDepth = initialPosition.w;
-        
-        vec4 crossCorner = z_normalization(
-            cameraViewProjectionMatrix * 
-            vec4(
-                vec3(dpos.xyz) + scaledUp + scaledRight, dpos.w
-            )
-        );
-        
         // Testing size for rectangular viewport:
-        vec2 halfViewSize = screenSize * 0.5;
-        vec2 topRight = crossCorner.xy / crossCorner.w;
-        vec2 bottomLeft = initialPosition.xy / initialPosition.w;
+        dvec2 halfViewSize = screenSize * 0.5;
+        dvec2 topRight = corners[1].xy / corners[1].w;
+        dvec2 bottomLeft = corners[0].xy / corners[0].w;
         
         // width and height
-        vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
+        dvec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
         
-        if (length(sizes) > maxBillboardSize) {
-            float correctionScale = maxBillboardSize / length(sizes);
-            
+        if (length(sizes) > maxSize) {
+            double correctionScale = maxSize / length(sizes);
             scaledRight *= correctionScale;
             scaledUp *= correctionScale;
         }
-        else {
-            // linear alpha decay
-            if (sizes.x < 2.0 * minBillboardSize) {
-                float maxVar = 2.0 * minBillboardSize;
-                float minVar = minBillboardSize;
-                float var = sizes.y + sizes.x;
-                ta = (var - minVar) / (maxVar - minVar);
-                if (ta == 0.0) {
-                    return;
-                }
-            }
-        }
     }
 
-    // Saving one matrix multiplication:
-    vec4 dposClip = cameraViewProjectionMatrix * vec4(dpos);
-    vec4 scaledRightClip = cameraViewProjectionMatrix * vec4(scaledRight, 0.0);
-    vec4 scaledUpClip = cameraViewProjectionMatrix * vec4(scaledUp, 0.0);
-
-    vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
-    vec4 secondPosition = z_normalization(dposClip + scaledRightClip - scaledUpClip);
-    vec4 crossCorner = z_normalization(dposClip + scaledUpClip + scaledRightClip);
-    vec4 thirdPosition = z_normalization(dposClip + scaledUpClip - scaledRightClip);
-
-    ge_screenSpaceDepth = initialPosition.w;
+    dvec4 corners[4] = getCorners(modelPos, scaledRight, scaledUp);
 
     // Build primitive    
-    gl_Position = initialPosition;
+    gl_Position = vec4(corners[0]);
     coords = vec2(0.0, 0.0);
     EmitVertex();
 
-    gl_Position = secondPosition;
+    gl_Position = vec4(corners[1]);
     coords = vec2(1.0, 0.0);
     EmitVertex();
 
-    gl_Position = thirdPosition;
+    gl_Position = vec4(corners[2]);
     coords = vec2(0.0, 1.0);
     EmitVertex();
 
-    gl_Position = crossCorner;
+    gl_Position = vec4(corners[3]);
     coords = vec2(1.0, 1.0);
     EmitVertex();
 
     EndPrimitive();
 }
+
+// float scaleForNonUniform() {
+//     return (size * 500.0) * pow(10.0, 12.5);
+// }
+
+// float scaleForUniform(vec3 pos) {
+//     float distanceToPoint = length(eyePosition - pos);
+//     return (distanceToPoint * size) / (1500.0);
+// }
+
+// void main() {
+//     ge_colormapAttributeScalar = vs_colormapAttributeScalar[0];
+
+//     vec3 pos = gl_in[0].gl_Position.xyz;
+
+//     float scaleMultiply = 1.0;
+//     if (sizeOption == SizeCompositionOptionUniform) {
+//         scaleMultiply = scaleForUniform(pos);
+//     }
+//     else if (sizeOption == SizeCompositionOptionNonUniform) {
+//         scaleMultiply = scaleForNonUniform();
+//     }
+
+//     vec3 normal = normalize(eyePosition - pos);
+//     vec3 newRight = normalize(cross(cameraUp, normal));
+//     vec3 newUp = normalize(cross(normal, newRight));
+//     vec3 scaledRight = scaleMultiply * newRight;
+//     vec3 scaledUp = scaleMultiply * newUp;
+
+//     vec4 lowerLeft = z_normalization(
+//         vec4(cameraViewProjectionMatrix * modelMatrix * vec4(pos - scaledRight - scaledUp, 1.0))
+//     );
+    
+//     vec4 upperRight = z_normalization(
+//         vec4(cameraViewProjectionMatrix * modelMatrix * vec4(pos + scaledUp + scaledRight, 1.0))
+//     ); 
+
+//     vec4 lowerRight = z_normalization(
+//         vec4(cameraViewProjectionMatrix * modelMatrix * vec4(pos + scaledRight - scaledUp, 1.0))
+//     );
+    
+//     vec4 upperLeft = z_normalization(
+//         vec4(cameraViewProjectionMatrix * modelMatrix * vec4(pos + scaledUp - scaledRight, 1.0))
+//     );
+
+//     ge_screenSpaceDepth = lowerLeft.w;
+//     ge_positionViewSpace = lowerLeft;
+
+//     // Build primitive    
+//     gl_Position = lowerLeft;
+//     coords = vec2(0.0, 0.0);
+//     EmitVertex();
+
+//     gl_Position = lowerRight;
+//     coords = vec2(1.0, 0.0);
+//     EmitVertex();
+
+//     gl_Position = upperLeft;
+//     coords = vec2(0.0, 1.0);
+//     EmitVertex();
+
+//     gl_Position = upperRight;
+//     coords = vec2(1.0, 1.0);
+//     EmitVertex();
+
+//     EndPrimitive();
+// }

@@ -28,6 +28,7 @@
 flat in float ge_colormapAttributeScalar;
 in vec2 coords;
 flat in float ge_screenSpaceDepth;
+flat in vec4 ge_positionViewSpace;
 in float ta;
 
 uniform vec4 color;
@@ -61,7 +62,7 @@ Fragment getFragment() {
 
     const float radius = 0.5;
     float distance = length(coords - radius);
-    if (distance > 0.6) discard;
+    if (distance > 0.55) discard;
 
     // calculate distance from the origin point
     float circle = smoothstep(radius, radius - (radius * 0.2), distance);
@@ -75,9 +76,9 @@ Fragment getFragment() {
     Fragment frag;
     frag.color = outputColor * vec4(circle);
     frag.depth = ge_screenSpaceDepth;
-    frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
+    frag.gPosition = ge_positionViewSpace;
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    frag.disableLDR2HDR = true;
+    frag.disableLDR2HDR = false;
 
     return frag;
 }
