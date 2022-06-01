@@ -215,43 +215,42 @@ namespace openspace {
 
         _lineWidth = p.lineWidth.value_or(_lineWidth);
         _renderFlowLine = p.renderFlowLine.value_or(_renderFlowLine);
+        _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
 
-        //_colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
+        _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
+        _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
+        if (p.colorMethod.has_value()) {
+            if (p.colorMethod.value() == "Uniform") {
+                _colorMethod = static_cast<int>(ColorMethod::Uniform);
+            }
+            else {
+                _colorMethod = static_cast<int>(ColorMethod::ByQuantity);
+            }
+        }
+        else {
+            _colorMethod = static_cast<int>(ColorMethod::Uniform);
+        }
 
-        //_colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
-        //_colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
-        //if (p.colorMethod.has_value()) {
-        //    if (p.colorMethod.value() == "Uniform") {
-        //        _colorMethod = static_cast<int>(ColorMethod::Uniform);
-        //    }
-        //    else {
-        //        _colorMethod = static_cast<int>(ColorMethod::ByQuantity);
-        //    }
-        //}
-        //else {
-        //    _colorMethod = static_cast<int>(ColorMethod::Uniform);
-        //}
+        if (p.colorTableRanges.has_value()) {
+            _colorTableRanges = *p.colorTableRanges;
+        }
+        else {
+            _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
+        }
 
-        //if (p.colorTableRanges.has_value()) {
-        //    _colorTableRanges = *p.colorTableRanges;
-        //}
-        //else {
-        //    _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
-        //}
-
-        //if (p.colorQuantity.has_value()) {
-        //    _colorMethod = static_cast<int>(ColorMethod::ByQuantity);
-        //    _colorQuantityTemp = *p.colorQuantity;
-        //}
+        if (p.colorQuantity.has_value()) {
+            _colorMethod = static_cast<int>(ColorMethod::ByQuantity);
+            _colorQuantityTemp = *p.colorQuantity;
+        }
     }
 
     void RenderableMovingFieldlines::initialize() {
-        //// Set a default color table, just in case the (optional) user defined paths are
-        //// corrupt or not provided
-        //_colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-        //_transferFunction = std::make_unique<TransferFunction>(
-        //    absPath(_colorTablePaths[0]).string()
-        //    );
+        // Set a default color table, just in case the (optional) user defined paths are
+        // corrupt or not provided
+        _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
+        _transferFunction = std::make_unique<TransferFunction>(
+            absPath(_colorTablePaths[0]).string()
+            );
 
         bool stateSuccuess = getStateFromCdfFiles();
         if (!stateSuccuess) {
@@ -310,6 +309,13 @@ namespace openspace {
             //        _nPointsOnPathLine - 1);
             //}
 
+            //_traversers[traverserIndex ].setStartPoint(
+            //    2400,
+            //    _nPointsOnPathLine - 1);
+            //_traversers[traverserIndex + 1].setStartPoint(
+            //    2400,
+            //    _nPointsOnPathLine - 1);
+
             // initialize the temporary key frame for each traverser
             _traversers[traverserIndex].temporaryInterpolationKeyFrame.vertices = 
                 std::vector(_nPointsOnFieldlines, glm::vec3{});
@@ -320,92 +326,53 @@ namespace openspace {
             traverserIndex += 2;
         }
 
-        int nFieldlines = _traversers.size();
-        int nVertices = _nPointsOnFieldlines * nFieldlines + 
-            _nPointsOnPathLine * 2 * nFieldlines;
-
-        _vertexBuffer.reserve(nVertices);
-
-        std::vector<FieldlinesState::MatchingFieldlines> matchingFieldlines =
-            _fieldlineState.getAllMatchingFieldlines();
-
-        // Initialize filedlines in buffer
-        for (PathLineTraverser traverser : _traversers) {
-
-            FieldlineVertex vertex;
-            vertex.position = glm::vec3{ 0.0f, 0.0f, 0.0f };
-            vertex.topology = static_cast<float>(traverser.frontKeyFrame->topology);
-            vertex.alpha = 0.0f;
-
-            _vertexBuffer.insert(_vertexBuffer.end(), _nPointsOnFieldlines, vertex);
-        }
-
-        // Initialize pathlines in buffer
-        float a = static_cast<float>(_renderFlowLine);
-        for (FieldlinesState::MatchingFieldlines mf : matchingFieldlines) {
-            for (glm::vec3 p : mf.pathLines.first.line) {
-                FieldlineVertex vertex;
-                vertex.position = p * fls::ReToMeter;
-                vertex.topology = -1.0f;
-                vertex.alpha = a;
-
-                _vertexBuffer.push_back(vertex);
-            }
-
-            for (glm::vec3 p : mf.pathLines.second.line) {
-                FieldlineVertex vertex;
-                vertex.position = p * fls::ReToMeter;
-                vertex.topology = -1.0f;
-                vertex.alpha = a;
-
-                _vertexBuffer.push_back(vertex);
-            }
-        }
-
         _renderedLines = _fieldlineState.vertexPositions();
+        _debugTopologyColor = std::vector<float>(_renderedLines.size(), -1.f);
+        size_t nExtraQuantities = _fieldlineState.nExtraQuantities();
+
+        // Each fieldline starts unrendered; changes depending on lifetime in update()
+        _renderedLinesAlpha = std::vector<float>(_renderedLines.size(), 0.0f);
 
         addProperty(_lineWidth);
         addProperty(_renderFlowLine);
+        addPropertySubOwner(_colorGroup);
+        _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
+        _colorGroup.addProperty(_colorUniform);
 
-        //size_t nExtraQuantities = _fieldlineState.nExtraQuantities();
-        //addPropertySubOwner(_colorGroup);
-        //_colorUniform.setViewOption(properties::Property::ViewOptions::Color);
-        //_colorGroup.addProperty(_colorUniform);
+        if (nExtraQuantities > 0) {
+            _colorQuantity = _colorQuantityTemp;
+            _colorQuantityMinMax = _colorTableRanges[_colorQuantity];
+            _colorQuantityMinMax.setViewOption(
+                properties::Property::ViewOptions::MinMaxRange
+            );
+            _colorGroup.addProperty(_colorQuantityMinMax);
+            _colorGroup.addProperty(_colorMethod);
+            _colorGroup.addProperty(_colorQuantity);
+            _colorGroup.addProperty(_colorTablePath);
 
-        //if (nExtraQuantities > 0) {
-        //    _colorQuantity = _colorQuantityTemp;
-        //    _colorQuantityMinMax = _colorTableRanges[_colorQuantity];
-        //    _colorQuantityMinMax.setViewOption(
-        //        properties::Property::ViewOptions::MinMaxRange
-        //    );
-        //    _colorGroup.addProperty(_colorQuantityMinMax);
-        //    _colorGroup.addProperty(_colorMethod);
-        //    _colorGroup.addProperty(_colorQuantity);
-        //    _colorGroup.addProperty(_colorTablePath);
+            const std::vector<std::string>& extraNames = _fieldlineState.extraQuantityNames();
+            for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
+                _colorQuantity.addOption(i, extraNames[i]);
+            }
 
-        //    const std::vector<std::string>& extraNames = _fieldlineState.extraQuantityNames();
-        //    for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
-        //        _colorQuantity.addOption(i, extraNames[i]);
-        //    }
+            _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
+            _colorTablePaths.resize(nExtraQuantities, _colorTablePaths.back());
 
-        //    _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
-        //    _colorTablePaths.resize(nExtraQuantities, _colorTablePaths.back());
+            _colorTablePath = _colorTablePaths[0];
 
-        //    _colorTablePath = _colorTablePaths[0];
-
-        //    _colorQuantity.onChange([this]() {
-        //        _shouldUpdateColorBuffer = true;
-        //        _colorQuantityMinMax = _colorTableRanges[_colorQuantity];
-        //        _colorTablePath = _colorTablePaths[_colorQuantity];
-        //        });
-        //    _colorTablePath.onChange([this]() {
-        //        _transferFunction->setPath(_colorTablePath);
-        //        _colorTablePaths[_colorQuantity] = _colorTablePath;
-        //        });
-        //    _colorQuantityMinMax.onChange([this]() {
-        //        _colorTableRanges[_colorQuantity] = _colorQuantityMinMax;
-        //        });
-        //}
+            _colorQuantity.onChange([this]() {
+                _shouldUpdateColorBuffer = true;
+                _colorQuantityMinMax = _colorTableRanges[_colorQuantity];
+                _colorTablePath = _colorTablePaths[_colorQuantity];
+                });
+            _colorTablePath.onChange([this]() {
+                _transferFunction->setPath(_colorTablePath);
+                _colorTablePaths[_colorQuantity] = _colorTablePath;
+                });
+            _colorQuantityMinMax.onChange([this]() {
+                _colorTableRanges[_colorQuantity] = _colorQuantityMinMax;
+                });
+        }
     }
 
     void RenderableMovingFieldlines::initializeGL() {
@@ -414,9 +381,12 @@ namespace openspace {
             absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/movingfieldlines_vs.glsl"),
             absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/movingfieldlines_fs.glsl")
         );
-
+        glGenVertexArrays(1, &_vertexArrayObjectFlow);
+        glGenBuffers(1, &_vertexPositionBufferFlow);
         glGenVertexArrays(1, &_vertexArrayObject);
-        glGenBuffers(1, &_vertexBufferObject);
+        glGenBuffers(1, &_vertexPositionBuffer);
+        glGenBuffers(1, &_vertexColorBuffer);
+        glGenBuffers(1, &_vertexAlphaBuffer);
 
         // Needed for additive blending
         setRenderBin(Renderable::RenderBin::Overlay);
@@ -460,6 +430,11 @@ namespace openspace {
                     ));
                 }
 
+                /************* TEMPORARY MAGIC VALUE ****************/
+                // smurfsaft
+                startTime = -28700.0;
+                /****************************************************/
+
                 extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
                 shouldExtractSeedPoints = false;
             }
@@ -496,12 +471,22 @@ namespace openspace {
         return isSuccessful;
     }
 
+
     void RenderableMovingFieldlines::deinitializeGL() {
         glDeleteVertexArrays(1, &_vertexArrayObject);
         _vertexArrayObject = 0;
 
-        glDeleteBuffers(1, &_vertexBufferObject);
-        _vertexBufferObject = 0;
+        glDeleteVertexArrays(1, &_vertexArrayObjectFlow);
+        _vertexArrayObjectFlow = 0;
+
+        glDeleteBuffers(1, &_vertexPositionBuffer);
+        _vertexPositionBuffer = 0;
+
+        glDeleteBuffers(1, &_vertexColorBuffer);
+        _vertexColorBuffer = 0;
+
+        glDeleteBuffers(1, &_vertexAlphaBuffer);
+        _vertexAlphaBuffer = 0;
 
         if (_shaderProgram) {
             global::renderEngine->removeRenderProgram(_shaderProgram.get());
@@ -632,16 +617,16 @@ namespace openspace {
 
         _shaderProgram->setUniform("modelViewProjection",
             data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
-        //_shaderProgram->setUniform("lineColor", _colorUniform);
-        //_shaderProgram->setUniform("colorMethod", _colorMethod);
+        _shaderProgram->setUniform("lineColor", _colorUniform);
+        _shaderProgram->setUniform("colorMethod", _colorMethod);
 
-        //if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
-        //    ghoul::opengl::TextureUnit textureUnit;
-        //    textureUnit.activate();
-        //    _transferFunction->bind(); // Calls update internally
-        //    _shaderProgram->setUniform("colorTable", textureUnit);
-        //    _shaderProgram->setUniform("colorTableRange", _colorTableRanges[_colorQuantity]);
-        //}
+        if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
+            ghoul::opengl::TextureUnit textureUnit;
+            textureUnit.activate();
+            _transferFunction->bind(); // Calls update internally
+            _shaderProgram->setUniform("colorTable", textureUnit);
+            _shaderProgram->setUniform("colorTableRange", _colorTableRanges[_colorQuantity]);
+        }
 
         glBindVertexArray(_vertexArrayObject);
 #ifndef __APPLE__
@@ -653,8 +638,7 @@ namespace openspace {
         std::vector<int> lineLengths = _fieldlineState.lineCount();
         std::vector<int> lineStarts = _fieldlineState.lineStart();
 
-        // TODO: Rewrite this
-        // This could be done in pre-processing
+        // code used for matching fieldlines
         if (_renderFlowLine) {
             // start is the index for the starting vertex of the next added
             // pathline found in the vector containing all vertices
@@ -692,7 +676,13 @@ namespace openspace {
         const double currentTime = data.time.j2000Seconds();
 
         moveLines(currentTime, previousTime);
-        updateVertexBuffer(currentTime);
+
+        updateVertexPositionBuffer();
+        if (_fieldlineState.nExtraQuantities() > 0) {
+            updateVertexColorBuffer();
+        }
+
+        updateVertexAlphaBuffer(currentTime);
     }
 
     void RenderableMovingFieldlines::moveLine(const double dt,
@@ -712,9 +702,23 @@ namespace openspace {
         traverser.timeSinceInterpolation < 0.0;
 
         if (passNext) {
+
             traverser.hasTemporaryKeyFrame = false;
             traverser.advanceKeyFrames();
         }
+
+        auto debugColor = [](FieldlinesState::Fieldline::Topology topology) {
+            switch (topology)
+            {
+            case FieldlinesState::Fieldline::Topology::Closed:
+                return 0.f;
+            case FieldlinesState::Fieldline::Topology::Open:
+                return 1.f;
+            case FieldlinesState::Fieldline::Topology::Imf:
+                return -0.5f;
+            }
+        };
+
 
         double normalizedTime = 0.0;
         normalizedTime = traverser.timeSinceInterpolation /
@@ -741,6 +745,10 @@ namespace openspace {
 
             _renderedLines[fieldlineVertex + lineStart] =
                 lerp(currentPosition, nextPosition, normalizedTime);
+
+            _debugTopologyColor[fieldlineVertex + lineStart] =
+                glm::mix(debugColor(traverser.backKeyFrame->topology),
+                    debugColor(traverser.frontKeyFrame->topology), normalizedTime);
         }
     }
 
@@ -985,70 +993,140 @@ namespace openspace {
         }
     }
 
-    /**
-    * Updates the vertex buffer for all fieldlines and pathlines.
-    * Each vertex contains position, topology and alpha values.
-    */
-    void RenderableMovingFieldlines::updateVertexBuffer(double currentTime) {
+    void RenderableMovingFieldlines::updateVertexPositionBuffer() {
         glBindVertexArray(_vertexArrayObject);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferObject);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-        // Update fieldline vertices
         const std::vector<glm::vec3>& vertPos = _renderedLines;
-        for (size_t i = 0; i < _traversers.size(); ++i) {
-            // One value for each fieldline
-            float topology = fieldlineTopology(i);
-            float alpha = fieldlineAlpha(i, currentTime);
 
-            for (size_t j = 0; j < _nPointsOnFieldlines; ++j) {
-                // Index for every fieldline vertex
-                size_t index = i * _nPointsOnFieldlines + j;
-                _vertexBuffer[index].position = vertPos[index];
-                _vertexBuffer[index].topology = topology;
-                _vertexBuffer[index].alpha = alpha;
-            }
+        std::vector<glm::vec4> data;
+        for (int i = 0; i < vertPos.size(); ++i) {
+            //data.push_back({ vertPos[i], -1.f });
+            data.push_back({ vertPos[i], -1.f });
+            data[i].w = _debugTopologyColor[i];
         }
 
-        std::vector<FieldlineVertex>::iterator pathlineIt =
-            _vertexBuffer.begin() + _traversers.size() * _nPointsOnFieldlines;
+        if (_renderFlowLine) {
 
-        // Update pathline alpha when checkbox is toggled
-        bool hasToggledFlowLine = static_cast<bool>(pathlineIt->alpha) != _renderFlowLine;
-        if (hasToggledFlowLine) {
-            float pathlineAlpha = static_cast<float>(_renderFlowLine);
-            while (pathlineIt != _vertexBuffer.end()) {
-                (pathlineIt++)->alpha = pathlineAlpha;
+            // convert all vertices from Re to meter and add to data
+            for (const FieldlinesState::MatchingFieldlines& mf : _fieldlineState.getAllMatchingFieldlines()) {
+                std::for_each(mf.pathLines.first.line.begin(), mf.pathLines.first.line.end(),
+                    [&data](const glm::vec3& element) {
+                        data.push_back({ element * fls::ReToMeter, -1.f });
+                    });
+
+                std::for_each(mf.pathLines.second.line.begin(), mf.pathLines.second.line.end(),
+                    [&data](const glm::vec3& element) {
+                        data.push_back({ element * fls::ReToMeter, -1.f });
+                    });
             }
         }
 
         glBufferData(
             GL_ARRAY_BUFFER,
-            _vertexBuffer.size() * sizeof(FieldlineVertex),
-            _vertexBuffer.data(),
+            data.size() * sizeof(glm::vec4),
+            data.data(),
             GL_STATIC_DRAW
         );
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
-            sizeof(FieldlineVertex), 
-            (void*)0
-        );
-
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 
-            sizeof(FieldlineVertex), 
-            (void*)offsetof(FieldlineVertex, topology)
-        );
-
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE,
-            sizeof(FieldlineVertex),
-            (void*)offsetof(FieldlineVertex, alpha)
-        );
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
+
+    void RenderableMovingFieldlines::updateVertexColorBuffer() {
+        glBindVertexArray(_vertexArrayObject);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+
+        bool isSuccessful;
+        const std::vector<float>& quantities = _fieldlineState.extraQuantity(
+            _colorQuantity,
+            isSuccessful
+        );
+
+        if (isSuccessful) {
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                quantities.size() * sizeof(float),
+                quantities.data(),
+                GL_STATIC_DRAW
+            );
+
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+        }
+    }
+
+    /**
+    * Updates OpenGL-buffer with a float value for each field- and path line vertex.
+    * The float value is multiplied with the vetex color alpha in the vertex shader.
+    */
+    void RenderableMovingFieldlines::updateVertexAlphaBuffer(const double currentTime) {
+
+        constexpr const double fieldlineFadeTime = 15.0;    // seconds
+
+        glBindVertexArray(_vertexArrayObject);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexAlphaBuffer);
+
+        std::vector<float> alpha = _renderedLinesAlpha;
+
+        for (size_t i = 0; i < _fieldlineState.getAllMatchingFieldlines().size(); i++) {
+            double birth = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.first.birthTime;
+            double death = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.first.deathTime;
+
+            double birthAlpha = std::min(
+                std::max(currentTime - birth, 0.0) / fieldlineFadeTime,
+                1.0);
+            double deathAlpha = std::min(
+                std::max(death - currentTime, 0.0) / fieldlineFadeTime,
+                1.0);
+            double fadeAlpha = birthAlpha * deathAlpha;
+
+            auto startIt = alpha.begin() + _fieldlineState.lineStart()[i * 2];
+            auto endIt = alpha.begin() + _fieldlineState.lineStart()[i * 2 + 1];
+            std::fill(startIt, endIt, static_cast<float>(fadeAlpha));
+
+            birth = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.second.birthTime;
+            death = _fieldlineState.getAllMatchingFieldlines()[i].pathLines.second.deathTime;
+
+            birthAlpha = std::min(
+                std::max(currentTime - birth, 0.0) / fieldlineFadeTime,
+                1.0);
+            deathAlpha = std::min(
+                std::max(death - currentTime, 0.0) / fieldlineFadeTime,
+                1.0);
+            fadeAlpha = birthAlpha * deathAlpha;
+
+            startIt = alpha.begin() + _fieldlineState.lineStart()[i * 2 + 1];
+            endIt = alpha.begin() + _fieldlineState.lineStart()[i * 2 + 1] + _nPointsOnFieldlines;
+            std::fill(startIt, endIt, static_cast<float>(fadeAlpha));
+        }
+
+        if (_renderFlowLine) {
+            int nFlowVertices =
+                _fieldlineState.getAllMatchingFieldlines().size() * 4 * _nPointsOnPathLine;
+            alpha.insert(alpha.end(), nFlowVertices, 1.0f);
+        }
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            alpha.size() * sizeof(float),
+            alpha.data(),
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
 
     /**
     * Constructor
@@ -1061,6 +1139,7 @@ namespace openspace {
 
     void RenderableMovingFieldlines::PathLineTraverser::advanceKeyFrames() {
         if (forward) {
+            //timeSinceInterpolation -= backKeyFrame->timeToNextKeyFrame;
             timeSinceInterpolation -= timeInterpolationDenominator;
             timeInterpolationDenominator = frontKeyFrame->timeToNextKeyFrame;
             backKeyFrame = frontKeyFrame;
@@ -1069,6 +1148,7 @@ namespace openspace {
         else {
             frontKeyFrame = backKeyFrame;
             --backKeyFrame;
+            //timeSinceInterpolation += backKeyFrame->timeToNextKeyFrame;
             timeInterpolationDenominator = backKeyFrame->timeToNextKeyFrame;
             timeSinceInterpolation += timeInterpolationDenominator;
         }
@@ -1156,6 +1236,20 @@ namespace openspace {
         else if (maxCount == closed) {
             return FieldlinesState::Fieldline::Topology::Closed;
         }
+    }
+
+    bool RenderableMovingFieldlines::PathLineTraverser::isAtEnd() const {
+        return forward ?
+            (frontKeyFrame == keyFrames.end() - 1) :
+            (isAtStart());
+    }
+
+    bool RenderableMovingFieldlines::PathLineTraverser::isAtStart() const {
+
+        if (backKeyFrame == keyFrames.begin())
+            return true;
+
+        return false;
     }
 
     /**
@@ -1284,43 +1378,6 @@ namespace openspace {
             ++counter;
         }
         return ind;
-    }
-
-    float RenderableMovingFieldlines::fieldlineTopology(size_t traverserIndex)
-    {
-        PathLineTraverser traverser = _traversers[traverserIndex];
-
-        return traverser.forward ?
-            static_cast<float>(traverser.frontKeyFrame->topology) :
-            static_cast<float>(traverser.backKeyFrame->topology);
-    }
-
-    float RenderableMovingFieldlines::fieldlineAlpha(size_t traverserIndex, double currentTime)
-    {
-        constexpr const double fieldlineFadeTime = 15.0;    // seconds
-
-        size_t matchingFieldlineIndex = traverserIndex / 2;
-        bool isFirst = traverserIndex % 2 == 0;
-
-        std::vector<FieldlinesState::MatchingFieldlines> matchingFieldlines =
-            _fieldlineState.getAllMatchingFieldlines();
-
-        double birth = isFirst ?
-            matchingFieldlines[matchingFieldlineIndex].pathLines.first.birthTime :
-            matchingFieldlines[matchingFieldlineIndex].pathLines.second.birthTime;
-
-        double death = isFirst ?
-            matchingFieldlines[matchingFieldlineIndex].pathLines.first.deathTime :
-            matchingFieldlines[matchingFieldlineIndex].pathLines.second.deathTime;
-
-        double birthAlpha = std::min(
-            std::max(currentTime - birth, 0.0) / fieldlineFadeTime,
-            1.0);
-        double deathAlpha = std::min(
-            std::max(death - currentTime, 0.0) / fieldlineFadeTime,
-            1.0);
-
-        return birthAlpha * deathAlpha;
     }
 
     double RenderableMovingFieldlines::PathLineTraverser::getTimeToReconnectionPoint(size_t indexOfReconnection) {

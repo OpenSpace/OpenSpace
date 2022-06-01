@@ -49,6 +49,8 @@ public:
         void advanceKeyFrames();
         void skipKeyFrame(FieldlinesState::Fieldline::Topology desiredTopology);
         FieldlinesState::Fieldline::Topology nextTopology();
+        bool isAtEnd() const;
+        bool isAtStart() const;
         double getTimeToReconnectionPoint(size_t indexOfReconnection);
         double getTimeToEndKeyFrame();
         void setStartPoint(double timeToRecon, size_t indexOfReconnection); 
@@ -85,14 +87,10 @@ public:
 
 
 private:
-    struct FieldlineVertex {
-        glm::vec3 position;
-        float alpha;
-        float topology;
-    };
-
     bool getStateFromCdfFiles();
-    void updateVertexBuffer(double currentTime);
+    void updateVertexPositionBuffer();
+    void updateVertexColorBuffer();
+    void updateVertexAlphaBuffer(const double currentTime);
     void moveLines(const double currentTime, const double previousTime);
     void moveLine(const double dt,
         const FieldlinesState::PathLine& pathLine,
@@ -112,8 +110,6 @@ private:
         std::vector<glm::vec3>::iterator beginIt, 
         std::vector<glm::vec3>::iterator endIt, 
         glm::vec3 criticalPoint);
-    float fieldlineTopology(size_t traverserIndex);
-    float fieldlineAlpha(size_t traverserIndex, double currentTime);
 
     enum class ColorMethod {
         Uniform = 0,
@@ -148,11 +144,16 @@ private:
     std::unique_ptr<TransferFunction> _transferFunction;
     // True when new state is loaded or user change which quantity to color the lines by
     bool _shouldUpdateColorBuffer = false;
-
     // OpenGL Vertex Array Object
     GLuint _vertexArrayObject = 0;
-    // OpenGL Vertex Buffer Object containing the vertex information
-    GLuint _vertexBufferObject = 0;
+    // OpenGL Vertex Buffer Object containing the vertex positions
+    GLuint _vertexPositionBuffer = 0;
+    // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
+    // the lines
+    GLuint _vertexColorBuffer = 0;
+    GLuint _vertexArrayObjectFlow = 0;
+    GLuint _vertexPositionBufferFlow = 0;
+    GLuint _vertexAlphaBuffer = 0;
 
     FieldlinesState _fieldlineState;
     double _manualTimeOffset = 0.0;
@@ -170,7 +171,8 @@ private:
     std::vector<float> _debugTopologyColor;
     std::vector<PathLineTraverser> _traversers;
 
-    std::vector<FieldlineVertex> _vertexBuffer;
+    // Show or hide fieldlines, is 1 while current time is between birth- and death time
+    std::vector<float> _renderedLinesAlpha;
 };
 }
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEMOVINGFIELDLINES___H__

@@ -421,7 +421,6 @@ void FieldlinesState::addLinesToBeRendered() {
         }
         addLine(line);
     }
-
 }
 
 double FieldlinesState::daysideDeathTime(size_t index) {
@@ -453,33 +452,6 @@ void FieldlinesState::initializeRenderedMatchingFieldlines() {
         addLine(mf.pathLines.first.keyFrames[0].vertices);
         addLine(mf.pathLines.second.keyFrames[0].vertices);
     }
-
-    /**
-    * It should be possible to ignore the addLine function and do something like below.
-    */
-
-    //if (_allMatchingFieldlines.empty()) return;
-
-    //int nFieldlines = _allMatchingFieldlines.size() * 2;
-    //int nPathlines = _allMatchingFieldlines.size() * 4;
-
-    //int nPointsOnFieldline = 
-    //    _allMatchingFieldlines[0].pathLines.first.keyFrames[0].vertices.size();
-    //int nPointsOnPathline =
-    //    _allMatchingFieldlines[0].pathLines.first.line.size() / 2;
-
-    //int startIndex = 0;
-    //for (int i = 0; i < nFieldlines; ++i) {
-    //    _lineStart.push_back(startIndex);
-    //    _lineCount.push_back(nPointsOnFieldline);
-    //    startIndex += nPointsOnFieldline;
-    //}
-
-    //for (int i = 0; i < nPathlines; ++i) {
-    //    _lineStart.push_back(startIndex);
-    //    _lineCount.push_back(nPointsOnPathline);
-    //    startIndex += nPointsOnPathline;
-    //}
 }
 
 // move all bad to the end and then we delete
