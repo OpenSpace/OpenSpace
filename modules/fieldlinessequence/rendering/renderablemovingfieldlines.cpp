@@ -746,9 +746,14 @@ namespace openspace {
             _renderedLines[fieldlineVertex + lineStart] =
                 lerp(currentPosition, nextPosition, normalizedTime);
 
-            _debugTopologyColor[fieldlineVertex + lineStart] =
-                glm::mix(debugColor(traverser.backKeyFrame->topology),
-                    debugColor(traverser.frontKeyFrame->topology), normalizedTime);
+            //_debugTopologyColor[fieldlineVertex + lineStart] =
+            //    glm::mix(debugColor(traverser.backKeyFrame->topology),
+            //        debugColor(traverser.frontKeyFrame->topology), normalizedTime);
+
+            _debugTopologyColor[fieldlineVertex + lineStart] = forward ?
+                static_cast<float>(traverser.frontKeyFrame->topology) :
+                static_cast<float>(traverser.backKeyFrame->topology);
+
         }
     }
 
