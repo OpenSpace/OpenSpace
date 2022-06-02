@@ -1,23 +1,17 @@
 {
-  "actions": [
-    {
-      "documentation": "Retargets the camera on points center",
-      "gui_path": "/PointsCenter",
-      "identifier": "profile.focus.pointscenter",
-      "is_local": false,
-      "name": "Focus on Point center",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'CosmicLifePoints')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    }
-  ],
   "assets": [
     "base_blank",
-    "cosmic_view/cosmic_view_renderable"
+    "cosmic_view/consensus",
+    "cosmic_view/endangered",
+    "cosmic_view/humans",
+    "cosmic_view/lineage",
+    "cosmic_view/mutations"
   ],
   "camera": {
-    "altitude": 2700000000000.0,
+    "altitude": 17000000.0,
     "anchor": "Earth",
     "latitude": 58.5877,
-    "longitude": 16.1924, 
+    "longitude": 16.1924,
     "type": "goToGeo"
   },
   "delta_times": [
@@ -42,14 +36,29 @@
     315360000.0,
     630720000.0
   ],
+  "mark_nodes": [
+    "Earth",
+    "Mars",
+    "Moon",
+    "Sun",
+    "Venus",
+    "ISS"
+  ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "A Cosmic View of Life Thesis Profile. Visualize relations between species.",
+    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles.",
     "license": "MIT License",
-    "name": "cosmic_view",
+    "name": "Default",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "properties": [
+    {
+      "name": "Scene.genus_primates.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    }
+  ],
   "time": {
     "type": "relative",
     "value": "-1d"
