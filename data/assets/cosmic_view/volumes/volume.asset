@@ -6,13 +6,13 @@
 
 local lineage = asset.require("cosmic_view/lineage")
 
-local homaniae_volume = {
-    Identifier = "homaniae_volume",
+local Primates_volume = {
+    Identifier = "Primates_volume",
     Parent = lineage.lineage_17.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
-        SourceDirectory = asset.localResource("volume_data/69_volume"),
-        TransferFunction = asset.localResource("transferfunctions/isotransferfunction.txt"),
+        SourceDirectory = asset.localResource("volume_data/Primates_volume"),
+        TransferFunction = asset.localResource("transferfunctions/isotransferfunction_primates.txt"),
         StepSize = 0.01,
         MinValue = 0,
         MaxValue = 1,
@@ -34,11 +34,11 @@ local homaniae_volume = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(homaniae_volume)
+  openspace.addSceneGraphNode(Primates_volume)
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(homaniae_volume)
+  openspace.removeSceneGraphNode(Primates_volume)
 end)
     
-asset.export(homaniae_volume)
+asset.export(Primates_volume)
