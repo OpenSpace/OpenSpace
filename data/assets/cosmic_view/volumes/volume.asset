@@ -6,19 +6,20 @@
 
 local lineage = asset.require("cosmic_view/lineage")
 
-local macaca_volume = {
-    Identifier = "macaca_volume",
+local homaniae_volume = {
+    Identifier = "homaniae_volume",
     Parent = lineage.lineage_17.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
-        SourceDirectory = asset.localResource("volume_data/macaca_volume"),
+        SourceDirectory = asset.localResource("volume_data/69_volume"),
         TransferFunction = asset.localResource("transferfunctions/isotransferfunction.txt"),
         StepSize = 0.01,
         MinValue = 0,
         MaxValue = 1,
         GridType = "Cartesian",
         SecondsBefore = 50*365*24*60*60, -- 50 years before
-        SecondsAfter = 50*365*24*60*60 -- 50 years after
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+        Enabled = false
     },
     GUI = {
         Path = "/Volumes"
@@ -31,12 +32,13 @@ local macaca_volume = {
     }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(macaca_volume)
+  openspace.addSceneGraphNode(homaniae_volume)
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(macaca_volume)
+  openspace.removeSceneGraphNode(homaniae_volume)
 end)
     
-asset.export(macaca_volume)
+asset.export(homaniae_volume)
