@@ -1,0 +1,10 @@
+return {{ 
+  Type = "GenerateRawVolumeTask",
+  File = "${DATA}/assets/cosmic_view/volumes/task_data/flatten_vol_Homo.txt",
+  Dimensions = {100,100,100},
+  LowerDomainBound = {-0.051284783, -0.058204953000000004, -0.057447029},
+  UpperDomainBound = {0.06647641700000001, 0.05955624700000001, 0.060314171000000014},
+  Time = "2018-05-04T00:00:00",
+  RawVolumeOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Homo_volume/isovolume.rawvolume",
+  DictionaryOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Homo_volume/isovolume.dictionary"
+}}

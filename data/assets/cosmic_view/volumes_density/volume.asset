@@ -1,0 +1,218 @@
+-- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_VOLUME enabled
+
+-- Before using this example,
+-- the volume data itself needs to be generated,
+-- using the task 'data/tasks/volume/generate_cartesian.task'
+
+local lineage = asset.require("cosmic_view/lineage")
+
+local Primates_volume = {
+    Identifier = "Primates_volume",
+    Parent = lineage.lineage_17.Identifier,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        SourceDirectory = asset.localResource("volume_data/Primates_volume"),
+        TransferFunction = asset.localResource("transferfunctions/isotransferfunction_primates.txt"),
+        StepSize = 0.01,
+        MinValue = 0,
+        MaxValue = 1,
+        GridType = "Cartesian",
+        SecondsBefore = 50*365*24*60*60, -- 50 years before
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+        Enabled = false
+    },
+    GUI = {
+        Path = "/Volumes"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1000
+        }
+    }
+}
+
+local Haplorrhini_volume = {
+    Identifier = "Haplorrhini_volume",
+    Parent = lineage.lineage_17.Identifier,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        SourceDirectory = asset.localResource("volume_data/Haplorrhini_volume"),
+        TransferFunction = asset.localResource("transferfunctions/isotransferfunction_haplorrhini.txt"),
+        StepSize = 0.01,
+        MinValue = 0,
+        MaxValue = 1,
+        GridType = "Cartesian",
+        SecondsBefore = 50*365*24*60*60, -- 50 years before
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+        Enabled = false
+    },
+    GUI = {
+        Path = "/Volumes"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1000
+        }
+    }
+}
+
+local Strepsirrhini_volume = {
+    Identifier = "Strepsirrhini_volume",
+    Parent = lineage.lineage_17.Identifier,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        SourceDirectory = asset.localResource("volume_data/Strepsirrhini_volume"),
+        TransferFunction = asset.localResource("transferfunctions/isotransferfunction_strepsirrhini.txt"),
+        StepSize = 0.01,
+        MinValue = 0,
+        MaxValue = 1,
+        GridType = "Cartesian",
+        SecondsBefore = 50*365*24*60*60, -- 50 years before
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+        Enabled = true
+    },
+    GUI = {
+        Path = "/Volumes"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1000
+        }
+    }
+}
+
+local Platyrrhini_volume = {
+    Identifier = "Platyrrhini_volume",
+    Parent = lineage.lineage_17.Identifier,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        SourceDirectory = asset.localResource("volume_data/Platyrrhini_volume"),
+        TransferFunction = asset.localResource("transferfunctions/isotransferfunction_platyrrhini.txt"),
+        StepSize = 0.01,
+        MinValue = 0,
+        MaxValue = 1,
+        GridType = "Cartesian",
+        SecondsBefore = 50*365*24*60*60, -- 50 years before
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+        Enabled = true
+    },
+    GUI = {
+        Path = "/Volumes"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1000
+        }
+    }
+}
+
+local Catarrhini_volume = {
+    Identifier = "Catarrhini_volume",
+    Parent = lineage.lineage_17.Identifier,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        SourceDirectory = asset.localResource("volume_data/Catarrhini_volume"),
+        TransferFunction = asset.localResource("transferfunctions/isotransferfunction_primates.txt"),
+        StepSize = 0.01,
+        MinValue = 0,
+        MaxValue = 1,
+        GridType = "Cartesian",
+        SecondsBefore = 50*365*24*60*60, -- 50 years before
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+        Enabled = false
+    },
+    GUI = {
+        Path = "/Volumes"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1000
+        }
+    }
+}
+
+local Cercopithecoidea_volume = {
+    Identifier = "Cercopithecoidea_volume",
+    Parent = lineage.lineage_17.Identifier,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        SourceDirectory = asset.localResource("volume_data/Cercopithecoidea_volume"),
+        TransferFunction = asset.localResource("transferfunctions/isotransferfunction_cercopithecoidea.txt"),
+        StepSize = 0.01,
+        MinValue = 0,
+        MaxValue = 1,
+        GridType = "Cartesian",
+        SecondsBefore = 50*365*24*60*60, -- 50 years before
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+        Enabled = true
+    },
+    GUI = {
+        Path = "/Volumes"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1000
+        }
+    }
+}
+
+local Hominoidea_volume = {
+    Identifier = "Hominoidea_volume",
+    Parent = lineage.lineage_17.Identifier,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        SourceDirectory = asset.localResource("volume_data/Hominoidea_volume"),
+        TransferFunction = asset.localResource("transferfunctions/isotransferfunction_hominoidea.txt"),
+        StepSize = 0.01,
+        MinValue = 0,
+        MaxValue = 1,
+        GridType = "Cartesian",
+        SecondsBefore = 50*365*24*60*60, -- 50 years before
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+        Enabled = true
+    },
+    GUI = {
+        Path = "/Volumes"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1000
+        }
+    }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Primates_volume)
+  openspace.addSceneGraphNode(Haplorrhini_volume)
+  openspace.addSceneGraphNode(Strepsirrhini_volume)
+  openspace.addSceneGraphNode(Platyrrhini_volume)
+  openspace.addSceneGraphNode(Catarrhini_volume)
+  openspace.addSceneGraphNode(Cercopithecoidea_volume)
+  openspace.addSceneGraphNode(Hominoidea_volume)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Primates_volume)
+  openspace.removeSceneGraphNode(Haplorrhini_volume)
+  openspace.removeSceneGraphNode(Strepsirrhini_volume)
+  openspace.removeSceneGraphNode(Platyrrhini_volume)
+  openspace.removeSceneGraphNode(Catarrhini_volume)
+  openspace.removeSceneGraphNode(Cercopithecoidea_volume)
+  openspace.removeSceneGraphNode(Hominoidea_volume)
+end)
+    
+asset.export(Primates_volume)
+asset.export(Haplorrhini_volume)
+asset.export(Strepsirrhini_volume)
+asset.export(Platyrrhini_volume)
+asset.export(Catarrhini_volume)
+asset.export(Cercopithecoidea_volume)
+asset.export(Hominoidea_volume)

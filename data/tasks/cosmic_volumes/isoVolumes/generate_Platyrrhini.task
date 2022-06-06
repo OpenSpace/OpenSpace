@@ -1,0 +1,10 @@
+return {{ 
+  Type = "GenerateRawVolumeTask",
+  File = "${DATA}/assets/cosmic_view/volumes/task_data/flatten_vol_Platyrrhini.txt",
+  Dimensions = {100,100,100},
+  LowerDomainBound = {-0.395407199, -0.296456396, 0.15991274399999997},
+  UpperDomainBound = {0.295697231, 0.394648034, 0.851017174},
+  Time = "2018-05-04T00:00:00",
+  RawVolumeOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Platyrrhini_volume/isovolume.rawvolume",
+  DictionaryOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Platyrrhini_volume/isovolume.dictionary"
+}}

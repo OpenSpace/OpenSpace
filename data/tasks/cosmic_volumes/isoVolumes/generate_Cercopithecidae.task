@@ -1,0 +1,10 @@
+return {{ 
+  Type = "GenerateRawVolumeTask",
+  File = "${DATA}/assets/cosmic_view/volumes/task_data/flatten_vol_Cercopithecidae.txt",
+  Dimensions = {100,100,100},
+  LowerDomainBound = {-0.398245706, -0.393113418, -0.059576092000000004},
+  UpperDomainBound = {0.469185604, 0.47431789199999996, 0.8078552179999999},
+  Time = "2018-05-04T00:00:00",
+  RawVolumeOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Cercopithecidae_volume/isovolume.rawvolume",
+  DictionaryOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Cercopithecidae_volume/isovolume.dictionary"
+}}

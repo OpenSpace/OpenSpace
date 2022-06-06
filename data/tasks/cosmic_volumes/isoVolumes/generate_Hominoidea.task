@@ -1,0 +1,10 @@
+return {{ 
+  Type = "GenerateRawVolumeTask",
+  File = "${DATA}/assets/cosmic_view/volumes/task_data/flatten_vol_Hominoidea.txt",
+  Dimensions = {50,50,50},
+  LowerDomainBound = {-0.156134693, -0.225815975, -0.226811807},
+  UpperDomainBound = {0.269340177, 0.199658895, 0.198663063},
+  Time = "2018-05-04T00:00:00",
+  RawVolumeOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Hominoidea_volume/isovolume.rawvolume",
+  DictionaryOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Hominoidea_volume/isovolume.dictionary"
+}}
