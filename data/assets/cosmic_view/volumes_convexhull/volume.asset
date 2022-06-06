@@ -22,7 +22,7 @@ local Strepsirrhini_convex_volume = {
         Enabled = false
     },
     GUI = {
-        Path = "/Volumes/convex"
+        Path = "/Volumes/Convex"
     },
     Transform = {
         Scale = {

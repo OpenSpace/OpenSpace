@@ -22,7 +22,7 @@ local Primates_volume = {
         Enabled = false
     },
     GUI = {
-        Path = "/Volumes"
+        Path = "/Volumes/Density"
     },
     Transform = {
         Scale = {
@@ -48,7 +48,7 @@ local Haplorrhini_volume = {
         Enabled = false
     },
     GUI = {
-        Path = "/Volumes"
+        Path = "/Volumes/Density"
     },
     Transform = {
         Scale = {
@@ -74,7 +74,7 @@ local Strepsirrhini_volume = {
         Enabled = true
     },
     GUI = {
-        Path = "/Volumes"
+        Path = "/Volumes/Density"
     },
     Transform = {
         Scale = {
@@ -100,7 +100,7 @@ local Platyrrhini_volume = {
         Enabled = true
     },
     GUI = {
-        Path = "/Volumes"
+        Path = "/Volumes/Density"
     },
     Transform = {
         Scale = {
@@ -126,7 +126,7 @@ local Catarrhini_volume = {
         Enabled = false
     },
     GUI = {
-        Path = "/Volumes"
+        Path = "/Volumes/Density"
     },
     Transform = {
         Scale = {
@@ -152,7 +152,7 @@ local Cercopithecoidea_volume = {
         Enabled = true
     },
     GUI = {
-        Path = "/Volumes"
+        Path = "/Volumes/Density"
     },
     Transform = {
         Scale = {
@@ -178,7 +178,7 @@ local Hominoidea_volume = {
         Enabled = true
     },
     GUI = {
-        Path = "/Volumes"
+        Path = "/Volumes/Density"
     },
     Transform = {
         Scale = {
