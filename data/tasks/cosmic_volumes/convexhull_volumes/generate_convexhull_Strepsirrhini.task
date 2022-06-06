@@ -1,0 +1,10 @@
+return {{ 
+  Type = "GenerateRawVolumeTask",
+  File = "${DATA}/assets/cosmic_view/volumes_convexhull/task_data/flatten_vol_convexhull_Strepsirrhini.txt",
+  Dimensions = {50,50,50},
+  LowerDomainBound = {-0.822028843, -0.755095709, -0.07311617599999998},
+  UpperDomainBound = {0.09726038699999995, 0.16419352099999995, 0.846173054},
+  Time = "2018-05-04T00:00:00",
+  RawVolumeOutput = "${DATA}/assets/cosmic_view/volumes_convexhull/volume_data/Strepsirrhini_volume/isovolume.rawvolume",
+  DictionaryOutput = "${DATA}/assets/cosmic_view/volumes_convexhull/volume_data/Strepsirrhini_volume/isovolume.dictionary"
+}}

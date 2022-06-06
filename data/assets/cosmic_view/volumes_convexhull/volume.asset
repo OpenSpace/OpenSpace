@@ -1,0 +1,44 @@
+-- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_VOLUME enabled
+
+-- Before using this example,
+-- the volume data itself needs to be generated,
+-- using the task 'data/tasks/volume/generate_cartesian.task'
+
+local lineage = asset.require("cosmic_view/lineage")
+
+local Strepsirrhini_convex_volume = {
+    Identifier = "Strepsirrhini_convex_volume",
+    Parent = lineage.lineage_17.Identifier,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        SourceDirectory = asset.localResource("volume_data/Strepsirrhini_volume"),
+        TransferFunction = asset.localResource("transferfunctions/isotransferfunction_strepsirrhini.txt"),
+        StepSize = 0.01,
+        MinValue = 0,
+        MaxValue = 1,
+        GridType = "Cartesian",
+        SecondsBefore = 50*365*24*60*60, -- 50 years before
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+        Enabled = false
+    },
+    GUI = {
+        Path = "/Volumes/convex"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1000
+        }
+    }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Strepsirrhini_convex_volume)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Strepsirrhini_convex_volume)
+end)
+    
+asset.export(Strepsirrhini_convex_volume)
