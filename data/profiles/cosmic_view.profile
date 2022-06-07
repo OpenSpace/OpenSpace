@@ -7,17 +7,30 @@
       "is_local": false,
       "name": "Focus on Point center",
       "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'CosmicLifePoints')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    }
+    },
+     {
+      "documentation": "World image enables when human asset is enable",
+      "gui_path": "/Cosmic",
+      "identifier": "profile.enable.worldimage",
+      "is_local": false,
+      "name": "Enable world image",
+      "script": "openspace.setPropertyValueSingle('Scene.all.Renderable.Enabled', 'true'); openspace.setPropertyValueSingle('ScreenSpace.humans.Enabled', 'true'); "
+    },
+
   ],
   "assets": [
     "base_blank",
-    "cosmic_view/cosmic_view_renderable"
+    "cosmic_view/consensus",
+    "cosmic_view/endangered",
+    "cosmic_view/humans",
+    "cosmic_view/lineage",
+    "cosmic_view/mutations"
   ],
   "camera": {
     "altitude": 2700000000000.0,
     "anchor": "Earth",
     "latitude": 58.5877,
-    "longitude": 16.1924, 
+    "longitude": 16.1924,
     "type": "goToGeo"
   },
   "delta_times": [

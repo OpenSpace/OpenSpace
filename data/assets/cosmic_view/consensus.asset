@@ -2,20 +2,20 @@
 local path = "C:/MasterThesis_cosmicView"
 
 -- Speck files --
-local consensus_file = asset.localResource(path .. "/data/consensus/speck/primates_consensus_all_variables.speck")
+local consensus_file = asset.localResource(path .. "/data/consensus/speck/primates_consensus.speck")
 
 -- Label files --
-local consensus_label = asset.localResource(path .. "/data/consensus/label/primates_consensus_label.speck")
+local consensus_label = asset.localResource(path .. "/data/consensus/label/primates_consensus_commonnames_label.speck")
 
 -- Color maps --
-local color_mutations = asset.localResource(path .. "/data/consensus/cmap/redblue.cmap")
+local color_mutations = asset.localResource(path .. "/data/mutations/cmap/plasma62.cmap")
 local color_lineage =  asset.localResource(path .. "/data/consensus/cmap/color_genus.cmap")
 
 -- Texture files -- 
 local consensus_texture = asset.localResource(path .. "/data/texture/point3A.png")
 
 -- Scale factor --
-local scale_factor = 10
+local scale_factor = 35
 
 local mutations_consensus = {
     Identifier = "mutations_consensus",
@@ -26,13 +26,13 @@ local mutations_consensus = {
       ScaleFactor = scale_factor,
       File = consensus_file,
       ColorMap = color_mutations,
-      ColorOption = { "synonymousDiff", "NonSynonymousDiff" },
-      ColorRange = { { 0, 140}, { 0, 20} },
+      ColorOption = { "synonymousDiff", "NonSynonymousDiff","sum_mutations", "minus_mutations", "syn_div_non"},
+      ColorRange = { { 0, 140}, { 0, 20}, {0,150}, {-2,122}, {0,66}},
       DrawLabels = false,
       LabelFile = consensus_label,
       TextColor = { 1.0, 1.0, 1.0 },
       TextSize = 1.0,
-      TextMinMaxSize = { 0, 14 },
+      TextMinMaxSize = { 0, 16 },
       FadeLabelDistances = { 0.0, 0.5 },
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",
@@ -56,13 +56,13 @@ local mutations_consensus = {
       ScaleFactor = scale_factor,
       File = consensus_file,
       ColorMap = color_lineage,
-      ColorOption = { "lineage_17","lineage_18","lineage_19","lineage_20","lineage_21","lineage_22", "lineage_23" },
-      ColorRange = { { 0.0, 1.0}, { 1.0, 2.0}, { 3.0, 7.0}, { 8, 18}, { 19.0, 51.0}, { 24.0, 62.0}, { 24.0, 89.0} },
-      DrawLabels = false,
+      ColorOption = { "lineage_17","lineage_18","lineage_19","lineage_20","lineage_21","lineage_22", "lineage_23", "Genus" },
+      ColorRange = { { 0.0, 1.0}, { 1.0, 2.0}, { 3.0, 7.0}, { 8, 18}, { 19.0, 51.0}, { 24.0, 62.0}, { 24.0, 89.0}, {1.0,71.0} },
+      DrawLabels = true,
       LabelFile = consensus_label,
       TextColor = { 1.0, 1.0, 1.0 },
       TextSize = 1.0,
-      TextMinMaxSize = { 0, 14 },
+      TextMinMaxSize = { 0, 16 },
       FadeLabelDistances = { 0.0, 0.5 },
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",
@@ -85,11 +85,11 @@ local mutations_consensus = {
       Opacity = 1.0,
       ScaleFactor = scale_factor,
       File = consensus_file,
-      DrawLabels = true,
+      DrawLabels = false,
       LabelFile = consensus_label,
       TextColor = { 1.0, 1.0, 1.0 },
       TextSize = 1.0,
-      TextMinMaxSize = { 0, 14 },
+      TextMinMaxSize = { 0, 16 },
       FadeLabelDistances = { 0.0, 0.5 },
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",

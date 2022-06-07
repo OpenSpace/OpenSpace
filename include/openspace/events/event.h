@@ -35,6 +35,7 @@ namespace openspace {
     class Camera;
     class Layer;
     class Profile;
+    class Renderable;
     class SceneGraphNode;
     class ScreenSpaceRenderable;
     class Time;
@@ -74,6 +75,8 @@ struct Event {
         LayerRemoved,
         SessionRecordingPlayback,
         PointSpacecraft,
+        RenderableEnabled,
+        RenderableDisabled,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -395,6 +398,32 @@ struct EventPointSpacecraft : public Event {
     const double ra;
     const double dec;
     const double duration;
+};
+
+/**
+ * This event is created whenever a renderable is enabled.  By the
+ * time this event is signalled, the renderable has already been enabled.
+ *
+ * \param Node The identifier of the node that contains the renderable
+ */
+struct EventRenderableEnabled : public Event {
+    static const Type Type = Event::Type::RenderableEnabled;
+
+    explicit EventRenderableEnabled(const SceneGraphNode* node_);
+    const tstring node;
+};
+
+/**
+ * This event is created whenever a renderable is disabled.  By the
+ * time this event is signalled, the renderable has already been disabled.
+ *
+ * \param Node The identifier of that node that contains the renderable
+ */
+struct EventRenderableDisabled : public Event {
+    static const Type Type = Event::Type::RenderableDisabled;
+
+    explicit EventRenderableDisabled(const SceneGraphNode* node_);
+    const tstring node;
 };
 
 /**

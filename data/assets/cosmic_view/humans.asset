@@ -19,8 +19,10 @@ local north_america_file = asset.localResource(path .. "/data/humans/speck/regio
 local central_america_file = asset.localResource(path .. "/data/humans/speck/regions/central_america.speck")
 local south_america_file = asset.localResource(path .. "/data/humans/speck/regions/south_america.speck")
 
+local test_file = asset.localResource(path .. "/data/humans/speck/test_oceanien.speck")
+
 -- Label files --
-local all_humans_label = asset.localResource(path .. "/data/humans/label/humans_regions_label.speck")
+local all_humans_label = asset.localResource(path .. "/data/humans/label/human_tribe_label.speck")
 
 -- Color maps -- 
 local color_continents = asset.localResource(path .. "/data/humans/cmap/human_continents.cmap")
@@ -28,18 +30,44 @@ local color_continents = asset.localResource(path .. "/data/humans/cmap/human_co
 -- Texture files -- 
 local human_texture = asset.localResource(path .. "/data/texture/point3A.png")
 
--- Scale factor --
-local scale_factor = 0
 
+
+-- Scale factor --
+local scale_factor_all = 0
+local scale_continents = 4
+
+
+local test = {
+  Identifier = "test",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 1, 0.067, 0.161 },
+    Opacity = 1.0,
+    ScaleFactor = scale_continents,
+    File = test_file,
+    ColorMap = color_continents,
+    ColorOption = { "region" },
+    ColorRange = { { 1.0, 2.0} },
+    Unit = "Km",
+    Texture = human_texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "test",
+    Path = "/Cosmic/Humans/Continents/Oceania"
+  }
+}
 
 
 local all = {
-    Identifier = "all",
+    Identifier = "allhumans",
     Renderable = {
       Type = "RenderableCosmicPoints",
       Color = { 0.945, 0.929, 0.513 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_factor_all,
       File = all_humans,
       ColorMap = color_continents,
       ColorOption = { "region" },
@@ -63,13 +91,16 @@ local all = {
     }
   }
 
+
+
+
   local south_africa = {
     Identifier = "south_africa",
     Renderable = {
       Type = "RenderableCosmicPoints",
       Color = { 1, 0.067, 0.161 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = south_africa_file,
       Unit = "Km",
       Texture = human_texture,
@@ -89,7 +120,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 1, 0.263, 0.263 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = west_africa_file,
       Unit = "Km",
       Texture = human_texture,
@@ -109,7 +140,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 1, 0.506, 0.459 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = central_africa_file,
       Unit = "Km",
       Texture = human_texture,
@@ -129,7 +160,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 1.0, 0.427, 0.267 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = north_africa_file,
       Unit = "Km",
       Texture = human_texture,
@@ -149,7 +180,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.776, 0.251, 1.0 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = europe_file,
       Unit = "Km",
       Texture = human_texture,
@@ -169,7 +200,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.212, 0.655, 0.361 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = west_asia_file,
       Unit = "Km",
       Texture = human_texture,
@@ -189,7 +220,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.686, 1.0, 0.063 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = central_asia_file,
       Unit = "Km",
       Texture = human_texture,
@@ -209,7 +240,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.659, 1, 0.361},
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = south_asia_file,
       Unit = "Km",
       Texture = human_texture,
@@ -230,7 +261,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.208, 0.659, 0.275 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = south_east_asia_file,
       Unit = "Km",
       Texture = human_texture,
@@ -250,7 +281,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.082, 1.0, 0.573 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = east_asia_file,
       Unit = "Km",
       Texture = human_texture,
@@ -270,7 +301,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.745, 1.0, 0.659 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = north_east_asia_file,
       Unit = "Km",
       Texture = human_texture,
@@ -290,7 +321,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 1.0, 1.0, 0.0 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = oceania_file,
       Unit = "Km",
       Texture = human_texture,
@@ -310,7 +341,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.075, 0.69, 1.0 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = north_america_file,
       Unit = "Km",
       Texture = human_texture,
@@ -330,7 +361,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.459, 0.957, 1.0 },
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = central_america_file,
       Unit = "Km",
       Texture = human_texture,
@@ -350,7 +381,7 @@ local all = {
       Type = "RenderableCosmicPoints",
       Color = { 0.067, 1.0, 0.906},
       Opacity = 1.0,
-      ScaleFactor = scale_factor,
+      ScaleFactor = scale_continents,
       File = south_america_file,
       Unit = "Km",
       Texture = human_texture,
@@ -366,11 +397,9 @@ local all = {
 
 
   
-    
-
-
-
+  
   asset.onInitialize(function()
+    openspace.addSceneGraphNode(test)
     openspace.addSceneGraphNode(all)
     openspace.addSceneGraphNode(south_africa)
     openspace.addSceneGraphNode(west_africa)
@@ -391,6 +420,7 @@ local all = {
 
 asset.onDeinitialize(function()
     openspace.removeSceneGraphNode(all)
+    openspace.removeSceneGraphNode(test)
     openspace.removeSceneGraphNode(south_africa)
     openspace.removeSceneGraphNode(west_africa)
     openspace.removeSceneGraphNode(central_africa)
@@ -409,6 +439,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(all)
+asset.export(test)
 asset.export(south_africa)
 asset.export(west_africa)
 asset.export(central_africa)

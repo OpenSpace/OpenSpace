@@ -8,15 +8,12 @@ local mutations_file = asset.localResource(path .. "/data/mutations/speck/primat
 local mutations_label = asset.localResource(path .. "/data/mutations/label/primates_CommonName_label.speck")
 
 -- Color map --
-local color_map = asset.localResource(path .. "/data/mutations/cmap/yellowpurple.cmap")
+local color_map = asset.localResource(path .. "/data/mutations/cmap/plasma30.cmap")
 
 -- Textire --
 local mutations_texture = asset.localResource(path .. "/data/texture/point3A.png")
 
 
-
-local Name = "Synonymous Mutations"
-local Identifier = "mutations"
 
 local mutations = {
     Identifier = "mutations",
@@ -24,16 +21,16 @@ local mutations = {
       Type = "RenderableCosmicPoints",
       Color = { 0.4,1.0,1.0 },
       Opacity = 1.0,
-      ScaleFactor = 15,
+      ScaleFactor = 30,
       File = mutations_file,
       ColorMap = color_map,
-      ColorOption = { "synonymousDiff", "NonSynonymousDiff" },
-      ColorRange = { { 0, 140}, { 0, 20} },
+      ColorOption = { "synonymousDiff", "NonSynonymousDiff","sum_mutations", "minus_mutations", "syn_div_non"},
+      ColorRange = { { 0, 140}, { 0, 20}, {0,150}, {-2,122}, {0,66} },
       DrawLabels = false,
       LabelFile = mutations_label,
       TextColor = { 1.0, 1.0, 1.0 },
       TextSize = 1.0,
-      TextMinMaxSize = { 0, 14 },
+      TextMinMaxSize = { 0, 17 },
       FadeLabelDistances = { 0.0, 0.5 },
       FadeLabelWidths = { 0.001, 0.5 },
       Unit = "Km",
@@ -49,26 +46,13 @@ local mutations = {
   }
 
 
-  -- colorbar to understand the colors for synonynmous mutations
-  local colorbar = {
-    Identifier = Identifier,
-    Name = Name,
-    Type = "ScreenSpaceImageLocal",
-    TexturePath = asset.localResource(path .. "/data/mutations/Synonymous_mutations.png"),
-    FaceCamera = false,
-    CartesianPosition = { 1.2, -0.6, -2.0 }
-  }
-
 
 asset.onInitialize(function()
 openspace.addSceneGraphNode(mutations)
---openspace.addScreenSpaceRenderable(colorbar);  
 end)
 
 asset.onDeinitialize(function()
 openspace.removeSceneGraphNode(mutations)
---openspace.removeScreenSpaceRenderable(colorbar)
 end)
 
 asset.export(mutations)
---asset.export(colorbar)

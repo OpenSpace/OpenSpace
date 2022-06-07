@@ -22,6 +22,14 @@ local trend_up_texture = asset.localResource(path .. "/data/endangered/texture/u
 local trend_same_texture = asset.localResource(path .. "/data/endangered/texture/same.png")
 local trend_down_texture = asset.localResource(path .. "/data/endangered/texture/down.png")
 
+-- Image files --
+local status_image_file = asset.localResource(path .. "/data/endangered/images/critically_endangered.png")
+
+-- Scale factors --
+local status_scale = 35
+local up_down_scale = 45
+local same_scale = 40
+
 
 local endangered_status = {
     Identifier = "endangered_status",
@@ -29,7 +37,7 @@ local endangered_status = {
       Type = "RenderableCosmicPoints",
       Color = { 0.4,1.0,1.0 },
       Opacity = 1.0,
-      ScaleFactor = 15,
+      ScaleFactor = status_scale,
       File = status_file,
       ColorMap = color_map_status,
       ColorOption = { "Status" },
@@ -54,6 +62,17 @@ local endangered_status = {
     }
   }
 
+  local status_image = {
+    Identifier = "endangered",
+    Name = "status image",
+    Type = "ScreenSpaceImageLocal",
+    TexturePath = status_image_file,
+    FaceCamera = false,
+    Scale = 0.3,
+    CartesianPosition = { 1.23, -0.59, -2.0 },
+    Enabled = false
+  }
+
 
   local endangered_trend_up = {
     Identifier = "endangered_trend_up",
@@ -61,7 +80,7 @@ local endangered_status = {
       Type = "RenderableCosmicPoints",
       Color = { 0.0, 1.0, 0.0 },
       Opacity = 1.0,
-      ScaleFactor = 23,
+      ScaleFactor = up_down_scale,
       File = trend_up_file,
       DrawLabels = true,
       LabelFile = trend_up_label ,
@@ -89,7 +108,7 @@ local endangered_status = {
       Type = "RenderableCosmicPoints",
       Color = { 0.212 ,0.733, 0.929 },
       Opacity = 1.0,
-      ScaleFactor = 20,
+      ScaleFactor = same_scale,
       File = trend_same_file,
       DrawLabels = true,
       LabelFile = trend_same_label ,
@@ -117,7 +136,7 @@ local endangered_status = {
       Type = "RenderableCosmicPoints",
       Color = { 1.0, 0.0, 0.0 },
       Opacity = 1.0,
-      ScaleFactor = 23,
+      ScaleFactor = up_down_scale,
       File = trend_down_file,
       DrawLabels = true,
       LabelFile = trend_down_label,
@@ -142,6 +161,7 @@ local endangered_status = {
 
   asset.onInitialize(function()
     openspace.addSceneGraphNode(endangered_status)
+    openspace.addSceneGraphNode(status_image)
     openspace.addSceneGraphNode(endangered_trend_up)
     openspace.addSceneGraphNode(endangered_trend_zero)
     openspace.addSceneGraphNode(endangered_trend_down)
@@ -149,12 +169,14 @@ local endangered_status = {
 
 asset.onDeinitialize(function()
     openspace.removeSceneGraphNode(endangered_status)
+    openspace.removeSceneGraphNode(status_image)
     openspace.removeSceneGraphNode(endangered_trend_up)
     openspace.removeSceneGraphNode(endangered_trend_zero)
     openspace.removeSceneGraphNode(endangered_trend_down)
 end)
 
 asset.export(endangered_status)
+asset.export(status_image)
 asset.export(endangered_trend_up)
 asset.export(endangered_trend_zero)
 asset.export(endangered_trend_down)

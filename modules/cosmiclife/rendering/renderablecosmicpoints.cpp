@@ -656,7 +656,7 @@ void RenderableCosmicPoints::initializeGL() {
 
     if (_hasLabel) {
         if (!_font) {
-            size_t _fontSize = 7;
+            size_t _fontSize = 8;
             _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(_fontSize),
@@ -734,7 +734,7 @@ void RenderableCosmicPoints::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.minBillboardSize, minBillboardSize);
     _program->setUniform(_uniformCache.maxBillboardSize, maxBillboardSize);
     _program->setUniform(_uniformCache.color, _pointColor);
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
@@ -831,7 +831,7 @@ void RenderableCosmicPoints::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+        glm::scale(glm::dmat4(8.0), glm::dvec3(data.modelTransform.scale)); // this is for changing the scale matrix
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
