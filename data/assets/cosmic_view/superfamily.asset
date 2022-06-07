@@ -76,7 +76,7 @@ local neander = {
     Identifier = "denisovan",
     Renderable = {
       Type = "RenderableCosmicPoints",
-      Color = {0.125,0.698,0.6667},
+      Color = {1.0,0.729,0.0},
       Opacity = 1.0,
       ScaleFactor = scale_factor,
       File = denisova,
@@ -144,7 +144,7 @@ local neander = {
       Texture = lineage_texture,
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
-      Enabled = true
+      Enabled = false
     },
     GUI = {
       Name = "Hominioidae",

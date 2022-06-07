@@ -68,7 +68,7 @@
   },
   "properties": [
     {
-      "name": "Scene.genus_primates.Renderable.Enabled",
+      "name": "Scene.homosapiens.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"
     }
