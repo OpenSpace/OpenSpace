@@ -4,15 +4,29 @@
     "cosmic_view/consensus",
     "cosmic_view/endangered",
     "cosmic_view/humans",
+    "cosmic_view/images",
     "cosmic_view/lineage",
-    "cosmic_view/mutations"
+    "cosmic_view/mutations",
+    "cosmic_view/superfamily",
+    "cosmic_view/volumes_density/volume",
+    "events/toggle_image_trail"
   ],
   "camera": {
-    "altitude": 17000000.0,
-    "anchor": "Earth",
-    "latitude": 58.5877,
-    "longitude": 16.1924,
-    "type": "goToGeo"
+    "aim": "",
+    "anchor": "homosapiens",
+    "frame": "",
+    "position": {
+      "x": 24.359527706542696,
+      "y": 24.359527706542845,
+      "z": 24.359527706542725
+    },
+    "type": "setNavigationState",
+    "up": {
+      "x": -0.7354055830872708,
+      "y": 0.6749225358197053,
+      "z": 0.06048304726756115
+    },
+    "yaw": 0.0003844993920288769
   },
   "delta_times": [
     1.0,
