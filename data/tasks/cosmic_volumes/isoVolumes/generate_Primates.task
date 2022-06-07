@@ -1,0 +1,10 @@
+return {{ 
+  Type = "GenerateRawVolumeTask",
+  File = "${DATA}/assets/cosmic_view/volumes/task_data/flatten_vol_Primates.txt",
+  Dimensions = {100,100,100},
+  LowerDomainBound = {-0.7220288429999999, -0.655095709, -0.326811807},
+  UpperDomainBound = {0.5691856070000001, 0.636118741, 0.964402643},
+  Time = "2018-05-04T00:00:00",
+  RawVolumeOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Primates_volume/isovolume.rawvolume",
+  DictionaryOutput = "${DATA}/assets/cosmic_view/volumes/volume_data/Primates_volume/isovolume.dictionary"
+}}

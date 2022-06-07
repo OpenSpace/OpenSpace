@@ -93,7 +93,7 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
         _file = absPath(*p.file).string();
     }
     if (p.valueFunction.has_value()) {
-        _valueFunctionLua = absPath(*p.valueFunction).string();
+        _valueFunctionLua = *p.valueFunction;
     }
     _hasFile = p.file.has_value();
     _hasFunction = p.valueFunction.has_value();
