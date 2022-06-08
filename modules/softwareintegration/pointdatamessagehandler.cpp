@@ -143,11 +143,24 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
 
     float min;
     float max;
+    simp::CmapNaNMode cmapNaNMode;
+    glm::vec4 cmapNaNColor;
     size_t nColors;
     std::vector<float> colorMap;
     try {
         min = simp::readFloatValue(message, messageOffset);
         max = simp::readFloatValue(message, messageOffset);
+        cmapNaNMode = simp::getCmapNaNMode(simp::readString(message, messageOffset));
+        switch (cmapNaNMode) {
+            case simp::CmapNaNMode::Color:
+                cmapNaNColor = simp::readColor(message, messageOffset);
+                break;
+            case simp::CmapNaNMode::Hide: // Nothing to read
+                break;
+            default: // simp::CmapNaNMode::Unknown
+                // TODO:  Throw SimpError
+                break;
+        }
         nColors = static_cast<size_t>(simp::readIntValue(message, messageOffset));
         simp::readColormap(message, messageOffset, nColors, colorMap);
     }
@@ -198,6 +211,38 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
         }
     };
     addCallback(identifier, { colormapLimitsCallback, {}, "colormapLimitsCallback" });
+
+    auto cmapNaNModeCallback = [this, identifier, cmapNaNMode, cmapNaNColor, connection] {
+
+        if (cmapNaNMode == simp::CmapNaNMode::Color) {
+            // Get renderable
+            auto r = getRenderable(identifier);
+
+            // Get cmapNaNColor of renderable
+            properties::Property* cmapNaNColorProperty = r->property("CmapNaNColor");
+            glm::vec4 propertyCmapNaNColor = std::any_cast<glm::vec4>(cmapNaNColorProperty->get());
+
+            // Update cmapNaNColor of renderable
+            if (propertyCmapNaNColor != cmapNaNColor) {
+                global::scriptEngine->queueScript(
+                    fmt::format(
+                        "openspace.setPropertyValueSingle('Scene.{}.Renderable.CmapNaNColor', {});",
+                        identifier, ghoul::to_string(cmapNaNColor)
+                    ),
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }
+        }
+
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.CmapNaNMode', {});",
+                identifier, static_cast<int>(cmapNaNMode)
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    };
+    addCallback(identifier, { cmapNaNModeCallback, {}, "cmapNaNModeCallback" });
 
     auto enableColormapCallback = [this, identifier] {
         global::scriptEngine->queueScript(

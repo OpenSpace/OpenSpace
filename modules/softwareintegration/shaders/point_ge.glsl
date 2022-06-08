@@ -104,6 +104,7 @@ void main() {
 
     if (linearSizeEnabled) {
         float interpolatedSizeAtt = 1.0;
+        // TODO: colormapAttributeScalar should be linearSizeAttributeScalar???
         float colormapAttributeScalar = vs_linearSizeAttributeScalar[0];
         if (colormapAttributeScalar < linearSizeMin) {
             interpolatedSizeAtt = 0.0;

@@ -78,8 +78,9 @@ protected:
     UniformCache(
         color, opacity, size, modelMatrix, cameraUp, screenSize,
         cameraViewProjectionMatrix, eyePosition, sizeOption,
-        colormapTexture, colormapMin, colormapMax, colormapEnabled,
-        linearSizeMin, linearSizeMax, linearSizeEnabled
+        colormapTexture, colormapMin, colormapMax, cmapNaNMode,
+        cmapNaNColor, colormapEnabled, linearSizeMin, linearSizeMax,
+        linearSizeEnabled
     ) _uniformCache;
 
     properties::FloatProperty _size;
@@ -93,6 +94,8 @@ protected:
     properties::BoolProperty _colormapEnabled;
     properties::FloatProperty _colormapMin;
     properties::FloatProperty _colormapMax;
+    properties::IntProperty _cmapNaNMode;
+    properties::Vec4Property _cmapNaNColor;
 
     std::optional<std::string> _identifier = std::nullopt;
 

@@ -105,6 +105,11 @@ std::string getSIMPType(const MessageType& type) {
     return it->first;
 }
 
+CmapNaNMode getCmapNaNMode(const std::string& type) {
+    if (tools::_cmapNaNModeFromString.count(type) == 0) return CmapNaNMode::Unknown;
+    return tools::_cmapNaNModeFromString.at(type);
+}
+
 std::string formatLengthOfSubject(size_t lengthOfSubject) {
     // Format length of subject to always be 15 digits
     std::ostringstream os;

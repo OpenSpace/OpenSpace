@@ -25,6 +25,9 @@
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
+const int CMAPNANMODE_HIDDEN = 0;
+const int CMAPNANMODE_COLOR = 1;
+
 flat in float ge_colormapAttributeScalar;
 in vec2 coords;
 flat in float ge_screenSpaceDepth;
@@ -36,6 +39,8 @@ uniform float opacity;
 
 uniform float colormapMin;
 uniform float colormapMax;
+uniform int cmapNaNMode;
+uniform vec4 cmapNaNColor;
 uniform bool colormapEnabled;
 uniform sampler1D colormapTexture;
 
@@ -55,8 +60,8 @@ Fragment getFragment() {
         discard;
     }
 
-    // Don't show points with no value for that attribute
-    if (colormapEnabled && isnan(ge_colormapAttributeScalar)) {
+    // Don't show points with no value for that attribute, if CmapNaNMode is Hidden
+    if (colormapEnabled && isnan(ge_colormapAttributeScalar) && cmapNaNMode == CMAPNANMODE_HIDDEN) {
         discard;
     }
 
@@ -69,8 +74,14 @@ Fragment getFragment() {
 
     vec4 outputColor = vec4(color.rgb, color.a * opacity); 
     if (colormapEnabled) {
-        vec4 colorFromColormap = attributeScalarToRgb(ge_colormapAttributeScalar);
-        outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * color.a * opacity);
+        // Set CmapNaNColor if point doesn't have a value for the attribute 
+        if (isnan(ge_colormapAttributeScalar) && cmapNaNMode == CMAPNANMODE_COLOR) {
+            outputColor = vec4(cmapNaNColor.rgb, cmapNaNColor.a * opacity);
+        }
+        else {
+            vec4 colorFromColormap = attributeScalarToRgb(ge_colormapAttributeScalar);
+            outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * color.a * opacity);
+        }
     }
 
     Fragment frag;
