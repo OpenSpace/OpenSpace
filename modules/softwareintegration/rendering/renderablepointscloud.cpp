@@ -45,11 +45,12 @@
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
-    constexpr const std::array<const char*, 16> UniformNames = {
+    constexpr const std::array<const char*, 18> UniformNames = {
         "color", "opacity", "size", "modelMatrix", "cameraUp", "screenSize",
-        "cameraViewProjectionMatrix", "eyePosition", "sizeOption", "colormapTexture",
-        "colormapMin", "colormapMax", "colormapEnabled", "linearSizeMin",
-        "linearSizeMax", "linearSizeEnabled"
+        "cameraViewProjectionMatrix", "eyePosition", "sizeOption", 
+        "colormapTexture", "colormapMin", "colormapMax", "cmapNaNMode",
+        "cmapNaNColor", "colormapEnabled", "linearSizeMin", "linearSizeMax",
+        "linearSizeEnabled"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -92,6 +93,18 @@ namespace {
         "ColormapMax",
         "Colormap max",
         "Maximum value to sample from color map."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo CmapNaNModeInfo = {
+        "CmapNaNMode",
+        "Cmap NaN Mode",
+        "How points with NaN value in colormap attribute should be represented."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo CmapNaNColorInfo = {
+        "CmapNaNColor",
+        "Cmap NaN Color",
+        "The color of the points where the colormap scalar is NaN."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColormapEnabledInfo = {
@@ -136,6 +149,12 @@ namespace {
 
         // [[codegen::verbatim(ColormapMaxInfo.description)]]
         std::optional<float> colormapMax;
+        
+        // [[codegen::verbatim(CmapNaNModeInfo.description)]]
+        std::optional<int> cmapNaNMode;
+
+        // [[codegen::verbatim(CmapNaNColorInfo.description)]]
+        std::optional<glm::vec4> cmapNaNColor;
 
         // [[codegen::verbatim(ColormapEnabledInfo.description)]]
         std::optional<bool> colormapEnabled;
@@ -172,34 +191,45 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _color(ColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(0.f), glm::vec4(1.f), glm::vec4(.01f))
     , _size(SizeInfo, 1.f, 0.f, 500.f, .1f)
     , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _colormapEnabled(ColormapEnabledInfo, false)
     , _colormapMin(ColormapMinInfo)
     , _colormapMax(ColormapMaxInfo)
+    , _cmapNaNMode(CmapNaNModeInfo)
+    , _cmapNaNColor(CmapNaNColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(1.0f), glm::vec4(0.f), glm::vec4(0.f))
+    , _colormapEnabled(ColormapEnabledInfo, false)
     , _linearSizeMax(LinearSizeMinInfo)
     , _linearSizeMin(LinearSizeMaxInfo)
     , _linearSizeEnabled(LinearSizeEnabledInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _identifier = p.identifier.value();
+
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    _colormapEnabled = p.colormapEnabled.value_or(_colormapEnabled);
-    _colormapEnabled.onChange([this] { checkIfColormapCanBeEnabled(); });
-    addProperty(_colormapEnabled);
-
-    _identifier = p.identifier.value();
-
     _size = p.size.value_or(_size);
     addProperty(_size);
 
-    _linearSizeEnabled = p.linearSizeEnabled.value_or(_linearSizeEnabled);
-    _linearSizeEnabled.onChange([this] { checkIfLinearSizeCanBeEnabled(); });
-    addProperty(_linearSizeEnabled);
+    _sizeOption.addOptions({
+        { SizeOption::Uniform, "Uniform" },
+        { SizeOption::NonUniform, "Non uniform" }
+    });
+    if (p.sizeOption.has_value()) {
+        switch (*p.sizeOption) {
+            case Parameters::SizeOption::Uniform:
+                _sizeOption = SizeOption::Uniform;
+                break;
+            case Parameters::SizeOption::NonUniform:
+                _sizeOption = SizeOption::NonUniform;
+                break;
+        }
+    }
+    addProperty(_sizeOption);
 
     addProperty(_opacity);
 
+    // =============== Colormap ===============
     _colormapMin = p.colormapMin.value_or(_colormapMin);
     _colormapMin.setVisibility(properties::Property::Visibility::Hidden);
     _colormapMin.onChange([this] { checkColormapMinMax(); });
@@ -209,6 +239,24 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _colormapMax.setVisibility(properties::Property::Visibility::Hidden);
     _colormapMax.onChange([this] { checkColormapMinMax(); });
     addProperty(_colormapMax);
+
+    _cmapNaNMode = p.cmapNaNMode.value_or(_cmapNaNMode);
+    _cmapNaNMode.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_cmapNaNMode);
+    
+    _cmapNaNColor = p.cmapNaNColor.value_or(_cmapNaNColor);
+    // _cmapNaNColor.setViewOption(properties::Property::ViewOptions::Color); // TODO: CHECK WHAT THIS IS
+    _cmapNaNColor.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_cmapNaNColor);
+
+    _colormapEnabled = p.colormapEnabled.value_or(_colormapEnabled);
+    _colormapEnabled.onChange([this] { checkIfColormapCanBeEnabled(); });
+    addProperty(_colormapEnabled);
+
+    // =============== Linear size ===============
+    _linearSizeEnabled = p.linearSizeEnabled.value_or(_linearSizeEnabled);
+    _linearSizeEnabled.onChange([this] { checkIfLinearSizeCanBeEnabled(); });
+    addProperty(_linearSizeEnabled);
 
      auto linearSizeMinMaxChecker = [this] {
         if (_linearSizeMin.value() > _linearSizeMax.value()) {
@@ -227,22 +275,6 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _linearSizeMax.setVisibility(properties::Property::Visibility::Hidden);
     _linearSizeMax.onChange(linearSizeMinMaxChecker);
     addProperty(_linearSizeMax);
-
-    _sizeOption.addOptions({
-        { SizeOption::Uniform, "Uniform" },
-        { SizeOption::NonUniform, "Non uniform" }
-    });
-    if (p.sizeOption.has_value()) {
-        switch (*p.sizeOption) {
-            case Parameters::SizeOption::Uniform:
-                _sizeOption = SizeOption::Uniform;
-                break;
-            case Parameters::SizeOption::NonUniform:
-                _sizeOption = SizeOption::NonUniform;
-                break;
-        }
-    }
-    addProperty(_sizeOption);
 }
 
 bool RenderablePointsCloud::isReady() const {
@@ -327,6 +359,8 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 
     _shaderProgram->setUniform(_uniformCache.colormapMin, _colormapMin);
     _shaderProgram->setUniform(_uniformCache.colormapMax, _colormapMax);
+    _shaderProgram->setUniform(_uniformCache.cmapNaNMode, _cmapNaNMode);
+    _shaderProgram->setUniform(_uniformCache.cmapNaNColor, _cmapNaNColor);
     _shaderProgram->setUniform(_uniformCache.colormapEnabled, _colormapEnabled);
 
     _shaderProgram->setUniform(_uniformCache.linearSizeMin, _linearSizeMin);

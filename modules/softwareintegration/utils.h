@@ -77,6 +77,12 @@ enum class MessageType : uint32_t {
     Unknown
 };
 
+enum class CmapNaNMode : uint32_t {
+    Hide = 0,
+    Color,
+    Unknown
+};
+
 namespace tools {
 
 enum class ErrorCode : uint32_t {
@@ -100,6 +106,11 @@ const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
     {"DISC", MessageType::Disconnection},
 };
 
+const std::unordered_map<std::string, CmapNaNMode> _cmapNaNModeFromString {
+    {"Hide", CmapNaNMode::Hide},
+    {"Color", CmapNaNMode::Color}
+};
+
 glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset);
 
 bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset);
@@ -116,6 +127,8 @@ public:
 MessageType getMessageType(const std::string& type);
 
 std::string getSIMPType(const MessageType& type);
+
+CmapNaNMode getCmapNaNMode(const std::string& type);
 
 
 std::string formatLengthOfSubject(size_t lengthOfSubject);
