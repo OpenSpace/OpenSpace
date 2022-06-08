@@ -149,7 +149,7 @@ namespace {
 namespace openspace {
 
 void EventHandler::initialize() {
-    global::callback::character->emplace_back(
+    global::callback::character->emplace(global::callback::character->begin(),
         [this](unsigned int charCode, KeyModifier mod) -> bool {
             if (_browserInstance) {
                 return charCallback(charCode, mod);
@@ -157,7 +157,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::keyboard->emplace_back(
+    global::callback::keyboard->emplace(global::callback::keyboard->begin(),
         [this](Key key, KeyModifier mod, KeyAction action) -> bool {
             if (_browserInstance) {
                 return keyboardCallback(key, mod, action);
@@ -165,7 +165,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::mousePosition->emplace_back(
+    global::callback::mousePosition->emplace(global::callback::mousePosition->begin(),
         [this](double x, double y) -> bool {
             if (_browserInstance) {
                 return mousePositionCallback(x, y);
@@ -173,15 +173,16 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::mouseButton->emplace_back(
         [this](MouseButton button, MouseAction action, KeyModifier mods) -> bool {
             if (_browserInstance) {
+    global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
                 return mouseButtonCallback(button, action, mods);
             }
             return false;
         }
     );
-    global::callback::mouseScrollWheel->emplace_back(
+    global::callback::mouseScrollWheel->emplace(
+        global::callback::mouseScrollWheel->begin(),
         [this](double x, double y) -> bool {
             if (_browserInstance) {
                 return mouseWheelCallback(glm::ivec2(x, y));
@@ -190,7 +191,7 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchDetected->emplace_back(
+    global::callback::touchDetected->emplace(global::callback::touchDetected->begin(),
         [&](TouchInput input) -> bool {
             if (!_browserInstance) {
                 return false;
@@ -229,7 +230,7 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchUpdated->emplace_back(
+    global::callback::touchUpdated->emplace(global::callback::touchUpdated->begin(),
         [&](TouchInput input) -> bool {
             if (!_browserInstance || _validTouchStates.empty()) {
                 return false;
@@ -267,7 +268,7 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchExit->emplace_back(
+    global::callback::touchExit->emplace(global::callback::touchExit->begin(),
         [&](TouchInput input) {
             if (!_browserInstance) {
                 return;
