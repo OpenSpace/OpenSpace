@@ -2,13 +2,13 @@
   "assets": [
     "base_blank",
     "cosmic_view/consensus",
+    "cosmic_view/density_volumes/volume",
     "cosmic_view/endangered",
     "cosmic_view/humans",
     "cosmic_view/images",
     "cosmic_view/lineage",
     "cosmic_view/mutations",
     "cosmic_view/superfamily",
-    "cosmic_view/volumes_density/volume",
     "events/toggle_image_trail"
   ],
   "camera": {
