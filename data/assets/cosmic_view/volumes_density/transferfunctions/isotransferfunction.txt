@@ -1,7 +1,0 @@
-width 1024
-lower 0.0000000000
-upper 1.0
-mappingkey 0.0 250 250 250  0
-mappingkey 0.05 250 250 250  255
-mappingkey 0.049 0 200 250  0
-
