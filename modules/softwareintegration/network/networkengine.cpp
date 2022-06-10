@@ -122,7 +122,7 @@ void NetworkEngine::peerEventLoop(size_t connection_id) {
 				LDEBUG(fmt::format("Connection lost to {}: {}", connection_id, err.message));
 				_incomingMessages.push({
 					connection_id,
-					SoftwareConnection::Message{ simp::MessageType::Disconnection }
+					SoftwareConnection::Message{ simp::MessageType::InternalDisconnection }
 				});
 			}
 			break;
@@ -222,7 +222,7 @@ void NetworkEngine::handleIncomingMessage(IncomingMessage incomingMessage) {
 			_pointDataMessageHandler.handleVisibilityMessage(message, connectionPtr);
 			break;
 		}
-		case simp::MessageType::Disconnection: {
+		case simp::MessageType::InternalDisconnection: {
 			LDEBUG(fmt::format("Message recieved.. Disconnect software connection: {}", incomingMessage.connection_id));
 			std::lock_guard guard(_softwareConnectionsMutex);
 			if (_softwareConnections.count(incomingMessage.connection_id)) {

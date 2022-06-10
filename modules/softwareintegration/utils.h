@@ -76,7 +76,7 @@ enum class MessageType : uint32_t {
     FixedSize,
     LinearSize,
     Visibility,
-    Disconnection,
+    InternalDisconnection,
     Unknown
 };
 
@@ -107,7 +107,7 @@ const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
     {"FPSI", MessageType::FixedSize},
     {"LPSI", MessageType::LinearSize},
     {"TOVI", MessageType::Visibility},
-    {"DISC", MessageType::Disconnection},
+    {"DISC", MessageType::InternalDisconnection},
 };
 
 const std::unordered_map<std::string, CmapNaNMode> _cmapNaNModeFromString {

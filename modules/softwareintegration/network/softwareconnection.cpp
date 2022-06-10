@@ -335,7 +335,7 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
     auto typeEnum = softwareintegration::simp::getMessageType(type);
 
     // Receive the message data
-    if (typeEnum != softwareintegration::simp::MessageType::Disconnection && typeEnum != softwareintegration::simp::MessageType::Unknown) {
+    if (typeEnum != softwareintegration::simp::MessageType::InternalDisconnection && typeEnum != softwareintegration::simp::MessageType::Unknown) {
         subjectBuffer.resize(subjectSize);
         if (!_socket->get(subjectBuffer.data(), subjectSize)) {
             throw SoftwareConnectionLostError("Failed to read message from socket. Disconnecting.");
