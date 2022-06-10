@@ -46,6 +46,7 @@ class PointDataMessageHandler {
 
 public:
     void handlePointDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleVelocityDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleColormapMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleAttributeDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);

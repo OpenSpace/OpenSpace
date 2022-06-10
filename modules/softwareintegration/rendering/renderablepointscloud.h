@@ -67,11 +67,13 @@ protected:
     void loadColormap(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadCmapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule);
 
     bool checkDataStorage();
 
     void checkIfColormapCanBeEnabled();
     void checkIfLinearSizeCanBeEnabled();
+    void checkIfMotionCanBeEnabled();
     void checkColormapMinMax();
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
@@ -80,7 +82,7 @@ protected:
         cameraViewProjectionMatrix, eyePosition, sizeOption,
         colormapTexture, colormapMin, colormapMax, cmapNaNMode,
         cmapNaNColor, colormapEnabled, linearSizeMin, linearSizeMax,
-        linearSizeEnabled
+        linearSizeEnabled, motionEnabled, theTime
     ) _uniformCache;
 
     properties::FloatProperty _size;
@@ -97,17 +99,25 @@ protected:
     properties::IntProperty _cmapNaNMode;
     properties::Vec4Property _cmapNaNColor;
 
+    properties::BoolProperty _motionEnabled;
+    
     std::optional<std::string> _identifier = std::nullopt;
 
     bool _hasLoadedColormapAttributeData = false;
     bool _hasLoadedColormap = false;
 
     bool _hasLoadedLinearSizeAttributeData = false;
+    
+    bool _hasLoadedVelocityData = false;
+
+    // This is determined by nrAttributes + size for each attribute
+    const size_t _nValuesForVAOStride = 8;
 
     enum class DataSliceKey : size_t {
         Points = 0,
         ColormapAttributes,
-        LinearSizeAttributes
+        LinearSizeAttributes,
+        Velocity
     };
     using DataSlice = std::vector<float>;
     std::unordered_map<DataSliceKey, std::shared_ptr<DataSlice>> _dataSlices;

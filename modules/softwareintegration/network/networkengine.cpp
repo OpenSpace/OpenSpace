@@ -177,6 +177,11 @@ void NetworkEngine::handleIncomingMessage(IncomingMessage incomingMessage) {
 			_pointDataMessageHandler.handlePointDataMessage(message, connectionPtr);
 			break;
 		}
+		case simp::MessageType::VelocityData: {
+			LDEBUG("Message recieved.. velocity data");
+			_pointDataMessageHandler.handleVelocityDataMessage(message, connectionPtr);
+			break;
+		}
 		case simp::MessageType::RemoveSceneGraphNode: {
 			LDEBUG(fmt::format("Message recieved.. Remove SGN"));
 			_pointDataMessageHandler.handleRemoveSGNMessage(message, connectionPtr);

@@ -35,6 +35,7 @@ namespace storage {
     
 enum class Key : uint32_t {
     DataPoints = 0,
+    VelocityData,
     Colormap,
     ColormapAttrData,
     LinearSizeAttrData,
@@ -43,6 +44,7 @@ enum class Key : uint32_t {
 
 const std::unordered_map<std::string, Key> _keyStringFromKey {
     {"DataPoints", Key::DataPoints},
+    {"VelocityData", Key::VelocityData},
     {"Colormap", Key::Colormap},
     {"ColormapAttributeData", Key::ColormapAttrData},
     {"LinearSizeAttributeData", Key::LinearSizeAttrData},
@@ -65,6 +67,7 @@ const char SEP = ';';
 enum class MessageType : uint32_t {
     Connection = 0,
     PointData,
+    VelocityData,
     RemoveSceneGraphNode,
     Color,
     Colormap,
@@ -95,6 +98,7 @@ enum class ErrorCode : uint32_t {
 const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
     {"CONN", MessageType::Connection},
     {"PDAT", MessageType::PointData},
+    {"VDAT", MessageType::VelocityData},
     {"RSGN", MessageType::RemoveSceneGraphNode},
     {"FCOL", MessageType::Color},
     {"LCOL", MessageType::Colormap},

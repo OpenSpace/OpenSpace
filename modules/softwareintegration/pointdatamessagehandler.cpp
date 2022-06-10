@@ -85,6 +85,45 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     addCallback(identifier, { reanchorCallback, { storage::Key::DataPoints }, "reanchorCallback" });
 }
 
+void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+    LWARNING(fmt::format("PointDataMessageHandler::handleVelocityDataMessage()"));
+    size_t messageOffset = 0;
+    std::string identifier;
+
+    checkRenderable(message, messageOffset, connection, identifier);
+
+    size_t nVelocities;
+    size_t dimensionality;
+    std::vector<float> velocities;
+
+    try {
+        // The following order of creating variables is the exact order they are received
+        // in the message. If the order is not the same, the global variable
+        // 'message offset' will be wrong
+        nVelocities = static_cast<size_t>(simp::readIntValue(message, messageOffset));
+        dimensionality = static_cast<size_t>(simp::readIntValue(message, messageOffset));
+        simp::readPointData(message, messageOffset, nVelocities, dimensionality, velocities);
+    }
+    catch (const simp::SimpError& err) {
+        LERROR(fmt::format("Error when reading point data message: {}", err.message));
+        return;
+    }
+
+    // Use the renderable identifier as the data key
+    auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
+    module->storeData(identifier, storage::Key::VelocityData, std::move(velocities));
+    auto callback = [identifier] {
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.MotionEnabled', {});",
+                identifier, "true"
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    };
+    addCallback(identifier, { callback, { storage::Key::VelocityData }, "Enable motion mode, wait for VelocityData" });
+}
+
 void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;

@@ -33,6 +33,7 @@ in vec2 coords;
 flat in float ge_screenSpaceDepth;
 flat in vec4 ge_positionViewSpace;
 in float ta;
+// in vec4 ge_gPosition;
 
 uniform vec4 color;
 uniform float opacity;

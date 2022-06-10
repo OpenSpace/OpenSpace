@@ -26,11 +26,16 @@
 
 #include "PowerScaling/powerScalingMath.hglsl"
 
+// const float EPS = 1e-5;
+
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
 in float vs_colormapAttributeScalar[];
 flat in float vs_linearSizeAttributeScalar[];
+
+// in vec4 vs_gPosition[];
+// out vec4 ge_gPosition;
 
 flat out float ge_screenSpaceDepth;
 out float ta;
@@ -96,15 +101,26 @@ void main() {
 
     ta = 1.0;
 
+
+    // // Discard geometry if star has no position (but wasn't a nullArray).
+    // // Or if observed distance is above threshold set by cutOffThreshold.
+    // // By discarding in gs instead of fs we save computations for when nothing is visible.
+    // vec4 position = gl_in[0].gl_Position;
+    // if (length(position) < EPS) {
+    //     return;
+    // }
+
     vec3 pos = gl_in[0].gl_Position.xyz;
 
     dvec4 modelPos = modelMatrix * dvec4(pos, 1.0);
 
     double scaleMultiply = 1.0e17 * size;
 
+    scaleMultiply *= 15; // TODO: FIX POINT SIZE, NOW IT'S ARBRITRARY
+
     if (linearSizeEnabled) {
         float interpolatedSizeAtt = 1.0;
-        // TODO: colormapAttributeScalar should be linearSizeAttributeScalar???
+        // TODO: "colormapAttributeScalar" should be "linearSizeAttributeScalar"???
         float colormapAttributeScalar = vs_linearSizeAttributeScalar[0];
         if (colormapAttributeScalar < linearSizeMin) {
             interpolatedSizeAtt = 0.0;
