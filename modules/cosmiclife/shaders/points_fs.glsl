@@ -41,7 +41,7 @@ Fragment getFragment() {
   }
 
   vec4 textureColor = texture(spriteTexture, texCoord);
-  if (textureColor.a == 0.0) {
+  if (textureColor.a < 0.1) {
     discard;
   }
 
