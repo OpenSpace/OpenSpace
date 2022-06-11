@@ -58,7 +58,6 @@ void main() {
     if (motionEnabled) {
         // TODO: How to handle NaN velocity values???
         if (!isnan(in_velocity[0]) || !isnan(in_velocity[1]) || !isnan(in_velocity[2])) {
-            // vec4 objectPosition = vec4(in_position * 1000 * Parsec, 1.0);
             objectPosition.xyz += 10*theTime/Parsec * in_velocity;
         }
         // objectPosition.xyz += theTime * vec3(500000.0, 500000.0, 500000.0); 

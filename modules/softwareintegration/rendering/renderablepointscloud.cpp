@@ -54,6 +54,7 @@ namespace {
         "cmapNaNColor", "colormapEnabled", "linearSizeMin", "linearSizeMax",
         "linearSizeEnabled", "motionEnabled", "theTime"
     };
+    // "velNaNMode", "velNaNColor", 
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
@@ -132,6 +133,18 @@ namespace {
         "Linear size enabled",
         "Boolean to determine whether to use linear size or not."
     };
+    
+    constexpr openspace::properties::Property::PropertyInfo VelNaNModeInfo = {
+        "VelNaNMode",
+        "Vel NaN Mode",
+        "How points with NaN value in colormap attribute should be represented."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo VelNaNColorInfo = {
+        "VelNaNColor",
+        "Vel NaN Color",
+        "The color of the points where the colormap scalar is NaN."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo MotionEnabledInfo = {
         "MotionEnabled",
@@ -177,6 +190,12 @@ namespace {
         // [[codegen::verbatim(LinearSizeEnabledInfo.description)]]
         std::optional<bool> linearSizeEnabled;
 
+        // [[codegen::verbatim(VelNaNModeInfo.description)]]
+        std::optional<int> velNaNMode;
+
+        // [[codegen::verbatim(VelNaNColorInfo.description)]]
+        std::optional<glm::vec4> velNaNColor;
+
         // [[codegen::verbatim(MotionEnabledInfo.description)]]
         std::optional<bool> motionEnabled;
 
@@ -211,6 +230,8 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _linearSizeMax(LinearSizeMinInfo)
     , _linearSizeMin(LinearSizeMaxInfo)
     , _linearSizeEnabled(LinearSizeEnabledInfo, false)
+    , _velNaNMode(VelNaNModeInfo)
+    , _velNaNColor(VelNaNColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(1.0f), glm::vec4(0.f), glm::vec4(0.f))
     , _motionEnabled(MotionEnabledInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -289,6 +310,15 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _linearSizeMax.onChange(linearSizeMinMaxChecker);
     addProperty(_linearSizeMax);
     
+    _velNaNMode = p.velNaNMode.value_or(_velNaNMode);
+    _velNaNMode.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_velNaNMode);
+    
+    _velNaNColor = p.velNaNColor.value_or(_velNaNColor);
+    // _velNaNColor.setViewOption(properties::Property::ViewOptions::Color); // TODO: CHECK WHAT THIS IS
+    _velNaNColor.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_velNaNColor);
+
     _motionEnabled = p.motionEnabled.value_or(_motionEnabled);
     _motionEnabled.onChange([this] { checkIfMotionCanBeEnabled(); });
     addProperty(_motionEnabled);
@@ -384,6 +414,8 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform(_uniformCache.linearSizeMax, _linearSizeMax);
     _shaderProgram->setUniform(_uniformCache.linearSizeEnabled, _linearSizeEnabled);
 
+    // _shaderProgram->setUniform(_uniformCache.velNaNMode, _velNaNMode);
+    // _shaderProgram->setUniform(_uniformCache.velNaNColor, _velNaNColor);
     _shaderProgram->setUniform(_uniformCache.motionEnabled, _motionEnabled);
     _shaderProgram->setUniform(
         _uniformCache.theTime,
@@ -471,9 +503,9 @@ void RenderablePointsCloud::update(const UpdateData&) {
                 bufferData.push_back(velocityDataSlice->at(j + 2));
             }
             else {
-                bufferData.push_back(std::nan("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
-                bufferData.push_back(std::nan("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
-                bufferData.push_back(std::nan("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
+                bufferData.push_back(std::nanf("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
+                bufferData.push_back(std::nanf("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
+                bufferData.push_back(std::nanf("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
                 // bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
                 // bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
                 // bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
@@ -756,8 +788,8 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
             1.0
         };
         // W-normalization
-        transformedPos /= transformedPos.w;
-        transformedPos *= distanceconstants::Parsec; // TODO: Is this converting parsec => meter?
+        // transformedPos /= transformedPos.w;
+        // transformedPos *= distanceconstants::Parsec; // TODO: Is this converting parsec => meter?
 
         addPosition(transformedPos);
     }

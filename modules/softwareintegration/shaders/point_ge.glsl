@@ -116,8 +116,6 @@ void main() {
 
     double scaleMultiply = 1.0e17 * size;
 
-    scaleMultiply *= 15; // TODO: FIX POINT SIZE, NOW IT'S ARBRITRARY
-
     if (linearSizeEnabled) {
         float interpolatedSizeAtt = 1.0;
         // TODO: "colormapAttributeScalar" should be "linearSizeAttributeScalar"???

@@ -80,9 +80,20 @@ enum class MessageType : uint32_t {
     Unknown
 };
 
-enum class CmapNaNMode : uint32_t {
+enum class NaNRenderMode : uint32_t {
     Hide = 0,
     Color,
+    Unknown
+};
+
+enum class LengthUnit : uint32_t {
+    m = 0,
+    km,
+    AU,
+    lyr,
+    pc,
+    kpc,
+    Mpc,
     Unknown
 };
 
@@ -110,9 +121,19 @@ const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
     {"DISC", MessageType::InternalDisconnection},
 };
 
-const std::unordered_map<std::string, CmapNaNMode> _cmapNaNModeFromString {
-    {"Hide", CmapNaNMode::Hide},
-    {"Color", CmapNaNMode::Color}
+const std::unordered_map<std::string, NaNRenderMode> _cmapNaNModeFromString {
+    {"Hide", NaNRenderMode::Hide},
+    {"Color", NaNRenderMode::Color}
+};
+
+const std::unordered_map<std::string, LengthUnit> _lengthUnitFromString {
+    {"m", LengthUnit::m},
+    {"km", LengthUnit::km},
+    {"AU", LengthUnit::AU},
+    {"lyr", LengthUnit::lyr},
+    {"pc", LengthUnit::pc},
+    {"kpc", LengthUnit::kpc},
+    {"Mpc", LengthUnit::Mpc}
 };
 
 glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset);
@@ -133,7 +154,9 @@ MessageType getMessageType(const std::string& type);
 
 std::string getSIMPType(const MessageType& type);
 
-CmapNaNMode getCmapNaNMode(const std::string& type);
+NaNRenderMode getNaNRenderMode(const std::string& type);
+
+LengthUnit getLengthUnit(const std::string& type);
 
 std::string formatLengthOfSubject(size_t lengthOfSubject);
 

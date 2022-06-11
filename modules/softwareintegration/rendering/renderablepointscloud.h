@@ -71,10 +71,10 @@ protected:
 
     bool checkDataStorage();
 
+    void checkColormapMinMax();
     void checkIfColormapCanBeEnabled();
     void checkIfLinearSizeCanBeEnabled();
     void checkIfMotionCanBeEnabled();
-    void checkColormapMinMax();
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
     UniformCache(
@@ -82,8 +82,9 @@ protected:
         cameraViewProjectionMatrix, eyePosition, sizeOption,
         colormapTexture, colormapMin, colormapMax, cmapNaNMode,
         cmapNaNColor, colormapEnabled, linearSizeMin, linearSizeMax,
-        linearSizeEnabled, motionEnabled, theTime
+        linearSizeEnabled,motionEnabled, theTime
     ) _uniformCache;
+    //  velNaNMode, velNaNColor, 
 
     properties::FloatProperty _size;
     properties::Vec4Property _color;
@@ -100,6 +101,8 @@ protected:
     properties::Vec4Property _cmapNaNColor;
 
     properties::BoolProperty _motionEnabled;
+    properties::IntProperty _velNaNMode;
+    properties::Vec4Property _velNaNColor;
     
     std::optional<std::string> _identifier = std::nullopt;
 

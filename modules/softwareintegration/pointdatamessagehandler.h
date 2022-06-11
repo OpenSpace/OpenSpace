@@ -94,6 +94,11 @@ private:
         const std::string& identifier,
         std::shared_ptr<SoftwareConnection> connection
     );
+
+    void convertToMeterPerSecond(
+        softwareintegration::simp::LengthUnit currLengthUnit, 
+        std::vector<float>& data
+    );
 };
 
 } // namespace openspace
