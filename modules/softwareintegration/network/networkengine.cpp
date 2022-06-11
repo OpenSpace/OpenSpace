@@ -65,7 +65,7 @@ void NetworkEngine::stop() {
 	}
 
 	_incomingMessages.interrupt();
-	
+
 	_shouldStopEventThread = true;
 	_socketServer.close();
 	_softwareConnections.clear();
@@ -90,7 +90,7 @@ void NetworkEngine::handleNewSoftwareConnections() {
 
 		socket->startStreams();
 
-		auto p = std::make_shared<SoftwareConnection>(SoftwareConnection{ std::move(socket) });
+		auto p = std::make_shared<SoftwareConnection>(std::move(socket));
 		std::lock_guard guard(_softwareConnectionsMutex);
 		auto [it, peerInserted] = _softwareConnections.emplace(p->id(), p);
 
@@ -164,6 +164,7 @@ void NetworkEngine::handleIncomingMessage(IncomingMessage incomingMessage) {
 
 	switch (messageType) {
 		case simp::MessageType::Connection: {
+			LDEBUG(fmt::format("Message recieved... Connection: {}", incomingMessage.connection_id));
 			size_t offset = 0;
 			const std::string software = simp::readString(message, offset);
 
@@ -173,62 +174,63 @@ void NetworkEngine::handleIncomingMessage(IncomingMessage incomingMessage) {
 			break;
 		}
 		case simp::MessageType::PointData: {
-			LDEBUG("Message recieved.. Point data");
+			LDEBUG("Message recieved... Point data");
 			_pointDataMessageHandler.handlePointDataMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::VelocityData: {
-			LDEBUG("Message recieved.. velocity data");
+			LDEBUG("Message recieved... Velocity data");
 			_pointDataMessageHandler.handleVelocityDataMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::RemoveSceneGraphNode: {
-			LDEBUG(fmt::format("Message recieved.. Remove SGN"));
+			LDEBUG(fmt::format("Message recieved... Remove SGN"));
 			_pointDataMessageHandler.handleRemoveSGNMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::Color: {
-			LDEBUG(fmt::format("Message recieved.. New color"));
+			LDEBUG(fmt::format("Message recieved... Color"));
 			_pointDataMessageHandler.handleFixedColorMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::Colormap: {
-			LDEBUG(fmt::format("Message recieved.. New colormap"));
+			LDEBUG(fmt::format("Message recieved... Colormap"));
 			_pointDataMessageHandler.handleColormapMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::AttributeData: {
-			LDEBUG(fmt::format("Message recieved.. New attribute data"));
+			LDEBUG(fmt::format("Message recieved... Attribute data"));
 			_pointDataMessageHandler.handleAttributeDataMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::Opacity: {
-			LDEBUG(fmt::format("Message recieved.. New Opacity"));
+			LDEBUG(fmt::format("Message recieved... Opacity"));
 			_pointDataMessageHandler.handleOpacityMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::FixedSize: {
-			LDEBUG(fmt::format("Message recieved.. New size"));
+			LDEBUG(fmt::format("Message recieved... Size"));
 			_pointDataMessageHandler.handleFixedPointSizeMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::LinearSize: {
-			LDEBUG(fmt::format("Message recieved.. New linear size"));
+			LDEBUG(fmt::format("Message recieved... Linear size"));
 			_pointDataMessageHandler.handleLinearPointSizeMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::Visibility: {
-			LDEBUG(fmt::format("Message recieved.. New visibility"));
+			LDEBUG(fmt::format("Message recieved... Visibility"));
 			_pointDataMessageHandler.handleVisibilityMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::InternalDisconnection: {
-			LDEBUG(fmt::format("Message recieved.. Disconnect software connection: {}", incomingMessage.connection_id));
+			LDEBUG(fmt::format("Message recieved... Disconnection from software connection: {}", incomingMessage.connection_id));
 			std::lock_guard guard(_softwareConnectionsMutex);
+			SoftwareConnection::NetworkEngineFriends::stopThread(connectionPtr);
+			
 			if (_softwareConnections.count(incomingMessage.connection_id)) {
 				_softwareConnections.erase(incomingMessage.connection_id);
 			}
-			SoftwareConnection::NetworkEngineFriends::stopThread(connectionPtr);
 			break;
 		}
 		default: {

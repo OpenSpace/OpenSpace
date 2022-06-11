@@ -65,8 +65,6 @@ private:
         std::shared_ptr<SoftwareConnection> connection, std::string& identifier
     );
 
-    void subscribeToRenderableUpdates(const std::string& identifier, std::shared_ptr<SoftwareConnection> connection);
-
     void addCallback(
         const std::string& identifier,
         const Callback& newCallback

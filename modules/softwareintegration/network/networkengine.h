@@ -39,7 +39,7 @@ public:
 	~NetworkEngine();
 
 	struct IncomingMessage {
-		size_t connection_id{1};
+		size_t connection_id;
 		SoftwareConnection::Message message{ softwareintegration::simp::MessageType::Unknown };
 	};
 

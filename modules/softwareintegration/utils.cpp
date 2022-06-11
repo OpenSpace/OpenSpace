@@ -66,8 +66,12 @@ namespace storage {
 
 namespace simp {
 
+SimpError::SimpError(const std::string& msg)
+    : errorCode{tools::ErrorCode::Generic}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(errorCode), msg), "Software Integration Messaging Protocol error")
+{}
+
 SimpError::SimpError(const tools::ErrorCode _errorCode, const std::string& msg)
-    : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(_errorCode), msg), "Software Integration Messaging Protocol error")
+    : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(errorCode), msg), "Software Integration Messaging Protocol error")
 {}
 
 bool tools::isEndOfCurrentValue(const std::vector<char>& message, size_t offset) {

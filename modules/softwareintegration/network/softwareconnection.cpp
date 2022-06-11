@@ -46,7 +46,9 @@ SoftwareConnection::SoftwareConnectionLostError::SoftwareConnectionLostError(con
 SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
     : _id{ _nextConnectionId++ }, _socket{ std::move(socket) }, _sceneGraphNodes{},
     _thread{}, _shouldStopThread{ false }
-{}
+{
+    LDEBUG(fmt::format("Adding software connection {}", _id));
+}
 
 SoftwareConnection::SoftwareConnection(SoftwareConnection&& sc)
 	: _id{ std::move(sc._id) }, _socket{ std::move(sc._socket) },
@@ -55,15 +57,16 @@ SoftwareConnection::SoftwareConnection(SoftwareConnection&& sc)
 {}
 
 SoftwareConnection::~SoftwareConnection() {
-    // TODO: Destructor being called on Connection for some reason
-    LINFO(fmt::format("Removing software connection {}", _id));
+    // When adding new features, always make sure that the
+    // destructor is called when disconnecting external
+    // since NetworkEngine and MessageHandler has
+    // shared_ptrs to SoftwareConnection, which can cause
+    // bugs if not handled properly. 
+    // Tips: use weak_ptr instead of shared_ptr in callbacks.
+    LDEBUG(fmt::format("Removing software connection {}", _id));
 
     if (!_isConnected) return;
     _isConnected = false;
-
-    for (auto& identifier : _sceneGraphNodes) {
-        removePropertySubscriptions(identifier);
-    }
 
     if (_socket) {
         _socket->disconnect();
@@ -94,6 +97,8 @@ void SoftwareConnection::addPropertySubscription(
     }
 
     auto property = r->property(propertyName);
+    
+    // Set new onChange handler
     OnChangeHandle onChangeHandle = property->onChange(newHandler);
 
     auto propertySubscriptions = _subscribedProperties.find(identifier);
@@ -102,7 +107,11 @@ void SoftwareConnection::addPropertySubscription(
         auto propertySubscription = propertySubscriptions->second.find(propertyName);
         if (propertySubscription != propertySubscriptions->second.end()) {
             // Property subscription already exists
-            removeExistingPropertySubscription(identifier, property, propertySubscription->second);
+            
+            // Remove old handle
+            property->removeOnChange(propertySubscription->second);
+
+            // Save new handle 
             propertySubscription->second = onChangeHandle;
         }
         else {
@@ -169,7 +178,10 @@ void SoftwareConnection::removePropertySubscriptions(const std::string& identifi
 
     if (propertySubscriptions == _subscribedProperties.end()) return;
 
-    for (auto& [propertyName, onChangeHandle] : propertySubscriptions->second) {
+    auto propertySubscriptionIt = std::begin(propertySubscriptions->second);
+    while (propertySubscriptionIt != std::end(propertySubscriptions->second)) {
+        auto& [propertyName, onChangeHandle] = *propertySubscriptionIt;
+
         if (!r->hasProperty(propertyName)) {
             LWARNING(fmt::format(
                 "Couldn't remove property subscription. Property \"{}\" doesn't exist on \"{}\"",
@@ -178,25 +190,13 @@ void SoftwareConnection::removePropertySubscriptions(const std::string& identifi
             continue;
         }
 
-        auto propertySubscription = propertySubscriptions->second.find(propertyName);
-        if (propertySubscription == propertySubscriptions->second.end()) continue;
-
         auto property = r->property(propertyName);
-        removeExistingPropertySubscription(identifier, property, onChangeHandle);
+        property->removeOnChange(onChangeHandle);
+
+        propertySubscriptionIt = propertySubscriptions->second.erase(propertySubscriptionIt);
     }
 
     _subscribedProperties.erase(propertySubscriptions);
-}
-
-void SoftwareConnection::removeExistingPropertySubscription(
-    const std::string& identifier,
-    properties::Property *property,
-    OnChangeHandle onChangeHandle
-) {
-    property->removeOnChange(onChangeHandle);
-
-    auto propertySubscriptions = _subscribedProperties.find(identifier);
-    propertySubscriptions->second.erase(property->identifier());
 }
 
 void SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
@@ -230,13 +230,19 @@ void SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscript
         auto propertySubscription = propertySubscriptions->second.find(propertyName);
         if (propertySubscription != propertySubscriptions->second.end()) {
             // Property subscription already exists
-            connectionPtr->removeExistingPropertySubscription(identifier, property, propertySubscription->second);
+
+            // Remove onChange handle
+            property->removeOnChange(propertySubscription->second);
+
+            // Remove property subscription
+            propertySubscriptions->second.erase(propertySubscription);
         }
     }
 }
 
 void SoftwareConnection::disconnect() {
     _socket->disconnect();
+    LINFO(fmt::format("OpenSpace has disconnected with external software through socket"));
 }
 
 bool SoftwareConnection::isConnected() const {
@@ -279,11 +285,6 @@ void SoftwareConnection::removeSceneGraphNode(const std::string& identifier) {
     }
 }
 
-/**
- * @brief This function is only called on the server node, i.e. the node connected to the external software
- * 
- * @return SoftwareConnection::Message 
- */
 SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
     // Header consists of version (3 char), message type (4 char) & subject size (15 char)
     size_t headerSize = 22 * sizeof(char);
@@ -324,13 +325,6 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
         subjectSizeIn.push_back(headerBuffer[i]);
     }
     const size_t subjectSize = std::stoi(subjectSizeIn);
-
-    // TODO: Remove this
-    // std::string rawHeader;
-    // for (int i = 0; i < 22; i++) {
-    //     rawHeader.push_back(headerBuffer[i]);
-    // }
-    // LDEBUG(fmt::format("Message received with header: {}", rawHeader));
 
     auto typeEnum = softwareintegration::simp::getMessageType(type);
 

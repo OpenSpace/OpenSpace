@@ -124,6 +124,7 @@ bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset);
 class SimpError : public ghoul::RuntimeError {
 public:
  tools::ErrorCode errorCode;
+ explicit SimpError(const std::string& msg);
  explicit SimpError(const tools::ErrorCode _errorCode, const std::string& msg);
 };
 
@@ -133,7 +134,6 @@ MessageType getMessageType(const std::string& type);
 std::string getSIMPType(const MessageType& type);
 
 CmapNaNMode getCmapNaNMode(const std::string& type);
-
 
 std::string formatLengthOfSubject(size_t lengthOfSubject);
 
