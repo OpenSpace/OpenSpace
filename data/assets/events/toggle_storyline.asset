@@ -1,0 +1,122 @@
+local offhomo = {
+    Identifier = "turnoffhomo",
+    Name = "Homo off",
+    Command = 'openspace.setPropertyValueSingle("Scene.neander.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.denisovan.Renderable.Enabled", false)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local onhomo = {
+    Identifier = "turnonhomo",
+    Name = "Homo on",
+    Command = 'openspace.setPropertyValueSingle("Scene.neander.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.denisovan.Renderable.Enabled", true)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local offhomininae = {
+    Identifier = "turnoffhomininae",
+    Name = "Homininae off",
+    Command = 'openspace.setPropertyValueSingle("Scene.homininae.Renderable.Enabled", false)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local onhomininae = {
+    Identifier = "turnonhomininae",
+    Name = "Homininae on",
+    Command = 'openspace.setPropertyValueSingle("Scene.homininae.Renderable.Enabled", true)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local offhominioidae = {
+    Identifier = "turnoffhominioidae",
+    Name = "Hominioidae off",
+    Command = 'openspace.setPropertyValueSingle("Scene.hominioidae.Renderable.Enabled", false)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local onhominioidae = {
+    Identifier = "turnonhominioidae",
+    Name = "Hominioidae on",
+    Command = 'openspace.setPropertyValueSingle("Scene.hominioidae.Renderable.Enabled", true)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local offhominioidae_volume = {
+    Identifier = "turnoffhominioidae_volume",
+    Name = "Hominioidae volume off",
+    Command = 'openspace.setPropertyValueSingle("Scene.Hominoidea_volume.Renderable.Enabled", false)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local onhominioidae_volume = {
+    Identifier = "turnonhominioidae_volume",
+    Name = "Hominioidae volume on",
+    Command = 'openspace.setPropertyValueSingle("Scene.Hominoidea_volume.Renderable.Enabled", true)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local offall_primates = {
+    Identifier = "offall_primates",
+    Name = "Primates off",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_genus.Renderable.Enabled", false)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local onall_primates = {
+    Identifier = "onall_primates",
+    Name = "Primates on",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_genus.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.homininae.Renderable.DrawLabels", false); openspace.setPropertyValueSingle("Scene.hominioidae.Renderable.DrawLabels", false); openspace.setPropertyValueSingle("Scene.homosapiens.Renderable.DrawLabels", false)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+local off_volumes = {
+    Identifier = "off_volumes",
+    Name = "All volumes off",
+    Command = 'openspace.setPropertyValueSingle("Scene.Cercopithecoidea_volume.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.Strepsirrhini_volume.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.Platyrrhini_volume.Renderable.Enabled", false)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+
+local on_volumes = {
+    Identifier = "on_volumes",
+    Name = "All volumes on",
+    Command = 'openspace.setPropertyValueSingle("Scene.Cercopithecoidea_volume.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.Strepsirrhini_volume.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.Platyrrhini_volume.Renderable.Enabled", true)',
+    GuiPath = "/RenderableEvent",
+    IsLocal = true
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(offhomo)
+  openspace.action.registerAction(onhomo)
+  openspace.action.registerAction(offhomininae)
+  openspace.action.registerAction(onhomininae)
+  openspace.action.registerAction(offhominioidae)
+  openspace.action.registerAction(onhominioidae)
+  openspace.action.registerAction(offhominioidae_volume)
+  openspace.action.registerAction(onhominioidae_volume)
+  openspace.action.registerAction(offall_primates)
+  openspace.action.registerAction(onall_primates)
+  openspace.action.registerAction(off_volumes)
+  openspace.action.registerAction(on_volumes)
+  openspace.event.registerEventAction(
+    "RenderableDisabled",
+    offhomo.Identifier,
+    { Node = "all" }
+  )
+  openspace.event.registerEventAction(
+    "RenderableEnabled",
+    onhomo.Identifier,
+    { Node = "all" }
+  )
+
+end)

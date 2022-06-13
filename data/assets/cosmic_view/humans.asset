@@ -399,7 +399,7 @@ local all = {
   
   
   asset.onInitialize(function()
-    openspace.addSceneGraphNode(test)
+   -- openspace.addSceneGraphNode(test)
     openspace.addSceneGraphNode(all)
     openspace.addSceneGraphNode(south_africa)
     openspace.addSceneGraphNode(west_africa)
@@ -420,7 +420,7 @@ local all = {
 
 asset.onDeinitialize(function()
     openspace.removeSceneGraphNode(all)
-    openspace.removeSceneGraphNode(test)
+  --  openspace.removeSceneGraphNode(test)
     openspace.removeSceneGraphNode(south_africa)
     openspace.removeSceneGraphNode(west_africa)
     openspace.removeSceneGraphNode(central_africa)
@@ -439,7 +439,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(all)
-asset.export(test)
+-- asset.export(test)
 asset.export(south_africa)
 asset.export(west_africa)
 asset.export(central_africa)

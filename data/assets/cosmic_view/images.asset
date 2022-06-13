@@ -5,6 +5,8 @@ local path = "C:/MasterThesis_cosmicView"
 local endangered =  asset.localResource(path .. "/data/endangered/images/critically_endangered.png")
 local synonymous = asset.localResource(path .. "/data/mutations/images/syn.png")
 local nonsynonymous = asset.localResource(path .. "/data/mutations/images/nonsyn.png")
+local redyellow = asset.localResource(path .. "/data/mutations/images/redyellow.png")
+local redblue = asset.localResource(path .. "/data/mutations/images/redblue.png")
 local world_continents =  asset.localResource(path .. "/data/humans/images/world_map.png")
 
 local status_image = {
@@ -42,6 +44,30 @@ local nonsyn = {
     Enabled = false
   }
 
+
+local redyellowcolor = {
+  Identifier = "redyellow",
+  Name = "Colormap redyellow",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = redyellow,
+  FaceCamera = false,
+  Scale = 0.45,
+  CartesianPosition = { 1.24, -0.6, -2.0 },
+  Enabled = false
+}
+
+local redbluecolor = {
+  Identifier = "redblue",
+  Name = "Colormap redblue",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = redblue,
+  FaceCamera = false,
+  Scale = 0.55,
+  CartesianPosition = { 1.24, -0.6, -2.0 },
+  Enabled = false
+}
+
+
   local world_map_image = {
     Identifier = "humans",
     Name = "world map",
@@ -60,6 +86,9 @@ local nonsyn = {
     openspace.addScreenSpaceRenderable(status_image) 
     openspace.addScreenSpaceRenderable(syn) 
     openspace.addScreenSpaceRenderable(nonsyn) 
+    openspace.addScreenSpaceRenderable(redyellowcolor) 
+    openspace.addScreenSpaceRenderable(redbluecolor) 
+
 end)
 
 
@@ -68,9 +97,13 @@ asset.onDeinitialize(function()
     openspace.removeScreenSpaceRenderable(status_image)
     openspace.removeScreenSpaceRenderable(syn)
     openspace.removeScreenSpaceRenderable(nonsyn)
+    openspace.removeScreenSpaceRenderable(redyellowcolor)
+    openspace.removeScreenSpaceRenderable(redbluecolor)
     end)
 
     asset.export(world_map_image)
     asset.export(status_image)
     asset.export(syn)
     asset.export(nonsyn)
+    asset.export(redyellowcolor)
+    asset.export(redbluecolor)
