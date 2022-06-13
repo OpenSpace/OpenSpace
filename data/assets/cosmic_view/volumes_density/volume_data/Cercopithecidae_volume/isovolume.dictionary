@@ -1,1 +1,0 @@
-return {Dimensions={100,100,100},DomainUnit="m",GridType="Cartesian",LowerDomainBound={-0.3982456922531128,-0.3931134045124054,-0.059576090425252914},MaxValue=1,MinValue=0,UpperDomainBound={0.46918559074401855,0.47431787848472595,0.8078551888465881},ValueUnit="K"}
