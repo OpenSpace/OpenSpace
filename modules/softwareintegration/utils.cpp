@@ -66,11 +66,54 @@ namespace storage {
 
 namespace simp {
 
-SimpError::SimpError(const tools::ErrorCode _errorCode, const std::string& msg)
-    : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(_errorCode), msg), "Software Integration Messaging Protocol error")
-{}
+// Anonymous namespace
+namespace {
 
-bool tools::isEndOfCurrentValue(const std::vector<char>& message, size_t offset) {
+const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType{
+    { "CONN", MessageType::Connection },
+    { "PDAT", MessageType::PointData },
+    { "RSGN", MessageType::RemoveSceneGraphNode },
+    { "FCOL", MessageType::Color },
+    { "LCOL", MessageType::Colormap },
+    { "ATDA", MessageType::AttributeData },
+    { "FOPA", MessageType::Opacity },
+    { "FPSI", MessageType::FixedSize },
+    { "LPSI", MessageType::LinearSize },
+    { "TOVI", MessageType::Visibility },
+    { "DISC", MessageType::Disconnection },
+};
+
+const std::unordered_map<std::string, CmapNaNMode> _cmapNaNModeFromString{
+    {"Hide", CmapNaNMode::Hide},
+    {"Color", CmapNaNMode::Color}
+};
+
+glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset) {
+    if (message[offset] != '[') {
+        throw SimpError(
+            tools::ErrorCode::Generic,
+            fmt::format("Expected to read '[', got {} in 'readColor'", message[offset])
+        );
+    }
+    ++offset;
+
+    float r = readFloatValue(message, offset);
+    float g = readFloatValue(message, offset);
+    float b = readFloatValue(message, offset);
+    float a = readFloatValue(message, offset);
+
+    if (message[offset] != ']') {
+        throw SimpError(
+            tools::ErrorCode::Generic,
+            fmt::format("Expected to read ']', got {} in 'readColor'", message[offset])
+        );
+    }
+    ++offset;
+
+    return { r, g, b, a };
+}
+
+bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset) {
     if (offset >= message.size()) {
         throw SimpError(
             tools::ErrorCode::OffsetLargerThanMessageSize,
@@ -88,26 +131,32 @@ bool tools::isEndOfCurrentValue(const std::vector<char>& message, size_t offset)
     return offset != 0 && message[offset] == SEP && message[offset - 1] != '\\';
 }
 
+}  // namespace
+
+SimpError::SimpError(const tools::ErrorCode _errorCode, const std::string& msg)
+    : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(_errorCode), msg), "Software Integration Messaging Protocol error")
+{}
+
 MessageType getMessageType(const std::string& type) {
-    if (tools::_messageTypeFromSIMPType.count(type) == 0) return MessageType::Unknown;
-    return tools::_messageTypeFromSIMPType.at(type);
+    if (_messageTypeFromSIMPType.count(type) == 0) return MessageType::Unknown;
+    return _messageTypeFromSIMPType.at(type);
 }
 
 std::string getSIMPType(const MessageType& type) {
     auto it = std::find_if(
-        tools::_messageTypeFromSIMPType.begin(),
-        tools::_messageTypeFromSIMPType.end(),
+        _messageTypeFromSIMPType.begin(),
+        _messageTypeFromSIMPType.end(),
         [type](const std::pair<const std::string, MessageType>& p) {
             return type == p.second;
         }
     );
-    if (it == tools::_messageTypeFromSIMPType.end()) return "UNKN";
+    if (it == _messageTypeFromSIMPType.end()) return "UNKN";
     return it->first;
 }
 
 CmapNaNMode getCmapNaNMode(const std::string& type) {
-    if (tools::_cmapNaNModeFromString.count(type) == 0) return CmapNaNMode::Unknown;
-    return tools::_cmapNaNModeFromString.at(type);
+    if (_cmapNaNModeFromString.count(type) == 0) return CmapNaNMode::Unknown;
+    return _cmapNaNModeFromString.at(type);
 }
 
 std::string formatLengthOfSubject(size_t lengthOfSubject) {
@@ -178,7 +227,7 @@ int readIntValue(const std::vector<char>& message, size_t& offset) {
     int value;
     bool isHex = false;
 
-    while (!tools::isEndOfCurrentValue(message, offset)) {
+    while (!isEndOfCurrentValue(message, offset)) {
         char c = message[offset];
         if (c == 'x' || c == 'X') isHex = true;
         string_value.push_back(c);
@@ -203,7 +252,7 @@ float readFloatValue(const std::vector<char>& message, size_t& offset) {
     std::string string_value;
     float value;
 
-    while (!tools::isEndOfCurrentValue(message, offset)) {
+    while (!isEndOfCurrentValue(message, offset)) {
         string_value.push_back(message[offset]);
         offset++;
     }
@@ -227,7 +276,7 @@ void readColormap(
 ) {
     colorMap.reserve(nColors * 4);
     while (message[offset] != SEP) {
-        glm::vec4 color = tools::readSingleColor(message, offset);
+        glm::vec4 color = readSingleColor(message, offset);
         
         // Colormap should be stored in a sequential vector 
         // of floats for syncing between nodes and when 
@@ -241,40 +290,15 @@ void readColormap(
     offset++;
 }
 
-glm::vec4 tools::readSingleColor(const std::vector<char>& message, size_t& offset) {
-    if (message[offset] != '[') {
-        throw SimpError(
-            tools::ErrorCode::Generic,
-            fmt::format("Expected to read '[', got {} in 'readColor'", message[offset])
-        );
-    }
-    ++offset;
-
-    float r = readFloatValue(message, offset);
-    float g = readFloatValue(message, offset);
-    float b = readFloatValue(message, offset);
-    float a = readFloatValue(message, offset);
-
-    if (message[offset] != ']') {
-        throw SimpError(
-            tools::ErrorCode::Generic,
-            fmt::format("Expected to read ']', got {} in 'readColor'", message[offset])
-        );
-    }
-    ++offset;
-
-    return { r, g, b, a };
-}
-
 glm::vec4 readColor(const std::vector<char>& message, size_t& offset) {
-    glm::vec4 color = tools::readSingleColor(message, offset);
+    glm::vec4 color = readSingleColor(message, offset);
     ++offset;
     return color;
 }
 
 std::string readString(const std::vector<char>& message, size_t& offset) {
     std::string value;
-    while (!tools::isEndOfCurrentValue(message, offset)) {
+    while (!isEndOfCurrentValue(message, offset)) {
         value.push_back(message[offset]);
         ++offset;
     }
@@ -292,7 +316,7 @@ void readPointData(
 ) {
     pointData.reserve(nPoints * dimensionality);
 
-    while (!tools::isEndOfCurrentValue(message, offset)) {
+    while (!isEndOfCurrentValue(message, offset)) {
         if (message[offset] != '[') {
             throw SimpError(
                 tools::ErrorCode::Generic,

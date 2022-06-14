@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,40 +33,33 @@
 
 namespace openspace {
 
+class AssetHelper;
+
 class SoftwareIntegrationModule : public OpenSpaceModule {
+    friend class AssetHelper;
+
 public:
     constexpr static const char* Name = "SoftwareIntegration";
 
     SoftwareIntegrationModule();
     ~SoftwareIntegrationModule();
 
-    void storeData(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key,
-        const std::vector<float>& data
-    );
-    const std::vector<float>& fetchData(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key
-    );
-    bool isDataDirty(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key
-    );
-    bool isSyncDataDirty(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key
-    );
+    void storeData(const SyncableFloatDataStorage::Identifier& identifier, const storage::Key key,
+                   const std::vector<float>& data);
+    const std::vector<float>& fetchData(const SyncableFloatDataStorage::Identifier& identifier, const storage::Key key);
+    bool isDataDirty(const SyncableFloatDataStorage::Identifier& identifier, const storage::Key key);
+    bool isSyncDataDirty(const SyncableFloatDataStorage::Identifier& identifier, const storage::Key key);
     std::string getStringOfAllKeysInStorage();
 
     std::vector<documentation::Documentation> documentations() const override;
 
+    scripting::LuaLibrary luaLibrary() const override;
+
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitialize() override;
-    
-    std::vector<Syncable*> getSyncables();
 
+    std::vector<Syncable*> getSyncables();
 
     // Centralized storage for datasets
     SyncableFloatDataStorage _syncableFloatDataStorage;

@@ -25,11 +25,12 @@
 #ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
 
-#include <mutex>
-#include <unordered_map>
 
 #include <openspace/util/syncable.h>
 #include <modules/softwareintegration/utils.h>
+
+#include <mutex>
+#include <unordered_map>
 
 namespace openspace {
 
@@ -37,48 +38,55 @@ using namespace softwareintegration;
 
 class SyncableFloatDataStorage : public Syncable {
 public:
-	/* ====================== Types ===================== */
-	struct Value {
-		// a dataset stored like x1, y1, z1, x2, y2 ....
-		std::vector<float> data;
-		bool hasEncoded = false;
-		bool syncDirty = true;
-		bool dirty = true;
-	};
-	using ValueData = decltype(Value::data);
-	using SceneStorage = std::unordered_map<storage::Key, Value>;
-	using Identifier = std::string;
-	using Storage = std::unordered_map<Identifier, SceneStorage>;
-	using Iterator = Storage::iterator;
-	using SceneIterator = SceneStorage::iterator;
-	/* ================================================== */
+    /* ====================== Types ===================== */
+    struct Value {
+        // a dataset stored like x1, y1, z1, x2, y2 ....
+        std::vector<float> data;
+        bool hasEncoded = false;
+        bool syncDirty = true;
+        bool dirty = true;
+    };
+    using ValueData = decltype(Value::data);
+    using SceneStorage = std::unordered_map<storage::Key, Value>;
+    using Identifier = std::string;
+    using Storage = std::unordered_map<Identifier, SceneStorage>;
+    using Iterator = Storage::iterator;
+    using SceneIterator = SceneStorage::iterator;
+    /* ================================================== */
 
-	/* ============== SyncEngine functions ============== */
-	virtual void encode(SyncBuffer* syncBuffer) override;
-	virtual void decode(SyncBuffer* syncBuffer) override;
-	virtual void postSync(bool isMaster) override;
-	/* ================================================== */
+    /* ============== SyncEngine functions ============== */
+    virtual void encode(SyncBuffer* syncBuffer) override;
+    virtual void decode(SyncBuffer* syncBuffer) override;
+    virtual void postSync(bool isMaster) override;
+    /* ================================================== */
 
-	const ValueData& fetch(const Identifier& identifier, const storage::Key key);
-	bool isDirty(const Identifier& identifier, const storage::Key key);
-	bool isSyncDirty(const Identifier& identifier, const storage::Key key); 
-	void store(const Identifier& identifier, const storage::Key key, const ValueData& data);
-	std::string getStringOfAllKeysInStorage();
+    const ValueData& fetch(const Identifier& identifier, const storage::Key key);
+    bool isDirty(const Identifier& identifier, const storage::Key key);
+    bool isSyncDirty(const Identifier& identifier, const storage::Key key);
+    void store(const Identifier& identifier, const storage::Key key, const ValueData& data);
+
+    void encodeStorage(SyncBuffer* syncBuffer, bool skipNonSynced = true);
+    void decodeStorage(SyncBuffer* syncBuffer, bool skipNonSynced = true);
+    void dump(std::vector<std::byte>& storageDump);
+    void store(const std::vector<std::byte>& storageDump);
+    std::vector<Identifier> getAllIdentifiers();
+
+    std::string getStringOfAllKeysInStorage();
 
 private:
-	/* =============== Utility functions ================ */
-	bool erase(const Identifier& identifier, const storage::Key key);
+    /* =============== Utility functions ================ */
+    bool erase(const Identifier& identifier, const storage::Key key);
 
-	void insertAssign(const Identifier& identifier, const storage::Key key, const Value& value);
+    void insertAssign(const Identifier& identifier, const storage::Key key, const Value& value);
 
-	size_t count(const Identifier& identifier, const storage::Key key);
-	size_t count(const Identifier& identifier);
-	/* ================================================== */
+    size_t count(const Identifier& identifier, const storage::Key key);
+    size_t count(const Identifier& identifier);
+    /* ================================================== */
 
-	std::mutex _mutex;
-	Storage _storage;
+    std::mutex _mutex;
+    Storage _storage;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
+#endif  // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,11 @@
 
 #include <unordered_map>
 
-namespace openspace {
-
-namespace softwareintegration {
+namespace openspace::softwareintegration {
 
 namespace storage {
-    
-enum class Key : uint32_t {
+
+enum class Key : uint8_t {
     DataPoints = 0,
     Colormap,
     ColormapAttrData,
@@ -41,11 +39,11 @@ enum class Key : uint32_t {
     Unknown
 };
 
-const std::unordered_map<std::string, Key> _keyStringFromKey {
-    {"DataPoints", Key::DataPoints},
-    {"Colormap", Key::Colormap},
-    {"ColormapAttributeData", Key::ColormapAttrData},
-    {"LinearSizeAttributeData", Key::LinearSizeAttrData},
+const std::unordered_map<std::string, Key> _keyStringFromKey{
+    { "DataPoints", Key::DataPoints },
+    { "Colormap", Key::Colormap },
+    { "ColormapAttributeData", Key::ColormapAttrData },
+    { "LinearSizeAttributeData", Key::LinearSizeAttrData },
 };
 
 Key getStorageKey(const std::string& key);
@@ -92,37 +90,13 @@ enum class ErrorCode : uint32_t {
     Generic,
 };
 
-const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
-    {"CONN", MessageType::Connection},
-    {"PDAT", MessageType::PointData},
-    {"RSGN", MessageType::RemoveSceneGraphNode},
-    {"FCOL", MessageType::Color},
-    {"LCOL", MessageType::Colormap},
-    {"ATDA", MessageType::AttributeData},
-    {"FOPA", MessageType::Opacity},
-    {"FPSI", MessageType::FixedSize},
-    {"LPSI", MessageType::LinearSize},
-    {"TOVI", MessageType::Visibility},
-    {"DISC", MessageType::Disconnection},
-};
-
-const std::unordered_map<std::string, CmapNaNMode> _cmapNaNModeFromString {
-    {"Hide", CmapNaNMode::Hide},
-    {"Color", CmapNaNMode::Color}
-};
-
-glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset);
-
-bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset);
-
-} // namespace tools
+}  // namespace tools
 
 class SimpError : public ghoul::RuntimeError {
 public:
- tools::ErrorCode errorCode;
- explicit SimpError(const tools::ErrorCode _errorCode, const std::string& msg);
+    tools::ErrorCode errorCode;
+    explicit SimpError(const tools::ErrorCode _errorCode, const std::string& msg);
 };
-
 
 MessageType getMessageType(const std::string& type);
 
@@ -130,15 +104,12 @@ std::string getSIMPType(const MessageType& type);
 
 CmapNaNMode getCmapNaNMode(const std::string& type);
 
-
 std::string formatLengthOfSubject(size_t lengthOfSubject);
 
-std::string formatUpdateMessage(MessageType messageType,
-                                std::string_view identifier,
-                                std::string_view value);
-    
+std::string formatUpdateMessage(MessageType messageType, std::string_view identifier, std::string_view value);
+
 std::string formatConnectionMessage(std::string_view value);
-    
+
 std::string formatColorMessage(std::string_view identifier, glm::vec4 color);
 
 std::string formatPointDataCallbackMessage(std::string_view identifier);
@@ -155,20 +126,13 @@ std::string readString(const std::vector<char>& message, size_t& offset);
 
 glm::vec4 readColor(const std::vector<char>& message, size_t& offset);
 
-void readPointData(
-    const std::vector<char>& message, size_t& offset, size_t nPoints,
-    size_t dimensionality, std::vector<float>& pointData
-);
+void readPointData(const std::vector<char>& message, size_t& offset, size_t nPoints, size_t dimensionality,
+                   std::vector<float>& pointData);
 
-void readColormap(
-    const std::vector<char>& message, size_t& offset, size_t nColors,
-    std::vector<float>& colorMap
-);
+void readColormap(const std::vector<char>& message, size_t& offset, size_t nColors, std::vector<float>& colorMap);
 
 } // namespace simp
 
-} // namespace softwareintegration
+} // namespace openspace::softwareintegration
 
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__
+#endif  // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__

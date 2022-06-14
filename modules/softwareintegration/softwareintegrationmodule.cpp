@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,19 +24,27 @@
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/scripting/lualibrary.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <openspace/util/factorymanager.h>
+
+#include "softwareintegrationmodule_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "SoftwareIntegrationModule";
-} // namespace
+
+constexpr const char* _loggerCat = "SoftwareIntegrationModule";
+
+}  // namespace
 
 namespace openspace {
 
@@ -53,32 +61,23 @@ SoftwareIntegrationModule::~SoftwareIntegrationModule() {
     internalDeinitialize();
 }
 
-void SoftwareIntegrationModule::storeData(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key,
-        const std::vector<float>& data
-) {
+void SoftwareIntegrationModule::storeData(const SyncableFloatDataStorage::Identifier& identifier,
+                                          const storage::Key key, const std::vector<float>& data) {
     _syncableFloatDataStorage.store(identifier, key, data);
 }
 
-const std::vector<float>& SoftwareIntegrationModule::fetchData(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key
-) {
+const std::vector<float>& SoftwareIntegrationModule::fetchData(const SyncableFloatDataStorage::Identifier& identifier,
+                                                               const storage::Key key) {
     return _syncableFloatDataStorage.fetch(identifier, key);
 }
 
-bool SoftwareIntegrationModule::isDataDirty(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key
-) {
+bool SoftwareIntegrationModule::isDataDirty(const SyncableFloatDataStorage::Identifier& identifier,
+                                            const storage::Key key) {
     return _syncableFloatDataStorage.isDirty(identifier, key);
 }
 
-bool SoftwareIntegrationModule::isSyncDataDirty(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key
-) {
+bool SoftwareIntegrationModule::isSyncDataDirty(const SyncableFloatDataStorage::Identifier& identifier,
+                                                const storage::Key key) {
     return _syncableFloatDataStorage.isSyncDirty(identifier, key);
 }
 
@@ -103,9 +102,7 @@ void SoftwareIntegrationModule::internalDeinitialize() {
     global::syncEngine->removeSyncables(getSyncables());
 }
 
-std::vector<documentation::Documentation>
-SoftwareIntegrationModule::documentations() const
-{
+std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
     return {
         RenderablePointsCloud::Documentation(),
     };
@@ -115,10 +112,16 @@ std::vector<Syncable*> SoftwareIntegrationModule::getSyncables() {
     return { &_syncableFloatDataStorage };
 }
 
-
-// Helper function for debugging 
+// Helper function for debugging
 std::string SoftwareIntegrationModule::getStringOfAllKeysInStorage() {
-	return _syncableFloatDataStorage.getStringOfAllKeysInStorage();
+    return _syncableFloatDataStorage.getStringOfAllKeysInStorage();
 }
 
-} // namespace openspace
+scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
+    return {
+        "softwareintegration",
+        { codegen::lua::LoadSessionData, codegen::lua::SaveSession }
+    };
+}
+
+}  // namespace openspace

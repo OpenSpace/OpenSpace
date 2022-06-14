@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,7 +62,7 @@ public:
 
     static documentation::Documentation Documentation();
 
-protected:
+private:
     void loadData(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadColormap(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadCmapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
@@ -96,6 +96,7 @@ protected:
     properties::FloatProperty _colormapMax;
     properties::IntProperty _cmapNaNMode;
     properties::Vec4Property _cmapNaNColor;
+    properties::StringProperty _name;
 
     std::optional<std::string> _identifier = std::nullopt;
 

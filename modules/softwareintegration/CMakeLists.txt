@@ -25,8 +25,8 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/pointdatamessagehandler.h
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/pointdatamessagehandler.h
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.h
   ${CMAKE_CURRENT_SOURCE_DIR}/network/networkengine.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.h
@@ -34,17 +34,20 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/syncablefloatdatastorage.h
   ${CMAKE_CURRENT_SOURCE_DIR}/interruptibleconcurrentqueue.h
   ${CMAKE_CURRENT_SOURCE_DIR}/interruptibleconcurrentqueue.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/assethelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/pointdatamessagehandler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule_lua.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/pointdatamessagehandler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/network/networkengine.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/syncablefloatdatastorage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/assethelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

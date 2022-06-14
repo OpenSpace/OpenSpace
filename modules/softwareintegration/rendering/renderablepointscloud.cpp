@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -131,6 +131,12 @@ namespace {
         "Boolean to determine whether to use linear size or not."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
+        "Name",
+        "Name",
+        "The name of the points cloud"
+    };
+
     struct [[codegen::Dictionary(RenderablePointsCloud)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec4> color;
@@ -168,6 +174,9 @@ namespace {
         // [[codegen::verbatim(LinearSizeEnabledInfo.description)]]
         std::optional<bool> linearSizeEnabled;
 
+        // [[codegen::verbatim(NameInfo.description)]]
+        std::optional<std::string> name;
+
         enum class SizeOption : uint32_t {
             Uniform,
             NonUniform
@@ -199,10 +208,15 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _linearSizeMax(LinearSizeMinInfo)
     , _linearSizeMin(LinearSizeMaxInfo)
     , _linearSizeEnabled(LinearSizeEnabledInfo)
+    , _name(NameInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _identifier = p.identifier.value();
+    
+    _name = p.name.value_or(_name);
+    _name.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_name);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);

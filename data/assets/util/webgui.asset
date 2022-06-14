@@ -10,7 +10,9 @@ local frontend = asset.syncedResource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  Url = dataProvider .. "/frontend/" ..  frontendHash .. "/frontend.zip"
+  -- Url = dataProvider .. "/frontend/" ..  frontendHash .. "/frontend.zip"
+  -- TODO: Remove. This was added in order to use the new GUI for saving sessions.
+  Url = "openspacegui.vlq.se/e2b459d60bc7d2fc0ad8e4a89789b26febe60e57/frontend.zip"
 })
 
 asset.onInitialize(function ()
