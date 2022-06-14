@@ -104,11 +104,6 @@ public:
 
 private:
     void removePropertySubscriptions(const std::string& identifier);
-    void removeExistingPropertySubscription(
-        const std::string& identifier,
-        properties::Property *property,
-        OnChangeHandle onChangeHandle
-    );
 
     SubscribedProperties _subscribedProperties;
 

@@ -33,6 +33,7 @@ namespace storage {
 
 enum class Key : uint8_t {
     DataPoints = 0,
+    VelocityData,
     Colormap,
     ColormapAttrData,
     LinearSizeAttrData,
@@ -63,6 +64,7 @@ const char SEP = ';';
 enum class MessageType : uint32_t {
     Connection = 0,
     PointData,
+    VelocityData,
     RemoveSceneGraphNode,
     Color,
     Colormap,
@@ -71,13 +73,24 @@ enum class MessageType : uint32_t {
     FixedSize,
     LinearSize,
     Visibility,
-    Disconnection,
+    InternalDisconnection,
     Unknown
 };
 
-enum class CmapNaNMode : uint32_t {
+enum class NaNRenderMode : uint32_t {
     Hide = 0,
     Color,
+    Unknown
+};
+
+enum class LengthUnit : uint32_t {
+    m = 0,
+    km,
+    AU,
+    lyr,
+    pc,
+    kpc,
+    Mpc,
     Unknown
 };
 
@@ -95,6 +108,7 @@ enum class ErrorCode : uint32_t {
 class SimpError : public ghoul::RuntimeError {
 public:
     tools::ErrorCode errorCode;
+    explicit SimpError(const std::string& msg);
     explicit SimpError(const tools::ErrorCode _errorCode, const std::string& msg);
 };
 
@@ -102,7 +116,9 @@ MessageType getMessageType(const std::string& type);
 
 std::string getSIMPType(const MessageType& type);
 
-CmapNaNMode getCmapNaNMode(const std::string& type);
+NaNRenderMode getNaNRenderMode(const std::string& type);
+
+LengthUnit getLengthUnit(const std::string& type);
 
 std::string formatLengthOfSubject(size_t lengthOfSubject);
 

@@ -42,16 +42,19 @@
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
 
+int TIME_COUNTER = 0;
+
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
-    constexpr const std::array<const char*, 18> UniformNames = {
+    constexpr const std::array<const char*, 20> UniformNames = {
         "color", "opacity", "size", "modelMatrix", "cameraUp", "screenSize",
         "cameraViewProjectionMatrix", "eyePosition", "sizeOption", 
         "colormapTexture", "colormapMin", "colormapMax", "cmapNaNMode",
         "cmapNaNColor", "colormapEnabled", "linearSizeMin", "linearSizeMax",
-        "linearSizeEnabled"
+        "linearSizeEnabled", "motionEnabled", "theTime"
     };
+    // "velNaNMode", "velNaNColor", 
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
@@ -130,6 +133,24 @@ namespace {
         "Linear size enabled",
         "Boolean to determine whether to use linear size or not."
     };
+    
+    constexpr openspace::properties::Property::PropertyInfo VelNaNModeInfo = {
+        "VelNaNMode",
+        "Vel NaN Mode",
+        "How points with NaN value in colormap attribute should be represented."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo VelNaNColorInfo = {
+        "VelNaNColor",
+        "Vel NaN Color",
+        "The color of the points where the colormap scalar is NaN."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MotionEnabledInfo = {
+        "MotionEnabled",
+        "Motion enabled",
+        "Boolean to determine whether to use motion or not."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "Name",
@@ -144,6 +165,7 @@ namespace {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size;
 
+        // TODO: This can be removed? Not in use anymore?
         // [[codegen::verbatim(DataInfo.description)]]
         std::optional<std::vector<glm::vec3>> data;
 
@@ -177,6 +199,15 @@ namespace {
         // [[codegen::verbatim(NameInfo.description)]]
         std::optional<std::string> name;
 
+        // [[codegen::verbatim(VelNaNModeInfo.description)]]
+        std::optional<int> velNaNMode;
+
+        // [[codegen::verbatim(VelNaNColorInfo.description)]]
+        std::optional<glm::vec4> velNaNColor;
+
+        // [[codegen::verbatim(MotionEnabledInfo.description)]]
+        std::optional<bool> motionEnabled;
+
         enum class SizeOption : uint32_t {
             Uniform,
             NonUniform
@@ -207,8 +238,11 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _colormapEnabled(ColormapEnabledInfo, false)
     , _linearSizeMax(LinearSizeMinInfo)
     , _linearSizeMin(LinearSizeMaxInfo)
-    , _linearSizeEnabled(LinearSizeEnabledInfo)
+    , _linearSizeEnabled{LinearSizeEnabledInfo, false}
     , _name(NameInfo)
+    , _velNaNMode(VelNaNModeInfo)
+    , _velNaNColor(VelNaNColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(1.0f), glm::vec4(0.f), glm::vec4(0.f))
+    , _motionEnabled(MotionEnabledInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -289,6 +323,19 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _linearSizeMax.setVisibility(properties::Property::Visibility::Hidden);
     _linearSizeMax.onChange(linearSizeMinMaxChecker);
     addProperty(_linearSizeMax);
+    
+    _velNaNMode = p.velNaNMode.value_or(_velNaNMode);
+    _velNaNMode.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_velNaNMode);
+    
+    _velNaNColor = p.velNaNColor.value_or(_velNaNColor);
+    // _velNaNColor.setViewOption(properties::Property::ViewOptions::Color); // TODO: CHECK WHAT THIS IS
+    _velNaNColor.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_velNaNColor);
+
+    _motionEnabled = p.motionEnabled.value_or(_motionEnabled);
+    _motionEnabled.onChange([this] { checkIfMotionCanBeEnabled(); });
+    addProperty(_motionEnabled);
 }
 
 bool RenderablePointsCloud::isReady() const {
@@ -381,6 +428,14 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform(_uniformCache.linearSizeMax, _linearSizeMax);
     _shaderProgram->setUniform(_uniformCache.linearSizeEnabled, _linearSizeEnabled);
 
+    // _shaderProgram->setUniform(_uniformCache.velNaNMode, _velNaNMode);
+    // _shaderProgram->setUniform(_uniformCache.velNaNColor, _velNaNColor);
+    _shaderProgram->setUniform(_uniformCache.motionEnabled, _motionEnabled);
+    _shaderProgram->setUniform(
+        _uniformCache.theTime,
+        static_cast<float>(data.time.j2000Seconds())
+    );
+    
     _shaderProgram->setUniform(_uniformCache.color, _color);
 
     _shaderProgram->setUniform(_uniformCache.opacity, _opacity);
@@ -429,6 +484,7 @@ void RenderablePointsCloud::update(const UpdateData&) {
         auto pointDataSlice = getDataSlice(DataSliceKey::Points);
         auto colormapAttrDataSlice = getDataSlice(DataSliceKey::ColormapAttributes);
         auto linearSizeAttrDataSlice = getDataSlice(DataSliceKey::LinearSizeAttributes);
+        auto velocityDataSlice = getDataSlice(DataSliceKey::Velocity);
 
         if (pointDataSlice->empty()) return;
 
@@ -445,14 +501,28 @@ void RenderablePointsCloud::update(const UpdateData&) {
                 bufferData.push_back(colormapAttrDataSlice->at(i));
             }
             else {
-                bufferData.push_back(0.0);
+                bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered?
             }
 
             if (linearSizeAttrDataSlice->size() > i) {
                 bufferData.push_back(linearSizeAttrDataSlice->at(i));
             }
             else {
-                bufferData.push_back(0.0);
+                bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered?
+            }
+
+            if (velocityDataSlice->size() > (j + 2)) {
+                bufferData.push_back(velocityDataSlice->at(j));
+                bufferData.push_back(velocityDataSlice->at(j + 1));
+                bufferData.push_back(velocityDataSlice->at(j + 2));
+            }
+            else {
+                bufferData.push_back(std::nanf("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
+                bufferData.push_back(std::nanf("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
+                bufferData.push_back(std::nanf("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
+                // bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
+                // bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
+                // bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
             }
         }
 
@@ -465,7 +535,7 @@ void RenderablePointsCloud::update(const UpdateData&) {
         // ==============================================================================================
 
         // ========================================= VAO stuff =========================================
-        GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * 5);
+        GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * _nValuesForVAOStride);
         GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
         glEnableVertexAttribArray(positionAttribute);
         glVertexAttribPointer(
@@ -502,6 +572,19 @@ void RenderablePointsCloud::update(const UpdateData&) {
                 reinterpret_cast<void*>(sizeof(GLfloat) * 4)
             );
         }
+
+        if (_hasLoadedVelocityData) { 
+            GLint velocityAttribute = _shaderProgram->attributeLocation("in_velocity");
+            glEnableVertexAttribArray(velocityAttribute);
+            glVertexAttribPointer(
+                velocityAttribute,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<void*>(sizeof(GLfloat) * 5)
+            );
+        }
         // ==============================================================================================
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -536,6 +619,11 @@ bool RenderablePointsCloud::checkDataStorage() {
         loadLinearSizeAttributeData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
+    
+    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::VelocityData)) {
+        loadVelocityData(softwareIntegrationModule);
+        updatedDataSlices = true;
+    }
 
     return updatedDataSlices;
 }
@@ -551,7 +639,7 @@ void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrat
 
     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
     pointDataSlice->clear();
-    pointDataSlice->reserve(fullPointData.size() * 3);
+    pointDataSlice->reserve(fullPointData.size() * 3); // TODO: Do we really need *3 here?
 
     // Create data slice
     auto addPosition = [&](const glm::vec4& pos) {
@@ -630,7 +718,7 @@ void RenderablePointsCloud::loadCmapAttributeData(SoftwareIntegrationModule* sof
     }
 
     _hasLoadedColormapAttributeData = true;
-    LDEBUG("Rerendering colormap attribute data");
+    LDEBUG("Rerendering with colormap attribute data");
 }
 
 void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
@@ -648,7 +736,7 @@ void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModul
             "There is a mismatch in the amount of linear size attribute scalars ({}) and the amount of points ({})",
             linearSizeAttributeData.size(), pointDataSlice->size() / 3
         ));
-        _colormapEnabled = false;
+        _linearSizeEnabled = false;
         return;
     }
 
@@ -661,8 +749,107 @@ void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModul
     }
 
     _hasLoadedLinearSizeAttributeData = true;
-     LDEBUG("Rerendering linear size attribute data");
+     LDEBUG("Rerendering with linear size attribute data");
 }
+
+void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule) {
+    // Fetch data from module's centralized storage
+    auto velocityData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::VelocityData);
+    
+    if (velocityData.empty()) {
+        LWARNING("There was an issue trying to fetch the velocity data from the centralized storage.");
+        return;
+    }
+
+    auto pointDataSlice = getDataSlice(DataSliceKey::Points);
+
+    if (pointDataSlice->size() != velocityData.size()) {
+        LWARNING(fmt::format(
+            "There is a mismatch in the amount of velocity data ({}) and the amount of points ({})",
+            velocityData.size() / 3, pointDataSlice->size() / 3
+        ));
+        _motionEnabled = false;
+        return;
+    }
+
+    auto velocityDataSlice = getDataSlice(DataSliceKey::Velocity);
+    velocityDataSlice->clear();
+    velocityDataSlice->reserve(velocityData.size() * 3); // TODO: Do we really need *3 here?
+
+    // =========================================
+    int nNans = 0;
+    int prevNNans = 0;
+    int nPointsContainingNans = 0;
+    // Create velocity data slice
+    auto addPosition = [&](const glm::vec4& pos) {
+        for (glm::vec4::length_type j = 0; j < glm::vec4::length() - 1; ++j) {
+            if (isnan(pos[j])) {
+                nNans++;
+            }
+            velocityDataSlice->push_back(pos[j]);
+        }
+        if (prevNNans < nNans) {
+            nPointsContainingNans++;
+            prevNNans = nNans;
+        }
+    };
+
+    for (size_t i = 0; i < velocityData.size(); i += 3) {
+        glm::dvec4 transformedPos = {
+            velocityData[i + 0],
+            velocityData[i + 1],
+            velocityData[i + 2],
+            1.0
+        };
+        // W-normalization
+        // transformedPos /= transformedPos.w;
+        // transformedPos *= distanceconstants::Parsec; // TODO: Is this converting parsec => meter?
+
+        addPosition(transformedPos);
+    }
+
+    LWARNING(fmt::format("Points: {}. Velocity points: {}. Velocity points w/ nans {}. Velocity nans in total: {}", pointDataSlice->size()/3, velocityData.size()/3, nPointsContainingNans, nNans));
+    // =========================================
+
+
+    _hasLoadedVelocityData = true;
+    LDEBUG("Rerendering with motion based on velocity data");
+}
+
+// void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrationModule) {
+//     // Fetch data from module's centralized storage
+//     auto fullPointData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::DataPoints);
+
+//     if (fullPointData.empty()) {
+//         LWARNING("There was an issue trying to fetch the point data from the centralized storage.");
+//         return;
+//     }
+
+//     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
+//     pointDataSlice->clear();
+//     pointDataSlice->reserve(fullPointData.size() * 3);
+
+//     // Create data slice
+//     auto addPosition = [&](const glm::vec4& pos) {
+//         for (glm::vec4::length_type j = 0; j < glm::vec4::length() - 1; ++j) {
+//             pointDataSlice->push_back(pos[j]);
+//         }
+//     };
+
+//     for (size_t i = 0; i < fullPointData.size(); i += 3) {
+//         glm::dvec4 transformedPos = {
+//             fullPointData[i + 0],
+//             fullPointData[i + 1],
+//             fullPointData[i + 2],
+//             1.0
+//         };
+//         // W-normalization
+//         transformedPos /= transformedPos.w;
+//         transformedPos *= distanceconstants::Parsec;
+
+//         addPosition(transformedPos);
+//     }
+// }
 
 std::shared_ptr<RenderablePointsCloud::DataSlice> RenderablePointsCloud::getDataSlice(DataSliceKey key) {
     if (!_dataSlices.count(key)) {
@@ -711,6 +898,24 @@ void RenderablePointsCloud::checkIfLinearSizeCanBeEnabled() {
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
+}
+
+void RenderablePointsCloud::checkIfMotionCanBeEnabled() {
+    if (!global::windowDelegate->isMaster()) return;
+
+    // This can happen if the user checks the "MotionEnabled" checkbox in the GUI
+    auto velocityData = getDataSlice(DataSliceKey::Velocity);
+    if (_motionEnabled.value() && velocityData->empty()) {
+        LINFO("Velocity data not loaded. Has it been sent from external software?");
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.MotionEnabled', {});",
+                _identifier.value(), "false"
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    LINFO(fmt::format("checkIfMotionCanBeEnabled(): MotionEnabled = {}", _motionEnabled));
 }
 
 void RenderablePointsCloud::checkColormapMinMax() {

@@ -46,6 +46,7 @@ class PointDataMessageHandler {
 
 public:
     void handlePointDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
+    void handleVelocityDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleColormapMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
     void handleAttributeDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection);
@@ -63,8 +64,6 @@ private:
         const std::vector<char>& message, size_t& messageOffset,
         std::shared_ptr<SoftwareConnection> connection, std::string& identifier
     );
-
-    void subscribeToRenderableUpdates(const std::string& identifier, std::shared_ptr<SoftwareConnection> connection);
 
     void addCallback(
         const std::string& identifier,
@@ -94,6 +93,11 @@ private:
         properties::Property* property,
         const std::string& identifier,
         std::shared_ptr<SoftwareConnection> connection
+    );
+
+    void convertToMeterPerSecond(
+        softwareintegration::simp::LengthUnit currLengthUnit, 
+        std::vector<float>& data
     );
 };
 

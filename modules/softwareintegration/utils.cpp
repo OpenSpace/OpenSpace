@@ -80,12 +80,21 @@ const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType{
     { "FPSI", MessageType::FixedSize },
     { "LPSI", MessageType::LinearSize },
     { "TOVI", MessageType::Visibility },
-    { "DISC", MessageType::Disconnection },
 };
 
-const std::unordered_map<std::string, CmapNaNMode> _cmapNaNModeFromString{
-    {"Hide", CmapNaNMode::Hide},
-    {"Color", CmapNaNMode::Color}
+const std::unordered_map<std::string, NaNRenderMode> _naNRenderModeFromString{
+    { "Hide", NaNRenderMode::Hide},
+    { "Color", NaNRenderMode::Color },
+};
+
+const std::unordered_map<std::string, LengthUnit> _lengthUnitFromString {
+    { "m", LengthUnit::m },
+    { "km", LengthUnit::km },
+    { "AU", LengthUnit::AU },
+    { "lyr", LengthUnit::lyr },
+    { "pc", LengthUnit::pc },
+    { "kpc", LengthUnit::kpc },
+    { "Mpc", LengthUnit::Mpc },
 };
 
 glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset) {
@@ -137,6 +146,10 @@ SimpError::SimpError(const tools::ErrorCode _errorCode, const std::string& msg)
     : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(_errorCode), msg), "Software Integration Messaging Protocol error")
 {}
 
+SimpError::SimpError(const std::string& msg)
+    : errorCode{tools::ErrorCode::Generic}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(errorCode), msg), "Software Integration Messaging Protocol error")
+{}
+
 MessageType getMessageType(const std::string& type) {
     if (_messageTypeFromSIMPType.count(type) == 0) return MessageType::Unknown;
     return _messageTypeFromSIMPType.at(type);
@@ -154,9 +167,14 @@ std::string getSIMPType(const MessageType& type) {
     return it->first;
 }
 
-CmapNaNMode getCmapNaNMode(const std::string& type) {
-    if (_cmapNaNModeFromString.count(type) == 0) return CmapNaNMode::Unknown;
-    return _cmapNaNModeFromString.at(type);
+NaNRenderMode getNaNRenderMode(const std::string& type) {
+    if (_naNRenderModeFromString.count(type) == 0) return NaNRenderMode::Unknown;
+    return _naNRenderModeFromString.at(type);
+}
+
+LengthUnit getLengthUnit(const std::string& type) {
+    if (_lengthUnitFromString.count(type) == 0) return LengthUnit::Unknown;
+    return _lengthUnitFromString.at(type);
 }
 
 std::string formatLengthOfSubject(size_t lengthOfSubject) {

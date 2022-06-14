@@ -33,6 +33,7 @@ in vec2 coords;
 flat in float ge_screenSpaceDepth;
 flat in vec4 ge_positionViewSpace;
 in float ta;
+// in vec4 ge_gPosition;
 
 uniform vec4 color;
 uniform float opacity;
@@ -43,6 +44,9 @@ uniform int cmapNaNMode;
 uniform vec4 cmapNaNColor;
 uniform bool colormapEnabled;
 uniform sampler1D colormapTexture;
+
+// uniform int velNaNMode;
+// uniform vec4 velNaNColor;
 
 vec4 attributeScalarToRgb(float attributeData) {
     float t = (attributeData - colormapMin) / (colormapMax - colormapMin);
@@ -60,7 +64,7 @@ Fragment getFragment() {
         discard;
     }
 
-    // Don't show points with no value for that attribute, if CmapNaNMode is Hidden
+    // Don't show points with no value for that attribute, if NaNRenderMode is Hidden
     if (colormapEnabled && isnan(ge_colormapAttributeScalar) && cmapNaNMode == CMAPNANMODE_HIDDEN) {
         discard;
     }
@@ -82,6 +86,11 @@ Fragment getFragment() {
             vec4 colorFromColormap = attributeScalarToRgb(ge_colormapAttributeScalar);
             outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * color.a * opacity);
         }
+
+        // // TODO: Remove, Just referencing so it doesn't crash
+        // if (velNaNMode == 0) {
+        //     velNaNColor = vec4(1.0, 1.0, 1.0);
+        // }
     }
 
     Fragment frag;

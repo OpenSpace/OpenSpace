@@ -33,6 +33,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
@@ -85,6 +86,102 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     addCallback(identifier, { reanchorCallback, { storage::Key::DataPoints }, "reanchorCallback" });
 }
 
+void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+    LWARNING(fmt::format("PointDataMessageHandler::handleVelocityDataMessage()"));
+    size_t messageOffset = 0;
+    std::string identifier;
+
+    checkRenderable(message, messageOffset, connection, identifier);
+
+    simp::LengthUnit length_unit;
+    simp::NaNRenderMode velNaNMode;
+    glm::vec4 velNaNColor;
+    size_t nVelocities;
+    size_t dimensionality;
+    std::vector<float> velocities;
+
+    try {
+        // The following order of creating variables is the exact order they are received
+        // in the message. If the order is not the same, the global variable
+        // 'message offset' will be wrong
+        length_unit = simp::getLengthUnit(simp::readString(message, messageOffset));
+        if (length_unit == simp::LengthUnit::Unknown) {
+            // TODO: Write message
+            throw simp::SimpError("");
+        }
+        velNaNMode = simp::getNaNRenderMode(simp::readString(message, messageOffset));
+        switch (velNaNMode) {
+            case simp::NaNRenderMode::Color:
+                velNaNColor = simp::readColor(message, messageOffset);
+                break;
+            case simp::NaNRenderMode::Hide: // Nothing to read
+                break;
+            default: // simp::NaNRenderMode::Unknown
+                // TODO: Write message
+                throw simp::SimpError("");
+                break;
+        }
+        nVelocities = static_cast<size_t>(simp::readIntValue(message, messageOffset));
+        dimensionality = static_cast<size_t>(simp::readIntValue(message, messageOffset));
+        simp::readPointData(message, messageOffset, nVelocities, dimensionality, velocities);
+    }
+    catch (const simp::SimpError& err) {
+        LERROR(fmt::format("Error when reading point data message: {}", err.message));
+        return;
+    }
+
+    // Convert data to m/s (assuming time unit is seconds for now)
+    if (length_unit != simp::LengthUnit::m) {
+        convertToMeterPerSecond(length_unit, velocities);
+    }
+
+    // Use the renderable identifier as the data key
+    auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
+    module->storeData(identifier, storage::Key::VelocityData, std::move(velocities));
+
+    auto velNaNModeCallback = [this, identifier, velNaNMode, velNaNColor, connection] {
+        if (velNaNMode == simp::NaNRenderMode::Color) {
+            // Get renderable
+            auto r = getRenderable(identifier);
+
+            // Get velNaNColor of renderable
+            properties::Property* velNaNColorProperty = r->property("VelNaNColor");
+            glm::vec4 propertyVelNaNColor = std::any_cast<glm::vec4>(velNaNColorProperty->get());
+
+            // Update velNaNColor of renderable
+            if (propertyVelNaNColor != velNaNColor) {
+                global::scriptEngine->queueScript(
+                    fmt::format(
+                        "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelNaNColor', {});",
+                        identifier, ghoul::to_string(velNaNColor)
+                    ),
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }
+        }
+
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelNaNMode', {});",
+                identifier, static_cast<int>(velNaNMode)
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    };
+    addCallback(identifier, { velNaNModeCallback, {}, "velNaNModeCallback" });
+
+    auto enableMotionCallback = [identifier] {
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.MotionEnabled', {});",
+                identifier, "true"
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    };
+    addCallback(identifier, { enableMotionCallback, { storage::Key::VelocityData }, "Enable motion mode, wait for VelocityData" });
+}
+
 void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
@@ -100,13 +197,19 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
         return;
     }
 
-    auto callback = [this, identifier, color, connection] {
-        // Get renderable
-        auto r = getRenderable(identifier);
+    // Get renderable
+    auto r = getRenderable(identifier);
+    if (!r) return;
 
-        // Get color of renderable
-        properties::Property* colorProperty = r->property("Color");
-        glm::vec4 propertyColor = std::any_cast<glm::vec4>(colorProperty->get());
+    // Get color of renderable
+    properties::Property* colorProperty = r->property("Color");
+    
+    // Create weak_ptr, safer than shared_ptr for lambdas
+    std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
+
+    auto setFixedColorCallback = [this, identifier, color, colorProperty, connWeakPtr] {
+        if (!colorProperty || connWeakPtr.expired()) return;
+        // auto conn = connWeakPtr.lock()
 
         // auto propertySub = connection->getPropertySubscription(identifier, colorProperty->identifier());
         // if (propertySub) {
@@ -114,7 +217,8 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
         // }
 
         // Update color of renderable
-        if (propertyColor != color) {
+        glm::vec4 currentColor = std::any_cast<glm::vec4>(colorProperty->get());
+        if (currentColor != color) {
             global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.Color', {});",
@@ -132,7 +236,14 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { callback, {}, "handleFixedColorMessage" });
+    addCallback(identifier, { setFixedColorCallback, {}, "handleFixedColorMessage" });
+
+    // Create and set onChange for color
+    auto updateColor = [this, colorProperty, identifier, connWeakPtr] {
+        if (!colorProperty || connWeakPtr.expired()) return;
+        onFixedColorChange(colorProperty, identifier, connWeakPtr.lock());
+    };
+    connection->addPropertySubscription(colorProperty->identifier(), identifier, updateColor);
 }
 
 void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -143,22 +254,23 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
 
     float min;
     float max;
-    simp::CmapNaNMode cmapNaNMode;
+    simp::NaNRenderMode cmapNaNMode;
     glm::vec4 cmapNaNColor;
     size_t nColors;
     std::vector<float> colorMap;
     try {
         min = simp::readFloatValue(message, messageOffset);
         max = simp::readFloatValue(message, messageOffset);
-        cmapNaNMode = simp::getCmapNaNMode(simp::readString(message, messageOffset));
+        cmapNaNMode = simp::getNaNRenderMode(simp::readString(message, messageOffset));
         switch (cmapNaNMode) {
-            case simp::CmapNaNMode::Color:
+            case simp::NaNRenderMode::Color:
                 cmapNaNColor = simp::readColor(message, messageOffset);
                 break;
-            case simp::CmapNaNMode::Hide: // Nothing to read
+            case simp::NaNRenderMode::Hide: // Nothing to read
                 break;
-            default: // simp::CmapNaNMode::Unknown
-                // TODO:  Throw SimpError
+            default: // simp::NaNRenderMode::Unknown
+                // TODO: Write message
+                throw simp::SimpError("");
                 break;
         }
         nColors = static_cast<size_t>(simp::readIntValue(message, messageOffset));
@@ -213,8 +325,7 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     addCallback(identifier, { colormapLimitsCallback, {}, "colormapLimitsCallback" });
 
     auto cmapNaNModeCallback = [this, identifier, cmapNaNMode, cmapNaNColor, connection] {
-
-        if (cmapNaNMode == simp::CmapNaNMode::Color) {
+        if (cmapNaNMode == simp::NaNRenderMode::Color) {
             // Get renderable
             auto r = getRenderable(identifier);
 
@@ -343,14 +454,20 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
         return;
     }
 
-    auto callback = [this, identifier, opacity, connection] {
-        // Get renderable
-        auto r = getRenderable(identifier);
+    // Get renderable
+    auto r = getRenderable(identifier);
+    if (!r) return;
+    
+    // Get opacity of renderable
+    properties::Property* opacityProperty = r->property("Opacity");
+    
+    // Create weak_ptr, safer than shared_ptr for lambdas
+    std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
 
-        // Get opacity from renderable
-        properties::Property* opacityProperty = r->property("Opacity");
-        auto propertyAny = opacityProperty->get();
-        float propertyOpacity = std::any_cast<float>(propertyAny);
+    auto callback = [this, identifier, opacity, opacityProperty, connWeakPtr] {
+        if (!opacityProperty || connWeakPtr.expired()) return;
+        // auto conn = connWeakPtr.lock()
+        
 
         // auto propertySub = connection->getPropertySubscription(identifier, opacityProperty->identifier());
         // if (propertySub) {
@@ -358,7 +475,8 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
         // }
 
         // Update opacity of renderable
-        if (propertyOpacity != opacity) {
+        float currentOpacity = std::any_cast<float>(opacityProperty->get());
+        if (currentOpacity != opacity) {
             std::string script = fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.Opacity', {});",
                 identifier, ghoul::to_string(opacity)
@@ -370,6 +488,13 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
         }
     };
     addCallback(identifier, { callback, {}, "handleOpacityMessage" });
+
+    // Create and set onChange for opacity
+    auto updateOpacity = [this, opacityProperty, identifier, connWeakPtr] {
+        if (!opacityProperty || connWeakPtr.expired()) return;
+        onOpacityChange(opacityProperty, identifier, connWeakPtr.lock());
+    };
+    connection->addPropertySubscription(opacityProperty->identifier(), identifier, updateOpacity);
 }
 
 void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -387,14 +512,19 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
         return;
     }
 
-    auto callback = [this, identifier, size, connection] {
-        // Get renderable
-        auto r = getRenderable(identifier);
+    // Get renderable
+    auto r = getRenderable(identifier);
+    if (!r) return;
 
-        // Get size from renderable
-        properties::Property* sizeProperty = r->property("Size");
-        auto propertyAny = sizeProperty->get();
-        float propertySize = std::any_cast<float>(propertyAny);
+    // Get size of renderable
+    properties::Property* sizeProperty = r->property("Size");
+    
+    // Create weak_ptr, safer than shared_ptr for lambdas
+    std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
+
+    auto callback = [this, identifier, size, sizeProperty, connWeakPtr] {
+        if (!sizeProperty || connWeakPtr.expired()) return;
+        // auto conn = connWeakPtr.lock()
 
         // auto propertySub = connection->getPropertySubscription(identifier, sizeProperty->identifier());
         // if (propertySub) {
@@ -402,7 +532,8 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
         // }
 
         // Update size of renderable
-        if (propertySize != size) {
+        float currentSize = std::any_cast<float>(sizeProperty->get());
+        if (currentSize != size) {
             // TODO: Add interpolation to script, but do not send back
             // updates to external software until the interpolation is done
             // Use this: "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {}, 1);",
@@ -424,6 +555,12 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
         );
     };
     addCallback(identifier, { callback, {}, "handleFixedPointSizeMessage" });
+
+    auto updateSize = [this, sizeProperty, identifier, connWeakPtr] {
+        if (!sizeProperty || connWeakPtr.expired()) return;
+        onFixedPointSizeChange(sizeProperty, identifier, connWeakPtr.lock());
+    };
+    connection->addPropertySubscription(sizeProperty->identifier(), identifier, updateSize);
 }
 
 void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -525,9 +662,21 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
         return;
     }
 
-    auto callback = [this, identifier, visibilityMessage, connection] {
-        // Get renderable
-        // auto r = getRenderable(identifier);
+    // Get renderable
+    auto r = getRenderable(identifier);
+    if (!r) return;
+
+    // Get visibility of renderable
+    properties::Property* visibilityProperty = r->property("Enabled");
+
+    // Create weak_ptr, safer than shared_ptr for lambdas
+    std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
+
+    const bool visibility = visibilityMessage == "T";
+
+    auto callback = [this, identifier, visibility, visibilityProperty, connWeakPtr] {
+        if (!visibilityProperty || connWeakPtr.expired()) return;
+        // auto conn = connWeakPtr.lock()
 
         // Get visibility from renderable
         // properties::Property* enabledProperty = r->property("Enabled");
@@ -536,18 +685,28 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
         //     propertySub->shouldSendMessage = false;
         // }
 
-        // Toggle visibility from renderable
-        const std::string visability = visibilityMessage == "T" ? "true" : "false";
-        std::string script = fmt::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {});",
-            identifier, visability
-        );
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
+        // Toggle visibility of renderable
+        bool currentVisibility = std::any_cast<bool>(visibilityProperty->get());
+        if (currentVisibility != visibility) {
+            const std::string vis = visibility ? "true" : "false";
+            std::string script = fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {});",
+                identifier, vis
+            );
+            global::scriptEngine->queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
     };
     addCallback(identifier, { callback, {}, "handleVisibilityMessage" });
+
+    // Create and set onChange for visibility
+    auto toggleVisibility = [this, visibilityProperty, identifier, connWeakPtr] {
+        if (!visibilityProperty || connWeakPtr.expired()) return;
+        onVisibilityChange(visibilityProperty, identifier, connWeakPtr.lock());    
+    };
+    connection->addPropertySubscription(visibilityProperty->identifier(), identifier, toggleVisibility);
 }
 
 void PointDataMessageHandler::handleRemoveSGNMessage(const std::vector<char>& message,std::shared_ptr<SoftwareConnection> connection) {
@@ -689,66 +848,6 @@ void PointDataMessageHandler::checkRenderable(
             "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)", // Reload WebGUI so that SoftwareIntegration GUI appears
             scripting::ScriptEngine::RemoteScripting::Yes
         );
-        auto subscriptionCallback = [this, identifier, connection] {
-            subscribeToRenderableUpdates(identifier, connection);
-        };
-        addCallback(identifier, { subscriptionCallback, {}, "subscriptionCallback" });
-    }
-    else {
-        subscribeToRenderableUpdates(identifier, connection);
-    }
-}
-
-void PointDataMessageHandler::subscribeToRenderableUpdates(
-    const std::string& identifier,
-    std::shared_ptr<SoftwareConnection> connection
-) {
-    // Get renderable
-    auto aRenderable = getRenderable(identifier);
-    if (!aRenderable) return;
-
-    if (!connection->isConnected()) {
-        LERROR(fmt::format(
-            "Could not subscribe to updates for renderable '{}' due to lost connection",
-            identifier
-        ));
-        return;
-    }
-
-    // Update color of renderable
-    properties::Property* colorProperty = aRenderable->property("Color");
-    if (colorProperty) {
-        auto updateColor = [this, colorProperty, identifier, connection]() {
-            onFixedColorChange(colorProperty, identifier, connection);
-        };
-        connection->addPropertySubscription(colorProperty->identifier(), identifier, updateColor);
-    }
-
-    // Update opacity of renderable
-    properties::Property* opacityProperty = aRenderable->property("Opacity");
-    if (opacityProperty) {
-        auto updateOpacity = [this, opacityProperty, identifier, connection]() {
-            onOpacityChange(opacityProperty, identifier, connection);
-        };
-        connection->addPropertySubscription(opacityProperty->identifier(), identifier, updateOpacity);
-    }
-
-    // Update size of renderable
-    properties::Property* sizeProperty = aRenderable->property("Size");
-    if (sizeProperty) {
-        auto updateSize = [this, sizeProperty, identifier, connection] {
-            onFixedPointSizeChange(sizeProperty, identifier, connection);
-        };
-        connection->addPropertySubscription(sizeProperty->identifier(), identifier, updateSize);
-    }
-
-    // Toggle visibility of renderable
-    properties::Property* visibilityProperty = aRenderable->property("Enabled");
-    if (visibilityProperty) {
-        auto toggleVisibility = [this, visibilityProperty, identifier, connection] {
-            onVisibilityChange(visibilityProperty, identifier, connection);    
-        };
-        connection->addPropertySubscription(visibilityProperty->identifier(), identifier, toggleVisibility);
     }
 }
 
@@ -868,6 +967,37 @@ void PointDataMessageHandler::onVisibilityChange(
 
     const std::string message = simp::formatUpdateMessage(simp::MessageType::Visibility, identifier, visibilityFlag);
     connection->sendMessage(message);
+}
+
+// TODO: Move to SIMP / use distanceconversion
+void PointDataMessageHandler::convertToMeterPerSecond(simp::LengthUnit currLengthUnit, std::vector<float>& data) {
+    // distanceconversion::convertDistance
+    float multiplier = 1.0;
+    switch (currLengthUnit) {
+        case simp::LengthUnit::km:
+            multiplier = 1000.0;
+            break;
+        case simp::LengthUnit::AU:
+            multiplier = static_cast<float>(distanceconstants::AstronomicalUnit);
+            break;
+        case simp::LengthUnit::lyr:
+            multiplier = static_cast<float>(distanceconstants::LightYear);
+            break;
+        case simp::LengthUnit::pc:
+            multiplier = static_cast<float>(distanceconstants::Parsec);
+            break;
+        case simp::LengthUnit::kpc:
+            multiplier = static_cast<float>(distanceconstants::Parsec * 1.0e3);
+            break;
+        case simp::LengthUnit::Mpc:
+            multiplier = static_cast<float>(distanceconstants::Parsec * 1.0e6);
+            break;
+        default:
+            break;
+    }
+    
+    std::transform(std::begin(data), std::end(data), std::begin(data), 
+                    [multiplier] (float f) {return f * multiplier;});
 }
 
 } // namespace openspace
