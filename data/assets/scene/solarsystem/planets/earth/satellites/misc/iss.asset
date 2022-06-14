@@ -2,7 +2,7 @@ local satelliteHelper = asset.require("util/tle_helper")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
-local url = "http://celestrak.com/satcat/tle.php?CATNR=25544"
+local url = "http://celestrak.com/NORAD/elements/gp.php?CATNR=25544"
 local identifier = "ISS"
 local filename = "ISS.txt"
 local nodes = {}

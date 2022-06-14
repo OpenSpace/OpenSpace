@@ -25,7 +25,7 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local imagesDestination = syncedDirectory .. "images"
+local imagesDestination = syncedDirectory
 
 local layer = {
   Identifier = Identifier,
@@ -45,7 +45,10 @@ local colorbar = {
 }
 
 asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
+
+   
+
+  if not openspace.directoryExists(C:\Users\anne1\dennafunkar\OpenSpace\sync\http\noaa-sos-oceans-ecco2_sst-veg_land\1) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "4096-1.zip", imagesDestination, true)       
     openspace.unzipFile(syncedDirectory .. "4096-2.zip", imagesDestination, true)       

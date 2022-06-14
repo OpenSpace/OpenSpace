@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "GRACE",
   Name = "GRACE",
-  FilePath = asset.localResource("CSR_GRACE_GRACE-FO_RL06_Mascons_all-corrections_v02.ncband_1.vrt"),
+  FilePath = asset.localResource("CSR_GRACE_GRACE-FO_RL06_Mascons_all-corrections_v02.ncband_204.vrt"),
   Description = [[ image of grace]],    
 }
 
@@ -22,7 +22,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "GRACE",
   Version = "1.1",
-  Description = [[ used gdal transformation from tif to vrt: gdaldem color-relief ,  gdalwarp -t_srs, gdal_translate -a_ullr -180 90 180 -90, gdalbuildvrt "*vrt" -te -180 -90 180 90 -addalpha "*.tif"],
+  Description = [[ used gdal transformation from tif to vrt: gdaldem color-relief ,  gdalwarp -t_srs, gdal_translate -a_ullr -180 90 180 -90, gdalbuildvrt "*vrt" -te -180 -90 180 90 -addalpha "*.tif"]],
   Author = "Center for Space Research",
   URL = "http://www2.csr.utexas.edu/grace/",
   License = "NASA"

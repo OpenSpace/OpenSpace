@@ -167,7 +167,7 @@ namespace {
             "NavigationState"
         );
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const documentation::SpecificationError& e) {    
         LERRORC("flyToNavigationState", ghoul::to_string(e.result));
         throw ghoul::lua::LuaError(fmt::format("Unable to create a path: {}", e.what()));
     }

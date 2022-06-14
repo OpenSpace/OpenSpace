@@ -27,7 +27,8 @@
   ],
   "additional_scripts": [
     "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiUrl\", 'http://127.0.0.1:4690/frontend/#/climate')",
-    ""
+    "",
+    "openspace.action.triggerAction(\"os.earth_global_illumination\")"
   ],
   "assets": [
     "base",
@@ -111,7 +112,67 @@
       "value": "true"
     },
     {
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.VIIRS_SNPP_Temporal.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "ScreenSpace.noaa-sos-oceans-ecco2_sst-veg_land-colorbar.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior",
+      "type": "setPropertyValue",
+      "value": "true"
+    },
+    {
       "name": "Scene.EarthTrail.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.MoonTrail.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.MercuryTrail.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.VenusTrail.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.MarsTrail.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JupiterTrail.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.SaturnTrail.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.UranusTrail.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.NeptuneTrail.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
     }
