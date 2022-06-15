@@ -155,6 +155,17 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
 
     // TODO: Fix! Executes too soon!
     auto enableMotionCallback = [identifier] {
+        // Set large time steps for the GUI (so you for example 
+        // can see the movement of stars at 5000 years/second)
+        std::string largeTimeSteps = "{ 1.0, 157680000000.0, 315360000000.0, 1576800000000.0, 3153600000000.0 }";
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.time.setDeltaTimeSteps({});",
+                largeTimeSteps
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        
         global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.MotionEnabled', {});",
@@ -731,7 +742,7 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
     // Create weak_ptr, safer than shared_ptr for lambdas
     std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
 
-    const bool visibility = visibilityMessage == "T"; // TODO: Move this into callback
+    const bool visibility = visibilityMessage == "T";
 
     auto setVisibilityCallback = [this, identifier, visibility, connWeakPtr] {        
         // Get renderable
