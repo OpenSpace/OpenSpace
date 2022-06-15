@@ -26,10 +26,28 @@
 
 #include <openspace/properties/optionproperty.h>
 
-TEST_CASE("OptionProperty: No Option", "[optionproperty]") {
+TEST_CASE("OptionProperty: Has Option", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     CHECK_FALSE(p.hasOption());
+
+    p.addOption(-20, "a");
+
+    CHECK(p.hasOption());
+}
+
+TEST_CASE("OptionProperty: Correct Value", "[optionproperty]") {
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+
+    p.addOption(-20, "a");
+    p.addOption(2, "b");
+    p.addOption(-10, "c");
+    
+    p = -10;
+    
+    CHECK(p == -10);
+    CHECK(p.option().value == -10);
+    CHECK(p.option().description == "c");
 }
 
 TEST_CASE("OptionProperty: Single Option Single Zero", "[optionproperty]") {
