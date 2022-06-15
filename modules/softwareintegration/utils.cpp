@@ -109,14 +109,14 @@ std::string getSIMPType(const MessageType& type) {
     return it->first;
 }
 
-NaNRenderMode getNaNRenderMode(const std::string& type) {
-    if (tools::_cmapNaNModeFromString.count(type) == 0) return NaNRenderMode::Unknown;
-    return tools::_cmapNaNModeFromString.at(type);
+ColormapNaNRenderMode getColormapNaNRenderMode(const std::string& type) {
+    if (tools::_colormapNaNRenderModeFromString.count(type) == 0) return ColormapNaNRenderMode::Unknown;
+    return tools::_colormapNaNRenderModeFromString.at(type);
 }
 
-LengthUnit getLengthUnit(const std::string& type) {
-    if (tools::_lengthUnitFromString.count(type) == 0) return LengthUnit::Unknown;
-    return tools::_lengthUnitFromString.at(type);
+VelocityNaNRenderMode getVelocityNaNRenderMode(const std::string& type) {
+    if (tools::_velocityNaNRenderModeFromString.count(type) == 0) return VelocityNaNRenderMode::Unknown;
+    return tools::_velocityNaNRenderModeFromString.at(type);
 }
 
 std::string formatLengthOfSubject(size_t lengthOfSubject) {

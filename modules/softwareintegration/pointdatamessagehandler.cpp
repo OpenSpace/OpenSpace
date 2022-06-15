@@ -33,8 +33,9 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/distanceconstants.h>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/scripting/scriptengine.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 
@@ -87,15 +88,14 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
 }
 
 void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
-    LWARNING(fmt::format("PointDataMessageHandler::handleVelocityDataMessage()"));
     size_t messageOffset = 0;
     std::string identifier;
 
     checkRenderable(message, messageOffset, connection, identifier);
 
-    simp::LengthUnit length_unit;
-    simp::NaNRenderMode velNaNMode;
-    glm::vec4 velNaNColor;
+    std::string velocityDistanceUnitString;
+    // std::string velocityTimeUnitString;
+    simp::VelocityNaNRenderMode velocityNaNMode;
     size_t nVelocities;
     size_t dimensionality;
     std::vector<float> velocities;
@@ -104,22 +104,18 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
         // The following order of creating variables is the exact order they are received
         // in the message. If the order is not the same, the global variable
         // 'message offset' will be wrong
-        length_unit = simp::getLengthUnit(simp::readString(message, messageOffset));
-        if (length_unit == simp::LengthUnit::Unknown) {
-            // TODO: Write message
-            throw simp::SimpError("");
-        }
-        velNaNMode = simp::getNaNRenderMode(simp::readString(message, messageOffset));
-        switch (velNaNMode) {
-            case simp::NaNRenderMode::Color:
-                velNaNColor = simp::readColor(message, messageOffset);
-                break;
-            case simp::NaNRenderMode::Hide: // Nothing to read
-                break;
-            default: // simp::NaNRenderMode::Unknown
-                // TODO: Write message
-                throw simp::SimpError("");
-                break;
+        velocityDistanceUnitString = simp::readString(message, messageOffset);
+        // velocityTimeUnitString = simp::readString(message, messageOffset);
+        // LWARNING(fmt::format("Velocitydata timeUnit = {}", velocityTimeUnitString));
+        std::string velocityNaNModeStr = simp::readString(message, messageOffset);
+        velocityNaNMode = simp::getVelocityNaNRenderMode(velocityNaNModeStr);
+        if (velocityNaNMode == simp::VelocityNaNRenderMode::Unknown) {
+            throw simp::SimpError(
+                fmt::format(
+                    "'{}' is not recognized as a velocity NaN render mode", 
+                    velocityNaNModeStr
+                )
+            );
         }
         nVelocities = static_cast<size_t>(simp::readIntValue(message, messageOffset));
         dimensionality = static_cast<size_t>(simp::readIntValue(message, messageOffset));
@@ -130,46 +126,34 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
         return;
     }
 
-    // Convert data to m/s (assuming time unit is seconds for now)
-    if (length_unit != simp::LengthUnit::m) {
-        convertToMeterPerSecond(length_unit, velocities);
-    }
-
-    // Use the renderable identifier as the data key
-    auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-    module->storeData(identifier, storage::Key::VelocityData, std::move(velocities));
-
-    auto velNaNModeCallback = [this, identifier, velNaNMode, velNaNColor, connection] {
-        if (velNaNMode == simp::NaNRenderMode::Color) {
-            // Get renderable
-            auto r = getRenderable(identifier);
-
-            // Get velNaNColor of renderable
-            properties::Property* velNaNColorProperty = r->property("VelNaNColor");
-            glm::vec4 propertyVelNaNColor = std::any_cast<glm::vec4>(velNaNColorProperty->get());
-
-            // Update velNaNColor of renderable
-            if (propertyVelNaNColor != velNaNColor) {
-                global::scriptEngine->queueScript(
-                    fmt::format(
-                        "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelNaNColor', {});",
-                        identifier, ghoul::to_string(velNaNColor)
-                    ),
-                    scripting::ScriptEngine::RemoteScripting::Yes
-                );
-            }
-        }
-
+    // Set units first to make sure they're available when converting during data loading
+    auto velocityUnitsCallback = [this, identifier, velocityDistanceUnitString, connection] {
         global::scriptEngine->queueScript(
             fmt::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelNaNMode', {});",
-                identifier, static_cast<int>(velNaNMode)
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelocityDistanceUnit', \"{}\");",
+                identifier, velocityDistanceUnitString
             ),
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { velNaNModeCallback, {}, "velNaNModeCallback" });
+    addCallback(identifier, { velocityUnitsCallback, {}, "velocityUnitsCallback" });
 
+    // Use the renderable identifier as the data key
+    auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
+    module->storeData(identifier, storage::Key::VelocityData, std::move(velocities));
+    
+    auto velocityNaNModeCallback = [this, identifier, velocityNaNMode, connection] {
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelocityNaNMode', {});",
+                identifier, static_cast<int>(velocityNaNMode)
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    };
+    addCallback(identifier, { velocityNaNModeCallback, {}, "velocityNaNModeCallback" });
+
+    // TODO: Fix! Executes too soon!
     auto enableMotionCallback = [identifier] {
         global::scriptEngine->queueScript(
             fmt::format(
@@ -179,7 +163,14 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { enableMotionCallback, { storage::Key::VelocityData }, "Enable motion mode, wait for VelocityData" });
+    addCallback(
+        identifier, 
+        { 
+            enableMotionCallback, 
+            { storage::Key::VelocityData }, 
+            "Enable motion mode, wait for VelocityData" 
+        }
+    );
 }
 
 void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -197,6 +188,7 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
         return;
     }
 
+    // TODO: This is an issue. Renderable might not have been created yet
     // Get renderable
     auto r = getRenderable(identifier);
     if (!r) return;
@@ -254,36 +246,39 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
 
     float min;
     float max;
-    simp::NaNRenderMode cmapNaNMode;
-    glm::vec4 cmapNaNColor;
+    simp::ColormapNaNRenderMode colormapNaNMode;
+    glm::vec4 colormapNaNColor;
     size_t nColors;
-    std::vector<float> colorMap;
+    std::vector<float> colormap;
     try {
         min = simp::readFloatValue(message, messageOffset);
         max = simp::readFloatValue(message, messageOffset);
-        cmapNaNMode = simp::getNaNRenderMode(simp::readString(message, messageOffset));
-        switch (cmapNaNMode) {
-            case simp::NaNRenderMode::Color:
-                cmapNaNColor = simp::readColor(message, messageOffset);
+        std::string colormapNaNModeString = simp::readString(message, messageOffset);
+        colormapNaNMode = simp::getColormapNaNRenderMode(colormapNaNModeString);
+        switch (colormapNaNMode) {
+            case simp::ColormapNaNRenderMode::FixedColor:
+                colormapNaNColor = simp::readColor(message, messageOffset);
                 break;
-            case simp::NaNRenderMode::Hide: // Nothing to read
+            case simp::ColormapNaNRenderMode::Hide: // Nothing to read
                 break;
-            default: // simp::NaNRenderMode::Unknown
-                // TODO: Write message
-                throw simp::SimpError("");
+            default: // simp::ColormapNaNRenderMode::Unknown
+                throw simp::SimpError(fmt::format(
+                    "OpenSpace doesn't support the colormap NaN render mode '{}'.",
+                    colormapNaNModeString
+                ));
                 break;
         }
         nColors = static_cast<size_t>(simp::readIntValue(message, messageOffset));
-        simp::readColormap(message, messageOffset, nColors, colorMap);
+        simp::readColormap(message, messageOffset, nColors, colormap);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format("Error when reading color map message: {}", err.message));
+        LERROR(fmt::format("Error when reading colormap message: {}", err.message));
         return;
     }
 
     // Use the renderable identifier as the data key
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
-    module->storeData(identifier, storage::Key::Colormap, std::move(colorMap));
+    module->storeData(identifier, storage::Key::Colormap, std::move(colormap));
 
     auto colormapLimitsCallback = [this, identifier, min, max, connection] {
         // Get renderable
@@ -324,21 +319,21 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     };
     addCallback(identifier, { colormapLimitsCallback, {}, "colormapLimitsCallback" });
 
-    auto cmapNaNModeCallback = [this, identifier, cmapNaNMode, cmapNaNColor, connection] {
-        if (cmapNaNMode == simp::NaNRenderMode::Color) {
+    auto colormapNaNModeCallback = [this, identifier, colormapNaNMode, colormapNaNColor, connection] {
+        if (colormapNaNMode == simp::ColormapNaNRenderMode::FixedColor) {
             // Get renderable
             auto r = getRenderable(identifier);
 
-            // Get cmapNaNColor of renderable
-            properties::Property* cmapNaNColorProperty = r->property("CmapNaNColor");
-            glm::vec4 propertyCmapNaNColor = std::any_cast<glm::vec4>(cmapNaNColorProperty->get());
+            // Get colormapNaNColor of renderable
+            properties::Property* colormapNaNColorProperty = r->property("ColormapNaNColor");
+            glm::vec4 propertyColormapNaNColor = std::any_cast<glm::vec4>(colormapNaNColorProperty->get());
 
-            // Update cmapNaNColor of renderable
-            if (propertyCmapNaNColor != cmapNaNColor) {
+            // Update colormapNaNColor of renderable
+            if (propertyColormapNaNColor != colormapNaNColor) {
                 global::scriptEngine->queueScript(
                     fmt::format(
-                        "openspace.setPropertyValueSingle('Scene.{}.Renderable.CmapNaNColor', {});",
-                        identifier, ghoul::to_string(cmapNaNColor)
+                        "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapNaNColor', {});",
+                        identifier, ghoul::to_string(colormapNaNColor)
                     ),
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
@@ -347,13 +342,13 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
 
         global::scriptEngine->queueScript(
             fmt::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.CmapNaNMode', {});",
-                identifier, static_cast<int>(cmapNaNMode)
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapNaNMode', {});",
+                identifier, static_cast<int>(colormapNaNMode)
             ),
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { cmapNaNModeCallback, {}, "cmapNaNModeCallback" });
+    addCallback(identifier, { colormapNaNModeCallback, {}, "colormapNaNModeCallback" });
 
     auto enableColormapCallback = [this, identifier] {
         global::scriptEngine->queueScript(
@@ -386,7 +381,7 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
             attributeData.push_back(simp::readFloatValue(message, messageOffset));
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format("Error when reading message with scalars for color map: {}", err.message));
+        LERROR(fmt::format("Error when reading message with scalars for colormap: {}", err.message));
         return;
     }
 
@@ -966,37 +961,6 @@ void PointDataMessageHandler::onVisibilityChange(
 
     const std::string message = simp::formatUpdateMessage(simp::MessageType::Visibility, identifier, visibilityFlag);
     connection->sendMessage(message);
-}
-
-// TODO: Move to SIMP / use distanceconversion
-void PointDataMessageHandler::convertToMeterPerSecond(simp::LengthUnit currLengthUnit, std::vector<float>& data) {
-    // distanceconversion::convertDistance
-    float multiplier = 1.0;
-    switch (currLengthUnit) {
-        case simp::LengthUnit::km:
-            multiplier = 1000.0;
-            break;
-        case simp::LengthUnit::AU:
-            multiplier = static_cast<float>(distanceconstants::AstronomicalUnit);
-            break;
-        case simp::LengthUnit::lyr:
-            multiplier = static_cast<float>(distanceconstants::LightYear);
-            break;
-        case simp::LengthUnit::pc:
-            multiplier = static_cast<float>(distanceconstants::Parsec);
-            break;
-        case simp::LengthUnit::kpc:
-            multiplier = static_cast<float>(distanceconstants::Parsec * 1.0e3);
-            break;
-        case simp::LengthUnit::Mpc:
-            multiplier = static_cast<float>(distanceconstants::Parsec * 1.0e6);
-            break;
-        default:
-            break;
-    }
-    
-    std::transform(std::begin(data), std::end(data), std::begin(data), 
-                    [multiplier] (float f) {return f * multiplier;});
 }
 
 } // namespace openspace

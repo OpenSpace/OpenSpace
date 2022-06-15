@@ -26,41 +26,32 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-const float Parsec = 3.0856776e16;
-
 layout(location = 0) in vec3 in_position;
+in vec3 in_velocity;
 in float in_colormapAttributeScalar;
 in float in_linearSizeAttributeScalar;
 
-in vec3 in_velocity;
-// out vec4 vs_gPosition;
+out vec3 vs_velocity;
 
 out float vs_colormapAttributeScalar;
 flat out float vs_linearSizeAttributeScalar;
 
 uniform bool motionEnabled;
-uniform float theTime;
+uniform float time;
 
 void main() {
     vs_colormapAttributeScalar = in_colormapAttributeScalar;
     vs_linearSizeAttributeScalar = in_linearSizeAttributeScalar;
-    
-    // Don't show points with no value for velocity
-    // if (motionEnabled && (isnan(in_velocity[0]) || isnan(in_velocity[1]) || isnan(in_velocity[2]))) {
-    //     vs_gPosition = vec4(0.0);    
-    //     gl_Position = vec4(0.0);
-    //     return;
-    // }
 
     vec4 objectPosition = vec4(in_position, 1.0);
 
     // Add velocity if applicable
-    if (motionEnabled) {
-        // TODO: How to handle NaN velocity values???
-        if (!isnan(in_velocity[0]) || !isnan(in_velocity[1]) || !isnan(in_velocity[2])) {
-            objectPosition.xyz += 10*theTime/Parsec * in_velocity;
-        }
-        // objectPosition.xyz += theTime * vec3(500000.0, 500000.0, 500000.0); 
+    // Velocity (UVW) is already in m/s
+    vs_velocity = in_velocity;
+    bool velocityIsNaN = (isnan(in_velocity[0]) || isnan(in_velocity[1]) || isnan(in_velocity[2]));
+    if (motionEnabled && !velocityIsNaN) {
+        // TODO: Need to subtract with t = 0 (when the position was measured)
+        objectPosition.xyz += time * in_velocity; 
     }
 
     gl_Position = objectPosition;

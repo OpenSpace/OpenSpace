@@ -25,28 +25,32 @@
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-const int CMAPNANMODE_HIDDEN = 0;
-const int CMAPNANMODE_COLOR = 1;
+const int COLORMAPNANMODE_HIDDEN = 0;
+const int COLORMAPNANMODE_COLOR = 1;
+
+const int VELOCITYNANMODE_HIDDEN = 0;
+const int VELOCITYNANMODE_STATIC = 2;
 
 flat in float ge_colormapAttributeScalar;
 in vec2 coords;
 flat in float ge_screenSpaceDepth;
 flat in vec4 ge_positionViewSpace;
 in float ta;
-// in vec4 ge_gPosition;
+
+in vec3 ge_velocity;
 
 uniform vec4 color;
 uniform float opacity;
 
 uniform float colormapMin;
 uniform float colormapMax;
-uniform int cmapNaNMode;
-uniform vec4 cmapNaNColor;
+uniform int colormapNaNMode;
+uniform vec4 colormapNaNColor;
 uniform bool colormapEnabled;
 uniform sampler1D colormapTexture;
 
-// uniform int velNaNMode;
-// uniform vec4 velNaNColor;
+uniform bool motionEnabled;
+uniform int velocityNaNMode;
 
 vec4 attributeScalarToRgb(float attributeData) {
     float t = (attributeData - colormapMin) / (colormapMax - colormapMin);
@@ -64,10 +68,28 @@ Fragment getFragment() {
         discard;
     }
 
-    // Don't show points with no value for that attribute, if NaNRenderMode is Hidden
-    if (colormapEnabled && isnan(ge_colormapAttributeScalar) && cmapNaNMode == CMAPNANMODE_HIDDEN) {
+    // Don't show points with no value for that 
+    // attribute, if ColormapNaNRenderMode is Hidden
+    if (colormapEnabled 
+        && isnan(ge_colormapAttributeScalar) 
+        && colormapNaNMode == COLORMAPNANMODE_HIDDEN) 
+    {
         discard;
     }
+    
+    // ========== Velocity NaN mode ==========
+    // Don't show points with no value for 
+    // velocity, if VelocityNaNRenderMode is Hidden
+    // vec3 vel = ge_velocity;
+    bool velocityIsNaN = (isnan(ge_velocity[0]) ||
+                          isnan(ge_velocity[1]) ||
+                          isnan(ge_velocity[2]));
+    if (motionEnabled && 
+        velocityIsNaN && 
+        velocityNaNMode == VELOCITYNANMODE_HIDDEN) 
+    {
+        discard;
+    } // else the point is left static
 
     const float radius = 0.5;
     float distance = length(coords - radius);
@@ -76,21 +98,16 @@ Fragment getFragment() {
     // calculate distance from the origin point
     float circle = smoothstep(radius, radius - (radius * 0.2), distance);
 
-    vec4 outputColor = vec4(color.rgb, color.a * opacity); 
+    vec4 outputColor = vec4(color.rgb, color.a * opacity);
     if (colormapEnabled) {
-        // Set CmapNaNColor if point doesn't have a value for the attribute 
-        if (isnan(ge_colormapAttributeScalar) && cmapNaNMode == CMAPNANMODE_COLOR) {
-            outputColor = vec4(cmapNaNColor.rgb, cmapNaNColor.a * opacity);
+        // Set colormapNaNColor if point doesn't have a value for the attribute 
+        if (isnan(ge_colormapAttributeScalar) && colormapNaNMode == COLORMAPNANMODE_COLOR) {
+            outputColor = vec4(colormapNaNColor.rgb, colormapNaNColor.a * opacity);
         }
         else {
             vec4 colorFromColormap = attributeScalarToRgb(ge_colormapAttributeScalar);
             outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * color.a * opacity);
         }
-
-        // // TODO: Remove, Just referencing so it doesn't crash
-        // if (velNaNMode == 0) {
-        //     velNaNColor = vec4(1.0, 1.0, 1.0);
-        // }
     }
 
     Fragment frag;

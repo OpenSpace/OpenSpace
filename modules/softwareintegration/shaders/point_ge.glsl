@@ -26,16 +26,13 @@
 
 #include "PowerScaling/powerScalingMath.hglsl"
 
-// const float EPS = 1e-5;
-
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
+in vec3 vs_velocity[];
+
 in float vs_colormapAttributeScalar[];
 flat in float vs_linearSizeAttributeScalar[];
-
-// in vec4 vs_gPosition[];
-// out vec4 ge_gPosition;
 
 flat out float ge_screenSpaceDepth;
 out float ta;
@@ -43,6 +40,8 @@ out vec4 ge_positionViewSpace;
 
 out vec2 coords;
 out float ge_colormapAttributeScalar;
+
+out vec3 ge_velocity;
 
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
@@ -56,6 +55,8 @@ uniform dmat4 cameraViewProjectionMatrix;
 uniform float linearSizeMin;
 uniform float linearSizeMax;
 uniform bool linearSizeEnabled;
+
+uniform bool motionEnabled;
 
 // FRAGILE
 // All of these values have to be synchronized with the values in the optionproperty
@@ -98,17 +99,9 @@ dvec4[2] getTwoCorners(dvec4 center, dvec3 right, dvec3 up) {
 
 void main() {
     ge_colormapAttributeScalar = vs_colormapAttributeScalar[0];
-
+    ge_velocity = vs_velocity[0];
+    
     ta = 1.0;
-
-
-    // // Discard geometry if star has no position (but wasn't a nullArray).
-    // // Or if observed distance is above threshold set by cutOffThreshold.
-    // // By discarding in gs instead of fs we save computations for when nothing is visible.
-    // vec4 position = gl_in[0].gl_Position;
-    // if (length(position) < EPS) {
-    //     return;
-    // }
 
     vec3 pos = gl_in[0].gl_Position.xyz;
 

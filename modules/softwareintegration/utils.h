@@ -80,20 +80,15 @@ enum class MessageType : uint32_t {
     Unknown
 };
 
-enum class NaNRenderMode : uint32_t {
+enum class ColormapNaNRenderMode : uint8_t {
     Hide = 0,
-    Color,
+    FixedColor,
     Unknown
 };
 
-enum class LengthUnit : uint32_t {
-    m = 0,
-    km,
-    AU,
-    lyr,
-    pc,
-    kpc,
-    Mpc,
+enum class VelocityNaNRenderMode : uint8_t {
+    Hide = 0,
+    Static,
     Unknown
 };
 
@@ -121,19 +116,14 @@ const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
     {"DISC", MessageType::InternalDisconnection},
 };
 
-const std::unordered_map<std::string, NaNRenderMode> _cmapNaNModeFromString {
-    {"Hide", NaNRenderMode::Hide},
-    {"Color", NaNRenderMode::Color}
+const std::unordered_map<std::string, ColormapNaNRenderMode> _colormapNaNRenderModeFromString {
+    {"Hide", ColormapNaNRenderMode::Hide},
+    {"FixedColor", ColormapNaNRenderMode::FixedColor}
 };
 
-const std::unordered_map<std::string, LengthUnit> _lengthUnitFromString {
-    {"m", LengthUnit::m},
-    {"km", LengthUnit::km},
-    {"AU", LengthUnit::AU},
-    {"lyr", LengthUnit::lyr},
-    {"pc", LengthUnit::pc},
-    {"kpc", LengthUnit::kpc},
-    {"Mpc", LengthUnit::Mpc}
+const std::unordered_map<std::string, VelocityNaNRenderMode> _velocityNaNRenderModeFromString {
+    {"Hide", VelocityNaNRenderMode::Hide},
+    {"Static", VelocityNaNRenderMode::Static}
 };
 
 glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset);
@@ -154,9 +144,9 @@ MessageType getMessageType(const std::string& type);
 
 std::string getSIMPType(const MessageType& type);
 
-NaNRenderMode getNaNRenderMode(const std::string& type);
+ColormapNaNRenderMode getColormapNaNRenderMode(const std::string& type);
 
-LengthUnit getLengthUnit(const std::string& type);
+VelocityNaNRenderMode getVelocityNaNRenderMode(const std::string& type);
 
 std::string formatLengthOfSubject(size_t lengthOfSubject);
 

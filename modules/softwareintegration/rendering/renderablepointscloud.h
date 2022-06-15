@@ -65,7 +65,7 @@ public:
 protected:
     void loadData(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadColormap(SoftwareIntegrationModule* softwareIntegrationModule);
-    void loadCmapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadColormapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule);
 
@@ -76,15 +76,16 @@ protected:
     void checkIfLinearSizeCanBeEnabled();
     void checkIfMotionCanBeEnabled();
 
+    bool shouldLoadVelocityData(bool isVelocityDataDirty);
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
     UniformCache(
         color, opacity, size, modelMatrix, cameraUp, screenSize,
         cameraViewProjectionMatrix, eyePosition, sizeOption,
-        colormapTexture, colormapMin, colormapMax, cmapNaNMode,
-        cmapNaNColor, colormapEnabled, linearSizeMin, linearSizeMax,
-        linearSizeEnabled,motionEnabled, theTime
+        colormapTexture, colormapMin, colormapMax, colormapNaNMode,
+        colormapNaNColor, colormapEnabled, linearSizeMin, linearSizeMax,
+        linearSizeEnabled, velocityNaNMode, motionEnabled, time
     ) _uniformCache;
-    //  velNaNMode, velNaNColor, 
 
     properties::FloatProperty _size;
     properties::Vec4Property _color;
@@ -97,12 +98,13 @@ protected:
     properties::BoolProperty _colormapEnabled;
     properties::FloatProperty _colormapMin;
     properties::FloatProperty _colormapMax;
-    properties::IntProperty _cmapNaNMode;
-    properties::Vec4Property _cmapNaNColor;
+    properties::IntProperty _colormapNaNMode;
+    properties::Vec4Property _colormapNaNColor;
 
     properties::BoolProperty _motionEnabled;
-    properties::IntProperty _velNaNMode;
-    properties::Vec4Property _velNaNColor;
+    properties::StringProperty _velocityDistanceUnit;
+    // properties::StringProperty _velocityTimeUnit;
+    properties::IntProperty _velocityNaNMode;
     
     std::optional<std::string> _identifier = std::nullopt;
 
@@ -111,6 +113,7 @@ protected:
 
     bool _hasLoadedLinearSizeAttributeData = false;
     
+    bool _velocityUnitsAreDirty = false;
     bool _hasLoadedVelocityData = false;
 
     // This is determined by nrAttributes + size for each attribute

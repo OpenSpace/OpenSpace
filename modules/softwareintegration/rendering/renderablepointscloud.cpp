@@ -32,7 +32,8 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/distanceconstants.h>
+#include <openspace/util/distanceconversion.h>
+// #include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -47,14 +48,13 @@ int TIME_COUNTER = 0;
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
-    constexpr const std::array<const char*, 20> UniformNames = {
+    constexpr const std::array<const char*, 21> UniformNames = {
         "color", "opacity", "size", "modelMatrix", "cameraUp", "screenSize",
-        "cameraViewProjectionMatrix", "eyePosition", "sizeOption", 
-        "colormapTexture", "colormapMin", "colormapMax", "cmapNaNMode",
-        "cmapNaNColor", "colormapEnabled", "linearSizeMin", "linearSizeMax",
-        "linearSizeEnabled", "motionEnabled", "theTime"
+        "cameraViewProjectionMatrix", "eyePosition", "sizeOption",
+        "colormapTexture", "colormapMin", "colormapMax", "colormapNaNMode",
+        "colormapNaNColor", "colormapEnabled", "linearSizeMin", "linearSizeMax",
+        "linearSizeEnabled","velocityNaNMode", "motionEnabled", "time"
     };
-    // "velNaNMode", "velNaNColor", 
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
@@ -89,24 +89,24 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColormapMinInfo = {
         "ColormapMin",
         "Colormap min",
-        "Minimum value to sample from color map."
+        "Minimum value to sample from colormap."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColormapMaxInfo = {
         "ColormapMax",
         "Colormap max",
-        "Maximum value to sample from color map."
+        "Maximum value to sample from colormap."
     };
-    
-    constexpr openspace::properties::Property::PropertyInfo CmapNaNModeInfo = {
-        "CmapNaNMode",
-        "Cmap NaN Mode",
+
+    constexpr openspace::properties::Property::PropertyInfo ColormapNaNModeInfo = {
+        "ColormapNaNMode",
+        "Colormap NaN Mode",
         "How points with NaN value in colormap attribute should be represented."
     };
-    
-    constexpr openspace::properties::Property::PropertyInfo CmapNaNColorInfo = {
-        "CmapNaNColor",
-        "Cmap NaN Color",
+
+    constexpr openspace::properties::Property::PropertyInfo ColormapNaNColorInfo = {
+        "ColormapNaNColor",
+        "Colormap NaN Color",
         "The color of the points where the colormap scalar is NaN."
     };
 
@@ -133,17 +133,17 @@ namespace {
         "Linear size enabled",
         "Boolean to determine whether to use linear size or not."
     };
-    
-    constexpr openspace::properties::Property::PropertyInfo VelNaNModeInfo = {
-        "VelNaNMode",
-        "Vel NaN Mode",
-        "How points with NaN value in colormap attribute should be represented."
+
+    constexpr openspace::properties::Property::PropertyInfo VelocityDistanceUnitInfo = {
+        "VelocityDistanceUnit",
+        "Velocity Distance Unit",
+        "The distance unit of the velocity data."
     };
-    
-    constexpr openspace::properties::Property::PropertyInfo VelNaNColorInfo = {
-        "VelNaNColor",
-        "Vel NaN Color",
-        "The color of the points where the colormap scalar is NaN."
+
+    constexpr openspace::properties::Property::PropertyInfo VelocityNaNModeInfo = {
+        "VelocityNaNMode",
+        "Velocity NaN Mode",
+        "How points with NaN value in colormap attribute should be represented."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MotionEnabledInfo = {
@@ -171,12 +171,12 @@ namespace {
 
         // [[codegen::verbatim(ColormapMaxInfo.description)]]
         std::optional<float> colormapMax;
-        
-        // [[codegen::verbatim(CmapNaNModeInfo.description)]]
-        std::optional<int> cmapNaNMode;
 
-        // [[codegen::verbatim(CmapNaNColorInfo.description)]]
-        std::optional<glm::vec4> cmapNaNColor;
+        // [[codegen::verbatim(ColormapNaNModeInfo.description)]]
+        std::optional<int> colormapNaNMode;
+
+        // [[codegen::verbatim(ColormapNaNColorInfo.description)]]
+        std::optional<glm::vec4> colormapNaNColor;
 
         // [[codegen::verbatim(ColormapEnabledInfo.description)]]
         std::optional<bool> colormapEnabled;
@@ -190,11 +190,11 @@ namespace {
         // [[codegen::verbatim(LinearSizeEnabledInfo.description)]]
         std::optional<bool> linearSizeEnabled;
 
-        // [[codegen::verbatim(VelNaNModeInfo.description)]]
-        std::optional<int> velNaNMode;
+        // [[codegen::verbatim(VelocityDistanceUnitInfo.description)]]
+        std::optional<std::string> velocityDistanceUnit;
 
-        // [[codegen::verbatim(VelNaNColorInfo.description)]]
-        std::optional<glm::vec4> velNaNColor;
+        // [[codegen::verbatim(VelocityNaNModeInfo.description)]]
+        std::optional<int> velocityNaNMode;
 
         // [[codegen::verbatim(MotionEnabledInfo.description)]]
         std::optional<bool> motionEnabled;
@@ -224,14 +224,14 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _colormapMin(ColormapMinInfo)
     , _colormapMax(ColormapMaxInfo)
-    , _cmapNaNMode(CmapNaNModeInfo)
-    , _cmapNaNColor(CmapNaNColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(1.0f), glm::vec4(0.f), glm::vec4(0.f))
+    , _colormapNaNMode(ColormapNaNModeInfo)
+    , _colormapNaNColor(ColormapNaNColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(1.0f), glm::vec4(0.f), glm::vec4(0.f))
     , _colormapEnabled(ColormapEnabledInfo, false)
     , _linearSizeMax(LinearSizeMinInfo)
     , _linearSizeMin(LinearSizeMaxInfo)
     , _linearSizeEnabled(LinearSizeEnabledInfo, false)
-    , _velNaNMode(VelNaNModeInfo)
-    , _velNaNColor(VelNaNColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(1.0f), glm::vec4(0.f), glm::vec4(0.f))
+    , _velocityDistanceUnit(VelocityDistanceUnitInfo, "<no unit set>")
+    , _velocityNaNMode(VelocityNaNModeInfo)
     , _motionEnabled(MotionEnabledInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -274,14 +274,13 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _colormapMax.onChange([this] { checkColormapMinMax(); });
     addProperty(_colormapMax);
 
-    _cmapNaNMode = p.cmapNaNMode.value_or(_cmapNaNMode);
-    _cmapNaNMode.setVisibility(properties::Property::Visibility::Hidden);
-    addProperty(_cmapNaNMode);
-    
-    _cmapNaNColor = p.cmapNaNColor.value_or(_cmapNaNColor);
-    // _cmapNaNColor.setViewOption(properties::Property::ViewOptions::Color); // TODO: CHECK WHAT THIS IS
-    _cmapNaNColor.setVisibility(properties::Property::Visibility::Hidden);
-    addProperty(_cmapNaNColor);
+    _colormapNaNMode = p.colormapNaNMode.value_or(_colormapNaNMode);
+    _colormapNaNMode.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_colormapNaNMode);
+
+    _colormapNaNColor = p.colormapNaNColor.value_or(_colormapNaNColor);
+    _colormapNaNColor.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_colormapNaNColor);
 
     _colormapEnabled = p.colormapEnabled.value_or(_colormapEnabled);
     _colormapEnabled.onChange([this] { checkIfColormapCanBeEnabled(); });
@@ -309,15 +308,16 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _linearSizeMax.setVisibility(properties::Property::Visibility::Hidden);
     _linearSizeMax.onChange(linearSizeMinMaxChecker);
     addProperty(_linearSizeMax);
-    
-    _velNaNMode = p.velNaNMode.value_or(_velNaNMode);
-    _velNaNMode.setVisibility(properties::Property::Visibility::Hidden);
-    addProperty(_velNaNMode);
-    
-    _velNaNColor = p.velNaNColor.value_or(_velNaNColor);
-    // _velNaNColor.setViewOption(properties::Property::ViewOptions::Color); // TODO: CHECK WHAT THIS IS
-    _velNaNColor.setVisibility(properties::Property::Visibility::Hidden);
-    addProperty(_velNaNColor);
+
+    _velocityDistanceUnit = p.velocityDistanceUnit.value_or(_velocityDistanceUnit);
+    _velocityDistanceUnit.setVisibility(properties::Property::Visibility::Hidden);
+    // _velocityDistanceUnit.onChange([this] { checkIfMotionCanBeEnabled(); }); // TODO: Maybe?
+    _velocityDistanceUnit.onChange([this] { _velocityUnitsAreDirty = true; });
+    addProperty(_velocityDistanceUnit);
+
+    _velocityNaNMode = p.velocityNaNMode.value_or(_velocityNaNMode);
+    _velocityNaNMode.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_velocityNaNMode);
 
     _motionEnabled = p.motionEnabled.value_or(_motionEnabled);
     _motionEnabled.onChange([this] { checkIfMotionCanBeEnabled(); });
@@ -406,22 +406,21 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 
     _shaderProgram->setUniform(_uniformCache.colormapMin, _colormapMin);
     _shaderProgram->setUniform(_uniformCache.colormapMax, _colormapMax);
-    _shaderProgram->setUniform(_uniformCache.cmapNaNMode, _cmapNaNMode);
-    _shaderProgram->setUniform(_uniformCache.cmapNaNColor, _cmapNaNColor);
+    _shaderProgram->setUniform(_uniformCache.colormapNaNMode, _colormapNaNMode);
+    _shaderProgram->setUniform(_uniformCache.colormapNaNColor, _colormapNaNColor);
     _shaderProgram->setUniform(_uniformCache.colormapEnabled, _colormapEnabled);
 
     _shaderProgram->setUniform(_uniformCache.linearSizeMin, _linearSizeMin);
     _shaderProgram->setUniform(_uniformCache.linearSizeMax, _linearSizeMax);
     _shaderProgram->setUniform(_uniformCache.linearSizeEnabled, _linearSizeEnabled);
 
-    // _shaderProgram->setUniform(_uniformCache.velNaNMode, _velNaNMode);
-    // _shaderProgram->setUniform(_uniformCache.velNaNColor, _velNaNColor);
+    _shaderProgram->setUniform(_uniformCache.velocityNaNMode, _velocityNaNMode);
     _shaderProgram->setUniform(_uniformCache.motionEnabled, _motionEnabled);
     _shaderProgram->setUniform(
-        _uniformCache.theTime,
+        _uniformCache.time,
         static_cast<float>(data.time.j2000Seconds())
     );
-    
+
     _shaderProgram->setUniform(_uniformCache.color, _color);
 
     _shaderProgram->setUniform(_uniformCache.opacity, _opacity);
@@ -591,24 +590,29 @@ bool RenderablePointsCloud::checkDataStorage() {
         loadData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
-    
+
     if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::Colormap)) {
         loadColormap(softwareIntegrationModule);
     }
-    
+
     if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::ColormapAttrData)) {
-        loadCmapAttributeData(softwareIntegrationModule);
+        loadColormapAttributeData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
-    
+
     if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::LinearSizeAttrData)) {
         loadLinearSizeAttributeData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
-    
-    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::VelocityData)) {
+
+    if (shouldLoadVelocityData(
+        softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::VelocityData)
+        )
+    ) 
+    {
         loadVelocityData(softwareIntegrationModule);
         updatedDataSlices = true;
+        _velocityUnitsAreDirty = false;
     }
 
     return updatedDataSlices;
@@ -625,7 +629,7 @@ void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrat
 
     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
     pointDataSlice->clear();
-    pointDataSlice->reserve(fullPointData.size() * 3); // TODO: Do we really need *3 here?
+    pointDataSlice->reserve(fullPointData.size());
 
     // Create data slice
     auto addPosition = [&](const glm::vec4& pos) {
@@ -642,26 +646,26 @@ void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrat
             1.0
         };
         // W-normalization
-        transformedPos /= transformedPos.w;
-        transformedPos *= distanceconstants::Parsec;
+        // transformedPos /= transformedPos.w; // TODO: Unnecessary. transformedPos.w == 1
+        transformedPos *= distanceconstants::Parsec; // Convert parsec => meter
 
         addPosition(transformedPos);
     }
 }
 
 void RenderablePointsCloud::loadColormap(SoftwareIntegrationModule* softwareIntegrationModule) {
-    auto colorMap = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::Colormap);
-    
-    if (colorMap.empty()) {
+    auto colormap = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::Colormap);
+
+    if (colormap.empty()) {
         LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
         return;
     }
 
-    size_t nValues = colorMap.size();
+    size_t nValues = colormap.size();
     uint8_t* values = new uint8_t[nValues];
 
     for (size_t i = 0; i < nValues; ++i) {
-        values[i] = static_cast<uint8_t>(colorMap[i] * 255);
+        values[i] = static_cast<uint8_t>(colormap[i] * 255);
     }
 
     _colormapTexture = nullptr;
@@ -676,9 +680,9 @@ void RenderablePointsCloud::loadColormap(SoftwareIntegrationModule* softwareInte
     _hasLoadedColormap = true;
 }
 
-void RenderablePointsCloud::loadCmapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
+void RenderablePointsCloud::loadColormapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
     auto colormapAttributeData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::ColormapAttrData);
-    
+
     if (colormapAttributeData.empty()) {
         LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
         return;
@@ -709,7 +713,7 @@ void RenderablePointsCloud::loadCmapAttributeData(SoftwareIntegrationModule* sof
 
 void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
     auto linearSizeAttributeData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::LinearSizeAttrData);
-    
+
     if (linearSizeAttributeData.empty()) {
         LWARNING("There was an issue trying to fetch the linear size attribute data from the centralized storage.");
         return;
@@ -741,7 +745,7 @@ void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModul
 void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule) {
     // Fetch data from module's centralized storage
     auto velocityData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::VelocityData);
-    
+
     if (velocityData.empty()) {
         LWARNING("There was an issue trying to fetch the velocity data from the centralized storage.");
         return;
@@ -760,12 +764,13 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
 
     auto velocityDataSlice = getDataSlice(DataSliceKey::Velocity);
     velocityDataSlice->clear();
-    velocityDataSlice->reserve(velocityData.size() * 3); // TODO: Do we really need *3 here?
+    velocityDataSlice->reserve(velocityData.size());
 
     // =========================================
     int nNans = 0;
     int prevNNans = 0;
     int nPointsContainingNans = 0;
+
     // Create velocity data slice
     auto addPosition = [&](const glm::vec4& pos) {
         for (glm::vec4::length_type j = 0; j < glm::vec4::length() - 1; ++j) {
@@ -780,6 +785,21 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
         }
     };
 
+    // std::string velocityDistanceUnitString = "km"; // TODO: Change to property
+    // Parse units
+    DistanceUnit velocityDistanceUnit;
+    try {
+        velocityDistanceUnit = distanceUnitFromString(_velocityDistanceUnit.value().c_str());
+    }
+    catch (const ghoul::MissingCaseException& err) {
+        LERROR(fmt::format(
+            "Error when parsing units."
+            "OpenSpace doesn't support the unit '{}'.",
+            _velocityDistanceUnit
+        ));
+        return;
+    }
+
     for (size_t i = 0; i < velocityData.size(); i += 3) {
         glm::dvec4 transformedPos = {
             velocityData[i + 0],
@@ -787,55 +807,36 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
             velocityData[i + 2],
             1.0
         };
-        // W-normalization
-        // transformedPos /= transformedPos.w;
-        // transformedPos *= distanceconstants::Parsec; // TODO: Is this converting parsec => meter?
+
+        // Convert to meters
+        if (velocityDistanceUnit != DistanceUnit::Meter) {
+            float toMeters = static_cast<float>(toMeter(velocityDistanceUnit));
+            transformedPos *= toMeters;
+        }
+
+        // // TODO: Convert to seconds (Double check that it's right)
+        // TimeUnit velTimeUnit = TimeUnit::Hour;
+        // if (velTimeUnit != TimeUnit::Second) {
+        //     float toSeconds = static_cast<float>(convertTime(1.0, velTimeUnit, TimeUnit::Second));
+        //     transformedPos *= toSeconds;
+        // }
 
         addPosition(transformedPos);
     }
-
-    LWARNING(fmt::format("Points: {}. Velocity points: {}. Velocity points w/ nans {}. Velocity nans in total: {}", pointDataSlice->size()/3, velocityData.size()/3, nPointsContainingNans, nNans));
+    LINFO(
+        fmt::format(
+            "Viewing {} points with velocity ({} points in total). {} points have NaN-value velocity and are {}.",
+            velocityData.size()/3 - nPointsContainingNans,
+            pointDataSlice->size()/3,
+            nPointsContainingNans,
+            _velocityNaNMode == 0 ? "Hidden" : "Static"
+        )
+    );
     // =========================================
-
 
     _hasLoadedVelocityData = true;
     LDEBUG("Rerendering with motion based on velocity data");
 }
-
-// void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrationModule) {
-//     // Fetch data from module's centralized storage
-//     auto fullPointData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::DataPoints);
-
-//     if (fullPointData.empty()) {
-//         LWARNING("There was an issue trying to fetch the point data from the centralized storage.");
-//         return;
-//     }
-
-//     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
-//     pointDataSlice->clear();
-//     pointDataSlice->reserve(fullPointData.size() * 3);
-
-//     // Create data slice
-//     auto addPosition = [&](const glm::vec4& pos) {
-//         for (glm::vec4::length_type j = 0; j < glm::vec4::length() - 1; ++j) {
-//             pointDataSlice->push_back(pos[j]);
-//         }
-//     };
-
-//     for (size_t i = 0; i < fullPointData.size(); i += 3) {
-//         glm::dvec4 transformedPos = {
-//             fullPointData[i + 0],
-//             fullPointData[i + 1],
-//             fullPointData[i + 2],
-//             1.0
-//         };
-//         // W-normalization
-//         transformedPos /= transformedPos.w;
-//         transformedPos *= distanceconstants::Parsec;
-
-//         addPosition(transformedPos);
-//     }
-// }
 
 std::shared_ptr<RenderablePointsCloud::DataSlice> RenderablePointsCloud::getDataSlice(DataSliceKey key) {
     if (!_dataSlices.count(key)) {
@@ -852,10 +853,10 @@ void RenderablePointsCloud::checkIfColormapCanBeEnabled() {
     if (_colormapEnabled.value()) {
         if ((!_colormapTexture || colormapAttributeData->empty())) {
             if (!_colormapTexture) {
-                LINFO("Color map not loaded. Has it been sent from external software?");
+                LINFO("Colormap not loaded. Has it been sent from external software?");
             }
             if (colormapAttributeData->empty()) {
-                LINFO("Color map attribute data not loaded. Has it been sent from external software?");
+                LINFO("Colormap attribute data not loaded. Has it been sent from external software?");
             }
 
             global::scriptEngine->queueScript(
@@ -901,7 +902,6 @@ void RenderablePointsCloud::checkIfMotionCanBeEnabled() {
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
-    LINFO(fmt::format("checkIfMotionCanBeEnabled(): MotionEnabled = {}", _motionEnabled));
 }
 
 void RenderablePointsCloud::checkColormapMinMax() {
@@ -913,6 +913,22 @@ void RenderablePointsCloud::checkColormapMinMax() {
         _colormapMin = max;
         _colormapMax = temp;
     }
+}
+
+bool RenderablePointsCloud::shouldLoadVelocityData(bool isVelocityDataDirty) {
+    // bool result = (
+    //     (isVelocityDataDirty || _velocityUnitsAreDirty) 
+    //     && _velocityDistanceUnit.value() != "<no unit set>"
+    // );
+    // if (result) {
+    //     LWARNING(fmt::format("LoadVelocityData can be executed! _velocityDistanceUnit = ->{}<-", _velocityDistanceUnit.value()));
+    // }
+
+    // return result;
+    return (
+        (isVelocityDataDirty || _velocityUnitsAreDirty) 
+        && _velocityDistanceUnit.value() != "<no unit set>"
+    );
 }
 
 } // namespace openspace
