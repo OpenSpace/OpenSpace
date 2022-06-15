@@ -75,6 +75,8 @@ private:
     void initTrajectory(std::string_view filename);
     void freeTrajectory();
 
+    void updateRepresentation(md_gl_representation_type_t rep_type);
+
     std::unique_ptr<HttpMemoryDownload> _pdb_download;
     double _pdb_download_progress;
     double _frame;
@@ -82,7 +84,7 @@ private:
     md_gl_representation_t _draw_rep;
     md_gl_molecule_t _draw_mol;
 
-    md_molecule_t   _molecule;
+    md_molecule_t _molecule;
     md_trajectory_i _trajectory;
     MoleculeType _molecule_type;
 

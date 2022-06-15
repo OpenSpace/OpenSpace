@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "glbinding/gl/bitfield.h"
+#include "glbinding/gl/functions.h"
+#include "md_util.h"
 #include <modules/molecule/rendering/renderablemolecule.h>
 
 #include <openspace/documentation/documentation.h>
@@ -67,10 +70,10 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
     _pdb_id(pdb_id_info)
 {
-    _molecule = {0};
-    _trajectory = {0};
-    _draw_mol = {0};
-    _draw_rep = {0};
+    _molecule = {};
+    _trajectory = {};
+    _draw_mol = {};
+    _draw_rep = {};
 
     _pdb_id.onChange([this]() {
         loadProteinPDB(_pdb_id.value());
@@ -118,37 +121,48 @@ void RenderableMolecule::update(const UpdateData& data) {
 }
 
 void RenderableMolecule::render(const RenderData& data, RendererTasks& tasks) {
+    using namespace glm;
+    const dmat4 I(1.0);
+
     if (_molecule.atom.count) {
-        glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation - glm::dvec3(_center)) *
-            glm::dmat4(data.modelTransform.rotation) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-        //glm::mat4 model_matrix = glm::mat4(modelTransform);
 
-        glm::mat4 model_matrix = glm::mat4(1.0);
-        glm::mat4 view_matrix = glm::translate(glm::mat4(1.0), {0,0,-200});
+        // zoom out and move closer the camera
+        dmat4 camView =
+            translate(I, {0.f, 0.f, -100.f}) *
+            scale(I, dvec3(1.0 / 215.0)) *
+            translate(I, { 0, 0, 21500 }) *
+            data.camera.combinedViewMatrix();
 
-        //glm::mat4 view_matrix = data.camera.combinedViewMatrix();
-        glm::mat4 proj_matrix = data.camera.projectionMatrix();
+        mat4 model_matrix =
+            scale(I, data.modelTransform.scale) *
+            dmat4(data.modelTransform.rotation) *
+            translate(I, data.modelTransform.translation - dvec3(_center));
+        
+        mat4 view_matrix =
+            camView;
 
-        md_gl_draw_op_t draw_op = {0};
+        mat4 proj_matrix = data.camera.projectionMatrix();
+
+        md_gl_draw_op_t draw_op = {};
 
         draw_op.rep = &_draw_rep;
-        draw_op.model_matrix = &model_matrix[0][0];
+        draw_op.model_matrix = value_ptr(model_matrix);
 
-        md_gl_draw_args_t args = {0};
+        md_gl_draw_args_t args = {};
         args.shaders = &_shaders;
         args.draw_operations = {
             1,
             &draw_op,
         };
         args.view_transform = {
-            &view_matrix[0][0],
-            &proj_matrix[0][0],
+            value_ptr(view_matrix),
+            value_ptr(proj_matrix),
+            nullptr, nullptr
         };
         args.atom_mask = 0;
         args.options = 0;
-
+        
+        // gl::glClear(gl::GL_DEPTH_BUFFER_BIT);
         md_gl_draw(&args);
     }
 }
@@ -182,14 +196,32 @@ void RenderableMolecule::initMolecule(std::string_view data, MoleculeType type) 
 
     // REP
     md_gl_representation_init(&_draw_rep, &_draw_mol);
-
-    md_gl_representation_args_t rep_args = {0};
-    rep_args.space_fill.radius_scale = 1.0f;
-
-    md_gl_representation_set_type_and_args(&_draw_rep, MD_GL_REP_SPACE_FILL, rep_args);
+    updateRepresentation(MD_GL_REP_SPACE_FILL);
 
     uint32_t* colors = (uint32_t*)md_alloc(default_temp_allocator, sizeof(uint32_t) * _molecule.atom.count);
+    for(int64_t i = 0; i < _molecule.atom.count; i++) {
+        md_element_t elt = _molecule.atom.element[i];
+        colors[i] = md_util_element_cpk_color(elt);
+    }
     md_gl_representation_set_color(&_draw_rep, 0, static_cast<uint32_t>(_molecule.atom.count), colors, 0);
+}
+
+void RenderableMolecule::updateRepresentation(md_gl_representation_type_t rep_type) {
+    md_gl_representation_args_t rep_args{};
+    
+    // float radius = data.modelTransform.scale.x * 1;
+    float radius = 1.f;
+    
+    switch (rep_type) {
+        case MD_GL_REP_SPACE_FILL:
+            rep_args.space_fill.radius_scale = radius;
+            break;
+        case MD_GL_REP_LICORICE:
+            rep_args.licorice.radius = radius;
+            break;
+    }
+
+    md_gl_representation_set_type_and_args(&_draw_rep, rep_type, rep_args);
 }
 
 void RenderableMolecule::freeMolecule() {
@@ -201,7 +233,7 @@ void RenderableMolecule::freeMolecule() {
     default:
         break;
     }
-    _molecule = {0};
+    _molecule = {};
     md_gl_representation_free(&_draw_rep);
 }
 

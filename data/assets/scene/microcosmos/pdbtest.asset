@@ -4,23 +4,10 @@ local PdbTest = {
   Identifier = "PdbTest",
   Renderable = {
     Type = "RenderableMolecule",
-    PdbId = "1AON",
-    LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      },
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
+    PdbId = "1MH1",
   },
   GUI = {
-    Path = "/Microcosmos/PDB/1AON"
+    Path = "/Microcosmos/PDB/1MH1"
   }
 }
 
