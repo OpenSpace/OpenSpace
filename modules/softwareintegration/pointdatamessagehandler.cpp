@@ -187,19 +187,24 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
         LERROR(fmt::format("Error when reading fixed color message: {}", err.message));
         return;
     }
-
-    // TODO: This is an issue. Renderable might not have been created yet
-    // Get renderable
-    auto r = getRenderable(identifier);
-    if (!r) return;
-
-    // Get color of renderable
-    properties::Property* colorProperty = r->property("Color");
     
     // Create weak_ptr, safer than shared_ptr for lambdas
     std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
 
-    auto setFixedColorCallback = [this, identifier, color, colorProperty, connWeakPtr] {
+    auto setFixedColorCallback = [this, identifier, color, connWeakPtr] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+        if (!r) {
+            LWARNING(fmt::format(
+                "Couldn't find renderable {} while setting color", 
+                identifier
+            ));
+            return;
+        }
+
+        // Get color of renderable
+        properties::Property* colorProperty = r->property("Color");
+        
         if (!colorProperty || connWeakPtr.expired()) return;
         // auto conn = connWeakPtr.lock()
 
@@ -228,14 +233,32 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { setFixedColorCallback, {}, "handleFixedColorMessage" });
+    addCallback(identifier, { setFixedColorCallback, {}, "setFixedColorCallback" });
 
     // Create and set onChange for color
-    auto updateColor = [this, colorProperty, identifier, connWeakPtr] {
+    auto onChangeColorCallback = [this, identifier, connWeakPtr] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+        if (!r) {
+            LWARNING(fmt::format(
+                "Couldn't find renderable {} to set onFixedColorChange", 
+                identifier
+            ));
+            return;
+        }
+
+        // Get color of renderable
+        properties::Property* colorProperty = r->property("Color");
+
         if (!colorProperty || connWeakPtr.expired()) return;
-        onFixedColorChange(colorProperty, identifier, connWeakPtr.lock());
+        auto updateColor = [this, colorProperty, identifier, connWeakPtr] {
+            if (!colorProperty || connWeakPtr.expired()) return;
+            onFixedColorChange(colorProperty, identifier, connWeakPtr.lock());
+        };
+        auto conn = connWeakPtr.lock();
+        conn->addPropertySubscription(colorProperty->identifier(), identifier, updateColor);
     };
-    connection->addPropertySubscription(colorProperty->identifier(), identifier, updateColor);
+    addCallback(identifier, { onChangeColorCallback, {}, "onChangeColorCallback" });
 }
 
 void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -449,21 +472,26 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
         return;
     }
 
-    // Get renderable
-    auto r = getRenderable(identifier);
-    if (!r) return;
-    
-    // Get opacity of renderable
-    properties::Property* opacityProperty = r->property("Opacity");
-    
     // Create weak_ptr, safer than shared_ptr for lambdas
     std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
 
-    auto callback = [this, identifier, opacity, opacityProperty, connWeakPtr] {
+    auto setOpacityCallback = [this, identifier, opacity, connWeakPtr] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+        if (!r) {
+            LWARNING(fmt::format(
+                "Couldn't find the renderable {} while trying to set opacity", 
+                identifier
+            ));
+            return;
+        }
+
+        // Get opacity of renderable
+        properties::Property* opacityProperty = r->property("Opacity");
+        
         if (!opacityProperty || connWeakPtr.expired()) return;
         // auto conn = connWeakPtr.lock()
         
-
         // auto propertySub = connection->getPropertySubscription(identifier, opacityProperty->identifier());
         // if (propertySub) {
         //     propertySub->shouldSendMessage = false;
@@ -482,14 +510,32 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
             );
         }
     };
-    addCallback(identifier, { callback, {}, "handleOpacityMessage" });
+    addCallback(identifier, { setOpacityCallback, {}, "setOpacityCallback" });
 
     // Create and set onChange for opacity
-    auto updateOpacity = [this, opacityProperty, identifier, connWeakPtr] {
+    auto onChangeOpacityCallback = [this, identifier, connWeakPtr] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+        if (!r) {
+            LWARNING(fmt::format(
+                "Couldn't find the renderable {} while trying to set opacity", 
+                identifier
+            ));
+            return;
+        }
+
+        // Get opacity of renderable
+        properties::Property* opacityProperty = r->property("Opacity");
+        
         if (!opacityProperty || connWeakPtr.expired()) return;
-        onOpacityChange(opacityProperty, identifier, connWeakPtr.lock());
+        auto updateOpacity = [this, opacityProperty, identifier, connWeakPtr] {
+            if (!opacityProperty || connWeakPtr.expired()) return;
+            onOpacityChange(opacityProperty, identifier, connWeakPtr.lock());
+        };
+        auto conn = connWeakPtr.lock();
+        conn->addPropertySubscription(opacityProperty->identifier(), identifier, updateOpacity);
     };
-    connection->addPropertySubscription(opacityProperty->identifier(), identifier, updateOpacity);
+    addCallback(identifier, { onChangeOpacityCallback, {}, "onChangeOpacityCallback" });
 }
 
 void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -507,17 +553,23 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
         return;
     }
 
-    // Get renderable
-    auto r = getRenderable(identifier);
-    if (!r) return;
-
-    // Get size of renderable
-    properties::Property* sizeProperty = r->property("Size");
-    
     // Create weak_ptr, safer than shared_ptr for lambdas
     std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
 
-    auto callback = [this, identifier, size, sizeProperty, connWeakPtr] {
+    auto setFixedPointSizeCallback = [this, identifier, size, connWeakPtr] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+        if (!r) {
+            LWARNING(fmt::format(
+                "Couldn't find renderable {} while setting point size", 
+                identifier
+            ));
+            return;
+        }
+
+        // Get size of renderable
+        properties::Property* sizeProperty = r->property("Size");
+
         if (!sizeProperty || connWeakPtr.expired()) return;
         // auto conn = connWeakPtr.lock()
 
@@ -549,13 +601,32 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
-    addCallback(identifier, { callback, {}, "handleFixedPointSizeMessage" });
+    addCallback(identifier, { setFixedPointSizeCallback, {}, "setFixedPointSizeCallback" });
+    
+    // Create and set onChange for point size
+    auto onChangeSizeCallback = [this, identifier, connWeakPtr] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+        if (!r) {
+            LWARNING(fmt::format(
+                "Couldn't find renderable {} to set onFixedPointSizeChange", 
+                identifier
+            ));
+            return;
+        }
 
-    auto updateSize = [this, sizeProperty, identifier, connWeakPtr] {
+        // Get size of renderable
+        properties::Property* sizeProperty = r->property("Size");
+
         if (!sizeProperty || connWeakPtr.expired()) return;
-        onFixedPointSizeChange(sizeProperty, identifier, connWeakPtr.lock());
+        auto updateSize = [this, sizeProperty, identifier, connWeakPtr] {
+            if (!sizeProperty || connWeakPtr.expired()) return;
+            onFixedPointSizeChange(sizeProperty, identifier, connWeakPtr.lock());
+        };
+        auto conn = connWeakPtr.lock();
+        conn->addPropertySubscription(sizeProperty->identifier(), identifier, updateSize);
     };
-    connection->addPropertySubscription(sizeProperty->identifier(), identifier, updateSize);
+    addCallback(identifier, { onChangeSizeCallback, {}, "onChangeSizeCallback" });
 }
 
 void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
@@ -657,19 +728,25 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
         return;
     }
 
-    // Get renderable
-    auto r = getRenderable(identifier);
-    if (!r) return;
-
-    // Get visibility of renderable
-    properties::Property* visibilityProperty = r->property("Enabled");
-
     // Create weak_ptr, safer than shared_ptr for lambdas
     std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
 
-    const bool visibility = visibilityMessage == "T";
+    const bool visibility = visibilityMessage == "T"; // TODO: Move this into callback
 
-    auto callback = [this, identifier, visibility, visibilityProperty, connWeakPtr] {
+    auto setVisibilityCallback = [this, identifier, visibility, connWeakPtr] {        
+        // Get renderable
+        auto r = getRenderable(identifier);
+        if (!r) {
+            LWARNING(fmt::format(
+                "Couldn't find renderable {} while setting visibility", 
+                identifier
+            ));
+            return;
+        }
+
+        // Get visibility of renderable
+        properties::Property* visibilityProperty = r->property("Enabled");
+        
         if (!visibilityProperty || connWeakPtr.expired()) return;
         // auto conn = connWeakPtr.lock()
 
@@ -694,14 +771,32 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
             );
         }
     };
-    addCallback(identifier, { callback, {}, "handleVisibilityMessage" });
+    addCallback(identifier, { setVisibilityCallback, {}, "setVisibilityCallback" });
 
     // Create and set onChange for visibility
-    auto toggleVisibility = [this, visibilityProperty, identifier, connWeakPtr] {
+    auto onChangeVisibilityCallback = [this, identifier, connWeakPtr] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+        if (!r) {
+            LWARNING(fmt::format(
+                "Couldn't find renderable {} to set onVisibilityChange", 
+                identifier
+            ));
+            return;
+        }
+
+        // Get visibility of renderable
+        properties::Property* visibilityProperty = r->property("Enabled");
+        
         if (!visibilityProperty || connWeakPtr.expired()) return;
-        onVisibilityChange(visibilityProperty, identifier, connWeakPtr.lock());    
+        auto toggleVisibility = [this, visibilityProperty, identifier, connWeakPtr] {
+            if (!visibilityProperty || connWeakPtr.expired()) return;
+            onVisibilityChange(visibilityProperty, identifier, connWeakPtr.lock());    
+        };
+        auto conn = connWeakPtr.lock();
+        conn->addPropertySubscription(visibilityProperty->identifier(), identifier, toggleVisibility);
     };
-    connection->addPropertySubscription(visibilityProperty->identifier(), identifier, toggleVisibility);
+    addCallback(identifier, { onChangeVisibilityCallback, {}, "onChangeVisibilityCallback" });
 }
 
 void PointDataMessageHandler::handleRemoveSGNMessage(const std::vector<char>& message,std::shared_ptr<SoftwareConnection> connection) {
