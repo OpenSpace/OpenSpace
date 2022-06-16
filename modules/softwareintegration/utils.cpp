@@ -38,6 +38,20 @@ namespace openspace {
 namespace softwareintegration {
 
 namespace storage {
+
+    // Anonymous namespace
+    namespace {
+        
+        const std::unordered_map<std::string, Key> _keyStringFromKey{
+            { "DataPoints", Key::DataPoints },
+            { "VelocityData", Key::VelocityData },
+            { "Colormap", Key::Colormap },
+            { "ColormapAttributeData", Key::ColormapAttrData },
+            { "LinearSizeAttributeData", Key::LinearSizeAttrData },
+        };
+
+    } // namespace
+
     bool hasStorageKey(const std::string& key) {
         return _keyStringFromKey.count(key) > 0;
     }
@@ -72,6 +86,7 @@ namespace {
 const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType{
     { "CONN", MessageType::Connection },
     { "PDAT", MessageType::PointData },
+    { "VDAT", MessageType::VelocityData },
     { "RSGN", MessageType::RemoveSceneGraphNode },
     { "FCOL", MessageType::Color },
     { "LCOL", MessageType::Colormap },

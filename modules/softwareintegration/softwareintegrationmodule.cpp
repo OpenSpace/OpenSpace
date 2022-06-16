@@ -24,13 +24,13 @@
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 
-#include <ghoul/filesystem/filesystem.h>
+#include <modules/softwareintegration/rendering/renderablepointscloud.h>
+#include <modules/softwareintegration/messagehandler.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/scriptengine.h>
-#include <modules/softwareintegration/rendering/renderablepointscloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
@@ -48,14 +48,9 @@ constexpr const char* _loggerCat = "SoftwareIntegrationModule";
 
 namespace openspace {
 
-SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {
-    if (global::windowDelegate->isMaster()) {
-        // The Master node will handle all communication with the external software
-        // and forward it to the Client nodes
-        // 4700, is the defualt port where the tcp socket will be opened to the ext. software
-        _networkEngine = std::make_unique<NetworkEngine>();
-    }
-}
+SoftwareIntegrationModule::SoftwareIntegrationModule()
+    : OpenSpaceModule(Name)
+{}
 
 SoftwareIntegrationModule::~SoftwareIntegrationModule() {
     internalDeinitialize();
@@ -89,17 +84,21 @@ void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePointsCloud>("RenderablePointsCloud");
 
     if (global::windowDelegate->isMaster()) {
-        _networkEngine->start();
+        // The Master node will handle all communication with the external software
+	    // and forward it to the Client nodes
+        _networkState = softwareintegration::network::serve();
 
         global::callback::postSyncPreDraw->emplace_back([this]() {
-            if (!_networkEngine) return;
-            _networkEngine->postSync();
+            softwareintegration::network::postSyncCallbacks();
         });
     }
 }
 
 void SoftwareIntegrationModule::internalDeinitialize() {
     global::syncEngine->removeSyncables(getSyncables());
+    if (_networkState) {
+        softwareintegration::network::stopServer(_networkState);
+    }
 }
 
 std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {

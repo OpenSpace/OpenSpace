@@ -40,13 +40,6 @@ enum class Key : uint8_t {
     Unknown
 };
 
-const std::unordered_map<std::string, Key> _keyStringFromKey{
-    { "DataPoints", Key::DataPoints },
-    { "Colormap", Key::Colormap },
-    { "ColormapAttributeData", Key::ColormapAttrData },
-    { "LinearSizeAttributeData", Key::LinearSizeAttrData },
-};
-
 Key getStorageKey(const std::string& key);
 
 std::string getStorageKeyString(const Key key);
@@ -73,7 +66,6 @@ enum class MessageType : uint32_t {
     FixedSize,
     LinearSize,
     Visibility,
-    InternalDisconnection,
     Unknown
 };
 

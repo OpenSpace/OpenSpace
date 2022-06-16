@@ -22,50 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___MESSAGEHANDLER___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___MESSAGEHANDLER___H__
 
-#include <openspace/util/openspacemodule.h>
-#include <modules/softwareintegration/syncablefloatdatastorage.h>
-#include <openspace/documentation/documentation.h>
-#include <modules/softwareintegration/network/network.h>
+#include <unordered_map>
 
-namespace openspace {
+#include <openspace/properties/propertyowner.h>
 
-class AssetHelper;
+#include <modules/softwareintegration/network/softwareconnection.h>
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
-    friend class AssetHelper;
+namespace openspace::softwareintegration::network {
 
-public:
-    constexpr static const char* Name = "SoftwareIntegration";
-
-    SoftwareIntegrationModule();
-    ~SoftwareIntegrationModule();
-
-    void storeData(const SyncableFloatDataStorage::Identifier& identifier, const storage::Key key,
-                   const std::vector<float>& data);
-    const std::vector<float>& fetchData(const SyncableFloatDataStorage::Identifier& identifier, const storage::Key key);
-    bool isDataDirty(const SyncableFloatDataStorage::Identifier& identifier, const storage::Key key);
-    bool isSyncDataDirty(const SyncableFloatDataStorage::Identifier& identifier, const storage::Key key);
-    std::string getStringOfAllKeysInStorage();
-
-    std::vector<documentation::Documentation> documentations() const override;
-
-    scripting::LuaLibrary luaLibrary() const override;
-
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitialize() override;
-
-    std::vector<Syncable*> getSyncables();
-
-    // Centralized storage for datasets
-    SyncableFloatDataStorage _syncableFloatDataStorage;
-
-    std::shared_ptr<softwareintegration::network::NetworkState> _networkState;
+struct Callback {
+    std::function<void()> function;
+    std::vector<softwareintegration::storage::Key> waitForData = {};
+    std::string description = "???"; // To help debugging. Maybe remove?
 };
+using CallbackList = std::vector<Callback>;
+using CallbackMap = std::unordered_map<std::string, CallbackList>;
 
-} // namespace openspace
+void postSyncCallbacks();
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+void handleMessage(IncomingMessage& incomingMessage);
+
+} // namespace openspace::softwareintegration::messagehandler
+
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___MESSAGEHANDLER___H__
