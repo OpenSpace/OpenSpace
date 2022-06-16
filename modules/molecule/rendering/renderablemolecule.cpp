@@ -24,7 +24,7 @@
 
 #include "glbinding/gl/bitfield.h"
 #include "glbinding/gl/functions.h"
-#include "md_util.h"
+#include "viamd/coloring.h"
 #include <modules/molecule/rendering/renderablemolecule.h>
 
 #include <openspace/documentation/documentation.h>
@@ -52,36 +52,134 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 )";
 
 namespace {
-    openspace::properties::Property::PropertyInfo pdb_id_info = {
-        "pdb_id",
-        "pdb_id",
+    enum RepresentationType {
+        SpaceFill = MD_GL_REP_SPACE_FILL,
+        Licorice = MD_GL_REP_LICORICE,
+    };
+
+    enum Coloring {
+        // Uniform,
+        Cpk,
+        AtomIndex,
+        ResId,
+        ResIndex,
+        ChainId,
+        ChainIndex,
+        SecondaryStructure,
+        // Property
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PdbIdInfo = {
+        "PdbId",
+        "Protein Data Bank ID",
         "This is the Protein Data Bank ID which is attempted to be loaded"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo RepTypeInfo = {
+        "RepType",
+        "Representation Type",
+        "How to draw the molecule"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColoringInfo = {
+        "Coloring",
+        "Coloring",
+        "Select a color mapping for the atoms"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RepScaleInfo = {
+        "RepScale",
+        "Representation Scale",
+        "Thickness of the atoms in Space Fill or Licorice representation"
+    };
+
+    struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
+        // [[codegen::verbatim(PdbIdInfo.description)]]
+        std::string pdbId;
+
+        enum class [[codegen::map(RepresentationType)]] RepresentationType {
+            SpaceFill,
+            Licorice,
+        };
+
+        // [[codegen::verbatim(RepTypeInfo.description)]]
+        std::optional<RepresentationType> repType;
+
+        enum class [[codegen::map(Coloring)]] Coloring {
+            Cpk,
+        };
+
+        // [[codegen::verbatim(ColoringInfo.description)]]
+        std::optional<Coloring> coloring;
+
+        // [[codegen::verbatim(RepScaleInfo.description)]]
+        std::optional<float> repScale;
+    };
+
+#include "renderablemolecule_codegen.cpp"
 }
 
 namespace openspace {
 
 documentation::Documentation RenderableMolecule::Documentation() {
-    //return codegen::doc<Parameters>("galaxy_renderablegalaxy");
-    return {};
+    return codegen::doc<Parameters>("molecule_renderablemolecule");
 }
 
 RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
-    _pdb_id(pdb_id_info)
+    _moleculeType(MoleculeType::None),
+    _pdbId(PdbIdInfo),
+    _repType(RepTypeInfo),
+    _coloring(ColoringInfo),
+    _repScale(RepScaleInfo, 1.f, 0.1f, 100.f)
 {
     _molecule = {};
     _trajectory = {};
-    _draw_mol = {};
-    _draw_rep = {};
+    _drawMol = {};
+    _drawRep = {};
+    
 
-    _pdb_id.onChange([this]() {
-        loadProteinPDB(_pdb_id.value());
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _pdbId.onChange([this]() {
+        loadProteinPDB(_pdbId.value());
     });
 
-    if (dictionary.hasKey("PdbId")) {
-        _pdb_id.setValue(dictionary.value<std::string>("PdbId"));
+    _pdbId = p.pdbId;
+
+    _repType.addOptions({
+        { RepresentationType::SpaceFill, "Space Fill" },
+        { RepresentationType::Licorice, "Licorice" },
+    });
+    
+    if (p.repType.has_value()) {
+        _repType = codegen::map<RepresentationType>(*p.repType);
+    } else {
+        _repType = RepresentationType::SpaceFill;
     }
+    
+    _coloring.addOptions({
+        { Coloring::Cpk, "CPK" },
+        { Coloring::AtomIndex, "Atom Index" },
+        { Coloring::ResId, "Residue ID" },
+        { Coloring::ResIndex, "Residue Index" },
+        { Coloring::ChainId, "Chain ID" },
+        { Coloring::ChainIndex, "Chain Index" },
+        { Coloring::SecondaryStructure, "Secondary Structure" },
+    });
+    
+    if (p.coloring.has_value()) {
+        _coloring = codegen::map<Coloring>(*p.coloring);
+    } else {
+        _coloring = Coloring::Cpk;
+    }
+    
+    _repScale = p.repScale.value_or(1.f);
+    
+    addProperty(_pdbId);
+    addProperty(_repType);
+    addProperty(_coloring);
+    addProperty(_repScale);
 }
 
 RenderableMolecule::~RenderableMolecule() {
@@ -109,13 +207,13 @@ bool RenderableMolecule::isReady() const {
 }
 
 void RenderableMolecule::update(const UpdateData& data) {
-    if (_pdb_download) {
-        if (_pdb_download->hasSucceeded()) {
-            auto& blob = _pdb_download->downloadedData();
+    if (_pdbDownload) {
+        if (_pdbDownload->hasSucceeded()) {
+            auto& blob = _pdbDownload->downloadedData();
             initMolecule(std::string_view(blob.data(), blob.size()), MoleculeType::Pdb);
-            _pdb_download.release();
-        } else if (_pdb_download->hasFailed()) {
-            _pdb_download.release();
+            _pdbDownload.release();
+        } else if (_pdbDownload->hasFailed()) {
+            _pdbDownload.release();
         }
     }
 }
@@ -145,7 +243,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks& tasks) {
 
         md_gl_draw_op_t draw_op = {};
 
-        draw_op.rep = &_draw_rep;
+        draw_op.rep = &_drawRep;
         draw_op.model_matrix = value_ptr(model_matrix);
 
         md_gl_draw_args_t args = {};
@@ -162,7 +260,6 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks& tasks) {
         args.atom_mask = 0;
         args.options = 0;
         
-        // gl::glClear(gl::GL_DEPTH_BUFFER_BIT);
         md_gl_draw(&args);
     }
 }
@@ -192,49 +289,85 @@ void RenderableMolecule::initMolecule(std::string_view data, MoleculeType type) 
     }
 
     // GL MOL
-    md_gl_molecule_init(&_draw_mol, &_molecule);
+    md_gl_molecule_init(&_drawMol, &_molecule);
 
     // REP
-    md_gl_representation_init(&_draw_rep, &_draw_mol);
-    updateRepresentation(MD_GL_REP_SPACE_FILL);
-
-    uint32_t* colors = (uint32_t*)md_alloc(default_temp_allocator, sizeof(uint32_t) * _molecule.atom.count);
-    for(int64_t i = 0; i < _molecule.atom.count; i++) {
-        md_element_t elt = _molecule.atom.element[i];
-        colors[i] = md_util_element_cpk_color(elt);
+    md_gl_representation_init(&_drawRep, &_drawMol);
+    updateRepresentation();
+    
+    // set the updateRepresentation hook once, when the molecule is first initialized
+    if (_moleculeType == MoleculeType::None) {
+        _repType.onChange([this]() { updateRepresentation(); });
+        _repScale.onChange([this]() { updateRepresentation(); });
+        _coloring.onChange([this]() { updateRepresentation(); });
     }
-    md_gl_representation_set_color(&_draw_rep, 0, static_cast<uint32_t>(_molecule.atom.count), colors, 0);
+    _moleculeType = type;
 }
 
-void RenderableMolecule::updateRepresentation(md_gl_representation_type_t rep_type) {
-    md_gl_representation_args_t rep_args{};
+void RenderableMolecule::updateRepresentation() {
+    { // REPRESENTATION TYPE
+        md_gl_representation_args_t rep_args{};
     
-    // float radius = data.modelTransform.scale.x * 1;
-    float radius = 1.f;
-    
-    switch (rep_type) {
-        case MD_GL_REP_SPACE_FILL:
-            rep_args.space_fill.radius_scale = radius;
-            break;
-        case MD_GL_REP_LICORICE:
-            rep_args.licorice.radius = radius;
-            break;
-    }
+        switch (_repType) {
+            case RepresentationType::SpaceFill:
+                rep_args.space_fill.radius_scale = _repScale;
+                break;
+            case RepresentationType::Licorice:
+                rep_args.licorice.radius = _repScale * .5f;
+                break;
+            default:
+                ghoul_assert(false, "unexpected molecule representation type");
+                break;
+        }
 
-    md_gl_representation_set_type_and_args(&_draw_rep, rep_type, rep_args);
+        md_gl_representation_set_type_and_args(&_drawRep, _repType, rep_args);
+    }
+    { // COLORING
+        uint32_t* colors = (uint32_t*)md_alloc(default_temp_allocator, sizeof(uint32_t) * _molecule.atom.count);
+        uint32_t count = static_cast<uint32_t>(_molecule.atom.count);
+
+        switch (_coloring) {
+            case Coloring::Cpk:
+                color_atoms_cpk(colors, count, _molecule);
+                break;
+            case Coloring::AtomIndex:
+                color_atoms_idx(colors, count, _molecule);
+                break;
+            case Coloring::ResId:
+                color_atoms_residue_id(colors, count, _molecule);
+                break;
+            case Coloring::ResIndex:
+                color_atoms_residue_index(colors, count, _molecule);
+                break;
+            case Coloring::ChainId:
+                color_atoms_chain_id(colors, count, _molecule);
+                break;
+            case Coloring::ChainIndex:
+                color_atoms_chain_index(colors, count, _molecule);
+                break;
+            case Coloring::SecondaryStructure:
+                color_atoms_secondary_structure(colors, count, _molecule);
+                break;
+            default:
+                ghoul_assert(false, "unexpected molecule coloring");
+                break;
+        }
+
+        md_gl_representation_set_color(&_drawRep, 0, static_cast<uint32_t>(_molecule.atom.count), colors, 0);
+    }
 }
 
 void RenderableMolecule::freeMolecule() {
-    switch (_molecule_type) {
+    switch (_moleculeType) {
     case MoleculeType::Pdb:
         md_pdb_molecule_free(&_molecule, default_allocator);
     case MoleculeType::Gro:
         md_gro_molecule_free(&_molecule, default_allocator);
-    default:
+    case MoleculeType::None:
         break;
     }
     _molecule = {};
-    md_gl_representation_free(&_draw_rep);
+    md_gl_representation_free(&_drawRep);
 }
 
 void RenderableMolecule::freeTrajectory() {
@@ -250,16 +383,16 @@ bool RenderableMolecule::loadProteinPDB(std::string_view pdb_id) {
     }
     */
 
-    _pdb_download = std::make_unique<HttpMemoryDownload>(url);
+    _pdbDownload = std::make_unique<HttpMemoryDownload>(url);
 
-    _pdb_download->onProgress([this](size_t downloadedBytes, std::optional<size_t> totalBytes) -> bool {
+    _pdbDownload->onProgress([this](size_t downloadedBytes, std::optional<size_t> totalBytes) -> bool {
         if (totalBytes.has_value()) {
-            this->_pdb_download_progress = downloadedBytes / static_cast<double>(totalBytes.value());
+            this->_pdbDownloadProgress = downloadedBytes / static_cast<double>(totalBytes.value());
         }
         return true;
     });
 
-    _pdb_download->start();
+    _pdbDownload->start();
 
     return true;
 }

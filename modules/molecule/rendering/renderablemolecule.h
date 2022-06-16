@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__
 #define __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__
 
+#include "openspace/properties/optionproperty.h"
+#include "openspace/properties/selectionproperty.h"
 #include <openspace/rendering/renderable.h>
 
 //#include <openspace/properties/scalar/floatproperty.h>
@@ -60,7 +62,7 @@ public:
 
 private:
     enum class MoleculeType {
-        Unknown,
+        None,
         Pdb,
         Gro,
     };
@@ -75,23 +77,26 @@ private:
     void initTrajectory(std::string_view filename);
     void freeTrajectory();
 
-    void updateRepresentation(md_gl_representation_type_t rep_type);
+    void updateRepresentation();
 
-    std::unique_ptr<HttpMemoryDownload> _pdb_download;
-    double _pdb_download_progress;
+    std::unique_ptr<HttpMemoryDownload> _pdbDownload;
+    double _pdbDownloadProgress;
     double _frame;
     md_gl_shaders_t _shaders;
-    md_gl_representation_t _draw_rep;
-    md_gl_molecule_t _draw_mol;
+    md_gl_representation_t _drawRep;
+    md_gl_molecule_t _drawMol;
 
     md_molecule_t _molecule;
     md_trajectory_i _trajectory;
-    MoleculeType _molecule_type;
+    MoleculeType _moleculeType;
 
     glm::vec3 _center;
     glm::vec3 _extent;
 
-    properties::StringProperty _pdb_id;
+    properties::StringProperty _pdbId;
+    properties::OptionProperty _repType;
+    properties::OptionProperty _coloring;
+    properties::FloatProperty _repScale;
 };
 
 } // namespace openspace
