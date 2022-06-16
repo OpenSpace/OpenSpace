@@ -103,7 +103,7 @@ protected:
 
     properties::BoolProperty _motionEnabled;
     properties::StringProperty _velocityDistanceUnit;
-    // properties::StringProperty _velocityTimeUnit;
+    properties::StringProperty _velocityTimeUnit;
     properties::IntProperty _velocityNaNMode;
     
     std::optional<std::string> _identifier = std::nullopt;

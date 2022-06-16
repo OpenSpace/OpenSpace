@@ -33,7 +33,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconversion.h>
-// #include <openspace/util/timeconversion.h>
+#include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -140,6 +140,12 @@ namespace {
         "The distance unit of the velocity data."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo VelocityTimeUnitInfo = {
+        "VelocityTimeUnit",
+        "Velocity Time Unit",
+        "The time unit of the velocity data."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo VelocityNaNModeInfo = {
         "VelocityNaNMode",
         "Velocity NaN Mode",
@@ -193,6 +199,9 @@ namespace {
         // [[codegen::verbatim(VelocityDistanceUnitInfo.description)]]
         std::optional<std::string> velocityDistanceUnit;
 
+        // [[codegen::verbatim(VelocityTimeUnitInfo.description)]]
+        std::optional<std::string> velocityTimeUnit;
+
         // [[codegen::verbatim(VelocityNaNModeInfo.description)]]
         std::optional<int> velocityNaNMode;
 
@@ -231,6 +240,7 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _linearSizeMin(LinearSizeMaxInfo)
     , _linearSizeEnabled(LinearSizeEnabledInfo, false)
     , _velocityDistanceUnit(VelocityDistanceUnitInfo, "<no unit set>")
+    , _velocityTimeUnit(VelocityTimeUnitInfo, "<no unit set>")
     , _velocityNaNMode(VelocityNaNModeInfo)
     , _motionEnabled(MotionEnabledInfo, false)
 {
@@ -311,9 +321,13 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
 
     _velocityDistanceUnit = p.velocityDistanceUnit.value_or(_velocityDistanceUnit);
     _velocityDistanceUnit.setVisibility(properties::Property::Visibility::Hidden);
-    // _velocityDistanceUnit.onChange([this] { checkIfMotionCanBeEnabled(); }); // TODO: Maybe?
     _velocityDistanceUnit.onChange([this] { _velocityUnitsAreDirty = true; });
     addProperty(_velocityDistanceUnit);
+
+    _velocityTimeUnit = p.velocityTimeUnit.value_or(_velocityTimeUnit);
+    _velocityTimeUnit.setVisibility(properties::Property::Visibility::Hidden);
+    _velocityTimeUnit.onChange([this] { _velocityUnitsAreDirty = true; });
+    addProperty(_velocityTimeUnit);
 
     _velocityNaNMode = p.velocityNaNMode.value_or(_velocityNaNMode);
     _velocityNaNMode.setVisibility(properties::Property::Visibility::Hidden);
@@ -785,19 +799,33 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
         }
     };
 
-    // std::string velocityDistanceUnitString = "km"; // TODO: Change to property
     // Parse units
     DistanceUnit velocityDistanceUnit;
+    TimeUnit velocityTimeUnit;
     try {
         velocityDistanceUnit = distanceUnitFromString(_velocityDistanceUnit.value().c_str());
+        velocityTimeUnit = timeUnitFromString(_velocityTimeUnit.value().c_str());
     }
-    catch (const ghoul::MissingCaseException& err) {
+    catch (const ghoul::MissingCaseException& ) {
         LERROR(fmt::format(
-            "Error when parsing units."
-            "OpenSpace doesn't support the unit '{}'.",
-            _velocityDistanceUnit
+            "Error when parsing velocity units."
+            "OpenSpace doesn't support the unit '{}/{}'.",
+            _velocityDistanceUnit,
+            _velocityTimeUnit
         ));
         return;
+    }
+
+    // Meters multiplier
+    float toMeters = 1.0;
+    if (velocityDistanceUnit != DistanceUnit::Meter) {
+        toMeters = static_cast<float>(toMeter(velocityDistanceUnit));
+    }
+
+    // Seconds divider
+    float toSeconds = 1.0;
+    if (velocityTimeUnit != TimeUnit::Second) {
+        toSeconds = static_cast<float>(convertTime(1.0, velocityTimeUnit, TimeUnit::Second));
     }
 
     for (size_t i = 0; i < velocityData.size(); i += 3) {
@@ -808,31 +836,20 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
             1.0
         };
 
-        // Convert to meters
-        if (velocityDistanceUnit != DistanceUnit::Meter) {
-            float toMeters = static_cast<float>(toMeter(velocityDistanceUnit));
-            transformedPos *= toMeters;
-        }
-
-        // // TODO: Convert to seconds (Double check that it's right)
-        // TimeUnit velTimeUnit = TimeUnit::Hour;
-        // if (velTimeUnit != TimeUnit::Second) {
-        //     float toSeconds = static_cast<float>(convertTime(1.0, velTimeUnit, TimeUnit::Second));
-        //     transformedPos *= toSeconds;
-        // }
+        // Convert to m/s if needed
+        transformedPos *= toMeters / toSeconds;
 
         addPosition(transformedPos);
     }
     LINFO(
         fmt::format(
-            "Viewing {} points with velocity ({} points in total). {} points have NaN-value velocity and are {}.",
+            "Viewing {} points with velocity ({} points in total). "
+            "{} points have NaN-value velocity and are hidden or static.",
             velocityData.size()/3 - nPointsContainingNans,
             pointDataSlice->size()/3,
-            nPointsContainingNans,
-            _velocityNaNMode == 0 ? "Hidden" : "Static"
+            nPointsContainingNans
         )
     );
-    // =========================================
 
     _hasLoadedVelocityData = true;
     LDEBUG("Rerendering with motion based on velocity data");
@@ -916,18 +933,10 @@ void RenderablePointsCloud::checkColormapMinMax() {
 }
 
 bool RenderablePointsCloud::shouldLoadVelocityData(bool isVelocityDataDirty) {
-    // bool result = (
-    //     (isVelocityDataDirty || _velocityUnitsAreDirty) 
-    //     && _velocityDistanceUnit.value() != "<no unit set>"
-    // );
-    // if (result) {
-    //     LWARNING(fmt::format("LoadVelocityData can be executed! _velocityDistanceUnit = ->{}<-", _velocityDistanceUnit.value()));
-    // }
-
-    // return result;
     return (
         (isVelocityDataDirty || _velocityUnitsAreDirty) 
         && _velocityDistanceUnit.value() != "<no unit set>"
+        && _velocityTimeUnit.value() != "<no unit set>"
     );
 }
 

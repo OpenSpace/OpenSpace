@@ -33,7 +33,6 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/distanceconversion.h>
 #include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -94,7 +93,7 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
     checkRenderable(message, messageOffset, connection, identifier);
 
     std::string velocityDistanceUnitString;
-    // std::string velocityTimeUnitString;
+    std::string velocityTimeUnitString;
     simp::VelocityNaNRenderMode velocityNaNMode;
     size_t nVelocities;
     size_t dimensionality;
@@ -105,8 +104,7 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
         // in the message. If the order is not the same, the global variable
         // 'message offset' will be wrong
         velocityDistanceUnitString = simp::readString(message, messageOffset);
-        // velocityTimeUnitString = simp::readString(message, messageOffset);
-        // LWARNING(fmt::format("Velocitydata timeUnit = {}", velocityTimeUnitString));
+        velocityTimeUnitString = simp::readString(message, messageOffset);
         std::string velocityNaNModeStr = simp::readString(message, messageOffset);
         velocityNaNMode = simp::getVelocityNaNRenderMode(velocityNaNModeStr);
         if (velocityNaNMode == simp::VelocityNaNRenderMode::Unknown) {
@@ -127,11 +125,20 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
     }
 
     // Set units first to make sure they're available when converting during data loading
-    auto velocityUnitsCallback = [this, identifier, velocityDistanceUnitString, connection] {
+    auto velocityUnitsCallback = [this, identifier, velocityDistanceUnitString, 
+                                  velocityTimeUnitString, connection] {
         global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelocityDistanceUnit', \"{}\");",
                 identifier, velocityDistanceUnitString
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+
+        global::scriptEngine->queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelocityTimeUnit', \"{}\");",
+                identifier, velocityTimeUnitString
             ),
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -157,7 +164,11 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
     auto enableMotionCallback = [identifier] {
         // Set large time steps for the GUI (so you for example 
         // can see the movement of stars at 5000 years/second)
-        std::string largeTimeSteps = "{ 1.0, 157680000000.0, 315360000000.0, 1576800000000.0, 3153600000000.0 }";
+        // Values set in seconds: Real time, 5k years, 
+        // 10k year, 50k year, 100k year, 500k year, 1M year
+        std::string largeTimeSteps = "{ 1.0, 157680000000.0, 315360000000.0,"
+                                     " 1576800000000.0, 3153600000000.0,"
+                                     " 15768000000000.0, 3153600000000.0 }";
         global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.time.setDeltaTimeSteps({});",
