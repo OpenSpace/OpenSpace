@@ -29,7 +29,7 @@ local color_genus = asset.localResource(path .. "/data/lineage/cmap/color_genus.
 local lineage_texture = asset.localResource(path .. "/data/texture/point3A.png")
 
 -- Scale factor --
-local scale_factor = 28
+local scale_factor = 12
 
 
 local lineage_17 = {
@@ -43,18 +43,18 @@ local lineage_17 = {
     ColorMap = color_17,
     ColorOption = { "lineage_17" },
     ColorRange = { { 0.0, 1.0}},
-    DrawLabels = true,
+    DrawLabels = false,
     LabelFile = label_17,
     TextColor = { 1.0, 1.0, 1.0 },
     TextSize = 1.0,
     TextMinMaxSize = { 0, 18 },
-    FadeLabelDistances = { 0.0, 0.5 },
-    FadeLabelWidths = { 0.001, 0.5 },
+    FadeLabelDistances = { 0.0, 10 },
+    FadeLabelWidths = { 0.001, 10 },
     Unit = "Km",
     Texture = lineage_texture,
     BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
     EnablePixelSizeControl = true,
-    Enabled = false
+    Enabled = true
   },
   GUI = {
     Name = "17: Order",
@@ -73,13 +73,13 @@ local lineage_18 = {
     ColorMap = color_18,
     ColorOption = { "lineage_18" },
     ColorRange = { { 1.0, 2.0} },
-    DrawLabels = true,
+    DrawLabels = false,
     LabelFile = label_18,
     TextColor = { 1.0, 1.0, 1.0 },
     TextSize = 1.0,
-    TextMinMaxSize = { 0, 16 },
+    TextMinMaxSize = { 0, 18 },
     FadeLabelDistances = { 0.0, 0.5 },
-    FadeLabelWidths = { 0.001, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
     Unit = "Km",
     Texture = lineage_texture,
     BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
@@ -104,13 +104,13 @@ local lineage_19 = {
     ColorMap = color_19,
     ColorOption = { "lineage_19" },
     ColorRange = { { 3.0, 7.0}},
-    DrawLabels = true,
+    DrawLabels = false,
     LabelFile = label_19,
     TextColor = { 1.0, 1.0, 1.0 },
     TextSize = 1.0,
-    TextMinMaxSize = { 0, 17 },
+    TextMinMaxSize = { 0, 18 },
     FadeLabelDistances = { 0.0, 0.5 },
-    FadeLabelWidths = { 0.001, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
     Unit = "Km",
     Texture = lineage_texture,
     BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
@@ -134,13 +134,13 @@ local lineage_20 = {
     ColorMap = color_20,
     ColorOption = { "lineage_20" },
     ColorRange = { { 8.0, 18.0}},
-    DrawLabels = true,
+    DrawLabels = false,
     LabelFile = label_20,
     TextColor = { 1.0, 1.0, 1.0 },
     TextSize = 1.0,
-    TextMinMaxSize = { 0, 15 },
+    TextMinMaxSize = { 0, 18 },
     FadeLabelDistances = { 0.0, 0.5 },
-    FadeLabelWidths = { 0.001, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
     Unit = "Km",
     Texture = lineage_texture ,
     BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
@@ -164,13 +164,13 @@ local lineage_21 = {
     ColorMap = color_21,
     ColorOption = { "lineage_21" },
     ColorRange = { { 19.0, 51.0}},
-    DrawLabels = true,
+    DrawLabels = false,
     LabelFile = label_21,
     TextColor = { 1.0, 1.0, 1.0 },
     TextSize = 1.0,
-    TextMinMaxSize = { 0, 16 },
+    TextMinMaxSize = { 0, 18 },
     FadeLabelDistances = { 0.0, 0.5 },
-    FadeLabelWidths = { 0.001, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
     Unit = "Km",
     Texture = lineage_texture,
     BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
@@ -195,13 +195,13 @@ local lineage_22 = {
     ColorMap = color_22,
     ColorOption = { "lineage_22" },
     ColorRange = { { 24.0, 62.0}},
-    DrawLabels = true,
+    DrawLabels = false,
     LabelFile = label_22,
     TextColor = { 1.0, 1.0, 1.0 },
     TextSize = 1.0,
-    TextMinMaxSize = { 0, 15 },
+    TextMinMaxSize = { 0, 18 },
     FadeLabelDistances = { 0.0, 0.5 },
-    FadeLabelWidths = { 0.001, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
     Unit = "Km",
     Texture = lineage_texture,
     BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
@@ -226,13 +226,13 @@ local lineage_23 = {
     ColorOption = { "lineage_23" },
     ColorRange = { { 24.0, 89.0}},
     ExactColors = true,
-    DrawLabels = true,
+    DrawLabels = false,
     LabelFile = label_23,
     TextColor = { 1.0, 1.0, 1.0 },
     TextSize = 1.0,
-    TextMinMaxSize = { 0, 14 },
+    TextMinMaxSize = { 0, 18 },
     FadeLabelDistances = { 0.0, 0.5 },
-    FadeLabelWidths = { 0.001, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
     Unit = "Km",
     Texture = lineage_texture,
     BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
@@ -256,11 +256,11 @@ local lineage_genus = {
     ColorMap = color_genus,
     ColorOption = { "Genus" },
     ColorRange = { { 1.0, 69.0}},
-    DrawLabels = true,
+    DrawLabels = false,
     LabelFile = label_genus,
     TextColor = { 1.0, 1.0, 1.0 },
     TextSize = 1.0,
-    TextMinMaxSize = { 0, 14 },
+    TextMinMaxSize = { 0, 18 },
     FadeLabelDistances = { 0.0, 0.5 },
     FadeLabelWidths = { 0.001, 10 },
     Unit = "Km",
@@ -290,9 +290,9 @@ local lineage = {
     LabelFile = label_species,
     TextColor = { 1.0, 1.0, 1.0 },
     TextSize = 1.0,
-    TextMinMaxSize = { 0, 14 },
+    TextMinMaxSize = { 0, 18 },
     FadeLabelDistances = { 0.0, 0.5 },
-    FadeLabelWidths = { 0.001, 0.5 },
+    FadeLabelWidths = { 0.001, 10 },
     Unit = "Km",
     Texture = lineage_texture,
     BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
@@ -309,7 +309,7 @@ local lineage = {
 
 
 asset.onInitialize(function()
-    openspace.addSceneGraphNode(lineage)
+    --openspace.addSceneGraphNode(lineage)
     openspace.addSceneGraphNode(lineage_17)
     openspace.addSceneGraphNode(lineage_18)
     openspace.addSceneGraphNode(lineage_19)
@@ -321,7 +321,7 @@ asset.onInitialize(function()
     end)
 
 asset.onDeinitialize(function()
-    openspace.removeSceneGraphNode(lineage)
+    --openspace.removeSceneGraphNode(lineage)
     openspace.removeSceneGraphNode(lineage_17)
     openspace.removeSceneGraphNode(lineage_18)
     openspace.removeSceneGraphNode(lineage_19)
@@ -333,7 +333,7 @@ asset.onDeinitialize(function()
     end)
 
 
-asset.export(lineage)
+--asset.export(lineage)
 asset.export(lineage_17)
 asset.export(lineage_18)
 asset.export(lineage_19)

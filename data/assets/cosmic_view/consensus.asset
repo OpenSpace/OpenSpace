@@ -8,14 +8,14 @@ local consensus_file = asset.localResource(path .. "/data/consensus/speck/primat
 local consensus_label = asset.localResource(path .. "/data/consensus/label/primates_consensus_commonnames_label.speck")
 
 -- Color maps --
-local color_mutations = asset.localResource(path .. "/data/mutations/cmap/plasma62.cmap")
+local color_mutations = asset.localResource(path .. "/data/mutations/cmap/redyellow.cmap")
 local color_lineage =  asset.localResource(path .. "/data/consensus/cmap/color_genus.cmap")
 
 -- Texture files -- 
 local consensus_texture = asset.localResource(path .. "/data/texture/point3A.png")
 
 -- Scale factor --
-local scale_factor = 35
+local scale_factor = 12
 
 local mutations_consensus = {
     Identifier = "mutations_consensus",
@@ -26,8 +26,8 @@ local mutations_consensus = {
       ScaleFactor = scale_factor,
       File = consensus_file,
       ColorMap = color_mutations,
-      ColorOption = { "synonymousDiff", "NonSynonymousDiff","sum_mutations", "minus_mutations", "syn_div_non"},
-      ColorRange = { { 0, 140}, { 0, 20}, {0,150}, {-2,122}, {0,66}},
+      ColorOption = { "synonymousDiff", "NonSynonymousDiff", "syn_div_non"},
+      ColorRange = { { 0, 140}, { 0, 20}, {0,66}},
       DrawLabels = false,
       LabelFile = consensus_label,
       TextColor = { 1.0, 1.0, 1.0 },

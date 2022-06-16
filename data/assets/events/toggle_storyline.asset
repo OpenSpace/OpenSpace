@@ -1,122 +1,338 @@
+-- Outside Maps --
+local fadeoutall = {
+    Identifier = "fadeoutall",
+    Name = "Fade out all",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_17.Renderable.Fade", 0, 1); openspace.setPropertyValueSingle("Scene.Hominoidea_volume.Renderable.Fade", 0, 1); openspace.setPropertyValueSingle("Scene.Cercopithecoidea_volume.Renderable.Fade", 0, 1); openspace.setPropertyValueSingle("Scene.Strepsirrhini_volume.Renderable.Fade", 0, 1); openspace.setPropertyValueSingle("Scene.Platyrrhini_volume.Renderable.Fade", 0, 1)', -- openspace.setPropertyValueSingle("Scene.homininae.Renderable.Fade", 0, 1); openspace.setPropertyValueSingle("Scene.homininae_genus.Renderable.Fade", 0, 1); openspace.setPropertyValueSingle("Scene.hominioidae.Renderable.Fade", 0, 1);
+    GuiPath = "/Storyline",
+    IsLocal = true
+}
+
+local fadeinall = {
+    Identifier = "fadeinall",
+    Name = "Fade in all",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_17.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.Hominoidea_volume.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.Cercopithecoidea_volume.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.Strepsirrhini_volume.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.Platyrrhini_volume.Renderable.Fade", 1, 1) ', -- openspace.setPropertyValueSingle("Scene.homininae.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.homininae_genus.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.hominioidae.Renderable.Fade", 1, 1); 
+    GuiPath = "/Storyline",
+    IsLocal = true
+}
+
+
+-- 1. Homininae -- 
+
+-- on and off homo sapiens
+local offhomosapiens = {
+    Identifier = "offhomosapiens",
+    Name = "Homo sapiens off",
+    Command = 'openspace.setPropertyValueSingle("Scene.homosapiens.Renderable.Enabled", false)',
+    GuiPath = "/Storyline/1.Homininae",
+    IsLocal = true
+}
+
+local onhomosapiens = {
+    Identifier = "onhomosapiens",
+    Name = "Homo sapiens on",
+    Command = 'openspace.setPropertyValueSingle("Scene.homosapiens.Renderable.Enabled", true)',
+    GuiPath = "/Storyline/1.Homininae",
+    IsLocal = true
+}
+
+-- on and off neanderthal and denisova
 local offhomo = {
-    Identifier = "turnoffhomo",
+    Identifier = "offhomo",
     Name = "Homo off",
     Command = 'openspace.setPropertyValueSingle("Scene.neander.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.denisovan.Renderable.Enabled", false)',
-    GuiPath = "/RenderableEvent",
+    GuiPath = "/Storyline/1.Homininae",
     IsLocal = true
 }
 
 local onhomo = {
-    Identifier = "turnonhomo",
+    Identifier = "onhomo",
     Name = "Homo on",
     Command = 'openspace.setPropertyValueSingle("Scene.neander.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.denisovan.Renderable.Enabled", true)',
-    GuiPath = "/RenderableEvent",
+    GuiPath = "/Storyline/1.Homininae",
     IsLocal = true
 }
 
+-- on and off gorillas and chimpanzees
 local offhomininae = {
-    Identifier = "turnoffhomininae",
+    Identifier = "offhomininae",
     Name = "Homininae off",
     Command = 'openspace.setPropertyValueSingle("Scene.homininae.Renderable.Enabled", false)',
-    GuiPath = "/RenderableEvent",
+    GuiPath = "/Storyline/1.Homininae",
     IsLocal = true
 }
 
 local onhomininae = {
-    Identifier = "turnonhomininae",
+    Identifier = "onhomininae",
     Name = "Homininae on",
     Command = 'openspace.setPropertyValueSingle("Scene.homininae.Renderable.Enabled", true)',
-    GuiPath = "/RenderableEvent",
+    GuiPath = "/Storyline/1.Homininae",
     IsLocal = true
 }
 
+-- on and off gorillas, chimpanzees and bonobos
+local offhomininae_genus = {
+    Identifier = "offhomininae_genus",
+    Name = "Homininae genus off",
+    Command = 'openspace.setPropertyValueSingle("Scene.homininae_genus.Renderable.Enabled", false)',
+    GuiPath = "/Storyline/1.Homininae",
+    IsLocal = true
+}
+
+local onhomininae_genus = {
+    Identifier = "onhomininae_genus",
+    Name = "Homininae genus on",
+    Command = 'openspace.setPropertyValueSingle("Scene.homininae_genus.Renderable.Enabled", true)', 
+    GuiPath = "/Storyline/1.Homininae",
+    IsLocal = true
+}
+
+-- 2. Hominioidae -- 
+
+-- on and off orangutans and gibbons
 local offhominioidae = {
-    Identifier = "turnoffhominioidae",
+    Identifier = "offhominioidae",
     Name = "Hominioidae off",
     Command = 'openspace.setPropertyValueSingle("Scene.hominioidae.Renderable.Enabled", false)',
-    GuiPath = "/RenderableEvent",
+    GuiPath = "/Storyline/2.Hominioidae",
     IsLocal = true
 }
 
 local onhominioidae = {
-    Identifier = "turnonhominioidae",
+    Identifier = "onhominioidae",
     Name = "Hominioidae on",
     Command = 'openspace.setPropertyValueSingle("Scene.hominioidae.Renderable.Enabled", true)',
-    GuiPath = "/RenderableEvent",
+    GuiPath = "/Storyline/2.Hominioidae",
     IsLocal = true
 }
 
-local offhominioidae_volume = {
-    Identifier = "turnoffhominioidae_volume",
-    Name = "Hominioidae volume off",
-    Command = 'openspace.setPropertyValueSingle("Scene.Hominoidea_volume.Renderable.Enabled", false)',
-    GuiPath = "/RenderableEvent",
+-- tree image of hominioidae
+local offhominioidae_image = {
+    Identifier = "offhominioidae_image",
+    Name = "Image off",
+    Command = 'openspace.setPropertyValueSingle("ScreenSpace.superfamily.Enabled", false)',
+    GuiPath = "/Storyline/2.Hominioidae",
     IsLocal = true
 }
 
-local onhominioidae_volume = {
-    Identifier = "turnonhominioidae_volume",
-    Name = "Hominioidae volume on",
-    Command = 'openspace.setPropertyValueSingle("Scene.Hominoidea_volume.Renderable.Enabled", true)',
-    GuiPath = "/RenderableEvent",
+local onhominioidae_image = {
+    Identifier = "onhominioidae_image",
+    Name = "Image on",
+    Command = 'openspace.setPropertyValueSingle("ScreenSpace.superfamily.Enabled", true)',
+    GuiPath = "/Storyline/2.Hominioidae",
+    IsLocal = true
+}
+
+-- 3. Primates -- 
+
+-- lineage 17: Primates
+local onall_primates = {
+    Identifier = "onall_primates",
+    Name = "17: Order on",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_17.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.homosapiens.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.hominioidae.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.homininae.Renderable.Enabled", false)',
+    GuiPath = "/Storyline/3.Primates",
     IsLocal = true
 }
 
 local offall_primates = {
     Identifier = "offall_primates",
-    Name = "Primates off",
-    Command = 'openspace.setPropertyValueSingle("Scene.lineage_genus.Renderable.Enabled", false)',
-    GuiPath = "/RenderableEvent",
+    Name = "17: Order off",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_17.Renderable.Fade", 0, 1)',
+    GuiPath = "/Storyline/3.Primates",
     IsLocal = true
 }
 
-local onall_primates = {
-    Identifier = "onall_primates",
-    Name = "Primates on",
-    Command = 'openspace.setPropertyValueSingle("Scene.lineage_genus.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.homininae.Renderable.DrawLabels", false); openspace.setPropertyValueSingle("Scene.hominioidae.Renderable.DrawLabels", false); openspace.setPropertyValueSingle("Scene.homosapiens.Renderable.DrawLabels", false)',
-    GuiPath = "/RenderableEvent",
+-- lineage 18: Suborder
+local on18_primates = {
+    Identifier = "on18_primates",
+    Name = "18: Suborder on",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_18.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.lineage_17.Renderable.Enabled", false)',
+    GuiPath = "/Storyline/3.Primates",
     IsLocal = true
 }
 
+local off18_primates = {
+    Identifier = "off18_primates",
+    Name = "18: Suborder off",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_18.Renderable.Fade", 0, 1)',
+    GuiPath = "/Storyline/3.Primates",
+    IsLocal = true
+}
+
+-- lineage 21: Superfamily
+local on21_primates = {
+    Identifier = "on21_primates",
+    Name = "21: Superfamily on",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_21.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.lineage_18.Renderable.Enabled", false)',
+    GuiPath = "/Storyline/3.Primates",
+    IsLocal = true
+}
+
+local off21_primates = {
+    Identifier = "off21_primates",
+    Name = "21: Superfamily off",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_21.Renderable.Fade", 0, 1)',
+    GuiPath = "/Storyline/3.Primates",
+    IsLocal = true
+}
+
+-- lineage 23: Subfamily
+local on23_primates = {
+    Identifier = "on23_primates",
+    Name = "23: Subfamily on",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_23.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.lineage_21.Renderable.Enabled", false)',
+    GuiPath = "/Storyline/3.Primates",
+    IsLocal = true
+}
+
+local off23_primates = {
+    Identifier = "off23_primates",
+    Name = "23: Subfamily off",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_23.Renderable.Fade", 0, 1)',
+    GuiPath = "/Storyline/3.Primates",
+    IsLocal = true
+}
+
+-- lineage Genus
+local onall_genus = {
+    Identifier = "onall_genus",
+    Name = "24: Primates genus on",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_genus.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.lineage_23.Renderable.Enabled", false)',
+    GuiPath = "/Storyline/3.Primates",
+    IsLocal = true
+}
+
+
+-- 4. Volumes --
+
+local offall_genus = {
+    Identifier = "offall_genus",
+    Name = "24: Primates genus off",
+    Command = 'openspace.setPropertyValueSingle("Scene.lineage_genus.Renderable.Fade", 0, 1)',
+    GuiPath = "/Storyline/4.Volumes",
+    IsLocal = true
+}
+
+-- turn on and off all volumes
 local off_volumes = {
     Identifier = "off_volumes",
     Name = "All volumes off",
-    Command = 'openspace.setPropertyValueSingle("Scene.Cercopithecoidea_volume.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.Strepsirrhini_volume.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.Platyrrhini_volume.Renderable.Enabled", false)',
-    GuiPath = "/RenderableEvent",
+    Command = 'openspace.setPropertyValueSingle("Scene.Hominoidea_volume.Renderable.Fade", 0, 1); openspace.setPropertyValueSingle("Scene.Cercopithecoidea_volume.Renderable.Fade", 0, 1); openspace.setPropertyValueSingle("Scene.Strepsirrhini_volume.Renderable.Fade", 0, 1); openspace.setPropertyValueSingle("Scene.Platyrrhini_volume.Renderable.Fade", 0, 1)',
+    GuiPath = "/Storyline/4.Volumes",
     IsLocal = true
 }
 
+local off_volumes_image = {
+    Identifier = "off_volumes_image",
+    Name = "image off",
+    Command = 'openspace.setPropertyValueSingle("ScreenSpace.volumeorder.Enabled", false)',
+    GuiPath = "/Storyline/4.Volumes",
+    IsLocal = true
+}
+
+-- tree image connected to the volumes
+local on_volumes_image = {
+    Identifier = "on_volumes_image",
+    Name = "image on",
+    Command = 'openspace.setPropertyValueSingle("ScreenSpace.volumeorder.Enabled", true)',
+    GuiPath = "/Storyline/4.Volumes",
+    IsLocal = true
+}
 
 local on_volumes = {
     Identifier = "on_volumes",
     Name = "All volumes on",
-    Command = 'openspace.setPropertyValueSingle("Scene.Cercopithecoidea_volume.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.Strepsirrhini_volume.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.Platyrrhini_volume.Renderable.Enabled", true)',
-    GuiPath = "/RenderableEvent",
+    Command = 'openspace.setPropertyValueSingle("Scene.Hominoidea_volume.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.Cercopithecoidea_volume.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.Strepsirrhini_volume.Renderable.Fade", 1, 1); openspace.setPropertyValueSingle("Scene.Platyrrhini_volume.Renderable.Fade", 1, 1)',
+    GuiPath = "/Storyline/4.Volumes",
+    IsLocal = true
+}
+
+-- 5. Endangered --
+
+-- On and off status dots and image 
+local on_status = {
+    Identifier = "on_status",
+    Name = "Status on",
+    Command = 'openspace.setPropertyValueSingle("ScreenSpace.endangered.Enabled", true); openspace.setPropertyValueSingle("Scene.endangered_status.Renderable.Enabled", true) ',
+    GuiPath = "/Storyline/5.Endangered",
+    IsLocal = true
+}
+
+local off_status = {
+    Identifier = "off_status",
+    Name = "Status off",
+    Command = 'openspace.setPropertyValueSingle("ScreenSpace.endangered.Enabled", false); openspace.setPropertyValueSingle("Scene.endangered_status.Renderable.Enabled", false) ',
+    GuiPath = "/Storyline/5.Endangered",
+    IsLocal = true
+}
+
+
+-- 6. Humans --
+local off_allhumans = {
+    Identifier = "off_allhumans",
+    Name = "Turn off all",
+    Command = 'openspace.setPropertyValueSingle("Scene.south_africa.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.west_africa.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.central_africa.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.north_africa.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.europe.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.west_asia.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.central_asia.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.south_asia.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.south_east_asia.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.east_asia.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.north_east_asia.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.oceania.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.north_america.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.central_america.Renderable.Enabled", false); openspace.setPropertyValueSingle("Scene.south_america.Renderable.Enabled", false);',
+    GuiPath = "/Storyline/6.Humans",
+    IsLocal = true
+}
+
+local on_allhumans = {
+    Identifier = "on_allhumans",
+    Name = "Turn on all",
+    Command = 'openspace.setPropertyValueSingle("Scene.south_africa.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.west_africa.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.central_africa.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.north_africa.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.europe.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.west_asia.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.central_asia.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.south_asia.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.south_east_asia.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.east_asia.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.north_east_asia.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.oceania.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.north_america.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.central_america.Renderable.Enabled", true); openspace.setPropertyValueSingle("Scene.south_america.Renderable.Enabled", true);',
+    GuiPath = "/Storyline/6.Humans",
+    IsLocal = true
+}
+
+local on_human_image = {
+    Identifier = "on_human_image",
+    Name = "Image on",
+    Command = 'openspace.setPropertyValueSingle("ScreenSpace.humans.Enabled", true)',
+    GuiPath = "/Storyline/6.Humans",
+    IsLocal = true
+}
+
+local off_human_image = {
+    Identifier = "off_human_image",
+    Name = "Image off",
+    Command = 'openspace.setPropertyValueSingle("ScreenSpace.humans.Enabled", false)',
+    GuiPath = "/Storyline/6.Humans",
     IsLocal = true
 }
 
 asset.onInitialize(function()
-  openspace.action.registerAction(offhomo)
-  openspace.action.registerAction(onhomo)
+  openspace.action.registerAction(fadeinall)
+  openspace.action.registerAction(fadeoutall)
+  openspace.action.registerAction(offhomosapiens)
+  openspace.action.registerAction(onhomosapiens)
   openspace.action.registerAction(offhomininae)
   openspace.action.registerAction(onhomininae)
+  openspace.action.registerAction(offhomininae_genus)
+  openspace.action.registerAction(onhomininae_genus)
+  openspace.action.registerAction(offhomo)
+  openspace.action.registerAction(onhomo)
   openspace.action.registerAction(offhominioidae)
   openspace.action.registerAction(onhominioidae)
-  openspace.action.registerAction(offhominioidae_volume)
-  openspace.action.registerAction(onhominioidae_volume)
+  openspace.action.registerAction(offhominioidae_image)
+  openspace.action.registerAction(onhominioidae_image)
   openspace.action.registerAction(offall_primates)
+  openspace.action.registerAction(offall_genus)
   openspace.action.registerAction(onall_primates)
+  openspace.action.registerAction(onall_genus)
   openspace.action.registerAction(off_volumes)
+  openspace.action.registerAction(off_volumes_image)
   openspace.action.registerAction(on_volumes)
-  openspace.event.registerEventAction(
-    "RenderableDisabled",
-    offhomo.Identifier,
-    { Node = "all" }
-  )
-  openspace.event.registerEventAction(
-    "RenderableEnabled",
-    onhomo.Identifier,
-    { Node = "all" }
-  )
+  openspace.action.registerAction(on_volumes_image)
+  openspace.action.registerAction(off_allhumans)
+  openspace.action.registerAction(on_allhumans)
+  openspace.action.registerAction(on_human_image)
+  openspace.action.registerAction(off_human_image)
+  openspace.action.registerAction(on_status)
+  openspace.action.registerAction(off_status)
+  openspace.action.registerAction(on18_primates)
+  openspace.action.registerAction(on21_primates)
+  openspace.action.registerAction(on23_primates)
+  openspace.action.registerAction(off18_primates)
+  openspace.action.registerAction(off21_primates)
+  openspace.action.registerAction(off23_primates)
 
 end)

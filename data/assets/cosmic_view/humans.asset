@@ -35,6 +35,7 @@ local human_texture = asset.localResource(path .. "/data/texture/point3A.png")
 -- Scale factor --
 local scale_factor_all = 0
 local scale_continents = 4
+local scale = 6
 
 
 local test = {
@@ -85,6 +86,12 @@ local all = {
       EnablePixelSizeControl = true,
       Enabled = false
     },
+    Transform = {
+      Scale = {
+        Type = 'StaticScale',
+        Scale  = scale
+      }
+    },
     GUI = {
       Name = "All Humans",
       Path = "/Cosmic/Humans"
@@ -108,6 +115,12 @@ local all = {
       EnablePixelSizeControl = true,
       Enabled = false
     },
+    Transform = {
+      Scale = {
+        Type = 'StaticScale',
+        Scale  = scale
+      }
+},
     GUI = {
       Name = "South Africa",
       Path = "/Cosmic/Humans/Continents/Africa"
@@ -127,6 +140,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+    },
+    Transform = {
+      Scale = {
+        Type = 'StaticScale',
+        Scale  = scale
+      }
     },
     GUI = {
       Name = "West Africa",
@@ -148,6 +167,12 @@ local all = {
       EnablePixelSizeControl = true,
       Enabled = false
     },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
     GUI = {
       Name = "Central Africa",
       Path = "/Cosmic/Humans/Continents/Africa"
@@ -168,6 +193,12 @@ local all = {
       EnablePixelSizeControl = true,
       Enabled = false
     },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+    }
+    },
     GUI = {
       Name = "North Africa",
       Path = "/Cosmic/Humans/Continents/Africa"
@@ -187,6 +218,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
     },
     GUI = {
       Name = "Europe",
@@ -208,6 +245,12 @@ local all = {
       EnablePixelSizeControl = true,
       Enabled = false
     },
+    Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
     GUI = {
       Name = "West Asia",
       Path = "/Cosmic/Humans/Continents/Asia"
@@ -227,6 +270,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+    }
     },
     GUI = {
       Name = "Central Asia",
@@ -247,6 +296,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
     },
     GUI = {
       Name = "South Asia",
@@ -268,6 +323,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
     },
     GUI = {
       Name = "South East Asia",
@@ -288,6 +349,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
     },
     GUI = {
       Name = "East Asia",
@@ -308,6 +375,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
     },
     GUI = {
       Name = "North East Asia",
@@ -328,6 +401,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
     },
     GUI = {
       Name = "Oceania",
@@ -348,6 +427,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
     },
     GUI = {
       Name = "North America",
@@ -368,6 +453,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
     },
     GUI = {
       Name = "Central America",
@@ -388,6 +479,12 @@ local all = {
       BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
       EnablePixelSizeControl = true,
       Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
     },
     GUI = {
       Name = "South America",

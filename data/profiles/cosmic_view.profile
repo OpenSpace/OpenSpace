@@ -66,13 +66,6 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
-  "properties": [
-    {
-      "name": "Scene.homosapiens.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "true"
-    }
-  ],
   "time": {
     "type": "relative",
     "value": "-1d"
