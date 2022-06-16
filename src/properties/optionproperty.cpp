@@ -88,19 +88,13 @@ void OptionProperty::addOptions(std::vector<std::string> options) {
 
 void OptionProperty::clearOptions() {
     _options.clear();
-    _value = 0;
 }
 
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
-    for (size_t i = 0; i < _options.size(); ++i) {
-        const Option& o = _options[i];
+    for (Option& o : _options) {
         if (o.value == value) {
-            // If it does, set it by calling the superclasses setValue method
-            // @TODO(abock): This should be setValue(value) instead or otherwise the
-            //               stored indices and option values start to drift if the
-            //               operator T of the OptionProperty is used
-            NumericalProperty::setValue(static_cast<int>(i));
+            NumericalProperty::setValue(value);
             return;
         }
     }
@@ -110,12 +104,20 @@ void OptionProperty::setValue(int value) {
 }
 
 bool OptionProperty::hasOption() const {
-    return value() >= 0 && value() < static_cast<int>(_options.size());
+    return _options.size() != 0;
 }
 
 
 const OptionProperty::Option& OptionProperty::option() const {
-    return _options[value()];
+    auto it = std::find_if(
+        _options.begin(),
+        _options.end(),
+        [val = value()](const Option& option) {
+            return option.value == val;
+        }
+    );
+    
+    return *it;
 }
 
 std::string OptionProperty::getDescriptionByValue(int value) {

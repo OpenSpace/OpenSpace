@@ -148,7 +148,9 @@ public:
     /**
      * Returns the currently selected option.
      *
-     * \return The currently selected option
+     * \return The currently selected option.
+     * \note The property must have a selected option when calling this method, see
+     * #hasOption.
      */
     const Option& option() const;
 
