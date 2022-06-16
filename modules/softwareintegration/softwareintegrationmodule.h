@@ -53,7 +53,11 @@ public:
         const SyncableFloatDataStorage::Identifier& identifier,
         const storage::Key key
     );
-    bool isSyncDataDirty(
+    void setDataLoaded(
+        const SyncableFloatDataStorage::Identifier& identifier,
+        const storage::Key key
+    );
+    bool dataLoaded(
         const SyncableFloatDataStorage::Identifier& identifier,
         const storage::Key key
     );

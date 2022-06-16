@@ -75,11 +75,18 @@ bool SoftwareIntegrationModule::isDataDirty(
     return _syncableFloatDataStorage.isDirty(identifier, key);
 }
 
-bool SoftwareIntegrationModule::isSyncDataDirty(
+void SoftwareIntegrationModule::setDataLoaded(
+    const SyncableFloatDataStorage::Identifier& identifier,
+    const storage::Key key
+) {
+    _syncableFloatDataStorage.setLoaded(identifier, key);
+}
+
+bool SoftwareIntegrationModule::dataLoaded(
         const SyncableFloatDataStorage::Identifier& identifier,
         const storage::Key key
 ) {
-    return _syncableFloatDataStorage.isSyncDirty(identifier, key);
+    return _syncableFloatDataStorage.hasLoaded(identifier, key);
 }
 
 void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {

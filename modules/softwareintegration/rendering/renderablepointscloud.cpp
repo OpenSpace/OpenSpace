@@ -651,6 +651,7 @@ void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrat
 
         addPosition(transformedPos);
     }
+    softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::DataPoints);
 }
 
 void RenderablePointsCloud::loadColormap(SoftwareIntegrationModule* softwareIntegrationModule) {
@@ -678,6 +679,7 @@ void RenderablePointsCloud::loadColormap(SoftwareIntegrationModule* softwareInte
     _colormapTexture->uploadTexture();
 
     _hasLoadedColormap = true;
+    softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::Colormap);
 }
 
 void RenderablePointsCloud::loadColormapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
@@ -709,6 +711,7 @@ void RenderablePointsCloud::loadColormapAttributeData(SoftwareIntegrationModule*
 
     _hasLoadedColormapAttributeData = true;
     LDEBUG("Rerendering with colormap attribute data");
+    softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::ColormapAttrData);
 }
 
 void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
@@ -739,7 +742,8 @@ void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModul
     }
 
     _hasLoadedLinearSizeAttributeData = true;
-     LDEBUG("Rerendering with linear size attribute data");
+    LDEBUG("Rerendering with linear size attribute data");
+    softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::LinearSizeAttrData);
 }
 
 void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule) {
@@ -835,6 +839,7 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
     // =========================================
 
     _hasLoadedVelocityData = true;
+    softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::VelocityData);
     LDEBUG("Rerendering with motion based on velocity data");
 }
 
