@@ -173,14 +173,24 @@ bool SyncableFloatDataStorage::isDirty(
 	return _storage.find(identifier)->second.find(key)->second.dirty;
 }
 
-bool SyncableFloatDataStorage::isSyncDirty(
-	const Identifier& identifier, const storage::Key key
-) {
+void SyncableFloatDataStorage::setLoaded(const Identifier& identifier, const storage::Key key) {
 	if (!count(identifier, key)) {
-		return true;
+		LERROR(fmt::format(
+			"SceneGraphNode {} has no data with key '{}' in the centralized data storage",
+			identifier,
+			storage::getStorageKeyString(key)
+		));
+		return;
+	}
+	_storage.find(identifier)->second.find(key)->second.hasLoaded = true;
+}
+
+bool SyncableFloatDataStorage::hasLoaded(const Identifier& identifier, const storage::Key key) {
+	if (!count(identifier, key)) {
+		return false;
 	}
 
-	return _storage.find(identifier)->second.find(key)->second.syncDirty;
+	return _storage.find(identifier)->second.find(key)->second.hasLoaded;
 }
 
 void SyncableFloatDataStorage::store(

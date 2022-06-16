@@ -877,7 +877,7 @@ void PointDataMessageHandler::postSync() {
 
                 try {
                     for (auto& waitFor : waitForData) {
-                        if (softwareIntegrationModule->isSyncDataDirty(identifier, waitFor)) {
+                        if (!softwareIntegrationModule->dataLoaded(identifier, waitFor)) {
                             throw std::exception{};
                         }
                     }

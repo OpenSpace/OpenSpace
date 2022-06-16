@@ -43,6 +43,7 @@ public:
 		std::vector<float> data;
 		bool hasEncoded = false;
 		bool syncDirty = true;
+		bool hasLoaded = false;
 		bool dirty = true;
 	};
 	using ValueData = decltype(Value::data);
@@ -61,7 +62,8 @@ public:
 
 	const ValueData& fetch(const Identifier& identifier, const storage::Key key);
 	bool isDirty(const Identifier& identifier, const storage::Key key);
-	bool isSyncDirty(const Identifier& identifier, const storage::Key key); 
+	void setLoaded(const Identifier& identifier, const storage::Key key); 
+	bool hasLoaded(const Identifier& identifier, const storage::Key key); 
 	void store(const Identifier& identifier, const storage::Key key, const ValueData& data);
 	std::string getStringOfAllKeysInStorage();
 
