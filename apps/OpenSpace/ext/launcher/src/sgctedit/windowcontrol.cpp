@@ -356,7 +356,7 @@ QWidget* WindowControl::createPlanarWidget() {
 
     _planar.fovH = new QDoubleSpinBox;
     _planar.fovH->setMinimum(0.0);
-    _planar.fovH->setMaximum(180.0);
+    _planar.fovH->setMaximum(179.0);
     _planar.fovH->setValue(DefaultFovH);
     _planar.fovH->setEnabled(false);
     _planar.fovH->setToolTip(hfovTip);
@@ -373,12 +373,12 @@ QWidget* WindowControl::createPlanarWidget() {
     layout->addWidget(fovV, 2, 0);
 
     _planar.fovV = new QDoubleSpinBox;
-    _planar.fovH->setMinimum(0.0);
-    _planar.fovH->setMaximum(90.0);
-    _planar.fovH->setValue(DefaultFovV);
+    _planar.fovV->setMinimum(0.0);
+    _planar.fovV->setMaximum(179.0);
+    _planar.fovV->setValue(DefaultFovV);
     _planar.fovV->setEnabled(false);
     _planar.fovV->setToolTip(vfovTip);
-    _planar.fovH->setSizePolicy(
+    _planar.fovV->setSizePolicy(
         QSizePolicy::MinimumExpanding,
         QSizePolicy::MinimumExpanding
     );
