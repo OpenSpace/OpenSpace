@@ -62,8 +62,8 @@ void eventLoop(std::weak_ptr<NetworkState> networkStateWeakPtr) {
 void serverLoop(std::weak_ptr<NetworkState> networkStateWeakPtr) {
 	while (!networkStateWeakPtr.expired()) {
 		auto networkState = networkStateWeakPtr.lock();
-		if (networkState->shouldStopThreads) break;
-		std::unique_ptr<ghoul::io::TcpSocket> socket = networkState->server.awaitPendingTcpSocket();
+		if (networkState->shouldStopThreads|| !networkState->server || !networkState->server->isListening()) break;
+		std::unique_ptr<ghoul::io::TcpSocket> socket = networkState->server->awaitPendingTcpSocket();
 
 		if (!socket) return;
 
@@ -91,38 +91,38 @@ std::shared_ptr<NetworkState> serve(const int port) {
 	auto networkState = std::make_shared<NetworkState>();
 
 	// 4700, is the defualt port where the tcp socket will be opened to the ext. software
-	networkState->server.listen(port);
+	networkState->server = std::make_unique<ghoul::io::TcpSocketServer>();
+	networkState->server->listen(port);
 
 	std::weak_ptr<NetworkState> networkStateWeakPtr = networkState;
-	networkState->serverThread = std::thread{ [networkStateWeakPtr] {
+	networkState->serverThread = std::make_unique<std::thread>([networkStateWeakPtr] {
 		serverLoop(networkStateWeakPtr);
-	} };
+	});
 
-	networkState->eventLoopThread = std::thread{ [networkStateWeakPtr] {
+	networkState->eventLoopThread = std::make_unique<std::thread>([networkStateWeakPtr] {
 		eventLoop(networkStateWeakPtr);
-	} };
+	});
 
 	return networkState;
 };
 
 void stopServer(std::shared_ptr<NetworkState> networkState) {
+	if (networkState->hasStopped) return;
+	networkState->hasStopped = true;
+
 	networkState->shouldStopThreads = true;
 
 	networkState->incomingMessages.interrupt();
 
-	networkState->server.close();
+	networkState->server->close();
 	
 	{
 		std::lock_guard guardSoftwareConnections(networkState->softwareConnectionsMutex);
 		networkState->softwareConnections.clear();
 	}
 
-	if (networkState->serverThread.joinable()) {
-		networkState->serverThread.join();
-	}
-	if (networkState->eventLoopThread.joinable()) {
-		networkState->eventLoopThread.join();
-	}
+	networkState->serverThread->join();
+	networkState->eventLoopThread->join();
 }
 
 SoftwareConnectionLostError::SoftwareConnectionLostError(const std::string& msg)

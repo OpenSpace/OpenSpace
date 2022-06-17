@@ -295,7 +295,7 @@ void handleVelocityDataMessage(const std::vector<char>& message, std::shared_ptr
         simp::readPointData(message, messageOffset, nVelocities, dimensionality, velocities);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format("Error when reading point data message: {}", err.message));
+        LERROR(fmt::format("Error when reading velocity data message: {}", err.message));
         return;
     }
 

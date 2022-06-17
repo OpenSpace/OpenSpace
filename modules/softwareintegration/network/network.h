@@ -48,15 +48,16 @@ struct IncomingMessage {
 };
 
 struct NetworkState {
-	ghoul::io::TcpSocketServer server;
+	std::unique_ptr<ghoul::io::TcpSocketServer> server;
 
-	std::thread serverThread;
-	std::thread eventLoopThread;
+	std::unique_ptr<std::thread> serverThread;
+	std::unique_ptr<std::thread> eventLoopThread;
 
 	std::unordered_map<size_t, std::shared_ptr<SoftwareConnection>> softwareConnections{};
 	std::mutex softwareConnectionsMutex{};
 
 	std::atomic_bool shouldStopThreads{ false };
+	std::atomic_bool hasStopped{ false };
 
 	InterruptibleConcurrentQueue<IncomingMessage> incomingMessages{};
 };
