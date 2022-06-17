@@ -261,7 +261,6 @@ void handlePointDataMessage(const std::vector<char>& message, std::shared_ptr<So
 }
 
 void handleVelocityDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
-    LWARNING(fmt::format("handleVelocityDataMessage()"));
     size_t messageOffset = 0;
     std::string identifier;
 

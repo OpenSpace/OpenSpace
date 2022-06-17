@@ -43,8 +43,6 @@
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
 
-int TIME_COUNTER = 0;
-
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
