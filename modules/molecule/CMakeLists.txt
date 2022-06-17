@@ -33,6 +33,8 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
   moleculemodule.cpp
   rendering/renderablemolecule.cpp
+  rendering/viamd/coloring.cpp
+  rendering/viamd/color_utils.cpp
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})
