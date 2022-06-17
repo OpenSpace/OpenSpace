@@ -26,54 +26,45 @@
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
 
 #include <modules/softwareintegration/network/softwareconnection.h>
-#include <modules/softwareintegration/pointdatamessagehandler.h>
-#include <modules/softwareintegration/interruptibleconcurrentqueue.h>
 #include <modules/softwareintegration/utils.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
+#include <modules/softwareintegration/interruptibleconcurrentqueue.h>
 
-namespace openspace {
+#include <functional>
+#include <unordered_map>
 
-class NetworkEngine {
+namespace openspace::softwareintegration::network {
+
+class SoftwareConnectionLostError : public ghoul::RuntimeError {
 public:
-	NetworkEngine(const int port = 4700);
-	~NetworkEngine();
-
-	struct IncomingMessage {
-		size_t connection_id;
-		SoftwareConnection::Message message{ softwareintegration::simp::MessageType::Unknown };
-	};
-
-	void start();
-	void stop();
-	void postSync();
-
-private:
-	void handleNewSoftwareConnections();
-	void handleIncomingMessage(IncomingMessage incomingMessage);
-	void peerEventLoop(size_t connection_id);
-	void eventLoop();
-
-	// The destuction of the object a shared_ptr is pointing to, occurs when the pointer no longer has any owners 
-	std::shared_ptr<SoftwareConnection> getSoftwareConnection(size_t id);
-
-	std::unordered_map<size_t, std::shared_ptr<SoftwareConnection>> _softwareConnections;
-	std::mutex _softwareConnectionsMutex;
-		
-	ghoul::io::TcpSocketServer _socketServer;
-	std::thread _serverThread;
-    std::atomic_bool _shouldStopServerThread = false;
-	std::thread _eventLoopThread;
-    std::atomic_bool _shouldStopEventThread = false;
-	
-
-	const int _port;
-
-    // Message handlers
-	PointDataMessageHandler _pointDataMessageHandler;
-
-	InterruptibleConcurrentQueue<IncomingMessage> _incomingMessages;
+    explicit SoftwareConnectionLostError(const std::string& msg);
 };
 
-} // namespace openspace
+struct IncomingMessage {
+	std::weak_ptr<SoftwareConnection> connection;
+	softwareintegration::simp::MessageType type{ softwareintegration::simp::MessageType::Unknown };
+	std::vector<char> content{};
+	std::string rawMessageType{""};
+};
+
+struct NetworkState {
+	ghoul::io::TcpSocketServer server;
+
+	std::thread serverThread;
+	std::thread eventLoopThread;
+
+	std::unordered_map<size_t, std::shared_ptr<SoftwareConnection>> softwareConnections{};
+	std::mutex softwareConnectionsMutex{};
+
+	std::atomic_bool shouldStopThreads{ false };
+
+	InterruptibleConcurrentQueue<IncomingMessage> incomingMessages{};
+};
+
+std::shared_ptr<NetworkState> serve(const int port = 4700);
+
+void stopServer(std::shared_ptr<NetworkState> networkState);
+
+} // namespace openspace::softwareintegration::network
 
 #endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__

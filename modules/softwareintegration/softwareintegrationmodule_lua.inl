@@ -22,64 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
+#include <modules/softwareintegration/assethelper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/windowdelegate.h>
 
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
+namespace {
 
-namespace openspace {
+/**
+ * Loads the data associated to the loaded session into the syncable data storage in the
+ * Software Integration Module
+ *
+ */
+[[codegen::luawrap]] std::string loadSessionData(std::string filePath) {
+    using namespace openspace;
 
-class SyncBuffer {
-public:
-    SyncBuffer(size_t n);
+    if (!global::windowDelegate->isMaster()) {
+        throw ghoul::lua::LuaError("Not on master...");
+    }
 
-    ~SyncBuffer();
+    auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
+    if (!softwareIntegrationModule) {
+        throw ghoul::lua::LuaError("Module not found...");
+    }
 
-    void encode(const std::string& s);
+    std::string errorMessage;
+    if (!AssetHelper::loadSessionData(softwareIntegrationModule, filePath, errorMessage)) {
+        return errorMessage;
+    }
+    else {
+        return "Success";
+    }
+}
 
-    template <typename T>
-    void encode(const T& v);
+/**
+ * Saves the current state of the Software Integration Module
+ *
+ */
+[[codegen::luawrap]] std::string saveSession(std::string wantedFilePath) {
+    using namespace openspace;
 
-    template <typename T>
-    void encode(std::vector<T>& value);
+    if (!global::windowDelegate->isMaster()) {
+        throw ghoul::lua::LuaError("Not on master...");
+    }
 
-    std::string decode();
+    std::string errorMessage;
+    if (!AssetHelper::saveSession(wantedFilePath, errorMessage)) {
+        LERRORC("SoftwareIntegration::saveSession", errorMessage);
+        return errorMessage;
+    }
+    else {
+        return "Success";
+    }
+}
 
-    template <typename T>
-    T decode();
+#include "softwareintegrationmodule_lua_codegen.cpp"
 
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
-
-    template <typename T>
-    void decode(T& value);
-
-    template <typename T>
-    void decode(std::vector<T>& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
-};
-
-} // namespace openspace
-
-#include "syncbuffer.inl"
-
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__
+}  // namespace

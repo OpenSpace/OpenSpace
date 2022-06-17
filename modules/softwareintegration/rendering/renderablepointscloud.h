@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,7 +62,7 @@ public:
 
     static documentation::Documentation Documentation();
 
-protected:
+private:
     void loadData(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadColormap(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadColormapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
@@ -87,6 +87,7 @@ protected:
         linearSizeEnabled, velocityNaNMode, motionEnabled, time
     ) _uniformCache;
 
+    properties::StringProperty _name;
     properties::FloatProperty _size;
     properties::Vec4Property _color;
     properties::OptionProperty _sizeOption;
@@ -105,6 +106,7 @@ protected:
     properties::StringProperty _velocityDistanceUnit;
     properties::StringProperty _velocityTimeUnit;
     properties::IntProperty _velocityNaNMode;
+    
     
     std::optional<std::string> _identifier = std::nullopt;
 

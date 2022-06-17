@@ -42,6 +42,21 @@ void SyncBuffer::encode(const T& v) {
 }
 
 template <typename T>
+void SyncBuffer::encode(std::vector<T>& value) {
+    const size_t size = sizeof(T) * value.size();
+
+    encode(static_cast<uint32_t>(value.size()));
+
+    size_t anticpatedBufferSize = _encodeOffset + size;
+    if (anticpatedBufferSize >= _n) {
+        _dataStream.resize(anticpatedBufferSize);
+    }
+
+    std::memcpy(_dataStream.data() + _encodeOffset, value.data(), size);
+    _encodeOffset += size;
+}
+
+template <typename T>
 T SyncBuffer::decode() {
     const size_t size = sizeof(T);
     ghoul_assert(_decodeOffset + size < _n, "");
@@ -58,5 +73,17 @@ void SyncBuffer::decode(T& value) {
     std::memcpy(&value, _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
 }
+
+template <typename T>
+void SyncBuffer::decode(std::vector<T>& value) {
+    uint32_t size;
+    decode(size);
+    value.resize(size);
+    const size_t sizeInBytes = sizeof(T) * size;
+    ghoul_assert(_decodeOffset + sizeInBytes < _n, "");
+    std::memcpy(value.data(), _dataStream.data() + _decodeOffset, sizeInBytes);
+    _decodeOffset += sizeInBytes;
+}
+
 
 } // namespace openspace

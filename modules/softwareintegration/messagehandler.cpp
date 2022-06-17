@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/softwareintegration/pointdatamessagehandler.h>
+#include <modules/softwareintegration/messagehandler.h>
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 #include <modules/softwareintegration/utils.h>
 
@@ -41,14 +41,188 @@
 #include <iomanip>
 
 namespace {
-    constexpr const char* _loggerCat = "PDatMessHand";
+
+constexpr const char* _loggerCat = "PDatMessHand";
+
 } // namespace
 
-namespace openspace {
+namespace openspace::softwareintegration::network {
 
-using namespace softwareintegration;
+// Anonymous namespace
+namespace {
 
-void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+CallbackMap callbacks{};
+std::mutex callbacksMutex{};
+size_t callbacksRetries{0};
+
+const Renderable* getRenderable(const std::string& identifier) {
+    return renderable(identifier);
+}
+
+void checkRenderable(
+    const std::vector<char>& message, size_t& messageOffset,
+    std::shared_ptr<SoftwareConnection> connection, std::string& identifier
+) {
+    std::string guiName;
+
+    try {
+        // The following order of creating variables is the exact order they are received
+        // in the message. If the order is not the same, the global variable
+        // 'message offset' will be wrong
+        identifier = simp::readString(message, messageOffset);
+        guiName = simp::readString(message, messageOffset);
+    }
+    catch (const simp::SimpError& err) {
+        LERROR(fmt::format("Error when reading identifier and guiName from message: {}", err.message));
+        return;
+    }
+
+    connection->addSceneGraphNode(identifier);
+
+    auto r = renderable(identifier);
+    bool hasCallbacks = false;
+    {
+        std::lock_guard guard(callbacksMutex);
+        hasCallbacks = callbacks.count(identifier) > 0;
+    }
+    if (!r && !hasCallbacks) {
+        LDEBUG(fmt::format("No renderable with identifier '{}' was found. Creating it.", identifier));
+
+        // Create a renderable, since it didn't exist
+        using namespace std::string_literals;
+        ghoul::Dictionary renderablePointsCloud;
+        renderablePointsCloud.setValue("Type", "RenderablePointsCloud"s);
+        renderablePointsCloud.setValue("Identifier", identifier);
+        renderablePointsCloud.setValue("Name", guiName);
+
+        ghoul::Dictionary gui;
+        gui.setValue("Name", guiName);
+        gui.setValue("Path", "/Software Integration"s);
+
+        ghoul::Dictionary node;
+        node.setValue("Identifier", identifier);
+        node.setValue("Renderable", renderablePointsCloud);
+        node.setValue("GUI", gui);
+
+        global::scriptEngine->queueScript(
+            "openspace.addSceneGraphNode(" + ghoul::formatLua(node) + ")"
+            "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)", // Reload WebGUI so that SoftwareIntegration GUI appears
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+}
+
+void addCallback(
+    const std::string& identifier,
+    const Callback& newCallback
+) {
+    std::lock_guard guard(callbacksMutex);
+    auto it = callbacks.find(identifier);
+    if (it == callbacks.end()) {
+        CallbackList newCallbackList{ newCallback };
+        callbacks.emplace(identifier, newCallbackList);
+    }
+    else {
+        it->second.push_back(newCallback);
+    }
+}
+
+void onFixedColorChange(
+    properties::Property* property,
+    const std::string& identifier,
+    std::shared_ptr<SoftwareConnection> connection
+) {
+    if (!connection->isConnected()) {
+        connection->removePropertySubscription(property->identifier(), identifier);
+        return;
+    }
+
+    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
+    // if (!propertySubscription) return;
+    // if (!propertySubscription->shouldSendMessage) {
+    //     propertySubscription->shouldSendMessage = true;
+    //     return;
+    // }
+
+    glm::vec4 color = std::any_cast<glm::vec4>(property->get());
+    
+    const std::string message = simp::formatColorMessage(identifier, color);
+    connection->sendMessage(message);
+}
+
+void onOpacityChange(
+    properties::Property* property,
+    const std::string& identifier,
+    std::shared_ptr<SoftwareConnection> connection
+) {
+    if (!connection->isConnected()) {
+        connection->removePropertySubscription(property->identifier(), identifier);
+        return;
+    }
+
+    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
+    // if (!propertySubscription) return;
+    // if (!propertySubscription->shouldSendMessage) {
+    //     propertySubscription->shouldSendMessage = true;
+    //     return;
+    // }
+
+    float value = std::any_cast<float>(property->get());
+    std::string hex_value = simp::floatToHex(value);
+
+    const std::string message = simp::formatUpdateMessage(simp::MessageType::Opacity, identifier, hex_value);
+    connection->sendMessage(message);
+}
+
+void onFixedPointSizeChange(
+    properties::Property* property,
+    const std::string& identifier,
+    std::shared_ptr<SoftwareConnection> connection
+) {
+    if (!connection->isConnected()) {
+        connection->removePropertySubscription(property->identifier(), identifier);
+        return;
+    }
+
+    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
+    // if (!propertySubscription) return;
+    // if (!propertySubscription->shouldSendMessage) {
+    //     propertySubscription->shouldSendMessage = true;
+    //     return;
+    // }
+
+    float value = std::any_cast<float>(property->get());
+    std::string hex_value = simp::floatToHex(value);
+
+    const std::string message = simp::formatUpdateMessage(simp::MessageType::FixedSize, identifier, hex_value);
+    connection->sendMessage(message);
+}
+
+void onVisibilityChange(
+    properties::Property* property,
+    const std::string& identifier,
+    std::shared_ptr<SoftwareConnection> connection
+) {
+    if (!connection->isConnected()) {
+        connection->removePropertySubscription(property->identifier(), identifier);
+        return;
+    }
+
+    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
+    // if (!propertySubscription) return;
+    // if (!propertySubscription->shouldSendMessage) {
+    //     propertySubscription->shouldSendMessage = true;
+    //     return;
+    // }
+
+    bool isVisible = std::any_cast<bool>(property->get());
+    std::string_view visibilityFlag = isVisible ? "T" : "F";
+
+    const std::string message = simp::formatUpdateMessage(simp::MessageType::Visibility, identifier, visibilityFlag);
+    connection->sendMessage(message);
+}
+
+void handlePointDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -86,7 +260,8 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     addCallback(identifier, { reanchorCallback, { storage::Key::DataPoints }, "reanchorCallback" });
 }
 
-void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+void handleVelocityDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+    LWARNING(fmt::format("handleVelocityDataMessage()"));
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -125,8 +300,7 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
     }
 
     // Set units first to make sure they're available when converting during data loading
-    auto velocityUnitsCallback = [this, identifier, velocityDistanceUnitString, 
-                                  velocityTimeUnitString, connection] {
+    auto velocityUnitsCallback = [identifier, velocityDistanceUnitString, velocityTimeUnitString, connection] {
         global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelocityDistanceUnit', \"{}\");",
@@ -148,8 +322,8 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
     // Use the renderable identifier as the data key
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
     module->storeData(identifier, storage::Key::VelocityData, std::move(velocities));
-    
-    auto velocityNaNModeCallback = [this, identifier, velocityNaNMode, connection] {
+
+    auto velocityNaNModeCallback = [identifier, velocityNaNMode, connection] {
         global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.VelocityNaNMode', {});",
@@ -195,7 +369,7 @@ void PointDataMessageHandler::handleVelocityDataMessage(const std::vector<char>&
     );
 }
 
-void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+void handleFixedColorMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -213,7 +387,7 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
     // Create weak_ptr, safer than shared_ptr for lambdas
     std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
 
-    auto setFixedColorCallback = [this, identifier, color, connWeakPtr] {
+    auto setFixedColorCallback = [identifier, color, connWeakPtr] {
         // Get renderable
         auto r = getRenderable(identifier);
         if (!r) {
@@ -258,7 +432,7 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
     addCallback(identifier, { setFixedColorCallback, {}, "setFixedColorCallback" });
 
     // Create and set onChange for color
-    auto onChangeColorCallback = [this, identifier, connWeakPtr] {
+    auto onChangeColorCallback = [identifier, connWeakPtr] {
         // Get renderable
         auto r = getRenderable(identifier);
         if (!r) {
@@ -273,7 +447,7 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
         properties::Property* colorProperty = r->property("Color");
 
         if (!colorProperty || connWeakPtr.expired()) return;
-        auto updateColor = [this, colorProperty, identifier, connWeakPtr] {
+        auto updateColor = [colorProperty, identifier, connWeakPtr] {
             if (!colorProperty || connWeakPtr.expired()) return;
             onFixedColorChange(colorProperty, identifier, connWeakPtr.lock());
         };
@@ -283,7 +457,7 @@ void PointDataMessageHandler::handleFixedColorMessage(const std::vector<char>& m
     addCallback(identifier, { onChangeColorCallback, {}, "onChangeColorCallback" });
 }
 
-void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+void handleColormapMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -325,9 +499,10 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
     module->storeData(identifier, storage::Key::Colormap, std::move(colormap));
 
-    auto colormapLimitsCallback = [this, identifier, min, max, connection] {
+    auto colormapLimitsCallback = [identifier, min, max, connection] {
         // Get renderable
         auto r = getRenderable(identifier);
+        if (!r) return;
 
         properties::Property* colormapMinProperty = r->property("ColormapMin");
         // auto minPropertySub = connection->getPropertySubscription(identifier, colormapMinProperty->identifier());
@@ -364,10 +539,11 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     };
     addCallback(identifier, { colormapLimitsCallback, {}, "colormapLimitsCallback" });
 
-    auto colormapNaNModeCallback = [this, identifier, colormapNaNMode, colormapNaNColor, connection] {
+    auto colormapNaNModeCallback = [identifier, colormapNaNMode, colormapNaNColor, connection] {
         if (colormapNaNMode == simp::ColormapNaNRenderMode::FixedColor) {
             // Get renderable
             auto r = getRenderable(identifier);
+            if (!r) return;
 
             // Get colormapNaNColor of renderable
             properties::Property* colormapNaNColorProperty = r->property("ColormapNaNColor");
@@ -395,7 +571,7 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     };
     addCallback(identifier, { colormapNaNModeCallback, {}, "colormapNaNModeCallback" });
 
-    auto enableColormapCallback = [this, identifier] {
+    auto enableColormapCallback = [identifier] {
         global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
@@ -409,7 +585,7 @@ void PointDataMessageHandler::handleColormapMessage(const std::vector<char>& mes
     addCallback(identifier, { enableColormapCallback, std::move(dataToWaitFor), "enableColormapCallback"  });
 }
 
-void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+void handleAttributeDataMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -449,7 +625,7 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
     std::string callbackDescription = "handleAttributeDataMessage, key=" + storage::getStorageKeyString(key);
     switch (key) {
         case storage::Key::ColormapAttrData : {
-            auto callback = [this, identifier] {
+            auto callback = [identifier] {
                 global::scriptEngine->queueScript(
                     fmt::format(
                         "openspace.setPropertyValueSingle('Scene.{}.Renderable.ColormapEnabled', {});",
@@ -462,7 +638,7 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
             break;
         }
         case storage::Key::LinearSizeAttrData: {
-            auto callback = [this, identifier] {
+            auto callback = [identifier] {
                 global::scriptEngine->queueScript(
                     fmt::format(
                         "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
@@ -479,7 +655,7 @@ void PointDataMessageHandler::handleAttributeDataMessage(const std::vector<char>
     }
 }
 
-void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+void handleOpacityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -497,7 +673,7 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
     // Create weak_ptr, safer than shared_ptr for lambdas
     std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
 
-    auto setOpacityCallback = [this, identifier, opacity, connWeakPtr] {
+    auto setOpacityCallback = [identifier, opacity, connWeakPtr] {
         // Get renderable
         auto r = getRenderable(identifier);
         if (!r) {
@@ -535,7 +711,7 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
     addCallback(identifier, { setOpacityCallback, {}, "setOpacityCallback" });
 
     // Create and set onChange for opacity
-    auto onChangeOpacityCallback = [this, identifier, connWeakPtr] {
+    auto onChangeOpacityCallback = [identifier, connWeakPtr] {
         // Get renderable
         auto r = getRenderable(identifier);
         if (!r) {
@@ -550,7 +726,7 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
         properties::Property* opacityProperty = r->property("Opacity");
         
         if (!opacityProperty || connWeakPtr.expired()) return;
-        auto updateOpacity = [this, opacityProperty, identifier, connWeakPtr] {
+        auto updateOpacity = [opacityProperty, identifier, connWeakPtr] {
             if (!opacityProperty || connWeakPtr.expired()) return;
             onOpacityChange(opacityProperty, identifier, connWeakPtr.lock());
         };
@@ -560,7 +736,7 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
     addCallback(identifier, { onChangeOpacityCallback, {}, "onChangeOpacityCallback" });
 }
 
-void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+void handleFixedPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -578,7 +754,7 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
     // Create weak_ptr, safer than shared_ptr for lambdas
     std::weak_ptr<SoftwareConnection> connWeakPtr{ connection };
 
-    auto setFixedPointSizeCallback = [this, identifier, size, connWeakPtr] {
+    auto setFixedPointSizeCallback = [identifier, size, connWeakPtr] {
         // Get renderable
         auto r = getRenderable(identifier);
         if (!r) {
@@ -626,7 +802,7 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
     addCallback(identifier, { setFixedPointSizeCallback, {}, "setFixedPointSizeCallback" });
     
     // Create and set onChange for point size
-    auto onChangeSizeCallback = [this, identifier, connWeakPtr] {
+    auto onChangeSizeCallback = [identifier, connWeakPtr] {
         // Get renderable
         auto r = getRenderable(identifier);
         if (!r) {
@@ -641,7 +817,7 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
         properties::Property* sizeProperty = r->property("Size");
 
         if (!sizeProperty || connWeakPtr.expired()) return;
-        auto updateSize = [this, sizeProperty, identifier, connWeakPtr] {
+        auto updateSize = [sizeProperty, identifier, connWeakPtr] {
             if (!sizeProperty || connWeakPtr.expired()) return;
             onFixedPointSizeChange(sizeProperty, identifier, connWeakPtr.lock());
         };
@@ -651,7 +827,7 @@ void PointDataMessageHandler::handleFixedPointSizeMessage(const std::vector<char
     addCallback(identifier, { onChangeSizeCallback, {}, "onChangeSizeCallback" });
 }
 
-void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+void handleLinearPointSizeMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -670,9 +846,10 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
         return;
     }
 
-    auto linearSizeCallback = [this, identifier, size, min, max] {
+    auto linearSizeCallback = [identifier, size, min, max] {
         // Get renderable
         auto r = getRenderable(identifier);
+        if (!r) return;
 
         // Get size from renderable
         properties::Property* sizeProperty = r->property("Size");
@@ -716,7 +893,7 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
     };
     addCallback(identifier, { linearSizeCallback, {}, "linearSizeCallback" });
 
-    auto enableLinearSizeCallback = [this, identifier] {
+    auto enableLinearSizeCallback = [identifier] {
         global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.LinearSizeEnabled', {});",
@@ -735,7 +912,7 @@ void PointDataMessageHandler::handleLinearPointSizeMessage(const std::vector<cha
     );
 }
 
-void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
+void handleVisibilityMessage(const std::vector<char>& message, std::shared_ptr<SoftwareConnection> connection) {
     size_t messageOffset = 0;
     std::string identifier;
 
@@ -755,7 +932,7 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
 
     const bool visibility = visibilityMessage == "T";
 
-    auto setVisibilityCallback = [this, identifier, visibility, connWeakPtr] {        
+    auto setVisibilityCallback = [identifier, visibility, connWeakPtr] {        
         // Get renderable
         auto r = getRenderable(identifier);
         if (!r) {
@@ -796,7 +973,7 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
     addCallback(identifier, { setVisibilityCallback, {}, "setVisibilityCallback" });
 
     // Create and set onChange for visibility
-    auto onChangeVisibilityCallback = [this, identifier, connWeakPtr] {
+    auto onChangeVisibilityCallback = [identifier, connWeakPtr] {
         // Get renderable
         auto r = getRenderable(identifier);
         if (!r) {
@@ -811,7 +988,7 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
         properties::Property* visibilityProperty = r->property("Enabled");
         
         if (!visibilityProperty || connWeakPtr.expired()) return;
-        auto toggleVisibility = [this, visibilityProperty, identifier, connWeakPtr] {
+        auto toggleVisibility = [visibilityProperty, identifier, connWeakPtr] {
             if (!visibilityProperty || connWeakPtr.expired()) return;
             onVisibilityChange(visibilityProperty, identifier, connWeakPtr.lock());    
         };
@@ -821,7 +998,7 @@ void PointDataMessageHandler::handleVisibilityMessage(const std::vector<char>& m
     addCallback(identifier, { onChangeVisibilityCallback, {}, "onChangeVisibilityCallback" });
 }
 
-void PointDataMessageHandler::handleRemoveSGNMessage(const std::vector<char>& message,std::shared_ptr<SoftwareConnection> connection) {
+void handleRemoveSGNMessage(const std::vector<char>& message,std::shared_ptr<SoftwareConnection> connection) {
 	size_t messageOffset = 0;
     std::string identifier;
 
@@ -854,12 +1031,95 @@ void PointDataMessageHandler::handleRemoveSGNMessage(const std::vector<char>& me
 	LDEBUG(fmt::format("Scene graph node '{}' removed.", identifier));
 }
 
-void PointDataMessageHandler::postSync() {
-    std::lock_guard guard(_onceNodeExistsCallbacksMutex);
+} // namespace
+
+void handleMessage(IncomingMessage& incomingMessage) {
+	if(incomingMessage.connection.expired()) {
+		LDEBUG(fmt::format("Trying to handle message from disconnected peer. Aborting."));
+		return;
+	}
+
+	auto connectionPtr = incomingMessage.connection.lock();
+
+	const simp::MessageType messageType = incomingMessage.type;
+	std::vector<char>& message = incomingMessage.content;
+
+	switch (messageType) {
+		case simp::MessageType::Connection: {
+			LDEBUG(fmt::format("Message recieved... Connection: {}", connectionPtr->id()));
+			size_t offset = 0;
+			const std::string software = simp::readString(message, offset);
+
+			// Send back message to software to complete handshake
+			connectionPtr->sendMessage(simp::formatConnectionMessage(software));
+			LINFO(fmt::format("OpenSpace has connected with {} through socket", software));
+			break;
+		}
+		case simp::MessageType::PointData: {
+			LDEBUG("Message recieved.. Point data");
+			handlePointDataMessage(message, connectionPtr);
+			break;
+		}
+		case simp::MessageType::VelocityData: {
+			LDEBUG("Message recieved... Velocity data");
+			handleVelocityDataMessage(message, connectionPtr);
+			break;
+		}
+		case simp::MessageType::RemoveSceneGraphNode: {
+			LDEBUG(fmt::format("Message recieved.. Remove SGN"));
+			handleRemoveSGNMessage(message, connectionPtr);
+			break;
+		}
+		case simp::MessageType::Color: {
+			LDEBUG(fmt::format("Message recieved.. New color"));
+			handleFixedColorMessage(message, connectionPtr);
+			break;
+		}
+		case simp::MessageType::Colormap: {
+			LDEBUG(fmt::format("Message recieved.. New colormap"));
+			handleColormapMessage(message, connectionPtr);
+			break;
+		}
+		case simp::MessageType::AttributeData: {
+			LDEBUG(fmt::format("Message recieved.. New attribute data"));
+			handleAttributeDataMessage(message, connectionPtr);
+			break;
+		}
+		case simp::MessageType::Opacity: {
+			LDEBUG(fmt::format("Message recieved.. New Opacity"));
+			handleOpacityMessage(message, connectionPtr);
+			break;
+		}
+		case simp::MessageType::FixedSize: {
+			LDEBUG(fmt::format("Message recieved.. New size"));
+			handleFixedPointSizeMessage(message, connectionPtr);
+			break;
+		}
+		case simp::MessageType::LinearSize: {
+			LDEBUG(fmt::format("Message recieved.. New linear size"));
+			handleLinearPointSizeMessage(message, connectionPtr);
+			break;
+		}
+		case simp::MessageType::Visibility: {
+			LDEBUG(fmt::format("Message recieved.. New visibility"));
+			handleVisibilityMessage(message, connectionPtr);
+			break;
+		}
+		default: {
+			LERROR(fmt::format(
+				"Unsupported message type: {}", incomingMessage.rawMessageType
+			));
+			break;
+		}
+	}
+}
+
+void postSyncCallbacks() {
+    std::lock_guard guard(callbacksMutex);
     // Check if the scene graph node has been created.
     // If so, call the corresponding callback functions to set up any subscriptions
-    auto callbackMapIt = _onceNodeExistsCallbacks.begin();
-    while (callbackMapIt != _onceNodeExistsCallbacks.end()) {
+    auto callbackMapIt = callbacks.begin();
+    while (callbackMapIt != callbacks.end()) {
         auto& [identifier, callbackList] = *callbackMapIt;
         
         try {
@@ -891,193 +1151,19 @@ void PointDataMessageHandler::postSync() {
             }
 
             if (callbackList.empty()) {
-                callbackMapIt = _onceNodeExistsCallbacks.erase(callbackMapIt);
-                _onceNodeExistsCallbacksRetries = 0;
+                callbackMapIt = callbacks.erase(callbackMapIt);
+                callbacksRetries = 0;
             } else {
                 callbackMapIt++;
             }
         }
         catch(std::exception &err) {
-            ++_onceNodeExistsCallbacksRetries;
-            ghoul_assert(_onceNodeExistsCallbacksRetries < 10, "Too many callback retries");
+            ++callbacksRetries;
+            ghoul_assert(callbacksRetries < 10, "Too many callback retries");
             LDEBUG(fmt::format("Error when trying to run callback: {}", err.what()));
             break;
         }
     }
 }
 
-const Renderable* PointDataMessageHandler::getRenderable(const std::string& identifier) {
-    return renderable(identifier);
-}
-
-void PointDataMessageHandler::checkRenderable(
-    const std::vector<char>& message, size_t& messageOffset,
-    std::shared_ptr<SoftwareConnection> connection, std::string& identifier
-) {
-    std::string guiName;
-
-    try {
-        // The following order of creating variables is the exact order they are received
-        // in the message. If the order is not the same, the global variable
-        // 'message offset' will be wrong
-        identifier = simp::readString(message, messageOffset);
-        guiName = simp::readString(message, messageOffset);
-    }
-    catch (const simp::SimpError& err) {
-        LERROR(fmt::format("Error when reading identifier and guiName from message: {}", err.message));
-        return;
-    }
-
-    connection->addSceneGraphNode(identifier);
-
-    const Renderable* r = renderable(identifier);
-    bool hasCallbacks = false;
-    {
-        std::lock_guard guard(_onceNodeExistsCallbacksMutex);
-        hasCallbacks = _onceNodeExistsCallbacks.count(identifier) > 0;
-    }
-    if (!r && !hasCallbacks) {
-        LDEBUG(fmt::format("No renderable with identifier '{}' was found. Creating it.", identifier));
-
-        // Create a renderable, since it didn't exist
-        using namespace std::string_literals;
-        ghoul::Dictionary renderablePointsCloud;
-        renderablePointsCloud.setValue("Type", "RenderablePointsCloud"s);
-        renderablePointsCloud.setValue("Identifier", identifier);
-
-        ghoul::Dictionary gui;
-        gui.setValue("Name", guiName);
-        gui.setValue("Path", "/Software Integration"s);
-
-        ghoul::Dictionary node;
-        node.setValue("Identifier", identifier);
-        node.setValue("Renderable", renderablePointsCloud);
-        node.setValue("GUI", gui);
-
-        global::scriptEngine->queueScript(
-            "openspace.addSceneGraphNode(" + ghoul::formatLua(node) + ")"
-            "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)", // Reload WebGUI so that SoftwareIntegration GUI appears
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-}
-
-void PointDataMessageHandler::addCallback(
-    const std::string& identifier,
-    const Callback& newCallback
-) {
-    std::lock_guard guard(_onceNodeExistsCallbacksMutex);
-    auto it = _onceNodeExistsCallbacks.find(identifier);
-    if (it == _onceNodeExistsCallbacks.end()) {
-        CallbackList newCallbackList{ newCallback };
-        _onceNodeExistsCallbacks.emplace(identifier, newCallbackList);
-    }
-    else {
-        it->second.push_back(newCallback);
-    }
-}
-
-void PointDataMessageHandler::onFixedColorChange(
-    properties::Property* property,
-    const std::string& identifier,
-    std::shared_ptr<SoftwareConnection> connection
-) {
-    if (!connection->isConnected()) {
-        SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
-            connection, property->identifier(), identifier
-        );
-        return;
-    }
-
-    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
-    // if (!propertySubscription) return;
-    // if (!propertySubscription->shouldSendMessage) {
-    //     propertySubscription->shouldSendMessage = true;
-    //     return;
-    // }
-
-    glm::vec4 color = std::any_cast<glm::vec4>(property->get());
-    
-    const std::string message = simp::formatColorMessage(identifier, color);
-    connection->sendMessage(message);
-}
-
-void PointDataMessageHandler::onOpacityChange(
-    properties::Property* property,
-    const std::string& identifier,
-    std::shared_ptr<SoftwareConnection> connection
-) {
-    if (!connection->isConnected()) {
-        SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
-            connection, property->identifier(), identifier
-        );
-        return;
-    }
-
-    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
-    // if (!propertySubscription) return;
-    // if (!propertySubscription->shouldSendMessage) {
-    //     propertySubscription->shouldSendMessage = true;
-    //     return;
-    // }
-
-    float value = std::any_cast<float>(property->get());
-    std::string hex_value = simp::floatToHex(value);
-
-    const std::string message = simp::formatUpdateMessage(simp::MessageType::Opacity, identifier, hex_value);
-    connection->sendMessage(message);
-}
-
-void PointDataMessageHandler::onFixedPointSizeChange(
-    properties::Property* property,
-    const std::string& identifier,
-    std::shared_ptr<SoftwareConnection> connection
-) {
-    if (!connection->isConnected()) {
-        SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
-            connection, property->identifier(), identifier
-        );
-        return;
-    }
-
-    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
-    // if (!propertySubscription) return;
-    // if (!propertySubscription->shouldSendMessage) {
-    //     propertySubscription->shouldSendMessage = true;
-    //     return;
-    // }
-
-    float value = std::any_cast<float>(property->get());
-    std::string hex_value = simp::floatToHex(value);
-
-    const std::string message = simp::formatUpdateMessage(simp::MessageType::FixedSize, identifier, hex_value);
-    connection->sendMessage(message);
-}
-
-void PointDataMessageHandler::onVisibilityChange(
-    properties::Property* property,
-    const std::string& identifier,
-    std::shared_ptr<SoftwareConnection> connection
-) {
-    if (!connection->isConnected()) {
-        SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
-            connection, property->identifier(), identifier
-        );
-        return;
-    }
-
-    // auto propertySubscription = connection->getPropertySubscription(identifier, property->identifier());
-    // if (!propertySubscription) return;
-    // if (!propertySubscription->shouldSendMessage) {
-    //     propertySubscription->shouldSendMessage = true;
-    //     return;
-    // }
-
-    bool isVisible = std::any_cast<bool>(property->get());
-    std::string_view visibilityFlag = isVisible ? "T" : "F";
-
-    const std::string message = simp::formatUpdateMessage(simp::MessageType::Visibility, identifier, visibilityFlag);
-    connection->sendMessage(message);
-}
-
-} // namespace openspace
+} // namespace openspace::softwareintegration::messagehandler

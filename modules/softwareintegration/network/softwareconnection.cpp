@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <modules/softwareintegration/network/softwareconnection.h>
 
+#include <modules/softwareintegration/network/network.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>
@@ -39,10 +40,6 @@ namespace openspace {
 
 std::atomic_size_t SoftwareConnection::_nextConnectionId = 1;
 
-SoftwareConnection::SoftwareConnectionLostError::SoftwareConnectionLostError(const std::string& msg)
-    : ghoul::RuntimeError(fmt::format("{}{}", "Software connection lost", msg), "SoftwareConnection")
-{}
-
 SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
     : _id{ _nextConnectionId++ }, _socket{ std::move(socket) }, _sceneGraphNodes{},
     _thread{}, _shouldStopThread{ false }
@@ -52,7 +49,7 @@ SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> soc
 
 SoftwareConnection::SoftwareConnection(SoftwareConnection&& sc)
 	: _id{ std::move(sc._id) }, _socket{ std::move(sc._socket) },
-    _isConnected{ sc._isConnected }, _sceneGraphNodes{ std::move(sc._sceneGraphNodes) },
+    _sceneGraphNodes{ std::move(sc._sceneGraphNodes) },
     _thread{}, _shouldStopThread{ false }
 {}
 
@@ -61,16 +58,13 @@ SoftwareConnection::~SoftwareConnection() {
     // destructor is called when disconnecting external
     // since NetworkEngine and MessageHandler has
     // shared_ptrs to SoftwareConnection, which can cause
-    // bugs if not handled properly. 
+    // bugs if not handled properly.
     // Tips: use weak_ptr instead of shared_ptr in callbacks.
     LDEBUG(fmt::format("Removing software connection {}", _id));
 
-    if (!_isConnected) return;
-    _isConnected = false;
-
-    if (_socket) {
-        _socket->disconnect();
-    }
+    _shouldStopThread = true;
+    _thread.detach();
+	disconnect();
 }
 
 void SoftwareConnection::addPropertySubscription(
@@ -199,8 +193,7 @@ void SoftwareConnection::removePropertySubscriptions(const std::string& identifi
     _subscribedProperties.erase(propertySubscriptions);
 }
 
-void SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscription(
-    std::shared_ptr<SoftwareConnection> connectionPtr,
+void SoftwareConnection::removePropertySubscription(
     const std::string& propertyName,
     const std::string& identifier
 ) {
@@ -224,8 +217,8 @@ void SoftwareConnection::PointDataMessageHandlerFriends::removePropertySubscript
 
     auto property = r->property(propertyName);
 
-    auto propertySubscriptions = connectionPtr->_subscribedProperties.find(identifier);
-    if (propertySubscriptions != connectionPtr->_subscribedProperties.end()) {
+    auto propertySubscriptions = _subscribedProperties.find(identifier);
+    if (propertySubscriptions != _subscribedProperties.end()) {
         // At least one property have been subscribed to on this SGN
         auto propertySubscription = propertySubscriptions->second.find(propertyName);
         if (propertySubscription != propertySubscriptions->second.end()) {
@@ -246,11 +239,11 @@ void SoftwareConnection::disconnect() {
 }
 
 bool SoftwareConnection::isConnected() const {
-    return _isConnected && _socket && _socket->isConnected();
+    return _socket && _socket->isConnected();
 }
 
 bool SoftwareConnection::isConnectedOrConnecting() const {
-    return _isConnected && _socket && (_socket->isConnected() || _socket->isConnecting());
+    return _socket && (_socket->isConnected() || _socket->isConnecting());
 }
 
 bool SoftwareConnection::sendMessage(const std::string& message) {
@@ -285,7 +278,51 @@ void SoftwareConnection::removeSceneGraphNode(const std::string& identifier) {
     }
 }
 
-SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
+size_t SoftwareConnection::id() {
+	return _id;
+}
+
+void SoftwareConnection::setThread(std::thread& t) {
+	_thread = std::move(t);
+}
+
+ghoul::io::TcpSocket* SoftwareConnection::socket() {
+    return _socket.get();
+}
+
+namespace softwareintegration::network::connection {
+
+void eventLoop(
+	std::weak_ptr<SoftwareConnection> connectionWeakPtr,
+	std::weak_ptr<NetworkState> networkStateWeakPtr
+) {
+	while (!connectionWeakPtr.expired()) {
+		auto connectionPtr = connectionWeakPtr.lock();
+		if (connectionPtr->_shouldStopThread) break;
+
+		try {
+			IncomingMessage m = receiveMessageFromSoftware(connectionPtr);
+			if (networkStateWeakPtr.expired()) break;
+			networkStateWeakPtr.lock()->incomingMessages.push(m);
+		}
+		catch (const SoftwareConnectionLostError& err) {
+			if (!networkStateWeakPtr.expired()
+				& (!connectionPtr->_shouldStopThread || !connectionPtr->isConnectedOrConnecting())
+			) {
+				LDEBUG(fmt::format("Connection lost to {}: {}", connectionPtr->id(), err.message));
+				auto networkState = networkStateWeakPtr.lock();
+				if (networkState->softwareConnections.count(connectionPtr->id())) {
+					networkState->softwareConnections.erase(connectionPtr->id());
+				}
+			}
+			break;
+		}
+	}
+}
+
+IncomingMessage receiveMessageFromSoftware(
+    std::shared_ptr<SoftwareConnection> connectionPtr
+) {
     // Header consists of version (3 char), message type (4 char) & subject size (15 char)
     size_t headerSize = 22 * sizeof(char);
 
@@ -294,7 +331,7 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
     std::vector<char> subjectBuffer;
 
     // Receive the header data
-    if (!_socket->get(headerBuffer.data(), headerSize)) {
+    if (!connectionPtr->socket()->get(headerBuffer.data(), headerSize)) {
         throw SoftwareConnectionLostError("Failed to read header from socket. Disconnecting.");
     }
 
@@ -329,34 +366,16 @@ SoftwareConnection::Message SoftwareConnection::receiveMessageFromSoftware() {
     auto typeEnum = softwareintegration::simp::getMessageType(type);
 
     // Receive the message data
-    if (typeEnum != softwareintegration::simp::MessageType::InternalDisconnection && typeEnum != softwareintegration::simp::MessageType::Unknown) {
+    if (typeEnum != softwareintegration::simp::MessageType::Unknown) {
         subjectBuffer.resize(subjectSize);
-        if (!_socket->get(subjectBuffer.data(), subjectSize)) {
+        if (!connectionPtr->socket()->get(subjectBuffer.data(), subjectSize)) {
             throw SoftwareConnectionLostError("Failed to read message from socket. Disconnecting.");
         }
     }
 
-    return Message{ typeEnum, subjectBuffer, type };
+    return { connectionPtr, typeEnum, subjectBuffer, type };
 }
 
-bool SoftwareConnection::shouldStopThread() {
-	return _shouldStopThread;
-}
-
-size_t SoftwareConnection::id() {
-	return _id;
-}
-
-void SoftwareConnection::setThread(std::thread& t) {
-	_thread = std::move(t);
-}
-
-void SoftwareConnection::NetworkEngineFriends::stopThread(std::shared_ptr<SoftwareConnection> connectionPtr) {
-	connectionPtr->_shouldStopThread = true;
-	connectionPtr->disconnect();
-	if (connectionPtr->_thread.joinable()) {
-		connectionPtr->_thread.join();
-	}
-}
+} // namespace softwareintegration::network::connection
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,14 +26,17 @@
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-
-#include <modules/softwareintegration/network/networkengine.h>
 #include <modules/softwareintegration/syncablefloatdatastorage.h>
 #include <openspace/documentation/documentation.h>
+#include <modules/softwareintegration/network/network.h>
 
 namespace openspace {
 
+class AssetHelper;
+
 class SoftwareIntegrationModule : public OpenSpaceModule {
+    friend class AssetHelper;
+
 public:
     constexpr static const char* Name = "SoftwareIntegration";
 
@@ -65,18 +68,18 @@ public:
 
     std::vector<documentation::Documentation> documentations() const override;
 
+    scripting::LuaLibrary luaLibrary() const override;
+
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitialize() override;
-    
-    std::vector<Syncable*> getSyncables();
 
+    std::vector<Syncable*> getSyncables();
 
     // Centralized storage for datasets
     SyncableFloatDataStorage _syncableFloatDataStorage;
 
-    // Network engine
-    std::unique_ptr<NetworkEngine> _networkEngine;
+    std::shared_ptr<softwareintegration::network::NetworkState> _networkState;
 };
 
 } // namespace openspace

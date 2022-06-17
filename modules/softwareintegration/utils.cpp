@@ -33,48 +33,105 @@ namespace {
     constexpr const char* _loggerCat = "SoftwareIntegrationMessageFormat";
 } // namespace
 
-namespace openspace {
+namespace openspace::softwareintegration {
 
-namespace softwareintegration {
 
 namespace storage {
-    bool hasStorageKey(const std::string& key) {
-        return _keyStringFromKey.count(key) > 0;
+
+// Anonymous namespace
+namespace {
+    
+    const std::unordered_map<std::string, Key> _keyStringFromKey{
+        { "DataPoints", Key::DataPoints },
+        { "VelocityData", Key::VelocityData },
+        { "Colormap", Key::Colormap },
+        { "ColormapAttributeData", Key::ColormapAttrData },
+        { "LinearSizeAttributeData", Key::LinearSizeAttrData },
+    };
+
+} // namespace
+
+bool hasStorageKey(const std::string& key) {
+    return _keyStringFromKey.count(key) > 0;
+}
+
+Key getStorageKey(const std::string& key) {
+    if (hasStorageKey(key)) {
+        return _keyStringFromKey.at(key);
     }
 
-    Key getStorageKey(const std::string& key) {
-        if (hasStorageKey(key)) {
-            return _keyStringFromKey.at(key);
+    return Key::Unknown;
+}
+
+std::string getStorageKeyString(const Key key) {
+    auto it = std::find_if(
+        _keyStringFromKey.begin(),
+        _keyStringFromKey.end(),
+        [key](const std::pair<const std::string, Key>& p) {
+            return key == p.second;
         }
-
-        return Key::Unknown;
-    }
-
-    std::string getStorageKeyString(const Key key) {
-        auto it = std::find_if(
-            _keyStringFromKey.begin(),
-            _keyStringFromKey.end(),
-            [key](const std::pair<const std::string, Key>& p) {
-                return key == p.second;
-            }
-        );
-        if (it == _keyStringFromKey.end()) return "";
-        return it->first;
-    }
+    );
+    if (it == _keyStringFromKey.end()) return "";
+    return it->first;
+}
 
 } // namespace storage
 
 namespace simp {
 
-SimpError::SimpError(const std::string& msg)
-    : errorCode{tools::ErrorCode::Generic}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(errorCode), msg), "Software Integration Messaging Protocol error")
-{}
+// Anonymous namespace
+namespace {
 
-SimpError::SimpError(const tools::ErrorCode _errorCode, const std::string& msg)
-    : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(errorCode), msg), "Software Integration Messaging Protocol error")
-{}
+const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
+    {"CONN", MessageType::Connection},
+    {"PDAT", MessageType::PointData},
+    {"VDAT", MessageType::VelocityData},
+    {"RSGN", MessageType::RemoveSceneGraphNode},
+    {"FCOL", MessageType::Color},
+    {"LCOL", MessageType::Colormap},
+    {"ATDA", MessageType::AttributeData},
+    {"FOPA", MessageType::Opacity},
+    {"FPSI", MessageType::FixedSize},
+    {"LPSI", MessageType::LinearSize},
+    {"TOVI", MessageType::Visibility},
+};
 
-bool tools::isEndOfCurrentValue(const std::vector<char>& message, size_t offset) {
+const std::unordered_map<std::string, ColormapNaNRenderMode> _colormapNaNRenderModeFromString {
+    {"Hide", ColormapNaNRenderMode::Hide},
+    {"FixedColor", ColormapNaNRenderMode::FixedColor}
+};
+
+const std::unordered_map<std::string, VelocityNaNRenderMode> _velocityNaNRenderModeFromString {
+    {"Hide", VelocityNaNRenderMode::Hide},
+    {"Static", VelocityNaNRenderMode::Static}
+};
+
+glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset) {
+    if (message[offset] != '[') {
+        throw SimpError(
+            tools::ErrorCode::Generic,
+            fmt::format("Expected to read '[', got {} in 'readColor'", message[offset])
+        );
+    }
+    ++offset;
+
+    float r = readFloatValue(message, offset);
+    float g = readFloatValue(message, offset);
+    float b = readFloatValue(message, offset);
+    float a = readFloatValue(message, offset);
+
+    if (message[offset] != ']') {
+        throw SimpError(
+            tools::ErrorCode::Generic,
+            fmt::format("Expected to read ']', got {} in 'readColor'", message[offset])
+        );
+    }
+    ++offset;
+
+    return { r, g, b, a };
+}
+
+bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset) {
     if (offset >= message.size()) {
         throw SimpError(
             tools::ErrorCode::OffsetLargerThanMessageSize,
@@ -92,31 +149,41 @@ bool tools::isEndOfCurrentValue(const std::vector<char>& message, size_t offset)
     return offset != 0 && message[offset] == SEP && message[offset - 1] != '\\';
 }
 
+}  // namespace
+
+SimpError::SimpError(const tools::ErrorCode _errorCode, const std::string& msg)
+    : errorCode{errorCode}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(_errorCode), msg), "Software Integration Messaging Protocol error")
+{}
+
+SimpError::SimpError(const std::string& msg)
+    : errorCode{tools::ErrorCode::Generic}, ghoul::RuntimeError(fmt::format("{}: Error Code: {} - {}", "SIMP error", static_cast<uint32_t>(errorCode), msg), "Software Integration Messaging Protocol error")
+{}
+
 MessageType getMessageType(const std::string& type) {
-    if (tools::_messageTypeFromSIMPType.count(type) == 0) return MessageType::Unknown;
-    return tools::_messageTypeFromSIMPType.at(type);
+    if (_messageTypeFromSIMPType.count(type) == 0) return MessageType::Unknown;
+    return _messageTypeFromSIMPType.at(type);
 }
 
 std::string getSIMPType(const MessageType& type) {
     auto it = std::find_if(
-        tools::_messageTypeFromSIMPType.begin(),
-        tools::_messageTypeFromSIMPType.end(),
+        _messageTypeFromSIMPType.begin(),
+        _messageTypeFromSIMPType.end(),
         [type](const std::pair<const std::string, MessageType>& p) {
             return type == p.second;
         }
     );
-    if (it == tools::_messageTypeFromSIMPType.end()) return "UNKN";
+    if (it == _messageTypeFromSIMPType.end()) return "UNKN";
     return it->first;
 }
 
 ColormapNaNRenderMode getColormapNaNRenderMode(const std::string& type) {
-    if (tools::_colormapNaNRenderModeFromString.count(type) == 0) return ColormapNaNRenderMode::Unknown;
-    return tools::_colormapNaNRenderModeFromString.at(type);
+    if (_colormapNaNRenderModeFromString.count(type) == 0) return ColormapNaNRenderMode::Unknown;
+    return _colormapNaNRenderModeFromString.at(type);
 }
 
 VelocityNaNRenderMode getVelocityNaNRenderMode(const std::string& type) {
-    if (tools::_velocityNaNRenderModeFromString.count(type) == 0) return VelocityNaNRenderMode::Unknown;
-    return tools::_velocityNaNRenderModeFromString.at(type);
+    if (_velocityNaNRenderModeFromString.count(type) == 0) return VelocityNaNRenderMode::Unknown;
+    return _velocityNaNRenderModeFromString.at(type);
 }
 
 std::string formatLengthOfSubject(size_t lengthOfSubject) {
@@ -187,7 +254,7 @@ int readIntValue(const std::vector<char>& message, size_t& offset) {
     int value;
     bool isHex = false;
 
-    while (!tools::isEndOfCurrentValue(message, offset)) {
+    while (!isEndOfCurrentValue(message, offset)) {
         char c = message[offset];
         if (c == 'x' || c == 'X') isHex = true;
         string_value.push_back(c);
@@ -212,7 +279,7 @@ float readFloatValue(const std::vector<char>& message, size_t& offset) {
     std::string string_value;
     float value;
 
-    while (!tools::isEndOfCurrentValue(message, offset)) {
+    while (!isEndOfCurrentValue(message, offset)) {
         string_value.push_back(message[offset]);
         offset++;
     }
@@ -236,7 +303,7 @@ void readColormap(
 ) {
     colorMap.reserve(nColors * 4);
     while (message[offset] != SEP) {
-        glm::vec4 color = tools::readSingleColor(message, offset);
+        glm::vec4 color = readSingleColor(message, offset);
         
         // Colormap should be stored in a sequential vector 
         // of floats for syncing between nodes and when 
@@ -250,40 +317,15 @@ void readColormap(
     offset++;
 }
 
-glm::vec4 tools::readSingleColor(const std::vector<char>& message, size_t& offset) {
-    if (message[offset] != '[') {
-        throw SimpError(
-            tools::ErrorCode::Generic,
-            fmt::format("Expected to read '[', got {} in 'readColor'", message[offset])
-        );
-    }
-    ++offset;
-
-    float r = readFloatValue(message, offset);
-    float g = readFloatValue(message, offset);
-    float b = readFloatValue(message, offset);
-    float a = readFloatValue(message, offset);
-
-    if (message[offset] != ']') {
-        throw SimpError(
-            tools::ErrorCode::Generic,
-            fmt::format("Expected to read ']', got {} in 'readColor'", message[offset])
-        );
-    }
-    ++offset;
-
-    return { r, g, b, a };
-}
-
 glm::vec4 readColor(const std::vector<char>& message, size_t& offset) {
-    glm::vec4 color = tools::readSingleColor(message, offset);
+    glm::vec4 color = readSingleColor(message, offset);
     ++offset;
     return color;
 }
 
 std::string readString(const std::vector<char>& message, size_t& offset) {
     std::string value;
-    while (!tools::isEndOfCurrentValue(message, offset)) {
+    while (!isEndOfCurrentValue(message, offset)) {
         value.push_back(message[offset]);
         ++offset;
     }
@@ -301,7 +343,7 @@ void readPointData(
 ) {
     pointData.reserve(nPoints * dimensionality);
 
-    while (!tools::isEndOfCurrentValue(message, offset)) {
+    while (!isEndOfCurrentValue(message, offset)) {
         if (message[offset] != '[') {
             throw SimpError(
                 tools::ErrorCode::Generic,
@@ -328,6 +370,4 @@ void readPointData(
 
 } // namespace simp
 
-} // namespace softwareintegration
-
-} // namespace openspace
+} // namespace openspace::softwareintegration
