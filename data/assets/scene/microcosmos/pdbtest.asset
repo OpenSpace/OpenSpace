@@ -4,7 +4,7 @@ local PdbTest = {
   Identifier = "PdbTest",
   Renderable = {
     Type = "RenderableMolecule",
-    PdbId = "1MH1",
+    FileOrUrl = "https://files.rcsb.org/download/1MH1.pdb",
   },
   GUI = {
     Path = "/Microcosmos/PDB/1MH1"

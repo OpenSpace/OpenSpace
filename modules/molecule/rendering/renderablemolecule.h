@@ -61,17 +61,12 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum class MoleculeType {
-        None,
-        Pdb,
-        Gro,
-    };
-
-    bool loadProteinPDB(std::string_view pdb_id);
-    bool loadMoleculeFile(std::string_view filename);
+    bool loadMolecule(std::string_view pdb_id);
+    bool loadMoleculeFromUrl(std::string_view filename);
+    bool loadMoleculeFromFile(std::string_view filename);
     bool loadTrajectoryFile(std::string_view filename);
 
-    void initMolecule(std::string_view data, MoleculeType type);
+    void initMolecule(std::string_view data);
     void freeMolecule();
 
     void initTrajectory(std::string_view filename);
@@ -79,8 +74,8 @@ private:
 
     void updateRepresentation();
 
-    std::unique_ptr<HttpMemoryDownload> _pdbDownload;
-    double _pdbDownloadProgress;
+    std::unique_ptr<HttpMemoryDownload> _fileDownload;
+    double _downloadProgress;
     double _frame;
     md_gl_shaders_t _shaders;
     md_gl_representation_t _drawRep;
@@ -88,15 +83,18 @@ private:
 
     md_molecule_t _molecule;
     md_trajectory_i _trajectory;
-    MoleculeType _moleculeType;
 
     glm::vec3 _center;
     glm::vec3 _extent;
 
-    properties::StringProperty _pdbId;
+    properties::StringProperty _fileOrUrl;
+    properties::OptionProperty _moleculeType;
+    properties::BoolProperty _isUrl;
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
+    
+    bool _isMoleculeLoaded;
 };
 
 } // namespace openspace
