@@ -24,7 +24,7 @@
 
 namespace {
 
-//Adds a new dashboard item to an existing SceenSpaceDashboard.
+// Adds a new dashboard item to an existing SceenSpaceDashboard.
 [[codegen::luawrap]] void addDashboardItemToScreenSpace(std::string identifier,
                                                         ghoul::Dictionary dashboard)
 {
