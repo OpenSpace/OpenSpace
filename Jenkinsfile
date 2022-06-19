@@ -364,6 +364,7 @@ macos_xcode: {
         stage('macos-xcode/test-codegen') {
           timeout(time: 2, unit: 'MINUTES') {
             testHelper.runUnitTests('bin/Debug/codegentest');
+          }
         }
 
         stage('macos-xcode/test-sgct') {
