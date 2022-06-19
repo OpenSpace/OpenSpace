@@ -322,7 +322,8 @@ macos_make: {
       if (env.RUN_UNIT_TESTS == 'true') {
         stage('macos-make/test-codegen') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/codegentest');
+            testHelper.runUnitTests('bin/Debug/codegentest');\
+          }
         }
 
         stage('macos-make/test-sgct') {
