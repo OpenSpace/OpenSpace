@@ -385,7 +385,7 @@ macos_xcode: {
           }
         }
       } 
-      cleanWs()
+       cleanWs()
     } // node('macos')
   }
 }
