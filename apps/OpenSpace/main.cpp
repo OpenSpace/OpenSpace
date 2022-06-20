@@ -71,6 +71,10 @@
 #include <modules/spout/spoutwrapper.h>
 #endif // OPENSPACE_HAS_SPOUT
 
+#ifdef SGCT_HAS_GSTREAMER
+#include <gstreamerWebRTC.h>
+#endif // SGCT_HAS_GSTREAMER
+
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 #include <float.h>
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
@@ -381,6 +385,11 @@ void mainInitFunc(GLFWwindow*) {
 #endif // OPENSPACE_HAS_SPOUT
     }
 
+#ifdef SGCT_HAS_GSTREAMER
+    initGST();
+#endif
+
+
     // Query joystick status, those connected before start up
     checkJoystickStatus();
 
@@ -509,6 +518,11 @@ void mainRenderFunc(const sgct::RenderData& data) {
 void mainDraw2DFunc(const sgct::RenderData& data) {
     ZoneScoped;
     LTRACE("main::mainDraw2DFunc(begin)");
+
+    #ifdef SGCT_HAS_GSTREAMER
+        //Do one iteration of GStreamer main loop
+        g_main_context_iteration(g_main_loop_get_context(glPipeline.loop), FALSE);
+    #endif
 
     currentWindow = &data.window;
     currentViewport = &data.viewport;
@@ -1407,6 +1421,11 @@ int main(int argc, char* argv[]) {
     const sgct::Configuration config = parseArguments(arg);
     LDEBUG("Loading cluster information");
     config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
+
+#ifdef SGCT_HAS_GSTREAMER
+    // Init the gstreamer lib
+    gst_init(&argc, &argv);
+#endif
 
     LDEBUG("Setting callbacks");
     Engine::Callbacks callbacks = {
