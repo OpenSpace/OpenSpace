@@ -1,23 +1,18 @@
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+
 local UVS = {
   Identifier = "JuiceUVS",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_UVS",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_UVS",
-      Method     = "POLYGON",
+      Name = "JUICE_UVS",
+      Method = "POLYGON",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,

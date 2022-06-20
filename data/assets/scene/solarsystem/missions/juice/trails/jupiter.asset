@@ -1,6 +1,7 @@
 local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
 local kernels = asset.require('../kernels')
 
+
 local JuiceTrailJupiter = {
   Identifier = "JuiceTrailJupiter",
   Parent = jupiterTransforms.JupiterBarycenter.Identifier,
@@ -13,8 +14,8 @@ local JuiceTrailJupiter = {
       Kernels = kernels.Kernels
     },
     Color = { 0.70, 0.370, 0.45 },
-    StartTime = "2022 MAY 31",
-    EndTime = "2033 JUN 04 02:51:00.546",
+    StartTime = "2031 JUL 02",
+    EndTime = "2035 OCT 05 00:00:00.000",
     SampleInterval = 3600
   },
   GUI = {

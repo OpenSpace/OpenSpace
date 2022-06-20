@@ -1,17 +1,18 @@
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+
 local StarOh1 = {
   Identifier = "JuiceStarOH1",
   Parent = transforms.Juice.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_STR-OH1",
-    RGB   = { 0.0, 0.0, 0.0 },
+    RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
-      Name       = "JUICE_STR-OH1",
-      Method     = "RECTANGLE",
+      Name = "JUICE_STR-OH1",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -28,13 +29,13 @@ local StarOh2 = {
   Identifier = "JuiceStarOH2",
   Parent = transforms.Juice.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_STR-OH2",
-    RGB   = { 0.0, 0.0, 0.0 },
+    RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
-      Name       = "JUICE_STR-OH2",
-      Method     = "RECTANGLE",
+      Name = "JUICE_STR-OH2",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -51,13 +52,13 @@ local StarOh3 = {
   Identifier = "JuiceStarOH3",
   Parent = transforms.Juice.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_STR-OH3",
-    RGB   = { 0.0, 0.0, 0.0 },
+    RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
-      Name       = "JUICE_STR-OH3",
-      Method     = "RECTANGLE",
+      Name = "JUICE_STR-OH3",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -69,6 +70,7 @@ local StarOh3 = {
     Path = "/Solar System/Missions/Juice/Instruments"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(StarOh1)

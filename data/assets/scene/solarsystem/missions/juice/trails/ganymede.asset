@@ -1,25 +1,10 @@
-local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
+local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
--- Hack for now;  should split Ganymede into Ganymede inertial and Ganymede w/ rotation
-local GanymedeBarycenter = {
-  Identifier = "GanymedeBarycenter",
-  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "GANYMEDE",
-      Observer = "JUPITER BARYCENTER"
-    }
-  },
-  GUI = {
-    Path = "/Solar System/Planets/Jupiter/Moons"
-  }
-}
 
 local JuiceTrailGanymede = {
   Identifier = "JuiceTrailGanymede",
-  Parent = GanymedeBarycenter.Identifier,
+  Parent = transforms.GanymedeBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -29,9 +14,9 @@ local JuiceTrailGanymede = {
       Kernels = kernels.Kernels
     },
     Color = { 0.70, 0.770, 0.35 },
-    StartTime = "2022 MAY 31",
-    EndTime = "2033 JUN 04 02:51:00.546",
-    SampleInterval = 3600
+    StartTime = "2034 DEC 01",
+    EndTime = "2035 OCT 05 00:00:00.000",
+    SampleInterval = 600
   },
   GUI = {
     Name = "Juice Trail (Ganymede)",
@@ -41,14 +26,11 @@ local JuiceTrailGanymede = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(GanymedeBarycenter)
   openspace.addSceneGraphNode(JuiceTrailGanymede)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JuiceTrailGanymede)
-  openspace.removeSceneGraphNode(GanymedeBarycenter)
 end)
 
-asset.export(GanymedeBarycenter)
 asset.export(JuiceTrailGanymede)

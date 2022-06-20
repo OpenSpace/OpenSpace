@@ -1,24 +1,19 @@
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+
 -- Circle shapes are not support
 local RimeBase = {
   Identifier = "JuiceRimeBase",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_RIME_BASE",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_RIME_BASE",
-      Method     = "CIRCLE",
+      Name = "JUICE_RIME_BASE",
+      Method = "CIRCLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -31,24 +26,18 @@ local RimeBase = {
   }
 }
 
--- Circle shapes are not support
+-- Circle shapes are not supported
 local Rime = {
   Identifier = "JuiceRime",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_RIME",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_RIME",
-      Method     = "CIRCLE",
+      Name = "JUICE_RIME",
+      Method = "CIRCLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -63,13 +52,13 @@ local Rime = {
 
 
 asset.onInitialize(function()
-  -- openspace.addSceneGraphNode(Rime)
-  -- openspace.addSceneGraphNode(RimeBase)
+  openspace.addSceneGraphNode(Rime)
+  openspace.addSceneGraphNode(RimeBase)
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.removeSceneGraphNode(RimeBase)
-  -- openspace.removeSceneGraphNode(Rime)
+  openspace.removeSceneGraphNode(RimeBase)
+  openspace.removeSceneGraphNode(Rime)
 end)
 
 asset.export(Rime)

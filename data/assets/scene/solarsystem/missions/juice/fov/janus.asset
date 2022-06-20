@@ -1,23 +1,24 @@
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+
 local Janus = {
   Identifier = "JuiceJanus",
   Parent = transforms.Juice.Identifier,
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = { 0.44,0.33,0.9 }
+      Position = { 0.44, 0.33, 0.9 }
     }
   },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_JANUS",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_JANUS",
-      Method     = "RECTANGLE",
+      Name = "JUICE_JANUS",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,

@@ -1,17 +1,18 @@
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+
 local NavCam = {
   Identifier = "JuiceNavCam",
   Parent = transforms.Juice.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_NAVCAM-1",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_NAVCAM-1",
-      Method     = "RECTANGLE",
+      Name = "JUICE_NAVCAM-1",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,

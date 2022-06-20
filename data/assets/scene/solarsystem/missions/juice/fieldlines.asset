@@ -1,13 +1,12 @@
 local transforms = asset.require('./transforms')
 
--- local data = asset.syncedResource({
---   Type = "HttpSynchronization",
---   Name = "Ganymede Plane Simulations",
---   Identifier = "juice_ganymede_fieldlines",
---   Version = 1
--- })
+local data = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Ganymede Plane Simulations",
+  Identifier = "juice_ganymede_fieldlines",
+  Version = 1
+})
 
-local data = asset.localResource('juice_ganymede_fieldlines')
 
 local magnetosphere = {
   Identifier = "GanymedeMagnetosphere",
@@ -19,19 +18,19 @@ local magnetosphere = {
     InputFileType = "Json",
     ColorMethod = "By Quantity",
     ColorQuantity = 0,
-    ColorTableRanges = {{62.556353386366766, 1665.5534182835445}},
+    ColorTableRanges = { { 62.556353386366766, 1665.5534182835445 } },
     ColorTablePaths = { asset.localResource("CMR-illuminance2.txt") },
     Color = { 1.0, 0.725, 0.75, 0.8 }
   },
   GUI = {
+    Name = "Ganymede Magnetosphere",
     Path = "/Solar System/Missions/Juice/Fieldlines"
   },
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(magnetosphere)
-  
-  openspace.setPropertyValueSingle("Scene.GanymedeMagnetosphere.Renderable.DomainEnabled", false)
 end)
 
 asset.onDeinitialize(function()

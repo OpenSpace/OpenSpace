@@ -31,6 +31,8 @@
   "assets": [
     "base",
     "scene/solarsystem/missions/juice/fieldlines",
+    "scene/solarsystem/missions/juice/fov/janus",
+    "scene/solarsystem/missions/juice/fov/navcam",
     "scene/solarsystem/missions/juice/model",
     "scene/solarsystem/missions/juice/plane",
     "scene/solarsystem/missions/juice/trail",
@@ -38,10 +40,10 @@
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
   "camera": {
-    "altitude": 17000000.0,
-    "anchor": "Earth",
-    "latitude": 58.5877,
-    "longitude": 16.1924,
+    "altitude": 9220000000.0,
+    "anchor": "Jupiter",
+    "latitude": -7.1689,
+    "longitude": -173.3037,
     "type": "goToGeo"
   },
   "delta_times": [
@@ -106,76 +108,6 @@
       "value": "0.0"
     },
     {
-      "name": "Scene.JuiceJMC1.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceJMC2.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceMajis.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceMajisIrB2.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceMajisIrB4.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceMajisIr.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceMajisVisnirB2.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceMajisVisnirB4.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceMajisVisnir.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceStarOH1.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceStarOH2.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceStarOH3.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceSwiFull.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceUVS.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
       "name": "Scene.JuiceTrailEarth.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
@@ -191,24 +123,19 @@
       "value": "false"
     },
     {
-      "name": "Scene.JuiceJanus.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.JuiceNavCam.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
       "name": "Scene.GanymedeMagnetosphere.Renderable.DomainEnabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceTrail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
     }
   ],
   "time": {
     "type": "absolute",
-    "value": "2031-08-01T00:00:00"
+    "value": "2031-08-01T03:01:30"
   },
   "version": {
     "major": 1,

@@ -1,24 +1,19 @@
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+
 -- Circle shapes are not support
 local Gala = {
   Identifier = "JuiceGala",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0, 0.0, 0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_GALA_RXT",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_GALA_RXT",
-      Method     = "CIRCLE",
+      Name = "JUICE_GALA_RXT",
+      Method = "CIRCLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -33,11 +28,11 @@ local Gala = {
 
 
 asset.onInitialize(function()
-  -- openspace.addSceneGraphNode(Gala)
+  openspace.addSceneGraphNode(Gala)
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.removeSceneGraphNode(Gala)
+  openspace.removeSceneGraphNode(Gala)
 end)
 
 asset.export(Gala)

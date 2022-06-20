@@ -1,23 +1,18 @@
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+
 local MajisVisnir = {
   Identifier = "JuiceMajisVisnir",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_MAJIS_VISNIR",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_MAJIS_VISNIR",
-      Method     = "RECTANGLE",
+      Name = "JUICE_MAJIS_VISNIR",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -33,20 +28,14 @@ local MajisVisnir = {
 local MajisVisnirB2 = {
   Identifier = "JuiceMajisVisnirB2",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_MAJIS_VISNIR_B2",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_MAJIS_VISNIR_B2",
-      Method     = "RECTANGLE",
+      Name = "JUICE_MAJIS_VISNIR_B2",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -62,20 +51,15 @@ local MajisVisnirB2 = {
 local MajisVisnirB4 = {
   Identifier = "JuiceMajisVisnirB4",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Enabled = false,
+    Body = "JUICE",
     Frame = "JUICE_MAJIS_VISNIR_B4",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_MAJIS_VISNIR_B4",
-      Method     = "RECTANGLE",
+      Name = "JUICE_MAJIS_VISNIR_B4",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -91,20 +75,15 @@ local MajisVisnirB4 = {
 local MajisIr = {
   Identifier = "JuiceMajisIr",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
     Type  = "RenderableFov",
+    Enabled = false,
     Body  = "JUICE",
     Frame = "JUICE_MAJIS_IR",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_MAJIS_IR",
-      Method     = "RECTANGLE",
+      Name = "JUICE_MAJIS_IR",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -120,20 +99,15 @@ local MajisIr = {
 local MajisIrB2 = {
   Identifier = "JuiceMajisIrB2",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Enabled = false,
+    Body = "JUICE",
     Frame = "JUICE_MAJIS_IR_B2",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_MAJIS_IR_B2",
-      Method     = "RECTANGLE",
+      Name = "JUICE_MAJIS_IR_B2",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -149,20 +123,15 @@ local MajisIrB2 = {
 local MajisIrB4 = {
   Identifier = "JuiceMajisIrB4",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Enabled = false,
+    Body = "JUICE",
     Frame = "JUICE_MAJIS_IR_B4",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_MAJIS_IR_B4",
-      Method     = "RECTANGLE",
+      Name = "JUICE_MAJIS_IR_B4",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -178,20 +147,15 @@ local MajisIrB4 = {
 local Majis = {
   Identifier = "JuiceMajis",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0.0,0.0,0.0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Enabled = false,
+    Body = "JUICE",
     Frame = "JUICE_MAJIS",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_MAJIS",
-      Method     = "RECTANGLE",
+      Name = "JUICE_MAJIS",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,

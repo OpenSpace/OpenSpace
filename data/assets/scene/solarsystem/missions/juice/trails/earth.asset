@@ -1,6 +1,7 @@
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local kernels = asset.require('../kernels')
 
+
 local JuiceTrailEarth = {
   Identifier = "JuiceTrailEarth",
   Parent = earthTransforms.EarthBarycenter.Identifier,
@@ -13,7 +14,7 @@ local JuiceTrailEarth = {
       Kernels = kernels.Kernels
     },
     Color = { 0.30, 0.70, 0.20 },
-    StartTime = "2022 MAY 31",
+    StartTime = "2023 APR 05 12:00:00.000",
     EndTime = "2033 JUN 04 02:51:00.546",
     SampleInterval = 3600
   },
@@ -22,6 +23,7 @@ local JuiceTrailEarth = {
     Path = "/Solar System/Missions/Juice"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JuiceTrailEarth)

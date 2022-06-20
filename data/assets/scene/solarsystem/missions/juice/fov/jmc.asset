@@ -1,23 +1,18 @@
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+
 local JMC1 = {
   Identifier = "JuiceJMC1",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0,0,0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_JMC-1",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_JMC-1",
-      Method     = "RECTANGLE",
+      Name = "JUICE_JMC-1",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -33,20 +28,14 @@ local JMC1 = {
 local JMC2 = {
   Identifier = "JuiceJMC2",
   Parent = transforms.Juice.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0,0,0 }
-    }
-  },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_JMC-2",
-    RGB   = { 0.8, 0.7, 0.7 },
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "JUICE_JMC-2",
-      Method     = "RECTANGLE",
+      Name = "JUICE_JMC-2",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,

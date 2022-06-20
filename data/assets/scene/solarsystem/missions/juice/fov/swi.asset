@@ -1,18 +1,19 @@
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+
 -- Circle shapes are not support
 local SwiCh2 = {
   Identifier = "JuiceSwiCH2",
   Parent = transforms.Juice.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_SWI_CH2",
-    RGB   = { 0.0, 0.0, 0.0 },
+    RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
-      Name       = "JUICE_SWI_CH2",
-      Method     = "CIRCLE",
+      Name = "JUICE_SWI_CH2",
+      Method = "CIRCLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -31,17 +32,17 @@ local SwiFull = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = { 0.465,- 0.1, 0.95 }
+      Position = { 0.465, -0.1, 0.95 }
     }
   },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_SWI_FULL",
-    RGB   = { 0.0, 0.0, 0.0 },
+    RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
-      Name       = "JUICE_SWI_FULL",
-      Method     = "RECTANGLE",
+      Name = "JUICE_SWI_FULL",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -62,17 +63,17 @@ local SwiFullGCO500 = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = { 0.465,- 0.1, 0.95 }
+      Position = { 0.465, -0.1, 0.95 }
     }
   },  
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
+    Type = "RenderableFov",
+    Body = "JUICE",
     Frame = "JUICE_SWI_FULL_GCO500",
-    RGB   = { 0.0, 0.0, 0.0 },
+    RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
-      Name       = "JUICE_SWI_FULL_GCO500",
-      Method     = "RECTANGLE",
+      Name = "JUICE_SWI_FULL_GCO500",
+      Method = "RECTANGLE",
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
@@ -87,15 +88,15 @@ local SwiFullGCO500 = {
 
 
 asset.onInitialize(function()
-  -- openspace.addSceneGraphNode(SwiCh2)
+  openspace.addSceneGraphNode(SwiCh2)
   openspace.addSceneGraphNode(SwiFull)
-  -- openspace.addSceneGraphNode(SwiFullGCO500)
+  openspace.addSceneGraphNode(SwiFullGCO500)
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.removeSceneGraphNode(SwiFullGCO500)
+  openspace.removeSceneGraphNode(SwiFullGCO500)
   openspace.removeSceneGraphNode(SwiFull)
-  -- openspace.removeSceneGraphNode(SwiCh2)
+  openspace.removeSceneGraphNode(SwiCh2)
 end)
 
 asset.export(SwiCh2)

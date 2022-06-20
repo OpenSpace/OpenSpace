@@ -1,6 +1,7 @@
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local transforms = asset.require('./transforms')
 
+
 local model = asset.syncedResource({
   Name = "JUICE Model",
   Type = "HttpSynchronization",
@@ -35,7 +36,7 @@ local JuiceModel = {
         Type = "SceneGraphLightSource",
         Identifier = "Sun",
         Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 0.08
+        Intensity = 0.6
       },
       {
         Identifier = "Camera",
