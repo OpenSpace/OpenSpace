@@ -55,8 +55,28 @@
 constexpr const char* shader_output_snippet = R"(
 layout(location = 0) out vec4 out_color;
 
+// this is a basic blinn-phong taken from learnopengl.com.
+
 void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color, uint atom_index) {
-   out_color  = color;
+    vec3 viewPos = vec3(0.0, 0.0, 0.0); // in view space the camera is at origin.
+    vec3 lightPos = viewPos; // place the light on the camera.
+
+    // ambient
+    vec3 ambient = 0.05 * color.rgb;
+
+    // diffuse
+    vec3 lightDir = normalize(lightPos - view_coord);
+    vec3 normal = normalize(view_normal);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * color.rgb;
+
+    // specular
+    vec3 viewDir = normalize(viewPos - view_coord);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
+    vec3 specular = vec3(0.3) * spec; // assuming bright white light color
+
+    out_color = vec4(ambient + diffuse + specular, color.a);
 }
 )";
 
@@ -311,7 +331,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
             translate(I, { 0, 0, 21500 }) *
             data.camera.combinedViewMatrix() *
             I;
-
+        
         mat4 model_matrix =
             scale(I, data.modelTransform.scale) *
             dmat4(data.modelTransform.rotation) *
@@ -323,7 +343,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
             I;
 
         mat4 proj_matrix =
-            dmat4(data.camera.projectionMatrix()) *
+            dmat4(data.camera.sgctInternal.projectionMatrix()) *
             I;
 
         md_gl_draw_op_t draw_op = {};
