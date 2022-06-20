@@ -1,5 +1,7 @@
 local transforms = asset.require('./transforms')
 
+-- Datasets created using the script found at:
+-- https://github.com/OpenSpace/scripts/tree/master/juice-gphio-image-conversion
 local data = asset.syncedResource({
   Type = "HttpSynchronization",
   Name = "Ganymede Plane Simulations",
@@ -9,10 +11,11 @@ local data = asset.syncedResource({
 
 
 local GanymedeRadius = 2634 * 1000
+-- Size value from the original dataset provided by Ronan
 local Size = 4.114 * GanymedeRadius
 
 local xy_n = {
-  Identifier = "Juice_XY_N",
+  Identifier = "Ganymede_Plane_XY_N",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -21,12 +24,13 @@ local xy_n = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XY Plane N",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xy_t = {
-  Identifier = "Juice_XY_T",
+  Identifier = "Ganymede_Plane_XY_T",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -35,12 +39,13 @@ local xy_t = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XY Plane T",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xy_u = {
-  Identifier = "Juice_XY_U",
+  Identifier = "Ganymede_Plane_XY_U",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -49,12 +54,13 @@ local xy_u = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XY Plane U",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xy_utot = {
-  Identifier = "Juice_XY_Utot",
+  Identifier = "Ganymede_Plane_XY_Utot",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -63,12 +69,13 @@ local xy_utot = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XY Plane U_tot",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xy_ux = {
-  Identifier = "Juice_XY_Ux",
+  Identifier = "Ganymede_Plane_XY_Ux",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -77,12 +84,13 @@ local xy_ux = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XY Plane Ux",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xy_uy = {
-  Identifier = "Juice_XY_Uy",
+  Identifier = "Ganymede_Plane_XY_Uy",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -91,12 +99,13 @@ local xy_uy = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XY Plane Uy",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xy_uz = {
-  Identifier = "Juice_XY_Uz",
+  Identifier = "Ganymede_Plane_XY_Uz",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -105,26 +114,13 @@ local xy_uz = {
     Enabled = false
   },
   GUI = {
-    Path = "/Solar System/Missions/Juice/Plane"
-  }
-}
-
-local xy_n = {
-  Identifier = "Juice_XY_N",
-  Parent = transforms.GPHIO.Identifier,
-  Renderable = {
-    Type = "RenderablePlaneImageLocal",
-    Size = Size,
-    Texture = data .. "XY-n.png",
-    Enabled = false
-  },
-  GUI = {
+    Name = "Ganymede XY Plane Uz",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xz_n = {
-  Identifier = "Juice_XZ_N",
+  Identifier = "Ganymede_Plane_XZ_N",
   Parent = transforms.GPHIO.Identifier,
   Transform = {
     Rotation = {
@@ -139,12 +135,13 @@ local xz_n = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XZ Plane N",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xz_t = {
-  Identifier = "Juice_XZ_T",
+  Identifier = "Ganymede_Plane_XZ_T",
   Parent = transforms.GPHIO.Identifier,
   Transform = {
     Rotation = {
@@ -159,12 +156,13 @@ local xz_t = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XZ Plane T",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xz_u = {
-  Identifier = "Juice_XZ_U",
+  Identifier = "Ganymede_Plane_XZ_U",
   Parent = transforms.GPHIO.Identifier,
   Transform = {
     Rotation = {
@@ -179,12 +177,13 @@ local xz_u = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XZ Plane U",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xz_utot = {
-  Identifier = "Juice_XZ_Utot",
+  Identifier = "Ganymede_Plane_XZ_Utot",
   Parent = transforms.GPHIO.Identifier,
   Transform = {
     Rotation = {
@@ -199,12 +198,13 @@ local xz_utot = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XZ Plane U_tot",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xz_ux = {
-  Identifier = "Juice_XZ_Ux",
+  Identifier = "Ganymede_Plane_XZ_Ux",
   Parent = transforms.GPHIO.Identifier,
   Transform = {
     Rotation = {
@@ -219,12 +219,13 @@ local xz_ux = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XZ Plane Ux",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xz_uy = {
-  Identifier = "Juice_XZ_Uy",
+  Identifier = "Ganymede_Plane_XZ_Uy",
   Parent = transforms.GPHIO.Identifier,
   Transform = {
     Rotation = {
@@ -239,12 +240,13 @@ local xz_uy = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XZ Plane Uy",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }
 
 local xz_uz = {
-  Identifier = "Juice_XZ_Uz",
+  Identifier = "Ganymede_Plane_XZ_Uz",
   Parent = transforms.GPHIO.Identifier,
   Transform = {
     Rotation = {
@@ -259,6 +261,7 @@ local xz_uz = {
     Enabled = false
   },
   GUI = {
+    Name = "Ganymede XZ Plane Uz",
     Path = "/Solar System/Missions/Juice/Plane"
   }
 }

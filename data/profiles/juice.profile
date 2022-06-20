@@ -1,30 +1,4 @@
 {
-  "actions": [
-    {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
-      "identifier": "profile.keybind.0",
-      "is_local": false,
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Earth",
-      "identifier": "profile.keybind.1",
-      "is_local": false,
-      "name": "Focus ISS",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Earth",
-      "identifier": "profile.keybind.2",
-      "is_local": false,
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    }
-  ],
   "additional_scripts": [
     ""
   ],
@@ -36,8 +10,7 @@
     "scene/solarsystem/missions/juice/model",
     "scene/solarsystem/missions/juice/plane",
     "scene/solarsystem/missions/juice/trail",
-    "scene/solarsystem/planets/earth/earth",
-    "scene/solarsystem/planets/earth/satellites/satellites"
+    "scene/solarsystem/planets/earth/earth"
   ],
   "camera": {
     "altitude": 9220000000.0,
@@ -68,20 +41,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "profile.keybind.0",
-      "key": "S"
-    },
-    {
-      "action": "profile.keybind.1",
-      "key": "I"
-    },
-    {
-      "action": "profile.keybind.2",
-      "key": "HOME"
-    }
-  ],
   "mark_nodes": [
     "Earth",
     "Juice",
@@ -90,18 +49,13 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles.",
+    "description": "Juice profile that visualizes the currently best known transjectory for the JUICE mission the Jupiter and its moons.",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
   "properties": [
-    {
-      "name": "{earth_satellites}.Renderable.Enabled",
-      "type": "setPropertyValue",
-      "value": "false"
-    },
     {
       "name": "NavigationHandler.OrbitalNavigator.MinimumAllowedDistance",
       "type": "setPropertyValueSingle",
@@ -131,6 +85,31 @@
       "name": "Scene.JuiceTrail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "Scene.GanymedeMagnetosphere.Renderable.LineWidth",
+      "type": "setPropertyValueSingle",
+      "value": "2.0"
+    },
+    {
+      "name": "Scene.GanymedeMagnetosphere.Renderable.Flow.ParticleSize",
+      "type": "setPropertyValueSingle",
+      "value": "25.000000"
+    },
+    {
+      "name": "Scene.GanymedeMagnetosphere.Renderable.Flow.ParticleSpacing",
+      "type": "setPropertyValueSingle",
+      "value": "40"
+    },
+    {
+      "name": "Scene.GanymedeMagnetosphere.Renderable.Flow.Speed",
+      "type": "setPropertyValueSingle",
+      "value": "150.000000"
+    },
+    {
+      "name": "Scene.GanymedeMagnetosphere.Renderable.FlowEnabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
     }
   ],
   "time": {

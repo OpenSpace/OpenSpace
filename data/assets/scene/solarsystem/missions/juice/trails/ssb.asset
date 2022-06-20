@@ -34,4 +34,3 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(JuiceTrail)
-  
