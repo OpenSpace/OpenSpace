@@ -634,6 +634,8 @@ void LuaConsole::render() {
 
     using namespace ghoul::fontrendering;
 
+    ghoul::GLDebugGroup group("LuaConsole");
+
     // Don't render the console if it's collapsed.
     if (_currentHeight < 1.f) {
         return;
