@@ -42,6 +42,7 @@
 
 #include <md_pdb.h>
 #include <md_gro.h>
+#include <md_xyz.h>
 #include <md_frame_cache.h>
 #include <core/md_allocator.h>
 
@@ -65,6 +66,7 @@ namespace {
     enum class MoleculeType {
         Pdb,
         Gro,
+        Xyz,
     };
 
     enum class RepresentationType {
@@ -83,7 +85,6 @@ namespace {
         SecondaryStructure,
         // Property
     };
-
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "file",
@@ -128,6 +129,7 @@ namespace {
         enum class [[codegen::map(MoleculeType)]] MoleculeType {
             Pdb,
             Gro,
+            Xyz,
         };
 
         // [[codegen::verbatim(MoleculeTypeInfo.description)]]
@@ -174,58 +176,29 @@ documentation::Documentation RenderableMolecule::Documentation() {
 
 RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
+    _loadedMolecule(nullptr),
     _fileOrUrl(FileInfo),
     _moleculeType(MoleculeTypeInfo),
     _isUrl(IsUrlInfo),
     _repType(RepTypeInfo),
     _coloring(ColoringInfo),
-    _repScale(RepScaleInfo, 1.f, 0.1f, 100.f), 
-    _isMoleculeLoaded(false)
+    _repScale(RepScaleInfo, 1.f, 0.1f, 100.f)
 {
     _molecule = {};
     _trajectory = {};
     _drawMol = {};
     _drawRep = {};
     
-
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    // TODO: find if it is url automatically based on fileOrUrl when property is unset.
-    _isUrl = p.isUrl.value_or(true);
-
-    _fileOrUrl.onChange([this]() {
-        if (_isUrl) {
-            loadMoleculeFromUrl(_fileOrUrl.value());
-        } else {
-            loadMoleculeFromFile(_fileOrUrl.value());
-        }
-    });
-
-    _fileOrUrl = p.fileOrUrl;
-
     _moleculeType.addOptions({
         { static_cast<int>(MoleculeType::Pdb), "PDB" },
         { static_cast<int>(MoleculeType::Gro), "GRO" },
+        { static_cast<int>(MoleculeType::Xyz), "XYZ" },
     });
     
-    if (p.moleculeType.has_value()) {
-        _moleculeType = static_cast<int>(codegen::map<MoleculeType>(*p.moleculeType));
-    } else {
-        // TODO: find molecule type automatically based on file extension when property
-        // is unset.
-        _moleculeType = static_cast<int>(MoleculeType::Pdb);
-    }
-
     _repType.addOptions({
         { static_cast<int>(RepresentationType::SpaceFill), "Space Fill" },
         { static_cast<int>(RepresentationType::Licorice), "Licorice" },
     });
-    
-    if (p.repType.has_value()) {
-        _repType = static_cast<int>(codegen::map<RepresentationType>(*p.repType));
-    } else {
-        _repType = static_cast<int>(RepresentationType::SpaceFill);
-    }
     
     _coloring.addOptions({
         { static_cast<int>(Coloring::Cpk), "CPK" },
@@ -236,6 +209,27 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
         { static_cast<int>(Coloring::ChainIndex), "Chain Index" },
         { static_cast<int>(Coloring::SecondaryStructure), "Secondary Structure" },
     });
+
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    // TODO: find if it is url automatically based on fileOrUrl when property is unset.
+    _isUrl = p.isUrl.value_or(true);
+
+    _fileOrUrl = p.fileOrUrl;
+
+    if (p.moleculeType.has_value()) {
+        _moleculeType = static_cast<int>(codegen::map<MoleculeType>(*p.moleculeType));
+    } else {
+        // TODO: find molecule type automatically based on file extension when property
+        // is unset.
+        _moleculeType = static_cast<int>(MoleculeType::Pdb);
+    }
+
+    if (p.repType.has_value()) {
+        _repType = static_cast<int>(codegen::map<RepresentationType>(*p.repType));
+    } else {
+        _repType = static_cast<int>(RepresentationType::SpaceFill);
+    }
     
     if (p.coloring.has_value()) {
         _coloring = static_cast<int>(codegen::map<Coloring>(*p.coloring));
@@ -244,6 +238,19 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     }
     
     _repScale = p.repScale.value_or(1.f);
+
+    const auto loadMolecule = [this]() {
+        if (_isUrl) {
+            loadMoleculeFromUrl(_fileOrUrl.value());
+        } else {
+            loadMoleculeFromFile(_fileOrUrl.value());
+        }
+    };
+
+    _fileOrUrl.onChange(loadMolecule);
+    _isUrl.onChange(loadMolecule);
+    _repType.onChange(loadMolecule);
+    loadMolecule();
     
     addProperty(_fileOrUrl);
     addProperty(_moleculeType);
@@ -277,19 +284,19 @@ bool RenderableMolecule::isReady() const {
     return true;
 }
 
-void RenderableMolecule::update(const UpdateData& data) {
+void RenderableMolecule::update(const UpdateData&) {
     if (_fileDownload) {
         if (_fileDownload->hasSucceeded()) {
             auto& blob = _fileDownload->downloadedData();
             initMolecule(std::string_view(blob.data(), blob.size()));
-            _fileDownload.release();
+            (void)_fileDownload.release();
         } else if (_fileDownload->hasFailed()) {
-            _fileDownload.release();
+            (void)_fileDownload.release();
         }
     }
 }
 
-void RenderableMolecule::render(const RenderData& data, RendererTasks& tasks) {
+void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     using namespace glm;
     const dmat4 I(1.0);
 
@@ -343,7 +350,14 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void RenderableMolecule::initMolecule(std::string_view data) {
-    if(_isMoleculeLoaded) {
+    // set the updateRepresentation hook once, when the molecule is first initialized
+    if (!_loadedMolecule) {
+        const auto updateRep = [this]() { updateRepresentation(); };
+        _repType.onChange(updateRep);
+        _repScale.onChange(updateRep);
+        _coloring.onChange(updateRep);
+    }
+    else {
         freeMolecule();
     }
 
@@ -356,8 +370,8 @@ void RenderableMolecule::initMolecule(std::string_view data) {
     case MoleculeType::Gro:
         api = md_gro_molecule_api();
         break;
-    default:
-        ghoul_assert(false, "unexpected molecule type");
+    case MoleculeType::Xyz:
+        api = md_xyz_molecule_api();
         break;
     }
 
@@ -377,8 +391,8 @@ void RenderableMolecule::initMolecule(std::string_view data) {
         _center = (min_aabb + max_aabb) * 0.5f;
         float radius = glm::compMax(_extent) * 0.5f;
     
-        // setBoundingSphere(radius);
-        // setInteractionSphere(radius);
+        setBoundingSphere(radius);
+        setInteractionSphere(radius);
     }
 
     // GL MOL
@@ -388,13 +402,7 @@ void RenderableMolecule::initMolecule(std::string_view data) {
     md_gl_representation_init(&_drawRep, &_drawMol);
     updateRepresentation();
     
-    // set the updateRepresentation hook once, when the molecule is first initialized
-    if (!_isMoleculeLoaded) {
-        _repType.onChange([this]() { updateRepresentation(); });
-        _repScale.onChange([this]() { updateRepresentation(); });
-        _coloring.onChange([this]() { updateRepresentation(); });
-    }
-    _isMoleculeLoaded = true;
+    _loadedMolecule = api;
 }
 
 void RenderableMolecule::updateRepresentation() {
@@ -420,7 +428,7 @@ void RenderableMolecule::updateRepresentation() {
         md_gl_representation_set_type_and_args(&_drawRep, _repType, rep_args);
     }
     { // COLORING
-        uint32_t* colors = (uint32_t*)md_alloc(default_temp_allocator, sizeof(uint32_t) * _molecule.atom.count);
+        uint32_t* colors = static_cast<uint32_t*>(md_alloc(default_temp_allocator, sizeof(uint32_t) * _molecule.atom.count));
         uint32_t count = static_cast<uint32_t>(_molecule.atom.count);
 
         switch (static_cast<Coloring>(_coloring.value())) {
@@ -455,16 +463,13 @@ void RenderableMolecule::updateRepresentation() {
 }
 
 void RenderableMolecule::freeMolecule() {
-    switch (static_cast<MoleculeType>(_moleculeType.value())) {
-    case MoleculeType::Pdb:
-        md_pdb_molecule_free(&_molecule, default_allocator);
-        break;
-    case MoleculeType::Gro:
-        md_gro_molecule_free(&_molecule, default_allocator);
-        break;
-    }
-    _molecule = {};
     md_gl_representation_free(&_drawRep);
+    md_gl_molecule_free(&_drawMol);
+    _loadedMolecule->free(&_molecule, default_allocator);
+    _loadedMolecule = nullptr;
+    _molecule = {};
+    _drawMol = {};
+    _drawRep = {};
 }
 
 void RenderableMolecule::freeTrajectory() {

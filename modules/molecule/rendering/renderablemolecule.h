@@ -78,11 +78,12 @@ private:
     double _downloadProgress;
     double _frame;
     md_gl_shaders_t _shaders;
-    md_gl_representation_t _drawRep;
-    md_gl_molecule_t _drawMol;
 
     md_molecule_t _molecule;
     md_trajectory_i _trajectory;
+    md_gl_representation_t _drawRep;
+    md_gl_molecule_t _drawMol;
+    md_molecule_api* _loadedMolecule;
 
     glm::vec3 _center;
     glm::vec3 _extent;
@@ -93,8 +94,6 @@ private:
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
-    
-    bool _isMoleculeLoaded;
 };
 
 } // namespace openspace
