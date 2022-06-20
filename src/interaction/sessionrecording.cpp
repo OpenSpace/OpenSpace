@@ -1514,7 +1514,7 @@ bool SessionRecording::playbackScript() {
         _playbackLineNum
     );
 
-    success &= checkIfScriptUsesScenegraphNode(kf._script);
+    checkIfScriptUsesScenegraphNode(kf._script);
 
     if (success) {
         success = addKeyframe(
@@ -1534,32 +1534,41 @@ void SessionRecording::populateListofLoadedSceneGraphNodes() {
     }
 }
 
-bool SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
+void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
     if (s.rfind(scriptReturnPrefix, 0) == 0) {
         s.erase(0, scriptReturnPrefix.length());
     }
     // This works for both setPropertyValue and setPropertyValueSingle
-    if (s.rfind("openspace.setPropertyValue", 0) == 0) {
+    bool containsSetPropertyVal = (s.rfind("openspace.setPropertyValue", 0) == 0);
+    bool containsParensStart = (s.find("(\"") != std::string::npos);
+    if (containsSetPropertyVal && containsParensStart) {
         std::string found;
-        if (s.find("(\"") != std::string::npos) {
-            std::string subj = s.substr(s.find("(\"") + 2);
-            for (std::string match : getPropertiesMatchingRegex(subj)) {
-                checkForScenegraphNodeAccess_Scene(subj, found);
-                checkForScenegraphNodeAccess_Nav(subj, found);
-                if (found.length() > 0) {
-                    auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), found);
-                    if (it == _loadedNodes.end()) {
-                        LERROR(fmt::format(
-                            "Playback file requires scenegraph node '{}', which is "
-                            "not currently loaded", found
-                        ));
-                        return false;
-                    }
+        std::string subj = s.substr(s.find("(\"") + 2);
+        size_t commaPos = subj.find(",");
+        if (commaPos != std::string::npos) {
+            subj = subj.substr(0, commaPos);
+        }
+        while (subj.back() == ' ' || subj.back() == '\"') {
+            subj.pop_back();
+        }
+        checkForScenegraphNodeAccess_Scene(subj, found);
+        checkForScenegraphNodeAccess_Nav(subj, found);
+        if (found.length() > 0) {
+            std::vector<std::string>::iterator it =
+                std::find(_loadedNodes.begin(), _loadedNodes.end(), found);
+            if (it == _loadedNodes.end()) {
+                std::vector<properties::Property*> matchHits;
+                matchHits =
+                         global::renderEngine->scene()->getPropertiesMatchingRegex(subj);
+                if (matchHits.empty()) {
+                    LWARNING(fmt::format(
+                        "Playback file contains a property setting of scenegraph"
+                        " node '{}', which is not currently loaded", found
+                    ));
                 }
             }
         }
     }
-    return true;
 }
 
 void SessionRecording::checkForScenegraphNodeAccess_Scene(std::string& s,

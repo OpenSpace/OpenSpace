@@ -696,7 +696,7 @@ protected:
         std::string& version, DataMode& mode);
     void populateListofLoadedSceneGraphNodes();
 
-    bool checkIfScriptUsesScenegraphNode(std::string s);
+    void checkIfScriptUsesScenegraphNode(std::string s);
     void checkForScenegraphNodeAccess_Scene(std::string& s, std::string& result);
     void checkForScenegraphNodeAccess_Nav(std::string& s, std::string& result);
     bool checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex);
