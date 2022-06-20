@@ -106,7 +106,7 @@ namespace {
             for (int r = 0; r < nRows; r++) {
                 QModelIndex idx = model.index(r, 0, parent);
                 std::string assetName = model.name(idx).toStdString();
-                // Need to check if it actually is an asset to prevent isse #2154
+                // Need to check if it actually is an asset to prevent issue #2154
                 if (model.isAsset(idx) && path == assetName) {
                     foundFileMatch = true;
                     model.setChecked(idx, true);
