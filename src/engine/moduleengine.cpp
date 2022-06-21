@@ -37,11 +37,24 @@
 
 namespace {
     constexpr const char* _loggerCat = "ModuleEngine";
+
+    constexpr openspace::properties::Property::PropertyInfo AllModulesInfo = {
+        "AllModules",
+        "All Modules",
+        "The list of all modules that were compiled for this version of OpenSpace in the "
+        "same order in which they were initialized."
+    };
 } // namespace
 
 namespace openspace {
 
-ModuleEngine::ModuleEngine() : properties::PropertyOwner({ "Modules" }) {}
+ModuleEngine::ModuleEngine()
+    : properties::PropertyOwner({ "Modules" })
+    , _allModules(AllModulesInfo)
+{
+    _allModules.setReadOnly(true);
+    addProperty(_allModules);
+}
 
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
@@ -50,9 +63,13 @@ void ModuleEngine::initialize(
 
     std::vector<OpenSpaceModule*> modules = AllModules();
 
+    std::vector<std::string> moduleNames;
+    moduleNames.reserve(modules.size());
     for (OpenSpaceModule* m : modules) {
         registerModule(std::unique_ptr<OpenSpaceModule>(m));
+        moduleNames.push_back(m->guiName());
     }
+    _allModules = moduleNames;
 
     for (OpenSpaceModule* m : modules) {
         const std::string& identifier = m->identifier();
