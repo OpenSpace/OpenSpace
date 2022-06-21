@@ -16,8 +16,7 @@
 	branch = OpenSpace
 [submodule "apps/OpenSpace/ext/sgct"]
 	path = apps/OpenSpace/ext/sgct
-	# url = https://github.com/sgct/sgct
-	url = https://github.com/nissebergman/sgct.git
+	url = https://github.com/sgct/sgct
 	branch = gstreamer-functionality
 [submodule "modules/fitsfilereader/ext/CCfits"]
 	path = modules/fitsfilereader/ext/CCfits
