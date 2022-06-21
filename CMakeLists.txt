@@ -48,6 +48,7 @@ if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
   message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
 endif ()
 
+
 ##########################################################################################
 # Cleanup project                                                                        #
 ##########################################################################################
@@ -263,6 +264,7 @@ endif ()
 ##########################################################################################
 # Misc settings                                                                          #
 ##########################################################################################
+
 
 # Manage the CPack packaging
 include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)

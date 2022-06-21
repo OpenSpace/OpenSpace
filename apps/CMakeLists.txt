@@ -40,9 +40,6 @@ file(GLOB app_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_D
 list(REMOVE_ITEM app_dirs ".DS_Store")
 list(REMOVE_ITEM app_dirs "CMakeLists.txt")
 
-
-
-
 message(STATUS "Enabled applications:")
 foreach (app ${app_dirs})
   string(TOUPPER ${app} upper_app)
