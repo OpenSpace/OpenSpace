@@ -2,13 +2,14 @@ local shared = asset.require("util/tle_helper")
 
 local group = {
   Title = "GPS",
-  Url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
+  Filename = "gps-ops.txt",
+  Url = "https://celestrak.com/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=TLE",
   TrailColor = { 0.9, 0.5, 0.0 },
   Description = [[The GPS satellites that give us our precise locations back here 
   on Earth.]]
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
+local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
 shared.registerSatelliteGroupObjects(asset, group, tle, true)
 
 
