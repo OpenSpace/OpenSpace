@@ -20,7 +20,8 @@ local JuiceTrailGanymede = {
   },
   GUI = {
     Name = "Juice Trail (Ganymede)",
-    Path = "/Solar System/Missions/Juice"
+    Path = "/Solar System/Missions/Juice",
+    Description = "Juice's trajectory relative to Ganymede"
   }
 }
 
@@ -34,3 +35,15 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(JuiceTrailGanymede)
+
+
+asset.meta = {
+  Name = "Juice trajectory relative to Ganymede",
+  Version = "1.0",
+  Description = [[
+    The trajectory of the Juice spacecraft relative to Ganymede
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

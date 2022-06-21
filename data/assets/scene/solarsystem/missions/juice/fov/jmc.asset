@@ -44,7 +44,8 @@ local JMC2 = {
   },
   GUI = {
     Name = "JUICE_JMC-2 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The field-of-views for the Juice Monitoring cameras"
   }
 }
 
@@ -61,3 +62,18 @@ end)
 
 asset.export(JMC1)
 asset.export(JMC2)
+
+
+asset.meta = {
+  Name = "JMC",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Juice Monitoring Cameras (JMC) onboard Juice, which
+    provide status information about the deployment of various Juice systems, like the
+    solar array, antenna, etc. See https://microcameras.space/project/juice/ for more
+    information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

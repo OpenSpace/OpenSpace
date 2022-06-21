@@ -24,8 +24,9 @@ local magnetosphere = {
   },
   GUI = {
     Name = "Ganymede Magnetosphere",
-    Path = "/Solar System/Missions/Juice/Fieldlines"
-  },
+    Path = "/Solar System/Missions/Juice/Fieldlines",
+    Description = "Fieldlines showing a simulation of the magnetic fields around Ganymede"
+  }
 }
 
 
@@ -36,3 +37,16 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(magnetosphere)
 end)
+
+
+asset.meta = {
+  Name = "Static fieldline representation of Ganymede's magnetic field",
+  Version = "1.0",
+  Description = [[
+    Showing a single timestep of the magnetic fieldlines around Ganymede in the GPHIO
+    coordinate system
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

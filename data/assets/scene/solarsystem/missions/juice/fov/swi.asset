@@ -51,7 +51,8 @@ local SwiFull = {
   },
   GUI = {
     Name = "SWI Full FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The field-of-view for the full SWI instrument onboard Juice."
   }
 }
 
@@ -88,17 +89,32 @@ local SwiFullGCO500 = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(SwiCh2)
+  -- openspace.addSceneGraphNode(SwiCh2)
   openspace.addSceneGraphNode(SwiFull)
-  openspace.addSceneGraphNode(SwiFullGCO500)
+  -- openspace.addSceneGraphNode(SwiFullGCO500)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SwiFullGCO500)
+  -- openspace.removeSceneGraphNode(SwiFullGCO500)
   openspace.removeSceneGraphNode(SwiFull)
-  openspace.removeSceneGraphNode(SwiCh2)
+  -- openspace.removeSceneGraphNode(SwiCh2)
 end)
 
-asset.export(SwiCh2)
+-- asset.export(SwiCh2)
 asset.export(SwiFull)
-asset.export(SwiFullGCO500)
+-- asset.export(SwiFullGCO500)
+
+
+asset.meta = {
+  Name = "SWI",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Submillimetre Wave Instrument (SWI), which is measuring
+    the chemistry, meteorology, and structure of Jupiters middle atmosphere as well as the
+    habitability of the Galilean moons. See
+    https://www.mps.mpg.de/planetary-science/juice-swi for more information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

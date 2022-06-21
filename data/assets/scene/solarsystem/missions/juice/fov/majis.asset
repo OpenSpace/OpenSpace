@@ -21,7 +21,11 @@ local MajisVisnir = {
   },
   GUI = {
     Name = "Majis Visnir FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = [[
+      The field-of-view for the Moon and Jupiter Imaging Spectrometer measuring in the
+      visible and near-infrared spectra (0.4-1.9 um and 1.5-5.7 um).
+    ]]
   }
 }
 
@@ -164,35 +168,54 @@ local Majis = {
   },
   GUI = {
     Name = "Majis FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = [[
+      The field-of-view for the Moon and Jupiter Imaging Spectrometer measuring in the
+      visible and near-infrared spectra (0.4-1.9 um and 1.5-5.7 um).
+    ]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(MajisVisnir)
-  openspace.addSceneGraphNode(MajisVisnirB2)
-  openspace.addSceneGraphNode(MajisVisnirB4)
-  openspace.addSceneGraphNode(MajisIr)
-  openspace.addSceneGraphNode(MajisIrB2)
-  openspace.addSceneGraphNode(MajisIrB4)
+  -- openspace.addSceneGraphNode(MajisVisnir)
+  -- openspace.addSceneGraphNode(MajisVisnirB2)
+  -- openspace.addSceneGraphNode(MajisVisnirB4)
+  -- openspace.addSceneGraphNode(MajisIr)
+  -- openspace.addSceneGraphNode(MajisIrB2)
+  -- openspace.addSceneGraphNode(MajisIrB4)
   openspace.addSceneGraphNode(Majis)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Majis)
-  openspace.removeSceneGraphNode(MajisIrB4)
-  openspace.removeSceneGraphNode(MajisIrB2)
-  openspace.removeSceneGraphNode(MajisIr)
-  openspace.removeSceneGraphNode(MajisVisnirB4)
-  openspace.removeSceneGraphNode(MajisVisnirB2)
+  -- openspace.removeSceneGraphNode(Majis)
+  -- openspace.removeSceneGraphNode(MajisIrB4)
+  -- openspace.removeSceneGraphNode(MajisIrB2)
+  -- openspace.removeSceneGraphNode(MajisIr)
+  -- openspace.removeSceneGraphNode(MajisVisnirB4)
+  -- openspace.removeSceneGraphNode(MajisVisnirB2)
   openspace.removeSceneGraphNode(MajisVisnir)
 end)
 
-asset.export(MajisVisnir)
-asset.export(MajisVisnirB2)
-asset.export(MajisVisnirB4)
-asset.export(MajisIr)
-asset.export(MajisIrB2)
-asset.export(MajisIrB4)
+-- asset.export(MajisVisnir)
+-- asset.export(MajisVisnirB2)
+-- asset.export(MajisVisnirB4)
+-- asset.export(MajisIr)
+-- asset.export(MajisIrB2)
+-- asset.export(MajisIrB4)
 asset.export(Majis)
+
+
+asset.meta = {
+  Name = "Majis",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Moon and Jupiter Imaging Spectrometer (MAJIS) onboard
+    Juice, which is going to take spectroscopic measurements of the Jovian moons and
+    Jupiter. See https://www.hou.usra.edu/meetings/lpsc2014/pdf/2493.pdf for more
+    information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

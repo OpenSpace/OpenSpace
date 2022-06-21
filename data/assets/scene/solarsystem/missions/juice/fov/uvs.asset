@@ -21,7 +21,8 @@ local UVS = {
   },
   GUI = {
     Name = "UVS FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The field-of-view for the UVS instrument onboard Juice"
   }
 }
 
@@ -35,3 +36,18 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(UVS)
+
+
+asset.meta = {
+  Name = "UVS",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Ultraviolet Spectograph (UVS), which is measuring the
+    composition, chemistry, structure, and variability of Europa's atmopshere. See
+    https://www.lpi.usra.edu/opag/meetings/aug2015/presentations/day-1/8_b_retherford.pdf
+    for more information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

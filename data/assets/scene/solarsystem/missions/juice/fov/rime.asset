@@ -22,7 +22,8 @@ local RimeBase = {
   },
   GUI = {
     Name = "Rime Base FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The location of the base for the RIME instrument onboard Juice."
   }
 }
 
@@ -46,7 +47,8 @@ local Rime = {
   },
   GUI = {
     Name = "Rime FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The location of the RIME instrument onboard Juice."
   }
 }
 
@@ -63,3 +65,19 @@ end)
 
 asset.export(Rime)
 asset.export(RimeBase)
+
+
+asset.meta = {
+  Name = "RIME",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Radar for Icy Moons Exploration (RIME) onboard Juice,
+    which is a ground-penetrating radar meant to measure the subsurface structure of the
+    ice surrounding the icy Galilean moons of up to 9 km. See
+    https://www.spacetech-i.com/products/mechanisms/juice-rime-antenna for more
+    information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

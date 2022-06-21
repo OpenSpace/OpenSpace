@@ -21,7 +21,8 @@ local StarOh1 = {
   },
   GUI = {
     Name = "Star Tracker OH1 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The first head of the Hydra star tracking system"
   }
 }
 
@@ -44,7 +45,8 @@ local StarOh2 = {
   },
   GUI = {
     Name = "Star Tracker OH2 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The second head of the Hydra star tracking system"
   }
 }
 
@@ -67,7 +69,8 @@ local StarOh3 = {
   },
   GUI = {
     Name = "Star Tracker OH3 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The third head of the Hydra star tracking system"
   }
 }
 
@@ -87,3 +90,17 @@ end)
 asset.export(StarOh1)
 asset.export(StarOh2)
 asset.export(StarOh3)
+
+
+asset.meta = {
+  Name = "Star Tracker",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the three headed "Hydra" star trackers onboard Juice, which
+    is measuring the location of stars and comparing them to their known locations in
+    order to determine the position of Juice relative to the celestial sphere.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
