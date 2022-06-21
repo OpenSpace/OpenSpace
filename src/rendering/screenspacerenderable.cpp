@@ -42,8 +42,8 @@
 #include <variant>
 
 namespace {
-    constexpr const std::array<const char*, 5> UniformNames = {
-        "color", "opacity", "mvpMatrix", "tex", "backgroundColor"
+    constexpr const std::array<const char*, 6> UniformNames = {
+        "color", "opacity", "mvpMatrix", "tex", "backgroundColor", "gamma"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -150,6 +150,12 @@ namespace {
         "the camera."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
+        "Gamma",
+        "Gamma Correction",
+        "Sets the gamma correction of the texture."
+    };
+
     float wrap(float value, float min, float max) {
         return glm::mod(value - min, max - min) + min;
     }
@@ -189,6 +195,9 @@ namespace {
 
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
+
+        // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
+        std::optional<float> gamma;
 
         // [[codegen::verbatim(UsePerspectiveProjectionInfo.description)]]
         std::optional<bool> usePerspectiveProjection;
@@ -286,6 +295,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
+    , _gamma(GammaInfo, 1.f, 0.f, 10.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -303,6 +313,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_faceCamera);
     addProperty(_cartesianPosition);
     addProperty(_raePosition);
+    addProperty(_gamma);
 
     // Setting spherical/euclidean onchange handler
     _useRadiusAzimuthElevation.onChange([this]() {
@@ -329,6 +340,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _enabled = p.enabled.value_or(_enabled);
+    _gamma = p.gamma.value_or(_gamma);
+
     _useRadiusAzimuthElevation =
         p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
 
@@ -591,7 +604,7 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     _shader->setUniform(_uniformCache.color, _multiplyColor);
     _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
-
+    _shader->setUniform(_uniformCache.gamma, _gamma);
     _shader->setUniform(
         _uniformCache.mvp,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
