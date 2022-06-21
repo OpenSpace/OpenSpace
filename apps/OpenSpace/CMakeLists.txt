@@ -195,3 +195,15 @@ if (WIN32)
     COMMAND_EXPAND_LISTS
   )
 endif ()
+
+# Handles dll copying and library linking for GStreamer functionality.
+if(SGCT_GSTREAMER_SUPPORT)
+  include(${OPENSPACE_BASE_DIR}/apps/OpenSpace/ext/sgct/ext/gstreamer/copy_gstreamer_libs.cmake)
+  copy_gstreamer_dlls(OpenSpace)
+  link_gstreamer_libs(OpenSpace)
+
+  target_compile_definitions(OpenSpace PUBLIC
+    $<$<BOOL:${SGCT_GSTREAMER_SUPPORT}>:SGCT_HAS_GSTREAMER>
+    "OPENSPACE_ROOT=\"${PROJECT_SOURCE_DIR}\"" # Path variable to be picked up in the GStreamer C++
+    )
+endif()
