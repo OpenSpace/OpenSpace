@@ -183,7 +183,7 @@ void SgctEdit::save() {
             "window 2 has to be bigger than window 3 (if it exists), and window 3 has to "
             "be bigger than window 4.\nOtherwise, rendering errors might occur.\n\nAre "
             "you sure you want to continue?",
-            QMessageBox::StandardButtons(QMessageBox::Yes || QMessageBox::No)
+            QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No)
         );
         if (ret == QMessageBox::No) {
             return;

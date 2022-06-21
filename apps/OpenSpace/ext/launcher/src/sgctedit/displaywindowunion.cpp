@@ -48,8 +48,8 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
                                        std::array<QColor, 4> windowColors)
 {
     // Add all window controls (some will be hidden from GUI initially)
-    for (unsigned int i = 0; i < nMaxWindows; ++i) {
-        const unsigned int monitorNumForThisWindow = (nMaxWindows > 3 && i >= 2) ? 1 : 0;
+    for (int i = 0; i < nMaxWindows; ++i) {
+        const int monitorNumForThisWindow = (nMaxWindows > 3 && i >= 2) ? 1 : 0;
 
         WindowControl* ctrl = new WindowControl(
             monitorNumForThisWindow,

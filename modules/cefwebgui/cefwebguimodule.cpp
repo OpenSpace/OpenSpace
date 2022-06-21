@@ -239,8 +239,8 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         ZoneScopedN("CefWebGuiModule")
 
         if (_endpointCallback != -1) {
-            WebGuiModule* webGuiModule = global::moduleEngine->module<WebGuiModule>();
-            webGuiModule->removeEndpointChangeCallback(_endpointCallback);
+            WebGuiModule* m = global::moduleEngine->module<WebGuiModule>();
+            m->removeEndpointChangeCallback(_endpointCallback);
             _endpointCallback = -1;
         }
         _enabled = false;

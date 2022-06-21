@@ -102,11 +102,11 @@ private:
     properties::BoolProperty _enabled;
     properties::BoolProperty _showTitleInGuiBrowser;
     properties::BoolProperty _allowCameraRotation;
-    properties::BoolProperty _hideTargetsBrowsersWithGui;
-    properties::BoolProperty _inverseZoomDirection;
     properties::DoubleProperty _cameraRotationSpeed;
     properties::DoubleProperty _targetAnimationSpeed;
     properties::DoubleProperty _browserAnimationSpeed;
+    properties::BoolProperty _hideTargetsBrowsersWithGui;
+    properties::BoolProperty _inverseZoomDirection;
     properties::DoubleProperty _spaceCraftAnimationTime;
     properties::StringProperty _wwtImageCollectionUrl;
 

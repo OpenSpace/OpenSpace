@@ -61,6 +61,7 @@ public:
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
 
+    properties::BoolProperty _enabled;
     properties::StringProperty _exoplanetsDataFolder;
     properties::StringProperty _bvColorMapPath;
     properties::StringProperty _starTexturePath;
@@ -74,8 +75,6 @@ protected:
     properties::BoolProperty _useOptimisticZone;
 
     properties::FloatProperty _habitableZoneOpacity;
-
-    properties::BoolProperty _enabled;
 };
 
 } // namespace openspace
