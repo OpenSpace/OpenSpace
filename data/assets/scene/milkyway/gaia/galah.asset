@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local speck = asset.syncedResource({
   Name = "Galah Speck Files",
   Type = "HttpSynchronization",
@@ -13,7 +9,7 @@ local colormaps = asset.syncedResource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
-  Version = 2
+  Version = 3
 })
 
 local textures = asset.syncedResource({
@@ -24,20 +20,21 @@ local textures = asset.syncedResource({
 })
 
 local gaia_abundance_galah = {
-  Identifier = "Gaia Abundance Galah",
+  Identifier = "GaiaAbundanceGalah",
   Renderable = {
     Type = "RenderableStars",
     Enabled = false,
     File = speck .. "GaiaAbundGalah.speck",
     Texture = textures .. "halo.png",
     -- ShapeTexture = textures .. "disc.png",
-    MagnitudeExponent = 6.2,
+    MagnitudeExponent = 7.25,
     SizeComposition = "Distance Modulus",
     RenderMethod = "Texture Based",
     ColorOption = "Other Data",
     OtherData = "FeH",
     ColorMap = colormaps .. "colorbv.cmap",
-    OtherDataColorMap = colormaps .. "viridis.cmap",
+    OtherDataColorMap = colormaps .. "RainbowGradient.cmap",
+    ColorRange = { { -0.8, 0.6 } },
     StaticFilter = -9999,
     StaticFilterReplacement = 0.0,
     DataMapping = {
@@ -52,8 +49,29 @@ local gaia_abundance_galah = {
     }
   },
   GUI = {
-    Path = "/Milky Way/Gaia"
+    Path = "/Milky Way/Gaia",
+    Name = "Gaia Abundance Galah",
+    Description = "Data set of stars color coded by metallicity."
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { gaia_abundance_galah })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(gaia_abundance_galah)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(gaia_abundance_galah)
+end)
+  
+asset.export(gaia_abundance_galah)
+
+
+
+asset.meta = {
+  Name = "Gaia Abundance Galah",
+  Version = "1.0",
+  Description = [[This asset contains a RenderableStars dataset with metallicity data.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT License"
+}

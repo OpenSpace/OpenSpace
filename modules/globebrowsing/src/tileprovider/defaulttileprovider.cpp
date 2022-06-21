@@ -134,7 +134,7 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
 
 Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
-    
+
     ghoul_assert(_asyncTextureDataProvider, "No data provider");
     if (tileIndex.level > maxLevel()) {
         return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
@@ -193,6 +193,11 @@ void DefaultTileProvider::reset() {
     global::moduleEngine->module<GlobeBrowsingModule>()->tileCache()->clear();
     ghoul_assert(_asyncTextureDataProvider, "No data provider");
     _asyncTextureDataProvider->prepareToBeDeleted();
+}
+
+int DefaultTileProvider::minLevel() {
+    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    return 1;
 }
 
 int DefaultTileProvider::maxLevel() {

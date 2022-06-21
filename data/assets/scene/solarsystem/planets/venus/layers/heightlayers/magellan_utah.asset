@@ -21,11 +21,16 @@ local layer = {
   }
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
 asset.export("layer", layer)
+
 
 
 asset.meta = {

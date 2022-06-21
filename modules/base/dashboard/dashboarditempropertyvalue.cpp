@@ -62,7 +62,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemPropertyValue::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_propertyvalue");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_propertyvalue",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemPropertyValue::DashboardItemPropertyValue(

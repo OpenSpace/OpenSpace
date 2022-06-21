@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local textures = asset.syncedResource({
   Name = "Background Radiation Textures",
   Type = "HttpSynchronization",
@@ -30,7 +26,7 @@ local multiverse_planck_1 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -60,7 +56,7 @@ local multiverse_planck_2 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -90,7 +86,7 @@ local multiverse_planck_3 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -120,7 +116,7 @@ local multiverse_planck_4 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -130,20 +126,34 @@ local multiverse_planck_4 = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  multiverse_planck_1, multiverse_planck_2, multiverse_planck_3, multiverse_planck_4
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(multiverse_planck_1)
+  openspace.addSceneGraphNode(multiverse_planck_2)
+  openspace.addSceneGraphNode(multiverse_planck_3)
+  openspace.addSceneGraphNode(multiverse_planck_4)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(multiverse_planck_4)
+  openspace.removeSceneGraphNode(multiverse_planck_3)
+  openspace.removeSceneGraphNode(multiverse_planck_2)
+  openspace.removeSceneGraphNode(multiverse_planck_1)
+end)
+  
+asset.export(multiverse_planck_1)
+asset.export(multiverse_planck_2)
+asset.export(multiverse_planck_3)
+asset.export(multiverse_planck_4)
+
 
 
 asset.meta = {
   Name = "Multiverse Background Radiation",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[ Non-physical representation of the location of hypothetical 
       cosmic microwave background radiation images how they would be observed from other
       locations in the universe. <br> This is not a measured dataset!]],
   Author = "Brian Abbott (AMNH), OpenSpace Team",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = { "PlanckMultiverse1", "PlanckMultiverse2",
-      "PlanckMultiverse3", "PlanckMultiverse4" }
+  License = "AMNH Digital Universe"
 }

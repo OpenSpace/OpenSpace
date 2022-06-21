@@ -101,7 +101,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_simulationincrement");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_simulationincrement",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(

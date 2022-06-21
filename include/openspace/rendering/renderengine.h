@@ -172,7 +172,7 @@ private:
 
     ghoul::opengl::OpenGLStateCache* _openglStateCache = nullptr;
 
-    properties::BoolProperty _showOverlayOnSlaves;
+    properties::BoolProperty _showOverlayOnClients;
     properties::BoolProperty _showLog;
     properties::FloatProperty _verticalLogOffset;
     properties::BoolProperty _showVersionInfo;

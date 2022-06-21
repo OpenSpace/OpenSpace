@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels").PlutoKernels
 
@@ -52,7 +51,19 @@ local KerberosTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Kerberos, KerberosTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Kerberos)
+  openspace.addSceneGraphNode(KerberosTrail)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(KerberosTrail)
+  openspace.removeSceneGraphNode(Kerberos)
+end)
+  
+asset.export(Kerberos)
+asset.export(KerberosTrail)
+
 
 
 asset.meta = {

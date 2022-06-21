@@ -30,7 +30,6 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
@@ -89,7 +88,6 @@ namespace {
         sizeof(SyncEngine) +
         sizeof(TimeManager) +
         sizeof(VersionChecker) +
-        sizeof(VirtualPropertyManager) +
         sizeof(WindowDelegate) +
         sizeof(configuration::Configuration) +
         sizeof(interaction::ActionManager) +
@@ -98,6 +96,7 @@ namespace {
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::NavigationHandler) +
         sizeof(interaction::SessionRecording) +
+        sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(scripting::ScriptEngine) +
@@ -259,14 +258,6 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    virtualPropertyManager = new (currentPos) VirtualPropertyManager;
-    ghoul_assert(virtualPropertyManager, "No virtualPropertyManager");
-    currentPos += sizeof(VirtualPropertyManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    virtualPropertyManager = new VirtualPropertyManager;
-#endif // WIN32
-
-#ifdef WIN32
     windowDelegate = new (currentPos) WindowDelegate;
     ghoul_assert(windowDelegate, "No windowDelegate");
     currentPos += sizeof(WindowDelegate);
@@ -356,6 +347,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    userPropertyOwner = new (currentPos) properties::PropertyOwner({ "UserProperties" });
+    ghoul_assert(userPropertyOwner, "No userPropertyOwner");
+    currentPos += sizeof(properties::PropertyOwner);
+#else // ^^^ WIN32 / !WIN32 vvv
+    userPropertyOwner = new properties::PropertyOwner({ "UserProperties" });
+#endif // WIN32
+
+#ifdef WIN32
     scriptEngine = new (currentPos) scripting::ScriptEngine;
     ghoul_assert(scriptEngine, "No scriptEngine");
     currentPos += sizeof(scripting::ScriptEngine);
@@ -385,7 +384,6 @@ void initialize() {
 
     rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
-    navigationHandler->setPropertyOwner(global::rootPropertyOwner);
     // New property subowners also have to be added to the ImGuiModule callback!
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
@@ -399,6 +397,8 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
     rootPropertyOwner->addPropertySubOwner(global::luaConsole);
     rootPropertyOwner->addPropertySubOwner(global::dashboard);
+
+    rootPropertyOwner->addPropertySubOwner(global::userPropertyOwner);
 
     syncEngine->addSyncable(global::scriptEngine);
 }
@@ -505,13 +505,6 @@ void destroy() {
     windowDelegate->~WindowDelegate();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete windowDelegate;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'VirtualPropertyManager'");
-#ifdef WIN32
-    virtualPropertyManager->~VirtualPropertyManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete virtualPropertyManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'VersionChecker'");

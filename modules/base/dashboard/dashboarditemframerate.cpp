@@ -157,7 +157,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemFramerate::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_framerate");
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_framerate",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)

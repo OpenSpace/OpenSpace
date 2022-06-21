@@ -76,7 +76,6 @@ public:
     void removeKeyframesAfter(double timestamp, Inclusive inclusive = Inclusive::No);
     void clearKeyframes();
     size_t nKeyframes() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
     double currentTime() const;
     void setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp);
 

@@ -1,5 +1,4 @@
-local assetHelper = asset.require("util/asset_helper")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local model = asset.syncedResource({
@@ -28,12 +27,7 @@ local animationLoop = {
     AnimationStartTime = StartTime,
     ModelScale = 3E7,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true
@@ -62,12 +56,7 @@ local animationLoopInf = {
     AnimationStartTime = StartTime,
     ModelScale = 3E7,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true
@@ -96,12 +85,7 @@ local animationOnce = {
     AnimationStartTime = StartTime,
     ModelScale = 3E7,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true
@@ -130,12 +114,7 @@ local animationBounceInf = {
     AnimationStartTime = StartTime,
     ModelScale = 3E7,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true
@@ -164,12 +143,7 @@ local animationBounce = {
     AnimationStartTime = StartTime,
     ModelScale = 3E7,
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
+      sun.LightSource
     },
     PerformShading = true,
     DisableFaceCulling = true
@@ -181,13 +155,28 @@ local animationBounce = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  animationLoop,
-  animationLoopInf,
-  animationOnce,
-  animationBounceInf,
-  animationBounce
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(animationLoop)
+  openspace.addSceneGraphNode(animationLoopInf)
+  openspace.addSceneGraphNode(animationOnce)
+  openspace.addSceneGraphNode(animationBounceInf)
+  openspace.addSceneGraphNode(animationBounce)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(animationBounce)
+  openspace.removeSceneGraphNode(animationBounceInf)
+  openspace.removeSceneGraphNode(animationOnce)
+  openspace.removeSceneGraphNode(animationLoopInf)
+  openspace.removeSceneGraphNode(animationLoop)
+end)
+
+
+asset.export(animationLoop)
+asset.export(animationLoopInf)
+asset.export(animationOnce)
+asset.export(animationBounceInf)
+asset.export(animationBounce)
 
 -- Asset
 asset.meta = {
@@ -196,17 +185,11 @@ asset.meta = {
   Description = "Simple animation example asset with an animated box model",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {
-    "animationLoop",
-    "animationLoopInf",
-    "animationOnce",
-    "animationBounceInf",
-    "animationBounce"
-  }
+  License = "MIT license"
 }
 
 -- Model
+-- @TODO: At the moment, this overwrites the previous meta description. Probably needs a way to specify multiple meta's per file?
 asset.meta = {
   Name = "Animated Box Model",
   Version = "1.0",
@@ -216,12 +199,5 @@ asset.meta = {
   License = [[
     Creative Commons Attribution 4.0 International License,
     https://creativecommons.org/licenses/by/4.0/
-  ]],
-  Identifiers = {
-    "animationLoop",
-    "animationLoopInf",
-    "animationOnce",
-    "animationBounceInf",
-    "animationBounce"
-  }
+  ]]
 }

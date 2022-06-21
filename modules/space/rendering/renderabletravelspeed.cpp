@@ -37,8 +37,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "renderableTravelSpeed";
-
     constexpr const std::array<const char*, 2> UniformNames = {"lineColor", "opacity"};
 
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
@@ -57,12 +55,6 @@ namespace {
         "Color",
         "Color",
         "This value determines the RGB color for the line."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LineOpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "This value determines the opacity for the line."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -94,9 +86,6 @@ namespace {
         // [[codegen::verbatim(LineColorInfo.description)]]
         std::optional<glm::vec3> color;
 
-        // [[codegen::verbatim(LineOpacityInfo.description)]]
-        std::optional<float> opacity;
-
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
@@ -126,10 +115,11 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
       )
     , _indicatorLength(IndicatorLengthInfo, 1, 1, 360)
     , _fadeLength(FadeLengthInfo, 1, 0, 360)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _opacity(LineOpacityInfo, 1.f, 0.f, 1.f)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
+    addProperty(_opacity);
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
     setRenderBin(RenderBin::Overlay);
 
@@ -137,8 +127,6 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     _lineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_lineColor);
 
-    _opacity = p.opacity.value_or(_opacity);
-    addProperty(_opacity);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
@@ -292,7 +280,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     }
 
     _shaderProgram->setUniform("lineColor", _lineColor);
-    _shaderProgram->setUniform("opacity", _opacity);
+    _shaderProgram->setUniform("opacity", opacity());
 }
 
 void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {

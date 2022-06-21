@@ -94,11 +94,11 @@ namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const char* KeyFontLight = "Light";
 
-    constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
-        "ShowOverlayOnSlaves",
-        "Show Overlay Information on Slaves",
+    constexpr openspace::properties::Property::PropertyInfo ShowOverlayClientsInfo = {
+        "ShowOverlayOnClients",
+        "Show Overlay Information on Clients",
         "If this value is enabled, the overlay information text is also automatically "
-        "rendered on the slave nodes. This values is disabled by default."
+        "rendered on client nodes. This values is disabled by default."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowLogInfo = {
@@ -280,7 +280,7 @@ namespace openspace {
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner({ "RenderEngine" })
-    , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
+    , _showOverlayOnClients(ShowOverlayClientsInfo, false)
     , _showLog(ShowLogInfo, true)
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
     , _showVersionInfo(ShowVersionInfo, true)
@@ -321,7 +321,7 @@ RenderEngine::RenderEngine()
     , _enabledFontColor(EnabledFontColorInfo, glm::vec4(0.2f, 0.75f, 0.2f, 1.f))
     , _disabledFontColor(DisabledFontColorInfo, glm::vec4(0.55f, 0.2f, 0.2f, 1.f))
 {
-    addProperty(_showOverlayOnSlaves);
+    addProperty(_showOverlayOnClients);
     addProperty(_showLog);
     addProperty(_verticalLogOffset);
     addProperty(_showVersionInfo);
@@ -512,7 +512,7 @@ void RenderEngine::initializeGL() {
     {
         ZoneScopedN("Log")
         LINFO("Initializing Log");
-        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+        auto log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
         _log = log.get();
         ghoul::logging::LogManager::ref().addLog(std::move(log));
     }
@@ -804,7 +804,7 @@ void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
     ZoneScoped
 
     const bool isMaster = global::windowDelegate->isMaster();
-    if (isMaster || _showOverlayOnSlaves) {
+    if (isMaster || _showOverlayOnClients) {
         renderScreenLog();
         renderVersionInformation();
         renderDashboard();
@@ -1070,27 +1070,10 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
     return {
         "",
         {
-            {
-                "addScreenSpaceRenderable",
-                &luascriptfunctions::addScreenSpaceRenderable,
-                "table",
-                "Will create a ScreenSpaceRenderable from a lua Table and add it in the "
-                "RenderEngine"
-            },
-            {
-                "removeScreenSpaceRenderable",
-                &luascriptfunctions::removeScreenSpaceRenderable,
-                "string",
-                "Given a ScreenSpaceRenderable name this script will remove it from the "
-                "renderengine"
-            },
-            {
-                "takeScreenshot",
-                &luascriptfunctions::takeScreenshot,
-                "",
-                "Take a screenshot and return the screenshot number. The screenshot will "
-                "be stored in the ${SCREENSHOTS} folder. "
-            }
+            codegen::lua::AddScreenSpaceRenderable,
+            codegen::lua::RemoveScreenSpaceRenderable,
+            codegen::lua::TakeScreenshot,
+            codegen::lua::DpiScaling
         }
     };
 }
@@ -1133,6 +1116,7 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
 
     if (it != global::screenSpaceRenderables->end()) {
         global::eventEngine->publishEvent<events::EventScreenSpaceRenderableRemoved>(s);
+        s->deinitializeGL();
         s->deinitialize();
         global::screenSpaceRootPropertyOwner->removePropertySubOwner(s);
         global::screenSpaceRenderables->erase(it);

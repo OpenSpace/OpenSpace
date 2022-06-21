@@ -69,13 +69,8 @@ documentation::Documentation ScreenSpaceSpout::Documentation() {
 
 ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _spoutName(NameInfo)
-    , _spoutSelection(SelectionInfo)
-    , _updateSelection(UpdateInfo)
-    , _receiver(GetSpout())
+    , _spoutReceiver(*this, dictionary)
 {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -85,127 +80,30 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     }
     identifier = makeUniqueIdentifier(identifier);
     setIdentifier(std::move(identifier));
-
-    _spoutName = p.spoutName.value_or(_spoutName);
-    _spoutName.onChange([this]() {
-        _isSpoutDirty = true;
-        _isErrorMessageDisplayed = false;
-
-        _receiver->SetActiveSender(_spoutName.value().c_str());
-    });
-    addProperty(_spoutName);
-
-    _spoutSelection.onChange([this]() {
-        _spoutName = _spoutSelection.option().description;
-    });
-    _spoutSelection.addOption(0, "");
-    addProperty(_spoutSelection);
-
-    _updateSelection.onChange([this]() {
-        const std::string& currentValue = _spoutSelection.options().empty() ?
-            "" :
-            _spoutSelection.option().description;
-
-        _spoutSelection.clearOptions();
-        _spoutSelection.addOption(0, "");
-
-        int nSenders = _receiver->GetSenderCount();
-
-        int idx = 0;
-
-        for (int i = 0; i < nSenders; ++i) {
-            char Name[256];
-            _receiver->GetSenderName(i, Name, 256);
-
-            _spoutSelection.addOption(i + 1, Name);
-
-            if (currentValue == Name) {
-                idx = i + 1;
-            }
-        }
-
-        _spoutSelection = idx;
-    });
-    addProperty(_updateSelection);
 }
 
 bool ScreenSpaceSpout::deinitializeGL() {
-    _receiver->ReleaseReceiver();
-    _receiver->Release();
+    _spoutReceiver.release();
 
     return ScreenSpaceRenderable::deinitializeGL();
 }
 
 bool ScreenSpaceSpout::isReady() const {
-    return ScreenSpaceRenderable::isReady() && !_spoutName.value().empty();
+    return ScreenSpaceRenderable::isReady() && !_spoutReceiver.isReceiving();
 }
 
 void ScreenSpaceSpout::update() {
-    if (_isFirstUpdate) {
-        defer { _isFirstUpdate = false; };
-
-        // Trigger an update; the value is a dummy that is ignored
-        _updateSelection.set(0);
-
-        // #0 is the empty string and we just pick the first one after that (if it exists)
-        if (_spoutSelection.options().size() > 1) {
-            _spoutSelection = 1;
-        }
-    }
-
-    if (_spoutName.value().empty()) {
-        return;
-    }
-
-    if (_isSpoutDirty) {
-        defer { _isSpoutDirty = false; };
-
-        std::memset(_currentSenderName, 0, 256);
-
-        _receiver->ReleaseReceiver();
-        _receiver->GetActiveSender(_currentSenderName);
-
-        unsigned int width;
-        unsigned int height;
-        const bool hasCreated = _receiver->CreateReceiver(
-            _currentSenderName,
-            width,
-            height
-        );
-        _objectSize = { width, height };
-
-        if (!hasCreated) {
-            LWARNINGC(
-                "ScreenSpaceSpout",
-                fmt::format("Could not create receiver for {}", _currentSenderName)
-            );
-            return;
-        }
-    }
-
-    unsigned int width;
-    unsigned int height;
-    const bool receiveSuccess = _receiver->ReceiveTexture(
-        _currentSenderName,
-        width,
-        height
-    );
-
-    if (!receiveSuccess && !_isErrorMessageDisplayed) {
-        LWARNINGC(
-            "ScreenSpaceSpout",
-            fmt::format("Could not receive texture for {}", _currentSenderName)
-        );
-        _isErrorMessageDisplayed = true;
-    }
+    ScreenSpaceRenderable::update();
+    _spoutReceiver.updateReceiver();
 }
 
 void ScreenSpaceSpout::bindTexture() {
-    _receiver->BindSharedTexture();
+    _spoutReceiver.saveGLTextureState();
+    glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
 }
 
 void ScreenSpaceSpout::unbindTexture() {
-    _receiver->UnBindSharedTexture();
+    _spoutReceiver.restoreGLTextureState();
 }
 
 } // namespace openspace

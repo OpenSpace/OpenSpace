@@ -1,0 +1,20 @@
+local image = asset.syncedResource({
+  Name = "M82 Galaxy Image",
+  Type = "HttpSynchronization",
+  Identifier = "m82_image",
+  Version = 1
+})
+
+asset.export("image", image)
+
+asset.meta = {
+  Name = "M82 Galaxy",
+  Version = "1.0",
+  Description = "M82 Galaxy Image",
+  Author = [[
+    NASA, ESA and the Hubble Heritage Team (STScI/AURA). Acknowledgment:
+    J. Gallagher (University of Wisconsin), M. Mountain (STScI) and P. Puxley (NSF)
+  ]],
+  URL = "https://esahubble.org/images/heic0604a/",
+  License = "CC BY 4.0"
+}

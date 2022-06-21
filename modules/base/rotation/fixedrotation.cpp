@@ -485,6 +485,20 @@ bool FixedRotation::initialize() {
     return res;
 }
 
+void FixedRotation::update(const UpdateData& data) {
+    bool anyAxisIsObjectType = (
+        _xAxis.type == Axis::Type::Object ||
+        _yAxis.type == Axis::Type::Object ||
+        _zAxis.type == Axis::Type::Object
+    );
+
+    if (_attachedNode || anyAxisIsObjectType) {
+        requireUpdate();
+    }
+
+    Rotation::update(data);
+}
+
 glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     if (!_enabled) {
         return glm::dmat3();

@@ -350,7 +350,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
 
         // Shadow calculations..
         _shadowDataArrayCache.clear();
-        for (const ShadowConfiguration& shadowConf : _shadowConfArray) {
+        for (ShadowConfiguration& shadowConf : _shadowConfArray) {
             // TO REMEMBER: all distances and lengths in world coordinates are in
             // meters!!! We need to move this to view space...
             double lt;
@@ -374,10 +374,19 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
             casterPos *= KM_TO_M; // converting to meters
 
             SceneGraphNode* sourceNode = sceneGraphNode(shadowConf.source.first);
+            if (!sourceNode) {
+                if (!shadowConf.printedSourceError) {
+                    LERROR("Invalid scenegraph node for the shadow's receiver");
+                    shadowConf.printedSourceError = true;
+                }
+                return;
+            }
             SceneGraphNode* casterNode = sceneGraphNode(shadowConf.caster.first);
-
-            if (!sourceNode || !casterNode) {
-                LERROR("Invalid scenegraph node for the shadow's caster or receiver");
+            if (!casterNode) {
+                if (!shadowConf.printedCasterError) {
+                    LERROR("Invalid scenegraph node for the shadow's caster");
+                    shadowConf.printedCasterError = true;
+                }
                 return;
             }
 

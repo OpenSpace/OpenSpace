@@ -365,7 +365,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             // atlas)
             // Once this limitation is fixed, we can remove the next piece of code
             // Removing non ASCII characters:
-            strncpy(lEntry.feature, token.c_str(), 256);
+            strncpy(lEntry.feature, token.c_str(), 255);
             int tokenChar = 0;
             while (tokenChar < 256) {
                 if (lEntry.feature[tokenChar] < 0 && lEntry.feature[tokenChar] != '\0') {

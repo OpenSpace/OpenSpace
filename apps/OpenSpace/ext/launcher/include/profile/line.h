@@ -27,7 +27,7 @@
 
 #include <QFrame>
 
-class Line : public QFrame {
+class Line final : public QFrame {
 public:
     Line();
 };

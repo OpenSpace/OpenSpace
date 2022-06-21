@@ -63,8 +63,27 @@ local unbindRoll = function(name, axis)
   ]]
 end
 
+
+-- Function that will find the first connected joystick with a name that matches one of
+-- the given possible names
+local findJoystick = function(possibleNames)
+  -- Will only catch the joysticks that are connected before start up
+  local joysticks = openspace.navigation.listAllJoysticks()
+
+  for _, joyStickName in ipairs(joysticks) do
+    for _, name in ipairs(possibleNames) do
+      if joyStickName == name then
+        return name
+      end
+    end
+  end
+
+  return nil
+end
+
 asset.export("bindLocalRoll", bindLocalRoll)
 asset.export("bindGlobalRoll", bindGlobalRoll)
 asset.export("permaBindLocalRoll", permaBindLocalRoll)
 asset.export("permaBindGlobalRoll", permaBindGlobalRoll)
 asset.export("unbindRoll", unbindRoll)
+asset.export("findJoystick", findJoystick)

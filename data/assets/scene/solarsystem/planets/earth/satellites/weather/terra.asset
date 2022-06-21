@@ -2,7 +2,7 @@ local satelliteHelper = asset.require("util/tle_helper")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
-local url = "http://celestrak.com/satcat/tle.php?CATNR=25994"
+local url = "http://celestrak.com/NORAD/elements/gp.php?CATNR=25994"
 local identifier = "Terra"
 local filename = "Terra.txt"
 local nodes = {}
@@ -10,7 +10,6 @@ local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
 
 
 asset.onInitialize(function ()
-
   local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
   local period = satelliteHelper.getPeriodFromElement(lineElement)
   local path = tle .. "/" .. filename

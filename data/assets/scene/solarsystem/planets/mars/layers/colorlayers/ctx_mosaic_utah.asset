@@ -7,8 +7,24 @@ local layer = {
   BlendMode = "Color"
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "CTX Mosaic [Utah]",
+  Version = "1.0",
+  Description = [[ CTX Mosaic layer for Mars globe. This layer is served from the 
+  OpenSpace servers in Utah.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

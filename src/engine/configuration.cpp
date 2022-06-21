@@ -452,11 +452,19 @@ std::filesystem::path findConfiguration(const std::string& filename) {
 }
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
+                                        const glm::ivec2& primaryMonitorResolution,
                                         const std::string& overrideScript)
 {
     ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
 
     Configuration result;
+
+    // Injecting the resolution of the primary screen into the Lua state
+    std::string script = fmt::format(
+        "ScreenResolution = {{ x = {}, y = {} }}",
+        primaryMonitorResolution.x, primaryMonitorResolution.y
+    );
+    ghoul::lua::runScript(result.state, script);
 
     // If there is an initial config helper file, load it into the state
     if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {

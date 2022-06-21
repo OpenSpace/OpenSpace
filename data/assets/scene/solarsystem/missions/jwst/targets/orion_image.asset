@@ -1,0 +1,17 @@
+local image = asset.syncedResource({
+  Name = "Orion Image",
+  Type = "HttpSynchronization",
+  Identifier = "orion_image",
+  Version = 1
+})
+
+asset.export("image", image)
+
+asset.meta = {
+  Name = "Orion Nebula",
+  Version = "1.0",
+  Description = "Orion Nebula Image",
+  Author = "Bill Schoening/NOIRLab/NSF/AURA",
+  URL = "https://noirlab.edu/public/images/noao-02677/",
+  License = "CC BY 4.0"
+}

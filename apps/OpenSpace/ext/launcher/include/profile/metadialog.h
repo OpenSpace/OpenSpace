@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___META___H__
-#define __OPENSPACE_UI_LAUNCHER___META___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___METADIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___METADIALOG___H__
 
 #include <QDialog>
 
@@ -37,7 +37,7 @@ class MetaDialog final : public QDialog {
 Q_OBJECT
 public:
    /**
-    * Constructor for meta class
+    * Constructor for meta class.
     *
     * \param profile The #openspace::Profile object containing all data of the
     *                new or imported profile.
@@ -45,11 +45,10 @@ public:
     */
     MetaDialog(QWidget* parent, std::optional<openspace::Profile::Meta>* meta);
 
-private slots:
-    void save();
-
 private:
     void createWidgets();
+
+    void save();
 
     std::optional<openspace::Profile::Meta>* _meta = nullptr;
 
@@ -61,4 +60,4 @@ private:
     QLineEdit* _licenseEdit = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___META___H__
+#endif // __OPENSPACE_UI_LAUNCHER___METADIALOG___H__

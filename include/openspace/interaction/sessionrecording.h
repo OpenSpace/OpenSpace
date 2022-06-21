@@ -25,7 +25,8 @@
 #ifndef __OPENSPACE_CORE___SESSIONRECORDING___H__
 #define __OPENSPACE_CORE___SESSIONRECORDING___H__
 
-#include <openspace/interaction/externinteraction.h>
+#include <openspace/properties/propertyowner.h>
+
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
@@ -80,7 +81,7 @@ public:
         std::string substringReplacement;
         ScriptSubstringReplace(std::string found, std::string replace)
             : substringFound(found)
-            , substringReplacement(replace) {};
+            , substringReplacement(replace) {}
     };
 
     static const size_t FileHeaderVersionLength = 5;
@@ -489,12 +490,13 @@ public:
     static std::string readHeaderElement(std::ifstream& stream, size_t readLen_chars);
 
     /**
- * Reads header information from a session recording file
- *
- * \param stringstream reference to ifstream that contains the session recording file data
- * \param readLen_chars number of characters to be read, which may be the expected
- *        length of the header line, or an arbitrary number of characters within it
- */
+     * Reads header information from a session recording file
+     *
+     * \param stringstream reference to ifstream that contains the session recording file
+     *        data
+     * \param readLen_chars number of characters to be read, which may be the expected
+     *        length of the header line, or an arbitrary number of characters within it
+     */
     static std::string readHeaderElement(std::stringstream& stream, size_t readLen_chars);
 
     /**
@@ -596,12 +598,11 @@ protected:
         Script,
         Invalid
     };
-    struct timelineEntry {
+    struct TimelineEntry {
         RecordedType keyframeType;
         unsigned int idxIntoKeyframeTypeArray;
         Timestamps t3stamps;
     };
-    ExternInteraction _externInteract;
     double _timestampRecordStarted = 0.0;
     Timestamps _timestamps3RecordStarted;
     double _timestampPlaybackStarted_application = 0.0;
@@ -622,6 +623,8 @@ protected:
     bool playbackScript();
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(RecordedType type);
+    void handlePlaybackEnd();
+
     bool findFirstCameraKeyframeInTimeline();
     Timestamps generateCurrentTimestamp3(double keyframeTime);
     static void saveStringToFile(const std::string& s, unsigned char* kfBuffer,
@@ -635,7 +638,7 @@ protected:
         datamessagestructures::TimeKeyframe keyframe, int lineNum);
     bool addKeyframe(Timestamps t3stamps,
         std::string scriptToQueue, int lineNum);
-    bool addKeyframeToTimeline(std::vector<timelineEntry>& timeline, RecordedType type,
+    bool addKeyframeToTimeline(std::vector<TimelineEntry>& timeline, RecordedType type,
             size_t indexIntoTypeKeyframes, Timestamps t3stamps, int lineNum);
 
     void initializePlayback_time(double now);
@@ -669,7 +672,6 @@ protected:
     bool isPropertyAllowedForBaseline(const std::string& propString);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
-    std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
     bool doesStartWithSubstring(const std::string& s, const std::string& matchSubstr);
     void trimCommandsFromScriptIfFound(std::string& script);
     void replaceCommandsFromScriptIfFound(std::string& script);
@@ -679,6 +681,8 @@ protected:
     double getNextTimestamp();
     double getPrevTimestamp();
     void cleanUpPlayback();
+    void cleanUpRecording();
+    void cleanUpTimelinesAndKeyframes();
     bool convertEntries(std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
@@ -738,16 +742,17 @@ protected:
 
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
 
-    bool _cleanupNeeded = false;
+    bool _cleanupNeededRecording = false;
+    bool _cleanupNeededPlayback = false;
     const std::string scriptReturnPrefix = "return ";
 
     std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
     std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;
     std::vector<std::string> _keyframesScript;
-    std::vector<timelineEntry> _timeline;
+    std::vector<TimelineEntry> _timeline;
 
     std::vector<std::string> _keyframesSavePropertiesBaseline_scripts;
-    std::vector<timelineEntry> _keyframesSavePropertiesBaseline_timeline;
+    std::vector<TimelineEntry> _keyframesSavePropertiesBaseline_timeline;
     std::vector<std::string> _propertyBaselinesSaved;
     const std::vector<std::string> _propertyBaselineRejects = {
         "NavigationHandler.OrbitalNavigator.Anchor",
@@ -798,6 +803,7 @@ protected:
     double _cameraFirstInTimeline_timestamp = 0;
 
     int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 
     DataMode _conversionDataMode = DataMode::Binary;
     int _conversionLineNum = 1;
@@ -855,7 +861,7 @@ public:
 
             _script.erase();
             _script = temp.data();
-        };
+        }
     };
 
 protected:

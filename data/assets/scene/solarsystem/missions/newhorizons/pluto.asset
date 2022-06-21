@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local NewHorizonsKernels = asset.require("./kernels").NewHorizonsKernels
@@ -28,7 +27,7 @@ local images = asset.syncedResource({
   Name = "Pluto Images",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_plutoencounter_pluto_images",
-  Version = 1
+  Version = 2
 })
 
 local plutoRadius = 1.173E6
@@ -243,9 +242,21 @@ local PlutoShadow = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  PlutoProjection,
-  PlutoBarycenterLabel,
-  PlutoText,
-  PlutoShadow
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoProjection)
+  openspace.addSceneGraphNode(PlutoBarycenterLabel)
+  openspace.addSceneGraphNode(PlutoText)
+  openspace.addSceneGraphNode(PlutoShadow)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoShadow)
+  openspace.removeSceneGraphNode(PlutoText)
+  openspace.removeSceneGraphNode(PlutoBarycenterLabel)
+  openspace.removeSceneGraphNode(PlutoProjection)
+end)
+    
+asset.export(PlutoProjection)
+asset.export(PlutoBarycenterLabel)
+asset.export(PlutoText)
+asset.export(PlutoShadow)

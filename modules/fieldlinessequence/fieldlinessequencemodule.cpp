@@ -61,14 +61,16 @@ FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
 }
 
 void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* factory =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "No renderable factory existed");
 
     factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
     factory->registerClass<RenderableMovingFieldlines>("RenderableMovingFieldlines");
 }
 
-std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const {
+std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
+{
     return {
         RenderableFieldlinesSequence::Documentation()
     };

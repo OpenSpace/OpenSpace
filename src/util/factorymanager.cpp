@@ -70,14 +70,6 @@ FactoryManager& FactoryManager::ref() {
     return *_manager;
 }
 
-void FactoryManager::addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> f,
-                                std::string name)
-{
-    ghoul_assert(f, "Factory must not be nullptr");
-
-    _factories.push_back({ std::move(f), std::move(name) });
-}
-
 std::string FactoryManager::generateJson() const {
     std::stringstream json;
 

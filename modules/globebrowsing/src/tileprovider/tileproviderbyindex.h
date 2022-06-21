@@ -38,6 +38,7 @@ public:
     TileDepthTransform depthTransform() override final;
     void update() override final;
     void reset() override final;
+    int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 

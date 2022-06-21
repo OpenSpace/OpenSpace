@@ -14,16 +14,21 @@ local layer = {
   BlendMode = "Color"
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Voyager Global Mosaic",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Europa Voyager - Galileo SSI Global Mosaic 500m v2. This global map
     base of Europa utilizes the best image quality and moderate resolution coverage
     supplied by the Galileo SSI (Solid-State Imaging) instrument and Voyager 1 and 2.
@@ -36,7 +41,6 @@ asset.meta = {
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Europa/Voyager-Galileo/" ..
     "Europa_Voyager_GalileoSSI_global_mosaic_500m",
-  License = "NASA/PDS",
-  Identifiers = {"Voyager_Global_Mosaic_Local"}
+  License = "NASA/PDS"
 }
 

@@ -1,7 +1,5 @@
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
-local fallBackLayer = asset.require("./fallbacks/blue_marble").layer
-
 local layer = {
   Identifier = "ESRI_VIIRS_Combo",
   Name = "ESRI VIIRS Combo",
@@ -41,25 +39,28 @@ local layer = {
     },
   },
   PadTiles = false,
-  Fallback = fallBackLayer,
   Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
     Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "ESRI VIIRS Combo",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
   Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]],
   Author = "OpenSpace Tem",
   URL = "http://www.openspaceproject.com",
-  License = "MIT License",
-  Identifiers = {"ESRI_VIIRS_Combo"}
+  License = "MIT License"
 }

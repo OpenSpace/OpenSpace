@@ -1,6 +1,6 @@
 asset.require("spice/base")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local assetHelper = asset.require("util/asset_helper")
+local sun = asset.require("scene/solarsystem/sun/sun")
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
 local models = asset.syncedResource({
   Name = "Insight Models Chutes",
@@ -31,12 +31,7 @@ local RotationMatrix = {
 }
 
 local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
+  sun.LightSource,
   {
     Type = "SceneGraphLightSource",
     Identifier = "Mars",
@@ -156,7 +151,7 @@ local RotationKeyframes = {
 
 local InsightParent = {
   Identifier = "InsightParent",
-  Parent = "Mars",
+  Parent = mars.Mars.Identifier,
   Transform = {
     Translation ={
       Type = "TimelineTranslation",
@@ -741,7 +736,7 @@ local Insight_Panels_Deployed_tex2 = {
     Start = panelDeployTime,
   },
   GUI = {
-    Hidden = true,
+    -- Hidden = true,
     Name = "Insight panels_deploy_tex2",
     Path = "/Solar System/Missions/Insight"
   }
@@ -796,7 +791,7 @@ local Insight_Trail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   InsightParent, Insight, Insight_Entry_CapsuleA, Insight_Entry_Capsule_Ring,
   Insight_Entry_Capsule_Plugs, Insight_Entry_Heatshield, Insight_Parachute_0,
   Insight_Parachute_Cords_0, Insight_Parachute_20, Insight_Parachute_Cords_20,
@@ -808,4 +803,20 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   Insight_Panels_Stowed_tex, Insight_Panels_Stowed_tex2, Insight_Panels_Stowed_AO01,
   Insight_Panels_Deployed_tex, Insight_Panels_Deployed_tex2,
   Insight_Panels_Deployed_AO06, Insight_Trail
-})
+}
+
+asset.onInitialize(function()
+  for _, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+    
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for _, node in ipairs(nodes) do
+  asset.export(node)
+end

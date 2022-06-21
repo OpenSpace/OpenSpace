@@ -619,7 +619,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _colorOption.onChange([&] { _dataIsDirty = true; });
     addProperty(_colorOption);
 
-    _colorTexturePath.onChange([&] { _colorTextureIsDirty = true; });
+    _colorTexturePath.onChange([&] {
+        if (std::filesystem::exists(_colorTexturePath.value())) {
+            _colorTextureIsDirty = true;
+        }
+        else {
+            LWARNING(fmt::format("File not found: {}", _colorTexturePath));
+        }
+    });
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
     addProperty(_colorTexturePath);
 
@@ -632,7 +639,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_otherDataRange);
 
     addProperty(_otherDataColorMapPath);
-    _otherDataColorMapPath.onChange([&]() { _otherDataColorMapIsDirty = true; });
+    _otherDataColorMapPath.onChange([&]() {
+        if (std::filesystem::exists(_otherDataColorMapPath.value())) {
+            _otherDataColorMapIsDirty = true;
+        }
+        else {
+            LWARNING(fmt::format("File not found: {}", _otherDataColorMapPath));
+        }
+    });
 
     _staticFilterValue = p.staticFilter;
     _staticFilterReplacementValue =
@@ -1034,10 +1048,10 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         const double funcValue = a * distCamera + b;
         fadeInVariable *= static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
 
-        _program->setUniform(_uniformCache.alphaValue, _opacity * fadeInVariable);
+        _program->setUniform(_uniformCache.alphaValue, opacity() * fadeInVariable);
     }
     else {
-        _program->setUniform(_uniformCache.alphaValue, _opacity);
+        _program->setUniform(_uniformCache.alphaValue, opacity());
     }
 
     ghoul::opengl::TextureUnit psfUnit;

@@ -38,6 +38,7 @@ bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefF
                                            CefLifeSpanHandler::WindowOpenDisposition,
                                            bool, const CefPopupFeatures&, CefWindowInfo&,
                                            CefRefPtr<CefClient>&, CefBrowserSettings&,
+                                           CefRefPtr<CefDictionaryValue>&,
                                            bool*)
 {
     // never permit CEF popups, always launch in default browser

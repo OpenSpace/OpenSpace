@@ -155,7 +155,7 @@ private:
     properties::StringListProperty _columnNamesList;
     std::vector<std::string> _columnNames;
     properties::OptionProperty _fileReaderOption;
-    properties::OptionProperty _renderOption;
+    properties::OptionProperty _renderMode;
     properties::OptionProperty _shaderOption;
     properties::IntProperty _nRenderedStars;
     // LongLongProperty doesn't show up in menu, use FloatProperty instead.

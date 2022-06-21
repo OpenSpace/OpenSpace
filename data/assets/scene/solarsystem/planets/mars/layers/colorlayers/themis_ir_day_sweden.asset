@@ -17,21 +17,25 @@ local layer = {
     (Description from URL).]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Themis IR Day [Sweden]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Themis Day layer for Mars. This map is hosted on the OpenSpace server
     in Sweden.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/Odyssey/THEMIS-IR-Mosaic-ASU/" ..
     "Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12",
-  License = "NASA/PDS",
-  Identifiers = {"Themis_IR_Day_Sweden"}
+  License = "NASA/PDS"
 }

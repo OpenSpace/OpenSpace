@@ -39,16 +39,6 @@
 #include <exception>
 #include <memory>
 
-class AssetLoaderTest;
-
-namespace {
-    int passTest(lua_State* state) {
-        bool* test = reinterpret_cast<bool*>(lua_touserdata(state, lua_upvalueindex(1)));
-        *test = true;
-        return 0;
-    }
-} // namespace
-
 TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
     openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
     ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
@@ -57,8 +47,8 @@ TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
         absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
-    REQUIRE_NOTHROW(assetLoader.add("passassertion"));
-    REQUIRE_NOTHROW(assetLoader.add("failassertion"));
+    CHECK_NOTHROW(assetLoader.add("passassertion"));
+    CHECK_NOTHROW(assetLoader.add("failassertion"));
 }
 
 TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
@@ -69,7 +59,7 @@ TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
         absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
-    REQUIRE_NOTHROW(assetLoader.add("require"));
+    CHECK_NOTHROW(assetLoader.add("require"));
 }
 
 TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
@@ -80,24 +70,5 @@ TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
         absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
-    REQUIRE_NOTHROW(assetLoader.add("assetfunctionsexist"));
+    CHECK_NOTHROW(assetLoader.add("assetfunctionsexist"));
 }
-
-//TEST_CASE("AssetLoader: Asset Initialization", "[assetloader]") {
-//    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-//    ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
-//    openspace::SynchronizationWatcher syncWatcher;
-//    openspace::AssetManager assetLoader(
-//        state,
-//        absPath("${TESTDIR}/AssetLoaderTest/").string()
-//    );
-//
-//    bool passed;
-//    lua_pushlightuserdata(*state, &passed);
-//    lua_pushcclosure(*state, &passTest, 1);
-//    lua_setglobal(*state, "passTest");
-//
-//    std::shared_ptr<openspace::Asset> asset = assetLoader.add("initialization");
-//    REQUIRE_NOTHROW(asset->initialize());
-//    REQUIRE(passed);
-//}

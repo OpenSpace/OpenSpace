@@ -5,7 +5,7 @@ local images = asset.syncedResource({
     Name = "Constellation Images",
     Type = "HttpSynchronization",
     Identifier = "constellation_images",
-    Version = 3
+    Version = 4
 })
 
 --function that reads the file
@@ -62,10 +62,11 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
           BlendMode = "Additive",
           Opacity = 0.1
         },
-        Tag = { "ConstellationArtImage", group },
+        Tag = { "ImageConstellation", group },
         GUI = {
           Name = name .. " Image",
-          Path = "/Milky Way/" .. guiPath
+          Path = "/Milky Way/" .. guiPath,
+          Description = name .. " Image"
         }
       }
       table.insert(genConstellations, aconstellation);
@@ -82,9 +83,9 @@ local show_art = {
   Identifier = "constellation_art.show_art",
   Name = "Show Constellation Art",
   Command = [[
-    openspace.setPropertyValue("Scene.ConstellationArt*.Renderable.Opacity", 0);
-    openspace.setPropertyValue("Scene.ConstellationArt*.Renderable.Enabled", true);
-    openspace.setPropertyValue("Scene.ConstellationArt*.Renderable.Opacity", 0.2, 2);
+    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0);
+    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", true);
+    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0.2, 2);
   ]],
   Documentation = "Enables and fades up constellation art work",
   GuiPath = "/Rendering",
@@ -95,7 +96,7 @@ asset.export("ShowArtAction", show_art)
 local hide_art = {
   Identifier = "constellation_art.hide_art",
   Name = "Hide Constellation Art",
-  Command = [[openspace.setPropertyValue("Scene.ConstellationArt*.Renderable.Opacity", 0, 2)]], 
+  Command = [[openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0, 2)]],
   Documentation = "Fades out constellation artwork",
   GuiPath = "/Rendering",
   IsLocal = false
@@ -105,7 +106,7 @@ asset.export("HideArtAction", hide_art)
 local disable_art = {
   Identifier = "constellation_art.disable_art",
   Name = "Disable Constellation Art",
-  Command = [[openspace.setPropertyValue("Scene.ConstellationArt*.Renderable.Enabled", false)]], 
+  Command = [[openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Enabled", false)]],
   Documentation = "Disable constellation artwork",
   GuiPath = "/Rendering",
   IsLocal = false
@@ -116,7 +117,7 @@ local show_zodiac_art = {
   Identifier = "constellation_art.show_zodiac_art",
   Name = "Show Zodiac Art",
   Command = [[
-    openspace.setPropertyValue("Scene.ConstellationArt*.Renderable.Opacity", 0);
+    openspace.setPropertyValue("Scene.ImageConstellation*.Renderable.Opacity", 0);
     openspace.setPropertyValue("{zodiac}.Renderable.Enabled",true);
     openspace.setPropertyValue("{zodiac}.Renderable.Opacity", 1, 2);
   ]],
@@ -141,7 +142,7 @@ local nodes = {}
 asset.onInitialize(function ()
   local constellationsCSV = images .. "constellation_data.csv"
 
-  nodes = createConstellations("ConstellationArt", "Constellation Art", constellationsCSV)
+  nodes = createConstellations("ImageConstellation", "Constellation Art", constellationsCSV)
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n);
   end
@@ -156,15 +157,18 @@ asset.onDeinitialize(function ()
     openspace.removeSceneGraphNode(n.Identifier);
   end
 
-  openspace.action.removeAction(show_art.Identifier)
-  openspace.action.removeAction(hide_art.Identifier)
-  openspace.action.removeAction(disable_art.Identifier)
+  openspace.action.removeAction(show_art)
+  openspace.action.removeAction(hide_art)
+  openspace.action.removeAction(disable_art)
 end)
 
+for _, n in ipairs(nodes) do
+  asset.export(n)
+end
 
 asset.meta = {
   Name = "Constellation Images",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Artistic images depicting the constellations",
   Author = "James Hedberg",
   URL = "http://jameshedberg.com",

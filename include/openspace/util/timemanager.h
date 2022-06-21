@@ -126,8 +126,6 @@ public:
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeStepsChangeCallback(CallbackHandle handle);
-    void triggerPlaybackStart();
-    void stopPlayback();
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
 
@@ -141,6 +139,8 @@ private:
     void clearDeltaTimesKeybindings();
     double currentApplicationTimeForInterpolation() const;
     double previousApplicationTimeForInterpolation() const;
+
+    bool isPlayingBackSessionRecording() const;
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
@@ -167,11 +167,10 @@ private:
     bool _shouldSetTime = false;
     Time _timeNextFrame;
 
-    bool _timelineChanged;
+    bool _timelineChanged = false;
 
     double _latestConsumedTimestamp = -std::numeric_limits<double>::max();
     int _nextCallbackHandle = 0;
-    bool _playbackModeEnabled = false;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;

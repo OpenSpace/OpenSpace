@@ -72,6 +72,11 @@ public:
     void update() override;
     bool isReady() const override;
 
+protected:
+    properties::Vec2Property _dimensions;
+    std::unique_ptr<BrowserInstance> _browserInstance;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:
@@ -81,21 +86,19 @@ private:
         void setTexture(GLuint t);
     };
 
+    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
+
+private:
     void bindTexture() override;
 
     properties::StringProperty _url;
-    properties::Vec2Property _dimensions;
     properties::TriggerProperty _reload;
 
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;
 };
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
