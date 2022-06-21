@@ -91,6 +91,8 @@ namespace {
 
     enum class RepresentationType {
         SpaceFill = MD_GL_REP_SPACE_FILL,
+        Ribbons = MD_GL_REP_RIBBONS,
+        Cartoon = MD_GL_REP_CARTOON,
         Licorice = MD_GL_REP_LICORICE,
     };
 
@@ -160,6 +162,8 @@ namespace {
 
         enum class [[codegen::map(RepresentationType)]] RepresentationType {
             SpaceFill,
+            Ribbons,
+            Cartoon,
             Licorice,
         };
 
@@ -217,6 +221,8 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     
     _repType.addOptions({
         { static_cast<int>(RepresentationType::SpaceFill), "Space Fill" },
+        { static_cast<int>(RepresentationType::Ribbons), "Ribbons" },
+        { static_cast<int>(RepresentationType::Cartoon), "Cartoon" },
         { static_cast<int>(RepresentationType::Licorice), "Licorice" },
     });
     
@@ -433,17 +439,18 @@ void RenderableMolecule::updateRepresentation() {
             case RepresentationType::SpaceFill:
                 rep_args.space_fill.radius_scale = _repScale;
                 break;
-            case RepresentationType::Licorice:
-                rep_args.licorice.radius = _repScale * .5f;
+            case RepresentationType::Cartoon:
+                rep_args.cartoon.width_scale = _repScale;
+                rep_args.cartoon.thickness_scale = _repScale;
                 break;
-            default:
-                ghoul_assert(false, "unexpected molecule representation type");
+            case RepresentationType::Ribbons:
+                rep_args.cartoon.width_scale = _repScale;
+                rep_args.cartoon.thickness_scale = _repScale;
+                break;
+            case RepresentationType::Licorice:
+                rep_args.licorice.radius = _repScale;
                 break;
         }
-        // rep_args.cartoon.thickness_scale = 1;
-        // rep_args.cartoon.width_scale = 1;
-        
-        // _repType = MD_GL_REP_CARTOON;
 
         md_gl_representation_set_type_and_args(&_drawRep, _repType, rep_args);
     }
