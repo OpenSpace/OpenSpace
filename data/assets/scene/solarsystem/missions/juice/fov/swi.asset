@@ -6,6 +6,11 @@ local kernels = asset.require('../kernels')
 local SwiCh2 = {
   Identifier = "JuiceSwiCH2",
   Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
   Renderable = {
     Type = "RenderableFov",
     Body = "JUICE",
@@ -29,6 +34,11 @@ local SwiCh2 = {
 local SwiFull = {
   Identifier = "JuiceSwiFull",
   Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
   Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -62,6 +72,11 @@ local SwiFull = {
 local SwiFullGCO500 = {
   Identifier = "JuiceSwiFullGCO500",
   Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
   Transform = {
     Translation = {
       Type = "StaticTranslation",

@@ -5,6 +5,11 @@ local kernels = asset.require('../kernels')
 local UVS = {
   Identifier = "JuiceUVS",
   Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
   Renderable = {
     Type = "RenderableFov",
     Body = "JUICE",
