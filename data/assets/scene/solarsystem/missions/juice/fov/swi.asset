@@ -32,6 +32,7 @@ local SwiFull = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
+      -- These translations are eyeballed based on the existing model
       Position = { 0.465, -0.1, 0.95 }
     }
   },
@@ -64,6 +65,7 @@ local SwiFullGCO500 = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
+      -- These translations are eyeballed based on the existing model
       Position = { 0.465, -0.1, 0.95 }
     }
   },  
@@ -89,14 +91,19 @@ local SwiFullGCO500 = {
 
 
 asset.onInitialize(function()
+  -- We are only adding the main version of this instrument as a scene graph node. Other
+  -- versions are defined in the available SPICE kernels, but not a lot of information is
+  -- accessible about them. We don't want to remove them entirely as they might prove
+  -- useful to some users though
+
   -- openspace.addSceneGraphNode(SwiCh2)
-  openspace.addSceneGraphNode(SwiFull)
   -- openspace.addSceneGraphNode(SwiFullGCO500)
+  openspace.addSceneGraphNode(SwiFull)
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.removeSceneGraphNode(SwiFullGCO500)
   openspace.removeSceneGraphNode(SwiFull)
+  -- openspace.removeSceneGraphNode(SwiFullGCO500)
   -- openspace.removeSceneGraphNode(SwiCh2)
 end)
 

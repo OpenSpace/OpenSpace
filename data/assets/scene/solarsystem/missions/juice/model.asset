@@ -21,16 +21,13 @@ local JuiceModel = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = { math.pi / 2.0, 0.0, 0.0 }
-    },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 0.01
     }
   },
   Renderable = {
     Type = "RenderableModel",
     Body = "JUICE",
     GeometryFile = model .. "juice.fbx",
+    ModelScale = "Centimeter",
     LightSources = {
       {
         Type = "SceneGraphLightSource",

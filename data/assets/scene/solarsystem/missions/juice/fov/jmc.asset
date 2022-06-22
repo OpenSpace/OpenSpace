@@ -21,7 +21,8 @@ local JMC1 = {
   },
   GUI = {
     Name = "JUICE_JMC-1 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The field-of-views for the Juice Monitoring cameras"
   }
 }
 

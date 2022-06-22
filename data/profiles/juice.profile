@@ -49,9 +49,9 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Juice profile that visualizes the currently best known transjectory for the JUICE mission the Jupiter and its moons. See https://sci.esa.int/documents/33960/35865/1567260128466-JUICE_Red_Book_i1.0.pdf for more information about the JUICE mission.",
+    "description": "Juice profile that visualizes the currently best known trajectory for the JUICE mission the Jupiter and its moons. See https://sci.esa.int/documents/33960/35865/1567260128466-JUICE_Red_Book_i1.0.pdf for more information about the JUICE mission.",
     "license": "MIT License",
-    "name": "Default",
+    "name": "Juice",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },

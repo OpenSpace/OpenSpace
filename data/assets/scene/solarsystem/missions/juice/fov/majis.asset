@@ -57,7 +57,6 @@ local MajisVisnirB4 = {
   Parent = transforms.Juice.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Enabled = false,
     Body = "JUICE",
     Frame = "JUICE_MAJIS_VISNIR_B4",
     RGB = { 0.8, 0.7, 0.7 },
@@ -81,7 +80,6 @@ local MajisIr = {
   Parent = transforms.Juice.Identifier,
   Renderable = {
     Type  = "RenderableFov",
-    Enabled = false,
     Body  = "JUICE",
     Frame = "JUICE_MAJIS_IR",
     RGB = { 0.8, 0.7, 0.7 },
@@ -105,7 +103,6 @@ local MajisIrB2 = {
   Parent = transforms.Juice.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Enabled = false,
     Body = "JUICE",
     Frame = "JUICE_MAJIS_IR_B2",
     RGB = { 0.8, 0.7, 0.7 },
@@ -129,7 +126,6 @@ local MajisIrB4 = {
   Parent = transforms.Juice.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Enabled = false,
     Body = "JUICE",
     Frame = "JUICE_MAJIS_IR_B4",
     RGB = { 0.8, 0.7, 0.7 },
@@ -153,7 +149,6 @@ local Majis = {
   Parent = transforms.Juice.Identifier,
   Renderable = {
     Type = "RenderableFov",
-    Enabled = false,
     Body = "JUICE",
     Frame = "JUICE_MAJIS",
     RGB = { 0.8, 0.7, 0.7 },
@@ -178,6 +173,11 @@ local Majis = {
 
 
 asset.onInitialize(function()
+  -- We are only adding the main version of this instrument as a scene graph node. Other
+  -- versions are defined in the available SPICE kernels, but not a lot of information is
+  -- accessible about them. We don't want to remove them entirely as they might prove
+  -- useful to some users though
+
   -- openspace.addSceneGraphNode(MajisVisnir)
   -- openspace.addSceneGraphNode(MajisVisnirB2)
   -- openspace.addSceneGraphNode(MajisVisnirB4)
@@ -188,13 +188,13 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.removeSceneGraphNode(Majis)
+  openspace.removeSceneGraphNode(Majis)
   -- openspace.removeSceneGraphNode(MajisIrB4)
   -- openspace.removeSceneGraphNode(MajisIrB2)
   -- openspace.removeSceneGraphNode(MajisIr)
   -- openspace.removeSceneGraphNode(MajisVisnirB4)
   -- openspace.removeSceneGraphNode(MajisVisnirB2)
-  openspace.removeSceneGraphNode(MajisVisnir)
+  -- openspace.removeSceneGraphNode(MajisVisnir)
 end)
 
 -- asset.export(MajisVisnir)

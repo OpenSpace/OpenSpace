@@ -171,7 +171,7 @@ local xz_t = {
   GUI = {
     Name = "Ganymede XZ Plane T",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = "A cut plane in Ganymede's XY plane showing the temperature"
+    Description = "A cut plane in Ganymede's XZ plane showing the temperature"
   }
 }
 
@@ -193,7 +193,7 @@ local xz_u = {
   GUI = {
     Name = "Ganymede XZ Plane U",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = [[A cut plane in Ganymede's XY plane showing the strength of the 
+    Description = [[A cut plane in Ganymede's XZ plane showing the strength of the 
       magnetic field]]
   }
 }
@@ -216,7 +216,7 @@ local xz_utot = {
   GUI = {
     Name = "Ganymede XZ Plane U_tot",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = [[A cut plane in Ganymede's XY plane showing the X, Y, and Z components
+    Description = [[A cut plane in Ganymede's XZ plane showing the X, Y, and Z components
       of the magnetic field mapped to the RGB components.]]
   }
 }
@@ -239,7 +239,7 @@ local xz_ux = {
   GUI = {
     Name = "Ganymede XZ Plane Ux",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = [[A cut plane in Ganymede's XY plane showing the X component of
+    Description = [[A cut plane in Ganymede's XZ plane showing the X component of
       Ganymede's magnetic field]]
   }
 }
@@ -262,7 +262,7 @@ local xz_uy = {
   GUI = {
     Name = "Ganymede XZ Plane Uy",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = [[A cut plane in Ganymede's XY plane showing the Y component of
+    Description = [[A cut plane in Ganymede's XZ plane showing the Y component of
       Ganymede's magnetic field]]
   }
 }
@@ -285,7 +285,7 @@ local xz_uz = {
   GUI = {
     Name = "Ganymede XZ Plane Uz",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = [[A cut plane in Ganymede's XY plane showing the Z component of
+    Description = [[A cut plane in Ganymede's XZ plane showing the Z component of
       Ganymede's magnetic field]]
   }
 }
@@ -326,6 +326,21 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(xy_t)
   openspace.removeSceneGraphNode(xy_n)
 end)
+
+asset.export(xy_n)
+asset.export(xy_t)
+asset.export(xy_u)
+asset.export(xy_utot)
+asset.export(xy_ux)
+asset.export(xy_uy)
+asset.export(xy_uz)
+asset.export(xz_n)
+asset.export(xz_t)
+asset.export(xz_u)
+asset.export(xz_utot)
+asset.export(xz_ux)
+asset.export(xz_uy)
+asset.export(xz_uz)
 
 
 asset.meta = {
