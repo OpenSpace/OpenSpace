@@ -49,7 +49,7 @@ TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>*
     if (_time->has_value()) {
         _timeData = **_time;
         if (_timeData.type == Profile::Time::Type::Relative) {
-            if (_timeData.value == "") {
+            if (_timeData.value.empty()) {
                 _timeData.value = "0d";
             }
             _relativeEdit->setSelection(0, _relativeEdit->text().length());
@@ -81,6 +81,7 @@ void TimeDialog::createWidgets() {
     {
         _absoluteLabel = new QLabel("Absolute UTC:");
         layout->addWidget(_absoluteLabel);
+        
         _absoluteEdit = new QDateTimeEdit;
         _absoluteEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _absoluteEdit->setDateTime(QDateTime::currentDateTime());
@@ -89,6 +90,7 @@ void TimeDialog::createWidgets() {
     {
         _relativeLabel = new QLabel("Relative Time:");
         layout->addWidget(_relativeLabel);
+        
         _relativeEdit = new QLineEdit;
         _relativeEdit->setToolTip(
             "String for relative time to actual (e.g. \"-1d\" for back 1 day)"

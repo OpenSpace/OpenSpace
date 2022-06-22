@@ -4,7 +4,8 @@ local CreateFocusNodes = false
 local AddMarsLayers = true
 local AddMoonLayers = true
 local AddMercuryLayers = true
-local DataFolder = openspace.absPath("${BASE}/../OpenSpaceData")
+local AddEarthLayers = true
+local DataFolder = openspace.absPath("${GLOBEBROWSING}")
 ----------------------------------------
 
 -- If you add layers for different planets than listed here, be sure to add an
@@ -52,6 +53,15 @@ local vrt_folders = {
     -- example:  "C:/OpenSpace/GlobeBrowsingData/Mercury"
     DataFolder .. "/Mercury",
     ""
+  },
+  Earth = {
+    -- Add folders here whose contents will be automatically added to the Earth globe
+    -- If multiple folders are added, the results will be added sequentially, meaning that
+    -- if areas overlap, images from the lower results will overwrite the images from former
+    -- results
+    -- example:  "C:/OpenSpace/GlobeBrowsingData/Earth"
+    DataFolder .. "/Earth",
+    ""
   }
 }
 
@@ -72,6 +82,11 @@ if AddMercuryLayers then
 else
   vrt_folders["Mercury"] = nil
 end
+if AddEarthLayers then
+  asset.require("../scene/solarsystem/planets/earth/earth")
+else
+  vrt_folders["Earth"] = nil
+end
 
 asset.onInitialize(function ()
   -- Add local patches described at the top of this file
@@ -87,3 +102,14 @@ asset.onInitialize(function ()
     end
   end
 end)
+
+
+asset.meta = {
+  Name = "Customization - GlobeBrowsing",
+  Version = "1.0",
+  Description = [[ This asset adds planetary images that can be downloaded separately
+  and placed in the OpenSpaceData folder]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

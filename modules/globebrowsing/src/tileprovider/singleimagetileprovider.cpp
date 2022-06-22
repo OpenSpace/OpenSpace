@@ -80,7 +80,7 @@ void SingleImageProvider::reset() {
     if (_filePath.value().empty()) {
         return;
     }
-    
+
     _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath, 2);
     if (!_tileTexture) {
         throw ghoul::RuntimeError(
@@ -91,6 +91,10 @@ void SingleImageProvider::reset() {
     _tileTexture->uploadTexture();
     _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
+}
+
+int SingleImageProvider::minLevel() {
+    return 1;
 }
 
 int SingleImageProvider::maxLevel() {

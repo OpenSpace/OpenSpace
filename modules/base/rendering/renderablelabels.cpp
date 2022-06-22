@@ -42,6 +42,7 @@
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -381,12 +382,8 @@ void RenderableLabels::initializeGL() {
 void RenderableLabels::deinitializeGL() {}
 
 void RenderableLabels::render(const RenderData& data, RendererTasks&) {
-
-    //bool additiveBlending = (_blendMode == BlendModeAdditive);
-    //if (additiveBlending) {
-        glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //}
+    glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     float fadeInVariable = 1.f;
 
@@ -420,10 +417,8 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
 
     renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
 
-    //if (additiveBlending) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    //}
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 
@@ -439,7 +434,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
     glm::vec4 textColor = glm::vec4(glm::vec3(_color), 1.f);
 
     textColor.a *= fadeInVariable;
-    textColor.a *= _opacity;
+    textColor.a *= opacity();
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
 

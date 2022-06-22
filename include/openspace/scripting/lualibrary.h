@@ -46,9 +46,19 @@ struct LuaLibrary {
         /// The name of the function
         std::string name;
         /// The function pointer that is executed if the function is called
-        lua_CFunction function;
-        /// A text describing the arguments to this function
-        std::string argumentText;
+        lua_CFunction function = nullptr;
+        struct Argument {
+            /// The name of the arguments
+            std::string name;
+            /// The type of the argument
+            std::string type;
+            /// The default value if it exists
+            std::optional<std::string> defaultValue = std::nullopt;
+        };
+        /// The ordered arguments that this function takes
+        std::vector<Argument> arguments;
+        /// Information about the type that this function returns
+        std::string returnType;
         /// A help text describing what the function does/
         std::string helpText;
     };
@@ -59,21 +69,11 @@ struct LuaLibrary {
     /// A list of script files that are executed for each Lua state
     std::vector<std::filesystem::path> scripts = std::vector<std::filesystem::path>();
     /// A list of all libraries that are children for this library
-    std::vector<LuaLibrary> subLibraries;
+    std::vector<LuaLibrary> subLibraries = std::vector<LuaLibrary>();
 
-    /// This struct contains information about a function or constant that is defined in
-    /// a Lua script
-    struct Documentation {
-        /// The name of the function/variable
-        std::string name;
-        /// The description of the parameters for a function
-        std::string parameter;
-        /// The description of the function/variable
-        std::string description;
-    };
     /// The list of documentations will be populated automatically by parsing the Lua
     /// scripts
-    std::vector<Documentation> documentations = std::vector<Documentation>();
+    std::vector<Function> documentations = std::vector<Function>();
 
     /// Comparison function that compares two LuaLibrary%s name
     bool operator<(const LuaLibrary& rhs) const;

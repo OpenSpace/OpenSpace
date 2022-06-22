@@ -1,5 +1,4 @@
 asset.require("spice/base")
-local assetHelper = asset.require("util/asset_helper")
 
 local TexturesPath = asset.syncedResource({
   Type = "HttpSynchronization",
@@ -46,9 +45,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeScreenSpaceRenderable(legend.Identifier)
-  openspace.action.removeAction(show_legend.Identifier)
-  openspace.action.removeAction(hide_legend.Identifier)
+  openspace.removeScreenSpaceRenderable(legend)
+  openspace.action.removeAction(show_legend)
+  openspace.action.removeAction(hide_legend)
 end)
 
 asset.meta = {
@@ -57,6 +56,5 @@ asset.meta = {
   Description = [[Screen space renderable image legend of flux nodes for the bastille day CME event]],
   Author = "Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "MIT",
-  Identifier = {"LegendFluxNodes-bastille-day-2000"}
+  License = "MIT"
 }

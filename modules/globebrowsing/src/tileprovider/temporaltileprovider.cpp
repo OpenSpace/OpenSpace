@@ -44,16 +44,7 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* KeyBasePath = "BasePath";
-
     constexpr const char* TimePlaceholder = "${OpenSpaceTimeId}";
-    
-    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
-        "FilePath",
-        "File Path",
-        "This is the path to the XML configuration file that describes the temporal tile "
-        "information."
-    };
 
     constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
@@ -122,7 +113,7 @@ namespace {
             // is checked against the provided format and added if it adheres to said
             // format
             std::filesystem::path folder [[codegen::directory()]];
-            
+
             // The format of files that is pared in the provided folder. The format string
             // has to be compatible to the C++ function get_time.
             // https://en.cppreference.com/w/cpp/io/manip/get_time
@@ -133,7 +124,7 @@ namespace {
         // Determines whether this tile provider should interpolate between two adjacent
         // layers
         std::optional<bool> interpolation;
-        
+
         // If provided, the tile provider will use this color map to convert a greyscale
         // image to color
         std::optional<std::string> colormap;
@@ -257,15 +248,33 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             std::tm tm = {};
             ss >> std::get_time(&tm, p.folder->format.c_str());
             if (!ss.fail()) {
-                std::string date = fmt::format(
-                    "{}-{}-{} {}:{}:{}",
-                    tm.tm_year + 1900,
-                    tm.tm_mon + 1,
-                    tm.tm_mday,
-                    tm.tm_hour,
-                    tm.tm_min,
-                    tm.tm_sec
-                );
+                std::string date;
+                if (p.folder->format.find("%j") != std::string::npos) {
+                    // If the user asked for a day-of-year, the day-of-month and the month
+                    // fields will not be set and calls to std::asctime will assert
+                    // unfortunately.  Luckily, Spice understands DOY date formats, so
+                    // we can specify those directly and noone would use a DOY and a DOM
+                    // time string in the same format string, right?  Right?!
+                    date = fmt::format(
+                        "{}-{}T{}:{}:{}",
+                        tm.tm_year + 1900,
+                        tm.tm_yday,
+                        tm.tm_hour,
+                        tm.tm_min,
+                        tm.tm_sec
+                    );
+                }
+                else {
+                    date = fmt::format(
+                        "{}-{}-{} {}:{}:{}",
+                        tm.tm_year + 1900,
+                        tm.tm_mon + 1,
+                        tm.tm_mday + 1,
+                        tm.tm_hour,
+                        tm.tm_min,
+                        tm.tm_sec
+                    );
+                }
 
                 double et = SpiceManager::ref().ephemerisTimeFromDate(date);
                 _folder.files.push_back({ et, path.path().string() });
@@ -281,8 +290,16 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                 return lhs.first < rhs.first;
             }
         );
+
+        if (_folder.files.empty()) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading layer '{}'. Folder {} does not contain any files that "
+                "matched the time format",
+                _identifier, _folder.folder
+            ));
+        }
     }
-    
+
     _isInterpolating = p.interpolation.value_or(_isInterpolating);
     if (_isInterpolating) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
@@ -352,6 +369,10 @@ void TemporalTileProvider::reset() {
     for (std::pair<const double, DefaultTileProvider>& it : _tileProviderMap) {
         it.second.reset();
     }
+}
+
+int TemporalTileProvider::minLevel() {
+    return 1;
 }
 
 int TemporalTileProvider::maxLevel() {
@@ -424,8 +445,8 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
                     _folder.files.cbegin(),
                     _folder.files.cend(),
                     time,
-                    [](const std::pair<double, std::string>& p, double time) {
-                        return p.first < time;
+                    [](const std::pair<double, std::string>& p, double sec) {
+                        return p.first < sec;
                     }
                 );
                 return std::string_view(it->second);
@@ -458,7 +479,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
             return p.first < t;
         }
     );
-    
+
     if (it != _folder.files.begin()) {
         it -= 1;
     }
@@ -484,6 +505,13 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
 
     It curr = next != _folder.files.begin() ? next - 1 : next;
     It nextNext = next != _folder.files.end() ? next + 1 : curr;
+
+    if (next == _folder.files.end()) {
+        curr = _folder.files.end() - 1;
+        next = curr;
+        nextNext = curr;
+    }
+
     It prev = curr != _folder.files.begin() ? curr - 1 : curr;
 
     _interpolateTileProvider->t1 = retrieveTileProvider(Time(curr->first));
@@ -491,14 +519,11 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
     _interpolateTileProvider->future = retrieveTileProvider(Time(nextNext->first));
     _interpolateTileProvider->before = retrieveTileProvider(Time(prev->first));
 
-    _interpolateTileProvider->factor = static_cast<float>(
-        (time.j2000Seconds() - curr->first) /
-        (next->first - curr->first)
+    float factor = static_cast<float>(
+        (time.j2000Seconds() - curr->first) / (next->first - curr->first)
     );
 
-    if (_interpolateTileProvider->factor > 1.f) {
-        _interpolateTileProvider->factor = 1.f;
-    }
+    _interpolateTileProvider->factor = std::clamp(factor, 0.f, 1.f);
 
     return _interpolateTileProvider.get();
 }
@@ -534,7 +559,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
     Time secondToFirst = Time(_prototyped.startTimeJ2000);
 
     _interpolateTileProvider->t1 = retrieveTileProvider(tCopy);
-    
+
     // if the images are for each hour
     if (_prototyped.temporalResolution == "1h") {
         constexpr const int Hour = 60 * 60;
@@ -695,9 +720,10 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     Tile prev = t1->tile(tileIndex);
     Tile next = t2->tile(tileIndex);
     // the tile before and the tile after the interpolation interval are loaded so the
-    // interpolation goes smoother
-    Tile prevprev = before->tile(tileIndex);
-    Tile nextnext = future->tile(tileIndex);
+    // interpolation goes smoother. It is on purpose that we are not actually storing the
+    // return tile here, we just want to trigger the load already
+    before->tile(tileIndex);
+    future->tile(tileIndex);
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
 
     if (!prev.texture || !next.texture) {
@@ -743,7 +769,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     glDisable(GL_BLEND);
     GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, textureBuffers);
-    
+
     // Setup our own viewport settings
     GLsizei w = static_cast<GLsizei>(writeTexture->width());
     GLsizei h = static_cast<GLsizei>(writeTexture->height());
@@ -813,6 +839,10 @@ void TemporalTileProvider::InterpolateTileProvider::reset() {
     t2->reset();
     before->reset();
     future->reset();
+}
+
+int TemporalTileProvider::InterpolateTileProvider::minLevel() {
+    return glm::max(t1->minLevel(), t2->minLevel());
 }
 
 int TemporalTileProvider::InterpolateTileProvider::maxLevel() {

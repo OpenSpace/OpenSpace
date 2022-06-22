@@ -967,8 +967,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setUniform("orenNayarRoughness", onr);
     }
 
-    _localRenderer.program->setUniform("opacity", _opacity);
-    _globalRenderer.program->setUniform("opacity", _opacity);
+    _localRenderer.program->setUniform("opacity", opacity());
+    _globalRenderer.program->setUniform("opacity", opacity());
 
 
     if (_globalRenderer.updatedSinceLastCall) {
@@ -2033,6 +2033,14 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         SceneGraphNode* casterNode =
             global::renderEngine->scene()->sceneGraphNode(caster);
 
+        if ((sourceNode == nullptr) || (casterNode == nullptr)) {
+            LERRORC(
+                "Renderableglobe",
+                "Invalid scenegraph node for the shadow's caster or shadow's receiver."
+            );
+            return;
+        }
+
         const double sourceRadiusScale = std::max(
             glm::compMax(sourceNode->scale()),
             1.0
@@ -2042,14 +2050,6 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             glm::compMax(casterNode->scale()),
             1.0
         );
-
-        if ((sourceNode == nullptr) || (casterNode == nullptr)) {
-            LERRORC(
-                "Renderableglobe",
-                "Invalid scenegraph node for the shadow's caster or shadow's receiver."
-            );
-            return;
-        }
 
         // First we determine if the caster is shadowing the current planet (all
         // calculations in World Coordinates):

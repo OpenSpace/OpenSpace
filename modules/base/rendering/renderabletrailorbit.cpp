@@ -136,25 +136,15 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTrailOrbit::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "base_renderable_renderabletrailorbit"
+    return codegen::doc<Parameters>(
+        "base_renderable_renderabletrailorbit",
+        RenderableTrail::Documentation()
     );
-
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderableTrail::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-
-    return doc;
 }
 
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
-    , _period(PeriodInfo, 0.0, 0.0, 1e9)
+    , _period(PeriodInfo, 0.0, 0.0, 250.0 * 365.25) // 250 years should be enough I guess
     , _resolution(ResolutionInfo, 10000, 1, 1000000)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -162,10 +152,9 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _translation->onParameterChange([this]() { _needsFullSweep = true; });
 
     // Period is in days
-    using namespace std::chrono;
-    _period = p.period * duration_cast<seconds>(hours(24)).count();
+    _period = p.period;
     _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
-    _period.setExponent(5.f);
+    _period.setExponent(3.f);
     addProperty(_period);
 
     _resolution = p.resolution;
@@ -378,7 +367,9 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         return { false, false, 0 };
     }
 
-    const double secondsPerPoint = _period / (_resolution - 1);
+    using namespace std::chrono;
+    double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // How much time has passed since the last permanent point
     const double delta = data.time.j2000Seconds() - _lastPointTime;
 
@@ -496,7 +487,9 @@ void RenderableTrailOrbit::fullSweep(double time) {
 
     _lastPointTime = time;
 
-    const double secondsPerPoint = _period / (_resolution - 1);
+    using namespace std::chrono;
+    const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; ++i) {
         const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0) });

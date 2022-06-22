@@ -24,19 +24,39 @@
 
 #include <modules/exoplanets/exoplanetsmodule.h>
 
+#include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/timeconversion.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
+#include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 
 #include "exoplanetsmodule_lua.inl"
 
 namespace {
+    constexpr const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Decides if the GUI for this module should be enabled."
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo DataFolderInfo = {
         "DataFolder",
         "Data Folder",
@@ -125,6 +145,9 @@ namespace {
     constexpr const char LookupTableFileName[] = "lookup.txt";
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+
         // [[codegen::verbatim(DataFolderInfo.description)]]
         std::optional<std::filesystem::path> dataFolder [[codegen::directory()]];
 
@@ -167,6 +190,7 @@ using namespace exoplanets;
 
 ExoplanetsModule::ExoplanetsModule()
     : OpenSpaceModule(Name)
+    , _enabled(EnabledInfo)
     , _exoplanetsDataFolder(DataFolderInfo)
     , _bvColorMapPath(BvColorMapInfo)
     , _starTexturePath(StarTextureInfo)
@@ -177,9 +201,11 @@ ExoplanetsModule::ExoplanetsModule()
     , _showComparisonCircle(ShowComparisonCircleInfo, false)
     , _showHabitableZone(ShowHabitableZoneInfo, true)
     , _useOptimisticZone(UseOptimisticZoneInfo, true)
-    , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.0f, 1.0f)
+    , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.f, 1.f)
 {
     _exoplanetsDataFolder.setReadOnly(true);
+
+    addProperty(_enabled);
 
     addProperty(_exoplanetsDataFolder);
     addProperty(_bvColorMapPath);
@@ -210,7 +236,7 @@ std::string ExoplanetsModule::exoplanetsDataPath() const {
 
 std::string ExoplanetsModule::lookUpTablePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
-    
+
     return absPath(
         fmt::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
     ).string();
@@ -256,43 +282,10 @@ float ExoplanetsModule::habitableZoneOpacity() const {
     return _habitableZoneOpacity;
 }
 
-scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "exoplanets";
-    res.functions = {
-        {
-            "addExoplanetSystem",
-            &exoplanets::luascriptfunctions::addExoplanetSystem,
-            "string or list of strings",
-            "Add one or multiple exoplanet systems to the scene, as specified by the "
-            "input. An input string should be the name of the system host star"
-        },
-        {
-            "removeExoplanetSystem",
-            &exoplanets::luascriptfunctions::removeExoplanetSystem,
-            "string",
-            "Removes the nodes of the specified exoplanet system from the scene graph"
-        },
-        {
-            "listAvailableExoplanetSystems",
-            &exoplanets::luascriptfunctions::listAvailableExoplanetSystems,
-            "",
-            "Prints a list with the names of all exoplanet systems that can be added to "
-            "the scene graph to the OpenSpace Log"
-        },
-        {
-            "getListOfExoplanets",
-            &exoplanets::luascriptfunctions::getListOfExoplanets,
-            "",
-            "Gets a list with the names of all exoplanet systems"
-        }
-    };
-
-    return res;
-}
-
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
+
+    _enabled = p.enabled.value_or(true);
 
     if (p.dataFolder.has_value()) {
         _exoplanetsDataFolder = p.dataFolder.value().string();
@@ -328,8 +321,9 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     _habitableZoneOpacity = p.habitableZoneOpacity.value_or(_habitableZoneOpacity);
 
-    auto fTask = FactoryManager::ref().factory<Task>();
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ExoplanetsDataPreparationTask>("ExoplanetsDataPreparationTask");
     fRenderable->registerClass<RenderableOrbitDisc>("RenderableOrbitDisc");
@@ -339,6 +333,18 @@ std::vector<documentation::Documentation> ExoplanetsModule::documentations() con
     return {
         ExoplanetsDataPreparationTask::documentation(),
         RenderableOrbitDisc::Documentation()
+    };
+}
+
+scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
+    return {
+        "exoplanets",
+        {
+            codegen::lua::AddExoplanetSystem,
+            codegen::lua::RemoveExoplanetSystem,
+            codegen::lua::GetListOfExoplanets,
+            codegen::lua::ListAvailableExoplanetSystems
+        }
     };
 }
 

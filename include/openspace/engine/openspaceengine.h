@@ -65,6 +65,15 @@ struct CommandlineArguments {
 
 class OpenSpaceEngine {
 public:
+    // A mode that specifies which part of the system is currently in control.
+    // The mode can be used to limit certain features, like setting time, navigation
+    // or triggering scripts
+    enum class Mode {
+        UserControl = 0,
+        SessionRecordingPlayback,
+        CameraPath
+    };
+
     OpenSpaceEngine();
     ~OpenSpaceEngine();
 
@@ -94,6 +103,16 @@ public:
 
     void toggleShutdownMode();
 
+    Mode currentMode() const;
+    bool setMode(Mode newMode);
+    void resetMode();
+
+    using CallbackHandle = int;
+    using ModeChangeCallback = std::function<void()>;
+
+    CallbackHandle addModeChangeCallback(ModeChangeCallback cb);
+    void removeModeChangeCallback(CallbackHandle handle);
+
     // Guaranteed to return a valid pointer
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
@@ -113,7 +132,6 @@ private:
     void loadFonts();
 
     void runGlobalCustomizationScripts();
-    void configureLogging();
     std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
@@ -137,6 +155,12 @@ private:
     // The first frame might take some more time in the update loop, so we need to know to
     // disable the synchronization; otherwise a hardware sync will kill us after 1 minute
     bool _isRenderingFirstFrame = true;
+
+    Mode _currentMode = Mode::UserControl;
+    Mode _modeLastFrame = Mode::UserControl;
+
+    int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
 };
 
 /**
@@ -189,11 +213,6 @@ void setAdditionalScriptsFromProfile(const Profile& p);
 
 } // namespace openspace
 
-// Lua functions - exposed for testing
-namespace openspace::luascriptfunctions {
-
-int createSingleColorImage(lua_State* L);
-
-} // openspace::luascriptfunctions
+std::filesystem::path createSingleColorImage(std::string name, glm::dvec3 color);
 
 #endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__

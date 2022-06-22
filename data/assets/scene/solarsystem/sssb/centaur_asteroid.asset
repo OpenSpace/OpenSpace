@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sharedSssb = asset.require("./sssb_shared")
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, "centaur_asteroid",
@@ -13,18 +12,26 @@ object.GUI.Description = [[ Asteroids with either a perihelion or a semi-major a
   between those of the four outer planets. ]]
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+  
+asset.export(object)
+  
 
 
 asset.meta = {
   Name = "Centaur Asteroids",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ RenderableSmallBody asset with data from from JPL Horizons
     contiaining the Centaur group.]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
   License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
     All documents available from this server may be protected under the U.S. and 
-    Foreign Copyright Laws.]],
-  Identifiers = {"sssb_sssb_data_centaur_asteroid"}
+    Foreign Copyright Laws.]]
 }

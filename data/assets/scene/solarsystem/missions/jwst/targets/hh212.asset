@@ -1,0 +1,35 @@
+local image = asset.require("./hh212_image").image
+
+local HH212Image = {
+  Identifier = "HH212Image",
+  Type = "ScreenSpaceImageLocal",
+  Name = "HH 212",
+  UseRadiusAzimuthElevation = true,
+  FaceCamera = false,
+  RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
+  UsePerspectiveProjection = false,
+  Opacity = 1.0,
+  TexturePath = image .. "hh212.png",
+  Tag = { "mission_jwst_target" },
+  Description = [[
+    Image of HH 212 by ESO/M. McCaughrean.
+  ]],
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(HH212Image)
+end)
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(HH212Image)
+end)
+
+asset.export(HH212Image)
+
+asset.meta = {
+  Name = "HH 212 Image",
+  Version = "1.0",
+  Description = "Screenspace image of HH 212",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

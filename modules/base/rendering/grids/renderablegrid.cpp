@@ -170,7 +170,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
-    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
@@ -242,6 +242,8 @@ void RenderableGrid::update(const UpdateData&) {
         _varray[nr++] = { halfSize.x, y0, 0.f };
         _varray[nr++] = { halfSize.x, y1, 0.f };
     }
+
+    setBoundingSphere(glm::length(glm::dvec2(halfSize)));
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);

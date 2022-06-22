@@ -70,18 +70,9 @@ public:
         const ghoul::Dictionary& dictionary);
 
     /**
-     * Generates a unique identifying string for the dictionary that is based on the
-     * \c Type and the \c Identifier values of the passed \p dictionary. All other
-     * parameters are ignored, but as long as the \c Type and/or the \c Identifier values
-     * differ, the resulting string will be different.
-     *
-     * \param dictionary The dictionary containing the \c Type and the \c Identifier used
-     *        to create a unique identifier
-     *
-     * \throw SpecificationError If the \p dictionary does not contain a \c Type, an
-     *        \c Identifier, and a \c Name
+     * Generates a unique identifying string for ResourceSynchronizaiton.
      */
-    static std::string generateUid(const ghoul::Dictionary& dictionary);
+    virtual std::string generateUid() = 0;
 
     /// Defaulted virtual constructor
     virtual ~ResourceSynchronization() = default;

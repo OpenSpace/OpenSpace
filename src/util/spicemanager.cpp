@@ -24,6 +24,7 @@
 
 #include <openspace/util/spicemanager.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -404,7 +405,18 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
     std::vector<std::pair<int, std::string>> bodies;
 
     constexpr const int Frnmln = 33;
-    SPICEINT_CELL(idset, 8192);
+    static SpiceInt idsetBuffer[SPICE_CELL_CTRLSZ + 8192];
+    static SpiceCell idset = {
+        SPICE_INT,
+        0,
+        8192,
+        0,
+        SPICETRUE,
+        SPICEFALSE,
+        SPICEFALSE,
+        &idsetBuffer,
+        &(idsetBuffer[SPICE_CELL_CTRLSZ])
+    };
 
     SpiceChar frname[Frnmln];
 
@@ -1342,61 +1354,11 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
     return {
         "spice",
         {
-            {
-                "loadKernel",
-                &luascriptfunctions::loadKernel,
-                "string",
-                "Loads the provided SPICE kernel by name. The name can contain path "
-                "tokens, which are automatically resolved"
-            },
-            {
-                "unloadKernel",
-                &luascriptfunctions::unloadKernel,
-                "{string, number}",
-                "Unloads the provided SPICE kernel. The name can contain path tokens, "
-                "which are automatically resolved"
-            },
-            {
-                "getSpkCoverage",
-                &luascriptfunctions::spkCoverage,
-                "string",
-                "Returns a list of SPK coverage intervals for the target."
-            },
-            {
-                "getCkCoverage",
-                &luascriptfunctions::ckCoverage,
-                "string",
-                "Returns a list of CK coverage intervals for the target."
-            },
-            {
-                "rotationMatrix",
-                &luascriptfunctions::rotationMatrix,
-                "{string, string, string}",
-                "Returns the rotationMatrix for a given body in a frame of reference at "
-                "a specific time. The first agument is the target body, the second is "
-                "the frame of reference, the third is the time. Example: "
-                "openspace.spice.rotationMatrix('INSIGHT_LANDER_CRUISE','MARS',"
-                "'2018 NOV 26 19:45:34')."
-            },
-            {
-                "position",
-                &luascriptfunctions::position,
-                "{string, string, string, string}",
-                "Returns the position for a target by an observer in a frame of "
-                "reference at a specific time. The first agument is the target body, the "
-                "second is the observer body, the third is the frame of reference, and "
-                "the fourth is the time. Example: openspace.spice.position('INSIGHT',"
-                "'MARS','GALACTIC', '2018 NOV 26 19:45:34')."
-            },
-            {
-                "getSpiceBodies",
-                &luascriptfunctions::spiceBodies,
-                "{ builtInFrames [, printValues] }",
-                "Returns a list of Spice Bodies loaded into the system. Returns SPICE "
-                "built in frames if builtInFrames. Returns User loaded frames if "
-                "!builtInFrames"
-            }
-
+            codegen::lua::LoadKernel,
+            codegen::lua::UnloadKernel,
+            codegen::lua::SpiceBodies,
+            codegen::lua::RotationMatrix,
+            codegen::lua::Position
         }
     };
 }

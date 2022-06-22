@@ -59,15 +59,13 @@ namespace {
     constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
     constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
 
-    constexpr const std::array<const char*, 20> UniformNames = {
+    constexpr const std::array<const char*, 21> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
-        "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
+        "hasColorMap", "useColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
-
-    constexpr double PARSEC = 0.308567756E17;
 
     enum RenderOption {
         ViewDirection = 0,
@@ -85,6 +83,14 @@ namespace {
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
         "size of each point."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
+        "UseColorMap",
+        "Use Color Map",
+        "If this value is set to 'true', the provided color map is used (if one was "
+        "provided in the configuration). If no color map was provided, changing this "
+        "setting does not do anything."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -255,6 +261,9 @@ namespace {
         // [[codegen::verbatim(ScaleFactorInfo.description)]]
         std::optional<float> scaleFactor;
 
+        // [[codegen::verbatim(UseColorMapInfo.description)]]
+        std::optional<bool> useColorMap;
+
         // [[codegen::verbatim(ColorMapInfo.description)]]
         std::optional<std::string> colorMap;
 
@@ -330,6 +339,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
+    , _useColorMap(UseColorMapInfo, true)
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
     , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -375,6 +385,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _speckFile = absPath(*p.file).string();
     }
     _hasSpeckFile = p.file.has_value();
+
+    _useColorMap = p.useColorMap.value_or(_useColorMap);
 
     _drawElements = p.drawElements.value_or(_drawElements);
     _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
@@ -442,11 +454,10 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         _isColorMapExact = p.exactColorMap.value_or(_isColorMapExact);
     }
-    else {
-        _pointColor = p.color;
-        _pointColor.setViewOption(properties::Property::ViewOptions::Color);
-        addProperty(_pointColor);
-    }
+
+    _pointColor = p.color;
+    _pointColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_pointColor);
 
     addProperty(_opacity);
 
@@ -539,6 +550,9 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _optionColorRangeData = glm::vec2(minValue, maxValue);
     });
     addProperty(_setRangeFromData);
+
+    _useColorMap.onChange([this]() { _dataIsDirty = true; });
+    addProperty(_useColorMap);
 
     _useLinearFiltering = p.useLinearFiltering.value_or(_useLinearFiltering);
     _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
@@ -685,7 +699,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.minBillboardSize, minBillboardSize);
     _program->setUniform(_uniformCache.maxBillboardSize, maxBillboardSize);
     _program->setUniform(_uniformCache.color, _pointColor);
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
@@ -715,6 +729,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     }
     _program->setUniform(_uniformCache.spriteTexture, textureUnit);
     _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
+    _program->setUniform(_uniformCache.useColormap, _useColorMap);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
@@ -974,7 +989,8 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     }
 
     // what datavar in use for the index color
-    int colorMapInUse = _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
+    int colorMapInUse =
+        _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
 
     // what datavar in use for the size scaling (if present)
     int sizeScalingInUse =
@@ -1026,7 +1042,8 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             case DistanceUnit::Gigalightyear:
                 unitValue = 6;
                 break;
-            default: ghoul::MissingCaseException();
+            default:
+                throw ghoul::MissingCaseException();
         }
 
         glm::vec4 position(transformedPos, unitValue);
@@ -1036,7 +1053,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
         const double r = glm::length(p);
         maxRadius = std::max(maxRadius, r);
 
-        if (_hasColorMapFile) {
+        if (_hasColorMapFile && _useColorMap && !_colorMap.entries.empty()) {
             for (int j = 0; j < 4; ++j) {
                 result.push_back(position[j]);
             }
@@ -1057,7 +1074,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             }
 
             if (_isColorMapExact) {
-                int colorIndex = variableColor + cmin;
+                int colorIndex = static_cast<int>(variableColor + cmin);
                 for (int j = 0; j < 4; ++j) {
                     result.push_back(_colorMap.entries[colorIndex][j]);
                 }
@@ -1090,11 +1107,14 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                 }
                 else {
                     float ncmap = static_cast<float>(_colorMap.entries.size());
-                    float normalization = ((cmax != cmin) && (ncmap > 2)) ?
-                        (ncmap - 2) / (cmax - cmin) : 0;
-                    int colorIndex = (variableColor - cmin) * normalization + 1;
+                    float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
+                        (ncmap - 2.f) / (cmax - cmin) : 0;
+                    int colorIndex = static_cast<int>(
+                        (variableColor - cmin) * normalization + 1.f
+                    );
                     colorIndex = colorIndex < 0 ? 0 : colorIndex;
-                    colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
+                    colorIndex = colorIndex >= ncmap ?
+                        static_cast<int>(ncmap - 1.f) : colorIndex;
 
                     for (int j = 0; j < 4; ++j) {
                         result.push_back(_colorMap.entries[colorIndex][j]);

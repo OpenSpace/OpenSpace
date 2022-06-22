@@ -48,10 +48,10 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
 {
-    _client = new BrowserClient(_renderHandler, _keyboardHandler);
+    _client = new BrowserClient(_renderHandler.get(), _keyboardHandler.get());
 
     CefWindowInfo windowInfo;
-    windowInfo.SetAsWindowless(nullptr);
+    windowInfo.SetAsWindowless(0);
 
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;
@@ -62,6 +62,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
         _client.get(),
         url,
         browserSettings,
+        nullptr,
         nullptr
     );
 

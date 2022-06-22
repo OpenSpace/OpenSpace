@@ -25,6 +25,7 @@
 #include <openspace/engine/moduleengine.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -36,11 +37,24 @@
 
 namespace {
     constexpr const char* _loggerCat = "ModuleEngine";
+
+    constexpr openspace::properties::Property::PropertyInfo AllModulesInfo = {
+        "AllModules",
+        "All Modules",
+        "The list of all modules that were compiled for this version of OpenSpace in the "
+        "same order in which they were initialized."
+    };
 } // namespace
 
 namespace openspace {
 
-ModuleEngine::ModuleEngine() : properties::PropertyOwner({ "Modules" }) {}
+ModuleEngine::ModuleEngine()
+    : properties::PropertyOwner({ "Modules" })
+    , _allModules(AllModulesInfo)
+{
+    _allModules.setReadOnly(true);
+    addProperty(_allModules);
+}
 
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
@@ -49,9 +63,13 @@ void ModuleEngine::initialize(
 
     std::vector<OpenSpaceModule*> modules = AllModules();
 
+    std::vector<std::string> moduleNames;
+    moduleNames.reserve(modules.size());
     for (OpenSpaceModule* m : modules) {
         registerModule(std::unique_ptr<OpenSpaceModule>(m));
+        moduleNames.push_back(m->guiName());
     }
+    _allModules = moduleNames;
 
     for (OpenSpaceModule* m : modules) {
         const std::string& identifier = m->identifier();
@@ -93,19 +111,19 @@ void ModuleEngine::deinitialize() {
     ZoneScoped
 
     LDEBUG("Deinitializing modules");
-    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Deinitializing module '{}'", m->identifier()));
-        m->deinitialize();
-    }
 
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+        LDEBUG(fmt::format("Deinitializing module '{}'", (*mIt)->identifier()));
+        (*mIt)->deinitialize();
+    }
     LDEBUG("Finished deinitializing modules");
 
-    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Destroying module '{}'", m->identifier()));
-        m = nullptr;
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+        LDEBUG(fmt::format("Destroying module '{}'", (*mIt)->identifier()));
+        (*mIt) = nullptr;
     }
-
     LDEBUG("Finished destroying modules");
+
     _modules.clear();
 }
 
@@ -113,9 +131,9 @@ void ModuleEngine::deinitializeGL() {
     ZoneScoped
 
     LDEBUG("Deinitializing OpenGL of modules");
-    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Deinitializing OpenGL of module '{}'", m->identifier()));
-        m->deinitializeGL();
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
+        LDEBUG(fmt::format("Deinitializing OpenGL of module '{}'", (*mIt)->identifier()));
+        (*mIt)->deinitializeGL();
 
     }
     LDEBUG("Finished deinitializing OpenGL of modules");
@@ -168,12 +186,7 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
     return {
         "modules",
         {
-            {
-                "isLoaded",
-                &luascriptfunctions::isLoaded,
-                "string",
-                "Checks whether a specific module is loaded"
-            }
+            codegen::lua::IsLoaded
         }
     };
 }

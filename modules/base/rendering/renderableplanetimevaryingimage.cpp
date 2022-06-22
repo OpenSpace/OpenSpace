@@ -76,20 +76,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "base_renderable_plane_time_varying_image"
+    return codegen::doc<Parameters>(
+        "base_renderable_plane_time_varying_image",
+        RenderablePlane::Documentation()
     );
-
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderablePlane::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-
-    return doc;
 }
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
@@ -98,9 +88,9 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     , _sourceFolder(SourceFolderInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    
+
     addProperty(_blendMode);
-    
+
     _sourceFolder = p.sourceFolder;
     if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
         LERROR(fmt::format(
@@ -143,7 +133,7 @@ void RenderablePlaneTimeVaryingImage::initialize() {
         return;
     }
     extractTriggerTimesFromFileNames();
-    computeSequenceEndTime();    
+    computeSequenceEndTime();
 }
 
 void RenderablePlaneTimeVaryingImage::initializeGL() {
@@ -207,7 +197,7 @@ void RenderablePlaneTimeVaryingImage::bindTexture() {
 void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     ZoneScoped
     RenderablePlane::update(data);
-        
+
     if (!_enabled || _startTimes.empty()) {
         return;
     }
@@ -218,6 +208,8 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
+            // true => we were not in an interval the previous frame but now we are
+            _activeTriggerTimeIndex == -1 ||
             // true => We stepped back to a time represented by another state
             currentTime < _startTimes[_activeTriggerTimeIndex] ||
             // true => We stepped forward to a time represented by another state
@@ -241,8 +233,8 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
 
 void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTasks& t) {
     if (!_startTimes.empty() &&
-        data.time.j2000Seconds() < _sequenceEndTime && 
-        data.time.j2000Seconds() > _startTimes[0]) 
+        data.time.j2000Seconds() < _sequenceEndTime &&
+        data.time.j2000Seconds() > _startTimes[0])
     {
         glDisable(GL_CULL_FACE);
         RenderablePlane::render(data, t);
@@ -291,7 +283,7 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
         const double lastTriggerTime = _startTimes[_sourceFiles.size() - 1];
         const double sequenceDuration = lastTriggerTime - _startTimes[0];
         const double averageStateDuration = sequenceDuration /
-            (static_cast<double>(_sourceFiles.size() - 1.0));
+            static_cast<double>(_sourceFiles.size() - 1);
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
 }

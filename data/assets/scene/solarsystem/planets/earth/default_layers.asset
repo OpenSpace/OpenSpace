@@ -1,4 +1,5 @@
 -- Color layers
+asset.require("./layers/colorlayers/blue_marble")
 local colorLayer = asset.require("./layers/colorlayers/esri_viirs_combo")
 asset.require("./layers/colorlayers/esri_world_imagery") 
 asset.require("./layers/colorlayers/esri_imagery_world_2D")
@@ -13,10 +14,12 @@ asset.require("./layers/colorlayers/ghrsst_l4_g1sst_sea_surface_temperature_temp
 asset.require("./layers/colorlayers/ghrsst_l4_mur_sea_surface_temperature_temporal")
 
 -- Height layers
+asset.require("./layers/heightlayers/blue_marble_height")
 local heightLayer = asset.require("./layers/heightlayers/terrain_tileset")
 
 -- Night layers
 local nightLayer = asset.require("./layers/nightlayers/earth_at_night_2012")
+asset.require("./layers/nightlayers/earth_night_texture")
 asset.require("./layers/nightlayers/earth_at_night_temporal")
 
 -- Overlays

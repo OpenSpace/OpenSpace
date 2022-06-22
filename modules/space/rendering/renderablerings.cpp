@@ -226,8 +226,14 @@ void RenderableRings::update(const UpdateData& data) {
         _textureIsDirty = false;
     }
 
-    _sunPosition = global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
-                   data.modelTransform.translation;
+    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
+    if (sun) {
+        _sunPosition = sun->worldPosition() - data.modelTransform.translation;
+    }
+    else {
+        // If the Sun node does not exist, we assume the light source to be in the origin
+        _sunPosition = -data.modelTransform.translation;
+    }
 }
 
 void RenderableRings::loadTexture() {

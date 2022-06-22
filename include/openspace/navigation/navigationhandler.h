@@ -68,16 +68,12 @@ public:
 
     // Mutators
     void setFocusNode(SceneGraphNode* node);
-    void resetCameraDirection();
-
     void setCamera(Camera* camera);
     void setInterpolationTime(float durationInSeconds);
 
     void updateCamera(double deltaTime);
-    void setEnableKeyFrameInteraction();
-    void setDisableKeyFrameInteraction();
-    void triggerPlaybackStart();
-    void stopPlayback();
+
+    void resetNavigationUpdateVariables();
 
     // Accessors
     Camera* camera() const;
@@ -98,6 +94,7 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
+    std::vector<std::string> listAllJoysticks() const;
     void setJoystickAxisMapping(std::string joystickName,
         int axis, JoystickCameraStates::AxisType mapping,
         JoystickCameraStates::AxisInvert shouldInvert =
@@ -155,8 +152,7 @@ public:
 private:
     void applyNavigationState(const NavigationState& ns);
     void updateCameraTransitions();
-
-    bool _playbackModeEnabled = false;
+    void clearGlobalJoystickStates();
 
     MouseInputState _mouseInputState;
     KeyboardInputState _keyboardInputState;

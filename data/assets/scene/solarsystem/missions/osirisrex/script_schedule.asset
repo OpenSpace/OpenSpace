@@ -13,6 +13,6 @@ asset.onInitialize(function ()
 end)
 
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.scriptScheduler.clear()
 end)

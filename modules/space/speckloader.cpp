@@ -145,10 +145,13 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
     Dataset res;
 
     int nDataValues = 0;
+    int currentLineNumber = 0;
 
     std::string line;
     // First phase: Loading the header information
     while (std::getline(file, line)) {
+        currentLineNumber++;
+
         // Ignore empty line or commented-out lines
         if (line.empty() || line[0] == '#') {
             continue;
@@ -280,6 +283,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
     // std::getline, we'd miss the first data value line
     bool isFirst = true;
     while (isFirst || std::getline(file, line)) {
+        currentLineNumber++;
         isFirst = false;
 
         // Ignore empty line or commented-out lines
@@ -315,10 +319,41 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
         str >> entry.position.x >> entry.position.y >> entry.position.z;
         allZero &= (entry.position == glm::vec3(0.0));
 
+        if (!str.good()) {
+            // Need to subtract one of the line number here as we increase the current
+            // line count in the beginning of the while loop we are currently in 
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading position information out of data line {} in file {}. "
+                "Value was not a number",
+                currentLineNumber - 1, path
+            ));
+        }
+
         entry.data.resize(nDataValues);
+        std::stringstream valueStream;
         for (int i = 0; i < nDataValues; i += 1) {
-            str >> entry.data[i];
-            allZero &= (entry.data[i] == 0.0);
+            std::string value;
+            str >> value;
+            if (value == "nan" || value == "NaN") {
+                entry.data[i] = std::numeric_limits<float>::quiet_NaN();
+            }
+            else {
+                valueStream.clear();
+                valueStream.str(value);
+                valueStream >> entry.data[i];
+
+                allZero &= (entry.data[i] == 0.0);
+                if (valueStream.fail()) {
+                    // Need to subtract one of the line number here as we increase the
+                    // current line count in the beginning of the while loop we are
+                    // currently in 
+                    throw ghoul::RuntimeError(fmt::format(
+                        "Error loading data value {} out of data line {} in file {}. "
+                        "Value was not a number",
+                        i, currentLineNumber - 1, path
+                    ));
+                }
+            }
         }
 
         if (skipAllZeroLines && allZero) {

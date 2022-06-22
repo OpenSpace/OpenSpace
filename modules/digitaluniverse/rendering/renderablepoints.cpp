@@ -55,8 +55,6 @@ namespace {
         "spriteTexture", "hasColorMap"
     };
 
-    constexpr double PARSEC = 0.308567756E17;
-
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
@@ -79,7 +77,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical onject."
+        "The path to the color map file of the astronomical object."
     };
 
     struct [[codegen::Dictionary(RenderablePoints)]] Parameters {
@@ -244,7 +242,7 @@ void RenderablePoints::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.sides, 4);
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
     if (_hasSpriteTexture) {
@@ -361,7 +359,7 @@ void RenderablePoints::readColorMapFile() {
         // std::streampos position = file.tellg();
         std::getline(file, line);
 
-        if (line[0] == '#' || line.empty()) {
+        if (line.empty() || line[0] == '#') {
             continue;
         }
 
@@ -399,11 +397,16 @@ std::vector<double> RenderablePoints::createDataSlice() {
         slice.reserve(4 * _dataset.entries.size());
     }
 
+    double maxRadius = 0.0;
+
     int colorIndex = 0;
     for (const speck::Dataset::Entry& e : _dataset.entries) {
         glm::dvec3 p = e.position;
         double scale = toMeter(_unit);
         p *= scale;
+
+        const double r = glm::length(p);
+        maxRadius = std::max(maxRadius, r);
 
         glm::dvec4 position(p, 1.0);
 
@@ -425,6 +428,7 @@ std::vector<double> RenderablePoints::createDataSlice() {
             0 :
             colorIndex + 1;
     }
+    setBoundingSphere(maxRadius);
 
     return slice;
 }

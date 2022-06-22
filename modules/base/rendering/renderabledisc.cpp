@@ -39,8 +39,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char _loggerCat[] = "RenderableDisc";
-
     constexpr const std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "colorTexture"
     };
@@ -157,7 +155,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.width, _width);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

@@ -40,6 +40,7 @@ public:
     TileDepthTransform depthTransform() override final;
     void update() override final;
     void reset() override final;
+    int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
@@ -47,7 +48,7 @@ public:
 
 private:
     properties::StringProperty _filePath;
-  
+
     std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
     Tile _tile;
 };

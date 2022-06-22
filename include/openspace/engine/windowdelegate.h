@@ -64,6 +64,8 @@ struct WindowDelegate {
 
     glm::vec2 (*dpiScaling)() = []() { return glm::vec2(1.f); };
 
+    float (*osDpiScaling)() = []() { return 1.f; };
+
     bool (*hasGuiWindow)() = []() { return false; };
 
     bool (*isGuiWindow)() = []() { return false; };

@@ -31,6 +31,7 @@
 #include <numeric>
 #include <mutex>
 #include <optional>
+#include <unordered_map>
 #include <variant>
 
 namespace {
@@ -155,12 +156,11 @@ void UrlSynchronization::start() {
             }
             std::filesystem::path destination = directory() / (_filename + TempSuffix);
 
-            std::unique_ptr<HttpFileDownload> download =
-                std::make_unique<HttpFileDownload>(
-                    url,
-                    destination,
-                    HttpFileDownload::Overwrite::Yes
-                );
+            auto download = std::make_unique<HttpFileDownload>(
+                url,
+                destination,
+                HttpFileDownload::Overwrite::Yes
+            );
             HttpFileDownload* dl = download.get();
 
             downloads.push_back(std::move(download));
@@ -243,6 +243,10 @@ void UrlSynchronization::start() {
 void UrlSynchronization::cancel() {
     _shouldCancel = true;
     _state = State::Unsynced;
+}
+
+std::string UrlSynchronization::generateUid() {
+    return _identifier;
 }
 
 } // namespace openspace

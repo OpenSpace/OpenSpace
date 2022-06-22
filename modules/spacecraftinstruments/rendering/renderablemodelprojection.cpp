@@ -38,8 +38,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableModelProjection";
-
     constexpr const char* DestinationFrame = "GALACTIC";
 
     constexpr const std::array<const char*, 7> MainUniformNames = {
@@ -67,13 +65,13 @@ namespace {
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
         // The file or files that should be loaded in this RenderableModel. The file can
         // contain filesystem tokens or can be specified relatively to the
-        // location of the .mod file.
+        // location of the .asset file.
         // This specifies the model that is rendered by the Renderable.
         std::filesystem::path geometryFile;
 
         // Contains information about projecting onto this planet.
         ghoul::Dictionary projection
-            [[codegen::reference("newhorizons_projectioncomponent")]];
+            [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
@@ -321,11 +319,14 @@ void RenderableModelProjection::update(const UpdateData& data) {
         }
     }
 
-    glm::dvec3 p =
-        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
-        data.modelTransform.translation;
-
-    _sunPosition = static_cast<glm::vec3>(p);
+    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
+    if (sun) {
+        _sunPosition = sun->worldPosition() - data.modelTransform.translation;
+    }
+    else {
+        // If the Sun node doesn't exist, we assume that the light source is in the origin
+        _sunPosition = -data.modelTransform.translation;
+    }
 }
 
 void RenderableModelProjection::imageProjectGPU(

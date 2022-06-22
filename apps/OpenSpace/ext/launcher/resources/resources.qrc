@@ -3,5 +3,7 @@
     <file>qss/launcher.qss</file>
     <file>images/openspace-horiz-logo-small.png</file>
     <file>images/launcher-background.png</file>
+    <file>images/outline_locked.png</file>
+    <file>images/outline_unlocked.png</file>
   </qresource>
 </RCC>

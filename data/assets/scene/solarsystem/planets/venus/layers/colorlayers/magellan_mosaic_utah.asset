@@ -26,11 +26,16 @@ local layer = {
   }
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
 
 
 asset.meta = {
@@ -41,6 +46,5 @@ asset.meta = {
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Venus/Magellan/" ..
     "Venus_Magellan_LeftLook_mosaic_global_75m",
-  License = "NASA/PDS",
-  Identifiers = {"Magellan_Mosaic_Utah"}
+  License = "NASA/PDS"
 }
