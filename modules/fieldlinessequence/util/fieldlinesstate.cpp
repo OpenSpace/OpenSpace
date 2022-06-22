@@ -575,20 +575,20 @@ void FieldlinesState::addMatchingKeyFrames(
 
     // Elon: check if even correct. Probably will need both front and back to be < 1.5f
     // to be considered closed. 1.5 is just a number from thin air
-    if (glm::length(keyFrame1.front()) < 1.5f && glm::length(keyFrame1.back()) < 1.5f) {
+    if (glm::length(keyFrame1.front()) < 5.5f && glm::length(keyFrame1.back()) < 5.5f) {
         f1.topology = Fieldline::Topology::Closed;
     }
-    else if (glm::length(keyFrame1.back()) < 1.5f || glm::length(keyFrame1.front()) < 1.5f) {
+    else if (glm::length(keyFrame1.back()) < 5.5f || glm::length(keyFrame1.front()) < 5.5f) {
         f1.topology = Fieldline::Topology::Open;
     }
     else {
         f1.topology = Fieldline::Topology::Imf;
     }
 
-    if (glm::length(keyFrame2.front()) < 1.5f && glm::length(keyFrame2.back()) < 1.5f) {
+    if (glm::length(keyFrame2.front()) < 5.5f && glm::length(keyFrame2.back()) < 5.5f) {
         f2.topology = Fieldline::Topology::Closed;
     }
-    else if (glm::length(keyFrame2.back()) < 1.5f || glm::length(keyFrame2.front()) < 1.5f) {
+    else if (glm::length(keyFrame2.back()) < 5.5f || glm::length(keyFrame2.front()) < 5.5f) {
         f2.topology = Fieldline::Topology::Open;
     }
     else {

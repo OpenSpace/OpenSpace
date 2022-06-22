@@ -49,15 +49,35 @@ vec4 getTransferFunctionColor() {
                             (colorTableRange.y - colorTableRange.x);
     return texture(colorTable, lookUpVal);
 }
+vec3 topologyColor(float topology)
+{
+    // Pathline
+    vec3 color = vec3(0.4f, 0.4f, 0.4f);    // gray
+
+    // Closed
+    float t = step(0.0f, topology);
+    color = t * vec3(0.7f, 0.2f, 0.2f) + (1.0f - t) * color; // blue
+
+    // Open
+	t = step(1.0f, topology);
+	color = t * vec3(0.2f, 0.7f, 0.2f) + (1.0f - t) * color; // green
+
+    // IMF
+	t = step(2.0f, topology);
+	color = t * vec3(0.2f, 0.2f, 0.7f) + (1.0f - t) * color; // red
+
+    return color;
+}
 
 void main() {
     vs_color = lineColor;
-    debugTopologyColor = in_position.w;
+    vs_color.xyz = topologyColor(in_position.w);
+
     if (colorMethod == colorByQuantity) {
         vec4 quantityColor = getTransferFunctionColor();
         vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
     }
-    vs_color.a *= in_vertex_alpha;
+    vs_color.a = in_vertex_alpha;
 
     vec4 position_in_meters = vec4(in_position.xyz, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
