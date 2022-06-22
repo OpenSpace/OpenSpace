@@ -31,7 +31,7 @@
 
 #include <modules/softwareintegration/network/softwareconnection.h>
 
-namespace openspace::softwareintegration::network {
+namespace openspace::softwareintegration::messagehandler {
 
 struct Callback {
     std::function<void()> function;
@@ -45,6 +45,17 @@ void postSyncCallbacks();
 
 void handleMessage(IncomingMessage& incomingMessage);
 
+template<typename T>
+bool handleEnumValue(
+    const std::vector<std::byte>& message,
+    size_t& offset,
+    const simp::DataKey& dataKey,
+    const std::string& identifier,
+    const std::string& propertyName
+);
+
 } // namespace openspace::softwareintegration::messagehandler
+
+#include "messagehandler.inl"
 
 #endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___MESSAGEHANDLER___H__

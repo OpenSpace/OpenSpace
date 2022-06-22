@@ -43,7 +43,7 @@ public:
 struct IncomingMessage {
 	std::weak_ptr<SoftwareConnection> connection;
 	softwareintegration::simp::MessageType type{ softwareintegration::simp::MessageType::Unknown };
-	std::vector<char> content{};
+	std::vector<std::byte> content{};
 	std::string rawMessageType{""};
 };
 

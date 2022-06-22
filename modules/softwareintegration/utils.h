@@ -50,32 +50,78 @@ bool hasStorageKey(const std::string& key);
 
 namespace simp {
 
-const std::string ProtocolVersion = "1.9";
+namespace {
 
-const char SEP = ';';
+const uint8_t _version_major = 1;
+const uint8_t _version_minor = 9;
+const uint8_t _version_patch = 1;
 
-enum class MessageType : uint32_t {
+} // namespace
+
+const std::string protocolVersion = fmt::format("{}.{}.{}", _version_major, _version_minor, _version_patch);
+
+const char DELIM = ';';
+const std::byte DELIM_BYTES{ DELIM };
+
+enum class MessageType : uint8_t {
     Connection = 0,
-    PointData,
-    VelocityData,
+    Data,
     RemoveSceneGraphNode,
-    Color,
-    Colormap,
-    AttributeData,
-    Opacity,
+    Unknown
+};
+
+enum class DataKey : uint16_t {
+    // Point
+    X = 0,
+    Y,
+    Z,
+    PointUnit,
+    // Velocity
+    U,
+    V,
+    W,
+    VelocityDistanceUnit,
+    VelocityTimeUnit,
+    VelocityNanMode,
+    VelocityEnabled,
+    // Color
+    Red,
+    Green,
+    Blue,
+    Alpha,
+    ColormapEnabled,
+    // Colormap
+    ColormapReds,
+    ColormapGreens,
+    ColormapBlues,
+    ColormapAlphas,
+    ColormapMin,
+    ColormapMax,
+    ColormapNanR,
+    ColormapNanG,
+    ColormapNanB,
+    ColormapNanA,
+    ColormapNanMode,
+    ColormapAttributeData,
+    // Fixed size
     FixedSize,
-    LinearSize,
+    LinearSizeEnabled,
+    // Linear size
+    LinearSizeMin,
+    LinearSizeMax,
+    LinearSizeAttributeData,
+    // Visibility
     Visibility,
     Unknown
 };
 
-enum class ColormapNaNRenderMode : uint8_t {
+enum class ColormapNanRenderMode {
     Hide = 0,
     FixedColor,
     Unknown
 };
 
-enum class VelocityNaNRenderMode : uint8_t {
+enum class VelocityNanRenderMode {
     Hide = 0,
     Static,
     Unknown
@@ -101,51 +147,52 @@ public:
 
 MessageType getMessageType(const std::string& type);
 
-std::string getSIMPType(const MessageType& type);
+std::string getStringFromMessageType(const MessageType& type);
 
-ColormapNaNRenderMode getColormapNaNRenderMode(const std::string& type);
+DataKey getDataKey(const std::string& type);
 
-VelocityNaNRenderMode getVelocityNaNRenderMode(const std::string& type);
+std::string getStringFromDataKey(const DataKey& type);
+
+ColormapNanRenderMode getColormapNanRenderMode(const std::string& type);
+
+VelocityNanRenderMode getVelocityNanRenderMode(const std::string& type);
 
 std::string formatLengthOfSubject(size_t lengthOfSubject);
 
-std::string formatUpdateMessage(MessageType messageType, std::string_view identifier, std::string_view value);
-
-std::string formatConnectionMessage(std::string_view value);
-
-std::string formatColorMessage(std::string_view identifier, glm::vec4 color);
-
-std::string formatPointDataCallbackMessage(std::string_view identifier);
-
-std::string floatToHex(const float f);
-
-float hexToFloat(const std::string& f);
-
-float readFloatValue(const std::vector<char>& message, size_t& offset);
-
-int readIntValue(const std::vector<char>& message, size_t& offset);
-
-std::string readString(const std::vector<char>& message, size_t& offset);
-
-glm::vec4 readColor(const std::vector<char>& message, size_t& offset);
-
-void readPointData(
-    const std::vector<char>& message,
+bool readColorChannel(
+    const std::vector<std::byte>& message,
     size_t& offset,
-    size_t nPoints,
-    size_t dimensionality,
-    std::vector<float>& pointData
+    const DataKey& dataKey,
+    glm::vec4& color,
+    const glm::vec4::length_type& channel
 );
 
-void readColormap(
-    const std::vector<char>& message,
-    size_t& offset,
-    size_t nColors,
-    std::vector<float>& colorMap
-);
+template <typename T>
+T networkToHostEndian(T value);
+
+template <typename T>
+T hostToNetworkEndian(T value);
+
+void readValue(const std::vector<std::byte>& message, size_t& offset, float& value);
+void readValue(const std::vector<std::byte>& message, size_t& offset, int32_t& value);
+void readValue(const std::vector<std::byte>& message, size_t& offset, bool& value);
+void readValue(const std::vector<std::byte>& message, size_t& offset, std::string& value);
+
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, float value);
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, float value);
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, int32_t value);
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, int32_t value);
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, bool value);
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, bool value);
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, const std::string& value);
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, const std::string& value);
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, const std::vector<std::byte>& value);
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, const std::vector<std::byte>& value);
 
 } // namespace simp
 
 } // namespace openspace::softwareintegration
+
+#include "utils.inl"
 
 #endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__

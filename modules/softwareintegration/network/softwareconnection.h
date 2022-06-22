@@ -30,7 +30,6 @@
 #include <ghoul/io/socket/tcpsocket.h>
 #include <openspace/properties/property.h>
 
-#include <unordered_set>
 #include <unordered_map>
 
 namespace openspace {
@@ -44,6 +43,7 @@ struct NetworkState;
 struct IncomingMessage;
 
 namespace connection {
+    
     void eventLoop(
         std::weak_ptr<SoftwareConnection> connectionWeakPtr,
         std::weak_ptr<softwareintegration::network::NetworkState> networkStateWeakPtr
@@ -52,6 +52,7 @@ namespace connection {
     IncomingMessage receiveMessageFromSoftware(
         std::shared_ptr<SoftwareConnection> connectionPtr
     );
+
 } // namespace connection
 
 } // namespace softwareintegration::network
@@ -59,17 +60,8 @@ namespace connection {
 using namespace softwareintegration::network;
 
 class SoftwareConnection {
-
 public:
-    using OnChangeHandle = properties::Property::OnChangeHandle;
-    struct PropertySubscription {
-        OnChangeHandle onChangeHandle;
-        bool shouldSendMessage{true};
-    };
-    using PropertyName = std::string;
-    using PropertySubscriptions = std::unordered_map<PropertyName, OnChangeHandle>;
-    using Identifier = std::string;
-    using SubscribedProperties = std::unordered_map<Identifier, PropertySubscriptions>;
+    struct SceneGraphNodeInfo;
 
     explicit SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
     SoftwareConnection(SoftwareConnection&& p);
@@ -78,17 +70,21 @@ public:
     void disconnect();
     bool isConnected() const;
     bool isConnectedOrConnecting() const;
-    bool sendMessage(const std::string& message);
+    bool sendMessage(
+        const softwareintegration::simp::MessageType& message_type,
+        const std::vector<std::byte>& subjectBuffer
+    );
+
+    bool hasPropertySubscription(
+        const std::string& identifier,
+        const std::string& propertyName
+    );
 
     void addPropertySubscription(
         const std::string& propertyName,
         const std::string& identifier,
         std::function<void()> newHandler
     );
-    // std::shared_ptr<PropertySubscription> getPropertySubscription(
-    //     const std::string& propertyName,
-    //     const std::string& identifier
-    // );
 
     void addSceneGraphNode(const std::string& identifier);
     void removeSceneGraphNode(const std::string& identifier);
@@ -101,29 +97,82 @@ public:
         std::weak_ptr<NetworkState> networkStateWeakPtr
     );
 
+    void removePropertySubscriptions(const std::string& identifier);
+    void removePropertySubscription(const std::string& identifier, const std::string& propertyName);
+
+    /**
+     * @brief Called from onChange handlers to see if we should send back to
+     * external software. Will also set its state to "true" when called
+     * 
+     */
+    bool shouldSendData(const std::string& identifier, const std::string& propertyName);
+    /**
+     * @brief Called from message handlers to not send back data in onChange handlers
+     * when properties are updated
+     * 
+     */
+    void setShouldNotSendData(const std::string& identifier, const std::string& propertyName);
+
+    void addToMessageQueue(
+        const std::string& identifier,
+        softwareintegration::simp::DataKey dataKey,
+        const std::tuple<std::vector<std::byte>, int32_t>& entry
+    );
+
+    void notifyMessageQueueHandler();
+
+    void handleOutgoingMessages();
+
     friend IncomingMessage connection::receiveMessageFromSoftware(
         std::shared_ptr<SoftwareConnection> connectionPtr
     );
 
-    void removePropertySubscription(const std::string& propertyName, const std::string& identifier);
-
-    void removePropertySubscriptions(const std::string& identifier);
+    bool handshakeHasBeenMade();
+    void setHandshakeHasBeenMade();
 
     ghoul::io::TcpSocket* socket();
 
+    std::mutex&  outgoingMessagesMutex();
+
 private:
-
-    SubscribedProperties _subscribedProperties;
-
-    std::unordered_set<std::string> _sceneGraphNodes;
+    void removeMessageQueue(const std::string& identifier);
 
     std::unique_ptr<ghoul::io::TcpSocket> _socket;
+
+    std::unordered_map<std::string, SceneGraphNodeInfo> _sceneGraphNodes;
+    std::mutex _outgoingMessagesMutex;
+    std::atomic_bool _shouldStopOutgoingMessagesThread;
+    std::unique_ptr<std::thread> _outgoingMessagesThread;
+    std::mutex _outgoingMessagesNotifierMutex;
+    std::condition_variable _outgoingMessagesNotifier;
 
     size_t _id;
     std::thread _thread;
     std::atomic_bool _shouldStopThread;
 
     static std::atomic_size_t _nextConnectionId;
+
+    bool _handshakeHasBeenMade = false;
+};
+
+struct SoftwareConnection::SceneGraphNodeInfo {
+    using OnChangeHandle = properties::Property::OnChangeHandle;
+    struct PropertySubscription {
+        OnChangeHandle onChangehandle;
+        bool shouldSendMessage{ false };
+    };
+    using PropertySubscriptions = std::unordered_map<std::string, PropertySubscription>;
+    //                                                    /\
+    //                                                    |
+    //                                               propertyName
+
+    using OutgoingMessages = std::unordered_map<
+        softwareintegration::simp::DataKey,
+        std::tuple<std::vector<std::byte>, int32_t>
+    >;
+
+    OutgoingMessages outgoingMessages{};
+    PropertySubscriptions propertySubscriptions{};
 };
 
 } // namespace openspace

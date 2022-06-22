@@ -22,37 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+namespace openspace {
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-layout(location = 0) in vec3 in_position;
-in vec3 in_velocity;
-in float in_colormapAttributeScalar;
-in float in_linearSizeAttributeScalar;
-
-out vec3 vs_velocity;
-
-out float vs_colormapAttributeScalar;
-flat out float vs_linearSizeAttributeScalar;
-
-uniform bool motionEnabled;
-uniform float time;
-
-void main() {
-    vs_colormapAttributeScalar = in_colormapAttributeScalar;
-    vs_linearSizeAttributeScalar = in_linearSizeAttributeScalar;
-
-    vec4 objectPosition = vec4(in_position, 1.0);
-
-    // Add velocity if applicable
-    // Velocity (UVW) is already in m/s
-    vs_velocity = in_velocity;
-    bool velocityIsNan = (isnan(in_velocity[0]) || isnan(in_velocity[1]) || isnan(in_velocity[2]));
-    if (motionEnabled && !velocityIsNan) {
-        // TODO: Need to subtract with t = 0 (when the position was measured)
-        objectPosition.xyz += time * in_velocity; 
+template<typename T>
+bool SyncableStorage::fetch(
+    const Identifier& identifier,
+    const storage::Key storageKey,
+    T& resultingData
+) {
+    LDEBUG(fmt::format("Loading data from float data storage: {}-{}", identifier, storage::getStorageKeyString(storageKey)));
+    std::lock_guard guard(_mutex);
+    if (!count(identifier)) {
+        LERROR(fmt::format(
+            "Could not find any data for SceneGraphNode '{}' in the centralized data storage",
+            identifier
+        ));
+        return false;
     }
 
-    gl_Position = objectPosition;
+    switch (storageKey) {
+        case storage::Key::DataPoints:
+        case storage::Key::Colormap:
+        case storage::Key::ColormapAttrData:
+        case storage::Key::LinearSizeAttrData:
+        case storage::Key::VelocityData: {
+            if (!std::is_same<T, std::vector<float>>::value) {
+                LERROR(fmt::format(
+                    "Can't put {} into a {}.",
+                    storage::getStorageKeyString(storageKey), typeid(T).name()
+                ));
+                return false;
+            }
+
+            return fetchDimFloatData(identifier, simpDataKeysFromStorageKey(storageKey), resultingData);
+        }
+        default: {
+            LERROR(fmt::format(
+                "Could not find data in storage for the key {}",
+                storage::getStorageKeyString(storageKey)
+            ));
+            break;
+        }
+    }
+
+    return false;
 }
+
+} // namespace openspace

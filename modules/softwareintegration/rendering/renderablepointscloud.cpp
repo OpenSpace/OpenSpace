@@ -24,8 +24,8 @@
 
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 
-#include <modules/softwareintegration/utils.h>
 #include <modules/softwareintegration/softwareintegrationmodule.h>
+#include <modules/softwareintegration/utils.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -43,17 +43,15 @@
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
 
-int TIME_COUNTER = 0;
-
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
-    constexpr const std::array<const char*, 21> UniformNames = {
-        "color", "opacity", "size", "modelMatrix", "cameraUp", "screenSize",
+    constexpr const std::array<const char*, 20> UniformNames = {
+        "color", "size", "modelMatrix", "cameraUp", "screenSize",
         "cameraViewProjectionMatrix", "eyePosition", "sizeOption",
-        "colormapTexture", "colormapMin", "colormapMax", "colormapNaNMode",
-        "colormapNaNColor", "colormapEnabled", "linearSizeMin", "linearSizeMax",
-        "linearSizeEnabled","velocityNaNMode", "motionEnabled", "time"
+        "colormapTexture", "colormapMin", "colormapMax", "colormapNanMode",
+        "colormapNanColor", "colormapEnabled", "linearSizeMin", "linearSizeMax",
+        "linearSizeEnabled","velocityNanMode", "motionEnabled", "time"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -68,16 +66,16 @@ namespace {
         "The size of the points."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DataInfo = {
-        "Data",
-        "Data",
-        "Data to use for the positions of the points, given in Parsec."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
         "Identifier",
         "Identifier",
         "Identifier used as part of key to access data in centralized central storage."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo PointUnitInfo = {
+        "PointUnit",
+        "Point Unit",
+        "The distance unit of the point data."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
@@ -98,14 +96,14 @@ namespace {
         "Maximum value to sample from colormap."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColormapNaNModeInfo = {
-        "ColormapNaNMode",
+    constexpr openspace::properties::Property::PropertyInfo ColormapNanModeInfo = {
+        "ColormapNanMode",
         "Colormap NaN Mode",
         "How points with NaN value in colormap attribute should be represented."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColormapNaNColorInfo = {
-        "ColormapNaNColor",
+    constexpr openspace::properties::Property::PropertyInfo ColormapNanColorInfo = {
+        "ColormapNanColor",
         "Colormap NaN Color",
         "The color of the points where the colormap scalar is NaN."
     };
@@ -139,15 +137,15 @@ namespace {
         "Velocity Distance Unit",
         "The distance unit of the velocity data."
     };
-
+    
     constexpr openspace::properties::Property::PropertyInfo VelocityTimeUnitInfo = {
         "VelocityTimeUnit",
         "Velocity Time Unit",
         "The time unit of the velocity data."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VelocityNaNModeInfo = {
-        "VelocityNaNMode",
+    constexpr openspace::properties::Property::PropertyInfo VelocityNanModeInfo = {
+        "VelocityNanMode",
         "Velocity NaN Mode",
         "How points with NaN value in colormap attribute should be represented."
     };
@@ -171,12 +169,11 @@ namespace {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size;
 
-        // TODO: This can be removed? Not in use anymore?
-        // [[codegen::verbatim(DataInfo.description)]]
-        std::optional<std::vector<glm::vec3>> data;
-
         // [[codegen::verbatim(IdentifierInfo.description)]]
         std::optional<std::string> identifier;
+
+        // [[codegen::verbatim(PointUnitInfo.description)]]
+        std::optional<std::string> pointUnit;
 
         // [[codegen::verbatim(ColormapMinInfo.description)]]
         std::optional<float> colormapMin;
@@ -184,11 +181,11 @@ namespace {
         // [[codegen::verbatim(ColormapMaxInfo.description)]]
         std::optional<float> colormapMax;
 
-        // [[codegen::verbatim(ColormapNaNModeInfo.description)]]
-        std::optional<int> colormapNaNMode;
+        // [[codegen::verbatim(ColormapNanModeInfo.description)]]
+        std::optional<int> colormapNanMode;
 
-        // [[codegen::verbatim(ColormapNaNColorInfo.description)]]
-        std::optional<glm::vec4> colormapNaNColor;
+        // [[codegen::verbatim(ColormapNanColorInfo.description)]]
+        std::optional<glm::vec4> colormapNanColor;
 
         // [[codegen::verbatim(ColormapEnabledInfo.description)]]
         std::optional<bool> colormapEnabled;
@@ -208,8 +205,8 @@ namespace {
         // [[codegen::verbatim(VelocityTimeUnitInfo.description)]]
         std::optional<std::string> velocityTimeUnit;
 
-        // [[codegen::verbatim(VelocityNaNModeInfo.description)]]
-        std::optional<int> velocityNaNMode;
+        // [[codegen::verbatim(VelocityNanModeInfo.description)]]
+        std::optional<int> velocityNanMode;
 
         // [[codegen::verbatim(MotionEnabledInfo.description)]]
         std::optional<bool> motionEnabled;
@@ -217,8 +214,9 @@ namespace {
         // [[codegen::verbatim(NameInfo.description)]]
         std::optional<std::string> name;
 
-        enum class SizeOption : uint32_t {
-            Uniform,
+        // VOLATILE: Keep in sync with SizeOption in `./renderablepointscloud.h`
+        enum class SizeOption {
+            Uniform = 0,
             NonUniform
         };
         // [[codegen::verbatim(SizeOptionInfo.description)]]
@@ -239,18 +237,19 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(0.f), glm::vec4(1.f), glm::vec4(.01f))
     , _size(SizeInfo, 1.f, 0.f, 500.f, .1f)
+    , _pointUnit(PointUnitInfo, "<no unit set>")
     , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _colormapMin(ColormapMinInfo)
     , _colormapMax(ColormapMaxInfo)
-    , _colormapNaNMode(ColormapNaNModeInfo)
-    , _colormapNaNColor(ColormapNaNColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(1.0f), glm::vec4(0.f), glm::vec4(0.f))
+    , _colormapNanMode(ColormapNanModeInfo)
+    , _colormapNanColor(ColormapNanColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(1.0f), glm::vec4(0.f), glm::vec4(0.f))
     , _colormapEnabled(ColormapEnabledInfo, false)
     , _linearSizeMax(LinearSizeMinInfo)
     , _linearSizeMin(LinearSizeMaxInfo)
     , _linearSizeEnabled(LinearSizeEnabledInfo, false)
     , _velocityDistanceUnit(VelocityDistanceUnitInfo, "<no unit set>")
     , _velocityTimeUnit(VelocityTimeUnitInfo, "<no unit set>")
-    , _velocityNaNMode(VelocityNaNModeInfo)
+    , _velocityNanMode(VelocityNanModeInfo)
     , _name(NameInfo)
     , _motionEnabled(MotionEnabledInfo, false)
 {
@@ -285,7 +284,10 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     }
     addProperty(_sizeOption);
 
-    addProperty(_opacity);
+    _pointUnit = p.pointUnit.value_or(_pointUnit);
+    _pointUnit.setVisibility(properties::Property::Visibility::Hidden);
+    _pointUnit.onChange([this] { _pointUnitIsDirty = true; });
+    addProperty(_pointUnit);
 
     // =============== Colormap ===============
     _colormapMin = p.colormapMin.value_or(_colormapMin);
@@ -298,13 +300,13 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _colormapMax.onChange([this] { checkColormapMinMax(); });
     addProperty(_colormapMax);
 
-    _colormapNaNMode = p.colormapNaNMode.value_or(_colormapNaNMode);
-    _colormapNaNMode.setVisibility(properties::Property::Visibility::Hidden);
-    addProperty(_colormapNaNMode);
+    _colormapNanMode = p.colormapNanMode.value_or(_colormapNanMode);
+    _colormapNanMode.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_colormapNanMode);
 
-    _colormapNaNColor = p.colormapNaNColor.value_or(_colormapNaNColor);
-    _colormapNaNColor.setVisibility(properties::Property::Visibility::Hidden);
-    addProperty(_colormapNaNColor);
+    _colormapNanColor = p.colormapNanColor.value_or(_colormapNanColor);
+    _colormapNanColor.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_colormapNanColor);
 
     _colormapEnabled = p.colormapEnabled.value_or(_colormapEnabled);
     _colormapEnabled.onChange([this] { checkIfColormapCanBeEnabled(); });
@@ -343,9 +345,9 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _velocityTimeUnit.onChange([this] { _velocityUnitsAreDirty = true; });
     addProperty(_velocityTimeUnit);
 
-    _velocityNaNMode = p.velocityNaNMode.value_or(_velocityNaNMode);
-    _velocityNaNMode.setVisibility(properties::Property::Visibility::Hidden);
-    addProperty(_velocityNaNMode);
+    _velocityNanMode = p.velocityNanMode.value_or(_velocityNanMode);
+    _velocityNanMode.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_velocityNanMode);
 
     _motionEnabled = p.motionEnabled.value_or(_motionEnabled);
     _motionEnabled.onChange([this] { checkIfMotionCanBeEnabled(); });
@@ -418,11 +420,6 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colormapTexture) {
-        // _colormapAttributeData
-        // TODO: Set _colormapTextre in shader. A trasnfer function similar to
-        // 'bv2rgb' in C:\OpenSpace\SoftwareIntegration\modules\space\shaders\star_fs.glsl
-        // should probably be used.
-
         colorUnit.activate();
         _colormapTexture->bind();
         _shaderProgram->setUniform(_uniformCache.colormapTexture, colorUnit);
@@ -434,15 +431,15 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 
     _shaderProgram->setUniform(_uniformCache.colormapMin, _colormapMin);
     _shaderProgram->setUniform(_uniformCache.colormapMax, _colormapMax);
-    _shaderProgram->setUniform(_uniformCache.colormapNaNMode, _colormapNaNMode);
-    _shaderProgram->setUniform(_uniformCache.colormapNaNColor, _colormapNaNColor);
+    _shaderProgram->setUniform(_uniformCache.colormapNanMode, _colormapNanMode);
+    _shaderProgram->setUniform(_uniformCache.colormapNanColor, _colormapNanColor);
     _shaderProgram->setUniform(_uniformCache.colormapEnabled, _colormapEnabled);
 
     _shaderProgram->setUniform(_uniformCache.linearSizeMin, _linearSizeMin);
     _shaderProgram->setUniform(_uniformCache.linearSizeMax, _linearSizeMax);
     _shaderProgram->setUniform(_uniformCache.linearSizeEnabled, _linearSizeEnabled);
 
-    _shaderProgram->setUniform(_uniformCache.velocityNaNMode, _velocityNaNMode);
+    _shaderProgram->setUniform(_uniformCache.velocityNanMode, _velocityNanMode);
     _shaderProgram->setUniform(_uniformCache.motionEnabled, _motionEnabled);
     _shaderProgram->setUniform(
         _uniformCache.time,
@@ -451,7 +448,6 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 
     _shaderProgram->setUniform(_uniformCache.color, _color);
 
-    _shaderProgram->setUniform(_uniformCache.opacity, _opacity);
     _shaderProgram->setUniform(_uniformCache.size, _size);
     _shaderProgram->setUniform(_uniformCache.sizeOption, _sizeOption);
 
@@ -514,14 +510,14 @@ void RenderablePointsCloud::update(const UpdateData&) {
                 bufferData.push_back(colormapAttrDataSlice->at(i));
             }
             else {
-                bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered?
+                bufferData.push_back(std::nanf("0"));
             }
 
             if (linearSizeAttrDataSlice->size() > i) {
                 bufferData.push_back(linearSizeAttrDataSlice->at(i));
             }
             else {
-                bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered?
+                bufferData.push_back(std::nanf("0"));
             }
 
             if (velocityDataSlice->size() > (j + 2)) {
@@ -530,12 +526,9 @@ void RenderablePointsCloud::update(const UpdateData&) {
                 bufferData.push_back(velocityDataSlice->at(j + 2));
             }
             else {
-                bufferData.push_back(std::nanf("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
-                bufferData.push_back(std::nanf("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
-                bufferData.push_back(std::nanf("0")); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
-                // bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
-                // bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
-                // bufferData.push_back(0.0); // TODO: We might not want to put 0.0 here. How is this rendered? Maybe push NAN?
+                bufferData.push_back(std::nanf("0"));
+                bufferData.push_back(std::nanf("0"));
+                bufferData.push_back(std::nanf("0"));
             }
         }
 
@@ -614,30 +607,27 @@ bool RenderablePointsCloud::checkDataStorage() {
     bool updatedDataSlices = false;
     auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
 
-    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::DataPoints)) {
-        loadData(softwareIntegrationModule);
+    if (shouldLoadPointData(softwareIntegrationModule)) {
+        loadPointData(softwareIntegrationModule);
         updatedDataSlices = true;
+        _pointUnitIsDirty = false;
     }
 
-    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::Colormap)) {
+    if (shouldLoadColormap(softwareIntegrationModule)) {
         loadColormap(softwareIntegrationModule);
     }
 
-    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::ColormapAttrData)) {
+    if (shouldLoadColormapAttrData(softwareIntegrationModule)) {
         loadColormapAttributeData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
 
-    if (softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::LinearSizeAttrData)) {
+    if (shouldLoadLinearSizeAttrData(softwareIntegrationModule)) {
         loadLinearSizeAttributeData(softwareIntegrationModule);
         updatedDataSlices = true;
     }
 
-    if (shouldLoadVelocityData(
-        softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::VelocityData)
-        )
-    ) 
-    {
+    if (shouldLoadVelocityData(softwareIntegrationModule)) {
         loadVelocityData(softwareIntegrationModule);
         updatedDataSlices = true;
         _velocityUnitsAreDirty = false;
@@ -646,46 +636,131 @@ bool RenderablePointsCloud::checkDataStorage() {
     return updatedDataSlices;
 }
 
-void RenderablePointsCloud::loadData(SoftwareIntegrationModule* softwareIntegrationModule) {
-    // Fetch data from module's centralized storage
-    auto fullPointData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::DataPoints);
-
-    if (fullPointData.empty()) {
-        LWARNING("There was an issue trying to fetch the point data from the centralized storage.");
+void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareIntegrationModule) {
+    // Fetch point data from module's centralized storage
+    std::vector<float> pointData; 
+    if (!softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::DataPoints, pointData)) {
+        LERROR("There was an issue trying to fetch the point data from the centralized storage.");
         return;
     }
 
+    // Parse unit
+    DistanceUnit pointUnit;
+    try {
+        pointUnit = distanceUnitFromString(_pointUnit.value().c_str());
+    }
+    catch (const ghoul::MissingCaseException& ) {
+        LERROR(fmt::format(
+            "Error when parsing point unit."
+            "OpenSpace doesn't support the distance unit '{}'.",
+            _pointUnit
+        ));
+        return;
+    }
+
+    // Convert to meters if needed
+    if (pointUnit != DistanceUnit::Meter) {
+        float toMeters = static_cast<float>(toMeter(pointUnit));
+        for (auto& point : pointData) {
+            point *= toMeters;
+        }
+    }
+    
+    // Assign point data to point data slice
     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
     pointDataSlice->clear();
-    pointDataSlice->reserve(fullPointData.size());
+    pointDataSlice->assign(pointData.begin(), pointData.end());
 
-    // Create data slice
-    auto addPosition = [&](const glm::vec4& pos) {
-        for (glm::vec4::length_type j = 0; j < glm::vec4::length() - 1; ++j) {
-            pointDataSlice->push_back(pos[j]);
-        }
-    };
-
-    for (size_t i = 0; i < fullPointData.size(); i += 3) {
-        glm::dvec4 transformedPos = {
-            fullPointData[i + 0],
-            fullPointData[i + 1],
-            fullPointData[i + 2],
-            1.0
-        };
-        // W-normalization
-        // transformedPos /= transformedPos.w; // TODO: Unnecessary. transformedPos.w == 1
-        transformedPos *= distanceconstants::Parsec; // Convert parsec => meter
-
-        addPosition(transformedPos);
-    }
     softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::DataPoints);
+    LDEBUG("New point data has loaded");
+}
+
+void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule) {
+    // Fetch velocity data from module's centralized storage
+    std::vector<float> velocityData;
+    if (!softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::VelocityData, velocityData)) {
+        LWARNING("There was an issue trying to fetch the velocity data from the centralized storage.");
+        return;
+    }
+
+    // Check that velocity data is same length as point data
+    auto pointDataSlice = getDataSlice(DataSliceKey::Points);
+    // if (pointDataSlice->size() != velocityData.size()) {
+    //     LWARNING(fmt::format(
+    //         "There is a mismatch in the amount of velocity data ({}) and the amount of points ({})",
+    //         velocityData.size() / 3, pointDataSlice->size() / 3
+    //     ));
+    //     _motionEnabled = false;
+    //     return;
+    // }
+
+    // Parse units
+    DistanceUnit velocityDistanceUnit;
+    TimeUnit velocityTimeUnit;
+    try {
+        velocityDistanceUnit = distanceUnitFromString(_velocityDistanceUnit.value().c_str());
+        velocityTimeUnit = timeUnitFromString(_velocityTimeUnit.value().c_str());
+    }
+    catch (const ghoul::MissingCaseException& ) {
+        LERROR(fmt::format(
+            "Error when parsing velocity units."
+            "OpenSpace doesn't support the velocity unit '{}/{}'.",
+            _velocityDistanceUnit,
+            _velocityTimeUnit
+        ));
+        return;
+    }
+
+    // Units conversion
+    bool conversionNeeded = false;
+
+    // Meters multiplier
+    float toMeters = 1.0;
+    if (velocityDistanceUnit != DistanceUnit::Meter) {
+        toMeters = static_cast<float>(toMeter(velocityDistanceUnit));
+        conversionNeeded = true;
+    }
+
+    // Seconds divider
+    float toSeconds = 1.0;
+    if (velocityTimeUnit != TimeUnit::Second) {
+        toSeconds = static_cast<float>(convertTime(1.0, velocityTimeUnit, TimeUnit::Second));
+        conversionNeeded = true;
+    }
+
+    // Check for NaN values and convert to m/s if needed
+    int nNans = 0;
+    for (auto& v : velocityData) {
+        if (isnan(v)) nNans++;
+        if (conversionNeeded) {
+            v *= toMeters / toSeconds;
+        }
+    }
+
+    // Assign velocity data to velocity data slice
+    auto velocityDataSlice = getDataSlice(DataSliceKey::Velocity);
+    velocityDataSlice->clear();
+    velocityDataSlice->assign(velocityData.begin(), velocityData.end());
+    
+    LINFO(
+        fmt::format(
+            "Viewing {} points with velocity ({} points in total). "
+            "{} points have NaN-value velocity and are hidden or static.",
+            velocityData.size()/3 - nNans/3,
+            pointDataSlice->size()/3,
+            nNans/3
+        )
+    );
+
+    _hasLoadedVelocityData = true;
+    softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::VelocityData);
+    LDEBUG("New velocity data has loaded");
 }
 
 void RenderablePointsCloud::loadColormap(SoftwareIntegrationModule* softwareIntegrationModule) {
-    auto colormap = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::Colormap);
-
-    if (colormap.empty()) {
+    // Fetch colormap data from module's centralized storage
+    std::vector<float> colormap;
+    if (!softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::Colormap, colormap)) {
         LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
         return;
     }
@@ -707,171 +782,64 @@ void RenderablePointsCloud::loadColormap(SoftwareIntegrationModule* softwareInte
     _colormapTexture->uploadTexture();
 
     _hasLoadedColormap = true;
+    LDEBUG("New colormap has loaded");
     softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::Colormap);
 }
 
 void RenderablePointsCloud::loadColormapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
-    auto colormapAttributeData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::ColormapAttrData);
-
-    if (colormapAttributeData.empty()) {
-        LWARNING("There was an issue trying to fetch the colormap data from the centralized storage.");
+    // Fetch colormap attribute data from module's centralized storage
+    std::vector<float> colormapAttributeData;
+    if (!softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::ColormapAttrData, colormapAttributeData)) {
+        LWARNING("There was an issue trying to fetch the colormap attribute data from the centralized storage.");
         return;
     }
 
+    // Check that colormap attribute data is same length as point data
     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
-
-    if (pointDataSlice->size() / 3 != colormapAttributeData.size()) {
-        LWARNING(fmt::format(
-            "There is a mismatch in the amount of colormap attribute scalars ({}) and the amount of points ({})",
-            colormapAttributeData.size(), pointDataSlice->size() / 3
-        ));
-        _colormapEnabled = false;
-        return;
-    }
+    // if (pointDataSlice->size() / 3 != colormapAttributeData.size()) {
+    //     LWARNING(fmt::format(
+    //         "There is a mismatch in the amount of colormap attribute scalars ({}) and the amount of points ({})",
+    //         colormapAttributeData.size(), pointDataSlice->size() / 3
+    //     ));
+    //     _colormapEnabled = false;
+    //     return;
+    // }
 
     auto colormapAttributeDataSlice = getDataSlice(DataSliceKey::ColormapAttributes);
     colormapAttributeDataSlice->clear();
-    colormapAttributeDataSlice->reserve(colormapAttributeData.size());
-
-    for (size_t i = 0; i < (pointDataSlice->size() / 3); ++i) {
-        colormapAttributeDataSlice->push_back(colormapAttributeData[i]);
-    }
+    colormapAttributeDataSlice->assign(colormapAttributeData.begin(), colormapAttributeData.end());
 
     _hasLoadedColormapAttributeData = true;
-    LDEBUG("Rerendering with colormap attribute data");
     softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::ColormapAttrData);
+    LDEBUG("New colormap attribute data has loaded");
 }
 
 void RenderablePointsCloud::loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule) {
-    auto linearSizeAttributeData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::LinearSizeAttrData);
-
-    if (linearSizeAttributeData.empty()) {
+    // Fetch linear size attribute data from module's centralized storage
+    std::vector<float> linearSizeAttributeData;
+    if (softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::LinearSizeAttrData, linearSizeAttributeData)) {
         LWARNING("There was an issue trying to fetch the linear size attribute data from the centralized storage.");
         return;
     }
 
+    // Check that linear size attribute data is same length as point data
     auto pointDataSlice = getDataSlice(DataSliceKey::Points);
-
-    if (pointDataSlice->size() / 3 != linearSizeAttributeData.size()) {
-        LWARNING(fmt::format(
-            "There is a mismatch in the amount of linear size attribute scalars ({}) and the amount of points ({})",
-            linearSizeAttributeData.size(), pointDataSlice->size() / 3
-        ));
-        _linearSizeEnabled = false;
-        return;
-    }
+    // if (pointDataSlice->size() / 3 != linearSizeAttributeData.size()) {
+    //     LWARNING(fmt::format(
+    //         "There is a mismatch in the amount of linear size attribute scalars ({}) and the amount of points ({})",
+    //         linearSizeAttributeData.size(), pointDataSlice->size() / 3
+    //     ));
+    //     _linearSizeEnabled = false;
+    //     return;
+    // }
 
     auto linearSizeAttributeDataSlice = getDataSlice(DataSliceKey::LinearSizeAttributes);
     linearSizeAttributeDataSlice->clear();
-    linearSizeAttributeDataSlice->reserve(linearSizeAttributeData.size());
-
-    for (size_t i = 0; i < (pointDataSlice->size() / 3); ++i) {
-        linearSizeAttributeDataSlice->push_back(linearSizeAttributeData[i]);
-    }
+    linearSizeAttributeDataSlice->assign(linearSizeAttributeData.begin(), linearSizeAttributeData.end());
 
     _hasLoadedLinearSizeAttributeData = true;
-    LDEBUG("Rerendering with linear size attribute data");
     softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::LinearSizeAttrData);
-}
-
-void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule) {
-    // Fetch data from module's centralized storage
-    auto velocityData = softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::VelocityData);
-
-    if (velocityData.empty()) {
-        LWARNING("There was an issue trying to fetch the velocity data from the centralized storage.");
-        return;
-    }
-
-    auto pointDataSlice = getDataSlice(DataSliceKey::Points);
-
-    if (pointDataSlice->size() != velocityData.size()) {
-        LWARNING(fmt::format(
-            "There is a mismatch in the amount of velocity data ({}) and the amount of points ({})",
-            velocityData.size() / 3, pointDataSlice->size() / 3
-        ));
-        _motionEnabled = false;
-        return;
-    }
-
-    auto velocityDataSlice = getDataSlice(DataSliceKey::Velocity);
-    velocityDataSlice->clear();
-    velocityDataSlice->reserve(velocityData.size());
-
-    // =========================================
-    int nNans = 0;
-    int prevNNans = 0;
-    int nPointsContainingNans = 0;
-
-    // Create velocity data slice
-    auto addPosition = [&](const glm::vec4& pos) {
-        for (glm::vec4::length_type j = 0; j < glm::vec4::length() - 1; ++j) {
-            if (isnan(pos[j])) {
-                nNans++;
-            }
-            velocityDataSlice->push_back(pos[j]);
-        }
-        if (prevNNans < nNans) {
-            nPointsContainingNans++;
-            prevNNans = nNans;
-        }
-    };
-
-    // Parse units
-    DistanceUnit velocityDistanceUnit;
-    TimeUnit velocityTimeUnit;
-    try {
-        velocityDistanceUnit = distanceUnitFromString(_velocityDistanceUnit.value().c_str());
-        velocityTimeUnit = timeUnitFromString(_velocityTimeUnit.value().c_str());
-    }
-    catch (const ghoul::MissingCaseException& ) {
-        LERROR(fmt::format(
-            "Error when parsing velocity units."
-            "OpenSpace doesn't support the unit '{}/{}'.",
-            _velocityDistanceUnit,
-            _velocityTimeUnit
-        ));
-        return;
-    }
-
-    // Meters multiplier
-    float toMeters = 1.0;
-    if (velocityDistanceUnit != DistanceUnit::Meter) {
-        toMeters = static_cast<float>(toMeter(velocityDistanceUnit));
-    }
-
-    // Seconds divider
-    float toSeconds = 1.0;
-    if (velocityTimeUnit != TimeUnit::Second) {
-        toSeconds = static_cast<float>(convertTime(1.0, velocityTimeUnit, TimeUnit::Second));
-    }
-
-    for (size_t i = 0; i < velocityData.size(); i += 3) {
-        glm::dvec4 transformedPos = {
-            velocityData[i + 0],
-            velocityData[i + 1],
-            velocityData[i + 2],
-            1.0
-        };
-
-        // Convert to m/s if needed
-        transformedPos *= toMeters / toSeconds;
-
-        addPosition(transformedPos);
-    }
-    LINFO(
-        fmt::format(
-            "Viewing {} points with velocity ({} points in total). "
-            "{} points have NaN-value velocity and are hidden or static.",
-            velocityData.size()/3 - nPointsContainingNans,
-            pointDataSlice->size()/3,
-            nPointsContainingNans
-        )
-    );
-
-    _hasLoadedVelocityData = true;
-    softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::VelocityData);
-    LDEBUG("Rerendering with motion based on velocity data");
+    LDEBUG("New colormap attribute data has loaded");
 }
 
 std::shared_ptr<RenderablePointsCloud::DataSlice> RenderablePointsCloud::getDataSlice(DataSliceKey key) {
@@ -951,12 +919,38 @@ void RenderablePointsCloud::checkColormapMinMax() {
     }
 }
 
-bool RenderablePointsCloud::shouldLoadVelocityData(bool isVelocityDataDirty) {
+bool RenderablePointsCloud::shouldLoadPointData(SoftwareIntegrationModule* softwareIntegrationModule) {
     return (
-        (isVelocityDataDirty || _velocityUnitsAreDirty) 
+        (
+            _pointUnitIsDirty
+            || softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::DataPoints)
+        )
+        && _pointUnit.value() != "<no unit set>"
+    );
+}
+
+bool RenderablePointsCloud::shouldLoadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule) {
+    return (
+        (
+            _velocityUnitsAreDirty
+            || softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::VelocityData)
+        ) 
         && _velocityDistanceUnit.value() != "<no unit set>"
         && _velocityTimeUnit.value() != "<no unit set>"
     );
 }
+
+bool RenderablePointsCloud::shouldLoadColormap(SoftwareIntegrationModule* softwareIntegrationModule) {
+    return softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::Colormap);
+}
+
+bool RenderablePointsCloud::shouldLoadColormapAttrData(SoftwareIntegrationModule* softwareIntegrationModule) {
+    return softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::ColormapAttrData);
+}
+
+bool RenderablePointsCloud::shouldLoadLinearSizeAttrData(SoftwareIntegrationModule* softwareIntegrationModule) {
+    return softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::LinearSizeAttrData);
+}
+
 
 } // namespace openspace

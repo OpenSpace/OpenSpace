@@ -40,17 +40,16 @@ in float ta;
 in vec3 ge_velocity;
 
 uniform vec4 color;
-uniform float opacity;
 
 uniform float colormapMin;
 uniform float colormapMax;
-uniform int colormapNaNMode;
-uniform vec4 colormapNaNColor;
+uniform int colormapNanMode;
+uniform vec4 colormapNanColor;
 uniform bool colormapEnabled;
 uniform sampler1D colormapTexture;
 
 uniform bool motionEnabled;
-uniform int velocityNaNMode;
+uniform int velocityNanMode;
 
 vec4 attributeScalarToRgb(float attributeData) {
     float t = (attributeData - colormapMin) / (colormapMax - colormapMin);
@@ -64,29 +63,29 @@ vec4 attributeScalarToRgb(float attributeData) {
 }
 
 Fragment getFragment() {
-    if (ta == 0.001 || opacity == 0.00001 || color.a == 0.00001) {
+    if (ta == 0.001 || color.a == 0.00001) {
         discard;
     }
 
     // Don't show points with no value for that 
-    // attribute, if ColormapNaNRenderMode is Hidden
-    if (colormapEnabled 
+    // attribute, if ColormapNanRenderMode is Hidden
+    if (
+        colormapEnabled 
         && isnan(ge_colormapAttributeScalar) 
-        && colormapNaNMode == COLORMAPNANMODE_HIDDEN) 
-    {
+        && colormapNanMode == COLORMAPNANMODE_HIDDEN
+    ) {
         discard;
     }
     
     // ========== Velocity NaN mode ==========
     // Don't show points with no value for 
-    // velocity, if VelocityNaNRenderMode is Hidden
-    // vec3 vel = ge_velocity;
-    bool velocityIsNaN = (isnan(ge_velocity[0]) ||
+    // velocity, if VelocityNanRenderMode is Hidden
+    bool velocityIsNan = (isnan(ge_velocity[0]) ||
                           isnan(ge_velocity[1]) ||
                           isnan(ge_velocity[2]));
     if (motionEnabled && 
-        velocityIsNaN && 
-        velocityNaNMode == VELOCITYNANMODE_HIDDEN) 
+        velocityIsNan && 
+        velocityNanMode == VELOCITYNANMODE_HIDDEN) 
     {
         discard;
     } // else the point is left static
@@ -98,15 +97,15 @@ Fragment getFragment() {
     // calculate distance from the origin point
     float circle = smoothstep(radius, radius - (radius * 0.2), distance);
 
-    vec4 outputColor = vec4(color.rgb, color.a * opacity);
+    vec4 outputColor = color;
     if (colormapEnabled) {
-        // Set colormapNaNColor if point doesn't have a value for the attribute 
-        if (isnan(ge_colormapAttributeScalar) && colormapNaNMode == COLORMAPNANMODE_COLOR) {
-            outputColor = vec4(colormapNaNColor.rgb, colormapNaNColor.a * opacity);
+        // Set colormapNanColor if point doesn't have a value for the attribute 
+        if (isnan(ge_colormapAttributeScalar) && colormapNanMode == COLORMAPNANMODE_COLOR) {
+            outputColor = vec4(colormapNanColor.rgb, colormapNanColor.a);
         }
         else {
             vec4 colorFromColormap = attributeScalarToRgb(ge_colormapAttributeScalar);
-            outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * color.a * opacity);
+            outputColor = vec4(colorFromColormap.rgb, colorFromColormap.a * color.a);
         }
     }
 

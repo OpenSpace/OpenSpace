@@ -25,8 +25,9 @@
 #include <modules/softwareintegration/assethelper.h>
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
-#include <modules/softwareintegration/syncablefloatdatastorage.h>
+#include <modules/softwareintegration/syncablestorage.h>
 #include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/query/query.h>
@@ -87,7 +88,7 @@ bool readFile(std::filesystem::path path, std::vector<std::byte>& buffer, std::s
     }
 }
 
-bool saveSessionData(SyncableFloatDataStorage& storage,
+bool saveSessionData(SyncableStorage& storage,
                      const std::filesystem::path& filePath,
                      std::string& errorMessage)
 {
@@ -132,13 +133,28 @@ bool AssetHelper::loadSessionData(SoftwareIntegrationModule* module,
     }
 
     try {
-        module->_syncableFloatDataStorage.store(byteStream);
+        module->_syncableStorage.store(byteStream);
     }
     catch (const std::exception& e) {
         errorMessage = fmt::format("Couldn't store loaded data in Software Integration storage", e.what());
         LERROR(errorMessage);
         return false;
     }
+
+    // Set large time steps for the GUI (so you for example 
+    // can see the movement of stars at 5000 years/second)
+    // Values set in seconds: Real time, 5k years, 
+    // 10k year, 50k year, 100k year, 500k year, 1M year
+    std::string largeTimeSteps = "{ 1.0, 157680000000.0, 315360000000.0,"
+                                    " 1576800000000.0, 3153600000000.0,"
+                                    " 15768000000000.0, 3153600000000.0 }";
+    global::scriptEngine->queueScript(
+        fmt::format(
+            "openspace.time.setDeltaTimeSteps({});",
+            largeTimeSteps
+        ),
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 
     return true;
 }
@@ -164,7 +180,7 @@ bool AssetHelper::saveSession(const std::string& wantedFileName, std::string& er
     auto sessionDataFilePath = dirPath / std::filesystem::path{ dirPath.filename().string() + ".dat" };
     if (
         !saveSessionData(
-            softwareIntegrationModule->_syncableFloatDataStorage,
+            softwareIntegrationModule->_syncableStorage,
             sessionDataFilePath,
             errorMessage
         )
@@ -179,7 +195,7 @@ bool AssetHelper::saveSession(const std::string& wantedFileName, std::string& er
 
         assetFile << "local nodes = {\n";
 
-        auto identifiers = softwareIntegrationModule->_syncableFloatDataStorage.getAllIdentifiers();
+        auto identifiers = softwareIntegrationModule->_syncableStorage.getAllIdentifiers();
         bool isFirstSgn = true;
         for (auto& identifier : identifiers) {
             auto r = renderable(identifier);

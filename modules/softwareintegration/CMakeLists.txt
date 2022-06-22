@@ -26,12 +26,16 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/messagehandler.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/messagehandler.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/network/network.h
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.h
   ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/syncablefloatdatastorage.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/syncablestorage.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/syncablestorage.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/interruptibleconcurrentqueue.h
   ${CMAKE_CURRENT_SOURCE_DIR}/interruptibleconcurrentqueue.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/assethelper.h
@@ -46,7 +50,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/syncablefloatdatastorage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/syncablestorage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/assethelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

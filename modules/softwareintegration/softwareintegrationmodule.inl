@@ -22,37 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+namespace openspace {
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-layout(location = 0) in vec3 in_position;
-in vec3 in_velocity;
-in float in_colormapAttributeScalar;
-in float in_linearSizeAttributeScalar;
-
-out vec3 vs_velocity;
-
-out float vs_colormapAttributeScalar;
-flat out float vs_linearSizeAttributeScalar;
-
-uniform bool motionEnabled;
-uniform float time;
-
-void main() {
-    vs_colormapAttributeScalar = in_colormapAttributeScalar;
-    vs_linearSizeAttributeScalar = in_linearSizeAttributeScalar;
-
-    vec4 objectPosition = vec4(in_position, 1.0);
-
-    // Add velocity if applicable
-    // Velocity (UVW) is already in m/s
-    vs_velocity = in_velocity;
-    bool velocityIsNan = (isnan(in_velocity[0]) || isnan(in_velocity[1]) || isnan(in_velocity[2]));
-    if (motionEnabled && !velocityIsNan) {
-        // TODO: Need to subtract with t = 0 (when the position was measured)
-        objectPosition.xyz += time * in_velocity; 
-    }
-
-    gl_Position = objectPosition;
+template <typename T>
+bool SoftwareIntegrationModule::fetchData(
+    const SyncableStorage::Identifier& identifier,
+    const storage::Key key,
+    T& resultingData
+) {
+    return _syncableStorage.fetch(identifier, key, resultingData);
 }
+
+} // namespace openspace

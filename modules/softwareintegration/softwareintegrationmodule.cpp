@@ -57,38 +57,32 @@ SoftwareIntegrationModule::~SoftwareIntegrationModule() {
 }
 
 void SoftwareIntegrationModule::storeData(
-    const SyncableFloatDataStorage::Identifier& identifier,
-    const storage::Key key, const std::vector<float>& data
+    const SyncableStorage::Identifier& identifier,
+    const simp::DataKey key,
+    const std::vector<std::byte>& data
 ) {
-    _syncableFloatDataStorage.store(identifier, key, data);
-}
-
-const std::vector<float>& SoftwareIntegrationModule::fetchData(
-    const SyncableFloatDataStorage::Identifier& identifier,
-    const storage::Key key
-) {
-    return _syncableFloatDataStorage.fetch(identifier, key);
+    _syncableStorage.store(identifier, key, data);
 }
 
 bool SoftwareIntegrationModule::isDataDirty(
-    const SyncableFloatDataStorage::Identifier& identifier,
+    const SyncableStorage::Identifier& identifier,
     const storage::Key key
 ) {
-    return _syncableFloatDataStorage.isDirty(identifier, key);
+    return _syncableStorage.isDirty(identifier, key);
 }
 
 void SoftwareIntegrationModule::setDataLoaded(
-    const SyncableFloatDataStorage::Identifier& identifier,
+    const SyncableStorage::Identifier& identifier,
     const storage::Key key
 ) {
-    _syncableFloatDataStorage.setLoaded(identifier, key);
+    _syncableStorage.setLoaded(identifier, key);
 }
 
 bool SoftwareIntegrationModule::dataLoaded(
-        const SyncableFloatDataStorage::Identifier& identifier,
+        const SyncableStorage::Identifier& identifier,
         const storage::Key key
 ) {
-    return _syncableFloatDataStorage.hasLoaded(identifier, key);
+    return _syncableStorage.hasLoaded(identifier, key);
 }
 
 void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
@@ -104,7 +98,12 @@ void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
         _networkState = softwareintegration::network::serve();
 
         global::callback::postSyncPreDraw->emplace_back([this]() {
-            softwareintegration::network::postSyncCallbacks();
+            if (_networkState) {
+                for (auto& connections : _networkState->softwareConnections) {
+                    connections.second->notifyMessageQueueHandler();
+                }
+            }
+            softwareintegration::messagehandler::postSyncCallbacks();
         });
     }
 }
@@ -125,12 +124,7 @@ SoftwareIntegrationModule::documentations() const
 }
 
 std::vector<Syncable*> SoftwareIntegrationModule::getSyncables() {
-    return { &_syncableFloatDataStorage };
-}
-
-// Helper function for debugging
-std::string SoftwareIntegrationModule::getStringOfAllKeysInStorage() {
-    return _syncableFloatDataStorage.getStringOfAllKeysInStorage();
+    return { &_syncableStorage };
 }
 
 scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
