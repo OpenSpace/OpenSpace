@@ -1,7 +1,8 @@
 # Streaming Thesis
 [User guide](http://internal.openspaceproject.com/theses/2022/theses-2022-streaming/user-guide)  
+[Good-to-know's](http://internal.openspaceproject.com/theses/2022/theses-2022-streaming/backlog)
 
-See Projects for todos and bugs
+See [Projects](https://github.com/OpenSpace/OpenSpace/projects/35) for todos and bugs.
 
 ---
 
