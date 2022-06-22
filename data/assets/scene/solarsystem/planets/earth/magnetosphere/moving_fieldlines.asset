@@ -1,0 +1,38 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere')
+
+-- Change to location on your machine
+local fieldlinesDirectory = 'C:/Users/HEM/Documents/Liu/Data_Fieldlines'
+local seedPointFile = 'C:/Users/HEM/Documents/Liu/Data_Fieldlines/seedpoint_dayside_nightside2.txt'
+
+local movingLines = {
+  Identifier = "MovingFieldlines",
+  Parent = transforms.GSMReferenceFrame.Identifier,
+  Renderable = {
+    Type = "RenderableMovingFieldlines",
+    SourceFolder = fieldlinesDirectory,
+    SeedPointFile = seedPointFile,
+    TracingVariable = "u_perp_b",
+    NumberOfPointsOnPathLine = 200,
+    NumberOfPointsOnFieldlines = 500,
+    LineWidth = 4,
+    RenderFlowLine = false
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Earth",
+    Name = "Moving fieldlines",
+    Description = "moving"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { movingLines })
+
+asset.meta = {
+  Name = "M",
+  Version = "1.0",
+  Description = "",
+  Author = "",
+  URL = "",
+  License = "",
+  Identifier = {"MovingFieldlines"}
+}
