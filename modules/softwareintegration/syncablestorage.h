@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLESTORAGE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLESTORAGE___H__
 
 
 #include <openspace/util/syncable.h>
@@ -36,19 +36,17 @@ namespace openspace {
 
 using namespace softwareintegration;
 
-class SyncableFloatDataStorage : public Syncable {
+class SyncableStorage : public Syncable {
 public:
 	/* ====================== Types ===================== */
     struct Value {
-        // a dataset stored like x1, y1, z1, x2, y2 ....
-        std::vector<float> data;
-        bool hasEncoded = false;
-        bool syncDirty = true;
+        std::vector<std::byte> data;
+        bool syncDirty = true; // Only used on master node
         bool hasLoaded = false;
         bool dirty = true;
     };
     using ValueData = decltype(Value::data);
-    using SceneStorage = std::unordered_map<storage::Key, Value>;
+    using SceneStorage = std::unordered_map<simp::DataKey, Value>;
     using Identifier = std::string;
     using Storage = std::unordered_map<Identifier, SceneStorage>;
     using Iterator = Storage::iterator;
@@ -58,15 +56,18 @@ public:
     /* ============== SyncEngine functions ============== */
     virtual void encode(SyncBuffer* syncBuffer) override;
     virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postSync(bool isMaster) override;
     /* ================================================== */
 
-    const ValueData& fetch(const Identifier& identifier, const storage::Key key);
-    void setLoaded(const Identifier& identifier, const storage::Key key); 
-    bool hasLoaded(const Identifier& identifier, const storage::Key key); 
-    bool isDirty(const Identifier& identifier, const storage::Key key);
-    bool isSyncDirty(const Identifier& identifier, const storage::Key key);
-    void store(const Identifier& identifier, const storage::Key key, const ValueData& data);
+    template<typename T>
+    bool fetch(
+        const Identifier& identifier,
+        const storage::Key storageKey,
+        T& resultingData
+    );
+    void setLoaded(const Identifier& identifier, const storage::Key storageKey); 
+    bool hasLoaded(const Identifier& identifier, const storage::Key storageKey); 
+    bool isDirty(const Identifier& identifier, const storage::Key storageKey);
+    void store(const Identifier& identifier, const simp::DataKey key, const std::vector<std::byte>& data);
 
     void encodeStorage(SyncBuffer* syncBuffer, bool skipNonSynced = true);
     void decodeStorage(SyncBuffer* syncBuffer, bool skipNonSynced = true);
@@ -74,16 +75,17 @@ public:
     void store(const std::vector<std::byte>& storageDump);
     std::vector<Identifier> getAllIdentifiers();
 
-    std::string getStringOfAllKeysInStorage();
-
 private:
     /* =============== Utility functions ================ */
-    bool erase(const Identifier& identifier, const storage::Key key);
-
-    void insertAssign(const Identifier& identifier, const storage::Key key, const Value& value);
-
-    size_t count(const Identifier& identifier, const storage::Key key);
+    void insertAssign(const Identifier& identifier, const simp::DataKey key, const Value& value);
     size_t count(const Identifier& identifier);
+    size_t count(const Identifier& identifier, const simp::DataKey key);
+    std::vector<simp::DataKey> simpDataKeysFromStorageKey(const storage::Key key);
+    bool fetchDimFloatData(
+        const Identifier& identifier, 
+        const std::vector<simp::DataKey> dimDataKeys,
+        std::vector<float>& resultingData
+    );
     /* ================================================== */
 
     std::mutex _mutex;
@@ -92,4 +94,6 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLEFLOATDATASTORAGE___H__
+#include "syncablestorage.inl"
+
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SYNCABLESTORAGE___H__

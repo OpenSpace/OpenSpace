@@ -22,37 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <climits>
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+namespace openspace::softwareintegration::simp {
 
-layout(location = 0) in vec3 in_position;
-in vec3 in_velocity;
-in float in_colormapAttributeScalar;
-in float in_linearSizeAttributeScalar;
+namespace {
 
-out vec3 vs_velocity;
 
-out float vs_colormapAttributeScalar;
-flat out float vs_linearSizeAttributeScalar;
+bool hostIsBigEndian() {
+    const int i = 1;
+    // For big endian the most significant byte 
+    // is placed at the byte with the lowest address
+    // Example: 4 byte int with with value 1 is as bytes
+    // is 0001 for big endian and 1000 for little endian
+    return *(char*)&i == 0;
+}
 
-uniform bool motionEnabled;
-uniform float time;
+template <typename T>
+T swapEndian(T value) {
+    union {
+        T u;
+        unsigned char u8[sizeof(T)];
+    } source, dest;
 
-void main() {
-    vs_colormapAttributeScalar = in_colormapAttributeScalar;
-    vs_linearSizeAttributeScalar = in_linearSizeAttributeScalar;
+    source.u = value;
 
-    vec4 objectPosition = vec4(in_position, 1.0);
-
-    // Add velocity if applicable
-    // Velocity (UVW) is already in m/s
-    vs_velocity = in_velocity;
-    bool velocityIsNan = (isnan(in_velocity[0]) || isnan(in_velocity[1]) || isnan(in_velocity[2]));
-    if (motionEnabled && !velocityIsNan) {
-        // TODO: Need to subtract with t = 0 (when the position was measured)
-        objectPosition.xyz += time * in_velocity; 
+    for (size_t k = 0; k < sizeof(T); k++) {
+        dest.u8[k] = source.u8[sizeof(T) - k - 1];
     }
 
-    gl_Position = objectPosition;
+    return *reinterpret_cast<T*>(dest.u8);
 }
+
+} // namespace
+
+template <typename T>
+T networkToHostEndian(T value) {
+    static_assert (CHAR_BIT == 8, "CHAR_BIT != 8");
+
+    if (hostIsBigEndian()) return value;
+
+    return swapEndian(value);
+}
+
+template <typename T>
+T hostToNetworkEndian(T value) {
+    static_assert (CHAR_BIT == 8, "CHAR_BIT != 8");
+    
+    if (!hostIsBigEndian()) return value;
+
+    return swapEndian(value);
+}
+
+} // namespace openspace::softwareintegration::simp

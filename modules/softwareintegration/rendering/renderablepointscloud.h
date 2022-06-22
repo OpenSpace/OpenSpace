@@ -63,7 +63,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void loadData(SoftwareIntegrationModule* softwareIntegrationModule);
+    void loadPointData(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadColormap(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadColormapAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
     void loadLinearSizeAttributeData(SoftwareIntegrationModule* softwareIntegrationModule);
@@ -76,20 +76,26 @@ private:
     void checkIfLinearSizeCanBeEnabled();
     void checkIfMotionCanBeEnabled();
 
-    bool shouldLoadVelocityData(bool isVelocityDataDirty);
+    bool shouldLoadPointData(SoftwareIntegrationModule* softwareIntegrationModule);
+    bool shouldLoadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule);
+    bool shouldLoadColormap(SoftwareIntegrationModule* softwareIntegrationModule);
+    bool shouldLoadColormapAttrData(SoftwareIntegrationModule* softwareIntegrationModule);
+    bool shouldLoadLinearSizeAttrData(SoftwareIntegrationModule* softwareIntegrationModule);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
     UniformCache(
-        color, opacity, size, modelMatrix, cameraUp, screenSize,
+        color, size, modelMatrix, cameraUp, screenSize,
         cameraViewProjectionMatrix, eyePosition, sizeOption,
-        colormapTexture, colormapMin, colormapMax, colormapNaNMode,
-        colormapNaNColor, colormapEnabled, linearSizeMin, linearSizeMax,
-        linearSizeEnabled, velocityNaNMode, motionEnabled, time
+        colormapTexture, colormapMin, colormapMax, colormapNanMode,
+        colormapNanColor, colormapEnabled, linearSizeMin, linearSizeMax,
+        linearSizeEnabled, velocityNanMode, motionEnabled, time
     ) _uniformCache;
 
     properties::StringProperty _name;
     properties::FloatProperty _size;
     properties::Vec4Property _color;
+    properties::StringProperty _pointUnit;
+
     properties::OptionProperty _sizeOption;
     properties::BoolProperty _linearSizeEnabled;
     properties::FloatProperty _linearSizeMin;
@@ -99,16 +105,18 @@ private:
     properties::BoolProperty _colormapEnabled;
     properties::FloatProperty _colormapMin;
     properties::FloatProperty _colormapMax;
-    properties::IntProperty _colormapNaNMode;
-    properties::Vec4Property _colormapNaNColor;
+    properties::IntProperty _colormapNanMode;
+    properties::Vec4Property _colormapNanColor;
 
     properties::BoolProperty _motionEnabled;
     properties::StringProperty _velocityDistanceUnit;
     properties::StringProperty _velocityTimeUnit;
-    properties::IntProperty _velocityNaNMode;
+    properties::IntProperty _velocityNanMode;
     
     
     std::optional<std::string> _identifier = std::nullopt;
+
+    bool _pointUnitIsDirty = false;
 
     bool _hasLoadedColormapAttributeData = false;
     bool _hasLoadedColormap = false;
@@ -130,10 +138,9 @@ private:
     using DataSlice = std::vector<float>;
     std::unordered_map<DataSliceKey, std::shared_ptr<DataSlice>> _dataSlices;
     std::shared_ptr<DataSlice> getDataSlice(DataSliceKey key);
-
     enum SizeOption {
         Uniform = 0,
-        NonUniform = 1
+        NonUniform
     };
 
     struct VBOLayout {

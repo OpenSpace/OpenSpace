@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <modules/softwareintegration/syncablefloatdatastorage.h>
+#include <modules/softwareintegration/syncablestorage.h>
 #include <openspace/documentation/documentation.h>
 #include <modules/softwareintegration/network/network.h>
 
@@ -44,27 +44,28 @@ public:
     ~SoftwareIntegrationModule();
 
     void storeData(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key,
-        const std::vector<float>& data
+        const SyncableStorage::Identifier& identifier,
+        const simp::DataKey key,
+        const std::vector<std::byte>& data
     );
-    const std::vector<float>& fetchData(
-        const SyncableFloatDataStorage::Identifier& identifier,
-        const storage::Key key
+    template <typename T>
+    bool fetchData(
+        const SyncableStorage::Identifier& identifier,
+        const storage::Key key,
+        T& resultingData
     );
     bool isDataDirty(
-        const SyncableFloatDataStorage::Identifier& identifier,
+        const SyncableStorage::Identifier& identifier,
         const storage::Key key
     );
     void setDataLoaded(
-        const SyncableFloatDataStorage::Identifier& identifier,
+        const SyncableStorage::Identifier& identifier,
         const storage::Key key
     );
     bool dataLoaded(
-        const SyncableFloatDataStorage::Identifier& identifier,
+        const SyncableStorage::Identifier& identifier,
         const storage::Key key
     );
-    std::string getStringOfAllKeysInStorage();
 
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -77,11 +78,13 @@ private:
     std::vector<Syncable*> getSyncables();
 
     // Centralized storage for datasets
-    SyncableFloatDataStorage _syncableFloatDataStorage;
+    SyncableStorage _syncableStorage;
 
     std::shared_ptr<softwareintegration::network::NetworkState> _networkState;
 };
 
 } // namespace openspace
+
+#include "softwareintegrationmodule.inl"
 
 #endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__

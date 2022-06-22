@@ -83,70 +83,189 @@ namespace simp {
 namespace {
 
 const std::unordered_map<std::string, MessageType> _messageTypeFromSIMPType {
-    {"CONN", MessageType::Connection},
-    {"PDAT", MessageType::PointData},
-    {"VDAT", MessageType::VelocityData},
-    {"RSGN", MessageType::RemoveSceneGraphNode},
-    {"FCOL", MessageType::Color},
-    {"LCOL", MessageType::Colormap},
-    {"ATDA", MessageType::AttributeData},
-    {"FOPA", MessageType::Opacity},
-    {"FPSI", MessageType::FixedSize},
-    {"LPSI", MessageType::LinearSize},
-    {"TOVI", MessageType::Visibility},
+    { "CONN", MessageType::Connection },
+    { "DATA", MessageType::Data },
+    { "RSGN", MessageType::RemoveSceneGraphNode },
 };
 
-const std::unordered_map<std::string, ColormapNaNRenderMode> _colormapNaNRenderModeFromString {
-    {"Hide", ColormapNaNRenderMode::Hide},
-    {"FixedColor", ColormapNaNRenderMode::FixedColor}
+const std::unordered_map<std::string, DataKey> _dataTypeFromString{
+    { "pos.x", DataKey::X },
+    { "pos.y", DataKey::Y },
+    { "pos.z", DataKey::Z },
+    { "pos.unit", DataKey::PointUnit },
+    { "vel.u", DataKey::U },
+    { "vel.v", DataKey::V },
+    { "vel.w", DataKey::W },
+    { "vel.unit.dist", DataKey::VelocityDistanceUnit },
+    { "vel.unit.time", DataKey::VelocityTimeUnit },
+    { "vel.nan.mode", DataKey::VelocityNanMode },
+    { "vel.enable", DataKey::VelocityEnabled },
+    { "col.r", DataKey::Red },
+    { "col.g", DataKey::Green },
+    { "col.b", DataKey::Blue },
+    { "col.a", DataKey::Alpha },
+    { "cmap.enable", DataKey::ColormapEnabled },
+    { "cmap.r", DataKey::ColormapReds },
+    { "cmap.g", DataKey::ColormapGreens },
+    { "cmap.b", DataKey::ColormapBlues },
+    { "cmap.a", DataKey::ColormapAlphas },
+    { "cmap.min", DataKey::ColormapMin },
+    { "cmap.max", DataKey::ColormapMax },
+    { "cmap.nan.r", DataKey::ColormapNanR },
+    { "cmap.nan.g", DataKey::ColormapNanG },
+    { "cmap.nan.b", DataKey::ColormapNanB },
+    { "cmap.nan.a", DataKey::ColormapNanA },
+    { "cmap.nan.mode", DataKey::ColormapNanMode },
+    { "cmap.attr", DataKey::ColormapAttributeData },
+    { "size.val", DataKey::FixedSize },
+    { "lsize.enabled", DataKey::LinearSizeEnabled },
+    { "lsize.min", DataKey::LinearSizeMin },
+    { "lsize.max", DataKey::LinearSizeMax },
+    { "lsize.attr", DataKey::LinearSizeAttributeData },
+    { "vis.val", DataKey::Visibility },
 };
 
-const std::unordered_map<std::string, VelocityNaNRenderMode> _velocityNaNRenderModeFromString {
-    {"Hide", VelocityNaNRenderMode::Hide},
-    {"Static", VelocityNaNRenderMode::Static}
+const std::unordered_map<std::string, ColormapNanRenderMode> _colormapNanRenderModeFromString {
+    { "Hide", ColormapNanRenderMode::Hide },
+    { "FixedColor", ColormapNanRenderMode::FixedColor },
 };
 
-glm::vec4 readSingleColor(const std::vector<char>& message, size_t& offset) {
-    if (message[offset] != '[') {
-        throw SimpError(
-            tools::ErrorCode::Generic,
-            fmt::format("Expected to read '[', got {} in 'readColor'", message[offset])
-        );
-    }
-    ++offset;
+const std::unordered_map<std::string, VelocityNanRenderMode> _velocityNanRenderModeFromString {
+    { "Hide", VelocityNanRenderMode::Hide },
+    { "Static", VelocityNanRenderMode::Static },
+};
 
-    float r = readFloatValue(message, offset);
-    float g = readFloatValue(message, offset);
-    float b = readFloatValue(message, offset);
-    float a = readFloatValue(message, offset);
+// glm::vec4 readSingleColor(const std::vector<std::byte>& message, size_t& offset) {
+//     if (message[offset] != '[') {
+//         throw SimpError(
+//             tools::ErrorCode::Generic,
+//             fmt::format("Expected to read '[', got {} in 'readColor'", message[offset])
+//         );
+//     }
+//     ++offset;
 
-    if (message[offset] != ']') {
-        throw SimpError(
-            tools::ErrorCode::Generic,
-            fmt::format("Expected to read ']', got {} in 'readColor'", message[offset])
-        );
-    }
-    ++offset;
+//     float r = readFloat32Value(message, offset);
+//     float g = readFloat32Value(message, offset);
+//     float b = readFloat32Value(message, offset);
+//     float a = readFloat32Value(message, offset);
 
-    return { r, g, b, a };
-}
+//     if (message[offset] != ']') {
+//         throw SimpError(
+//             tools::ErrorCode::Generic,
+//             fmt::format("Expected to read ']', got {} in 'readColor'", message[offset])
+//         );
+//     }
+//     ++offset;
 
-bool isEndOfCurrentValue(const std::vector<char>& message, size_t offset) {
+//     return { r, g, b, a };
+// }
+
+void checkOffset(const std::vector<std::byte>& message, size_t offset) {
     if (offset >= message.size()) {
         throw SimpError(
             tools::ErrorCode::OffsetLargerThanMessageSize,
-            "Unexpectedly reached the end of the message..."
+            "Offset is larger than length of message..."
+        );
+    }
+}
+
+void checkOffset(const std::vector<std::byte>& message, std::vector<size_t>& offsets) {
+    for (size_t offset : offsets) {
+        checkOffset(message, offset);
+    }
+}
+
+int32_t readInt32Value(const std::vector<std::byte>& message, size_t& offset) {
+    std::vector<size_t> offsetsToCheck{ offset, offset + 3 };
+    checkOffset(message, offsetsToCheck);
+    int32_t value;
+
+    try {
+        // Read 4 bytes
+        std::memcpy(&value, message.data() + offset, 4);
+    }
+    catch(std::exception &err) {
+        throw SimpError(
+            fmt::format("Error when trying to parse an integer at offset {}", err.what())
         );
     }
 
-    if (message.size() > 0 && offset == message.size() - 1 && message[offset] != SEP) {
+    offset += 4;
+    return networkToHostEndian(value);
+}
+
+bool readBoolValue(const std::vector<std::byte>& message, size_t& offset) {
+    checkOffset(message, offset);
+    bool value;
+
+    try {
+        // Read 1 byte
+        std::memcpy(&value, message.data() + offset, 1);
+    }
+    catch(std::exception &err) {
+        throw SimpError(
+            fmt::format("Error when trying to parse a bool at offset {}", err.what())
+        );
+    }
+
+    offset += 1;
+    return value;
+}
+
+/**
+ * Assumption: float is 4 bytes
+ * Maybe add a check in beginning?
+ */
+float readFloat32Value(const std::vector<std::byte>& message, size_t& offset) {
+    std::vector<size_t> offsetsToCheck{ offset, offset + 3 };
+    checkOffset(message, offsetsToCheck);
+    float value;
+
+    try {
+        // Read 4 bytes
+        std::memcpy(&value, message.data() + offset, 4);
+    }
+    catch(std::exception &err) {
+        throw SimpError(
+            fmt::format("Error when trying to parse a float at offset = {}", err.what())
+        );
+    }
+    offset += 4;
+    return networkToHostEndian(value);
+}
+
+size_t findEndOfString(const std::vector<std::byte>& message, size_t offset) {
+    checkOffset(message, offset);
+
+    auto delimIt = std::find(message.begin() + offset, message.end(), DELIM_BYTES);
+    auto delimOffset = std::distance(message.begin(), delimIt);
+    while (message[delimOffset - 1] == std::byte{ '\\' }) {
+        delimIt = std::find(message.begin() + delimOffset + 1, message.end(), DELIM_BYTES);
+        delimOffset = std::distance(message.begin(), delimIt);
+    }
+
+    if (delimIt == message.end()) {
         throw SimpError(
             tools::ErrorCode::ReachedEndBeforeSeparator,
-            "Reached end of message before reading separator character..."
+            "Message reached end before delimiter character"
         );
     }
 
-    return offset != 0 && message[offset] == SEP && message[offset - 1] != '\\';
+    checkOffset(message, delimOffset); // Sanity check
+
+    return delimOffset;
+}
+
+std::string readString(const std::vector<std::byte>& message, size_t& offset) {
+    checkOffset(message, offset);
+
+    size_t offsetAtEndOfString = findEndOfString(message, offset);
+
+    std::vector<std::byte> stringByteBuffer{ message.begin() + offset, message.begin() + offsetAtEndOfString };
+    std::string value{ reinterpret_cast<const char *>(stringByteBuffer.data()), stringByteBuffer.size() };
+
+    offset = offsetAtEndOfString + 1; // +1 because we need to skip delimiter char in next value read
+    return value;
 }
 
 }  // namespace
@@ -164,7 +283,7 @@ MessageType getMessageType(const std::string& type) {
     return _messageTypeFromSIMPType.at(type);
 }
 
-std::string getSIMPType(const MessageType& type) {
+std::string getStringFromMessageType(const MessageType& type) {
     auto it = std::find_if(
         _messageTypeFromSIMPType.begin(),
         _messageTypeFromSIMPType.end(),
@@ -176,14 +295,37 @@ std::string getSIMPType(const MessageType& type) {
     return it->first;
 }
 
-ColormapNaNRenderMode getColormapNaNRenderMode(const std::string& type) {
-    if (_colormapNaNRenderModeFromString.count(type) == 0) return ColormapNaNRenderMode::Unknown;
-    return _colormapNaNRenderModeFromString.at(type);
+bool hasDataKey(const std::string& key) {
+    return _dataTypeFromString.count(key) > 0;
 }
 
-VelocityNaNRenderMode getVelocityNaNRenderMode(const std::string& type) {
-    if (_velocityNaNRenderModeFromString.count(type) == 0) return VelocityNaNRenderMode::Unknown;
-    return _velocityNaNRenderModeFromString.at(type);
+DataKey getDataKey(const std::string& key) {
+    if (hasDataKey(key)) {
+        return _dataTypeFromString.at(key);
+    }
+    return DataKey::Unknown;
+}
+
+std::string getStringFromDataKey(const DataKey& key) {
+    auto it = std::find_if(
+        _dataTypeFromString.begin(),
+        _dataTypeFromString.end(),
+        [key](const std::pair<const std::string, DataKey>& p) {
+            return key == p.second;
+        }
+    );
+    if (it == _dataTypeFromString.end()) return "";
+    return it->first;
+}
+
+ColormapNanRenderMode getColormapNanRenderMode(const std::string& type) {
+    if (_colormapNanRenderModeFromString.count(type) == 0) return ColormapNanRenderMode::Unknown;
+    return _colormapNanRenderModeFromString.at(type);
+}
+
+VelocityNanRenderMode getVelocityNanRenderMode(const std::string& type) {
+    if (_velocityNanRenderModeFromString.count(type) == 0) return VelocityNanRenderMode::Unknown;
+    return _velocityNanRenderModeFromString.at(type);
 }
 
 std::string formatLengthOfSubject(size_t lengthOfSubject) {
@@ -193,180 +335,95 @@ std::string formatLengthOfSubject(size_t lengthOfSubject) {
     return os.str();
 }
 
-std::string formatUpdateMessage(MessageType messageType,
-                                std::string_view identifier,
-                                std::string_view value)
-{
-    std::string subject = fmt::format(
-        "{}{}{}{}", identifier, SEP, value, SEP
-    );
-
-    const std::string lengthOfSubject = formatLengthOfSubject(subject.length());
-
-    return fmt::format("{}{}{}{}", ProtocolVersion, getSIMPType(messageType), lengthOfSubject, subject);
-}
-
-std::string formatConnectionMessage(std::string_view software) {
-    std::string subject = fmt::format(
-        "{}{}", software, SEP
-    );
-
-    const std::string lengthOfSubject = formatLengthOfSubject(subject.length());
-
-    return fmt::format("{}{}{}{}", ProtocolVersion, getSIMPType(MessageType::Connection), lengthOfSubject, subject);
-}
-
-std::string formatColorMessage(std::string_view identifier, glm::vec4 color) {
-    std::ostringstream value_stream;
-    value_stream << "[" << floatToHex(color.r) << SEP << floatToHex(color.g) << SEP
-                << floatToHex(color.b) << SEP << floatToHex(color.a) << SEP << "]";
-
-    return formatUpdateMessage(MessageType::Color, identifier, value_stream.str());
-}
-
-std::string formatPointDataCallbackMessage(std::string_view identifier) {
-    std::string subject = fmt::format(
-        "{}{}", identifier, SEP
-    );
-
-    const std::string lengthOfSubject = formatLengthOfSubject(subject.length());
-
-    return fmt::format("{}{}{}{}", ProtocolVersion, getSIMPType(MessageType::PointData), lengthOfSubject, subject);
-}
-
-std::string floatToHex(const float f) {
-    const uint32_t *int_representation = reinterpret_cast<const uint32_t *>(&f);
-    std::ostringstream stream;
-    stream << "0x" << std::setfill ('0') << std::setw(sizeof(float)*2) << std::hex << *int_representation;
-
-    return stream.str();
-}
-
-float hexToFloat(const std::string& f) {
-    uint32_t int_value = static_cast<uint32_t>(std::stoul(f, nullptr, 16));
-    std::ostringstream stream;
-    stream << std::dec << int_value;
-    return *reinterpret_cast<float*>(&int_value);
-}
-
-int readIntValue(const std::vector<char>& message, size_t& offset) {
-    std::string string_value;
-    int value;
-    bool isHex = false;
-
-    while (!isEndOfCurrentValue(message, offset)) {
-        char c = message[offset];
-        if (c == 'x' || c == 'X') isHex = true;
-        string_value.push_back(c);
-        offset++;
-    }
-
-    try {
-        value = std::stoi(string_value, nullptr, isHex ? 16 : 10);
-    }
-    catch(std::exception &err) {
-        throw SimpError(
-            tools::ErrorCode::Generic,
-            fmt::format("Error when trying to parse the integer {}: {}", string_value, err.what())
-        );
-    }
-
-    ++offset;
-    return value;
-}
-
-float readFloatValue(const std::vector<char>& message, size_t& offset) {
-    std::string string_value;
-    float value;
-
-    while (!isEndOfCurrentValue(message, offset)) {
-        string_value.push_back(message[offset]);
-        offset++;
-    }
-
-    try {
-        value = hexToFloat(string_value);
-    }
-    catch(std::exception &err) {
-        throw SimpError(
-            tools::ErrorCode::Generic,
-            fmt::format("Error when trying to parse the float {}: {}", string_value, err.what())
-        );
-    }
-
-    ++offset;
-    return value;
-}
-
-void readColormap(
-    const std::vector<char>& message, size_t& offset, size_t nColors, std::vector<float>& colorMap
-) {
-    colorMap.reserve(nColors * 4);
-    while (message[offset] != SEP) {
-        glm::vec4 color = readSingleColor(message, offset);
-        
-        // Colormap should be stored in a sequential vector 
-        // of floats for syncing between nodes and when 
-        // loaded to as a texture in the shader.
-        colorMap.push_back(color[0]);
-        colorMap.push_back(color[1]);
-        colorMap.push_back(color[2]);
-        colorMap.push_back(color[3]);
-    }
-    
-    offset++;
-}
-
-glm::vec4 readColor(const std::vector<char>& message, size_t& offset) {
-    glm::vec4 color = readSingleColor(message, offset);
-    ++offset;
-    return color;
-}
-
-std::string readString(const std::vector<char>& message, size_t& offset) {
-    std::string value;
-    while (!isEndOfCurrentValue(message, offset)) {
-        value.push_back(message[offset]);
-        ++offset;
-    }
-
-    ++offset;
-    return value;
-}
-
-void readPointData(
-    const std::vector<char>& message,
+bool readColorChannel(
+    const std::vector<std::byte>& message,
     size_t& offset,
-    size_t nPoints,
-    size_t dimensionality,
-    std::vector<float>& pointData
+    const DataKey& dataKey,
+    glm::vec4& color,
+    const glm::vec4::length_type& channel
 ) {
-    pointData.reserve(nPoints * dimensionality);
-
-    while (!isEndOfCurrentValue(message, offset)) {
-        if (message[offset] != '[') {
-            throw SimpError(
-                tools::ErrorCode::Generic,
-                fmt::format("Expected to read '[', got {} in 'readPointData'", message[offset])
-            );
-        }
-        ++offset;
-
-        for (int i = 0; i < dimensionality; ++i) {
-            pointData.push_back(readFloatValue(message, offset));
-        }
-
-        if (message[offset] != ']') {
-            throw SimpError(
-                tools::ErrorCode::Generic,
-                fmt::format("Expected to read ']', got {} in 'readPointData'", message[offset])
-            );
-        }
-        ++offset;
+    float newChannelValue;
+    try {
+        simp::readValue(message, offset, newChannelValue);
     }
+    catch (const simp::SimpError& err) {
+        LERROR(fmt::format(
+            "Error when parsing float in {} message: {}",
+            simp::getStringFromDataKey(dataKey), err.message
+        ));
+        return false;
+    }
+    color[channel] = newChannelValue;
 
-    ++offset;
+    return true;
 }
+
+void readValue(const std::vector<std::byte>& message, size_t& offset, float& value) {
+    value = readFloat32Value(message, offset);
+}
+
+void readValue(const std::vector<std::byte>& message, size_t& offset, int32_t& value) {
+    value = readInt32Value(message, offset);
+}
+
+void readValue(const std::vector<std::byte>& message, size_t& offset, std::string& value) {
+    value = readString(message, offset);
+}
+
+void readValue(const std::vector<std::byte>& message, size_t& offset, bool& value) {
+    // Bool is only one byte in SIMP => no need to convert endianness
+    value = readBoolValue(message, offset);
+}
+
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, float value) {
+    byteBuffer.resize(byteBuffer.size() +  4);
+    auto valueInNetworkByteorder = hostToNetworkEndian(value);
+    std::memcpy(byteBuffer.data() + offset, &valueInNetworkByteorder, 4);
+}
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, float value) {
+    toByteBuffer(byteBuffer, static_cast<const size_t&>(offset), value);
+    offset += 4;
+}
+
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, int32_t value) {
+    byteBuffer.resize(byteBuffer.size() +  4);
+    auto valueInNetworkByteorder = hostToNetworkEndian(value);
+    std::memcpy(byteBuffer.data() + offset, &valueInNetworkByteorder, 4);
+}
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, int32_t value) {
+    toByteBuffer(byteBuffer, static_cast<const size_t&>(offset), value);
+    offset += 4;
+}
+
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, bool value) {
+    byteBuffer.resize(byteBuffer.size() +  1);
+    // Bool is only one byte in SIMP => no need to convert endianness (byteorder)
+    std::memcpy(byteBuffer.data() + offset, &value, 1);
+}
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, bool value) {
+    toByteBuffer(byteBuffer, static_cast<const size_t&>(offset), value);
+    offset += 1;
+}
+
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, const std::string& value) {
+    byteBuffer.resize(byteBuffer.size() + (value.size() * sizeof(char)));
+    // Don't want to convert byteorder of strings, since we want to 
+    std::memcpy(byteBuffer.data() + offset, value.data(), value.size() * sizeof(char));
+}
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, const std::string& value) {
+    toByteBuffer(byteBuffer, static_cast<const size_t&>(offset), value);
+    offset += value.size() * sizeof(char);
+}
+
+void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, const std::vector<std::byte>& value) {
+    byteBuffer.resize(byteBuffer.size() + value.size());
+    std::memcpy(byteBuffer.data() + offset, value.data(), value.size());
+}
+void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, const std::vector<std::byte>& value) {
+    toByteBuffer(byteBuffer, static_cast<const size_t&>(offset), value);
+    offset += value.size();
+}
+
 
 } // namespace simp
 

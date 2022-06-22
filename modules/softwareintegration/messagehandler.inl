@@ -22,37 +22,75 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+namespace openspace::softwareintegration::messagehandler {
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+namespace {
 
-layout(location = 0) in vec3 in_position;
-in vec3 in_velocity;
-in float in_colormapAttributeScalar;
-in float in_linearSizeAttributeScalar;
-
-out vec3 vs_velocity;
-
-out float vs_colormapAttributeScalar;
-flat out float vs_linearSizeAttributeScalar;
-
-uniform bool motionEnabled;
-uniform float time;
-
-void main() {
-    vs_colormapAttributeScalar = in_colormapAttributeScalar;
-    vs_linearSizeAttributeScalar = in_linearSizeAttributeScalar;
-
-    vec4 objectPosition = vec4(in_position, 1.0);
-
-    // Add velocity if applicable
-    // Velocity (UVW) is already in m/s
-    vs_velocity = in_velocity;
-    bool velocityIsNan = (isnan(in_velocity[0]) || isnan(in_velocity[1]) || isnan(in_velocity[2]));
-    if (motionEnabled && !velocityIsNan) {
-        // TODO: Need to subtract with t = 0 (when the position was measured)
-        objectPosition.xyz += time * in_velocity; 
+template<typename T>
+bool handleEnumValue(
+    const std::vector<std::byte>& message,
+    size_t& offset,
+    const std::string& identifier,
+    const simp::DataKey& dataKey,
+    const std::string& propertyName
+) {
+    int32_t newValue;
+    try {
+        simp::readValue(message, offset, newValue);
+    }
+    catch (const simp::SimpError& err) {
+        LERROR(fmt::format(
+            "Error when parsing int32_t in DATA.{} message: {}",
+            simp::getStringFromDataKey(dataKey), err.message
+        ));
+        return false;
     }
 
-    gl_Position = objectPosition;
+    try {
+        static_cast<T>(newValue);
+    }
+    catch (const std::exception& err) {
+        LERROR(fmt::format(
+            "Error when casting {} to {} in DATA.{} message: {}",
+            newValue, typeid(T).name(), simp::getStringFromDataKey(dataKey), err.what()
+        ));
+        return false;
+    }
+
+    auto setEnumCallback = [identifier, propertyName, newValue] {
+        // Get renderable
+        auto r = getRenderable(identifier);
+        if (!r) return;
+
+        // Get property
+        auto property = r->property(propertyName);
+        if (!property) return;
+
+        // Update bool property of renderable
+        auto currentValue = std::any_cast<int>(property->get());
+        if (newValue != currentValue) {
+            global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', {});",
+                    identifier, propertyName, ghoul::to_string(newValue)
+                ),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+    };
+    addCallback(
+        identifier,
+        {
+            setEnumCallback,
+            {},
+            fmt::format("Callback on property {}", propertyName), 
+        }
+    );
+
+    return true;
 }
+
+} // namespace
+
+
+} // openspace::softwareintegration::messagehandler

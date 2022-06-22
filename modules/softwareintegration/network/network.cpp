@@ -51,7 +51,7 @@ void eventLoop(std::weak_ptr<NetworkState> networkStateWeakPtr) {
 		// on this thread until interrupt is called
 		try {
 			auto pm = networkState->incomingMessages.pop();
-			handleMessage(pm);
+			messagehandler::handleMessage(pm);
 		}
 		catch (const ghoul::RuntimeError&) {
 			break;

@@ -111,17 +111,16 @@ void main() {
 
     if (linearSizeEnabled) {
         float interpolatedSizeAtt = 1.0;
-        // TODO: "colormapAttributeScalar" should be "linearSizeAttributeScalar"???
-        float colormapAttributeScalar = vs_linearSizeAttributeScalar[0];
-        if (colormapAttributeScalar < linearSizeMin) {
+        float linearSizeAttributeScalar = vs_linearSizeAttributeScalar[0];
+        if (linearSizeAttributeScalar < linearSizeMin) {
             interpolatedSizeAtt = 0.0;
         }
-        else if (colormapAttributeScalar > linearSizeMax) {
+        else if (linearSizeAttributeScalar > linearSizeMax) {
             interpolatedSizeAtt = 1.0;
         }
         else {
             // Linear interpolation
-            interpolatedSizeAtt = (colormapAttributeScalar - linearSizeMin) / (linearSizeMax - linearSizeMin);
+            interpolatedSizeAtt = (linearSizeAttributeScalar - linearSizeMin) / (linearSizeMax - linearSizeMin);
         }
         interpolatedSizeAtt = mix(1.0, 5.0, interpolatedSizeAtt);
 
