@@ -57,7 +57,7 @@ namespace documentation { struct Documentation; }
 class RenderablePlanesCloud : public Renderable {
 public:
     explicit RenderablePlanesCloud(const ghoul::Dictionary& dictionary);
-    ~RenderablePlanesCloud() = default;
+    ~RenderablePlanesCloud() override = default;
 
     void initialize() override;
     void initializeGL() override;

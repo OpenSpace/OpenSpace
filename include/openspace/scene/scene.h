@@ -82,7 +82,7 @@ public:
 
     // constructors & destructor
     Scene(std::unique_ptr<SceneInitializer> initializer);
-    ~Scene();
+    virtual ~Scene() override;
 
     /**
      * Clear the scene graph,

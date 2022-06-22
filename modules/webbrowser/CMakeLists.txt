@@ -286,7 +286,7 @@ list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()
 add_external_library_dependencies("${deps}")
 
-if (UNIX)
+if (UNIX AND NOT (${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
   # Linux needs to have copies of CEF files in Resources/ in its build-type dir to avoid
   # the 'Couldn't mmap icu data file' runtime error
   file(COPY ${CEF_ROOT}/Resources/

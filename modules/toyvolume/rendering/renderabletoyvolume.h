@@ -39,7 +39,7 @@ struct RenderData;
 class RenderableToyVolume : public Renderable {
 public:
     RenderableToyVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableToyVolume();
+    ~RenderableToyVolume() override;
 
     void initializeGL() override;
     void deinitializeGL() override;

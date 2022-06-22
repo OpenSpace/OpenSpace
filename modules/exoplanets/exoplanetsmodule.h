@@ -39,7 +39,7 @@ public:
     constexpr static const char* Name = "Exoplanets";
 
     ExoplanetsModule();
-    virtual ~ExoplanetsModule() = default;
+    ~ExoplanetsModule() override = default;
 
     bool hasDataFiles() const;
     std::string exoplanetsDataPath() const;

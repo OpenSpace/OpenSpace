@@ -59,7 +59,7 @@ class AtmosphereDeferredcaster : public Deferredcaster {
 public:
     AtmosphereDeferredcaster(float textureScale,
         std::vector<ShadowConfiguration> shadowConfigArray, bool saveCalculatedTextures);
-    virtual ~AtmosphereDeferredcaster() = default;
+    ~AtmosphereDeferredcaster() override = default;
 
     void initialize();
     void deinitialize();

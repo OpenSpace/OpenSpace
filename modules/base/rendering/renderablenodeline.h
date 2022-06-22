@@ -46,7 +46,7 @@ class Translation;
 class RenderableNodeLine : public Renderable {
 public:
     RenderableNodeLine(const ghoul::Dictionary& dictionary);
-    ~RenderableNodeLine() = default;
+    ~RenderableNodeLine() override = default;
 
     static documentation::Documentation Documentation();
 

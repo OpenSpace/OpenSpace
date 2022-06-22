@@ -38,7 +38,7 @@ namespace documentation { struct Documentation; }
 class DashboardItemPropertyValue : public DashboardTextItem {
 public:
     DashboardItemPropertyValue(const ghoul::Dictionary& dictionary);
-    ~DashboardItemPropertyValue() = default;
+    ~DashboardItemPropertyValue() override = default;
 
     void render(glm::vec2& penPosition) override;
 

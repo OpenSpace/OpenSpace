@@ -91,7 +91,7 @@ struct Appearance : properties::PropertyOwner {
         properties::OptionProperty renderingModes;
     };
 
-    ~RenderableTrail() = default;
+    virtual ~RenderableTrail() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;

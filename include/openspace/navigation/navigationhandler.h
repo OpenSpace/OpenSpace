@@ -61,7 +61,7 @@ class PathNavigator;
 class NavigationHandler : public properties::PropertyOwner {
 public:
     NavigationHandler();
-    ~NavigationHandler();
+    virtual ~NavigationHandler() override;
 
     void initialize();
     void deinitialize();

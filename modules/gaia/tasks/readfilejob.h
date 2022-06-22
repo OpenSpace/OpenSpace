@@ -48,7 +48,7 @@ struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
         int lastRow, size_t nDefaultCols, int nValuesPerStar,
         std::shared_ptr<FitsFileReader> fitsReader);
 
-    ~ReadFileJob() = default;
+    ~ReadFileJob() override = default;
 
     void execute() override;
 

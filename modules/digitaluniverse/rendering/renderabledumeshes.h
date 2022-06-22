@@ -53,7 +53,7 @@ namespace documentation { struct Documentation; }
 class RenderableDUMeshes : public Renderable {
 public:
     explicit RenderableDUMeshes(const ghoul::Dictionary& dictionary);
-    ~RenderableDUMeshes() = default;
+    ~RenderableDUMeshes() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
