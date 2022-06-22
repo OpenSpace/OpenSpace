@@ -45,6 +45,6 @@ Fragment getFragment() {
   }
 
   frag.depth = vs_depth;
-  frag.color.rgb = pow(frag.color.rgb, vec3(1.0/(gamma + 0.000001)));
+  frag.color.rgb = pow(frag.color.rgb, vec3(1.0/(gamma)));
   return frag;
 }

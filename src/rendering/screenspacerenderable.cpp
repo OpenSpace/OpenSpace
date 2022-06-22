@@ -295,7 +295,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
-    , _gamma(GammaInfo, 1.f, 0.f, 10.f)
+    , _gamma(GammaInfo, 1.f, 0.000001f, 10.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
