@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/logging/logmanager.h>
+
 namespace openspace {
 
 template<typename T>
@@ -30,10 +32,10 @@ bool SyncableStorage::fetch(
     const storage::Key storageKey,
     T& resultingData
 ) {
-    LDEBUG(fmt::format("Loading data from float data storage: {}-{}", identifier, storage::getStorageKeyString(storageKey)));
+    LDEBUGC("SyncableStorage", fmt::format("Loading data from float data storage: {}-{}", identifier, storage::getStorageKeyString(storageKey)));
     std::lock_guard guard(_mutex);
     if (!count(identifier)) {
-        LERROR(fmt::format(
+        LERRORC("SyncableStorage", fmt::format(
             "Could not find any data for SceneGraphNode '{}' in the centralized data storage",
             identifier
         ));
@@ -47,7 +49,7 @@ bool SyncableStorage::fetch(
         case storage::Key::LinearSizeAttrData:
         case storage::Key::VelocityData: {
             if (!std::is_same<T, std::vector<float>>::value) {
-                LERROR(fmt::format(
+                LERRORC("SyncableStorage", fmt::format(
                     "Can't put {} into a {}.",
                     storage::getStorageKeyString(storageKey), typeid(T).name()
                 ));
@@ -57,7 +59,7 @@ bool SyncableStorage::fetch(
             return fetchDimFloatData(identifier, simpDataKeysFromStorageKey(storageKey), resultingData);
         }
         default: {
-            LERROR(fmt::format(
+            LERRORC("SyncableStorage", fmt::format(
                 "Could not find data in storage for the key {}",
                 storage::getStorageKeyString(storageKey)
             ));

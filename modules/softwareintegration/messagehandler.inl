@@ -22,6 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/engine/globals.h>
+#include <ghoul/logging/logmanager.h>
+
 namespace openspace::softwareintegration::messagehandler {
 
 namespace {
@@ -39,7 +45,7 @@ bool handleEnumValue(
         simp::readValue(message, offset, newValue);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format(
+        LERRORC("MessageHandler", fmt::format(
             "Error when parsing int32_t in DATA.{} message: {}",
             simp::getStringFromDataKey(dataKey), err.message
         ));
@@ -50,7 +56,7 @@ bool handleEnumValue(
         static_cast<T>(newValue);
     }
     catch (const std::exception& err) {
-        LERROR(fmt::format(
+        LERRORC("MessageHandler", fmt::format(
             "Error when casting {} to {} in DATA.{} message: {}",
             newValue, typeid(T).name(), simp::getStringFromDataKey(dataKey), err.what()
         ));
@@ -59,7 +65,7 @@ bool handleEnumValue(
 
     auto setEnumCallback = [identifier, propertyName, newValue] {
         // Get renderable
-        auto r = getRenderable(identifier);
+        auto r = renderable(identifier);
         if (!r) return;
 
         // Get property

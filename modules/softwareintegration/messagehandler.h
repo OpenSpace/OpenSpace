@@ -54,6 +54,8 @@ bool handleEnumValue(
     const std::string& propertyName
 );
 
+void addCallback(const std::string& identifier, const Callback& newCallback);
+
 } // namespace openspace::softwareintegration::messagehandler
 
 #include "messagehandler.inl"

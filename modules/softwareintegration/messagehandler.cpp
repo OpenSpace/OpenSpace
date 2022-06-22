@@ -27,13 +27,9 @@
 #include <modules/softwareintegration/utils.h>
 
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
@@ -54,25 +50,6 @@ namespace {
 CallbackMap callbacks{};
 std::mutex callbacksMutex{};
 size_t callbacksRetries{0};
-
-const Renderable* getRenderable(const std::string& identifier) {
-    return renderable(identifier);
-}
-
-void addCallback(
-    const std::string& identifier,
-    const Callback& newCallback
-) {
-    std::lock_guard guard(callbacksMutex);
-    auto it = callbacks.find(identifier);
-    if (it == callbacks.end()) {
-        CallbackList newCallbackList{ newCallback };
-        callbacks.emplace(identifier, newCallbackList);
-    }
-    else {
-        it->second.push_back(newCallback);
-    }
-}
 
 void checkRenderable(
     const std::vector<std::byte>& message, size_t& messageOffset,
@@ -236,7 +213,7 @@ void checkAddOnChangeCallback(
     // Create and set onChange for property
     auto onChangeCallback = [identifier, connWeakPtr, propertyName, onChange] {
         // Get renderable
-        auto r = getRenderable(identifier);
+        auto r = renderable(identifier);
         if (!r) return;
 
         // Get property
@@ -248,7 +225,7 @@ void checkAddOnChangeCallback(
             auto connection = connWeakPtr.lock();
 
             // Get renderable
-            auto r = getRenderable(identifier);
+            auto r = renderable(identifier);
             if (!r) return;
 
             // Get property
@@ -310,7 +287,7 @@ bool handleSingleFloatValue(
 
     auto setValueCallback = [identifier, newValue, propertyName] {
         // Get renderable
-        auto r = getRenderable(identifier);
+        auto r = renderable(identifier);
         if (!r) return;
 
         // Get property of renderable
@@ -360,7 +337,7 @@ bool handleColorValue(
 ) {
     auto setColorCallback = [identifier, _newColor, propertyName] {
         // Get renderable
-        auto r = getRenderable(identifier);
+        auto r = renderable(identifier);
         if (!r) return;
 
         // Get color of renderable
@@ -434,7 +411,7 @@ bool handleBoolValue(
 
     auto setEnabledCallback = [identifier, propertyName, newValue] {
         // Get renderable
-        auto r = getRenderable(identifier);
+        auto r = renderable(identifier);
         if (!r) return;
 
         // Get property
@@ -503,7 +480,7 @@ bool handleStringValue(
 
     auto setStringCallback = [identifier, propertyName, newStringValue] {
         // Get renderable
-        auto r = getRenderable(identifier);
+        auto r = renderable(identifier);
         if (!r) return;
 
         // Get property
@@ -788,6 +765,18 @@ void handleRemoveSGNMessage(const std::vector<std::byte>& message, std::shared_p
 
 } // namespace
 
+void addCallback(const std::string& identifier, const Callback& newCallback) {
+    std::lock_guard guard(callbacksMutex);
+    auto it = callbacks.find(identifier);
+    if (it == callbacks.end()) {
+        CallbackList newCallbackList{ newCallback };
+        callbacks.emplace(identifier, newCallbackList);
+    }
+    else {
+        it->second.push_back(newCallback);
+    }
+}
+
 void handleMessage(IncomingMessage& incomingMessage) {
 	if(incomingMessage.connection.expired()) {
 		LDEBUG(fmt::format("Trying to handle message from disconnected peer. Aborting."));
@@ -862,7 +851,7 @@ void postSyncCallbacks() {
             const SceneGraphNode* sgn = global::renderEngine->scene()->sceneGraphNode(identifier);
             if (!sgn) throw std::exception{};
 
-            auto r = getRenderable(identifier);
+            auto r = renderable(identifier);
             if (!r) throw std::exception{};
 
             auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
