@@ -61,7 +61,7 @@ namespace {
  * Returns the paths to all loaded assets, loaded directly or indirectly, as a table
  * containing the paths to all loaded assets.
  */
-[[codegen::luawrap]] std::vector<std::string> allAssets(std::string assetName) {
+[[codegen::luawrap]] std::vector<std::string> allAssets() {
     using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
     std::vector<std::string> res;

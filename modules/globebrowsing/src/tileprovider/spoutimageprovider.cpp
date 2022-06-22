@@ -49,7 +49,9 @@ documentation::Documentation SpoutImageProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_spoutimageprovider");
 }
 
-SpoutImageProvider::SpoutImageProvider(const ghoul::Dictionary& dictionary) {
+SpoutImageProvider::SpoutImageProvider(
+                                     [[maybe_unused]] const ghoul::Dictionary& dictionary)
+{
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_SPOUT
@@ -197,7 +199,7 @@ void SpoutImageProvider::update() {
             return;
         }
     }
-    
+
     spoutReceiver->updateReceiver();
 #endif // OPENSPACE_HAS_SPOUT
 }

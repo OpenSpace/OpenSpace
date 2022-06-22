@@ -181,7 +181,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
-    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:

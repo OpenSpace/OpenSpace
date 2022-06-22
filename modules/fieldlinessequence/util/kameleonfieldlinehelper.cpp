@@ -89,7 +89,7 @@ namespace openspace::fls {
  *        vector at each line vertex
  */
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-                                 const std::unordered_map<std::string, 
+                                 const std::unordered_map<std::string,
                                  std::vector<glm::vec3>>& seedMap,
                                  double manualTimeOffset,
                                  const std::string& tracingVar,
@@ -310,7 +310,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
-            (model == fls::Model::Batsrus && 
+            (model == fls::Model::Batsrus &&
                 (str == TAsPOverRho || str == "T" || str == "t"))
             )
         {

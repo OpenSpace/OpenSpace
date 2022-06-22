@@ -40,6 +40,7 @@
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
+#include <glm/ext/quaternion_relational.hpp>
 
 namespace {
     constexpr const char _loggerCat[] = "Path";
@@ -131,7 +132,6 @@ Path::Path(Waypoint start, Waypoint end, Type type,
 
         // We now know how long it took to traverse the path. Use that
         _speedFactorFromDuration = _progressedTime / *duration;
-
         resetPlaybackVariables();
     }
 }
@@ -161,23 +161,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     if (_type == Type::Linear) {
         // Special handling of linear paths, so that it can be used when we are
         // traversing very large distances without introducing precision problems
-        const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
-        const double remainingDistance = glm::length(prevPosToEnd);
-
-        // Actual displacement may not be bigger than remaining distance
-        if (displacement > remainingDistance) {
-            displacement = remainingDistance;
-            _traveledDistance = pathLength();
-            _shouldQuit = true;
-            return _end.pose();
-        }
-
-        // Just move along the line from the current position to the target
-        newPose.position = _prevPose.position -
-            displacement * glm::normalize(prevPosToEnd);
-
-        const double relativeDistance = _traveledDistance / pathLength();
-        newPose.rotation = interpolateRotation(relativeDistance);
+        newPose = linearInterpolatedPose(_traveledDistance, displacement);
     }
     else {
         if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
@@ -204,7 +188,16 @@ bool Path::hasReachedEnd() const {
         return true;
     }
 
-    return (_traveledDistance / pathLength()) >= 1.0;
+    bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
+
+    constexpr const double RotationEpsilon = 0.0001;
+    bool isRotationFinished = ghoul::isSameOrientation(
+        _prevPose.rotation,
+        _end.rotation(),
+        RotationEpsilon
+    );
+
+    return isPositionFinished && isRotationFinished;
 }
 
 void Path::resetPlaybackVariables() {
@@ -212,6 +205,28 @@ void Path::resetPlaybackVariables() {
     _traveledDistance = 0.0;
     _progressedTime = 0.0;
     _shouldQuit = false;
+}
+
+CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
+    ghoul_assert(_type == Type::Linear, "Path type must be linear");
+    const double relativeDistance = distance / pathLength();
+    const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
+    const double remainingDistance = glm::length(prevPosToEnd);
+    CameraPose pose;
+
+    // Actual displacement may not be bigger than remaining distance
+    if (displacement > remainingDistance) {
+        _traveledDistance = pathLength();
+        pose.position = _end.position();
+    }
+    else {
+        // Just move along line from the current position to the target
+        const glm::dvec3 lineDir = glm::normalize(prevPosToEnd);
+        pose.position = _prevPose.position - displacement * lineDir;
+    }
+
+    pose.rotation = linearPathRotation(relativeDistance);
+    return pose;
 }
 
 CameraPose Path::interpolatedPose(double distance) const {
@@ -227,6 +242,8 @@ glm::dquat Path::interpolateRotation(double t) const {
         case Type::AvoidCollision:
             return easedSlerpRotation(t);
         case Type::Linear:
+            // @TODO (2022-03-29, emmbr) Fix so that rendering the rotation of linear
+            // paths works again. I.e. openspace.debugging.renderCameraPath
             return linearPathRotation(t);
         case Type::ZoomOutOverview:
         case Type::AvoidCollisionWithLookAt:
@@ -243,45 +260,59 @@ glm::dquat Path::easedSlerpRotation(double t) const {
 }
 
 glm::dquat Path::linearPathRotation(double t) const {
-    const double tHalf = 0.5;
+    const glm::dvec3 a = ghoul::viewDirection(_start.rotation());
+    const glm::dvec3 b = ghoul::viewDirection(_end.rotation());
+    const double angle = std::acos(glm::dot(a, b)); // assumes length 1.0 for a & b
 
-    const glm::dvec3 endNodePos = _end.node()->worldPosition();
-    const glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+    // Seconds per pi angles. Per default, it takes 5 seconds to turn 90 degrees
+    double factor = 5.0 / glm::half_pi<double>();
+    factor *= global::navigationHandler->pathNavigator().linearRotationSpeedFactor();
 
-    if (t < tHalf) {
-        // Interpolate to look at target
-        const glm::dvec3 halfWayPosition = _curve->positionAt(tHalf);
-        const glm::dquat q = ghoul::lookAtQuaternion(halfWayPosition, endNodePos, endUp);
+    double turnDuration = std::max(angle * factor, 1.0); // Always at least 1 second
+    const double time = glm::clamp(_progressedTime / turnDuration, 0.0, 1.0);
+    return easedSlerpRotation(time);
 
-        const double tScaled = ghoul::sineEaseInOut(t / tHalf);
-        return glm::slerp(_start.rotation(), q, tScaled);
-    }
+    // @TODO (2022-03-18, emmbr) Leaving this for now, as something similar might have to
+    // be implemented for navigation states. But should be removed/reimplemented
 
-    // This distance is guaranteed to be strictly decreasing for linear paths
-    const double distanceToEnd = glm::distance(_prevPose.position, _end.position());
+    //const glm::dvec3 endNodePos = _end.node()->worldPosition();
+    //const glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
 
-    // Determine the distance at which to start interpolating to the target rotation.
-    // The magic numbers here are just randomly picked constants, set to make the
-    // resulting rotation look ok-ish
-    double closingUpDistance = 10.0 * _end.validBoundingSphere();
-    if (pathLength() < 2.0 * closingUpDistance) {
-        closingUpDistance = 0.2 * pathLength();
-    }
+    //const double tHalf = 0.5;
+    //if (t < tHalf) {
+    //    // Interpolate to look at target
+    //    const glm::dvec3 halfWayPosition = _curve->positionAt(tHalf);
+    //    const glm::dquat q = ghoul::lookAtQuaternion(halfWayPosition, endNodePos, endUp);
 
-    if (distanceToEnd < closingUpDistance) {
-        // Interpolate to target rotation
-        const double tScaled = ghoul::sineEaseInOut(1.0 - distanceToEnd / closingUpDistance);
+    //    const double tScaled = ghoul::sineEaseInOut(t / tHalf);
+    //    return glm::slerp(_start.rotation(), q, tScaled);
+    //}
 
-        // Compute a position in front of the camera at the end orientation
-        const double inFrontDistance = glm::distance(_end.position(), endNodePos);
-        const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
-        const glm::dvec3 inFrontOfEnd = _end.position() + inFrontDistance * viewDir;
-        const glm::dvec3 lookAtPos = ghoul::interpolateLinear(tScaled, endNodePos, inFrontOfEnd);
-        return ghoul::lookAtQuaternion(_prevPose.position, lookAtPos, endUp);
-    }
+    //// This distance is guaranteed to be strictly decreasing for linear paths
+    //const double distanceToEnd = glm::distance(_prevPose.position, _end.position());
 
-    // Keep looking at the end node
-    return ghoul::lookAtQuaternion(_prevPose.position, endNodePos, endUp);
+    //// Determine the distance at which to start interpolating to the target rotation.
+    //// The magic numbers here are just randomly picked constants, set to make the
+    //// resulting rotation look ok-ish
+    //double closingUpDistance = 10.0 * _end.validBoundingSphere();
+    //if (pathLength() < 2.0 * closingUpDistance) {
+    //    closingUpDistance = 0.2 * pathLength();
+    //}
+
+    //if (distanceToEnd < closingUpDistance) {
+    //    // Interpolate to target rotation
+    //    const double tScaled = ghoul::sineEaseInOut(1.0 - distanceToEnd / closingUpDistance);
+
+    //    // Compute a position in front of the camera at the end orientation
+    //    const double inFrontDistance = glm::distance(_end.position(), endNodePos);
+    //    const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
+    //    const glm::dvec3 inFrontOfEnd = _end.position() + inFrontDistance * viewDir;
+    //    const glm::dvec3 lookAtPos = ghoul::interpolateLinear(tScaled, endNodePos, inFrontOfEnd);
+    //    return ghoul::lookAtQuaternion(_prevPose.position, lookAtPos, endUp);
+    //}
+
+    //// Keep looking at the end node
+    //return ghoul::lookAtQuaternion(_prevPose.position, endNodePos, endUp);
 }
 
 glm::dquat Path::lookAtTargetsRotation(double t) const {
@@ -308,7 +339,8 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
         const double tScaled = ghoul::cubicEaseInOut((t - t1) / (t2 - t1));
         lookAtPos = ghoul::interpolateLinear(tScaled, startNodePos, endNodePos);
     }
-    else if (t > t2) {
+    else {
+        // (t > t2)
         // Compute a position in front of the camera at the end orientation
         const double inFrontDistance = glm::distance(endPos, endNodePos);
         const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
@@ -350,8 +382,17 @@ double Path::speedAlongPath(double traveledDistance) const {
     double startUpDistance = DampenDistanceFactor * _start.validBoundingSphere();
     double closeUpDistance = DampenDistanceFactor * _end.validBoundingSphere();
 
+    // Kind of an ugly workaround to make damping behave over very long paths, and/or
+    // where the target nodes might have large bounding spheres. The current max is set
+    // based on the order of magnitude of the solar system, which ofc is very specific to
+    // our space content...
+    // @TODO (2022-03-22, emmbr) Come up with a better more general solution
+    constexpr const double MaxDistance = 1E12;
+    startUpDistance = glm::min(MaxDistance, startUpDistance);
+    closeUpDistance = glm::min(MaxDistance, closeUpDistance);
+
     if (pathLength() < startUpDistance + closeUpDistance) {
-        startUpDistance = 0.49 * pathLength(); // a little less than half
+        startUpDistance = 0.4 * pathLength(); // a little less than half
         closeUpDistance = startUpDistance;
     }
 
@@ -402,7 +443,8 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
         bool isSame = (n->identifier() == node->identifier());
         // If the nodes are in the very same position, they are probably representing
         // the same object
-        isSame |= glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
+        isSame |=
+            glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
 
         if (isSame) {
             continue;
@@ -465,6 +507,14 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
         const glm::dvec3 targetToPrev = prevPos - nodePos;
         const glm::dvec3 targetToSun = sunPos - nodePos;
 
+        // Check against zero vectors, as this will lead to nan-values from cross product
+        if (glm::length(targetToSun) < LengthEpsilon ||
+            glm::length(targetToPrev) < LengthEpsilon)
+        {
+            // Same situation as if sun does not exist. Any direction will do
+            return glm::dvec3(0.0, 0.0, 1.0);
+        }
+
         constexpr const float defaultPositionOffsetAngle = -30.f; // degrees
         constexpr const float angle = glm::radians(defaultPositionOffsetAngle);
         const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
@@ -490,7 +540,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         return Waypoint();
     }
 
-    glm::dvec3 targetPos = glm::dvec3(0.0);
+    glm::dvec3 targetPos;
     if (info.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
         // Convert to world coordinates
@@ -506,7 +556,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
-        glm::dvec3 stepDir = glm::dvec3(0.0);
+        glm::dvec3 stepDir;
         if (type == Path::Type::Linear) {
             // If linear path, compute position along line form start to end point
             glm::dvec3 endNodePos = targetNode->worldPosition();
@@ -619,6 +669,23 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 p.useTargetUpDirection.value_or(false)
             };
 
+            double startToTargetCenterDistance = glm::distance(
+                startPoint.position(),
+                targetNode->worldPosition()
+            );
+
+            // Use a linear path if camera start is within the bounding sphere
+            const PathNavigator& navigator = global::navigationHandler->pathNavigator();
+            const double bs = navigator.findValidBoundingSphere(targetNode);
+            bool withinTargetBoundingSphere = startToTargetCenterDistance < bs;
+            if (withinTargetBoundingSphere) {
+                LINFO(
+                    "Camera is within the bounding sphere of the target node. "
+                    "Using linear path"
+                );
+                type = Path::Type::Linear;
+            }
+
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, type) };
             break;
         }
@@ -643,7 +710,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     catch (const PathCurve::TooShortPathError& e) {
         LINFO("Already at the requested target");
         // Rethrow e, so the pathnavigator can handle it as well
-        throw e;
+        throw;
     }
     catch (const PathCurve::InsufficientPrecisionError&) {
         // There wasn't enough precision to represent the full curve in world

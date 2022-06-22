@@ -17,13 +17,16 @@ local band = asset.syncedResource({
   Version = 1
 })
 
+local launchTime = "2021 DEC 25 12:20:00"
+local endTime = "2024 JAN 22 00:00:00"
+
 local JWSTBand = {
   Identifier = "JWSTBand",
   Parent = transforms.JWSTPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 14:06:03",
-    End = "2021 OCT 01"
+    Start = launchTime,
+    End = endTime
   },
   Transform = {
     Rotation = {
@@ -35,7 +38,6 @@ local JWSTBand = {
     }
   },
   Renderable = {
-    Enabled = false,
     Type = "RenderableSphere",
     Texture = band .. "JWST-band.png",
     Size = 9.2E15,
@@ -60,15 +62,15 @@ local JWSTModel = {
   Parent = transforms.JWSTRotation.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 14:06:03",
-    End = "2021 OCT 01"
+    Start = launchTime,
+    End = endTime
   },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "jwst_anim74_2fps_2018_nb.osmodel",
     ModelScale = 0.0328, -- First scale down with centimeters then scale up with feet
     EnableAnimation = true,
-    AnimationStartTime = "2018 10 01 14:06:03",
+    AnimationStartTime = "2021 12 25 12:20:00",
     AnimationTimeScale = "Millisecond",
     AnimationMode = "Once",
     LightSources = {
@@ -92,11 +94,10 @@ local JWSTFov = {
   Parent = JWSTModel.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 14:06:03",
-    End = "2021 OCT 01"
+    Start = launchTime,
+    End = endTime
   },
   Renderable = {
-    Enabled = false,
     Type = "RenderablePrism",
     Segments = 6,
     Lines = 3,
@@ -126,16 +127,15 @@ local JWSTLabel = {
   Parent = transforms.JWSTPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 14:06:03",
-    End = "2021 OCT 01"
+    Start = launchTime,
+    End = endTime
   },
   Renderable = {
-    Enabled = true,
     Type = "RenderableLabels",
     Text = "JWST",
-    FontSize = 20,
-    Size = 6.25,
-    MinMaxSize = { 1.0, 100.0 },
+    FontSize = 50,
+    Size = 6.5,
+    MinMaxSize = { 4.0, 30.0 },
     OrientationOption = "Camera View Direction",
     BlendMode = "Normal",
     EnableFading = false
@@ -148,19 +148,67 @@ local JWSTLabel = {
 }
 
 asset.onInitialize(function()
+  -- Start of data outage, use Terra instead as replacement
+  openspace.scriptScheduler.loadScheduledScript(
+    "2021 DEC 19 00:00:00",
+    [[openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      true
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      false
+    )]],
+    [[openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      false
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      true
+    )]],
+    "",
+    2 -- Not default group, never clear this script
+  )
+
+  -- End of data outage, Go back to VIIRS ESRI combo
+  openspace.scriptScheduler.loadScheduledScript(
+    "2021 DEC 30 00:00:00",
+    [[openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      false
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      true
+    )]],
+    [[openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      true
+    )
+    openspace.setPropertyValueSingle(
+      "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      false
+    )]],
+    "",
+    2 -- Not default group, never clear this script
+  )
+
   openspace.addSceneGraphNode(JWSTBand)
   openspace.addSceneGraphNode(JWSTModel)
   openspace.addSceneGraphNode(JWSTFov)
   openspace.addSceneGraphNode(JWSTLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTLabel)
   openspace.removeSceneGraphNode(JWSTFov)
   openspace.removeSceneGraphNode(JWSTModel)
   openspace.removeSceneGraphNode(JWSTBand)
+
+  openspace.scriptScheduler.clear(2)
 end)
-    
+
 asset.export(JWSTBand)
 asset.export(JWSTModel)
 asset.export(JWSTFov)

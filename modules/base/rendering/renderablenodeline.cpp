@@ -39,7 +39,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableNodeLine";
     constexpr const char* ProgramName = "NodeLineProgram";
     constexpr const char* Root = "Root";
 
@@ -212,7 +211,7 @@ void RenderableNodeLine::updateVertexData() {
                 _start.value(), _end.value()
             )
         );
-        
+
         return;
     }
 
@@ -270,7 +269,7 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());
-    _program->setUniform("color", glm::vec4(_lineColor.value(), _opacity));
+    _program->setUniform("color", glm::vec4(_lineColor.value(), opacity()));
 
     // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

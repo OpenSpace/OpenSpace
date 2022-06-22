@@ -151,7 +151,7 @@ local RotationKeyframes = {
 
 local InsightParent = {
   Identifier = "InsightParent",
-  Parent = mars.Identifier,
+  Parent = mars.Mars.Identifier,
   Transform = {
     Translation ={
       Type = "TimelineTranslation",

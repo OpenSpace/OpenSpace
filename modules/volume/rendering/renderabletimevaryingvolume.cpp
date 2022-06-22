@@ -51,7 +51,6 @@ namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
 
     const float SecondsInOneDay = 60 * 60 * 24;
-    constexpr const float VolumeMaxOpacity = 500;
 
     static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
@@ -104,10 +103,10 @@ namespace {
         "Lets you scrub through the sequence's time steps."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "The volumes general opacity."
+    constexpr openspace::properties::Property::PropertyInfo BrightnessInfo = {
+        "Brightness",
+        "Brightness",
+        "The volume renderer's general brightness."
     };
 
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
@@ -138,8 +137,8 @@ namespace {
         // Specifies if you want to invert the volume data at it z-axis.
         std::optional<bool> invertDataAtZ;
 
-        // [[codegen::verbatim(OpacityInfo.description)]]
-        std::optional<float> opacity;
+        // [[codegen::verbatim(BrightnessInfo.description)]]
+        std::optional<float> brightness;
 
         // [[codegen::verbatim(StepSizeInfo.description)]]
         std::optional<float> stepSize;
@@ -164,7 +163,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
-    , _opacity(OpacityInfo, 10.f, 0.f, VolumeMaxOpacity)
+    , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -194,10 +193,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     _stepSize = p.stepSize.value_or(_stepSize);
 
-    if (p.opacity.has_value()) {
-        _opacity = *p.opacity * VolumeMaxOpacity;
-    }
-
+    _brightness = p.brightness.value_or(_brightness);
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
     _secondsAfter = p.secondsAfter;
 
@@ -211,6 +207,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
 
+    addProperty(_brightness);
     addProperty(_opacity);
 }
 
@@ -452,7 +449,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
-        _raycaster->setOpacity(_opacity);
+        _raycaster->setBrightness(_brightness * opacity());
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
     }

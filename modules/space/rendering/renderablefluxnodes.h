@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLEFLUXNODES___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLEFLUXNODES___H__
+
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/optionproperty.h>
@@ -94,12 +97,12 @@ private:
         Illuminance = 3,
     };
 
-    UniformCache(streamColor, nodeSize, proximityNodesSize, 
+    UniformCache(streamColor, nodeSize, proximityNodesSize,
         thresholdFlux, colorMode, filterLower, filterUpper, scalingMode, colorTableRange,
         domainLimZ, nodeSkip, nodeSkipDefault, nodeSkipEarth, nodeSkipMethod,
         nodeSkipFluxThreshold, nodeSkipRadiusThreshold, fluxColorAlpha,
         earthPos, distanceThreshold, time, maxNodeDistanceSize, usingCameraPerspective,
-        drawCircles, drawHollow, useGaussian, perspectiveDistanceFactor, minMaxNodeSize, 
+        drawCircles, drawHollow, useGaussian, perspectiveDistanceFactor, minMaxNodeSize,
         usingPulse, usingGaussianPulse) _uniformCache;
 
     std::filesystem::path _binarySourceFolderPath;
@@ -195,7 +198,7 @@ private:
     properties::FloatProperty _fluxNodeskipThreshold;
     //The nodeskip for values within the range of the radius threshold to Earth
     properties::IntProperty _earthNodeSkip;
-    // The Radius threshold to decide the line between 
+    // The Radius threshold to decide the line between
     //_pDefaultNodeSkip and _pAmountofNodes
     properties::FloatProperty _radiusNodeSkipThreshold;
 
@@ -208,4 +211,7 @@ private:
     properties::BoolProperty _pulseEnabled;
     properties::BoolProperty _gaussianPulseEnabled;
 };
+
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLEFLUXNODES___H__

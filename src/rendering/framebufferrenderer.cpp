@@ -51,29 +51,6 @@
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
-    // If this is true (detected automatically), the OpenGL debug information functions
-    // are available and will be used to mark object names and debug groups
-    bool HasGLDebugInfo = false;
-
-    struct GLDebugGroup {
-        explicit GLDebugGroup(std::string_view name) {
-            if (HasGLDebugInfo) {
-                glPushDebugGroup(
-                    GL_DEBUG_SOURCE_APPLICATION,
-                    0,
-                    static_cast<GLsizei>(name.length()),
-                    name.data()
-                );
-            }
-        }
-
-        ~GLDebugGroup() {
-            if (HasGLDebugInfo) {
-                glPopDebugGroup();
-            }
-        }
-    };
-
     constexpr const glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
 
     constexpr const std::array<const char*, 9> HDRUniformNames = {
@@ -114,10 +91,6 @@ void FramebufferRenderer::initialize() {
     TracyGpuZone("Rendering initialize");
 
     LDEBUG("Initializing FramebufferRenderer");
-
-    HasGLDebugInfo = glbinding::Binding::ObjectLabel.isResolved() &&
-                     glbinding::Binding::PushDebugGroup.isResolved() &&
-                     glbinding::Binding::PopDebugGroup.isResolved();
 
     const GLfloat vertexData[] = {
         // x     y
@@ -207,7 +180,7 @@ void FramebufferRenderer::initialize() {
         _gBuffers.depthTexture,
         0
     );
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
     }
 
@@ -722,10 +695,6 @@ void FramebufferRenderer::updateResolution() {
     ZoneScoped
     TracyGpuZone("Renderer updateResolution")
 
-    HasGLDebugInfo = glbinding::Binding::ObjectLabel.isResolved() &&
-                     glbinding::Binding::PushDebugGroup.isResolved() &&
-                     glbinding::Binding::PopDebugGroup.isResolved();
-
     glBindTexture(GL_TEXTURE_2D, _gBuffers.colorTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -742,7 +711,7 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _gBuffers.colorTexture, -1, "G-Buffer Color");
     }
 
@@ -762,7 +731,7 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _gBuffers.positionTexture, -1, "G-Buffer Position");
     }
 
@@ -782,7 +751,7 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _gBuffers.normalTexture, -1, "G-Buffer Normal");
     }
 
@@ -802,7 +771,7 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (HasGLDebugInfo) {
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _gBuffers.depthTexture, -1, "G-Buffer Depth");
     }
 
@@ -1172,21 +1141,21 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         TracyGpuZone("Background")
-        GLDebugGroup group("Background");
+        ghoul::GLDebugGroup group("Background");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
         scene->render(data, tasks);
     }
 
     {
         TracyGpuZone("Opaque")
-        GLDebugGroup group("Opaque");
+        ghoul::GLDebugGroup group("Opaque");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
         scene->render(data, tasks);
     }
 
     {
         TracyGpuZone("PreDeferredTransparent")
-        GLDebugGroup group("PreDeferredTransparent");
+        ghoul::GLDebugGroup group("PreDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PreDeferredTransparent
         );
@@ -1196,13 +1165,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // Run Volume Tasks
     {
         TracyGpuZone("Raycaster Tasks")
-        GLDebugGroup group("Raycaster Tasks");
+        ghoul::GLDebugGroup group("Raycaster Tasks");
         performRaycasterTasks(tasks.raycasterTasks, viewport);
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
         TracyGpuZone("Deferred Caster Tasks")
-        GLDebugGroup group("Deferred Caster Tasks");
+        ghoul::GLDebugGroup group("Deferred Caster Tasks");
 
         // We use ping pong rendering in order to be able to render multiple deferred
         // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
@@ -1218,7 +1187,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         TracyGpuZone("PostDeferredTransparent")
-        GLDebugGroup group("PostDeferredTransparent");
+        ghoul::GLDebugGroup group("PostDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PostDeferredTransparent
         );
@@ -1227,7 +1196,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         TracyGpuZone("Overlay")
-        GLDebugGroup group("Overlay");
+        ghoul::GLDebugGroup group("Overlay");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
         scene->render(data, tasks);
     }
@@ -1252,14 +1221,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     {
         // Apply the selected TMO on the results and resolve the result to the default FBO
         TracyGpuZone("Apply TMO")
-        GLDebugGroup group("Apply TMO");
+        ghoul::GLDebugGroup group("Apply TMO");
 
         applyTMO(blackoutFactor, viewport);
     }
 
     if (_enableFXAA) {
         TracyGpuZone("Apply FXAA")
-        GLDebugGroup group("Apply FXAA");
+        ghoul::GLDebugGroup group("Apply FXAA");
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
         applyFXAA(viewport);
     }

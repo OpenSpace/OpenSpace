@@ -23,12 +23,12 @@
  ****************************************************************************************/
 
 namespace {
- 
+
 // Returns true if a camera path is currently running, and false otherwise.
 [[codegen::luawrap]] bool isFlying() {
     using namespace openspace;
     bool hasFinished = global::navigationHandler->pathNavigator().hasFinished();
-    return hasFinished;
+    return !hasFinished;
 }
 
 // Continue playing a paused camera path.

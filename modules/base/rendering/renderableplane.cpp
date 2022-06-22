@@ -217,7 +217,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
 
     _shader->activate();
-    _shader->setUniform("opacity", _opacity);
+    _shader->setUniform("opacity", opacity());
 
     _shader->setUniform("mirrorBackside", _mirrorBackside);
 

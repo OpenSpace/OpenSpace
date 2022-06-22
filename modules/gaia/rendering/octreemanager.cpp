@@ -395,7 +395,7 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
 std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& mvp,
                                                               const glm::vec2& screenSize,
                                                               int& deltaStars,
-                                                              gaia::RenderOption option,
+                                                              gaia::RenderMode mode,
                                                               float lodPixelThreshold)
 {
     std::map<int, std::vector<float>> renderData;
@@ -471,7 +471,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
             mvp,
             screenSize,
             deltaStars,
-            option
+            mode
         );
 
         // Avoid freezing when switching render mode for large datasets by only fetching
@@ -521,11 +521,11 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
     return renderData;
 }
 
-std::vector<float> OctreeManager::getAllData(gaia::RenderOption option) {
+std::vector<float> OctreeManager::getAllData(gaia::RenderMode mode) {
     std::vector<float> fullData;
 
     for (size_t i = 0; i < 8; ++i) {
-        std::vector<float> tmpData = getNodeData(*_root->Children[i], option);
+        std::vector<float> tmpData = getNodeData(*_root->Children[i], mode);
         fullData.insert(fullData.end(), tmpData.begin(), tmpData.end());
     }
     return fullData;
@@ -1037,7 +1037,7 @@ void OctreeManager::sliceNodeLodCache(OctreeNode& node) {
         std::vector<float> tmpCol;
         std::vector<float> tmpVel;
         // Ordered map contain the MAX_STARS_PER_NODE brightest stars in all children!
-        for (auto const &[absMag, placement] : node.magOrder) {
+        for (auto const& [absMag, placement] : node.magOrder) {
             auto posBegin = node.posData.begin() + placement * POS_SIZE;
             auto colBegin = node.colData.begin() + placement * COL_SIZE;
             auto velBegin = node.velData.begin() + placement * VEL_SIZE;
@@ -1102,7 +1102,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
                                                                     const glm::dmat4& mvp,
                                                               const glm::vec2& screenSize,
                                                                           int& deltaStars,
-                                                                gaia::RenderOption option)
+                                                                    gaia::RenderMode mode)
 {
     std::map<int, std::vector<float>> fetchedData;
     //int depth  = static_cast<int>(log2( MAX_DIST / node->halfDimension ));
@@ -1172,7 +1172,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
                 // Insert data and adjust stars added in this frame.
                 fetchedData[node.bufferIndex] = constructInsertData(
                     node,
-                    option,
+                    mode,
                     deltaStars
                 );
             }
@@ -1191,7 +1191,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
             // Insert data and adjust stars added in this frame.
             fetchedData[node.bufferIndex] = constructInsertData(
                 node,
-                option,
+                mode,
                 deltaStars
             );
         }
@@ -1211,7 +1211,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
             mvp,
             screenSize,
             deltaStars,
-            option
+            mode
         );
         fetchedData.insert(tmpData.begin(), tmpData.end());
     }
@@ -1255,18 +1255,18 @@ std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(OctreeNode&
 }
 
 std::vector<float> OctreeManager::getNodeData(const OctreeNode& node,
-                                              gaia::RenderOption option)
+                                              gaia::RenderMode mode)
 {
     // Return node data if node is a leaf.
     if (node.isLeaf) {
         int dStars = 0;
-        return constructInsertData(node, option, dStars);
+        return constructInsertData(node, mode, dStars);
     }
 
     // If we're not in a leaf, get data from all children recursively.
     std::vector<float> nodeData;
     for (size_t i = 0; i < 8; ++i) {
-        std::vector<float> tmpData = getNodeData(*node.Children[i], option);
+        std::vector<float> tmpData = getNodeData(*node.Children[i], mode);
         nodeData.insert(nodeData.end(), tmpData.begin(), tmpData.end());
     }
     return nodeData;
@@ -1362,7 +1362,7 @@ bool OctreeManager::updateBufferIndex(OctreeNode& node) {
 }
 
 std::vector<float> OctreeManager::constructInsertData(const OctreeNode& node,
-                                                      gaia::RenderOption option,
+                                                      gaia::RenderMode mode,
                                                       int& deltaStars)
 {
     // Return early if node doesn't contain any stars!
@@ -1376,12 +1376,12 @@ std::vector<float> OctreeManager::constructInsertData(const OctreeNode& node,
     if (_useVBO) {
         insertData.resize(POS_SIZE * MAX_STARS_PER_NODE, 0.f);
     }
-    if (option != gaia::RenderOption::Static) {
+    if (mode != gaia::RenderMode::Static) {
         insertData.insert(insertData.end(), node.colData.begin(), node.colData.end());
         if (_useVBO) {
             insertData.resize((POS_SIZE + COL_SIZE) * MAX_STARS_PER_NODE, 0.f);
         }
-        if (option == gaia::RenderOption::Motion) {
+        if (mode == gaia::RenderMode::Motion) {
             insertData.insert(insertData.end(), node.velData.begin(), node.velData.end());
             if (_useVBO) {
                 insertData.resize(

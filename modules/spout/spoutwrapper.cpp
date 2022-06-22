@@ -91,7 +91,7 @@ void SpoutMain::saveGLState() {
     _defaultReadBuffer = static_cast<unsigned int>(buf);
 
     glGetIntegerv(GL_DRAW_BUFFER0, &buf);
-    _defaultReadBuffer = static_cast<unsigned int>(buf);
+    _defaultDrawBuffer[0] = static_cast<unsigned int>(buf);
 
     saveGLTextureState();
 }

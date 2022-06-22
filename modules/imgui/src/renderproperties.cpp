@@ -73,7 +73,7 @@ void renderTooltip(Property* prop, double delay) {
 
 void executeSetPropertyScript(const std::string& id, const std::string& value) {
     global::scriptEngine->queueScript(
-        "openspace.setPropertyValueSingle('" + id + "', " + value + ");",
+        fmt::format("openspace.setPropertyValueSingle('{}', {});", id, value),
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
@@ -115,46 +115,47 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     int value = *p;
     const std::vector<OptionProperty::Option>& options = p->options();
     switch (p->displayType()) {
-    case OptionProperty::DisplayType::Radio: {
-        ImGui::Text("%s", name.c_str());
-        ImGui::Separator();
-        for (const OptionProperty::Option& o : options) {
-            ImGui::RadioButton(o.description.c_str(), &value, o.value);
+        case OptionProperty::DisplayType::Radio: {
+            ImGui::Text("%s", name.c_str());
+            ImGui::Separator();
+            for (const OptionProperty::Option& o : options) {
+                ImGui::RadioButton(o.description.c_str(), &value, o.value);
+                if (showTooltip) {
+                    renderTooltip(prop, tooltipDelay);
+                }
+            }
+            ImGui::Separator();
+            break;
+        }
+        case OptionProperty::DisplayType::Dropdown: {
+            // The order of the options does not have to correspond with the value of the
+            // option
+            std::string nodeNames;
+            for (const OptionProperty::Option& o : options) {
+                nodeNames += o.description + '\0';
+            }
+            nodeNames += '\0';
+
+            int idx = static_cast<int>(std::distance(
+                options.begin(),
+                std::find_if(
+                    options.begin(),
+                    options.end(),
+                    [value](const OptionProperty::Option& o) { return o.value == value; }
+                )
+            ));
+
+            const bool hasChanged = ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
             if (showTooltip) {
                 renderTooltip(prop, tooltipDelay);
             }
-        }
-        ImGui::Separator();
-        break;
-    }
-    case OptionProperty::DisplayType::Dropdown: {
-        // The order of the options does not have to correspond with the value of the
-        // option
-        std::string nodeNames;
-        for (const OptionProperty::Option& o : options) {
-            nodeNames += o.description + '\0';
-        }
-        nodeNames += '\0';
 
-        int idx = static_cast<int>(std::distance(
-            options.begin(),
-            std::find_if(
-                options.begin(),
-                options.end(),
-                [value](const OptionProperty::Option& o) { return o.value == value; }
-        )));
+            if (hasChanged) {
+                value = options[idx].value;
+            }
 
-        const bool hasChanged = ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
-        if (showTooltip) {
-            renderTooltip(prop, tooltipDelay);
+            break;
         }
-
-        if (hasChanged) {
-            value = options[idx].value;
-        }
-
-        break;
-    }
     }
     if (value != p->value() && !isReadOnly) {
         executeSetPropertyScript(p->fullyQualifiedIdentifier(), std::to_string(value));
@@ -170,10 +171,10 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    bool selectionChanged = false;
-    std::set<std::string> newSelected;
-
     if (ImGui::TreeNode(name.c_str())) {
+        bool selectionChanged = false;
+        std::set<std::string> newSelected;
+       
         std::set<std::string> selected = p->value();
         const std::vector<std::string>& options = p->options();
 
@@ -224,12 +225,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 #else
     strcpy(buffer, value.c_str());
 #endif
-    bool hasNewValue = ImGui::InputText(
-        name.c_str(),
-        buffer,
-        bufferSize,
-        ImGuiInputTextFlags_EnterReturnsTrue
-    );
+    bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
@@ -262,13 +258,8 @@ void renderListProperty(const std::string& name, const std::string& fullIdentifi
 #else
     strcpy(buffer, value.c_str());
 #endif
-    bool hasNewValue = ImGui::InputText(
-        name.c_str(),
-        buffer,
-        bufferSize,
-        ImGuiInputTextFlags_EnterReturnsTrue
-    );
-
+    
+    bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
     if (hasNewValue) {
         std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');
         std::string script = "{";
@@ -415,21 +406,13 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
     IVec2Property::ValueType value = *p;
     int min = glm::compMin(p->minValue());
     int max = glm::compMax(p->maxValue());
-    bool changed = ImGui::SliderInt2(
-        name.c_str(),
-        &value.x,
-        min,
-        max
-    );
+    bool changed = ImGui::SliderInt2(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -447,21 +430,13 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
     int min = glm::compMin(p->minValue());
     int max = glm::compMax(p->maxValue());
 
-    bool changed = ImGui::SliderInt3(
-        name.c_str(),
-        &value.x,
-        min,
-        max
-    );
+    bool changed = ImGui::SliderInt3(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
     ImGui::PopID();
 }
@@ -478,21 +453,13 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
     int min = glm::compMin(p->minValue());
     int max = glm::compMax(p->maxValue());
 
-    bool changed = ImGui::SliderInt4(
-        name.c_str(),
-        &value.x,
-        min,
-        max
-    );
+    bool changed = ImGui::SliderInt4(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
     ImGui::PopID();
 }
@@ -552,10 +519,7 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -575,10 +539,7 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
 
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
-        changed = ImGui::ColorEdit3(
-            name.c_str(),
-            glm::value_ptr(value)
-        );
+        changed = ImGui::ColorEdit3(name.c_str(), glm::value_ptr(value));
     }
     else {
         changed = ImGui::SliderFloat3(
@@ -595,10 +556,7 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -618,10 +576,7 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
 
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
-        changed = ImGui::ColorEdit4(
-            name.c_str(),
-            glm::value_ptr(value)
-        );
+        changed = ImGui::ColorEdit4(name.c_str(), glm::value_ptr(value));
     }
     else {
         changed = ImGui::SliderFloat4(
@@ -638,10 +593,7 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -671,10 +623,7 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -705,10 +654,7 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -739,10 +685,7 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -794,10 +737,7 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -859,10 +799,7 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -934,10 +871,7 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
-            ghoul::to_string(value)
-        );
+        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
     }
 
     ImGui::PopID();

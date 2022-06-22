@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
-#define __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___PROPERTIESDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___PROPERTIESDIALOG___H__
 
 #include <QDialog>
 
@@ -56,7 +56,9 @@ public:
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
-private slots:
+private:
+    void createWidgets();
+
     void listItemSelected();
     void listItemAdded();
     void listItemRemove();
@@ -66,9 +68,6 @@ private slots:
     void parseSelections();
 
     void selectLineFromScriptLog();
-
-private:
-    void createWidgets();
 
     QString createOneLineSummary(openspace::Profile::Property p);
     void transitionFromEditMode();
@@ -98,4 +97,4 @@ private:
     QLabel* _errorMsg = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___PROPERTIESDIALOG___H__

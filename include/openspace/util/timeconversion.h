@@ -198,7 +198,8 @@ constexpr double convertTime(double t, TimeUnit sourceUnit, TimeUnit destination
         case TimeUnit::Year:
             seconds  = t * SecondsPerYear;
             break;
-        default: ;
+        default:
+            break;
     }
 
     switch (destinationUnit) {

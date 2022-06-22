@@ -182,8 +182,8 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
 void DocumentationEngine::addHandlebarTemplates(std::vector<HandlebarTemplate> templates)
 {
     _handlebarTemplates.insert(
-        std::end(_handlebarTemplates),
-        std::begin(templates), std::end(templates)
+        _handlebarTemplates.end(),
+        templates.begin(), templates.end()
     );
 }
 

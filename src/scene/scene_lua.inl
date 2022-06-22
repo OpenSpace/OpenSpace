@@ -22,6 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/matrix/dmat2property.h>
+#include <openspace/properties/matrix/dmat3property.h>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/matrix/mat2property.h>
+#include <openspace/properties/matrix/mat3property.h>
+#include <openspace/properties/matrix/mat4property.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/longproperty.h>
+#include <openspace/properties/scalar/shortproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
+#include <openspace/properties/scalar/ulongproperty.h>
+#include <openspace/properties/scalar/ushortproperty.h>
+#include <openspace/properties/vector/dvec2property.h>
+#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/vector/dvec4property.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/ivec3property.h>
+#include <openspace/properties/vector/ivec4property.h>
+#include <openspace/properties/vector/uvec2property.h>
+#include <openspace/properties/vector/uvec3property.h>
+#include <openspace/properties/vector/uvec4property.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
+
 namespace {
 
 template <class T>
@@ -943,6 +973,157 @@ namespace {
 
     double is = node->interactionSphere();
     return is;
+}
+
+template <typename T>
+void createCustomProperty(openspace::properties::Property::PropertyInfo info,
+                          std::optional<std::string> onChange)
+{
+    T* p = new T(info);
+    if (onChange.has_value()) {
+        p->onChange(
+            [p, script = *onChange]() {
+                using namespace ghoul::lua;
+                LuaState s;
+                openspace::global::scriptEngine->initializeLuaState(s);
+                ghoul::lua::push(s, p->value());
+                lua_setglobal(s, "value");
+                ghoul::lua::runScript(s, script);
+            }
+        );
+    }
+    openspace::global::userPropertyOwner->addProperty(p);
+}
+
+[[codegen::luawrap]] void addCustomProperty(std::string identifier, std::string type,
+                                            std::optional<std::string> guiName,
+                                            std::optional<std::string> description,
+                                            std::optional<std::string> onChange)
+{
+    using namespace openspace;
+
+    if (identifier.empty()) {
+        throw ghoul::lua::LuaError("Identifier must not empty");
+    }
+
+    if (global::userPropertyOwner->hasProperty(identifier)) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Failed to register property '{}' since a user-defined property with that "
+            "name already exists",
+            identifier
+        ));
+    }
+
+    // @TODO (abock, 2022-05-01)  These if statements here are a bit gnarly since it
+    // requires us to update them as soon as we add a new property type. It would be nicer
+    // to have a factory function for this but right now this is the only place where that
+    // factory would be used.
+
+    const char* gui =
+        guiName.has_value() && !guiName->empty() ?
+        guiName->c_str() :
+        identifier.c_str();
+
+    properties::Property::PropertyInfo info = {
+        identifier.c_str(),
+        gui,
+        description.has_value() ? description->c_str() : ""
+    };
+    if (type == "DMat2Property") {
+        createCustomProperty<properties::DMat2Property>(info, std::move(onChange));
+    }
+    else if (type == "DMat3Property") {
+        createCustomProperty<properties::DMat3Property>(info, std::move(onChange));
+    }
+    else if (type == "DMat4Property") {
+        createCustomProperty<properties::DMat4Property>(info, std::move(onChange));
+    }
+    else if (type == "Mat2Property") {
+        createCustomProperty<properties::Mat2Property>(info, std::move(onChange));
+    }
+    else if (type == "Mat3Property") {
+        createCustomProperty<properties::Mat3Property>(info, std::move(onChange));
+    }
+    else if (type == "Mat4Property") {
+        createCustomProperty<properties::Mat4Property>(info, std::move(onChange));
+    }
+    else if (type == "BoolProperty") {
+        createCustomProperty<properties::BoolProperty>(info, std::move(onChange));
+    }
+    else if (type == "DoubleProperty") {
+        createCustomProperty<properties::DoubleProperty>(info, std::move(onChange));
+    }
+    else if (type == "FloatProperty") {
+        createCustomProperty<properties::FloatProperty>(info, std::move(onChange));
+    }
+    else if (type == "IntProperty") {
+        createCustomProperty<properties::IntProperty>(info, std::move(onChange));
+    }
+    else if (type == "LongProperty") {
+        createCustomProperty<properties::LongProperty>(info, std::move(onChange));
+    }
+    else if (type == "ShortProperty") {
+        createCustomProperty<properties::ShortProperty>(info, std::move(onChange));
+    }
+    else if (type == "UIntProperty") {
+        createCustomProperty<properties::UIntProperty>(info, std::move(onChange));
+    }
+    else if (type == "ULongProperty") {
+        createCustomProperty<properties::ULongProperty>(info, std::move(onChange));
+    }
+    else if (type == "UShortProperty") {
+        createCustomProperty<properties::UShortProperty>(info, std::move(onChange));
+    }
+    else if (type == "DVec2Property") {
+        createCustomProperty<properties::DVec2Property>(info, std::move(onChange));
+    }
+    else if (type == "DVec3Property") {
+        createCustomProperty<properties::DVec3Property>(info, std::move(onChange));
+    }
+    else if (type == "DVec4Property") {
+        createCustomProperty<properties::DVec4Property>(info, std::move(onChange));
+    }
+    else if (type == "IVec2Property") {
+        createCustomProperty<properties::IVec2Property>(info, std::move(onChange));
+    }
+    else if (type == "IVec3Property") {
+        createCustomProperty<properties::IVec3Property>(info, std::move(onChange));
+    }
+    else if (type == "IVec4Property") {
+        createCustomProperty<properties::IVec4Property>(info, std::move(onChange));
+    }
+    else if (type == "UVec2Property") {
+        createCustomProperty<properties::UVec2Property>(info, std::move(onChange));
+    }
+    else if (type == "UVec3Property") {
+        createCustomProperty<properties::UVec3Property>(info, std::move(onChange));
+    }
+    else if (type == "UVec4Property") {
+        createCustomProperty<properties::UVec4Property>(info, std::move(onChange));
+    }
+    else if (type == "Vec2Property") {
+        createCustomProperty<properties::Vec2Property>(info, std::move(onChange));
+    }
+    else if (type == "Vec3Property") {
+        createCustomProperty<properties::Vec3Property>(info, std::move(onChange));
+    }
+    else if (type == "Vec4Property") {
+        createCustomProperty<properties::Vec4Property>(info, std::move(onChange));
+    }
+}
+
+[[codegen::luawrap]] void removeCustomProperty(std::string identifier) {
+    using namespace openspace;
+    properties::Property* p = global::userPropertyOwner->property(identifier);
+    if (p) {
+        global::userPropertyOwner->removeProperty(p);
+        delete p;
+    }
+    else {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Could not find user-defined property '{}'", identifier
+        ));
+    }
 }
 
 } // namespace

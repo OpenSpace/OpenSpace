@@ -32,7 +32,7 @@ local layer_folder = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = "C:/Development/sync/http/earth_textures_climate/1",
+    Folder = path,
     Format = "%Y-%m-%d-land.png"
   },
   Interpolation = true,

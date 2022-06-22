@@ -2,7 +2,7 @@ local satelliteHelper = asset.require("util/tle_helper")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
-local url = "http://celestrak.com/satcat/tle.php?CATNR=25544"
+local url = "http://celestrak.com/NORAD/elements/gp.php?CATNR=25544"
 local identifier = "ISS"
 local filename = "ISS.txt"
 local nodes = {}
@@ -41,36 +41,36 @@ local initializeAndAddNodes = function()
     },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/ISS"
+      Path = "/Solar System/Planets/Earth/Satellites/ISS"
     }
   }
 
   local parentNode = {
-     Identifier = "ISSModel",
-      Parent = iss.Identifier,
-      Transform = {
-        Rotation = {
-          Type = "FixedRotation",
-          Attached = "ISSModel",
-          XAxis = { 0.01, -1.0, 0.56 },
-          XAxisOrthogonal = true,
-          YAxis = transforms.EarthInertial.Identifier
-        }
-      },
-      Renderable = {
-        Type = "RenderableModel",
-        GeometryFile = models .. "ISS.fbx",
-        ModelScale = "Centimeter",
-        LightSources = {
-          sun.LightSource
-        },
-        PerformShading = true,
-        DisableFaceCulling = true
-      },
-      GUI = {
-        Name = "ISS Model",
-        Path = "/Solar System/Planets/Earth/Satellites/ISS"
+    Identifier = "ISSModel",
+    Parent = iss.Identifier,
+    Transform = {
+      Rotation = {
+        Type = "FixedRotation",
+        Attached = "ISSModel",
+        XAxis = { 0.01, -1.0, 0.56 },
+        XAxisOrthogonal = true,
+        YAxis = transforms.EarthInertial.Identifier
       }
+    },
+    Renderable = {
+      Type = "RenderableModel",
+      GeometryFile = models .. "ISS.fbx",
+      ModelScale = "Centimeter",
+      LightSources = {
+        sun.LightSource
+      },
+      PerformShading = true,
+      DisableFaceCulling = true
+    },
+    GUI = {
+      Name = "ISS Model",
+      Path = "/Solar System/Planets/Earth/Satellites/ISS"
+    }
   }
 
   local issTrail = {

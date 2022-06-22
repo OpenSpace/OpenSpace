@@ -171,10 +171,29 @@ void log(int i, const EventSessionRecordingPlayback& e) {
     LINFO(fmt::format("[{}] SessionRecordingPlayback: {}", i, state));
 }
 
+void log(int i, const EventPointSpacecraft& e) {
+    ghoul_assert(e.type == EventPointSpacecraft::Type, "Wrong type");
+    LINFO(fmt::format(
+        "[{}] PointSpacecraft: Ra: {}, Dec: {}, Duration: {}", i, e.ra, e.dec,
+        e.duration
+    ));
+}
+
 void log(int i, const CustomEvent& e) {
     ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
     LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
 }
+
+void log(int i, const EventRenderableEnabled& e) {
+    ghoul_assert(e.type == EventRenderableEnabled::Type, "Wrong type");
+    LINFO(fmt::format("[{}] EventRenderableEnabled: {}", i, e.node));
+}
+
+void log(int i, const EventRenderableDisabled& e) {
+    ghoul_assert(e.type == EventRenderableDisabled::Type, "Wrong type");
+    LINFO(fmt::format("[{}] EventRenderableDisabled: {}", i, e.node));
+}
+
 
 std::string_view toString(Event::Type type) {
     switch (type) {
@@ -195,6 +214,9 @@ std::string_view toString(Event::Type type) {
         case Event::Type::LayerAdded: return "LayerAdded";
         case Event::Type::LayerRemoved: return "LayerRemoved";
         case Event::Type::SessionRecordingPlayback: return "SessionRecordingPlayback";
+        case Event::Type::PointSpacecraft: return "PointSpacecraft";
+        case Event::Type::RenderableEnabled: return "RenderableEnabled";
+        case Event::Type::RenderableDisabled: return "RenderableDisabled";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -249,6 +271,15 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "SessionRecordingPlayback") {
         return Event::Type::SessionRecordingPlayback;
+    }
+    else if (str == "PointSpacecraft") {
+        return Event::Type::PointSpacecraft;
+    }
+    else if (str == "RenderableEnabled") {
+        return Event::Type::RenderableEnabled;
+    }
+    else if (str == "RenderableDisabled") {
+        return Event::Type::RenderableDisabled;
     }
     else if (str == "Custom") {
         return Event::Type::Custom;
@@ -411,9 +442,29 @@ ghoul::Dictionary toParameter(const Event& e) {
                     break;
             }
             break;
+        case Event::Type::PointSpacecraft:
+            d.setValue("Ra", static_cast<const EventPointSpacecraft&>(e).ra);
+            d.setValue("Dec", static_cast<const EventPointSpacecraft&>(e).dec);
+            d.setValue("Duration", static_cast<const EventPointSpacecraft&>(e).duration);
+            break;
+        case Event::Type::RenderableEnabled:
+            d.setValue(
+                "Node",
+                std::string(static_cast<const EventRenderableEnabled&>(e).node)
+            );
+            break;
+        case Event::Type::RenderableDisabled:
+            d.setValue(
+                "Node",
+                std::string(static_cast<const EventRenderableDisabled&>(e).node)
+            );
+            break;
         case Event::Type::Custom:
             d.setValue(
                 "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
+            );
+            d.setValue(
+                "Payload", std::string(static_cast<const CustomEvent&>(e).payload)
             );
             break;
         default:
@@ -473,6 +524,15 @@ void logAllEvents(const Event* e) {
                 break;
             case Event::Type::SessionRecordingPlayback:
                 log(i, *static_cast<const EventSessionRecordingPlayback*>(e));
+                break;
+            case Event::Type::PointSpacecraft:
+                log(i, *static_cast<const EventPointSpacecraft*>(e));
+                break;
+            case Event::Type::RenderableEnabled:
+                log(i, *static_cast<const EventRenderableEnabled*>(e));
+                break;
+            case Event::Type::RenderableDisabled:
+                log(i, *static_cast<const EventRenderableDisabled*>(e));
                 break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
@@ -586,7 +646,25 @@ EventSessionRecordingPlayback::EventSessionRecordingPlayback(State state_)
     , state(state_)
 {}
 
-CustomEvent::CustomEvent(std::string_view subtype_, const void* payload_)
+EventPointSpacecraft::EventPointSpacecraft(double ra_, double dec_, double duration_)
+    : Event(Type)
+    , ra(ra_)
+    , dec(dec_)
+    , duration(duration_)
+{}
+
+EventRenderableEnabled::EventRenderableEnabled(const SceneGraphNode* node_)
+    : Event(Type)
+    , node(temporaryString(node_->identifier()))
+{}
+
+EventRenderableDisabled::EventRenderableDisabled(const SceneGraphNode* node_)
+    : Event(Type)
+    , node(temporaryString(node_->identifier()))
+{}
+
+
+CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)
     : Event(Type)
     , subtype(subtype_)
     , payload(payload_)

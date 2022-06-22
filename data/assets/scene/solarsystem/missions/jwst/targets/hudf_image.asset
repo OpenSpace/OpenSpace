@@ -1,0 +1,17 @@
+local image = asset.syncedResource({
+  Name = "HUDF Image",
+  Type = "HttpSynchronization",
+  Identifier = "hudf_image",
+  Version = 4
+})
+
+asset.export("image", image)
+
+asset.meta = {
+  Name = "Hubble Ultra Deep Field",
+  Version = "1.0",
+  Description = "Hubble Ultra Deep Field Image",
+  Author = "NASA, ESA, and S. Beckwith (STScI) and the HUDF Team",
+  URL = "https://esahubble.org/images/heic0611b/",
+  License = "CC BY 4.0"
+}

@@ -88,6 +88,13 @@ public:
     bool hasReachedEnd() const;
 
     /**
+     * Compute the interpolated camera pose at a certain distance along a *linear*
+     * path. Note that the linear path is a special case, to avoid risks of precision
+     * problems for long paths
+     */
+    CameraPose linearInterpolatedPose(double distance, double displacement);
+
+    /**
      * Compute the interpolated camera pose at a certain distance along the path
      */
     CameraPose interpolatedPose(double distance) const;

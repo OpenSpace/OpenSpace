@@ -93,7 +93,9 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     const double maxRadius = std::max(startNodeRadius, endNodeRadius);
     bool nodesAreDifferent = start.nodeIdentifier() != end.nodeIdentifier();
     if (glm::length(startToEnd) >  0.5 * maxRadius && nodesAreDifferent) {
-        double cosAngleToTarget = glm::dot(normalize(-startViewDir), normalize(startToEnd));
+        double cosAngleToTarget = glm::dot(
+            normalize(-startViewDir), normalize(startToEnd)
+        );
         bool targetInOppositeDirection = cosAngleToTarget > 0.7;
 
         if (targetInOppositeDirection) {

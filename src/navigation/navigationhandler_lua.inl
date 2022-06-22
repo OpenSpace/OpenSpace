@@ -63,25 +63,7 @@ namespace {
         state = global::navigationHandler->navigationState();
     }
 
-    ghoul::Dictionary res;
-    res.setValue("Anchor", state.anchor);
-    if (!state.aim.empty()) {
-        res.setValue("Aim", state.aim);
-    }
-    if (!state.referenceFrame.empty()) {
-        res.setValue("ReferenceFrame", state.referenceFrame);
-    }
-    res.setValue("ReferenceFrame", state.position);
-    if (state.up.has_value()) {
-        res.setValue("Up", *state.up);
-    }
-    if (state.yaw != 0) {
-        res.setValue("Up", state.yaw);
-    }
-    if (state.pitch != 0) {
-        res.setValue("Pitch", state.pitch);
-    }
-    return res;
+    return state.dictionary();
 }
 
 // Set the navigation state. The argument must be a valid Navigation State.
@@ -126,6 +108,36 @@ namespace {
 // Reset the camera direction to point at the aim node.
 [[codegen::luawrap]] void retargetAim() {
     openspace::global::navigationHandler->orbitalNavigator().startRetargetAim();
+}
+
+// Picks the next node from the interesting nodes out of the profile and selects that. If
+// the current anchor is not an interesting node, the first will be selected
+[[codegen::luawrap]] void targetNextInterestingAnchor() {
+    using namespace openspace;
+    if (global::profile->markNodes.empty()) {
+        LWARNINGC(
+            "targetNextInterestingAnchor",
+            "Profile does not define any interesting nodes"
+        );
+        return;
+    }
+    const std::vector<std::string>& markNodes = global::profile->markNodes;
+
+    std::string currAnchor =
+        global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
+
+    auto it = std::find(markNodes.begin(), markNodes.end(), currAnchor);
+    if (it == markNodes.end() || ((it + 1) == markNodes.end())) {
+        // We want to use the first node either if
+        //  1. The current node is not an interesting node
+        //  2. The current node is the last interesting node
+        global::navigationHandler->orbitalNavigator().setFocusNode(markNodes.front());
+    }
+    else {
+        // Otherwise we can just select the next one
+        global::navigationHandler->orbitalNavigator().setFocusNode(*(it + 1));
+    }
+    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
 /**
@@ -274,7 +286,10 @@ joystickAxis(std::string joystickName, int axis)
  * currently bound to the button identified by the second argument.
  */
 [[codegen::luawrap]] void clearJoystickButton(std::string joystickName, int button) {
-    openspace::global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
+    openspace::global::navigationHandler->clearJoystickButtonCommand(
+        joystickName,
+        button
+    );
 }
 
 /**
@@ -349,6 +364,14 @@ joystickAxis(std::string joystickName, int axis)
     catch (ghoul::RuntimeError& e) {
         throw ghoul::lua::LuaError(e.message);
     }
+}
+
+/**
+ * Return the complete list of connected joysticks
+ */
+[[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
+    using namespace openspace;
+    return global::navigationHandler->listAllJoysticks();
 }
 
 #include "navigationhandler_lua_codegen.cpp"

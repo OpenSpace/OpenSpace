@@ -8,8 +8,8 @@ local SolarSystemBarycenter = {
   -- No parent; this node is attached to the scene graph root
   TimeFrame = { -- Using Spice kernels for 1850-2150
     Type = "TimeFrameInterval",
-    Start = "1850-JAN-01",
-    End = "2150-JAN-01"
+    Start = "1550-JAN-01",
+    End = "2650-JAN-22"
   },
   GUI = {
     Name = "Solar System Barycenter",
