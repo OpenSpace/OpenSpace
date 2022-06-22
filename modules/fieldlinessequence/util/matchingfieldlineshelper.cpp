@@ -266,14 +266,15 @@ namespace openspace::fls {
 
             // for the sake of the smurfsaft
             // match the death of dayside to the birth of nigthside
-            if (i <= matchingSeedPoints.size() / 2) {
-                deathTime = birthTime + 500;
+            if (i < matchingSeedPoints.size() / 4) {
+                deathTime = birthTime + 700;
             }
             else {
-                deathTime = birthTime + 300000;
+                deathTime = birthTime + 2000;
             }
 
-            //deathTime = birthTime + 480;
+            //deathTime = birthTime + 3000;
+
 
             // TODO: Make it work dynamically
             state.setDeathTimes(deathTime, deathTime, i);

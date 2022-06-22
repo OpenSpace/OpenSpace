@@ -270,17 +270,28 @@ namespace openspace {
                 getTimeToReconnectionPoint(mf.pathLines.second.daysideReconnectionStart);
 
 
-            // right now only hard coding for nightside is working
-            // then use this with custom number
-            //_traversers[traverserIndex].setStartPoint(
-            //    1000,
+            // nighside only
+            //_traversers[traverserIndex ].setStartPoint(
+            //    2400,
             //    _nPointsOnPathLine - 1);
             //_traversers[traverserIndex + 1].setStartPoint(
-            //    1000,
+            //    2400,
             //    _nPointsOnPathLine - 1);
 
-            //// hard coding for the sake of the smurfsaft
-            if (traverserIndex <= _traversers.size() / 2) {
+            // dayside only
+            //if (timeToReconTrav1 > timeToReconTrav2) {
+            //    _traversers[traverserIndex].setStartPoint(
+            //        timeToReconTrav2,
+            //        mf.pathLines.first.daysideReconnectionStart);
+            //}
+            //else {
+            //    _traversers[traverserIndex + 1].setStartPoint(
+            //        timeToReconTrav1,
+            //        mf.pathLines.second.daysideReconnectionStart);
+            //}
+
+            // hard coding for the sake of the smurfsaft 
+            if (traverserIndex < _fieldlineState.getAllMatchingFieldlines().size()) {
 
             //    // ---------This part works for dayside separate---------
             //    // find out which traverser has the longest traveling time to point of
@@ -298,23 +309,14 @@ namespace openspace {
                 }
             }
             else {
-
-                // right now only hard coding for nightside is working
-                // then use this with custom number
+                double timeToNightsideReconnection = 2400;
                 _traversers[traverserIndex].setStartPoint(
-                    2400,
+                    timeToNightsideReconnection,
                     _nPointsOnPathLine - 1);
                 _traversers[traverserIndex + 1].setStartPoint(
-                    2400,
+                    timeToNightsideReconnection,
                     _nPointsOnPathLine - 1);
             }
-
-            //_traversers[traverserIndex ].setStartPoint(
-            //    2400,
-            //    _nPointsOnPathLine - 1);
-            //_traversers[traverserIndex + 1].setStartPoint(
-            //    2400,
-            //    _nPointsOnPathLine - 1);
 
             // initialize the temporary key frame for each traverser
             _traversers[traverserIndex].temporaryInterpolationKeyFrame.vertices = 
@@ -1411,6 +1413,7 @@ namespace openspace {
         }
     }
 
+    // unused
     bool RenderableMovingFieldlines::PathLineTraverser::isFalseTopologyChange() const {
 
         bool isFluctuatingForward = false;
