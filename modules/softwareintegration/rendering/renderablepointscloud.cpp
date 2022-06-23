@@ -137,13 +137,19 @@ namespace {
         "Velocity Distance Unit",
         "The distance unit of the velocity data."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo VelocityTimeUnitInfo = {
         "VelocityTimeUnit",
         "Velocity Time Unit",
         "The time unit of the velocity data."
     };
-
+    
+    constexpr openspace::properties::Property::PropertyInfo VelocityDateRecordedInfo = {
+        "VelocityDateRecorded",
+        "Velocity Date Recorded",
+        "The date the velocity data was recorded."
+    };
+    
     constexpr openspace::properties::Property::PropertyInfo VelocityNanModeInfo = {
         "VelocityNanMode",
         "Velocity NaN Mode",
@@ -205,6 +211,9 @@ namespace {
         // [[codegen::verbatim(VelocityTimeUnitInfo.description)]]
         std::optional<std::string> velocityTimeUnit;
 
+        // [[codegen::verbatim(VelocityDateRecordedInfo.description)]]
+        std::optional<glm::ivec3> velocityDateRecorded;
+
         // [[codegen::verbatim(VelocityNanModeInfo.description)]]
         std::optional<int> velocityNanMode;
 
@@ -249,6 +258,7 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _linearSizeEnabled(LinearSizeEnabledInfo, false)
     , _velocityDistanceUnit(VelocityDistanceUnitInfo, "<no unit set>")
     , _velocityTimeUnit(VelocityTimeUnitInfo, "<no unit set>")
+    , _velocityDateRecorded(VelocityDateRecordedInfo, glm::ivec3{ -1 })
     , _velocityNanMode(VelocityNanModeInfo)
     , _name(NameInfo)
     , _motionEnabled(MotionEnabledInfo, false)
@@ -344,6 +354,11 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _velocityTimeUnit.setVisibility(properties::Property::Visibility::Hidden);
     _velocityTimeUnit.onChange([this] { _velocityUnitsAreDirty = true; });
     addProperty(_velocityTimeUnit);
+
+    _velocityDateRecorded = p.velocityDateRecorded.value_or(_velocityDateRecorded);
+    _velocityDateRecorded.setVisibility(properties::Property::Visibility::Hidden);
+    _velocityDateRecorded.onChange([this] { updateVelocityT0(); });
+    addProperty(_velocityDateRecorded);
 
     _velocityNanMode = p.velocityNanMode.value_or(_velocityNanMode);
     _velocityNanMode.setVisibility(properties::Property::Visibility::Hidden);
@@ -443,7 +458,7 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform(_uniformCache.motionEnabled, _motionEnabled);
     _shaderProgram->setUniform(
         _uniformCache.time,
-        static_cast<float>(data.time.j2000Seconds())
+        static_cast<float>(data.time.j2000Seconds() - _t0)
     );
 
     _shaderProgram->setUniform(_uniformCache.color, _color);
@@ -952,5 +967,8 @@ bool RenderablePointsCloud::shouldLoadLinearSizeAttrData(SoftwareIntegrationModu
     return softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::LinearSizeAttrData);
 }
 
+void RenderablePointsCloud::updateVelocityT0() {
+    _t0 = Time::convertTime(simp::toDateString(_velocityDateRecorded));
+}
 
 } // namespace openspace

@@ -113,7 +113,7 @@ void SyncableStorage::setLoaded(const Identifier& identifier, const storage::Key
     for (auto key : simpDataKeys) {
         if (!count(identifier, key)) {
             LERROR(fmt::format(
-                "SceneGraphNode {} has no data with key '{}' in the centralized data storage",
+                "SceneGraphNode {} has no data with key '{}' in the syncable data storage",
                 identifier,
                 simp::getStringFromDataKey(key)
             ));
@@ -303,7 +303,7 @@ bool SyncableStorage::fetchDimFloatData(
 
     if (!count(identifier)) {
         LERROR(fmt::format(
-            "SceneGraphNode {} is missing from the centralized data storage", 
+            "SceneGraphNode {} is missing from the syncable data storage", 
             identifier
         ));
         return false;
@@ -314,7 +314,7 @@ bool SyncableStorage::fetchDimFloatData(
     for (size_t i = 0; i < nDimensions; i++) {
         if (!count(identifier, dimDataKeys[i])) {
             LERROR(fmt::format(
-                "SceneGraphNode {} is missing {} from the centralized data storage", 
+                "SceneGraphNode {} is missing {} from the syncable data storage", 
                 identifier, simp::getStringFromDataKey(dimDataKeys[i])
             ));
             return false;

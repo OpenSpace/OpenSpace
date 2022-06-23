@@ -380,6 +380,66 @@ bool handleColorValue(
     return true;
 }
 
+bool handleDateValue(
+    const std::string& identifier,
+    const glm::ivec3& _newDate,
+    const std::string& propertyName,
+    std::shared_ptr<SoftwareConnection> connection = nullptr,
+    const std::function<
+        void(
+            properties::Property* property,
+            const std::string& identifier,
+            std::shared_ptr<SoftwareConnection> connection
+        )
+    >& onChangeCallback = nullptr
+) {
+    auto setDateCallback = [identifier, _newDate, propertyName] {
+        // Get renderable
+        auto r = renderable(identifier);
+        if (!r) return;
+
+        // Get date value of renderable
+        auto property = r->property(propertyName);
+        if (!property) return;
+        
+        auto currentDate = std::any_cast<glm::ivec3>(property->get());
+
+        // Update new date values
+        auto newDate = _newDate;
+        for (glm::ivec3::length_type i = 0; i < glm::ivec3::length(); ++i) {
+            // Keep the parts of currentDate that won't be updated
+            if (newDate[i] < 0) {
+                newDate[i] = currentDate[i];
+            }
+        }
+
+        // Update date of renderable
+        if (glm::any(glm::notEqual(newDate, currentDate))) {
+            global::scriptEngine->queueScript(
+                fmt::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', {});",
+                    identifier, propertyName, newDate
+                ),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+    };
+    addCallback(
+        identifier, 
+        {
+            setDateCallback, 
+            {}, 
+            fmt::format("Callback on property {}", propertyName), 
+        }
+    );
+
+    if (onChangeCallback && connection) {
+        checkAddOnChangeCallback(identifier, propertyName, connection, onChangeCallback);
+    }
+
+    return true;
+}
+
 bool handleBoolValue(
     const std::vector<std::byte>& message,
     size_t& offset,
@@ -527,6 +587,8 @@ void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<So
     bool hasNewColor = false;
     glm::vec4 newColormapNanColor{ -1.0 };
     bool hasNewNanColor = false;
+    glm::ivec3 newVelocityDateRecorded{ -1 };
+    bool hasNewVelocityDateRecorded = false;
 
     while (offset < message.size()) {
         std::string dataKeyStr;
@@ -705,6 +767,18 @@ void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<So
         else if (dataKey == simp::DataKey::VelocityTimeUnit) {
             if (!handleStringValue(message, offset, identifier, dataKey, "VelocityTimeUnit")) break;
         }
+        else if (dataKey == simp::DataKey::VelocityYearRecorded) {
+            if (!simp::readDateValue(message, offset, dataKey, newVelocityDateRecorded, 0)) break;
+            hasNewVelocityDateRecorded = true;
+        }
+        else if (dataKey == simp::DataKey::VelocityMonthRecorded) {
+            if (!simp::readDateValue(message, offset, dataKey, newVelocityDateRecorded, 1)) break;
+            hasNewVelocityDateRecorded = true;
+        }
+        else if (dataKey == simp::DataKey::VelocityDayRecorded) {
+            if (!simp::readDateValue(message, offset, dataKey, newVelocityDateRecorded, 2)) break;
+            hasNewVelocityDateRecorded = true;
+        }
         else if (dataKey == simp::DataKey::VelocityNanMode) {
             if (!handleEnumValue<simp::VelocityNanRenderMode>(message, offset, identifier, dataKey, "VelocityNanMode")) break;
         }
@@ -727,6 +801,9 @@ void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<So
     }
     if (hasNewNanColor) {
         handleColorValue(identifier, newColormapNanColor, "ColormapNanColor");
+    }
+    if (hasNewVelocityDateRecorded) {
+        handleDateValue(identifier, newVelocityDateRecorded, "VelocityDateRecorded");
     }
 }
 
