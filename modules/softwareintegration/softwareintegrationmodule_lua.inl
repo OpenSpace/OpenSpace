@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/softwareintegration/assethelper.h>
+#include <modules/softwareintegration/session/session.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
@@ -47,7 +47,7 @@ namespace {
     }
 
     std::string errorMessage;
-    if (!AssetHelper::loadSessionData(softwareIntegrationModule, filePath, errorMessage)) {
+    if (!softwareintegration::Session::loadSessionData(softwareIntegrationModule, filePath, errorMessage)) {
         return errorMessage;
     }
     else {
@@ -67,7 +67,7 @@ namespace {
     }
 
     std::string errorMessage;
-    if (!AssetHelper::saveSession(wantedFilePath, errorMessage)) {
+    if (!softwareintegration::Session::saveSession(wantedFilePath, errorMessage)) {
         LERRORC("SoftwareIntegration::saveSession", errorMessage);
         return errorMessage;
     }

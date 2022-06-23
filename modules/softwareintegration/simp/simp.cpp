@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/softwareintegration/utils.h>
+#include <modules/softwareintegration/simp/simp.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
@@ -33,51 +33,8 @@ namespace {
     constexpr const char* _loggerCat = "SoftwareIntegrationMessageFormat";
 } // namespace
 
-namespace openspace::softwareintegration {
+namespace openspace::softwareintegration::simp {
 
-
-namespace storage {
-
-// Anonymous namespace
-namespace {
-    
-    const std::unordered_map<std::string, Key> _keyStringFromKey{
-        { "DataPoints", Key::DataPoints },
-        { "VelocityData", Key::VelocityData },
-        { "Colormap", Key::Colormap },
-        { "ColormapAttributeData", Key::ColormapAttrData },
-        { "LinearSizeAttributeData", Key::LinearSizeAttrData },
-    };
-
-} // namespace
-
-bool hasStorageKey(const std::string& key) {
-    return _keyStringFromKey.count(key) > 0;
-}
-
-Key getStorageKey(const std::string& key) {
-    if (hasStorageKey(key)) {
-        return _keyStringFromKey.at(key);
-    }
-
-    return Key::Unknown;
-}
-
-std::string getStorageKeyString(const Key key) {
-    auto it = std::find_if(
-        _keyStringFromKey.begin(),
-        _keyStringFromKey.end(),
-        [key](const std::pair<const std::string, Key>& p) {
-            return key == p.second;
-        }
-    );
-    if (it == _keyStringFromKey.end()) return "";
-    return it->first;
-}
-
-} // namespace storage
-
-namespace simp {
 
 // Anonymous namespace
 namespace {
@@ -425,6 +382,4 @@ void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, const std:
 }
 
 
-} // namespace simp
-
-} // namespace openspace::softwareintegration
+} // namespace openspace::softwareintegration::simp

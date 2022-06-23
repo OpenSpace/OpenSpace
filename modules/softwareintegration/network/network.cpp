@@ -24,8 +24,7 @@
 
 #include <modules/softwareintegration/network/network.h>
 
-#include <modules/softwareintegration/messagehandler.h>
-#include <modules/softwareintegration/utils.h>
+#include <modules/softwareintegration/network/messagehandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/scene/scene.h>

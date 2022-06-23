@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/softwareintegration/assethelper.h>
+#include <modules/softwareintegration/session/session.h>
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
-#include <modules/softwareintegration/syncablestorage.h>
+#include <modules/softwareintegration/utils/syncablestorage.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/engine/moduleengine.h>
@@ -38,7 +38,7 @@
 
 namespace {
 
-constexpr const char* _loggerCat = "SoftwareIntegrationAssetHelper";
+constexpr const char* _loggerCat = "SoftwareIntegrationSession";
 
 }  // namespace
 
@@ -112,9 +112,9 @@ bool saveSessionData(SyncableStorage& storage,
     return true;
 }
 
-} // namepsace
+} // namespace
 
-bool AssetHelper::loadSessionData(SoftwareIntegrationModule* module,
+bool softwareintegration::Session::loadSessionData(SoftwareIntegrationModule* module,
                                   const std::string& filePathString,
                                   std::string& errorMessage
 ) {
@@ -159,7 +159,7 @@ bool AssetHelper::loadSessionData(SoftwareIntegrationModule* module,
     return true;
 }
 
-bool AssetHelper::saveSession(const std::string& wantedFileName, std::string& errorMessage) {
+bool softwareintegration::Session::saveSession(const std::string& wantedFileName, std::string& errorMessage) {
     auto softwareIntegrationModule = global::moduleEngine->module<SoftwareIntegrationModule>();
     if (!softwareIntegrationModule) {
         errorMessage = "Software Integration Module not found.";

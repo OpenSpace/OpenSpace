@@ -26,9 +26,9 @@
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
 
 #include <modules/softwareintegration/network/softwareconnection.h>
-#include <modules/softwareintegration/utils.h>
+#include <modules/softwareintegration/simp/simp.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
-#include <modules/softwareintegration/interruptibleconcurrentqueue.h>
+#include <modules/softwareintegration/utils/interruptibleconcurrentqueue.h>
 
 #include <functional>
 #include <unordered_map>

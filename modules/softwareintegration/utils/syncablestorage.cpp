@@ -22,9 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/softwareintegration/syncablestorage.h>
+#include <modules/softwareintegration/utils/syncablestorage.h>
 
-#include <modules/softwareintegration/utils.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
@@ -36,6 +35,47 @@ constexpr const char* _loggerCat = "SyncableStorage";
 } // namespace
 
 namespace openspace {
+
+namespace softwareintegration::storage {
+
+// Anonymous namespace
+namespace {
+    
+    const std::unordered_map<std::string, Key> _keyStringFromKey{
+        { "DataPoints", Key::DataPoints },
+        { "VelocityData", Key::VelocityData },
+        { "Colormap", Key::Colormap },
+        { "ColormapAttributeData", Key::ColormapAttrData },
+        { "LinearSizeAttributeData", Key::LinearSizeAttrData },
+    };
+
+} // namespace
+
+bool hasStorageKey(const std::string& key) {
+    return _keyStringFromKey.count(key) > 0;
+}
+
+Key getStorageKey(const std::string& key) {
+    if (hasStorageKey(key)) {
+        return _keyStringFromKey.at(key);
+    }
+
+    return Key::Unknown;
+}
+
+std::string getStorageKeyString(const Key key) {
+    auto it = std::find_if(
+        _keyStringFromKey.begin(),
+        _keyStringFromKey.end(),
+        [key](const std::pair<const std::string, Key>& p) {
+            return key == p.second;
+        }
+    );
+    if (it == _keyStringFromKey.end()) return "";
+    return it->first;
+}
+
+} // namespace softwareintegration::storage
 
 using namespace softwareintegration;
 

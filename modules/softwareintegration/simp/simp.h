@@ -27,28 +27,8 @@
 
 #include <unordered_map>
 
-namespace openspace::softwareintegration {
+namespace openspace::softwareintegration::simp {
 
-namespace storage {
-
-enum class Key : uint8_t {
-    DataPoints = 0,
-    VelocityData,
-    Colormap,
-    ColormapAttrData,
-    LinearSizeAttrData,
-    Unknown
-};
-
-Key getStorageKey(const std::string& key);
-
-std::string getStorageKeyString(const Key key);
-
-bool hasStorageKey(const std::string& key);
-
-} // namespace storage
-
-namespace simp {
 
 namespace {
 
@@ -189,10 +169,9 @@ void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, const std:
 void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, const std::vector<std::byte>& value);
 void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, const std::vector<std::byte>& value);
 
-} // namespace simp
 
-} // namespace openspace::softwareintegration
+} // namespace openspace::softwareintegration::simp
 
-#include "utils.inl"
+#include "simp.inl"
 
 #endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__

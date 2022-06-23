@@ -26,16 +26,20 @@
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <modules/softwareintegration/syncablestorage.h>
+#include <modules/softwareintegration/utils/syncablestorage.h>
 #include <openspace/documentation/documentation.h>
 #include <modules/softwareintegration/network/network.h>
 
 namespace openspace {
 
-class AssetHelper;
+namespace softwareintegration {
+
+class Session;
+
+} // namespace softwareintegration
 
 class SoftwareIntegrationModule : public OpenSpaceModule {
-    friend class AssetHelper;
+    friend class softwareintegration::Session;
 
 public:
     constexpr static const char* Name = "SoftwareIntegration";

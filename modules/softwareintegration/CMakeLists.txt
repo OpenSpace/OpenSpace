@@ -27,31 +27,31 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/messagehandler.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/messagehandler.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/messagehandler.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/messagehandler.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/network/network.h
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/utils.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/syncablestorage.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/syncablestorage.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/interruptibleconcurrentqueue.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/interruptibleconcurrentqueue.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/assethelper.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/simp/simp.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/simp/simp.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/syncablestorage.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/syncablestorage.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/interruptibleconcurrentqueue.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/interruptibleconcurrentqueue.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/session/session.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule_lua.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/messagehandler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/network/messagehandler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/network/network.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/network/softwareconnection.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/syncablestorage.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/assethelper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/simp/simp.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/syncablestorage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/session/session.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

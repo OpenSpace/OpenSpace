@@ -25,7 +25,6 @@
 #include <modules/softwareintegration/network/softwareconnection.h>
 
 #include <modules/softwareintegration/network/network.h>
-#include <modules/softwareintegration/utils.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>

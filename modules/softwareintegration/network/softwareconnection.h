@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWARECONNECTION___H__
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWARECONNECTION___H__
 
-#include <modules/softwareintegration/utils.h>
+#include <modules/softwareintegration/simp/simp.h>
 #include <openspace/network/messagestructures.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <openspace/properties/property.h>

@@ -27,12 +27,31 @@
 
 
 #include <openspace/util/syncable.h>
-#include <modules/softwareintegration/utils.h>
+#include <modules/softwareintegration/simp/simp.h>
 
 #include <mutex>
 #include <unordered_map>
 
 namespace openspace {
+
+namespace softwareintegration::storage {
+
+enum class Key : uint8_t {
+    DataPoints = 0,
+    VelocityData,
+    Colormap,
+    ColormapAttrData,
+    LinearSizeAttrData,
+    Unknown
+};
+
+Key getStorageKey(const std::string& key);
+
+std::string getStorageKeyString(const Key key);
+
+bool hasStorageKey(const std::string& key);
+
+} // namespace softwareintegration::storage
 
 using namespace softwareintegration;
 

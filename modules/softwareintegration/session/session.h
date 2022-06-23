@@ -22,25 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___ASSETHELPER___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___ASSETHELPER___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSESSION___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSESSION___H__
 
 namespace openspace {
 
 class SoftwareIntegrationModule;
 
-class AssetHelper {
+namespace softwareintegration {
+
+class Session {
 public:
-    AssetHelper() = delete;
+    Session() = delete;
 
     static bool loadSessionData(SoftwareIntegrationModule* module,
-                         const std::string& filePathString,
-                         std::string& errorMessage);
+                                const std::string& filePathString,
+                                std::string& errorMessage);
 
     static bool saveSession(const std::string& wantedFileName, std::string& errorMessage);
 
 };
 
+}  // namespace softwareintegration
+
 }  // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___ASSETHELPER___H__
+#endif  // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSESSION___H__

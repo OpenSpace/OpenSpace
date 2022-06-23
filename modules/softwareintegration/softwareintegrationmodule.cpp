@@ -24,7 +24,7 @@
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 
-#include <modules/softwareintegration/messagehandler.h>
+#include <modules/softwareintegration/network/messagehandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>

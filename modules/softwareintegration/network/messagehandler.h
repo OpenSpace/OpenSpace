@@ -27,9 +27,10 @@
 
 #include <unordered_map>
 
-#include <openspace/properties/propertyowner.h>
-
 #include <modules/softwareintegration/network/softwareconnection.h>
+#include <modules/softwareintegration/utils/syncablestorage.h>
+
+#include <openspace/properties/propertyowner.h>
 
 namespace openspace::softwareintegration::messagehandler {
 

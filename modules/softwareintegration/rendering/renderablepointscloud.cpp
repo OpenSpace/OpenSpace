@@ -25,7 +25,7 @@
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
-#include <modules/softwareintegration/utils.h>
+#include <modules/softwareintegration/simp/simp.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>

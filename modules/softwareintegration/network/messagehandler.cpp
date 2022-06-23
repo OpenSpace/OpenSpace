@@ -22,10 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/softwareintegration/messagehandler.h>
-#include <modules/softwareintegration/softwareintegrationmodule.h>
-#include <modules/softwareintegration/utils.h>
+#include <modules/softwareintegration/network/messagehandler.h>
 
+#include <modules/softwareintegration/softwareintegrationmodule.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
