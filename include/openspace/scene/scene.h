@@ -261,7 +261,7 @@ public:
      *        properties in the currently-available properties
      * \return Vector of Property objs containing property names that matched the regex
      */
-    std::vector<properties::Property*> getPropertiesMatchingRegex(
+    std::vector<properties::Property*> propertiesMatchingRegex(
         std::string propertyString);
 
 private:

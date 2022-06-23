@@ -812,14 +812,10 @@ PropertyValueType Scene::propertyValueType(const std::string& value) {
     }
 }
 
-std::vector<properties::Property*> Scene::getPropertiesMatchingRegex(
+std::vector<properties::Property*> Scene::propertiesMatchingRegex(
                                                               std::string propertyString)
 {
-    return findMatchesInAllProperties(
-        propertyString,
-        allProperties(),
-        ""
-    );
+    return findMatchesInAllProperties(propertyString, allProperties(), "");
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {

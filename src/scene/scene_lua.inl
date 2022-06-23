@@ -208,9 +208,11 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
 
     const int type = lua_type(L, -1);
 
-    std::vector<properties::Property*> matchingProps = findMatchesInAllProperties(regex,
-                                                                              properties,
-                                                                              groupName);
+    std::vector<properties::Property*> matchingProps = findMatchesInAllProperties(
+        regex,
+        properties,
+        groupName
+    );
 
     // Stores whether we found at least one matching property. If this is false at the
     // end of the loop, the property name regex was probably misspelled.
