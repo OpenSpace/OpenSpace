@@ -55,6 +55,9 @@ const std::unordered_map<std::string, DataKey> _dataTypeFromString{
     { "vel.w", DataKey::W },
     { "vel.unit.dist", DataKey::VelocityDistanceUnit },
     { "vel.unit.time", DataKey::VelocityTimeUnit },
+    { "vel.t0.day", DataKey::VelocityDayRecorded },
+    { "vel.t0.month", DataKey::VelocityMonthRecorded },
+    { "vel.t0.year", DataKey::VelocityYearRecorded },
     { "vel.nan.mode", DataKey::VelocityNanMode },
     { "vel.enable", DataKey::VelocityEnabled },
     { "col.r", DataKey::Red },
@@ -91,31 +94,6 @@ const std::unordered_map<std::string, VelocityNanRenderMode> _velocityNanRenderM
     { "Hide", VelocityNanRenderMode::Hide },
     { "Static", VelocityNanRenderMode::Static },
 };
-
-// glm::vec4 readSingleColor(const std::vector<std::byte>& message, size_t& offset) {
-//     if (message[offset] != '[') {
-//         throw SimpError(
-//             tools::ErrorCode::Generic,
-//             fmt::format("Expected to read '[', got {} in 'readColor'", message[offset])
-//         );
-//     }
-//     ++offset;
-
-//     float r = readFloat32Value(message, offset);
-//     float g = readFloat32Value(message, offset);
-//     float b = readFloat32Value(message, offset);
-//     float a = readFloat32Value(message, offset);
-
-//     if (message[offset] != ']') {
-//         throw SimpError(
-//             tools::ErrorCode::Generic,
-//             fmt::format("Expected to read ']', got {} in 'readColor'", message[offset])
-//         );
-//     }
-//     ++offset;
-
-//     return { r, g, b, a };
-// }
 
 void checkOffset(const std::vector<std::byte>& message, size_t offset) {
     if (offset >= message.size()) {
@@ -292,6 +270,78 @@ std::string formatLengthOfSubject(size_t lengthOfSubject) {
     return os.str();
 }
 
+std::string yearIntToString(int32_t yearAsInt) {
+    // Only positive values for year possible since Time::convertTime 
+    // (used in RenderablePointsCloud::updateVelocityT0) just converts 
+    // negative values to small values
+    if (yearAsInt < 0) {
+        LERROR(fmt::format(
+            "The year can't be negative. The provided year: {}", 
+            yearAsInt
+        ));
+        return "";
+    }
+    return std::to_string(yearAsInt);
+}
+
+std::string monthIntToString(int32_t monthAsInt) {
+    switch (monthAsInt) {
+        case 1:
+            return "JAN";
+        case 2:
+            return "FEB";
+        case 3:
+            return "MAR";
+        case 4:
+            return "APR";
+        case 5:
+            return "MAY";
+        case 6:
+            return "JUN";
+        case 7:
+            return "JUL";
+        case 8:
+            return "AUG";
+        case 9:
+            return "SEP";
+        case 10:
+            return "OCT";
+        case 11:
+            return "NOV";
+        case 12:
+            return "DEC";
+        default:
+            LERROR(fmt::format("There's no month {}", monthAsInt));
+            return "";
+    }
+}
+
+std::string dayIntToString(int32_t dayAsInt) {
+    if (dayAsInt < 0 || dayAsInt > 31) {
+        LERROR(fmt::format(
+            "There was an issue trying to convert the day as int to a string. The provided day as int: {}", 
+            dayAsInt
+        ));
+        return "";
+    }
+
+    std::string dayAsString{};
+    if (dayAsInt < 10) dayAsString = "0";
+    dayAsString += std::to_string(dayAsInt);
+
+    return dayAsString;
+}
+
+std::string toDateString(glm::ivec3 dateVec) {
+    std::string dateString{};
+    dateString += simp::yearIntToString(dateVec[0]); // Year
+    dateString += " " + simp::monthIntToString(dateVec[1]); // Month
+    dateString += " " + simp::dayIntToString(dateVec[2]); // Day
+    LWARNING(fmt::format("dateString='{}'", dateString));
+
+    return dateString;
+}
+
 bool readColorChannel(
     const std::vector<std::byte>& message,
     size_t& offset,
@@ -311,6 +361,28 @@ bool readColorChannel(
         return false;
     }
     color[channel] = newChannelValue;
+
+    return true;
+}
+bool readDateValue(
+    const std::vector<std::byte>& message,
+    size_t& offset,
+    const DataKey& dataKey,
+    glm::ivec3& date,
+    const glm::ivec3::length_type& timeUnit
+) {
+    int32_t newTimeValue;
+    try {
+        simp::readValue(message, offset, newTimeValue);
+    }
+    catch (const simp::SimpError& err) {
+        LERROR(fmt::format(
+            "Error when parsing int in {} message: {}",
+            simp::getStringFromDataKey(dataKey), err.message
+        ));
+        return false;
+    }
+    date[timeUnit] = newTimeValue;
 
     return true;
 }

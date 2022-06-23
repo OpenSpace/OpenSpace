@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/ivec3property.h>
 #include <openspace/properties/optionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -74,6 +75,7 @@ private:
     void checkColormapMinMax();
     void checkIfColormapCanBeEnabled();
     void checkIfLinearSizeCanBeEnabled();
+    void updateVelocityT0();
     void checkIfMotionCanBeEnabled();
 
     bool shouldLoadPointData(SoftwareIntegrationModule* softwareIntegrationModule);
@@ -111,6 +113,7 @@ private:
     properties::BoolProperty _motionEnabled;
     properties::StringProperty _velocityDistanceUnit;
     properties::StringProperty _velocityTimeUnit;
+    properties::IVec3Property _velocityDateRecorded;
     properties::IntProperty _velocityNanMode;
     
     
@@ -123,6 +126,8 @@ private:
 
     bool _hasLoadedLinearSizeAttributeData = false;
     
+    double _t0 = 0.0;
+    bool _velocityDateIsDirty = false;
     bool _velocityUnitsAreDirty = false;
     bool _hasLoadedVelocityData = false;
 

@@ -61,6 +61,9 @@ enum class DataKey : uint16_t {
     W,
     VelocityDistanceUnit,
     VelocityTimeUnit,
+    VelocityDayRecorded,
+    VelocityMonthRecorded,
+    VelocityYearRecorded,
     VelocityNanMode,
     VelocityEnabled,
     // Color
@@ -138,6 +141,11 @@ VelocityNanRenderMode getVelocityNanRenderMode(const std::string& type);
 
 std::string formatLengthOfSubject(size_t lengthOfSubject);
 
+std::string yearIntToString(int32_t yearAsInt);
+std::string monthIntToString(int32_t monthAsInt);
+std::string dayIntToString(int32_t dayAsInt);
+std::string toDateString(glm::ivec3 dateVec);
+
 bool readColorChannel(
     const std::vector<std::byte>& message,
     size_t& offset,
@@ -145,6 +153,14 @@ bool readColorChannel(
     glm::vec4& color,
     const glm::vec4::length_type& channel
 );
+
+bool readDateValue(
+    const std::vector<std::byte>& message,
+    size_t& offset,
+    const DataKey& dataKey,
+    glm::ivec3& date,
+    const glm::ivec3::length_type& timeUnit
+); 
 
 template <typename T>
 T networkToHostEndian(T value);
