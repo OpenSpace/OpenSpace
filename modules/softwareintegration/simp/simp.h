@@ -29,7 +29,6 @@
 
 namespace openspace::softwareintegration::simp {
 
-
 namespace {
 
 const uint8_t _version_major = 1;
@@ -168,7 +167,6 @@ void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, cons
 void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, const std::string& value);
 void toByteBuffer(std::vector<std::byte>& byteBuffer, const size_t& offset, const std::vector<std::byte>& value);
 void toByteBuffer(std::vector<std::byte>& byteBuffer, size_t& offset, const std::vector<std::byte>& value);
-
 
 } // namespace openspace::softwareintegration::simp
 

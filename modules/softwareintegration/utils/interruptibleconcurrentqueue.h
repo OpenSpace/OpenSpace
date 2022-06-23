@@ -46,7 +46,6 @@ private:
     mutable std::condition_variable _notifyForPop;
 };
 
-
 } // namespace openspace
 
 #include "interruptibleconcurrentqueue.inl"
