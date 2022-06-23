@@ -35,6 +35,7 @@ set(SOURCE_FILES
   rendering/renderablemolecule.cpp
   rendering/viamd/coloring.cpp
   rendering/viamd/color_utils.cpp
+  rendering/viamd/loader.cpp
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})

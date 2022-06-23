@@ -25,6 +25,7 @@
 #include "glbinding/gl/bitfield.h"
 #include "glbinding/gl/functions.h"
 #include "viamd/coloring.h"
+#include "viamd/loader.h"
 #include <modules/molecule/rendering/renderablemolecule.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -84,6 +85,7 @@ namespace {
     constexpr const char* _loggerCat = "RenderableMolecule";
 
     enum class MoleculeType {
+        Auto,
         Pdb,
         Gro,
         Xyz,
@@ -109,19 +111,19 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
-        "file",
+        "File",
         "Molecule File",
         "File path or URL to a molecule file"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoleculeTypeInfo = {
-        "moleculeType",
+        "MoleculeType",
         "Molecule Type",
         "Type of molecule file"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IsUrlInfo = {
-        "isUrl",
+        "IsUrl",
         "Is URL",
         "Whether the Molecule File is a URL or a local path"
     };
@@ -149,6 +151,7 @@ namespace {
         std::string fileOrUrl;
 
         enum class [[codegen::map(MoleculeType)]] MoleculeType {
+            Auto,
             Pdb,
             Gro,
             Xyz,
@@ -214,6 +217,7 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     _drawRep = {};
     
     _moleculeType.addOptions({
+        { static_cast<int>(MoleculeType::Auto), "Auto" },
         { static_cast<int>(MoleculeType::Pdb), "PDB" },
         { static_cast<int>(MoleculeType::Gro), "GRO" },
         { static_cast<int>(MoleculeType::Xyz), "XYZ" },
@@ -246,9 +250,7 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     if (p.moleculeType.has_value()) {
         _moleculeType = static_cast<int>(codegen::map<MoleculeType>(*p.moleculeType));
     } else {
-        // TODO: find molecule type automatically based on file extension when property
-        // is unset.
-        _moleculeType = static_cast<int>(MoleculeType::Pdb);
+        _moleculeType = static_cast<int>(MoleculeType::Auto);
     }
 
     if (p.repType.has_value()) {
@@ -399,6 +401,15 @@ void RenderableMolecule::initMolecule(std::string_view data) {
     case MoleculeType::Xyz:
         api = md_xyz_molecule_api();
         break;
+    case MoleculeType::Auto:
+        std::string filename = _fileOrUrl;
+        api = load::mol::get_api(str_from_cstr(filename.c_str()));
+      break;
+    }
+    
+    if (!api) {
+        LERROR("failed to initialize molecule: unknown file type");
+        return;
     }
 
     api->init_from_str(&_molecule, { data.data(), static_cast<int64_t>(data.size()) }, default_allocator);
