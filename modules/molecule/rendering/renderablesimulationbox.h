@@ -22,31 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/molecule/moleculemodule.h>
+#ifndef __OPENSPACE_MODULE_MOLECULE___RENDERABLESIMULATIONBOX___H__
+#define __OPENSPACE_MODULE_MOLECULE___RENDERABLESIMULATIONBOX___H__
 
-#include <modules/molecule/rendering/renderablemolecule.h>
-#include <modules/molecule/rendering/renderablesimulationbox.h>
-#include <openspace/documentation/documentation.h>
+#include "renderablemolecule.h"
+#include "openspace/properties/optionproperty.h"
+#include "openspace/properties/selectionproperty.h"
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
+
+//#include <openspace/properties/scalar/floatproperty.h>
+//#include <openspace/properties/vector/vec3property.h>
+//#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+//#include <ghoul/opengl/ghoul_gl.h>
+//#include <ghoul/opengl/uniformcache.h>
+
+
+#include <md_gl.h>
+#include <md_molecule.h>
+#include <md_trajectory.h>
 
 namespace openspace {
 
-MoleculeModule::MoleculeModule() : OpenSpaceModule(Name) {}
+struct RenderData;
+class HttpMemoryDownload;
 
-void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableMolecule>("RenderableMolecule");
-    fRenderable->registerClass<RenderableSimulationBox>("RenderableSimulationBox");
-}
+class RenderableSimulationBox : public Renderable {
+public:
+    explicit RenderableSimulationBox(const ghoul::Dictionary& dictionary);
 
-std::vector<documentation::Documentation> MoleculeModule::documentations() const {
-    return {
-        RenderableMolecule::Documentation(),
-    };
-}
+    void initialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+    bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
+    void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
+
+private:
+  unsigned width, height;
+  
+  struct molecule_t {
+    std::unique_ptr<RenderableMolecule> renderable;
+    glm::dvec3 position;
+    double angle;
+    glm::dvec3 direction; // moving direction where magnitude is linear velocity
+    glm::dvec3 rotation;  // rotation axis where magnitude is angular velocity
+  };
+    
+  std::vector<molecule_t> _molecules;
+  
+  properties::StringProperty _moleculeFile;
+  properties::StringProperty _trajectoryFile;
+  properties::IntProperty _moleculeCount;
+  properties::FloatProperty _linearVelocity;
+  properties::FloatProperty _angularVelocity;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_MOLECULE___RENDERABLESIMULATIONBOX___H__
+

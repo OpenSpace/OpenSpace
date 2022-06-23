@@ -17,19 +17,28 @@ local moleculeFiles = asset.syncedResource({
   }
 })
 
+-- local PdbTest = {
+--   Identifier = "PdbTest",
+--   -- Parent = sunTransforms.SunCenter.Identifier,
+--   Renderable = {
+--     Type = "RenderableMolecule",
+--     MoleculeFile = moleculeFiles .. "1mh1.pdb",
+--     -- TrajectoryFile = moleculeFiles .. "centered.xtc",
+--   },
+--   GUI = {
+--     Path = "/Microcosmos/Molecules/Simulation"
+--   }
+-- }
+
 local PdbTest = {
   Identifier = "PdbTest",
   -- Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
-    Type = "RenderableMolecule",
+    Type = "RenderableSimulationBox",
     MoleculeFile = moleculeFiles .. "1mh1.pdb",
-    -- TrajectoryFile = moleculeFiles .. "centered.xtc",
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1,
-    }
+    MoleculeCount = 10,
+    LinearVelocity = 1.0,
+    AngularVelocity = 10.0 / 360.0 * 3.14,
   },
   GUI = {
     Path = "/Microcosmos/Molecules/Simulation"

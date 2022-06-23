@@ -27,12 +27,14 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
   moleculemodule.h  
   rendering/renderablemolecule.h
+  rendering/renderablesimulationbox.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   moleculemodule.cpp
   rendering/renderablemolecule.cpp
+  rendering/renderablesimulationbox.cpp
   rendering/viamd/coloring.cpp
   rendering/viamd/color_utils.cpp
   rendering/viamd/loader.cpp
