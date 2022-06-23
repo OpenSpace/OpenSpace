@@ -253,6 +253,17 @@ public:
      */
     void setPropertiesFromProfile(const Profile& p);
 
+    /**
+     * Searches for any properties that match the regex propertyString, and returns
+     * the results in a vector.
+     *
+     * \param propertyString the regex string that is intended to match one or more
+     *        properties in the currently-available properties
+     * \return Vector of Property objs containing property names that matched the regex
+     */
+    std::vector<properties::Property*> propertiesMatchingRegex(
+        std::string propertyString);
+
 private:
     /**
      * Accepts string version of a property value from a profile, converts it to the
