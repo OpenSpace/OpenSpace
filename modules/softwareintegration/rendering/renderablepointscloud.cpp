@@ -674,10 +674,15 @@ void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareInt
     }
 
     // Convert to meters if needed
+    int nNans = 0;
     if (pointUnit != DistanceUnit::Meter) {
         float toMeters = static_cast<float>(toMeter(pointUnit));
-        for (auto& point : pointData) {
-            point *= toMeters;
+        for (auto& value : pointData) {
+            if (isnan(value)) {
+                nNans++;
+                continue;
+            }
+            value *= toMeters;
         }
     }
     
@@ -687,7 +692,11 @@ void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareInt
     pointDataSlice->assign(pointData.begin(), pointData.end());
 
     softwareIntegrationModule->setDataLoaded(_identifier.value(), storage::Key::DataPoints);
-    LDEBUG("New point data has loaded");
+    LINFO(fmt::format(
+        "New point data ({} points) has loaded. {} values are NaN values. "
+        "Point's with at least one NaN value are hidden.", 
+        (pointData.size() / 3), nNans
+    ));
 }
 
 void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* softwareIntegrationModule) {
@@ -746,7 +755,10 @@ void RenderablePointsCloud::loadVelocityData(SoftwareIntegrationModule* software
     // Check for NaN values and convert to m/s if needed
     int nNans = 0;
     for (auto& v : velocityData) {
-        if (isnan(v)) nNans++;
+        if (isnan(v)) {
+            nNans++;
+            continue;
+        }
         if (conversionNeeded) {
             v *= toMeters / toSeconds;
         }

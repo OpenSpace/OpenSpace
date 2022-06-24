@@ -50,7 +50,6 @@ void main() {
     vs_velocity = in_velocity;
     bool velocityIsNan = (isnan(in_velocity[0]) || isnan(in_velocity[1]) || isnan(in_velocity[2]));
     if (motionEnabled && !velocityIsNan) {
-        // TODO: Need to subtract with t = 0 (when the position was measured)
         objectPosition.xyz += time * in_velocity; 
     }
 
