@@ -97,6 +97,7 @@ private:
     properties::FloatProperty _size;
     properties::Vec4Property _color;
     properties::StringProperty _pointUnit;
+    properties::StringProperty _positionCoordSystem;
 
     properties::OptionProperty _sizeOption;
     properties::BoolProperty _linearSizeEnabled;
@@ -120,6 +121,7 @@ private:
     std::optional<std::string> _identifier = std::nullopt;
 
     bool _pointUnitIsDirty = false;
+    bool _positionCoordSystemIsDirty = false;
 
     bool _hasLoadedColormapAttributeData = false;
     bool _hasLoadedColormap = false;

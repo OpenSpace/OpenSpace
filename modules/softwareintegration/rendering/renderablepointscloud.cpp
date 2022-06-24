@@ -43,6 +43,9 @@
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
 
+
+const std::string STRING_NOT_SET = "<string not set>";
+
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
@@ -76,6 +79,12 @@ namespace {
         "PointUnit",
         "Point Unit",
         "The distance unit of the point data."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo PositionCoordSystemInfo = {
+        "PositionCoordSystem",
+        "Position Coordinate System",
+        "The coordinate system of the point data."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
@@ -181,6 +190,9 @@ namespace {
         // [[codegen::verbatim(PointUnitInfo.description)]]
         std::optional<std::string> pointUnit;
 
+        // [[codegen::verbatim(PositionCoordSystemInfo.description)]]
+        std::optional<std::string> positionCoordSystem;
+
         // [[codegen::verbatim(ColormapMinInfo.description)]]
         std::optional<float> colormapMin;
 
@@ -246,7 +258,8 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(0.f), glm::vec4(1.f), glm::vec4(.01f))
     , _size(SizeInfo, 1.f, 0.f, 500.f, .1f)
-    , _pointUnit(PointUnitInfo, "<no unit set>")
+    , _pointUnit(PointUnitInfo, STRING_NOT_SET)
+    , _positionCoordSystem(PositionCoordSystemInfo, STRING_NOT_SET)
     , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _colormapMin(ColormapMinInfo)
     , _colormapMax(ColormapMaxInfo)
@@ -256,8 +269,8 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _linearSizeMax(LinearSizeMinInfo)
     , _linearSizeMin(LinearSizeMaxInfo)
     , _linearSizeEnabled(LinearSizeEnabledInfo, false)
-    , _velocityDistanceUnit(VelocityDistanceUnitInfo, "<no unit set>")
-    , _velocityTimeUnit(VelocityTimeUnitInfo, "<no unit set>")
+    , _velocityDistanceUnit(VelocityDistanceUnitInfo, STRING_NOT_SET)
+    , _velocityTimeUnit(VelocityTimeUnitInfo, STRING_NOT_SET)
     , _velocityDateRecorded(VelocityDateRecordedInfo, glm::ivec3{ -1 })
     , _velocityNanMode(VelocityNanModeInfo)
     , _name(NameInfo)
@@ -298,6 +311,11 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _pointUnit.setVisibility(properties::Property::Visibility::Hidden);
     _pointUnit.onChange([this] { _pointUnitIsDirty = true; });
     addProperty(_pointUnit);
+
+    _positionCoordSystem = p.positionCoordSystem.value_or(_positionCoordSystem);
+    _positionCoordSystem.setVisibility(properties::Property::Visibility::Hidden);
+    _positionCoordSystem.onChange([this] { _positionCoordSystemIsDirty = true; });
+    addProperty(_positionCoordSystem);
 
     // =============== Colormap ===============
     _colormapMin = p.colormapMin.value_or(_colormapMin);
@@ -626,6 +644,7 @@ bool RenderablePointsCloud::checkDataStorage() {
         loadPointData(softwareIntegrationModule);
         updatedDataSlices = true;
         _pointUnitIsDirty = false;
+        _positionCoordSystemIsDirty = false;
     }
 
     if (shouldLoadColormap(softwareIntegrationModule)) {
@@ -653,8 +672,33 @@ bool RenderablePointsCloud::checkDataStorage() {
 
 void RenderablePointsCloud::loadPointData(SoftwareIntegrationModule* softwareIntegrationModule) {
     // Fetch point data from module's centralized storage
-    std::vector<float> pointData; 
-    if (!softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::DataPoints, pointData)) {
+    ghoul::Dictionary additionalInfo;
+    switch (simp::getCoordSystem(_positionCoordSystem)) {
+        case simp::CoordSystem::Cartesian: {
+            additionalInfo.setValue(
+                "CoordSystem", 
+                simp::getStringFromCoordSystem(simp::CoordSystem::Cartesian)
+            );
+            break;
+        }
+        case simp::CoordSystem::ICRS: {
+            additionalInfo.setValue(
+                "CoordSystem", 
+                simp::getStringFromCoordSystem(simp::CoordSystem::ICRS)
+            );
+            break;
+        }
+        default: { // Unknown
+            LERROR(fmt::format(
+                "Could not find any coordinate system '{}'",
+                _positionCoordSystem
+            ));
+            return;
+        }
+    }
+    
+    std::vector<float> pointData;
+    if (!softwareIntegrationModule->fetchData(_identifier.value(), storage::Key::DataPoints, pointData, additionalInfo)) {
         LERROR("There was an issue trying to fetch the point data from the centralized storage.");
         return;
     }
@@ -938,9 +982,11 @@ bool RenderablePointsCloud::shouldLoadPointData(SoftwareIntegrationModule* softw
     return (
         (
             _pointUnitIsDirty
+            || _positionCoordSystemIsDirty
             || softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::DataPoints)
         )
-        && _pointUnit.value() != "<no unit set>"
+        && _pointUnit.value() != STRING_NOT_SET
+        && _positionCoordSystem.value() != STRING_NOT_SET
     );
 }
 
@@ -950,8 +996,8 @@ bool RenderablePointsCloud::shouldLoadVelocityData(SoftwareIntegrationModule* so
             _velocityUnitsAreDirty
             || softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::VelocityData)
         ) 
-        && _velocityDistanceUnit.value() != "<no unit set>"
-        && _velocityTimeUnit.value() != "<no unit set>"
+        && _velocityDistanceUnit.value() != STRING_NOT_SET
+        && _velocityTimeUnit.value() != STRING_NOT_SET
     );
 }
 

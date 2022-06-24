@@ -49,7 +49,11 @@ const std::unordered_map<std::string, DataKey> _dataTypeFromString{
     { "pos.x", DataKey::X },
     { "pos.y", DataKey::Y },
     { "pos.z", DataKey::Z },
+    { "pos.ra", DataKey::RA },
+    { "pos.dec", DataKey::Dec },
+    { "pos.dist", DataKey::Distance },
     { "pos.unit", DataKey::PointUnit },
+    { "pos.coordsys", DataKey::PositionCoordSystem },
     { "vel.u", DataKey::U },
     { "vel.v", DataKey::V },
     { "vel.w", DataKey::W },
@@ -83,6 +87,11 @@ const std::unordered_map<std::string, DataKey> _dataTypeFromString{
     { "lsize.max", DataKey::LinearSizeMax },
     { "lsize.attr", DataKey::LinearSizeAttributeData },
     { "vis.val", DataKey::Visibility },
+};
+
+const std::unordered_map<std::string, CoordSystem> _coordSystemFromString {
+    { "Cartesian", CoordSystem::Cartesian },
+    { "ICRS", CoordSystem::ICRS },
 };
 
 const std::unordered_map<std::string, ColormapNanRenderMode> _colormapNanRenderModeFromString {
@@ -250,6 +259,29 @@ std::string getStringFromDataKey(const DataKey& key) {
         }
     );
     if (it == _dataTypeFromString.end()) return "";
+    return it->first;
+}
+
+bool hasCoordSystem(const std::string& key) {
+    return _coordSystemFromString.count(key) > 0;
+}
+
+CoordSystem getCoordSystem(const std::string& key) {
+    if (hasCoordSystem(key)) {
+        return _coordSystemFromString.at(key);
+    }
+    return CoordSystem::Unknown;
+}
+
+std::string getStringFromCoordSystem(const CoordSystem& key) {
+    auto it = std::find_if(
+        _coordSystemFromString.begin(),
+        _coordSystemFromString.end(),
+        [key](const std::pair<const std::string, CoordSystem>& p) {
+            return key == p.second;
+        }
+    );
+    if (it == _coordSystemFromString.end()) return "";
     return it->first;
 }
 

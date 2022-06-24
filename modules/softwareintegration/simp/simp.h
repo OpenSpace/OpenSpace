@@ -54,7 +54,11 @@ enum class DataKey : uint16_t {
     X = 0,
     Y,
     Z,
+    RA,
+    Dec,
+    Distance,
     PointUnit,
+    PositionCoordSystem,
     // Velocity
     U,
     V,
@@ -97,6 +101,12 @@ enum class DataKey : uint16_t {
     Unknown
 };
 
+enum class CoordSystem : uint8_t {
+    Cartesian = 0,
+    ICRS,
+    Unknown
+};
+
 enum class ColormapNanRenderMode {
     Hide = 0,
     FixedColor,
@@ -134,6 +144,10 @@ std::string getStringFromMessageType(const MessageType& type);
 DataKey getDataKey(const std::string& type);
 
 std::string getStringFromDataKey(const DataKey& type);
+
+CoordSystem getCoordSystem(const std::string& type);
+
+std::string getStringFromCoordSystem(const CoordSystem& type);
 
 ColormapNanRenderMode getColormapNanRenderMode(const std::string& type);
 

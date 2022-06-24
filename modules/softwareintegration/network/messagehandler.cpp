@@ -609,6 +609,9 @@ void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<So
         if (dataKey == simp::DataKey::X
             || dataKey == simp::DataKey::Y
             || dataKey == simp::DataKey::Z
+            || dataKey == simp::DataKey::RA
+            || dataKey == simp::DataKey::Dec
+            || dataKey == simp::DataKey::Distance
             || dataKey == simp::DataKey::U
             || dataKey == simp::DataKey::V
             || dataKey == simp::DataKey::W
@@ -666,6 +669,9 @@ void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<So
 
         if (dataKey == simp::DataKey::PointUnit) {
             if (!handleStringValue(message, offset, identifier, dataKey, "PointUnit")) break;
+        }
+        else if (dataKey == simp::DataKey::PositionCoordSystem) {
+            if (!handleStringValue(message, offset, identifier, dataKey, "PositionCoordSystem")) break;
         }
         // Handle fixed color
         else if (dataKey == simp::DataKey::Red) {

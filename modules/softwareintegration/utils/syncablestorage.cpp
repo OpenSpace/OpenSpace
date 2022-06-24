@@ -25,6 +25,7 @@
 #include <modules/softwareintegration/utils/syncablestorage.h>
 
 #include <openspace/util/syncbuffer.h>
+#include <openspace/util/coordinateconversion.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -244,6 +245,33 @@ void SyncableStorage::insertAssign(const Identifier& identifier, const simp::Dat
     }
 }
 
+// ghoul::Dictionary getDataKeysAdditionalInfo(const storage::Key storageKey) {
+//     ghoul::Dictionary additionalInfo;
+//     switch () {
+//         case simp::CoordSystem::Cartesian: {
+//             additionalInfo.setValue(
+//                 "CoordSystem", 
+//                 simp::getStringFromCoordSystem(simp::CoordSystem::Cartesian)
+//             );
+//             break;
+//         }
+//         case simp::CoordSystem::ICRS: {
+//             additionalInfo.setValue(
+//                 "CoordSystem", 
+//                 simp::getStringFromCoordSystem(simp::CoordSystem::ICRS)
+//             );
+//             break;
+//         }
+//         default: { // Unknown
+//             LERROR(fmt::format(
+//                 "Could not find any coordinate system '{}'",
+//                 _positionCoordSystem
+//             ));
+//             return;
+//         }
+//     }
+// }
+
 size_t SyncableStorage::count(const Identifier& identifier) {
     return _storage.count(identifier);
 }
@@ -255,10 +283,34 @@ size_t SyncableStorage::count(const Identifier& identifier, const simp::DataKey 
     return sceneIt->second.count(key);
 }
 
-std::vector<simp::DataKey> SyncableStorage::simpDataKeysFromStorageKey(const storage::Key key) {
+std::vector<simp::DataKey> SyncableStorage::simpDataKeysFromStorageKey(
+    const storage::Key key,
+    const ghoul::Dictionary& additionalInfo
+) {
     switch (key) {
         case storage::Key::DataPoints: {
-            return { simp::DataKey::X, simp::DataKey::Y, simp::DataKey::Z };
+            if (!additionalInfo.hasKey("CoordSystem")) {
+                LERROR(fmt::format(
+                    "A coordinate system is needed to load point data from syncable storage."
+                ));
+                return {};
+            }
+            
+            std::string coordSystemString = additionalInfo.value<std::string>("CoordSystem");
+            simp::CoordSystem coordSystem = simp::getCoordSystem(coordSystemString);
+            switch (coordSystem) {
+                case simp::CoordSystem::Cartesian:
+                    return { simp::DataKey::X, simp::DataKey::Y, simp::DataKey::Z };
+                case simp::CoordSystem::ICRS:
+                    return { simp::DataKey::RA, simp::DataKey::Dec, simp::DataKey::Distance };
+                default: { // simp::CoordSystem::Unknown
+                    LERROR(fmt::format(
+                        "Could not find the coordinate system '{}'.",
+                        coordSystemString
+                    ));
+                    return {};
+                }
+            }
         }
         case storage::Key::VelocityData:{
             return { simp::DataKey::U, simp::DataKey::V, simp::DataKey::W };
@@ -392,6 +444,52 @@ bool SyncableStorage::fetchDimFloatData(
     }
 
     return true;
+}
+
+bool SyncableStorage::fetchPositionData(
+    const Identifier& identifier,
+    const storage::Key storageKey,
+    std::vector<float>& resultingData,
+    const ghoul::Dictionary& additionalInfo
+) {
+    if (!additionalInfo.hasKey("CoordSystem")) {
+        LERROR(fmt::format(
+            "A coordinate system is needed to load point data from syncable storage."
+        ));
+        return false;
+    }
+    
+    std::string coordSystemString = additionalInfo.value<std::string>("CoordSystem");
+    simp::CoordSystem coordSystem = simp::getCoordSystem(coordSystemString);
+    bool success = fetchDimFloatData(identifier, simpDataKeysFromStorageKey(storageKey, additionalInfo), resultingData);
+    if (!success) return false;
+    
+    switch (coordSystem) {
+        case simp::CoordSystem::Cartesian:
+            return success;
+        case simp::CoordSystem::ICRS: {
+            // Convert (RA, Dec, Distance) => (X, Y, Z)
+            for (size_t i = 0; i < resultingData.size()/3; i += 3) {
+                double ra = resultingData[i];
+                double dec = resultingData[i + 1];
+                double dist = resultingData[i + 2];
+                glm::dvec3 pos = icrsToGalacticCartesian(ra, dec, dist);
+                resultingData[i] = static_cast<float>(pos.x);
+                resultingData[i + 1] = static_cast<float>(pos.y);
+                resultingData[i + 2] = static_cast<float>(pos.z);
+            }
+            
+            // TODO: Check for errors
+            return true;
+        }
+        default: { // simp::CoordSystem::Unknown
+            LERROR(fmt::format(
+                "Could not find the coordinate system '{}' when trying to fetch data from syncable storage",
+                coordSystemString
+            ));
+            return false;
+        }
+    }
 }
 
 /* ================================================== */

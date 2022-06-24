@@ -30,7 +30,8 @@ template<typename T>
 bool SyncableStorage::fetch(
     const Identifier& identifier,
     const storage::Key storageKey,
-    T& resultingData
+    T& resultingData,
+    const ghoul::Dictionary& additionalInfo
 ) {
     LDEBUGC("SyncableStorage", fmt::format("Loading data from float data storage: {}-{}", identifier, storage::getStorageKeyString(storageKey)));
     std::lock_guard guard(_mutex);
@@ -42,8 +43,11 @@ bool SyncableStorage::fetch(
         return false;
     }
 
+    LERRORC("SyncableStorage", fmt::format("stroageKey={}", storage::getStorageKeyString(storageKey)));
     switch (storageKey) {
-        case storage::Key::DataPoints:
+        case storage::Key::DataPoints: {
+            return fetchPositionData(identifier, storageKey, resultingData, additionalInfo);
+        }
         case storage::Key::Colormap:
         case storage::Key::ColormapAttrData:
         case storage::Key::LinearSizeAttrData:
@@ -55,7 +59,10 @@ bool SyncableStorage::fetch(
                 ));
                 return false;
             }
-
+            // std::vector<simp::DataKey> simpDataKeys = simpDataKeysFromStorageKey(storageKey, additionalInfo);
+            // if (simpDataKeys.size() < 1) {
+            //     return false;
+            // }
             return fetchDimFloatData(identifier, simpDataKeysFromStorageKey(storageKey), resultingData);
         }
         default: {

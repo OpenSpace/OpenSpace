@@ -28,9 +28,10 @@ template <typename T>
 bool SoftwareIntegrationModule::fetchData(
     const SyncableStorage::Identifier& identifier,
     const storage::Key key,
-    T& resultingData
+    T& resultingData,
+    const ghoul::Dictionary& additionalInfo
 ) {
-    return _syncableStorage.fetch(identifier, key, resultingData);
+    return _syncableStorage.fetch(identifier, key, resultingData, additionalInfo);
 }
 
 } // namespace openspace

@@ -29,6 +29,8 @@
 #include <openspace/util/syncable.h>
 #include <modules/softwareintegration/simp/simp.h>
 
+#include <ghoul/misc/dictionary.h>
+
 #include <mutex>
 #include <unordered_map>
 
@@ -81,7 +83,8 @@ public:
     bool fetch(
         const Identifier& identifier,
         const storage::Key storageKey,
-        T& resultingData
+        T& resultingData,
+        const ghoul::Dictionary& additionalInfo
     );
     void setLoaded(const Identifier& identifier, const storage::Key storageKey); 
     bool hasLoaded(const Identifier& identifier, const storage::Key storageKey); 
@@ -97,13 +100,25 @@ public:
 private:
     /* =============== Utility functions ================ */
     void insertAssign(const Identifier& identifier, const simp::DataKey key, const Value& value);
+    
     size_t count(const Identifier& identifier);
     size_t count(const Identifier& identifier, const simp::DataKey key);
-    std::vector<simp::DataKey> simpDataKeysFromStorageKey(const storage::Key key);
+    
+    std::vector<simp::DataKey> simpDataKeysFromStorageKey(
+        const storage::Key key, 
+        const ghoul::Dictionary& additionalInfo = {}
+    );
     bool fetchDimFloatData(
         const Identifier& identifier, 
         const std::vector<simp::DataKey> dimDataKeys,
         std::vector<float>& resultingData
+    );
+    bool fetchPositionData(
+        const Identifier& identifier, 
+        // const std::vector<simp::DataKey> dimDataKeys,
+        const storage::Key key,
+        std::vector<float>& resultingData,
+        const ghoul::Dictionary& additionalInfo
     );
     /* ================================================== */
 

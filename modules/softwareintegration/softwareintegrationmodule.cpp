@@ -66,9 +66,10 @@ void SoftwareIntegrationModule::storeData(
 
 bool SoftwareIntegrationModule::isDataDirty(
     const SyncableStorage::Identifier& identifier,
-    const storage::Key key
+    const storage::Key key,
+    const ghoul::Dictionary& additionalInfo 
 ) {
-    return _syncableStorage.isDirty(identifier, key);
+    return _syncableStorage.isDirty(identifier, key, additionalInfo);
 }
 
 void SoftwareIntegrationModule::setDataLoaded(

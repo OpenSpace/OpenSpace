@@ -56,11 +56,13 @@ public:
     bool fetchData(
         const SyncableStorage::Identifier& identifier,
         const storage::Key key,
-        T& resultingData
+        T& resultingData,
+        const ghoul::Dictionary& additionalInfo = {}
     );
     bool isDataDirty(
         const SyncableStorage::Identifier& identifier,
-        const storage::Key key
+        const storage::Key key,
+        const ghoul::Dictionary& additionalInfo = {}
     );
     void setDataLoaded(
         const SyncableStorage::Identifier& identifier,
