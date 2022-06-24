@@ -43,6 +43,9 @@
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
 
+
+const std::string STRING_NOT_SET = "<string not set>";
+
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
@@ -246,7 +249,7 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec4(glm::vec3(0.5f), 1.f), glm::vec4(0.f), glm::vec4(1.f), glm::vec4(.01f))
     , _size(SizeInfo, 1.f, 0.f, 500.f, .1f)
-    , _pointUnit(PointUnitInfo, "<no unit set>")
+    , _pointUnit(PointUnitInfo, STRING_NOT_SET)
     , _sizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _colormapMin(ColormapMinInfo)
     , _colormapMax(ColormapMaxInfo)
@@ -256,8 +259,8 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _linearSizeMax(LinearSizeMinInfo)
     , _linearSizeMin(LinearSizeMaxInfo)
     , _linearSizeEnabled(LinearSizeEnabledInfo, false)
-    , _velocityDistanceUnit(VelocityDistanceUnitInfo, "<no unit set>")
-    , _velocityTimeUnit(VelocityTimeUnitInfo, "<no unit set>")
+    , _velocityDistanceUnit(VelocityDistanceUnitInfo, STRING_NOT_SET)
+    , _velocityTimeUnit(VelocityTimeUnitInfo, STRING_NOT_SET)
     , _velocityDateRecorded(VelocityDateRecordedInfo, glm::ivec3{ -1 })
     , _velocityNanMode(VelocityNanModeInfo)
     , _name(NameInfo)
@@ -952,7 +955,7 @@ bool RenderablePointsCloud::shouldLoadPointData(SoftwareIntegrationModule* softw
             _pointUnitIsDirty
             || softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::DataPoints)
         )
-        && _pointUnit.value() != "<no unit set>"
+        && _pointUnit.value() != STRING_NOT_SET
     );
 }
 
@@ -962,8 +965,8 @@ bool RenderablePointsCloud::shouldLoadVelocityData(SoftwareIntegrationModule* so
             _velocityUnitsAreDirty
             || softwareIntegrationModule->isDataDirty(_identifier.value(), storage::Key::VelocityData)
         ) 
-        && _velocityDistanceUnit.value() != "<no unit set>"
-        && _velocityTimeUnit.value() != "<no unit set>"
+        && _velocityDistanceUnit.value() != STRING_NOT_SET
+        && _velocityTimeUnit.value() != STRING_NOT_SET
     );
 }
 
