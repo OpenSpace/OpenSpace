@@ -36,7 +36,7 @@ namespace openspace {
 class DashboardItemInstruments : public DashboardTextItem {
 public:
     DashboardItemInstruments(const ghoul::Dictionary& dictionary);
-    ~DashboardItemInstruments() = default;
+    ~DashboardItemInstruments() override = default;
 
     void render(glm::vec2& penPosition) override;
 

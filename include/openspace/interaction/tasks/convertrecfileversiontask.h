@@ -37,7 +37,7 @@ namespace openspace::interaction {
 class ConvertRecFileVersionTask : public Task {
 public:
     ConvertRecFileVersionTask(const ghoul::Dictionary& dictionary);
-    ~ConvertRecFileVersionTask();
+    ~ConvertRecFileVersionTask() override;
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();

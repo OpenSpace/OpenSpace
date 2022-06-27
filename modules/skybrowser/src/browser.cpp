@@ -80,13 +80,13 @@ void Browser::RenderHandler::setTexture(GLuint t) {
 }
 
 Browser::Browser(const ghoul::Dictionary& dictionary)
-    : _url(UrlInfo)
-    , _browserPixeldimensions(
+    : _browserPixeldimensions(
         DimensionsInfo,
         glm::vec2(500.f),
         glm::vec2(10.f),
         glm::vec2(3000.f)
     )
+    , _url(UrlInfo)
     , _reload(ReloadInfo)
 {
     if (dictionary.hasValue<std::string>(UrlInfo.identifier)) {

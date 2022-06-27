@@ -158,7 +158,6 @@ if (UNIX)
       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE" CACHE STRING "" FORCE)
     endif()
   endif ()
-  set(ASSIMP_BUILD_MINIZIP ON CACHE BOOL "Set to have assimp build minizip" FORCE)
 endif ()
 
 add_subdirectory(ext)
@@ -197,6 +196,7 @@ if (APPLE)
     "~/Qt/5.11/clang_64/lib/cmake"
     "~/Qt/5.12/clang_64/lib/cmake"
     "~/Qt/5.15.1/clang_64/lib/cmake"
+    "~/Qt/6.2.3/macos/lib/cmake"
   )
 endif ()
 

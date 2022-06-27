@@ -78,7 +78,6 @@ function (set_openspace_compile_settings target)
     "-Wbitfield-constant-conversion"
     "-Wbool-conversions"
     "-Wcast-align"
-    "-Wcast-function-type"
     "-Wcast-qual"
     "-Wcomma"
     "-Wconditional-uninitialized"
@@ -143,7 +142,7 @@ function (set_openspace_compile_settings target)
     "-Wvla"
     "-Wzero-as-null-pointer-constant"
     
-    "-Wno-attributes=codegen::"
+    "-Wno-attributes"
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
   )

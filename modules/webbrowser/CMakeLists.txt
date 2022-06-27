@@ -57,7 +57,7 @@ cmake_policy(SET CMP0074 NEW)
 # Specify the CEF distribution version.
 
 # Release from 03/21/2022 verified to work on Windows.
-set(CEF_VERSION "91.1.23+g04c8d56+chromium-91.0.4472.164")
+set(CEF_VERSION "102.0.10+gf249b2e+chromium-102.0.5005.115")
 
 # Removing - micahnyc 03/21/2022
 # 73.1.13 has an issue on MacOS: The GUI freezing upon interaction.
@@ -106,6 +106,11 @@ find_package(CEF REQUIRED)
 add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
 mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SANDBOX)
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  # The CEF DLL wrapper is raising a lot of warnings on GCC
+  target_compile_options(libcef_dll_wrapper PRIVATE "-w")
+endif ()
 
 ##########################################################################################
 # Add CEF client files
@@ -281,7 +286,7 @@ list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()
 add_external_library_dependencies("${deps}")
 
-if (UNIX)
+if (UNIX AND NOT (${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
   # Linux needs to have copies of CEF files in Resources/ in its build-type dir to avoid
   # the 'Couldn't mmap icu data file' runtime error
   file(COPY ${CEF_ROOT}/Resources/

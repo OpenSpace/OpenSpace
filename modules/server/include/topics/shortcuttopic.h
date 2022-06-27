@@ -31,7 +31,7 @@ namespace openspace {
 
 class ShortcutTopic : public Topic {
 public:
-    virtual ~ShortcutTopic() = default;
+    ~ShortcutTopic() override = default;
 
     void handleJson(const nlohmann::json& input) override;
     bool isDone() const override;

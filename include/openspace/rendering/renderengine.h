@@ -66,7 +66,7 @@ struct ShutdownInformation;
 class RenderEngine : public properties::PropertyOwner {
 public:
     RenderEngine();
-    ~RenderEngine();
+    virtual ~RenderEngine() override;
 
     void initialize();
     void initializeGL();

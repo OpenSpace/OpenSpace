@@ -47,7 +47,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     Translation();
-    virtual ~Translation() = default;
+    virtual ~Translation() override = default;
     virtual bool initialize();
 
     virtual void update(const UpdateData& data);

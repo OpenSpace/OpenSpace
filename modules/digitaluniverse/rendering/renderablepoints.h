@@ -52,7 +52,7 @@ namespace documentation { struct Documentation; }
 class RenderablePoints : public Renderable {
 public:
     explicit RenderablePoints(const ghoul::Dictionary& dictionary);
-    ~RenderablePoints() = default;
+    ~RenderablePoints() override = default;
 
     void initialize() override;
     void initializeGL() override;

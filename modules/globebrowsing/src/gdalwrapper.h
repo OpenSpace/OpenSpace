@@ -55,7 +55,7 @@ public:
 
 private:
     GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
-    ~GdalWrapper() = default;
+    ~GdalWrapper() override = default;
 
     void setGdalProxyConfiguration();
 

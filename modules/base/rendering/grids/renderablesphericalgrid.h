@@ -41,7 +41,7 @@ namespace openspace {
 class RenderableSphericalGrid : public Renderable {
 public:
     RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableSphericalGrid() = default;
+    ~RenderableSphericalGrid() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;

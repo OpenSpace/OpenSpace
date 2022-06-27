@@ -34,7 +34,7 @@ namespace openspace {
 class EngineModeTopic : public Topic {
 public:
     EngineModeTopic();
-    virtual ~EngineModeTopic();
+    ~EngineModeTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

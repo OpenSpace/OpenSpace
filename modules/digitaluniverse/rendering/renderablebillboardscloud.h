@@ -56,7 +56,7 @@ namespace documentation { struct Documentation; }
 class RenderableBillboardsCloud : public Renderable {
 public:
     explicit RenderableBillboardsCloud(const ghoul::Dictionary& dictionary);
-    ~RenderableBillboardsCloud() = default;
+    ~RenderableBillboardsCloud() override = default;
 
     void initialize() override;
     void initializeGL() override;

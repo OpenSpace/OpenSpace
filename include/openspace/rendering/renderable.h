@@ -65,7 +65,7 @@ public:
         ghoul::Dictionary dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary);
-    virtual ~Renderable() = default;
+    virtual ~Renderable() override = default;
 
     virtual void initialize();
     virtual void initializeGL();

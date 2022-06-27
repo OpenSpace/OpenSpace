@@ -47,7 +47,7 @@ public:
 
     LightSource();
     LightSource(const ghoul::Dictionary& dictionary);
-    virtual ~LightSource() = default;
+    ~LightSource() override = default;
 
     virtual glm::vec3 directionViewSpace(const RenderData& renderData) const = 0;
 

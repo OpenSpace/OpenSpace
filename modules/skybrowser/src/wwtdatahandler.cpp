@@ -268,7 +268,7 @@ int WwtDataHandler::nLoadedImages() const {
 }
 
 const ImageData& WwtDataHandler::getImage(int i) const {
-    ghoul_assert(i < _images.size(), "Index outside of image vector boundaries");
+    ghoul_assert(i < static_cast<int>(_images.size()), "Index outside of vector size");
     return _images[i];
 }
 
