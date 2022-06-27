@@ -604,7 +604,7 @@ protected:
         Timestamps t3stamps;
     };
     double _timestampRecordStarted = 0.0;
-    Timestamps _timestamps3RecordStarted;
+    Timestamps _timestamps3RecordStarted{ 0.0, 0.0, 0.0 };
     double _timestampPlaybackStarted_application = 0.0;
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
@@ -696,10 +696,12 @@ protected:
         std::string& version, DataMode& mode);
     void populateListofLoadedSceneGraphNodes();
 
-    bool checkIfScriptUsesScenegraphNode(std::string s);
-    void checkForScenegraphNodeAccess_Scene(std::string& s, std::string& result);
-    void checkForScenegraphNodeAccess_Nav(std::string& s, std::string& result);
+    void checkIfScriptUsesScenegraphNode(std::string s);
+    bool checkForScenegraphNodeAccessScene(std::string& s);
+    bool checkForScenegraphNodeAccessNav(std::string& navTerm);
+    std::string extractScenegraphNodeFromScene(std::string& s);
     bool checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex);
+    std::string isolateTermFromQuotes(std::string s);
     void eraseSpacesFromString(std::string& s);
     std::string getNameFromSurroundingQuotes(std::string& s);
 
@@ -733,11 +735,11 @@ protected:
 
     bool _saveRenderingDuringPlayback = false;
     double _saveRenderingDeltaTime = 1.0 / 30.0;
-    double _saveRenderingCurrentRecordedTime;
+    double _saveRenderingCurrentRecordedTime = 0.0;
     std::chrono::steady_clock::duration _saveRenderingDeltaTime_interpolation_usec;
     std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
-    double _saveRenderingCurrentApplicationTime_interpolation;
-    long long _saveRenderingClockInterpolation_countsPerSec;
+    double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
+    long long _saveRenderingClockInterpolation_countsPerSec = 1;
     bool _saveRendering_isFirstFrame = true;
 
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
