@@ -158,7 +158,6 @@ if (UNIX)
       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE" CACHE STRING "" FORCE)
     endif()
   endif ()
-  set(ASSIMP_BUILD_MINIZIP ON CACHE BOOL "Set to have assimp build minizip" FORCE)
 endif ()
 
 add_subdirectory(ext)
