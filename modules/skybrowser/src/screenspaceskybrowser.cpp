@@ -123,7 +123,6 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 
     if (global::windowDelegate->isMaster()) {
-        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         _borderColor = randomBorderColor();
     }
 

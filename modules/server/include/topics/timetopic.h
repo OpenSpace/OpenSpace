@@ -33,7 +33,7 @@ namespace openspace {
 class TimeTopic : public Topic {
 public:
     TimeTopic();
-    virtual ~TimeTopic();
+    ~TimeTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

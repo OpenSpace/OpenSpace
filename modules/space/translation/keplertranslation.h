@@ -61,7 +61,7 @@ public:
     KeplerTranslation(const ghoul::Dictionary& dictionary);
 
     /// Default destructor
-    virtual ~KeplerTranslation() = default;
+    ~KeplerTranslation() override = default;
 
     /**
     * Method returning the translation vector at a given time.

@@ -312,7 +312,6 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     , defaultBehavior(IdleBehaviorInfo)
 {
     addProperty(apply);
-    using Behavior = IdleBehavior::Behavior;
     defaultBehavior.addOptions({
         { static_cast<int>(Behavior::Orbit), IdleKeyOrbit },
         { static_cast<int>(Behavior::OrbitAtConstantLat), IdleKeyOrbitAtConstantLat },

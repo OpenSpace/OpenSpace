@@ -32,7 +32,7 @@ namespace openspace::globebrowsing {
 class TextTileProvider : public TileProvider {
 public:
     TextTileProvider(TileTextureInitData initData, size_t fontSize = 48);
-    virtual ~TextTileProvider();
+    ~TextTileProvider() override;
 
     void reset() override;
 

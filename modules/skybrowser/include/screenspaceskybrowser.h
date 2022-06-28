@@ -38,7 +38,7 @@ namespace openspace {
 class ScreenSpaceSkyBrowser : public ScreenSpaceRenderable, public WwtCommunicator {
 public:
     explicit ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceSkyBrowser();
+    ~ScreenSpaceSkyBrowser() override;
 
     bool initializeGL() override;
     bool deinitializeGL() override;

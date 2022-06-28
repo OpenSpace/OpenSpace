@@ -39,7 +39,7 @@ namespace openspace {
 class FlightControllerTopic : public Topic {
 public:
     FlightControllerTopic();
-    ~FlightControllerTopic();
+    ~FlightControllerTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

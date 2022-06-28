@@ -101,7 +101,7 @@ public:
     SessionRecording();
     SessionRecording(bool isGlobal);
 
-    ~SessionRecording();
+    ~SessionRecording() override;
 
     /**
      * Used to de-initialize the session recording feature. Any recording or playback
@@ -837,7 +837,7 @@ protected:
 class SessionRecording_legacy_0085 : public SessionRecording {
 public:
     SessionRecording_legacy_0085() : SessionRecording() {}
-    ~SessionRecording_legacy_0085() {}
+    ~SessionRecording_legacy_0085() override {}
     char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
     char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
     std::string fileFormatVersion() override {

@@ -33,7 +33,7 @@ namespace openspace {
 class SkyBrowserTopic : public Topic {
 public:
     SkyBrowserTopic();
-    virtual ~SkyBrowserTopic();
+    ~SkyBrowserTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

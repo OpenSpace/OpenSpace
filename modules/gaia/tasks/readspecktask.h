@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 class ReadSpeckTask : public Task {
 public:
     ReadSpeckTask(const ghoul::Dictionary& dictionary);
-    virtual ~ReadSpeckTask() = default;
+    ~ReadSpeckTask() override = default;
 
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;

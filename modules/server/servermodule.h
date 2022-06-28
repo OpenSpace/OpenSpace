@@ -51,7 +51,7 @@ public:
     static constexpr const char* Name = "Server";
 
     ServerModule();
-    virtual ~ServerModule();
+    virtual ~ServerModule() override;
 
     ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
 

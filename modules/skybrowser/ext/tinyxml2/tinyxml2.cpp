@@ -21,6 +21,11 @@ must not be misrepresented as being the original software.
 distribution.
 */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+
 #include "tinyxml2.h"
 
 #include <new>		// yes, this one new style header, is in the Android SDK.
@@ -2984,3 +2989,5 @@ bool XMLPrinter::Visit( const XMLUnknown& unknown )
 }
 
 }   // namespace tinyxml2
+
+#pragma GCC diagnostic pop

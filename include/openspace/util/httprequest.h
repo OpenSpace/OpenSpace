@@ -375,7 +375,7 @@ public:
      * This destructor will cancel any ongoing download and wait for its completion, so it
      * might not block for a short amount of time.
      */
-    virtual ~HttpFileDownload() = default;
+    virtual ~HttpFileDownload() override = default;
 
     /**
      * Returns the path where the contents of the URL provided in the constructor will be
@@ -443,7 +443,7 @@ public:
      * This destructor will cancel any ongoing download and wait for its completion, so it
      * might not block for a short amount of time.
      */
-    virtual ~HttpMemoryDownload() = default;
+    virtual ~HttpMemoryDownload() override = default;
 
     /**
      * Returns a reference to the buffer that is used to store the contents of the URL
