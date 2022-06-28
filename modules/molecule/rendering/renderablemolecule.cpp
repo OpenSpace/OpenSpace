@@ -110,22 +110,22 @@ namespace {
         // Property
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
-        "File",
+    constexpr openspace::properties::Property::PropertyInfo MoleculeFileInfo = {
+        "MoleculeFile",
         "Molecule File",
-        "File path or URL to a molecule file"
+        "Molecule file path"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TrajectoryFileInfo = {
+        "TrajectoryFile",
+        "Trajectory File",
+        "Trajectory file path"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoleculeTypeInfo = {
         "MoleculeType",
         "Molecule Type",
         "Type of molecule file"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo IsUrlInfo = {
-        "IsUrl",
-        "Is URL",
-        "Whether the Molecule File is a URL or a local path"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RepTypeInfo = {
@@ -147,8 +147,11 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::string fileOrUrl;
+        // [[codegen::verbatim(MoleculeFileInfo.description)]]
+        std::string moleculeFile;
+
+        // [[codegen::verbatim(TrajectoryFileInfo.description)]]
+        std::optional<std::string> trajectoryFile;
 
         enum class [[codegen::map(MoleculeType)]] MoleculeType {
             Auto,
@@ -159,9 +162,6 @@ namespace {
 
         // [[codegen::verbatim(MoleculeTypeInfo.description)]]
         std::optional<MoleculeType> moleculeType;
-
-        // [[codegen::verbatim(IsUrlInfo.description)]]
-        std::optional<bool> isUrl;
 
         enum class [[codegen::map(RepresentationType)]] RepresentationType {
             SpaceFill,
@@ -195,6 +195,39 @@ namespace {
 #include "renderablemolecule_codegen.cpp"
 }
 
+md_molecule_api* moleculeApi(std::string_view filename, MoleculeType type) {
+    switch (type) {
+    case MoleculeType::Pdb:
+        return md_pdb_molecule_api();
+    case MoleculeType::Gro:
+        return md_gro_molecule_api();
+    case MoleculeType::Xyz:
+        return md_xyz_molecule_api();
+    case MoleculeType::Auto:
+        str_t str = str_from_cstr(filename.data());
+        return load::mol::get_api(str);
+      break;
+    }
+}
+
+md_trajectory_api* trajectoryApi(std::string_view filename, MoleculeType type) {
+    switch (type) {
+    case MoleculeType::Pdb:
+        return md_pdb_trajectory_api();
+    case MoleculeType::Gro:
+        LWARNING("GRO files are not supposed to have trajectories");
+        return nullptr;
+    case MoleculeType::Xyz:
+        return md_xyz_trajectory_api();
+        break;
+    case MoleculeType::Auto:
+        str_t str = str_from_cstr(filename.data());
+        return load::traj::get_api(str);
+      break;
+    }
+}
+
+
 namespace openspace {
 
 documentation::Documentation RenderableMolecule::Documentation() {
@@ -203,10 +236,12 @@ documentation::Documentation RenderableMolecule::Documentation() {
 
 RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
+    _deferredTask(GlDeferredTask::None),
     _loadedMolecule(nullptr),
-    _fileOrUrl(FileInfo),
+    _loadedTrajectory(nullptr),
+    _moleculeFile(MoleculeFileInfo),
+    _trajectoryFile(TrajectoryFileInfo),
     _moleculeType(MoleculeTypeInfo),
-    _isUrl(IsUrlInfo),
     _repType(RepTypeInfo),
     _coloring(ColoringInfo),
     _repScale(RepScaleInfo, 1.f, 0.1f, 100.f)
@@ -242,10 +277,8 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // TODO: find if it is url automatically based on fileOrUrl when property is unset.
-    _isUrl = p.isUrl.value_or(true);
-
-    _fileOrUrl = p.fileOrUrl;
+    _moleculeFile = p.moleculeFile;
+    _trajectoryFile = p.trajectoryFile.value_or("");
 
     if (p.moleculeType.has_value()) {
         _moleculeType = static_cast<int>(codegen::map<MoleculeType>(*p.moleculeType));
@@ -268,21 +301,17 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     _repScale = p.repScale.value_or(1.f);
 
     const auto loadMolecule = [this]() {
-        if (_isUrl) {
-            loadMoleculeFromUrl(_fileOrUrl.value());
-        } else {
-            loadMoleculeFromFile(_fileOrUrl.value());
-        }
+        _deferredTask = GlDeferredTask::LoadMolecule;
     };
 
-    _fileOrUrl.onChange(loadMolecule);
-    _isUrl.onChange(loadMolecule);
+    _moleculeFile.onChange(loadMolecule);
+    _trajectoryFile.onChange(loadMolecule);
     _repType.onChange(loadMolecule);
     loadMolecule();
     
-    addProperty(_fileOrUrl);
+    addProperty(_moleculeFile);
+    addProperty(_trajectoryFile);
     addProperty(_moleculeType);
-    addProperty(_isUrl);
     addProperty(_repType);
     addProperty(_coloring);
     addProperty(_repScale);
@@ -313,15 +342,27 @@ bool RenderableMolecule::isReady() const {
 }
 
 void RenderableMolecule::update(const UpdateData&) {
-    if (_fileDownload) {
-        if (_fileDownload->hasSucceeded()) {
-            auto& blob = _fileDownload->downloadedData();
-            initMolecule(std::string_view(blob.data(), blob.size()));
-            (void)_fileDownload.release();
-        } else if (_fileDownload->hasFailed()) {
-            (void)_fileDownload.release();
-        }
+    // This is a dirty hack to load molecules in a gl context.
+    switch (_deferredTask) {
+    case GlDeferredTask::None:
+        break;
+    case GlDeferredTask::LoadMolecule:
+        initMolecule();
+        if (_trajectoryFile.value() != "")
+            initTrajectory();
+        break;
     }
+    _deferredTask = GlDeferredTask::None;
+    
+    
+    // if (_loadedTrajectory) {
+    //     int64_t nFrames = md_trajectory_num_frames(&_trajectory);
+    //     int64_t frame = static_cast<int64_t>(data.time.j2000Seconds()) % nFrames;
+    //     md_trajectory_frame_header_t header{};
+    //     md_trajectory_load_frame(&_trajectory, frame, &header, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z);
+    //     md_gl_molecule_set_atom_position(&_drawMol, 0,static_cast<uint32_t>(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+    //     std::cout << "here" << std::endl;
+    // }
 }
 
 void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
@@ -340,14 +381,17 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
             data.camera.combinedViewMatrix() *
             I;
         
+        // having the view matrix in the model matrix is better because
+        // mold uses single precision but that's not enough
         mat4 model_matrix =
+            camView *
+            translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             dmat4(data.modelTransform.rotation) *
-            translate(I, data.modelTransform.translation - dvec3(_center)) *
+            translate(I, -dvec3(_center)) *
             I;
         
         mat4 view_matrix =
-            camView *
             I;
 
         mat4 proj_matrix =
@@ -377,7 +421,23 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     }
 }
 
-void RenderableMolecule::initMolecule(std::string_view data) {
+float RenderableMolecule::computeRadius() {
+    glm::vec3 min_aabb {FLT_MAX};
+    glm::vec3 max_aabb {-FLT_MAX};
+
+    for (int64_t i = 0; i < _molecule.atom.count; ++i) {
+        glm::vec3 p {_molecule.atom.x[i], _molecule.atom.y[i], _molecule.atom.z[i]};
+        min_aabb = glm::min(min_aabb, p);
+        max_aabb = glm::max(max_aabb, p);
+    }
+
+    _extent = max_aabb - min_aabb;
+    _center = (min_aabb + max_aabb) * 0.5f;
+    float radius = glm::compMax(_extent) * 0.5f;
+    return radius;
+}
+
+void RenderableMolecule::initMolecule() {
     // set the updateRepresentation hook once, when the molecule is first initialized
     if (!_loadedMolecule) {
         const auto updateRep = [this]() { updateRepresentation(); };
@@ -385,61 +445,47 @@ void RenderableMolecule::initMolecule(std::string_view data) {
         _repScale.onChange(updateRep);
         _coloring.onChange(updateRep);
     }
+    
+    // free previously loaded molecule
     else {
         freeMolecule();
     }
 
-    md_molecule_api* api;
+    _loadedMolecule = moleculeApi(_moleculeFile.value(), static_cast<MoleculeType>(_moleculeType.value()));
 
-    switch (static_cast<MoleculeType>(_moleculeType.value())) {
-    case MoleculeType::Pdb:
-        api = md_pdb_molecule_api();
-        break;
-    case MoleculeType::Gro:
-        api = md_gro_molecule_api();
-        break;
-    case MoleculeType::Xyz:
-        api = md_xyz_molecule_api();
-        break;
-    case MoleculeType::Auto:
-        std::string filename = _fileOrUrl;
-        api = load::mol::get_api(str_from_cstr(filename.c_str()));
-      break;
-    }
-    
-    if (!api) {
+    if (!_loadedMolecule) {
         LERROR("failed to initialize molecule: unknown file type");
         return;
     }
 
-    api->init_from_str(&_molecule, { data.data(), static_cast<int64_t>(data.size()) }, default_allocator);
+    _loadedMolecule->init_from_file(&_molecule, str_from_cstr(_moleculeFile.value().data()), default_allocator);
 
-    if (_molecule.atom.count > 0) {
-        glm::vec3 min_aabb {FLT_MAX};
-        glm::vec3 max_aabb {-FLT_MAX};
+    float radius = computeRadius();
+    setBoundingSphere(radius);
+    setInteractionSphere(radius);
 
-        for (int64_t i = 0; i < _molecule.atom.count; ++i) {
-            glm::vec3 p {_molecule.atom.x[i], _molecule.atom.y[i], _molecule.atom.z[i]};
-            min_aabb = glm::min(min_aabb, p);
-            max_aabb = glm::max(max_aabb, p);
-        }
-
-        _extent = max_aabb - min_aabb;
-        _center = (min_aabb + max_aabb) * 0.5f;
-        float radius = glm::compMax(_extent) * 0.5f;
-    
-        setBoundingSphere(radius);
-        setInteractionSphere(radius);
-    }
-
-    // GL MOL
     md_gl_molecule_init(&_drawMol, &_molecule);
-
-    // REP
     md_gl_representation_init(&_drawRep, &_drawMol);
     updateRepresentation();
-    
-    _loadedMolecule = api;
+}
+
+void RenderableMolecule::initTrajectory() {
+    _loadedTrajectory = trajectoryApi(_trajectoryFile.value().data(), static_cast<MoleculeType>(_moleculeType.value()));
+
+    if (!_loadedTrajectory) {
+        LERROR("failed to initialize trajectory: unknown file type");
+        return;
+    }
+
+    // _loadedMolecule = molApi;
+
+    // if (trajApi) {
+    //     initTrajectory();
+    // }
+    //     std::string filename = _moleculeFileOrUrl;
+    //     str_t str = str_from_cstr(filename.c_str());
+    //     md_trajectory_i* internalTraj = load::traj::open_file(str, &_molecule, default_allocator);
+    //     load_trajectory_data(data, filename);
 }
 
 void RenderableMolecule::updateRepresentation() {
@@ -511,52 +557,6 @@ void RenderableMolecule::freeMolecule() {
 }
 
 void RenderableMolecule::freeTrajectory() {
-}
-
-bool RenderableMolecule::loadMoleculeFromUrl(std::string_view url) {
-    // TODO: handle error
-
-    if (_fileDownload) {
-        _fileDownload->cancel();
-        _fileDownload->wait();
-    }
-    _downloadProgress = 0.0;
-
-    _fileDownload = std::make_unique<HttpMemoryDownload>(url.data());
-
-    _fileDownload->onProgress([this](size_t downloadedBytes, std::optional<size_t> totalBytes) -> bool {
-        if (totalBytes.has_value()) {
-            _downloadProgress = downloadedBytes / static_cast<double>(totalBytes.value());
-        }
-        return true;
-    });
-
-    _fileDownload->start();
-
-    return true;
-}
-
-bool RenderableMolecule::loadMoleculeFromFile(std::string_view filepath) {
-    // TODO: handle error
-
-    if (_fileDownload) {
-        _fileDownload->cancel();
-        _fileDownload->wait();
-    }
-    _downloadProgress = 0.0;
-
-    std::ifstream fs;
-    std::stringstream ss;
-    fs.open(filepath.data());
-    if (!fs.is_open()) {
-        std::string err = "failed to open file: " + std::string(filepath);
-        LERROR(err);
-        return false;
-    }
-    ss << fs.rdbuf();
-    initMolecule(ss.str());
-
-    return true;
 }
 
 } // namespace openspace

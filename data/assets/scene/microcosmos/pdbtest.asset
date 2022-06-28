@@ -1,13 +1,27 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+local moleculeFile = asset.syncedResource({
+  Name = "Molecule File",
+  Type = "UrlSynchronization",
+  Identifier = "molecule_file",
+  Url = "https://files.rcsb.org/download/1MH1.pdb"
+})
+
 local PdbTest = {
   Identifier = "PdbTest",
+  Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
     Type = "RenderableMolecule",
-    FileOrUrl = "https://files.rcsb.org/download/1MH1.pdb",
+    MoleculeFile = moleculeFile .. "1MH1.pdb",
+  },
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1,
+    }
   },
   GUI = {
-    Path = "/Microcosmos/PDB/1MH1"
+    Path = "/Microcosmos/Molecules/Simulation"
   }
 }
 

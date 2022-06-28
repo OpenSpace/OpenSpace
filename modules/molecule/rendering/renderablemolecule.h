@@ -61,21 +61,21 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    bool loadMolecule(std::string_view pdb_id);
-    bool loadMoleculeFromUrl(std::string_view filename);
-    bool loadMoleculeFromFile(std::string_view filename);
-    bool loadTrajectoryFile(std::string_view filename);
-
-    void initMolecule(std::string_view data);
+    enum class GlDeferredTask {
+        None,
+        LoadMolecule,
+    } _deferredTask;
+    
+    void initMolecule();
     void freeMolecule();
-
-    void initTrajectory(std::string_view filename);
+    void initTrajectory();
     void freeTrajectory();
 
     void updateRepresentation();
+    
+    // Probably in ångströms
+    float computeRadius();
 
-    std::unique_ptr<HttpMemoryDownload> _fileDownload;
-    double _downloadProgress;
     double _frame;
     md_gl_shaders_t _shaders;
 
@@ -84,13 +84,14 @@ private:
     md_gl_representation_t _drawRep;
     md_gl_molecule_t _drawMol;
     md_molecule_api* _loadedMolecule;
+    md_trajectory_api* _loadedTrajectory;
 
     glm::vec3 _center;
     glm::vec3 _extent;
 
-    properties::StringProperty _fileOrUrl;
+    properties::StringProperty _moleculeFile;
+    properties::StringProperty _trajectoryFile;
     properties::OptionProperty _moleculeType;
-    properties::BoolProperty _isUrl;
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
