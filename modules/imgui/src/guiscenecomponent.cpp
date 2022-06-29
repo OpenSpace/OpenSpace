@@ -68,8 +68,8 @@ namespace {
                 ImGui::Checkbox("Is Ready", &isReady);
 
                 Renderable::RenderBin bin = renderable->renderBin();
-                std::string binStr = [](Renderable::RenderBin bin) {
-                    switch (bin) {
+                std::string binStr = [](Renderable::RenderBin b) {
+                    switch (b) {
                         case Renderable::RenderBin::Background:
                             return "Background";
                         case Renderable::RenderBin::Opaque:

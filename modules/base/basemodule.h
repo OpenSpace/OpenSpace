@@ -37,7 +37,7 @@ public:
     constexpr static const char* Name = "Base";
 
     BaseModule();
-    virtual ~BaseModule() = default;
+    ~BaseModule() override = default;
 
     std::vector<documentation::Documentation> documentations() const override;
     std::vector<scripting::LuaLibrary> luaLibraries() const override;

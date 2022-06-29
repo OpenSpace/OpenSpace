@@ -81,20 +81,16 @@ openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* p
     return tagMatchOwner;
 }
 
-void applyRegularExpression(lua_State* L, const std::string& regex,
-                          const std::vector<openspace::properties::Property*>& properties,
-                                                             double interpolationDuration,
-                                                             const std::string& groupName,
-                                                     ghoul::EasingFunction easingFunction)
+std::vector<openspace::properties::Property*> findMatchesInAllProperties(
+                                                                const std::string& regex,
+                         const std::vector<openspace::properties::Property*>& properties,
+                                                            const std::string& groupName)
 {
     using namespace openspace;
-    using ghoul::lua::errorLocation;
-    using ghoul::lua::luaTypeToString;
 
+    std::vector<properties::Property*> matches;
     const bool isGroupMode = !groupName.empty();
     bool isLiteral = false;
-
-    const int type = lua_type(L, -1);
 
     // Extract the property and node name to be searched for from regex
     std::string propertyName;
@@ -107,25 +103,25 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
         // If none then malformed regular expression
         if (propertyName.empty() && nodeName.empty()) {
             LERRORC(
-                "applyRegularExpression",
+                "findMatchesInAllProperties",
                 fmt::format(
                     "Malformed regular expression: '{}': Empty both before and after '*'",
                     regex
                 )
             );
-            return;
+            return matches;
         }
 
         // Currently do not support several wildcards
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
             LERRORC(
-                "applyRegularExpression",
+                "findMatchesInAllProperties",
                 fmt::format(
                     "Malformed regular expression: '{}': Currently only one '*' is "
                     "supported", regex
                 )
             );
-            return;
+            return matches;
         }
     }
     // Literal or tag
@@ -146,7 +142,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
         if (isLiteral && id != propertyName) {
             continue;
         }
-        else if (!propertyName.empty()){
+        else if (!propertyName.empty()) {
             size_t propertyPos = id.find(propertyName);
             if (propertyPos != std::string::npos) {
                 // Check that the propertyName fully matches the property in id
@@ -192,6 +188,36 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 continue;
             }
         }
+        matches.push_back(prop);
+    }
+    return matches;
+}
+
+void applyRegularExpression(lua_State* L, const std::string& regex,
+                          const std::vector<openspace::properties::Property*>& properties,
+                                                             double interpolationDuration,
+                                                             const std::string& groupName,
+                                                     ghoul::EasingFunction easingFunction)
+{
+    using namespace openspace;
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    const bool isGroupMode = !groupName.empty();
+    bool isLiteral = false;
+
+    const int type = lua_type(L, -1);
+
+    std::vector<properties::Property*> matchingProps = findMatchesInAllProperties(
+        regex,
+        properties,
+        groupName
+    );
+
+    // Stores whether we found at least one matching property. If this is false at the
+    // end of the loop, the property name regex was probably misspelled.
+    bool foundMatching = false;
+    for (properties::Property* prop : matchingProps) {
 
         // Check that the types match
         if (type != prop->typeLua()) {

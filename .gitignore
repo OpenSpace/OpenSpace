@@ -1,8 +1,5 @@
 # Build and editor thing
-/build/
-/build-ninja/
-/build-xcode/
-/build-make/
+/build*/
 *~
 *.dir
 *.idea/

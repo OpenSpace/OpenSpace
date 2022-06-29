@@ -31,7 +31,7 @@
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable : 4100)
-#elif __clang__
+#elif defined(__clang__)
 //#pragma clang diagnostic push
 //#pragma clang diagnostic ignored "-Wunused-variable"
 #endif // _MSC_VER
@@ -40,7 +40,7 @@
 
 #ifdef _MSC_VER
 #pragma warning (pop)
-#elif __clang__
+#elif defined(__clang__)
 //#pragma clang diagnostic pop
 #endif // _MSC_VER
 

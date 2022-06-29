@@ -1272,6 +1272,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     global::renderEngine->updateRenderer();
     global::renderEngine->updateScreenSpaceRenderables();
     global::renderEngine->updateShaderPrograms();
+    global::luaConsole->update();
 
     if (!master) {
         _scene->camera()->invalidateCache();
@@ -1311,15 +1312,6 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
     ZoneScoped
     TracyGpuZone("Render")
     LTRACE("OpenSpaceEngine::render(begin)");
-
-    const bool isGuiWindow =
-        global::windowDelegate->hasGuiWindow() ?
-        global::windowDelegate->isGuiWindow() :
-        true;
-
-    if (isGuiWindow) {
-        global::luaConsole->update();
-    }
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
@@ -1862,7 +1854,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::RemoveTag,
             codegen::lua::DownloadFile,
             codegen::lua::CreateSingleColorImage,
-            codegen::lua::IsMaster
+            codegen::lua::IsMaster,
+            codegen::lua::Version
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")

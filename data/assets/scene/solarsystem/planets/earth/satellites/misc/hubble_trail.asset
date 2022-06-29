@@ -1,7 +1,7 @@
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local satelliteHelper = asset.require('util/tle_helper')
 
-local url = "https://celestrak.com/satcat/tle.php?CATNR=20580"
+local url = "https://celestrak.com/NORAD/elements/gp.php?CATNR=20580"
 local identifier = "HST"
 local filename = "HST.txt"
 local nodes = {}

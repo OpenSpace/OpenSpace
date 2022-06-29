@@ -81,7 +81,7 @@ public:
     static constexpr const char* KeyTag = "Tag";
 
     SceneGraphNode();
-    ~SceneGraphNode();
+    virtual ~SceneGraphNode() override;
 
     static ghoul::mm_unique_ptr<SceneGraphNode> createFromDictionary(
         const ghoul::Dictionary& dictionary);

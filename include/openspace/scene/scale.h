@@ -45,7 +45,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     Scale();
-    virtual ~Scale() = default;
+    virtual ~Scale() override = default;
 
     virtual bool initialize();
 

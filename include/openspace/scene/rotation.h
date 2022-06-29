@@ -45,7 +45,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     Rotation();
-    virtual ~Rotation() = default;
+    virtual ~Rotation() override = default;
 
     virtual bool initialize();
 

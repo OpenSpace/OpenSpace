@@ -32,7 +32,7 @@ namespace openspace {
 class GetPropertyTopic : public Topic {
 public:
     GetPropertyTopic() = default;
-    virtual ~GetPropertyTopic() = default;
+    ~GetPropertyTopic() override = default;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

@@ -26,6 +26,7 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(cmake/webbrowser_helpers.cmake)
 
 set(WEBBROWSER_MODULE_NAME WebBrowser)
 set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSER_MODULE_PATH")
@@ -56,7 +57,7 @@ cmake_policy(SET CMP0074 NEW)
 # Specify the CEF distribution version.
 
 # Release from 03/21/2022 verified to work on Windows.
-set(CEF_VERSION "91.1.23+g04c8d56+chromium-91.0.4472.164")
+set(CEF_VERSION "102.0.10+gf249b2e+chromium-102.0.5005.115")
 
 # Removing - micahnyc 03/21/2022
 # 73.1.13 has an issue on MacOS: The GUI freezing upon interaction.
@@ -66,7 +67,7 @@ set(CEF_VERSION "91.1.23+g04c8d56+chromium-91.0.4472.164")
 #endif ()
 
 # CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
-if (WIN32)
+if (WIN32 OR UNIX)
   option(USE_SANDBOX OFF)
 endif ()
 
@@ -106,6 +107,11 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
 mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SANDBOX)
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  # The CEF DLL wrapper is raising a lot of warnings on GCC
+  target_compile_options(libcef_dll_wrapper PRIVATE "-w")
+endif ()
+
 ##########################################################################################
 # Add CEF client files
 
@@ -133,6 +139,10 @@ if (OS_MACOSX)
   list(APPEND WEBBROWSER_HELPER_SOURCES src/processhelpermac.cpp)
 endif()
 set(WEBBROWSER_HELPER_SOURCES_WINDOWS src/processhelperwindows.cpp)
+if (OS_LINUX)
+  list(APPEND WEBBROWSER_HELPER_SOURCES src/processhelperlinux.cpp)
+  set(WEBBROWSER_HELPER_SOURCES_LINUX src/processhelperlinux.cpp)
+endif()
 APPEND_PLATFORM_SOURCES(WEBBROWSER_HELPER_SOURCES)
 
 set(WEBBROWSER_RESOURCES_MAC_SOURCES_MACOSX
@@ -152,8 +162,20 @@ set(WEBBROWSER_RESOURCES_SRCS
 )
 
 # Place Helper in separate executable
-# The naming style "<ApplicionName> Helper" is required by Chromium.
-set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+# The naming style "<ApplicationName> Helper" is required by Chromium.
+set(CEF_HELPER_FILE_REQUIRES_RENAME FALSE)
+if (UNIX AND (${CMAKE_GENERATOR} STREQUAL "Unix Makefiles"))
+  # Linux builds that use GNU Make cannot handle spaces in filenames. For this type
+  # of build, the build file will have an underscore instead of a space, and this
+  # will be renamed back to a space when the build is complete.
+  set(CEF_HELPER_FILE_REQUIRES_RENAME TRUE)
+endif()
+if (CEF_HELPER_FILE_REQUIRES_RENAME)
+  # Use '_' instead of ' ' in helper filename
+  set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+else()
+  set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+endif()
 set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
 set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
 
@@ -186,12 +208,9 @@ if (OS_MACOSX)
     endif ()
   endforeach()
 
-set_property(TARGET ${CEF_HELPER_TARGET_GPU} PROPERTY FOLDER "Helper")
-set_property(TARGET ${CEF_HELPER_TARGET_RENDERER} PROPERTY FOLDER "Helper")
-
-endif ()
-
-if (OS_WINDOWS)
+  set_property(TARGET ${CEF_HELPER_TARGET_GPU} PROPERTY FOLDER "Helper")
+  set_property(TARGET ${CEF_HELPER_TARGET_RENDERER} PROPERTY FOLDER "Helper")
+else()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
   add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
@@ -200,9 +219,11 @@ if (OS_WINDOWS)
   # Logical target used to link the libcef library.
   add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
   target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-  # Add the custom manifest files to the executable.
-  add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
-endif (OS_WINDOWS)
+  if (OS_WINDOWS)
+    # Add the custom manifest files to the executable.
+    add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
+  endif (OS_WINDOWS)
+endif ()
 
 set_property(TARGET ${CEF_HELPER_TARGET} PROPERTY FOLDER "Helper")
 
@@ -254,6 +275,8 @@ set_folder_location(openspace_web_helper "Helper")
 
 target_include_directories(${webbrowser_module} SYSTEM PUBLIC ${CEF_ROOT})
 
+set_modules_dependency_on_cef_libraries(${webbrowser_module})
+
 set(deps "")
 foreach (i ${CEF_BINARY_FILES})
   list(APPEND deps "${CEF_BINARY_DIR}/${i}")
@@ -262,3 +285,25 @@ foreach (j ${CEF_RESOURCE_FILES})
 list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()
 add_external_library_dependencies("${deps}")
+
+if (UNIX AND NOT (${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
+  # Linux needs to have copies of CEF files in Resources/ in its build-type dir to avoid
+  # the 'Couldn't mmap icu data file' runtime error
+  file(COPY ${CEF_ROOT}/Resources/
+    DESTINATION ${CEF_ROOT}/${CMAKE_BUILD_TYPE}/
+    FILES_MATCHING PATTERN *
+  )
+
+  if (CEF_HELPER_FILE_REQUIRES_RENAME)
+    # Rename to "OpenSpace Helper" after build & link in order to prevent GNU Make from
+    # having to deal with the space in the filename
+    ADD_CUSTOM_COMMAND(
+      TARGET ${CEF_HELPER_TARGET} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E rename
+        "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/${CEF_HELPER_TARGET}"
+        "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/OpenSpace Helper"
+      COMMENT "Renaming ${CEF_HELPER_TARGET} to 'OpenSpace Helper'"
+    )
+  endif()
+endif ()
+

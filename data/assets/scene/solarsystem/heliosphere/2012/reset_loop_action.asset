@@ -14,5 +14,5 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.asction.removeAction(resetLoopAction)
+    openspace.action.removeAction(resetLoopAction)
 end)

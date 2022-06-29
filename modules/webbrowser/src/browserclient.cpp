@@ -43,7 +43,7 @@ BrowserClient::BrowserClient(WebRenderHandler* handler,
     _lifeSpanHandler = browserLauncher;
     _requestHandler = browserLauncher;
     _contextMenuHandler = new BrowserClient::NoContextMenuHandler;
-};
+}
 
 CefRefPtr<CefContextMenuHandler> BrowserClient::GetContextMenuHandler() {
     return _contextMenuHandler;

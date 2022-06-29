@@ -141,10 +141,23 @@ if (UNIX)
       #Can set to "RelWithDebInfo" or "Debug" also, but problems occur if this is blank by default
       set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
     endif()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLM_ENABLE_EXPERIMENTAL" CACHE STRING "" FORCE)
+    if (NOT DEFINED CMAKE_CXX_FLAGS OR CMAKE_CXX_FLAGS MATCHES "")
+      set(CMAKE_CXX_FLAGS " ")
+    endif()
+    STRING(FIND ${CMAKE_CXX_FLAGS} "GLM_ENABLE_EXPERIMENTAL" GLM_FLAG_POS)
+    if (${GLM_FLAG_POS} EQUAL -1)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLM_ENABLE_EXPERIMENTAL" CACHE STRING "" FORCE)
+    endif()
     set(OpenGL_GL_PREFERENCE "GLVND" CACHE STRING "OpenGL Preference setting necessary for linux" FORCE)
+    #Fix for gcc tolerating space in target name
+    if (NOT DEFINED CMAKE_C_FLAGS OR CMAKE_C_FLAGS MATCHES "")
+      set(CMAKE_C_FLAGS " ")
+    endif()
+    STRING(FIND ${CMAKE_C_FLAGS} "_GNU_SOURCE" GNUSOURCE_FLAG_POS)
+    if (${GNUSOURCE_FLAG_POS} EQUAL -1)
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE" CACHE STRING "" FORCE)
+    endif()
   endif ()
-  set(ASSIMP_BUILD_MINIZIP ON CACHE BOOL "Set to have assimp build minizip" FORCE)
 endif ()
 
 add_subdirectory(ext)
@@ -183,6 +196,7 @@ if (APPLE)
     "~/Qt/5.11/clang_64/lib/cmake"
     "~/Qt/5.12/clang_64/lib/cmake"
     "~/Qt/5.15.1/clang_64/lib/cmake"
+    "~/Qt/6.2.3/macos/lib/cmake"
   )
 endif ()
 

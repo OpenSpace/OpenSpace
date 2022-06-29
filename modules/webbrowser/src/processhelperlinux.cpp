@@ -22,35 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SPACEMODULE___H__
-#define __OPENSPACE_MODULE_SPACE___SPACEMODULE___H__
+// Copyright (c) 2013 The Chromium Embedded Framework Authors. All rights
+// reserved. Use of this source code is governed by a BSD-style license that can
+// be found in the LICENSE file.
 
-#include <openspace/util/openspacemodule.h>
+#include "include/cef_app.h"
+#include "include/webbrowserapp.h"
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/opengl/programobjectmanager.h>
+// Entry point function for all processes.
+int main(int argc, char* argv[]) {
+  // Provide CEF with command-line arguments.
+  CefMainArgs main_args(argc, argv);
 
-namespace openspace {
+  CefRefPtr<openspace::WebBrowserApp> app(new openspace::WebBrowserApp);
 
-class SpaceModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "Space";
-
-    SpaceModule();
-    ~SpaceModule() override = default;
-    std::vector<documentation::Documentation> documentations() const override;
-
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
-
-    scripting::LuaLibrary luaLibrary() const override;
-
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitializeGL() override;
-
-    properties::BoolProperty _showSpiceExceptions;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SPACE___SPACEMODULE___H__
+  // CEF applications have multiple sub-processes (render, GPU, etc) that share
+  // the same executable. This function checks the command-line and, if this is
+  // a sub-process, executes the appropriate logic.
+  return CefExecuteProcess(main_args, app.get(), nullptr);
+}

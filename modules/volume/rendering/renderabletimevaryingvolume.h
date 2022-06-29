@@ -50,7 +50,7 @@ class VolumeClipPlanes;
 class RenderableTimeVaryingVolume : public Renderable {
 public:
     RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableTimeVaryingVolume();
+    ~RenderableTimeVaryingVolume() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
