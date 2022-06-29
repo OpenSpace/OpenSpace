@@ -190,7 +190,7 @@ namespace {
         // [[codegen::verbatim(CartesianPositionInfo.description)]]
         std::optional<glm::vec3> cartesianPosition;
 
-        // [[codegen::verbatim(RadiusAzimuthElevationInfo.description)]]
+        // [[codegen::verbatim(GammaInfo.description)]]
         std::optional<glm::vec3> radiusAzimuthElevation;
 
         // [[codegen::verbatim(ScaleInfo.description)]]
