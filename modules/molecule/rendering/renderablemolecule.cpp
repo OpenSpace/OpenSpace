@@ -332,6 +332,7 @@ void RenderableMolecule::update(const UpdateData& data) {
             
             // cubic
             md_trajectory_frame_header_t header[4];
+            mat3_t boxes[4];
             int64_t stride = ROUND_UP(_molecule.atom.count, md_simd_widthf);    // The interploation uses SIMD vectorization without bounds, so we make sure there is no overlap between the data segments
             int64_t bytes = stride * sizeof(float) * 3 * 4;
             float* mem = static_cast<float*>(malloc(bytes));
@@ -345,11 +346,20 @@ void RenderableMolecule::update(const UpdateData& data) {
                 md_vec3_soa_t dst = {
                     _molecule.atom.x, _molecule.atom.y, _molecule.atom.z,
                 };
+
                 md_trajectory_load_frame(_trajectory, frames[0], &header[0], src[0].x, src[0].y, src[0].z);
                 md_trajectory_load_frame(_trajectory, frames[1], &header[1], src[1].x, src[1].y, src[1].z);
                 md_trajectory_load_frame(_trajectory, frames[2], &header[2], src[2].x, src[2].y, src[2].z);
                 md_trajectory_load_frame(_trajectory, frames[3], &header[3], src[3].x, src[3].y, src[3].z);
-                md_util_cubic_interpolation(dst, src, _molecule.atom.count, vec3_t{{0, 0, 0}}, t, 1.0f);
+
+                memcpy(&boxes[0], header[0].box, sizeof(boxes[0]));
+                memcpy(&boxes[1], header[1].box, sizeof(boxes[1]));
+                memcpy(&boxes[2], header[2].box, sizeof(boxes[2]));
+                memcpy(&boxes[3], header[3].box, sizeof(boxes[3]));
+                mat3_t box = cubic_spline(boxes[0], boxes[1], boxes[2], boxes[3], t, 1.0);
+                vec3_t pbc_ext = box * vec3_t{{1.0, 1.0, 1.0}};
+
+                md_util_cubic_interpolation(dst, src, _molecule.atom.count, pbc_ext, t, 1.0f);
             }
             free(mem);
             md_gl_molecule_set_atom_position(&_drawMol, 0, uint32_t(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
