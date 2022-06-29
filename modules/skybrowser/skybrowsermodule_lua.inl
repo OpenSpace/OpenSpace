@@ -435,6 +435,7 @@ namespace {
         "Name = '" + nameBrowser + "',"
         "Url = '" + url + "',"
         "FaceCamera = false,"
+        "Gamma = 2.2,"
         "CartesianPosition = " + ghoul::to_string(positionBrowser) +
      "}";
 
