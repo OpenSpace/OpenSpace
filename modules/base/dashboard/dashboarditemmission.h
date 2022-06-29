@@ -34,7 +34,7 @@ namespace documentation { struct Documentation; }
 class DashboardItemMission : public DashboardTextItem {
 public:
     DashboardItemMission(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemMission() = default;
+    ~DashboardItemMission() override = default;
 
     void render(glm::vec2& penPosition) override;
 

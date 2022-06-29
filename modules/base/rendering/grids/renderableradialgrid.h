@@ -44,7 +44,7 @@ namespace openspace {
 class RenderableRadialGrid : public Renderable {
 public:
     RenderableRadialGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableRadialGrid() = default;
+    ~RenderableRadialGrid() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;

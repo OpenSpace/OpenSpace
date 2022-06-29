@@ -36,7 +36,7 @@ public:
     constexpr static const char* Name = "Gaia";
 
     GaiaModule();
-    virtual ~GaiaModule() = default;
+    ~GaiaModule() override = default;
 
     std::vector<documentation::Documentation> documentations() const override;
     scripting::LuaLibrary luaLibrary() const override;

@@ -37,7 +37,7 @@ public:
     constexpr static const char* Name = "DigitalUniverse";
 
     DigitalUniverseModule();
-    virtual ~DigitalUniverseModule() = default;
+    ~DigitalUniverseModule() override = default;
     std::vector<documentation::Documentation> documentations() const override;
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;

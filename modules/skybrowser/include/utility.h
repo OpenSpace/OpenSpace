@@ -199,11 +199,12 @@ glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3&
  */
 double sizeFromFov(double fov, glm::dvec3 worldPosition);
 
-template<typename T>
+template <typename T>
 class Animation {
 public:
     Animation(T start, T goal, double time)
-        : _start(start), _goal(goal)
+        : _goal(std::move(goal))
+        , _start(std::move(start))
     {
         _animationTime = std::chrono::milliseconds(static_cast<int>(time * 1000));
     }

@@ -781,10 +781,9 @@ void LuaConsole::render() {
     }
 
     // Computes the location for right justified text on the same y height as the entry
-    auto locationForRightJustifiedText = [this, res](const std::string& text) {
+    auto locationForRightJustifiedText = [this, res, dpi](const std::string& text) {
         using namespace ghoul::fontrendering;
 
-        const float dpi = global::windowDelegate->osDpiScaling();
         const glm::vec2 loc = glm::vec2(
             EntryFontSize * dpi / 2.f,
             res.y - _currentHeight + EntryFontSize * dpi

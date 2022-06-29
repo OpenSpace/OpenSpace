@@ -39,7 +39,7 @@ namespace documentation { struct Documentation; }
 class ReadFitsTask : public Task {
 public:
     ReadFitsTask(const ghoul::Dictionary& dictionary);
-    virtual ~ReadFitsTask() = default;
+    ~ReadFitsTask() override = default;
 
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;

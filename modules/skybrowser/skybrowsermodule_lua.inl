@@ -60,7 +60,7 @@ namespace {
                 std::remove_if(
                     str.begin(), str.end(),
                     [](char c) {
-                        return c < 0 || c >= 128;
+                        return c < 0;
                     }
                 ),
                 str.end()
@@ -435,6 +435,7 @@ namespace {
         "Name = '" + nameBrowser + "',"
         "Url = '" + url + "',"
         "FaceCamera = false,"
+        "Gamma = 2.2,"
         "CartesianPosition = " + ghoul::to_string(positionBrowser) +
      "}";
 
@@ -552,8 +553,6 @@ namespace {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    const ImageData& image = module->getWwtDataHandler()->getImage(imageIndex);
-
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->removeSelectedImage(imageIndex);

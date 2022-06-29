@@ -39,7 +39,7 @@ namespace openspace::globebrowsing {
 class LayerAdjustment : public properties::PropertyOwner {
 public:
     LayerAdjustment();
-    ~LayerAdjustment() = default;
+    ~LayerAdjustment() override = default;
 
     void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
 

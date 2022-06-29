@@ -41,7 +41,7 @@ namespace scripting { struct LuaLibrary; }
 class Dashboard : public properties::PropertyOwner {
 public:
     Dashboard();
-    ~Dashboard() = default;
+    virtual ~Dashboard() override = default;
 
     void render(glm::vec2& penPosition);
 
