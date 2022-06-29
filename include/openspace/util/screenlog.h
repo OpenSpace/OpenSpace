@@ -82,7 +82,7 @@ public:
     /**
      * Destructor
      */
-    ~ScreenLog() = default;
+    ~ScreenLog() override = default;
 
     /**
      * Overwritten ghoul::loggling::Log method that is called whenever a new log message

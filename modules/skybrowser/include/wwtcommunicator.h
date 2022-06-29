@@ -39,7 +39,7 @@ class WwtCommunicator : public Browser {
 public:
     explicit WwtCommunicator(const ghoul::Dictionary& dictionary);
     WwtCommunicator(const WwtCommunicator&) = default;
-    ~WwtCommunicator();
+    ~WwtCommunicator() override;
 
     void update();
 

@@ -95,7 +95,7 @@ enum class ShadowCompType {
 class RenderableGlobe : public Renderable {
 public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
-    ~RenderableGlobe() = default;
+    ~RenderableGlobe() override = default;
 
     void initializeGL() override;
     void deinitialize() override;

@@ -37,7 +37,7 @@ namespace openspace {
 class GUIRenderHandler : public WebRenderHandler {
 public:
     GUIRenderHandler();
-    virtual ~GUIRenderHandler();
+    ~GUIRenderHandler() override;
 
     void draw() override;
     void render() override;

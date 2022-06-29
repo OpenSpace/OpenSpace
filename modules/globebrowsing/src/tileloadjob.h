@@ -47,7 +47,7 @@ struct TileLoadJob : public Job<RawTile> {
      * Destroys the allocated data pointer if it has been allocated and the TileLoadJob
      * has ownership of it.
      */
-    ~TileLoadJob();
+    ~TileLoadJob() override;
 
     /**
      * If the TileLoadJob has been created using PBO, this is the address that the

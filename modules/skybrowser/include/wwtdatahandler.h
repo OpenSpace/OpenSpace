@@ -25,10 +25,15 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 
-#include <modules/skybrowser/ext/tinyxml2/tinyxml2.h>
 #include <modules/space/speckloader.h>
 #include <openspace/documentation/documentation.h>
 #include <unordered_map>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#include <modules/skybrowser/ext/tinyxml2/tinyxml2.h>
+#pragma GCC diagnostic pop
 
 namespace openspace::documentation { struct Documentation; }
 

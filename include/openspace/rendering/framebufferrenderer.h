@@ -58,7 +58,7 @@ class FramebufferRenderer : public RaycasterListener,
                             public DeferredcasterListener
 {
 public:
-    virtual ~FramebufferRenderer() = default;
+    virtual ~FramebufferRenderer() override final = default;
 
     void initialize();
     void deinitialize();

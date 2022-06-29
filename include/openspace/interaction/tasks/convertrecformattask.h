@@ -41,7 +41,7 @@ public:
         ToBinary
     };
     ConvertRecFormatTask(const ghoul::Dictionary& dictionary);
-    ~ConvertRecFormatTask();
+    ~ConvertRecFormatTask() override;
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();

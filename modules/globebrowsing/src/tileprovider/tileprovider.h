@@ -80,7 +80,7 @@ struct TileProvider : public properties::PropertyOwner {
     static void deinitializeDefaultTile();
 
     TileProvider();
-    virtual ~TileProvider() = default;
+    ~TileProvider() override = default;
 
     void initialize();
     void deinitialize();

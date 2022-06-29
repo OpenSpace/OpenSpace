@@ -271,7 +271,7 @@ void SessionRecording::stopRecording() {
     if (_state == SessionState::Recording) {
         // Add all property baseline scripts to the beginning of the recording file
         datamessagestructures::ScriptMessage smTmp;
-        for (TimelineEntry initPropScripts : _keyframesSavePropertiesBaseline_timeline) {
+        for (TimelineEntry& initPropScripts : _keyframesSavePropertiesBaseline_timeline) {
             if (initPropScripts.keyframeType == RecordedType::Script) {
                 smTmp._script = _keyframesSavePropertiesBaseline_scripts
                     [initPropScripts.idxIntoKeyframeTypeArray];
@@ -1514,7 +1514,7 @@ bool SessionRecording::playbackScript() {
         _playbackLineNum
     );
 
-    success &= checkIfScriptUsesScenegraphNode(kf._script);
+    checkIfScriptUsesScenegraphNode(kf._script);
 
     if (success) {
         success = addKeyframe(
@@ -1534,61 +1534,100 @@ void SessionRecording::populateListofLoadedSceneGraphNodes() {
     }
 }
 
-bool SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
+void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
     if (s.rfind(scriptReturnPrefix, 0) == 0) {
         s.erase(0, scriptReturnPrefix.length());
     }
     // This works for both setPropertyValue and setPropertyValueSingle
-    if (s.rfind("openspace.setPropertyValue", 0) == 0) {
-        std::string found;
-        if (s.find("(\"") != std::string::npos) {
-            std::string subj = s.substr(s.find("(\"") + 2);
-            checkForScenegraphNodeAccess_Scene(subj, found);
-            checkForScenegraphNodeAccess_Nav(subj, found);
-            if (found.length() > 0) {
-                auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), found);
+    bool containsSetPropertyVal = (s.rfind("openspace.setPropertyValue", 0) == 0);
+    bool containsParensStart = (s.find("(") != std::string::npos);
+    if (containsSetPropertyVal && containsParensStart) {
+        std::string subjectOfSetProp = isolateTermFromQuotes(s.substr(s.find("(") + 1));
+        if (checkForScenegraphNodeAccessNav(subjectOfSetProp)) {
+            size_t commaPos = s.find(",");
+            std::string navNode = isolateTermFromQuotes(s.substr(commaPos + 1));
+            if (navNode != "nil") {
+                std::vector<std::string>::iterator it =
+                    std::find(_loadedNodes.begin(), _loadedNodes.end(), navNode);
                 if (it == _loadedNodes.end()) {
-                    LERROR(fmt::format(
-                        "Playback file requires scenegraph node '{}', which is "
-                        "not currently loaded", found
+                    LWARNING(fmt::format(
+                        "Playback file contains a property setting of navigation using"
+                        " scenegraph node '{}', which is not currently loaded", navNode
                     ));
-                    return false;
+                }
+            }
+        }
+        else if (checkForScenegraphNodeAccessScene(subjectOfSetProp)) {
+            std::string found = extractScenegraphNodeFromScene(subjectOfSetProp);
+            if (!found.empty()) {
+                std::vector<properties::Property*> matchHits =
+                    global::renderEngine->scene()->propertiesMatchingRegex(
+                        subjectOfSetProp
+                    );
+                if (matchHits.empty()) {
+                    LWARNING(fmt::format(
+                        "Playback file contains a property setting of scenegraph"
+                        " node '{}', which is not currently loaded", found
+                    ));
                 }
             }
         }
     }
-    return true;
 }
 
-void SessionRecording::checkForScenegraphNodeAccess_Scene(std::string& s,
-                                                          std::string& result)
-{
+bool SessionRecording::checkForScenegraphNodeAccessScene(std::string& s) {
     const std::string scene = "Scene.";
-    auto posScene = s.find(scene);
+    return (s.find(scene) != std::string::npos);
+}
+
+std::string SessionRecording::extractScenegraphNodeFromScene(std::string& s) {
+    const std::string scene = "Scene.";
+    std::string extracted;
+    size_t posScene = s.find(scene);
     if (posScene != std::string::npos) {
-        auto posDot = s.find(".", posScene + scene.length() + 1);
+        size_t posDot = s.find(".", posScene + scene.length() + 1);
         if (posDot > posScene && posDot != std::string::npos) {
-            result = s.substr(posScene + scene.length(), posDot
-                - (posScene + scene.length()));
+            extracted = s.substr(posScene + scene.length(), posDot -
+                (posScene + scene.length()));
         }
     }
+    return extracted;
 }
 
-void SessionRecording::checkForScenegraphNodeAccess_Nav(std::string& s,
-                                                        std::string& result)
-{
+bool SessionRecording::checkForScenegraphNodeAccessNav(std::string& navTerm) {
     const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
-    auto posNav = s.find(nextTerm);
+    size_t posNav = navTerm.find(nextTerm);
     if (posNav != std::string::npos) {
         for (std::string accessName : _navScriptsUsingNodes) {
-            if (s.substr(posNav + nextTerm.length()).rfind(accessName) == 0) {
-                std::string postName = s.substr(posNav + nextTerm.length()
-                    + accessName.length() + 2);
-                eraseSpacesFromString(postName);
-                result = getNameFromSurroundingQuotes(postName);
-            }
+              if (navTerm.find(accessName) != std::string::npos) {
+                  return true;
+              }
         }
     }
+    return false;
+}
+
+std::string SessionRecording::isolateTermFromQuotes(std::string s) {
+    //Remove any leading spaces
+    while (s.front() == ' ') {
+        s.erase(0, 1);
+    }
+    const std::string possibleQuotes = "\'\"[]";
+    while (possibleQuotes.find(s.front()) != std::string::npos) {
+        s.erase(0, 1);
+    }
+    for (char q : possibleQuotes) {
+        if (s.find(q) != std::string::npos) {
+            s = s.substr(0, s.find(q));
+            return s;
+        }
+    }
+    //If no quotes found, remove other possible characters from end
+    std::string unwantedChars = " );";
+    while (unwantedChars.find(s.back()) != std::string::npos) {
+        s.pop_back();
+    }
+    return s;
 }
 
 void SessionRecording::eraseSpacesFromString(std::string& s) {

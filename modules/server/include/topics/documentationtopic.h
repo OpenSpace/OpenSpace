@@ -32,7 +32,7 @@ namespace openspace {
 class DocumentationTopic : public Topic {
 public:
     DocumentationTopic() = default;
-    virtual ~DocumentationTopic() = default;
+    ~DocumentationTopic() override = default;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

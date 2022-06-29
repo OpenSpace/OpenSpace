@@ -42,7 +42,7 @@ namespace openspace::planetgeometry {
 class SimpleSphereGeometry : public PlanetGeometry {
 public:
     SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
-    ~SimpleSphereGeometry();
+    ~SimpleSphereGeometry() override;
 
     void initialize() override;
     void deinitialize() override;

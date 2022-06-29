@@ -34,7 +34,7 @@ namespace openspace {
 class SessionRecordingTopic : public Topic {
 public:
     SessionRecordingTopic();
-    virtual ~SessionRecordingTopic();
+    ~SessionRecordingTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

@@ -34,7 +34,7 @@ class Connection;
 class BounceTopic : public Topic {
 public:
     BounceTopic() = default;
-    virtual ~BounceTopic() = default;
+    ~BounceTopic() override = default;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

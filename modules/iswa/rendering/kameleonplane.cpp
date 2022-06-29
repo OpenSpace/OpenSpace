@@ -151,7 +151,7 @@ void KameleonPlane::initializeGL() {
             // else if autofilter is turned off, register backgroundValues
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::All);
+                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
                 //_backgroundValues.setVisible(true);
             }
         });

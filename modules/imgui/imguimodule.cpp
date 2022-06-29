@@ -52,70 +52,6 @@ namespace {
 
     constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
 
-    void addScreenSpaceRenderableLocal(std::string identifier, std::string texturePath) {
-        if (!std::filesystem::is_regular_file(absPath(texturePath))) {
-            LWARNING(fmt::format("Could not find image '{}'", texturePath));
-            return;
-        }
-
-        std::string script;
-        if (identifier.empty()) {
-            script = fmt::format(
-                "openspace.addScreenSpaceRenderable({{\
-                    Type = 'ScreenSpaceImageLocal',\
-                    TexturePath = openspace.absPath('{}')\
-                }});",
-                texturePath
-            );
-        }
-        else {
-            script = fmt::format(
-                "openspace.addScreenSpaceRenderable({{\
-                    Type = 'ScreenSpaceImageLocal',\
-                    TexturePath = openspace.absPath('{0}'),\
-                    Identifier = '{1}',\
-                    Name = '{1}'\
-                }});",
-                texturePath, identifier
-            );
-        }
-
-        openspace::global::scriptEngine->queueScript(
-            script,
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-
-    void addScreenSpaceRenderableOnline(std::string identifier, std::string texturePath) {
-        std::string script;
-        if (identifier.empty()) {
-            script = fmt::format(
-                "openspace.addScreenSpaceRenderable({{\
-                    Type = 'ScreenSpaceImageOnline',\
-                    URL = '{}'\
-                }});",
-                texturePath
-            );
-        }
-        else {
-            script = fmt::format(
-                "openspace.addScreenSpaceRenderable({{\
-                    Type = 'ScreenSpaceImageOnline',\
-                    URL = '{0}',\
-                    Identifier = '{1}',\
-                    Name = '{1}'\
-                }});",
-                texturePath,
-                identifier
-            );
-        }
-
-        openspace::global::scriptEngine->queueScript(
-            script,
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
@@ -553,18 +489,6 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
        ImGui::Checkbox(comp->guiName().c_str(), &enabled);
        comp->setEnabled(enabled);
    }
-
-   // Render and Update property visibility
-   // Fragile! Keep this in sync with properties::Property::Visibility
-   using V = properties::Property::Visibility;
-   int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
-
-   // Array is sorted by importance
-   std::array<const char*, 4> items = { "User", "Developer", "Hidden", "All" };
-   ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
-
-   _currentVisibility = static_cast<V>(t);
-   _property.setVisibility(_currentVisibility);
 
 #ifdef SHOW_IMGUI_HELPERS
    ImGui::Checkbox("ImGUI Internals", &_showInternals);

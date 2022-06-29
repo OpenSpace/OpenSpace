@@ -51,7 +51,7 @@ class Path;
 class PathNavigator : public properties::PropertyOwner {
 public:
     PathNavigator();
-    ~PathNavigator();
+    virtual ~PathNavigator() override;
 
     // Accessors
     Camera* camera() const;
