@@ -1815,7 +1815,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::RemoveTag,
             codegen::lua::DownloadFile,
             codegen::lua::CreateSingleColorImage,
-            codegen::lua::IsMaster
+            codegen::lua::IsMaster,
+            codegen::lua::Version
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
