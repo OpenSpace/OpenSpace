@@ -53,6 +53,27 @@ namespace connection {
         std::shared_ptr<SoftwareConnection> connectionPtr
     );
 
+    struct SceneGraphNodeInfo {
+        using OnChangeHandle = properties::Property::OnChangeHandle;
+        struct PropertySubscription {
+            OnChangeHandle onChangehandle;
+            bool shouldSendMessage{ false };
+        };
+        using PropertySubscriptions = std::unordered_map<std::string, PropertySubscription>;
+        /*                                                    /\
+                                                              |
+                                                         propertyName
+        */
+
+        using OutgoingMessages = std::unordered_map<
+            softwareintegration::simp::DataKey,
+            std::tuple<std::vector<std::byte>, int32_t>
+        >;
+
+        OutgoingMessages outgoingMessages{};
+        PropertySubscriptions propertySubscriptions{};
+    };
+
 } // namespace connection
 
 } // namespace softwareintegration::network
@@ -61,8 +82,6 @@ using namespace softwareintegration::network;
 
 class SoftwareConnection {
 public:
-    struct SceneGraphNodeInfo;
-
     explicit SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
     SoftwareConnection(SoftwareConnection&& p);
     ~SoftwareConnection();
@@ -139,7 +158,7 @@ private:
 
     std::unique_ptr<ghoul::io::TcpSocket> _socket;
 
-    std::unordered_map<std::string, SceneGraphNodeInfo> _sceneGraphNodes;
+    std::unordered_map<std::string, connection::SceneGraphNodeInfo> _sceneGraphNodes;
     std::mutex _outgoingMessagesMutex;
     std::atomic_bool _shouldStopOutgoingMessagesThread;
     std::unique_ptr<std::thread> _outgoingMessagesThread;
@@ -153,26 +172,6 @@ private:
     static std::atomic_size_t _nextConnectionId;
 
     bool _handshakeHasBeenMade = false;
-};
-
-struct SoftwareConnection::SceneGraphNodeInfo {
-    using OnChangeHandle = properties::Property::OnChangeHandle;
-    struct PropertySubscription {
-        OnChangeHandle onChangehandle;
-        bool shouldSendMessage{ false };
-    };
-    using PropertySubscriptions = std::unordered_map<std::string, PropertySubscription>;
-    //                                                    /\
-    //                                                    |
-    //                                               propertyName
-
-    using OutgoingMessages = std::unordered_map<
-        softwareintegration::simp::DataKey,
-        std::tuple<std::vector<std::byte>, int32_t>
-    >;
-
-    OutgoingMessages outgoingMessages{};
-    PropertySubscriptions propertySubscriptions{};
 };
 
 } // namespace openspace

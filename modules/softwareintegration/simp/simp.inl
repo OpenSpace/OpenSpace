@@ -35,7 +35,7 @@ bool hostIsBigEndian() {
     // is placed at the byte with the lowest address
     // Example: 4 byte int with with value 1 is as bytes
     // is 0001 for big endian and 1000 for little endian
-    return *(char*)&i == 0;
+    return *(const char*)&i == 0;
 }
 
 template <typename T>

@@ -98,7 +98,7 @@ void SoftwareConnection::addPropertySubscription(
     }
 
     // Set new onChange handler
-    SceneGraphNodeInfo::OnChangeHandle onChangeHandle = property->onChange(newHandler);
+    connection::SceneGraphNodeInfo::OnChangeHandle onChangeHandle = property->onChange(newHandler);
 
     auto propertySubscriptions = _sceneGraphNodes.find(identifier);
     if (propertySubscriptions == _sceneGraphNodes.end()) {
@@ -118,7 +118,7 @@ void SoftwareConnection::addPropertySubscription(
     }
     else {
         // Property subscription doesn't exist
-        SceneGraphNodeInfo::PropertySubscription newPropertySubscription{ onChangeHandle };
+        connection::SceneGraphNodeInfo::PropertySubscription newPropertySubscription{ onChangeHandle };
         propertySubscriptions->second.propertySubscriptions.emplace(propertyName, newPropertySubscription);
     }
 }
