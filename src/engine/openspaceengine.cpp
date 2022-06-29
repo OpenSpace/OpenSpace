@@ -118,11 +118,24 @@ namespace {
         }
     }
 
-    openspace::properties::Property::PropertyInfo PrintEventsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PrintEventsInfo = {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
         "printed to the log."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
+        "PropertyVisibility",
+        "Property Visibility",
+        "Hides or displays different settings in the GUI depending on how advanced they "
+        "are."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
+        "ShowHiddenSceneGraphNodes",
+        "Show Hidden Scene Graph Nodes",
+        "If checked, hidden scene graph nodes are visible in the UI"
     };
 } // namespace
 
@@ -131,7 +144,10 @@ namespace openspace {
 class Scene;
 
 OpenSpaceEngine::OpenSpaceEngine()
-    : _printEvents(PrintEventsInfo, false)
+    : properties::PropertyOwner({ "OpenSpaceEngine" })
+    , _printEvents(PrintEventsInfo, false)
+    , _visibility(VisibilityInfo)
+    , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
 {
     FactoryManager::initialize();
     FactoryManager::ref().addFactory<Renderable>("Renderable");
@@ -146,6 +162,19 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     SpiceManager::initialize();
     TransformationManager::initialize();
+
+    addProperty(_printEvents);
+    addProperty(_visibility);
+    addProperty(_showHiddenSceneGraphNodes);
+
+    using Visibility = openspace::properties::Property::Visibility;
+    _visibility.addOptions({
+        { static_cast<int>(Visibility::NoviceUser), "Novice User" },
+        { static_cast<int>(Visibility::User), "User" },
+        { static_cast<int>(Visibility::AdvancedUser), "Advanced User" },
+        { static_cast<int>(Visibility::Developer), "Developer" },
+        { static_cast<int>(Visibility::Hidden), "Everything" },
+    });
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
@@ -1192,6 +1221,8 @@ void OpenSpaceEngine::preSynchronization() {
     if (_isRenderingFirstFrame) {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
+
+        global::scriptEngine->runScriptFile(absPath("${SCRIPTS}/developer_settings.lua"));
     }
 
     // Handle callback(s) for change in engine mode
@@ -1580,6 +1611,14 @@ void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     ZoneScoped
 
     global::syncEngine->decodeSyncables(std::move(data));
+}
+
+properties::Property::Visibility openspace::OpenSpaceEngine::visibility() const {
+    return static_cast<properties::Property::Visibility>(_visibility.value());
+}
+
+bool openspace::OpenSpaceEngine::showHiddenSceneGraphNodes() const {
+    return _showHiddenSceneGraphNodes;
 }
 
 void OpenSpaceEngine::toggleShutdownMode() {

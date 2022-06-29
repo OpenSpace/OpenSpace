@@ -168,11 +168,6 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
-    _source.type.onChange([this]() {
-        _source.nodeName.setVisibility(
-            properties::Property::Visibility(_source.type == Type::Node)
-        );
-    });
     if (p.sourceType.has_value()) {
         _source.type = codegen::map<Type>(*p.sourceType);
     }
@@ -201,11 +196,6 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
-    _reference.type.onChange([this]() {
-        _reference.nodeName.setVisibility(
-            properties::Property::Visibility(_reference.type == Type::Node)
-        );
-    });
     _reference.type = codegen::map<Type>(p.referenceType);
     addProperty(_reference.type);
 
@@ -227,11 +217,6 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         { Type::Node, "Node" },
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
-    });
-    _destination.type.onChange([this]() {
-        _destination.nodeName.setVisibility(
-            properties::Property::Visibility(_source.type == Type::Node)
-        );
     });
     if (p.destinationType.has_value()) {
         _destination.type = codegen::map<Type>(*p.destinationType);

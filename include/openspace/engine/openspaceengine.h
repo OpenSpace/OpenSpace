@@ -25,6 +25,9 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/property.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/profile.h>
@@ -63,7 +66,7 @@ struct CommandlineArguments {
     std::string configurationOverride;
 };
 
-class OpenSpaceEngine {
+class OpenSpaceEngine : public properties::PropertyOwner {
 public:
     // A mode that specifies which part of the system is currently in control.
     // The mode can be used to limit certain features, like setting time, navigation
@@ -101,6 +104,8 @@ public:
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
+    properties::Property::Visibility visibility() const;
+    bool showHiddenSceneGraphNodes() const;
     void toggleShutdownMode();
 
     Mode currentMode() const;
@@ -136,6 +141,8 @@ private:
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     properties::BoolProperty _printEvents;
+    properties::OptionProperty _visibility;
+    properties::BoolProperty _showHiddenSceneGraphNodes;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;

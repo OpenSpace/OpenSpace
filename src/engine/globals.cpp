@@ -399,6 +399,7 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::dashboard);
 
     rootPropertyOwner->addPropertySubOwner(global::userPropertyOwner);
+    rootPropertyOwner->addPropertySubOwner(global::openSpaceEngine);
 
     syncEngine->addSyncable(global::scriptEngine);
 }
