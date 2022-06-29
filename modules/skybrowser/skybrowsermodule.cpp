@@ -169,7 +169,7 @@ SkyBrowserModule::SkyBrowserModule()
 
     // Set callback functions
     global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
-        [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
+        [&](MouseButton, MouseAction action, KeyModifier) -> bool {
             if (action == MouseAction::Press) {
                 _cameraRotation.stop();
             }
@@ -218,7 +218,7 @@ SkyBrowserModule::SkyBrowserModule()
         // Trigger callbacks (should maybe have a check to see if update is needed)
         using K = CallbackHandle;
         using V = CallbackFunction;
-        for (const std::pair<const K, V>& it : _preSyncCallbacks) {
+        for (const std::pair<K, V>& it : _preSyncCallbacks) {
             it.second(); // call function
         }
     });

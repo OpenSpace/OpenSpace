@@ -65,7 +65,7 @@ private:
 
     struct InterpolateTileProvider : public TileProvider {
         InterpolateTileProvider(const ghoul::Dictionary&);
-        virtual ~InterpolateTileProvider();
+        ~InterpolateTileProvider() override;
 
         Tile tile(const TileIndex& tileIndex) override final;
         Tile::Status tileStatus(const TileIndex& index) override final;

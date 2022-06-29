@@ -32,7 +32,7 @@ namespace openspace {
 class TriggerPropertyTopic : public Topic {
 public:
     TriggerPropertyTopic() = default;
-    virtual ~TriggerPropertyTopic() = default;
+    ~TriggerPropertyTopic() override = default;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

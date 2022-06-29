@@ -40,7 +40,7 @@ class VolumeClipPlane;
 class VolumeClipPlanes : public properties::PropertyOwner {
 public:
     VolumeClipPlanes(const ghoul::Dictionary& dictionary);
-    virtual ~VolumeClipPlanes() = default;
+    ~VolumeClipPlanes() override = default;
 
     void initialize();
     void deinitialize();

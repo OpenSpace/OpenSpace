@@ -44,7 +44,7 @@ namespace planetgeometry { class PlanetGeometry; }
 class RenderablePlanetProjection : public Renderable {
 public:
     RenderablePlanetProjection(const ghoul::Dictionary& dict);
-    ~RenderablePlanetProjection();
+    ~RenderablePlanetProjection() override;
 
     void initializeGL() override;
     void deinitializeGL() override;

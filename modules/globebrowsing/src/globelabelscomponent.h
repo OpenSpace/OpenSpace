@@ -50,7 +50,7 @@ namespace globebrowsing { class RenderableGlobe; }
 class GlobeLabelsComponent : public properties::PropertyOwner {
 public:
     GlobeLabelsComponent();
-    ~GlobeLabelsComponent() = default;
+    ~GlobeLabelsComponent() override = default;
 
     void initialize(const ghoul::Dictionary& dictionary,
         globebrowsing::RenderableGlobe* globe);

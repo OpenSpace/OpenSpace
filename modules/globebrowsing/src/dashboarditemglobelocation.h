@@ -41,7 +41,7 @@ namespace documentation { struct Documentation; }
 class DashboardItemGlobeLocation : public DashboardItem {
 public:
     DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary);
-    ~DashboardItemGlobeLocation() = default;
+    ~DashboardItemGlobeLocation() override = default;
 
     void render(glm::vec2& penPosition) override;
 

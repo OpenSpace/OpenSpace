@@ -58,7 +58,7 @@ public:
     static constexpr const char* KeyIdentifier = "Identifier";
 
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable();
+    virtual ~ScreenSpaceRenderable() override;
 
     virtual void render();
 
