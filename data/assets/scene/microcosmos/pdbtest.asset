@@ -1,10 +1,20 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
-local moleculeFile = asset.syncedResource({
+local moleculeDb = "https://home.thissma.fr/moldata/"
+
+local moleculeFiles = asset.syncedResource({
   Name = "Molecule File",
   Type = "UrlSynchronization",
   Identifier = "molecule_file",
-  Url = "https://files.rcsb.org/download/1MH1.pdb"
+  Url = {
+    moleculeDb .. "full.xyz",
+    moleculeDb .. "full.arc",
+    moleculeDb .. "1mh1.pdb",
+    moleculeDb .. "inside-md-npt.gro",
+    moleculeDb .. "inside-md-pullout.xtc",
+    moleculeDb .. "centered.gro",
+    moleculeDb .. "centered.xtc",
+  }
 })
 
 local PdbTest = {
@@ -12,7 +22,8 @@ local PdbTest = {
   Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeFile .. "1MH1.pdb",
+    MoleculeFile = moleculeFiles .. "centered.gro",
+    TrajectoryFile = moleculeFiles .. "centered.xtc",
   },
   Transform = {
     Scale = {

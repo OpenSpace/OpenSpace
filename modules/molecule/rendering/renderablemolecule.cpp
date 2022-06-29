@@ -24,6 +24,7 @@
 
 #include "glbinding/gl/bitfield.h"
 #include "glbinding/gl/functions.h"
+#include "md_util.h"
 #include "viamd/coloring.h"
 #include "viamd/loader.h"
 #include <modules/molecule/rendering/renderablemolecule.h>
@@ -84,13 +85,6 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 namespace {
     constexpr const char* _loggerCat = "RenderableMolecule";
 
-    enum class MoleculeType {
-        Auto,
-        Pdb,
-        Gro,
-        Xyz,
-    };
-
     enum class RepresentationType {
         SpaceFill = MD_GL_REP_SPACE_FILL,
         Ribbons = MD_GL_REP_RIBBONS,
@@ -122,12 +116,6 @@ namespace {
         "Trajectory file path"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MoleculeTypeInfo = {
-        "MoleculeType",
-        "Molecule Type",
-        "Type of molecule file"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo RepTypeInfo = {
         "RepType",
         "Representation Type",
@@ -152,16 +140,6 @@ namespace {
 
         // [[codegen::verbatim(TrajectoryFileInfo.description)]]
         std::optional<std::string> trajectoryFile;
-
-        enum class [[codegen::map(MoleculeType)]] MoleculeType {
-            Auto,
-            Pdb,
-            Gro,
-            Xyz,
-        };
-
-        // [[codegen::verbatim(MoleculeTypeInfo.description)]]
-        std::optional<MoleculeType> moleculeType;
 
         enum class [[codegen::map(RepresentationType)]] RepresentationType {
             SpaceFill,
@@ -195,39 +173,6 @@ namespace {
 #include "renderablemolecule_codegen.cpp"
 }
 
-md_molecule_api* moleculeApi(std::string_view filename, MoleculeType type) {
-    switch (type) {
-    case MoleculeType::Pdb:
-        return md_pdb_molecule_api();
-    case MoleculeType::Gro:
-        return md_gro_molecule_api();
-    case MoleculeType::Xyz:
-        return md_xyz_molecule_api();
-    case MoleculeType::Auto:
-        str_t str = str_from_cstr(filename.data());
-        return load::mol::get_api(str);
-      break;
-    }
-}
-
-md_trajectory_api* trajectoryApi(std::string_view filename, MoleculeType type) {
-    switch (type) {
-    case MoleculeType::Pdb:
-        return md_pdb_trajectory_api();
-    case MoleculeType::Gro:
-        LWARNING("GRO files are not supposed to have trajectories");
-        return nullptr;
-    case MoleculeType::Xyz:
-        return md_xyz_trajectory_api();
-        break;
-    case MoleculeType::Auto:
-        str_t str = str_from_cstr(filename.data());
-        return load::traj::get_api(str);
-      break;
-    }
-}
-
-
 namespace openspace {
 
 documentation::Documentation RenderableMolecule::Documentation() {
@@ -237,11 +182,10 @@ documentation::Documentation RenderableMolecule::Documentation() {
 RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
     _deferredTask(GlDeferredTask::None),
-    _loadedMolecule(nullptr),
-    _loadedTrajectory(nullptr),
+    _moleculeApi(nullptr),
+    _trajectoryApi(nullptr),
     _moleculeFile(MoleculeFileInfo),
     _trajectoryFile(TrajectoryFileInfo),
-    _moleculeType(MoleculeTypeInfo),
     _repType(RepTypeInfo),
     _coloring(ColoringInfo),
     _repScale(RepScaleInfo, 1.f, 0.1f, 100.f)
@@ -250,13 +194,6 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     _trajectory = {};
     _drawMol = {};
     _drawRep = {};
-    
-    _moleculeType.addOptions({
-        { static_cast<int>(MoleculeType::Auto), "Auto" },
-        { static_cast<int>(MoleculeType::Pdb), "PDB" },
-        { static_cast<int>(MoleculeType::Gro), "GRO" },
-        { static_cast<int>(MoleculeType::Xyz), "XYZ" },
-    });
     
     _repType.addOptions({
         { static_cast<int>(RepresentationType::SpaceFill), "Space Fill" },
@@ -279,12 +216,6 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
 
     _moleculeFile = p.moleculeFile;
     _trajectoryFile = p.trajectoryFile.value_or("");
-
-    if (p.moleculeType.has_value()) {
-        _moleculeType = static_cast<int>(codegen::map<MoleculeType>(*p.moleculeType));
-    } else {
-        _moleculeType = static_cast<int>(MoleculeType::Auto);
-    }
 
     if (p.repType.has_value()) {
         _repType = static_cast<int>(codegen::map<RepresentationType>(*p.repType));
@@ -311,7 +242,6 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     
     addProperty(_moleculeFile);
     addProperty(_trajectoryFile);
-    addProperty(_moleculeType);
     addProperty(_repType);
     addProperty(_coloring);
     addProperty(_repScale);
@@ -341,7 +271,7 @@ bool RenderableMolecule::isReady() const {
     return true;
 }
 
-void RenderableMolecule::update(const UpdateData&) {
+void RenderableMolecule::update(const UpdateData& data) {
     // This is a dirty hack to load molecules in a gl context.
     switch (_deferredTask) {
     case GlDeferredTask::None:
@@ -354,15 +284,67 @@ void RenderableMolecule::update(const UpdateData&) {
     }
     _deferredTask = GlDeferredTask::None;
     
-    
-    // if (_loadedTrajectory) {
-    //     int64_t nFrames = md_trajectory_num_frames(&_trajectory);
-    //     int64_t frame = static_cast<int64_t>(data.time.j2000Seconds()) % nFrames;
-    //     md_trajectory_frame_header_t header{};
-    //     md_trajectory_load_frame(&_trajectory, frame, &header, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z);
-    //     md_gl_molecule_set_atom_position(&_drawMol, 0,static_cast<uint32_t>(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
-    //     std::cout << "here" << std::endl;
-    // }
+    // update animation
+    if (_trajectoryApi) {
+        int64_t nFrames = md_trajectory_num_frames(_trajectory);
+        if (nFrames >= 4) {
+            double time = data.time.j2000Seconds() * 1.0;
+            double t = fract(time);
+            int64_t frames[4];
+
+            // The animation is played forward and back (bouncing), the first and last
+            // frame are repeated.
+
+            if ((int64_t(time) / nFrames) % 2 == 0) { // animation forward
+                int64_t frame = int64_t(time) % nFrames;
+                if (frame < 0) frame += nFrames;
+                frames[0] = std::max(0l, frame - 1);
+                frames[1] = frame;
+                frames[2] = std::min(nFrames - 1, frame + 1);
+                frames[3] = std::min(nFrames - 1, frame + 2);
+            }
+            else { // animation backward
+                int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
+                if (frame < 0) frame += nFrames;
+                frames[0] = std::max(0l, frame - 2);
+                frames[1] = std::max(0l, frame - 1);
+                frames[2] = frame;
+                frames[3] = std::min(nFrames - 1, frame + 1);
+            }
+
+            // nearest
+            // md_trajectory_frame_header_t header{};
+            // md_trajectory_load_frame(_trajectory, frame, &header, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z);
+            // md_gl_molecule_set_atom_position(&_drawMol, 0,static_cast<uint32_t>(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+            
+            // cubic
+            md_trajectory_frame_header_t header[4];
+            int64_t stride = ROUND_UP(_molecule.atom.count, md_simd_widthf);    // The interploation uses SIMD vectorization without bounds, so we make sure there is no overlap between the data segments
+            int64_t bytes = stride * sizeof(float) * 3 * 4;
+            float* mem = static_cast<float*>(malloc(bytes));
+            {
+                md_vec3_soa_t src[4] = {
+                    {mem + stride * 0, mem + stride *  1, mem + stride *  2},
+                    {mem + stride * 3, mem + stride *  4, mem + stride *  5},
+                    {mem + stride * 6, mem + stride *  7, mem + stride *  8},
+                    {mem + stride * 9, mem + stride * 10, mem + stride * 11},
+                };
+                md_vec3_soa_t dst = {
+                    _molecule.atom.x, _molecule.atom.y, _molecule.atom.z,
+                };
+                md_trajectory_load_frame(_trajectory, frames[0], &header[0], src[0].x, src[0].y, src[0].z);
+                md_trajectory_load_frame(_trajectory, frames[1], &header[1], src[1].x, src[1].y, src[1].z);
+                md_trajectory_load_frame(_trajectory, frames[2], &header[2], src[2].x, src[2].y, src[2].z);
+                md_trajectory_load_frame(_trajectory, frames[3], &header[3], src[3].x, src[3].y, src[3].z);
+                md_util_cubic_interpolation(dst, src, _molecule.atom.count, vec3_t{{0, 0, 0}}, t, 1.0f);
+            }
+            free(mem);
+            md_gl_molecule_set_atom_position(&_drawMol, 0, uint32_t(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+        }
+        else {
+            LERROR("Molecule trajectory contains less than 4 frames. Cannot interpolate.");
+        }
+    }
 }
 
 void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
@@ -438,8 +420,10 @@ float RenderableMolecule::computeRadius() {
 }
 
 void RenderableMolecule::initMolecule() {
+    LDEBUG("Loading molecule file '" + _trajectoryFile.value() + "'");
+
     // set the updateRepresentation hook once, when the molecule is first initialized
-    if (!_loadedMolecule) {
+    if (!_moleculeApi) {
         const auto updateRep = [this]() { updateRepresentation(); };
         _repType.onChange(updateRep);
         _repScale.onChange(updateRep);
@@ -451,14 +435,18 @@ void RenderableMolecule::initMolecule() {
         freeMolecule();
     }
 
-    _loadedMolecule = moleculeApi(_moleculeFile.value(), static_cast<MoleculeType>(_moleculeType.value()));
+    // need to keep the string in scope to keep the str pointer valid
+    std::string molFile = _moleculeFile.value();
+    str_t molFileStr = str_from_cstr(molFile.data());
+    
+    _moleculeApi = load::mol::get_api(molFileStr);
 
-    if (!_loadedMolecule) {
+    if (!_moleculeApi) {
         LERROR("failed to initialize molecule: unknown file type");
         return;
     }
 
-    _loadedMolecule->init_from_file(&_molecule, str_from_cstr(_moleculeFile.value().data()), default_allocator);
+    _moleculeApi->init_from_file(&_molecule, molFileStr, default_allocator);
 
     float radius = computeRadius();
     setBoundingSphere(radius);
@@ -470,22 +458,25 @@ void RenderableMolecule::initMolecule() {
 }
 
 void RenderableMolecule::initTrajectory() {
-    _loadedTrajectory = trajectoryApi(_trajectoryFile.value().data(), static_cast<MoleculeType>(_moleculeType.value()));
+    LDEBUG("Loading trajectory file '" + _trajectoryFile.value() + "'");
+    
+    // need to keep the string in scope to keep the str pointer valid
+    std::string trajFile = _trajectoryFile.value();
+    str_t trajFileStr = str_from_cstr(trajFile.data());
 
-    if (!_loadedTrajectory) {
+    _trajectoryApi = load::traj::get_api(trajFileStr);
+
+    if (!_trajectoryApi) {
         LERROR("failed to initialize trajectory: unknown file type");
         return;
     }
+    
+    _trajectory = load::traj::open_file(trajFileStr, &_molecule, default_allocator);
 
-    // _loadedMolecule = molApi;
-
-    // if (trajApi) {
-    //     initTrajectory();
-    // }
-    //     std::string filename = _moleculeFileOrUrl;
-    //     str_t str = str_from_cstr(filename.c_str());
-    //     md_trajectory_i* internalTraj = load::traj::open_file(str, &_molecule, default_allocator);
-    //     load_trajectory_data(data, filename);
+    if (!_trajectory) {
+        LERROR("failed to initialize trajectory: failed to load file");
+        return;
+    }
 }
 
 void RenderableMolecule::updateRepresentation() {
@@ -549,14 +540,17 @@ void RenderableMolecule::updateRepresentation() {
 void RenderableMolecule::freeMolecule() {
     md_gl_representation_free(&_drawRep);
     md_gl_molecule_free(&_drawMol);
-    _loadedMolecule->free(&_molecule, default_allocator);
-    _loadedMolecule = nullptr;
+    _moleculeApi->free(&_molecule, default_allocator);
+    _moleculeApi = nullptr;
     _molecule = {};
     _drawMol = {};
     _drawRep = {};
 }
 
 void RenderableMolecule::freeTrajectory() {
+    _trajectoryApi->destroy(_trajectory);
+    _trajectoryApi = nullptr;
+    _trajectory = nullptr;
 }
 
 } // namespace openspace

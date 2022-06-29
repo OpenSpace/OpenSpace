@@ -79,19 +79,18 @@ private:
     double _frame;
     md_gl_shaders_t _shaders;
 
+    md_molecule_api* _moleculeApi;
+    md_trajectory_api* _trajectoryApi;
     md_molecule_t _molecule;
-    md_trajectory_i _trajectory;
+    md_trajectory_i* _trajectory;
     md_gl_representation_t _drawRep;
     md_gl_molecule_t _drawMol;
-    md_molecule_api* _loadedMolecule;
-    md_trajectory_api* _loadedTrajectory;
 
     glm::vec3 _center;
     glm::vec3 _extent;
 
     properties::StringProperty _moleculeFile;
     properties::StringProperty _trajectoryFile;
-    properties::OptionProperty _moleculeType;
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
