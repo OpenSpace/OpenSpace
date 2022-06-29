@@ -93,8 +93,8 @@ void CameraTopic::sendCameraData() {
     std::pair <double, std::string> altSimplified = simplifyDistance(position.z);
 
     nlohmann::json jsonData = {
-        { "longitude", position.x },
-        { "latitude", position.y},
+        { "latitude", position.x},
+        { "longitude", position.y },
         { "altitude", altSimplified.first },
         { "altitudeUnit", altSimplified.second}
     };
