@@ -490,7 +490,39 @@ void from_json(const nlohmann::json& j, version10::Keybinding& v) {
         { "key", "documentation", "name", "gui_path", "is_local", "script" }
     );
 
-    v.key = stringToKey(j.at("key").get<std::string>());
+    std::string key = j.at("key").get<std::string>();
+    if (key == "KP0") {
+        key = "KP_0";
+    }
+    else if (key == "KP1") {
+        key = "KP_1";
+    }
+    else if (key == "KP2") {
+        key = "KP_2";
+    }
+    else if (key == "KP3") {
+        key = "KP_3";
+    }
+    else if (key == "KP4") {
+        key = "KP_4";
+    }
+    else if (key == "KP5") {
+        key = "KP_5";
+    }
+    else if (key == "KP6") {
+        key = "KP_6";
+    }
+    else if (key == "KP7") {
+        key = "KP_7";
+    }
+    else if (key == "KP8") {
+        key = "KP_8";
+    }
+    else if (key == "KP9") {
+        key = "KP_9";
+    }
+
+    v.key = stringToKey(key);
     j["documentation"].get_to(v.documentation);
     j["name"].get_to(v.name);
     j["gui_path"].get_to(v.guiPath);
