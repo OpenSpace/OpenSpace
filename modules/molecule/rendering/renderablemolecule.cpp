@@ -134,6 +134,12 @@ namespace {
         "Thickness of the atoms in Space Fill or Licorice representation"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AnimSpeedInfo = {
+        "AnimSpeed",
+        "Animation Speed",
+        "Playback speed of the animation (in frames per second)"
+    };
+
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         // [[codegen::verbatim(MoleculeFileInfo.description)]]
         std::string moleculeFile;
@@ -168,6 +174,9 @@ namespace {
 
         // [[codegen::verbatim(RepScaleInfo.description)]]
         std::optional<float> repScale;
+
+        // [[codegen::verbatim(AnimSpeedInfo.description)]]
+        std::optional<float> animSpeed;
     };
 
 #include "renderablemolecule_codegen.cpp"
@@ -188,7 +197,8 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     _trajectoryFile(TrajectoryFileInfo),
     _repType(RepTypeInfo),
     _coloring(ColoringInfo),
-    _repScale(RepScaleInfo, 1.f, 0.1f, 100.f)
+    _repScale(RepScaleInfo, 1.f, 0.1f, 10.f),
+    _animSpeed(AnimSpeedInfo, 1.f, 0.1f, 1000.f)
 {
     _molecule = {};
     _trajectory = {};
@@ -230,6 +240,7 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     }
     
     _repScale = p.repScale.value_or(1.f);
+    _animSpeed = p.animSpeed.value_or(1.f);
 
     const auto loadMolecule = [this]() {
         _deferredTask = GlDeferredTask::LoadMolecule;
@@ -245,6 +256,7 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     addProperty(_repType);
     addProperty(_coloring);
     addProperty(_repScale);
+    addProperty(_animSpeed);
 }
 
 RenderableMolecule::~RenderableMolecule() {
@@ -288,7 +300,7 @@ void RenderableMolecule::update(const UpdateData& data) {
     if (_trajectoryApi) {
         int64_t nFrames = md_trajectory_num_frames(_trajectory);
         if (nFrames >= 4) {
-            double time = data.time.j2000Seconds() * 1.0;
+            double time = data.time.j2000Seconds() * _animSpeed;
             double t = fract(time);
             int64_t frames[4];
 
@@ -304,6 +316,7 @@ void RenderableMolecule::update(const UpdateData& data) {
                 frames[3] = std::min(nFrames - 1, frame + 2);
             }
             else { // animation backward
+                t = 1.0 - t;
                 int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
                 if (frame < 0) frame += nFrames;
                 frames[0] = std::max(0l, frame - 2);

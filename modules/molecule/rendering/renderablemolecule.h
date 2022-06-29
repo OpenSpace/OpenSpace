@@ -94,6 +94,7 @@ private:
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
+    properties::FloatProperty _animSpeed;
 };
 
 } // namespace openspace
