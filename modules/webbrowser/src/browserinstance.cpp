@@ -51,6 +51,8 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     _client = new BrowserClient(_renderHandler.get(), _keyboardHandler.get());
 
     CefWindowInfo windowInfo;
+    // On Windows and MacOS this function takes a pointer as a parameter, but Linux
+    // requires this to be a long unsigned int, so we can't use nullptr here
     windowInfo.SetAsWindowless(0);
 
     CefBrowserSettings browserSettings;

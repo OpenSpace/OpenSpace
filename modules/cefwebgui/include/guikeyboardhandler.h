@@ -32,7 +32,7 @@ namespace openspace {
 class GUIKeyboardHandler : public WebKeyboardHandler {
 public:
     GUIKeyboardHandler();
-    virtual ~GUIKeyboardHandler() = default;
+    ~GUIKeyboardHandler() override = default;
 };
 
 } // namespace openspace

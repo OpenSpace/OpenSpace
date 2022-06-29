@@ -238,7 +238,7 @@ void JoystickCameraStates::setAxisMapping(std::string joystickName,
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= joystickCameraState->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystickCameraState->axisMapping.size())) {
         joystickCameraState->axisMapping.resize(axis + 1);
         joystickCameraState->prevAxisValues.resize(axis + 1);
     }
@@ -266,7 +266,7 @@ void JoystickCameraStates::setAxisMappingProperty(std::string joystickName,
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= joystickCameraState->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystickCameraState->axisMapping.size())) {
         joystickCameraState->axisMapping.resize(axis + 1);
         joystickCameraState->prevAxisValues.resize(axis + 1);
     }
@@ -292,7 +292,7 @@ JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(
         return dummy;
     }
 
-    if (axis >= joystick->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystick->axisMapping.size())) {
         JoystickCameraStates::AxisInformation dummy;
         return dummy;
     }
@@ -309,7 +309,7 @@ void JoystickCameraStates::setDeadzone(const std::string& joystickName, int axis
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= joystickCameraState->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystickCameraState->axisMapping.size())) {
         joystickCameraState->axisMapping.resize(axis + 1);
         joystickCameraState->prevAxisValues.resize(axis + 1);
     }
@@ -323,7 +323,7 @@ float JoystickCameraStates::deadzone(const std::string& joystickName, int axis) 
         return 0.f;
     }
 
-    if (axis >= joystick->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystick->axisMapping.size())) {
         return 0.f;
     }
 

@@ -82,7 +82,7 @@ public:
 
     // constructors & destructor
     Scene(std::unique_ptr<SceneInitializer> initializer);
-    ~Scene();
+    virtual ~Scene() override;
 
     /**
      * Clear the scene graph,
@@ -252,6 +252,17 @@ public:
      * \param p The Profile to be read.
      */
     void setPropertiesFromProfile(const Profile& p);
+
+    /**
+     * Searches for any properties that match the regex propertyString, and returns
+     * the results in a vector.
+     *
+     * \param propertyString the regex string that is intended to match one or more
+     *        properties in the currently-available properties
+     * \return Vector of Property objs containing property names that matched the regex
+     */
+    std::vector<properties::Property*> propertiesMatchingRegex(
+        std::string propertyString);
 
 private:
     /**

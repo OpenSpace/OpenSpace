@@ -43,7 +43,7 @@ public:
     );
 
     PlanetGeometry();
-    virtual ~PlanetGeometry() = default;
+    ~PlanetGeometry() override = default;
     virtual void initialize();
     virtual void deinitialize();
     virtual void render() = 0;

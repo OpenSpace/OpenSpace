@@ -44,8 +44,8 @@ namespace openspace {
 
 TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
                                      ScreenSpaceSkyBrowser* browser)
-    : _targetNode(targetNode)
-    , _browser(browser)
+    : _browser(browser)
+    , _targetNode(targetNode)
 {
     ghoul_assert(browser, "Sky browser is null pointer");
     ghoul_assert(targetNode, "Sky target is null pointer");

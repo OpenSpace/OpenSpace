@@ -38,7 +38,7 @@ public:
     constexpr static const char* Name = "StateMachine";
 
     StateMachineModule();
-    ~StateMachineModule() = default;
+    ~StateMachineModule() override = default;
 
     void initializeStateMachine(const ghoul::Dictionary& states,
         const ghoul::Dictionary& transitions,

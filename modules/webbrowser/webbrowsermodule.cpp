@@ -44,7 +44,7 @@ namespace {
 
     #ifdef _MSC_VER
         constexpr const char* SubprocessPath = "OpenSpace Helper.exe";
-    #elif __APPLE__
+    #elif defined(__APPLE__)
         constexpr const char* SubprocessPath =
             "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
     #else

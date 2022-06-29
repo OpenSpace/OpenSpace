@@ -57,7 +57,7 @@ namespace documentation { struct Documentation; }
 class RenderableModel : public Renderable {
 public:
     RenderableModel(const ghoul::Dictionary& dictionary);
-    ~RenderableModel() = default;
+    ~RenderableModel() override = default;
 
     void initialize() override;
     void initializeGL() override;

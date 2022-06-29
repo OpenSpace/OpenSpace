@@ -42,7 +42,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     ServerInterface(const ghoul::Dictionary& dictionary);
-    ~ServerInterface();
+    virtual ~ServerInterface() override;
 
     void initialize();
     void deinitialize();

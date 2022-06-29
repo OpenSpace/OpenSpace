@@ -53,7 +53,7 @@ public:
     using CallbackFunction = std::function<void()>;
 
     ServerModule();
-    virtual ~ServerModule();
+    virtual ~ServerModule() override;
 
     ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
 

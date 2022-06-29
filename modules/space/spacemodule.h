@@ -37,7 +37,7 @@ public:
     constexpr static const char* Name = "Space";
 
     SpaceModule();
-    virtual ~SpaceModule() = default;
+    ~SpaceModule() override = default;
     std::vector<documentation::Documentation> documentations() const override;
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;

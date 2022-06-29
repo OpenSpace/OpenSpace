@@ -98,7 +98,7 @@ function satellites(title, file, color, group)
 end
 
 local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder, shouldAddDuplicates)
-  local filename = group.Url:match("([^/]+)$")
+  local filename = group.Filename
   local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
 
   local path = tleFolder .. "/" .. filename
