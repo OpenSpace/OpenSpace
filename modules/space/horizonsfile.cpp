@@ -195,13 +195,13 @@ json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath)
 
 nlohmann::json convertHorizonsDownloadToJson(std::filesystem::path filePath) {
     // Read the entire file into a string
-    constexpr auto read_size = std::size_t(4096);
+    constexpr size_t readSize = std::size_t(4096);
     std::ifstream stream = std::ifstream(filePath);
     stream.exceptions(std::ios_base::badbit);
 
     std::string answer;
-    std::string buf = std::string(read_size, '\0');
-    while (stream.read(buf.data(), read_size)) {
+    std::string buf = std::string(readSize, '\0');
+    while (stream.read(buf.data(), readSize)) {
         answer.append(buf, 0, stream.gcount());
     }
     answer.append(buf, 0, stream.gcount());
