@@ -9,8 +9,8 @@ local syncedKernels = asset.syncedResource({
 })
 
 local kernels = {
-  syncedKernels .. "./sat415.bsp",
-  syncedKernels .. "./sat393_daphnis.bsp"
+  syncedKernels .. "sat415.bsp",
+  syncedKernels .. "sat393_daphnis.bsp"
 }
 
 local parentIdentifier = transforms.SaturnBarycenter.Identifier
