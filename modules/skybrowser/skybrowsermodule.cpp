@@ -307,6 +307,9 @@ void SkyBrowserModule::lookAtTarget(const std::string& id) {
 
 void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
     _hoverCircle = circle;
+
+    // Always disable it per default. It should only be visible on interaction
+    disableHoverCircle();
 }
 
 void SkyBrowserModule::moveHoverCircle(int i, bool useScript) {
