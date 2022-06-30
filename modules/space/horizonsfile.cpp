@@ -170,7 +170,7 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
 
 json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath) {
     // Set up HTTP request and download result
-    auto download = std::make_unique<HttpFileDownload>(
+    std::unique_ptr<HttpFileDownload> download = std::make_unique<HttpFileDownload>(
         url,
         filePath,
         HttpFileDownload::Overwrite::Yes
@@ -190,14 +190,18 @@ json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath)
         dl->cancel();
     }
 
+    return convertHorizonsDownloadToJson(filePath);
+}
+
+nlohmann::json convertHorizonsDownloadToJson(std::filesystem::path filePath) {
     // Read the entire file into a string
     constexpr auto read_size = std::size_t(4096);
-    std::ifstream stream = std::ifstream(filePath.string().data());
+    std::ifstream stream = std::ifstream(filePath);
     stream.exceptions(std::ios_base::badbit);
 
     std::string answer;
     std::string buf = std::string(read_size, '\0');
-    while (stream.read(&buf[0], read_size)) {
+    while (stream.read(buf.data(), read_size)) {
         answer.append(buf, 0, stream.gcount());
     }
     answer.append(buf, 0, stream.gcount());
@@ -208,9 +212,9 @@ json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath)
 
 HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
     // Signature, source and version
-    if (auto signature = answer.find("signature"); signature != answer.end()) {
+    if (auto signature = answer.find("signature");  signature != answer.end()) {
 
-        if (auto source = signature->find("source"); source != signature->end()) {
+        if (auto source = signature->find("source");  source != signature->end()) {
             if (*source != static_cast<std::string>(ApiSource)) {
                 LWARNING(fmt::format("Horizons answer from unkown source '{}'", *source));
             }
@@ -219,7 +223,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
             LWARNING("Could not find source information, source might not be acceptable");
         }
 
-        if (auto version = signature->find("version"); version != signature->end()) {
+        if (auto version = signature->find("version");  version != signature->end()) {
             if (*version != static_cast<std::string>(CurrentVersion)) {
                 LWARNING(fmt::format(
                     "Unknown Horizons version '{}' found. The currently supported "

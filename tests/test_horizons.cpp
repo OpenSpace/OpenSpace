@@ -36,21 +36,25 @@
 using namespace openspace;
 using json = nlohmann::json;
 
+// Struct to hold the data for some of the tests
+struct HorizonsTestData {
+    std::string observer, target, start, stop, step, unit;
+};
+
 // Avoid repetitive code by using these functions
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-void testHorizonsAnswer(const std::string& observer, const std::string& target,
-    const std::string& start, const std::string& stop, const std::string& step,
-    const std::string& unit, HorizonsType type, std::filesystem::path filePath,
-    HorizonsResultCode expectedAnswerCode)
+void testHorizonsAnswer(const HorizonsTestData& data, HorizonsType type,
+                        std::filesystem::path filePath,
+                        HorizonsResultCode expectedAnswerCode)
 {
     std::string url = constructHorizonsUrl(
         type,
-        target,
-        observer,
-        start,
-        stop,
-        step,
-        unit
+        data.target,
+        data.observer,
+        data.start,
+        data.stop,
+        data.step,
+        data.unit
     );
     json answer = sendHorizonsRequest(url, filePath);
     HorizonsResultCode code = isValidHorizonsAnswer(answer);
@@ -61,20 +65,20 @@ void testHorizonsAnswer(const std::string& observer, const std::string& target,
     CHECK(!std::filesystem::is_regular_file(filePath));
 }
 
-void testHorizonsAnswerAndResult(const std::string& observer, const std::string& target,
-    const std::string& start, const std::string& stop, const std::string& step,
-    const std::string& unit, HorizonsType type, std::filesystem::path filePath,
-    HorizonsResultCode expectedAnswerCode, HorizonsResultCode expectedResultCode,
-    bool shouldDeleteFile = true)
+void testHorizonsAnswerAndResult(const HorizonsTestData& data, HorizonsType type,
+                                 std::filesystem::path filePath,
+                                 HorizonsResultCode expectedAnswerCode,
+                                 HorizonsResultCode expectedResultCode,
+                                 bool shouldDeleteFile = true)
 {
     std::string url = constructHorizonsUrl(
         type,
-        target,
-        observer,
-        start,
-        stop,
-        step,
-        unit
+        data.target,
+        data.observer,
+        data.start,
+        data.stop,
+        data.step,
+        data.unit
     );
     json answer = sendHorizonsRequest(url, filePath);
     HorizonsResultCode answerCode = isValidHorizonsAnswer(answer);
@@ -96,12 +100,12 @@ void testHorizonsAnswerAndResult(const std::string& observer, const std::string&
 }
 
 void testReadingHorizons(HorizonsType type, std::filesystem::path filePath,
-    double t0, double x0, double y0, double z0,
-    double t1, double x1, double y1, double z1,
-    double t2, double x2, double y2, double z2)
+                       const double t0, const double x0, const double y0, const double z0,
+                       const double t1, const double x1, const double y1, const double z1,
+                       const double t2, const double x2, const double y2, const double z2)
 {
     // Get files and make sure they exist
-    std::filesystem::path kernel = absPath("${BASE}/tests/horizonsTest/naif0012.tls");
+    std::filesystem::path kernel = absPath("${TESTDIR}/horizonsTest/naif0012.tls");
     CHECK(std::filesystem::is_regular_file(kernel));
     CHECK(std::filesystem::is_regular_file(filePath));
 
@@ -117,7 +121,7 @@ void testReadingHorizons(HorizonsType type, std::filesystem::path filePath,
     CHECK(result.errorCode == HorizonsResultCode::Valid);
 
     std::vector<HorizonsKeyframe> data = result.data;
-    CHECK(data.size() == 3);
+    REQUIRE(data.size() == 3);
 
     CHECK(data[0].time == Approx(t0));
     CHECK(data[0].position.x == Approx(x0));
@@ -137,6 +141,7 @@ void testReadingHorizons(HorizonsType type, std::filesystem::path filePath,
     CHECK(data[2].position.z == Approx(z2));
 
     // Clean up
+    openspace::SpiceManager::ref().unloadKernel(kernel.string());
     openspace::SpiceManager::deinitialize();
 }
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
@@ -147,7 +152,7 @@ TEST_CASE("HorizonsFile: Space module", "[horizonsfile]") {
     CHECK(true);
     LINFOC("test_horizons", "Downloading Horizons test data ...");
 #else
-    LERRORC("test_horizons", "Theese tests requires the Space module to be enabled");
+    LERRORC("test_horizons", "These tests requires the Space module to be enabled");
     CHECK(false);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
@@ -156,234 +161,129 @@ TEST_CASE("HorizonsFile: Space module", "[horizonsfile]") {
 // Test the errors that are captured by the error field in the json result
 TEST_CASE("HorizonsFile: File size too large", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@ssb";
-    std::string target = "-74"; // MRO
-    std::string start = "2005-08-13 00:00:00";
-    std::string stop = "2022-07-01 00:00:00";
-    std::string step = "1";
-    std::string unit = "m";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_1.hrz");
+    HorizonsTestData data;
+    data.observer = "@ssb";
+    data.target = "-74"; // MRO
+    data.start = "2005-08-13 00:00:00";
+    data.stop = "2022-07-01 00:00:00";
+    data.step = "1";
+    data.unit = "m";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_1.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::ErrorSize;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 
     // Test Observer format
     type = HorizonsType::Observer;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 TEST_CASE("HorizonsFile: Time steps too large", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@ssb";
-    std::string target = "-74"; // MRO
-    std::string start = "2005-08-13 00:00:00";
-    std::string stop = "2022-07-01 00:00:00";
-    std::string step = "1111111111";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_2.hrz");
+    HorizonsTestData data;
+    data.observer = "@ssb";
+    data.target = "-74"; // MRO
+    data.start = "2005-08-13 00:00:00";
+    data.stop = "2022-07-01 00:00:00";
+    data.step = "1111111111";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_2.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::ErrorSpan;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 
     // Test Observer format
     type = HorizonsType::Observer;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data,type, filePath, expectedAnswerCode);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 TEST_CASE("HorizonsFile: Outside available time range", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@ssb";
-    std::string target = "Tesla";
-    std::string start = "1950-05-19 00:00:00";
-    std::string stop = "2000-05-19 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_3.hrz");
+    HorizonsTestData data;
+    data.observer = "@ssb";
+    data.target = "Tesla";
+    data.start = "1950-05-19 00:00:00";
+    data.stop = "2000-05-19 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_3.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::ErrorTimeRange;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 
     // Test Observer format
     type = HorizonsType::Observer;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 TEST_CASE("HorizonsFile: No observer", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "abcdefghijkl";
-    std::string target = "Tesla";
-    std::string start = "2021-05-19 00:00:00";
-    std::string stop = "2022-05-19 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_4.hrz");
+    HorizonsTestData data;
+    data.observer = "abcdefghijkl";
+    data.target = "Tesla";
+    data.start = "2021-05-19 00:00:00";
+    data.stop = "2022-05-19 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_4.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::ErrorNoObserver;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 
     // Test Observer format
     type = HorizonsType::Observer;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 TEST_CASE("HorizonsFile: Observer and target same", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "500@4"; // Mars barycenter
-    std::string target = "4";       // Mars barycenter
-    std::string start = "2021-05-19 00:00:00";
-    std::string stop = "2022-05-19 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_5.hrz");
+    HorizonsTestData data;
+    data.observer = "500@4"; // Mars barycenter
+    data.target = "4";       // Mars barycenter
+    data.start = "2021-05-19 00:00:00";
+    data.stop = "2022-05-19 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_5.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::ErrorObserverTargetSame;
 
     // This test is only for Observer type format
     HorizonsType type = HorizonsType::Observer;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 TEST_CASE("HorizonsFile: Multiple observer stations", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    // Test Vector format
-    std::string observer = "l2";
-    std::string target = "Tesla";
-    std::string start = "2021-05-19 00:00:00";
-    std::string stop = "2022-05-19 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_6.hrz");
+    HorizonsTestData data;
+    data.observer = "l2";
+    data.target = "Tesla";
+    data.start = "2021-05-19 00:00:00";
+    data.stop = "2022-05-19 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_6.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::MultipleObserverStations;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 
     // Test Observer format
     type = HorizonsType::Observer;
-    testHorizonsAnswer(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
-        type,
-        filePath,
-        expectedAnswerCode
-    );
+    testHorizonsAnswer(data, type, filePath, expectedAnswerCode);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
@@ -391,25 +291,21 @@ TEST_CASE("HorizonsFile: Multiple observer stations", "[horizonsfile]") {
 // Test errors that are nat captured by the error field in the json result
 TEST_CASE("HorizonsFile: Multiple observers", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@mars";
-    std::string target = "Tesla";
-    std::string start = "2021-05-19 00:00:00";
-    std::string stop = "2022-05-19 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_7.hrz");
+    HorizonsTestData data;
+    data.observer = "@mars";
+    data.target = "Tesla";
+    data.start = "2021-05-19 00:00:00";
+    data.stop = "2022-05-19 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_7.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::Valid;
     HorizonsResultCode expectedResultCode = HorizonsResultCode::MultipleObserver;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -419,12 +315,7 @@ TEST_CASE("HorizonsFile: Multiple observers", "[horizonsfile]") {
     // Test Observer format
     type = HorizonsType::Observer;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -435,25 +326,21 @@ TEST_CASE("HorizonsFile: Multiple observers", "[horizonsfile]") {
 
 TEST_CASE("HorizonsFile: No target", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@ssb";
-    std::string target = "abcdefghijkl";
-    std::string start = "2021-05-20 00:00:00";
-    std::string stop = "2022-05-20 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_8.hrz");
+    HorizonsTestData data;
+    data.observer = "@ssb";
+    data.target = "abcdefghijkl";
+    data.start = "2021-05-20 00:00:00";
+    data.stop = "2022-05-20 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_8.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::Valid;
     HorizonsResultCode expectedResultCode = HorizonsResultCode::ErrorNoTarget;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -463,12 +350,7 @@ TEST_CASE("HorizonsFile: No target", "[horizonsfile]") {
     // Test Observer format
     type = HorizonsType::Observer;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -479,25 +361,21 @@ TEST_CASE("HorizonsFile: No target", "[horizonsfile]") {
 
 TEST_CASE("HorizonsFile: Multiple targets (major bodies)", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@ssb";
-    std::string target = "mars";
-    std::string start = "2021-05-20 00:00:00";
-    std::string stop = "2022-05-20 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_9.hrz");
+    HorizonsTestData data;
+    data.observer = "@ssb";
+    data.target = "mars";
+    data.start = "2021-05-20 00:00:00";
+    data.stop = "2022-05-20 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_9.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::Valid;
     HorizonsResultCode expectedResultCode = HorizonsResultCode::MultipleTarget;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -507,12 +385,7 @@ TEST_CASE("HorizonsFile: Multiple targets (major bodies)", "[horizonsfile]") {
     // Test Observer format
     type = HorizonsType::Observer;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -523,25 +396,21 @@ TEST_CASE("HorizonsFile: Multiple targets (major bodies)", "[horizonsfile]") {
 
 TEST_CASE("HorizonsFile: Multiple targets (minor bodies case 1)", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@ssb";
-    std::string target = "DES = 141P;";
-    std::string start = "2021-05-20 00:00:00";
-    std::string stop = "2022-05-20 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_10.hrz");
+    HorizonsTestData data;
+    data.observer = "@ssb";
+    data.target = "DES = 141P;";
+    data.start = "2021-05-20 00:00:00";
+    data.stop = "2022-05-20 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_10.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::Valid;
     HorizonsResultCode expectedResultCode = HorizonsResultCode::MultipleTarget;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -551,12 +420,7 @@ TEST_CASE("HorizonsFile: Multiple targets (minor bodies case 1)", "[horizonsfile
     // Test Observer format
     type = HorizonsType::Observer;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -567,25 +431,21 @@ TEST_CASE("HorizonsFile: Multiple targets (minor bodies case 1)", "[horizonsfile
 
 TEST_CASE("HorizonsFile: Multiple targets (minor bodies case 2)", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@ssb";
-    std::string target = "borisov";
-    std::string start = "2021-05-20 00:00:00";
-    std::string stop = "2022-05-20 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_11.hrz");
+    HorizonsTestData data;
+    data.observer = "@ssb";
+    data.target = "borisov";
+    data.start = "2021-05-20 00:00:00";
+    data.stop = "2022-05-20 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_11.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::Valid;
     HorizonsResultCode expectedResultCode = HorizonsResultCode::MultipleTarget;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -595,12 +455,7 @@ TEST_CASE("HorizonsFile: Multiple targets (minor bodies case 2)", "[horizonsfile
     // Test Observer format
     type = HorizonsType::Observer;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -611,25 +466,21 @@ TEST_CASE("HorizonsFile: Multiple targets (minor bodies case 2)", "[horizonsfile
 
 TEST_CASE("HorizonsFile: Detect multiple observers or targets", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@l2";
-    std::string target = "90001048"; // 141P Machholz 2 epoch 2019
-    std::string start = "2021-05-23 00:00:00";
-    std::string stop = "2022-05-23 00:00:00";
-    std::string step = "1";
-    std::string unit = "d";
-    std::filesystem::path filePath = absPath("${BASE}/tests/horizonsTest/horizonstest_12.hrz");
+    HorizonsTestData data;
+    data.observer = "@l2";
+    data.target = "90001048"; // 141P Machholz 2 epoch 2019
+    data.start = "2021-05-23 00:00:00";
+    data.stop = "2022-05-23 00:00:00";
+    data.step = "1";
+    data.unit = "d";
+    std::filesystem::path filePath = absPath("${TESTDIR}/horizonsTest/horizonstest_12.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::Valid;
     HorizonsResultCode expectedResultCode = HorizonsResultCode::MultipleObserver;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -639,12 +490,7 @@ TEST_CASE("HorizonsFile: Detect multiple observers or targets", "[horizonsfile]"
     // Test Observer format
     type = HorizonsType::Observer;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePath,
         expectedAnswerCode,
@@ -655,26 +501,22 @@ TEST_CASE("HorizonsFile: Detect multiple observers or targets", "[horizonsfile]"
 
 TEST_CASE("HorizonsFile: Valid request and response", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    std::string observer = "@ssb";
-    std::string target = "Tesla";
-    std::string start = "2022-05-22 00:00:00";
-    std::string stop = "2022-05-23 00:00:00";
-    std::string step = "12";
-    std::string unit = "h";
-    std::filesystem::path filePathVector = absPath("${BASE}/tests/horizonsTest/validVectorFile.hrz");
-    std::filesystem::path filePathObserver = absPath("${BASE}/tests/horizonsTest/validObserverFile.hrz");
+    HorizonsTestData data;
+    data.observer = "@ssb";
+    data.target = "Tesla";
+    data.start = "2022-05-22 00:00:00";
+    data.stop = "2022-05-23 00:00:00";
+    data.step = "12";
+    data.unit = "h";
+    std::filesystem::path filePathVector = absPath("${TESTDIR}/horizonsTest/validVectorFile.hrz");
+    std::filesystem::path filePathObserver = absPath("${TESTDIR}/horizonsTest/validObserverFile.hrz");
     HorizonsResultCode expectedAnswerCode = HorizonsResultCode::Valid;
     HorizonsResultCode expectedResultCode = HorizonsResultCode::Valid;
 
     // Test Vector format
     HorizonsType type = HorizonsType::Vector;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePathVector,
         expectedAnswerCode,
@@ -685,12 +527,7 @@ TEST_CASE("HorizonsFile: Valid request and response", "[horizonsfile]") {
     // Test Observer format
     type = HorizonsType::Observer;
     testHorizonsAnswerAndResult(
-        observer,
-        target,
-        start,
-        stop,
-        step,
-        unit,
+        data,
         type,
         filePathObserver,
         expectedAnswerCode,
@@ -706,7 +543,7 @@ TEST_CASE("HorizonsFile: Valid request and response", "[horizonsfile]") {
 TEST_CASE("HorizonsFile: Parsing time range with time", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     std::filesystem::path filePath =
-        absPath("${BASE}/tests/horizonsTest/timerange_time.hrz");
+        absPath("${TESTDIR}/horizonsTest/timerange_time.hrz");
     HorizonsFile horizonsFile(filePath);
 
     // Parse time range
@@ -724,7 +561,7 @@ TEST_CASE("HorizonsFile: Parsing time range with time", "[horizonsfile]") {
 TEST_CASE("HorizonsFile: Parsing time range without time", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     std::filesystem::path filePath =
-        absPath("${BASE}/tests/horizonsTest/timerange_no_time.hrz");
+        absPath("${TESTDIR}/horizonsTest/timerange_no_time.hrz");
     HorizonsFile horizonsFile(filePath);
 
     // Parse time range
@@ -746,14 +583,14 @@ TEST_CASE("HorizonsFile: Parsing time range without time", "[horizonsfile]") {
 TEST_CASE("HorizonsFile: Parsing multiple matching observers", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     std::filesystem::path filePath =
-        absPath("${BASE}/tests/horizonsTest/parse_multiple_observers.hrz");
+        absPath("${TESTDIR}/horizonsTest/parse_multiple_observers.hrz");
     HorizonsFile horizonsFile(filePath);
 
     // Parse matches
     std::vector<std::string> matches =
         horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
 
-    CHECK(matches.size() == 3);
+    REQUIRE(matches.size() == 3);
     CHECK(matches[0] ==
         "  ID#      Name                               Designation  IAU/aliases/other   "
     );
@@ -769,14 +606,14 @@ TEST_CASE("HorizonsFile: Parsing multiple matching observers", "[horizonsfile]")
 TEST_CASE("HorizonsFile: Parsing multiple matching targets", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     std::filesystem::path filePath =
-        absPath("${BASE}/tests/horizonsTest/parse_multiple_targets.hrz");
+        absPath("${TESTDIR}/horizonsTest/parse_multiple_targets.hrz");
     HorizonsFile horizonsFile(filePath);
 
     // Parse matches
     std::vector<std::string> matches =
         horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
 
-    CHECK(matches.size() == 11);
+    REQUIRE(matches.size() == 11);
     CHECK(matches[0] ==
         "  ID#      Name                               Designation  IAU/aliases/other   "
     );
@@ -816,7 +653,7 @@ TEST_CASE("HorizonsFile: Parsing multiple matching targets", "[horizonsfile]") {
 TEST_CASE("HorizonsFile: Parsing multiple matching stations", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     std::filesystem::path filePath =
-        absPath("${BASE}/tests/horizonsTest/parse_multiple_stations.hrz");
+        absPath("${TESTDIR}/horizonsTest/parse_multiple_stations.hrz");
     CHECK(std::filesystem::is_regular_file(filePath));
     HorizonsFile horizonsFile(filePath);
 
@@ -824,7 +661,7 @@ TEST_CASE("HorizonsFile: Parsing multiple matching stations", "[horizonsfile]") 
     std::vector<std::string> matches =
         horizonsFile.parseMatches("Observatory Name", "Multiple matching stations found");
 
-    CHECK(matches.size() == 11);
+    REQUIRE(matches.size() == 11);
     CHECK(matches[0] ==
         "   #   E. Lon    DXY      DZ    Observatory Name"
     );
@@ -867,22 +704,22 @@ TEST_CASE("HorizonsFile: Reading Vector data from request", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     HorizonsType type = HorizonsType::Vector;
     std::filesystem::path filePathVector =
-        absPath("${BASE}/tests/horizonsTest/validVectorFile.hrz");
+        absPath("${TESTDIR}/horizonsTest/validVectorFile.hrz");
 
-    double t0 = 706449669.18513119;
-    double x0 = -126379670172.70331;
-    double y0 = 63049830070.652786;
-    double z0 = -126710964556.55870;
+    const double t0 = 706449669.18513119;
+    const double x0 = -126379670172.70331;
+    const double y0 = 63049830070.652786;
+    const double z0 = -126710964556.55870;
 
-    double t1 = 706492869.18512082;
-    double x1 = -127019567853.94952;
-    double y1 = 62510445746.414017;
-    double z1 = -125904395646.64995;
+    const double t1 = 706492869.18512082;
+    const double x1 = -127019567853.94952;
+    const double y1 = 62510445746.414017;
+    const double z1 = -125904395646.64995;
 
-    double t2 = 706536069.18511045;
-    double x2 = -127654909093.56494;
-    double y2 = 61968790989.645737;
-    double z2 = -125093260079.10854;
+    const double t2 = 706536069.18511045;
+    const double x2 = -127654909093.56494;
+    const double y2 = 61968790989.645737;
+    const double z2 = -125093260079.10854;
 
     testReadingHorizons(
         type, filePathVector,
@@ -901,22 +738,22 @@ TEST_CASE("HorizonsFile: Reading Observer data from request", "[horizonsfile]") 
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     HorizonsType type = HorizonsType::Observer;
     std::filesystem::path filePathObserver =
-        absPath("${BASE}/tests/horizonsTest/validObserverFile.hrz");
+        absPath("${TESTDIR}/horizonsTest/validObserverFile.hrz");
 
-    double t0 = 706449669.18513119;
-    double x0 = -126371142157.29857;
-    double y0 = 63056923889.044579;
-    double z0 = -126721572150.18513;
+    const double t0 = 706449669.18513119;
+    const double x0 = -126371142157.29857;
+    const double y0 = 63056923889.044579;
+    const double z0 = -126721572150.18513;
 
-    double t1 = 706492869.18512082;
-    double x1 = -127011112787.76295;
-    double y1 = 62517559574.749786;
-    double z1 = -125915045896.36182;
+    const double t1 = 706492869.18512082;
+    const double x1 = -127011112787.76295;
+    const double y1 = 62517559574.749786;
+    const double z1 = -125915045896.36182;
 
-    double t2 = 706536069.18511045;
-    double x2 = -127646529740.40393;
-    double y2 = 61975921972.090714;
-    double z2 = -125103951590.60988;
+    const double t2 = 706536069.18511045;
+    const double x2 = -127646529740.40393;
+    const double y2 = 61975921972.090714;
+    const double z2 = -125103951590.60988;
 
     testReadingHorizons(
         type, filePathObserver,
@@ -936,22 +773,22 @@ TEST_CASE("HorizonsFile: Reading Vector data from file", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     HorizonsType type = HorizonsType::Vector;
     std::filesystem::path filePathVector =
-        absPath("${BASE}/tests/horizonsTest/vectorFileTest.hrz");
+        absPath("${TESTDIR}/horizonsTest/vectorFileTest.hrz");
 
-    double t0 = 706449669.18513119;
-    double x0 = -126379670172.70331;
-    double y0 = 63049830070.652786;
-    double z0 = -126710964556.55870;
+    const double t0 = 706449669.18513119;
+    const double x0 = -126379670172.70331;
+    const double y0 = 63049830070.652786;
+    const double z0 = -126710964556.55870;
 
-    double t1 = 706492869.18512082;
-    double x1 = -127019567853.94952;
-    double y1 = 62510445746.414017;
-    double z1 = -125904395646.64995;
+    const double t1 = 706492869.18512082;
+    const double x1 = -127019567853.94952;
+    const double y1 = 62510445746.414017;
+    const double z1 = -125904395646.64995;
 
-    double t2 = 706536069.18511045;
-    double x2 = -127654909093.56494;
-    double y2 = 61968790989.645737;
-    double z2 = -125093260079.10854;
+    const double t2 = 706536069.18511045;
+    const double x2 = -127654909093.56494;
+    const double y2 = 61968790989.645737;
+    const double z2 = -125093260079.10854;
 
     testReadingHorizons(
         type, filePathVector,
@@ -966,22 +803,22 @@ TEST_CASE("HorizonsFile: Reading Observer data from file", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     HorizonsType type = HorizonsType::Observer;
     std::filesystem::path filePathObserver =
-        absPath("${BASE}/tests/horizonsTest/observerFileTest.hrz");
+        absPath("${TESTDIR}/horizonsTest/observerFileTest.hrz");
 
-    double t0 = 706449669.18513119;
-    double x0 = -126371142157.29857;
-    double y0 = 63056923889.044579;
-    double z0 = -126721572150.18513;
+    const double t0 = 706449669.18513119;
+    const double x0 = -126371142157.29857;
+    const double y0 = 63056923889.044579;
+    const double z0 = -126721572150.18513;
 
-    double t1 = 706492869.18512082;
-    double x1 = -127011112787.76295;
-    double y1 = 62517559574.749786;
-    double z1 = -125915045896.36182;
+    const double t1 = 706492869.18512082;
+    const double x1 = -127011112787.76295;
+    const double y1 = 62517559574.749786;
+    const double z1 = -125915045896.36182;
 
-    double t2 = 706536069.18511045;
-    double x2 = -127646529740.40393;
-    double y2 = 61975921972.090714;
-    double z2 = -125103951590.60988;
+    const double t2 = 706536069.18511045;
+    const double x2 = -127646529740.40393;
+    const double y2 = 61975921972.090714;
+    const double z2 = -125103951590.60988;
 
     testReadingHorizons(
         type, filePathObserver,
