@@ -65,7 +65,7 @@ private:
   unsigned width, height;
   
   struct molecule_t {
-    std::unique_ptr<RenderableMolecule> renderable;
+    std::shared_ptr<RenderableMolecule> renderable;
     glm::dvec3 position;
     double angle;
     glm::dvec3 direction; // moving direction where magnitude is linear velocity
@@ -73,6 +73,9 @@ private:
   };
     
   std::vector<molecule_t> _molecules;
+  // because some molecules may share the same renderable, keep a vec of all unique
+  // renderables to perform actions on 1 renderable only once.
+  std::vector<std::shared_ptr<RenderableMolecule>> _renderables;
   
   properties::StringProperty _moleculeFile;
   properties::StringProperty _trajectoryFile;
@@ -81,6 +84,7 @@ private:
   properties::FloatProperty _angularVelocity;
   properties::DVec3Property _simulationBox;
   properties::FloatProperty _animationSpeed;
+  properties::FloatProperty _collisionRadius;
 };
 
 } // namespace openspace

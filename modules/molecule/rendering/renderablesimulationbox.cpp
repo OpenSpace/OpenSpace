@@ -53,6 +53,12 @@ namespace {
         "Adjust the speed of the animation (seconds/s)"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CollisionRadiusInfo = {
+        "CollisionRadius",
+        "Collision Radius",
+        "Radius of the collision sphere around molecules"
+    };
+
     struct [[codegen::Dictionary(RenderableSimulationBox)]] Parameters {
         // [[codegen::verbatim(MoleculeFileInfo.description)]]
         std::string moleculeFile;
@@ -74,6 +80,9 @@ namespace {
 
         // [[codegen::verbatim(AnimationSpeedInfo.description)]]
         std::optional<float> animationSpeed;
+
+        // [[codegen::verbatim(CollisionRadiusInfo.description)]]
+        float collisionRadius;
     };
 
 #include "renderablesimulationbox_codegen.cpp"
@@ -91,7 +100,8 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
   _linearVelocity(LinearVelocityInfo),
   _angularVelocity(AngularVelocityInfo),
   _simulationBox(SimulationBoxInfo),
-  _animationSpeed(AnimationSpeedInfo)
+  _animationSpeed(AnimationSpeedInfo),
+  _collisionRadius(CollisionRadiusInfo)
 {
   
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -103,6 +113,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _angularVelocity = p.angularVelocity;
     _simulationBox = p.simulationBox;
     _animationSpeed = p.animationSpeed.value_or(1.f);
+    _collisionRadius = p.collisionRadius;
   
     // addProperty(_moleculeFile);
     // addProperty(_trajectoryFile);
@@ -117,48 +128,52 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
   ghoul::Dictionary d;
   d.setValue<std::string>("MoleculeFile", _moleculeFile);
   d.setValue<std::string>("TrajectoryFile", _trajectoryFile);
+  auto renderable = std::make_shared<RenderableMolecule>(d);
   
   for (int i = 0; i < _moleculeCount; i++) {
     molecule_t demoMolecule {
-      std::make_unique<RenderableMolecule>(d),
-      dvec3(0.0),                              // position
-      0.0,                                     // angle
-      sphericalRand(_linearVelocity.value()),  // direction
-      sphericalRand(_angularVelocity.value()), // rotation
+      renderable,
+      linearRand(dvec3(0.0), _simulationBox.value()),  // position
+      0.0,                                             // angle
+      sphericalRand(_linearVelocity.value()),          // direction
+      sphericalRand(_angularVelocity.value()),         // rotation
     };
     _molecules.push_back(std::move(demoMolecule));
   }
+  
+  _renderables.push_back(renderable);
 }
 
 void RenderableSimulationBox::initialize() {
-  for (auto& molecule : _molecules) {
-    molecule.renderable->initialize();
+  for (auto& renderable: _renderables) {
+    renderable->initialize();
   }
 }
 
 void RenderableSimulationBox::initializeGL() {
-  for (auto& molecule : _molecules) {
-    molecule.renderable->initializeGL();
+  for (auto& renderable: _renderables) {
+    renderable->initializeGL();
   }
 }
 
 void RenderableSimulationBox::deinitializeGL() {
-  for (auto& molecule : _molecules) {
+  for (auto& molecule: _molecules) {
     molecule.renderable->deinitializeGL();
   }
 }
 
 bool RenderableSimulationBox::isReady() const {
   bool isReady = true;
-  for (const auto& molecule : _molecules) {
-    isReady &= molecule.renderable->isReady();
+  for (const auto& renderable: _renderables) {
+    isReady &= renderable->isReady();
   }
   return isReady;
 }
 
 void RenderableSimulationBox::render(const RenderData& data, RendererTasks& tasks) {
-  for (auto& molecule : _molecules) {
+  for (auto& molecule: _molecules) {
     RenderData copyData = data;
+    copyData.modelTransform.translation -= _simulationBox.value() * 0.5; // center the box
     copyData.modelTransform.translation += molecule.position;
     copyData.modelTransform.rotation = dmat4(copyData.modelTransform.rotation) * rotate(dmat4(1.0), molecule.angle, molecule.rotation);
     molecule.renderable->render(copyData, tasks);
@@ -171,8 +186,9 @@ void RenderableSimulationBox::update(const UpdateData& data) {
 
   // TODO: just doing some shit here, I need to implement proper brownian later
   // std::vector<dvec3> samples(1000);
-
-  for (auto& molecule : _molecules) {
+  
+  // update positions / rotations
+  for (auto& molecule: _molecules) {
     // for (auto& sample : samples) {
     //   sample = ballRand(_linearVelocity.value());
     // }
@@ -188,8 +204,35 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     molecule.angle += length(molecule.rotation) * dt;
   }
 
-  for (auto& molecule : _molecules) {
-    molecule.renderable->update(data);
+  // compute collisions
+  for (auto it1 = _molecules.begin(); it1 != _molecules.end(); ++it1) {
+    for (auto it2 = std::next(it1); it2 != _molecules.end(); ++it2) {
+      
+      molecule_t& m1 = *it1;
+      molecule_t& m2 = *it2;
+      
+      double dist = distance(m1.position, m2.position);
+      double intersection = 2.0 * _collisionRadius - dist;
+
+      if (dist && intersection > 0.0) { // collision detected
+        // swap the direction components normal to the collision plane from the 2
+        // molecules. (simplistic elastic collision of 2 spheres with same mass)
+        dvec3 dir = (m2.position - m1.position) / dist;
+        dvec3 compM1 = dir * dot(m1.direction, dir);
+        dvec3 compM2 = -dir * dot(m2.direction, -dir);
+        m1.direction = m1.direction - compM1 + compM2;
+        m2.direction = m2.direction - compM2 + compM1;
+
+        // move the spheres away from each other (not intersecting)
+        m1.position += -dir * intersection;
+        m2.position += dir * intersection;
+      }
+      
+    }
+  }
+
+  for (auto& renderable: _renderables) {
+    renderable->update(data);
   }
 }
 

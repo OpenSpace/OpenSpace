@@ -38,10 +38,11 @@ local PdbTest = {
     Type = "RenderableSimulationBox",
     MoleculeFile = moleculeFiles .. "o2.arc",
     -- TrajectoryFile = moleculeFiles .. "o2.arc",
-    MoleculeCount = 100,
+    MoleculeCount = 1000,
     LinearVelocity = 10.0,
-    AngularVelocity = 2.0 / 360.0 * 3.14,
-    SimulationBox = { 100.0, 100.0, 100.0 },
+    AngularVelocity = 60.0 / 360.0 * 3.14,
+    SimulationBox = { 200.0, 200.0, 200.0 },
+    CollisionRadius = 2.0,
   },
   GUI = {
     Path = "/Microcosmos/Molecules/Simulation"
