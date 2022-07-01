@@ -492,7 +492,7 @@ void RenderEngine::initializeGL() {
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    global::windowDelegate->setNearFarClippingPlane(0.001f, 1000.f);
+    global::windowDelegate->setNearFarClippingPlane(0.1f, 1000.f);
 
     // Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window

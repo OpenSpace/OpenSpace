@@ -19,11 +19,11 @@ local moleculeFiles = asset.syncedResource({
 
 local PdbTest = {
   Identifier = "PdbTest",
-  Parent = sunTransforms.SunCenter.Identifier,
+  -- Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeFiles .. "centered.gro",
-    TrajectoryFile = moleculeFiles .. "centered.xtc",
+    MoleculeFile = moleculeFiles .. "1mh1.pdb",
+    -- TrajectoryFile = moleculeFiles .. "centered.xtc",
   },
   Transform = {
     Scale = {

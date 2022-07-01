@@ -3,6 +3,7 @@
 /build-ninja/
 /build-xcode/
 /build-make/
+/moldata/
 *~
 *.dir
 *.idea/
