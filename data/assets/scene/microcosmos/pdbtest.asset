@@ -14,6 +14,7 @@ local moleculeFiles = asset.syncedResource({
     moleculeDb .. "inside-md-pullout.xtc",
     moleculeDb .. "centered.gro",
     moleculeDb .. "centered.xtc",
+    moleculeDb .. "o2.arc",
   }
 })
 
@@ -35,11 +36,12 @@ local PdbTest = {
   -- Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFile = moleculeFiles .. "1mh1.pdb",
-    MoleculeCount = 1,
+    MoleculeFile = moleculeFiles .. "o2.arc",
+    -- TrajectoryFile = moleculeFiles .. "o2.arc",
+    MoleculeCount = 100,
     LinearVelocity = 10.0,
     AngularVelocity = 2.0 / 360.0 * 3.14,
-    SimulationBox = { 10.0, 10.0, 10.0 },
+    SimulationBox = { 100.0, 100.0, 100.0 },
   },
   GUI = {
     Path = "/Microcosmos/Molecules/Simulation"

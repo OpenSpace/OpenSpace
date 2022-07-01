@@ -47,6 +47,12 @@ namespace {
         "Size of the periodic simulation box (x/y/z)"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
+        "AnimationSpeed",
+        "Animation Speed",
+        "Adjust the speed of the animation (seconds/s)"
+    };
+
     struct [[codegen::Dictionary(RenderableSimulationBox)]] Parameters {
         // [[codegen::verbatim(MoleculeFileInfo.description)]]
         std::string moleculeFile;
@@ -65,6 +71,9 @@ namespace {
 
         // [[codegen::verbatim(SimulationBoxInfo.description)]]
         glm::dvec3 simulationBox;
+
+        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
+        std::optional<float> animationSpeed;
     };
 
 #include "renderablesimulationbox_codegen.cpp"
@@ -81,7 +90,8 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
   _moleculeCount(MoleculeCountInfo),
   _linearVelocity(LinearVelocityInfo),
   _angularVelocity(AngularVelocityInfo),
-  _simulationBox(SimulationBoxInfo)
+  _simulationBox(SimulationBoxInfo),
+  _animationSpeed(AnimationSpeedInfo)
 {
   
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -92,6 +102,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _linearVelocity = p.linearVelocity;
     _angularVelocity = p.angularVelocity;
     _simulationBox = p.simulationBox;
+    _animationSpeed = p.animationSpeed.value_or(1.f);
   
     // addProperty(_moleculeFile);
     // addProperty(_trajectoryFile);
@@ -99,6 +110,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_linearVelocity);
     addProperty(_angularVelocity);
     addProperty(_simulationBox);
+    addProperty(_animationSpeed);
   
   // add the molecules
   
@@ -155,20 +167,21 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks& task
 
 void RenderableSimulationBox::update(const UpdateData& data) {
   double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
+  dt *= _animationSpeed;
 
   // TODO: just doing some shit here, I need to implement proper brownian later
-  std::vector<dvec3> samples(1000);
+  // std::vector<dvec3> samples(1000);
 
   for (auto& molecule : _molecules) {
-    for (auto& sample : samples) {
-      sample = ballRand(_linearVelocity.value());
-    }
+    // for (auto& sample : samples) {
+    //   sample = ballRand(_linearVelocity.value());
+    // }
 
-    molecule.direction = std::reduce(samples.begin(), samples.end(), -molecule.direction, [&](dvec3 a, dvec3 b) {
-      auto d1 = dot(a, molecule.direction);
-      auto d2 = dot(a, molecule.direction);
-      return d1 > d2 ? a : b;
-    });
+    // molecule.direction = std::reduce(samples.begin(), samples.end(), -molecule.direction, [&](dvec3 a, dvec3 b) {
+    //   auto d1 = dot(a, molecule.direction);
+    //   auto d2 = dot(a, molecule.direction);
+    //   return d1 > d2 ? a : b;
+    // });
 
     molecule.position += molecule.direction * dt;
     molecule.position = mod(molecule.position, _simulationBox.value());

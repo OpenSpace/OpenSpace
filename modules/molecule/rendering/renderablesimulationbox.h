@@ -80,6 +80,7 @@ private:
   properties::FloatProperty _linearVelocity;
   properties::FloatProperty _angularVelocity;
   properties::DVec3Property _simulationBox;
+  properties::FloatProperty _animationSpeed;
 };
 
 } // namespace openspace
