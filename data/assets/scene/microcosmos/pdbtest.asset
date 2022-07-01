@@ -36,9 +36,10 @@ local PdbTest = {
   Renderable = {
     Type = "RenderableSimulationBox",
     MoleculeFile = moleculeFiles .. "1mh1.pdb",
-    MoleculeCount = 10,
-    LinearVelocity = 1.0,
-    AngularVelocity = 10.0 / 360.0 * 3.14,
+    MoleculeCount = 1,
+    LinearVelocity = 10.0,
+    AngularVelocity = 2.0 / 360.0 * 3.14,
+    SimulationBox = { 10.0, 10.0, 10.0 },
   },
   GUI = {
     Path = "/Microcosmos/Molecules/Simulation"

@@ -41,6 +41,12 @@ namespace {
         "Average angular velocity at the start of the simulation (radians/s)"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SimulationBoxInfo = {
+        "SimulationBox",
+        "Simulation Box",
+        "Size of the periodic simulation box (x/y/z)"
+    };
+
     struct [[codegen::Dictionary(RenderableSimulationBox)]] Parameters {
         // [[codegen::verbatim(MoleculeFileInfo.description)]]
         std::string moleculeFile;
@@ -56,6 +62,9 @@ namespace {
 
         // [[codegen::verbatim(AngularVelocityInfo.description)]]
         float angularVelocity;
+
+        // [[codegen::verbatim(SimulationBoxInfo.description)]]
+        glm::dvec3 simulationBox;
     };
 
 #include "renderablesimulationbox_codegen.cpp"
@@ -71,7 +80,8 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
   _trajectoryFile(TrajectoryFileInfo),
   _moleculeCount(MoleculeCountInfo),
   _linearVelocity(LinearVelocityInfo),
-  _angularVelocity(AngularVelocityInfo)
+  _angularVelocity(AngularVelocityInfo),
+  _simulationBox(SimulationBoxInfo)
 {
   
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -81,12 +91,14 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _moleculeCount = p.moleculeCount;
     _linearVelocity = p.linearVelocity;
     _angularVelocity = p.angularVelocity;
+    _simulationBox = p.simulationBox;
   
     // addProperty(_moleculeFile);
     // addProperty(_trajectoryFile);
     // addProperty(_moleculeCount);
     addProperty(_linearVelocity);
     addProperty(_angularVelocity);
+    addProperty(_simulationBox);
   
   // add the molecules
   
@@ -143,7 +155,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks& task
 
 void RenderableSimulationBox::update(const UpdateData& data) {
   double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
-  std::cout << dt << std::endl;
 
   // TODO: just doing some shit here, I need to implement proper brownian later
   std::vector<dvec3> samples(1000);
@@ -160,6 +171,7 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     });
 
     molecule.position += molecule.direction * dt;
+    molecule.position = mod(molecule.position, _simulationBox.value());
     molecule.angle += length(molecule.rotation) * dt;
   }
 

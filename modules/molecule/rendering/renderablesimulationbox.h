@@ -28,6 +28,7 @@
 #include "renderablemolecule.h"
 #include "openspace/properties/optionproperty.h"
 #include "openspace/properties/selectionproperty.h"
+#include "openspace/properties/vector/dvec3property.h"
 #include <openspace/rendering/renderable.h>
 
 //#include <openspace/properties/scalar/floatproperty.h>
@@ -78,6 +79,7 @@ private:
   properties::IntProperty _moleculeCount;
   properties::FloatProperty _linearVelocity;
   properties::FloatProperty _angularVelocity;
+  properties::DVec3Property _simulationBox;
 };
 
 } // namespace openspace
