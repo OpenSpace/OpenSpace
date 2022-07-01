@@ -30,6 +30,7 @@ add_executable(
   test_distanceconversion.cpp
   test_configuration.cpp
   test_documentation.cpp
+  test_horizons.cpp
   test_iswamanager.cpp
   test_jsonformatting.cpp
   test_latlonpatch.cpp
