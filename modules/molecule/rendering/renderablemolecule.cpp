@@ -376,20 +376,16 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
 
     if (_molecule.atom.count) {
         
-        // _repScale = data.modelTransform.scale.x;
+        // because the molecule is small, a scaling of the view matrix causes the molecule
+        // to be moved out of view in clip space. Reset the scaling for the molecule
+        // is fine for now.
+        Camera camCopy = data.camera;
+        camCopy.setScaling(1.f);
 
-        // zoom out and move closer the camera
-        dmat4 camView =
-            translate(I, {0.f, 0.f, -100.f}) *
-            scale(I, dvec3(1.0 / 215.0)) *
-            translate(I, { 0, 0, 21500 }) *
-            data.camera.combinedViewMatrix() *
-            I;
-        
         // having the view matrix in the model matrix is better because
         // mold uses single precision but that's not enough
         mat4 model_matrix =
-            camView *
+            camCopy.combinedViewMatrix() *
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             dmat4(data.modelTransform.rotation) *
@@ -400,7 +396,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
             I;
 
         mat4 proj_matrix =
-            dmat4(data.camera.sgctInternal.projectionMatrix()) *
+            dmat4(camCopy.sgctInternal.projectionMatrix()) *
             I;
 
         md_gl_draw_op_t draw_op = {};
@@ -472,8 +468,10 @@ void RenderableMolecule::initMolecule() {
     _moleculeApi->init_from_file(&_molecule, molFileStr, default_allocator);
 
     float radius = computeRadius();
-    setBoundingSphere(radius);
-    setInteractionSphere(radius);
+    // setBoundingSphere(radius * 1.0E10); // OpenSpace in in meters, Mold is in Ångströms
+    // setInteractionSphere(radius * 1.0E10); // OpenSpace in in meters, Mold is in Ångströms
+    setBoundingSphere(radius * 1.0E-10); // OpenSpace in in meters, Mold is in Ångströms
+    setInteractionSphere(radius * 1.0E-10); // OpenSpace in in meters, Mold is in Ångströms
 
     md_gl_molecule_init(&_drawMol, &_molecule);
     md_gl_representation_init(&_drawRep, &_drawMol);
