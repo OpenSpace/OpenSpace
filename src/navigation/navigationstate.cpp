@@ -106,8 +106,8 @@ CameraPose NavigationState::cameraPose() const {
     if (!referenceFrameNode) {
         LERROR(fmt::format(
             "Could not find scene graph node '{}' used as reference frame.",
-            referenceFrame)
-        );
+            referenceFrame
+        ));
         return CameraPose();
     }
 
@@ -115,7 +115,7 @@ CameraPose NavigationState::cameraPose() const {
 
     const glm::dmat3 referenceFrameTransform = referenceFrameNode->modelTransform();
 
-    resultingPose.position = anchorNode->worldPosition() +
+    resultingPose.position = referenceFrameNode->worldPosition() +
         referenceFrameTransform * glm::dvec3(position);
 
     glm::dvec3 upVector = up.has_value() ?
