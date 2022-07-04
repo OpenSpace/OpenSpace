@@ -1718,6 +1718,9 @@ void setCameraFromProfile(const Profile& p) {
                 if (navStateProfile.referenceFrame.empty()) {
                     nav.referenceFrame = nav.anchor;
                 }
+                else {
+                    nav.referenceFrame = navStateProfile.referenceFrame;
+                }
                 nav.position = navStateProfile.position;
                 if (navStateProfile.up.has_value()) {
                     nav.up = navStateProfile.up;
