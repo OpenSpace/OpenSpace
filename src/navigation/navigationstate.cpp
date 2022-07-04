@@ -115,7 +115,7 @@ CameraPose NavigationState::cameraPose() const {
 
     const glm::dmat3 referenceFrameTransform = referenceFrameNode->modelTransform();
 
-    resultingPose.position = referenceFrameNode->worldPosition() +
+    resultingPose.position = anchorNode->worldPosition() +
         referenceFrameTransform * glm::dvec3(position);
 
     glm::dvec3 upVector = up.has_value() ?
