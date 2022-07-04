@@ -106,8 +106,8 @@ CameraPose NavigationState::cameraPose() const {
     if (!referenceFrameNode) {
         LERROR(fmt::format(
             "Could not find scene graph node '{}' used as reference frame.",
-            referenceFrame)
-        );
+            referenceFrame
+        ));
         return CameraPose();
     }
 

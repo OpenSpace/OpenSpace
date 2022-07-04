@@ -1715,8 +1715,11 @@ void setCameraFromProfile(const Profile& p) {
                 if (navStateProfile.aim.has_value()) {
                     nav.aim = navStateProfile.aim.value();
                 }
-                if (nav.referenceFrame.empty()) {
-                    nav.referenceFrame = "Root";
+                if (navStateProfile.referenceFrame.empty()) {
+                    nav.referenceFrame = nav.anchor;
+                }
+                else {
+                    nav.referenceFrame = navStateProfile.referenceFrame;
                 }
                 nav.position = navStateProfile.position;
                 if (navStateProfile.up.has_value()) {
