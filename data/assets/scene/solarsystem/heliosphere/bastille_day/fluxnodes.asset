@@ -13,6 +13,9 @@ local fluxNodesBinaries = asset.syncedResource({
 local fluxNodes = {
   Identifier = "MAS-MHD-FluxNodes-bastille-day-2000",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 695700000.0,
   Transform = {
     Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
   },

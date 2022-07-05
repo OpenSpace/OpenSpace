@@ -58,7 +58,7 @@ public:
     static constexpr const char* KeyIdentifier = "Identifier";
 
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable();
+    virtual ~ScreenSpaceRenderable() override;
 
     virtual void render();
 
@@ -70,7 +70,22 @@ public:
     virtual void update();
     virtual bool isReady() const;
     bool isEnabled() const;
+    bool isUsingRaeCoords() const;
+    bool isFacingCamera() const;
+    void setEnabled(bool isEnabled);
     float depth();
+    float scale() const;
+
+    // Screen space functionality in these coords: [-1,1][-ratio,ratio]
+    glm::vec2 screenSpacePosition();
+    glm::vec2 screenSpaceDimensions();
+    glm::vec2 upperRightCornerScreenSpace();
+    glm::vec2 lowerLeftCornerScreenSpace();
+    bool isIntersecting(glm::vec2 coord);
+    void translate(glm::vec2 translation, glm::vec2 position);
+    void setCartesianPosition(const glm::vec3& position);
+    void setRaeFromCartesianPosition(const glm::vec3& position);
+    glm::vec3 raePosition() const;
 
     static documentation::Documentation Documentation();
 
@@ -78,15 +93,25 @@ protected:
     void createShaders();
     std::string makeUniqueIdentifier(std::string name);
 
-    glm::mat4 scaleMatrix();
+    virtual glm::mat4 scaleMatrix();
     glm::mat4 globalRotationMatrix();
     glm::mat4 translationMatrix();
     glm::mat4 localRotationMatrix();
+
+    glm::vec3 raeToCartesian(const glm::vec3& rae) const;
+    glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
     void draw(glm::mat4 modelTransform);
 
     virtual void bindTexture() = 0;
     virtual void unbindTexture();
+
+    glm::vec3 sphericalToRae(glm::vec3 spherical) const;
+    glm::vec3 raeToSpherical(glm::vec3 rae) const;
+    glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
+    glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
+    glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
+    float opacity() const;
 
     properties::BoolProperty _enabled;
     properties::BoolProperty _usePerspectiveProjection;
@@ -105,13 +130,15 @@ protected:
     properties::Vec3Property _localRotation;
 
     properties::FloatProperty _scale;
+    properties::FloatProperty _gamma;
     properties::Vec3Property _multiplyColor;
     properties::Vec4Property _backgroundColor;
     properties::FloatProperty _opacity;
+    properties::FloatProperty _fade;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
-    UniformCache(color, opacity, mvp, texture, backgroundColor) _uniformCache;
+    UniformCache(color, opacity, mvp, texture, backgroundColor, gamma) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

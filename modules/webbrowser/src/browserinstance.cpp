@@ -48,10 +48,12 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
 {
-    _client = new BrowserClient(_renderHandler, _keyboardHandler);
+    _client = new BrowserClient(_renderHandler.get(), _keyboardHandler.get());
 
     CefWindowInfo windowInfo;
-    windowInfo.SetAsWindowless(nullptr);
+    // On Windows and MacOS this function takes a pointer as a parameter, but Linux
+    // requires this to be a long unsigned int, so we can't use nullptr here
+    windowInfo.SetAsWindowless(0);
 
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;
@@ -62,6 +64,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
         _client.get(),
         url,
         browserSettings,
+        nullptr,
         nullptr
     );
 

@@ -45,7 +45,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     TimeFrame();
-    virtual ~TimeFrame() = default;
+    virtual ~TimeFrame() override = default;
 
     virtual bool initialize();
 

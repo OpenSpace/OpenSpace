@@ -579,7 +579,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     if (distanceToCamera < maxDistance) {
         _program->activate();
 
-        _program->setUniform(_uniformCache.opacity, _opacity);
+        _program->setUniform(_uniformCache.opacity, opacity());
 
         // Model transform and view transform needs to be in double precision
         const glm::dmat4 modelTransform =
@@ -689,6 +689,8 @@ void RenderableModel::update(const UpdateData& data) {
     setBoundingSphere(_geometry->boundingRadius() * _modelScale *
         glm::compMax(data.modelTransform.scale)
     );
+    // Set Interaction sphere size to be 10% of the bounding sphere
+    setInteractionSphere(_boundingSphere * 0.1);
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;

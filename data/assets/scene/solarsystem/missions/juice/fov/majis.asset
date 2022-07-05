@@ -1,0 +1,256 @@
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+
+local MajisVisnir = {
+  Identifier = "JuiceMajisVisnir",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_MAJIS_VISNIR",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_MAJIS_VISNIR",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis Visnir FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = [[
+      The field-of-view for the Moon and Jupiter Imaging Spectrometer measuring in the
+      visible and near-infrared spectra (0.4-1.9 um and 1.5-5.7 um).
+    ]]
+  }
+}
+
+local MajisVisnirB2 = {
+  Identifier = "JuiceMajisVisnirB2",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_MAJIS_VISNIR_B2",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_MAJIS_VISNIR_B2",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis Visnir B2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisVisnirB4 = {
+  Identifier = "JuiceMajisVisnirB4",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_MAJIS_VISNIR_B4",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_MAJIS_VISNIR_B4",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis Visnir B4 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisIr = {
+  Identifier = "JuiceMajisIr",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = "JUICE",
+    Frame = "JUICE_MAJIS_IR",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_MAJIS_IR",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis IR FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisIrB2 = {
+  Identifier = "JuiceMajisIrB2",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_MAJIS_IR_B2",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_MAJIS_IR_B2",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis IR B2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisIrB4 = {
+  Identifier = "JuiceMajisIrB4",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_MAJIS_IR_B4",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_MAJIS_IR_B4",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis IR B4 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local Majis = {
+  Identifier = "JuiceMajis",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_MAJIS",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_MAJIS",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = [[
+      The field-of-view for the Moon and Jupiter Imaging Spectrometer measuring in the
+      visible and near-infrared spectra (0.4-1.9 um and 1.5-5.7 um).
+    ]]
+  }
+}
+
+
+asset.onInitialize(function()
+  -- We are only adding the main version of this instrument as a scene graph node. Other
+  -- versions are defined in the available SPICE kernels, but not a lot of information is
+  -- accessible about them. We don't want to remove them entirely as they might prove
+  -- useful to some users though
+
+  -- openspace.addSceneGraphNode(MajisVisnir)
+  -- openspace.addSceneGraphNode(MajisVisnirB2)
+  -- openspace.addSceneGraphNode(MajisVisnirB4)
+  -- openspace.addSceneGraphNode(MajisIr)
+  -- openspace.addSceneGraphNode(MajisIrB2)
+  -- openspace.addSceneGraphNode(MajisIrB4)
+  openspace.addSceneGraphNode(Majis)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Majis)
+  -- openspace.removeSceneGraphNode(MajisIrB4)
+  -- openspace.removeSceneGraphNode(MajisIrB2)
+  -- openspace.removeSceneGraphNode(MajisIr)
+  -- openspace.removeSceneGraphNode(MajisVisnirB4)
+  -- openspace.removeSceneGraphNode(MajisVisnirB2)
+  -- openspace.removeSceneGraphNode(MajisVisnir)
+end)
+
+-- asset.export(MajisVisnir)
+-- asset.export(MajisVisnirB2)
+-- asset.export(MajisVisnirB4)
+-- asset.export(MajisIr)
+-- asset.export(MajisIrB2)
+-- asset.export(MajisIrB4)
+asset.export(Majis)
+
+
+asset.meta = {
+  Name = "Majis",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Moon and Jupiter Imaging Spectrometer (MAJIS) onboard
+    Juice, which is going to take spectroscopic measurements of the Jovian moons and
+    Jupiter. See https://www.hou.usra.edu/meetings/lpsc2014/pdf/2493.pdf for more
+    information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

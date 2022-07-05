@@ -1,12 +1,12 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>http://asgard.sci.utah.edu/Mars/ThemisIRNight/tile/${z}/${y}/${x}</ServerUrl>
+    <ServerUrl>http://openspace.sci.utah.edu/Mars/ThemisIRNight/tile/${z}/${y}/${x}</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>
-    <UpperLeftY>90.0</UpperLeftY>
+    <UpperLeftY>60.0</UpperLeftY>
     <LowerRightX>180.0</LowerRightX>
-    <LowerRightY>-90.0</LowerRightY>
+    <LowerRightY>-60.0</LowerRightY>
     <SizeX>213388</SizeX>
     <SizeY>71130</SizeY>
     <TileLevel>9</TileLevel>

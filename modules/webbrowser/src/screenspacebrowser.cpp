@@ -76,8 +76,8 @@ void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
 
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _url(UrlInfo)
     , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
+    , _url(UrlInfo)
     , _reload(ReloadInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -94,8 +94,8 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     _renderHandler = new ScreenSpaceRenderHandler;
     _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
-        _renderHandler,
-        _keyboardHandler
+        _renderHandler.get(),
+        _keyboardHandler.get()
     );
 
     _url.onChange([this]() { _isUrlDirty = true; });

@@ -1,5 +1,4 @@
--- a11_lem.asset
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
@@ -43,12 +42,7 @@ local Apollo11LemModel = {
     GeometryFile = lem_model .. "LM-2_ver2clean.obj",
     RotationVector = { 91.044090, 171.229706, 111.666664 },
     LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      },
+      sun.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",

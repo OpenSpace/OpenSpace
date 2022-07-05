@@ -1,5 +1,5 @@
 asset.require("spice/base")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
 local models = asset.syncedResource({
@@ -31,12 +31,7 @@ local RotationMatrix = {
 }
 
 local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
+  sun.LightSource,
   {
     Type = "SceneGraphLightSource",
     Identifier = "Mars",
@@ -156,7 +151,7 @@ local RotationKeyframes = {
 
 local InsightParent = {
   Identifier = "InsightParent",
-  Parent = mars.Identifier,
+  Parent = mars.Mars.Identifier,
   Transform = {
     Translation ={
       Type = "TimelineTranslation",

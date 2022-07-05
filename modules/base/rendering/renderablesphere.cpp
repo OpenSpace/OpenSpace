@@ -280,7 +280,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     );
     _shader->setUniform(_uniformCache.modelViewRotation, modelViewRotation);
 
-    float adjustedOpacity = _opacity;
+    float adjustedOpacity = opacity();
 
     if (!_disableFadeInDistance) {
         if (_fadeInThreshold > -1.0) {
@@ -339,7 +339,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    _texture->bind();
+    bindTexture();
+    defer{ unbindTexture(); };
     _shader->setUniform(_uniformCache.colorTexture, unit);
 
     // Setting these states should not be necessary,
@@ -389,6 +390,12 @@ void RenderableSphere::update(const UpdateData&) {
         _sphereIsDirty = false;
     }
 }
+
+void RenderableSphere::bindTexture() {
+    _texture->bind();
+}
+
+void RenderableSphere::unbindTexture() {}
 
 void RenderableSphere::loadTexture() {
     if (!_texturePath.value().empty()) {

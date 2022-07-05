@@ -57,7 +57,7 @@ public:
         std::filesystem::path synchronizationRoot);
 
     /// Contructor that will terminate the synchronization thread if it is still running
-    virtual ~UrlSynchronization();
+    ~UrlSynchronization() override;
 
     /**
      * Returns the location to which files downloaded through this ResourceSynchronization
@@ -72,6 +72,8 @@ public:
 
     /// Cancels any ongoing synchronization of this ResourceSynchronization
     void cancel() override;
+
+    std::string generateUid() override;
 
     static documentation::Documentation Documentation();
 

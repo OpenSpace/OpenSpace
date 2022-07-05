@@ -61,7 +61,7 @@ class PathNavigator;
 class NavigationHandler : public properties::PropertyOwner {
 public:
     NavigationHandler();
-    ~NavigationHandler();
+    virtual ~NavigationHandler() override;
 
     void initialize();
     void deinitialize();
@@ -94,6 +94,7 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
+    std::vector<std::string> listAllJoysticks() const;
     void setJoystickAxisMapping(std::string joystickName,
         int axis, JoystickCameraStates::AxisType mapping,
         JoystickCameraStates::AxisInvert shouldInvert =

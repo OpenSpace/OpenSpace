@@ -85,20 +85,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemInstruments::Documentation() {
-    documentation::Documentation doc =
-        codegen::doc<Parameters>("spacecraftinstruments_dashboarditem_instuments");
-
-    // @TODO cleanup
-    // Insert the parent's documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = DashboardTextItem::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
+    return codegen::doc<Parameters>(
+        "spacecraftinstruments_dashboarditem_instuments",
+        DashboardTextItem::Documentation()
     );
-
-    return doc;
 }
 
 DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dictionary)
@@ -141,8 +131,9 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
     double previous = sequencer.prevCaptureTime(currentTime);
     double next = sequencer.nextCaptureTime(currentTime);
-    double remaining = sequencer.nextCaptureTime(currentTime) - currentTime;
-    const float t = static_cast<float>(1.0 - remaining / (next - previous));
+    double remaining = next - currentTime;
+    float t = static_cast<float>(1.0 - remaining / (next - previous));
+    t = std::clamp(t, 0.f, 1.f);
 
     if (remaining > 0.0) {
         RenderFont(

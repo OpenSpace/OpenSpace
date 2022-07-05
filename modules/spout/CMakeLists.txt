@@ -26,14 +26,18 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   renderableplanespout.h
+  renderablespherespout.h
   screenspacespout.h
   spoutlibrary.h
+  spoutwrapper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   renderableplanespout.cpp
+  renderablespherespout.cpp
   screenspacespout.cpp
+  spoutwrapper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

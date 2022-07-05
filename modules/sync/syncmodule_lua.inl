@@ -22,14 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
+namespace {
 
-namespace openspace::luascriptfunctions {
-
-int syncResource(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::syncResource");
-    auto [identifier, version] = ghoul::lua::values<std::string, double>(L);
+/**
+ * Synchronizes the http resource identified by the name passed as the first parameter and
+ * the version provided as the second parameter. The application will hang while the data
+ * is being downloaded.
+ */
+[[codegen::luawrap]] bool syncResource(std::string identifier, int version) {
+    using namespace openspace;
 
     ghoul::Dictionary dict;
     dict.setValue("Type", std::string("HttpSynchronization"));
@@ -45,13 +46,21 @@ int syncResource(lua_State* L) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 
-    ghoul::lua::push(L, sync->isResolved());
-    return 1;
+    bool isResolved = sync->isResolved();
+    return isResolved;
 }
 
-int unsyncResource(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::unsyncResource");
-    auto [identifier, version] = ghoul::lua::values<std::string, std::optional<int>>(L);
+/**
+ * Unsynchronizes the http resources identified by the name passed as the first parameter
+ * by removing all data that was downloaded as part of the original synchronization. If
+ * the second parameter is provided, is it the version of the resources that is
+ * unsynchronized, if the parameter is not provided, all versions for the specified http
+ * resource are removed.
+ */
+[[codegen::luawrap]] void unsyncResource(std::string identifier,
+                                         std::optional<int> version)
+{
+    using namespace openspace;
 
     const SyncModule* module = global::moduleEngine->module<SyncModule>();
     std::filesystem::path sync = absPath(module->synchronizationRoot());
@@ -70,8 +79,8 @@ int unsyncResource(lua_State* L) {
         std::filesystem::remove_all(folder);
         std::filesystem::remove(base / syncFile);
     }
-
-    return 0;
 }
 
-} // namespace openspace::luascriptfunctions
+#include "syncmodule_lua_codegen.cpp"
+
+} // namespace

@@ -245,4 +245,8 @@ void UrlSynchronization::cancel() {
     _state = State::Unsynced;
 }
 
+std::string UrlSynchronization::generateUid() {
+    return _identifier;
+}
+
 } // namespace openspace

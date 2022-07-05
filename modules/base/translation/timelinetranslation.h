@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
 #define __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
 
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/translation.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 

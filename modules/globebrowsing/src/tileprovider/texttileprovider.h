@@ -32,14 +32,14 @@ namespace openspace::globebrowsing {
 class TextTileProvider : public TileProvider {
 public:
     TextTileProvider(TileTextureInitData initData, size_t fontSize = 48);
-    virtual ~TextTileProvider();
+    ~TextTileProvider() override;
 
     void reset() override;
 
 protected:
     Tile renderTile(const TileIndex& tileIndex, const std::string& text,
         const glm::vec2& position, const glm::vec4& color);
-    
+
     const TileTextureInitData initData;
 
     std::unique_ptr<ghoul::fontrendering::FontRenderer> fontRenderer;

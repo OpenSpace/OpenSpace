@@ -81,7 +81,7 @@ public:
         std::string substringReplacement;
         ScriptSubstringReplace(std::string found, std::string replace)
             : substringFound(found)
-            , substringReplacement(replace) {};
+            , substringReplacement(replace) {}
     };
 
     static const size_t FileHeaderVersionLength = 5;
@@ -101,7 +101,7 @@ public:
     SessionRecording();
     SessionRecording(bool isGlobal);
 
-    ~SessionRecording();
+    ~SessionRecording() override;
 
     /**
      * Used to de-initialize the session recording feature. Any recording or playback
@@ -492,7 +492,8 @@ public:
     /**
      * Reads header information from a session recording file
      *
-     * \param stringstream reference to ifstream that contains the session recording file data
+     * \param stringstream reference to ifstream that contains the session recording file
+     *        data
      * \param readLen_chars number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */
@@ -603,7 +604,7 @@ protected:
         Timestamps t3stamps;
     };
     double _timestampRecordStarted = 0.0;
-    Timestamps _timestamps3RecordStarted;
+    Timestamps _timestamps3RecordStarted{ 0.0, 0.0, 0.0 };
     double _timestampPlaybackStarted_application = 0.0;
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
@@ -671,7 +672,6 @@ protected:
     bool isPropertyAllowedForBaseline(const std::string& propString);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
-    std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
     bool doesStartWithSubstring(const std::string& s, const std::string& matchSubstr);
     void trimCommandsFromScriptIfFound(std::string& script);
     void replaceCommandsFromScriptIfFound(std::string& script);
@@ -681,6 +681,8 @@ protected:
     double getNextTimestamp();
     double getPrevTimestamp();
     void cleanUpPlayback();
+    void cleanUpRecording();
+    void cleanUpTimelinesAndKeyframes();
     bool convertEntries(std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
@@ -694,10 +696,12 @@ protected:
         std::string& version, DataMode& mode);
     void populateListofLoadedSceneGraphNodes();
 
-    bool checkIfScriptUsesScenegraphNode(std::string s);
-    void checkForScenegraphNodeAccess_Scene(std::string& s, std::string& result);
-    void checkForScenegraphNodeAccess_Nav(std::string& s, std::string& result);
+    void checkIfScriptUsesScenegraphNode(std::string s);
+    bool checkForScenegraphNodeAccessScene(std::string& s);
+    bool checkForScenegraphNodeAccessNav(std::string& navTerm);
+    std::string extractScenegraphNodeFromScene(std::string& s);
     bool checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex);
+    std::string isolateTermFromQuotes(std::string s);
     void eraseSpacesFromString(std::string& s);
     std::string getNameFromSurroundingQuotes(std::string& s);
 
@@ -731,16 +735,17 @@ protected:
 
     bool _saveRenderingDuringPlayback = false;
     double _saveRenderingDeltaTime = 1.0 / 30.0;
-    double _saveRenderingCurrentRecordedTime;
+    double _saveRenderingCurrentRecordedTime = 0.0;
     std::chrono::steady_clock::duration _saveRenderingDeltaTime_interpolation_usec;
     std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
-    double _saveRenderingCurrentApplicationTime_interpolation;
-    long long _saveRenderingClockInterpolation_countsPerSec;
+    double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
+    long long _saveRenderingClockInterpolation_countsPerSec = 1;
     bool _saveRendering_isFirstFrame = true;
 
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
 
-    bool _cleanupNeeded = false;
+    bool _cleanupNeededRecording = false;
+    bool _cleanupNeededPlayback = false;
     const std::string scriptReturnPrefix = "return ";
 
     std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
@@ -800,6 +805,7 @@ protected:
     double _cameraFirstInTimeline_timestamp = 0;
 
     int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 
     DataMode _conversionDataMode = DataMode::Binary;
     int _conversionLineNum = 1;
@@ -831,7 +837,7 @@ protected:
 class SessionRecording_legacy_0085 : public SessionRecording {
 public:
     SessionRecording_legacy_0085() : SessionRecording() {}
-    ~SessionRecording_legacy_0085() {}
+    ~SessionRecording_legacy_0085() override {}
     char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
     char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
     std::string fileFormatVersion() override {
@@ -857,7 +863,7 @@ public:
 
             _script.erase();
             _script = temp.data();
-        };
+        }
     };
 
 protected:

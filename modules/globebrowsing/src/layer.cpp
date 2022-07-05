@@ -115,7 +115,7 @@ namespace {
         std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
             "SingleImageTileLayer", "ImageSequenceTileLayer", "SizeReferenceTileLayer",
             "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
-            "ByLevelTileLayer", "SolidColor")]];
+            "ByLevelTileLayer", "SolidColor", "SpoutImageTileLayer")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -302,6 +302,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
             // Intentional fall through. Same for all tile layers
             case layergroupid::TypeID::DefaultTileLayer:
             case layergroupid::TypeID::SingleImageTileLayer:
+            case layergroupid::TypeID::SpoutImageTileLayer:
             case layergroupid::TypeID::ImageSequenceTileLayer:
             case layergroupid::TypeID::SizeReferenceTileLayer:
             case layergroupid::TypeID::TemporalTileLayer:
@@ -470,6 +471,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::SpoutImageTileLayer:
         case layergroupid::TypeID::ImageSequenceTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:
         case layergroupid::TypeID::TemporalTileLayer:
@@ -502,6 +504,7 @@ void Layer::addVisibleProperties() {
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::SpoutImageTileLayer:
         case layergroupid::TypeID::ImageSequenceTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:
         case layergroupid::TypeID::TemporalTileLayer:

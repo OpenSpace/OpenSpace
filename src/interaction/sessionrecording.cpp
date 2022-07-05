@@ -58,6 +58,8 @@
 #include <windows.h>
 #endif // WIN32
 
+#include "sessionrecording_lua.inl"
+
 namespace {
     constexpr const char* _loggerCat = "SessionRecording";
 
@@ -76,10 +78,7 @@ namespace {
     };
 
     constexpr const bool UsingTimeKeyframes = false;
-
 } // namespace
-
-#include "sessionrecording_lua.inl"
 
 namespace openspace::interaction {
 
@@ -239,7 +238,7 @@ bool SessionRecording::startRecording(const std::string& filename) {
         _timestampRecordStarted = global::windowDelegate->applicationTime();
 
         // Record the current delta time as the first property to save in the file.
-        // This needs to be saved as a baseline whether or not it changes during recording.
+        // This needs to be saved as a baseline whether or not it changes during recording
         _timestamps3RecordStarted = {
             _timestampRecordStarted,
             0.0,
@@ -272,7 +271,7 @@ void SessionRecording::stopRecording() {
     if (_state == SessionState::Recording) {
         // Add all property baseline scripts to the beginning of the recording file
         datamessagestructures::ScriptMessage smTmp;
-        for (TimelineEntry initPropScripts : _keyframesSavePropertiesBaseline_timeline) {
+        for (TimelineEntry& initPropScripts : _keyframesSavePropertiesBaseline_timeline) {
             if (initPropScripts.keyframeType == RecordedType::Script) {
                 smTmp._script = _keyframesSavePropertiesBaseline_scripts
                     [initPropScripts.idxIntoKeyframeTypeArray];
@@ -343,7 +342,7 @@ void SessionRecording::stopRecording() {
     }
     // Close the recording file
     _recordFile.close();
-    _cleanupNeeded = true;
+    _cleanupNeededRecording = true;
 }
 
 bool SessionRecording::startPlayback(std::string& filename,
@@ -603,7 +602,7 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
 
 void SessionRecording::handlePlaybackEnd() {
     _state = SessionState::Idle;
-    _cleanupNeeded = true;
+    _cleanupNeededPlayback = true;
     global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
         events::EventSessionRecordingPlayback::State::Finished
     );
@@ -634,23 +633,31 @@ void SessionRecording::cleanUpPlayback() {
     ghoul_assert(camera != nullptr, "Camera must not be nullptr");
     Scene* scene = camera->parent()->scene();
     if (!_timeline.empty()) {
-        if (_timeline.size() > 0) {
-            unsigned int p =
-                _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
-            if (_keyframesCamera.size() > 0) {
-                const SceneGraphNode* n = scene->sceneGraphNode(
-                    _keyframesCamera[p].focusNode);
-                if (n) {
-                    global::navigationHandler->orbitalNavigator().setFocusNode(
-                        n->identifier());
-                }
+        unsigned int p =
+            _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
+        if (_keyframesCamera.size() > 0) {
+            const SceneGraphNode* n = scene->sceneGraphNode(
+                _keyframesCamera[p].focusNode
+            );
+            if (n) {
+                global::navigationHandler->orbitalNavigator().setFocusNode(
+                    n->identifier()
+                );
             }
         }
     }
 
     _playbackFile.close();
+    cleanUpTimelinesAndKeyframes();
+    _cleanupNeededPlayback = false;
+}
 
-    // Clear all timelines and keyframes
+void SessionRecording::cleanUpRecording() {
+    cleanUpTimelinesAndKeyframes();
+    _cleanupNeededRecording = false;
+}
+
+void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _timeline.clear();
     _keyframesCamera.clear();
     _keyframesTime.clear();
@@ -670,8 +677,6 @@ void SessionRecording::cleanUpPlayback() {
     _playbackPauseOffset = 0.0;
     _playbackLoopMode = false;
     _playbackForceSimTimeAtStart = false;
-
-    _cleanupNeeded = false;
 }
 
 void SessionRecording::writeToFileBuffer(unsigned char* buf,
@@ -928,6 +933,19 @@ void SessionRecording::saveScriptKeyframeAscii(Timestamps& times,
 {
     std::stringstream keyframeLine = std::stringstream();
     saveHeaderAscii(times, HeaderScriptAscii, keyframeLine);
+    // Erase all \r (from windows newline), and all \n from line endings and replace with
+    // ';' so that lua will treat them as separate lines. This is done in order to treat
+    // a multi-line script as a single line in the file.
+    size_t startPos = sm._script.find("\r", 0);
+    while (startPos != std::string::npos) {
+        sm._script.erase(startPos, 1);
+        startPos = sm._script.find("\r", startPos);
+    }
+    startPos = sm._script.find("\n", 0);
+    while (startPos != std::string::npos) {
+        sm._script.replace(startPos, 1, ";");
+        startPos = sm._script.find("\n", startPos);
+    }
     sm.write(keyframeLine);
     saveKeyframeToFile(keyframeLine.str(), file);
 }
@@ -975,8 +993,11 @@ void SessionRecording::preSynchronization() {
     else if (isPlayingBack()) {
         moveAheadInTime();
     }
-    else if (_cleanupNeeded) {
+    else if (_cleanupNeededPlayback) {
         cleanUpPlayback();
+    }
+    else if (_cleanupNeededRecording) {
+        cleanUpRecording();
     }
 
     // Handle callback(s) for change in idle/record/playback state
@@ -1042,10 +1063,8 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
     bool parsingStatusOk = true;
 
     if (_recordingDataMode == DataMode::Binary) {
-        unsigned char frameType;
-
         while (parsingStatusOk) {
-            frameType = readFromPlayback<unsigned char>(_playbackFile);
+            unsigned char frameType = readFromPlayback<unsigned char>(_playbackFile);
             // Check if have reached EOF
             if (!_playbackFile) {
                 LINFO(fmt::format(
@@ -1495,7 +1514,7 @@ bool SessionRecording::playbackScript() {
         _playbackLineNum
     );
 
-    success = checkIfScriptUsesScenegraphNode(kf._script);
+    checkIfScriptUsesScenegraphNode(kf._script);
 
     if (success) {
         success = addKeyframe(
@@ -1515,61 +1534,100 @@ void SessionRecording::populateListofLoadedSceneGraphNodes() {
     }
 }
 
-bool SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
+void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
     if (s.rfind(scriptReturnPrefix, 0) == 0) {
         s.erase(0, scriptReturnPrefix.length());
     }
     // This works for both setPropertyValue and setPropertyValueSingle
-    if (s.rfind("openspace.setPropertyValue", 0) == 0) {
-        std::string found;
-        if (s.find("(\"") != std::string::npos) {
-            std::string subj = s.substr(s.find("(\"") + 2);
-            checkForScenegraphNodeAccess_Scene(subj, found);
-            checkForScenegraphNodeAccess_Nav(subj, found);
-            if (found.length() > 0) {
-                auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), found);
+    bool containsSetPropertyVal = (s.rfind("openspace.setPropertyValue", 0) == 0);
+    bool containsParensStart = (s.find("(") != std::string::npos);
+    if (containsSetPropertyVal && containsParensStart) {
+        std::string subjectOfSetProp = isolateTermFromQuotes(s.substr(s.find("(") + 1));
+        if (checkForScenegraphNodeAccessNav(subjectOfSetProp)) {
+            size_t commaPos = s.find(",");
+            std::string navNode = isolateTermFromQuotes(s.substr(commaPos + 1));
+            if (navNode != "nil") {
+                std::vector<std::string>::iterator it =
+                    std::find(_loadedNodes.begin(), _loadedNodes.end(), navNode);
                 if (it == _loadedNodes.end()) {
-                    LERROR(fmt::format(
-                        "Playback file requires scenegraph node '{}', which is "
-                        "not currently loaded", found
+                    LWARNING(fmt::format(
+                        "Playback file contains a property setting of navigation using"
+                        " scenegraph node '{}', which is not currently loaded", navNode
                     ));
-                    return false;
+                }
+            }
+        }
+        else if (checkForScenegraphNodeAccessScene(subjectOfSetProp)) {
+            std::string found = extractScenegraphNodeFromScene(subjectOfSetProp);
+            if (!found.empty()) {
+                std::vector<properties::Property*> matchHits =
+                    global::renderEngine->scene()->propertiesMatchingRegex(
+                        subjectOfSetProp
+                    );
+                if (matchHits.empty()) {
+                    LWARNING(fmt::format(
+                        "Playback file contains a property setting of scenegraph"
+                        " node '{}', which is not currently loaded", found
+                    ));
                 }
             }
         }
     }
-    return true;
 }
 
-void SessionRecording::checkForScenegraphNodeAccess_Scene(std::string& s,
-                                                          std::string& result)
-{
+bool SessionRecording::checkForScenegraphNodeAccessScene(std::string& s) {
     const std::string scene = "Scene.";
-    auto posScene = s.find(scene);
+    return (s.find(scene) != std::string::npos);
+}
+
+std::string SessionRecording::extractScenegraphNodeFromScene(std::string& s) {
+    const std::string scene = "Scene.";
+    std::string extracted;
+    size_t posScene = s.find(scene);
     if (posScene != std::string::npos) {
-        auto posDot = s.find(".", posScene + scene.length() + 1);
+        size_t posDot = s.find(".", posScene + scene.length() + 1);
         if (posDot > posScene && posDot != std::string::npos) {
-            result = s.substr(posScene + scene.length(), posDot
-                - (posScene + scene.length()));
+            extracted = s.substr(posScene + scene.length(), posDot -
+                (posScene + scene.length()));
         }
     }
+    return extracted;
 }
 
-void SessionRecording::checkForScenegraphNodeAccess_Nav(std::string& s,
-                                                        std::string& result)
-{
+bool SessionRecording::checkForScenegraphNodeAccessNav(std::string& navTerm) {
     const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
-    auto posNav = s.find(nextTerm);
+    size_t posNav = navTerm.find(nextTerm);
     if (posNav != std::string::npos) {
         for (std::string accessName : _navScriptsUsingNodes) {
-            if (s.substr(posNav + nextTerm.length()).rfind(accessName) == 0) {
-                std::string postName = s.substr(posNav + nextTerm.length()
-                    + accessName.length() + 2);
-                eraseSpacesFromString(postName);
-                result = getNameFromSurroundingQuotes(postName);
-            }
+              if (navTerm.find(accessName) != std::string::npos) {
+                  return true;
+              }
         }
     }
+    return false;
+}
+
+std::string SessionRecording::isolateTermFromQuotes(std::string s) {
+    //Remove any leading spaces
+    while (s.front() == ' ') {
+        s.erase(0, 1);
+    }
+    const std::string possibleQuotes = "\'\"[]";
+    while (possibleQuotes.find(s.front()) != std::string::npos) {
+        s.erase(0, 1);
+    }
+    for (char q : possibleQuotes) {
+        if (s.find(q) != std::string::npos) {
+            s = s.substr(0, s.find(q));
+            return s;
+        }
+    }
+    //If no quotes found, remove other possible characters from end
+    std::string unwantedChars = " );";
+    while (unwantedChars.find(s.back()) != std::string::npos) {
+        s.pop_back();
+    }
+    return s;
 }
 
 void SessionRecording::eraseSpacesFromString(std::string& s) {
@@ -2004,7 +2062,6 @@ bool SessionRecording::processCameraKeyframe(double now) {
     Scene* scene = camera->parent()->scene();
 
     const SceneGraphNode* n = scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode);
-
     if (n) {
         global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
     }
@@ -2157,6 +2214,7 @@ std::vector<std::string> SessionRecording::playbackList() const {
             }
         }
     }
+    std::sort(fileList.begin(), fileList.end());
     return fileList;
 }
 
@@ -2245,8 +2303,7 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     inputFstream.close();
 }
 
-std::string SessionRecording::convertFile(std::string filename, int depth)
-{
+std::string SessionRecording::convertFile(std::string filename, int depth) {
     std::string conversionOutFilename = filename;
     std::ifstream conversionInFile;
     std::stringstream conversionInStream;
@@ -2352,10 +2409,8 @@ bool SessionRecording::convertEntries(std::string& inFilename,
     std::string lineParsing;
 
     if (mode == DataMode::Binary) {
-        unsigned char frameType;
-
         while (conversionStatusOk) {
-            frameType = readFromPlayback<unsigned char>(inStream);
+            unsigned char frameType = readFromPlayback<unsigned char>(inStream);
             // Check if have reached EOF
             if (!inStream) {
                 LINFO(fmt::format(
@@ -2547,118 +2602,20 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
     return {
         "sessionRecording",
         {
-            {
-                "startRecording",
-                &luascriptfunctions::startRecording,
-                "string",
-                "Starts a recording session. The string argument is the filename used "
-                "for the file where the recorded keyframes are saved. "
-                "The file data format is binary."
-            },
-            {
-                "startRecordingAscii",
-                &luascriptfunctions::startRecordingAscii,
-                "string",
-                "Starts a recording session. The string argument is the filename used "
-                "for the file where the recorded keyframes are saved. "
-                "The file data format is ASCII."
-            },
-            {
-                "stopRecording",
-                &luascriptfunctions::stopRecording,
-                "void",
-                "Stops a recording session"
-            },
-            {
-                "startPlayback",
-                &luascriptfunctions::startPlaybackDefault,
-                "string [, bool]",
-                "Starts a playback session with keyframe times that are relative to "
-                "the time since the recording was started (the same relative time "
-                "applies to the playback). When playback starts, the simulation time "
-                "is automatically set to what it was at recording time. The string "
-                "argument is the filename to pull playback keyframes from (the file "
-                "path is relative to the RECORDINGS variable specified in the config "
-                "file). If a second input value of true is given, then playback will "
-                "continually loop until it is manually stopped."
-            },
-            {
-                "startPlaybackApplicationTime",
-                &luascriptfunctions::startPlaybackApplicationTime,
-                "string",
-                "Starts a playback session with keyframe times that are relative to "
-                "application time (seconds since OpenSpace application started). "
-                "The string argument is the filename to pull playback keyframes from "
-                "(the file path is relative to the RECORDINGS variable specified in the "
-                "config file)."
-            },
-            {
-                "startPlaybackRecordedTime",
-                &luascriptfunctions::startPlaybackRecordedTime,
-                "string [, bool]",
-                "Starts a playback session with keyframe times that are relative to "
-                "the time since the recording was started (the same relative time "
-                "applies to the playback). The string argument is the filename to pull "
-                "playback keyframes from (the file path is relative to the RECORDINGS "
-                "variable specified in the config file). If a second input value of "
-                "true is given, then playback will continually loop until it is "
-                "manually stopped."
-            },
-            {
-                "startPlaybackSimulationTime",
-                &luascriptfunctions::startPlaybackSimulationTime,
-                "string",
-                "Starts a playback session with keyframe times that are relative to "
-                "the simulated date & time. The string argument is the filename to pull "
-                "playback keyframes from (the file path is relative to the RECORDINGS "
-                "variable specified in the config file)."
-            },
-            {
-                "stopPlayback",
-                &luascriptfunctions::stopPlayback,
-                "",
-                "Stops a playback session before playback of all keyframes is complete"
-            },
-            {
-                "enableTakeScreenShotDuringPlayback",
-                &luascriptfunctions::enableTakeScreenShotDuringPlayback,
-                "[int]",
-                "Enables that rendered frames should be saved during playback. The "
-                "parameter determines the number of frames that are exported per second "
-                "if this value is not provided, 60 frames per second will be exported."
-            },
-            {
-                "disableTakeScreenShotDuringPlayback",
-                &luascriptfunctions::disableTakeScreenShotDuringPlayback,
-                "",
-                "Used to disable that renderings are saved during playback"
-            },
-            {
-                "fileFormatConversion",
-                &luascriptfunctions::fileFormatConversion,
-                "string",
-                "Performs a conversion of the specified file to the most most recent "
-                "file format, creating a copy of the recording file."
-            },
-            {
-                "setPlaybackPause",
-                &luascriptfunctions::setPlaybackPause,
-                "bool",
-                "Pauses or resumes the playback progression through keyframes"
-            },
-            {
-                "togglePlaybackPause",
-                &luascriptfunctions::togglePlaybackPause,
-                "",
-                "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards"
-            },
-            {
-               "isPlayingBack",
-                & luascriptfunctions::isPlayingBack,
-                "",
-                "Returns true if session recording is currently playing back a recording"
-            }
+            codegen::lua::StartRecording,
+            codegen::lua::StartRecordingAscii,
+            codegen::lua::StopRecording,
+            codegen::lua::StartPlaybackDefault,
+            codegen::lua::StartPlaybackApplicationTime,
+            codegen::lua::StartPlaybackRecordedTime,
+            codegen::lua::StartPlaybackSimulationTime,
+            codegen::lua::StopPlayback,
+            codegen::lua::EnableTakeScreenShotDuringPlayback,
+            codegen::lua::DisableTakeScreenShotDuringPlayback,
+            codegen::lua::FileFormatConversion,
+            codegen::lua::SetPlaybackPause,
+            codegen::lua::TogglePlaybackPause,
+            codegen::lua::IsPlayingBack
         }
     };
 }

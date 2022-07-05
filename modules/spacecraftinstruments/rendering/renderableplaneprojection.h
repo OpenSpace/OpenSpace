@@ -46,7 +46,7 @@ struct UpdateData;
 class RenderablePlaneProjection : public Renderable {
 public:
     RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
-    ~RenderablePlaneProjection();
+    ~RenderablePlaneProjection() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -86,8 +86,6 @@ private:
         std::string frame;
         std::string node;
     } _target;
-    std::string _name = "ImagePlane";
-    bool _moving = false;
     bool _hasImage = false;
 };
 

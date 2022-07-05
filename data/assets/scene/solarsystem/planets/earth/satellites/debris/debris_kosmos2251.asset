@@ -2,11 +2,12 @@ local shared = asset.require("util/tle_helper")
 
 local group = {
   Title = "Kosmos 2251 Debris",
-  Url = "http://www.celestrak.com/NORAD/elements/cosmos-2251-debris.txt",
+  Filename = "cosmos-2251-debris.txt",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=cosmos-2251-debris&FORMAT=TLE",
   TrailColor = { 0.66, 0.8, 0.5 }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
+local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
 shared.registerSatelliteGroupObjects(asset, group, tle, true)
 
 

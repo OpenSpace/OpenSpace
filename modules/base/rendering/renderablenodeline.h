@@ -46,7 +46,7 @@ class Translation;
 class RenderableNodeLine : public Renderable {
 public:
     RenderableNodeLine(const ghoul::Dictionary& dictionary);
-    ~RenderableNodeLine() = default;
+    ~RenderableNodeLine() override = default;
 
     static documentation::Documentation Documentation();
 
@@ -62,8 +62,8 @@ private:
 
     bool isReady() const override;
     void updateVertexData();
+    void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void validateNodes();
 
     void unbindGL();
     void bindGL();

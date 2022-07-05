@@ -65,7 +65,7 @@ public:
         ghoul::Dictionary dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary);
-    virtual ~Renderable() = default;
+    virtual ~Renderable() override = default;
 
     virtual void initialize();
     virtual void initializeGL();
@@ -105,6 +105,7 @@ public:
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
+    properties::FloatProperty _fade;
     properties::StringProperty _renderableType;
 
     void setBoundingSphere(double boundingSphere);
@@ -112,6 +113,9 @@ protected:
 
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
+
+    /// Returns the full opacity constructed from the _opacity and _fade property values
+    float opacity() const;
 
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;

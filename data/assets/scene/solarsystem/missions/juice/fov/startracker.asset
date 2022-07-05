@@ -1,0 +1,121 @@
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+
+local StarOh1 = {
+  Identifier = "JuiceStarOH1",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_STR-OH1",
+    RGB = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name = "JUICE_STR-OH1",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Star Tracker OH1 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The first head of the Hydra star tracking system"
+  }
+}
+
+local StarOh2 = {
+  Identifier = "JuiceStarOH2",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_STR-OH2",
+    RGB = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name = "JUICE_STR-OH2",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Star Tracker OH2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The second head of the Hydra star tracking system"
+  }
+}
+
+local StarOh3 = {
+  Identifier = "JuiceStarOH3",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_STR-OH3",
+    RGB = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name = "JUICE_STR-OH3",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Star Tracker OH3 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The third head of the Hydra star tracking system"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(StarOh1)
+  openspace.addSceneGraphNode(StarOh2)
+  openspace.addSceneGraphNode(StarOh3)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StarOh3)
+  openspace.removeSceneGraphNode(StarOh2)
+  openspace.removeSceneGraphNode(StarOh1)
+end)
+
+asset.export(StarOh1)
+asset.export(StarOh2)
+asset.export(StarOh3)
+
+
+asset.meta = {
+  Name = "Star Tracker",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the three headed "Hydra" star trackers onboard Juice, which
+    is measuring the location of stars and comparing them to their known locations in
+    order to determine the position of Juice relative to the celestial sphere.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

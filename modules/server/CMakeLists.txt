@@ -34,6 +34,7 @@ set(HEADER_FILES
   include/topics/authorizationtopic.h
   include/topics/bouncetopic.h
   include/topics/documentationtopic.h
+  include/topics/enginemodetopic.h
   include/topics/flightcontrollertopic.h
   include/topics/getpropertytopic.h
   include/topics/luascripttopic.h
@@ -42,6 +43,7 @@ set(HEADER_FILES
   include/topics/shortcuttopic.h
   include/topics/subscriptiontopic.h
   include/topics/timetopic.h
+  include/topics/skybrowsertopic.h
   include/topics/topic.h
   include/topics/triggerpropertytopic.h
   include/topics/versiontopic.h
@@ -57,6 +59,7 @@ set(SOURCE_FILES
   src/topics/authorizationtopic.cpp
   src/topics/bouncetopic.cpp
   src/topics/documentationtopic.cpp
+  src/topics/enginemodetopic.cpp
   src/topics/flightcontrollertopic.cpp
   src/topics/getpropertytopic.cpp
   src/topics/luascripttopic.cpp
@@ -65,6 +68,7 @@ set(SOURCE_FILES
   src/topics/shortcuttopic.cpp
   src/topics/subscriptiontopic.cpp
   src/topics/timetopic.cpp
+  src/topics/skybrowsertopic.cpp
   src/topics/topic.cpp
   src/topics/triggerpropertytopic.cpp
   src/topics/versiontopic.cpp

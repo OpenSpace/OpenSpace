@@ -318,15 +318,19 @@ TEST_CASE("SpiceManager: Get Target Position", "[spicemanager]") {
     str2et_c(utctime, &et);
     spkpos_c("EARTH", et, "J2000", "LT+S", "CASSINI", pos, &lt);
 
-    glm::dvec3 targetPosition =glm::dvec3(0.0);
+    glm::dvec3 targetPosition = glm::dvec3(0.0);
     double lightTime = 0.0;
     SpiceManager::AberrationCorrection corr = {
         SpiceManager::AberrationCorrection::Type::LightTimeStellar,
         SpiceManager::AberrationCorrection::Direction::Reception
     };
 
-    CHECK_NOTHROW(targetPosition = SpiceManager::ref().targetPosition(
-        "EARTH", "CASSINI", "J2000", corr, et, lightTime)
+    CHECK_NOTHROW(
+        [&]() {
+            targetPosition = SpiceManager::ref().targetPosition(
+                "EARTH", "CASSINI", "J2000", corr, et, lightTime
+            );
+        }()
     );
     CHECK(pos[0] == Approx(targetPosition[0]));
     CHECK(pos[1] == Approx(targetPosition[1]));
@@ -414,8 +418,12 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
 
     glm::dmat3 positionMatrix = glm::dmat3(1.0);
     glm::dvec3 position(state[0], state[1], state[2]);
-    CHECK_NOTHROW(positionMatrix = SpiceManager::ref().positionTransformMatrix(
-        "CASSINI_HGA", "J2000", et)
+    CHECK_NOTHROW(
+        [&]() {
+            positionMatrix = SpiceManager::ref().positionTransformMatrix(
+                "CASSINI_HGA", "J2000", et
+            );
+        }()
     );
 
     // check for matrix consistency

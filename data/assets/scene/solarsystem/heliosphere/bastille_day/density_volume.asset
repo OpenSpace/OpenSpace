@@ -1,5 +1,6 @@
 local propertyHelper = asset.require("util/property_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 local densityDirectory = asset.syncedResource({
   Name = "Bastille Day MAS Density",
@@ -12,6 +13,9 @@ local sunRadius = 6.957E8
 
 local densityVolume = {
   Identifier = "MAS-MHD-Density-bastille-day-2000",
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 1/695700000,
   Parent = sunTransforms.SunIAU.Identifier,
   Transform = {
     Scale = {
@@ -28,7 +32,7 @@ local densityVolume = {
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
     StepSize = 0.004,
-    Opacity = 0.3,
+    Brightness = 0.3,
     TransferFunction = asset.localResource("transferfunctions/mas-mhd-r-squared-old.txt"),
     SourceDirectory = densityDirectory,
     GridType = "Spherical",

@@ -56,7 +56,7 @@ namespace documentation { struct Documentation; }
 class RenderableBillboardsCloud : public Renderable {
 public:
     explicit RenderableBillboardsCloud(const ghoul::Dictionary& dictionary);
-    ~RenderableBillboardsCloud() = default;
+    ~RenderableBillboardsCloud() override = default;
 
     void initialize() override;
     void initializeGL() override;
@@ -98,6 +98,7 @@ private:
     GLuint _pTexture = 0;
 
     properties::FloatProperty _scaleFactor;
+    properties::BoolProperty _useColorMap;
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
     properties::Vec3Property _textColor;
@@ -128,7 +129,8 @@ private:
         cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
         minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
-        screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
+        screenSize, spriteTexture, hasColormap, useColormap, enabledRectSizeControl,
+        hasDvarScaling
     ) _uniformCache;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;

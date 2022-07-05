@@ -217,7 +217,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
 
     _shader->activate();
-    _shader->setUniform("opacity", _opacity);
+    _shader->setUniform("opacity", opacity());
 
     _shader->setUniform("mirrorBackside", _mirrorBackside);
 
@@ -270,6 +270,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
+    glDisable(GL_CULL_FACE);
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);

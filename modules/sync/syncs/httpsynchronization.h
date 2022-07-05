@@ -67,7 +67,7 @@ public:
         std::vector<std::string> synchronizationRepositories);
 
     /// Destructor that will close the asynchronous file transfer, if it is still ongoing
-    virtual ~HttpSynchronization();
+    ~HttpSynchronization() override;
 
     /**
      * Returns the location to which files downloaded through this ResourceSynchronization
@@ -86,6 +86,8 @@ public:
 
     /// Cancels any ongoing synchronization of this ResourceSynchronization
     void cancel() override;
+
+    std::string generateUid() override;
 
     static documentation::Documentation Documentation();
 

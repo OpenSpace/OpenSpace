@@ -72,20 +72,20 @@ struct Shaders {
 
 struct VertexObjects {
     struct {
-        GLuint vao;
-        GLuint vbo;
+        GLuint vao = 0;
+        GLuint vbo = 0;
     } square;
 
     struct {
-        GLuint vao;
-        GLuint vbo;
-        GLuint ibo;
+        GLuint vao = 0;
+        GLuint vbo = 0;
+        GLuint ibo = 0;
 
         int nElements = 64;
     } sphere;
 
     struct {
-        GLuint vao;
+        GLuint vao = 0;
     } empty;
 };
 

@@ -50,7 +50,7 @@ class VolumeClipPlanes;
 class RenderableTimeVaryingVolume : public Renderable {
 public:
     RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableTimeVaryingVolume();
+    ~RenderableTimeVaryingVolume() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -82,7 +82,7 @@ private:
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
-    properties::FloatProperty _opacity;
+    properties::FloatProperty _brightness;
     properties::FloatProperty _rNormalization;
     properties::FloatProperty _rUpperBound;
     properties::FloatProperty _secondsBefore;

@@ -1,0 +1,19 @@
+local image = asset.syncedResource({
+  Name = "M51 Galaxy Image",
+  Type = "HttpSynchronization",
+  Identifier = "m51_image",
+  Version = 1
+})
+
+asset.export("image", image)
+
+asset.meta = {
+  Name = "M51 Galaxy",
+  Version = "1.0",
+  Description = "M51 Galaxy Image",
+  Author = [[
+    NASA, ESA, S. Beckwith (STScI), and The Hubble Heritage Team (STScI/AURA)
+  ]],
+  URL = "https://hubblesite.org/contents/media/images/2005/12/1677-Image.html",
+  License = "https://hubblesite.org/copyright"
+}

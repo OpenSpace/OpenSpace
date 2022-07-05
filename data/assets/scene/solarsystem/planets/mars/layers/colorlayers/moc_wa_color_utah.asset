@@ -1,7 +1,5 @@
 local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
-local fallbackLayer = asset.require("./fallbacks/mars_texture").layer
-
 local layer = {
   Identifier = "MOC_WA_Color_Utah",
   Name = "MOC WA Color [Utah]",
@@ -10,7 +8,6 @@ local layer = {
     Gamma = 1.6,
     Multiplier = 1.07
   }, 
-  Fallback = fallbackLayer,
   Description = [[This map is an AMNH version of the global mossaic produced by the
     Mars Global Surveyor Wide Angle Camera. This version has color added and the
     shadows subdued based on the MOLA DTM.  Data Reference:

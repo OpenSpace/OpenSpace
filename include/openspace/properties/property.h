@@ -62,13 +62,15 @@ class Property {
 public:
     /**
     * The visibility classes for Property%s. The classes are strictly ordered as
-    * All > Developer > User > Hidden
+    * Hidden > Developer > AdvancedUser > User > NoviceUser > Always
     */
     enum class Visibility {
-        Hidden = 3, ///< Never visible
-        Developer = 2, ///< Visible in Developer mode
-        User = 1, ///< Visible in User mode
-        All = 0,  ///< Visible for all types, no matter what
+        Hidden = 5, ///< Never visible
+        Developer = 4, ///< Visible in Developer mode
+        AdvancedUser = 3, ///< Visible in Advanced User mode
+        User = 2, ///< Visible in User mode
+        NoviceUser = 1, ///< Visible in Novice User mode
+        Always = 0,  ///< Visible for all types, no matter what
     };
 
     /**
@@ -99,7 +101,7 @@ public:
         /// The user facing description of this Property
         const char* description;
         /// Determines the visibility of this Property in the user interface
-        Visibility visibility = Visibility::All;
+        Visibility visibility = Visibility::Always;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
@@ -119,7 +121,7 @@ public:
      * necessary information for this Property. #PropertyInfo::identifier needs to be
      * unique for each PropertyOwner. The #PropertyInfo::guiName will be stored in the
      * metaData to be accessed by the GUI elements using the #PropertyInfo::guiName key.
-     * The default visibility settings is Visibility::All, whereas the default read-only
+     * The default visibility settings is Visibility::Always, whereas the default read-only
      * state is \c false.
      *
      * \param info The PropertyInfo structure that contains all the required static

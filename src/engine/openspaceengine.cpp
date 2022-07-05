@@ -29,6 +29,7 @@
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/logfactory.h>
@@ -50,6 +51,7 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/profile.h>
@@ -71,6 +73,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -101,7 +104,7 @@
 namespace {
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     constexpr const char* _loggerCat = "OpenSpaceEngine";
 
@@ -115,11 +118,24 @@ namespace {
         }
     }
 
-    openspace::properties::Property::PropertyInfo PrintEventsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PrintEventsInfo = {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
         "printed to the log."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
+        "PropertyVisibility",
+        "Property Visibility",
+        "Hides or displays different settings in the GUI depending on how advanced they "
+        "are."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
+        "ShowHiddenSceneGraphNodes",
+        "Show Hidden Scene Graph Nodes",
+        "If checked, hidden scene graph nodes are visible in the UI"
     };
 } // namespace
 
@@ -128,7 +144,10 @@ namespace openspace {
 class Scene;
 
 OpenSpaceEngine::OpenSpaceEngine()
-    : _printEvents(PrintEventsInfo, false)
+    : properties::PropertyOwner({ "OpenSpaceEngine" })
+    , _printEvents(PrintEventsInfo, false)
+    , _visibility(VisibilityInfo)
+    , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
 {
     FactoryManager::initialize();
     FactoryManager::ref().addFactory<Renderable>("Renderable");
@@ -143,6 +162,19 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     SpiceManager::initialize();
     TransformationManager::initialize();
+
+    addProperty(_printEvents);
+    addProperty(_visibility);
+    addProperty(_showHiddenSceneGraphNodes);
+
+    using Visibility = openspace::properties::Property::Visibility;
+    _visibility.addOptions({
+        { static_cast<int>(Visibility::NoviceUser), "Novice User" },
+        { static_cast<int>(Visibility::User), "User" },
+        { static_cast<int>(Visibility::AdvancedUser), "Advanced User" },
+        { static_cast<int>(Visibility::Developer), "Developer" },
+        { static_cast<int>(Visibility::Hidden), "Everything" },
+    });
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
@@ -167,7 +199,7 @@ void OpenSpaceEngine::registerPathTokens() {
         using Override = ghoul::filesystem::FileSystem::Override;
         FileSys.registerPathToken(
             std::move(fullKey),
-            std::move(path.second),
+            path.second,
             Override(overrideBase || overrideTemporary)
         );
     }
@@ -180,6 +212,10 @@ void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     global::initialize();
+    // Initialize the general capabilities component
+    SysCap.addComponent(
+        std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
+    );
 
     _printEvents = global::configuration->isPrintingEvents;
 
@@ -296,41 +332,50 @@ void OpenSpaceEngine::initialize() {
 
     // Process profile file (must be provided in configuration file)
     if (!global::configuration->profile.empty()) {
-        std::string inputProfilePath = absPath("${PROFILES}").string();
-        std::string outputScenePath = absPath("${TEMPORARY}").string();
-        std::string inputProfile = inputProfilePath + "/" + global::configuration->profile
-            + ".profile";
-        std::string inputUserProfile = absPath("${USER_PROFILES}").string() + "/" +
-            global::configuration->profile + ".profile";
+        std::filesystem::path profile;
+        if (!std::filesystem::is_regular_file(global::configuration->profile)) {
+            std::filesystem::path userCandidate = absPath(fmt::format(
+                "${{USER_PROFILES}}/{}.profile", global::configuration->profile
+            ));
+            std::filesystem::path profileCandidate = absPath(fmt::format(
+                "${{PROFILES}}/{}.profile", global::configuration->profile
+            ));
 
-        if (std::filesystem::is_regular_file(inputUserProfile)) {
-            inputProfile = inputUserProfile;
-        }
-
-        if (!std::filesystem::is_regular_file(inputProfile)) {
-            LERROR(fmt::format(
-                "Could not load profile '{}': File does not exist", inputProfile)
-            );
+            // Give the user profile priority if there are both
+            if (std::filesystem::is_regular_file(userCandidate)) {
+                profile = userCandidate;
+            }
+            else if (std::filesystem::is_regular_file(profileCandidate)) {
+                profile = profileCandidate;
+            }
+            else {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Could not load profile '{}': File does not exist",
+                    global::configuration->profile
+                ));
+            }
         }
         else {
-            // Load the profile
-            std::ifstream inFile;
-            try {
-                inFile.open(inputProfile, std::ifstream::in);
-            }
-            catch (const std::ifstream::failure& e) {
-                throw ghoul::RuntimeError(fmt::format(
-                    "Exception opening profile file for read: {} ({})",
-                    inputProfile, e.what())
-                );
-            }
-
-            std::string content(
-                (std::istreambuf_iterator<char>(inFile)),
-                std::istreambuf_iterator<char>()
-            );
-            *global::profile = Profile(content);
+            profile = global::configuration->profile;
         }
+
+        // Load the profile
+        std::ifstream inFile;
+        try {
+            inFile.open(profile, std::ifstream::in);
+        }
+        catch (const std::ifstream::failure& e) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Exception opening profile file for read: {} ({})",
+                profile, e.what())
+            );
+        }
+
+        std::string content(
+            (std::istreambuf_iterator<char>(inFile)),
+            std::istreambuf_iterator<char>()
+        );
+        *global::profile = Profile(content);
     }
 
     // Set up asset loader
@@ -403,11 +448,8 @@ void OpenSpaceEngine::initializeGL() {
     glbinding::Binding::initialize(global::windowDelegate->openGLProcedureAddress);
     //glbinding::Binding::useCurrentContext();
 
-    LDEBUG("Adding system components");
+    LDEBUG("Adding OpenGL capabilities components");
     // Detect and log OpenCL and OpenGL versions and available devices
-    SysCap.addComponent(
-        std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
-    );
     SysCap.addComponent(
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
@@ -1179,7 +1221,20 @@ void OpenSpaceEngine::preSynchronization() {
     if (_isRenderingFirstFrame) {
         setCameraFromProfile(*global::profile);
         setAdditionalScriptsFromProfile(*global::profile);
+
+        global::scriptEngine->runScriptFile(absPath("${SCRIPTS}/developer_settings.lua"));
     }
+
+    // Handle callback(s) for change in engine mode
+    if (_modeLastFrame != _currentMode) {
+        using K = CallbackHandle;
+        using V = ModeChangeCallback;
+        for (const std::pair<K, V>& it : _modeChangeCallbacks) {
+            it.second();
+        }
+    }
+    _modeLastFrame = _currentMode;
+
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
@@ -1217,6 +1272,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     global::renderEngine->updateRenderer();
     global::renderEngine->updateScreenSpaceRenderables();
     global::renderEngine->updateShaderPrograms();
+    global::luaConsole->update();
 
     if (!master) {
         _scene->camera()->invalidateCache();
@@ -1256,15 +1312,6 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
     ZoneScoped
     TracyGpuZone("Render")
     LTRACE("OpenSpaceEngine::render(begin)");
-
-    const bool isGuiWindow =
-        global::windowDelegate->hasGuiWindow() ?
-        global::windowDelegate->isGuiWindow() :
-        true;
-
-    if (isGuiWindow) {
-        global::luaConsole->update();
-    }
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
@@ -1566,6 +1613,14 @@ void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     global::syncEngine->decodeSyncables(std::move(data));
 }
 
+properties::Property::Visibility openspace::OpenSpaceEngine::visibility() const {
+    return static_cast<properties::Property::Visibility>(_visibility.value());
+}
+
+bool openspace::OpenSpaceEngine::showHiddenSceneGraphNodes() const {
+    return _showHiddenSceneGraphNodes;
+}
+
 void OpenSpaceEngine::toggleShutdownMode() {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
@@ -1617,10 +1672,41 @@ void OpenSpaceEngine::resetMode() {
     LDEBUG(fmt::format("Reset engine mode to {}", stringify(_currentMode)));
 }
 
+OpenSpaceEngine::CallbackHandle OpenSpaceEngine::addModeChangeCallback(
+                                                                   ModeChangeCallback cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _modeChangeCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _modeChangeCallbacks.begin(),
+        _modeChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, ModeChangeCallback>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _modeChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _modeChangeCallbacks.erase(it);
+}
+
 void setCameraFromProfile(const Profile& p) {
     if (!p.camera.has_value()) {
-        throw ghoul::RuntimeError("No 'camera' entry exists in the startup profile");
+        // If the camera is not specified, we want to set it to a sensible default value
+        interaction::NavigationState nav;
+        nav.anchor = "Root";
+        nav.referenceFrame = "Root";
+        global::navigationHandler->setNavigationStateNextFrame(nav);
+        return;
     }
+
     std::visit(
         overloaded{
             [](const Profile::CameraNavState& navStateProfile) {
@@ -1629,8 +1715,11 @@ void setCameraFromProfile(const Profile& p) {
                 if (navStateProfile.aim.has_value()) {
                     nav.aim = navStateProfile.aim.value();
                 }
-                if (nav.referenceFrame.empty()) {
-                    nav.referenceFrame = "Root";
+                if (navStateProfile.referenceFrame.empty()) {
+                    nav.referenceFrame = nav.anchor;
+                }
+                else {
+                    nav.referenceFrame = navStateProfile.referenceFrame;
                 }
                 nav.position = navStateProfile.position;
                 if (navStateProfile.up.has_value()) {
@@ -1761,61 +1850,15 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     return {
         "",
         {
-            {
-                "toggleShutdown",
-                &luascriptfunctions::toggleShutdown,
-                "",
-                "Toggles the shutdown mode that will close the application after the "
-                "count down timer is reached"
-            },
-            {
-                "writeDocumentation",
-                &luascriptfunctions::writeDocumentation,
-                "",
-                "Writes out documentation files"
-            },
-            {
-                "downloadFile",
-                &luascriptfunctions::downloadFile,
-                "",
-                "Downloads a file from Lua scope"
-            },
-            {
-                "setScreenshotFolder",
-                &luascriptfunctions::setScreenshotFolder,
-                "string",
-                "Sets the folder used for storing screenshots or session recording frames"
-            },
-            {
-                "addTag",
-                &luascriptfunctions::addTag,
-                "string, string",
-                "Adds a tag (second argument) to a scene graph node (first argument)"
-            },
-            {
-                "removeTag",
-                &luascriptfunctions::removeTag,
-                "string, string",
-                "Removes a tag (second argument) from a scene graph node (first argument)"
-            },
-            {
-                "createSingleColorImage",
-                &luascriptfunctions::createSingleColorImage,
-                "string, vec3",
-                "Creates a 1 pixel image with a certain color in the cache folder and "
-                "returns the path to the file. If a cached file with the given name "
-                "already exists, the path to that file is returned. The first argument "
-                "is the name of the file, without extension. The second is the RGB "
-                "color, given as {r, g, b} with values between 0 and 1."
-            },
-            {
-                "isMaster",
-                &luascriptfunctions::isMaster,
-                "",
-                "Returns whether the current OpenSpace instance is the master node of a "
-                "cluster configuration. If this instance is not part of a cluster, this "
-                "function also returns 'true'."
-            }
+            codegen::lua::ToggleShutdown,
+            codegen::lua::WriteDocumentation,
+            codegen::lua::SetScreenshotFolder,
+            codegen::lua::AddTag,
+            codegen::lua::RemoveTag,
+            codegen::lua::DownloadFile,
+            codegen::lua::CreateSingleColorImage,
+            codegen::lua::IsMaster,
+            codegen::lua::Version
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")

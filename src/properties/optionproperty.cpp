@@ -72,6 +72,8 @@ void OptionProperty::addOption(int value, std::string desc) {
         }
     }
     _options.push_back(std::move(option));
+    // Set default value to option added first
+    NumericalProperty::setValue(_options[0].value);
 }
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {

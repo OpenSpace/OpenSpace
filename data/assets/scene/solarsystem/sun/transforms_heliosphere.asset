@@ -28,11 +28,11 @@ local HEEQ180ReferenceFrame = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HEEQ180ReferenceFrame)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HEEQ180ReferenceFrame)
 end)
-  
+
 asset.export(HEEQ180ReferenceFrame)
 
 

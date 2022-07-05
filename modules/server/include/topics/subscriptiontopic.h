@@ -34,7 +34,7 @@ namespace openspace {
 class SubscriptionTopic : public Topic {
 public:
     SubscriptionTopic() = default;
-    ~SubscriptionTopic();
+    ~SubscriptionTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

@@ -64,7 +64,7 @@ private:
         ghoul::opengl::Texture::FilterMode::LinearMipMap;
     ghoul::opengl::Texture::WrappingMode _wrappingMode =
         ghoul::opengl::Texture::WrappingMode::Repeat;
-    
+
     bool _shouldWatchFile = true;
     bool _shouldPurgeFromRAM = true;
 

@@ -47,7 +47,7 @@ namespace scripting { struct LuaLibrary; }
 class ParallelPeer : public properties::PropertyOwner {
 public:
     ParallelPeer();
-    ~ParallelPeer();
+    ~ParallelPeer() override;
 
     void connect();
     void setPort(std::string port);
@@ -125,7 +125,7 @@ private:
     std::atomic<bool> _timeTimelineChanged;
     std::mutex _latencyMutex;
     std::deque<double> _latencyDiffs;
-    double _initialTimeDiff;
+    double _initialTimeDiff = 0.0;
 
     std::unique_ptr<std::thread> _receiveThread = nullptr;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;

@@ -44,11 +44,11 @@ namespace {
 
     #ifdef _MSC_VER
         constexpr const char* SubprocessPath = "OpenSpace Helper.exe";
-    #elif __APPLE__
+    #elif defined(__APPLE__)
         constexpr const char* SubprocessPath =
             "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
     #else
-        constexpr const char* SubprocessPath = "";
+        constexpr const char* SubprocessPath = "OpenSpace Helper";
     #endif
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -138,11 +138,6 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     if (dictionary.hasValue<bool>("Enabled")) {
         _enabled = dictionary.value<bool>("Enabled");
-    }
-
-    const bool isMaster = global::windowDelegate->isMaster();
-    if (!_enabled || (!isMaster)) {
-        return;
     }
 
     LDEBUG(fmt::format("CEF using web helper executable: {}", _webHelperLocation));

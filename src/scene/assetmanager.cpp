@@ -25,10 +25,13 @@
 #include <openspace/scene/assetmanager.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 
 #include "assetmanager_lua.inl"
 
@@ -99,6 +102,7 @@ namespace {
         // to populate the descriptions in the main user interface
         std::optional<std::vector<std::string>> identifiers;
     };
+
 #include "assetmanager_codegen.cpp"
 } // namespace
 
@@ -182,8 +186,13 @@ void AssetManager::update() {
             continue;
         }
 
-        _rootAssets.push_back(a);
         a->load(nullptr);
+        if (a->isFailed()) {
+            // The loading might fail because of any number of reasons, most likely of
+            // them some Lua syntax error
+            continue;
+        }
+        _rootAssets.push_back(a);
         a->startSynchronizations();
 
         _toBeInitialized.push_back(a);
@@ -199,7 +208,7 @@ void AssetManager::update() {
         const auto it = std::find_if(
             _assets.cbegin(),
             _assets.cend(),
-            [&path](const std::unique_ptr<Asset>& asset) { return asset->path() == path; }
+            [&path](const std::unique_ptr<Asset>& a) { return a->path() == path; }
         );
         if (it == _assets.cend()) {
             LWARNING(fmt::format("Tried to remove unknown asset {}. Skipping", asset));
@@ -334,6 +343,10 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
         LERROR(fmt::format("Could not load asset {}: {}", asset->path(), e.message));
         return false;
     }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+        return false;
+    }
 
     // Extract meta information from the asset file if it was provided
     lua_getglobal(*_luaState, AssetGlobalVariableName);
@@ -458,11 +471,11 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         [](lua_State* L) {
             ZoneScoped
 
-            Asset* asset = ghoul::lua::userData<Asset>(L, 1);
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 1);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::localResourceLua");
 
             std::string name = ghoul::lua::value<std::string>(L);
-            std::filesystem::path path = asset->path().parent_path() / name;
+            std::filesystem::path path = thisAsset->path().parent_path() / name;
             ghoul::lua::push(L, path);
             return 1;
         },
@@ -479,33 +492,32 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
-            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::syncedResourceLua");
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            std::string uid = ResourceSynchronization::generateUid(d);
+            std::unique_ptr<ResourceSynchronization> s =
+                ResourceSynchronization::createFromDictionary(d);
+            
+            std::string uid = d.value<std::string>("Type") + "/" + s->generateUid();
             SyncItem* syncItem = nullptr;
             auto it = manager->_synchronizations.find(uid);
             if (it == manager->_synchronizations.end()) {
-                std::unique_ptr<ResourceSynchronization> s =
-                    ResourceSynchronization::createFromDictionary(d);
-
                 auto si = std::make_unique<SyncItem>();
                 si->synchronization = std::move(s);
-                si->assets.push_back(asset);
+                si->assets.push_back(thisAsset);
                 syncItem = si.get();
                 manager->_synchronizations[uid] = std::move(si);
             }
             else {
                 syncItem = it->second.get();
-                syncItem->assets.push_back(asset);
+                syncItem->assets.push_back(thisAsset);
             }
 
             if (!syncItem->synchronization->isResolved()) {
                 manager->_unfinishedSynchronizations.push_back(syncItem);
             }
 
-            asset->addSynchronization(syncItem->synchronization.get());
+            thisAsset->addSynchronization(syncItem->synchronization.get());
             std::filesystem::path path = syncItem->synchronization->directory();
             path += std::filesystem::path::preferred_separator;
             ghoul::lua::push(L, path);
@@ -581,12 +593,12 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
-            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::exists");
             const std::string name = ghoul::lua::value<std::string>(L);
 
             std::filesystem::path path = manager->generateAssetPath(
-                asset->path().parent_path(),
+                thisAsset->path().parent_path(),
                 name
             );
 
@@ -607,7 +619,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
-            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
             int n = ghoul::lua::checkArgumentsAndThrow(L, { 1 , 2 }, "lua::exportAsset");
             std::string exportName;
             std::string identifier;
@@ -659,7 +671,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
 
             lua_rawgeti(L, LUA_REGISTRYINDEX, manager->_assetsTableRef);
-            std::string path = asset->path().string();
+            std::string path = thisAsset->path().string();
             lua_getfield(L, -1, path.c_str());
             lua_getfield(L, -1, ExportsTableName);
             const int exportsTableIndex = lua_gettop(L);
@@ -670,7 +682,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
             // Register registerIdentifierWithMeta function to add meta at runtime
             if (!identifier.empty()) {
-                asset->addIdentifier(identifier);
+                thisAsset->addIdentifier(identifier);
             }
 
             lua_settop(L, 0);
@@ -689,11 +701,11 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
-            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onInitialize");
 
             const int referenceIndex = luaL_ref(L, LUA_REGISTRYINDEX);
-            manager->_onInitializeFunctionRefs[asset].push_back(referenceIndex);
+            manager->_onInitializeFunctionRefs[thisAsset].push_back(referenceIndex);
 
             lua_settop(L, 0);
             return 0;
@@ -711,11 +723,11 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
-            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
+            Asset* thisAsset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onDeinitialize");
 
             const int referenceIndex = luaL_ref(L, LUA_REGISTRYINDEX);
-            manager->_onDeinitializeFunctionRefs[asset].push_back(referenceIndex);
+            manager->_onDeinitializeFunctionRefs[thisAsset].push_back(referenceIndex);
 
             lua_settop(L, 0);
             return 0;
@@ -865,22 +877,10 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
     return {
         "asset",
         {
-            // Functions for adding/removing assets
-            {
-                "add",
-                &luascriptfunctions::asset::add,
-                "string",
-                "Adds an asset to the current scene. The parameter passed into this "
-                "function is the path to the file that should be loaded"
-            },
-            {
-                "remove",
-                &luascriptfunctions::asset::remove,
-                "string",
-                "Removes the asset with the specfied name from the scene. The parameter "
-                "to this function is the same that was originally used to load this "
-                "asset, i.e. the path to the asset file"
-            }
+            codegen::lua::Add,
+            codegen::lua::Remove,
+            codegen::lua::IsLoaded,
+            codegen::lua::AllAssets
         }
     };
 }

@@ -98,6 +98,7 @@ namespace {
         sizeof(interaction::SessionRecording) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
+        sizeof(properties::PropertyOwner) +
         sizeof(scripting::ScriptEngine) +
         sizeof(scripting::ScriptScheduler) +
         sizeof(Profile);
@@ -346,6 +347,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    userPropertyOwner = new (currentPos) properties::PropertyOwner({ "UserProperties" });
+    ghoul_assert(userPropertyOwner, "No userPropertyOwner");
+    currentPos += sizeof(properties::PropertyOwner);
+#else // ^^^ WIN32 / !WIN32 vvv
+    userPropertyOwner = new properties::PropertyOwner({ "UserProperties" });
+#endif // WIN32
+
+#ifdef WIN32
     scriptEngine = new (currentPos) scripting::ScriptEngine;
     ghoul_assert(scriptEngine, "No scriptEngine");
     currentPos += sizeof(scripting::ScriptEngine);
@@ -375,7 +384,6 @@ void initialize() {
 
     rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
-    navigationHandler->setPropertyOwner(global::rootPropertyOwner);
     // New property subowners also have to be added to the ImGuiModule callback!
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
@@ -389,6 +397,9 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
     rootPropertyOwner->addPropertySubOwner(global::luaConsole);
     rootPropertyOwner->addPropertySubOwner(global::dashboard);
+
+    rootPropertyOwner->addPropertySubOwner(global::userPropertyOwner);
+    rootPropertyOwner->addPropertySubOwner(global::openSpaceEngine);
 
     syncEngine->addSyncable(global::scriptEngine);
 }

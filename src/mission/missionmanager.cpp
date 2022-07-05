@@ -24,6 +24,7 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -108,30 +109,10 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
     return {
         "",
         {
-            {
-                "loadMission",
-                &luascriptfunctions::loadMission,
-                "string",
-                "Load mission phases from file"
-            },
-            {
-                "unloadMission",
-                &luascriptfunctions::unloadMission,
-                "string",
-                "Unloads a previously loaded mission"
-            },
-            {
-                "hasMission",
-                &luascriptfunctions::hasMission,
-                "string",
-                "Returns whether a mission with the provided name has been loaded"
-            },
-            {
-                "setCurrentMission",
-                &luascriptfunctions::setCurrentMission,
-                "string",
-                "Set the currnet mission"
-            },
+            codegen::lua::LoadMission,
+            codegen::lua::UnloadMission,
+            codegen::lua::HasMission,
+            codegen::lua::SetCurrentMission
         }
     };
 }

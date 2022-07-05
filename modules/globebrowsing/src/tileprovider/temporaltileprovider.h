@@ -51,6 +51,7 @@ public:
     TileDepthTransform depthTransform() override final;
     void update() override final;
     void reset() override final;
+    int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
@@ -64,13 +65,14 @@ private:
 
     struct InterpolateTileProvider : public TileProvider {
         InterpolateTileProvider(const ghoul::Dictionary&);
-        virtual ~InterpolateTileProvider();
+        ~InterpolateTileProvider() override;
 
         Tile tile(const TileIndex& tileIndex) override final;
         Tile::Status tileStatus(const TileIndex& index) override final;
         TileDepthTransform depthTransform() override final;
         void update() override final;
         void reset() override final;
+        int minLevel() override final;
         int maxLevel() override final;
         float noDataValueAsFloat() override final;
 

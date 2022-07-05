@@ -15,6 +15,9 @@ local sunRadius = 6.957E8
 local fieldlines = {
   Identifier = "MAS-MHD-Fieldlines-bastille-day-2000",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 1/695700000,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -31,14 +34,11 @@ local fieldlines = {
       asset.localResource("transferfunctions/density-fieldlines.txt"),
       asset.localResource("transferfunctions/velocity-fieldlines.txt")
     },
-    ColorTableMinMax = {
+    ColorTableRanges = {
       { 0, 1000000 },
       { 100, 2000 }
     },
     SimulationModel = "mas",
-    Color = {
-      Uniform = { 0.0, 0.725, 0.75, 1.0 }
-    }
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
@@ -67,7 +67,6 @@ asset.onDeinitialize(function ()
 end)
 
 asset.export(fieldlines)
-
 
 asset.meta = {
   Name = "Predictive Science Inc. Fieldlines Bastille Day",

@@ -1,4 +1,4 @@
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local models = asset.syncedResource({
@@ -7,20 +7,6 @@ local models = asset.syncedResource({
   Identifier = "apollo_boulders",
   Version = 2
 })
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sun_transforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
-}
 
 
 local Station6Frag1Holder = {
@@ -65,7 +51,14 @@ local Station6Frag1Model = {
     Type = "RenderableModel",
     GeometryFile = models .. "A17-S6-frag1.obj",
     RotationVector = { 235.909088,165.000000,286.299194 },
-    LightSources = LightSources,
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
     PerformShading = false,
     DisableFaceCulling = true
   },
@@ -108,7 +101,14 @@ local Station6Frag2Model = {
     Type = "RenderableModel",
     GeometryFile = models .. "station6_boulder_frag2.obj",
     RotationVector = { 336.959991,210.239990,325.984253 },
-    LightSources = LightSources,
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
     PerformShading = false,
     DisableFaceCulling = true,
   },
@@ -139,7 +139,14 @@ local Station6Frag3Model = {
     Type = "RenderableModel",
     GeometryFile = models .. "station6_boulder_frag3.obj",
     RotationVector = { 293.181824,255.000000,4.090910 },
-    LightSources = LightSources,
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
     PerformShading = false,
     DisableFaceCulling = true
   },
