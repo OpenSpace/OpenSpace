@@ -23,7 +23,7 @@ local moleculeFiles = asset.syncedResource({
 --   -- Parent = sunTransforms.SunCenter.Identifier,
 --   Renderable = {
 --     Type = "RenderableMolecule",
---     MoleculeFile = moleculeFiles .. "1mh1.pdb",
+--     MoleculeFile = moleculeFiles .. "centered.gro",
 --     -- TrajectoryFile = moleculeFiles .. "centered.xtc",
 --   },
 --   GUI = {

@@ -15,10 +15,12 @@ cmake-build-*
 cmake_install.cmake
 install_manifest.txt
 Makefile
+compile_commands.json
 
 # OS specific things
 .DS_Store
 Thumbs.db
+GPUCache/
 
 # OpenSpace-generated folders and files
 /bin/
