@@ -137,6 +137,15 @@ namespace {
         "Show Hidden Scene Graph Nodes",
         "If checked, hidden scene graph nodes are visible in the UI"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
+        "FadeDuration",
+        "Fade Duration (seconds)",
+        "Controls how long time the fading in/out takes when enabling/disabling an "
+        "object through a checkbox in the UI. Holding SHIFT while clicking the "
+        "checkbox will enable/disable the renderable without fading, aswill setting "
+        "this value to zero."
+    };
 } // namespace
 
 namespace openspace {
@@ -148,6 +157,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
     , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
+    , _fadeOnEnableDuration(FadeDurationInfo, 1.0, 0.0, 10.0)
 {
     FactoryManager::initialize();
     FactoryManager::ref().addFactory<Renderable>("Renderable");
@@ -165,7 +175,6 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     addProperty(_printEvents);
     addProperty(_visibility);
-    addProperty(_showHiddenSceneGraphNodes);
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
@@ -175,6 +184,9 @@ OpenSpaceEngine::OpenSpaceEngine()
         { static_cast<int>(Visibility::Developer), "Developer" },
         { static_cast<int>(Visibility::Hidden), "Everything" },
     });
+
+    addProperty(_showHiddenSceneGraphNodes);
+    addProperty(_fadeOnEnableDuration);
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
