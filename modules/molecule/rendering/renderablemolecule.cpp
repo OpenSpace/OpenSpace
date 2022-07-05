@@ -260,8 +260,10 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
 }
 
 RenderableMolecule::~RenderableMolecule() {
-    freeMolecule();
-    freeTrajectory();
+    if (_moleculeApi)
+        freeMolecule();
+    if (_trajectoryApi)
+        freeTrajectory();
 }
 
 void RenderableMolecule::initialize() {
@@ -310,19 +312,19 @@ void RenderableMolecule::update(const UpdateData& data) {
             if ((int64_t(time) / nFrames) % 2 == 0) { // animation forward
                 int64_t frame = int64_t(time) % nFrames;
                 if (frame < 0) frame += nFrames;
-                frames[0] = std::max(0l, frame - 1);
+                frames[0] = std::max<int64_t>(0, frame - 1);
                 frames[1] = frame;
-                frames[2] = std::min(nFrames - 1, frame + 1);
-                frames[3] = std::min(nFrames - 1, frame + 2);
+                frames[2] = std::min<int64_t>(nFrames - 1, frame + 1);
+                frames[3] = std::min<int64_t>(nFrames - 1, frame + 2);
             }
             else { // animation backward
                 t = 1.0 - t;
                 int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
                 if (frame < 0) frame += nFrames;
-                frames[0] = std::max(0l, frame - 2);
-                frames[1] = std::max(0l, frame - 1);
+                frames[0] = std::max<int64_t>(0, frame - 2);
+                frames[1] = std::max<int64_t>(0, frame - 1);
                 frames[2] = frame;
-                frames[3] = std::min(nFrames - 1, frame + 1);
+                frames[3] = std::min<int64_t>(nFrames - 1, frame + 1);
             }
 
             // nearest
