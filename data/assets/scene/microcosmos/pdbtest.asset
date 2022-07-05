@@ -3,18 +3,30 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local moleculeDb = "https://home.thissma.fr/moldata/"
 
 local moleculeFiles = asset.syncedResource({
-  Name = "Molecule File",
+  Name = "Molecule Files",
   Type = "UrlSynchronization",
-  Identifier = "molecule_file",
+  Identifier = "molecule_files",
   Url = {
-    moleculeDb .. "full.xyz",
-    moleculeDb .. "full.arc",
-    moleculeDb .. "1mh1.pdb",
-    moleculeDb .. "inside-md-npt.gro",
-    moleculeDb .. "inside-md-pullout.xtc",
-    moleculeDb .. "centered.gro",
-    moleculeDb .. "centered.xtc",
-    moleculeDb .. "o2.arc",
+    moleculeDb .. "67P-molecules/acetaldehyde.arc",
+    moleculeDb .. "67P-molecules/acetic-acid.arc",
+    moleculeDb .. "67P-molecules/butanal.arc",
+    moleculeDb .. "67P-molecules/co2.arc",
+    moleculeDb .. "67P-molecules/eg.arc",
+    moleculeDb .. "67P-molecules/ethanol.arc",
+    moleculeDb .. "67P-molecules/formaldehyde.arc",
+    moleculeDb .. "67P-molecules/formic.arc",
+    moleculeDb .. "67P-molecules/h2o.arc",
+    moleculeDb .. "67P-molecules/methanol.arc",
+    moleculeDb .. "67P-molecules/methyl-acetate.arc",
+    moleculeDb .. "67P-molecules/n2.arc",
+    moleculeDb .. "67P-molecules/o2.arc",
+    moleculeDb .. "67P-molecules/propanal.arc",
+
+    moleculeDb .. "aspirin/aspirin.gro",
+    moleculeDb .. "aspirin/aspirin.xtc",
+    moleculeDb .. "ice-melting/ice.gro",
+    moleculeDb .. "ice-melting/ice.xtc",
+    moleculeDb .. "c60.arc",
   }
 })
 
@@ -23,8 +35,8 @@ local moleculeFiles = asset.syncedResource({
 --   -- Parent = sunTransforms.SunCenter.Identifier,
 --   Renderable = {
 --     Type = "RenderableMolecule",
---     MoleculeFile = moleculeFiles .. "centered.gro",
---     -- TrajectoryFile = moleculeFiles .. "centered.xtc",
+--     MoleculeFile = moleculeFiles .. "ice.gro",
+--     -- TrajectoryFile = moleculeFiles .. "ice.xtc",
 --   },
 --   GUI = {
 --     Path = "/Microcosmos/Molecules/Simulation"
@@ -37,7 +49,7 @@ local PdbTest = {
   Renderable = {
     Type = "RenderableSimulationBox",
     MoleculeFile = moleculeFiles .. "o2.arc",
-    -- TrajectoryFile = moleculeFiles .. "o2.arc",
+    TrajectoryFile = moleculeFiles .. "o2.arc",
     MoleculeCount = 1000,
     LinearVelocity = 10.0,
     AngularVelocity = 60.0 / 360.0 * 3.14,
