@@ -1026,13 +1026,11 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     constexpr unsigned int MaxObj = 1024;
     constexpr unsigned int WinSiz = 16384;
 
-#if defined __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
-#elif defined __GNUC__
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
 
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
@@ -1045,11 +1043,8 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
         const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
 
-#if defined __clang__
 #pragma clang diagnostic pop
-#elif defined __GNUC__
 #pragma GCC diagnostic pop
-#endif
 
         scard_c(0, &cover);
         ckcov_c(path.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
@@ -1085,13 +1080,11 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     constexpr unsigned int MaxObj = 1024;
     constexpr unsigned int WinSiz = 16384;
 
-#if defined __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
-#elif defined __GNUC__
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
 
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
@@ -1104,11 +1097,8 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
         const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
 
-#if defined __clang__
 #pragma clang diagnostic pop
-#elif defined __GNUC__
 #pragma GCC diagnostic pop
-#endif
 
         scard_c(0, &cover);
         spkcov_c(path.c_str(), obj, &cover);

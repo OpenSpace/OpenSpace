@@ -30,17 +30,13 @@
 #pragma warning (disable : 4706) // assignment within conditional expression
 #endif // WIN32
 
-#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif // __GNUC__
 
 #include <json/json.hpp>
 
-#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
-#endif // __GNUC__
 
 #ifdef WIN32
 #pragma warning (pop)
