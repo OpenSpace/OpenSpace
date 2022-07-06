@@ -467,7 +467,14 @@ void RenderableMolecule::initMolecule() {
         return;
     }
 
-    _moleculeApi->init_from_file(&_molecule, molFileStr, default_allocator);
+    bool init = _moleculeApi->init_from_file(&_molecule, molFileStr, default_allocator);
+    
+    
+    if (!init) {
+        LERROR("failed to initialize molecule: malformed file");
+        _moleculeApi = nullptr;
+        return;
+    }
 
     float radius = computeRadius();
     // setBoundingSphere(radius * 1.0E10); // OpenSpace in in meters, Mold is in Ångströms
@@ -498,6 +505,7 @@ void RenderableMolecule::initTrajectory() {
 
     if (!_trajectory) {
         LERROR("failed to initialize trajectory: failed to load file");
+        _trajectoryApi = nullptr;
         return;
     }
 }
