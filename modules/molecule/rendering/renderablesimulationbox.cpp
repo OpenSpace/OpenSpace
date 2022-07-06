@@ -184,25 +184,14 @@ void RenderableSimulationBox::update(const UpdateData& data) {
   double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
   dt *= _animationSpeed;
 
-  // TODO: just doing some shit here, I need to implement proper brownian later
-  // std::vector<dvec3> samples(1000);
-  
   // update positions / rotations
   for (auto& molecule: _molecules) {
-    // for (auto& sample : samples) {
-    //   sample = ballRand(_linearVelocity.value());
-    // }
-
-    // molecule.direction = std::reduce(samples.begin(), samples.end(), -molecule.direction, [&](dvec3 a, dvec3 b) {
-    //   auto d1 = dot(a, molecule.direction);
-    //   auto d2 = dot(a, molecule.direction);
-    //   return d1 > d2 ? a : b;
-    // });
-
     molecule.position += molecule.direction * dt;
     molecule.position = mod(molecule.position, _simulationBox.value());
     molecule.angle += length(molecule.rotation) * dt;
   }
+  
+  double collRadiusSquared = _collisionRadius * _collisionRadius;
 
   // compute collisions
   for (auto it1 = _molecules.begin(); it1 != _molecules.end(); ++it1) {
@@ -211,10 +200,11 @@ void RenderableSimulationBox::update(const UpdateData& data) {
       molecule_t& m1 = *it1;
       molecule_t& m2 = *it2;
       
-      double dist = distance(m1.position, m2.position);
-      double intersection = 2.0 * _collisionRadius - dist;
+      double distSquared = dot(m1.position, m2.position);
 
-      if (dist && intersection > 0.0) { // collision detected
+      if (distSquared < collRadiusSquared) { // collision detected
+        double dist = sqrt(distSquared);
+        double intersection = 2.0 * _collisionRadius - dist;
         // swap the direction components normal to the collision plane from the 2
         // molecules. (simplistic elastic collision of 2 spheres with same mass)
         dvec3 dir = (m2.position - m1.position) / dist;
@@ -227,7 +217,6 @@ void RenderableSimulationBox::update(const UpdateData& data) {
         m1.position += -dir * intersection;
         m2.position += dir * intersection;
       }
-      
     }
   }
 
