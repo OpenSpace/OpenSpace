@@ -25,17 +25,22 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
 #define __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
 
 #include <modules/touch/ext/libTUIO11/TUIO/TuioListener.h>
 #include <modules/touch/ext/libTUIO11/TUIO/TuioClient.h>
 
-#pragma GCC diagnostic pop
+#ifdef __clang__
 #pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #include <openspace/util/touch.h>
 #include <ghoul/glm.h>
