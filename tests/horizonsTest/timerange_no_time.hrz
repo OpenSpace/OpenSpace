@@ -1,0 +1,135 @@
+*******************************************************************************
+ Revised: Apr 21, 2022             Gaia Observatory                     -139479
+                               http://sci.esa.int/gaia/
+
+ BACKGROUND:
+  Gaia is designed and operated by the European Space Agency. It launched
+  December 19, 2013 @ 09:12 UTC on a Soyuz launcher from Kourou, French Guiana.
+
+  On 2014-Jan-08, it arrived at its operational Lissajous orbit around the 
+  gravitationally stable Earth-Sun Lagrange-point L2, roughly 1.5 million km 
+  from Earth in the direction opposite the Sun.  The orbit is not shadowed by 
+  Earth eclipses. The orbit period is about 180 days; the size of the orbit 
+  is typically 340,000 x 90,000 km. 
+ 
+ MISSION:
+  Gaia's 5-year primary mission is to ... 
+
+    * Measure the positions of ~1 billion stars both in our Galaxy and other 
+       members of the Local Group, with an accuracy down to 24 uas 
+    * Perform spectral and photometric measurements of all objects 
+    * Derive space velocities of the Galaxy's constituent stars using the 
+       stellar distances and motions
+    * Create a three-dimensional structural map of the Galaxy
+
+  Additional expected results include extrasolar planet detection, brown dwarf 
+  detection, solar system asteroid discoveries, supernova early detection, and 
+  testing of Einstein's general relativity.
+ 
+ GAIA SPACECRAFT: 
+  Spacecraft dry mass total       1392 kg
+  Propellant                       237 kg
+  Total launch mass               2029 kg
+  Power: 12.8 m^2 solar array provides up to 1910 Watts
+
+ SCIENCE INSTRUMENTS:
+  Single integrated instrument that comprises three major functions: 
+  astrometry, photometry (320-1000 nm) and spectrometry (846-874 nm). 
+
+  The three functions use two common telescopes and a shared focal plane, 
+  with each function having a dedicated area on the large 0.5m x 1m CCD 
+  detector array.
+
+ SPACECRAFT TRAJECTORY (from ESA 2022-Apr-19, predicts thereafter)
+  Trajectory name                                    Start         Stop
+  --------------------------------------------    -----------   -----------
+  ORB1_20220419_000001                            2013-Dec-19   2026-Sep-14 
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / API_USER Mon May 23 05:28:00 2022 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: Gaia (spacecraft) (-139479)     {source: gaia_merged}
+Center body name: Earth-Moon Barycenter (3)       {source: gaia_merged}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2022-May-22 00:00:00.0000 TDB
+Stop  time      : A.D. 2022-May-23 00:00:00.0000 TDB
+Step-size       : 720 minutes
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : (undefined)                                                  
+Output units    : KM-S
+Output type     : GEOMETRIC cartesian states
+Output format   : 1 (position only)
+Reference frame : Ecliptic of J2000.0
+*******************************************************************************
+JDTDB
+   X     Y     Z
+*******************************************************************************
+$$SOE
+2459721.500000000 = A.D. 2022-May-22 00:00:00.0000 TDB 
+  -1.005869741260714E+06 -1.229636409807553E+06  5.553741267973231E+04
+2459722.000000000 = A.D. 2022-May-22 12:00:00.0000 TDB 
+  -9.976647219177654E+05 -1.235095646685846E+06  5.296169462755765E+04
+2459722.500000000 = A.D. 2022-May-23 00:00:00.0000 TDB 
+  -9.893621107980320E+05 -1.240524898186224E+06  5.037219698871591E+04
+$$EOE
+*******************************************************************************
+ 
+TIME
+
+  Barycentric Dynamical Time ("TDB" or T_eph) output was requested. This
+continuous relativistic coordinate time is equivalent to the relativistic
+proper time of a clock at rest in a reference frame comoving with the
+solar system barycenter but outside the system's gravity well. It is the
+independent variable in the solar system relativistic equations of motion.
+
+  TDB runs at a uniform rate of one SI second per second and is independent
+of irregularities in Earth's rotation.
+
+  Calendar dates prior to 1582-Oct-15 are in the Julian calendar system.
+Later calendar dates are in the Gregorian system.
+
+REFERENCE FRAME AND COORDINATES
+
+  Ecliptic at the standard reference epoch
+
+    Reference epoch: J2000.0
+    X-Y plane: adopted Earth orbital plane at the reference epoch
+               Note: IAU76 obliquity of 84381.448 arcseconds wrt ICRF X-Y plane
+    X-axis   : ICRF
+    Z-axis   : perpendicular to the X-Y plane in the directional (+ or -) sense
+               of Earth's north pole at the reference epoch.
+
+  Symbol meaning:
+
+    JDTDB    Julian Day Number, Barycentric Dynamical Time
+      X      X-component of position vector (km)
+      Y      Y-component of position vector (km)
+      Z      Z-component of position vector (km)
+
+ABERRATIONS AND CORRECTIONS
+
+ Geometric state vectors have NO corrections or aberrations applied.
+
+Computations by ...
+
+    Solar System Dynamics Group, Horizons On-Line Ephemeris System
+    4800 Oak Grove Drive, Jet Propulsion Laboratory
+    Pasadena, CA  91109   USA
+
+    General site: https://ssd.jpl.nasa.gov/
+    Mailing list: https://ssd.jpl.nasa.gov/email_list.html
+    System news : https://ssd.jpl.nasa.gov/horizons/news.html
+    User Guide  : https://ssd.jpl.nasa.gov/horizons/manual.html
+    Connect     : browser        https://ssd.jpl.nasa.gov/horizons/app.html#/x
+                  API            https://ssd-api.jpl.nasa.gov/doc/horizons.html
+                  command-line   telnet ssd.jpl.nasa.gov 6775
+                  e-mail/batch   https://ssd.jpl.nasa.gov/ftp/ssd/hrzn_batch.txt
+                  scripts        https://ssd.jpl.nasa.gov/ftp/ssd/SCRIPTS
+    Author      : Jon.D.Giorgini@jpl.nasa.gov
+*******************************************************************************
+

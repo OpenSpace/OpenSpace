@@ -87,6 +87,12 @@ namespace {
     using namespace openspace;
 
     SceneGraphNode* circle = global::renderEngine->scene()->sceneGraphNode(identifier);
+    if (!circle) {
+        throw ghoul::lua::LuaError(fmt::format(
+            "Could not find node to set as hover circle: '{}'", identifier
+        ));
+    }
+
     global::moduleEngine->module<SkyBrowserModule>()->setHoverCircle(circle);
 }
 
@@ -435,6 +441,7 @@ namespace {
         "Name = '" + nameBrowser + "',"
         "Url = '" + url + "',"
         "FaceCamera = false,"
+        "Gamma = 2.2,"
         "CartesianPosition = " + ghoul::to_string(positionBrowser) +
      "}";
 

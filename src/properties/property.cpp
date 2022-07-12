@@ -339,9 +339,11 @@ std::string Property::generateBaseJsonDescription() const {
 
 std::string Property::generateMetaDataJsonDescription() const {
     static const std::map<Visibility, std::string> VisibilityConverter = {
-        { Visibility::All, "All" },
-        { Visibility::Developer, "Developer" },
+        { Visibility::Always, "Always" },
+        { Visibility::NoviceUser, "NoviceUser" },
         { Visibility::User, "User" },
+        { Visibility::AdvancedUser, "AdvancedUser" },
+        { Visibility::Developer, "Developer" },
         { Visibility::Hidden, "Hidden" }
     };
     Visibility visibility = static_cast<Visibility>(

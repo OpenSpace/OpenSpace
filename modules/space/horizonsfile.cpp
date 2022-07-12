@@ -24,6 +24,7 @@
 
 #include <modules/space/horizonsfile.h>
 
+#include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -167,11 +168,53 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     return url;
 }
 
+json sendHorizonsRequest(const std::string& url, std::filesystem::path filePath) {
+    // Set up HTTP request and download result
+    std::unique_ptr<HttpFileDownload> download = std::make_unique<HttpFileDownload>(
+        url,
+        filePath,
+        HttpFileDownload::Overwrite::Yes
+    );
+
+    HttpFileDownload* dl = download.get();
+    dl->start();
+
+    bool failed = false;
+    dl->wait();
+    if (!dl->hasSucceeded()) {
+        LERROR(fmt::format("Error downloading horizons file with URL {}", dl->url()));
+        failed = true;
+    }
+
+    if (failed) {
+        dl->cancel();
+    }
+
+    return convertHorizonsDownloadToJson(filePath);
+}
+
+nlohmann::json convertHorizonsDownloadToJson(std::filesystem::path filePath) {
+    // Read the entire file into a string
+    constexpr size_t readSize = std::size_t(4096);
+    std::ifstream stream = std::ifstream(filePath);
+    stream.exceptions(std::ios_base::badbit);
+
+    std::string answer;
+    std::string buf = std::string(readSize, '\0');
+    while (stream.read(buf.data(), readSize)) {
+        answer.append(buf, 0, stream.gcount());
+    }
+    answer.append(buf, 0, stream.gcount());
+
+    // convert to a json object
+    return json::parse(answer);
+}
+
 HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
     // Signature, source and version
-    if (auto signature = answer.find("signature"); signature != answer.end()) {
+    if (auto signature = answer.find("signature");  signature != answer.end()) {
 
-        if (auto source = signature->find("source"); source != signature->end()) {
+        if (auto source = signature->find("source");  source != signature->end()) {
             if (*source != static_cast<std::string>(ApiSource)) {
                 LWARNING(fmt::format("Horizons answer from unkown source '{}'", *source));
             }
@@ -180,7 +223,7 @@ HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
             LWARNING("Could not find source information, source might not be acceptable");
         }
 
-        if (auto version = signature->find("version"); version != signature->end()) {
+        if (auto version = signature->find("version");  version != signature->end()) {
             if (*version != static_cast<std::string>(CurrentVersion)) {
                 LWARNING(fmt::format(
                     "Unknown Horizons version '{}' found. The currently supported "

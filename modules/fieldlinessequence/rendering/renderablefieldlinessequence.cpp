@@ -550,9 +550,6 @@ fls::Model stringToModel(std::string str) {
 
 bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM() {
     fls::Model model = stringToModel(_modelStr);
-    if (model == fls::Model::Invalid) {
-        return false;
-    }
     for (const std::string& filePath : _sourceFiles) {
         FieldlinesState newState;
         const bool loadedSuccessfully = newState.loadStateFromJson(
@@ -1079,6 +1076,12 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         if (!_hasBeenUpdated) {
             updateVertexPositionBuffer();
         }
+
+        if (_states[_activeStateIndex].nExtraQuantities() > 0) {
+            _shouldUpdateColorBuffer = true;
+            _shouldUpdateMaskingBuffer = true;
+        }
+
         _hasBeenUpdated = true;
     }
     else {

@@ -221,7 +221,7 @@ TEST_CASE("IntListProperty: Get Lua Value", "[intlistproperty]") {
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) ==
-        "{ [1] = 1.000000, [2] = 2.000000, [3] = 3.000000 }"
+        "{ [1] = 1, [2] = 2, [3] = 3 }"
     );
 }
 
@@ -324,14 +324,14 @@ TEST_CASE("DoubleListProperty: Invalid Set Lua Value - Not List", "[doublelistpr
 TEST_CASE("DoubleListProperty: Get Lua Value", "[doublelistproperty]") {
     openspace::properties::DoubleListProperty p({ "id", "gui", "desc" });
 
-    const std::vector<double> list{ 1.0, 2.0, 3.0 };
+    const std::vector<double> list{ 1.0, 2.1, 3.2 };
     p.setValue(list);
 
     ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     CHECK(ghoul::lua::luaValueToString(L, 1) ==
-        "{ [1] = 1.000000, [2] = 2.000000, [3] = 3.000000 }"
+        "{ [1] = 1, [2] = 2.1, [3] = 3.2 }"
     );
 }
 

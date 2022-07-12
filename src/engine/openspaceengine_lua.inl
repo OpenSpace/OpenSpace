@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/openspace.h>
+
 namespace {
 
 /**
@@ -170,8 +172,6 @@ namespace {
     }
 }
 
-namespace {
-
 /**
  * Returns whether the current OpenSpace instance is the master node of a cluster
  * configuration. If this instance is not part of a cluster, this function also returns
@@ -181,6 +181,30 @@ namespace {
     return openspace::global::windowDelegate->isMaster();
 }
 
-#include "openspaceengine_lua_codegen.cpp"
+/**
+ * This function returns information about the current OpenSpace version. The resulting
+ * table has the structure:
+ * Version = {
+ *   Major = <number>
+ *   Minor = <number>
+ *   Patch = <number>
+ * },
+ * Commit = <string>
+ * Branch = <string>
+ */
+[[codegen::luawrap]] ghoul::Dictionary version() {
+    ghoul::Dictionary res;
 
-} // namespace
+    ghoul::Dictionary version;
+    version.setValue("Major", openspace::OPENSPACE_VERSION_MAJOR);
+    version.setValue("Minor", openspace::OPENSPACE_VERSION_MINOR);
+    version.setValue("Patch", openspace::OPENSPACE_VERSION_PATCH);
+    res.setValue("Version", std::move(version));
+
+    res.setValue("Commit", std::string(openspace::OPENSPACE_GIT_COMMIT));
+    res.setValue("Branch", std::string(openspace::OPENSPACE_GIT_BRANCH));
+
+    return res;
+}
+
+#include "openspaceengine_lua_codegen.cpp"

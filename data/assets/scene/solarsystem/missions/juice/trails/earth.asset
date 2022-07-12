@@ -1,0 +1,49 @@
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local kernels = asset.require('../kernels')
+
+
+local JuiceTrailEarth = {
+  Identifier = "JuiceTrailEarth",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JUICE",
+      Observer = "EARTH BARYCENTER",
+      Kernels = kernels.Kernels
+    },
+    Color = { 0.30, 0.70, 0.20 },
+    StartTime = "2023 APR 05 12:00:00.000",
+    EndTime = "2033 JUN 04 02:51:00.546",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "Juice Trail (Earth)",
+    Path = "/Solar System/Missions/Juice",
+    Description = "Juice's trajectory relative to the Earth barycenter"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JuiceTrailEarth)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JuiceTrailEarth)
+end)
+
+asset.export(JuiceTrailEarth)
+
+
+asset.meta = {
+  Name = "Juice trajectory relative to the Earth barycenter",
+  Version = "1.0",
+  Description = [[
+    The trajectory of the Juice spacecraft relative to the Earth barycenter
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

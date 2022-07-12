@@ -124,9 +124,6 @@ private:
     UniformCache(tex, ortho) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
 
-    properties::Property::Visibility _currentVisibility =
-        properties::Property::Visibility::Developer;
-
     std::vector<ImGuiContext*> _contexts;
 
     std::vector<TouchInput> _validTouchStates;

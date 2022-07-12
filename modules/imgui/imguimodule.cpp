@@ -490,18 +490,6 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
        comp->setEnabled(enabled);
    }
 
-   // Render and Update property visibility
-   // Fragile! Keep this in sync with properties::Property::Visibility
-   using V = properties::Property::Visibility;
-   int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
-
-   // Array is sorted by importance
-   std::array<const char*, 4> items = { "User", "Developer", "Hidden", "All" };
-   ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
-
-   _currentVisibility = static_cast<V>(t);
-   _property.setVisibility(_currentVisibility);
-
 #ifdef SHOW_IMGUI_HELPERS
    ImGui::Checkbox("ImGUI Internals", &_showInternals);
    if (_showInternals) {
