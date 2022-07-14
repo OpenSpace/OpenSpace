@@ -875,14 +875,14 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
 bool SessionRecording::doesStartWithSubstring(const std::string& s,
                                               const std::string& matchSubstr)
 {
-    return (s.substr(0, matchSubstr.length()).compare(matchSubstr) == 0);
+    return s.substr(0, matchSubstr.length()) == matchSubstr;
 }
 
 void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script) {
-    Timestamps times
-        = generateCurrentTimestamp3(global::windowDelegate->applicationTime());
-    size_t indexIntoScriptKeyframesFromMainTimeline
-        = _keyframesSavePropertiesBaseline_scripts.size();
+    Timestamps times =
+        generateCurrentTimestamp3(global::windowDelegate->applicationTime());
+    size_t indexIntoScriptKeyframesFromMainTimeline =
+        _keyframesSavePropertiesBaseline_scripts.size();
     _keyframesSavePropertiesBaseline_scripts.push_back(std::move(script));
     addKeyframeToTimeline(
         _keyframesSavePropertiesBaseline_timeline,
@@ -2327,7 +2327,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         // correct version of the file to be converted, then call getLegacy() to recurse
         // to the next level down in the legacy subclasses until we get the right
         // version, then proceed with conversion from there.
-        if (fileVersion.compare(fileFormatVersion()) != 0) {
+        if (fileVersion != fileFormatVersion()) {
             //conversionInStream.seekg(conversionInStream.beg);
             newFilename = getLegacyConversionResult(filename, depth + 1);
             removeTrailingPathSlashes(newFilename);

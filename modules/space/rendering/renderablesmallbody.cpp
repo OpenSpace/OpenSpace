@@ -217,7 +217,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
             endElement = static_cast<unsigned int>(_numObjects - 1);
         }
 
-        if (line.compare(expectedHeaderLine) != 0) {
+        if (line != expectedHeaderLine) {
             LERROR(fmt::format(
                 "File {} does not have the appropriate JPL SBDB header at line 1",
                 filename
