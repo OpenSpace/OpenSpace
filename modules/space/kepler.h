@@ -22,33 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
+#ifndef __OPENSPACE_MODULE_SPACE___KEPLER___H__
+#define __OPENSPACE_MODULE_SPACE___KEPLER___H__
 
-#include <modules/space/rendering/renderableorbitalkepler.h>
-#include <openspace/rendering/renderable.h>
-
-#include <modules/base/rendering/renderabletrail.h>
-#include <modules/space/translation/keplertranslation.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/uintproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/opengl/programobject.h>
+#include <filesystem>
+#include <string>
+#include <vector>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct SatelliteKeplerParameters {
+    std::string name;
+    // International Designator (launch year + launch number of the year + piece of launch
+    std::string id;
 
-class RenderableSatellites : public RenderableOrbitalKepler {
-public:
-    RenderableSatellites(const ghoul::Dictionary& dictionary);
-    virtual void readDataFile(const std::string& filename) override;
-    static documentation::Documentation Documentation();
-    void initializeFileReading();
+    double inclination = 0.0;
+    double semiMajorAxis = 0.0;
+    double ascendingNode = 0.0;
+    double eccentricity = 0.0;
+    double argumentOfPeriapsis = 0.0;
+    double meanAnomaly = 0.0;
+    double meanMotion = 0.0;
+    double epoch = 0.0;
+    double period = 0.0;
 };
+
+double epochFromSubstring(const std::string& epochString);
+double epochFromYMDdSubstring(const std::string& epochString);
+
+/**
+ * Reads the satellite information from the provided \p file and returns them as
+ * individual values.
+ *
+ * \param file The file to the TLE file. This file must be a valid file
+ * \return Information about all of the contained satellite information in the \p file
+ *
+ * \pre \p file must be a file and must exist
+ * \throw ghoul::RuntimeError If the provided \p file is not a valid TLE file
+ */
+std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file);
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-
+#endif // __OPENSPACE_MODULE_SPACE___KEPLER___H__

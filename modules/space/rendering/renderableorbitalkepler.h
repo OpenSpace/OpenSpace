@@ -66,9 +66,6 @@ public:
 protected:
     static documentation::Documentation Documentation();
 
-    double calculateSemiMajorAxis(double meanMotion) const;
-    double epochFromSubstring(const std::string& epochString) const;
-    double epochFromYMDdSubstring(const std::string& epochString);
     void updateBuffers();
 
     std::function<void()> _reinitializeTrailBuffers;

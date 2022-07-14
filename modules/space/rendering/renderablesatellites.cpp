@@ -26,6 +26,7 @@
 
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/tletranslation.h>
+#include <modules/space/kepler.h>
 #include <modules/space/spacemodule.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -105,18 +106,8 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
     _data.clear();
     _segmentSize.clear();
 
-    std::ifstream file;
-    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    file.open(filename);
-
-    std::streamoff numberOfLines = std::count(
-        std::istreambuf_iterator<char>(file),
-        std::istreambuf_iterator<char>(),
-        '\n'
-    );
-    file.seekg(std::ios_base::beg); // reset iterator to beginning of file
-
-    _numObjects = numberOfLines / nLineEntriesPerSatellite;
+    std::vector<SatelliteKeplerParameters> parameters = readTleFile(filename);
+    _numObjects = parameters.size();
 
     if (!_isFileReadinitialized) {
         _isFileReadinitialized = true;
@@ -127,112 +118,35 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
     std::string name;
     long long endElement = _startRenderIdx + _sizeRender - 1;
     endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
-    //Burn lines if not starting at first element
-    for (unsigned int k = 0; k < _startRenderIdx; ++k) {
-        skipSingleEntryInFile(file);
+
+    if (_startRenderIdx < 0 || _startRenderIdx >= _numObjects) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Start index {} out of range [0, {}]", _startRenderIdx, _numObjects
+        ));
     }
-    for (std::streamoff i = _startRenderIdx; i <= endElement; i++) {
-        //Read title line
-        std::getline(file, name);
-        KeplerParameters keplerElements;
+    if (endElement < 0 || endElement >= _numObjects) {
+        throw ghoul::RuntimeError(fmt::format(
+            "End index {} out of range [0, {}]", endElement, _numObjects
+        ));
+    }
 
-        std::getline(file, line);
-        if (line[0] == '1') {
-            // First line
-            // Field Columns   Content
-            //     1   01-01   Line number
-            //     2   03-07   Satellite number
-            //     3   08-08   Classification (U = Unclassified)
-            //     4   10-11   International Designator (Last two digits of launch year)
-            //     5   12-14   International Designator (Launch number of the year)
-            //     6   15-17   International Designator(piece of the launch)    A
-            name += " " + line.substr(2, 15);
-            if (_startRenderIdx == i && _sizeRender == 1) {
-                LINFO(fmt::format(
-                    "Set render block to start at object  {}",
-                    name
-                ));
-            }
-            //     7   19-20   Epoch Year(last two digits of year)
-            //     8   21-32   Epoch(day of the year and fractional portion of the day)
-            //     9   34-43   First Time Derivative of the Mean Motion divided by two
-            //    10   45-52   Second Time Derivative of Mean Motion divided by six
-            //    11   54-61   BSTAR drag term(decimal point assumed)[10] - 11606 - 4
-            //    12   63-63   The "Ephemeris type"
-            //    13   65-68   Element set  number.Incremented when a new TLE is generated
-            //    14   69-69   Checksum (modulo 10)
-            keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
-        }
-        else {
-            throw ghoul::RuntimeError(fmt::format(
-                "File {} entry {} does not have '1' header", filename, i + 1
-            ));
-        }
+    for (size_t i = _startRenderIdx; i <= endElement; i++) {
+        SatelliteKeplerParameters param = parameters[i];
 
-        std::getline(file, line);
-        if (line[0] == '2') {
-            // Second line
-            // Field    Columns   Content
-            //     1      01-01   Line number
-            //     2      03-07   Satellite number
-            //     3      09-16   Inclination (degrees)
-            //     4      18-25   Right ascension of the ascending node (degrees)
-            //     5      27-33   Eccentricity (decimal point assumed)
-            //     6      35-42   Argument of perigee (degrees)
-            //     7      44-51   Mean Anomaly (degrees)
-            //     8      53-63   Mean Motion (revolutions per day)
-            //     9      64-68   Revolution number at epoch (revolutions)
-            //    10      69-69   Checksum (modulo 10)
+        KeplerParameters e;
+        e.inclination = param.inclination;
+        e.semiMajorAxis = param.semiMajorAxis;
+        e.ascendingNode = param.ascendingNode;
+        e.eccentricity = param.eccentricity;
+        e.argumentOfPeriapsis = param.argumentOfPeriapsis;
+        e.meanAnomaly = param.meanAnomaly;
+        e.meanMotion = param.meanMotion;
+        e.epoch = param.epoch;
+        e.period = param.period;
 
-            std::stringstream stream;
-            stream.exceptions(std::ios::failbit);
-
-            // Get inclination
-            stream.str(line.substr(8, 8));
-            stream >> keplerElements.inclination;
-            stream.clear();
-
-            // Get Right ascension of the ascending node
-            stream.str(line.substr(17, 8));
-            stream >> keplerElements.ascendingNode;
-            stream.clear();
-
-            // Get Eccentricity
-            stream.str("0." + line.substr(26, 7));
-            stream >> keplerElements.eccentricity;
-            stream.clear();
-
-            // Get argument of periapsis
-            stream.str(line.substr(34, 8));
-            stream >> keplerElements.argumentOfPeriapsis;
-            stream.clear();
-
-            // Get mean anomaly
-            stream.str(line.substr(43, 8));
-            stream >> keplerElements.meanAnomaly;
-            stream.clear();
-
-            // Get mean motion
-            stream.str(line.substr(52, 11));
-            stream >> keplerElements.meanMotion;
-        }
-        else {
-            throw ghoul::RuntimeError(fmt::format(
-                "File {} entry {} does not have '2' header", filename, i + 1
-            ));
-        }
-
-        // Calculate the semi major axis based on the mean motion using kepler's laws
-        keplerElements.semiMajorAxis = calculateSemiMajorAxis(keplerElements.meanMotion);
-
-        using namespace std::chrono;
-        double period = seconds(hours(24)).count() / keplerElements.meanMotion;
-        keplerElements.period = period;
-
-        _data.push_back(keplerElements);
+        _data.push_back(e);
         _segmentSize.push_back(_segmentQuality * 16);
     }
-    file.close();
 }
 
 void RenderableSatellites::initializeFileReading() {
@@ -243,11 +157,4 @@ void RenderableSatellites::initializeFileReading() {
     }
 }
 
-void RenderableSatellites::skipSingleEntryInFile(std::ifstream& file) {
-    std::string line;
-    for (unsigned int i = 0; i < nLineEntriesPerSatellite; i++) {
-        std::getline(file, line);
-    }
-}
-
-}
+} // namespace openspace
