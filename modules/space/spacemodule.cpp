@@ -32,7 +32,6 @@
 #include <modules/space/rendering/renderablesmallbody.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/renderabletravelspeed.h>
-#include <modules/space/rendering/simplespheregeometry.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/tletranslation.h>
@@ -74,8 +73,6 @@ SpaceModule::SpaceModule()
 }
 
 void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    FactoryManager::ref().addFactory<planetgeometry::PlanetGeometry>("PlanetGeometry");
-
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
@@ -106,11 +103,6 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
 
-    ghoul::TemplateFactory<planetgeometry::PlanetGeometry>* fGeometry =
-        FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
-    ghoul_assert(fGeometry, "Planet geometry factory was not created");
-    fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
-
     if (dictionary.hasValue<bool>(SpiceExceptionInfo.identifier)) {
         _showSpiceExceptions = dictionary.value<bool>(SpiceExceptionInfo.identifier);
     }
@@ -124,7 +116,6 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
         HorizonsTranslation::Documentation(),
         KeplerTranslation::Documentation(),
-        planetgeometry::PlanetGeometry::Documentation(),
         RenderableConstellationBounds::Documentation(),
         RenderableFluxNodes::Documentation(),
         RenderableHabitableZone::Documentation(),
@@ -133,7 +124,6 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableSmallBody::Documentation(),
         RenderableStars::Documentation(),
         RenderableTravelSpeed::Documentation(),
-        planetgeometry::SimpleSphereGeometry::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
         TLETranslation::Documentation()
