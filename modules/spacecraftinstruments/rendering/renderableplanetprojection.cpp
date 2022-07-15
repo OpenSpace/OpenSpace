@@ -143,9 +143,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderablePlanetProjection)]] Parameters {
-        // The geometry that is used for rendering this planet
-        ghoul::Dictionary geometry [[codegen::reference("space_geometry_planet")]];
-
         // Contains information about projecting onto this planet
         ghoul::Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
