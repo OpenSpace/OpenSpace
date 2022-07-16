@@ -17,11 +17,11 @@ local initializeAndAddNodes = function()
     Parent = transforms.EarthInertial.Identifier,
     Transform = {
       Translation = {
-        Type = "TLETranslation",
+        Type = "GPTranslation",
         Body = identifier,
         Observer = transforms.EarthInertial.Identifier,
         File = path,
-        LineNumber = 1
+        Format = "TLE"
       },
       Rotation = {
         Type = "SpiceRotation",
@@ -43,11 +43,11 @@ local initializeAndAddNodes = function()
     Renderable = {
       Type = "RenderableTrailOrbit",
       Translation = {
-        Type = "TLETranslation",
+        Type = "GPTranslation",
         Body = identifier,
         Observer = transforms.EarthInertial.Identifier,
         File = path,
-        LineNumber = 1
+        Format = "TLE"
       },
       RenderBinMode = "PostDeferredTransparent",
       Color = { 0.0, 0.902, 0.6},

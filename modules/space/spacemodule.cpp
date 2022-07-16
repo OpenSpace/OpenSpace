@@ -34,7 +34,7 @@
 #include <modules/space/rendering/renderabletravelspeed.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
-#include <modules/space/translation/tletranslation.h>
+#include <modules/space/translation/gptranslation.h>
 #include <modules/space/translation/horizonstranslation.h>
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
@@ -94,7 +94,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     fTranslation->registerClass<KeplerTranslation>("KeplerTranslation");
     fTranslation->registerClass<SpiceTranslation>("SpiceTranslation");
-    fTranslation->registerClass<TLETranslation>("TLETranslation");
+    fTranslation->registerClass<GPTranslation>("GPTranslation");
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
     ghoul::TemplateFactory<Rotation>* fRotation =
@@ -126,7 +126,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        TLETranslation::Documentation()
+        GPTranslation::Documentation()
     };
 }
 

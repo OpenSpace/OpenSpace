@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/space/translation/tletranslation.h>
+#include <modules/space/translation/gptranslation.h>
 
 #include <modules/space/kepler.h>
 #include <openspace/documentation/verifier.h>
@@ -30,39 +30,57 @@
 #include <optional>
 
 namespace {
-    struct [[codegen::Dictionary(TLETranslation)]] Parameters {
-        // Specifies the filename of the Two-Line-Element file
+    struct [[codegen::Dictionary(GPTranslation)]] Parameters {
+        // Specifies the filename of the general pertubation file
         std::filesystem::path file;
 
-        // Specifies the line number within the file where the group of 3 TLE lines begins
-        // (1-based). Defaults to 1
-        std::optional<int> lineNumber [[codegen::greater(0)]];
+        enum class Format {
+            TLE,
+            OMM
+        };
+        Format format;
+
+        // Specifies the element within the file that should be used in case the file
+        // provides multiple general pertubation elements. Defaults to 1.
+        std::optional<int> element [[codegen::greater(0)]];
     };
-#include "tletranslation_codegen.cpp"
+#include "gptranslation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation TLETranslation::Documentation() {
-    return codegen::doc<Parameters>("space_transform_tle");
+documentation::Documentation GPTranslation::Documentation() {
+    return codegen::doc<Parameters>("space_transform_gp");
 }
 
-TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {
+GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     if (!std::filesystem::is_regular_file(p.file)) {
         throw ghoul::RuntimeError("The provided TLE file must exist");
     }
 
-    int lineNum = p.lineNumber.value_or(1);
+    int element = p.element.value_or(1);
 
-    std::vector<SatelliteKeplerParameters> parameters = readTleFile(p.file);
-    if (parameters.size() < lineNum) {
+    std::function<std::vector<SatelliteKeplerParameters>(std::filesystem::path)> func;
+    switch (p.format) {
+        case Parameters::Format::TLE:
+            func = &readTleFile;
+            break;
+        case Parameters::Format::OMM:
+            func = &readOmmFile;
+            break;
+        default:
+            throw ghoul::MissingCaseException();
+    }
+
+    std::vector<SatelliteKeplerParameters> parameters = func(p.file);
+    if (parameters.size() < element) {
         throw ghoul::RuntimeError(fmt::format(
-            "Requested line {} but only {} are available", lineNum, parameters.size()
+            "Requested element {} but only {} are available", element, parameters.size()
         ));
     }
 
-    SatelliteKeplerParameters param = parameters[lineNum - 1];
+    SatelliteKeplerParameters param = parameters[element - 1];
     setKeplerElements(
         param.eccentricity,
         param.semiMajorAxis,

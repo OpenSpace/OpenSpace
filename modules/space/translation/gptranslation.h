@@ -22,30 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___TLETRANSLATION___H__
-#define __OPENSPACE_MODULE_SPACE___TLETRANSLATION___H__
+#ifndef __OPENSPACE_MODULE_SPACE___GPTRANSLATION___H__
+#define __OPENSPACE_MODULE_SPACE___GPTRANSLATION___H__
 
 #include <modules/space/translation/keplertranslation.h>
 
 namespace openspace {
 
 /**
- * A specialization of the KeplerTranslation that extracts the Keplerian elements from a
- * two-line element as described by the US Space Command
- * https://celestrak.com/columns/v04n03
- * The ghoul::Dictionary passed to the constructor must contain the pointer to a file that
- * will be read.
+ * A specialization of the KeplerTranslation that utilizes general pertubation file
+ * formats to extracts the Keplerian elements
  */
-class TLETranslation : public KeplerTranslation {
+class GPTranslation : public KeplerTranslation {
 public:
     /**
-     * Constructor for the TLETranslation class. The \p dictionary must contain a key for
-     * the file that contains the TLE information. The ghoul::Dictionary will be tested
-     * against the openspace::Documentation returned by Documentation.
+     * Constructor for the GPTranslation class. The \p dictionary must contain a key for
+     * the file that contains the general pertubation information as well as the file
+     * format that is to be used.
      *
      * \param The ghoul::Dictionary that contains the information for this TLETranslation
      */
-    explicit TLETranslation(const ghoul::Dictionary& dictionary);
+    explicit GPTranslation(const ghoul::Dictionary& dictionary);
 
     /**
      * Method returning the openspace::Documentation that describes the ghoul::Dictionary
@@ -59,4 +56,4 @@ public:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___TLETRANSLATION___H__
+#endif // __OPENSPACE_MODULE_SPACE___GPTRANSLATION___H__

@@ -25,7 +25,6 @@
 #include <modules/space/rendering/renderableorbitalkepler.h>
 
 #include <modules/space/translation/keplertranslation.h>
-#include <modules/space/translation/tletranslation.h>
 #include <modules/space/spacemodule.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>

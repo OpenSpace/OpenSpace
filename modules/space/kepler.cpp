@@ -204,7 +204,7 @@ namespace {
         if (pos == 10) {
             // We have the first form
             int monthNum = std::atoi(epochString.substr(5, 2).c_str());
-            int dayOfMonthNum = std::atoi(epochString.substr(7, 2).c_str());
+            int dayOfMonthNum = std::atoi(epochString.substr(8, 2).c_str());
             nDays = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
         }
         else if (pos == 8) {
@@ -221,8 +221,7 @@ namespace {
         // 3
         using namespace std::chrono;
         const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-        //Need to subtract 1 from daysInYear since it is not a zero-based count
-        const double nSecondsSince2000 = (daysSince2000 + nDays - 1) * SecondsPerDay;
+        const double nSecondsSince2000 = (daysSince2000 + nDays) * SecondsPerDay;
 
 
         // 4
@@ -234,15 +233,14 @@ namespace {
         );
 
         // 5
-        std::string remainder = epochString.substr(pos);
+        std::string remainder = epochString.substr(pos + 1);
         const int hours = std::atoi(remainder.substr(0, 2).c_str());
         const int minutes = std::atoi(remainder.substr(3, 2).c_str());
-        const int seconds = std::atoi(remainder.substr(5, 2).c_str());
+        const double seconds = std::atof(remainder.substr(6).c_str());
 
         const long long totalSeconds =
             std::chrono::seconds(std::chrono::hours(hours)).count() +
-            std::chrono::seconds(std::chrono::minutes(minutes)).count() +
-            seconds;
+            std::chrono::seconds(std::chrono::minutes(minutes)).count();
 
 
         // 6
@@ -250,7 +248,7 @@ namespace {
 
         // Combine all of the values
         const double epoch =
-            nSecondsSince2000 + totalSeconds + nLeapSecondsOffset - offset;
+            nSecondsSince2000 + totalSeconds + nLeapSecondsOffset - offset + seconds;
         return epoch;
     }
 } // namespace

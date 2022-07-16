@@ -26,7 +26,6 @@
 
 #include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/translation/keplertranslation.h>
-#include <modules/space/translation/tletranslation.h>
 #include <modules/space/kepler.h>
 #include <modules/space/spacemodule.h>
 #include <openspace/engine/openspaceengine.h>

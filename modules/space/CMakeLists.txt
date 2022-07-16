@@ -37,9 +37,9 @@ set(HEADER_FILES
   rendering/renderablesmallbody.h
   rendering/renderablestars.h
   rendering/renderabletravelspeed.h
+  translation/gptranslation.h
   translation/keplertranslation.h
   translation/spicetranslation.h
-  translation/tletranslation.h
   translation/horizonstranslation.h
   rotation/spicerotation.h
 )
@@ -59,9 +59,9 @@ set(SOURCE_FILES
   rendering/renderablesmallbody.cpp
   rendering/renderablestars.cpp
   rendering/renderabletravelspeed.cpp
+  translation/gptranslation.cpp
   translation/keplertranslation.cpp
   translation/spicetranslation.cpp
-  translation/tletranslation.cpp
   translation/horizonstranslation.cpp
   rotation/spicerotation.cpp
 )
