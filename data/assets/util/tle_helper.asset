@@ -81,6 +81,7 @@ function satellites(title, file, color, group)
     Renderable = {
       Type = "RenderableSatellites",
       Path = file,
+      Format = "TLE",
       SegmentQuality = 3,
       Color = color,
       Fade = 1.5,

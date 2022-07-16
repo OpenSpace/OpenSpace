@@ -92,6 +92,17 @@ namespace {
         // [[codegen::verbatim(PathInfo.description)]]
         std::string path;
 
+        enum class [[codegen::map(openspace::kepler::Format)]] Format {
+            // A NORAD-style Two-Line element
+            TLE,
+            // Orbit Mean-Elements Message in the KVN notation
+            OMM,
+            // JPL's Small Bodies Database
+            SBDB
+        };
+        // The file format that is contained in the file
+        Format format;
+
         // [[codegen::verbatim(SegmentQualityInfo.description)]]
         int segmentQuality;
 
@@ -145,6 +156,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _path.onChange(_reinitializeTrailBuffers);
     addProperty(_path);
 
+    _format = codegen::map<kepler::Format>(p.format);
+
     _startRenderIdx = p.startRenderIdx.value_or(0);
 
     _sizeRender = p.renderSize.value_or(0u);
@@ -177,7 +190,7 @@ void RenderableOrbitalKepler::initializeGL() {
     updateBuffers();
 
     double maxSemiMajorAxis = 0.0;
-    for (const KeplerParameters& kp : _data) {
+    for (const kepler::SatelliteParameters& kp : _data) {
         if (kp.semiMajorAxis > maxSemiMajorAxis) {
             maxSemiMajorAxis = kp.semiMajorAxis;
         }
@@ -209,7 +222,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     if (_updateDataBuffersAtNextRender) {
         _updateDataBuffersAtNextRender = false;
-        initializeGL();
+        updateBuffers();
     }
 
     _programObject->activate();
@@ -252,7 +265,12 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableOrbitalKepler::updateBuffers() {
-    readDataFile(_path);
+    std::vector<kepler::SatelliteParameters> parameters = kepler::readFile(
+       _path.value(),
+        _format
+    );
+
+    loadData(parameters);
 
     size_t nVerticesTotal = 0;
 
@@ -264,7 +282,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     size_t vertexBufIdx = 0;
     for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
-        const KeplerParameters& orbit = _data[orbitIdx];
+        const kepler::SatelliteParameters& orbit = _data[orbitIdx];
 
         _keplerTranslator.setKeplerElements(
             orbit.eccentricity,

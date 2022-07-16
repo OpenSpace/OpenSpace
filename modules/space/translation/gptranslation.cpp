@@ -34,10 +34,15 @@ namespace {
         // Specifies the filename of the general pertubation file
         std::filesystem::path file;
 
-        enum class Format {
+        enum class [[codegen::map(openspace::kepler::Format)]] Format {
+            // A NORAD-style Two-Line element
             TLE,
-            OMM
+            // Orbit Mean-Elements Message in the KVN notation
+            OMM,
+            // JPL's Small Bodies Database
+            SBDB
         };
+        // The file format that is contained in the file
         Format format;
 
         // Specifies the element within the file that should be used in case the file
@@ -61,26 +66,17 @@ GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
 
     int element = p.element.value_or(1);
 
-    std::function<std::vector<SatelliteKeplerParameters>(std::filesystem::path)> func;
-    switch (p.format) {
-        case Parameters::Format::TLE:
-            func = &readTleFile;
-            break;
-        case Parameters::Format::OMM:
-            func = &readOmmFile;
-            break;
-        default:
-            throw ghoul::MissingCaseException();
-    }
-
-    std::vector<SatelliteKeplerParameters> parameters = func(p.file);
+    std::vector<kepler::SatelliteParameters> parameters = kepler::readFile(
+        p.file,
+        codegen::map<kepler::Format>(p.format)
+    );
     if (parameters.size() < element) {
         throw ghoul::RuntimeError(fmt::format(
             "Requested element {} but only {} are available", element, parameters.size()
         ));
     }
 
-    SatelliteKeplerParameters param = parameters[element - 1];
+    kepler::SatelliteParameters param = parameters[element - 1];
     setKeplerElements(
         param.eccentricity,
         param.semiMajorAxis,

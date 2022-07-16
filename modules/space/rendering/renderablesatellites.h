@@ -43,9 +43,10 @@ namespace documentation { struct Documentation; }
 class RenderableSatellites : public RenderableOrbitalKepler {
 public:
     RenderableSatellites(const ghoul::Dictionary& dictionary);
-    virtual void readDataFile(const std::string& filename) override;
     static documentation::Documentation Documentation();
-    void initializeFileReading();
+
+private:
+    virtual void loadData(std::vector<kepler::SatelliteParameters> data) override;
 };
 
 } // namespace openspace

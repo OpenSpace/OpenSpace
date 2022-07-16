@@ -44,6 +44,7 @@
 #include <filesystem>
 #include <fstream>
 #include <math.h>
+#include <random>
 #include <vector>
 
 namespace {
@@ -64,26 +65,6 @@ namespace {
         "how many objects are contained in the data file. Produces an evenly-distributed"
         "sample from the data file."
     };
-
-    double importAngleValue(const std::string& angle) {
-        if (angle.empty()) {
-            return 0.0;
-        }
-
-        double output = std::stod(angle);
-        output = std::fmod(output, 360.0);
-        if (output < 0.0) {
-            output += 360.0;
-        }
-        return output;
-    }
-
-    std::string& formatObjectName(std::string& name) {
-        const std::string trimChars = "\t\n\v\f\r\" ";
-        name.erase(0, name.find_first_not_of(trimChars));
-        name.erase(name.find_last_not_of(trimChars) + 1);
-        return name;
-    }
 
     struct [[codegen::Dictionary(RenderableSmallBody)]] Parameters {
         // [[codegen::verbatim(ContiguousModeInfo.description)]]
@@ -163,137 +144,9 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
         _contiguousMode.onChange(_updateContiguousModeSelect);
 }
 
-void RenderableSmallBody::readDataFile(const std::string& filename) {
-    if (!std::filesystem::is_regular_file(filename)) {
-        throw ghoul::RuntimeError(fmt::format(
-            "JPL SBDB file {} does not exist.", filename
-        ));
-    }
+void RenderableSmallBody::loadData(std::vector<kepler::SatelliteParameters> data) {
+    _numObjects = data.size();
 
-    std::ifstream file;
-    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    file.open(filename);
-
-    std::streamoff numberOfLines = std::count(
-        std::istreambuf_iterator<char>(file),
-        std::istreambuf_iterator<char>(),
-        '\n'
-    );
-    file.seekg(std::ios_base::beg); // reset iterator to beginning of file
-    _data.clear();
-    _sbNames.clear();
-    _segmentSize.clear();
-
-    std::string line;
-    unsigned int csvLine = 0;
-    int fieldCount = 0;
-    const std::string expectedHeaderLine = "full_name,epoch_cal,e,a,i,om,w,ma,per";
-
-    try {
-        std::getline(file, line); // get rid of first line (header)
-        numberOfLines -= 1;
-        if (_numObjects != numberOfLines) {
-            _isFileReadinitialized = false;
-        }
-        _numObjects = numberOfLines;
-
-        float lineSkipFraction = 1.0;
-        if (!_isFileReadinitialized) {
-            _isFileReadinitialized = true;
-            initializeFileReading();
-        }
-
-        unsigned int startElement = 0;
-        unsigned int endElement;
-        if (_contiguousMode) {
-            lineSkipFraction = 1.0;
-            startElement = _startRenderIdx;
-            endElement = _startRenderIdx + _sizeRender - 1;
-        }
-        else {
-            lineSkipFraction = static_cast<float>(_upperLimit)
-                / static_cast<float>(_numObjects);
-            endElement = static_cast<unsigned int>(_numObjects - 1);
-        }
-
-        if (line != expectedHeaderLine) {
-            LERROR(fmt::format(
-                "File {} does not have the appropriate JPL SBDB header at line 1",
-                filename
-            ));
-            return;
-        }
-
-        unsigned int sequentialLineErrors = 0;
-        endElement =
-            (endElement >= _numObjects) ?
-            static_cast<unsigned int>(_numObjects - 1) :
-            endElement;
-        // Burn lines if not starting at first element
-        for (unsigned int k = 0; k < startElement; ++k) {
-            skipSingleLineInFile(file);
-        }
-        bool firstDataLine = true;
-        int lastLineCount = -1;
-        for (csvLine = startElement + 1;
-             csvLine <= endElement + 1;
-             csvLine++, sequentialLineErrors++)
-        {
-            float currLineFraction = static_cast<float>(csvLine - 1) * lineSkipFraction;
-            int currLineCount = static_cast<int>(currLineFraction);
-            if (currLineCount > lastLineCount) {
-                try {
-                    readOrbitalParamsFromThisLine(firstDataLine, fieldCount, csvLine,
-                        file);
-                    sequentialLineErrors = 0;
-                }
-                catch (std::invalid_argument&) {
-                    const char* errMsg = "Unable to convert field {} to double value "\
-                        "(invalid_argument exception). Ignoring line {}/{} of {}.";
-                    LINFO(fmt::format(
-                        errMsg,
-                        fieldCount, csvLine + 1, numberOfLines, filename
-                    ));
-                }
-                catch (std::out_of_range&) {
-                    const char* errMsg = "Unable to convert field {} to double value "\
-                        "(out_of_range exception). Ignoring line {}/{} of {}.";
-                    LINFO(fmt::format(
-                        errMsg,
-                        fieldCount, csvLine + 1, numberOfLines, filename
-                    ));
-                }
-                catch (std::ios_base::failure&) {
-                    throw;
-                }
-
-                if (sequentialLineErrors == 4) {
-                    _data.clear();
-                    _sbNames.clear();
-                    LERROR(fmt::format(
-                        "Abandoning data file {} (too many sequential line errors).",
-                        filename
-                    ));
-                    break;
-                }
-            }
-            else {
-                skipSingleLineInFile(file);
-            }
-            lastLineCount = currLineCount;
-            firstDataLine = false;
-        }
-    }
-    catch (const std::ios_base::failure&) {
-        LERROR(fmt::format(
-            "File read exception (ios_base::failure) while trying to read field {} at "
-            "line {}/{} of {}",
-            fieldCount, csvLine + 1, numberOfLines, filename
-        ));
-    }
-}
-
-void RenderableSmallBody::initializeFileReading() {
     _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
     _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
     if (_sizeRender == 0u) {
@@ -304,118 +157,43 @@ void RenderableSmallBody::initializeFileReading() {
     if (_upperLimit == 0u) {
         _upperLimit = static_cast<unsigned int>(_numObjects);
     }
-}
 
-void RenderableSmallBody::skipSingleLineInFile(std::ifstream& file) {
-    std::string line;
-    std::getline(file, line);
-}
+    if (_contiguousMode) {
+        if (_startRenderIdx >= data.size() ||
+            (_startRenderIdx + _sizeRender) >= data.size())
+        {
+            throw ghoul::RuntimeError(fmt::format(
+                "Tried to load {} objects but only {} are available",
+                _startRenderIdx + _sizeRender, data.size()
+            ));
+        }
 
-void RenderableSmallBody::readOrbitalParamsFromThisLine(bool firstDataLine,
-                                                        int& fieldCount,
-                                                        unsigned int& csvLine,
-                                                        std::ifstream& file)
-{
-    const int numDataFields = 8;
-    std::string name;
-    std::string field;
-    KeplerParameters keplerElements;
-
-    //If there was a read/conversion error in the previous line, then read the remainder
-    // of that line and throw it out first before proceeding with the next line.
-    if (fieldCount != (numDataFields + 1) && !firstDataLine) {
-        std::getline(file, field);
-    }
-    fieldCount = 0;
-
-    // Object designator string
-    std::getline(file, name, ',');
-    if (_startRenderIdx > 0 && _startRenderIdx == (csvLine - 1) && _sizeRender == 1) {
-        formatObjectName(name);
-        LINFO(fmt::format("Set render block to start at object  {}", name));
-    }
-    fieldCount++;
-
-    // Epoch
-    if (!std::getline(file, field, ',')) {
-        throw std::invalid_argument(
-            "Unable to read epoch from line"  + std::to_string(csvLine + 1)
+        // Extract subset that starts at _startRenderIdx and contains _sizeRender obejcts
+        data = std::vector<kepler::SatelliteParameters>(
+            data.begin() + _startRenderIdx,
+            data.begin() + _startRenderIdx + _sizeRender
         );
     }
-    keplerElements.epoch = epochFromYMDdSubstring(field);
-    fieldCount++;
+    else {
+        // First shuffle the whole array
+        std::default_random_engine rng;
+        std::shuffle(data.begin(), data.end(), rng);
 
-    // Eccentricity (unit-less)
-    if (!std::getline(file, field, ',')) {
-        throw std::invalid_argument(
-            "Unable to read eccentricity from line" + std::to_string(csvLine + 1)
+        // Then take the first _sizeRender values
+        data = std::vector<kepler::SatelliteParameters>(
+            data.begin(), data.begin() + _sizeRender
         );
     }
-    keplerElements.eccentricity = std::stod(field);
-    fieldCount++;
 
-    // Semi-major axis (astronomical units - au)
-    if (!std::getline(file, field, ',')) {
-        throw std::invalid_argument(
-            "Unable to read semi-major axis from line" + std::to_string(csvLine + 1)
+    _segmentSize.clear();
+    for (const kepler::SatelliteParameters& p : data) {
+        const double scale = static_cast<double>(_segmentQuality) * 10.0;
+        _segmentSize.push_back(
+            static_cast<size_t>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
         );
     }
-    keplerElements.semiMajorAxis = std::stod(field);
-    keplerElements.semiMajorAxis *= convertAuToKm;
-    fieldCount++;
 
-    // Inclination (degrees)
-    if (!std::getline(file, field, ',')) {
-        throw std::invalid_argument(
-            "Unable to read inclination from line" + std::to_string(csvLine + 1)
-        );
-    }
-    keplerElements.inclination = importAngleValue(field);
-    fieldCount++;
-
-    // Longitude of ascending node (degrees)
-    if (!std::getline(file, field, ',')) {
-        throw std::invalid_argument(
-            "Unable to read ascending node from line" + std::to_string(csvLine + 1)
-        );
-    }
-    keplerElements.ascendingNode = importAngleValue(field);
-    fieldCount++;
-
-    // Argument of Periapsis (degrees)
-    if (!std::getline(file, field, ',')) {
-        throw std::invalid_argument(
-            "Unable to read arg of periapsis from line" + std::to_string(csvLine + 1)
-        );
-    }
-    keplerElements.argumentOfPeriapsis = importAngleValue(field);
-    fieldCount++;
-
-    // Mean Anomaly (degrees)
-    if (!std::getline(file, field, ',')) {
-        throw std::invalid_argument(
-            "Unable to read mean anomaly from line" + std::to_string(csvLine + 1)
-        );
-    }
-    keplerElements.meanAnomaly = importAngleValue(field);
-    fieldCount++;
-
-    // Period (days)
-    if (!std::getline(file, field)) {
-        throw std::invalid_argument(
-            "Unable to read period from line" + std::to_string(csvLine + 1)
-        );
-    }
-    keplerElements.period = std::stod(field);
-    keplerElements.period *= convertDaysToSecs;
-    fieldCount++;
-
-    _data.push_back(keplerElements);
-    _sbNames.push_back(name);
-    const double scale = static_cast<double>(_segmentQuality) * 10.0;
-    _segmentSize.push_back(
-        static_cast<size_t>(scale + (scale / pow(1 - keplerElements.eccentricity, 1.2)))
-    );
+    _data = std::move(data);
 }
 
 } // namespace openspace

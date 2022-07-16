@@ -25,6 +25,7 @@ local createSssbGroupObject = function(filename, guiName, sssbFolder, trailColor
     Renderable = {
       Type = "RenderableSmallBody",
       Path = sssbFolder .. filename,
+      Format = "SBDB",
       Segments = 200,
       Color = trailColor,
       TrailFade = 0.5,

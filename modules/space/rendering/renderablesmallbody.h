@@ -43,14 +43,11 @@ namespace documentation { struct Documentation; }
 class RenderableSmallBody : public RenderableOrbitalKepler {
 public:
     RenderableSmallBody(const ghoul::Dictionary& dictionary);
+    
     static documentation::Documentation Documentation();
 
 private:
-    void readOrbitalParamsFromThisLine(bool firstDataLine, int& fieldCount,
-        unsigned int& csvLine, std::ifstream& file);
-    virtual void readDataFile(const std::string& filename) override;
-    void initializeFileReading();
-    void skipSingleLineInFile(std::ifstream& file);
+    virtual void loadData(std::vector<kepler::SatelliteParameters> data) override;
 
     std::vector<std::string> _sbNames;
     std::function<void()> _updateContiguousModeSelect;

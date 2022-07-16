@@ -29,9 +29,9 @@
 #include <string>
 #include <vector>
 
-namespace openspace {
+namespace openspace::kepler {
 
-struct SatelliteKeplerParameters {
+struct SatelliteParameters {
     std::string name;
     // International Designator (launch year + launch number of the year + piece of launch
     std::string id;
@@ -46,33 +46,63 @@ struct SatelliteKeplerParameters {
     double period = 0.0;
 };
 
-double epochFromSubstring(const std::string& epochString);
-double epochFromYMDdSubstring(const std::string& epochString);
-
 /**
- * Reads the satellite information from the provided \p file and returns them as
- * individual values.
+ * Reads the object information from the provided \p file and returns them as individual
+ * values.
  *
  * \param file The file to the TLE file. This file must be a valid file
- * \return Information about all of the contained satellite information in the \p file
+ * \return Information about all of the contained objects in the \p file
  *
  * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid TLE file
  */
-std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file);
+std::vector<SatelliteParameters> readTleFile(std::filesystem::path file);
 
 /**
- * Reads the satellite information from the provided \p file and returns them as
- * individual values.
+ * Reads the object information from the provided \p file and returns them as individual
+ * values.
  *
  * \param file The file to the OMM file. This file must be a valid file
- * \return Information about all of the contained satellite information in the \p file
+ * \return Information about all of the contained objects in the \p file
  *
  * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid OMM file
  */
-std::vector<SatelliteKeplerParameters> readOmmFile(std::filesystem::path file);
+std::vector<SatelliteParameters> readOmmFile(std::filesystem::path file);
 
-} // namespace openspace
+/**
+ * Reads the object information from a CSV file following JPL's Small Body Database
+ * format, which provides the Epoch, eccentricity, semi-major axis (in AU), inclination,
+ * ascending node, argument of periapsis, mean anomaly, and period in that order.
+ * 
+ * \param file The CSV file containing the information about the objects
+ * \return Information about all of the contained objects in the \p file
+ *
+ * \pre \p file must be a file and must exist
+ * \throw ghoul::RuntimeError If the provided \p is not a valid JPL SBDB CSV format
+ */
+std::vector<SatelliteParameters> readSbdbFile(std::filesystem::path file);
+
+/**
+ * The different formats that the #readFile function is capable of loading 
+ */
+enum class Format {
+    TLE, 
+    OMM,
+    SBDB
+};
+/**
+ * Reads the object information from the provided file.
+ *
+ * \param file The file containing the information about the objects
+ * \param format The format of the provided \p file
+ * \return Information about all of the contained objects in the \p file
+ *
+ * \pre \p file must be a file and must exist
+ * \throw ghoul::RuntimeError If the provided \p is not in the provided file
+ */
+std::vector<SatelliteParameters> readFile(std::filesystem::path file, Format format);
+
+} // namespace openspace::kepler
 
 #endif // __OPENSPACE_MODULE_SPACE___KEPLER___H__

@@ -96,24 +96,21 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 }
 
-void RenderableSatellites::readDataFile(const std::string& filename) {
-    if (!std::filesystem::is_regular_file(filename)) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Satellite TLE file {} does not exist", filename
-        ));
-    }
+void RenderableSatellites::loadData(std::vector<kepler::SatelliteParameters> data) {
     _data.clear();
     _segmentSize.clear();
 
-    std::vector<SatelliteKeplerParameters> parameters = readTleFile(filename);
-    _numObjects = parameters.size();
+    _numObjects = data.size();
 
     if (!_isFileReadinitialized) {
         _isFileReadinitialized = true;
-        initializeFileReading();
+        _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
+        _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
+        if (_sizeRender == 0u) {
+            _sizeRender = static_cast<unsigned int>(_numObjects);
+        }
     }
 
-    std::string line = "-";
     std::string name;
     long long endElement = _startRenderIdx + _sizeRender - 1;
     endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
@@ -129,30 +126,14 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
         ));
     }
 
-    for (size_t i = _startRenderIdx; i <= endElement; i++) {
-        SatelliteKeplerParameters param = parameters[i];
+    // Extract subset that starts at _startRenderIdx and contains _sizeRender obejcts
+    data = std::vector<kepler::SatelliteParameters>(
+        data.begin() + _startRenderIdx,
+        data.begin() + _startRenderIdx + _sizeRender
+    );
 
-        KeplerParameters e;
-        e.inclination = param.inclination;
-        e.semiMajorAxis = param.semiMajorAxis;
-        e.ascendingNode = param.ascendingNode;
-        e.eccentricity = param.eccentricity;
-        e.argumentOfPeriapsis = param.argumentOfPeriapsis;
-        e.meanAnomaly = param.meanAnomaly;
-        e.epoch = param.epoch;
-        e.period = param.period;
-
-        _data.push_back(e);
-        _segmentSize.push_back(_segmentQuality * 16);
-    }
-}
-
-void RenderableSatellites::initializeFileReading() {
-    _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
-    _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
-    if (_sizeRender == 0u) {
-        _sizeRender = static_cast<unsigned int>(_numObjects);
-    }
+    _segmentSize = std::vector<size_t>(data.size(), _segmentQuality * 16);
+    _data = std::move(data);
 }
 
 } // namespace openspace

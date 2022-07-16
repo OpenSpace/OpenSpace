@@ -177,6 +177,105 @@ namespace {
     }
 
 
+    double epochFromSubstring(const std::string& epochString) {
+        // The epochString is in the form:
+        // YYDDD.DDDDDDDD
+        // With YY being the last two years of the launch epoch, the first DDD the day of
+        // the year and the remaning a fractional part of the day
+
+        // The main overview of this function:
+        // 1. Reconstruct the full year from the YY part
+        // 2. Calculate the number of days since the beginning of the year
+        // 3. Convert the number of days to a number of seconds
+        // 4. Get the number of leap seconds since January 1st, 2000 and remove them
+        // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
+        // midnight
+
+        // According to https://celestrak.com/columns/v04n03/
+        // Apparently, US Space Command sees no need to change the two-line element set
+        // format yet since no artificial earth satellites existed prior to 1957. By their
+        // reasoning, two-digit years from 57-99 correspond to 1957-1999 and those from
+        // 00-56 correspond to 2000-2056. We'll see each other again in 2057!
+
+        // 1. Get the full year
+        std::string yearPrefix =
+            std::atoi(epochString.substr(0, 2).c_str()) > 57 ? "19" : "20";
+        const int year = std::atoi((yearPrefix + epochString.substr(0, 2)).c_str());
+        const int daysSince2000 = countDays(year);
+
+        // 2.
+        double daysInYear = std::atof(epochString.substr(2).c_str());
+
+        // 3
+        using namespace std::chrono;
+        const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
+        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
+
+        // 4
+        // We need to remove additional leap seconds past 2000 and add them prior to
+        // 2000 to sync up the time zones
+        const double nLeapSecondsOffset = -countLeapSeconds(
+            year,
+            static_cast<int>(std::floor(daysInYear))
+        );
+
+        // 5
+        const double nSecondsEpochOffset =
+            static_cast<double>(seconds(hours(12)).count());
+
+        // Combine all of the values
+        const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
+        return epoch;
+    }
+
+    double epochFromYMDdSubstring(const std::string& epochString) {
+        // The epochString is in the form:
+        // YYYYMMDD.ddddddd
+        // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
+        // and dddd the fraction of that day.
+
+        // The main overview of this function:
+        // 1. Read the year value
+        // 2. Calculate the number of days since the beginning of the year
+        // 3. Convert the number of days to a number of seconds
+        // 4. Get the number of leap seconds since January 1st, 2000 and remove them
+        // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
+        // midnight
+
+        // 1
+        int year = std::atoi(epochString.substr(0, 4).c_str());
+        const int daysSince2000 = countDays(year);
+
+        // 2.
+        int monthNum = std::atoi(epochString.substr(4, 2).c_str());
+        int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
+        int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
+        double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
+        double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
+
+        // 3
+        using namespace std::chrono;
+        const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
+        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
+
+        // 4
+        // We need to remove additional leap seconds past 2000 and add them prior to
+        // 2000 to sync up the time zones
+        const double nLeapSecondsOffset = -countLeapSeconds(
+            year,
+            static_cast<int>(std::floor(daysInYear))
+        );
+
+        // 5
+        const double offset = static_cast<double>(seconds(hours(12)).count());
+
+        // Combine all of the values
+        const double epoch = nSecondsSince2000 + nLeapSecondsOffset - offset;
+        return epoch;
+    }
+
     double epochFromOmmString(const std::string& epochString) {
         // The epochString is in the form:
         // YYYY-MM-DDThh:mm:ss[.d->d][Z]
@@ -253,111 +352,12 @@ namespace {
     }
 } // namespace
 
-namespace openspace {
+namespace openspace::kepler {
 
-double epochFromSubstring(const std::string& epochString) {
-    // The epochString is in the form:
-    // YYDDD.DDDDDDDD
-    // With YY being the last two years of the launch epoch, the first DDD the day of the
-    // year and the remaning a fractional part of the day
-
-    // The main overview of this function:
-    // 1. Reconstruct the full year from the YY part
-    // 2. Calculate the number of days since the beginning of the year
-    // 3. Convert the number of days to a number of seconds
-    // 4. Get the number of leap seconds since January 1st, 2000 and remove them
-    // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
-    // midnight
-
-    // According to https://celestrak.com/columns/v04n03/
-    // Apparently, US Space Command sees no need to change the two-line element set format
-    // yet since no artificial earth satellites existed prior to 1957. By their reasoning,
-    // two-digit years from 57-99 correspond to 1957-1999 and those from 00-56
-    // correspond to 2000-2056. We'll see each other again in 2057!
-
-    // 1. Get the full year
-    std::string yearPrefix =
-        std::atoi(epochString.substr(0, 2).c_str()) > 57 ? "19" : "20";
-    const int year = std::atoi((yearPrefix + epochString.substr(0, 2)).c_str());
-    const int daysSince2000 = countDays(year);
-
-    // 2.
-    double daysInYear = std::atof(epochString.substr(2).c_str());
-
-    // 3
-    using namespace std::chrono;
-    const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-    //Need to subtract 1 from daysInYear since it is not a zero-based count
-    const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
-
-    // 4
-    // We need to remove additional leap seconds past 2000 and add them prior to
-    // 2000 to sync up the time zones
-    const double nLeapSecondsOffset = -countLeapSeconds(
-        year,
-        static_cast<int>(std::floor(daysInYear))
-    );
-
-    // 5
-    const double nSecondsEpochOffset =
-        static_cast<double>(seconds(hours(12)).count());
-
-    // Combine all of the values
-    const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
-    return epoch;
-}
-
-double epochFromYMDdSubstring(const std::string& epochString) {
-    // The epochString is in the form:
-    // YYYYMMDD.ddddddd
-    // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
-    // and dddd the fraction of that day.
-
-    // The main overview of this function:
-    // 1. Read the year value
-    // 2. Calculate the number of days since the beginning of the year
-    // 3. Convert the number of days to a number of seconds
-    // 4. Get the number of leap seconds since January 1st, 2000 and remove them
-    // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
-    // midnight
-
-    // 1
-    int year = std::atoi(epochString.substr(0, 4).c_str());
-    const int daysSince2000 = countDays(year);
-
-    // 2.
-    int monthNum = std::atoi(epochString.substr(4, 2).c_str());
-    int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
-    int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
-    double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
-    double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
-
-    // 3
-    using namespace std::chrono;
-    const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-    //Need to subtract 1 from daysInYear since it is not a zero-based count
-    const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
-
-    // 4
-    // We need to remove additional leap seconds past 2000 and add them prior to
-    // 2000 to sync up the time zones
-    const double nLeapSecondsOffset = -countLeapSeconds(
-        year,
-        static_cast<int>(std::floor(daysInYear))
-    );
-
-    // 5
-    const double nSecondsEpochOffset = static_cast<double>(seconds(hours(12)).count());
-
-    // Combine all of the values
-    const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
-    return epoch;
-}
-
-std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file) {
+std::vector<SatelliteParameters> readTleFile(std::filesystem::path file) {
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
-    std::vector<SatelliteKeplerParameters> result;
+    std::vector<SatelliteParameters> result;
 
     std::ifstream f;
     f.open(file);
@@ -366,7 +366,7 @@ std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file) {
 
     std::string header;
     while (std::getline(f, header)) {
-        SatelliteKeplerParameters p;
+        SatelliteParameters p;
 
         // Header
         p.name = header;
@@ -471,16 +471,16 @@ std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file) {
     return result;
 }
 
-std::vector<SatelliteKeplerParameters> readOmmFile(std::filesystem::path file) {
+std::vector<SatelliteParameters> readOmmFile(std::filesystem::path file) {
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
-    std::vector<SatelliteKeplerParameters> result;
+    std::vector<SatelliteParameters> result;
 
     std::ifstream f;
     f.open(file);
 
     int lineNum = 1;
-    std::optional<SatelliteKeplerParameters> current = std::nullopt;
+    std::optional<SatelliteParameters> current = std::nullopt;
     std::string line;
     while (std::getline(f, line)) {
         if (line.empty()) {
@@ -517,7 +517,7 @@ std::vector<SatelliteKeplerParameters> readOmmFile(std::filesystem::path file) {
             }
 
             // ... and start a new one
-            current = SatelliteKeplerParameters();
+            current = SatelliteParameters();
         }
 
         ghoul_assert(current.has_value(), "No current element");
@@ -563,4 +563,75 @@ std::vector<SatelliteKeplerParameters> readOmmFile(std::filesystem::path file) {
     return result;
 }
 
-} // namespace openspace
+std::vector<SatelliteParameters> readSbdbFile(std::filesystem::path file) {
+    constexpr int NDataFields = 9;
+    constexpr std::string_view ExpectedHeader = "full_name,epoch_cal,e,a,i,om,w,ma,per";
+
+    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+
+    std::ifstream f;
+    f.open(file);
+
+    std::string line;
+    std::getline(f, line);
+    if (line != ExpectedHeader) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Expected JPL SBDB file to start with '{}' but found '{}' instead",
+            ExpectedHeader, line
+        ));
+    }
+
+    std::vector<SatelliteParameters> result;
+    while (std::getline(f, line)) {
+        constexpr double AuToKm = 1.496e8;
+
+        std::vector<std::string> parts = ghoul::tokenizeString(line, ',');
+        if (parts.size() != NDataFields) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Malformed line {}, expected 8 data fields, got {}", line, parts.size()
+            ));
+        }
+        SatelliteParameters p;
+
+        ghoul::trimWhitespace(parts[0]);
+        p.name = parts[0];
+
+        p.epoch = epochFromYMDdSubstring(parts[1]);
+        p.eccentricity = std::stod(parts[2]);
+        p.semiMajorAxis = std::stod(parts[3]) * AuToKm;
+
+        auto importAngleValue = [](const std::string& angle) {
+            if (angle.empty()) {
+                return 0.0;
+            }
+
+            double output = std::stod(angle);
+            output = std::fmod(output, 360.0);
+            if (output < 0.0) {
+                output += 360.0;
+            }
+            return output;
+        };
+
+        p.inclination = importAngleValue(parts[4]);
+        p.ascendingNode = importAngleValue(parts[5]);
+        p.argumentOfPeriapsis = importAngleValue(parts[6]);
+        p.meanAnomaly = importAngleValue(parts[7]);
+        p.period =
+            std::stod(parts[8]) * std::chrono::seconds(std::chrono::hours(24)).count();
+
+        result.push_back(std::move(p));
+    }
+    return result;
+}
+
+std::vector<SatelliteParameters> readFile(std::filesystem::path file, Format format) {
+    switch (format) {
+        case Format::TLE: return readTleFile(file);
+        case Format::OMM: return readOmmFile(file);
+        case Format::SBDB: return readSbdbFile(file);
+        default: throw ghoul::MissingCaseException();
+    }
+}
+
+} // namespace openspace::kepler
