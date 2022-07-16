@@ -7,7 +7,7 @@ local object = sharedSssb.createSssbGroupObject("sssb_data_main_belt_asteroid.cs
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 1
 object.Renderable.TrailFade = 0.1
-object.Renderable.UpperLimit = 50000
+object.Renderable.RenderSize = 50000
 
 object.GUI.Description = [[ Asteroids with a semi-major axis of between 2.0 and 3.2 au,
   and a perihelion distance greater than 1.666 au. ]]

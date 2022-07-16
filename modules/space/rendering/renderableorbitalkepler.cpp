@@ -41,17 +41,19 @@
 #include <chrono>
 #include <fstream>
 #include <math.h>
+#include <random>
 #include <vector>
 
 namespace {
     constexpr const char* ProgramName = "OrbitalKepler";
 
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
         "The file path to the data file to read"
     };
-    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
+
+    constexpr openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
         "SegmentQuality",
         "Segment Quality",
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
@@ -59,6 +61,7 @@ namespace {
         "orbital trail. This does not control the direct number of segments because "
         "these automatically increase according to the eccentricity of the orbit."
     };
+
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -66,31 +69,44 @@ namespace {
         "method includes lines. If the rendering mode is set to Points, this value is "
         "ignored."
     };
+    
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "This value determines the RGB main color for the lines and points of the trail."
     };
+    
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade",
         "This value determines how fast the trail fades and is an appearance property. "
     };
-    static const openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
+    
+    constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
         "Index of object in renderable group to start rendering (all prior objects will "
         "be ignored)."
     };
-    static const openspace::properties::Property::PropertyInfo RenderSizeInfo = {
+
+    constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
         "Contiguous Size of Render Block",
         "Number of objects to render sequentially from StartRenderIdx"
     };
+    
+    constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
+        "ContiguousMode",
+        "Contiguous Mode",
+        "If enabled, then the contiguous set of objects starting from StartRenderIdx "
+        "of size RenderSize will be rendered. If disabled, then the number of objects "
+        "defined by UpperLimit will rendered from an evenly dispersed sample of the "
+        "full length of the data file."
+    };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
         // [[codegen::verbatim(PathInfo.description)]]
-        std::string path;
+        std::filesystem::path path;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
             // A NORAD-style Two-Line element
@@ -120,6 +136,9 @@ namespace {
 
         // [[codegen::verbatim(RenderSizeInfo.description)]]
         std::optional<int> renderSize;
+
+        // [[codegen::verbatim(ContiguousModeInfo.description)]]
+        std::optional<bool> contiguousMode;
     };
 #include "renderableorbitalkepler_codegen.cpp"
 } // namespace
@@ -136,13 +155,14 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
     , _path(PathInfo)
+    , _contiguousMode(ContiguousModeInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     addProperty(_opacity);
 
     _segmentQuality = static_cast<unsigned int>(p.segmentQuality);
-    _segmentQuality.onChange([this] { initializeGL(); });
+    _segmentQuality.onChange([this]() { initializeGL(); });
     addProperty(_segmentQuality);
 
     _appearance.lineColor = p.color;
@@ -150,15 +170,37 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _appearance.lineWidth = p.lineWidth.value_or(2.f);
     addPropertySubOwner(_appearance);
 
-    _path = p.path;
-    _path.onChange([this] { initializeGL(); });
+    _path = p.path.string();
+    _path.onChange([this]() { initializeGL(); });
     addProperty(_path);
 
     _format = codegen::map<kepler::Format>(p.format);
 
     _startRenderIdx = p.startRenderIdx.value_or(0);
+    _startRenderIdx.onChange([this]() {
+        if (_contiguousMode) {
+            if ((_numObjects - _startRenderIdx) < _sizeRender) {
+                _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
+            }
+            _updateDataBuffersAtNextRender = true;
+        }
+    });
+    addProperty(_startRenderIdx);
 
     _sizeRender = p.renderSize.value_or(0u);
+    _sizeRender.onChange([this]() {
+        if (_contiguousMode) {
+            if (_sizeRender > (_numObjects - _startRenderIdx)) {
+                _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
+            }
+        }
+        _updateDataBuffersAtNextRender = true;
+    });
+    addProperty(_sizeRender);
+
+    _contiguousMode = p.contiguousMode.value_or(false);
+    _contiguousMode.onChange([this]() { _updateDataBuffersAtNextRender = true; });
+    addProperty(_contiguousMode);
 }
 
 void RenderableOrbitalKepler::initializeGL() {
@@ -186,14 +228,6 @@ void RenderableOrbitalKepler::initializeGL() {
     _uniformCache.opacity = _programObject->uniformLocation("opacity");
 
     updateBuffers();
-
-    double maxSemiMajorAxis = 0.0;
-    for (const kepler::SatelliteParameters& kp : _data) {
-        if (kp.semiMajorAxis > maxSemiMajorAxis) {
-            maxSemiMajorAxis = kp.semiMajorAxis;
-        }
-    }
-    setBoundingSphere(maxSemiMajorAxis * 1000);
 }
 
 void RenderableOrbitalKepler::deinitializeGL() {
@@ -214,14 +248,14 @@ bool RenderableOrbitalKepler::isReady() const {
 }
 
 void RenderableOrbitalKepler::update(const UpdateData&) {
-    if (!_data.empty() && _updateDataBuffersAtNextRender) {
+    if (_updateDataBuffersAtNextRender) {
         _updateDataBuffersAtNextRender = false;
         updateBuffers();
     }
 }
 
 void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
-    if (_data.empty()) {
+    if (_vertexBufferData.empty()) {
         return;
     }
 
@@ -248,7 +282,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     glLineWidth(_appearance.lineWidth);
 
-    const size_t nrOrbits = _data.size();
+    const size_t nrOrbits = _segmentSize.size();
     gl::GLint vertices = 0;
 
     //glDepthMask(false);
@@ -270,11 +304,67 @@ void RenderableOrbitalKepler::updateBuffers() {
         _format
     );
 
-    loadData(parameters);
+    _numObjects = parameters.size();
+
+    if (_startRenderIdx < 0 || _startRenderIdx >= _numObjects) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Start index {} out of range [0, {}]", _startRenderIdx, _numObjects
+        ));
+    }
+    
+    long long endElement = _startRenderIdx + _sizeRender - 1;
+    endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
+    if (endElement < 0 || endElement >= _numObjects) {
+        throw ghoul::RuntimeError(fmt::format(
+            "End index {} out of range [0, {}]", endElement, _numObjects
+        ));
+    }
+
+    _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
+    _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
+    if (_sizeRender == 0u) {
+        _sizeRender = static_cast<unsigned int>(_numObjects);
+    }
+
+    if (_contiguousMode) {
+        if (_startRenderIdx >= parameters.size() ||
+            (_startRenderIdx + _sizeRender) >= parameters.size())
+        {
+            throw ghoul::RuntimeError(fmt::format(
+                "Tried to load {} objects but only {} are available",
+                _startRenderIdx + _sizeRender, parameters.size()
+            ));
+        }
+
+        // Extract subset that starts at _startRenderIdx and contains _sizeRender obejcts
+        parameters = std::vector<kepler::SatelliteParameters>(
+            parameters.begin() + _startRenderIdx,
+            parameters.begin() + _startRenderIdx + _sizeRender
+        );
+    }
+    else {
+        // First shuffle the whole array
+        std::default_random_engine rng;
+        std::shuffle(parameters.begin(), parameters.end(), rng);
+
+        // Then take the first _sizeRender values
+        parameters = std::vector<kepler::SatelliteParameters>(
+            parameters.begin(),
+            parameters.begin() + _sizeRender
+        );
+    }
+
+    _segmentSize.clear();
+    for (const kepler::SatelliteParameters& p : parameters) {
+        const double scale = static_cast<double>(_segmentQuality) * 10.0;
+        _segmentSize.push_back(
+            static_cast<size_t>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
+        );
+    }
 
     size_t nVerticesTotal = 0;
 
-    int numOrbits = static_cast<int>(_data.size());
+    int numOrbits = static_cast<int>(parameters.size());
     for (int i = 0; i < numOrbits; ++i) {
         nVerticesTotal += _segmentSize[i] + 1;
     }
@@ -283,7 +373,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     size_t vertexBufIdx = 0;
     KeplerTranslation keplerTranslator;
     for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
-        const kepler::SatelliteParameters& orbit = _data[orbitIdx];
+        const kepler::SatelliteParameters& orbit = parameters[orbitIdx];
 
         keplerTranslator.setKeplerElements(
             orbit.eccentricity,
@@ -298,7 +388,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
         for (size_t j = 0 ; j < (_segmentSize[orbitIdx] + 1); ++j) {
             double timeOffset = orbit.period *
-                static_cast<double>(j)/ static_cast<double>(_segmentSize[orbitIdx]);
+                static_cast<double>(j) / static_cast<double>(_segmentSize[orbitIdx]);
 
             glm::dvec3 position = keplerTranslator.position({
                 {},
@@ -328,7 +418,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout),  nullptr);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
@@ -341,6 +431,14 @@ void RenderableOrbitalKepler::updateBuffers() {
     );
 
     glBindVertexArray(0);
+
+    double maxSemiMajorAxis = 0.0;
+    for (const kepler::SatelliteParameters& kp : parameters) {
+        if (kp.semiMajorAxis > maxSemiMajorAxis) {
+            maxSemiMajorAxis = kp.semiMajorAxis;
+        }
+    }
+    setBoundingSphere(maxSemiMajorAxis * 1000);
 }
 
 } // namespace opensapce

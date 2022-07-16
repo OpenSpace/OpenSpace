@@ -79,7 +79,7 @@ function satellites(title, file, color, group)
     Identifier = title,
     Parent = transforms.EarthInertial.Identifier,
     Renderable = {
-      Type = "RenderableSatellites",
+      Type = "RenderableOrbitalKepler",
       Path = file,
       Format = "TLE",
       SegmentQuality = 3,

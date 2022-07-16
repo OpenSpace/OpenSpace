@@ -27,9 +27,8 @@
 #include <modules/space/rendering/renderableconstellationbounds.h>
 #include <modules/space/rendering/renderablefluxnodes.h>
 #include <modules/space/rendering/renderablehabitablezone.h>
+#include <modules/space/rendering/renderableorbitalkepler.h>
 #include <modules/space/rendering/renderablerings.h>
-#include <modules/space/rendering/renderablesatellites.h>
-#include <modules/space/rendering/renderablesmallbody.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/renderabletravelspeed.h>
 #include <modules/space/translation/keplertranslation.h>
@@ -83,8 +82,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableFluxNodes>("RenderableFluxNodes");
     fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
-    fRenderable->registerClass<RenderableSatellites>("RenderableSatellites");
-    fRenderable->registerClass<RenderableSmallBody>("RenderableSmallBody");
+    fRenderable->registerClass<RenderableOrbitalKepler>("RenderableOrbitalKepler");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
 
@@ -120,8 +118,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableFluxNodes::Documentation(),
         RenderableHabitableZone::Documentation(),
         RenderableRings::Documentation(),
-        RenderableSatellites::Documentation(),
-        RenderableSmallBody::Documentation(),
+        RenderableOrbitalKepler::Documentation(),
         RenderableStars::Documentation(),
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),

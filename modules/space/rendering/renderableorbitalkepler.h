@@ -51,23 +51,19 @@ public:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    virtual void loadData(std::vector<kepler::SatelliteParameters> parameters) = 0;
-
     static documentation::Documentation Documentation();
 
-protected:
+private:
     void updateBuffers();
 
     bool _updateDataBuffersAtNextRender = false;
     bool _isFileReadinitialized = false;
     std::streamoff _numObjects;
-    std::vector<kepler::SatelliteParameters> _data;
     std::vector<size_t> _segmentSize;
     properties::UIntProperty _segmentQuality;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;
 
-private:
     /// The layout of the VBOs
     struct TrailVBOLayout {
         float x = 0.f;
@@ -86,6 +82,7 @@ private:
 
     ghoul::opengl::ProgramObject* _programObject;
     properties::StringProperty _path;
+    properties::BoolProperty _contiguousMode;
     kepler::Format _format;
     RenderableTrail::Appearance _appearance;
 

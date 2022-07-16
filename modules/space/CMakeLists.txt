@@ -33,8 +33,6 @@ set(HEADER_FILES
   rendering/renderablehabitablezone.h
   rendering/renderablerings.h
   rendering/renderableorbitalkepler.h
-  rendering/renderablesatellites.h
-  rendering/renderablesmallbody.h
   rendering/renderablestars.h
   rendering/renderabletravelspeed.h
   translation/gptranslation.h
@@ -55,8 +53,6 @@ set(SOURCE_FILES
   rendering/renderablehabitablezone.cpp
   rendering/renderablerings.cpp
   rendering/renderableorbitalkepler.cpp
-  rendering/renderablesatellites.cpp
-  rendering/renderablesmallbody.cpp
   rendering/renderablestars.cpp
   rendering/renderabletravelspeed.cpp
   translation/gptranslation.cpp

@@ -44,7 +44,7 @@
 
 
 namespace {
-    constexpr const char* ProgramName = "RenderableSatellites";
+    constexpr const char* ProgramName = "RenderableOrbitalKepler";
     constexpr const char* _loggerCat = "SpaceDebris";
 
     constexpr const char* KeyRawVolumeOutput = "RawVolumeOutput";
