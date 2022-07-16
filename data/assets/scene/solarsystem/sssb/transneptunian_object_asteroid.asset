@@ -33,8 +33,8 @@ asset.export(object)
 asset.meta = {
   Name = "Trans-Neptunian Asteroids",
   Version = "1.1",
-  Description = [[ RenderableSmallBody asset with data from from JPL Horizons
-    contiaining Trans-Neptunian group. ]],
+  Description = [[ Asset with data from from JPL Horizons containing Trans-Neptunian
+    group. ]],
   Author = [[JPL Small-Body Database hosted by California Institute of
     Technology]],
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
