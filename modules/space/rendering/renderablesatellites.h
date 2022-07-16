@@ -43,7 +43,6 @@ namespace documentation { struct Documentation; }
 class RenderableSatellites : public RenderableOrbitalKepler {
 public:
     RenderableSatellites(const ghoul::Dictionary& dictionary);
-    static documentation::Documentation Documentation();
 
 private:
     virtual void loadData(std::vector<kepler::SatelliteParameters> data) override;

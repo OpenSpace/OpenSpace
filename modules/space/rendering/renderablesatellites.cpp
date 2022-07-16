@@ -47,53 +47,28 @@
 
 namespace {
     constexpr const char* _loggerCat = "Satellites";
-
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Segments",
-        "The number of segments to use for each orbit ellipse"
-    };
-
-    struct [[codegen::Dictionary(RenderableSatellites)]] Parameters {
-        // [[codegen::verbatim(SegmentsInfo.description)]]
-        double segments;
-    };
-#include "renderablesatellites_codegen.cpp"
 }
 
 namespace openspace {
 
-documentation::Documentation RenderableSatellites::Documentation() {
-    return codegen::doc<Parameters>(
-        "space_renderablesatellites",
-        RenderableOrbitalKepler::Documentation()
-    );
-}
-
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
 {
-    // Commented out right now as its not super clear how it works with inheritance. We'd
-    // probably want a codegen::check function that only does the checking without
-    // actually creating a Parameter objects
-    // codegen::bake<Parameters>(dictionary);
     addProperty(_startRenderIdx);
     addProperty(_sizeRender);
 
-    _updateStartRenderIdxSelect = [this]() {
+    _startRenderIdx.onChange([this]() {
         if ((_numObjects - _startRenderIdx) < _sizeRender) {
             _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
         }
         updateBuffers();
-    };
-    _updateRenderSizeSelect = [this]() {
+    });
+    _sizeRender.onChange([this]() {
         if (_sizeRender > (_numObjects - _startRenderIdx)) {
             _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
         }
         updateBuffers();
-    };
-    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
-    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
+    });
 }
 
 void RenderableSatellites::loadData(std::vector<kepler::SatelliteParameters> data) {

@@ -137,14 +137,12 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
     , _path(PathInfo)
 {
-    _reinitializeTrailBuffers = std::function<void()>([this] { initializeGL(); });
-
     const Parameters p = codegen::bake<Parameters>(dict);
 
     addProperty(_opacity);
 
     _segmentQuality = static_cast<unsigned int>(p.segmentQuality);
-    _segmentQuality.onChange(_reinitializeTrailBuffers);
+    _segmentQuality.onChange([this] { initializeGL(); });
     addProperty(_segmentQuality);
 
     _appearance.lineColor = p.color;
@@ -153,7 +151,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addPropertySubOwner(_appearance);
 
     _path = p.path;
-    _path.onChange(_reinitializeTrailBuffers);
+    _path.onChange([this] { initializeGL(); });
     addProperty(_path);
 
     _format = codegen::map<kepler::Format>(p.format);
@@ -215,14 +213,16 @@ bool RenderableOrbitalKepler::isReady() const {
     return _programObject != nullptr;
 }
 
+void RenderableOrbitalKepler::update(const UpdateData&) {
+    if (!_data.empty() && _updateDataBuffersAtNextRender) {
+        _updateDataBuffersAtNextRender = false;
+        updateBuffers();
+    }
+}
+
 void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     if (_data.empty()) {
         return;
-    }
-
-    if (_updateDataBuffersAtNextRender) {
-        _updateDataBuffersAtNextRender = false;
-        updateBuffers();
     }
 
     _programObject->activate();
@@ -281,10 +281,11 @@ void RenderableOrbitalKepler::updateBuffers() {
     _vertexBufferData.resize(nVerticesTotal);
 
     size_t vertexBufIdx = 0;
+    KeplerTranslation keplerTranslator;
     for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
         const kepler::SatelliteParameters& orbit = _data[orbitIdx];
 
-        _keplerTranslator.setKeplerElements(
+        keplerTranslator.setKeplerElements(
             orbit.eccentricity,
             orbit.semiMajorAxis,
             orbit.inclination,
@@ -299,7 +300,7 @@ void RenderableOrbitalKepler::updateBuffers() {
             double timeOffset = orbit.period *
                 static_cast<double>(j)/ static_cast<double>(_segmentSize[orbitIdx]);
 
-            glm::dvec3 position = _keplerTranslator.position({
+            glm::dvec3 position = keplerTranslator.position({
                 {},
                 Time(timeOffset + orbit.epoch),
                 Time(0.0)

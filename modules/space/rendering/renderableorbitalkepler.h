@@ -48,39 +48,26 @@ public:
     void deinitializeGL() override;
 
     bool isReady() const override;
+    void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     virtual void loadData(std::vector<kepler::SatelliteParameters> parameters) = 0;
 
-protected:
     static documentation::Documentation Documentation();
 
+protected:
     void updateBuffers();
 
-    std::function<void()> _reinitializeTrailBuffers;
-    std::function<void()> _updateStartRenderIdxSelect;
-    std::function<void()> _updateRenderSizeSelect;
-
     bool _updateDataBuffersAtNextRender = false;
-    std::streamoff _numObjects;
     bool _isFileReadinitialized = false;
-    inline static constexpr double convertAuToKm = 1.496e8;
-    inline static constexpr double convertDaysToSecs = 86400.0;
+    std::streamoff _numObjects;
     std::vector<kepler::SatelliteParameters> _data;
     std::vector<size_t> _segmentSize;
     properties::UIntProperty _segmentQuality;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;
-    properties::Property::OnChangeHandle _startRenderIdxCallbackHandle;
-    properties::Property::OnChangeHandle _sizeRenderCallbackHandle;
 
 private:
-    struct Vertex {
-        glm::vec3 position = glm::vec3(0.f);
-        glm::vec3 color = glm::vec3(0.f);
-        glm::vec2 texcoord = glm::vec2(0.f);
-    };
-
     /// The layout of the VBOs
     struct TrailVBOLayout {
         float x = 0.f;
@@ -91,21 +78,16 @@ private:
         double period = 0.0;
     };
 
-    KeplerTranslation _keplerTranslator;
-
-    /// The backend storage for the vertex buffer object containing all points for this
-    /// trail.
+    /// The backend storage for the vertex buffer object containing all points
     std::vector<TrailVBOLayout> _vertexBufferData;
 
     GLuint _vertexArray;
     GLuint _vertexBuffer;
 
-
     ghoul::opengl::ProgramObject* _programObject;
     properties::StringProperty _path;
     kepler::Format _format;
     RenderableTrail::Appearance _appearance;
-    glm::vec3 _position = glm::vec3(0.f);
 
     UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
         numberOfSegments) _uniformCache;

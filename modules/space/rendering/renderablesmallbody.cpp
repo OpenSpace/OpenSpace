@@ -70,7 +70,9 @@ namespace {
         // [[codegen::verbatim(ContiguousModeInfo.description)]]
         std::optional<bool> contiguousMode;
 
-        // [[codegen::verbatim(UpperLimitInfo.description)]]
+        // Upper limit on the number of objects for this renderable, regardless of how
+        // many objects are contained in the data file. Produces an evenly-distributed
+        // sample from the data file
         std::optional<int> upperLimit;
     };
 #include "renderablesmallbody_codegen.cpp"
@@ -88,22 +90,14 @@ documentation::Documentation RenderableSmallBody::Documentation() {
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
     , _contiguousMode(ContiguousModeInfo, false)
-    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
 {
-    codegen::bake<Parameters>(dictionary);
+    Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_startRenderIdx);
     addProperty(_sizeRender);
     addProperty(_contiguousMode);
-    addProperty(_upperLimit);
 
-    if (dictionary.hasValue<double>(UpperLimitInfo.identifier)) {
-        _upperLimit = static_cast<unsigned int>(
-            dictionary.value<double>(UpperLimitInfo.identifier));
-    }
-    else {
-        _upperLimit = 0u;
-    }
+    _sizeRender = p.upperLimit.value_or(0);
 
     if (dictionary.hasValue<bool>(ContiguousModeInfo.identifier)) {
         _contiguousMode = dictionary.value<bool>(ContiguousModeInfo.identifier);
@@ -112,7 +106,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
         _contiguousMode = false;
     }
 
-    _updateStartRenderIdxSelect = std::function<void()>([this] {
+    _startRenderIdx.onChange([this]() {
         if (_contiguousMode) {
             if ((_numObjects - _startRenderIdx) < _sizeRender) {
                 _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
@@ -120,7 +114,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
             _updateDataBuffersAtNextRender = true;
         }
     });
-    _updateRenderSizeSelect = std::function<void()>([this] {
+    _sizeRender.onChange([this]() {
         if (_contiguousMode) {
             if (_sizeRender > (_numObjects - _startRenderIdx)) {
                 _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
@@ -128,20 +122,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
             _updateDataBuffersAtNextRender = true;
         }
     });
-    _updateRenderUpperLimitSelect = std::function<void()>([this] {
-        if (!_contiguousMode) {
-            _updateDataBuffersAtNextRender = true;
-        }
-    });
-    _updateContiguousModeSelect = std::function<void()>([this] {
-        _updateDataBuffersAtNextRender = true;
-    });
-
-    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
-    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
-    _upperLimitCallbackHandle = _upperLimit.onChange(_updateRenderUpperLimitSelect);
-    _contiguousModeCallbackhandle =
-        _contiguousMode.onChange(_updateContiguousModeSelect);
+    _contiguousMode.onChange([this] { _updateDataBuffersAtNextRender = true; });
 }
 
 void RenderableSmallBody::loadData(std::vector<kepler::SatelliteParameters> data) {
@@ -151,11 +132,6 @@ void RenderableSmallBody::loadData(std::vector<kepler::SatelliteParameters> data
     _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
     if (_sizeRender == 0u) {
         _sizeRender = static_cast<unsigned int>(_numObjects);
-    }
-
-    _upperLimit.setMaxValue(static_cast<unsigned int>(_numObjects));
-    if (_upperLimit == 0u) {
-        _upperLimit = static_cast<unsigned int>(_numObjects);
     }
 
     if (_contiguousMode) {
