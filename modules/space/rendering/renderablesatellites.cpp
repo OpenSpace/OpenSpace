@@ -140,7 +140,6 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
         e.eccentricity = param.eccentricity;
         e.argumentOfPeriapsis = param.argumentOfPeriapsis;
         e.meanAnomaly = param.meanAnomaly;
-        e.meanMotion = param.meanMotion;
         e.epoch = param.epoch;
         e.period = param.period;
 

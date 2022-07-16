@@ -79,7 +79,6 @@ protected:
         double eccentricity = 0.0;
         double argumentOfPeriapsis = 0.0;
         double meanAnomaly = 0.0;
-        double meanMotion = 0.0;
         double epoch = 0.0;
         double period = 0.0;
     };

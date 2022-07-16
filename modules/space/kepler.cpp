@@ -24,7 +24,10 @@
 
 #include <modules/space/kepler.h>
 
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <fstream>
+#include <optional>
 #include <sstream>
 
 namespace {
@@ -172,6 +175,84 @@ namespace {
         // We need the semi major axis in km instead of m
         return semiMajorAxis / 1000.0;
     }
+
+
+    double epochFromOmmString(const std::string& epochString) {
+        // The epochString is in the form:
+        // YYYY-MM-DDThh:mm:ss[.d->d][Z]
+        // or
+        // YYYY-DDDThh:mm:ss[.d->d][Z]
+
+        // The main overview of this function:
+        // 0. Determine which type it is
+        // 1. Read the year value
+        // 2. Calculate the number of days since the beginning of the year
+        // 3. Convert the number of days to a number of seconds
+        // 4. Get the number of leap seconds since January 1st, 2000 and remove them
+        // 5. Add the hh:mm:ss component
+        // 6. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
+        // midnight
+
+        // 1
+        int year = std::atoi(epochString.substr(0, 4).c_str());
+        const int daysSince2000 = countDays(year);
+
+
+        // 2.
+        const size_t pos = epochString.find('T');
+        int nDays = 0;
+        if (pos == 10) {
+            // We have the first form
+            int monthNum = std::atoi(epochString.substr(5, 2).c_str());
+            int dayOfMonthNum = std::atoi(epochString.substr(7, 2).c_str());
+            nDays = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
+        }
+        else if (pos == 8) {
+            // We have the second form
+            nDays = std::atoi(epochString.substr(5, 3).c_str());
+        }
+        else {
+            throw ghoul::RuntimeError(fmt::format(
+                "Malformed epoch string '{}'", epochString
+            ));
+        }
+
+
+        // 3
+        using namespace std::chrono;
+        const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
+        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        const double nSecondsSince2000 = (daysSince2000 + nDays - 1) * SecondsPerDay;
+
+
+        // 4
+        // We need to remove additional leap seconds past 2000 and add them prior to
+        // 2000 to sync up the time zones
+        const double nLeapSecondsOffset = -countLeapSeconds(
+            year,
+            static_cast<int>(std::floor(nDays))
+        );
+
+        // 5
+        std::string remainder = epochString.substr(pos);
+        const int hours = std::atoi(remainder.substr(0, 2).c_str());
+        const int minutes = std::atoi(remainder.substr(3, 2).c_str());
+        const int seconds = std::atoi(remainder.substr(5, 2).c_str());
+
+        const long long totalSeconds =
+            std::chrono::seconds(std::chrono::hours(hours)).count() +
+            std::chrono::seconds(std::chrono::minutes(minutes)).count() +
+            seconds;
+
+
+        // 6
+        const long long offset = std::chrono::seconds(std::chrono::hours(12)).count();
+
+        // Combine all of the values
+        const double epoch =
+            nSecondsSince2000 + totalSeconds + nLeapSecondsOffset - offset;
+        return epoch;
+    }
 } // namespace
 
 namespace openspace {
@@ -283,7 +364,7 @@ std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file) {
     std::ifstream f;
     f.open(file);
 
-    int line = 1;
+    int lineNum = 1;
 
     std::string header;
     while (std::getline(f, header)) {
@@ -312,7 +393,7 @@ std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file) {
         std::getline(f, firstLine);
         if (f.bad() || firstLine[0] != '1') {
             throw ghoul::RuntimeError(fmt::format(
-                "Malformed TLE file '{}' at line {}", file, line + 1
+                "Malformed TLE file '{}' at line {}", file, lineNum + 1
             ));
         }
         // The id only contains the last two digits of the launch year, so we have to
@@ -344,7 +425,7 @@ std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file) {
         std::getline(f, secondLine);
         if (f.bad() || secondLine[0] != '2') {
             throw ghoul::RuntimeError(fmt::format(
-                "Malformed TLE file '{}' at line {}", file, line + 1
+                "Malformed TLE file '{}' at line {}", file, lineNum + 1
             ));
         }
 
@@ -378,14 +459,107 @@ std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file) {
 
         // Get mean motion
         stream.str(secondLine.substr(52, 11));
-        stream >> p.meanMotion;
+        float meanMotion;
+        stream >> meanMotion;
 
-        p.semiMajorAxis = calculateSemiMajorAxis(p.meanMotion);
-        p.period = std::chrono::seconds(std::chrono::hours(24)).count() / p.meanMotion;
+        p.semiMajorAxis = calculateSemiMajorAxis(meanMotion);
+        p.period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
 
         result.push_back(p);
 
-        line = line + 3;
+        lineNum = lineNum + 3;
+    }
+
+    return result;
+}
+
+std::vector<SatelliteKeplerParameters> readOmmFile(std::filesystem::path file) {
+    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+
+    std::vector<SatelliteKeplerParameters> result;
+
+    std::ifstream f;
+    f.open(file);
+
+    int lineNum = 1;
+    std::optional<SatelliteKeplerParameters> current = std::nullopt;
+    std::string line;
+    while (std::getline(f, line)) {
+        if (line.empty()) {
+            continue;
+        }
+
+        // Tokenize the line
+        std::vector<std::string> parts = ghoul::tokenizeString(line, '=');
+        for (std::string& p : parts) {
+            ghoul::trimWhitespace(p);
+        }
+
+        if (parts.size() != 2) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Malformed line '{}' at {}", line, lineNum
+            ));
+        }
+
+        if (parts[0] == "CCSDS_OMM_VERS") {
+            if (parts[1] != "2.0") {
+                LWARNINGC(
+                    "OMM",
+                    fmt::format(
+                        "Only version 2.0 is currently supported but found {}. "
+                        "Parsing might fail",
+                        parts[1]
+                    )
+                );
+            }
+
+            // We start a new value so we need to store the last one...
+            if (current.has_value()) {
+                result.push_back(*current);
+            }
+
+            // ... and start a new one
+            current = SatelliteKeplerParameters();
+        }
+
+        ghoul_assert(current.has_value(), "No current element");
+
+        if (parts[0] == "OBJECT_NAME") {
+            current->name = parts[1];
+        }
+        else if (parts[0] == "OBJECT_ID") {
+            current->id = parts[1];
+        }
+        else if (parts[0] == "EPOCH") {
+            current->epoch = epochFromOmmString(parts[1]);
+        }
+        else if (parts[0] == "MEAN_MOTION") {
+            float mm = std::stof(parts[1]);
+            current->semiMajorAxis = calculateSemiMajorAxis(mm);
+            current->period = std::chrono::seconds(std::chrono::hours(24)).count() / mm;
+        }
+        else if (parts[0] == "SEMI_MAJOR_AXIS") {
+
+        }
+        else if (parts[0] == "ECCENTRICITY") {
+            current->eccentricity = std::stof(parts[1]);
+        }
+        else if (parts[0] == "INCLINATION") {
+            current->inclination = std::stof(parts[1]);
+        }
+        else if (parts[0] == "RA_OF_ASC_NODE") {
+            current->ascendingNode = std::stof(parts[1]);
+        }
+        else if (parts[0] == "ARG_OF_PERICENTER") {
+            current->argumentOfPeriapsis = std::stof(parts[1]);
+        }
+        else if (parts[0] == "MEAN_ANOMALY") {
+            current->meanAnomaly = std::stof(parts[1]);
+        }
+    }
+
+    if (current.has_value()) {
+        result.push_back(*current);
     }
 
     return result;

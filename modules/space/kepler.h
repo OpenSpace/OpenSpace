@@ -42,7 +42,6 @@ struct SatelliteKeplerParameters {
     double eccentricity = 0.0;
     double argumentOfPeriapsis = 0.0;
     double meanAnomaly = 0.0;
-    double meanMotion = 0.0;
     double epoch = 0.0;
     double period = 0.0;
 };
@@ -61,6 +60,18 @@ double epochFromYMDdSubstring(const std::string& epochString);
  * \throw ghoul::RuntimeError If the provided \p file is not a valid TLE file
  */
 std::vector<SatelliteKeplerParameters> readTleFile(std::filesystem::path file);
+
+/**
+ * Reads the satellite information from the provided \p file and returns them as
+ * individual values.
+ *
+ * \param file The file to the OMM file. This file must be a valid file
+ * \return Information about all of the contained satellite information in the \p file
+ *
+ * \pre \p file must be a file and must exist
+ * \throw ghoul::RuntimeError If the provided \p file is not a valid OMM file
+ */
+std::vector<SatelliteKeplerParameters> readOmmFile(std::filesystem::path file);
 
 } // namespace openspace
 
