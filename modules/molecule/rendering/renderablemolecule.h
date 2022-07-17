@@ -22,8 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__
-#define __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__
+#pragma once
 
 #include "openspace/properties/optionproperty.h"
 #include "openspace/properties/selectionproperty.h"
@@ -66,6 +65,9 @@ private:
         LoadMolecule,
     } _deferredTask;
     
+    void handleDeferredTasks();
+    void updateAnimation(double t);
+    
     void initMolecule();
     void freeMolecule();
     void initTrajectory();
@@ -73,8 +75,7 @@ private:
 
     void updateRepresentation();
     
-    // Probably in ångströms
-    float computeRadius();
+    void computeAABB();
 
     double _frame;
     md_gl_shaders_t _shaders;
@@ -94,9 +95,8 @@ private:
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
-    properties::FloatProperty _animSpeed;
+    properties::FloatProperty _animationSpeed;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__

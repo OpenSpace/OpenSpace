@@ -22,12 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "renderablemolecule.h"
+
 #include "glbinding/gl/bitfield.h"
 #include "glbinding/gl/functions.h"
 #include "md_util.h"
 #include "viamd/coloring.h"
 #include "viamd/loader.h"
-#include <modules/molecule/rendering/renderablemolecule.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -134,8 +135,8 @@ namespace {
         "Thickness of the atoms in Space Fill or Licorice representation"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AnimSpeedInfo = {
-        "AnimSpeed",
+    constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
+        "AnimationSpeed",
         "Animation Speed",
         "Playback speed of the animation (in frames per second)"
     };
@@ -175,8 +176,8 @@ namespace {
         // [[codegen::verbatim(RepScaleInfo.description)]]
         std::optional<float> repScale;
 
-        // [[codegen::verbatim(AnimSpeedInfo.description)]]
-        std::optional<float> animSpeed;
+        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
+        std::optional<float> animationSpeed;
     };
 
 #include "renderablemolecule_codegen.cpp"
@@ -198,7 +199,7 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     _repType(RepTypeInfo),
     _coloring(ColoringInfo),
     _repScale(RepScaleInfo, 1.f, 0.1f, 10.f),
-    _animSpeed(AnimSpeedInfo, 1.f, 0.1f, 1000.f)
+    _animationSpeed(AnimationSpeedInfo, 1.f, 0.1f, 1000.f)
 {
     _molecule = {};
     _trajectory = {};
@@ -240,7 +241,7 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     }
     
     _repScale = p.repScale.value_or(1.f);
-    _animSpeed = p.animSpeed.value_or(1.f);
+    _animationSpeed = p.animationSpeed.value_or(1.f);
 
     const auto loadMolecule = [this]() {
         _deferredTask = GlDeferredTask::LoadMolecule;
@@ -256,7 +257,7 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     addProperty(_repType);
     addProperty(_coloring);
     addProperty(_repScale);
-    addProperty(_animSpeed);
+    addProperty(_animationSpeed);
 }
 
 RenderableMolecule::~RenderableMolecule() {
@@ -285,7 +286,7 @@ bool RenderableMolecule::isReady() const {
     return true;
 }
 
-void RenderableMolecule::update(const UpdateData& data) {
+void RenderableMolecule::handleDeferredTasks() {
     // This is a dirty hack to load molecules in a gl context.
     switch (_deferredTask) {
     case GlDeferredTask::None:
@@ -297,78 +298,84 @@ void RenderableMolecule::update(const UpdateData& data) {
         break;
     }
     _deferredTask = GlDeferredTask::None;
-    
+}
+
+void RenderableMolecule::updateAnimation(double time) {
+    int64_t nFrames = md_trajectory_num_frames(_trajectory);
+    if (nFrames >= 4) {
+        double t = fract(time * _animationSpeed);
+        int64_t frames[4];
+
+        // The animation is played forward and back (bouncing), the first and last
+        // frame are repeated.
+
+        if ((int64_t(time) / nFrames) % 2 == 0) { // animation forward
+            int64_t frame = int64_t(time) % nFrames;
+            if (frame < 0) frame += nFrames;
+            frames[0] = std::max<int64_t>(0, frame - 1);
+            frames[1] = frame;
+            frames[2] = std::min<int64_t>(nFrames - 1, frame + 1);
+            frames[3] = std::min<int64_t>(nFrames - 1, frame + 2);
+        }
+        else { // animation backward
+            t = 1.0 - t;
+            int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
+            if (frame < 0) frame += nFrames;
+            frames[0] = std::max<int64_t>(0, frame - 2);
+            frames[1] = std::max<int64_t>(0, frame - 1);
+            frames[2] = frame;
+            frames[3] = std::min<int64_t>(nFrames - 1, frame + 1);
+        }
+
+        // nearest
+        // md_trajectory_frame_header_t header{};
+        // md_trajectory_load_frame(_trajectory, frame, &header, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z);
+        // md_gl_molecule_set_atom_position(&_drawMol, 0,static_cast<uint32_t>(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+        
+        // cubic
+        md_trajectory_frame_header_t header[4];
+        mat3_t boxes[4];
+        int64_t stride = ROUND_UP(_molecule.atom.count, md_simd_widthf);    // The interploation uses SIMD vectorization without bounds, so we make sure there is no overlap between the data segments
+        int64_t bytes = stride * sizeof(float) * 3 * 4;
+        float* mem = static_cast<float*>(malloc(bytes));
+        {
+            md_vec3_soa_t src[4] = {
+                {mem + stride * 0, mem + stride *  1, mem + stride *  2},
+                {mem + stride * 3, mem + stride *  4, mem + stride *  5},
+                {mem + stride * 6, mem + stride *  7, mem + stride *  8},
+                {mem + stride * 9, mem + stride * 10, mem + stride * 11},
+            };
+            md_vec3_soa_t dst = {
+                _molecule.atom.x, _molecule.atom.y, _molecule.atom.z,
+            };
+
+            md_trajectory_load_frame(_trajectory, frames[0], &header[0], src[0].x, src[0].y, src[0].z);
+            md_trajectory_load_frame(_trajectory, frames[1], &header[1], src[1].x, src[1].y, src[1].z);
+            md_trajectory_load_frame(_trajectory, frames[2], &header[2], src[2].x, src[2].y, src[2].z);
+            md_trajectory_load_frame(_trajectory, frames[3], &header[3], src[3].x, src[3].y, src[3].z);
+
+            memcpy(&boxes[0], header[0].box, sizeof(boxes[0]));
+            memcpy(&boxes[1], header[1].box, sizeof(boxes[1]));
+            memcpy(&boxes[2], header[2].box, sizeof(boxes[2]));
+            memcpy(&boxes[3], header[3].box, sizeof(boxes[3]));
+            mat3_t box = cubic_spline(boxes[0], boxes[1], boxes[2], boxes[3], t, 1.0);
+            vec3_t pbc_ext = box * vec3_t{{1.0, 1.0, 1.0}};
+
+            md_util_cubic_interpolation(dst, src, _molecule.atom.count, pbc_ext, t, 1.0f);
+        }
+        free(mem);
+        md_gl_molecule_set_atom_position(&_drawMol, 0, uint32_t(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+    }
+    else {
+        LERROR("Molecule trajectory contains less than 4 frames. Cannot interpolate.");
+    }
+}
+
+void RenderableMolecule::update(const UpdateData& data) {
+    handleDeferredTasks();
     // update animation
     if (_trajectoryApi) {
-        int64_t nFrames = md_trajectory_num_frames(_trajectory);
-        if (nFrames >= 4) {
-            double time = data.time.j2000Seconds() * _animSpeed;
-            double t = fract(time);
-            int64_t frames[4];
-
-            // The animation is played forward and back (bouncing), the first and last
-            // frame are repeated.
-
-            if ((int64_t(time) / nFrames) % 2 == 0) { // animation forward
-                int64_t frame = int64_t(time) % nFrames;
-                if (frame < 0) frame += nFrames;
-                frames[0] = std::max<int64_t>(0, frame - 1);
-                frames[1] = frame;
-                frames[2] = std::min<int64_t>(nFrames - 1, frame + 1);
-                frames[3] = std::min<int64_t>(nFrames - 1, frame + 2);
-            }
-            else { // animation backward
-                t = 1.0 - t;
-                int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
-                if (frame < 0) frame += nFrames;
-                frames[0] = std::max<int64_t>(0, frame - 2);
-                frames[1] = std::max<int64_t>(0, frame - 1);
-                frames[2] = frame;
-                frames[3] = std::min<int64_t>(nFrames - 1, frame + 1);
-            }
-
-            // nearest
-            // md_trajectory_frame_header_t header{};
-            // md_trajectory_load_frame(_trajectory, frame, &header, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z);
-            // md_gl_molecule_set_atom_position(&_drawMol, 0,static_cast<uint32_t>(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
-            
-            // cubic
-            md_trajectory_frame_header_t header[4];
-            mat3_t boxes[4];
-            int64_t stride = ROUND_UP(_molecule.atom.count, md_simd_widthf);    // The interploation uses SIMD vectorization without bounds, so we make sure there is no overlap between the data segments
-            int64_t bytes = stride * sizeof(float) * 3 * 4;
-            float* mem = static_cast<float*>(malloc(bytes));
-            {
-                md_vec3_soa_t src[4] = {
-                    {mem + stride * 0, mem + stride *  1, mem + stride *  2},
-                    {mem + stride * 3, mem + stride *  4, mem + stride *  5},
-                    {mem + stride * 6, mem + stride *  7, mem + stride *  8},
-                    {mem + stride * 9, mem + stride * 10, mem + stride * 11},
-                };
-                md_vec3_soa_t dst = {
-                    _molecule.atom.x, _molecule.atom.y, _molecule.atom.z,
-                };
-
-                md_trajectory_load_frame(_trajectory, frames[0], &header[0], src[0].x, src[0].y, src[0].z);
-                md_trajectory_load_frame(_trajectory, frames[1], &header[1], src[1].x, src[1].y, src[1].z);
-                md_trajectory_load_frame(_trajectory, frames[2], &header[2], src[2].x, src[2].y, src[2].z);
-                md_trajectory_load_frame(_trajectory, frames[3], &header[3], src[3].x, src[3].y, src[3].z);
-
-                memcpy(&boxes[0], header[0].box, sizeof(boxes[0]));
-                memcpy(&boxes[1], header[1].box, sizeof(boxes[1]));
-                memcpy(&boxes[2], header[2].box, sizeof(boxes[2]));
-                memcpy(&boxes[3], header[3].box, sizeof(boxes[3]));
-                mat3_t box = cubic_spline(boxes[0], boxes[1], boxes[2], boxes[3], t, 1.0);
-                vec3_t pbc_ext = box * vec3_t{{1.0, 1.0, 1.0}};
-
-                md_util_cubic_interpolation(dst, src, _molecule.atom.count, pbc_ext, t, 1.0f);
-            }
-            free(mem);
-            md_gl_molecule_set_atom_position(&_drawMol, 0, uint32_t(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
-        }
-        else {
-            LERROR("Molecule trajectory contains less than 4 frames. Cannot interpolate.");
-        }
+        updateAnimation(data.time.j2000Seconds());
     }
 }
 
@@ -424,7 +431,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     }
 }
 
-float RenderableMolecule::computeRadius() {
+void RenderableMolecule::computeAABB() {
     glm::vec3 min_aabb {FLT_MAX};
     glm::vec3 max_aabb {-FLT_MAX};
 
@@ -436,8 +443,6 @@ float RenderableMolecule::computeRadius() {
 
     _extent = max_aabb - min_aabb;
     _center = (min_aabb + max_aabb) * 0.5f;
-    float radius = glm::compMax(_extent) * 0.5f;
-    return radius;
 }
 
 void RenderableMolecule::initMolecule() {
@@ -476,11 +481,12 @@ void RenderableMolecule::initMolecule() {
         return;
     }
 
-    float radius = computeRadius();
-    // setBoundingSphere(radius * 1.0E10); // OpenSpace in in meters, Mold is in Ångströms
-    // setInteractionSphere(radius * 1.0E10); // OpenSpace in in meters, Mold is in Ångströms
-    setBoundingSphere(radius * 1.0E-10); // OpenSpace in in meters, Mold is in Ångströms
-    setInteractionSphere(radius * 1.0E-10); // OpenSpace in in meters, Mold is in Ångströms
+    computeAABB();
+    float radius = compMax(_extent) * 0.5f;
+    // setBoundingSphere(radius * 1.0E10); // OpenSpace is in meters, Mold is in Ångströms
+    // setInteractionSphere(radius * 1.0E10); // OpenSpace is in meters, Mold is in Ångströms
+    setBoundingSphere(radius * 1.0E-10); // OpenSpace is in meters, Mold is in Ångströms
+    setInteractionSphere(radius * 1.0E-10); // OpenSpace is in meters, Mold is in Ångströms
 
     md_gl_molecule_init(&_drawMol, &_molecule);
     md_gl_representation_init(&_drawRep, &_drawMol);

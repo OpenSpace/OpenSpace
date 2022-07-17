@@ -22,17 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#pragma once
+#ifndef __OPENSPACE_MODULE_MOLECULE___RENDERABLESIMULATIONBOX___H__
+#define __OPENSPACE_MODULE_MOLECULE___RENDERABLESIMULATIONBOX___H__
 
+#include "renderablemolecule.h"
 #include "openspace/properties/optionproperty.h"
 #include "openspace/properties/selectionproperty.h"
+#include "openspace/properties/vector/dvec3property.h"
 #include <openspace/rendering/renderable.h>
 
 //#include <openspace/properties/scalar/floatproperty.h>
 //#include <openspace/properties/vector/vec3property.h>
 //#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include "openspace/properties/vector/dvec3property.h"
 //#include <ghoul/opengl/ghoul_gl.h>
 //#include <ghoul/opengl/uniformcache.h>
 
@@ -49,7 +51,6 @@ class HttpMemoryDownload;
 class RenderableSimulationBox : public Renderable {
 public:
     explicit RenderableSimulationBox(const ghoul::Dictionary& dictionary);
-    virtual ~RenderableSimulationBox();
 
     void initialize() override;
     void initializeGL() override;
@@ -61,48 +62,32 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum class GlDeferredTask {
-        None,
-        LoadMolecule,
-    } _deferredTask;
+  unsigned width, height;
+  
+  struct molecule_t {
+    std::shared_ptr<RenderableMolecule> renderable;
+    glm::dvec3 position;
+    double angle;
+    glm::dvec3 direction; // moving direction where magnitude is linear velocity
+    glm::dvec3 rotation;  // rotation axis where magnitude is angular velocity
+  };
     
-    void handleDeferredTasks();
-    void updateAnimation(double t);
-    
-    void initMolecule();
-    void freeMolecule();
-    void initTrajectory();
-    void freeTrajectory();
-
-    void updateRepresentation();
-    
-    void computeAABB();
-
-    double _frame;
-    md_gl_shaders_t _shaders;
-
-    md_molecule_api* _moleculeApi;
-    md_trajectory_api* _trajectoryApi;
-    md_molecule_t _molecule;
-    md_trajectory_i* _trajectory;
-    md_gl_representation_t _drawRep;
-    md_gl_molecule_t _drawMol;
-
-    glm::vec3 _center;
-    glm::vec3 _extent;
-
-    properties::StringProperty _moleculeFile;
-    properties::StringProperty _trajectoryFile;
-    properties::OptionProperty _repType;
-    properties::OptionProperty _coloring;
-    properties::FloatProperty _repScale;
-    properties::FloatProperty _animationSpeed;
-    properties::FloatProperty _simulationSpeed;
-    properties::IntProperty _moleculeCount;
-    properties::FloatProperty _linearVelocity;
-    properties::FloatProperty _angularVelocity;
-    properties::DVec3Property _simulationBox;
-    properties::FloatProperty _collisionRadius;
+  std::vector<molecule_t> _molecules;
+  // because some molecules may share the same renderable, keep a vec of all unique
+  // renderables to perform actions on 1 renderable only once.
+  std::vector<std::shared_ptr<RenderableMolecule>> _renderables;
+  
+  properties::StringProperty _moleculeFile;
+  properties::StringProperty _trajectoryFile;
+  properties::IntProperty _moleculeCount;
+  properties::FloatProperty _linearVelocity;
+  properties::FloatProperty _angularVelocity;
+  properties::DVec3Property _simulationBox;
+  properties::FloatProperty _animationSpeed;
+  properties::FloatProperty _collisionRadius;
 };
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_MOLECULE___RENDERABLESIMULATIONBOX___H__
+

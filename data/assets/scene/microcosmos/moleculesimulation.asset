@@ -1,4 +1,4 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+-- local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local moleculeDb = "https://home.thissma.fr/moldata/"
 
@@ -30,21 +30,8 @@ local moleculeFiles = asset.syncedResource({
   }
 })
 
--- local PdbTest = {
---   Identifier = "PdbTest",
---   -- Parent = sunTransforms.SunCenter.Identifier,
---   Renderable = {
---     Type = "RenderableMolecule",
---     MoleculeFile = moleculeFiles .. "ice.gro",
---     -- TrajectoryFile = moleculeFiles .. "ice.xtc",
---   },
---   GUI = {
---     Path = "/Microcosmos/Molecules/Simulation"
---   }
--- }
-
-local PdbTest = {
-  Identifier = "PdbTest",
+local MoleculeSimulation = {
+  Identifier = "MoleculeSimulation",
   -- Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
     Type = "RenderableSimulationBox",
@@ -62,11 +49,11 @@ local PdbTest = {
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(PdbTest)
+  openspace.addSceneGraphNode(MoleculeSimulation)
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(PdbTest)
+  openspace.removeSceneGraphNode(MoleculeSimulation)
 end)
     
-asset.export(PdbTest)
+asset.export(MoleculeSimulation)
