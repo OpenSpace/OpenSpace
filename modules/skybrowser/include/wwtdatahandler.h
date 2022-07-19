@@ -29,11 +29,17 @@
 #include <openspace/documentation/documentation.h>
 #include <unordered_map>
 
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
+
 #include <modules/skybrowser/ext/tinyxml2/tinyxml2.h>
+
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 
 namespace openspace::documentation { struct Documentation; }
 
