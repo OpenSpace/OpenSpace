@@ -23,6 +23,7 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 set(HEADER_FILES
   moleculemodule.h  
@@ -50,3 +51,4 @@ create_new_module(
 )
 
 include_external_library(${molecule_module} PRIVATE mold ${CMAKE_CURRENT_SOURCE_DIR}/ext/mold)
+disable_external_warnings(mold)
