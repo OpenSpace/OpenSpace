@@ -21,6 +21,7 @@ compile_commands.json
 .DS_Store
 Thumbs.db
 GPUCache/
+.cache/
 
 # OpenSpace-generated folders and files
 /bin/
