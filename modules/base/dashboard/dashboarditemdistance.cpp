@@ -358,7 +358,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     try {
         char* end = fmt::format_to(
             _buffer.data(),
-            _formatString.value().c_str(),
+            fmt::runtime(_formatString.value()),
             sourceInfo.second, destinationInfo.second, dist.first, dist.second
         );
 
