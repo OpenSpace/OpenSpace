@@ -66,8 +66,19 @@ private:
         LoadMolecule,
     } _deferredTask;
     
+    struct molecule_state_t {
+        glm::dvec3 position;
+        double angle;
+        glm::dvec3 direction; // moving direction where magnitude is linear velocity
+        glm::dvec3 rotation;  // rotation axis where magnitude is angular velocity
+    };
+    
+    std::vector<molecule_state_t> _moleculeStates;
+    
     void handleDeferredTasks();
     void updateAnimation(double t);
+    void updateSimulation(double dt);
+    void applyTransforms();
     
     void initMolecule();
     void freeMolecule();
@@ -84,6 +95,7 @@ private:
     md_molecule_api* _moleculeApi;
     md_trajectory_api* _trajectoryApi;
     md_molecule_t _molecule;
+    md_molecule_t _concatMolecule;
     md_trajectory_i* _trajectory;
     md_gl_representation_t _drawRep;
     md_gl_molecule_t _drawMol;

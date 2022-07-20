@@ -24,12 +24,16 @@
 
 #include "renderablesimulationbox.h"
 
+#include "../md_concat.h"
+
 #include "glbinding/gl/bitfield.h"
 #include "glbinding/gl/functions.h"
 #include <md_util.h>
 #include <core/md_array.inl>
 #include "viamd/coloring.h"
 #include "viamd/loader.h"
+
+#include <glm/gtc/random.hpp>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -55,6 +59,7 @@
 #define ZoneScoped
 #endif
 
+using namespace glm;
 
 constexpr const char* shader_output_snippet = R"(
 layout(location = 0) out vec4 out_color;
@@ -263,6 +268,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _collisionRadius(CollisionRadiusInfo)
 {
     _molecule = {};
+    _concatMolecule = {};
     _trajectory = {};
     _drawMol = {};
     _drawRep = {};
@@ -317,6 +323,17 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _moleculeFile.onChange(loadMolecule);
     _trajectoryFile.onChange(loadMolecule);
     _repType.onChange(loadMolecule);
+    
+    for (int i = 0; i < _moleculeCount; i++) {
+        molecule_state_t demoMolecule {
+            linearRand(dvec3(0.0), _simulationBox.value()),  // position
+            0.0,                                             // angle
+            sphericalRand(_linearVelocity.value()),          // direction
+            sphericalRand(_angularVelocity.value()),         // rotation
+        };
+        _moleculeStates.push_back(std::move(demoMolecule));
+    }
+    
     loadMolecule();
     
     addProperty(_moleculeFile);
@@ -431,26 +448,94 @@ void RenderableSimulationBox::updateAnimation(double time) {
             md_util_cubic_interpolation(dst, src, _molecule.atom.count, pbc_ext, t, 1.0f);
         }
         free(mem);
-        md_gl_molecule_set_atom_position(&_drawMol, 0, uint32_t(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
     }
     else {
         LERROR("Molecule trajectory contains less than 4 frames. Cannot interpolate.");
     }
 }
 
+void RenderableSimulationBox::applyTransforms() {
+    for (size_t i = 0; i < _moleculeStates.size(); i++) {
+        const molecule_state_t& state = _moleculeStates[i];
+        dmat4 transform =
+            translate(dmat4(1.0), state.position) *
+            rotate(dmat4(1.0), state.angle, state.rotation) *
+            dmat4(1.0);
+        
+        for (int j = 0; j < _molecule.atom.count; j++) {
+            dvec4 pos(*(_molecule.atom.x + j), *(_molecule.atom.y + j), *(_molecule.atom.z + j), 1.0);
+            pos = transform * pos;
+            *(_concatMolecule.atom.x + (i * _molecule.atom.count) + j) = pos.x;
+            *(_concatMolecule.atom.y + (i * _molecule.atom.count) + j) = pos.y;
+            *(_concatMolecule.atom.z + (i * _molecule.atom.count) + j) = pos.z;
+        }
+    }
+}
+
+void RenderableSimulationBox::updateSimulation(double dt) {
+    dt *= _animationSpeed;
+
+    // update positions / rotations
+    for (auto& molecule : _moleculeStates) {
+        molecule.position += molecule.direction * dt;
+        molecule.position = mod(molecule.position, _simulationBox.value());
+        molecule.angle += length(molecule.rotation) * dt;
+    }
+
+    double collRadiusSquared = _collisionRadius * _collisionRadius;
+
+    // compute collisions
+    for (auto it1 = _moleculeStates.begin(); it1 != _moleculeStates.end(); ++it1) {
+        for (auto it2 = std::next(it1); it2 != _moleculeStates.end(); ++it2) {
+
+            molecule_state_t& m1 = *it1;
+            molecule_state_t& m2 = *it2;
+
+            double distSquared = dot(m1.position, m2.position);
+
+            if (distSquared < collRadiusSquared) { // collision detected
+                double dist = sqrt(distSquared);
+                double intersection = 2.0 * _collisionRadius - dist;
+                // swap the direction components normal to the collision plane from the 2
+                // molecules. (simplistic elastic collision of 2 spheres with same mass)
+                dvec3 dir = (m2.position - m1.position) / dist;
+                dvec3 compM1 = dir * dot(m1.direction, dir);
+                dvec3 compM2 = -dir * dot(m2.direction, -dir);
+                m1.direction = m1.direction - compM1 + compM2;
+                m2.direction = m2.direction - compM2 + compM1;
+
+                // move the spheres away from each other (not intersecting)
+                m1.position += -dir * intersection;
+                m2.position += dir * intersection;
+            }
+        }
+    }
+}
+
 void RenderableSimulationBox::update(const UpdateData& data) {
     handleDeferredTasks();
+    
+    double t = data.time.j2000Seconds();
+    double dt = t - data.previousFrameTime.j2000Seconds();
+
     // update animation
     if (_trajectoryApi) {
-        updateAnimation(data.time.j2000Seconds());
+        updateAnimation(t);
     }
+    
+    // update simulation
+    updateSimulation(dt);
+    
+    // update gl repr
+    applyTransforms();
+    md_gl_molecule_set_atom_position(&_drawMol, 0, uint32_t(_concatMolecule.atom.count), _concatMolecule.atom.x, _concatMolecule.atom.y, _concatMolecule.atom.z, 0);
 }
 
 void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     using namespace glm;
     const dmat4 I(1.0);
 
-    if (_molecule.atom.count) {
+    if (_concatMolecule.atom.count) {
         
         // because the molecule is small, a scaling of the view matrix causes the molecule
         // to be moved out of view in clip space. Reset the scaling for the molecule
@@ -465,7 +550,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             dmat4(data.modelTransform.rotation) *
-            translate(I, -dvec3(_center)) *
+            translate(I, -_simulationBox.value() / 2.0) *
             I;
         
         mat4 view_matrix =
@@ -541,57 +626,21 @@ void RenderableSimulationBox::initMolecule() {
 
     bool init = _moleculeApi->init_from_file(&_molecule, molFileStr, default_allocator);
     
-    _molecule;
-    
-    // duplicate the molecule data n times. This is done for performance reasons, because
-    // the molecule simulation can be treated as 1 big molecule with a single draw call.
-    int nAtoms = _molecule.atom.count;
-    int nMols = _moleculeCount;
-    md_array_resize(_molecule.atom.x, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.y, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.z, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.vx, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.vy, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.vz, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.radius, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.mass, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.valence, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.element, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.name, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.flags, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.residue_idx, nAtoms * _moleculeCount, default_allocator);
-    md_array_resize(_molecule.atom.chain_idx, nAtoms * _moleculeCount, default_allocator);
-    for (int i = 0; i < nMols; i++) {
-        memcpy(_molecule.atom.x + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.y + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.z + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.vx + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.vy + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.vz + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.radius + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.mass + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.valence + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.element + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.name + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.flags + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.residue_idx + nAtoms * nMols, _molecule.atom.x, nAtoms);
-        memcpy(_molecule.atom.chain_idx + nAtoms * nMols, _molecule.atom.x, nAtoms);
-    }
-    _molecule.atom.count = nAtoms * nMols;
-    
-    
     if (!init) {
         LERROR("failed to initialize molecule: malformed file");
         _moleculeApi = nullptr;
         return;
     }
+    
+    // duplicate the molecule data n times. This is done for performance reasons, because
+    // the molecule simulation can be treated as 1 big molecule with a single draw call.
+    _concatMolecule = concat_molecule_init(&_molecule, _moleculeCount, default_allocator);
+    
+    double sphere = glm::compMax(_simulationBox.value()) / 2.0;
+    setBoundingSphere(sphere);
+    setInteractionSphere(sphere);
 
-    // setBoundingSphere(radius * 1.0E10); // OpenSpace is in meters, Mold is in Ångströms
-    // setInteractionSphere(radius * 1.0E10); // OpenSpace is in meters, Mold is in Ångströms
-    // setBoundingSphere(radius * 1.0E-10); // OpenSpace is in meters, Mold is in Ångströms
-    // setInteractionSphere(radius * 1.0E-10); // OpenSpace is in meters, Mold is in Ångströms
-
-    md_gl_molecule_init(&_drawMol, &_molecule);
+    md_gl_molecule_init(&_drawMol, &_concatMolecule);
     md_gl_representation_init(&_drawRep, &_drawMol);
     updateRepresentation();
 }
@@ -643,37 +692,37 @@ void RenderableSimulationBox::updateRepresentation() {
         md_gl_representation_set_type_and_args(&_drawRep, _repType, rep_args);
     }
     { // COLORING
-        uint32_t* colors = static_cast<uint32_t*>(md_alloc(default_temp_allocator, sizeof(uint32_t) * _molecule.atom.count));
-        uint32_t count = static_cast<uint32_t>(_molecule.atom.count);
+        uint32_t* colors = static_cast<uint32_t*>(md_alloc(default_temp_allocator, sizeof(uint32_t) * _concatMolecule.atom.count));
+        uint32_t count = static_cast<uint32_t>(_concatMolecule.atom.count);
 
         switch (static_cast<Coloring>(_coloring.value())) {
             case Coloring::Cpk:
-                color_atoms_cpk(colors, count, _molecule);
+                color_atoms_cpk(colors, count, _concatMolecule);
                 break;
             case Coloring::AtomIndex:
-                color_atoms_idx(colors, count, _molecule);
+                color_atoms_idx(colors, count, _concatMolecule);
                 break;
             case Coloring::ResId:
-                color_atoms_residue_id(colors, count, _molecule);
+                color_atoms_residue_id(colors, count, _concatMolecule);
                 break;
             case Coloring::ResIndex:
-                color_atoms_residue_index(colors, count, _molecule);
+                color_atoms_residue_index(colors, count, _concatMolecule);
                 break;
             case Coloring::ChainId:
-                color_atoms_chain_id(colors, count, _molecule);
+                color_atoms_chain_id(colors, count, _concatMolecule);
                 break;
             case Coloring::ChainIndex:
-                color_atoms_chain_index(colors, count, _molecule);
+                color_atoms_chain_index(colors, count, _concatMolecule);
                 break;
             case Coloring::SecondaryStructure:
-                color_atoms_secondary_structure(colors, count, _molecule);
+                color_atoms_secondary_structure(colors, count, _concatMolecule);
                 break;
             default:
                 ghoul_assert(false, "unexpected molecule coloring");
                 break;
         }
 
-        md_gl_representation_set_color(&_drawRep, 0, static_cast<uint32_t>(_molecule.atom.count), colors, 0);
+        md_gl_representation_set_color(&_drawRep, 0, static_cast<uint32_t>(_concatMolecule.atom.count), colors, 0);
     }
 }
 
@@ -682,6 +731,8 @@ void RenderableSimulationBox::freeMolecule() {
     md_gl_molecule_free(&_drawMol);
     _moleculeApi->free(&_molecule, default_allocator);
     _moleculeApi = nullptr;
+    concat_molecule_free(&_concatMolecule, default_allocator);
+    _concatMolecule = {};
     _molecule = {};
     _drawMol = {};
     _drawRep = {};
