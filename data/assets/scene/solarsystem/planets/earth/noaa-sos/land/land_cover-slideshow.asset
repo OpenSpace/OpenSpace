@@ -30,6 +30,7 @@ local labelsDestination = syncedDirectory .. "labels/"
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "2048.jpg",
   Description = Description
 }
@@ -38,7 +39,8 @@ function create_label(number)
   return {
     Identifier = Identifier .. "-" .. number,
     Name = Name .. " (" .. number .. ")",
-    Type = "ScreenSpaceImageLocal",
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
     TexturePath = labelsDestination .. "lcc_" .. number .. ".jpg",
     Enabled = false,
     FaceCamera = false,

@@ -1,10 +1,4 @@
-local colorLayer = asset.require("./layers/colorlayers/uranus_texture")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Uranus.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/uranus_texture", true)
 
 
 asset.meta = {

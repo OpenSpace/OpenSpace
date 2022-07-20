@@ -2,7 +2,8 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "Indices",
-  Type = "TileIndexTileLayer"
+  Type = "TileIndexTileLayer",
+  Enabled = asset.enabled
 }
 
 asset.onInitialize(function()

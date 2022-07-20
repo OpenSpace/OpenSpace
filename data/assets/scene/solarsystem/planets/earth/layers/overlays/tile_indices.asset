@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "Tile_Indices",
   Name = "Tile Indices",
+  Enabled = asset.enabled,
   Type = "TileIndexTileLayer"
 }
 

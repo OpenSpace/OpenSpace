@@ -1,48 +1,39 @@
 --mdis
-asset.require("./layers/colorlayers/messenger_mdis_utah") 
-asset.require("./layers/colorlayers/messenger_mdis_sweden") 
+asset.require("./layers/colorlayers/messenger_mdis_utah", false) 
+asset.require("./layers/colorlayers/messenger_mdis_sweden", false)
 --mossaic
-asset.require("./layers/colorlayers/messenger_mosaic_utah") 
-asset.require("./layers/colorlayers/messenger_mosaic_sweden") 
+asset.require("./layers/colorlayers/messenger_mosaic_utah", false)
+asset.require("./layers/colorlayers/messenger_mosaic_sweden", false)
 --mosaic2 aka 8 color
-asset.require("./layers/colorlayers/messenger_mosaic2_utah")
-asset.require("./layers/colorlayers/messenger_mosaic2_sweden")
+asset.require("./layers/colorlayers/messenger_mosaic2_utah", false)
+asset.require("./layers/colorlayers/messenger_mosaic2_sweden", false)
 --bdr
-local colorLayer = asset.require("./layers/colorlayers/messenger_bdr_utah") -- TODO enabled
-asset.require("./layers/colorlayers/messenger_bdr_sweden") 
+asset.require("./layers/colorlayers/messenger_bdr_utah", true)
+asset.require("./layers/colorlayers/messenger_bdr_sweden", false)
 --mdr
-asset.require("./layers/colorlayers/messenger_mdr_utah") 
+asset.require("./layers/colorlayers/messenger_mdr_utah", false)
 --mp3
-asset.require("./layers/colorlayers/messenger_mp3_utah") 
+asset.require("./layers/colorlayers/messenger_mp3_utah", false)
 --hie
-asset.require("./layers/colorlayers/messenger_hie_utah") 
-asset.require("./layers/colorlayers/messenger_hie_sweden") 
+asset.require("./layers/colorlayers/messenger_hie_utah", false)
+asset.require("./layers/colorlayers/messenger_hie_sweden", false)
 --hiw
-asset.require("./layers/colorlayers/messenger_hiw_utah") 
-asset.require("./layers/colorlayers/messenger_hiw_sweden")
+asset.require("./layers/colorlayers/messenger_hiw_utah", false)
+asset.require("./layers/colorlayers/messenger_hiw_sweden", false)
 --loi
-asset.require("./layers/colorlayers/messenger_loi_utah") 
-asset.require("./layers/colorlayers/messenger_loi_sweden") 
+asset.require("./layers/colorlayers/messenger_loi_utah", false)
+asset.require("./layers/colorlayers/messenger_loi_sweden", false)
 --shade
-asset.require("./layers/colorlayers/messenger_shade_utah")
-asset.require("./layers/colorlayers/messenger_shade_sweden")
+asset.require("./layers/colorlayers/messenger_shade_utah", false)
+asset.require("./layers/colorlayers/messenger_shade_sweden", false)
 --local textures, these are mineral abundance maps
-asset.require("./layers/colorlayers/alsimap_02122015")
-asset.require("./layers/colorlayers/casimap_02122015")
-asset.require("./layers/colorlayers/fesimap_02122015")
-asset.require("./layers/colorlayers/mgsimap_02122015")
-asset.require("./layers/colorlayers/ssimap_02122015")
+asset.require("./layers/colorlayers/alsimap_02122015", false)
+asset.require("./layers/colorlayers/casimap_02122015", false)
+asset.require("./layers/colorlayers/fesimap_02122015", false)
+asset.require("./layers/colorlayers/mgsimap_02122015", false)
+asset.require("./layers/colorlayers/ssimap_02122015", false)
 
-local heightLayer = asset.require("./layers/heightlayers/messenger_dem_utah")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Mercury.Renderable.Layers.ColorLayers." ..
-  colorLayer.layer.Identifier .. ".Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Mercury.Renderable.Layers.HeightLayers." ..
-  heightLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/heightlayers/messenger_dem_utah", true)
 
 
 asset.meta = {

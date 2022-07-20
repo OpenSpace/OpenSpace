@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "Aqua_Modis_Temporal",
   Name = "Aqua Modis (Temporal)",
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
   Mode = "Prototyped",
   Prototyped = {

@@ -1,11 +1,4 @@
-local colorLayer = asset.require("./layers/colorlayers/cassini_iss_global_mosaic_4km_local")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Titan.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/cassini_iss_global_mosaic_4km_local", true)
 
 
 asset.meta = {

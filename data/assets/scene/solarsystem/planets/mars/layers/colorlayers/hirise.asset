@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "HiRISE-PSP",
   Name = "HiRISE",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("hirise.vrt"),
   BlendMode = "Color",
   Settings = {

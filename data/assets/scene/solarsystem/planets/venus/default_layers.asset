@@ -1,16 +1,9 @@
 -- Color layers
-asset.require("./layers/colorlayers/venus_texture")
-local colorLayer = asset.require("./layers/colorlayers/magellan_mosaic_utah")
+asset.require("./layers/colorlayers/venus_texture", false)
+asset.require("./layers/colorlayers/magellan_mosaic_utah", true)
 
 -- Height layers
-local heightLayer = asset.require("./layers/heightlayers/magellan_utah")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.HeightLayers." .. heightLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/heightlayers/magellan_utah", true)
 
 
 asset.meta = {

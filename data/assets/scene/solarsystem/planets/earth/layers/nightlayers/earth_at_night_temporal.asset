@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer =  {
   Identifier = "Earth_at_Night_Temporal",
   Name = "Earth at Night (Temporal)",
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
   Mode = "Prototyped",
   Prototyped = {

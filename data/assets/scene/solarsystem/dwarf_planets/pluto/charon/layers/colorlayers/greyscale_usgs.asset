@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../charon").Charon.Identifier
 local layer = {
   Identifier = "Greyscale_USGS",
   Name = "Black & White [USGS]",
+  Enabled = asset.enabled,
   FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/charon_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_CHARON_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90.0003,359.972,90",
 }
 

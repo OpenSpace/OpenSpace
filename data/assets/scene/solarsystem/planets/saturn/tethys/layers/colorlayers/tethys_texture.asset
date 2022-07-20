@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "tethys.jpg",
+  Enabled = asset.enabled
 }
 
 asset.onInitialize(function()

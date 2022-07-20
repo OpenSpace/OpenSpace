@@ -1,13 +1,6 @@
 local colorLayersPath = "./layers/colorlayers"
 
-local colorLayer = asset.require(colorLayersPath .. "/ganymede_texture")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Ganymede.Renderable.Layers.ColorLayers." ..
-   colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require(colorLayersPath .. "/ganymede_texture", true)
 
 
 asset.meta = {

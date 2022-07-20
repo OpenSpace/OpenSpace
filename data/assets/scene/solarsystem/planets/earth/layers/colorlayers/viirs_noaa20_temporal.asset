@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "VIIRS_NOAA20_Temporal",
   Name = "VIIRS NOAA20 (Temporal)",
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
   Mode = "Prototyped",
   Prototyped = {

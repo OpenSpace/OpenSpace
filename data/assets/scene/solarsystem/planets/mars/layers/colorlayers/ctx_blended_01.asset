@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "CTX_blended_01",
   Name = "CTX Blended beta01",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("ctx_blended_01.vrt"),
   BlendMode = "Color",
   Settings = {

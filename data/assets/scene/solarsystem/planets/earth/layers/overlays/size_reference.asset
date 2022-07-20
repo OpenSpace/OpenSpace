@@ -4,6 +4,7 @@ local globeIdentifier = earthAsset.Identifier
 local layer ={
   Identifier = "Size_Reference",
   Name = "Size Reference",
+  Enabled = asset.enabled,
   Type = "SizeReferenceTileLayer",
   Radii = earthAsset.Renderable.Radii
 }

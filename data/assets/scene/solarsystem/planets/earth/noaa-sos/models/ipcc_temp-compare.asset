@@ -39,7 +39,8 @@ for i,v in ipairs(layers_names) do
   local layer = {
     Identifier = Identifier .. v,
     Name = Name,
-    FilePath = syncedDirectory .. v .. ".png",
+  Enabled = asset.enabled,
+  FilePath = syncedDirectory .. v .. ".png",
     Description = Description
   }
 
@@ -49,6 +50,7 @@ end
 local colorbar = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "colorbar.png",
   FaceCamera = false,

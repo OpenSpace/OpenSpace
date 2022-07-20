@@ -29,6 +29,7 @@ local imagesDestination = syncedDirectory .. "images"
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   Type = "ImageSequenceTileLayer",
   FolderPath = imagesDestination,
   Description = Description
