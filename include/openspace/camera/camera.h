@@ -74,6 +74,7 @@ public:
     void setScaling(float scaling);
     void setMaxFov(float fov);
     void setParent(SceneGraphNode* parent);
+    void setAtmosphereDimming(float atmosphereDimming);
 
     // Relative mutators
     void rotate(glm::dquat rotation);
@@ -93,6 +94,7 @@ public:
     float sinMaxFov() const;
     SceneGraphNode* parent() const;
     float scaling() const;
+    float atmosphereDimming() const;
 
     // @TODO this should simply be called viewMatrix!
     // Or it needs to be changed so that it actually is combined. Right now it is
@@ -154,6 +156,8 @@ private:
     SyncData<glm::dquat> _rotation  = glm::dquat(glm::dvec3(1.0, 1.0, 1.0));
     SyncData<float> _scaling = 1.f;
     SceneGraphNode* _parent = nullptr;
+
+    float _atmosphereDimming = 1.f;
 
     // _focusPosition to be removed
     glm::dvec3 _focusPosition = glm::dvec3(0.0);

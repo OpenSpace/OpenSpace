@@ -95,6 +95,11 @@ private:
     properties::BoolProperty _sunFollowingCameraEnabled;
     properties::BoolProperty _hardShadowsEnabled;
 
+    // Atmosphere dimming
+    properties::FloatProperty _atmosphereDimmingHeight;
+    properties::FloatProperty _atmosphereDimmingSunsetAngleStart;
+    properties::FloatProperty _atmosphereDimmingSunsetAngleEnd;
+
     float _planetRadius = 0.f;
     float _mieScattExtPropCoefProp = 1.f;
 
