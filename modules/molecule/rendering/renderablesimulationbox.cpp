@@ -259,8 +259,8 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _repType(RepTypeInfo),
     _coloring(ColoringInfo),
     _repScale(RepScaleInfo, 1.f, 0.1f, 10.f),
-    _animationSpeed(AnimationSpeedInfo, 1.f, 0.1f, 1000.f),
-    _simulationSpeed(SimulationSpeedInfo),
+    _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 1000.f),
+    _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 1000.f),
     _moleculeCount(MoleculeCountInfo),
     _linearVelocity(LinearVelocityInfo),
     _angularVelocity(AngularVelocityInfo),
@@ -342,6 +342,8 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_coloring);
     addProperty(_repScale);
     addProperty(_animationSpeed);
+    addProperty(_simulationBox);
+    addProperty(_simulationSpeed);
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {
@@ -473,7 +475,7 @@ void RenderableSimulationBox::applyTransforms() {
 }
 
 void RenderableSimulationBox::updateSimulation(double dt) {
-    dt *= _animationSpeed;
+    dt *= _simulationSpeed;
 
     // update positions / rotations
     for (auto& molecule : _moleculeStates) {
