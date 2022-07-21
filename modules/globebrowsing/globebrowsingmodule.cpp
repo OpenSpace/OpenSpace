@@ -426,11 +426,11 @@ glm::dvec3 GlobeBrowsingModule::geoPosition() const {
 
     const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
     if (!n) {
-        return glm::dvec3(0);
+        return glm::dvec3(0.0);
     }
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return glm::dvec3(0);
+        return glm::dvec3(0.0);
     }
 
     const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();

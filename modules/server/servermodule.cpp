@@ -24,6 +24,7 @@
 
 #include <modules/server/servermodule.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/server/include/serverinterface.h>
 #include <modules/server/include/connection.h>
 #include <modules/server/include/topics/topic.h>

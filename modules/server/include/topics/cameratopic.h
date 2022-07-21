@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___CAMERA_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___CAMERA_TOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
 #include <chrono>
@@ -53,4 +53,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___CAMERA_TOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__

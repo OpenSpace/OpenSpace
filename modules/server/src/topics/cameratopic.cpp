@@ -46,7 +46,8 @@ using nlohmann::json;
 namespace openspace {
 
 CameraTopic::CameraTopic()
-    : _lastUpdateTime(std::chrono::system_clock::now()) {}
+    : _lastUpdateTime(std::chrono::system_clock::now()) 
+{}
 
 CameraTopic::~CameraTopic() {
     if (_dataCallbackHandle != UnsetOnChangeHandle) {
@@ -63,10 +64,6 @@ bool CameraTopic::isDone() const {
 
 void CameraTopic::handleJson(const nlohmann::json& json) {
     std::string event = json.at(EventKey).get<std::string>();
-    if (event == UnsubscribeEvent) {
-        _isDone = true;
-        return;
-    }
 
     if (event != SubscribeEvent) {
         _isDone = true;
@@ -90,13 +87,13 @@ void CameraTopic::sendCameraData() {
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     glm::dvec3 position = module->geoPosition();
-    std::pair <double, std::string> altSimplified = simplifyDistance(position.z);
+    std::pair<double, std::string> altSimplified = simplifyDistance(position.z);
 
     nlohmann::json jsonData = {
-        { "latitude", position.x},
+        { "latitude", position.x },
         { "longitude", position.y },
         { "altitude", altSimplified.first },
-        { "altitudeUnit", altSimplified.second}
+        { "altitudeUnit", altSimplified.second }
     };
 
     _connection->sendJson(wrappedPayload(jsonData));
