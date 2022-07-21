@@ -43,12 +43,12 @@ namespace {
     constexpr const char* _loggerCat = "WebBrowser";
 
     #ifdef _MSC_VER
-        constexpr const char* SubprocessPath = "OpenSpace Helper.exe";
+        constexpr const char* SubprocessPath = "OpenSpace_Helper.exe";
     #elif defined(__APPLE__)
         constexpr const char* SubprocessPath =
-            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
+            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace_Helper";
     #else
-        constexpr const char* SubprocessPath = "OpenSpace Helper";
+        constexpr const char* SubprocessPath = "OpenSpace_Helper";
     #endif
 
     constexpr openspace::properties::Property::PropertyInfo

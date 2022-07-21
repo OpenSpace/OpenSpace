@@ -27,6 +27,7 @@
 #include <openspace/openspace.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <sstream>
@@ -44,14 +45,7 @@ VersionChecker::~VersionChecker() {
 void VersionChecker::requestLatestVersion(const std::string& url) {
     using GCC = ghoul::systemcapabilities::GeneralCapabilitiesComponent;
     std::string operatingSystem = SysCap.component<GCC>().operatingSystemString();
-
-    // Need to escape non-http characters when passing the operating system in the url
-    for (size_t i = 0; i < operatingSystem.size(); i++) {
-        if (operatingSystem[i] == ' ') {
-            operatingSystem.erase(i, 1);
-            operatingSystem.insert(i, "%20");
-        }
-    }
+    operatingSystem = ghoul::encodeUrl(operatingSystem);
 
     std::string fullUrl = fmt::format(
         "{}?client_version={}&commit_hash={}&operating_system={}",

@@ -182,7 +182,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
                 *_font,
                 penPosition,
                 fmt::format(
-                    _transitionFormat.value().c_str(),
+                    fmt::runtime(_transitionFormat.value()),
                     targetDeltaTime.first, targetDeltaTime.second,
                     pauseText,
                     currentDeltaTime.first, currentDeltaTime.second
@@ -194,7 +194,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
                 *_font,
                 penPosition,
                 fmt::format(
-                    _regularFormat.value().c_str(),
+                    fmt::runtime(_regularFormat.value()),
                     targetDeltaTime.first, targetDeltaTime.second, pauseText
                 )
             );

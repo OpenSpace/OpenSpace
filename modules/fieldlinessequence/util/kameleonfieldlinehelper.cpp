@@ -364,8 +364,8 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
             }
             if (!success) {
                 LWARNING(fmt::format(
-                    "Failed to load at least one of the magnitude variables: {}, {}, {} "
-                    "& {}. Removing ability to store corresponding magnitude",
+                    "Failed to load at least one of the magnitude variables: {}, {}, {}. "
+                    "Removing ability to store corresponding magnitude",
                     s1, s2, s3
                 ));
                 extraMagVars.erase(

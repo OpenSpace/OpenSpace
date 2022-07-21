@@ -309,6 +309,7 @@ void parseLuaState(Configuration& configuration) {
     lua_getglobal(s, "sgctconfiginitializeString");
     c.sgctConfigNameInitialized = ghoul::lua::value<std::string>(
         s,
+        1,
         ghoul::lua::PopValue::Yes
     );
 

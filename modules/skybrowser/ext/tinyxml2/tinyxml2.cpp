@@ -21,10 +21,12 @@ must not be misrepresented as being the original software.
 distribution.
 */
 
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wsuggest-override"
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
 
 #include "tinyxml2.h"
 
@@ -2990,4 +2992,6 @@ bool XMLPrinter::Visit( const XMLUnknown& unknown )
 
 }   // namespace tinyxml2
 
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif

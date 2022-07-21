@@ -538,8 +538,7 @@ void logAllEvents(const Event* e) {
                 log(i, *static_cast<const CustomEvent*>(e));
                 break;
             default:
-                LINFO(fmt::format("[{}]: Unknown {}", typeid(e).name()));
-                break;
+                throw ghoul::MissingCaseException();
         }
 
         i++;

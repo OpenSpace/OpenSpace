@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <filesystem>
 #include <fstream>
 
@@ -52,60 +53,6 @@ namespace {
     constexpr std::string_view StartTime = "&START_TIME=";
     constexpr std::string_view StopTime = "&STOP_TIME=";
     constexpr std::string_view StepSize = "&STEP_SIZE=";
-
-    // URL encoding
-    constexpr std::string_view WhiteSpace = "%20";
-    constexpr std::string_view HashTag = "%23";
-    constexpr std::string_view DollarSign = "%24";
-    constexpr std::string_view Ampersand = "%26";
-    constexpr std::string_view PlusSign = "%2B";
-    constexpr std::string_view Comma = "%2C";
-    constexpr std::string_view Slash = "%2F";
-    constexpr std::string_view Colon = "%3A";
-    constexpr std::string_view Semicolon = "%3B";
-    constexpr std::string_view EqualsSign = "%3D";
-    constexpr std::string_view QuestionMark = "%3F";
-    constexpr std::string_view AtSymbol = "%40";
-    constexpr std::string_view LeftSquareBracket = "%5B";
-    constexpr std::string_view RightSquareBracket = "%5D";
-
-    std::string replaceAll(std::string string, const std::string& from,
-                           const std::string& to)
-    {
-        if (from.empty()) {
-            return "";
-        }
-
-        size_t pos = string.find(from);
-        while (pos != std::string::npos) {
-            string.replace(pos, from.length(), to);
-
-            // In case 'to' contains 'from', ex replacing 'x' with 'yx'
-            size_t offset = pos + to.length();
-            pos = string.find(from, offset);
-        }
-        return string;
-    }
-
-    std::string urlEncode(const std::string& string) {
-        std::string result;
-        result = replaceAll(string, " ", static_cast<std::string>(WhiteSpace));
-        result = replaceAll(result, "#", static_cast<std::string>(HashTag));
-        result = replaceAll(result, "$", static_cast<std::string>(DollarSign));
-        result = replaceAll(result, "&", static_cast<std::string>(Ampersand));
-        result = replaceAll(result, "+", static_cast<std::string>(PlusSign));
-        result = replaceAll(result, ",", static_cast<std::string>(Comma));
-        result = replaceAll(result, "/", static_cast<std::string>(Slash));
-        result = replaceAll(result, ":", static_cast<std::string>(Colon));
-        result = replaceAll(result, ";", static_cast<std::string>(Semicolon));
-        result = replaceAll(result, "=", static_cast<std::string>(EqualsSign));
-        result = replaceAll(result, "?", static_cast<std::string>(QuestionMark));
-        result = replaceAll(result, "@", static_cast<std::string>(AtSymbol));
-        result = replaceAll(result, "[", static_cast<std::string>(LeftSquareBracket));
-        result = replaceAll(result, "]", static_cast<std::string>(RightSquareBracket));
-        return result;
-    }
-
 } // namespace
 
 namespace openspace {
@@ -117,7 +64,7 @@ HorizonsFile::HorizonsFile(std::filesystem::path file)
 HorizonsFile::HorizonsFile(std::filesystem::path filePath, const std::string& result) {
     // Write the response into a new file and save it
     std::ofstream file(filePath);
-    file << replaceAll(result, "\\n", "\n") << std::endl;
+    file << ghoul::replaceAll(result, "\\n", "\n") << std::endl;
     file.close();
     _file = std::move(filePath);
 }
@@ -153,16 +100,18 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
             throw ghoul::MissingCaseException();
     }
 
-    url += fmt::format("{}'{}'", Command, urlEncode(target));
-    url += fmt::format("{}'{}'", Center, urlEncode(observer));
-    url += fmt::format("{}'{}'", StartTime, urlEncode(startTime));
-    url += fmt::format("{}'{}'", StopTime, urlEncode(stopTime));
+    url += fmt::format("{}'{}'", Command, ghoul::encodeUrl(target));
+    url += fmt::format("{}'{}'", Center, ghoul::encodeUrl(observer));
+    url += fmt::format("{}'{}'", StartTime, ghoul::encodeUrl(startTime));
+    url += fmt::format("{}'{}'", StopTime, ghoul::encodeUrl(stopTime));
 
     if (unit.empty()) {
-        url += fmt::format("{}'{}'", StepSize, urlEncode(stepSize));
+        url += fmt::format("{}'{}'", StepSize, ghoul::encodeUrl(stepSize));
     }
     else {
-        url += fmt::format("{}'{}{}{}'", StepSize, urlEncode(stepSize), WhiteSpace, unit);
+        url += fmt::format(
+            "{}'{}%20{}'", StepSize, ghoul::encodeUrl(stepSize), unit
+        );
     }
 
     return url;

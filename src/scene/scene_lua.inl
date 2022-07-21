@@ -134,7 +134,6 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 
     // Stores whether we found at least one matching property. If this is false at the end
     // of the loop, the property name regex was probably misspelled.
-    bool foundMatching = false;
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
         const std::string id = prop->fullyQualifiedIdentifier();
@@ -202,9 +201,6 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     using namespace openspace;
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
-
-    const bool isGroupMode = !groupName.empty();
-    bool isLiteral = false;
 
     const int type = lua_type(L, -1);
 
