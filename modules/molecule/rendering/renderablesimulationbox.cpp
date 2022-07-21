@@ -389,7 +389,7 @@ void RenderableSimulationBox::handleDeferredTasks() {
 void RenderableSimulationBox::updateAnimation(double time) {
     int64_t nFrames = md_trajectory_num_frames(_trajectory);
     if (nFrames >= 4) {
-        double t = fract(time * _animationSpeed);
+        double t = fract(time);
         int64_t frames[4];
 
         // The animation is played forward and back (bouncing), the first and last
@@ -446,7 +446,9 @@ void RenderableSimulationBox::updateAnimation(double time) {
             memcpy(&boxes[3], header[3].box, sizeof(boxes[3]));
             mat3_t box = cubic_spline(boxes[0], boxes[1], boxes[2], boxes[3], t, 1.0);
             vec3_t pbc_ext = box * vec3_t{{1.0, 1.0, 1.0}};
-
+            
+            int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
+            std::cout << frame << std::endl;
             md_util_cubic_interpolation(dst, src, _molecule.atom.count, pbc_ext, t, 1.0f);
         }
         free(mem);
@@ -475,8 +477,6 @@ void RenderableSimulationBox::applyTransforms() {
 }
 
 void RenderableSimulationBox::updateSimulation(double dt) {
-    dt *= _simulationSpeed;
-
     // update positions / rotations
     for (auto& molecule : _moleculeStates) {
         molecule.position += molecule.direction * dt;
@@ -522,11 +522,11 @@ void RenderableSimulationBox::update(const UpdateData& data) {
 
     // update animation
     if (_trajectoryApi) {
-        updateAnimation(t);
+        updateAnimation(t * _animationSpeed);
     }
     
     // update simulation
-    updateSimulation(dt);
+    updateSimulation(dt * _simulationSpeed);
     
     // update gl repr
     applyTransforms();
