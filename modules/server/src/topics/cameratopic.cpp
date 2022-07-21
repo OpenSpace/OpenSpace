@@ -22,16 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/server/include/topics/skybrowsertopic.h"
+#include "modules/server/include/topics/cameratopic.h"
 
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
-#include <modules/skybrowser/skybrowsermodule.h>
-#include <modules/skybrowser/include/targetbrowserpair.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
+#include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -44,34 +45,25 @@ using nlohmann::json;
 
 namespace openspace {
 
-SkyBrowserTopic::SkyBrowserTopic()
-    : _lastUpdateTime(std::chrono::system_clock::now())
-{
-    ServerModule* module = global::moduleEngine->module<ServerModule>();
-    if (module) {
-        _skyBrowserUpdateTime = std::chrono::milliseconds(module->skyBrowserUpdateTime());
-    }
-}
+CameraTopic::CameraTopic()
+    : _lastUpdateTime(std::chrono::system_clock::now()) 
+{}
 
-SkyBrowserTopic::~SkyBrowserTopic() {
-    if (_targetDataCallbackHandle != UnsetOnChangeHandle) {
+CameraTopic::~CameraTopic() {
+    if (_dataCallbackHandle != UnsetOnChangeHandle) {
         ServerModule* module = global::moduleEngine->module<ServerModule>();
         if (module) {
-            module->removePreSyncCallback(_targetDataCallbackHandle);
+            module->removePreSyncCallback(_dataCallbackHandle);
         }
     }
 }
 
-bool SkyBrowserTopic::isDone() const {
+bool CameraTopic::isDone() const {
     return _isDone;
 }
 
-void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
+void CameraTopic::handleJson(const nlohmann::json& json) {
     std::string event = json.at(EventKey).get<std::string>();
-    if (event == UnsubscribeEvent) {
-        _isDone = true;
-        return;
-    }
 
     if (event != SubscribeEvent) {
         _isDone = true;
@@ -79,53 +71,32 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     }
 
     ServerModule* module = global::moduleEngine->module<ServerModule>();
-    _targetDataCallbackHandle = module->addPreSyncCallback(
+    _dataCallbackHandle = module->addPreSyncCallback(
         [this]() {
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-            if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
-                sendBrowserData();
+            if (now - _lastUpdateTime > _cameraPositionUpdateTime) {
+                sendCameraData();
                 _lastUpdateTime = std::chrono::system_clock::now();
             }
         }
     );
 }
 
-void SkyBrowserTopic::sendBrowserData() {
+void CameraTopic::sendCameraData() {
     using namespace openspace;
 
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    ghoul::Dictionary data;
+    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
+    glm::dvec3 position = module->geoPosition();
+    std::pair<double, std::string> altSimplified = simplifyDistance(position.z);
 
-    // Set general data
-    data.setValue("selectedBrowserId", module->selectedBrowserId());
-    data.setValue("cameraInSolarSystem", module->isCameraInSolarSystem());
+    nlohmann::json jsonData = {
+        { "latitude", position.x },
+        { "longitude", position.y },
+        { "altitude", altSimplified.first },
+        { "altitudeUnit", altSimplified.second }
+    };
 
-    // Pass data for all the browsers and the corresponding targets
-    if (module->isCameraInSolarSystem()) {
-        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
-        ghoul::Dictionary targets;
-        for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
-            std::string id = pair->browserId();
-            ghoul::Dictionary target = pair->dataAsDictionary();
-            targets.setValue(id, target);
-        }
-        data.setValue("browsers", targets);
-    }
-
-    std::string jsonString = ghoul::formatJson(data);
-
-    // Only send message if data actually changed
-    if (jsonString != _lastUpdateJsonString) {
-        json jsonData = json::parse(jsonString.begin(), jsonString.end());
-        _connection->sendJson(wrappedPayload(jsonData));
-    }
-
-    // @TODO (2022-04-28, emmbr) The message is still sent very often; every time the
-    // camera moves or the time is changes, because this changes the "roll" parameter
-    // of the browser. This is the update that occurs most often. Maybe it could be
-    // separated into it's own topic?
-
-    _lastUpdateJsonString = jsonString;
+    _connection->sendJson(wrappedPayload(jsonData));
 }
 
 } // namespace openspace

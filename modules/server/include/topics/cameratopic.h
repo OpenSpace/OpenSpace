@@ -22,74 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#ifndef __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
 
-#include <openspace/util/openspacemodule.h>
-
-#include <modules/server/include/serverinterface.h>
-
-#include <deque>
-#include <memory>
-#include <mutex>
+#include <modules/server/include/topics/topic.h>
+#include <chrono>
 
 namespace openspace {
 
-constexpr int SOCKET_API_VERSION_MAJOR = 0;
-constexpr int SOCKET_API_VERSION_MINOR = 1;
-constexpr int SOCKET_API_VERSION_PATCH = 0;
-
-class Connection;
-
-struct Message {
-    std::weak_ptr<Connection> connection;
-    std::string messageString;
-};
-
-class ServerModule : public OpenSpaceModule {
+class CameraTopic : public Topic {
 public:
-    static constexpr const char* Name = "Server";
-    using CallbackHandle = int;
-    using CallbackFunction = std::function<void()>;
+    CameraTopic();
+    virtual ~CameraTopic();
 
-    ServerModule();
-    virtual ~ServerModule() override;
-
-    ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
-
-    int skyBrowserUpdateTime() const;
-
-    CallbackHandle addPreSyncCallback(CallbackFunction cb);
-    void removePreSyncCallback(CallbackHandle handle);
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
 private:
-    struct ConnectionData {
-        std::shared_ptr<Connection> connection;
-        bool isMarkedForRemoval = false;
-    };
+    const int UnsetOnChangeHandle = -1;
 
-    void handleConnection(std::shared_ptr<Connection> connection);
-    void cleanUpFinishedThreads();
-    void consumeMessages();
-    void disconnectAll();
-    void preSync();
+    void sendCameraData();
 
-    std::mutex _messageQueueMutex;
-    std::deque<Message> _messageQueue;
+    int _dataCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
+    std::chrono::system_clock::time_point _lastUpdateTime;
+    glm::dvec3 _lastPosition = glm::dvec3(0);
 
-    std::vector<ConnectionData> _connections;
-    std::vector<std::unique_ptr<ServerInterface>> _interfaces;
-    properties::PropertyOwner _interfaceOwner;
-    int _skyBrowserUpdateTime = 100;
-
-    // Callbacks for tiggering topic
-    int _nextCallbackHandle = 0;
-    std::vector<std::pair<CallbackHandle, CallbackFunction>> _preSyncCallbacks;
+    std::chrono::milliseconds _cameraPositionUpdateTime = std::chrono::milliseconds(100);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#endif // __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__

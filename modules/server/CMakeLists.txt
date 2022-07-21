@@ -33,6 +33,7 @@ set(HEADER_FILES
   include/serverinterface.h
   include/topics/authorizationtopic.h
   include/topics/bouncetopic.h
+  include/topics/cameratopic.h
   include/topics/documentationtopic.h
   include/topics/enginemodetopic.h
   include/topics/flightcontrollertopic.h
@@ -58,6 +59,7 @@ set(SOURCE_FILES
   src/serverinterface.cpp
   src/topics/authorizationtopic.cpp
   src/topics/bouncetopic.cpp
+  src/topics/cameratopic.cpp
   src/topics/documentationtopic.cpp
   src/topics/enginemodetopic.cpp
   src/topics/flightcontrollertopic.cpp
