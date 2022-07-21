@@ -66,7 +66,7 @@ GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
 
     int element = p.element.value_or(1);
 
-    std::vector<kepler::SatelliteParameters> parameters = kepler::readFile(
+    std::vector<kepler::Parameters> parameters = kepler::readFile(
         p.file,
         codegen::map<kepler::Format>(p.format)
     );
@@ -76,7 +76,7 @@ GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
         ));
     }
 
-    kepler::SatelliteParameters param = parameters[element - 1];
+    kepler::Parameters param = parameters[element - 1];
     setKeplerElements(
         param.eccentricity,
         param.semiMajorAxis,

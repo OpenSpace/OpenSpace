@@ -296,7 +296,6 @@ namespace {
         int year = std::atoi(epochString.substr(0, 4).c_str());
         const int daysSince2000 = countDays(year);
 
-
         // 2.
         const size_t pos = epochString.find('T');
         int nDays = 0;
@@ -316,12 +315,10 @@ namespace {
             ));
         }
 
-
         // 3
         using namespace std::chrono;
         const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
         const double nSecondsSince2000 = (daysSince2000 + nDays) * SecondsPerDay;
-
 
         // 4
         // We need to remove additional leap seconds past 2000 and add them prior to
@@ -341,7 +338,6 @@ namespace {
             std::chrono::seconds(std::chrono::hours(hours)).count() +
             std::chrono::seconds(std::chrono::minutes(minutes)).count();
 
-
         // 6
         const long long offset = std::chrono::seconds(std::chrono::hours(12)).count();
 
@@ -354,10 +350,10 @@ namespace {
 
 namespace openspace::kepler {
 
-std::vector<SatelliteParameters> readTleFile(std::filesystem::path file) {
+std::vector<Parameters> readTleFile(std::filesystem::path file) {
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
-    std::vector<SatelliteParameters> result;
+    std::vector<Parameters> result;
 
     std::ifstream f;
     f.open(file);
@@ -366,7 +362,7 @@ std::vector<SatelliteParameters> readTleFile(std::filesystem::path file) {
 
     std::string header;
     while (std::getline(f, header)) {
-        SatelliteParameters p;
+        Parameters p;
 
         // Header
         p.name = header;
@@ -471,16 +467,16 @@ std::vector<SatelliteParameters> readTleFile(std::filesystem::path file) {
     return result;
 }
 
-std::vector<SatelliteParameters> readOmmFile(std::filesystem::path file) {
+std::vector<Parameters> readOmmFile(std::filesystem::path file) {
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
-    std::vector<SatelliteParameters> result;
+    std::vector<Parameters> result;
 
     std::ifstream f;
     f.open(file);
 
     int lineNum = 1;
-    std::optional<SatelliteParameters> current = std::nullopt;
+    std::optional<Parameters> current = std::nullopt;
     std::string line;
     while (std::getline(f, line)) {
         if (line.empty()) {
@@ -517,7 +513,7 @@ std::vector<SatelliteParameters> readOmmFile(std::filesystem::path file) {
             }
 
             // ... and start a new one
-            current = SatelliteParameters();
+            current = Parameters();
         }
 
         ghoul_assert(current.has_value(), "No current element");
@@ -563,7 +559,7 @@ std::vector<SatelliteParameters> readOmmFile(std::filesystem::path file) {
     return result;
 }
 
-std::vector<SatelliteParameters> readSbdbFile(std::filesystem::path file) {
+std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
     constexpr int NDataFields = 9;
     constexpr std::string_view ExpectedHeader = "full_name,epoch_cal,e,a,i,om,w,ma,per";
 
@@ -581,7 +577,7 @@ std::vector<SatelliteParameters> readSbdbFile(std::filesystem::path file) {
         ));
     }
 
-    std::vector<SatelliteParameters> result;
+    std::vector<Parameters> result;
     while (std::getline(f, line)) {
         constexpr double AuToKm = 1.496e8;
 
@@ -591,7 +587,7 @@ std::vector<SatelliteParameters> readSbdbFile(std::filesystem::path file) {
                 "Malformed line {}, expected 8 data fields, got {}", line, parts.size()
             ));
         }
-        SatelliteParameters p;
+        Parameters p;
 
         ghoul::trimWhitespace(parts[0]);
         p.name = parts[0];
@@ -625,12 +621,12 @@ std::vector<SatelliteParameters> readSbdbFile(std::filesystem::path file) {
     return result;
 }
 
-std::vector<SatelliteParameters> readFile(std::filesystem::path file, Format format) {
+std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
     switch (format) {
-        case Format::TLE: return readTleFile(file);
-        case Format::OMM: return readOmmFile(file);
+        case Format::TLE:  return readTleFile(file);
+        case Format::OMM:  return readOmmFile(file);
         case Format::SBDB: return readSbdbFile(file);
-        default: throw ghoul::MissingCaseException();
+        default:           throw ghoul::MissingCaseException();
     }
 }
 

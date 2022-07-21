@@ -299,7 +299,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableOrbitalKepler::updateBuffers() {
-    std::vector<kepler::SatelliteParameters> parameters = kepler::readFile(
+    std::vector<kepler::Parameters> parameters = kepler::readFile(
        _path.value(),
         _format
     );
@@ -337,7 +337,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         }
 
         // Extract subset that starts at _startRenderIdx and contains _sizeRender obejcts
-        parameters = std::vector<kepler::SatelliteParameters>(
+        parameters = std::vector<kepler::Parameters>(
             parameters.begin() + _startRenderIdx,
             parameters.begin() + _startRenderIdx + _sizeRender
         );
@@ -348,14 +348,14 @@ void RenderableOrbitalKepler::updateBuffers() {
         std::shuffle(parameters.begin(), parameters.end(), rng);
 
         // Then take the first _sizeRender values
-        parameters = std::vector<kepler::SatelliteParameters>(
+        parameters = std::vector<kepler::Parameters>(
             parameters.begin(),
             parameters.begin() + _sizeRender
         );
     }
 
     _segmentSize.clear();
-    for (const kepler::SatelliteParameters& p : parameters) {
+    for (const kepler::Parameters& p : parameters) {
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
         _segmentSize.push_back(
             static_cast<size_t>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
@@ -373,7 +373,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     size_t vertexBufIdx = 0;
     KeplerTranslation keplerTranslator;
     for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
-        const kepler::SatelliteParameters& orbit = parameters[orbitIdx];
+        const kepler::Parameters& orbit = parameters[orbitIdx];
 
         keplerTranslator.setKeplerElements(
             orbit.eccentricity,
@@ -433,7 +433,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     glBindVertexArray(0);
 
     double maxSemiMajorAxis = 0.0;
-    for (const kepler::SatelliteParameters& kp : parameters) {
+    for (const kepler::Parameters& kp : parameters) {
         if (kp.semiMajorAxis > maxSemiMajorAxis) {
             maxSemiMajorAxis = kp.semiMajorAxis;
         }

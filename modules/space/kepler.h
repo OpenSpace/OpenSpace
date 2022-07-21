@@ -31,9 +31,11 @@
 
 namespace openspace::kepler {
 
-struct SatelliteParameters {
+struct Parameters {
+    // Some human-readable name for the object represented by this kepler parameter set
     std::string name;
-    // International Designator (launch year + launch number of the year + piece of launch
+
+    // Some form of unique identifier for the object represented by this data
     std::string id;
 
     double inclination = 0.0;
@@ -56,7 +58,7 @@ struct SatelliteParameters {
  * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid TLE file
  */
-std::vector<SatelliteParameters> readTleFile(std::filesystem::path file);
+std::vector<Parameters> readTleFile(std::filesystem::path file);
 
 /**
  * Reads the object information from the provided \p file and returns them as individual
@@ -68,7 +70,7 @@ std::vector<SatelliteParameters> readTleFile(std::filesystem::path file);
  * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid OMM file
  */
-std::vector<SatelliteParameters> readOmmFile(std::filesystem::path file);
+std::vector<Parameters> readOmmFile(std::filesystem::path file);
 
 /**
  * Reads the object information from a CSV file following JPL's Small Body Database
@@ -81,7 +83,7 @@ std::vector<SatelliteParameters> readOmmFile(std::filesystem::path file);
  * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p is not a valid JPL SBDB CSV format
  */
-std::vector<SatelliteParameters> readSbdbFile(std::filesystem::path file);
+std::vector<Parameters> readSbdbFile(std::filesystem::path file);
 
 /**
  * The different formats that the #readFile function is capable of loading 
@@ -101,7 +103,7 @@ enum class Format {
  * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p is not in the provided file
  */
-std::vector<SatelliteParameters> readFile(std::filesystem::path file, Format format);
+std::vector<Parameters> readFile(std::filesystem::path file, Format format);
 
 } // namespace openspace::kepler
 
