@@ -24,17 +24,15 @@
 
 #pragma once
 
+#include "openspace/properties/listproperty.h"
 #include "openspace/properties/optionproperty.h"
 #include "openspace/properties/selectionproperty.h"
 #include <openspace/rendering/renderable.h>
 
-//#include <openspace/properties/scalar/floatproperty.h>
-//#include <openspace/properties/vector/vec3property.h>
-//#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include "openspace/properties/vector/dvec3property.h"
-//#include <ghoul/opengl/ghoul_gl.h>
-//#include <ghoul/opengl/uniformcache.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/list/doublelistproperty.h>
+#include <openspace/properties/vector/dvec3property.h>
 
 
 #include <md_gl.h>
@@ -65,52 +63,50 @@ private:
         None,
         LoadMolecule,
     } _deferredTask;
-    
+
     struct molecule_state_t {
         glm::dvec3 position;
         double angle;
         glm::dvec3 direction; // moving direction where magnitude is linear velocity
         glm::dvec3 rotation;  // rotation axis where magnitude is angular velocity
     };
-    
-    std::vector<molecule_state_t> _moleculeStates;
+
+    struct molecule_data_t {
+        std::vector<molecule_state_t> states;
+        md_molecule_api* moleculeApi;
+        md_trajectory_api* trajectoryApi;
+        md_molecule_t molecule;
+        md_molecule_t concatMolecule;
+        md_trajectory_i* trajectory;
+        md_gl_representation_t drawRep;
+        md_gl_molecule_t drawMol;
+    };
     
     void handleDeferredTasks();
-    void updateAnimation(double t);
-    void updateSimulation(double dt);
+    void updateAnimation(molecule_data_t& mol, double t);
+    void updateSimulation(molecule_data_t& mol, double dt);
     void applyTransforms();
     
-    void initMolecule();
-    void freeMolecule();
-    void initTrajectory();
-    void freeTrajectory();
+    void initMolecule(molecule_data_t& mol, const std::string& file);
+    void freeMolecule(molecule_data_t& mol);
+    void initTrajectory(molecule_data_t& mol, const std::string& file);
+    void freeTrajectory(molecule_data_t& mol);
 
-    void updateRepresentation();
+    void updateRepresentation(molecule_data_t& mol);
     
-    void computeAABB();
-
     double _frame;
     md_gl_shaders_t _shaders;
+    
+    std::vector<molecule_data_t> _molecules;
 
-    md_molecule_api* _moleculeApi;
-    md_trajectory_api* _trajectoryApi;
-    md_molecule_t _molecule;
-    md_molecule_t _concatMolecule;
-    md_trajectory_i* _trajectory;
-    md_gl_representation_t _drawRep;
-    md_gl_molecule_t _drawMol;
-
-    glm::vec3 _center;
-    glm::vec3 _extent;
-
-    properties::StringProperty _moleculeFile;
-    properties::StringProperty _trajectoryFile;
+    properties::StringListProperty _moleculeFiles;
+    properties::StringListProperty _trajectoryFiles;
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
     properties::FloatProperty _animationSpeed;
     properties::FloatProperty _simulationSpeed;
-    properties::IntProperty _moleculeCount;
+    properties::IntListProperty _moleculeCounts;
     properties::FloatProperty _linearVelocity;
     properties::FloatProperty _angularVelocity;
     properties::DVec3Property _simulationBox;

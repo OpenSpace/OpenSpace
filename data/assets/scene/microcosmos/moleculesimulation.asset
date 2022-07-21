@@ -35,13 +35,14 @@ local MoleculeSimulation = {
   -- Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFile = moleculeFiles .. "o2.arc",
-    TrajectoryFile = moleculeFiles .. "o2.arc",
-    MoleculeCount = 1000,
+    MoleculeFiles = { moleculeFiles .. "h2o.arc", moleculeFiles .. "o2.arc" },
+    TrajectoryFiles = { moleculeFiles .. "h2o.arc", moleculeFiles .. "o2.arc" },
+    MoleculeCounts = { 500, 500 },
     LinearVelocity = 10.0,
     AngularVelocity = 60.0 / 360.0 * 3.14,
     SimulationBox = { 200.0, 200.0, 200.0 },
     CollisionRadius = 2.0,
+    AnimationSpeed = 100,
   },
   GUI = {
     Path = "/Microcosmos/Molecules/Simulation"

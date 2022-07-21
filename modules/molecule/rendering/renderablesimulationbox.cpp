@@ -111,16 +111,16 @@ namespace {
         // Property
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MoleculeFileInfo = {
-        "MoleculeFile",
-        "Molecule File",
-        "Molecule file path"
+    constexpr openspace::properties::Property::PropertyInfo MoleculeFilesInfo = {
+        "MoleculeFiles",
+        "Molecule Files",
+        "Molecule file paths"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TrajectoryFileInfo = {
-        "TrajectoryFile",
-        "Trajectory File",
-        "Trajectory file path"
+    constexpr openspace::properties::Property::PropertyInfo TrajectoryFilesInfo = {
+        "TrajectoryFiles",
+        "Trajectory Files",
+        "Trajectory file paths"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RepTypeInfo = {
@@ -153,9 +153,9 @@ namespace {
         "Adjust the speed of the simulation (seconds per second)"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MoleculeCountInfo = {
-        "MoleculeCount",
-        "Molecule Count",
+    constexpr openspace::properties::Property::PropertyInfo MoleculeCountsInfo = {
+        "MoleculeCounts",
+        "Molecule Counts",
         "Count of molecules to simulate"
     };
 
@@ -184,11 +184,11 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
-        // [[codegen::verbatim(MoleculeFileInfo.description)]]
-        std::string moleculeFile;
+        // [[codegen::verbatim(MoleculeFilesInfo.description)]]
+        std::vector<std::string> moleculeFiles;
 
-        // [[codegen::verbatim(TrajectoryFileInfo.description)]]
-        std::optional<std::string> trajectoryFile;
+        // [[codegen::verbatim(TrajectoryFilesInfo.description)]]
+        std::vector<std::string> trajectoryFiles;
 
         enum class [[codegen::map(RepresentationType)]] RepresentationType {
             SpaceFill,
@@ -224,8 +224,8 @@ namespace {
         // [[codegen::verbatim(SimulationSpeedInfo.description)]]
         std::optional<float> simulationSpeed;
 
-        // [[codegen::verbatim(MoleculeCountInfo.description)]]
-        int moleculeCount;
+        // [[codegen::verbatim(MoleculeCountsInfo.description)]]
+        std::vector<int> moleculeCounts;
 
         // [[codegen::verbatim(LinearVelocityInfo.description)]]
         float linearVelocity;
@@ -252,27 +252,19 @@ documentation::Documentation RenderableSimulationBox::Documentation() {
 RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
     _deferredTask(GlDeferredTask::None),
-    _moleculeApi(nullptr),
-    _trajectoryApi(nullptr),
-    _moleculeFile(MoleculeFileInfo),
-    _trajectoryFile(TrajectoryFileInfo),
+    _moleculeFiles(MoleculeFilesInfo),
+    _trajectoryFiles(TrajectoryFilesInfo),
     _repType(RepTypeInfo),
     _coloring(ColoringInfo),
     _repScale(RepScaleInfo, 1.f, 0.1f, 10.f),
     _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 1000.f),
     _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 1000.f),
-    _moleculeCount(MoleculeCountInfo),
+    _moleculeCounts(MoleculeCountsInfo),
     _linearVelocity(LinearVelocityInfo),
     _angularVelocity(AngularVelocityInfo),
     _simulationBox(SimulationBoxInfo),
     _collisionRadius(CollisionRadiusInfo)
 {
-    _molecule = {};
-    _concatMolecule = {};
-    _trajectory = {};
-    _drawMol = {};
-    _drawRep = {};
-    
     _repType.addOptions({
         { static_cast<int>(RepresentationType::SpaceFill), "Space Fill" },
         { static_cast<int>(RepresentationType::Ribbons), "Ribbons" },
@@ -292,10 +284,10 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _moleculeFile = p.moleculeFile;
-    _trajectoryFile = p.trajectoryFile.value_or("");
+    _moleculeFiles = p.moleculeFiles;
+    _trajectoryFiles = p.trajectoryFiles;
     _simulationSpeed = p.simulationSpeed.value_or(1.f);
-    _moleculeCount = p.moleculeCount;
+    _moleculeCounts = p.moleculeCounts;
     _linearVelocity = p.linearVelocity;
     _angularVelocity = p.angularVelocity;
     _simulationBox = p.simulationBox;
@@ -315,29 +307,33 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     
     _repScale = p.repScale.value_or(1.f);
     _animationSpeed = p.animationSpeed.value_or(1.f);
-
-    const auto loadMolecule = [this]() {
-        _deferredTask = GlDeferredTask::LoadMolecule;
-    };
-
-    _moleculeFile.onChange(loadMolecule);
-    _trajectoryFile.onChange(loadMolecule);
-    _repType.onChange(loadMolecule);
+    _deferredTask = GlDeferredTask::LoadMolecule;
     
-    for (int i = 0; i < _moleculeCount; i++) {
-        molecule_state_t demoMolecule {
-            linearRand(dvec3(0.0), _simulationBox.value()),  // position
-            0.0,                                             // angle
-            sphericalRand(_linearVelocity.value()),          // direction
-            sphericalRand(_angularVelocity.value()),         // rotation
+    for (int count : _moleculeCounts.value()) {
+        molecule_data_t mol {
+            {},      // states
+            nullptr, //moleculeApi
+            nullptr, //trajectoryApi
+            {},      //molecule
+            {},      //concatMolecule
+            nullptr, //trajectory
+            {},      //drawRep
+            {},      //drawMol
         };
-        _moleculeStates.push_back(std::move(demoMolecule));
+        
+        for (int i = 0; i < count; i++) {
+            molecule_state_t demoMolecule {
+                linearRand(dvec3(0.0), _simulationBox.value()),  // position
+                0.0,                                             // angle
+                sphericalRand(_linearVelocity.value()),          // direction
+                sphericalRand(_angularVelocity.value()),         // rotation
+            };
+            mol.states.push_back(demoMolecule);
+        }
+        
+        _molecules.push_back(mol);
     }
-    
-    loadMolecule();
-    
-    addProperty(_moleculeFile);
-    addProperty(_trajectoryFile);
+
     addProperty(_repType);
     addProperty(_coloring);
     addProperty(_repScale);
@@ -347,10 +343,12 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {
-    if (_moleculeApi)
-        freeMolecule();
-    if (_trajectoryApi)
-        freeTrajectory();
+    for (molecule_data_t& mol : _molecules) {
+        if (mol.moleculeApi)
+            freeMolecule(mol);
+        if (mol.trajectoryApi)
+            freeTrajectory(mol);
+    }
 }
 
 void RenderableSimulationBox::initialize() {
@@ -378,16 +376,23 @@ void RenderableSimulationBox::handleDeferredTasks() {
     case GlDeferredTask::None:
         break;
     case GlDeferredTask::LoadMolecule:
-        initMolecule();
-        if (_trajectoryFile.value() != "")
-            initTrajectory();
+        size_t i = 0;
+        for (molecule_data_t& mol : _molecules) {
+            std::string molFile = _moleculeFiles.value().at(i);
+            std::string trajFile = _trajectoryFiles.value().at(i);
+
+            initMolecule(mol, molFile);
+            if (trajFile != "")
+                initTrajectory(mol, trajFile);
+            i++;
+        }
         break;
     }
     _deferredTask = GlDeferredTask::None;
 }
 
-void RenderableSimulationBox::updateAnimation(double time) {
-    int64_t nFrames = md_trajectory_num_frames(_trajectory);
+void RenderableSimulationBox::updateAnimation(molecule_data_t& mol, double time) {
+    int64_t nFrames = md_trajectory_num_frames(mol.trajectory);
     if (nFrames >= 4) {
         double t = fract(time);
         int64_t frames[4];
@@ -414,14 +419,14 @@ void RenderableSimulationBox::updateAnimation(double time) {
         }
 
         // nearest
-        // md_trajectory_frame_header_t header{};
-        // md_trajectory_load_frame(_trajectory, frame, &header, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z);
-        // md_gl_molecule_set_atom_position(&_drawMol, 0,static_cast<uint32_t>(_molecule.atom.count), _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
+        // mdtraj_frame_header_t header{};
+        // mdtraj_load_frame(traj, frame, &header, mol.atom.x, mol.atom.y, mol.atom.z);
+        // md_gl_molecule_set_atom_position(&_drawMol, 0,static_cast<uint32_t>(mol.atom.count), mol.atom.x, mol.atom.y, mol.atom.z, 0);
         
         // cubic
         md_trajectory_frame_header_t header[4];
         mat3_t boxes[4];
-        int64_t stride = ROUND_UP(_molecule.atom.count, md_simd_widthf);    // The interploation uses SIMD vectorization without bounds, so we make sure there is no overlap between the data segments
+        int64_t stride = ROUND_UP(mol.molecule.atom.count, md_simd_widthf);    // The interploation uses SIMD vectorization without bounds, so we make sure there is no overlap between the data segments
         int64_t bytes = stride * sizeof(float) * 3 * 4;
         float* mem = static_cast<float*>(malloc(bytes));
         {
@@ -432,13 +437,13 @@ void RenderableSimulationBox::updateAnimation(double time) {
                 {mem + stride * 9, mem + stride * 10, mem + stride * 11},
             };
             md_vec3_soa_t dst = {
-                _molecule.atom.x, _molecule.atom.y, _molecule.atom.z,
+                mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z,
             };
 
-            md_trajectory_load_frame(_trajectory, frames[0], &header[0], src[0].x, src[0].y, src[0].z);
-            md_trajectory_load_frame(_trajectory, frames[1], &header[1], src[1].x, src[1].y, src[1].z);
-            md_trajectory_load_frame(_trajectory, frames[2], &header[2], src[2].x, src[2].y, src[2].z);
-            md_trajectory_load_frame(_trajectory, frames[3], &header[3], src[3].x, src[3].y, src[3].z);
+            md_trajectory_load_frame(mol.trajectory, frames[0], &header[0], src[0].x, src[0].y, src[0].z);
+            md_trajectory_load_frame(mol.trajectory, frames[1], &header[1], src[1].x, src[1].y, src[1].z);
+            md_trajectory_load_frame(mol.trajectory, frames[2], &header[2], src[2].x, src[2].y, src[2].z);
+            md_trajectory_load_frame(mol.trajectory, frames[3], &header[3], src[3].x, src[3].y, src[3].z);
 
             memcpy(&boxes[0], header[0].box, sizeof(boxes[0]));
             memcpy(&boxes[1], header[1].box, sizeof(boxes[1]));
@@ -448,8 +453,7 @@ void RenderableSimulationBox::updateAnimation(double time) {
             vec3_t pbc_ext = box * vec3_t{{1.0, 1.0, 1.0}};
             
             int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
-            std::cout << frame << std::endl;
-            md_util_cubic_interpolation(dst, src, _molecule.atom.count, pbc_ext, t, 1.0f);
+            md_util_cubic_interpolation(dst, src, mol.molecule.atom.count, pbc_ext, t, 1.0f);
         }
         free(mem);
     }
@@ -459,26 +463,28 @@ void RenderableSimulationBox::updateAnimation(double time) {
 }
 
 void RenderableSimulationBox::applyTransforms() {
-    for (size_t i = 0; i < _moleculeStates.size(); i++) {
-        const molecule_state_t& state = _moleculeStates[i];
-        dmat4 transform =
-            translate(dmat4(1.0), state.position) *
-            rotate(dmat4(1.0), state.angle, state.rotation) *
-            dmat4(1.0);
+    for (const molecule_data_t& mol : _molecules) {
+        for (size_t i = 0; i < mol.states.size(); i++) {
+            const molecule_state_t& state = mol.states[i];
+            dmat4 transform =
+                translate(dmat4(1.0), state.position) *
+                rotate(dmat4(1.0), state.angle, state.rotation) *
+                dmat4(1.0);
         
-        for (int j = 0; j < _molecule.atom.count; j++) {
-            dvec4 pos(*(_molecule.atom.x + j), *(_molecule.atom.y + j), *(_molecule.atom.z + j), 1.0);
-            pos = transform * pos;
-            *(_concatMolecule.atom.x + (i * _molecule.atom.count) + j) = pos.x;
-            *(_concatMolecule.atom.y + (i * _molecule.atom.count) + j) = pos.y;
-            *(_concatMolecule.atom.z + (i * _molecule.atom.count) + j) = pos.z;
+            for (int j = 0; j < mol.molecule.atom.count; j++) {
+                dvec4 pos(*(mol.molecule.atom.x + j), *(mol.molecule.atom.y + j), *(mol.molecule.atom.z + j), 1.0);
+                pos = transform * pos;
+                *(mol.concatMolecule.atom.x + (i * mol.molecule.atom.count) + j) = pos.x;
+                *(mol.concatMolecule.atom.y + (i * mol.molecule.atom.count) + j) = pos.y;
+                *(mol.concatMolecule.atom.z + (i * mol.molecule.atom.count) + j) = pos.z;
+            }
         }
     }
 }
 
-void RenderableSimulationBox::updateSimulation(double dt) {
+void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) {
     // update positions / rotations
-    for (auto& molecule : _moleculeStates) {
+    for (auto& molecule : mol.states) {
         molecule.position += molecule.direction * dt;
         molecule.position = mod(molecule.position, _simulationBox.value());
         molecule.angle += length(molecule.rotation) * dt;
@@ -487,8 +493,8 @@ void RenderableSimulationBox::updateSimulation(double dt) {
     double collRadiusSquared = _collisionRadius * _collisionRadius;
 
     // compute collisions
-    for (auto it1 = _moleculeStates.begin(); it1 != _moleculeStates.end(); ++it1) {
-        for (auto it2 = std::next(it1); it2 != _moleculeStates.end(); ++it2) {
+    for (auto it1 = mol.states.begin(); it1 != mol.states.end(); ++it1) {
+        for (auto it2 = std::next(it1); it2 != mol.states.end(); ++it2) {
 
             molecule_state_t& m1 = *it1;
             molecule_state_t& m2 = *it2;
@@ -519,158 +525,146 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     
     double t = data.time.j2000Seconds();
     double dt = t - data.previousFrameTime.j2000Seconds();
-
-    // update animation
-    if (_trajectoryApi) {
-        updateAnimation(t * _animationSpeed);
+    
+    for (molecule_data_t& mol : _molecules) {
+        // update animation
+        if (mol.trajectoryApi) {
+            updateAnimation(mol, t * _animationSpeed);
+        }
+    
+        // update simulation
+        updateSimulation(mol, dt * _simulationSpeed);
+    
+        // update gl repr
+        applyTransforms();
+        md_gl_molecule_set_atom_position(&mol.drawMol, 0, uint32_t(mol.concatMolecule.atom.count),
+            mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z, 0);
     }
-    
-    // update simulation
-    updateSimulation(dt * _simulationSpeed);
-    
-    // update gl repr
-    applyTransforms();
-    md_gl_molecule_set_atom_position(&_drawMol, 0, uint32_t(_concatMolecule.atom.count), _concatMolecule.atom.x, _concatMolecule.atom.y, _concatMolecule.atom.z, 0);
 }
 
 void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     using namespace glm;
     const dmat4 I(1.0);
 
-    if (_concatMolecule.atom.count) {
-        
-        // because the molecule is small, a scaling of the view matrix causes the molecule
-        // to be moved out of view in clip space. Reset the scaling for the molecule
-        // is fine for now.
-        Camera camCopy = data.camera;
-        camCopy.setScaling(1.f);
+    // because the molecule is small, a scaling of the view matrix causes the molecule
+    // to be moved out of view in clip space. Reset the scaling for the molecule
+    // is fine for now.
+    Camera camCopy = data.camera;
+    camCopy.setScaling(1.f);
 
-        // having the view matrix in the model matrix is better because
-        // mold uses single precision but that's not enough
-        mat4 model_matrix =
-            camCopy.combinedViewMatrix() *
-            translate(I, data.modelTransform.translation) *
-            scale(I, data.modelTransform.scale) *
-            dmat4(data.modelTransform.rotation) *
-            translate(I, -_simulationBox.value() / 2.0) *
-            I;
-        
-        mat4 view_matrix =
-            I;
+    // having the view matrix in the model matrix is better because
+    // mold uses single precision but that's not enough
+    mat4 model_matrix =
+        camCopy.combinedViewMatrix() *
+        translate(I, data.modelTransform.translation) *
+        scale(I, data.modelTransform.scale) *
+        dmat4(data.modelTransform.rotation) *
+        translate(I, -_simulationBox.value() / 2.0) *
+        I;
 
-        mat4 proj_matrix =
-            dmat4(camCopy.sgctInternal.projectionMatrix()) *
-            I;
+    mat4 view_matrix =
+        I;
 
-        md_gl_draw_op_t draw_op = {};
+    mat4 proj_matrix =
+        dmat4(camCopy.sgctInternal.projectionMatrix()) *
+        I;
 
-        draw_op.rep = &_drawRep;
-        draw_op.model_matrix = value_ptr(model_matrix);
-
-        md_gl_draw_args_t args = {};
-        args.shaders = &_shaders;
-        args.draw_operations = {
-            1,
-            &draw_op,
-        };
-        args.view_transform = {
-            value_ptr(view_matrix),
-            value_ptr(proj_matrix),
-            nullptr, nullptr
-        };
-        args.atom_mask = 0;
-        args.options = 0;
-        
-        md_gl_draw(&args);
-    }
-}
-
-void RenderableSimulationBox::computeAABB() {
-    glm::vec3 min_aabb {FLT_MAX};
-    glm::vec3 max_aabb {-FLT_MAX};
-
-    for (int64_t i = 0; i < _molecule.atom.count; ++i) {
-        glm::vec3 p {_molecule.atom.x[i], _molecule.atom.y[i], _molecule.atom.z[i]};
-        min_aabb = glm::min(min_aabb, p);
-        max_aabb = glm::max(max_aabb, p);
+    std::vector<md_gl_draw_op_t> drawOps;
+    for (molecule_data_t& mol : _molecules) {
+        if (mol.concatMolecule.atom.count) {
+            md_gl_draw_op_t drawOp = {};
+            drawOp.model_matrix = value_ptr(model_matrix);
+            drawOp.rep = &mol.drawRep;
+            drawOps.push_back(drawOp);
+        }
     }
 
-    _extent = max_aabb - min_aabb;
-    _center = (min_aabb + max_aabb) * 0.5f;
+    md_gl_draw_args_t args = {};
+    args.shaders = &_shaders;
+    args.view_transform = {
+        value_ptr(view_matrix),
+        value_ptr(proj_matrix),
+        nullptr, nullptr
+    };
+    args.atom_mask = 0;
+    args.options = 0;
+        
+    args.draw_operations = {
+        static_cast<uint32_t>(drawOps.size()),
+        drawOps.data(),
+    };
+
+    md_gl_draw(&args);
 }
 
-void RenderableSimulationBox::initMolecule() {
-    LDEBUG("Loading molecule file '" + _trajectoryFile.value() + "'");
+void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::string& file) {
+    LDEBUG("Loading molecule file '" + file + "'");
 
-    // set the updateRepresentation hook once, when the molecule is first initialized
-    if (!_moleculeApi) {
-        const auto updateRep = [this]() { updateRepresentation(); };
-        _repType.onChange(updateRep);
-        _repScale.onChange(updateRep);
-        _coloring.onChange(updateRep);
+    // // set the updateRepresentation hook once, when the molecule is first initialized
+    if (!mol.moleculeApi) {
+    //     const auto updateRep = [this]() { updateRepresentation(mol); };
+    //     _repType.onChange(updateRep);
+    //     _repScale.onChange(updateRep);
+    //     _coloring.onChange(updateRep);
     }
     
     // free previously loaded molecule
     else {
-        freeMolecule();
+        freeMolecule(mol);
     }
-
-    // need to keep the string in scope to keep the str pointer valid
-    std::string molFile = _moleculeFile.value();
-    str_t molFileStr = str_from_cstr(molFile.data());
     
-    _moleculeApi = load::mol::get_api(molFileStr);
+    str_t molFileStr = str_from_cstr(file.data());
+    mol.moleculeApi = load::mol::get_api(molFileStr);
 
-    if (!_moleculeApi) {
+    if (!mol.moleculeApi) {
         LERROR("failed to initialize molecule: unknown file type");
         return;
     }
 
-    bool init = _moleculeApi->init_from_file(&_molecule, molFileStr, default_allocator);
+    bool init = mol.moleculeApi->init_from_file(&mol.molecule, molFileStr, default_allocator);
     
     if (!init) {
         LERROR("failed to initialize molecule: malformed file");
-        _moleculeApi = nullptr;
+        mol.moleculeApi = nullptr;
         return;
     }
     
     // duplicate the molecule data n times. This is done for performance reasons, because
     // the molecule simulation can be treated as 1 big molecule with a single draw call.
-    _concatMolecule = concat_molecule_init(&_molecule, _moleculeCount, default_allocator);
+    mol.concatMolecule = concat_molecule_init(&mol.molecule, mol.states.size(), default_allocator);
     
     double sphere = glm::compMax(_simulationBox.value()) / 2.0;
     setBoundingSphere(sphere);
     setInteractionSphere(sphere);
 
-    md_gl_molecule_init(&_drawMol, &_concatMolecule);
-    md_gl_representation_init(&_drawRep, &_drawMol);
-    updateRepresentation();
+    md_gl_molecule_init(&mol.drawMol, &mol.concatMolecule);
+    md_gl_representation_init(&mol.drawRep, &mol.drawMol);
+    updateRepresentation(mol);
 }
 
-void RenderableSimulationBox::initTrajectory() {
-    LDEBUG("Loading trajectory file '" + _trajectoryFile.value() + "'");
+void RenderableSimulationBox::initTrajectory(molecule_data_t& mol, const std::string& file) {
+    LDEBUG("Loading trajectory file '" + file + "'");
     
     // need to keep the string in scope to keep the str pointer valid
-    std::string trajFile = _trajectoryFile.value();
-    str_t trajFileStr = str_from_cstr(trajFile.data());
+    str_t trajFileStr = str_from_cstr(file.data());
 
-    _trajectoryApi = load::traj::get_api(trajFileStr);
+    mol.trajectoryApi = load::traj::get_api(trajFileStr);
 
-    if (!_trajectoryApi) {
+    if (!mol.trajectoryApi) {
         LERROR("failed to initialize trajectory: unknown file type");
         return;
     }
     
-    _trajectory = load::traj::open_file(trajFileStr, &_molecule, default_allocator);
+    mol.trajectory = load::traj::open_file(trajFileStr, &mol.molecule, default_allocator);
 
-    if (!_trajectory) {
+    if (!mol.trajectory) {
         LERROR("failed to initialize trajectory: failed to load file");
-        _trajectoryApi = nullptr;
+        mol.trajectoryApi = nullptr;
         return;
     }
 }
 
-void RenderableSimulationBox::updateRepresentation() {
+void RenderableSimulationBox::updateRepresentation(molecule_data_t& mol) {
     { // REPRESENTATION TYPE
         md_gl_representation_args_t rep_args{};
     
@@ -691,59 +685,59 @@ void RenderableSimulationBox::updateRepresentation() {
                 break;
         }
 
-        md_gl_representation_set_type_and_args(&_drawRep, _repType, rep_args);
+        md_gl_representation_set_type_and_args(&mol.drawRep, _repType, rep_args);
     }
     { // COLORING
-        uint32_t* colors = static_cast<uint32_t*>(md_alloc(default_temp_allocator, sizeof(uint32_t) * _concatMolecule.atom.count));
-        uint32_t count = static_cast<uint32_t>(_concatMolecule.atom.count);
+        uint32_t* colors = static_cast<uint32_t*>(md_alloc(default_temp_allocator, sizeof(uint32_t) * mol.concatMolecule.atom.count));
+        uint32_t count = static_cast<uint32_t>(mol.concatMolecule.atom.count);
 
         switch (static_cast<Coloring>(_coloring.value())) {
             case Coloring::Cpk:
-                color_atoms_cpk(colors, count, _concatMolecule);
+                color_atoms_cpk(colors, count, mol.concatMolecule);
                 break;
             case Coloring::AtomIndex:
-                color_atoms_idx(colors, count, _concatMolecule);
+                color_atoms_idx(colors, count, mol.concatMolecule);
                 break;
             case Coloring::ResId:
-                color_atoms_residue_id(colors, count, _concatMolecule);
+                color_atoms_residue_id(colors, count, mol.concatMolecule);
                 break;
             case Coloring::ResIndex:
-                color_atoms_residue_index(colors, count, _concatMolecule);
+                color_atoms_residue_index(colors, count, mol.concatMolecule);
                 break;
             case Coloring::ChainId:
-                color_atoms_chain_id(colors, count, _concatMolecule);
+                color_atoms_chain_id(colors, count, mol.concatMolecule);
                 break;
             case Coloring::ChainIndex:
-                color_atoms_chain_index(colors, count, _concatMolecule);
+                color_atoms_chain_index(colors, count, mol.concatMolecule);
                 break;
             case Coloring::SecondaryStructure:
-                color_atoms_secondary_structure(colors, count, _concatMolecule);
+                color_atoms_secondary_structure(colors, count, mol.concatMolecule);
                 break;
             default:
                 ghoul_assert(false, "unexpected molecule coloring");
                 break;
         }
 
-        md_gl_representation_set_color(&_drawRep, 0, static_cast<uint32_t>(_concatMolecule.atom.count), colors, 0);
+        md_gl_representation_set_color(&mol.drawRep, 0, static_cast<uint32_t>(mol.concatMolecule.atom.count), colors, 0);
     }
 }
 
-void RenderableSimulationBox::freeMolecule() {
-    md_gl_representation_free(&_drawRep);
-    md_gl_molecule_free(&_drawMol);
-    _moleculeApi->free(&_molecule, default_allocator);
-    _moleculeApi = nullptr;
-    concat_molecule_free(&_concatMolecule, default_allocator);
-    _concatMolecule = {};
-    _molecule = {};
-    _drawMol = {};
-    _drawRep = {};
+void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {
+    md_gl_representation_free(&mol.drawRep);
+    md_gl_molecule_free(&mol.drawMol);
+    mol.moleculeApi->free(&mol.molecule, default_allocator);
+    mol.moleculeApi = nullptr;
+    concat_molecule_free(&mol.concatMolecule, default_allocator);
+    mol.concatMolecule = {};
+    mol.molecule = {};
+    mol.drawMol = {};
+    mol.drawRep = {};
 }
 
-void RenderableSimulationBox::freeTrajectory() {
-    _trajectoryApi->destroy(_trajectory);
-    _trajectoryApi = nullptr;
-    _trajectory = nullptr;
+void RenderableSimulationBox::freeTrajectory(molecule_data_t& mol) {
+    mol.trajectoryApi->destroy(mol.trajectory);
+    mol.trajectoryApi = nullptr;
+    mol.trajectory = nullptr;
 }
 
 } // namespace openspace
