@@ -23,7 +23,7 @@
 ##########################################################################################
 
 function (set_openspace_compile_settings target)
-  target_compile_features(${target} PRIVATE cxx_std_17)
+  target_compile_features(${target} PRIVATE cxx_std_20)
 
   set(MSVC_WARNINGS
     "/MP"       # Multi-threading support

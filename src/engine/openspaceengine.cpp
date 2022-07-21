@@ -219,11 +219,6 @@ void OpenSpaceEngine::initialize() {
 
     _printEvents = global::configuration->isPrintingEvents;
 
-    const std::string versionCheckUrl = global::configuration->versionCheckUrl;
-    if (!versionCheckUrl.empty()) {
-        global::versionChecker->requestLatestVersion(versionCheckUrl);
-    }
-
     std::string cacheFolder = absPath("${CACHE}").string();
     if (global::configuration->usePerProfileCache) {
         std::string profile = global::configuration->profile;
@@ -463,6 +458,10 @@ void OpenSpaceEngine::initializeGL() {
     );
     SysCap.logCapabilities(verbosity);
 
+    const std::string versionCheckUrl = global::configuration->versionCheckUrl;
+    if (!versionCheckUrl.empty()) {
+        global::versionChecker->requestLatestVersion(versionCheckUrl);
+    }
 
     // Check the required OpenGL versions of the registered modules
     ghoul::systemcapabilities::Version version =

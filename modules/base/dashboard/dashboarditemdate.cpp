@@ -91,7 +91,11 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     );
 
     try {
-        RenderFont(*_font, penPosition, fmt::format(_formatString.value().c_str(), time));
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(fmt::runtime(_formatString.value()), time)
+        );
     }
     catch (const fmt::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
@@ -103,7 +107,7 @@ glm::vec2 DashboardItemDate::size() const {
     ZoneScoped
 
     std::string_view time = global::timeManager->time().UTC();
-    return _font->boundingBox(fmt::format(_formatString.value().c_str(), time));
+    return _font->boundingBox(fmt::format(fmt::runtime(_formatString.value()), time));
 }
 
 } // namespace openspace
