@@ -26,6 +26,8 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
+#include <scn/scn.h>
+#include <scn/tuple_return.h>
 #include <fstream>
 #include <optional>
 #include <sstream>
@@ -177,7 +179,7 @@ namespace {
     }
 
 
-    double epochFromSubstring(const std::string& epochString) {
+    double epochFromSubstring(const std::string& epoch) {
         // The epochString is in the form:
         // YYDDD.DDDDDDDD
         // With YY being the last two years of the launch epoch, the first DDD the day of
@@ -197,14 +199,13 @@ namespace {
         // reasoning, two-digit years from 57-99 correspond to 1957-1999 and those from
         // 00-56 correspond to 2000-2056. We'll see each other again in 2057!
 
-        // 1. Get the full year
-        std::string yearPrefix =
-            std::atoi(epochString.substr(0, 2).c_str()) > 57 ? "19" : "20";
-        const int year = std::atoi((yearPrefix + epochString.substr(0, 2)).c_str());
+        // 1,2. Get the full year and days
+        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(epoch, "{:2}{}");
+        if (!res) {
+            throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+        }
+        year += year > 57 ? 1900 : 2000;
         const int daysSince2000 = countDays(year);
-
-        // 2.
-        double daysInYear = std::atof(epochString.substr(2).c_str());
 
         // 3
         using namespace std::chrono;
@@ -215,7 +216,7 @@ namespace {
         // 4
         // We need to remove additional leap seconds past 2000 and add them prior to
         // 2000 to sync up the time zones
-        const double nLeapSecondsOffset = -countLeapSeconds(
+        const double nLeapSecondsOffset = countLeapSeconds(
             year,
             static_cast<int>(std::floor(daysInYear))
         );
@@ -225,11 +226,10 @@ namespace {
             static_cast<double>(seconds(hours(12)).count());
 
         // Combine all of the values
-        const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
-        return epoch;
+        return nSecondsSince2000 - nLeapSecondsOffset - nSecondsEpochOffset;
     }
 
-    double epochFromYMDdSubstring(const std::string& epochString) {
+    double epochFromYMDdSubstring(const std::string& epoch) {
         // The epochString is in the form:
         // YYYYMMDD.ddddddd
         // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
@@ -243,15 +243,14 @@ namespace {
         // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
         // midnight
 
-        // 1
-        int year = std::atoi(epochString.substr(0, 4).c_str());
+        // 1, 2
+        auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
+            scn::scan_tuple<int, int, int, double>(epoch, "{:4}{:2}{:2}{}");
+        if (!res) {
+            throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+        }
         const int daysSince2000 = countDays(year);
-
-        // 2.
-        int monthNum = std::atoi(epochString.substr(4, 2).c_str());
-        int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
         int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
-        double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
         double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
 
         // 3
@@ -272,11 +271,10 @@ namespace {
         const double offset = static_cast<double>(seconds(hours(12)).count());
 
         // Combine all of the values
-        const double epoch = nSecondsSince2000 + nLeapSecondsOffset - offset;
-        return epoch;
+        return nSecondsSince2000 + nLeapSecondsOffset - offset;
     }
 
-    double epochFromOmmString(const std::string& epochString) {
+    double epochFromOmmString(const std::string& epoch) {
         // The epochString is in the form:
         // YYYY-MM-DDThh:mm:ss[.d->d][Z]
         // or
@@ -292,59 +290,76 @@ namespace {
         // 6. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
         // midnight
 
-        // 1
-        int year = std::atoi(epochString.substr(0, 4).c_str());
-        const int daysSince2000 = countDays(year);
+        std::string e = epoch;
+        if (e.back() == 'Z') {
+            e.pop_back();
+        }
 
-        // 2.
-        const size_t pos = epochString.find('T');
-        int nDays = 0;
+        struct {
+            int year;
+            int nDays;
+            int hours;
+            int minutes;
+            double seconds;
+        } date;
+
+        // 1, 2
+        const size_t pos = epoch.find('T');
         if (pos == 10) {
             // We have the first form
-            int monthNum = std::atoi(epochString.substr(5, 2).c_str());
-            int dayOfMonthNum = std::atoi(epochString.substr(8, 2).c_str());
-            nDays = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
+            
+            int month;
+            int days;
+            auto res = scn::scan(
+                epoch, "{:4}-{:2}-{:2}T{:2}:{:2}:{}",
+                date.year, month, days, date.hours, date.minutes, date.seconds
+            );
+            if (!res) {
+                throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+            }
+            date.nDays = daysIntoGivenYear(date.year, month, days);
         }
         else if (pos == 8) {
             // We have the second form
-            nDays = std::atoi(epochString.substr(5, 3).c_str());
+
+            auto res = scn::scan(
+                epoch, "{:4}-{:3}T{:2}:{:2}:{}",
+                date.year, date.nDays, date.hours, date.minutes, date.seconds
+            );
+            if (!res) {
+                throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+            }
         }
         else {
-            throw ghoul::RuntimeError(fmt::format(
-                "Malformed epoch string '{}'", epochString
-            ));
+            throw ghoul::RuntimeError(fmt::format("Malformed epoch string '{}'", epoch));
         }
+
+        const int daysSince2000 = countDays(date.year);
 
         // 3
         using namespace std::chrono;
         const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-        const double nSecondsSince2000 = (daysSince2000 + nDays) * SecondsPerDay;
+        const double nSecondsSince2000 = (daysSince2000 + date.nDays) * SecondsPerDay;
 
         // 4
         // We need to remove additional leap seconds past 2000 and add them prior to
         // 2000 to sync up the time zones
         const double nLeapSecondsOffset = -countLeapSeconds(
-            year,
-            static_cast<int>(std::floor(nDays))
+            date.year,
+            static_cast<int>(std::floor(date.nDays))
         );
 
         // 5
-        std::string remainder = epochString.substr(pos + 1);
-        const int hours = std::atoi(remainder.substr(0, 2).c_str());
-        const int minutes = std::atoi(remainder.substr(3, 2).c_str());
-        const double seconds = std::atof(remainder.substr(6).c_str());
-
         const long long totalSeconds =
-            std::chrono::seconds(std::chrono::hours(hours)).count() +
-            std::chrono::seconds(std::chrono::minutes(minutes)).count();
+            std::chrono::seconds(std::chrono::hours(date.hours)).count() +
+            std::chrono::seconds(std::chrono::minutes(date.minutes)).count();
 
         // 6
         const long long offset = std::chrono::seconds(std::chrono::hours(12)).count();
 
         // Combine all of the values
-        const double epoch =
-            nSecondsSince2000 + totalSeconds + nLeapSecondsOffset - offset + seconds;
-        return epoch;
+        return
+            nSecondsSince2000 + totalSeconds + nLeapSecondsOffset - offset + date.seconds;
     }
 } // namespace
 
