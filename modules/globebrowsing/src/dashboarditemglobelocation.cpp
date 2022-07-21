@@ -190,7 +190,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         {
             end = fmt::format_to(
                 _buffer.data(),
-                _formatString, lat, lon, dist.first, dist.second
+                fmt::runtime(_formatString), lat, lon, dist.first, dist.second
             );
             break;
         }
@@ -217,7 +217,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
             end = fmt::format_to(
                 _buffer.data(),
-                _formatString,
+                fmt::runtime(_formatString),
                 latDeg, latMin, latSec, isNorth ? "N" : "S",
                 lonDeg, lonMin, lonSec, isEast ? "E" : "W",
                 dist.first, dist.second

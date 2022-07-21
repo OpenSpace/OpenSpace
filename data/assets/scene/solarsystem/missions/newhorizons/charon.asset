@@ -29,11 +29,8 @@ local CharonProjection = {
   },
   Renderable = {
     Type = "RenderablePlanetProjection",
-    Geometry = {
-      Type = "SimpleSphere",
-      Radius = charonRadius,
-      Segments = 350
-    },
+    Radius = charonRadius,
+    Segments = 350,
     ColorTexturePaths = {
       textures .. "NH_Charon_mosaic.png",
       textures .. "NH_Charon_mosaic_8192.png"

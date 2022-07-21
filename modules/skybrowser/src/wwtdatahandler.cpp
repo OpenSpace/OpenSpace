@@ -155,7 +155,7 @@ void parseWtmlsFromDisc(std::vector<tinyxml2::XMLDocument*>& xmls,
 {
     for (const auto& entry : std::filesystem::directory_iterator(directory)) {
         tinyxml2::XMLDocument* document = new tinyxml2::XMLDocument();
-        std::string path = entry.path().u8string();
+        std::string path = entry.path().string();
         tinyxml2::XMLError successCode = document->LoadFile(path.c_str());
 
         if (successCode == tinyxml2::XMLError::XML_SUCCESS) {

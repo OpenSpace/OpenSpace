@@ -31,6 +31,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
@@ -38,6 +39,7 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 struct Image;
+class Sphere;
 
 namespace planetgeometry { class PlanetGeometry; }
 
@@ -59,6 +61,7 @@ public:
 private:
     void loadColorTexture();
     void loadHeightTexture();
+    void createSphere();
 
     glm::mat4 attitudeParameters(double time, const glm::vec3& up);
     void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture,
@@ -94,7 +97,9 @@ private:
     properties::IntProperty _projectionsInBuffer;
     properties::TriggerProperty _clearProjectionBuffer;
 
-    std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
+    properties::Vec3Property _radius;
+    properties::IntProperty _segments;
+    std::unique_ptr<Sphere> _sphere;
 
     glm::mat4 _transform = glm::mat4(1.f);
     glm::mat4 _projectorMatrix = glm::mat4(1.f);

@@ -134,7 +134,6 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 
     // Stores whether we found at least one matching property. If this is false at the end
     // of the loop, the property name regex was probably misspelled.
-    bool foundMatching = false;
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
         const std::string id = prop->fullyQualifiedIdentifier();
@@ -202,9 +201,6 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     using namespace openspace;
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
-
-    const bool isGroupMode = !groupName.empty();
-    bool isLiteral = false;
 
     const int type = lua_type(L, -1);
 
@@ -455,15 +451,6 @@ int propertySetValueSingle(lua_State* L) {
     return propertySetValue(L);
 }
 
-int propertyHasProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::propertyHasProperty");
-    const std::string uri = ghoul::lua::value<std::string>(L);
-
-    properties::Property* prop = property(uri);
-    ghoul::lua::push(L, prop != nullptr);
-    return 1;
-}
-
 int propertyGetValue(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetValue");
     const std::string uri = ghoul::lua::value<std::string>(L);
@@ -485,14 +472,23 @@ int propertyGetValue(lua_State* L) {
     return 1;
 }
 
+}  // namespace openspace::luascriptfunctions
+
+namespace {
+
 /**
- * \ingroup LuaScripts
- * getProperty
+ * Returns whether a property with the given URI exists
+ */
+[[codegen::luawrap]] bool hasProperty(std::string uri) {
+    openspace::properties::Property* prop = openspace::property(uri);
+    return prop != nullptr;
+}
+
+/**
  * Returns a list of property identifiers that match the passed regular expression
  */
-int propertyGetProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetProperty");
-    std::string regex = ghoul::lua::value<std::string>(L);
+[[codegen::luawrap]] std::vector<std::string> getProperty(std::string regex) {
+    using namespace openspace;
 
     std::string groupName;
     if (doesUriContainGroupTag(regex, groupName)) {
@@ -511,26 +507,18 @@ int propertyGetProperty(lua_State* L) {
 
         // If none then malformed regular expression
         if (propertyName.empty() && nodeName.empty()) {
-            LERRORC(
-                "propertyGetProperty",
-                fmt::format(
-                    "Malformed regular expression: '{}': Empty both before and after '*'",
-                    regex
-                )
-            );
-            return 0;
+            throw ghoul::lua::LuaError(fmt::format(
+                "Malformed regular expression: '{}': Empty both before and after '*'",
+                regex
+            ));
         }
 
         // Currently do not support several wildcards
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
-            LERRORC(
-                "propertyGetProperty",
-                fmt::format(
-                    "Malformed regular expression: '{}': "
-                    "Currently only one '*' is supported", regex
-                )
-            );
-            return 0;
+            throw ghoul::lua::LuaError(fmt::format(
+                "Malformed regular expression: '{}': Currently only one '*' is supported",
+                regex
+            ));
         }
     }
     // Literal or tag
@@ -602,19 +590,8 @@ int propertyGetProperty(lua_State* L) {
         res.push_back(id);
     }
 
-    lua_newtable(L);
-    int number = 1;
-    for (const std::string& s : res) {
-        ghoul::lua::push(L, s);
-        lua_rawseti(L, -2, number);
-        ++number;
-    }
-    return 1;
+    return res;
 }
-
-}  // namespace openspace::luascriptfunctions
-
-namespace {
 
 /**
  * Loads the SceneGraphNode described in the table and adds it to the SceneGraph.
