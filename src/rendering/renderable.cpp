@@ -24,11 +24,13 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/navigation/navigationhandler.h> 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
@@ -81,6 +83,14 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
+        "DimInAtmosphere",
+        "Dim In Atmosphere",
+        "Enables/Disables if the object should be dimmed if the camera is in an "
+        "atmosphere.",
+        openspace::properties::Property::Visibility::Developer
+    };
+
     struct [[codegen::Dictionary(Renderable)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -106,6 +116,9 @@ namespace {
 
         // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
         std::optional<RenderBinMode> renderBinMode;
+
+        // [[codegen::verbatim(DimInAtmosphereInfo.description)]]
+        std::optional<bool> dimInAtmosphere;
     };
 #include "renderable_codegen.cpp"
 } // namespace
@@ -146,6 +159,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
+    , _dimInAtmosphere(DimInAtmosphereInfo, false)
 {
     ZoneScoped
 
@@ -193,6 +207,9 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     if (p.renderBinMode.has_value()) {
         setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
     }
+    
+    _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
+    addProperty(_dimInAtmosphere);
 }
 
 void Renderable::initialize() {}
@@ -292,7 +309,10 @@ void Renderable::registerUpdateRenderBinFromOpacity() {
 }
 
 float Renderable::opacity() const {
-    return _opacity * _fade;
+    // Rendering should depend on if camera is in the atmosphere and if camera is at the 
+    // dark part of the globe
+    return _dimInAtmosphere ?
+        _opacity * _fade * global::navigationHandler->camera()->atmosphereDimmingFactor() :
+        _opacity * _fade;
 }
-
 }  // namespace openspace
