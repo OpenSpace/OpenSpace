@@ -87,7 +87,8 @@ namespace {
         "DimInAtmosphere",
         "Dim In Atmosphere",
         "Enables/Disables if the object should be dimmed if the camera is in an "
-        "atmosphere."
+        "atmosphere.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(Renderable)]] Parameters {
@@ -310,9 +311,8 @@ void Renderable::registerUpdateRenderBinFromOpacity() {
 float Renderable::opacity() const {
     // Rendering should depend on if camera is in the atmosphere and if camera is at the 
     // dark part of the globe
-    float dimming = global::navigationHandler->camera()->atmosphereDimming();
-    dimming = _dimInAtmosphere ? dimming : 1.0;
-    return _opacity * _fade * dimming;
+    return _dimInAtmosphere ?
+        _opacity * _fade * global::navigationHandler->camera()->atmosphereDimmingFactor() :
+        _opacity * _fade;
 }
-
 }  // namespace openspace

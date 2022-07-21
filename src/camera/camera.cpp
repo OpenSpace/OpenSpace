@@ -156,12 +156,12 @@ float Camera::sinMaxFov() const {
     return _cachedSinMaxFov.datum;
 }
 
-void Camera::setAtmosphereDimming(float atmosphereDimming) {
-    _atmosphereDimming = atmosphereDimming;
+void Camera::setAtmosphereDimmingFactor(float atmosphereDimmingFactor) {
+    _atmosphereDimmingFactor = atmosphereDimmingFactor;
 }
 
-float Camera::atmosphereDimming() const {
-    return _atmosphereDimming;
+float Camera::atmosphereDimmingFactor() const {
+    return _atmosphereDimmingFactor;
 }
 
 SceneGraphNode* Camera::parent() const {

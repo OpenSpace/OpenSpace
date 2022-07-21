@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/textureunit.h>
@@ -97,8 +98,7 @@ private:
 
     // Atmosphere dimming
     properties::FloatProperty _atmosphereDimmingHeight;
-    properties::FloatProperty _atmosphereDimmingSunsetAngleStart;
-    properties::FloatProperty _atmosphereDimmingSunsetAngleEnd;
+    properties::Vec2Property _atmosphereDimmingSunsetAngle;
 
     float _planetRadius = 0.f;
     float _mieScattExtPropCoefProp = 1.f;
