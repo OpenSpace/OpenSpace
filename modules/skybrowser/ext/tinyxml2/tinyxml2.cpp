@@ -28,6 +28,13 @@ distribution.
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wsuggest-override"
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
+
 #include "tinyxml2.h"
 
 #include <new>		// yes, this one new style header, is in the Android SDK.
@@ -2994,4 +3001,8 @@ bool XMLPrinter::Visit( const XMLUnknown& unknown )
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
 #endif

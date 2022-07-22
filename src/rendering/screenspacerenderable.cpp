@@ -285,6 +285,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec3(glm::pi<float>())
     )
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
+    , _gamma(GammaInfo, 1.f, 0.000001f, 10.f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _backgroundColor(
         BackgroundColorInfo,
@@ -295,7 +296,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
-    , _gamma(GammaInfo, 1.f, 0.000001f, 10.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
