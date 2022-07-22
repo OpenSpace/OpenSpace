@@ -309,7 +309,7 @@ namespace openspace {
                 }
             }
             else {
-                double timeToNightsideReconnection = 2400;
+                double timeToNightsideReconnection = 2500;
                 _traversers[traverserIndex].setStartPoint(
                     timeToNightsideReconnection,
                     _nPointsOnPathLine - 1);
