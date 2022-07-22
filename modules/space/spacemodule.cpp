@@ -132,7 +132,8 @@ scripting::LuaLibrary SpaceModule::luaLibrary() const {
         "space",
         {
             codegen::lua::ConvertFromRaDec,
-            codegen::lua::ConvertToRaDec
+            codegen::lua::ConvertToRaDec,
+            codegen::lua::ReadKeplerFile
         }
     };
 }

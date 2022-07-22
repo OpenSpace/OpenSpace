@@ -24,6 +24,8 @@
 
 #include <modules/space/kepler.h>
 
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 #include <scn/scn.h>
@@ -33,6 +35,9 @@
 #include <sstream>
 
 namespace {
+    constexpr std::string_view _loggerCat = "Kepler";
+    constexpr int8_t CurrentCacheVersion = 1;
+
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
     constexpr const std::array<int, 36> LeapYears = {
@@ -636,13 +641,111 @@ std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
     return result;
 }
 
-std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
-    switch (format) {
-        case Format::TLE:  return readTleFile(file);
-        case Format::OMM:  return readOmmFile(file);
-        case Format::SBDB: return readSbdbFile(file);
-        default:           throw ghoul::MissingCaseException();
+void saveCache(const std::vector<Parameters>& params, std::filesystem::path file) {
+    std::ofstream stream(file, std::ofstream::binary);
+
+    stream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
+
+    uint32_t size = static_cast<uint32_t>(params.size());
+    stream.write(reinterpret_cast<const char*>(&size), sizeof(uint32_t));
+    for (const Parameters& param : params) {
+        uint32_t nameLength = static_cast<uint32_t>(param.name.size());
+        stream.write(reinterpret_cast<const char*>(&nameLength), sizeof(uint32_t));
+        stream.write(param.name.data(), nameLength * sizeof(char));
+
+        uint32_t idLength = static_cast<uint32_t>(param.id.size());
+        stream.write(reinterpret_cast<const char*>(&idLength), sizeof(uint32_t));
+        stream.write(param.id.data(), idLength * sizeof(char));
+
+        stream.write(reinterpret_cast<const char*>(&param.inclination), sizeof(double));
+        stream.write(reinterpret_cast<const char*>(&param.semiMajorAxis), sizeof(double));
+        stream.write(reinterpret_cast<const char*>(&param.ascendingNode), sizeof(double));
+        stream.write(reinterpret_cast<const char*>(&param.eccentricity), sizeof(double));
+        stream.write(
+            reinterpret_cast<const char*>(&param.argumentOfPeriapsis),
+            sizeof(double)
+        );
+        stream.write(reinterpret_cast<const char*>(&param.meanAnomaly), sizeof(double));
+        stream.write(reinterpret_cast<const char*>(&param.epoch), sizeof(double));
+        stream.write(reinterpret_cast<const char*>(&param.period), sizeof(double));
     }
+}
+
+std::optional<std::vector<Parameters>> loadCache(std::filesystem::path file) {
+    std::ifstream stream(file, std::ifstream::binary);
+
+    int8_t version = 0;
+    stream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+    if (version != CurrentCacheVersion) {
+        LINFO("The format of the cached file has changed");
+        return std::nullopt;
+    }
+
+    uint32_t size = 0;
+    stream.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
+    std::vector<Parameters> res;
+    res.reserve(size);
+    for (uint32_t i = 0; i < size; i++) {
+        Parameters param;
+        
+        uint32_t nameLength = 0;
+        stream.read(reinterpret_cast<char*>(&nameLength), sizeof(uint32_t));
+        param.name.resize(nameLength);
+        stream.read(param.name.data(), nameLength * sizeof(char));
+
+        uint32_t idLength = 0;
+        stream.read(reinterpret_cast<char*>(&idLength), sizeof(uint32_t));
+        param.id.resize(idLength);
+        stream.read(param.id.data(), idLength * sizeof(char));
+
+        stream.read(reinterpret_cast<char*>(&param.inclination), sizeof(double));
+        stream.read(reinterpret_cast<char*>(&param.semiMajorAxis), sizeof(double));
+        stream.read(reinterpret_cast<char*>(&param.ascendingNode), sizeof(double));
+        stream.read(reinterpret_cast<char*>(&param.eccentricity), sizeof(double));
+        stream.read(reinterpret_cast<char*>(&param.argumentOfPeriapsis), sizeof(double));
+        stream.read(reinterpret_cast<char*>(&param.meanAnomaly), sizeof(double));
+        stream.read(reinterpret_cast<char*>(&param.epoch), sizeof(double));
+        stream.read(reinterpret_cast<char*>(&param.period), sizeof(double));
+
+        res.push_back(std::move(param));
+    }
+
+    return res;
+}
+
+std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
+    std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
+    if (std::filesystem::is_regular_file(cachedFile)) {
+        LINFO(fmt::format(
+            "Cached file {} used for Kepler file {}", cachedFile, file
+        ));
+
+        std::optional<std::vector<Parameters>> res = loadCache(cachedFile);
+        if (res.has_value()) {
+            return *res;
+        }
+
+        // If there is no value in the optional, the cached loading failed
+    }
+
+    std::vector<Parameters> res;
+    switch (format) {
+        case Format::TLE:
+            res = readTleFile(file);
+            break;
+        case Format::OMM:
+            res = readOmmFile(file);
+            break;
+        case Format::SBDB:
+            res = readSbdbFile(file);
+            break;
+        default:
+            throw ghoul::MissingCaseException();
+    }
+
+    LINFO(fmt::format("Saving cache {} for Kepler file {}", cachedFile, file));
+    saveCache(res, cachedFile);
+    return res;
 }
 
 } // namespace openspace::kepler
