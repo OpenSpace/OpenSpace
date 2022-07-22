@@ -1,14 +1,43 @@
-local shared = asset.require("util/tle_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Russian LEO Navigation",
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Russian LEO Navigation)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_musson",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=musson&FORMAT=kvn",
   Filename = "musson.txt",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=musson&FORMAT=TLE",
-  TrailColor = { 0.75, 0.75, 0.35 }
+  Override = true
+})
+
+local satellites = {
+  Identifier = "musson",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "musson.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Russian LEO Navigation",
+    Path = "/Solar System/Planets/Earth/Satellites"
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
+
 
 
 asset.meta = {

@@ -1,14 +1,43 @@
-local shared = asset.require("util/tle_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Iridium 33 Debris",
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Iridium 33 Debris)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_iridium-33-debris",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=iridium-33-debris&FORMAT=kvn",
   Filename = "iridium-33-debris.txt",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=iridium-33-debris&FORMAT=TLE",
-  TrailColor = { 0.8, 0.0, 0.3 }
+  Override = true
+})
+
+local satellites = {
+  Identifier = "iridium-33-debris",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "iridium-33-debris.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.8, 0.0, 0.3 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Iridium 33 Debris",
+    Path = "/Solar System/Planets/Earth/Satellites"
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
+
 
 
 asset.meta = {
