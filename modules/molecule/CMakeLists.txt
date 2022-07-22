@@ -39,6 +39,7 @@ set(SOURCE_FILES
   rendering/viamd/coloring.cpp
   rendering/viamd/color_utils.cpp
   rendering/viamd/loader.cpp
+  rendering/billboard.cpp
   md_concat.cpp
 )
 

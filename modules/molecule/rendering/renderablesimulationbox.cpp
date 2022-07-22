@@ -25,8 +25,10 @@
 #include "renderablesimulationbox.h"
 
 #include "../md_concat.h"
+#include "billboard.h"
 
 #include "glbinding/gl/bitfield.h"
+#include "glbinding/gl/enum.h"
 #include "glbinding/gl/functions.h"
 #include <md_util.h>
 #include <core/md_array.inl>
@@ -359,9 +361,11 @@ void RenderableSimulationBox::initializeGL() {
     ZoneScoped
     md_gl_initialize();
     md_gl_shaders_init(&_shaders, shader_output_snippet);
+    billboardGlInit();
 }
 
 void RenderableSimulationBox::deinitializeGL() {
+    billboardGlDeinit();
     md_gl_shaders_free(&_shaders);
     md_gl_shutdown();
 }
@@ -452,7 +456,6 @@ void RenderableSimulationBox::updateAnimation(molecule_data_t& mol, double time)
             mat3_t box = cubic_spline(boxes[0], boxes[1], boxes[2], boxes[3], t, 1.0);
             vec3_t pbc_ext = box * vec3_t{{1.0, 1.0, 1.0}};
             
-            int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
             md_util_cubic_interpolation(dst, src, mol.molecule.atom.count, pbc_ext, t, 1.0f);
         }
         free(mem);
@@ -554,7 +557,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
     // having the view matrix in the model matrix is better because
     // mold uses single precision but that's not enough
-    mat4 model_matrix =
+    mat4 modelMatrix =
         camCopy.combinedViewMatrix() *
         translate(I, data.modelTransform.translation) *
         scale(I, data.modelTransform.scale) *
@@ -562,10 +565,10 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         translate(I, -_simulationBox.value() / 2.0) *
         I;
 
-    mat4 view_matrix =
+    mat4 viewMatrix =
         I;
 
-    mat4 proj_matrix =
+    mat4 projMatrix =
         dmat4(camCopy.sgctInternal.projectionMatrix()) *
         I;
 
@@ -573,7 +576,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     for (molecule_data_t& mol : _molecules) {
         if (mol.concatMolecule.atom.count) {
             md_gl_draw_op_t drawOp = {};
-            drawOp.model_matrix = value_ptr(model_matrix);
+            drawOp.model_matrix = value_ptr(modelMatrix);
             drawOp.rep = &mol.drawRep;
             drawOps.push_back(drawOp);
         }
@@ -582,8 +585,8 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     md_gl_draw_args_t args = {};
     args.shaders = &_shaders;
     args.view_transform = {
-        value_ptr(view_matrix),
-        value_ptr(proj_matrix),
+        value_ptr(viewMatrix),
+        value_ptr(projMatrix),
         nullptr, nullptr
     };
     args.atom_mask = 0;
@@ -594,7 +597,20 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         drawOps.data(),
     };
 
+    gl::glDisable(gl::GL_DEPTH_TEST);
+    {
+        mat4 billboardModel = 
+            camCopy.combinedViewMatrix() *
+            translate(I, data.modelTransform.translation) *
+            scale(I, data.modelTransform.scale) *
+            scale(I, dvec3(_simulationBox)) *
+            scale(I, dvec3(5.0)) *
+            I;
+        mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
+        billboardDraw(projMatrix * billboardModel * faceCamera);
+    }
     md_gl_draw(&args);
+    gl::glEnable(gl::GL_DEPTH_TEST);
 }
 
 void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::string& file) {
