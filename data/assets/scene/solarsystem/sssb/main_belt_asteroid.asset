@@ -23,8 +23,8 @@ local object = {
   GUI = {
     Name = "Main Asteroid Belt",
     Path = "/Solar System/Small Bodies",
-    Description = [[ Asteroids with a semi-major axis of between 2.0 and 3.2 au,
-      and a perihelion distance greater than 1.666 au. ]]
+    Description = [[Asteroids with a semi-major axis of between 2.0 and 3.2 AU,
+      and a perihelion distance greater than 1.666 AU.]]
   }
 }
 
@@ -43,11 +43,11 @@ asset.export(object)
 asset.meta = {
   Name = "Main Asteroid Belt",
   Version = "1.1",
-  Description = [[ Asset with data from from JPL Horizons containing Main Asteroid Belt
+  Description = [[Asset with data from from JPL Horizons containing Main Asteroid Belt
     group.]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
-  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
-    All documents available from this server may be protected under the U.S. and
-    Foreign Copyright Laws.]]
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws.]]
 }

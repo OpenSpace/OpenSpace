@@ -25,8 +25,8 @@ local satellites = {
   GUI = {
     Name = "Starlink",
     Path = "/Solar System/Planets/Earth/Satellites",
-    Description = [[LEO satellite constellation launched by SpaceX to provide 
-      broadband internet access.]]
+    Description = [[LEO satellite constellation launched by SpaceX to provide broadband
+      internet access.]]
   }
 }
 
@@ -45,8 +45,7 @@ asset.export(satellites)
 asset.meta = {
   Name = "Satellites Communications - Starlink",
   Version = "1.0",
-  Description = [[ Satellites asset for Communications - Starlink. Data from 
-  Celestrak]],
+  Description = "Satellites asset for Communications - Starlink. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

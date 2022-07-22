@@ -22,8 +22,8 @@ local object = {
   GUI = {
     Name = "Chiron-type Comets",
     Path = "/Solar System/Small Bodies",
-    Description = [[ Comets with a Tisserand's parameter with respect to Jupiter of
-      greater than 3 and a semi-major axis greater than that of Jupiter. ]]
+    Description = [[Comets with a Tisserand's parameter with respect to Jupiter of
+      greater than 3 and a semi-major axis greater than that of Jupiter.]]
   }
 }
 
@@ -42,11 +42,11 @@ asset.export(object)
 asset.meta = {
   Name = "Chiron-Type Comets",
   Version = "1.1",
-  Description = [[ Asset with data from from JPL Horizons containing the Chiron-Type
+  Description = [[Asset with data from from JPL Horizons containing the Chiron-Type
     group.]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
-  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
-    All documents available from this server may be protected under the U.S. and
-    Foreign Copyright Laws.]]
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws.]]
 }

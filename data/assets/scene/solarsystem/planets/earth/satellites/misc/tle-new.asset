@@ -44,7 +44,7 @@ asset.export(satellites)
 asset.meta = {
   Name = "Satellites Last 30 Days",
   Version = "1.0",
-  Description = [[ Satellites asset for Last 30 Days. Data from Celestrak]],
+  Description = "Satellites asset for Last 30 Days. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

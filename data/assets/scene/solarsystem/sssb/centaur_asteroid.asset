@@ -22,8 +22,8 @@ local object = {
   GUI = {
     Name = "Centaur Asteroids",
     Path = "/Solar System/Small Bodies",
-    Description = [[ Asteroids with either a perihelion or a semi-major axis
-      between those of the four outer planets. ]]
+    Description = [[Asteroids with either a perihelion or a semi-major axis between those
+      of the four outer planets.]]
   }
 }
 
@@ -42,10 +42,10 @@ asset.export(object)
 asset.meta = {
   Name = "Centaur Asteroids",
   Version = "1.1",
-  Description = [[ Asset with data from from JPL Horizons containing the Centaur group.]],
+  Description = "Asset with data from from JPL Horizons containing the Centaur group.",
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
-  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
-    All documents available from this server may be protected under the U.S. and 
-    Foreign Copyright Laws.]]
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws.]]
 }

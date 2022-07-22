@@ -28,7 +28,8 @@ local SNPP = {
   },
   Tag = { "earth_satellite", "SNPP" },
   GUI = {
-      Path = "/Solar System/Planets/Earth/Satellites/SNPP"
+    Name = "SNPP",
+    Path = "/Solar System/Planets/Earth/Satellites/SNPP"
   }
 }
 
@@ -102,8 +103,8 @@ asset.export(SNPPLabel)
 asset.meta = {
   Name = "SNPP",
   Version = "1.0",
-  Description = [[ Trail for SNPP. trail from
-  CELESTRAK. Can be used in conjunction with VIIRS SNPP (Temporal) layer for Earth.]],
+  Description = [[Trail for SNPP from Celestrak. Can be used in conjunction with VIIRS
+    SNPP (Temporal) layer for Earth.]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/",
   License = "NASA"

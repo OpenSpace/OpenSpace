@@ -28,7 +28,8 @@ local Terra = {
   },
   Tag = { "earth_satellite", "Terra" },
   GUI = {
-      Path = "/Solar System/Planets/Earth/Satellites/Terra"
+    Name = "Terra",
+    Path = "/Solar System/Planets/Earth/Satellites/Terra"
   }
 }
 
@@ -105,8 +106,8 @@ asset.export(TerraLabel)
 asset.meta = {
   Name = "Terra",
   Version = "1.0",
-  Description = [[ Trail for Terra. trail from
-    CELESTRAK. Can be used in conjuntion with Terra Modis (Temporal) layer for Earth]],
+  Description = [[Trail for Terra from Celestrak. Can be used in conjuntion with Terra
+    Modis (Temporal) layer for Earth]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/",
   License = "NASA"

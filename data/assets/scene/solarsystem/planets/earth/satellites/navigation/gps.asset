@@ -25,8 +25,7 @@ local satellites = {
   GUI = {
     Name = "GPS",
     Path = "/Solar System/Planets/Earth/Satellites",
-    Description = [[The GPS satellites that give us our precise locations back here 
-      on Earth.]]
+    Description = [[The GPS satellites that give us our precise locations back on Earth.]]
   }
 }
 
@@ -45,7 +44,7 @@ asset.export(satellites)
 asset.meta = {
   Name = "Satellites Navigation GPS",
   Version = "1.0",
-  Description = [[ Satellites asset for Navigation GPS. Data from Celestrak]],
+  Description = "Satellites asset for Navigation GPS. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

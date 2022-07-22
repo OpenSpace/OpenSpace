@@ -24,8 +24,7 @@ local satellites = {
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Geodetic",
-    Path = "/Solar System/Planets/Earth/Satellites",
-    Description = [[Satellites that employ active communication.]]
+    Path = "/Solar System/Planets/Earth/Satellites"
   }
 }
 
@@ -44,7 +43,7 @@ asset.export(satellites)
 asset.meta = {
   Name = "Satellites Science Geodect",
   Version = "1.0",
-  Description = [[ Satellites asset for Science Geodect. Data from Celestrak]],
+  Description = "Satellites asset for Science Geodect. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

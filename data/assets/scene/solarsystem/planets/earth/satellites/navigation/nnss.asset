@@ -25,7 +25,7 @@ local satellites = {
   GUI = {
     Name = "Navy Navigation Satellite System",
     Path = "/Solar System/Planets/Earth/Satellites",
-    Description = [[Satellites that employ active communication.]]
+    Description = [[The first satellite navigation system to be used operationally.]]
   }
 }
 
@@ -44,8 +44,8 @@ asset.export(satellites)
 asset.meta = {
   Name = "Satellites Navigation Navy Navigation Satellite System",
   Version = "1.0",
-  Description = [[ Satellites asset for Navigation Navy Navigation Satellite System. 
-  Data from Celestrak]],
+  Description = [[Satellites asset for Navigation Navy Navigation Satellite System. Data
+    from Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

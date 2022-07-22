@@ -22,8 +22,8 @@ local object = {
   GUI = {
     Name = "Jupiter Trojan Asteroids",
     Path = "/Solar System/Small Bodies",
-    Description = [[ Asteroids trapped in Jupiter's L4/L5 Lagrange points (semimajor axis
-      of between 4.6 and 5.5 au), with an eccentricity of less than 0.3. ]]
+    Description = [[Asteroids trapped in Jupiter's L4/L5 Lagrange points (semimajor axis
+      of between 4.6 and 5.5 AU), with an eccentricity of less than 0.3.]]
   }
 }
 
@@ -42,11 +42,10 @@ asset.export(object)
 asset.meta = {
   Name = "Jupiter Trojan Asteroids",
   Version = "1.1",
-  Description = [[ Asset with data from from JPL Horizons containing Jupiter Trojan
-    group.]],
+  Description = "Asset with data from from JPL Horizons containing Jupiter Trojan group.",
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
-  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
-    All documents available from this server may be protected under the U.S. and
-    Foreign Copyright Laws.]]
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws.]]
 }
