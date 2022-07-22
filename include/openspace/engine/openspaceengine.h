@@ -78,7 +78,7 @@ public:
     };
 
     OpenSpaceEngine();
-    ~OpenSpaceEngine();
+    ~OpenSpaceEngine() override;
 
     void registerPathTokens();
     void initialize();

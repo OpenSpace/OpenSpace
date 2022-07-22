@@ -22,33 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/webbrowserapp.h"
+#ifndef __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
+
+#include <modules/server/include/topics/topic.h>
+#include <chrono>
 
 namespace openspace {
 
-CefRefPtr<CefRenderProcessHandler> WebBrowserApp::GetRenderProcessHandler() {
-    return this;
-}
+class CameraTopic : public Topic {
+public:
+    CameraTopic();
+    virtual ~CameraTopic();
 
-void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                     CefRefPtr<CefV8Context>)
-{
-//    CEF_REQUIRE_UI_THREAD();
-//    CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
-//    CefRefPtr<CefV8Value> global = context->GetGlobal();
-//    global->SetValue("IsWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
-}
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
-                                                  CefRefPtr<CefCommandLine> commandLine)
-{
-    commandLine->AppendSwitch("--enable-gpu-rasterization");
-    commandLine->AppendSwitch("--use-gl=desktop");
-    commandLine->AppendSwitch("--enable-webgl2-compute-context");
-    commandLine->AppendSwitch("log-gpu-control-list-decisions");
-    commandLine->AppendSwitch("use-mock-keychain");
-    commandLine->AppendSwitch("enable-begin-frame-scheduling");
-    commandLine->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
-}
+private:
+    const int UnsetOnChangeHandle = -1;
+
+    void sendCameraData();
+
+    int _dataCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
+    std::chrono::system_clock::time_point _lastUpdateTime;
+    glm::dvec3 _lastPosition = glm::dvec3(0);
+
+    std::chrono::milliseconds _cameraPositionUpdateTime = std::chrono::milliseconds(100);
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__

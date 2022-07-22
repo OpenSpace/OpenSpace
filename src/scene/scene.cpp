@@ -334,6 +334,7 @@ void Scene::update(const UpdateData& data) {
     if (_dirtyNodeRegistry) {
         updateNodeRegistry();
     }
+    _camera->setAtmosphereDimmingFactor(1.f);
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             node->update(data);

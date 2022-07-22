@@ -47,8 +47,6 @@ struct ImageData;
 class SkyBrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SkyBrowser";
-    using CallbackHandle = int;
-    using CallbackFunction = std::function<void()>;
 
     SkyBrowserModule();
 
@@ -89,9 +87,6 @@ public:
     void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages() const;
 
-    CallbackHandle addPreSyncCallback(CallbackFunction cb);
-    void removePreSyncCallback(CallbackHandle handle);
-
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -125,10 +120,6 @@ private:
 
     // Data handler for the image collections
     std::unique_ptr<WwtDataHandler> _dataHandler;
-
-    // Callbacks for tiggering topic
-    int _nextCallbackHandle = 0;
-    std::vector<std::pair<CallbackHandle, CallbackFunction>> _preSyncCallbacks;
 };
 
 } // namespace openspace
