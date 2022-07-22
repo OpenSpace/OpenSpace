@@ -1,4 +1,5 @@
 -- local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local choury = asset.require("scene/solarsystem/missions/rosetta/67p.asset")
 
 local moleculeDb = "https://home.thissma.fr/moldata/"
 
@@ -32,11 +33,18 @@ local moleculeFiles = asset.syncedResource({
 
 local MoleculeSimulation = {
   Identifier = "MoleculeSimulation",
-  -- Parent = sunTransforms.SunCenter.Identifier,
+  -- Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = choury.Barycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 10E3, 0, 0 }, -- some distance away from the comet
+    }
+  },
   Renderable = {
     Type = "RenderableSimulationBox",
     MoleculeFiles = { moleculeFiles .. "h2o.arc", moleculeFiles .. "o2.arc" },
-    TrajectoryFiles = { moleculeFiles .. "h2o.arc", moleculeFiles .. "o2.arc" },
+    TrajectoryFiles = { "", moleculeFiles .. "o2.arc" },
     MoleculeCounts = { 500, 500 },
     LinearVelocity = 10.0,
     AngularVelocity = 60.0 / 360.0 * 3.14,
