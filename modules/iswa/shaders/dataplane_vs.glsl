@@ -37,12 +37,12 @@ uniform mat4 ModelTransform;
 
 
 void main() {
-    vec4 tmp = in_position;
-    vec4 position = pscTransform(tmp, ModelTransform);
+  vec4 tmp = in_position;
+  vec4 position = pscTransform(tmp, ModelTransform);
 
-    vs_position = tmp;
-    vs_st = in_st;
-    
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+  vs_position = tmp;
+  vs_st = in_st;
+  
+  position = ViewProjection * position;
+  gl_Position =  z_normalization(position);
 }

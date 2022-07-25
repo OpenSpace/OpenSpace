@@ -37,15 +37,15 @@ uniform mat4 ModelTransform;
 
 
 void main() {
-    vs_st = in_st;
-    vs_position = in_position;
-    vec4 tmp = in_position;
+  vs_st = in_st;
+  vs_position = in_position;
+  vec4 tmp = in_position;
 
-    // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
-    // vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-    
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+  // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
+  // vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+  
+  vec4 position = pscTransform(tmp, ModelTransform);
+  vs_position = tmp;
+  position = ViewProjection * position;
+  gl_Position =  z_normalization(position);
 }

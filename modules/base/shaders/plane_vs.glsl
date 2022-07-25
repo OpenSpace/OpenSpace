@@ -38,16 +38,16 @@ uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;
 
 void main() {
-    vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-    vec4 positionClipSpace = modelViewProjectionTransform * position;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+  vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+  vec4 positionClipSpace = modelViewProjectionTransform * position;
+  vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-    gl_Position = positionScreenSpace;
+  gl_Position = positionScreenSpace;
 
-    // G-Buffer
-    vs_gNormal = vec3(0.0);
-    vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;
+  // G-Buffer
+  vs_gNormal = vec3(0.0);
+  vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;
 
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
+  vs_st = in_st;
+  vs_screenSpaceDepth = positionScreenSpace.w;
 }

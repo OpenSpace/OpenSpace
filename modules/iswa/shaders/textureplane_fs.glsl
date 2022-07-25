@@ -34,12 +34,12 @@ uniform float transparency;
 
 
 Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
-    vec4 diffuse = texture(texture1, vs_st);
+  vec4 position = vs_position;
+  float depth = pscDepth(position);
+  vec4 diffuse = texture(texture1, vs_st);
 
-    Fragment frag;
-    frag.color = diffuse * vec4(1.0, 1.0, 1.0, transparency);
-    frag.depth = depth;
-    return frag;
+  Fragment frag;
+  frag.color = diffuse * vec4(1.0, 1.0, 1.0, transparency);
+  frag.depth = depth;
+  return frag;
 }

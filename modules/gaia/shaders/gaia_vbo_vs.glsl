@@ -56,67 +56,67 @@ uniform vec2 bpRpThreshold;
 uniform vec2 distThreshold;
 
 void main() {
-    vs_brightness = in_brightness;
+  vs_brightness = in_brightness;
 
-    // Check if we should filter this star by position. Thres depending on original values.
-    if ((abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) || 
-        (abs(posXThreshold.y) > EPS && in_position.x > posXThreshold.y) || 
-        (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
-        (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
-        (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
-        (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) || 
-        (abs(distThreshold.x - distThreshold.y) < EPS 
-        && abs(length(in_position) - distThreshold.y) < EPS) ||
-        (renderOption != RENDEROPTION_STATIC && (
-        (abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
-        (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) || 
-        (abs(gMagThreshold.y - 20.0f) > EPS && in_brightness.x > gMagThreshold.y) ||
-        (abs(bpRpThreshold.x - bpRpThreshold.y) < EPS && abs(bpRpThreshold.x - in_brightness.y) < EPS) ||
-        (abs(bpRpThreshold.x) > EPS && in_brightness.y < bpRpThreshold.x) || 
-        (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y))))
-    {
-        // Discard star in geometry shader.
-        vs_gPosition = vec4(0.0);    
-        gl_Position = vec4(0.0);
-        return;
-    }
+  // Check if we should filter this star by position. Thres depending on original values.
+  if ((abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) || 
+      (abs(posXThreshold.y) > EPS && in_position.x > posXThreshold.y) || 
+      (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
+      (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
+      (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
+      (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) || 
+      (abs(distThreshold.x - distThreshold.y) < EPS 
+      && abs(length(in_position) - distThreshold.y) < EPS) ||
+      (renderOption != RENDEROPTION_STATIC && (
+      (abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
+      (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) || 
+      (abs(gMagThreshold.y - 20.0f) > EPS && in_brightness.x > gMagThreshold.y) ||
+      (abs(bpRpThreshold.x - bpRpThreshold.y) < EPS && abs(bpRpThreshold.x - in_brightness.y) < EPS) ||
+      (abs(bpRpThreshold.x) > EPS && in_brightness.y < bpRpThreshold.x) || 
+      (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y))))
+  {
+    // Discard star in geometry shader.
+    vs_gPosition = vec4(0.0);    
+    gl_Position = vec4(0.0);
+    return;
+  }
 
-    // Convert kiloParsec to meter.
-    vec4 objectPosition = vec4(in_position * 1000 * Parsec, 1.0);
+  // Convert kiloParsec to meter.
+  vec4 objectPosition = vec4(in_position * 1000 * Parsec, 1.0);
 
-    // Add velocity if we've read any.
-    if (renderOption == RENDEROPTION_MOTION) {
-        // Velocity is already in [m/s].
-        objectPosition.xyz += time * in_velocity;
-    }
+  // Add velocity if we've read any.
+  if (renderOption == RENDEROPTION_MOTION) {
+    // Velocity is already in [m/s].
+    objectPosition.xyz += time * in_velocity;
+  }
 
-    // Thres moving stars by their new position.
-    float distPosition = length(objectPosition.xyz / (1000.0 * Parsec));
-    if ((abs(distThreshold.x - distThreshold.y) > EPS && 
-        ((abs(distThreshold.x) > EPS && distPosition< distThreshold.x) || 
-        (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))))
-    {
-        // Discard star in geometry shader.
-        vs_gPosition = vec4(0.0);    
-        gl_Position = vec4(0.0);
-        return;
-    }
+  // Thres moving stars by their new position.
+  float distPosition = length(objectPosition.xyz / (1000.0 * Parsec));
+  if ((abs(distThreshold.x - distThreshold.y) > EPS && 
+      ((abs(distThreshold.x) > EPS && distPosition< distThreshold.x) || 
+      (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))))
+  {
+    // Discard star in geometry shader.
+    vs_gPosition = vec4(0.0);    
+    gl_Position = vec4(0.0);
+    return;
+  }
 
-    // Apply camera transforms.
-    dvec4 viewPosition = view * model * objectPosition;
-    vec4 sunPosition = vec4(view * model * vec4(0.0f, 0.0f, 0.0f, 1.0f));
+  // Apply camera transforms.
+  dvec4 viewPosition = view * model * objectPosition;
+  vec4 sunPosition = vec4(view * model * vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
-    vs_starDistFromSun = safeLength(objectPosition);
-    vs_cameraDistFromSun = safeLength(sunPosition);
+  vs_starDistFromSun = safeLength(objectPosition);
+  vs_cameraDistFromSun = safeLength(sunPosition);
 
-    // Remove stars without position, happens when VBO chunk is stuffed with zeros.
-    // Has to be done in Geometry shader because Vertices cannot be discarded here.
-    if (length(in_position) > EPS) {
-        vs_gPosition = vec4(model * objectPosition);    
-        gl_Position = vec4(projection * viewPosition);
-    }
-    else {
-        vs_gPosition = vec4(0.0);    
-        gl_Position = vec4(0.0);
-    }
+  // Remove stars without position, happens when VBO chunk is stuffed with zeros.
+  // Has to be done in Geometry shader because Vertices cannot be discarded here.
+  if (length(in_position) > EPS) {
+    vs_gPosition = vec4(model * objectPosition);    
+    gl_Position = vec4(projection * viewPosition);
+  }
+  else {
+    vs_gPosition = vec4(0.0);    
+    gl_Position = vec4(0.0);
+  }
 }

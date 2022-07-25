@@ -23,6 +23,6 @@
  ****************************************************************************************/
 
 void getEntry(inout vec3 entryPos, inout float entryDepth) {
-    entryPos = cameraPosInRaycaster;
-    entryDepth = 0;
+  entryPos = cameraPosInRaycaster;
+  entryDepth = 0;
 }
