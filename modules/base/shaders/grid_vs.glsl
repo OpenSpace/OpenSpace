@@ -32,6 +32,7 @@ out vec4 vs_positionViewSpace;
 uniform dmat4 modelViewTransform;
 uniform dmat4 MVPTransform;
 
+
 void main() {
   dvec4 objPosDouble = dvec4(in_position, 1.0);
   dvec4 positionViewSpace = modelViewTransform * objPosDouble;

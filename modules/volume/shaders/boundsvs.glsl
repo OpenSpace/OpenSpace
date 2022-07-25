@@ -36,11 +36,11 @@ uniform mat4 projectionTransform;
 
 
 void main() {
-    positionLocalSpace = vec4(vertPosition, 1.0);
-    positionCameraSpace = modelViewTransform * positionLocalSpace;
+  positionLocalSpace = vec4(vertPosition, 1.0);
+  positionCameraSpace = modelViewTransform * positionLocalSpace;
 
-    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+  vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+  vec4 positionScreenSpace = z_normalization(positionClipSpace);
     
-    gl_Position = positionScreenSpace;
+  gl_Position = positionScreenSpace;
 }

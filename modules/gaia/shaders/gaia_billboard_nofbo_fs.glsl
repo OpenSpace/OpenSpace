@@ -25,14 +25,6 @@
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
-// Keep in sync with gaiaoptions.h:RenderOption enum
-const int RENDEROPTION_STATIC = 0;
-const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
-const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
-const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
-const float LUM_LOWER_CAP = 0.01;
-
 in vec2 ge_brightness;
 in vec4 ge_gPosition;
 in vec2 texCoord;
@@ -46,6 +38,15 @@ uniform float luminosityMultiplier;
 uniform float sharpness;
 uniform int renderOption;
 
+// Keep in sync with gaiaoptions.h:RenderOption enum
+const int RENDEROPTION_STATIC = 0;
+const int RENDEROPTION_COLOR = 1;
+const int RENDEROPTION_MOTION = 2; 
+const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
+const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
+const float LUM_LOWER_CAP = 0.01;
+
+
 vec3 color2rgb(float color) {
   // BV is [-0.4, 2.0]
   float st = (color + 0.4) / (2.0 + 0.4);
@@ -55,6 +56,7 @@ vec3 color2rgb(float color) {
 
   return texture(colorTexture, st).rgb;
 }
+
 
 Fragment getFragment() {
   // Assume all stars has equal luminosity as the Sun when no magnitude is loaded.

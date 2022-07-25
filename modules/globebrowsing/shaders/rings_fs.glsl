@@ -36,10 +36,10 @@ uniform sampler2DShadow shadowMapTexture;
 uniform sampler1D ringTexture;
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
-
 uniform vec3 sunPosition;
 uniform float nightFactor;
 uniform float zFightingPercentage;
+
 
 Fragment getFragment() {
   // Moving the origin to the center

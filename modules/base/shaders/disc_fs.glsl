@@ -31,6 +31,7 @@ uniform sampler1D colorTexture;
 uniform float width;
 uniform float opacity;
 
+
 Fragment getFragment() {
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(vs_st);

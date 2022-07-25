@@ -50,6 +50,7 @@ uniform vec4 viewport;
 #define VERTEX_SORTING_OLDESTFIRST 1
 #define VERTEX_SORTING_NOSORTING 2
 
+
 void main() {
   int modId = gl_VertexID;
 

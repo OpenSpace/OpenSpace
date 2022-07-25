@@ -26,7 +26,20 @@
 
 #include "floatoperations.glsl"
 
+in vec2 ge_brightness;
+in vec4 ge_gPosition;
+in vec2 texCoord;
+in float ge_starDistFromSun;
+in float ge_cameraDistFromSun;
+in float ge_observedDist;
+
 layout (location = 0) out vec4 outColor;
+
+uniform sampler2D psfTexture;
+uniform sampler1D colorTexture;
+uniform float luminosityMultiplier;
+uniform float sharpness;
+uniform int renderOption;
 
 // Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
@@ -36,18 +49,6 @@ const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
 const float FLT_MAX  = 3.402823466e38; // Max float constant in GLSL
 const float LUM_LOWER_CAP = 0.01;
 
-in vec2 ge_brightness;
-in vec4 ge_gPosition;
-in vec2 texCoord;
-in float ge_starDistFromSun;
-in float ge_cameraDistFromSun;
-in float ge_observedDist;
-
-uniform sampler2D psfTexture;
-uniform sampler1D colorTexture;
-uniform float luminosityMultiplier;
-uniform float sharpness;
-uniform int renderOption;
 
 vec3 color2rgb(float color) {
   // BV is [-0.4, 2.0]
@@ -55,9 +56,9 @@ vec3 color2rgb(float color) {
 
   // Bp-Rp[-2.0, 6.5], Bp-G[-2.1, 5.0], G-Rp[-1.0, 3.0]
   //float st = (color + 1.0) / (5.0 + 1.0);
-
   return texture(colorTexture, st).rgb;
 }
+
 
 void main() {
   // Assume all stars has equal luminosity as the Sun when no magnitude is loaded.

@@ -32,6 +32,7 @@ uniform sampler2D colorTexture;
 uniform float opacity;
 uniform bool mirrorTexture;
 
+
 Fragment getFragment() {
   vec2 texCoord = vs_textureCoords;
 

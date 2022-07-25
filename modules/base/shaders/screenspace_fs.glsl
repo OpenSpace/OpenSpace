@@ -34,6 +34,7 @@ uniform float opacity = 1.0;
 uniform vec4 backgroundColor = vec4(0.0);
 uniform float gamma = 1.0;
 
+
 Fragment getFragment() {
   Fragment frag;
 

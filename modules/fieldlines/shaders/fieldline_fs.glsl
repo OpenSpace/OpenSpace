@@ -32,6 +32,7 @@ in vec3 gs_normal;
 uniform bool classification;
 uniform vec4 fieldLineColor;
 
+
 Fragment getFragment() {
   float alpha = 1 - length(gs_normal) * length(gs_normal);
 

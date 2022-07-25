@@ -27,12 +27,13 @@
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_textureCoords;
 
-uniform mat4 modelViewProjection;
-uniform mat3 modelViewRotation;
-
 out vec2 vs_textureCoords;
 out vec4 vs_position;
 out vec3 vs_normal;
+
+uniform mat4 modelViewProjection;
+uniform mat3 modelViewRotation;
+
 
 void main() {
   vs_normal = modelViewRotation * normalize(in_position.xyz);

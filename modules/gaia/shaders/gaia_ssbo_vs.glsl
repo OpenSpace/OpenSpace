@@ -26,13 +26,6 @@
 
 #include "floatoperations.glsl"
 
-// Keep in sync with gaiaoptions.h:RenderOption enum
-const int RENDEROPTION_STATIC = 0;
-const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
-const float EPS = 1e-5;
-const float Parsec = 3.0856776e16;
-
 layout (std430) buffer ssbo_idx_data { 
   int starsPerChunk[];
 };
@@ -51,17 +44,23 @@ uniform dmat4 view;
 uniform dmat4 projection;
 uniform float time; 
 uniform int renderOption;
-
 uniform int maxStarsPerNode;
 uniform int valuesPerStar;
 uniform int nChunksToRender;
-
 uniform vec2 posXThreshold;
 uniform vec2 posYThreshold;
 uniform vec2 posZThreshold;
 uniform vec2 gMagThreshold;
 uniform vec2 bpRpThreshold;
 uniform vec2 distThreshold;
+
+// Keep in sync with gaiaoptions.h:RenderOption enum
+const int RENDEROPTION_STATIC = 0;
+const int RENDEROPTION_COLOR = 1;
+const int RENDEROPTION_MOTION = 2; 
+const float EPS = 1e-5;
+const float Parsec = 3.0856776e16;
+
 
 // Use binary search to find the chunk containing our star ID.
 int findChunkId(int left, int right, int id) {
@@ -82,6 +81,7 @@ int findChunkId(int left, int right, int id) {
   }
   return -1;
 }
+
 
 void main() {
   // Fetch our data.

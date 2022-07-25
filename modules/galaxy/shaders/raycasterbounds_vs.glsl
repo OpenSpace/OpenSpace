@@ -34,6 +34,7 @@ out vec4 viewPosition;
 uniform mat4 projectionTransform;
 uniform dmat4 modelViewTransform;
 
+
 void main() {
   modelPosition = vertPosition.xyz;
   dvec4 vp = modelViewTransform * vertPosition;

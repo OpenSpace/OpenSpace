@@ -153,6 +153,7 @@ in vec3 positionWorldSpace;
 
 uniform float opacity;
 
+
 Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(0.3, 0.3, 0.3, 1.0);

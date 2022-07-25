@@ -38,6 +38,7 @@ uniform float transparency;
 
 const vec4 Transparent = vec4(0.0);
 
+
 Fragment getFragment() {
   vec4 position = vs_position;
   float depth = pscDepth(position);

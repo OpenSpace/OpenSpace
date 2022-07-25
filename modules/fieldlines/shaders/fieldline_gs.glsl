@@ -38,7 +38,7 @@ uniform mat4 modelViewProjection;
 uniform mat4 modelTransform;
 uniform vec3 cameraViewDir;
 
-vec4 prismoid[4];
+
 
 // Calculate the correct powerscaled position and depth for the ABuffer
 void ABufferEmitVertex(vec4 pos) {
@@ -52,6 +52,7 @@ void ABufferEmitVertex(vec4 pos) {
   gl_Position = z_normalization(position);
   EmitVertex();
 }
+
 
 // Original code from http://prideout.net/blog/?p=61
 void main() {
@@ -78,6 +79,7 @@ void main() {
   normals[2] = -normals[3];
 
   // Calculate positions for the new vertices
+  vec4 prismoid[4];
   prismoid[0] = vec4(p1 + normals[0] * width, 0.0);
   prismoid[1] = vec4(p1 + normals[1] * width, 0.0);
   prismoid[2] = vec4(p2 + normals[2] * width, 0.0);

@@ -29,6 +29,7 @@ in float vs_depth;
 
 uniform bool usingAdditiveBlending;
 
+
 Fragment getFragment() {
   if (vs_color.a == 0) {
     discard;

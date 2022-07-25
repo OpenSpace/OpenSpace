@@ -24,12 +24,13 @@
 
 #version __CONTEXT__
 
-uniform sampler2D tex;
-
 in vec2 out_uv;
 in vec4 out_color;
 
 out vec4 FragColor;
+
+uniform sampler2D tex;
+
 
 void main() {
   FragColor = out_color * texture(tex, out_uv);

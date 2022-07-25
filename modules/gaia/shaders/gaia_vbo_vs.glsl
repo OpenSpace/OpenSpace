@@ -26,13 +26,6 @@
 
 #include "floatoperations.glsl"
 
-// Keep in sync with gaiaoptions.h:RenderOption enum
-const int RENDEROPTION_STATIC = 0;
-const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
-const float EPS = 1e-5;
-const float Parsec = 3.0856776e16;
-
 in vec3 in_position;
 in vec2 in_brightness;
 in vec3 in_velocity;
@@ -47,13 +40,20 @@ uniform dmat4 view;
 uniform dmat4 projection;
 uniform float time; 
 uniform int renderOption;
-
 uniform vec2 posXThreshold;
 uniform vec2 posYThreshold;
 uniform vec2 posZThreshold;
 uniform vec2 gMagThreshold;
 uniform vec2 bpRpThreshold;
 uniform vec2 distThreshold;
+
+// Keep in sync with gaiaoptions.h:RenderOption enum
+const int RENDEROPTION_STATIC = 0;
+const int RENDEROPTION_COLOR = 1;
+const int RENDEROPTION_MOTION = 2; 
+const float EPS = 1e-5;
+const float Parsec = 3.0856776e16;
+
 
 void main() {
   vs_brightness = in_brightness;

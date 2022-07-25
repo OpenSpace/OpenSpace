@@ -28,7 +28,6 @@
 in vec2 vs_st;
 in vec4 vs_position;
 
-
 uniform sampler2D textures[6];
 uniform sampler2D transferFunctions[6];
 

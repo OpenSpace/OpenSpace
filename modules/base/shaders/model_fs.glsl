@@ -33,28 +33,23 @@ in mat3 TBN;
 uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 1.0;
 uniform float specularIntensity = 1.0;
-
 uniform bool performShading = true;
 uniform bool use_forced_color = false;
 uniform bool has_texture_diffuse;
 uniform bool has_texture_normal;
 uniform bool has_texture_specular;
 uniform bool has_color_specular;
-
 uniform bool opacityBlending = false;
-
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_specular;
-
 uniform vec3 color_diffuse;
 uniform vec3 color_specular;
-
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
 uniform float lightIntensities[8];
-
 uniform float opacity = 1.0;
+
 
 Fragment getFragment() {
   // Render invisible mesh with flashy procedural material

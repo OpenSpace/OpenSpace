@@ -24,6 +24,15 @@
 
 #version __CONTEXT__
 
+// Inputs
+layout(location = 0) in vec3 in_position;        // Should be provided in meters
+layout(location = 1) in float in_color_scalar;   // The extra value used to color lines.
+layout(location = 2) in float in_masking_scalar; // The extra value used to mask out parts of lines.
+
+out vec4 vs_color;
+out float vs_depth;
+//out vec4 vs_gPosition;
+
 // General Uniforms that's always needed
 uniform vec4 lineColor;
 uniform mat4 modelViewProjection;
@@ -52,18 +61,10 @@ uniform vec2 domainLimY;
 uniform vec2 domainLimZ;
 uniform vec2 domainLimR;
 
-// Inputs
-layout(location = 0) in vec3 in_position;        // Should be provided in meters
-layout(location = 1) in float in_color_scalar;   // The extra value used to color lines.
-layout(location = 2) in float in_masking_scalar; // The extra value used to mask out parts of lines.
-
 // These should correspond to the enum 'ColorMethod' in renderablefieldlinesequence.cpp
 const int uniformColor = 0;
 const int colorByQuantity = 1;
 
-out vec4 vs_color;
-out float vs_depth;
-//out vec4 vs_gPosition;
 
 vec4 getTransferFunctionColor() {
   // Remap the color scalar to a [0,1] range
@@ -78,6 +79,7 @@ bool isPartOfParticle(double time, int vertexId, int particleSize, int particleS
   int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
   return modulusResult > 0 && modulusResult <= particleSize;
 }
+
 
 void main() {
   bool hasColor = true;

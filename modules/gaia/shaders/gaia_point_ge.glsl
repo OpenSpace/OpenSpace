@@ -26,8 +26,6 @@
 
 #include "floatoperations.glsl"
 
-const float EPS = 1e-5;
-
 layout(points) in;
 in vec2 vs_brightness[];
 in vec4 vs_gPosition[];
@@ -44,6 +42,9 @@ out float ge_observedDist;
 uniform dmat4 view;
 uniform float viewScaling;
 uniform float cutOffThreshold;
+
+const float EPS = 1e-5;
+
 
 void main() {
   ge_brightness = vs_brightness[0];

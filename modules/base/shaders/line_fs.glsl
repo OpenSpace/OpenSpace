@@ -29,6 +29,7 @@ in vec4 vs_positionViewSpace;
 
 uniform vec4 color;
 
+
 Fragment getFragment() {
   Fragment frag;
 

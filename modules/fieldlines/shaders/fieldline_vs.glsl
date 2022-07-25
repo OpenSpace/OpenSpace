@@ -34,6 +34,7 @@ out vec4 vs_color;
 uniform mat4 modelViewProjection;
 uniform mat4 modelTransform;
 
+
 void main() {
   vs_color = in_color;
   gl_Position = vec4(in_position, 0);

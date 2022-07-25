@@ -26,12 +26,6 @@
 
 #include "floatoperations.glsl"
 
-// Keep in sync with gaiaoptions.h:RenderOption enum
-const int RENDEROPTION_STATIC = 0;
-const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
-const float EPS = 1e-5;
-
 layout(points) in;
 in vec2 vs_brightness[];
 in vec4 vs_gPosition[];
@@ -48,7 +42,6 @@ out float ge_observedDist;
 
 uniform dmat4 view;
 uniform dmat4 projection;
-
 uniform dvec3 cameraPos;
 uniform dvec3 cameraLookUp;
 uniform float viewScaling;
@@ -58,12 +51,20 @@ uniform float billboardSize;
 uniform int renderOption;
 uniform float magnitudeBoost;
 
+// Keep in sync with gaiaoptions.h:RenderOption enum
+const int RENDEROPTION_STATIC = 0;
+const int RENDEROPTION_COLOR = 1;
+const int RENDEROPTION_MOTION = 2; 
+const float EPS = 1e-5;
+
+
 const vec2 corners[4] = vec2[4](
   vec2(0.0, 1.0), 
   vec2(0.0, 0.0), 
   vec2(1.0, 1.0), 
   vec2(1.0, 0.0) 
 );
+
 
 void main() {
   ge_brightness = vs_brightness[0];

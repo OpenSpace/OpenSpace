@@ -27,11 +27,10 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 4) out;
-
 flat in vec4 colorMap[];
 flat in float dvarScaling[];
 
+layout(triangle_strip, max_vertices = 4) out;
 flat out vec4 gs_colorMap;
 out vec2 texCoord;
 flat out float vs_screenSpaceDepth;
@@ -71,6 +70,7 @@ const vec2 corners[4] = vec2[4](
 
 const int RenderOptionCameraViewDirection = 0;
 const int RenderOptionCameraPositionNormal = 1;
+
 
 void main() {
   ta = 1.0;

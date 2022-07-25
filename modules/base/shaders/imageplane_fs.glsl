@@ -29,6 +29,7 @@ in float vs_screenSpaceDepth;
 
 uniform sampler2D texture1;
 
+
 Fragment getFragment() {
   Fragment frag;
 

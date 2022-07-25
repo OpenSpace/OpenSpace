@@ -37,9 +37,11 @@ uniform sampler2D depthTexture;
 uniform bool needShadowMap;
 uniform vec3 boresight;
 
+
 bool inRange(float x, float a, float b) {
   return (x >= a && x <= b);
 } 
+
 
 void main() {
   vec3 n = normalize(vs_normal.xyz);

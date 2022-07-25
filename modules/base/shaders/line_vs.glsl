@@ -32,6 +32,7 @@ out vec4 vs_positionViewSpace;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
+
 void main() {
   vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1));
   vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;

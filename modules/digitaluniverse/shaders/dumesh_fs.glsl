@@ -30,6 +30,7 @@ in vec4 vs_positionViewSpace;
 uniform vec3 color;
 uniform float alphaValue;
 
+
 Fragment getFragment() {
   Fragment frag;
 

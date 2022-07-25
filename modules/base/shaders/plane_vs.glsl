@@ -28,14 +28,15 @@
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
-
 out vec4 vs_gPosition;
+
 out vec3 vs_gNormal;
 out float vs_screenSpaceDepth;
 out vec2 vs_st;
 
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;
+
 
 void main() {
   vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);

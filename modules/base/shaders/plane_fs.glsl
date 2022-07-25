@@ -35,6 +35,7 @@ uniform float opacity = 1.0;
 uniform bool mirrorBackside = true;
 uniform vec3 multiplyColor;
 
+
 Fragment getFragment() {
   Fragment frag;
   if (gl_FrontFacing) {

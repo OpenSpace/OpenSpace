@@ -33,7 +33,6 @@ uniform vec3 color;
 uniform int renderPhase;
 uniform float opacity = 1.0;
 uniform float lineWidth;
-
 uniform vec4 viewport;
 
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
@@ -41,6 +40,7 @@ const int RenderPhaseLines = 0;
 const int RenderPhasePoints = 1;
 
 const float Delta = 0.25;
+
 
 Fragment getFragment() {
   Fragment frag;
