@@ -548,6 +548,9 @@ void RenderableSimulationBox::update(const UpdateData& data) {
 void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     using namespace glm;
     const dmat4 I(1.0);
+    
+    // compute distance from camera to molecule
+    float distance = length(data.modelTransform.translation - data.camera.positionVec3());
 
     // because the molecule is small, a scaling of the view matrix causes the molecule
     // to be moved out of view in clip space. Reset the scaling for the molecule
@@ -597,7 +600,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         drawOps.data(),
     };
 
-    { // draw billboard
+    { // draw billboard & molecule
         mat4 billboardModel = 
             camCopy.combinedViewMatrix() *
             translate(I, data.modelTransform.translation) *
@@ -608,9 +611,9 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
         mat4 transform = projMatrix * billboardModel * faceCamera;
 
-        billboardDraw(transform, 0.01f, 1.f); // write depth=1 (clear depth buffer) in billboard
+        billboardDraw(transform, distance * 1E-5f, 1.f); // write depth=1 (clear depth buffer) in billboard
         md_gl_draw(&args);                    // draw molecule
-        billboardDraw(transform, 0.01f, 0.f); // write depth=0 (lock depth buffer) in billboard
+        billboardDraw(transform, distance * 1E-5f, 0.f); // write depth=0 (lock depth buffer) in billboard
     }
 
 }
