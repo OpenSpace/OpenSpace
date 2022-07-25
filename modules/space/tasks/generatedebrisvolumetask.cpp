@@ -257,7 +257,7 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
     file.open(filename);
 
     int numberOfLines = std::count(std::istreambuf_iterator<char>(file),
-                                   std::istreambuf_iterator<char>(), '\n' );
+                                   std::istreambuf_iterator<char>(), '\n');
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
 
     // 3 because a TLE has 3 lines per element/ object.
@@ -404,7 +404,7 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
         });
         // LINFO(fmt::format("cart: {} ", position));
         glm::dvec3 sphPos;
-        if( gridType == "Spherical"){
+        if (gridType == "Spherical"){
             sphPos = cartesianToSphericalCoord(position);
 
             if(sphPos.y < minTheta){

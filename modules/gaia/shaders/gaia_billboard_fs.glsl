@@ -72,7 +72,7 @@ void main() {
     }
 
     // Calculate the color and luminosity if we have the magnitude and B-V color.
-    if ( renderOption != RENDEROPTION_STATIC ) {
+    if (renderOption != RENDEROPTION_STATIC) {
         color = color2rgb(ge_brightness.y);
         ratioMultiplier = 0.5;
 
@@ -97,7 +97,7 @@ void main() {
     color *= luminosity * pow(luminosityMultiplier, 3.0);
 
     // Decrease contributing brightness for stars in central cluster.
-    if ( ge_cameraDistFromSun > ge_starDistFromSun ) {
+    if (ge_cameraDistFromSun > ge_starDistFromSun) {
         float ratio = ge_starDistFromSun / ge_cameraDistFromSun;
         //color *= ratio * ratioMultiplier;
     }

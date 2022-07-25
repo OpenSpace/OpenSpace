@@ -53,7 +53,7 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
     _inFilePath = absPath(_inFilename);
 
     std::string::size_type idx = _inFilename.find_last_of('/');
-    if( idx != std::string::npos ) {
+    if (idx != std::string::npos) {
         _inFilename = _inFilename.substr(idx + 1);
     }
 

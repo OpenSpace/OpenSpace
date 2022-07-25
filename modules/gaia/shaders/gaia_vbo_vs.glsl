@@ -67,7 +67,7 @@ void main() {
         (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) || 
         (abs(distThreshold.x - distThreshold.y) < EPS 
         && abs(length(in_position) - distThreshold.y) < EPS) ||
-        ( renderOption != RENDEROPTION_STATIC && (
+        (renderOption != RENDEROPTION_STATIC && (
         (abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
         (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) || 
         (abs(gMagThreshold.y - 20.0f) > EPS && in_brightness.x > gMagThreshold.y) ||
@@ -91,7 +91,7 @@ void main() {
     }
 
     // Thres moving stars by their new position.
-    float distPosition = length(objectPosition.xyz / (1000.0 * Parsec) );
+    float distPosition = length(objectPosition.xyz / (1000.0 * Parsec));
     if ((abs(distThreshold.x - distThreshold.y) > EPS && 
         ((abs(distThreshold.x) > EPS && distPosition< distThreshold.x) || 
         (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))))

@@ -101,7 +101,7 @@ void main() {
 
     // Compute an estimation of the gradient
     float edgeHorizontal = abs(-2.0 * pixelLumLeft + pixelLumLeftCorners) + 
-        abs(-2.0 * pixelLumCenter + pixelLumDownUp ) * 2.0 + abs(-2.0 * pixelLumRight + pixelLumRightCorners);
+        abs(-2.0 * pixelLumCenter + pixelLumDownUp) * 2.0 + abs(-2.0 * pixelLumRight + pixelLumRightCorners);
     float edgeVertical = abs(-2.0 * pixelLumUp + pixelLumUpCorners) + 
         abs(-2.0 * pixelLumCenter + pixelLumLeftRight) * 2.0  + abs(-2.0 * pixelLumDown + pixelLumDownCorners);
 

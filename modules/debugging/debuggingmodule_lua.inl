@@ -69,7 +69,7 @@ std::string makeIdentifier(std::string s) {
         "if openspace.hasSceneGraphNode('{0}') then "
             "openspace.removeSceneGraphNode('{0}') "
         "end "
-        "openspace.addSceneGraphNode( {{ Identifier = '{0}' }} )",
+        "openspace.addSceneGraphNode({{ Identifier = '{0}' }})",
         RenderedPathIdentifier
     );
 
@@ -192,7 +192,7 @@ std::string makeIdentifier(std::string s) {
         "if openspace.hasSceneGraphNode('{0}') then "
         "openspace.removeSceneGraphNode('{0}') "
         "end "
-        "openspace.addSceneGraphNode( {{ Identifier = '{0}' }} )",
+        "openspace.addSceneGraphNode({{ Identifier = '{0}' }})",
         RenderedPointsIdentifier
     );
 

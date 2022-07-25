@@ -60,7 +60,7 @@ Fragment getFragment() {
 
     // Find our elliptic scale factors by trigonometric approximation. 
     float beta = atan(length(screenPos) / near);
-    vec2 sigmaScaleFactor = vec2( 1.0 / cos(beta), 1.0 / pow(cos(beta), 2.0)); 
+    vec2 sigmaScaleFactor = vec2(1.0 / cos(beta), 1.0 / pow(cos(beta), 2.0)); 
 
 	float defaultScreen = 1200.0;
 	float scaling = screenSize.y / defaultScreen * yFactor;
@@ -129,7 +129,7 @@ Fragment getFragment() {
             vec2 sPoint = uv + (pixelSize * ivec2(x, y));
 
             // Calculate the contribution of this pixel (elliptic gaussian distribution).
-            float pixelWeight = exp(-( 
+            float pixelWeight = exp(-(
                 a * pow(x * fullAspect, 2.0)
                 + 2 * b * x * y * fullAspect 
                 + c * pow(y, 2.0) 
@@ -138,7 +138,7 @@ Fragment getFragment() {
             // Only sample inside FBO texture and if the pixel will contribute to final color.
             if (all(greaterThan(sPoint, vec2(0.0))) && all(lessThan(sPoint, vec2(1.0))) 
                 && pixelWeight > pixelWeightThreshold) {
-                vec4 sIntensity = texture( renderedTexture, sPoint );
+                vec4 sIntensity = texture(renderedTexture, sPoint);
 
                 // Use normal distribution function for halo/bloom effect. 
                 if (useCircleDist) {

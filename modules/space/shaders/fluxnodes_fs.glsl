@@ -70,7 +70,7 @@ Fragment getFragment() {
         {
             if (length(coord) < 0.3) {
                 float e = 2.718055;
-                float y = pow(e, - (pow(length(coord), 2.0)) /( 2.0 * pow(0.2, 2.0)));
+                float y = pow(e, - (pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
                 if (y < 0.05) {
                     discard;
                 }
@@ -84,7 +84,7 @@ Fragment getFragment() {
 
     if (useGaussian) {
         float e = 2.718055;
-        float y = pow(e, - (pow(length(coord), 2.0)) /( 2.0 * pow(0.2, 2.0)));
+        float y = pow(e, - (pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
         if (y < 0.05) {
             discard;
         }

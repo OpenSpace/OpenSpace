@@ -45,7 +45,7 @@ void ScreenLog::removeExpiredEntries() {
         [&t, ttl = _timeToLive](const LogEntry& e) { return (t - e.timeStamp) > ttl; }
     );
 
-    _entries.erase(rit, _entries.end() );
+    _entries.erase(rit, _entries.end());
 }
 
 void ScreenLog::log(LogLevel level, std::string_view category, std::string_view message) {

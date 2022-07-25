@@ -80,7 +80,7 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImage(const std::filesystem::p
         // Extension HDU Object
         return readImageInternal<T>(_infile->currentExtension());
     } catch (const FitsException& e){
-        LERROR("Could not read FITS image from table. " + e.message() );
+        LERROR("Could not read FITS image from table. " + e.message());
     }
 
     return nullptr;
@@ -115,7 +115,7 @@ std::shared_ptr<std::unordered_map<std::string, T>> FitsFileReader::readHeader(
         );
         return std::make_shared<std::unordered_map<std::string, T>>(std::move(result));
     } catch (const FitsException& e) {
-        LERROR("Could not read FITS header. " + e.message() );
+        LERROR("Could not read FITS header. " + e.message());
     }
     return nullptr;
 }
@@ -131,7 +131,7 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
         image.readKey(key, value);
         return std::make_unique<T>(value);
     } catch (FitsException& e) {
-        LERROR("Could not read FITS key. " + e.message() );
+        LERROR("Could not read FITS key. " + e.message());
     }
     return nullptr;
 }
@@ -663,7 +663,7 @@ const std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& im
         ImageData<T> im = { std::move(contents), image.axis(0), image.axis(1) };
         return std::make_shared<ImageData<T>>(im);
     } catch (const FitsException& e){
-        LERROR("Could not read FITS image EXTHDU. " + e.message() );
+        LERROR("Could not read FITS image EXTHDU. " + e.message());
     }
     return nullptr;
 }
@@ -676,7 +676,7 @@ const std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(PHDU& imag
         ImageData<T> im = { std::move(contents), image.axis(0), image.axis(1) };
         return std::make_shared<ImageData<T>>(im);
     } catch (const FitsException& e){
-        LERROR("Could not read FITS image PHDU. " + e.message() );
+        LERROR("Could not read FITS image PHDU. " + e.message());
     }
     return nullptr;
 }

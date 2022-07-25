@@ -62,11 +62,11 @@ uniform float minBillboardSize;
 
 const double PARSEC = 0.308567756e17LF;
 
-const vec2 corners[4] = vec2[4]( 
+const vec2 corners[4] = vec2[4](
   vec2(0.0, 0.0),
   vec2(1.0, 0.0), 
   vec2(1.0, 1.0),
-  vec2(0.0, 1.0)     
+  vec2(0.0, 1.0)
 );
 
 const int RenderOptionCameraViewDirection = 0;

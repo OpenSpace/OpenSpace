@@ -49,7 +49,7 @@ var sidebarNavigate = (index) => {
   var subtreeSelector = "#index" + index + "-subtree";
 
   if ((currentDocumentation == documentation[index]) 
-    && (document.querySelector(subtreeSelector).innerHTML != "") ) 
+    && (document.querySelector(subtreeSelector).innerHTML != "")) 
   {
       var subtreeSelector = "#index" + index + "-subtree";
       document.querySelector(subtreeSelector).innerHTML = "";

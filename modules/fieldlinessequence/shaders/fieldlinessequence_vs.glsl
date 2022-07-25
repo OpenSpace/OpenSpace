@@ -83,7 +83,7 @@ void main() {
     bool hasColor = true;
 
     if (usingMasking && (in_masking_scalar < maskingRange.x ||
-                         in_masking_scalar > maskingRange.y ))
+                         in_masking_scalar > maskingRange.y))
     {
         hasColor = false;
     }

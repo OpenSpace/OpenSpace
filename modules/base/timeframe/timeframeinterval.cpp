@@ -72,10 +72,10 @@ documentation::Documentation TimeFrameInterval::Documentation() {
 }
 
 bool TimeFrameInterval::isActive(const Time& time) const {
-    if (_hasStart && time.j2000Seconds() < _start ) {
+    if (_hasStart && time.j2000Seconds() < _start) {
         return false;
     }
-    if (_hasEnd && time.j2000Seconds() >= _end ) {
+    if (_hasEnd && time.j2000Seconds() >= _end) {
         return false;
     }
     return true;

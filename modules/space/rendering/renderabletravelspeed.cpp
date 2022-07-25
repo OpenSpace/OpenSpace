@@ -283,7 +283,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     _shaderProgram->setUniform("opacity", opacity());
 }
 
-void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {
+void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
     if (!_enabled) {
         return;
     }
