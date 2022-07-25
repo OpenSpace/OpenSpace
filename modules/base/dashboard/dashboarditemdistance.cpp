@@ -378,7 +378,7 @@ glm::vec2 DashboardItemDistance::size() const {
     ZoneScoped
 
     const double d = glm::length(1e20);
-    std::pair<double, std::string> dist;
+    std::pair<double, std::string_view> dist;
     if (_doSimplification) {
         dist = simplifyDistance(d);
     }
