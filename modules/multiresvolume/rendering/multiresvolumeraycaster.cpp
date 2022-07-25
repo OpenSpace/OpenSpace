@@ -38,9 +38,9 @@ namespace {
     constexpr std::string_view GlslHelperPath =
         "${MODULES}/multiresvolume/shaders/helper.glsl";
     constexpr std::string_view GlslBoundsVsPath =
-        "${MODULES}/multiresvolume/shaders/boundsVs.glsl";
+        "${MODULES}/multiresvolume/shaders/bounds_vs.glsl";
     constexpr std::string_view GlslBoundsFsPath =
-        "${MODULES}/multiresvolume/shaders/boundsFs.glsl";
+        "${MODULES}/multiresvolume/shaders/bounds_fs.glsl";
 } // namespace
 
 namespace openspace {
