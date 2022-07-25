@@ -550,7 +550,10 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     const dmat4 I(1.0);
     
     // compute distance from camera to molecule
+    // we apply artificial scaling to everything to cheat a bit with the unit system:
+    // TODO explain
     float distance = length(data.modelTransform.translation - data.camera.positionVec3());
+    float fakeScaling = 100.f / distance;
 
     // because the molecule is small, a scaling of the view matrix causes the molecule
     // to be moved out of view in clip space. Reset the scaling for the molecule
@@ -565,6 +568,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         translate(I, data.modelTransform.translation) *
         scale(I, data.modelTransform.scale) *
         dmat4(data.modelTransform.rotation) *
+        scale(I, dvec3(fakeScaling)) *
         translate(I, -_simulationBox.value() / 2.0) *
         I;
 
@@ -606,14 +610,16 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             scale(I, dvec3(_simulationBox)) *
-            scale(I, dvec3(3.0)) *
+            scale(I, dvec3(3.0)) * // billboard circle radius (wrt. simbox)
+            scale(I, dvec3(fakeScaling)) *
             I;
         mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
         mat4 transform = projMatrix * billboardModel * faceCamera;
+        float circleWidth = distance / compMax(_simulationBox.value()) * 1E-2;
 
-        billboardDraw(transform, distance * 1E-5f, 1.f); // write depth=1 (clear depth buffer) in billboard
-        md_gl_draw(&args);                    // draw molecule
-        billboardDraw(transform, distance * 1E-5f, 0.f); // write depth=0 (lock depth buffer) in billboard
+        billboardDraw(transform, circleWidth, 1.f); // write depth=1 (clear depth buffer) in billboard
+        md_gl_draw(&args);                               // draw molecule
+        billboardDraw(transform, circleWidth, 0.f); // write depth=0 (lock depth buffer) in billboard
     }
 
 }
