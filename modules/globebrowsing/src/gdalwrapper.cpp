@@ -35,7 +35,7 @@
 #include <gdal.h>
 
 namespace {
-    constexpr const char* _loggerCat = "GdalWrapper";
+    constexpr std::string_view _loggerCat = "GdalWrapper";
 
     constexpr openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
         "LogGdalErrors",

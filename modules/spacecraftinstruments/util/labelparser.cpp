@@ -35,9 +35,9 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "LabelParser";
-    constexpr const char* keySpecs = "Read";
-    constexpr const char* keyConvert = "Convert";
+    constexpr std::string_view _loggerCat = "LabelParser";
+    constexpr std::string_view keySpecs = "Read";
+    constexpr std::string_view keyConvert = "Convert";
 } // namespace
 
 namespace openspace {
@@ -188,7 +188,7 @@ bool LabelParser::create() {
 
             _detectorType = "CAMERA"; // default value
 
-            constexpr const char* ErrorMsg =
+            constexpr std::string_view ErrorMsg =
                 "Unrecognized '{}' in line {} in file {}. The 'Convert' table must "
                 "contain the identity tranformation for all values encountered in the "
                 "label files, for example: ROSETTA = {{ \"ROSETTA\" }}";

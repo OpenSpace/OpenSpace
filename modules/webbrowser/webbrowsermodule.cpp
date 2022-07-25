@@ -40,15 +40,15 @@
 #include <filesystem>
 
 namespace {
-    constexpr const char* _loggerCat = "WebBrowser";
+    constexpr std::string_view _loggerCat = "WebBrowser";
 
     #ifdef _MSC_VER
-        constexpr const char* SubprocessPath = "OpenSpace_Helper.exe";
+        constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
     #elif defined(__APPLE__)
-        constexpr const char* SubprocessPath =
+        constexpr std::string_view SubprocessPath =
             "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace_Helper";
     #else
-        constexpr const char* SubprocessPath = "OpenSpace_Helper";
+        constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
     #endif
 
     constexpr openspace::properties::Property::PropertyInfo

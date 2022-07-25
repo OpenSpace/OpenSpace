@@ -31,7 +31,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr const char* _loggerCat = "WebGUI:RenderHandler";
+    constexpr std::string_view _loggerCat = "WebGUI:RenderHandler";
 } // namespace
 
 namespace openspace {

@@ -33,7 +33,7 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* _loggerCat = "LayerGroup";
+    constexpr std::string_view _loggerCat = "LayerGroup";
 
     constexpr openspace::properties::Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
@@ -49,8 +49,8 @@ namespace openspace::globebrowsing {
 
 LayerGroup::LayerGroup(layergroupid::GroupID id)
     : properties::PropertyOwner({
-        layergroupid::LAYER_GROUP_IDENTIFIERS[id],
-        layergroupid::LAYER_GROUP_NAMES[id]
+        std::string(layergroupid::LAYER_GROUP_IDENTIFIERS[id]),
+        std::string(layergroupid::LAYER_GROUP_NAMES[id])
     })
     , _groupId(id)
     , _levelBlendingEnabled(BlendTileInfo, true)

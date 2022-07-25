@@ -24,9 +24,9 @@
 
 namespace {
 
-constexpr const char _loggerCat[] = "ExoplanetsModule";
+constexpr std::string_view _loggerCat = "ExoplanetsModule";
 
-constexpr const char ExoplanetsGuiPath[] = "/Milky Way/Exoplanets/Exoplanet Systems/";
+constexpr std::string_view ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
 // Lua cannot handle backslashes, so replace these with forward slashes
 std::string formatPathToLua(const std::string& path) {
@@ -124,7 +124,7 @@ void createExoplanetSystem(const std::string& starName) {
     std::string sanitizedStarName = starName;
     sanitizeNameString(sanitizedStarName);
 
-    const std::string guiPath = ExoplanetsGuiPath + sanitizedStarName;
+    const std::string guiPath = fmt::format("{}{}", ExoplanetsGuiPath, sanitizedStarName);
 
     SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
@@ -445,7 +445,7 @@ void createExoplanetSystem(const std::string& starName) {
     bool hasLuminosity = !std::isnan(system.starData.luminosity);
 
     if (hasTeff && hasLuminosity) {
-        constexpr const char* description =
+        constexpr std::string_view description =
             "The habitable zone is the region around a star in which an Earth-like "
             "planet can potentially have liquid water on its surface."
             "<br><br>"
@@ -486,7 +486,7 @@ void createExoplanetSystem(const std::string& starName) {
             "GUI = {"
                 "Name = '" + starName + " Habitable Zone',"
                 "Path = '" + guiPath + "',"
-                "Description = '" + description + "'"
+                "Description = '" + std::string(description) + "'"
             "}"
         "}";
 
@@ -504,7 +504,7 @@ void createExoplanetSystem(const std::string& starName) {
             // magnitude or star luminosity, but for now this looks good enough.
             double size = 59.0 * radiusInMeter;
             if (hasTeff) {
-                constexpr const float sunTeff = 5780.f;
+                constexpr float sunTeff = 5780.f;
                 size *= std::pow(system.starData.teff / sunTeff, 2.0);
             }
 

@@ -34,10 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr const char* ProgramName = "ShadowCylinderProgram";
-    constexpr const char* MainFrame = "GALACTIC";
-
-    constexpr const std::array<const char*, 3> UniformNames = {
+    constexpr std::array<const char*, 3> UniformNames = {
         "modelViewProjectionTransform", "shadowColor", "opacity"
     };
 
@@ -210,10 +207,10 @@ void RenderableShadowCylinder::initializeGL() {
     glGenBuffers(1, &_vbo);
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
-        ProgramName,
+        "ShadowCylinderProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "ShadowCylinderProgram",
                 absPath(
                     "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"
                 ),
@@ -229,7 +226,7 @@ void RenderableShadowCylinder::initializeGL() {
 
 void RenderableShadowCylinder::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
-        ProgramName,
+        "ShadowCylinderProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -280,7 +277,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
 void RenderableShadowCylinder::update(const UpdateData& data) {
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(
         _bodyFrame,
-        MainFrame,
+        "GALACTIC",
         data.time.j2000Seconds()
     );
 
@@ -318,7 +315,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
     glm::dvec3 vecLightSource = SpiceManager::ref().targetPosition(
         _body,
         _lightSource,
-        MainFrame,
+        "GALACTIC",
         {
             SpiceManager::AberrationCorrection::Type(_aberration.value()),
             SpiceManager::AberrationCorrection::Direction::Reception

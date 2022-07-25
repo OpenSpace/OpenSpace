@@ -61,8 +61,8 @@ namespace {
             openspace::DistanceUnits.begin(),
             openspace::DistanceUnits.end(),
             res.begin(),
-            [](openspace::DistanceUnit unit) -> std::string {
-                return nameForDistanceUnit(unit);
+            [](openspace::DistanceUnit unit) {
+                return std::string(nameForDistanceUnit(unit));
             }
         );
         return res;
@@ -105,7 +105,10 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     addProperty(_doSimplification);
 
     for (DistanceUnit u : DistanceUnits) {
-        _requestedUnit.addOption(static_cast<int>(u), nameForDistanceUnit(u));
+        _requestedUnit.addOption(
+            static_cast<int>(u),
+            std::string(nameForDistanceUnit(u))
+        );
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (p.requestedUnit.has_value()) {
@@ -127,7 +130,7 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
 
     const double speedPerSecond = speedPerFrame / secondsPerFrame;
 
-    std::pair<double, std::string> dist;
+    std::pair<double, std::string_view> dist;
     if (_doSimplification) {
         dist = simplifyDistance(speedPerSecond);
     }
@@ -153,7 +156,7 @@ glm::vec2 DashboardItemVelocity::size() const {
     ZoneScoped
 
     const double d = glm::length(1e20);
-    std::pair<double, std::string> dist;
+    std::pair<double, std::string_view> dist;
     if (_doSimplification) {
         dist = simplifyDistance(d);
     }

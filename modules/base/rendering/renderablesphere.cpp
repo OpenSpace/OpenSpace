@@ -41,9 +41,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "Sphere";
-
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr std::array<const char*, 5> UniformNames = {
         "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
         "mirrorTexture"
     };
@@ -228,10 +226,10 @@ void RenderableSphere::initializeGL() {
     _sphere->initialize();
 
     _shader = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "Sphere",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "Sphere",
                 absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
             );
@@ -247,7 +245,7 @@ void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "Sphere",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

@@ -30,13 +30,12 @@
 #include <functional>
 
 namespace {
-
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* TcpSocketType = "TcpSocket";
-    constexpr const char* WebSocketType = "WebSocket";
-    constexpr const char* DenyAccess = "Deny";
-    constexpr const char* RequirePassword = "RequirePassword";
-    constexpr const char* AllowAccess = "Allow";
+    constexpr std::string_view KeyIdentifier = "Identifier";
+    constexpr std::string_view TcpSocketType = "TcpSocket";
+    constexpr std::string_view WebSocketType = "WebSocket";
+    constexpr std::string_view DenyAccess = "Deny";
+    constexpr std::string_view RequirePassword = "RequirePassword";
+    constexpr std::string_view AllowAccess = "Allow";
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
@@ -110,12 +109,27 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     , _password(PasswordInfo)
 {
 
-    _type.addOption(static_cast<int>(InterfaceType::TcpSocket), TcpSocketType);
-    _type.addOption(static_cast<int>(InterfaceType::WebSocket), WebSocketType);
+    _type.addOption(
+        static_cast<int>(InterfaceType::TcpSocket),
+        std::string(TcpSocketType)
+    );
+    _type.addOption(
+        static_cast<int>(InterfaceType::WebSocket),
+        std::string(WebSocketType)
+    );
 
-    _defaultAccess.addOption(static_cast<int>(Access::Deny), DenyAccess);
-    _defaultAccess.addOption(static_cast<int>(Access::RequirePassword), RequirePassword);
-    _defaultAccess.addOption(static_cast<int>(Access::Allow), AllowAccess);
+    _defaultAccess.addOption(
+        static_cast<int>(Access::Deny),
+        std::string(DenyAccess)
+    );
+    _defaultAccess.addOption(
+        static_cast<int>(Access::RequirePassword),
+        std::string(RequirePassword)
+    );
+    _defaultAccess.addOption(
+        static_cast<int>(Access::Allow),
+        std::string(AllowAccess)
+    );
 
     if (config.hasKey(DefaultAccessInfo.identifier)) {
         std::string access = config.value<std::string>(DefaultAccessInfo.identifier);

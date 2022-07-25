@@ -33,7 +33,7 @@ namespace openspace::global::callback {
 namespace {
     // Using the same mechanism as in the globals file
 #ifdef WIN32
-    constexpr const int TotalSize =
+    constexpr int TotalSize =
         sizeof(std::vector<std::function<void()>>) +
         sizeof(std::vector<std::function<void()>>) +
         sizeof(std::vector<std::function<void()>>) +

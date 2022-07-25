@@ -361,7 +361,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     }
 
 
-    constexpr const double Epsilon = 1e-7;
+    constexpr double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
     if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
         return { false, false, 0 };

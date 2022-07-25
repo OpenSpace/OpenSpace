@@ -43,9 +43,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "Timevarying Sphere";
-
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr std::array<const char*, 5> UniformNames = {
         "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
         "mirrorTexture"
     };
@@ -222,10 +220,10 @@ void RenderableTimeVaryingSphere::initializeGL() {
     _sphere->initialize();
 
     _shader = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "Timevarying Sphere",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "Timevarying Sphere",
                 absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
             );
@@ -245,7 +243,7 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
     _texture = nullptr;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "Timevarying Sphere",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

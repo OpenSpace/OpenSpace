@@ -46,7 +46,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "Satellites";
+    constexpr std::string_view _loggerCat = "Satellites";
 
     static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",

@@ -35,7 +35,7 @@
 #include <sys/stat.h>
 
 namespace {
-    constexpr const char* _loggerCat = "WwtDataHandler";
+    constexpr std::string_view _loggerCat = "WwtDataHandler";
 } //namespace
 
 namespace openspace {

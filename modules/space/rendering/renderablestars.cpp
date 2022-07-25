@@ -31,7 +31,6 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/templatefactory.h>
@@ -49,9 +48,9 @@
 #include <type_traits>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableStars";
+    constexpr std::string_view _loggerCat = "RenderableStars";
 
-    constexpr const std::array<const char*, 17> UniformNames = {
+    constexpr std::array<const char*, 17> UniformNames = {
         "modelMatrix", "cameraUp", "cameraViewProjectionMatrix", "colorOption",
         "magnitudeExponent", "eyePosition", "psfParamConf", "lumCent", "radiusCent",
         "brightnessCent", "colorTexture", "alphaValue", "psfTexture", "otherDataTexture",
@@ -72,11 +71,11 @@ namespace {
         DistanceModulus
     };
 
-    constexpr const int PsfMethodSpencer = 0;
-    constexpr const int PsfMethodMoffat = 1;
+    constexpr int PsfMethodSpencer = 0;
+    constexpr int PsfMethodMoffat = 1;
 
-    constexpr const int PsfTextureSize = 64;
-    constexpr const int ConvolvedfTextureSize = 257;
+    constexpr int PsfTextureSize = 64;
+    constexpr int ConvolvedfTextureSize = 257;
 
     constexpr double PARSEC = 0.308567756E17;
 
@@ -781,7 +780,7 @@ void RenderableStars::initializeGL() {
     glBindVertexArray(_psfVao);
     glBindBuffer(GL_ARRAY_BUFFER, _psfVbo);
 
-    constexpr const std::array<GLfloat, 24> VertexData = {
+    constexpr std::array<GLfloat, 24> VertexData = {
         //x      y     s     t
         -1.f, -1.f, 0.f, 0.f,
          1.f,  1.f, 1.f, 1.f,
@@ -909,7 +908,7 @@ void RenderableStars::renderPSFToTexture() {
         );
 
     program->activate();
-    constexpr const std::array<float, 4> Black = { 0.f, 0.f, 0.f, 0.f };
+    constexpr std::array<float, 4> Black = { 0.f, 0.f, 0.f, 0.f };
     glClearBufferfv(GL_COLOR, 0, Black.data());
 
     program->setUniform("psfMethod", _psfMethodOption.value());

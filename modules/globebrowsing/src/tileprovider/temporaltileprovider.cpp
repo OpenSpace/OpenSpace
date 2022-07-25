@@ -44,7 +44,7 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* TimePlaceholder = "${OpenSpaceTimeId}";
+    constexpr std::string_view TimePlaceholder = "${OpenSpaceTimeId}";
 
     constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
@@ -134,7 +134,7 @@ namespace {
     std::string_view timeStringify(const std::string& format, const openspace::Time& t) {
         ZoneScoped
 
-        constexpr const int BufferSize = 64;
+        constexpr int BufferSize = 64;
         ghoul_assert(format.size() < BufferSize, "Format string too long");
 
         using namespace openspace;
@@ -562,7 +562,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
 
     // if the images are for each hour
     if (_prototyped.temporalResolution == "1h") {
-        constexpr const int Hour = 60 * 60;
+        constexpr int Hour = 60 * 60;
         // the second tile to interpolate between
         nextTile.advanceTime(Hour);
         // the tile after the second tile
@@ -576,7 +576,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
     }
     // if the images are for each month
     if (_prototyped.temporalResolution == "1M") {
-        constexpr const int Day = 24 * 60 * 60;
+        constexpr int Day = 24 * 60 * 60;
 
         // the second tile to interpolate between
         nextTile.advanceTime(32 * Day);

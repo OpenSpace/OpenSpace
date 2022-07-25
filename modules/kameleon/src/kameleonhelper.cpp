@@ -42,7 +42,7 @@
 
 
 namespace {
-    constexpr const char* _loggerCat = "KameleonHelper";
+    constexpr std::string_view _loggerCat = "KameleonHelper";
 } // namespace
 
 namespace openspace::kameleonHelper {

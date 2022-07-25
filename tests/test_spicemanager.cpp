@@ -30,9 +30,9 @@
 #include "SpiceZpr.h"
 
 namespace {
-    constexpr const int FILLEN = 128;
-    constexpr const int TYPLEN = 32;
-    constexpr const int SRCLEN = 128;
+    constexpr int FILLEN = 128;
+    constexpr int TYPLEN = 32;
+    constexpr int SRCLEN = 128;
 
     namespace spicemanager_constants {
         SpiceInt handle;

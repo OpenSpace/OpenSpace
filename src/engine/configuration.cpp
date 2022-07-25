@@ -35,8 +35,8 @@
 
 namespace {
     // We can't use ${SCRIPTS} here as that hasn't been defined by this point
-    constexpr const char* InitialConfigHelper =
-                                               "${BASE}/scripts/configuration_helper.lua";
+    constexpr std::string_view InitialConfigHelper =
+        "${BASE}/scripts/configuration_helper.lua";
 
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
@@ -454,7 +454,7 @@ std::filesystem::path findConfiguration(const std::string& filename) {
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
                                         const glm::ivec2& primaryMonitorResolution,
-                                        const std::string& overrideScript)
+                                        std::string_view overrideScript)
 {
     ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
 

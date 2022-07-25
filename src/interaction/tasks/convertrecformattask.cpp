@@ -34,10 +34,10 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ConvertRecFormatTask";
+    constexpr std::string_view _loggerCat = "ConvertRecFormatTask";
 
-    constexpr const char* KeyInFilePath = "InputFilePath";
-    constexpr const char* KeyOutFilePath = "OutputFilePath";
+    constexpr std::string_view KeyInFilePath = "InputFilePath";
+    constexpr std::string_view KeyOutFilePath = "OutputFilePath";
 } // namespace
 
 namespace openspace::interaction {
@@ -316,13 +316,13 @@ documentation::Documentation ConvertRecFormatTask::documentation() {
         "convert_format_task",
         {
             {
-                KeyInFilePath,
+                "InputFilePath",
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,
                 "The filename to convert to the opposite format.",
             },
             {
-                KeyOutFilePath,
+                "OutputFilePath",
                 new StringAnnotationVerifier("A valid output filename"),
                 Optional::No,
                 "The filename containing the converted result.",

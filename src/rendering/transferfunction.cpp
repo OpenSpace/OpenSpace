@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/transferfunction.h>
 
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -37,7 +36,7 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "TransferFunction";
+    constexpr std::string_view _loggerCat = "TransferFunction";
 } // namespace
 
 namespace openspace {

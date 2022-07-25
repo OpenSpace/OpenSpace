@@ -41,7 +41,7 @@
 #include "statemachinemodule_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "StateMachine";
+    constexpr std::string_view _loggerCat = "StateMachine";
 } // namespace
 
 namespace openspace {

@@ -39,17 +39,14 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "EphemerisProgram";
-    constexpr const char* KeyTranslation = "Translation";
-
 #ifdef __APPLE__
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase"
     };
 #else
-    constexpr const std::array<const char*, 14> UniformNames = {
+    constexpr std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase", "viewport", "lineWidth"
@@ -200,7 +197,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
 
     _translation = Translation::createFromDictionary(
-        dictionary.value<ghoul::Dictionary>(KeyTranslation)
+        dictionary.value<ghoul::Dictionary>("Translation")
     );
     addPropertySubOwner(_translation.get());
 
@@ -248,10 +245,10 @@ void RenderableTrail::initializeGL() {
     );
 #else
     _programObject = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "EphemerisProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "EphemerisProgram",
                 absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
             );
@@ -264,7 +261,7 @@ void RenderableTrail::initializeGL() {
 
 void RenderableTrail::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "EphemerisProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

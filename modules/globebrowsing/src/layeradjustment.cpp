@@ -81,7 +81,7 @@ LayerAdjustment::LayerAdjustment()
 {
     // Add options to option properties
     for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
-        _typeOption.addOption(i, layergroupid::ADJUSTMENT_TYPE_NAMES[i]);
+        _typeOption.addOption(i, std::string(layergroupid::ADJUSTMENT_TYPE_NAMES[i]));
     }
     _typeOption.setValue(static_cast<int>(layergroupid::AdjustmentTypeID::None));
     _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());

@@ -223,7 +223,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     }
     yAxis = glm::normalize(yAxis);
 
-    constexpr const glm::dvec3 n = glm::dvec3(0.0, 0.0, 1.0);
+    constexpr glm::dvec3 n = glm::dvec3(0.0, 0.0, 1.0);
     glm::dvec3 zAxis = glm::dvec3(
         zAxis.x = yAxis.y * n.z - yAxis.z * n.y,
         zAxis.y = yAxis.z * n.x - yAxis.x * n.z,

@@ -41,7 +41,7 @@
 #define ENABLE_DIRECTMSG
 
 namespace {
-    constexpr const char* _loggerCat = "win32_touch";
+    constexpr std::string_view _loggerCat = "win32_touch";
     HHOOK gTouchHook = nullptr;
     std::thread* gMouseHookThread = nullptr;
     HHOOK gMouseHook = nullptr;
@@ -283,8 +283,8 @@ Win32TouchHook::~Win32TouchHook() {
 // - Seems to move the cursor when we get two fingers as input..
 // - If we ourselves would pump windows for events, we can handle this.
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
-    constexpr const LONG_PTR SIGNATURE_MASK = 0xFFFFFF00;
-    constexpr const LONG_PTR MOUSEEVENTF_FROMTOUCH = 0xFF515700;
+    constexpr LONG_PTR SIGNATURE_MASK = 0xFFFFFF00;
+    constexpr LONG_PTR MOUSEEVENTF_FROMTOUCH = 0xFF515700;
     if (nCode < 0) {
         // do not process message
         return CallNextHookEx(0, nCode, wParam, lParam);

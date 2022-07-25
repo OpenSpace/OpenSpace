@@ -49,7 +49,7 @@ Envelope::Envelope(std::vector<EnvelopePoint> vec) {
 }
 
 bool Envelope::operator!=(const Envelope& env) const {
-    constexpr const double MinDist = 0.0001;
+    constexpr double MinDist = 0.0001;
 
     if (_points.size() != env._points.size()) {
         return true;

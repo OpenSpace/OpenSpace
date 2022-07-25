@@ -105,8 +105,8 @@ namespace {
             openspace::DistanceUnits.begin(),
             openspace::DistanceUnits.end(),
             res.begin(),
-            [](openspace::DistanceUnit unit) -> std::string {
-                return nameForDistanceUnit(unit);
+            [](openspace::DistanceUnit unit) {
+                return std::string(nameForDistanceUnit(unit));
             }
         );
         return res;
@@ -257,7 +257,10 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     addProperty(_doSimplification);
 
     for (DistanceUnit u : DistanceUnits) {
-        _requestedUnit.addOption(static_cast<int>(u), nameForDistanceUnit(u));
+        _requestedUnit.addOption(
+            static_cast<int>(u),
+            std::string(nameForDistanceUnit(u))
+        );
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (p.requestedUnit.has_value()) {
@@ -344,7 +347,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     );
 
     const double d = glm::length(sourceInfo.first - destinationInfo.first);
-    std::pair<double, std::string> dist;
+    std::pair<double, std::string_view> dist;
     if (_doSimplification) {
         dist = simplifyDistance(d);
     }

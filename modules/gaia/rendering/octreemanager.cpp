@@ -33,7 +33,7 @@
 #include <thread>
 
 namespace {
-    constexpr const char* _loggerCat = "OctreeManager";
+    constexpr std::string_view _loggerCat = "OctreeManager";
 } // namespace
 
 namespace openspace {

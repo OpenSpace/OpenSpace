@@ -43,8 +43,8 @@
 #include "parallelpeer_lua.inl"
 
 namespace {
-    constexpr const size_t MaxLatencyDiffs = 64;
-    constexpr const char* _loggerCat = "ParallelPeer";
+    constexpr size_t MaxLatencyDiffs = 64;
+    constexpr std::string_view _loggerCat = "ParallelPeer";
 
     constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
         "Password",

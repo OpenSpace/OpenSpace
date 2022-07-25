@@ -47,7 +47,7 @@
 using namespace CCfits;
 
 namespace {
-    constexpr const char* _loggerCat = "FitsFileReader";
+    constexpr std::string_view _loggerCat = "FitsFileReader";
 } // namespace
 
 namespace openspace {

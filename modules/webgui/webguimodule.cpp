@@ -39,9 +39,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "WebGuiModule";
-    constexpr const char* DefaultAddress = "localhost";
-    constexpr const int DefaultPort = 4680;
+    constexpr std::string_view _loggerCat = "WebGuiModule";
 
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
@@ -121,8 +119,8 @@ WebGuiModule::WebGuiModule()
     , _directories(DirectoriesInfo)
     , _servedDirectories(ServedDirectoriesInfo)
     , _defaultEndpoint(DefaultEndpointInfo)
-    , _port(PortInfo, DefaultPort)
-    , _address(AddressInfo, DefaultAddress)
+    , _port(PortInfo, 4680)
+    , _address(AddressInfo, "localhost")
     , _webSocketInterface(WebSocketInterfaceInfo)
 {
     addProperty(_enabled);

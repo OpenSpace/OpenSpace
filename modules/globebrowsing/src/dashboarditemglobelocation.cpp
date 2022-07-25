@@ -42,9 +42,6 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
     constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
@@ -100,11 +97,11 @@ documentation::Documentation DashboardItemGlobeLocation::Documentation() {
 DashboardItemGlobeLocation::DashboardItemGlobeLocation(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 10.f, 144.f, 1.f)
+    , _fontName(FontNameInfo, "Mono")
+    , _fontSize(FontSizeInfo, 10.f, 10.f, 144.f, 1.f)
     , _displayFormat(DisplayFormatInfo)
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
-    , _font(global::fontManager->font(KeyFontMono, 10))
+    , _font(global::fontManager->font("Mono", 10))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -181,7 +178,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     double lon = position.y;
     double altitude = position.z;
 
-    std::pair<double, std::string> dist = simplifyDistance(altitude);
+    std::pair<double, std::string_view> dist = simplifyDistance(altitude);
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     char* end = nullptr;

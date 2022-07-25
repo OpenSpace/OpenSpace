@@ -58,7 +58,8 @@ namespace {
 
     using AxisType = openspace::interaction::WebsocketCameraStates::AxisType;
 
-    constexpr const char* _loggerCat = "FlightControllerTopic";
+    constexpr std::string_view _loggerCat = "FlightControllerTopic";
+
     constexpr const char* TypeKey = "type";
     constexpr const char* ValuesKey = "values";
 

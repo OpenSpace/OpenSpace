@@ -33,7 +33,7 @@
 #include <sstream>
 
 namespace {
-    constexpr const char _loggerCat[] = "VersionChecker";
+    constexpr std::string_view _loggerCat = "VersionChecker";
 } // namespace
 
 namespace openspace {

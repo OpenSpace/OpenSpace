@@ -35,7 +35,7 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableDistanceLabel";
+    constexpr std::string_view _loggerCat = "RenderableDistanceLabel";
 
     constexpr openspace::properties::Property::PropertyInfo NodeLineInfo = {
         "NodeLine",
@@ -117,9 +117,9 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         const float scale = unit(_distanceUnit);
 
         // Get unit descriptor text
-        std::string unitDescriptor = toString(_distanceUnit);
+        std::string_view unitDescriptor = toString(_distanceUnit);
         if (!_customUnitDescriptor.value().empty()) {
-            unitDescriptor = _customUnitDescriptor.value();
+            unitDescriptor = _customUnitDescriptor;
         }
 
         // Get distance as string and remove fractional part
@@ -131,7 +131,7 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         distanceText.erase(pos, subStr.size());
 
         // Create final label text and set it
-        const std::string finalText = distanceText + " " + unitDescriptor;
+        const std::string finalText = fmt::format("{} {}", distanceText, unitDescriptor);
         setLabelText(finalText);
 
         // Update placement of label with transformation matrix

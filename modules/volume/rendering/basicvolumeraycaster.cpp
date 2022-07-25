@@ -38,10 +38,10 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* GlslRaycastPath = "${MODULE_VOLUME}/shaders/raycast.glsl";
-    constexpr const char* GlslHelperPath = "${MODULE_VOLUME}/shaders/helper.glsl";
-    constexpr const char* GlslBoundsVsPath = "${MODULE_VOLUME}/shaders/boundsvs.glsl";
-    constexpr const char* GlslBoundsFsPath = "${MODULE_VOLUME}/shaders/boundsfs.glsl";
+    constexpr std::string_view GlslRaycast = "${MODULE_VOLUME}/shaders/raycast.glsl";
+    constexpr std::string_view GlslHelper = "${MODULE_VOLUME}/shaders/helper.glsl";
+    constexpr std::string_view GlslBoundsVs = "${MODULE_VOLUME}/shaders/boundsvs.glsl";
+    constexpr std::string_view GlslBoundsFs = "${MODULE_VOLUME}/shaders/boundsfs.glsl";
 } // namespace
 
 namespace openspace::volume {
@@ -162,19 +162,19 @@ bool BasicVolumeRaycaster::isCameraInside(const RenderData& data,
 }
 
 std::string BasicVolumeRaycaster::boundsVertexShaderPath() const {
-    return absPath(GlslBoundsVsPath).string();
+    return absPath(GlslBoundsVs).string();
 }
 
 std::string BasicVolumeRaycaster::boundsFragmentShaderPath() const {
-    return absPath(GlslBoundsFsPath).string();
+    return absPath(GlslBoundsFs).string();
 }
 
 std::string BasicVolumeRaycaster::raycasterPath() const {
-    return absPath(GlslRaycastPath).string();
+    return absPath(GlslRaycast).string();
 }
 
 std::string BasicVolumeRaycaster::helperPath() const {
-    return absPath(GlslHelperPath).string();
+    return absPath(GlslHelper).string();
 }
 
 void BasicVolumeRaycaster::setTransferFunction(

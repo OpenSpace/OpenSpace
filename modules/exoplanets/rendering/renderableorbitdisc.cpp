@@ -40,32 +40,32 @@
 #include <optional>
 
 namespace {
-    constexpr const std::array<const char*, 6> UniformNames = {
+    constexpr std::array<const char*, 6> UniformNames = {
         "modelViewProjectionTransform", "offset", "opacity",
         "discTexture", "eccentricity", "semiMajorAxis"
     };
 
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for the color."
     };
 
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value specifies the semi-major axis of the orbit, in meter."
     };
 
-    static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
         "sphere, for this orbit."
     };
 
-    static const openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This property determines the width of the disc. The values specify the lower "

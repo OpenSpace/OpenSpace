@@ -61,7 +61,7 @@
 #include "sessionrecording_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "SessionRecording";
+    constexpr std::string_view _loggerCat = "SessionRecording";
 
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
@@ -77,7 +77,7 @@ namespace {
         "computed values are used instead"
     };
 
-    constexpr const bool UsingTimeKeyframes = false;
+    constexpr bool UsingTimeKeyframes = false;
 } // namespace
 
 namespace openspace::interaction {
@@ -735,7 +735,7 @@ void SessionRecording::saveStringToFile(const std::string& s,
 bool SessionRecording::hasCameraChangedFromPrev(
                                              datamessagestructures::CameraKeyframe kfNew)
 {
-    constexpr const  double threshold = 1e-2;
+    constexpr double threshold = 1e-2;
     bool hasChanged = false;
 
     glm::dvec3 positionDiff = kfNew._position - _prevRecordedCameraKeyframe._position;
@@ -1019,8 +1019,8 @@ void SessionRecording::render() {
     }
 
 
-    constexpr const char* FontName = "Mono";
-    constexpr const float FontSizeFrameinfo = 32.f;
+    constexpr std::string_view FontName = "Mono";
+    constexpr float FontSizeFrameinfo = 32.f;
     std::shared_ptr<ghoul::fontrendering::Font> font =
         global::fontManager->font(FontName, FontSizeFrameinfo);
 

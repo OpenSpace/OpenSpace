@@ -36,8 +36,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "GridProgram";
-
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
@@ -116,10 +114,10 @@ bool RenderableSphericalGrid::isReady() const {
 
 void RenderableSphericalGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "GridProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "GridProgram",
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
             );
@@ -148,7 +146,7 @@ void RenderableSphericalGrid::deinitializeGL() {
     _iBufferID = 0;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "GridProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

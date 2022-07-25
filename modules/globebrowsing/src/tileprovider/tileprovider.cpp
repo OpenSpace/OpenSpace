@@ -75,7 +75,7 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
 {
     ZoneScoped
 
-    const char* type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
+    std::string_view type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
 
     ghoul::TemplateFactory<TileProvider>* factory =
         FactoryManager::ref().factory<TileProvider>();

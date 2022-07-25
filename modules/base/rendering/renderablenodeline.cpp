@@ -39,9 +39,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* ProgramName = "NodeLineProgram";
-    constexpr const char* Root = "Root";
-
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start Node",
@@ -108,8 +105,8 @@ documentation::Documentation RenderableNodeLine::Documentation() {
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _start(StartNodeInfo, Root)
-    , _end(EndNodeInfo, Root)
+    , _start(StartNodeInfo, "Root")
+    , _end(EndNodeInfo, "Root")
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
@@ -145,10 +142,10 @@ std::string RenderableNodeLine::end() const {
 
 void RenderableNodeLine::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "NodeLineProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "NodeLineProgram",
                 absPath("${MODULE_BASE}/shaders/line_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/line_fs.glsl")
             );
@@ -175,7 +172,7 @@ void RenderableNodeLine::deinitializeGL() {
     _vBufferId = 0;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "NodeLineProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

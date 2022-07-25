@@ -37,7 +37,7 @@
 #include <optional>
 
 namespace {
-    constexpr const std::array<const char*, 2> UniformNames = {"lineColor", "opacity"};
+    constexpr std::array<const char*, 2> UniformNames = {"lineColor", "opacity"};
 
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",

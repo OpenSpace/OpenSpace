@@ -30,7 +30,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -48,9 +47,9 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderablePoints";
+    constexpr std::string_view _loggerCat = "RenderablePoints";
 
-    constexpr const std::array<const char*, 7> UniformNames = {
+    constexpr std::array<const char*, 7> UniformNames = {
         "modelViewProjectionTransform", "color", "sides", "alphaValue", "scaleFactor",
         "spriteTexture", "hasColorMap"
     };

@@ -313,7 +313,7 @@ namespace {
     const glm::dvec3 currentPosModelCoords =
         glm::inverse(gl->modelTransform()) * glm::dvec4(currentPosW, 1.0);
 
-    constexpr const double LengthEpsilon = 10.0; // meters
+    constexpr double LengthEpsilon = 10.0; // meters
     if (glm::distance(currentPosModelCoords, positionModelCoords) < LengthEpsilon) {
         LINFOC("GlobeBrowsing", "flyToGeo: Already at the requested position");
         return;
@@ -326,7 +326,7 @@ namespace {
     instruction.setValue("PathType", std::string("ZoomOutOverview"));
 
     if (duration.has_value()) {
-        constexpr const double Epsilon = 1e-5;
+        constexpr double Epsilon = 1e-5;
         if (*duration <= Epsilon) {
             throw ghoul::lua::LuaError("Duration must be larger than zero");
         }

@@ -89,17 +89,16 @@
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
-    constexpr const char _loggerCat[] = "GlobeBrowsingModule";
-    constexpr const char _factoryName[] = "TileProvider";
+    constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
         "WMSCacheEnabled",
         "WMS Cache Enabled",
         "Determines whether automatic caching of WMS servers is enabled. Changing the "
         "value of this property will not affect already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo OfflineModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OfflineModeInfo = {
         "OfflineMode",
         "Offline Mode",
         "Determines whether loaded WMS servers should be used in offline mode, that is "
@@ -109,21 +108,21 @@ namespace {
         "already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
         "WMSCacheLocation",
         "WMS Cache Location",
         "The location of the cache folder for WMS servers. Changing the value of this "
         "property will not affect already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
         "WMSCacheSize",
         "WMS Cache Size",
         "The maximum size of the cache for each WMS server. Changing the value of this "
         "property will not affect already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile Cache Size",
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU."
@@ -301,7 +300,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fRotation, "Rotation factory was not created");
     fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
 
-    FactoryManager::ref().addFactory<TileProvider>(_factoryName);
+    FactoryManager::ref().addFactory<TileProvider>("TileProvider");
 
     ghoul::TemplateFactory<TileProvider>* fTileProvider =
         FactoryManager::ref().factory<TileProvider>();
@@ -309,33 +308,32 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     {
         using namespace layergroupid;
-        fTileProvider->registerClass<DefaultTileProvider>(
+        fTileProvider->registerClass<DefaultTileProvider>(std::string(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::DefaultTileLayer)]
-        );
-        fTileProvider->registerClass<SingleImageProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SingleImageTileLayer)]
-        );
-        fTileProvider->registerClass<ImageSequenceTileProvider>(
+        ));
+        fTileProvider->registerClass<SingleImageProvider>(std::string(LAYER_TYPE_NAMES[static_cast<int>(TypeID::SingleImageTileLayer)]
+        ));
+        fTileProvider->registerClass<ImageSequenceTileProvider>(std::string(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::ImageSequenceTileLayer)]
-        );
-        fTileProvider->registerClass<SpoutImageProvider>(
+        ));
+        fTileProvider->registerClass<SpoutImageProvider>(std::string(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::SpoutImageTileLayer)]
-        );
-        fTileProvider->registerClass<TemporalTileProvider>(
+        ));
+        fTileProvider->registerClass<TemporalTileProvider>(std::string(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::TemporalTileLayer)]
-        );
-        fTileProvider->registerClass<TileIndexTileProvider>(
+        ));
+        fTileProvider->registerClass<TileIndexTileProvider>(std::string(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::TileIndexTileLayer)]
-        );
-        fTileProvider->registerClass<SizeReferenceTileProvider>(
+        ));
+        fTileProvider->registerClass<SizeReferenceTileProvider>(std::string(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::SizeReferenceTileLayer)]
-        );
-        fTileProvider->registerClass<TileProviderByLevel>(
+        ));
+        fTileProvider->registerClass<TileProviderByLevel>(std::string(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByLevelTileLayer)]
-        );
-        fTileProvider->registerClass<TileProviderByIndex>(
+        ));
+        fTileProvider->registerClass<TileProviderByIndex>(std::string(
             LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByIndexTileLayer)]
-        );
+        ));
     }
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
@@ -601,27 +599,36 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
 std::string GlobeBrowsingModule::layerGroupNamesList() {
     std::string listLayerGroups;
     for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
-        listLayerGroups += globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i] +
-                           std::string(", ");
+        listLayerGroups += fmt::format(
+            "{}, ", globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i]
+        );
     }
-    listLayerGroups += std::string(" and ") +
+
+    return fmt::format(
+        "{} and {}",
+        listLayerGroups,
         globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[
             globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1
-        ];
-    return listLayerGroups;
+        ]
+    );
 }
 
 std::string GlobeBrowsingModule::layerTypeNamesList() {
     std::string listLayerTypes;
     for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
-        listLayerTypes += std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) +
-                          ", ";
+        listLayerTypes += fmt::format(
+            "{}, ",
+            globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]
+        );
     }
-    listLayerTypes += std::string(" and ") +
+
+    return fmt::format(
+        "{} and {}",
+        listLayerTypes,
         globebrowsing::layergroupid::LAYER_TYPE_NAMES[
             globebrowsing::layergroupid::NUM_LAYER_TYPES - 1
-        ];
-    return listLayerTypes;
+        ]
+    );
 }
 
 void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,

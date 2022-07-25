@@ -32,7 +32,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -50,18 +49,18 @@
 #include <optional>
 
 namespace {
-    constexpr const char* MeterUnit = "m";
-    constexpr const char* KilometerUnit = "Km";
-    constexpr const char* MegameterUnit = "Mm";
-    constexpr const char* GigameterUnit = "Gm";
-    constexpr const char* AstronomicalUnitUnit = "au";
-    constexpr const char* TerameterUnit = "Tm";
-    constexpr const char* PetameterUnit = "Pm";
-    constexpr const char* ParsecUnit = "pc";
-    constexpr const char* KiloparsecUnit = "Kpc";
-    constexpr const char* MegaparsecUnit = "Mpc";
-    constexpr const char* GigaparsecUnit = "Gpc";
-    constexpr const char* GigalightyearUnit = "Gly";
+    constexpr std::string_view MeterUnit = "m";
+    constexpr std::string_view KilometerUnit = "Km";
+    constexpr std::string_view MegameterUnit = "Mm";
+    constexpr std::string_view GigameterUnit = "Gm";
+    constexpr std::string_view AstronomicalUnitUnit = "au";
+    constexpr std::string_view TerameterUnit = "Tm";
+    constexpr std::string_view PetameterUnit = "Pm";
+    constexpr std::string_view ParsecUnit = "pc";
+    constexpr std::string_view KiloparsecUnit = "Kpc";
+    constexpr std::string_view MegaparsecUnit = "Mpc";
+    constexpr std::string_view GigaparsecUnit = "Gpc";
+    constexpr std::string_view GigalightyearUnit = "Gly";
 
     enum BlendMode {
         Normal = 0,
@@ -329,18 +328,18 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _enableFadingEffect = p.enableFading.value_or(_enableFadingEffect);
     addProperty(_enableFadingEffect);
 
-    _fadeUnitOption.addOption(Meter, MeterUnit);
-    _fadeUnitOption.addOption(Kilometer, KilometerUnit);
-    _fadeUnitOption.addOption(Megameter, MegameterUnit);
-    _fadeUnitOption.addOption(Gigameter, GigameterUnit);
-    _fadeUnitOption.addOption(AstronomicalUnit, AstronomicalUnitUnit);
-    _fadeUnitOption.addOption(Terameter, TerameterUnit);
-    _fadeUnitOption.addOption(Petameter, PetameterUnit);
-    _fadeUnitOption.addOption(Parsec, ParsecUnit);
-    _fadeUnitOption.addOption(KiloParsec, KiloparsecUnit);
-    _fadeUnitOption.addOption(MegaParsec, MegaparsecUnit);
-    _fadeUnitOption.addOption(GigaParsec, GigaparsecUnit);
-    _fadeUnitOption.addOption(GigaLightyear, GigalightyearUnit);
+    _fadeUnitOption.addOption(Meter, std::string(MeterUnit));
+    _fadeUnitOption.addOption(Kilometer, std::string(KilometerUnit));
+    _fadeUnitOption.addOption(Megameter, std::string(MegameterUnit));
+    _fadeUnitOption.addOption(Gigameter, std::string(GigameterUnit));
+    _fadeUnitOption.addOption(AstronomicalUnit, std::string(AstronomicalUnitUnit));
+    _fadeUnitOption.addOption(Terameter, std::string(TerameterUnit));
+    _fadeUnitOption.addOption(Petameter, std::string(PetameterUnit));
+    _fadeUnitOption.addOption(Parsec, std::string(ParsecUnit));
+    _fadeUnitOption.addOption(KiloParsec, std::string(KiloparsecUnit));
+    _fadeUnitOption.addOption(MegaParsec, std::string(MegaparsecUnit));
+    _fadeUnitOption.addOption(GigaParsec, std::string(GigaparsecUnit));
+    _fadeUnitOption.addOption(GigaLightyear, std::string(GigalightyearUnit));
 
     if (p.fadeUnit.has_value()) {
         _fadeUnitOption = codegen::map<Unit>(*p.fadeUnit);
@@ -506,7 +505,7 @@ float RenderableLabels::unit(int unit) const {
     }
 }
 
-std::string RenderableLabels::toString(int unit) const {
+std::string_view RenderableLabels::toString(int unit) const {
     switch (static_cast<Unit>(unit)) {
         case Meter: return MeterUnit;
         case Kilometer: return KilometerUnit;

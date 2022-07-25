@@ -68,9 +68,9 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
+    constexpr std::string_view _loggerCat = "AtmosphereDeferredcaster";
 
-    constexpr const std::array<const char*, 27> UniformNames = {
+    constexpr std::array<const char*, 27> UniformNames = {
         "cullAtmosphere", "Rg", "Rt", "groundRadianceEmission", "HR", "betaRayleigh",
         "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "HO",
         "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU",
@@ -80,8 +80,8 @@ namespace {
         "inscatterTexture"
     };
 
-    constexpr const float ATM_EPS = 2000.f;
-    constexpr const float KM_TO_M = 1000.f;
+    constexpr float ATM_EPS = 2000.f;
+    constexpr float KM_TO_M = 1000.f;
 
     template <GLenum colorBufferAttachment = GL_COLOR_ATTACHMENT0>
     void saveTextureFile(const std::filesystem::path& fileName, const glm::ivec2& size) {
@@ -287,7 +287,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     // Number of planet radii to use as distance threshold for culling
     prg.setUniform(_uniformCache.cullAtmosphere, 1);
 
-    constexpr const double DistanceCullingRadii = 5000;
+    constexpr double DistanceCullingRadii = 5000;
     glm::dmat4 MV = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
         data.camera.combinedViewMatrix();
     if (distance <= scaledRadius * DistanceCullingRadii &&
@@ -564,7 +564,7 @@ void AtmosphereDeferredcaster::calculateTransmittance() {
     program->setUniform("HO", _ozoneHeightScale);
     program->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 
-    constexpr const float Black[] = { 0.f, 0.f, 0.f, 0.f };
+    constexpr float Black[] = { 0.f, 0.f, 0.f, 0.f };
     glClearBufferfv(GL_COLOR, 0, Black);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (_saveCalculationTextures) {

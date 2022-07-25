@@ -50,7 +50,7 @@
 #include "pathnavigator_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "PathNavigator";
+    constexpr std::string_view _loggerCat = "PathNavigator";
 
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultPathType",
@@ -98,8 +98,7 @@ namespace {
         "seconds. A value of 2 means twice that fast, and so on."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
         "MinimalValidBoundingSphere",
         "Minimal Valid Bounding Sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
@@ -244,7 +243,7 @@ void PathNavigator::updateCamera(double deltaTime) {
         handlePathEnd();
 
         if (_applyIdleBehaviorOnFinish) {
-            constexpr const char* ApplyIdleBehaviorScript =
+            constexpr const char ApplyIdleBehaviorScript[] =
                 "openspace.setPropertyValueSingle("
                     "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
                     "true"

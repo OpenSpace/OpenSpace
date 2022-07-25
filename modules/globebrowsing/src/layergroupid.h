@@ -30,8 +30,8 @@
 
 namespace openspace::globebrowsing::layergroupid {
 
-static constexpr const int NUM_LAYER_GROUPS = 5;
-static constexpr const char* LAYER_GROUP_IDENTIFIERS[NUM_LAYER_GROUPS] = {
+static constexpr int NUM_LAYER_GROUPS = 5;
+static constexpr std::string_view LAYER_GROUP_IDENTIFIERS[NUM_LAYER_GROUPS] = {
     "HeightLayers",
     "ColorLayers",
     "Overlays",
@@ -39,7 +39,7 @@ static constexpr const char* LAYER_GROUP_IDENTIFIERS[NUM_LAYER_GROUPS] = {
     "WaterMasks"
 };
 
-static constexpr const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+static constexpr std::string_view LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "Height Layers",
     "Color Layers",
     "Overlays",
@@ -56,8 +56,8 @@ enum GroupID {
     Unknown
 };
 
-static constexpr const int NUM_LAYER_TYPES = 10;
-static constexpr const char* LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
+static constexpr int NUM_LAYER_TYPES = 10;
+static constexpr std::string_view LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
     "DefaultTileLayer",
     "SingleImageTileLayer",
     "ImageSequenceTileLayer",
@@ -88,7 +88,7 @@ enum class TypeID {
 };
 
 static constexpr int NUM_ADJUSTMENT_TYPES = 3;
-static constexpr const char* ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
+static constexpr std::string_view ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
     "None",
     "ChromaKey",
     "TransferFunction",
@@ -104,7 +104,7 @@ enum class AdjustmentTypeID {
 };
 
 static constexpr int NUM_BLEND_MODES = 5;
-static constexpr const char* BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
+static constexpr std::string_view BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
     "Normal",
     "Multiply",
     "Add",

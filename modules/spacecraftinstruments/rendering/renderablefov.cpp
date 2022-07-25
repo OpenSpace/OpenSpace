@@ -38,16 +38,14 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "FovProgram";
-
-    constexpr const std::array<const char*, 9> UniformNames = {
+    constexpr std::array<const char*, 9> UniformNames = {
         "modelViewProjectionTransform", "colorStart", "colorEnd",
         "activeColor", "targetInFieldOfViewColor", "intersectionStartColor",
         "intersectionEndColor", "squareColor", "interpolation"
     };
 
-    constexpr const int InterpolationSteps = 5;
-    constexpr const double Epsilon = 1e-4;
+    constexpr int InterpolationSteps = 5;
+    constexpr double Epsilon = 1e-4;
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
@@ -268,10 +266,10 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
 void RenderableFov::initializeGL() {
     _program = SpacecraftInstrumentsModule::ProgramObjectManager.request(
-        ProgramName,
+        "FovProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "FovProgram",
                 absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
                 absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
             );
@@ -416,7 +414,7 @@ void RenderableFov::initializeGL() {
 
 void RenderableFov::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
-        ProgramName,
+        "FovProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

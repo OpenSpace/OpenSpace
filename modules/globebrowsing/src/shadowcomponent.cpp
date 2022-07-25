@@ -35,7 +35,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -53,7 +52,7 @@
 #include <locale>
 
 namespace {
-    constexpr const char* _loggerCat = "ShadowComponent";
+    constexpr std::string_view _loggerCat = "ShadowComponent";
 
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
@@ -74,7 +73,7 @@ namespace {
         "The depth map size in pixels. You must entry the width and height values."
     };
 
-    constexpr const GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
+    constexpr GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
 
     void checkFrameBufferState(const std::string& codePosition) {
         if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {

@@ -49,15 +49,14 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableDUMeshes";
-    constexpr const char* ProgramObjectName = "RenderableDUMeshes";
+    constexpr std::string_view _loggerCat = "RenderableDUMeshes";
 
-    constexpr const std::array<const char*, 4> UniformNames = {
+    constexpr std::array<const char*, 4> UniformNames = {
         "modelViewTransform", "projectionTransform", "alphaValue", "color"
     };
 
-    constexpr const int RenderOptionViewDirection = 0;
-    constexpr const int RenderOptionPositionNormal = 1;
+    constexpr int RenderOptionViewDirection = 0;
+    constexpr int RenderOptionPositionNormal = 1;
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
@@ -258,7 +257,7 @@ bool RenderableDUMeshes::isReady() const {
 
 void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
+        "RenderableDUMeshes",
         []() {
             return global::renderEngine->buildRenderProgram(
                 "RenderableDUMeshes",
@@ -279,7 +278,7 @@ void RenderableDUMeshes::initializeGL() {
 
     if (_hasLabel) {
         if (!_font) {
-            constexpr const int FontSize = 50;
+            constexpr int FontSize = 50;
             _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(FontSize),
@@ -299,7 +298,7 @@ void RenderableDUMeshes::deinitializeGL() {
     }
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
+        "RenderableDUMeshes",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

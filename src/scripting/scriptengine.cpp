@@ -43,9 +43,9 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "ScriptEngine";
+    constexpr std::string_view _loggerCat = "ScriptEngine";
 
-    constexpr const int TableOffset = -3; // top-first argument-second argument
+    constexpr int TableOffset = -3; // top-first argument-second argument
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;
@@ -84,8 +84,8 @@ namespace {
 
     void toJson(const openspace::scripting::LuaLibrary& library, std::stringstream& json)
     {
-        constexpr const char* replStr = R"("{}": "{}", )";
-        constexpr const char* replStr2 = R"("{}": "{}")";
+        constexpr std::string_view replStr = R"("{}": "{}", )";
+        constexpr std::string_view replStr2 = R"("{}": "{}")";
 
         using namespace openspace;
         using namespace openspace::scripting;
@@ -199,7 +199,7 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     const int top = lua_gettop(state);
 
     lua_newtable(state);
-    lua_setglobal(state, OpenSpaceLibraryName);
+    lua_setglobal(state, OpenSpaceLibraryName.data());
 
     LDEBUG("Add OpenSpace modules");
     for (LuaLibrary& lib : _registeredLibraries) {
@@ -323,7 +323,7 @@ bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
 
 bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& name) {
     bool result = false;
-    lua_getglobal(state, OpenSpaceLibraryName);
+    lua_getglobal(state, OpenSpaceLibraryName.data());
     const bool hasOpenSpaceLibrary = lua_istable(state, -1);
     if (!hasOpenSpaceLibrary) {
         LFATAL("OpenSpace library was not created in initialize method");
@@ -482,7 +482,7 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
     ghoul_assert(state, "State must not be nullptr");
     const int top = lua_gettop(state);
 
-    lua_getglobal(state, OpenSpaceLibraryName);
+    lua_getglobal(state, OpenSpaceLibraryName.data());
     if (library.name.empty()) {
         addLibraryFunctions(state, library, Replace::Yes);
         lua_pop(state, 1);
@@ -677,14 +677,14 @@ void ScriptEngine::postSync(bool isMaster) {
     }
 }
 
-void ScriptEngine::queueScript(const std::string& script,
+void ScriptEngine::queueScript(std::string script,
                                ScriptEngine::RemoteScripting remoteScripting,
                                ScriptCallback callback)
 {
     ZoneScoped
 
     if (!script.empty()) {
-        _incomingScripts.push({ script, remoteScripting, callback });
+        _incomingScripts.push({ std::move(script), remoteScripting, callback });
     }
 }
 

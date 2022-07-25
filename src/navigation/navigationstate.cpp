@@ -29,9 +29,9 @@
 #include <openspace/query/query.h>
 
 namespace {
-    constexpr const char* _loggerCat = "NavigationState";
+    constexpr std::string_view _loggerCat = "NavigationState";
 
-    const double Epsilon = 1E-7;
+    constexpr double Epsilon = 1E-7;
 
     struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node

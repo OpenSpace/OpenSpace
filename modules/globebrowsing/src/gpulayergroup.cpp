@@ -116,7 +116,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
 }
 
 void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
-                         const LayerGroup& layerGroup, const std::string& nameBase,
+                         const LayerGroup& layerGroup, std::string_view nameBase,
                          int category)
 {
     const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
@@ -126,7 +126,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
         GPULayer& gal = _gpuActiveLayers[i];
         auto& galuc = gal.uniformCache;
         const Layer& al = *activeLayers[i];
-        std::string name = nameBase + "[" + std::to_string(i) + "].";
+        std::string name = fmt::format("{}[{}].", nameBase, i);
 
         if (category == layergroupid::GroupID::HeightLayers) {
             gal.isHeightLayer = true;

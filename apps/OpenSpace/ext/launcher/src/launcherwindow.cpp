@@ -46,40 +46,36 @@
 using namespace openspace;
 
 namespace {
-    constexpr const int ScreenWidth = 480;
-    constexpr const int ScreenHeight = 640;
+    constexpr int ScreenWidth = 480;
+    constexpr int ScreenHeight = 640;
 
-    constexpr const int LeftRuler = 40;
-    constexpr const int TopRuler = 80;
-    constexpr const int ItemWidth = 240;
-    constexpr const int ItemHeight = ItemWidth / 4;
-    constexpr const int SmallItemWidth = 100;
-    constexpr const int SmallItemHeight = SmallItemWidth / 4;
+    constexpr int LeftRuler = 40;
+    constexpr int TopRuler = 80;
+    constexpr int ItemWidth = 240;
+    constexpr int ItemHeight = ItemWidth / 4;
+    constexpr int SmallItemWidth = 100;
+    constexpr int SmallItemHeight = SmallItemWidth / 4;
 
     namespace geometry {
-        constexpr const QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
-        constexpr const QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
-        constexpr const QRect ChooseLabel(LeftRuler, TopRuler + 80, 151, 24);
-        constexpr const QRect ProfileBox(
-            LeftRuler, TopRuler + 110, ItemWidth, ItemHeight
-        );
-        constexpr const QRect NewProfileButton(
+        constexpr QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
+        constexpr QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
+        constexpr QRect ChooseLabel(LeftRuler, TopRuler + 80, 151, 24);
+        constexpr QRect ProfileBox(LeftRuler, TopRuler + 110, ItemWidth, ItemHeight);
+        constexpr QRect NewProfileButton(
             LeftRuler + 140, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr const QRect EditProfileButton(
+        constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr const QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
-        constexpr const QRect WindowConfigBox(
-            LeftRuler, TopRuler + 260, ItemWidth, ItemHeight
-        );
-        constexpr const QRect NewWindowButton(
+        constexpr QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
+        constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
+        constexpr QRect NewWindowButton(
             LeftRuler + 140, TopRuler + 330, SmallItemWidth, SmallItemHeight
         );
-        constexpr const QRect EditWindowButton(
+        constexpr QRect EditWindowButton(
             LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight
         );
-        constexpr const QRect StartButton(
+        constexpr QRect StartButton(
             LeftRuler, TopRuler + 400, ItemWidth, ItemHeight
         );
     } // geometry

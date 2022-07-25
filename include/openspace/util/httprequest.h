@@ -417,7 +417,7 @@ private:
     static std::mutex _directoryCreationMutex;
 
     /// The maximum number of file handles that all HttpFileDownloads combined can use up
-    static constexpr const int MaxFileHandles = 32;
+    static constexpr int MaxFileHandles = 32;
 
     /// Stores the number of currently open file handles across all HttpFileDownloads
     static std::atomic_int nCurrentFileHandles;

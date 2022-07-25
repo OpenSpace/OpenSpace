@@ -44,13 +44,13 @@
 // #define SHOW_IMGUI_HELPERS
 
 namespace {
-    constexpr const char* _loggerCat = "GUI";
-    constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
-    constexpr const float FontSize = 14.f;
+    constexpr std::string_view _loggerCat = "GUI";
+    constexpr std::string_view GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+    constexpr float FontSize = 14.f;
 
     ImFont* captionFont = nullptr;
 
-    constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
+    constexpr std::array<const char*, 2> UniformNames = { "tex", "ortho" };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",

@@ -42,9 +42,9 @@
 #include <optional>
 
 namespace {
-    constexpr const char* placeholderFile = "${DATA}/placeholder.png";
+    constexpr std::string_view placeholderFile = "${DATA}/placeholder.png";
 
-    constexpr const char* _loggerCat = "ProjectionComponent";
+    constexpr std::string_view _loggerCat = "ProjectionComponent";
 
     constexpr openspace::properties::Property::PropertyInfo ProjectionInfo = {
         "PerformProjection",

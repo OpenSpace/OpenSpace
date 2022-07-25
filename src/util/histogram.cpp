@@ -29,7 +29,7 @@
 #include <cmath>
 
 namespace {
-    constexpr const char* _loggerCat = "Histogram";
+    constexpr std::string_view _loggerCat = "Histogram";
 } // namespace
 
 namespace openspace {

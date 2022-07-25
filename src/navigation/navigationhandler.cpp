@@ -57,22 +57,22 @@ namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    constexpr const char* _loggerCat = "NavigationHandler";
+    constexpr std::string_view _loggerCat = "NavigationHandler";
 
     using namespace openspace;
-    constexpr const properties::Property::PropertyInfo KeyDisableMouseInputInfo = {
+    constexpr properties::Property::PropertyInfo KeyDisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable all mouse inputs",
         "Disables all mouse inputs and prevents them from affecting the camera"
     };
 
-    constexpr const properties::Property::PropertyInfo KeyDisableJoystickInputInfo = {
+    constexpr properties::Property::PropertyInfo KeyDisableJoystickInputInfo = {
         "DisableJoystickInputs",
         "Disable all joystick inputs",
         "Disables all joystick inputs and prevents them from affecting the camera"
     };
 
-    constexpr const properties::Property::PropertyInfo KeyFrameInfo = {
+    constexpr properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "

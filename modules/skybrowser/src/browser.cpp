@@ -34,7 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Browser";
+    constexpr std::string_view _loggerCat = "Browser";
 
     const openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",

@@ -46,7 +46,7 @@
 #include <thread>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableFieldlinesSequence";
+    constexpr std::string_view _loggerCat = "RenderableFieldlinesSequence";
 
     constexpr openspace::properties::Property::PropertyInfo ColorMethodInfo = {
         "ColorMethod",
@@ -764,9 +764,9 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
 // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
 void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
     // number of  characters in filename (excluding '.osfls')
-    constexpr const int FilenameSize = 23;
+    constexpr int FilenameSize = 23;
     // size(".osfls")
-    constexpr const int ExtSize = 6;
+    constexpr int ExtSize = 6;
 
     for (const std::string& filePath : _sourceFiles) {
         const size_t strLength = filePath.size();

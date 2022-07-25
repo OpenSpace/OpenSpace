@@ -57,4 +57,12 @@ std::string StringProperty::toStringConversion() const {
     return json.dump();
 }
 
+StringProperty::operator std::string_view() {
+    return _value;
+}
+
+StringProperty::operator std::string_view() const {
+    return _value;
+}
+
 } // namespace openspace::properties

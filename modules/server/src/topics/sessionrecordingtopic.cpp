@@ -30,11 +30,11 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "SessionRecordingTopic";
-    constexpr const char* EventKey = "event";
-    constexpr const char* SubscribeEvent = "start_subscription";
-    constexpr const char* UnsubscribeEvent = "stop_subscription";
-    constexpr const char* RefreshEvent = "refresh";
+    constexpr std::string_view _loggerCat = "SessionRecordingTopic";
+    
+    constexpr std::string_view SubscribeEvent = "start_subscription";
+    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
+    constexpr std::string_view RefreshEvent = "refresh";
 
     constexpr const char* PropertiesKey = "properties";
     constexpr const char* FilesKey = "files";
@@ -60,7 +60,7 @@ bool SessionRecordingTopic::isDone() const {
 }
 
 void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
-    const std::string event = json.at(EventKey).get<std::string>();
+    const std::string event = json.at("event").get<std::string>();
     if (event != SubscribeEvent && event != UnsubscribeEvent &&
         event != RefreshEvent)
     {

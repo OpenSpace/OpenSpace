@@ -38,7 +38,7 @@
 namespace openspace {
 
 namespace {
-    constexpr const char* _loggerCat = "Asset";
+    constexpr std::string_view _loggerCat = "Asset";
 } // namespace
 
 Asset::Asset(AssetManager& manager, std::filesystem::path assetPath)

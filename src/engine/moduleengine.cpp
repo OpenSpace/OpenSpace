@@ -36,7 +36,7 @@
 #include "moduleengine_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "ModuleEngine";
+    constexpr std::string_view _loggerCat = "ModuleEngine";
 
     constexpr openspace::properties::Property::PropertyInfo AllModulesInfo = {
         "AllModules",

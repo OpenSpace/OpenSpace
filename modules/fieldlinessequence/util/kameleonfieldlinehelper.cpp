@@ -50,12 +50,12 @@
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 namespace {
-    constexpr const char* _loggerCat = "FieldlinesSequence[ Kameleon ]";
+    constexpr std::string_view _loggerCat = "FieldlinesSequence[ Kameleon ]";
 
-    constexpr const char* TAsPOverRho = "T = p/rho";
-    constexpr const char* JParallelB  = "Current: mag(J||B)";
+    constexpr std::string_view TAsPOverRho = "T = p/rho";
+    constexpr std::string_view JParallelB  = "Current: mag(J||B)";
     // [nPa]/[amu/cm^3] * ToKelvin => Temperature in Kelvin
-    constexpr const float ToKelvin = 72429735.6984f;
+    constexpr float ToKelvin = 72429735.6984f;
 } // namespace
 
 namespace openspace::fls {
@@ -318,8 +318,8 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                 "BATSRUS doesn't contain variable T for temperature. Trying to calculate "
                 "it using the ideal gas law: T = pressure/density"
             );
-            constexpr const char* p = "p";
-            constexpr const char* r = "rho";
+            constexpr const char p[] = "p";
+            constexpr const char r[] = "rho";
             success = kameleon->doesVariableExist(p) && kameleon->loadVariable(p) &&
                       kameleon->doesVariableExist(r) && kameleon->loadVariable(r);
             str = TAsPOverRho;

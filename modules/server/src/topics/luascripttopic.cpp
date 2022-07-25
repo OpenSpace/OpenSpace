@@ -33,11 +33,11 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr const char* KeyScript = "script";
-    constexpr const char* KeyFunction = "function";
-    constexpr const char* KeyArguments = "arguments";
-    constexpr const char* KeyReturn = "return";
-    constexpr const char* _loggerCat = "LuaScriptTopic";
+    constexpr std::string_view KeyScript = "script";
+    constexpr std::string_view KeyFunction = "function";
+    constexpr std::string_view KeyArguments = "arguments";
+    constexpr std::string_view KeyReturn = "return";
+    constexpr std::string_view _loggerCat = "LuaScriptTopic";
 
     std::string formatLua(const nlohmann::json::const_iterator& it);
 

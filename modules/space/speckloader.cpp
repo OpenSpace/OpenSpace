@@ -36,9 +36,9 @@
 #include <string_view>
 
 namespace {
-    constexpr const int8_t DataCacheFileVersion = 10;
-    constexpr const int8_t LabelCacheFileVersion = 10;
-    constexpr const int8_t ColorCacheFileVersion = 10;
+    constexpr int8_t DataCacheFileVersion = 10;
+    constexpr int8_t LabelCacheFileVersion = 10;
+    constexpr int8_t ColorCacheFileVersion = 10;
 
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {
         for (size_t i = 0; i < lhs.size(); i++) {

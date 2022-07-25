@@ -45,14 +45,12 @@
 #include <vector>
 
 namespace {
-    constexpr const char* ProgramName = "OrbitalKepler";
-
-    constexpr const std::array<int, 36> LeapYears = {
+    constexpr std::array<int, 36> LeapYears = {
         1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
         2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
         2044, 2048, 2052, 2056
     };
-    constexpr const std::array<int, 12> DaysOfMonths = {
+    constexpr std::array<int, 12> DaysOfMonths = {
         31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     };
 
@@ -66,10 +64,10 @@ namespace {
         }
     };
 
-    constexpr const LeapSecond LeapEpoch = { 2000, 1 };
+    constexpr LeapSecond LeapEpoch = { 2000, 1 };
 
     // List taken from: https://www.ietf.org/timezones/data/leap-seconds.list
-    constexpr const std::array<LeapSecond, 28> LeapSeconds = {
+    constexpr std::array<LeapSecond, 28> LeapSeconds = {
         LeapSecond{ 1972,   1 },
         LeapSecond{ 1972, 183 },
         LeapSecond{ 1973,   1 },
@@ -106,9 +104,9 @@ namespace {
         // Find the position of the current year in the vector, the difference
         // between its position and the position of 2000 (for J2000) gives the
         // number of leap years
-        constexpr const int Epoch = 2000;
-        constexpr const int DaysRegularYear = 365;
-        constexpr const int DaysLeapYear = 366;
+        constexpr int Epoch = 2000;
+        constexpr int DaysRegularYear = 365;
+        constexpr int DaysLeapYear = 366;
 
         if (year == Epoch) {
             return 0;
@@ -242,9 +240,9 @@ documentation::Documentation RenderableOrbitalKepler::Documentation() {
 }
 
 double RenderableOrbitalKepler::calculateSemiMajorAxis(double meanMotion) const {
-    constexpr const double GravitationalConstant = 6.6740831e-11;
-    constexpr const double MassEarth = 5.9721986e24;
-    constexpr const double muEarth = GravitationalConstant * MassEarth;
+    constexpr double GravitationalConstant = 6.6740831e-11;
+    constexpr double MassEarth = 5.9721986e24;
+    constexpr double muEarth = GravitationalConstant * MassEarth;
 
     // Use Kepler's 3rd law to calculate semimajor axis
     // a^3 / P^2 = mu / (2pi)^2
@@ -255,7 +253,7 @@ double RenderableOrbitalKepler::calculateSemiMajorAxis(double meanMotion) const 
     const double period =
         std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
 
-    constexpr const double pisq = glm::pi<double>() * glm::pi<double>();
+    constexpr double pisq = glm::pi<double>() * glm::pi<double>();
     const double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
 
     // We need the semi major axis in km instead of m
@@ -398,10 +396,10 @@ void RenderableOrbitalKepler::initializeGL() {
     glGenBuffers(1, &_vertexBuffer);
 
     _programObject = SpaceModule::ProgramObjectManager.request(
-       ProgramName,
+        "OrbitalKepler",
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine->buildRenderProgram(
-               ProgramName,
+               "OrbitalKepler",
                absPath("${MODULE_SPACE}/shaders/debrisViz_vs.glsl"),
                absPath("${MODULE_SPACE}/shaders/debrisViz_fs.glsl")
            );
@@ -431,7 +429,7 @@ void RenderableOrbitalKepler::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArray);
 
     SpaceModule::ProgramObjectManager.release(
-        ProgramName,
+        "OrbitalKepler",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

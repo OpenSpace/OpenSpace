@@ -159,7 +159,7 @@ bool HongKangParser::create() {
     file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
     file.open(absPath(_fileName));
 
-    constexpr const double Exposure = 0.01;
+    constexpr double Exposure = 0.01;
 
     std::string previousTarget;
     std::string previousCamera;

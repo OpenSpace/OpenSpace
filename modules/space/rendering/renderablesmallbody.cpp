@@ -47,7 +47,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "SmallSolarSystemBody";
+    constexpr std::string_view _loggerCat = "SmallSolarSystemBody";
 
     static const openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",

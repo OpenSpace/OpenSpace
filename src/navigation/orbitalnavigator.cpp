@@ -41,12 +41,12 @@
 #include <cmath>
 
 namespace {
-    constexpr const char* _loggerCat = "OrbitalNavigator";
+    constexpr std::string_view _loggerCat = "OrbitalNavigator";
 
-    constexpr const double AngleEpsilon = 1E-7;
-    constexpr const double DistanceRatioAimThreshold = 1E-4;
+    constexpr double AngleEpsilon = 1E-7;
+    constexpr double DistanceRatioAimThreshold = 1E-4;
 
-    constexpr const openspace::properties::Property::PropertyInfo AnchorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
         "Anchor",
         "The name of the scene graph node that is the origin of the camera interaction. "
@@ -54,7 +54,7 @@ namespace {
         "Any scene graph node can be the anchor node."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo AimInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AimInfo = {
         "Aim",
         "Aim",
         "The name of the scene graph node that is the aim of the camera. "
@@ -62,18 +62,14 @@ namespace {
         "to this node."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-        RetargetAnchorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo RetargetAnchorInfo = {
         "RetargetAnchor",
         "Retarget Anchor",
         "When triggered, this property starts an interpolation to reset the "
         "camera direction to the anchor node."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-        RetargetAimInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo RetargetAimInfo = {
         "RetargetAim",
         "Retarget Aim",
         "When triggered, this property starts an interpolation to reset the "
@@ -88,8 +84,7 @@ namespace {
         "is disabled, the camera will roll forever."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationalFrictionInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo RotationalFrictionInfo = {
         "RotationalFriction",
         "Rotational Friction",
         "If this is enabled, a small friction is applied to the rotational part of the "
@@ -143,8 +138,8 @@ namespace {
         "through another property."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        FollowAnchorNodeDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FollowAnchorNodeDistanceInfo =
+    {
         "FollowAnchorNodeRotationDistance",
         "Follow Anchor Node Rotation Distance",
         "A factor used to determine the distance at which the camera starts rotating "
@@ -159,8 +154,7 @@ namespace {
         "meters above the surface."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        StereoInterpolationTimeInfo =
+    constexpr openspace::properties::Property::PropertyInfo StereoInterpolationTimeInfo =
     {
         "StereoInterpolationTime",
         "Stereo Interpolation Time",
@@ -177,8 +171,7 @@ namespace {
         "when the anchor or aim node is changed, in seconds."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        FollowRotationInterpTimeInfo =
+    constexpr openspace::properties::Property::PropertyInfo FollowRotationInterpTimeInfo =
     {
         "FollowRotationInterpolationTime",
         "Follow Rotation Interpolation Time",
@@ -204,8 +197,7 @@ namespace {
         "If disabled, view scale will be set to 10^StaticViewScaleExponent."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        StaticViewScaleExponentInfo =
+    constexpr openspace::properties::Property::PropertyInfo StaticViewScaleExponentInfo =
     {
         "StaticViewScaleExponent",
         "Static View Scale Exponent",
@@ -260,8 +252,7 @@ namespace {
         "idle behavior."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        AbortOnCameraInteractionInfo =
+    constexpr openspace::properties::Property::PropertyInfo AbortOnCameraInteractionInfo =
     {
         "AbortOnCameraInteraction",
         "Abort on Camera Interaction",
@@ -280,9 +271,9 @@ namespace {
         "or canceled, in seconds."
     };
 
-    constexpr const char IdleKeyOrbit[] = "Orbit";
-    constexpr const char IdleKeyOrbitAtConstantLat[] = "OrbitAtConstantLatitude";
-    constexpr const char IdleKeyOrbitAroundUp[] = "OrbitAroundUp";
+    constexpr std::string_view IdleKeyOrbit = "Orbit";
+    constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
+    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
 
 } // namespace
 
@@ -313,9 +304,18 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 {
     addProperty(apply);
     defaultBehavior.addOptions({
-        { static_cast<int>(Behavior::Orbit), IdleKeyOrbit },
-        { static_cast<int>(Behavior::OrbitAtConstantLat), IdleKeyOrbitAtConstantLat },
-        { static_cast<int>(Behavior::OrbitAroundUp), IdleKeyOrbitAroundUp }
+        {
+            static_cast<int>(Behavior::Orbit),
+            std::string(IdleKeyOrbit)
+        },
+        {
+            static_cast<int>(Behavior::OrbitAtConstantLat),
+            std::string(IdleKeyOrbitAtConstantLat)
+        },
+        {
+            static_cast<int>(Behavior::OrbitAroundUp),
+            std::string(IdleKeyOrbitAroundUp)
+        }
     });
     defaultBehavior = static_cast<int>(IdleBehavior::Behavior::Orbit);
     addProperty(defaultBehavior);

@@ -28,8 +28,8 @@ constexpr const char RenderedPathIdentifier[] = "CurrentCameraPath";
 constexpr const char RenderedPointsIdentifier[] = "CurrentPathControlPoints";
 constexpr const char DebuggingGuiPath[] = "/Debugging";
 
-constexpr const glm::vec3 PathColor = { 1.0, 1.0, 0.0 };
-constexpr const glm::vec3 OrientationLineColor = { 0.0, 1.0, 1.0 };
+constexpr glm::vec3 PathColor = { 1.0, 1.0, 0.0 };
+constexpr glm::vec3 OrientationLineColor = { 0.0, 1.0, 1.0 };
 
 // Conver the input string to a format that is valid as an identifier
 std::string makeIdentifier(std::string s) {

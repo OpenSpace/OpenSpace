@@ -63,7 +63,7 @@ public:
      * After this method has been called, users may invoke setValue.
      */
     void bind(ghoul::opengl::ProgramObject& programObject,
-        const LayerGroup& layerGroup, const std::string& nameBase, int category);
+        const LayerGroup& layerGroup, std::string_view nameBase, int category);
 
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.

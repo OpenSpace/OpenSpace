@@ -42,32 +42,32 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* HistoryFile = "ConsoleHistory";
+    constexpr std::string_view HistoryFile = "ConsoleHistory";
 
-    constexpr const int NoAutoComplete = -1;
+    constexpr int NoAutoComplete = -1;
 
-    constexpr const int MaximumHistoryLength = 1000;
+    constexpr int MaximumHistoryLength = 1000;
 
     // A high number is chosen since we didn't have a version number before
     // any small number might also be equal to the console history length
 
-    constexpr const uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
+    constexpr uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
-    constexpr const openspace::Key CommandInputButton = openspace::Key::GraveAccent;
+    constexpr openspace::Key CommandInputButton = openspace::Key::GraveAccent;
 
-    constexpr const char* FontName = "Console";
-    constexpr const float EntryFontSize = 14.0f;
-    constexpr const float HistoryFontSize = 11.0f;
+    constexpr std::string_view FontName = "Console";
+    constexpr float EntryFontSize = 14.0f;
+    constexpr float HistoryFontSize = 11.0f;
 
     // Additional space between the entry text and the history (in pixels)
-    constexpr const float SeparatorSpace = 30.f;
+    constexpr float SeparatorSpace = 30.f;
 
     // Determines at which speed the console opens.
-    constexpr const float ConsoleOpenSpeed = 2.5;
+    constexpr float ConsoleOpenSpeed = 2.5;
 
     // The number of characters to display after the cursor
     // when horizontal scrolling is required.
-    constexpr const int NVisibleCharsAfterCursor = 5;
+    constexpr int NVisibleCharsAfterCursor = 5;
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "IsVisible",

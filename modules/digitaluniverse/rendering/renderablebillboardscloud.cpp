@@ -31,7 +31,6 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -55,11 +54,9 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableBillboardsCloud";
-    constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
-    constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
+    constexpr std::string_view _loggerCat = "RenderableBillboardsCloud";
 
-    constexpr const std::array<const char*, 21> UniformNames = {
+    constexpr std::array<const char*, 21> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
@@ -594,10 +591,10 @@ void RenderableBillboardsCloud::initializeGL() {
     ZoneScoped
 
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
+        "RenderableBillboardsCloud",
         []() {
             return global::renderEngine->buildRenderProgram(
-                ProgramObjectName,
+                "RenderableBillboardsCloud",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
@@ -606,10 +603,10 @@ void RenderableBillboardsCloud::initializeGL() {
     );
 
     _renderToPolygonProgram = DigitalUniverseModule::ProgramObjectManager.request(
-        RenderToPolygonProgram,
+        "RenderableBillboardsCloud_Polygon",
         []() {
             return ghoul::opengl::ProgramObject::Build(
-                RenderToPolygonProgram,
+                "RenderableBillboardsCloud_Polygon",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
@@ -643,14 +640,16 @@ void RenderableBillboardsCloud::deinitializeGL() {
     _vao = 0;
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
+        "RenderableBillboardsCloud",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
     _program = nullptr;
 
-    DigitalUniverseModule::ProgramObjectManager.release(RenderToPolygonProgram);
+    DigitalUniverseModule::ProgramObjectManager.release(
+        "RenderableBillboardsCloud_Polygon"
+    );
     _renderToPolygonProgram = nullptr;
 
     DigitalUniverseModule::TextureManager.release(_spriteTexture);
@@ -1200,7 +1199,7 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
     glBindVertexArray(_polygonVao);
     glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
 
-    constexpr const std::array<GLfloat, 4> VertexData = {
+    constexpr std::array<GLfloat, 4> VertexData = {
         //      x      y     z     w
         0.f, 0.f, 0.f, 1.f,
     };
@@ -1221,7 +1220,7 @@ void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
         );
 
     program->activate();
-    constexpr const glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _polygonSides);

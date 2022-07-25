@@ -32,7 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ParallelConnection";
+    constexpr std::string_view _loggerCat = "ParallelConnection";
 } // namespace
 
 namespace openspace {

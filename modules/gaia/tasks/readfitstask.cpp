@@ -38,9 +38,9 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyFilterColumnNames = "FilterColumnNames";
+    constexpr std::string_view KeyFilterColumnNames = "FilterColumnNames";
 
-    constexpr const char* _loggerCat = "ReadFitsTask";
+    constexpr std::string_view _loggerCat = "ReadFitsTask";
 
     struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
         // If SingleFileProcess is set to true then this specifies the path to a single

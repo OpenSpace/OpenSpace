@@ -21,48 +21,37 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <modules/space/tasks/generatedebrisvolumetask.h>
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <openspace/util/spicemanager.h>
-
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/misc/dictionaryluaformatter.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
-//#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
-
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <fstream>
 #include <queue>
 
-
-
 namespace {
-    constexpr const char* ProgramName = "RenderableSatellites";
-    constexpr const char* _loggerCat = "SpaceDebris";
+    constexpr std::string_view ProgramName = "RenderableSatellites";
+    constexpr std::string_view _loggerCat = "SpaceDebris";
 
-    constexpr const char* KeyRawVolumeOutput = "RawVolumeOutput";
-    constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyStartTime = "StartTime";
-    constexpr const char* KeyTimeStep = "TimeStep";
-    constexpr const char* KeyEndTime = "EndTime";
-    constexpr const char* KeyInputPath = "InputPath";
-    constexpr const char* KeyGridType = "GridType";
+    constexpr std::string_view KeyRawVolumeOutput = "RawVolumeOutput";
+    constexpr std::string_view KeyDictionaryOutput = "DictionaryOutput";
+    constexpr std::string_view KeyDimensions = "Dimensions";
+    constexpr std::string_view KeyStartTime = "StartTime";
+    constexpr std::string_view KeyTimeStep = "TimeStep";
+    constexpr std::string_view KeyEndTime = "EndTime";
+    constexpr std::string_view KeyInputPath = "InputPath";
+    constexpr std::string_view KeyGridType = "GridType";
 
-    // constexpr const char* KeyInputPath1 = "InputPath1";
-    // constexpr const char* KeyInputPath2 = "InputPath2";
-    // constexpr const char* KeyInputPath3 = "InputPath3";
-    // constexpr const char* KeyInputPath4 = "InputPath4";
-
-     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+     constexpr std::string_view KeyLowerDomainBound = "LowerDomainBound";
+     constexpr std::string_view KeyUpperDomainBound = "UpperDomainBound";
 } // namespace
 
 namespace openspace {
@@ -80,9 +69,9 @@ int countDays(int year) {
     // Find the position of the current year in the vector, the difference
     // between its position and the position of 2000 (for J2000) gives the
     // number of leap years
-    constexpr const int Epoch = 2000;
-    constexpr const int DaysRegularYear = 365;
-    constexpr const int DaysLeapYear = 366;
+    constexpr int Epoch = 2000;
+    constexpr int DaysRegularYear = 365;
+    constexpr int DaysLeapYear = 366;
 
     if (year == Epoch) {
         return 0;
@@ -169,9 +158,9 @@ int countLeapSeconds(int year, int dayOfYear) {
 }
 
 double calculateSemiMajorAxis(double meanMotion) {
-    constexpr const double GravitationalConstant = 6.6740831e-11;
-    constexpr const double MassEarth = 5.9721986e24;
-    constexpr const double muEarth = GravitationalConstant * MassEarth;
+    constexpr double GravitationalConstant = 6.6740831e-11;
+    constexpr double MassEarth = 5.9721986e24;
+    constexpr double muEarth = GravitationalConstant * MassEarth;
 
     // Use Kepler's 3rd law to calculate semimajor axis
     // a^3 / P^2 = mu / (2pi)^2

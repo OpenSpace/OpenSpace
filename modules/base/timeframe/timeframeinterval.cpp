@@ -31,25 +31,25 @@
 #include <optional>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo HasStartInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HasStartInfo = {
         "HasStart",
         "Has Start",
         "If enabled, this TimeFrame will be inactive before the Start"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo StartInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StartInfo = {
         "Start",
         "Start",
         "Specifies the time when this TimeFrame becomes active"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo HasEndInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HasEndInfo = {
         "HasEnd",
         "Has End",
         "If enabled, this TimeFrame will be inactive after the End"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo EndInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EndInfo = {
         "End",
         "End",
         "Specifies the time when this TimeFrame becomes inactive"

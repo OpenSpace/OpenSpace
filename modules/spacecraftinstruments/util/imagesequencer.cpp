@@ -30,7 +30,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ImageSequencer";
+    constexpr std::string_view _loggerCat = "ImageSequencer";
 } // namespace
 
 namespace openspace {

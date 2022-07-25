@@ -48,10 +48,10 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "GlobeLabels";
+    constexpr std::string_view _loggerCat = "GlobeLabels";
 
-    constexpr const double LabelFadeOutLimitAltitudeMeters = 25000.0;
-    constexpr const float MinOpacityValueConst = 0.009f;
+    constexpr double LabelFadeOutLimitAltitudeMeters = 25000.0;
+    constexpr float MinOpacityValueConst = 0.009f;
 
     enum LabelRenderingAlignmentType {
         Horizontally = 0,
@@ -677,8 +677,7 @@ bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
     farNormal *= invMagFar;
     // farDistance *= invMagFar;
 
-    constexpr const float Radius = 1.0;
-
+    constexpr float Radius = 1.0;
     if ((glm::dot(leftNormal, position) + leftDistance) < -Radius) {
         return false;
     }

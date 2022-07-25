@@ -34,9 +34,9 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ConvertRecFileVersionTask";
+    constexpr std::string_view _loggerCat = "ConvertRecFileVersionTask";
 
-    constexpr const char* KeyInFilePath = "InputFilePath";
+    constexpr std::string_view KeyInFilePath = "InputFilePath";
 } // namespace
 
 namespace openspace::interaction {
@@ -111,7 +111,7 @@ documentation::Documentation ConvertRecFileVersionTask::documentation() {
         "convert_file_version_task",
         {
             {
-                KeyInFilePath,
+                "InputFilePath",
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,
                 "The filename to update to the current file format.",

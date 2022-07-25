@@ -38,9 +38,9 @@
 #include <random>
 
 namespace {
-    constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
+    constexpr std::string_view _loggerCat = "ScreenSpaceSkyBrowser";
 
-    constexpr const openspace::properties::Property::PropertyInfo TextureQualityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureQualityInfo = {
         "TextureQuality",
         "Quality of Texture",
         "A parameter to set the resolution of the texture. 1 is full resolution and "
@@ -48,7 +48,7 @@ namespace {
         "frame rate."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
         "DisplayCopy",
         "Display Copy Position",
         "Display a copy of this sky browser at an additional position. This copy will not "
@@ -56,13 +56,13 @@ namespace {
         "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
         "ShowDisplayCopy",
         "Show Display Copy",
         "Show the display copy."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo IsHiddenInfo = {
+    constexpr openspace::properties::Property::PropertyInfo IsHiddenInfo = {
         "IsHidden",
         "Is Hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
