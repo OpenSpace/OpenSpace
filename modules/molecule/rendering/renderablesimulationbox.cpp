@@ -597,20 +597,22 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         drawOps.data(),
     };
 
-    gl::glDisable(gl::GL_DEPTH_TEST);
-    {
+    { // draw billboard
         mat4 billboardModel = 
             camCopy.combinedViewMatrix() *
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             scale(I, dvec3(_simulationBox)) *
-            scale(I, dvec3(5.0)) *
+            scale(I, dvec3(3.0)) *
             I;
         mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
-        billboardDraw(projMatrix * billboardModel * faceCamera);
+        mat4 transform = projMatrix * billboardModel * faceCamera;
+
+        billboardDraw(transform, 0.01f, 1.f); // write depth=1 (clear depth buffer) in billboard
+        md_gl_draw(&args);                    // draw molecule
+        billboardDraw(transform, 0.01f, 0.f); // write depth=0 (lock depth buffer) in billboard
     }
-    md_gl_draw(&args);
-    gl::glEnable(gl::GL_DEPTH_TEST);
+
 }
 
 void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::string& file) {

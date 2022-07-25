@@ -14,7 +14,7 @@ out vec2 pos;
 void main() {
   gl_Position = uTransform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
   gl_Position /= gl_Position.w;
-  gl_Position.z = 0.0;
+  gl_Position.z = 0.0; // always visible
   pos = aPos.xy;
 }
 )";
@@ -23,14 +23,18 @@ constexpr const char* fragShader = R"(
 #version 330 core
 out vec4 color;
 in vec2 pos;
+uniform float uStrokeWidth;
+uniform float uFragDepth;
 
 void main() {
   float len = length(pos) * 2.0;
 
+  gl_FragDepth = uFragDepth;
   color = vec4(1.0);
-  
-  if (len < 0.99)
-    color.a = 0.0;
+
+  if (len < 1.0 - uStrokeWidth)
+    // color.a = 0.0;
+    color = vec4(0.0);
   
   else if (len > 1)
     discard;
@@ -88,10 +92,12 @@ void billboardGlDeinit() {
   }
 }
 
-void billboardDraw(glm::mat4 const& transform) {
+void billboardDraw(glm::mat4 const& transform, float width, float depth) {
   glUseProgram(prog);
   glBindVertexArray(vao);
-  glUniformMatrix4fv(0, 1, false, glm::value_ptr(transform));
+  glUniformMatrix4fv(glGetUniformLocation(prog, "uTransform"), 1, false, glm::value_ptr(transform));
+  glUniform1f(glGetUniformLocation(prog, "uStrokeWidth"), width);
+  glUniform1f(glGetUniformLocation(prog, "uFragDepth"), depth);
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glBindVertexArray(0);
   glUseProgram(0);

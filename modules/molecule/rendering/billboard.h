@@ -5,4 +5,4 @@
 void billboardGlInit();
 void billboardGlDeinit();
 
-void billboardDraw(glm::mat4 const& mat);
+void billboardDraw(glm::mat4 const& mat, float width, float depth);
