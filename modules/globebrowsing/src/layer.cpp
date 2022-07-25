@@ -36,13 +36,13 @@
 namespace openspace::globebrowsing {
 
 namespace {
-    constexpr const char* _loggerCat = "Layer";
+    constexpr std::string_view _loggerCat = "Layer";
 
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeyName = "Name";
-    constexpr const char* KeyDesc = "Description";
-    constexpr const char* KeyLayerGroupID = "LayerGroupID";
-    constexpr const char* KeyAdjustment = "Adjustment";
+    constexpr std::string_view KeyIdentifier = "Identifier";
+    constexpr std::string_view KeyName = "Name";
+    constexpr std::string_view KeyDesc = "Description";
+    constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
+    constexpr std::string_view KeyAdjustment = "Adjustment";
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -244,13 +244,13 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     // Add options to option properties
     for (int i = 0; i < layergroupid::NUM_LAYER_TYPES; ++i) {
-        _typeOption.addOption(i, layergroupid::LAYER_TYPE_NAMES[i]);
+        _typeOption.addOption(i, std::string(layergroupid::LAYER_TYPE_NAMES[i]));
     }
     _typeOption.setValue(static_cast<int>(typeID));
     _type = static_cast<layergroupid::TypeID>(_typeOption.value());
 
     for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
-        _blendModeOption.addOption(i, layergroupid::BLEND_MODE_NAMES[i]);
+        _blendModeOption.addOption(i, std::string(layergroupid::BLEND_MODE_NAMES[i]));
     }
 
     // Initialize blend mode
@@ -480,7 +480,10 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
         case layergroupid::TypeID::ByLevelTileLayer: {
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
-            initDict.setValue(KeyLayerGroupID, static_cast<int>(_layerGroupId));
+            initDict.setValue(
+                std::string(KeyLayerGroupID),
+                static_cast<int>(_layerGroupId)
+            );
             if (initDict.hasKey(KeyName) && initDict.hasValue<std::string>(KeyName)) {
                 std::string name = initDict.value<std::string>(KeyName);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");

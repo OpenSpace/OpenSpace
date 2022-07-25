@@ -41,7 +41,7 @@
 #include <cmath>
 
 namespace {
-    constexpr const char* _loggerCat = "OrbitalNavigator";
+    constexpr std::string_view _loggerCat = "OrbitalNavigator";
 
     constexpr double AngleEpsilon = 1E-7;
     constexpr double DistanceRatioAimThreshold = 1E-4;
@@ -271,9 +271,9 @@ namespace {
         "or canceled, in seconds."
     };
 
-    constexpr const char IdleKeyOrbit[] = "Orbit";
-    constexpr const char IdleKeyOrbitAtConstantLat[] = "OrbitAtConstantLatitude";
-    constexpr const char IdleKeyOrbitAroundUp[] = "OrbitAroundUp";
+    constexpr std::string_view IdleKeyOrbit = "Orbit";
+    constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
+    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
 
 } // namespace
 
@@ -304,9 +304,18 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 {
     addProperty(apply);
     defaultBehavior.addOptions({
-        { static_cast<int>(Behavior::Orbit), IdleKeyOrbit },
-        { static_cast<int>(Behavior::OrbitAtConstantLat), IdleKeyOrbitAtConstantLat },
-        { static_cast<int>(Behavior::OrbitAroundUp), IdleKeyOrbitAroundUp }
+        {
+            static_cast<int>(Behavior::Orbit),
+            std::string(IdleKeyOrbit)
+        },
+        {
+            static_cast<int>(Behavior::OrbitAtConstantLat),
+            std::string(IdleKeyOrbitAtConstantLat)
+        },
+        {
+            static_cast<int>(Behavior::OrbitAroundUp),
+            std::string(IdleKeyOrbitAroundUp)
+        }
     });
     defaultBehavior = static_cast<int>(IdleBehavior::Behavior::Orbit);
     addProperty(defaultBehavior);

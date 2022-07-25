@@ -37,7 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char _loggerCat[] = "SkyBrowserModule";
+    constexpr std::string_view _loggerCat = "SkyBrowserModule";
 
 /**
  * Takes an index to an image and selects that image in the currently

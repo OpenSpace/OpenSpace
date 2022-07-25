@@ -35,12 +35,12 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr const char* KeyInFilenamePrefix = "InFilenamePrefix";
-    constexpr const char* KeyInFilenameSuffix = "InFilenameSuffix";
-    constexpr const char* KeyInFirstIndex = "InFirstIndex";
-    constexpr const char* KeyInNSlices = "InNSlices";
-    constexpr const char* KeyOutFilename = "OutFilename";
-    constexpr const char* KeyOutDimensions = "OutDimensions";
+    constexpr std::string_view KeyInFilenamePrefix = "InFilenamePrefix";
+    constexpr std::string_view KeyInFilenameSuffix = "InFilenameSuffix";
+    constexpr std::string_view KeyInFirstIndex = "InFirstIndex";
+    constexpr std::string_view KeyInNSlices = "InNSlices";
+    constexpr std::string_view KeyOutFilename = "OutFilename";
+    constexpr std::string_view KeyOutDimensions = "OutDimensions";
 } // namespace
 
 namespace openspace {

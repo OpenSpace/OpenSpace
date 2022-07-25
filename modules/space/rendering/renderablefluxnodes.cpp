@@ -46,7 +46,7 @@
 #include <thread>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableFluxNodes";
+    constexpr std::string_view _loggerCat = "RenderableFluxNodes";
 
     constexpr std::array<const char*, 29> UniformNames = {
         "streamColor", "nodeSize", "proximityNodesSize",

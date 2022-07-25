@@ -48,7 +48,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
+    constexpr std::string_view _loggerCat = "RenderableTimeVaryingVolume";
 
     const float SecondsInOneDay = 60 * 60 * 24;
 

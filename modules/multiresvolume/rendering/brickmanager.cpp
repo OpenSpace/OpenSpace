@@ -31,7 +31,7 @@
 #include <glm/gtx/std_based_type.hpp>
 
 namespace {
-    constexpr const char* _loggerCat = "BrickManager";
+    constexpr std::string_view _loggerCat = "BrickManager";
 } // namespace
 
 namespace openspace {

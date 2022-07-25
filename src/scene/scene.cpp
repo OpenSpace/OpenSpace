@@ -57,9 +57,9 @@
 #include "scene_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "Scene";
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeyParent = "Parent";
+    constexpr std::string_view _loggerCat = "Scene";
+    constexpr std::string_view KeyIdentifier = "Identifier";
+    constexpr std::string_view KeyParent = "Parent";
 
 #ifdef TRACY_ENABLE
     constexpr const char* renderBinToString(int renderBin) {

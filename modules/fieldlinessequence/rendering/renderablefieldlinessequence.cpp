@@ -46,7 +46,7 @@
 #include <thread>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableFieldlinesSequence";
+    constexpr std::string_view _loggerCat = "RenderableFieldlinesSequence";
 
     constexpr openspace::properties::Property::PropertyInfo ColorMethodInfo = {
         "ColorMethod",

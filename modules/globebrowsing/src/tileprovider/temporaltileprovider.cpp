@@ -44,7 +44,7 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* TimePlaceholder = "${OpenSpaceTimeId}";
+    constexpr std::string_view TimePlaceholder = "${OpenSpaceTimeId}";
 
     constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",

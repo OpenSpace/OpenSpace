@@ -36,7 +36,7 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "TransferFunction";
+    constexpr std::string_view _loggerCat = "TransferFunction";
 } // namespace
 
 namespace openspace {

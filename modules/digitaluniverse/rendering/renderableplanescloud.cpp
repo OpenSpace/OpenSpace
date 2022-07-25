@@ -47,8 +47,7 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderablePlanesCloud";
-    constexpr const char* ProgramObjectName = "RenderablePlanesCloud";
+    constexpr std::string_view _loggerCat = "RenderablePlanesCloud";
 
     constexpr int PlanesVertexDataSize = 36;
 
@@ -389,7 +388,7 @@ void RenderablePlanesCloud::initializeGL() {
     ZoneScoped
 
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
+        "RenderablePlanesCloud",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "RenderablePlanesCloud",
@@ -430,7 +429,7 @@ void RenderablePlanesCloud::deinitializeGL() {
     deleteDataGPUAndCPU();
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
+        "RenderablePlanesCloud",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

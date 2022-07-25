@@ -47,7 +47,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderablePoints";
+    constexpr std::string_view _loggerCat = "RenderablePoints";
 
     constexpr std::array<const char*, 7> UniformNames = {
         "modelViewProjectionTransform", "color", "sides", "alphaValue", "scaleFactor",

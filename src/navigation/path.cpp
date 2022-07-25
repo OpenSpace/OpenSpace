@@ -43,10 +43,10 @@
 #include <glm/ext/quaternion_relational.hpp>
 
 namespace {
-    constexpr const char _loggerCat[] = "Path";
+    constexpr std::string_view _loggerCat = "Path";
     constexpr float LengthEpsilon = 1e-5f;
 
-    constexpr const char SunIdentifier[] = "Sun";
+    constexpr const char* SunIdentifier = "Sun";
 
     // TODO: where should this documentation be?
     // It's nice to have these to interpret the dictionary when creating the path, but

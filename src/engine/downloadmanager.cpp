@@ -36,7 +36,7 @@
 #include <thread>
 
 namespace {
-    constexpr const char* _loggerCat = "DownloadManager";
+    constexpr std::string_view _loggerCat = "DownloadManager";
 
     struct ProgressInformation {
         std::shared_ptr<openspace::DownloadManager::FileFuture> future;

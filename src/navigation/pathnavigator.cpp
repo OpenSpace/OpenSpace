@@ -50,7 +50,7 @@
 #include "pathnavigator_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "PathNavigator";
+    constexpr std::string_view _loggerCat = "PathNavigator";
 
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultPathType",
@@ -243,7 +243,7 @@ void PathNavigator::updateCamera(double deltaTime) {
         handlePathEnd();
 
         if (_applyIdleBehaviorOnFinish) {
-            constexpr const char* ApplyIdleBehaviorScript =
+            constexpr const char ApplyIdleBehaviorScript[] =
                 "openspace.setPropertyValueSingle("
                     "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
                     "true"

@@ -42,7 +42,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableSkyTarget";
+    constexpr std::string_view _loggerCat = "RenderableSkyTarget";
 
     enum BlendMode {
         Normal = 0,

@@ -41,7 +41,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace {
-    constexpr const char* _loggerCat = "SceneGraphNode";
+    constexpr std::string_view _loggerCat = "SceneGraphNode";
 
     constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo = {
         "ComputeScreenSpaceData",

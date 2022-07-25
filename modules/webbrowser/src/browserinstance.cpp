@@ -38,7 +38,7 @@
 #include <filesystem>
 
 namespace {
-    constexpr const char* _loggerCat = "CEF BrowserInstance";
+    constexpr std::string_view _loggerCat = "CEF BrowserInstance";
 } // namespace
 
 namespace openspace {

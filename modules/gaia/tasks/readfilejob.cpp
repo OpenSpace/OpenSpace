@@ -30,8 +30,8 @@
 #include <ghoul/fmt.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ReadFileJob";
-}
+    constexpr std::string_view _loggerCat = "ReadFileJob";
+} // namespace
 
 namespace openspace::gaia {
 

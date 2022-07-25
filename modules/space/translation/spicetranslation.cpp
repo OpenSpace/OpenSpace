@@ -37,8 +37,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* DefaultReferenceFrame = "GALACTIC";
-
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "Target",
         "Target",
@@ -100,9 +98,9 @@ documentation::Documentation SpiceTranslation::Documentation() {
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     : _target(TargetInfo)
     , _observer(ObserverInfo)
-    , _frame(FrameInfo, DefaultReferenceFrame)
+    , _frame(FrameInfo, "GALACTIC")
     , _fixedDate(FixedDateInfo)
-    , _cachedFrame(DefaultReferenceFrame)
+    , _cachedFrame("GALACTIC")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

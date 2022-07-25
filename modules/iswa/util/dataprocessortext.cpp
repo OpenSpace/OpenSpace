@@ -47,13 +47,13 @@ std::vector<std::string> DataProcessorText::readMetadata(const std::string& data
     //# x           y           z           N           V_x         B_x
 
     // The string where the interesting data begins
-    constexpr const char* info = "# Output data: field with ";
+    constexpr std::string_view info = "# Output data: field with ";
     std::vector<std::string> options;
     std::string line;
     std::stringstream memorystream(data);
     while (getline(memorystream, line)) {
         if (line.find(info) == 0) {
-            line = line.substr(strlen(info));
+            line = line.substr(info.size());
             std::stringstream ss(line);
 
             std::string token;

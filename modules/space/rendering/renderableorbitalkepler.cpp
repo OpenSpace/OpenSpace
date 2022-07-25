@@ -45,8 +45,6 @@
 #include <vector>
 
 namespace {
-    constexpr const char* ProgramName = "OrbitalKepler";
-
     constexpr std::array<int, 36> LeapYears = {
         1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
         2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
@@ -398,10 +396,10 @@ void RenderableOrbitalKepler::initializeGL() {
     glGenBuffers(1, &_vertexBuffer);
 
     _programObject = SpaceModule::ProgramObjectManager.request(
-       ProgramName,
+        "OrbitalKepler",
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine->buildRenderProgram(
-               ProgramName,
+               "OrbitalKepler",
                absPath("${MODULE_SPACE}/shaders/debrisViz_vs.glsl"),
                absPath("${MODULE_SPACE}/shaders/debrisViz_fs.glsl")
            );
@@ -431,7 +429,7 @@ void RenderableOrbitalKepler::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArray);
 
     SpaceModule::ProgramObjectManager.release(
-        ProgramName,
+        "OrbitalKepler",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

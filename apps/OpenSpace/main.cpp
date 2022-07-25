@@ -96,8 +96,8 @@ using namespace sgct;
 namespace {
 
 constexpr std::string_view _loggerCat = "main";
-constexpr const char* SpoutTag = "Spout";
-constexpr const char* OpenVRTag = "OpenVR";
+constexpr std::string_view SpoutTag = "Spout";
+constexpr std::string_view OpenVRTag = "OpenVR";
 
 // @TODO (abock, 2020-04-09): These state variables should disappear
 const Window* currentWindow = nullptr;

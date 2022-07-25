@@ -49,8 +49,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableDUMeshes";
-    constexpr const char* ProgramObjectName = "RenderableDUMeshes";
+    constexpr std::string_view _loggerCat = "RenderableDUMeshes";
 
     constexpr std::array<const char*, 4> UniformNames = {
         "modelViewTransform", "projectionTransform", "alphaValue", "color"
@@ -258,7 +257,7 @@ bool RenderableDUMeshes::isReady() const {
 
 void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
+        "RenderableDUMeshes",
         []() {
             return global::renderEngine->buildRenderProgram(
                 "RenderableDUMeshes",
@@ -299,7 +298,7 @@ void RenderableDUMeshes::deinitializeGL() {
     }
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
+        "RenderableDUMeshes",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

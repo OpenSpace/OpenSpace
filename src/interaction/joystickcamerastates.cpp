@@ -32,7 +32,7 @@
 #include <utility>
 
 namespace {
-    constexpr const char* _loggerCat = "JoystickCameraStates";
+    constexpr std::string_view _loggerCat = "JoystickCameraStates";
 } // namespace
 
 namespace openspace::interaction {

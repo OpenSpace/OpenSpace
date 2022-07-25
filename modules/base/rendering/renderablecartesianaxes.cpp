@@ -37,9 +37,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "CartesianAxesProgram";
-    const int NVertexIndices = 6;
-
     constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
         "XColor",
         "X Color",
@@ -107,10 +104,10 @@ bool RenderableCartesianAxes::isReady() const {
 
 void RenderableCartesianAxes::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "CartesianAxesProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "CartesianAxesProgram",
                 absPath("${MODULE_BASE}/shaders/axes_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/axes_fs.glsl")
             );
@@ -167,7 +164,7 @@ void RenderableCartesianAxes::deinitializeGL() {
     _iBufferId = 0;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "CartesianAxesProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -200,7 +197,7 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     glLineWidth(3.0);
 
     glBindVertexArray(_vaoId);
-    glDrawElements(GL_LINES, NVertexIndices, GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 
     _program->deactivate();

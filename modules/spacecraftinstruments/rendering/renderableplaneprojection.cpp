@@ -42,8 +42,7 @@
 #include <glm/gtx/projection.hpp>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderablePlaneProjection";
-    constexpr const char* GalacticFrame = "GALACTIC";
+    constexpr std::string_view _loggerCat = "RenderablePlaneProjection";
 
     struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {
         // The SPICE name of the spacecraft from which the projection is performed
@@ -154,7 +153,7 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(
         _target.frame,
-        GalacticFrame,
+        "GALACTIC",
         time
     );
 
@@ -224,7 +223,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     const glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
         _target.body,
         _spacecraft,
-        GalacticFrame,
+        "GALACTIC",
         {
             SpiceManager::AberrationCorrection::Type::ConvergedNewtonianStellar,
             SpiceManager::AberrationCorrection::Direction::Reception
@@ -239,14 +238,14 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     for (size_t j = 0; j < bounds.size(); ++j) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(
             frame,
-            GalacticFrame,
+            "GALACTIC",
             currentTime
         ) * bounds[j];
         glm::dvec3 cornerPosition = glm::proj(vecToTarget, bounds[j]);
 
         cornerPosition -= vecToTarget;
         cornerPosition = SpiceManager::ref().frameTransformationMatrix(
-            GalacticFrame,
+            "GALACTIC",
             _target.frame,
             currentTime
         ) * cornerPosition;

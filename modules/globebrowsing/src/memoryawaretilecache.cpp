@@ -32,7 +32,7 @@
 #include <numeric>
 
 namespace {
-    constexpr const char* _loggerCat = "MemoryAwareTileCache";
+    constexpr std::string_view _loggerCat = "MemoryAwareTileCache";
 
     constexpr openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
         "CpuAllocatedTileData",

@@ -61,7 +61,7 @@
 #include "sessionrecording_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "SessionRecording";
+    constexpr std::string_view _loggerCat = "SessionRecording";
 
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
@@ -1019,7 +1019,7 @@ void SessionRecording::render() {
     }
 
 
-    constexpr const char* FontName = "Mono";
+    constexpr std::string_view FontName = "Mono";
     constexpr float FontSizeFrameinfo = 32.f;
     std::shared_ptr<ghoul::fontrendering::Font> font =
         global::fontManager->font(FontName, FontSizeFrameinfo);

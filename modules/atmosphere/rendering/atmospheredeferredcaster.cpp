@@ -68,7 +68,7 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
+    constexpr std::string_view _loggerCat = "AtmosphereDeferredcaster";
 
     constexpr std::array<const char*, 27> UniformNames = {
         "cullAtmosphere", "Rg", "Rt", "groundRadianceEmission", "HR", "betaRayleigh",

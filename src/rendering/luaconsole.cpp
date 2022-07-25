@@ -42,7 +42,7 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* HistoryFile = "ConsoleHistory";
+    constexpr std::string_view HistoryFile = "ConsoleHistory";
 
     constexpr int NoAutoComplete = -1;
 
@@ -55,7 +55,7 @@ namespace {
 
     constexpr openspace::Key CommandInputButton = openspace::Key::GraveAccent;
 
-    constexpr const char* FontName = "Console";
+    constexpr std::string_view FontName = "Console";
     constexpr float EntryFontSize = 14.0f;
     constexpr float HistoryFontSize = 11.0f;
 

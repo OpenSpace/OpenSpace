@@ -64,26 +64,26 @@
 
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-constexpr const char* monthNumber(const char* month) {
-    if      (ghoul::equal(month, "JAN")) return "01";
-    else if (ghoul::equal(month, "FEB")) return "02";
-    else if (ghoul::equal(month, "MAR")) return "03";
-    else if (ghoul::equal(month, "APR")) return "04";
-    else if (ghoul::equal(month, "MAY")) return "05";
-    else if (ghoul::equal(month, "JUN")) return "06";
-    else if (ghoul::equal(month, "JUL")) return "07";
-    else if (ghoul::equal(month, "AUG")) return "08";
-    else if (ghoul::equal(month, "SEP")) return "09";
-    else if (ghoul::equal(month, "OCT")) return "10";
-    else if (ghoul::equal(month, "NOV")) return "11";
-    else if (ghoul::equal(month, "DEC")) return "12";
-    else                                 return "";
+constexpr std::string_view monthNumber(std::string_view month) {
+    if      (month == "JAN") return "01";
+    else if (month == "FEB") return "02";
+    else if (month == "MAR") return "03";
+    else if (month == "APR") return "04";
+    else if (month == "MAY") return "05";
+    else if (month == "JUN") return "06";
+    else if (month == "JUL") return "07";
+    else if (month == "AUG") return "08";
+    else if (month == "SEP") return "09";
+    else if (month == "OCT") return "10";
+    else if (month == "NOV") return "11";
+    else if (month == "DEC") return "12";
+    else                     return "";
 }
 
 
 namespace {
     using json = nlohmann::json;
-    constexpr const char* _loggerCat = "IswaManager";
+    constexpr std::string_view _loggerCat = "IswaManager";
 
     void createScreenSpace(int id) {
         std::string idStr = std::to_string(id);
@@ -278,7 +278,7 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
     std::getline(ss, token, ' ');
     url += token + "-";
     std::getline(ss, token, ' ');
-    url = url + monthNumber(token.c_str()) + "-";
+    url = fmt::format("{}{}-", url, monthNumber(token));
     std::getline(ss, token, 'T');
     url += token + "%20";
     std::getline(ss, token, '.');

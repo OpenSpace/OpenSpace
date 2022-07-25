@@ -70,13 +70,13 @@
 #include "renderengine_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "RenderEngine";
+    constexpr std::string_view _loggerCat = "RenderEngine";
 
     constexpr std::chrono::seconds ScreenLogTimeToLive(15);
-    constexpr const char* RenderFsPath = "${SHADERS}/render.frag";
+    constexpr std::string_view RenderFsPath = "${SHADERS}/render.frag";
 
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const char* KeyFontLight = "Light";
+    constexpr std::string_view KeyFontMono = "Mono";
+    constexpr std::string_view KeyFontLight = "Light";
 
     constexpr openspace::properties::Property::PropertyInfo ShowOverlayClientsInfo = {
         "ShowOverlayOnClients",
@@ -726,7 +726,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 
 
     if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
-        constexpr const char* ToggleRotationFrictionScript = R"(
+        constexpr const char ToggleRotationFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
@@ -738,7 +738,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     }
 
     if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
-        constexpr const char* ToggleZoomFrictionScript = R"(
+        constexpr const char ToggleZoomFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
@@ -750,7 +750,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     }
 
     if (intersects(mousePosition, _cameraButtonLocations.roll)) {
-        constexpr const char* ToggleRollFrictionScript = R"(
+        constexpr const char ToggleRollFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
             openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 

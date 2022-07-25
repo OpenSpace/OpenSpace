@@ -131,8 +131,8 @@ namespace {
         "exoplanet system"
     };
 
-    constexpr const char ExoplanetsDataFileName[] = "exoplanets_data.bin";
-    constexpr const char LookupTableFileName[] = "lookup.txt";
+    constexpr std::string_view ExoplanetsDataFileName = "exoplanets_data.bin";
+    constexpr std::string_view LookupTableFileName = "lookup.txt";
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]

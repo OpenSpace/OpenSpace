@@ -38,7 +38,7 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetsDataPreparationTask";
+    constexpr std::string_view _loggerCat = "ExoplanetsDataPreparationTask";
 
     struct [[codegen::Dictionary(ExoplanetsDataPreparationTask)]] Parameters {
         // The csv file to extract data from

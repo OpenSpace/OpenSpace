@@ -35,7 +35,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "ZoomOutOverviewCurve";
+    constexpr std::string_view _loggerCat = "ZoomOutOverviewCurve";
 } // namespace
 
 namespace openspace::interaction {

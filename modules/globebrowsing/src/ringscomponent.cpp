@@ -51,7 +51,7 @@
 #include <locale>
 
 namespace {
-    constexpr const char* _loggerCat = "RingsComponent";
+    constexpr std::string_view _loggerCat = "RingsComponent";
 
     constexpr std::array<const char*, 9> UniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",

@@ -35,7 +35,7 @@
 #include <queue>
 
 namespace {
-    constexpr const char* _loggerCat = "TSP";
+    constexpr std::string_view _loggerCat = "TSP";
 } // namespace
 
 namespace openspace {

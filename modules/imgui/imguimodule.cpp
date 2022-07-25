@@ -44,8 +44,8 @@
 // #define SHOW_IMGUI_HELPERS
 
 namespace {
-    constexpr const char* _loggerCat = "GUI";
-    constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+    constexpr std::string_view _loggerCat = "GUI";
+    constexpr std::string_view GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
     constexpr float FontSize = 14.f;
 
     ImFont* captionFont = nullptr;

@@ -32,7 +32,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* LoggerCat = "ScreenSpaceSpout";
+    constexpr std::string_view LoggerCat = "ScreenSpaceSpout";
 
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "SpoutName",

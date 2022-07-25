@@ -35,7 +35,7 @@
 #include <thread>
 
 namespace {
-    constexpr const char* _loggerCat = "ConstructOctreeTask";
+    constexpr std::string_view _loggerCat = "ConstructOctreeTask";
 
     struct [[codegen::Dictionary(ConstructOctreeTask)]] Parameters {
         // If SingleFileInput is set to true then this specifies the path to a single BIN

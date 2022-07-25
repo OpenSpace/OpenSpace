@@ -50,7 +50,7 @@
 #endif // WIN32
 
 namespace {
-    constexpr const char* _loggerCat = "KameleonWrapper";
+    constexpr std::string_view _loggerCat = "KameleonWrapper";
     constexpr float RE_TO_METER = 6371000;
 } // namespace
 

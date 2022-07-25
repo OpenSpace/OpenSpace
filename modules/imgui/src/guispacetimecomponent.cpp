@@ -59,9 +59,10 @@ namespace {
         }
     }
 
-    constexpr const char* AnchorProperty = "NavigationHandler.OrbitalNavigator.Anchor";
+    constexpr std::string_view AnchorProperty =
+        "NavigationHandler.OrbitalNavigator.Anchor";
 
-    constexpr const char* RetargetAnchorProperty =
+    constexpr std::string_view RetargetAnchorProperty =
         "NavigationHandler.OrbitalNavigator.RetargetAnchor";
 
 } // namespace
@@ -347,7 +348,7 @@ void GuiSpaceTimeComponent::render() {
                 openspace::TimeUnits.end(),
                 std::string(""),
                 [](const std::string& a, const openspace::TimeUnit& unit) {
-                    return a + nameForTimeUnit(unit, true) + " / second" + '\0';
+                    return fmt::format("{}{} / second\0", a, nameForTimeUnit(unit, true));
                 }
             );
 

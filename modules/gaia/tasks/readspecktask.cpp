@@ -34,7 +34,7 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ReadSpeckTask";
+    constexpr std::string_view _loggerCat = "ReadSpeckTask";
 
     struct [[codegen::Dictionary(ReadSpeckTask)]] Parameters {
         // The path to the SPECK file that are to be read

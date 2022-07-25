@@ -52,7 +52,7 @@
 #include <locale>
 
 namespace {
-    constexpr const char* _loggerCat = "ShadowComponent";
+    constexpr std::string_view _loggerCat = "ShadowComponent";
 
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",

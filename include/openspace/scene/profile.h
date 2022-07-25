@@ -106,7 +106,7 @@ public:
     };
 
     struct CameraNavState {
-        static constexpr const char* Type = "setNavigationState";
+        static constexpr std::string_view Type = "setNavigationState";
 
         std::string anchor;
         std::optional<std::string> aim;
@@ -118,7 +118,7 @@ public:
     };
 
     struct CameraGoToGeo {
-        static constexpr const char* Type = "goToGeo";
+        static constexpr std::string_view Type = "goToGeo";
 
         std::string anchor;
         double latitude;

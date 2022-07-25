@@ -36,9 +36,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* EventKey = "event";
-    constexpr const char* SubscribeEvent = "start_subscription";
-    constexpr const char* UnsubscribeEvent = "stop_subscription";
+    constexpr std::string_view SubscribeEvent = "start_subscription";
+    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
 } // namespace
 
 using nlohmann::json;
@@ -63,7 +62,7 @@ bool CameraTopic::isDone() const {
 }
 
 void CameraTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at(EventKey).get<std::string>();
+    std::string event = json.at("event").get<std::string>();
 
     if (event != SubscribeEvent) {
         _isDone = true;
@@ -87,7 +86,7 @@ void CameraTopic::sendCameraData() {
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     glm::dvec3 position = module->geoPosition();
-    std::pair<double, std::string> altSimplified = simplifyDistance(position.z);
+    std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);
 
     nlohmann::json jsonData = {
         { "latitude", position.x },

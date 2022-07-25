@@ -38,7 +38,7 @@
 #include <type_traits>
 
 namespace {
-    constexpr const char* _loggerCat = "HorizonsTranslation";
+    constexpr std::string_view _loggerCat = "HorizonsTranslation";
     constexpr int8_t CurrentCacheVersion = 2;
 } // namespace
 

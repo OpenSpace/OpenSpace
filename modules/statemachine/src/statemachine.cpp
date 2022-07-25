@@ -30,7 +30,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "StateMachine";
+    constexpr std::string_view _loggerCat = "StateMachine";
 
     struct [[codegen::Dictionary(StateMachine)]] Parameters {
         // A list of states

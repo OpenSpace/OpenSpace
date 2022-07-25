@@ -48,7 +48,7 @@
 #include <type_traits>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableStars";
+    constexpr std::string_view _loggerCat = "RenderableStars";
 
     constexpr std::array<const char*, 17> UniformNames = {
         "modelMatrix", "cameraUp", "cameraViewProjectionMatrix", "colorOption",

@@ -32,7 +32,7 @@
 #include <iomanip>
 
 namespace {
-    constexpr const char* _loggerCat = "FieldlinesState";
+    constexpr std::string_view _loggerCat = "FieldlinesState";
     constexpr int CurrentVersion = 0;
     using json = nlohmann::json;
 } // namespace

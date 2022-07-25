@@ -7,7 +7,7 @@
 
 namespace openspace {
 
-constexpr const char* ModulePaths[] = {
+constexpr std::string_view ModulePaths[] = {
     // We need the empty string here or otherwise ModulePaths might be empty and thus
     // cause a compiler error
     "",

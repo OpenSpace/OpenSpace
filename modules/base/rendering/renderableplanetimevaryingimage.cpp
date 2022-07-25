@@ -38,8 +38,8 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyLazyLoading = "LazyLoading";
-    constexpr const char* _loggerCat = "RenderablePlaneTimeVaryingImage";
+    constexpr std::string_view KeyLazyLoading = "LazyLoading";
+    constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
     constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",

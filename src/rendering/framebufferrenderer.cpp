@@ -49,7 +49,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "FramebufferRenderer";
+    constexpr std::string_view _loggerCat = "FramebufferRenderer";
 
     constexpr glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
 
@@ -67,13 +67,14 @@ namespace {
         "resolution"
     };
 
-    constexpr const char* ExitFragmentShaderPath =
+    constexpr std::string_view ExitFragmentShaderPath =
         "${SHADERS}/framebuffer/exitframebuffer.frag";
-    constexpr const char* RaycastFragmentShaderPath =
+    constexpr std::string_view RaycastFragmentShaderPath =
         "${SHADERS}/framebuffer/raycastframebuffer.frag";
-    constexpr const char* GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
-    constexpr const char* GetEntryOutsidePath = "${SHADERS}/framebuffer/outside.glsl";
-    constexpr const char* RenderFragmentShaderPath =
+    constexpr std::string_view GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
+    constexpr std::string_view GetEntryOutsidePath =
+        "${SHADERS}/framebuffer/outside.glsl";
+    constexpr std::string_view RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
     const GLenum ColorAttachmentArray[4] = {

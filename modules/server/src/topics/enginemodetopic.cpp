@@ -30,15 +30,11 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char _loggerCat[] = "EngineModeTopic";
+    constexpr std::string_view _loggerCat = "EngineModeTopic";
 
-    constexpr const char EventKey[] = "event";
-    constexpr const char SubscribeEvent[] = "start_subscription";
-    constexpr const char UnsubscribeEvent[] = "stop_subscription";
-    constexpr const char RefreshEvent[] = "refresh";
-
-    constexpr const char ModeKey[] = "mode";
-
+    constexpr std::string_view SubscribeEvent = "start_subscription";
+    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
+    constexpr std::string_view RefreshEvent = "refresh";
 } // namespace
 
 using nlohmann::json;
@@ -60,7 +56,7 @@ bool EngineModeTopic::isDone() const {
 }
 
 void EngineModeTopic::handleJson(const nlohmann::json& json) {
-    const std::string event = json.at(EventKey).get<std::string>();
+    const std::string event = json.at("event").get<std::string>();
     if (event != SubscribeEvent && event != UnsubscribeEvent &&
         event != RefreshEvent)
     {
@@ -108,7 +104,7 @@ void EngineModeTopic::sendJsonData() {
         default:
             throw ghoul::MissingCaseException();
     }
-    stateJson[ModeKey] = modeString;
+    stateJson["mode"] = modeString;
 
     if (!stateJson.empty()) {
         _connection->sendJson(wrappedPayload(stateJson));

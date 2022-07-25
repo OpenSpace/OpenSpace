@@ -45,8 +45,8 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableModel";
-    constexpr const char* ProgramName = "ModelProgram";
+    constexpr std::string_view _loggerCat = "RenderableModel";
+    constexpr std::string_view ProgramName = "ModelProgram";
 
     constexpr int DefaultBlending = 0;
     constexpr int AdditiveBlending = 1;
@@ -509,7 +509,7 @@ void RenderableModel::initialize() {
 void RenderableModel::initializeGL() {
     ZoneScoped
 
-    std::string program = ProgramName;
+    std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
         program += "|vs=" + _vertexShaderPath;
     }
@@ -528,7 +528,7 @@ void RenderableModel::initializeGL() {
                 absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
                 std::filesystem::path(_fragmentShaderPath);
 
-            return global::renderEngine->buildRenderProgram(ProgramName, vs, fs);
+            return global::renderEngine->buildRenderProgram(program, vs, fs);
         }
     );
     // We don't really know what kind of shader the user provides us with, so we can't
@@ -547,7 +547,7 @@ void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
 
-    std::string program = ProgramName;
+    std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
         program += "|vs=" + _vertexShaderPath;
     }

@@ -41,18 +41,18 @@
 using nlohmann::json;
 
 namespace {
-    constexpr const char* _loggerCat = "GetPropertyTopic";
-    constexpr const char* AllPropertiesValue = "__allProperties";
-    constexpr const char* AllNodesValue = "__allNodes";
-    constexpr const char* AllScreenSpaceRenderablesValue = "__screenSpaceRenderables";
-    constexpr const char* PropertyKey = "property";
-    constexpr const char* RootPropertyOwner = "__rootOwner";
+    constexpr std::string_view _loggerCat = "GetPropertyTopic";
+    constexpr std::string_view AllPropertiesValue = "__allProperties";
+    constexpr std::string_view AllNodesValue = "__allNodes";
+    constexpr std::string_view AllScreenSpaceRenderablesValue =
+        "__screenSpaceRenderables";
+    constexpr std::string_view RootPropertyOwner = "__rootOwner";
 } // namespace
 
 namespace openspace {
 
 void GetPropertyTopic::handleJson(const nlohmann::json& json) {
-    std::string requestedKey = json.at(PropertyKey).get<std::string>();
+    std::string requestedKey = json.at("property").get<std::string>();
     LDEBUG("Getting property '" + requestedKey + "'...");
     nlohmann::json response;
     if (requestedKey == AllPropertiesValue) {

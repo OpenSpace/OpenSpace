@@ -32,7 +32,7 @@
 #include <SpoutLibrary.h>
 
 namespace {
-    constexpr const char _loggerCat[] = "Spout";
+    constexpr std::string_view _loggerCat = "Spout";
 
     constexpr openspace::properties::Property::PropertyInfo NameSenderInfo = {
         "SpoutName",

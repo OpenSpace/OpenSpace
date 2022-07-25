@@ -32,9 +32,9 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "SelectionProperty";
+    constexpr std::string_view _loggerCat = "SelectionProperty";
 
-    constexpr const char* OptionsKey = "Options";
+    constexpr std::string_view OptionsKey = "Options";
 } // namespace
 
 namespace openspace::properties {

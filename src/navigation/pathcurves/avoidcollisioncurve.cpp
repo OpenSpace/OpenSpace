@@ -38,7 +38,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "AvoidCollisionCurve";
+    constexpr std::string_view _loggerCat = "AvoidCollisionCurve";
 
     constexpr double CloseToNodeThresholdRadiusMultiplier = 5.0;
     constexpr double AvoidCollisionDistanceRadiusMultiplier = 3.0;

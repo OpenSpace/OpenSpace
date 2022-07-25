@@ -48,7 +48,7 @@
 #include <cstdint>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableGaiaStars";
+    constexpr std::string_view _loggerCat = "RenderableGaiaStars";
 
     constexpr size_t PositionSize = 3;
     constexpr size_t ColorSize = 2;

@@ -56,7 +56,7 @@
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr const char* _loggerCat = "RenderableGalaxy";
+    constexpr std::string_view _loggerCat = "RenderableGalaxy";
 
     enum StarRenderingMethod {
         Points,

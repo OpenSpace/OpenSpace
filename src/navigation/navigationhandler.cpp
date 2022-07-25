@@ -57,7 +57,7 @@ namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    constexpr const char* _loggerCat = "NavigationHandler";
+    constexpr std::string_view _loggerCat = "NavigationHandler";
 
     using namespace openspace;
     constexpr properties::Property::PropertyInfo KeyDisableMouseInputInfo = {

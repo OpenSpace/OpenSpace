@@ -976,11 +976,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             _layerManager.layerGroups();
 
         for (size_t i = 0; i < layerGroups.size(); ++i) {
-            const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _globalRenderer.gpuLayerGroups[i].bind(
                 *_globalRenderer.program,
                 *layerGroups[i],
-                nameBase,
+                layergroupid::LAYER_GROUP_IDENTIFIERS[i],
                 static_cast<int>(i)
             );
         }
@@ -1001,11 +1000,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             _layerManager.layerGroups();
 
         for (size_t i = 0; i < layerGroups.size(); ++i) {
-            const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _localRenderer.gpuLayerGroups[i].bind(
                 *_localRenderer.program,
                 *layerGroups[i],
-                nameBase,
+                layergroupid::LAYER_GROUP_IDENTIFIERS[i],
                 static_cast<int>(i)
             );
         }
@@ -1645,7 +1643,7 @@ void RenderableGlobe::recompileShaders() {
     for (size_t i = 0; i < preprocessingData.layeredTextureInfo.size(); i++) {
         // lastLayerIndex must be at least 0 for the shader to compile,
         // the layer type is inactivated by setting use to false
-        const std::string& groupName = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
+        std::string groupName = std::string(layergroupid::LAYER_GROUP_IDENTIFIERS[i]);
         shaderDictionary.setValue(
             "lastLayerIndex" + groupName,
             glm::max(preprocessingData.layeredTextureInfo[i].lastLayerIdx, 0)
@@ -2103,16 +2101,14 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
     const std::string uniformVarName("shadowDataArray[");
     unsigned int counter = 0;
     for (const ShadowRenderingStruct& sd : shadowDataArray) {
-        constexpr const char* NameIsShadowing = "shadowDataArray[{}].isShadowing";
-        constexpr const char* NameXp          = "shadowDataArray[{}].xp";
-        constexpr const char* NameXu          = "shadowDataArray[{}].xu";
-        constexpr const char* NameRc          = "shadowDataArray[{}].rc";
-        constexpr const char* NameSource      = "shadowDataArray[{}].sourceCasterVec";
-        constexpr const char* NamePos         = "shadowDataArray[{}].casterPositionVec";
+        constexpr std::string_view NameIsShadowing = "shadowDataArray[{}].isShadowing";
+        constexpr std::string_view NameXp = "shadowDataArray[{}].xp";
+        constexpr std::string_view NameXu = "shadowDataArray[{}].xu";
+        constexpr std::string_view NameRc = "shadowDataArray[{}].rc";
+        constexpr std::string_view NameSource = "shadowDataArray[{}].sourceCasterVec";
+        constexpr std::string_view NamePos = "shadowDataArray[{}].casterPositionVec";
 
-        programObject.setUniform(
-            fmt::format(NameIsShadowing, counter), sd.isShadowing
-        );
+        programObject.setUniform(fmt::format(NameIsShadowing, counter), sd.isShadowing);
 
         if (sd.isShadowing) {
             programObject.setUniform(fmt::format(NameXp, counter), sd.xp);

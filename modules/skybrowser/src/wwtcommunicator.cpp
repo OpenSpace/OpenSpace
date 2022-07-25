@@ -31,7 +31,7 @@
 #include <ghoul/misc/dictionaryjsonformatter.h>
 
 namespace {
-    constexpr const char* _loggerCat = "WwtCommunicator";
+    constexpr std::string_view _loggerCat = "WwtCommunicator";
 } // namespace
 
 namespace openspace {

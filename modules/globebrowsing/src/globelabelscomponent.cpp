@@ -48,7 +48,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "GlobeLabels";
+    constexpr std::string_view _loggerCat = "GlobeLabels";
 
     constexpr double LabelFadeOutLimitAltitudeMeters = 25000.0;
     constexpr float MinOpacityValueConst = 0.009f;

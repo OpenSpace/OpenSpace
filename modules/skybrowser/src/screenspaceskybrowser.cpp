@@ -38,7 +38,7 @@
 #include <random>
 
 namespace {
-    constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
+    constexpr std::string_view _loggerCat = "ScreenSpaceSkyBrowser";
 
     constexpr openspace::properties::Property::PropertyInfo TextureQualityInfo = {
         "TextureQuality",

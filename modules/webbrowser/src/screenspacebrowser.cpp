@@ -36,7 +36,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "ScreenSpaceBrowser";
+    constexpr std::string_view _loggerCat = "ScreenSpaceBrowser";
 
     const openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",

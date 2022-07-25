@@ -30,7 +30,7 @@
 #include <ghoul/fmt.h>
 
 namespace {
-    constexpr const char* _loggerCat = "LocalErrorHistogramManager";
+    constexpr std::string_view _loggerCat = "LocalErrorHistogramManager";
 } // namespace
 
 namespace openspace {

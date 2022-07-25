@@ -38,8 +38,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr const char* DestinationFrame = "GALACTIC";
-
     constexpr std::array<const char*, 7> MainUniformNames = {
         "performShading", "directionToSunViewSpace", "modelViewTransform",
         "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
@@ -385,7 +383,7 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
 {
     _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
         _projectionComponent.instrumentId(),
-        DestinationFrame,
+        "GALACTIC",
         time
     );
 
@@ -398,7 +396,7 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
     const glm::dvec3 p = SpiceManager::ref().targetPosition(
         _projectionComponent.projectorId(),
         _projectionComponent.projecteeId(),
-        DestinationFrame,
+        "GALACTIC",
         _projectionComponent.aberration(),
         time,
         lightTime

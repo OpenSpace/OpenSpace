@@ -41,7 +41,7 @@
 #define ENABLE_DIRECTMSG
 
 namespace {
-    constexpr const char* _loggerCat = "win32_touch";
+    constexpr std::string_view _loggerCat = "win32_touch";
     HHOOK gTouchHook = nullptr;
     std::thread* gMouseHookThread = nullptr;
     HHOOK gMouseHook = nullptr;

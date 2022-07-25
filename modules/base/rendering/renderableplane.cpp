@@ -43,8 +43,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "Plane";
-
     enum BlendMode {
         Normal = 0,
         Additive
@@ -184,10 +182,10 @@ void RenderablePlane::initializeGL() {
     createPlane();
 
     _shader = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "Plane",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "Plane",
                 absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
             );
@@ -205,7 +203,7 @@ void RenderablePlane::deinitializeGL() {
     _vertexPositionBuffer = 0;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "Plane",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
