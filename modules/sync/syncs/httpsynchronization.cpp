@@ -35,7 +35,7 @@ namespace {
 
     constexpr const char* TempSuffix = ".tmp";
 
-    constexpr const int ApplicationVersion = 1;
+    constexpr int ApplicationVersion = 1;
 
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
         // The unique identifier for this resource that is used to request a set of files

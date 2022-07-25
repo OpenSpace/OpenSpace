@@ -31,7 +31,6 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -59,7 +58,7 @@ namespace {
     constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
     constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
 
-    constexpr const std::array<const char*, 21> UniformNames = {
+    constexpr std::array<const char*, 21> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
@@ -1221,7 +1220,7 @@ void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
         );
 
     program->activate();
-    constexpr const glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _polygonSides);

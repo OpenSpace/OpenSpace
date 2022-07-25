@@ -43,13 +43,13 @@ namespace {
     constexpr const char* ProjectiveProgramName = "ProjectiveProgram";
     constexpr const char* FBOPassProgramName = "FBOPassProgram";
 
-    constexpr const std::array<const char*, 12> MainUniformNames = {
+    constexpr std::array<const char*, 12> MainUniformNames = {
         "sun_pos", "modelTransform", "modelViewProjectionTransform", "hasBaseMap",
         "hasHeightMap", "heightExaggeration", "meridianShift", "ambientBrightness",
         "projectionFading", "baseTexture", "projectionTexture", "heightTexture"
     };
 
-    constexpr const std::array<const char*, 6> FboUniformNames = {
+    constexpr std::array<const char*, 6> FboUniformNames = {
         "projectionTexture", "ProjectorMatrix", "ModelTransform",
         "boresight", "radius", "segments"
     };

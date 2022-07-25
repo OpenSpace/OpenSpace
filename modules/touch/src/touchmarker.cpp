@@ -31,7 +31,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const std::array<const char*, 4> UniformNames = {
+    constexpr std::array<const char*, 4> UniformNames = {
         "radius", "opacity", "thickness", "color"
     };
 

@@ -51,18 +51,18 @@
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
-    constexpr const glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
+    constexpr glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
 
-    constexpr const std::array<const char*, 9> HDRUniformNames = {
+    constexpr std::array<const char*, 9> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma",
         "Hue", "Saturation", "Value", "Viewport", "Resolution"
     };
 
-    constexpr const std::array<const char*, 4> FXAAUniformNames = {
+    constexpr std::array<const char*, 4> FXAAUniformNames = {
         "renderedTexture", "inverseScreenSize", "Viewport", "Resolution"
     };
 
-    constexpr const std::array<const char*, 4> DownscaledVolumeUniformNames = {
+    constexpr std::array<const char*, 4> DownscaledVolumeUniformNames = {
         "downscaledRenderedVolume", "downscaledRenderedVolumeDepth", "viewport",
         "resolution"
     };
@@ -511,7 +511,7 @@ void FramebufferRenderer::updateDownscaleTextures() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    constexpr const float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
+    constexpr float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor);
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);

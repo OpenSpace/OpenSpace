@@ -504,7 +504,7 @@ void createExoplanetSystem(const std::string& starName) {
             // magnitude or star luminosity, but for now this looks good enough.
             double size = 59.0 * radiusInMeter;
             if (hasTeff) {
-                constexpr const float sunTeff = 5780.f;
+                constexpr float sunTeff = 5780.f;
                 size *= std::pow(system.starData.teff / sunTeff, 2.0);
             }
 

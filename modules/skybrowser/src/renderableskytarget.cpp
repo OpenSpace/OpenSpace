@@ -49,21 +49,20 @@ namespace {
         Additive
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo crossHairSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo crossHairSizeInfo = {
         "CrosshairSize",
         "Crosshair Size",
         "Determines the size of the crosshair. The size is determined in fov (degrees)."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo RectangleThresholdInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo RectangleThresholdInfo = {
         "RectangleThreshold",
         "Rectangle Threshold",
         "When the field of view is larger than the rectangle threshold, a rectangle will"
         "be rendered in the target."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "The thickness of the line of the target. The larger number, the thicker line."

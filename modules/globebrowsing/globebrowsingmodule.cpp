@@ -92,14 +92,14 @@ namespace {
     constexpr const char _loggerCat[] = "GlobeBrowsingModule";
     constexpr const char _factoryName[] = "TileProvider";
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
         "WMSCacheEnabled",
         "WMS Cache Enabled",
         "Determines whether automatic caching of WMS servers is enabled. Changing the "
         "value of this property will not affect already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo OfflineModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OfflineModeInfo = {
         "OfflineMode",
         "Offline Mode",
         "Determines whether loaded WMS servers should be used in offline mode, that is "
@@ -109,21 +109,21 @@ namespace {
         "already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
         "WMSCacheLocation",
         "WMS Cache Location",
         "The location of the cache folder for WMS servers. Changing the value of this "
         "property will not affect already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
         "WMSCacheSize",
         "WMS Cache Size",
         "The maximum size of the cache for each WMS server. Changing the value of this "
         "property will not affect already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile Cache Size",
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU."

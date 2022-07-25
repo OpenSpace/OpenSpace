@@ -898,7 +898,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
 }
 
 double TouchInteraction::computeConstTimeDecayCoefficient(double velocity) {
-    constexpr const double postDecayVelocityTarget = 1e-6;
+    constexpr double postDecayVelocityTarget = 1e-6;
     const double stepsToDecay = _constTimeDecay_secs / _frameTimeAvg.averageFrameTime();
 
     if (stepsToDecay > 0.0 && std::abs(velocity) > postDecayVelocityTarget) {

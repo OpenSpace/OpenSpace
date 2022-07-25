@@ -95,7 +95,7 @@ using namespace sgct;
 
 namespace {
 
-constexpr const char* _loggerCat = "main";
+constexpr std::string_view _loggerCat = "main";
 constexpr const char* SpoutTag = "Spout";
 constexpr const char* OpenVRTag = "OpenVR";
 

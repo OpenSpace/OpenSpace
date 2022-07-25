@@ -40,17 +40,17 @@
 namespace {
     constexpr const char* DestinationFrame = "GALACTIC";
 
-    constexpr const std::array<const char*, 7> MainUniformNames = {
+    constexpr std::array<const char*, 7> MainUniformNames = {
         "performShading", "directionToSunViewSpace", "modelViewTransform",
         "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
     };
 
-    constexpr const std::array<const char*, 6> FboUniformNames = {
+    constexpr std::array<const char*, 6> FboUniformNames = {
         "projectionTexture", "depthTexture", "needShadowMap", "ProjectorMatrix",
         "ModelTransform", "boresight"
     };
 
-    constexpr const std::array<const char*, 2> DepthFboUniformNames = {
+    constexpr std::array<const char*, 2> DepthFboUniformNames = {
         "ProjectorMatrix", "ModelTransform"
     };
 

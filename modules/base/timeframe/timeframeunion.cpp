@@ -31,7 +31,7 @@
 #include <openspace/util/time.h>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo TimeFramesInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TimeFramesInfo = {
         "TimeFrames",
         "Time Frames",
         "A vector of time frames to combine into one. "

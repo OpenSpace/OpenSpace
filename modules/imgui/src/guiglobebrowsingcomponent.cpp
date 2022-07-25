@@ -225,7 +225,7 @@ void GuiGlobeBrowsingComponent::render() {
     }
 
     if (ImGui::BeginPopup("globebrowsing_add_server")) {
-        constexpr const int InputBufferSize = 512;
+        constexpr int InputBufferSize = 512;
         static char NameInputBuffer[InputBufferSize];
         ImGui::InputText("Server Name", NameInputBuffer, InputBufferSize);
 
@@ -276,7 +276,7 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::Columns(6, nullptr, false);
 
     const float width = ImGui::GetWindowWidth();
-    constexpr const float ButtonWidth = 60.f;
+    constexpr float ButtonWidth = 60.f;
     ImGui::SetColumnOffset(5, width - 1.5f * ButtonWidth);
     ImGui::SetColumnOffset(4, width - 2.5f * ButtonWidth);
     ImGui::SetColumnOffset(3, width - 3.5f * ButtonWidth);

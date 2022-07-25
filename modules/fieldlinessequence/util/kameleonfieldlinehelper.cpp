@@ -55,7 +55,7 @@ namespace {
     constexpr const char* TAsPOverRho = "T = p/rho";
     constexpr const char* JParallelB  = "Current: mag(J||B)";
     // [nPa]/[amu/cm^3] * ToKelvin => Temperature in Kelvin
-    constexpr const float ToKelvin = 72429735.6984f;
+    constexpr float ToKelvin = 72429735.6984f;
 } // namespace
 
 namespace openspace::fls {

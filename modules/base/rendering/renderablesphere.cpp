@@ -43,7 +43,7 @@
 namespace {
     constexpr const char* ProgramName = "Sphere";
 
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr std::array<const char*, 5> UniformNames = {
         "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
         "mirrorTexture"
     };

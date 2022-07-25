@@ -33,7 +33,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "FieldlinesState";
-    constexpr const int CurrentVersion = 0;
+    constexpr int CurrentVersion = 0;
     using json = nlohmann::json;
 } // namespace
 

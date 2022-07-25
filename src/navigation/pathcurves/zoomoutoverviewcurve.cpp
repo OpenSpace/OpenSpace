@@ -65,7 +65,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     _points.push_back(start.position() + startTangentLength * startTangentDir);
 
     const glm::dvec3 startPosToEndPos = end.position() - start.position();
-    constexpr const double Epsilon = 1E-4;
+    constexpr double Epsilon = 1E-4;
 
     // Zoom out
     if (start.nodeIdentifier() != end.nodeIdentifier() &&

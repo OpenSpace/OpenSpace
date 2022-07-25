@@ -43,13 +43,13 @@ namespace {
     constexpr const char* KeyTranslation = "Translation";
 
 #ifdef __APPLE__
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase"
     };
 #else
-    constexpr const std::array<const char*, 14> UniformNames = {
+    constexpr std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase", "viewport", "lineWidth"

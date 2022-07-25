@@ -45,7 +45,7 @@
 namespace {
     constexpr const char* ProgramName = "Timevarying Sphere";
 
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr std::array<const char*, 5> UniformNames = {
         "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
         "mirrorTexture"
     };

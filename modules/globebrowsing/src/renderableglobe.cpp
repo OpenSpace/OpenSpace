@@ -65,9 +65,9 @@ namespace std {
 
 namespace {
     // Global flags to modify the RenderableGlobe
-    constexpr const bool LimitLevelByAvailableData = true;
-    constexpr const bool PerformFrustumCulling = true;
-    constexpr const bool PreformHorizonCulling = true;
+    constexpr bool LimitLevelByAvailableData = true;
+    constexpr bool PerformFrustumCulling = true;
+    constexpr bool PreformHorizonCulling = true;
 
     // Shadow structure
     struct ShadowRenderingStruct {
@@ -84,7 +84,7 @@ namespace {
         glm::vec3(-1.f, -1.f, 0.f),
         glm::vec3( 1.f,  1.f, 1e35f)
     };
-    constexpr const float DefaultHeight = 0.f;
+    constexpr float DefaultHeight = 0.f;
 
     // I tried reducing this to 16, but it left the rendering with artifacts when the
     // atmosphere was enabled. The best guess to the circular artifacts are due to the
@@ -93,8 +93,8 @@ namespace {
     // raycaster. We tried a simple solution that uses two grids and switches between
     // them at a cutoff level, and I think this might still be the best solution for the
     // time being.  --abock  2018-10-30
-    constexpr const int DefaultSkirtedGridSegments = 64;
-    constexpr const int UnknownDesiredLevel = -1;
+    constexpr int DefaultSkirtedGridSegments = 64;
+    constexpr int UnknownDesiredLevel = -1;
 
     const openspace::globebrowsing::GeodeticPatch Coverage =
         openspace::globebrowsing::GeodeticPatch(0, 0, 90, 180);
@@ -1531,7 +1531,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         // If it does not it will still produce "correct" normals. If the resolution is
         // higher the shadows will be softer, if it is lower, pixels will be visible.
         // Since default is 64 this will most likely work fine.
-        constexpr const float TileDelta = 1.f / DefaultSkirtedGridSegments;
+        constexpr float TileDelta = 1.f / DefaultSkirtedGridSegments;
         const glm::vec3 deltaTheta0 = modelViewTransformMat3 *
             (glm::vec3(corner10 - corner00) * TileDelta);
         const glm::vec3 deltaTheta1 = modelViewTransformMat3 *
@@ -1991,7 +1991,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
 {
     ZoneScoped
 
-    constexpr const double KM_TO_M = 1000.0;
+    constexpr double KM_TO_M = 1000.0;
 
     ghoul_assert(
         !_ellipsoid.shadowConfigurationArray().empty(),

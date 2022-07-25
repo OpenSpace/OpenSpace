@@ -35,7 +35,7 @@
 #include <math.h>
 
 namespace {
-    constexpr const float KM_TO_M = 1000.f;
+    constexpr float KM_TO_M = 1000.f;
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",

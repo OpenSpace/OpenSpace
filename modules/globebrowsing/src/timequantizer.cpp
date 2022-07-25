@@ -152,12 +152,12 @@ DateTime::DateTime(std::string_view initDateTime) {
 
 void DateTime::setTime(std::string_view input) {
     // Indices into an ISO8601 YYYY-MM-ddTHH:mm:ss string
-    constexpr const size_t IndexYear = 0;
-    constexpr const size_t IndexMonth = 5;
-    constexpr const size_t IndexDay = 8;
-    constexpr const size_t IndexHour = 11;
-    constexpr const size_t IndexMinute = 14;
-    constexpr const size_t IndexSecond = 17;
+    constexpr size_t IndexYear = 0;
+    constexpr size_t IndexMonth = 5;
+    constexpr size_t IndexDay = 8;
+    constexpr size_t IndexHour = 11;
+    constexpr size_t IndexMinute = 14;
+    constexpr size_t IndexSecond = 17;
 
     std::from_chars(input.data() + IndexYear, input.data() + IndexYear + 4, _year);
     std::from_chars(input.data() + IndexMonth, input.data() + IndexMonth + 2, _month);
@@ -482,7 +482,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     ZoneScoped
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
-    constexpr const int BufferSize = sizeof(Format);
+    constexpr int BufferSize = sizeof(Format);
     char unquantizedString[BufferSize];
     std::memset(unquantizedString, 0, BufferSize);
     SpiceManager::ref().dateFromEphemerisTime(
@@ -493,8 +493,8 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
 
     DateTime unquantized(std::string_view(unquantizedString, BufferSize));
     // resolutionFraction helps to improve iteration performance
-    constexpr const double ResolutionFraction = 0.7;
-    constexpr const int IterationLimit = 50;
+    constexpr double ResolutionFraction = 0.7;
+    constexpr int IterationLimit = 50;
 
     if (_timerange.includes(t)) {
         int iterations = 0;

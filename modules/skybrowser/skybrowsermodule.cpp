@@ -39,69 +39,67 @@
 #include "skybrowsermodule_lua.inl"
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Decides if the GUI for this module should be enabled."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-        ShowTitleInGuiBrowserInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo ShowTitleInGuiBrowserInfo = {
         "ShowTitleInGuiBrowser",
         "Show Title in Gui Browser",
         "If true, the name of the currently selected sky browser is shown in the WebGUI "
         "browser."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo AllowRotationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow Camera Rotation",
         "Toggles if the camera should rotate to look at the sky target if it is going "
         "outside of the current field of view."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo CameraRotSpeedInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CameraRotSpeedInfo = {
         "CameraRotationSpeed",
         "Camera Rotation Speed",
         "The speed of the rotation of the camera when the camera rotates to look at a "
         "coordinate which is outside of the field of view."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo TargetSpeedInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TargetSpeedInfo = {
         "TargetAnimationSpeed",
         "Target Animation Speed",
         "This determines the speed of the animation of the sky target."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
         "Field of View Animation Speed",
         "This determines the speed of the animation of the field of view in the browser."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo HideWithGuiInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HideWithGuiInfo = {
         "HideTargetsBrowsersWithGui",
         "Hide Targets and Browsers with GUI",
         "If checked, the targets and browsers will be disabled when the sky browser "
         "panel is minimized."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo InverseZoomInfo = {
+    constexpr openspace::properties::Property::PropertyInfo InverseZoomInfo = {
         "InverseZoomDirection",
         "Inverse Zoom Direction",
         "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
         "inversed."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo SpaceCraftTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SpaceCraftTimeInfo = {
         "SpaceCraftAnimationTime",
         "Space Craft Animation Time",
         "Sets the duration (in seconds) of the animation of the space craft when it is "
         "pointed to where the target is aiming."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ImageCollectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ImageCollectionInfo = {
        "WwtImageCollectionUrl",
        "AAS WorldWide Telescope Image Collection Url",
        "The url of the image collection which is loaded into AAS WorldWide Telescope."

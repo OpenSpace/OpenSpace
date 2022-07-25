@@ -318,8 +318,7 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
 glm::vec2 DashboardItemAngle::size() const {
     ZoneScoped
 
-    constexpr const double Angle = 120;
-
+    constexpr double Angle = 120;
     return _font->boundingBox("Angle: " + std::to_string(Angle));
 }
 

@@ -30,7 +30,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -51,7 +50,7 @@ namespace {
     constexpr const char* _loggerCat = "RenderablePlanesCloud";
     constexpr const char* ProgramObjectName = "RenderablePlanesCloud";
 
-    constexpr const int PlanesVertexDataSize = 36;
+    constexpr int PlanesVertexDataSize = 36;
 
     constexpr std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "alphaValue", "fadeInValue", "galaxyTexture"
@@ -407,7 +406,7 @@ void RenderablePlanesCloud::initializeGL() {
 
     if (_hasLabel) {
         if (!_font) {
-            constexpr const int FontSize = 30;
+            constexpr int FontSize = 30;
             _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(FontSize),

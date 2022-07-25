@@ -48,9 +48,9 @@ namespace {
         // Find the position of the current year in the vector, the difference
         // between its position and the position of 2000 (for J2000) gives the
         // number of leap years
-        constexpr const int Epoch = 2000;
-        constexpr const int DaysRegularYear = 365;
-        constexpr const int DaysLeapYear = 366;
+        constexpr int Epoch = 2000;
+        constexpr int DaysRegularYear = 365;
+        constexpr int DaysLeapYear = 366;
 
         if (year == Epoch) {
             return 0;
@@ -192,9 +192,9 @@ namespace {
     }
 
     double calculateSemiMajorAxis(double meanMotion) {
-        constexpr const double GravitationalConstant = 6.6740831e-11;
-        constexpr const double MassEarth = 5.9721986e24;
-        constexpr const double muEarth = GravitationalConstant * MassEarth;
+        constexpr double GravitationalConstant = 6.6740831e-11;
+        constexpr double MassEarth = 5.9721986e24;
+        constexpr double muEarth = GravitationalConstant * MassEarth;
 
         // Use Kepler's 3rd law to calculate semimajor axis
         // a^3 / P^2 = mu / (2pi)^2
@@ -204,7 +204,7 @@ namespace {
         // mu = G*M_earth
         double period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
 
-        constexpr const double pisq = glm::pi<double>() * glm::pi<double>();
+        constexpr double pisq = glm::pi<double>() * glm::pi<double>();
         double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
 
         // We need the semi major axis in km instead of m

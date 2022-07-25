@@ -30,7 +30,7 @@
 #include <vector>
 
 namespace {
-    constexpr const size_t MaxIterations = 8;
+    constexpr size_t MaxIterations = 8;
 } // namespace
 
 namespace openspace::globebrowsing {

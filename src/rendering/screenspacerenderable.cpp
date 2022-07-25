@@ -42,7 +42,7 @@
 #include <variant>
 
 namespace {
-    constexpr const std::array<const char*, 6> UniformNames = {
+    constexpr std::array<const char*, 6> UniformNames = {
         "color", "opacity", "mvpMatrix", "tex", "backgroundColor", "gamma"
     };
 
@@ -53,7 +53,8 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-    UseRadiusAzimuthElevationInfo = {
+        UseRadiusAzimuthElevationInfo =
+    {
         "UseRadiusAzimuthElevation",
         "Use Radius Azimuth and Elevation",
         "This value determines whether the location of this screen space plane will be "
@@ -64,8 +65,8 @@ namespace {
         "planetarium environment."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-    UsePerspectiveProjectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UsePerspectiveProjectionInfo =
+    {
         "UsePerspectiveProjection",
         "Use Perspective Projection",
         "Determines whetether the z/radius values affects the size of the plane or not."
@@ -107,8 +108,7 @@ namespace {
         "Useful for applying a color grayscale images."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background Color",
         "The fixed color that is combined with the screen space renderable to create the "

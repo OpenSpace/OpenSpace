@@ -40,14 +40,14 @@
 namespace {
     constexpr const char* ProgramName = "FovProgram";
 
-    constexpr const std::array<const char*, 9> UniformNames = {
+    constexpr std::array<const char*, 9> UniformNames = {
         "modelViewProjectionTransform", "colorStart", "colorEnd",
         "activeColor", "targetInFieldOfViewColor", "intersectionStartColor",
         "intersectionEndColor", "squareColor", "interpolation"
     };
 
-    constexpr const int InterpolationSteps = 5;
-    constexpr const double Epsilon = 1e-4;
+    constexpr int InterpolationSteps = 5;
+    constexpr double Epsilon = 1e-4;
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",

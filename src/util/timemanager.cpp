@@ -460,7 +460,7 @@ void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
 }
 
 void TimeManager::addDeltaTimesKeybindings() {
-    constexpr const std::array<Key, 10> Keys = {
+    constexpr std::array<Key, 10> Keys = {
         Key::Num1,
         Key::Num2,
         Key::Num3,

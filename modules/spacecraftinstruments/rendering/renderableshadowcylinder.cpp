@@ -37,7 +37,7 @@ namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
     constexpr const char* MainFrame = "GALACTIC";
 
-    constexpr const std::array<const char*, 3> UniformNames = {
+    constexpr std::array<const char*, 3> UniformNames = {
         "modelViewProjectionTransform", "shadowColor", "opacity"
     };
 

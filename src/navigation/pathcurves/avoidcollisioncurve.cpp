@@ -40,12 +40,12 @@
 namespace {
     constexpr const char* _loggerCat = "AvoidCollisionCurve";
 
-    constexpr const double CloseToNodeThresholdRadiusMultiplier = 5.0;
-    constexpr const double AvoidCollisionDistanceRadiusMultiplier = 3.0;
-    constexpr const double CollisionBufferSizeRadiusMultiplier = 1.0;
-    constexpr const int MaxAvoidCollisionSteps = 10;
+    constexpr double CloseToNodeThresholdRadiusMultiplier = 5.0;
+    constexpr double AvoidCollisionDistanceRadiusMultiplier = 3.0;
+    constexpr double CollisionBufferSizeRadiusMultiplier = 1.0;
+    constexpr int MaxAvoidCollisionSteps = 10;
 
-    constexpr const double Epsilon = 1e-5;
+    constexpr double Epsilon = 1e-5;
 } // namespace
 
 namespace openspace::interaction {

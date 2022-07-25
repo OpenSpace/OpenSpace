@@ -37,7 +37,7 @@
 #include <variant>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo EnableInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnableInfo = {
         "Enable",
         "Enabled",
         "If this value is 'true', all the machinery of this rotation is used, of it is "
@@ -45,7 +45,7 @@ namespace {
         "undefined behavior."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo XAxisTypeInfo = {
         "xAxisType",
         "xAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
@@ -54,7 +54,7 @@ namespace {
         "vectors."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo YAxisTypeInfo = {
         "yAxisType",
         "yAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
@@ -63,7 +63,7 @@ namespace {
         "vectors."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisTypeInfo = {
         "zAxisType",
         "zAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
@@ -72,7 +72,7 @@ namespace {
         "vectors."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisObjectInfo = {
+    constexpr openspace::properties::Property::PropertyInfo XAxisObjectInfo = {
         "xAxisObject",
         "xAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
@@ -80,7 +80,7 @@ namespace {
         "stay fixed to the current position of that object."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisObjectInfo = {
+    constexpr openspace::properties::Property::PropertyInfo YAxisObjectInfo = {
         "yAxisObject",
         "yAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
@@ -88,7 +88,7 @@ namespace {
         "stay fixed to the current position of that object."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisObjectInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisObjectInfo = {
         "zAxisObject",
         "zAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
@@ -96,8 +96,7 @@ namespace {
         "stay fixed to the current position of that object."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisInvertObjectInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo XAxisInvertObjectInfo = {
         "xAxisInvertObject",
         "xAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
@@ -105,8 +104,7 @@ namespace {
         "referenced object."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisInvertObjectInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo YAxisInvertObjectInfo = {
         "yAxisInvertObject",
         "yAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
@@ -114,8 +112,7 @@ namespace {
         "referenced object."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisInvertObjectInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisInvertObjectInfo = {
         "zAxisInvertObject",
         "zAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
@@ -123,30 +120,28 @@ namespace {
         "referenced object."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisVectorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo XAxisVectorInfo = {
         "xAxisVector",
         "xAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisVectorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo YAxisVectorInfo = {
         "yAxisVector",
         "yAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisVectorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisVectorInfo = {
         "zAxisVector",
         "zAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-    XAxisOrthogonalVectorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo XAxisOrthogonalVectorInfo = {
         "xAxisOrthogonal",
         "xAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
@@ -154,9 +149,7 @@ namespace {
         "construct an orthogonal vector instead."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-    YAxisOrthogonalVectorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo YAxisOrthogonalVectorInfo = {
         "yAxisOrthogonal",
         "yAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
@@ -164,9 +157,7 @@ namespace {
         "construct an orthogonal vector instead."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-    ZAxisOrthogonalVectorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo ZAxisOrthogonalVectorInfo = {
         "zAxisOrthogonal",
         "zAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
@@ -174,7 +165,7 @@ namespace {
         "construct an orthogonal vector instead."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo AttachedInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AttachedInfo = {
         "Attached",
         "Attached Node",
         "This is the name of the node that this rotation is attached to, this value is "
@@ -508,7 +499,7 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     const glm::vec3 y = yAxis();
     const glm::vec3 z = zAxis();
 
-    constexpr const float Epsilon = 1e-3f;
+    constexpr float Epsilon = 1e-3f;
 
     if (glm::dot(x, y) > 1.f - Epsilon ||
         glm::dot(y, z) > 1.f - Epsilon ||

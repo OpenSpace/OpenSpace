@@ -72,7 +72,7 @@
 namespace {
     constexpr const char* _loggerCat = "RenderEngine";
 
-    constexpr const std::chrono::seconds ScreenLogTimeToLive(15);
+    constexpr std::chrono::seconds ScreenLogTimeToLive(15);
     constexpr const char* RenderFsPath = "${SHADERS}/render.frag";
 
     constexpr const char* KeyFontMono = "Mono";
@@ -794,7 +794,7 @@ void RenderEngine::renderEndscreen() {
         glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
-    constexpr const std::string_view Text = "Shutting down";
+    constexpr std::string_view Text = "Shutting down";
     const glm::vec2 size = _fontShutdown->boundingBox(Text);
     glm::vec2 penPosition = glm::vec2(
         fontResolution().x / 2 - size.x / 2,
@@ -826,7 +826,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         return;
     }
 
-    constexpr const std::string_view FirstLine = "Shutdown in: {:.2f}s/{:.2f}s";
+    constexpr std::string_view FirstLine = "Shutdown in: {:.2f}s/{:.2f}s";
     const glm::vec2 size1 = _fontShutdown->boundingBox(
         fmt::format(FirstLine, timer, fullTime)
     );
@@ -1137,8 +1137,8 @@ void RenderEngine::renderCameraInformation() {
 
     float penPosY = fontResolution().y - rotationBox.y;
 
-    constexpr const float YSeparation = 5.f;
-    constexpr const float XSeparation = 5.f;
+    constexpr float YSeparation = 5.f;
+    constexpr float XSeparation = 5.f;
 
     const interaction::OrbitalNavigator& nav =
         global::navigationHandler->orbitalNavigator();
@@ -1258,10 +1258,10 @@ void RenderEngine::renderScreenLog() {
 
     _log->removeExpiredEntries();
 
-    constexpr const size_t MaxNumberMessages = 20;
-    constexpr const int CategoryLength = 30;
-    constexpr const int MessageLength = 280;
-    constexpr const std::chrono::seconds FadeTime(5);
+    constexpr size_t MaxNumberMessages = 20;
+    constexpr int CategoryLength = 30;
+    constexpr int MessageLength = 280;
+    constexpr std::chrono::seconds FadeTime(5);
 
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
     const glm::ivec2 fontRes = fontResolution();

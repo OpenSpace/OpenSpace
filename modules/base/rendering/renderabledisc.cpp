@@ -39,7 +39,7 @@
 #include <optional>
 
 namespace {
-    constexpr const std::array<const char*, 4> UniformNames = {
+    constexpr std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "colorTexture"
     };
 

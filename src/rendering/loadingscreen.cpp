@@ -43,42 +43,38 @@
 #include <thread>
 
 namespace {
-    constexpr const float LoadingFontSize = 25.f;
-    constexpr const float MessageFontSize = 22.f;
-    constexpr const float ItemFontSize = 10.f;
+    constexpr float LoadingFontSize = 25.f;
+    constexpr float MessageFontSize = 22.f;
+    constexpr float ItemFontSize = 10.f;
 
-    constexpr const glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
-    constexpr const glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
+    constexpr glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
+    constexpr glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
 
-    constexpr const glm::vec2 ProgressbarCenter = glm::vec2(0.f, -0.75f);  // in NDC
-    constexpr const glm::vec2 ProgressbarSize = glm::vec2(0.7f, 0.0075f);  // in NDC
-    constexpr const float ProgressbarLineWidth = 0.0025f;  // in NDC
+    constexpr glm::vec2 ProgressbarCenter = glm::vec2(0.f, -0.75f);  // in NDC
+    constexpr glm::vec2 ProgressbarSize = glm::vec2(0.7f, 0.0075f);  // in NDC
+    constexpr float ProgressbarLineWidth = 0.0025f;  // in NDC
 
-    constexpr const glm::vec4 ProgressbarOutlineColor =
-        glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
+    constexpr glm::vec4 ProgressbarOutlineColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
 
-    constexpr const glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
-    constexpr const glm::vec4 PhaseColorSynchronization =
-        glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
-    constexpr const glm::vec4 PhaseColorInitialization =
-        glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+    constexpr glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    constexpr glm::vec4 PhaseColorSynchronization = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
+    constexpr glm::vec4 PhaseColorInitialization = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
 
-    constexpr const glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
-    constexpr const glm::vec4 ItemStatusColorInitializing =
-        glm::vec4(0.7f, 0.7f, 0.f, 1.f);
-    constexpr const glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
-    constexpr const glm::vec4 ItemStatusColorFailed = glm::vec4(0.8f, 0.1f, 0.1f, 1.f);
+    constexpr glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+    constexpr glm::vec4 ItemStatusColorInitializing = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    constexpr glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+    constexpr glm::vec4 ItemStatusColorFailed = glm::vec4(0.8f, 0.1f, 0.1f, 1.f);
 
-    constexpr const float ItemStandoffDistance = 5.f; // in pixels
+    constexpr float ItemStandoffDistance = 5.f; // in pixels
 
-    constexpr const float LoadingTextPosition = 0.275f;  // in NDC
-    constexpr const float StatusMessageOffset = 0.225f;  // in NDC
+    constexpr float LoadingTextPosition = 0.275f;  // in NDC
+    constexpr float StatusMessageOffset = 0.225f;  // in NDC
 
-    constexpr const int MaxNumberLocationSamples = 1000;
+    constexpr int MaxNumberLocationSamples = 1000;
 
-    constexpr const std::chrono::milliseconds TTL(5000);
+    constexpr std::chrono::milliseconds TTL(5000);
 
-    constexpr const std::chrono::milliseconds RefreshRate(16);
+    constexpr std::chrono::milliseconds RefreshRate(16);
 
     bool rectOverlaps(glm::vec2 lhsLl, glm::vec2 lhsUr, glm::vec2 rhsLl, glm::vec2 rhsUr)
     {

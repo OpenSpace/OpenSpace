@@ -98,8 +98,7 @@ namespace {
         "seconds. A value of 2 means twice that fast, and so on."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
         "MinimalValidBoundingSphere",
         "Minimal Valid Bounding Sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "

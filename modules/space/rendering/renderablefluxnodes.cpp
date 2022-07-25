@@ -34,7 +34,6 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
@@ -49,7 +48,7 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableFluxNodes";
 
-    constexpr const std::array<const char*, 29> UniformNames = {
+    constexpr std::array<const char*, 29> UniformNames = {
         "streamColor", "nodeSize", "proximityNodesSize",
         "thresholdFlux", "colorMode", "filterLower", "filterUpper", "scalingMode",
         "colorTableRange", "domainLimZ", "nodeSkip", "nodeSkipDefault", "nodeSkipEarth",

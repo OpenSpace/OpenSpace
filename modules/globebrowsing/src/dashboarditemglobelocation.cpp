@@ -43,7 +43,7 @@
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
+    constexpr float DefaultFontSize = 10.f;
 
     constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",

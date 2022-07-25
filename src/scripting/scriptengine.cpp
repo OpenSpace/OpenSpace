@@ -45,7 +45,7 @@
 namespace {
     constexpr const char* _loggerCat = "ScriptEngine";
 
-    constexpr const int TableOffset = -3; // top-first argument-second argument
+    constexpr int TableOffset = -3; // top-first argument-second argument
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;

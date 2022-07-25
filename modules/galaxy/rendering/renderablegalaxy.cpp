@@ -63,12 +63,12 @@ namespace {
         Billboards
     };
 
-    constexpr const std::array<const char*, 4> UniformNamesPoints = {
+    constexpr std::array<const char*, 4> UniformNamesPoints = {
         "modelMatrix", "viewProjectionMatrix", "eyePosition",
         "opacityCoefficient"
     };
 
-    constexpr const std::array<const char*, 5> UniformNamesBillboards = {
+    constexpr std::array<const char*, 5> UniformNamesBillboards = {
         "modelMatrix", "viewProjectionMatrix",
         "cameraUp", "eyePosition", "psfTexture"
     };

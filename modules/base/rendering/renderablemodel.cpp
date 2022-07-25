@@ -48,11 +48,11 @@ namespace {
     constexpr const char* _loggerCat = "RenderableModel";
     constexpr const char* ProgramName = "ModelProgram";
 
-    constexpr const int DefaultBlending = 0;
-    constexpr const int AdditiveBlending = 1;
-    constexpr const int PointsAndLinesBlending = 2;
-    constexpr const int PolygonBlending = 3;
-    constexpr const int ColorAddingBlending = 4;
+    constexpr int DefaultBlending = 0;
+    constexpr int AdditiveBlending = 1;
+    constexpr int PointsAndLinesBlending = 2;
+    constexpr int PolygonBlending = 3;
+    constexpr int ColorAddingBlending = 4;
 
     std::map<std::string, int> BlendingMapping = {
         { "Default", DefaultBlending },
@@ -68,7 +68,7 @@ namespace {
         "Enable or disable the animation for the model if it has any"
     };
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",

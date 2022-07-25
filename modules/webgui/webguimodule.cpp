@@ -41,7 +41,7 @@
 namespace {
     constexpr const char* _loggerCat = "WebGuiModule";
     constexpr const char* DefaultAddress = "localhost";
-    constexpr const int DefaultPort = 4680;
+    constexpr int DefaultPort = 4680;
 
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",

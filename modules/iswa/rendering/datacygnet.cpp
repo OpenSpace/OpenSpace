@@ -37,7 +37,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "DataCygnet";
-    constexpr const int MaxTextures = 6;
+    constexpr int MaxTextures = 6;
 
     constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",

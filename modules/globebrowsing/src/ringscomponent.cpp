@@ -34,7 +34,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -54,13 +53,13 @@
 namespace {
     constexpr const char* _loggerCat = "RingsComponent";
 
-    constexpr const std::array<const char*, 9> UniformNames = {
+    constexpr std::array<const char*, 9> UniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
         "zFightingPercentage"
     };
 
-    constexpr const std::array<const char*, 15> UniformNamesAdvancedRings = {
+    constexpr std::array<const char*, 15> UniformNamesAdvancedRings = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd",
         "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor",
@@ -68,7 +67,7 @@ namespace {
         "zFightingPercentage"
     };
 
-    constexpr const std::array<const char*, 3> GeomUniformNames = {
+    constexpr std::array<const char*, 3> GeomUniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "ringTexture"
     };
 

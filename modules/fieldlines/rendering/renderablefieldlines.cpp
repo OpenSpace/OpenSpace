@@ -39,7 +39,7 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableFieldlines";
 
-    constexpr const float DefaultFieldlineStepSize = 0.5f;
+    constexpr float DefaultFieldlineStepSize = 0.5f;
     const glm::vec4 DefaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
     constexpr const char* KeyVectorField = "VectorField";
@@ -67,8 +67,8 @@ namespace {
 
     constexpr const char* VectorFieldKameleonVariableLorentz = "Lorentz";
 
-    constexpr const int SeedPointSourceFile = 0;
-    constexpr const int SeedPointSourceTable = 1;
+    constexpr int SeedPointSourceFile = 0;
+    constexpr int SeedPointSourceTable = 1;
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         KeyFieldlinesStepSize,
