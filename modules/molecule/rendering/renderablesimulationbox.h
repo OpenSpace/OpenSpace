@@ -59,11 +59,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum class GlDeferredTask {
-        None,
-        LoadMolecule,
-    } _deferredTask;
-
     struct molecule_state_t {
         glm::dvec3 position;
         double angle;
@@ -82,7 +77,6 @@ private:
         md_gl_molecule_t drawMol;
     };
     
-    void handleDeferredTasks();
     void updateAnimation(molecule_data_t& mol, double t);
     void updateSimulation(molecule_data_t& mol, double dt);
     void applyTransforms();

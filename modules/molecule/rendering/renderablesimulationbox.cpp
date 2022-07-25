@@ -253,7 +253,6 @@ documentation::Documentation RenderableSimulationBox::Documentation() {
 
 RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
-    _deferredTask(GlDeferredTask::None),
     _moleculeFiles(MoleculeFilesInfo),
     _trajectoryFiles(TrajectoryFilesInfo),
     _repType(RepTypeInfo),
@@ -309,7 +308,6 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     
     _repScale = p.repScale.value_or(1.f);
     _animationSpeed = p.animationSpeed.value_or(1.f);
-    _deferredTask = GlDeferredTask::LoadMolecule;
     
     for (int count : _moleculeCounts.value()) {
         molecule_data_t mol {
@@ -335,6 +333,14 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         
         _molecules.push_back(mol);
     }
+    
+    _repScale.onChange([this] () {
+        for (molecule_data_t& mol: _molecules) {
+            if (mol.moleculeApi) {
+                updateRepresentation(mol);
+            }
+        }
+    });
 
     addProperty(_repType);
     addProperty(_coloring);
@@ -362,6 +368,17 @@ void RenderableSimulationBox::initializeGL() {
     md_gl_initialize();
     md_gl_shaders_init(&_shaders, shader_output_snippet);
     billboardGlInit();
+
+    size_t i = 0;
+    for (molecule_data_t& mol : _molecules) {
+        std::string molFile = _moleculeFiles.value().at(i);
+        std::string trajFile = _trajectoryFiles.value().at(i);
+
+        initMolecule(mol, molFile);
+        if (trajFile != "")
+            initTrajectory(mol, trajFile);
+        i++;
+    }
 }
 
 void RenderableSimulationBox::deinitializeGL() {
@@ -373,28 +390,6 @@ void RenderableSimulationBox::deinitializeGL() {
 bool RenderableSimulationBox::isReady() const {
     return true;
 }
-
-void RenderableSimulationBox::handleDeferredTasks() {
-    // This is a dirty hack to load molecules in a gl context.
-    switch (_deferredTask) {
-    case GlDeferredTask::None:
-        break;
-    case GlDeferredTask::LoadMolecule:
-        size_t i = 0;
-        for (molecule_data_t& mol : _molecules) {
-            std::string molFile = _moleculeFiles.value().at(i);
-            std::string trajFile = _trajectoryFiles.value().at(i);
-
-            initMolecule(mol, molFile);
-            if (trajFile != "")
-                initTrajectory(mol, trajFile);
-            i++;
-        }
-        break;
-    }
-    _deferredTask = GlDeferredTask::None;
-}
-
 void RenderableSimulationBox::updateAnimation(molecule_data_t& mol, double time) {
     int64_t nFrames = md_trajectory_num_frames(mol.trajectory);
     if (nFrames >= 4) {
@@ -524,8 +519,6 @@ void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) 
 }
 
 void RenderableSimulationBox::update(const UpdateData& data) {
-    handleDeferredTasks();
-    
     double t = data.time.j2000Seconds();
     double dt = t - data.previousFrameTime.j2000Seconds();
     
@@ -627,16 +620,8 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::string& file) {
     LDEBUG("Loading molecule file '" + file + "'");
 
-    // // set the updateRepresentation hook once, when the molecule is first initialized
-    if (!mol.moleculeApi) {
-    //     const auto updateRep = [this]() { updateRepresentation(mol); };
-    //     _repType.onChange(updateRep);
-    //     _repScale.onChange(updateRep);
-    //     _coloring.onChange(updateRep);
-    }
-    
     // free previously loaded molecule
-    else {
+    if (mol.moleculeApi) {
         freeMolecule(mol);
     }
     
