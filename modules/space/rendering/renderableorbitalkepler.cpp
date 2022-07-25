@@ -166,12 +166,13 @@ namespace {
         return dayCount;
     }
 
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
         "The file path to the data file to read"
     };
-    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
+
+    constexpr openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
         "SegmentQuality",
         "Segment Quality",
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
@@ -179,6 +180,7 @@ namespace {
         "orbital trail. This does not control the direct number of segments because "
         "these automatically increase according to the eccentricity of the orbit."
     };
+
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -186,23 +188,27 @@ namespace {
         "method includes lines. If the rendering mode is set to Points, this value is "
         "ignored."
     };
+    
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "This value determines the RGB main color for the lines and points of the trail."
     };
+
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade",
         "This value determines how fast the trail fades and is an appearance property. "
     };
-    static const openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
+
+    constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
         "Index of object in renderable group to start rendering (all prior objects will "
         "be ignored)."
     };
-    static const openspace::properties::Property::PropertyInfo RenderSizeInfo = {
+
+    constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
         "Contiguous Size of Render Block",
         "Number of objects to render sequentially from StartRenderIdx"

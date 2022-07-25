@@ -52,7 +52,7 @@ namespace {
 
     const float SecondsInOneDay = 60 * 60 * 24;
 
-    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "Specifies how often to sample on the raycaster. Lower step -> higher resolution."

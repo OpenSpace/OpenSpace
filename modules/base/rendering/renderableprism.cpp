@@ -54,13 +54,13 @@ namespace {
         "up the shape of the prism."
     };
 
-    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "The radius of the prism's shape in meters."
     };
 
-    static const openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
         "Base Radius",
         "The radius of the base of the prism's shape, in meters. By default it is "
