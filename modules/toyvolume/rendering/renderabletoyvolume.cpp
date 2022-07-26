@@ -85,7 +85,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
-    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f )
+    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
     , _rotation(
         RotationInfo,

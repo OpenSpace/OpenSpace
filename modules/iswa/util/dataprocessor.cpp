@@ -83,11 +83,11 @@ float DataProcessor::normalizeWithStandardScore(float value, float mean, float s
 {
     float zScoreMin = normalizationValues.x;
     float zScoreMax = normalizationValues.y;
-    float standardScore = ( value - mean ) / sd;
+    float standardScore = (value - mean) / sd;
     // Clamp intresting values
     standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
     //return and normalize
-    return ( standardScore + zScoreMin ) / (zScoreMin + zScoreMax );
+    return (standardScore + zScoreMin) / (zScoreMin + zScoreMax);
 }
 
 float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean,

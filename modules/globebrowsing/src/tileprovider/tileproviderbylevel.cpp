@@ -86,7 +86,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             static_cast<int>(_levelTileProviders.size()) - 1;
     }
 
-    // Fill in the gaps (value -1 ) in provider indices, from back to end
+    // Fill in the gaps (value -1) in provider indices, from back to end
     for (int i = static_cast<int>(_providerIndices.size()) - 2; i >= 0; --i) {
         if (_providerIndices[i] == -1) {
             _providerIndices[i] = _providerIndices[i + 1];

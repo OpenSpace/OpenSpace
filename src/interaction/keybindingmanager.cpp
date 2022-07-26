@@ -88,7 +88,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
 void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
     // Erase-remove idiom does not work for std::multimap so we have to do this on foot
 
-    for (auto it = _keyLua.begin(); it != _keyLua.end(); ) {
+    for (auto it = _keyLua.begin(); it != _keyLua.end();) {
         // If the current iterator is the key that we are looking for, delete it
         // (std::multimap::erase will return the iterator to the next element for us)
         if (it->first == key) {

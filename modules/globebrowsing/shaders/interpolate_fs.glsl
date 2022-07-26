@@ -24,12 +24,13 @@
 
 #include "fragment.glsl"
 
+in vec2 texCoord;
+
 uniform sampler2D prevTexture;
 uniform sampler2D nextTexture;
 uniform sampler1D colormapTexture;
 uniform float blendFactor;
 
-in vec2 texCoord;
 
 Fragment getFragment() {
   vec4 texel0 = texture(prevTexture, texCoord);

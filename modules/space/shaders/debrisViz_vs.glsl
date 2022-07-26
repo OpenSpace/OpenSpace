@@ -38,15 +38,14 @@ uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform double inGameTime;
 
+
 void main() {
-  /*
-   * The way the position and line fade is calculated is:
-   * By using inGameTime, epoch and period of this orbit, we get how many revolutions it
-   * has done since epoch. The fract of that, is how far into a revolution it has traveled
-   * since epoch. Similarly we do the same but for this vertex, but calculating
-   * offsetPeriods. In the fragment shader the difference between periodFraction_f and
-   * offsetPeriods is calculated to know how much to fade that specific fragment.
-   */
+  // The way the position and line fade is calculated is:
+  // By using inGameTime, epoch and period of this orbit, we get how many revolutions it
+  // has done since epoch. The fract of that, is how far into a revolution it has traveled
+  // since epoch. Similarly we do the same but for this vertex, but calculating
+  // offsetPeriods. In the fragment shader the difference between periodFraction_f and
+  // offsetPeriods is calculated to know how much to fade that specific fragment.
 
   // If orbit_data is doubles, cast to float first
   float epoch = orbitData.x;

@@ -257,7 +257,7 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
     file.open(filename);
 
     int numberOfLines = std::count(std::istreambuf_iterator<char>(file),
-                                   std::istreambuf_iterator<char>(), '\n' );
+                                   std::istreambuf_iterator<char>(), '\n');
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
 
     // 3 because a TLE has 3 lines per element/ object.
@@ -404,19 +404,19 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
         });
         // LINFO(fmt::format("cart: {} ", position));
         glm::dvec3 sphPos;
-        if( gridType == "Spherical"){
+        if (gridType == "Spherical"){
             sphPos = cartesianToSphericalCoord(position);
 
-            if(sphPos.y < minTheta){
+            if (sphPos.y < minTheta){
                 minTheta = sphPos.y;
             }
-            if(sphPos.z < minPhi){
+            if (sphPos.z < minPhi){
                 minPhi = sphPos.z;
             }
-            if(sphPos.y > maxTheta){
+            if (sphPos.y > maxTheta){
                 maxTheta = sphPos.y;
             }
-            if(sphPos.z > maxPhi){
+            if (sphPos.z > maxPhi){
                 maxPhi = sphPos.z;
             }
             // LINFO(fmt::format("pos: {} ", sphPos));
@@ -478,7 +478,7 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee,
     // epsilon is to make sure that for example if newPosition.x/maxApogee = 1,
     // then the index for that dimension will not exceed the range of the grid.
     float epsilon = static_cast<float>(0.000000001);
-    if(gridType == "Cartesian"){ //|| gridType == "Spherical"){
+    if (gridType == "Cartesian"){ //|| gridType == "Spherical"){
         glm::dvec3 newPosition = glm::dvec3(position.x + maxApogee
                                         ,position.y + maxApogee
                                         ,position.z + maxApogee);
@@ -493,12 +493,11 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee,
         return coordinateIndex.z * (dim.x * dim.y) +
             coordinateIndex.y * dim.x + coordinateIndex.x;
     }
-    else if(gridType == "Spherical"){
-
-        if(position.y >= 3.1415926535897932384626433832795028){
+    else if (gridType == "Spherical"){
+        if (position.y >= 3.1415926535897932384626433832795028){
             position.y = 0;
         }
-        if(position.z >= (2 * 3.1415926535897932384626433832795028)){
+        if (position.z >= (2 * 3.1415926535897932384626433832795028)){
             position.z = 0;
         }
 
@@ -541,10 +540,10 @@ double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positio
         //LINFO(fmt::format("pos: {} ", position));
         int index = getIndexFromPosition(position, dim, maxApogee, gridType);
         //LINFO(fmt::format("index: {} ", index));
-        if(gridType == "Cartesian"){
+        if (gridType == "Cartesian"){
             ++densityArray[index];
         }
-        else if(gridType == "Spherical"){
+        else if (gridType == "Spherical"){
             // something like this
             double voxelVolume = getVoxelVolume(index, raw, dim, maxApogee);
             densityArray[index] += 1/voxelVolume;
@@ -637,10 +636,10 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
 
     //////////
     VolumeGridType GridType = VolumeGridType::Cartesian;
-    if(_gridType == "Spherical"){
+    if (_gridType == "Spherical"){
         GridType = VolumeGridType::Spherical;
     }
-    else if(_gridType != "Cartesian"){
+    else if (_gridType != "Cartesian"){
         // TODO:: Error message
         return;
     }

@@ -418,7 +418,7 @@ OrbitalNavigator::OrbitalNavigator()
     // lerp(endValue, startValue, interpolationParameter).
     //
     // The transfer functions are derived from:
-    // f(t) = d/dt ( ln(1 / f_orig(t)) ) where f_orig is the transfer function that would
+    // f(t) = d/dt (ln(1 / f_orig(t))) where f_orig is the transfer function that would
     // be used if the interpolation was sinply linear between a start value and an end
     // value instead of current value and end value (0) as we use it when inerpoláting.
     // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear

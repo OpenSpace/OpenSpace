@@ -235,7 +235,7 @@ namespace openspace {
 AtmosphereDeferredcaster::AtmosphereDeferredcaster(float textureScale,
                                        std::vector<ShadowConfiguration> shadowConfigArray,
                                                               bool saveCalculatedTextures)
-    : _transmittanceTableSize(glm::ivec2(256 * textureScale, 64 * textureScale) )
+    : _transmittanceTableSize(glm::ivec2(256 * textureScale, 64 * textureScale))
     , _irradianceTableSize(glm::ivec2(64 * textureScale, 16 * textureScale))
     , _deltaETableSize(glm::ivec2(64 * textureScale, 16 * textureScale))
     , _muSSamples(static_cast<int>(32 * textureScale))

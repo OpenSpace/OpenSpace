@@ -34,14 +34,15 @@ out float vs_screenSpaceDepth;
 
 uniform mat4 modelViewProjectionTransform;
 
+
 void main() {
-    vec4 position = vec4(in_position.xy, 0.0, 1.0);
-    vec4 positionScreenSpace = z_normalization(modelViewProjectionTransform * position);
+  vec4 position = vec4(in_position.xy, 0.0, 1.0);
+  vec4 positionScreenSpace = z_normalization(modelViewProjectionTransform * position);
 
-    // Moving the origin to the center
-    vs_st = (in_st - vec2(0.5)) * 2.0;
+  // Moving the origin to the center
+  vs_st = (in_st - vec2(0.5)) * 2.0;
 
-    vs_screenSpaceDepth = positionScreenSpace.w;
+  vs_screenSpaceDepth = positionScreenSpace.w;
 
-    gl_Position = positionScreenSpace;
+  gl_Position = positionScreenSpace;
 }

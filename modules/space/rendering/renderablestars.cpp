@@ -123,7 +123,7 @@ namespace {
         "The speck file that is loaded to get the data for rendering these stars."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "ColorBV Texture",
         "The path to the texture that is used to convert from the B-V value of the star "

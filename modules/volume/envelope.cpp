@@ -99,7 +99,7 @@ glm::vec3 Envelope::normalizeColor(glm::vec3 vec) const {
 
 glm::vec4 Envelope::valueAtPosition(float pos) const {
     auto afterIter = _points.begin();
-    while (afterIter->position.first < pos ) {
+    while (afterIter->position.first < pos) {
         if (afterIter == _points.end()) {
             return { 0.f, 0.f, 0.f ,0.f };
         }

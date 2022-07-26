@@ -51,6 +51,7 @@ const int VertexColorTypeIntersectionStart = 4;
 const int VertexColorTypeIntersectionEnd = 5;
 const int VertexColorTypeSquare = 6;
 
+
 void main() {
   vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_point_position, 1.0);
 

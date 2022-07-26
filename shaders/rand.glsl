@@ -28,8 +28,8 @@
 /**
  * Return a random number between 0 and 1, based on a vec2
  */
-float rand(vec2 co){
-    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+float rand(vec2 co) {
+  return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 #endif

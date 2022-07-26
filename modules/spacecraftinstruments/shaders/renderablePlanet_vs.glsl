@@ -41,6 +41,7 @@ uniform float heightExaggeration;
 uniform sampler2D heightTexture;
 uniform bool meridianShift;
 
+
 void main() {
   vs_st = in_st;
 

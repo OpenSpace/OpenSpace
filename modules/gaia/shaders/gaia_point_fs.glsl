@@ -26,7 +26,18 @@
 
 #include "floatoperations.glsl"
 
+in vec2 ge_brightness;
+in vec4 ge_gPosition;
+in float ge_starDistFromSun;
+in float ge_cameraDistFromSun;
+in float ge_observedDist;
+
 layout (location = 0) out vec4 outColor;
+
+uniform sampler1D colorTexture;
+uniform float luminosityMultiplier;
+uniform int renderOption;
+uniform float viewScaling;
 
 // Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
@@ -35,63 +46,54 @@ const int RENDEROPTION_MOTION = 2;
 const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
 const float LUM_LOWER_CAP = 0.01;
 
-in vec2 ge_brightness;
-in vec4 ge_gPosition;
-in float ge_starDistFromSun;
-in float ge_cameraDistFromSun;
-in float ge_observedDist;
-
-uniform sampler1D colorTexture;
-uniform float luminosityMultiplier;
-uniform int renderOption;
-uniform float viewScaling;
 
 vec3 color2rgb(float color) {
-    // BV is [-0.4, 2.0]
-    float st = (color + 0.4) / (2.0 + 0.4);
+  // BV is [-0.4, 2.0]
+  float st = (color + 0.4) / (2.0 + 0.4);
 
-    // Bp-Rp[-2.0, 6.5], Bp-G[-2.1, 5.0], G-Rp[-1.0, 3.0]
-    //float st = (color + 1.0) / (5.0 + 1.0);
+  // Bp-Rp[-2.0, 6.5], Bp-G[-2.1, 5.0], G-Rp[-1.0, 3.0]
+  //float st = (color + 1.0) / (5.0 + 1.0);
 
-    return texture(colorTexture, st).rgb;
+  return texture(colorTexture, st).rgb;
 }
 
+
 void main() {
-    // Assume all stars has equal luminosity as the Sun when no magnitude is loaded.
-    float luminosity = 0.05;
-    vec3 color = vec3(luminosity);
-    float ratioMultiplier = 1.0;
+  // Assume all stars has equal luminosity as the Sun when no magnitude is loaded.
+  float luminosity = 0.05;
+  vec3 color = vec3(luminosity);
+  float ratioMultiplier = 1.0;
 
-    // Calculate the color and luminosity if we have the magnitude and B-V color.
-    if (renderOption != RENDEROPTION_STATIC) {
-        color = color2rgb(ge_brightness.y);
-        ratioMultiplier = 0.01;
+  // Calculate the color and luminosity if we have the magnitude and B-V color.
+  if (renderOption != RENDEROPTION_STATIC) {
+    color = color2rgb(ge_brightness.y);
+    ratioMultiplier = 0.01;
 
-        // Absolute magnitude is brightness a star would have at 10 pc away.
-        float absoluteMagnitude = ge_brightness.x;
+    // Absolute magnitude is brightness a star would have at 10 pc away.
+    float absoluteMagnitude = ge_brightness.x;
 
-        // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
-        // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
-        luminosity = pow(10.0, 1.89 - 0.4 * absoluteMagnitude);
+    // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
+    // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
+    luminosity = pow(10.0, 1.89 - 0.4 * absoluteMagnitude);
 
-        // If luminosity is really really small then set it to a static low number.
-        if (luminosity < LUM_LOWER_CAP) {
-            luminosity = LUM_LOWER_CAP;
-        }
+    // If luminosity is really really small then set it to a static low number.
+    if (luminosity < LUM_LOWER_CAP) {
+      luminosity = LUM_LOWER_CAP;
     }
+  }
 
-    // Luminosity decrease by {squared} distance [measured in Pc].
-    float observedDistance = ge_observedDist / ONE_PARSEC;
-    luminosity /= pow(observedDistance, 2.0);
+  // Luminosity decrease by {squared} distance [measured in Pc].
+  float observedDistance = ge_observedDist / ONE_PARSEC;
+  luminosity /= pow(observedDistance, 2.0);
 
-    // Multiply our color with the luminosity as well as a user-controlled property.
-    color *= luminosity * pow(luminosityMultiplier, 3.0);
+  // Multiply our color with the luminosity as well as a user-controlled property.
+  color *= luminosity * pow(luminosityMultiplier, 3.0);
 
-    // Decrease contributing brightness for stars in central cluster.
-    if (ge_cameraDistFromSun > ge_starDistFromSun) {
-        float ratio = ge_starDistFromSun / ge_cameraDistFromSun;
-        //color *= ratio * ratioMultiplier;
-    }
+  // Decrease contributing brightness for stars in central cluster.
+  if (ge_cameraDistFromSun > ge_starDistFromSun) {
+    float ratio = ge_starDistFromSun / ge_cameraDistFromSun;
+    //color *= ratio * ratioMultiplier;
+  }
 
-    outColor = vec4(color, 1.0f);
+  outColor = vec4(color, 1.0f);
 }

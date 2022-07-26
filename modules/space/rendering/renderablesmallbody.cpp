@@ -49,7 +49,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "SmallSolarSystemBody";
 
-    static const openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous Mode",
         "If enabled, then the contiguous set of objects starting from StartRenderIdx "
@@ -57,7 +57,8 @@ namespace {
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
         "full length of the data file."
     };
-    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
+    
+    constexpr openspace::properties::Property::PropertyInfo UpperLimitInfo = {
         "UpperLimit",
         "Upper Limit",
         "Upper limit on the number of objects for this renderable, regardless of "

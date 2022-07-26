@@ -333,7 +333,7 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
     parentId /= 10;
 
     //--------- Change all indices until we find a common parent --------------//
-    while (parentId != 8 && (needToSwitchX || needToSwitchY || needToSwitchZ) ) {
+    while (parentId != 8 && (needToSwitchX || needToSwitchY || needToSwitchZ)) {
         nodeIndex = parentId % 10;
 
         dx = (nodeIndex % 2 == 0) ? 1 : -1;
@@ -1105,7 +1105,6 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
                                                                     gaia::RenderMode mode)
 {
     std::map<int, std::vector<float>> fetchedData;
-    //int depth  = static_cast<int>(log2( MAX_DIST / node->halfDimension ));
 
     // Calculate the corners of the node.
     std::vector<glm::dvec4> corners(8);

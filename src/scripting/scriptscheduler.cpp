@@ -142,7 +142,7 @@ void ScriptScheduler::rewind() {
 
 void ScriptScheduler::clearSchedule(std::optional<int> group) {
     if (group.has_value()) {
-        for (auto it = _scripts.begin(); it < _scripts.end(); ) {
+        for (auto it = _scripts.begin(); it < _scripts.end();) {
             if (it->group == *group) {
                 it = _scripts.erase(it);
             }

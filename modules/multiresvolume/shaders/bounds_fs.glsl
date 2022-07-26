@@ -30,11 +30,11 @@ in vec4 worldPosition;
 
 
 Fragment getFragment() {
-    vec4 position = worldPosition;
-    float depth = pscDepth(position);
+  vec4 position = worldPosition;
+  float depth = pscDepth(position);
 
-    Fragment frag;
-    frag.color = vec4(vPosition + 0.5, 1.0);
-    frag.depth = depth;
-    return frag;
+  Fragment frag;
+  frag.color = vec4(vPosition + 0.5, 1.0);
+  frag.depth = depth;
+  return frag;
 }

@@ -79,7 +79,7 @@ TouchInputHolder::TouchInputHolder(TouchInput input)
 {}
 
 bool TouchInputHolder::tryAddInput(TouchInput input) {
-    if(_inputs.empty()) {
+    if (_inputs.empty()) {
         _inputs.emplace_front(input);
         return true;
     }

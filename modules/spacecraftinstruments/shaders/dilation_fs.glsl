@@ -42,6 +42,7 @@ vec2 offsets[8] = vec2[](
   vec2( 1.0,  1.0)
 );
 
+
 // Collect the contributing colors from the neighboring texels and return the averaged
 // value of all texels that passed the masking test based on 'stencil'
 vec3 gatherNeighboringColors() {
@@ -76,6 +77,7 @@ vec3 gatherNeighboringColors() {
     return vec3(0.0);
   }
 }
+
 
 void main() {
   if (texture(stencil, vs_uv).r == 0.0) {

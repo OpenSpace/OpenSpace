@@ -64,9 +64,9 @@ uniform vec3 p01;
 uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
 uniform float chunkMinHeight;
-
 uniform float distanceScaleFactor;
 uniform int chunkLevel;
+
 
 vec3 bilinearInterpolation(vec2 uv) {
   vec3 p0 = mix(p00, p10, uv.x);
@@ -85,6 +85,7 @@ vec3 getLevelWeights(float distToVertexOnEllipsoid) {
     clamp(levelInterp - 1.0, 0.0, 1.0)
   );
 }
+
 
 void main() {
   // Position in cameraspace

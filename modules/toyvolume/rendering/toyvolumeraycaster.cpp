@@ -40,9 +40,9 @@ namespace {
     constexpr std::string_view GlslRaycastPath =
         "${MODULE_TOYVOLUME}/shaders/raycast.glsl";
     constexpr std::string_view GlslBoundsVsPath =
-        "${MODULE_TOYVOLUME}/shaders/boundsvs.glsl";
+        "${MODULE_TOYVOLUME}/shaders/bounds_vs.glsl";
     constexpr std::string_view GlslBoundsFsPath =
-        "${MODULE_TOYVOLUME}/shaders/boundsfs.glsl";
+        "${MODULE_TOYVOLUME}/shaders/bounds_fs.glsl";
 } // namespace
 
 namespace openspace {

@@ -182,7 +182,7 @@ bool LabelParser::create() {
 
             line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
             line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end() );
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
             std::string read = line.substr(0, line.find_first_of('='));
 

@@ -28,11 +28,10 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 4) out;
-
 in vec4 vs_gPosition[];
 in vec3 vs_color[];
 
+layout(triangle_strip, max_vertices = 4) out;
 out vec4 vs_position;
 out vec2 psfCoords;
 flat out vec3 ge_color;
@@ -44,6 +43,7 @@ uniform dmat4 viewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
 const double PARSEC = 3.08567756E16;
+
 
 void main() {
   vs_position = gl_in[0].gl_Position;

@@ -31,6 +31,7 @@ uniform float opacity;
 uniform float thickness;
 uniform vec3 color;
 
+
 Fragment getFragment() {
   // calculate normal from texture coordinates
   vec3 n;

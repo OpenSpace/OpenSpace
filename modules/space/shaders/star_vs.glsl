@@ -33,6 +33,7 @@ out vec4 vs_bvLumAbsMagAppMag;
 out vec3 vs_velocity;
 out float vs_speed;
 
+
 void main() {
   vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
   vs_velocity = in_velocity;
