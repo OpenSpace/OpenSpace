@@ -342,7 +342,7 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
     const size_t HeightChannel = 0;
-    const LayerGroup& heightmaps = lm.layerGroup(layergroupid::GroupID::HeightLayers);
+    const LayerGroup& heightmaps = lm.layerGroup(layers::Group::ID::HeightLayers);
 
     ChunkTileVector chunkTileSettingPairs = tilesAndSettingsUnsorted(
         heightmaps,
@@ -399,8 +399,7 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
 bool colorAvailableForChunk(const Chunk& chunk, const LayerManager& lm) {
     ZoneScoped
 
-    const LayerGroup& colorLayers = lm.layerGroup(layergroupid::GroupID::ColorLayers);
-
+    const LayerGroup& colorLayers = lm.layerGroup(layers::Group::ID::ColorLayers);
     for (Layer* lyr : colorLayers.activeLayers()) {
         if (lyr->tileProvider()) {
             ChunkTile t = lyr->tileProvider()->chunkTile(chunk.tileIndex);
@@ -978,9 +977,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             _globalRenderer.gpuLayerGroups[i].bind(
                 *_globalRenderer.program,
-                *layerGroups[i],
-                layergroupid::LAYER_GROUP_IDENTIFIERS[i],
-                static_cast<int>(i)
+                *layerGroups[i]
             );
         }
 
@@ -1002,9 +999,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             _localRenderer.gpuLayerGroups[i].bind(
                 *_localRenderer.program,
-                *layerGroups[i],
-                layergroupid::LAYER_GROUP_IDENTIFIERS[i],
-                static_cast<int>(i)
+                *layerGroups[i]
             );
         }
 
@@ -1063,9 +1058,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     _globalRenderer.program->setUniform("modelViewTransform", modelViewTransform);
 
-    const bool hasHeightLayer = !_layerManager.layerGroup(
-        layergroupid::HeightLayers
-    ).activeLayers().empty();
+    const bool hasHeightLayer =
+        !_layerManager.layerGroup(layers::Group::ID::HeightLayers).activeLayers().empty();
     if (_generalProperties.useAccurateNormals && hasHeightLayer) {
         // Apply an extra scaling to the height if the object is scaled
         _globalRenderer.program->setUniform(
@@ -1076,10 +1070,11 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         );
     }
 
+    using namespace layers;
     const bool nightLayersActive =
-        !_layerManager.layerGroup(layergroupid::NightLayers).activeLayers().empty();
+        !_layerManager.layerGroup(Group::ID::NightLayers).activeLayers().empty();
     const bool waterLayersActive =
-        !_layerManager.layerGroup(layergroupid::WaterMasks).activeLayers().empty();
+        !_layerManager.layerGroup(Group::ID::WaterMasks).activeLayers().empty();
 
     if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
         const glm::dvec3 directionToSunWorldSpace =
@@ -1406,7 +1401,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         patchNormalCameraSpace
     );
 
-    if (!_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty()) {
+    using namespace layers;
+    if (!_layerManager.layerGroup(Group::ID::HeightLayers).activeLayers().empty()) {
         // Apply an extra scaling to the height if the object is scaled
         program.setUniform(
             "heightScale",
@@ -1501,10 +1497,12 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
                                         const Chunk& chunk, const RenderData& data)
 {
+    using namespace layers;
+
     ZoneScoped
 
     if (_generalProperties.useAccurateNormals &&
-        !_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty())
+        !_layerManager.layerGroup(Group::ID::HeightLayers).activeLayers().empty())
     {
         const glm::dvec3 corner00 = _ellipsoid.cartesianSurfacePosition(
             chunk.surfacePatch.corner(Quad::SOUTH_WEST)
@@ -1555,13 +1553,12 @@ void RenderableGlobe::recompileShaders() {
         struct LayerGroupPreprocessingData {
             int lastLayerIdx;
             bool layerBlendingEnabled;
-            std::vector<layergroupid::TypeID> layerType;
-            std::vector<layergroupid::BlendModeID> blendMode;
-            std::vector<layergroupid::AdjustmentTypeID> layerAdjustmentType;
+            std::vector<layers::Layer::ID> layerType;
+            std::vector<layers::Blend::ID> blendMode;
+            std::vector<layers::Adjustment::ID> layerAdjustmentType;
         };
 
-        std::array<LayerGroupPreprocessingData, layergroupid::NUM_LAYER_GROUPS>
-            layeredTextureInfo;
+        std::array<LayerGroupPreprocessingData, layers::Groups.size()> layeredTextureInfo;
         std::vector<std::pair<std::string, std::string>> keyValuePairs;
     };
 
@@ -1571,11 +1568,11 @@ void RenderableGlobe::recompileShaders() {
 
     LayerShaderPreprocessingData preprocessingData;
 
-    for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
+    for (size_t i = 0; i < layers::Groups.size(); i++) {
         LayerShaderPreprocessingData::LayerGroupPreprocessingData layeredTextureInfo;
 
-        const LayerGroup& layerGroup = _layerManager.layerGroup(layergroupid::GroupID(i));
-        const std::vector<Layer*>& layers = layerGroup.activeLayers();
+        const LayerGroup& group = _layerManager.layerGroup(layers::Group::ID(i));
+        const std::vector<Layer*>& layers = group.activeLayers();
 
         // This check was implicit before;  not sure if it will fire or will be handled
         // elsewhere
@@ -1584,9 +1581,9 @@ void RenderableGlobe::recompileShaders() {
         //    "If activeLayers is empty the following line will lead to an overflow"
         //);
         layeredTextureInfo.lastLayerIdx = static_cast<int>(
-            layerGroup.activeLayers().size() - 1
+            group.activeLayers().size() - 1
         );
-        layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
+        layeredTextureInfo.layerBlendingEnabled = group.layerBlendingEnabled();
 
         for (Layer* layer : layers) {
             layeredTextureInfo.layerType.push_back(layer->type());
@@ -1602,9 +1599,8 @@ void RenderableGlobe::recompileShaders() {
     std::vector<std::pair<std::string, std::string>>& pairs =
         preprocessingData.keyValuePairs;
 
-    const bool hasHeightLayer = !_layerManager.layerGroup(
-        layergroupid::HeightLayers
-    ).activeLayers().empty();
+    const bool hasHeightLayer =
+        !_layerManager.layerGroup(layers::Group::ID::HeightLayers).activeLayers().empty();
 
     pairs.emplace_back("useAccurateNormals",
         std::to_string(_generalProperties.useAccurateNormals && hasHeightLayer)
@@ -1643,22 +1639,26 @@ void RenderableGlobe::recompileShaders() {
     for (size_t i = 0; i < preprocessingData.layeredTextureInfo.size(); i++) {
         // lastLayerIndex must be at least 0 for the shader to compile,
         // the layer type is inactivated by setting use to false
-        std::string groupName = std::string(layergroupid::LAYER_GROUP_IDENTIFIERS[i]);
         shaderDictionary.setValue(
-            "lastLayerIndex" + groupName,
+            fmt::format("lastLayerIndex{}", layers::Groups[i].identifier),
             glm::max(preprocessingData.layeredTextureInfo[i].lastLayerIdx, 0)
         );
         shaderDictionary.setValue(
-            "use" + groupName,
+            fmt::format("use{}", layers::Groups[i].identifier),
             preprocessingData.layeredTextureInfo[i].lastLayerIdx >= 0
         );
         shaderDictionary.setValue(
-            "blend" + groupName,
+            fmt::format("blend{}", layers::Groups[i].identifier),
             preprocessingData.layeredTextureInfo[i].layerBlendingEnabled
         );
 
         // This is to avoid errors from shader preprocessor
-        shaderDictionary.setValue(groupName + "0" + "LayerType", 0);
+        shaderDictionary.setValue(
+            fmt::format("{}0LayerType", layers::Groups[i].identifier),
+            0
+        );
+
+        std::string groupName = std::string(layers::Groups[i].identifier);
 
         for (int j = 0;
              j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1;
@@ -1701,10 +1701,10 @@ void RenderableGlobe::recompileShaders() {
     }
 
     ghoul::Dictionary layerGroupNames;
-    for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
+    for (int i = 0; i < layers::Groups.size(); ++i) {
         layerGroupNames.setValue(
             std::to_string(i),
-            std::string(layergroupid::LAYER_GROUP_IDENTIFIERS[i])
+            std::string(layers::Groups[i].identifier)
         );
     }
     shaderDictionary.setValue("layerGroups", layerGroupNames);
@@ -1881,7 +1881,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
     // Get the tile providers for the height maps
     const std::vector<Layer*>& heightMapLayers =
-        _layerManager.layerGroup(layergroupid::GroupID::HeightLayers).activeLayers();
+        _layerManager.layerGroup(layers::Group::ID::HeightLayers).activeLayers();
 
     for (Layer* layer : heightMapLayers) {
         TileProvider* tileProvider = layer->tileProvider();
@@ -2271,11 +2271,10 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
     ZoneScoped
 
     const int currLevel = chunk.tileIndex.level;
-
-    for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
-        for (Layer* layer :
-             _layerManager.layerGroup(layergroupid::GroupID(i)).activeLayers())
-        {
+    
+    for (const layers::Group& gi : layers::Groups) {
+        const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
+        for (Layer* layer : lyrs) {
             Tile::Status status = layer->tileStatus(chunk.tileIndex);
             if (status == Tile::Status::OK) {
                 return UnknownDesiredLevel;

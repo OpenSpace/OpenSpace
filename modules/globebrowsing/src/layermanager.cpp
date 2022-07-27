@@ -58,14 +58,15 @@ void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
 
     // First create empty layer groups in case not all are specified
     for (size_t i = 0; i < _layerGroups.size(); ++i) {
-        _layerGroups[i] = std::make_unique<LayerGroup>(layergroupid::GroupID(i));
+        _layerGroups[i] = std::make_unique<LayerGroup>(layers::Groups[i]);
     }
 
     // Create all the layer groups
     for (std::string_view groupName : layerGroupsDict.keys()) {
-        layergroupid::GroupID id = ghoul::from_string<layergroupid::GroupID>(groupName);
+        using namespace layers;
+        Group::ID id = ghoul::from_string<Group::ID>(groupName);
 
-        if (id != layergroupid::GroupID::Unknown) {
+        if (id != Group::ID::Unknown) {
             ghoul::Dictionary d = layerGroupsDict.value<ghoul::Dictionary>(groupName);
             _layerGroups[static_cast<int>(id)]->setLayersFromDict(d);
         }
@@ -89,14 +90,13 @@ void LayerManager::deinitialize() {
     }
 }
 
-Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
-                              const ghoul::Dictionary& layerDict)
-{
+Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict) {
     ZoneScoped
 
-    ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
+    ghoul_assert(id != layergroupid::Group::ID::Unknown, "Layer group ID must be known");
+
     try {
-        return _layerGroups[groupId]->addLayer(layerDict);
+        return _layerGroups[static_cast<size_t>(id)]->addLayer(layerDict);
     }
     catch (const documentation::SpecificationError& e) {
         LERRORC(e.component, e.message);
@@ -114,19 +114,19 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
     }
 }
 
-void LayerManager::deleteLayer(layergroupid::GroupID id, const std::string& layerName) {
+void LayerManager::deleteLayer(layers::Group::ID id, const std::string& layerName) {
     ZoneScoped
 
-    ghoul_assert(id != layergroupid::Unknown, "Layer group ID must be known");
-    _layerGroups[id]->deleteLayer(layerName);
+    ghoul_assert(id != layergroupid::Group::ID::Unknown, "Layer group ID must be known");
+    _layerGroups[static_cast<size_t>(id)]->deleteLayer(layerName);
 }
 
-LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) {
-    return *_layerGroups[groupId];
+LayerGroup& LayerManager::layerGroup(layers::Group::ID groupId) {
+    return *_layerGroups[static_cast<size_t>(groupId)];
 }
 
-const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) const {
-    return *_layerGroups[groupId];
+const LayerGroup& LayerManager::layerGroup(layers::Group::ID groupId) const {
+    return *_layerGroups[static_cast<size_t>(groupId)];
 }
 
 bool LayerManager::hasAnyBlendingLayersEnabled() const {

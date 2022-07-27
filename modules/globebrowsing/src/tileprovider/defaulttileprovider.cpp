@@ -94,7 +94,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     // 1. Get required Keys
     _filePath = p.filePath;
 
-    _layerGroupID = layergroupid::GroupID(p.layerGroupID);
+    _layerGroupID = layers::Group::ID(p.layerGroupID);
 
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
@@ -102,11 +102,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _padTiles = p.padTiles.value_or(_padTiles);
 
     // Only preprocess height layers by default
-    switch (_layerGroupID) {
-        case layergroupid::GroupID::HeightLayers: _performPreProcessing = true; break;
-        default:                                  _performPreProcessing = false; break;
-    }
-
+    _performPreProcessing = _layerGroupID == layers::Group::ID::HeightLayers;
     _performPreProcessing = p.performPreProcessing.value_or(_performPreProcessing);
 
     TileTextureInitData initData(

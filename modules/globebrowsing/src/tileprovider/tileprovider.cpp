@@ -70,12 +70,12 @@ Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
 unsigned int TileProvider::NumTileProviders = 0;
 
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
-                                                         layergroupid::TypeID layerTypeID,
+                                                            layers::Layer::ID layerTypeID,
                                                       const ghoul::Dictionary& dictionary)
 {
     ZoneScoped
 
-    std::string_view type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
+    std::string_view type = layers::Layers[static_cast<int>(layerTypeID)].identifier;
 
     ghoul::TemplateFactory<TileProvider>* factory =
         FactoryManager::ref().factory<TileProvider>();

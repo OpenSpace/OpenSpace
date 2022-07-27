@@ -53,7 +53,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
         program.setUniform(galuc.multiplier, al.renderSettings().multiplier);
         program.setUniform(galuc.offset, al.renderSettings().offset);
 
-        if (al.layerAdjustment().type() == layergroupid::AdjustmentTypeID::ChromaKey) {
+        if (al.layerAdjustment().type() == layers::Adjustment::ID::ChromaKey) {
             program.setUniform(
                 galuc.chromaKeyColor,
                 al.layerAdjustment().chromaKeyColor()
@@ -66,15 +66,15 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
 
         switch (al.type()) {
             // Intentional fall through. Same for all tile layers
-            case layergroupid::TypeID::DefaultTileLayer:
-            case layergroupid::TypeID::SingleImageTileLayer:
-            case layergroupid::TypeID::SpoutImageTileLayer:
-            case layergroupid::TypeID::ImageSequenceTileLayer:
-            case layergroupid::TypeID::SizeReferenceTileLayer:
-            case layergroupid::TypeID::TemporalTileLayer:
-            case layergroupid::TypeID::TileIndexTileLayer:
-            case layergroupid::TypeID::ByIndexTileLayer:
-            case layergroupid::TypeID::ByLevelTileLayer: {
+            case layers::Layer::ID::DefaultTileLayer:
+            case layers::Layer::ID::SingleImageTileLayer:
+            case layers::Layer::ID::SpoutImageTileLayer:
+            case layers::Layer::ID::ImageSequenceTileLayer:
+            case layers::Layer::ID::SizeReferenceTileLayer:
+            case layers::Layer::ID::TemporalTileLayer:
+            case layers::Layer::ID::TileIndexTileLayer:
+            case layers::Layer::ID::ByIndexTileLayer:
+            case layers::Layer::ID::ByLevelTileLayer: {
                 const ChunkTilePile& ctp = al.chunkTilePile(
                     tileIndex,
                     layerGroup.pileSize()
@@ -101,7 +101,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                 );
                 break;
             }
-            case layergroupid::TypeID::SolidColor:
+            case layers::Layer::ID::SolidColor:
                 program.setUniform(galuc.color, al.solidColor());
                 break;
             default:
@@ -115,10 +115,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
     }
 }
 
-void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
-                         const LayerGroup& layerGroup, std::string_view nameBase,
-                         int category)
-{
+void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& layerGroup) {
     const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
     _gpuActiveLayers.resize(activeLayers.size());
     const int pileSize = layerGroup.pileSize();
@@ -126,9 +123,9 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
         GPULayer& gal = _gpuActiveLayers[i];
         auto& galuc = gal.uniformCache;
         const Layer& al = *activeLayers[i];
-        std::string name = fmt::format("{}[{}].", nameBase, i);
+        std::string name = fmt::format("{}[{}].", layerGroup.identifier(), i);
 
-        if (category == layergroupid::GroupID::HeightLayers) {
+        if (layerGroup.isHeightLayer()) {
             gal.isHeightLayer = true;
         }
 
@@ -137,7 +134,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
         galuc.multiplier = p.uniformLocation(name + "settings.multiplier");
         galuc.offset = p.uniformLocation(name + "settings.offset");
 
-        if (al.layerAdjustment().type() == layergroupid::AdjustmentTypeID::ChromaKey) {
+        if (al.layerAdjustment().type() == layers::Adjustment::ID::ChromaKey) {
             galuc.chromaKeyColor = p.uniformLocation(
                 name + "adjustment.chromaKeyColor"
             );
@@ -148,15 +145,15 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
 
         switch (al.type()) {
             // Intentional fall through. Same for all tile layers
-            case layergroupid::TypeID::DefaultTileLayer:
-            case layergroupid::TypeID::SingleImageTileLayer:
-            case layergroupid::TypeID::SpoutImageTileLayer:
-            case layergroupid::TypeID::ImageSequenceTileLayer:
-            case layergroupid::TypeID::SizeReferenceTileLayer:
-            case layergroupid::TypeID::TemporalTileLayer:
-            case layergroupid::TypeID::TileIndexTileLayer:
-            case layergroupid::TypeID::ByIndexTileLayer:
-            case layergroupid::TypeID::ByLevelTileLayer: {
+            case layers::Layer::ID::DefaultTileLayer:
+            case layers::Layer::ID::SingleImageTileLayer:
+            case layers::Layer::ID::SpoutImageTileLayer:
+            case layers::Layer::ID::ImageSequenceTileLayer:
+            case layers::Layer::ID::SizeReferenceTileLayer:
+            case layers::Layer::ID::TemporalTileLayer:
+            case layers::Layer::ID::TileIndexTileLayer:
+            case layers::Layer::ID::ByIndexTileLayer:
+            case layers::Layer::ID::ByLevelTileLayer: {
                 gal.gpuChunkTiles.resize(pileSize);
                 for (size_t j = 0; j < gal.gpuChunkTiles.size(); ++j) {
                     GPULayer::GPUChunkTile& t = gal.gpuChunkTiles[j];
@@ -177,7 +174,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
 
                 break;
             }
-            case layergroupid::TypeID::SolidColor:
+            case layers::Layer::ID::SolidColor:
                 galuc.color = p.uniformLocation(name + "color");
                 break;
             default:

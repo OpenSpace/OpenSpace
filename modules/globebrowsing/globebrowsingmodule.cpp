@@ -306,35 +306,16 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         FactoryManager::ref().factory<TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
-    {
-        using namespace layergroupid;
-        fTileProvider->registerClass<DefaultTileProvider>(std::string(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::DefaultTileLayer)]
-        ));
-        fTileProvider->registerClass<SingleImageProvider>(std::string(LAYER_TYPE_NAMES[static_cast<int>(TypeID::SingleImageTileLayer)]
-        ));
-        fTileProvider->registerClass<ImageSequenceTileProvider>(std::string(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ImageSequenceTileLayer)]
-        ));
-        fTileProvider->registerClass<SpoutImageProvider>(std::string(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SpoutImageTileLayer)]
-        ));
-        fTileProvider->registerClass<TemporalTileProvider>(std::string(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::TemporalTileLayer)]
-        ));
-        fTileProvider->registerClass<TileIndexTileProvider>(std::string(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::TileIndexTileLayer)]
-        ));
-        fTileProvider->registerClass<SizeReferenceTileProvider>(std::string(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SizeReferenceTileLayer)]
-        ));
-        fTileProvider->registerClass<TileProviderByLevel>(std::string(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByLevelTileLayer)]
-        ));
-        fTileProvider->registerClass<TileProviderByIndex>(std::string(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByIndexTileLayer)]
-        ));
-    }
+
+    fTileProvider->registerClass<DefaultTileProvider>("DefaultTileLayer");
+    fTileProvider->registerClass<SingleImageProvider>("SingleImageTileLayer");
+    fTileProvider->registerClass<ImageSequenceTileProvider>("ImageSequenceTileLayer");
+    fTileProvider->registerClass<SpoutImageProvider>("SpoutImageTileLayer");
+    fTileProvider->registerClass<TemporalTileProvider>("TemporalTileLayer");
+    fTileProvider->registerClass<TileIndexTileProvider>("TileIndexTileLayer");
+    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileLayer");
+    fTileProvider->registerClass<TileProviderByLevel>("ByLevelTileLayer");
+    fTileProvider->registerClass<TileProviderByIndex>("ByIndexTileLayer");
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
@@ -596,41 +577,6 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
     }
 }
 
-std::string GlobeBrowsingModule::layerGroupNamesList() {
-    std::string listLayerGroups;
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
-        listLayerGroups += fmt::format(
-            "{}, ", globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i]
-        );
-    }
-
-    return fmt::format(
-        "{} and {}",
-        listLayerGroups,
-        globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[
-            globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1
-        ]
-    );
-}
-
-std::string GlobeBrowsingModule::layerTypeNamesList() {
-    std::string listLayerTypes;
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
-        listLayerTypes += fmt::format(
-            "{}, ",
-            globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]
-        );
-    }
-
-    return fmt::format(
-        "{} and {}",
-        listLayerTypes,
-        globebrowsing::layergroupid::LAYER_TYPE_NAMES[
-            globebrowsing::layergroupid::NUM_LAYER_TYPES - 1
-        ]
-    );
-}
-
 void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,
                                               std::string url)
 {
@@ -745,8 +691,6 @@ uint64_t GlobeBrowsingModule::wmsCacheSize() const {
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
-    std::string listLayerGroups = layerGroupNamesList();
-
     scripting::LuaLibrary res;
     res.name = "globebrowsing";
     res.functions = {

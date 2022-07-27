@@ -51,10 +51,8 @@ namespace {
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
-        layerGroupName
-        );
-    if (groupID == layergroupid::GroupID::Unknown) {
+    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroupName);
+    if (groupID == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
     }
 
@@ -91,10 +89,8 @@ namespace {
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
-        layerGroupName
-        );
-    if (groupID == layergroupid::GroupID::Unknown) {
+    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroupName);
+    if (groupID == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
     }
 
@@ -135,18 +131,17 @@ namespace {
         throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    globebrowsing::layergroupid::GroupID group =
-        ghoul::from_string<globebrowsing::layergroupid::GroupID>(layer);
-    if (group == globebrowsing::layergroupid::GroupID::Unknown) {
+    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layer);
+    if (group == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer groupd: " + layer);
     }
 
-    const globebrowsing::LayerGroup& lg = globe->layerManager().layerGroup(group);
-    std::vector<globebrowsing::Layer*> layers = lg.layers();
+    const LayerGroup& lg = globe->layerManager().layerGroup(group);
+    std::vector<Layer*> layers = lg.layers();
 
     std::vector<std::string> res;
     res.reserve(layers.size());
-    for (globebrowsing::Layer* l : layers) {
+    for (Layer* l : layers) {
         res.push_back(l->identifier());
     }
     return res;
@@ -181,13 +176,12 @@ namespace {
         throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    globebrowsing::layergroupid::GroupID group =
-        ghoul::from_string<globebrowsing::layergroupid::GroupID>(layer);
-    if (group == globebrowsing::layergroupid::GroupID::Unknown) {
+    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layer);
+    if (group == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer groupd: " + layer);
     }
 
-    globebrowsing::LayerGroup& lg = globe->layerManager().layerGroup(group);
+    LayerGroup& lg = globe->layerManager().layerGroup(group);
     lg.moveLayer(oldPosition, newPosition);
 }
 

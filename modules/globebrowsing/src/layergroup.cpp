@@ -47,12 +47,9 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-LayerGroup::LayerGroup(layergroupid::GroupID id)
-    : properties::PropertyOwner({
-        std::string(layergroupid::LAYER_GROUP_IDENTIFIERS[id]),
-        std::string(layergroupid::LAYER_GROUP_NAMES[id])
-    })
-    , _groupId(id)
+LayerGroup::LayerGroup(layers::Group group)
+    : properties::PropertyOwner({ std::string(group.identifier), std::string(group.name)})
+    , _groupId(group.id)
     , _levelBlendingEnabled(BlendTileInfo, true)
 {
     addProperty(_levelBlendingEnabled);
@@ -246,6 +243,10 @@ void LayerGroup::onChange(std::function<void(Layer*)> callback) {
     for (const std::unique_ptr<Layer>& layer : _layers) {
         layer->onChange(_onChangeCallback);
     }
+}
+
+bool LayerGroup::isHeightLayer() const {
+    return _groupId == layers::Group::ID::HeightLayers;
 }
 
 } // namespace openspace::globebrowsing

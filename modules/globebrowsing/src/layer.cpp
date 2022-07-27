@@ -183,8 +183,7 @@ documentation::Documentation Layer::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_layer");
 }
 
-Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
-             LayerGroup& parent)
+Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent)
     : properties::PropertyOwner({
         layerDict.value<std::string>(KeyIdentifier),
         layerDict.hasKey(KeyName) ? layerDict.value<std::string>(KeyName) : "",
@@ -203,15 +202,15 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 {
     const Parameters p = codegen::bake<Parameters>(layerDict);
 
-    layergroupid::TypeID typeID;
+    layers::Layer::ID typeID;
     if (p.type.has_value()) {
-        typeID = ghoul::from_string<layergroupid::TypeID>(*p.type);
-        if (typeID == layergroupid::TypeID::Unknown) {
+        typeID = ghoul::from_string<layers::Layer::ID>(*p.type);
+        if (typeID == layers::Layer::ID::Unknown) {
             throw ghoul::RuntimeError("Unknown layer type!");
         }
     }
     else {
-        typeID = layergroupid::TypeID::DefaultTileLayer;
+        typeID = layers::Layer::ID::DefaultTileLayer;
     }
 
     initializeBasedOnType(typeID, layerDict);
@@ -243,38 +242,38 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     }
 
     // Add options to option properties
-    for (int i = 0; i < layergroupid::NUM_LAYER_TYPES; ++i) {
-        _typeOption.addOption(i, std::string(layergroupid::LAYER_TYPE_NAMES[i]));
+    for (const layers::Layer& li : layers::Layers) {
+        _typeOption.addOption(static_cast<int>(li.id), std::string(li.identifier));
     }
     _typeOption.setValue(static_cast<int>(typeID));
-    _type = static_cast<layergroupid::TypeID>(_typeOption.value());
+    _type = static_cast<layers::Layer::ID>(_typeOption.value());
 
-    for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
-        _blendModeOption.addOption(i, std::string(layergroupid::BLEND_MODE_NAMES[i]));
+    for (const layers::Blend& bi : layers::Blends) {
+        _blendModeOption.addOption(static_cast<int>(bi.id), std::string(bi.identifier));
     }
 
     // Initialize blend mode
     if (p.blendMode.has_value()) {
         switch (*p.blendMode) {
             case Parameters::BlendMode::Normal:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Normal);
                 break;
             case Parameters::BlendMode::Multiply:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Multiply);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Multiply);
                 break;
             case Parameters::BlendMode::Add:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Add);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Add);
                 break;
             case Parameters::BlendMode::Subtract:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Subtract);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Subtract);
                 break;
             case Parameters::BlendMode::Color:
-                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Color);
+                _blendModeOption = static_cast<int>(layers::Blend::ID::Color);
                 break;
         }
     }
     else {
-        _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
+        _blendModeOption = static_cast<int>(layers::Blend::ID::Normal);
     }
 
     // On change callbacks definitions
@@ -300,27 +299,27 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     _typeOption.onChange([&]() {
         switch (type()) {
             // Intentional fall through. Same for all tile layers
-            case layergroupid::TypeID::DefaultTileLayer:
-            case layergroupid::TypeID::SingleImageTileLayer:
-            case layergroupid::TypeID::SpoutImageTileLayer:
-            case layergroupid::TypeID::ImageSequenceTileLayer:
-            case layergroupid::TypeID::SizeReferenceTileLayer:
-            case layergroupid::TypeID::TemporalTileLayer:
-            case layergroupid::TypeID::TileIndexTileLayer:
-            case layergroupid::TypeID::ByIndexTileLayer:
-            case layergroupid::TypeID::ByLevelTileLayer:
+            case layers::Layer::ID::DefaultTileLayer:
+            case layers::Layer::ID::SingleImageTileLayer:
+            case layers::Layer::ID::SpoutImageTileLayer:
+            case layers::Layer::ID::ImageSequenceTileLayer:
+            case layers::Layer::ID::SizeReferenceTileLayer:
+            case layers::Layer::ID::TemporalTileLayer:
+            case layers::Layer::ID::TileIndexTileLayer:
+            case layers::Layer::ID::ByIndexTileLayer:
+            case layers::Layer::ID::ByLevelTileLayer:
                 if (_tileProvider) {
                     removePropertySubOwner(*_tileProvider);
                 }
                 break;
-            case layergroupid::TypeID::SolidColor:
+            case layers::Layer::ID::SolidColor:
                 removeProperty(_solidColor);
                 break;
             default:
                 throw ghoul::MissingCaseException();
         }
 
-        _type = static_cast<layergroupid::TypeID>(_typeOption.value());
+        _type = static_cast<layers::Layer::ID>(_typeOption.value());
         initializeBasedOnType(type(), {});
         addVisibleProperties();
         if (_onChangeCallback) {
@@ -395,12 +394,12 @@ Tile::Status Layer::tileStatus(const TileIndex& index) const {
         Tile::Status::Unavailable;
 }
 
-layergroupid::TypeID Layer::type() const {
+layers::Layer::ID Layer::type() const {
     return _type;
 }
 
-layergroupid::BlendModeID Layer::blendMode() const {
-    return static_cast<layergroupid::BlendModeID>(_blendModeOption.value());
+layers::Blend::ID Layer::blendMode() const {
+    return static_cast<layers::Blend::ID>(_blendModeOption.value());
 }
 
 TileDepthTransform Layer::depthTransform() const {
@@ -466,18 +465,18 @@ glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransfor
     return sourceToCurrentSize * (uv - glm::vec2(_padTilePixelStartOffset) / sourceSize);
 }
 
-void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary initDict) {
+void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDict) {
     switch (id) {
         // Intentional fall through. Same for all tile layers
-        case layergroupid::TypeID::DefaultTileLayer:
-        case layergroupid::TypeID::SingleImageTileLayer:
-        case layergroupid::TypeID::SpoutImageTileLayer:
-        case layergroupid::TypeID::ImageSequenceTileLayer:
-        case layergroupid::TypeID::SizeReferenceTileLayer:
-        case layergroupid::TypeID::TemporalTileLayer:
-        case layergroupid::TypeID::TileIndexTileLayer:
-        case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer: {
+        case layers::Layer::ID::DefaultTileLayer:
+        case layers::Layer::ID::SingleImageTileLayer:
+        case layers::Layer::ID::SpoutImageTileLayer:
+        case layers::Layer::ID::ImageSequenceTileLayer:
+        case layers::Layer::ID::SizeReferenceTileLayer:
+        case layers::Layer::ID::TemporalTileLayer:
+        case layers::Layer::ID::TileIndexTileLayer:
+        case layers::Layer::ID::ByIndexTileLayer:
+        case layers::Layer::ID::ByLevelTileLayer:
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
             initDict.setValue(
@@ -490,13 +489,11 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
             }
             _tileProvider = TileProvider::createFromDictionary(id, std::move(initDict));
             break;
-        }
-        case layergroupid::TypeID::SolidColor: {
+        case layers::Layer::ID::SolidColor:
             if (initDict.hasValue<glm::dvec3>(ColorInfo.identifier)) {
                 _solidColor = initDict.value<glm::dvec3>(ColorInfo.identifier);
             }
             break;
-        }
         default:
             throw ghoul::MissingCaseException();
     }
@@ -505,21 +502,20 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
 void Layer::addVisibleProperties() {
     switch (type()) {
         // Intentional fall through. Same for all tile layers
-        case layergroupid::TypeID::DefaultTileLayer:
-        case layergroupid::TypeID::SingleImageTileLayer:
-        case layergroupid::TypeID::SpoutImageTileLayer:
-        case layergroupid::TypeID::ImageSequenceTileLayer:
-        case layergroupid::TypeID::SizeReferenceTileLayer:
-        case layergroupid::TypeID::TemporalTileLayer:
-        case layergroupid::TypeID::TileIndexTileLayer:
-        case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer: {
+        case layers::Layer::ID::DefaultTileLayer:
+        case layers::Layer::ID::SingleImageTileLayer:
+        case layers::Layer::ID::SpoutImageTileLayer:
+        case layers::Layer::ID::ImageSequenceTileLayer:
+        case layers::Layer::ID::SizeReferenceTileLayer:
+        case layers::Layer::ID::TemporalTileLayer:
+        case layers::Layer::ID::TileIndexTileLayer:
+        case layers::Layer::ID::ByIndexTileLayer:
+        case layers::Layer::ID::ByLevelTileLayer:
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }
             break;
-        }
-        case layergroupid::TypeID::SolidColor: {
+        case layers::Layer::ID::SolidColor: {
             addProperty(_solidColor);
             break;
         }

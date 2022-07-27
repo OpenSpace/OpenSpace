@@ -62,8 +62,7 @@ public:
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    void bind(ghoul::opengl::ProgramObject& programObject,
-        const LayerGroup& layerGroup, std::string_view nameBase, int category);
+    void bind(ghoul::opengl::ProgramObject& programObject, const LayerGroup& layerGroup);
 
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.
