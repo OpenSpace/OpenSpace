@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <modules/fieldlinessequence/util/webfieldlinesmanager.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -99,6 +100,13 @@ private:
     // False => states are stored in RAM (using 'in-RAM-states'), True => states are
     // loaded from disk during runtime (using 'runtime-states')
     bool _loadingStatesDynamically  = false;
+    // Stated whether the asset is fetching dynamic web content
+    bool _dynamicWebContent = false;
+    // The URL to the content
+    std::string _dynWebContentUrl = "";
+    //  Web Fieldlines manager downloads and updates renderable field lines with
+    //  field lines downloaded from the web.
+    WebFieldlinesManager _webFieldlinesManager;
     // Used for 'runtime-states'. True when finished loading a new state from disk on
     // another thread.
     std::atomic_bool _newStateIsReady = false;

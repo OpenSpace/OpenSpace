@@ -197,6 +197,9 @@ namespace {
         // Set to true if you are streaming data during runtime
         std::optional<bool> loadAtRuntime;
 
+        // API call to where data will be downloaded dynamically
+        std::optional<std::string> dynamicWebContent;
+
         // [[codegen::verbatim(ColorUniformInfo.description)]]
         std::optional<glm::vec4> color [[codegen::color()]];
 
@@ -454,6 +457,15 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _loadingStatesDynamically = false;
     }
 
+    // obs that property differ from member variable name
+    _dynWebContentUrl = p.dynamicWebContent.value_or(_dynWebContentUrl);
+    if (!_dynWebContentUrl.empty()) {
+        _dynamicWebContent = true;
+        LINFO("Initializing sync-directory and downloading a startset");
+        std::string what = _webFieldlinesManager.initializeSyncDirectory("whyAStringHere");
+
+    }
+
     if (p.maskingRanges.has_value()) {
         _maskingRanges = *p.maskingRanges;
     }
@@ -577,7 +589,7 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
     _states.push_back(newState);
     _nStates = _startTimes.size();
     if (_nStates == 1) {
-        // loading dynamicaly is not nessesary if only having one set in the sequence 
+        // loading dynamicaly is not nessesary if only having one set in the sequence
         _loadingStatesDynamically = false;
     }
     _activeStateIndex = 0;

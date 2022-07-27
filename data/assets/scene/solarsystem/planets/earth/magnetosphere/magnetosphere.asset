@@ -25,7 +25,6 @@ local earthMagnetosphere = {
     ColorQuantity = 4, -- speed
     ColorTableRanges = {{50, 300}},
     ColorTablePaths = {transferFunction},
-    LoadAtRuntime = true,
     ScaleToMeters = 1.0,
     Color = { 1.0, 0.725, 0.75, 0.8 }
   },
