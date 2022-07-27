@@ -433,17 +433,22 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
         }
     }
 
+#if defined __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
-
+#elif defined __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
 
     // transform reference position into new frame
     mxvg_c(referenceMatrix, state, 3, 3, state_t);
 
+#if defined __clang__
 #pragma clang diagnostic pop
+#elif defined __GNUC__
 #pragma GCC diagnostic pop
+#endif
 
     position = positionMatrix * position;
     // check transformed values match 

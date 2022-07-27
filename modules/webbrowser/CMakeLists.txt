@@ -46,25 +46,12 @@ cmake_minimum_required(VERSION 2.8.12.1)
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 
-# "OpenSpace Helper" is not a valid CMake target name under OLD
-# https://cmake.org/cmake/help/git-stage/policy/CMP0037.html
-cmake_policy(SET CMP0037 OLD)
-
 # Use <PackageName>_ROOT variables
 # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
 cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
-
-# Release from 03/21/2022 verified to work on Windows.
 set(CEF_VERSION "102.0.10+gf249b2e+chromium-102.0.5005.115")
-
-# Removing - micahnyc 03/21/2022
-# 73.1.13 has an issue on MacOS: The GUI freezing upon interaction.
-# Therefore, we fall back to 3.3578.1867 from 01/29/2019
-#if (APPLE)
-#  set(CEF_VERSION "3.3578.1867.g0f6d65a")
-#endif ()
 
 # CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
 if (WIN32 OR UNIX)
@@ -107,7 +94,7 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
 mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SANDBOX)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # The CEF DLL wrapper is raising a lot of warnings on GCC
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
 endif ()
@@ -128,8 +115,8 @@ set(WEBBROWSER_SOURCES_WINDOWS
   resource.h
   simple_handler_win.cc
 )
-APPEND_PLATFORM_SOURCES(WEBBROWSER_SOURCES)
-APPEND_PLATFORM_SOURCES(WEBBROWSER_RESOURCES_SOURCES)
+append_platform_sources(WEBBROWSER_SOURCES)
+append_platform_sources(WEBBROWSER_RESOURCES_SOURCES)
 
 set(WEBBROWSER_SOURCES ${WEBBROWSER_SOURCES} ${WEBBROWSER_RESOURCES_SOURCES})
 
@@ -143,18 +130,18 @@ if (OS_LINUX)
   list(APPEND WEBBROWSER_HELPER_SOURCES src/processhelperlinux.cpp)
   set(WEBBROWSER_HELPER_SOURCES_LINUX src/processhelperlinux.cpp)
 endif()
-APPEND_PLATFORM_SOURCES(WEBBROWSER_HELPER_SOURCES)
+append_platform_sources(WEBBROWSER_HELPER_SOURCES)
 
 set(WEBBROWSER_RESOURCES_MAC_SOURCES_MACOSX
   mac/Info.plist
 )
-APPEND_PLATFORM_SOURCES(WEBBROWSER_RESOURCES_MAC_SOURCES)
+append_platform_sources(WEBBROWSER_RESOURCES_MAC_SOURCES)
 
 set(WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS_MACOSX
   mac/English.lproj/InfoPlist.strings
   mac/English.lproj/MainMenu.xib
 )
-APPEND_PLATFORM_SOURCES(WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS)
+append_platform_sources(WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS)
 
 set(WEBBROWSER_RESOURCES_SRCS
   ${WEBBROWSER_RESOURCES_MAC_SOURCES}
@@ -163,19 +150,7 @@ set(WEBBROWSER_RESOURCES_SRCS
 
 # Place Helper in separate executable
 # The naming style "<ApplicationName> Helper" is required by Chromium.
-set(CEF_HELPER_FILE_REQUIRES_RENAME FALSE)
-if (UNIX AND (${CMAKE_GENERATOR} STREQUAL "Unix Makefiles"))
-  # Linux builds that use GNU Make cannot handle spaces in filenames. For this type
-  # of build, the build file will have an underscore instead of a space, and this
-  # will be renamed back to a space when the build is complete.
-  set(CEF_HELPER_FILE_REQUIRES_RENAME TRUE)
-endif()
-if (CEF_HELPER_FILE_REQUIRES_RENAME)
-  # Use '_' instead of ' ' in helper filename
-  set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
-else()
-  set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
-endif()
+set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
 set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
 set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
 
@@ -187,11 +162,11 @@ list(APPEND Targets ${CEF_HELPER_TARGET} ${CEF_HELPER_TARGET_GPU} ${CEF_HELPER_T
 
 
 if (OS_MACOSX)
-  ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+  add_logical_target("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
   foreach(target IN LISTS Targets)
     # Helper executable target.
     add_executable(${target} MACOSX_BUNDLE ${WEBBROWSER_HELPER_SOURCES})
-    SET_EXECUTABLE_TARGET_PROPERTIES(${target})
+    set_executable_target_properties(${target})
     # add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
     add_dependencies(${target} libcef_dll_wrapper)
     target_link_libraries(${target} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
@@ -214,7 +189,7 @@ else()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
   add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
-  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
+  set_executable_target_properties(${CEF_HELPER_TARGET})
   add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
   # Logical target used to link the libcef library.
   add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
@@ -282,7 +257,7 @@ foreach (i ${CEF_BINARY_FILES})
   list(APPEND deps "${CEF_BINARY_DIR}/${i}")
 endforeach()
 foreach (j ${CEF_RESOURCE_FILES})
-list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
+  list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()
 add_external_library_dependencies("${deps}")
 
@@ -293,17 +268,13 @@ if (UNIX AND NOT (${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
     DESTINATION ${CEF_ROOT}/${CMAKE_BUILD_TYPE}/
     FILES_MATCHING PATTERN *
   )
+  endif ()
 
-  if (CEF_HELPER_FILE_REQUIRES_RENAME)
-    # Rename to "OpenSpace Helper" after build & link in order to prevent GNU Make from
-    # having to deal with the space in the filename
-    ADD_CUSTOM_COMMAND(
-      TARGET ${CEF_HELPER_TARGET} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E rename
-        "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/${CEF_HELPER_TARGET}"
-        "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/OpenSpace Helper"
-      COMMENT "Renaming ${CEF_HELPER_TARGET} to 'OpenSpace Helper'"
-    )
-  endif()
-endif ()
-
+# Rename to "OpenSpace Helper" after build & link as spaces in targets are not allowed
+# add_custom_command(
+#   TARGET ${CEF_HELPER_TARGET} POST_BUILD
+#   COMMAND ${CMAKE_COMMAND} -E rename
+#     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/${CEF_HELPER_TARGET}"
+#     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/OpenSpace Helper"
+#   COMMENT "Renaming ${CEF_HELPER_TARGET} to 'OpenSpace Helper'"
+# )

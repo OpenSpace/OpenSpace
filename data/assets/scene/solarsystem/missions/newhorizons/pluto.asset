@@ -51,11 +51,7 @@ local PlutoProjection = {
   Renderable = {
     Type = "RenderablePlanetProjection",
     Radius = plutoRadius,
-    Geometry = {
-        Type = "SimpleSphere",
-        Radius = plutoRadius,
-        Segments = 400
-    },
+    Segments = 400,
     ColorTexturePaths = {
       textures .. "pluto.png",
       textures .. "NH_Pluto_mosaic_16384.png",

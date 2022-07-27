@@ -24,7 +24,8 @@ local sphere = {
     RenderBinMode = "PreDeferredTransparent",
     MirrorTexture = true,
     FadeOutThreshold = 0.0015,
-    Background = true
+    Background = true,
+    DimInAtmosphere = true,
   },
   GUI = {
     Name = "Milky Way Sphere",

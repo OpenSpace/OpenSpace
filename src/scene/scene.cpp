@@ -334,6 +334,7 @@ void Scene::update(const UpdateData& data) {
     if (_dirtyNodeRegistry) {
         updateNodeRegistry();
     }
+    _camera->setAtmosphereDimmingFactor(1.f);
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             node->update(data);
@@ -864,27 +865,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the fourth argument to setPropertyValue."
             },
             {
-                "hasProperty",
-                &luascriptfunctions::propertyHasProperty,
-                {},
-                "",
-                "Returns whether a property with the given URI exists"
-            },
-            {
                 "getPropertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
                 "Returns the value the property, identified by the provided URI."
             },
-            {
-                "getProperty",
-                &luascriptfunctions::propertyGetProperty,
-                {},
-                "",
-                "Returns a list of property identifiers that match the passed regular "
-                "expression"
-            },
+            codegen::lua::HasProperty,
+            codegen::lua::GetProperty,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,

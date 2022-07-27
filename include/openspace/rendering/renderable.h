@@ -107,6 +107,7 @@ protected:
     properties::FloatProperty _opacity;
     properties::FloatProperty _fade;
     properties::StringProperty _renderableType;
+    properties::BoolProperty _dimInAtmosphere;
 
     void setBoundingSphere(double boundingSphere);
     void setInteractionSphere(double interactionSphere);

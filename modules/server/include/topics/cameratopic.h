@@ -22,44 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__
-#define __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__
+#ifndef __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
 
-#include <modules/space/rendering/planetgeometry.h>
-
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec3property.h>
+#include <modules/server/include/topics/topic.h>
+#include <chrono>
 
 namespace openspace {
-    class Renderable;
-    class Sphere;
-} // namespace openspace
 
-namespace openspace::documentation { struct Documentation; }
-
-namespace openspace::planetgeometry {
-
-class SimpleSphereGeometry : public PlanetGeometry {
+class CameraTopic : public Topic {
 public:
-    SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
-    ~SimpleSphereGeometry() override;
+    CameraTopic();
+    virtual ~CameraTopic();
 
-    void initialize() override;
-    void deinitialize() override;
-    void render() override;
-
-    float boundingSphere() const override;
-
-    static documentation::Documentation Documentation();
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
 private:
-    void createSphere();
+    const int UnsetOnChangeHandle = -1;
 
-    properties::Vec3Property _radius;
-    properties::IntProperty _segments;
-    Sphere* _sphere;
+    void sendCameraData();
+
+    int _dataCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
+    std::chrono::system_clock::time_point _lastUpdateTime;
+    glm::dvec3 _lastPosition = glm::dvec3(0);
+
+    std::chrono::milliseconds _cameraPositionUpdateTime = std::chrono::milliseconds(100);
 };
 
-} // namespace openspace::planetgeometry
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__

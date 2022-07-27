@@ -24,11 +24,13 @@
 
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -171,42 +173,13 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     ZoneScoped
+    
+    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
 
-    using namespace globebrowsing;
-
-    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
-    if (!n) {
-        return;
-    }
-    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
-    if (!globe) {
-        return;
-    }
-
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
-    const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
-        cameraPositionModelSpace
-    );
-
-    const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
-        posHandle.centerToReferenceSurface
-    );
-
-    double lat = glm::degrees(geo2.lat);
-    double lon = glm::degrees(geo2.lon);
-
-    double altitude = glm::length(
-        cameraPositionModelSpace - posHandle.centerToReferenceSurface
-    );
-
-    if (glm::length(cameraPositionModelSpace) <
-        glm::length(posHandle.centerToReferenceSurface))
-    {
-        altitude = -altitude;
-    }
+    glm::dvec3 position = module->geoPosition();
+    double lat = position.x;
+    double lon = position.y;
+    double altitude = position.z;
 
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
@@ -217,7 +190,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         {
             end = fmt::format_to(
                 _buffer.data(),
-                _formatString, lat, lon, dist.first, dist.second
+                fmt::runtime(_formatString), lat, lon, dist.first, dist.second
             );
             break;
         }
@@ -244,7 +217,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
             end = fmt::format_to(
                 _buffer.data(),
-                _formatString,
+                fmt::runtime(_formatString),
                 latDeg, latMin, latSec, isNorth ? "N" : "S",
                 lonDeg, lonMin, lonSec, isEast ? "E" : "W",
                 dist.first, dist.second

@@ -23,12 +23,11 @@
 ##########################################################################################
 
 function (set_openspace_compile_settings target)
-  target_compile_features(${target} PRIVATE cxx_std_17)
+  target_compile_features(${target} PRIVATE cxx_std_20)
 
   set(MSVC_WARNINGS
     "/MP"       # Multi-threading support
     "/W4"       # Highest warning level
-    "/wd4068"   # unknown pragma
     "/wd4127"   # conditional expression is constant [raised by: websocketpp]
     "/wd4201"   # nonstandard extension used : nameless struct/union  [raised by: GLM]
     "/wd5030"   # attribute 'attribute' is not recognized  [raised by: codegen]
@@ -146,7 +145,6 @@ function (set_openspace_compile_settings target)
     "-Wno-attributes"
     "-Wno-missing-braces"
     "-Wno-unknown-attributes"
-    "-Wno-unknown-pragmas"
   )
   if (OPENSPACE_WARNINGS_AS_ERRORS)
     set(CLANG_WARNINGS ${CLANG_WARNINGS} "-Werror")
@@ -185,7 +183,6 @@ function (set_openspace_compile_settings target)
     "-Wno-float-equal"
     "-Wno-long-long"
     "-Wno-unknown-attributes"
-    "-Wno-unknown-pragmas"
     "-Wno-write-strings"
   )
   if (OPENSPACE_WARNINGS_AS_ERRORS)

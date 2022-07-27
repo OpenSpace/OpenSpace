@@ -29,8 +29,6 @@
 #include <ghoul/ghoul.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
@@ -62,19 +60,6 @@
 namespace {
     const std::string ConfigurationFile = "openspace.cfg";
     const std::string _loggerCat = "TaskRunner Main";
-}
-
-void initTextureReaders() {
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_unique<ghoul::io::TextureReaderDevIL>()
-        );
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_unique<ghoul::io::TextureReaderFreeImage>()
-        );
-    #endif // GHOUL_USE_FREEIMAGE
 }
 
 void performTasks(const std::string& path) {

@@ -47,7 +47,8 @@ local stars = {
       Vy = "vy",
       Vz = "vz",
       Speed = "speed"
-    }
+    },
+    DimInAtmosphere = true,
   },
   GUI = {
     Name = "Stars",
@@ -84,7 +85,8 @@ local sunstar = {
       Vy = "vy",
       Vz = "vz",
       Speed = "speed",
-    }
+    },
+    DimInAtmosphere = true,
   },
   GUI = {
     Name = "Sun Star",

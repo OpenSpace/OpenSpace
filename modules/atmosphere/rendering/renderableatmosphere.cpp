@@ -25,13 +25,18 @@
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/properties/property.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <math.h>
 
 namespace {
+    constexpr const float KM_TO_M = 1000.f;
+
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
         "Atmosphere Height (KM)",
@@ -132,6 +137,18 @@ namespace {
         "Enable/Disables hard shadows through the atmosphere"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AtmosphereDimmingHeightInfo ={
+        "AtmosphereDimmingHeight",
+        "Atmosphere Dimming Height",
+        "Percentage of the atmosphere where other objects, such as the stars, are faded."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SunsetAngleInfo = {
+        "AtmosphereDimmingSunsetAngle",
+        "Atmosphere Dimming Sunset Angle",
+        "The angle (degrees) between the Camera and the Sun where the sunset starts, and "
+        "the atmosphere starts to fade in objects such as the stars."
+    };
 
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
         struct ShadowGroup {
@@ -212,6 +229,12 @@ namespace {
             std::optional<bool> saveCalculatedTextures;
         };
         std::optional<ATMDebug> debug;
+
+        // [[codegen::verbatim(AtmosphereDimmingHeightInfo.description)]]
+        std::optional<float> atmosphereDimmingHeight;
+
+        // [[codegen::verbatim(SunsetAngleInfo.description)]]
+        std::optional<glm::vec2> sunsetAngle;
     };
 #include "renderableatmosphere_codegen.cpp"
 
@@ -252,6 +275,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunIntensity(SunIntensityInfo, 5.f, 0.1f, 1000.f)
     , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabled(EclipseHardShadowsInfo, false)
+    , _atmosphereDimmingHeight(AtmosphereDimmingHeightInfo, 0.7f, 0.f, 1.f)
+    , _atmosphereDimmingSunsetAngle(SunsetAngleInfo, 
+        glm::vec2(95.f, 100.f), glm::vec2(0.f), glm::vec2(180.f)
+    )
  {
     auto updateWithCalculation = [this]() {
         _deferredCasterNeedsUpdate = true;
@@ -355,6 +382,17 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     }
 
     setBoundingSphere(_planetRadius * 1000.0);
+
+    _atmosphereDimmingHeight = p.atmosphereDimmingHeight.value_or(_atmosphereDimmingHeight);
+    addProperty(_atmosphereDimmingHeight);
+
+    _atmosphereDimmingSunsetAngle = p.sunsetAngle.value_or(
+        _atmosphereDimmingSunsetAngle
+    );
+    _atmosphereDimmingSunsetAngle.setViewOption(
+        properties::Property::ViewOptions::MinMaxRange
+    );
+    addProperty(_atmosphereDimmingSunsetAngle);
 }
 
 void RenderableAtmosphere::deinitializeGL() {
@@ -406,6 +444,55 @@ void RenderableAtmosphere::update(const UpdateData& data) {
     glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
     _deferredcaster->setModelTransform(modelTransform);
     _deferredcaster->update(data);
+
+    // Calculate atmosphere dimming coefficient
+    // Calculate if the camera is in the atmosphere and if it is in the fading region
+    float atmosphereDimming = 1.f;
+    glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+    glm::dvec3 planetPos = glm::dvec3(modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
+    float cameraDistance = static_cast<float>(glm::distance(planetPos, cameraPos));
+    // Atmosphere height is in KM
+    float atmosphereEdge = KM_TO_M * (_planetRadius + _atmosphereHeight);
+    // Height of the atmosphere where the objects will be faded
+    float atmosphereFadingHeight = KM_TO_M * _atmosphereDimmingHeight * _atmosphereHeight;
+    float atmosphereInnerEdge = atmosphereEdge - atmosphereFadingHeight;
+    bool cameraIsInAtmosphere = cameraDistance < atmosphereEdge;
+    bool cameraIsInFadingRegion = cameraDistance > atmosphereInnerEdge;
+
+    // Check if camera is in sunset
+    glm::dvec3 normalUnderCamera = glm::normalize(cameraPos - planetPos);
+    glm::dvec3 vecToSun = glm::normalize(-planetPos);
+    float cameraSunAngle = glm::degrees(static_cast<float>(
+        glm::acos(glm::dot(vecToSun, normalUnderCamera))
+    ));
+    float sunsetStart = _atmosphereDimmingSunsetAngle.value().x;
+    float sunsetEnd = _atmosphereDimmingSunsetAngle.value().y;
+    // If cameraSunAngle is more than 90 degrees, we are in shaded part of globe
+    bool cameraIsInSun = cameraSunAngle <= sunsetEnd;
+    bool cameraIsInSunset = cameraSunAngle > sunsetStart && cameraIsInSun;
+
+    // Fade if camera is inside the atmosphere
+    if (cameraIsInAtmosphere && cameraIsInSun) {
+        // If camera is in fading part of the atmosphere
+        // Fade with regards to altitude
+        if (cameraIsInFadingRegion) {
+            // Fading - linear interpolation
+            atmosphereDimming = (cameraDistance - atmosphereInnerEdge) / 
+                atmosphereFadingHeight;
+        }
+        else {
+            // Camera is below fading region - atmosphere dims objects completely
+            atmosphereDimming = 0.0;
+        }
+        if (cameraIsInSunset) {
+            // Fading - linear interpolation
+            atmosphereDimming = (cameraSunAngle - sunsetStart) / 
+                (sunsetEnd - sunsetStart);
+        }
+        global::navigationHandler->camera()->setAtmosphereDimmingFactor(
+            atmosphereDimming
+        );
+    }
 }
 
 void RenderableAtmosphere::updateAtmosphereParameters() {

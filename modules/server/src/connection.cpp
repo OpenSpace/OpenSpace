@@ -26,6 +26,7 @@
 
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
+#include <modules/server/include/topics/cameratopic.h>
 #include <modules/server/include/topics/documentationtopic.h>
 #include <modules/server/include/topics/enginemodetopic.h>
 #include <modules/server/include/topics/flightcontrollertopic.h>
@@ -71,6 +72,7 @@ namespace {
     constexpr const char* BounceTopicKey = "bounce";
     constexpr const char* FlightControllerTopicKey = "flightcontroller";
     constexpr const char* SkyBrowserKey = "skybrowser";
+    constexpr const char* CameraKey = "camera";
 } // namespace
 
 namespace openspace {
@@ -110,6 +112,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<FlightControllerTopic>(FlightControllerTopicKey);
     _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
     _topicFactory.registerClass<SkyBrowserTopic>(SkyBrowserKey);
+    _topicFactory.registerClass<CameraTopic>(CameraKey);
 }
 
 void Connection::handleMessage(const std::string& message) {

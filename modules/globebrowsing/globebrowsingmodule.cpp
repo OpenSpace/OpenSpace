@@ -421,6 +421,46 @@ glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
     return glm::vec3(globe.ellipsoid().cartesianPosition(pos));
 }
 
+glm::dvec3 GlobeBrowsingModule::geoPosition() const {
+    using namespace globebrowsing;
+
+    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
+    if (!n) {
+        return glm::dvec3(0.0);
+    }
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        return glm::dvec3(0.0);
+    }
+
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
+    const glm::dvec3 cameraPositionModelSpace =
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+    const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
+        cameraPositionModelSpace
+    );
+
+    const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
+        posHandle.centerToReferenceSurface
+    );
+
+    double lat = glm::degrees(geo2.lat);
+    double lon = glm::degrees(geo2.lon);
+
+    double altitude = glm::length(
+        cameraPositionModelSpace - posHandle.centerToReferenceSurface
+    );
+
+    if (glm::length(cameraPositionModelSpace) <
+        glm::length(posHandle.centerToReferenceSurface))
+    {
+        altitude = -altitude;
+    }
+
+    return glm::dvec3(lat, lon, altitude);
+}
+
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     const globebrowsing::TileIndex& ti,
                                     glm::vec2 uv, bool doResetCameraDirection)

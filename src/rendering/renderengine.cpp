@@ -58,6 +58,7 @@
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
+#include <ghoul/io/texture/texturereaderstb.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/profiling.h>
@@ -65,23 +66,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-
-#ifdef GHOUL_USE_DEVIL
-#include <ghoul/io/texture/texturereaderdevil.h>
-#endif // GHOUL_USE_DEVIL
-#ifdef GHOUL_USE_FREEIMAGE
-#include <ghoul/io/texture/texturereaderfreeimage.h>
-#endif // GHOUL_USE_FREEIMAGE
-
-#ifdef GHOUL_USE_SOIL
-#include <ghoul/io/texture/texturereadersoil.h>
-#include <ghoul/io/texture/texturewriter.h>
-#include <ghoul/io/texture/texturewritersoil.h>
-#endif // GHOUL_USE_SOIL
-
-#ifdef GHOUL_USE_STB_IMAGE
-#include <ghoul/io/texture/texturereaderstb.h>
-#endif // GHOUL_USE_STB_IMAGE
 
 #include "renderengine_lua.inl"
 
@@ -427,29 +411,9 @@ void RenderEngine::initialize() {
     _disableMasterRendering = global::configuration->isRenderingOnMasterDisabled;
     _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
 
-#ifdef GHOUL_USE_DEVIL
-    ghoul::io::TextureReader::ref().addReader(
-        std::make_unique<ghoul::io::TextureReaderDevIL>()
-    );
-#endif // GHOUL_USE_DEVIL
-#ifdef GHOUL_USE_FREEIMAGE
-    ghoul::io::TextureReader::ref().addReader(
-        std::make_unique<ghoul::io::TextureReaderFreeImage>()
-    );
-#endif // GHOUL_USE_FREEIMAGE
-#ifdef GHOUL_USE_SOIL
-    ghoul::io::TextureReader::ref().addReader(
-        std::make_unique<ghoul::io::TextureReaderSOIL>()
-    );
-    ghoul::io::TextureWriter::ref().addWriter(
-        std::make_unique<ghoul::io::TextureWriterSOIL>()
-    );
-#endif // GHOUL_USE_SOIL
-#ifdef GHOUL_USE_STB_IMAGE
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderSTB>()
     );
-#endif // GHOUL_USE_STB_IMAGE
 
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderCMAP>()
