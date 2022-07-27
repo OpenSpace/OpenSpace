@@ -54,3 +54,11 @@ create_new_module(
 
 include_external_library(${molecule_module} PRIVATE mold ${CMAKE_CURRENT_SOURCE_DIR}/ext/mold)
 disable_external_warnings(mold)
+  
+# disable annoying warnings from mold included header files
+# TODO: Cmake people help me!! How do you do that properly??
+# I hate Cmake
+if (MSVC)
+else ()
+  target_compile_options(${molecule_module} PRIVATE -w)
+endif ()

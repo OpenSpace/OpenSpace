@@ -32,6 +32,8 @@
 #include "glbinding/gl/functions.h"
 #include <md_util.h>
 #include <core/md_array.inl>
+#include <md_script.h>
+#include <md_filter.h>
 #include "viamd/coloring.h"
 #include "viamd/loader.h"
 
@@ -369,6 +371,9 @@ void RenderableSimulationBox::initializeGL() {
     md_gl_shaders_init(&_shaders, shader_output_snippet);
     billboardGlInit();
 
+    std::string viamdFilter =
+        "not(element('O'))";
+
     size_t i = 0;
     for (molecule_data_t& mol : _molecules) {
         std::string molFile = _moleculeFiles.value().at(i);
@@ -377,8 +382,13 @@ void RenderableSimulationBox::initializeGL() {
         initMolecule(mol, molFile);
         if (trajFile != "")
             initTrajectory(mol, trajFile);
+
+        if (mol.trajectory)
+            applyViamdFilter(mol, viamdFilter);
+
         i++;
     }
+    
 }
 
 void RenderableSimulationBox::deinitializeGL() {
@@ -732,6 +742,53 @@ void RenderableSimulationBox::updateRepresentation(molecule_data_t& mol) {
 
         md_gl_representation_set_color(&mol.drawRep, 0, static_cast<uint32_t>(mol.concatMolecule.atom.count), colors, 0);
     }
+}
+
+void RenderableSimulationBox::applyViamdFilter(molecule_data_t& mol, const std::string& filter) {
+    str_t str = str_from_cstr(filter.data());
+    md_filter_result_t res{};
+
+    md_script_ir_t* filterIR = md_script_ir_create(default_temp_allocator);
+
+    bool success = md_filter_evaluate(&res, str, &mol.molecule, filterIR, default_temp_allocator);
+    
+    if (success) {
+        LINFO("Compiled filter");
+        // md_bitfield_clear(mol.drawRep);
+        // for (int64_t i = 0; i < res.num_bitfields; ++i) {
+        //     md_bitfield_or_inplace(mask, &res.bitfields[i]);
+        // }
+    }
+
+    else {
+        LERROR("Failed to evaluate IR from source");
+    }
+
+    md_filter_free(&res, default_temp_allocator);
+    md_script_ir_free(filterIR);
+}
+
+void RenderableSimulationBox::applyViamdScript(molecule_data_t& mol, const std::string& script) {
+    str_t str = str_from_cstr(script.data());
+    int numFrames = md_trajectory_num_frames(mol.trajectory);
+
+    md_script_ir_t* selectionIr = md_script_ir_create(default_temp_allocator);
+    md_script_ir_t* mainIr = md_script_ir_create(default_temp_allocator);
+    md_script_eval_t* fullEval = md_script_eval_create(numFrames, mainIr, default_temp_allocator);
+    // md_script_eval_t* filtEval = md_script_eval_create(numFrames, main_ir, default_temp_allocator);
+
+    bool res = md_script_ir_compile_source(mainIr, str, &mol.molecule, selectionIr);
+    
+    if (res) {
+        res = md_script_eval_compute(fullEval, mainIr, &mol.molecule, mol.trajectory, nullptr);
+        // md_script_eval_compute(filtEval, main_ir, &mol.molecule, &mol.trajectory, nullptr);
+    } else {
+        LERROR("Failed to compile IR from source");
+    }
+
+    md_script_ir_free(mainIr);
+    md_script_ir_free(selectionIr);
+    md_script_eval_free(fullEval);
 }
 
 void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {

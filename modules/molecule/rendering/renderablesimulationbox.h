@@ -79,15 +79,17 @@ private:
     
     void updateAnimation(molecule_data_t& mol, double t);
     void updateSimulation(molecule_data_t& mol, double dt);
+    void updateRepresentation(molecule_data_t& mol);
     void applyTransforms();
+    void applyViamdFilter(molecule_data_t& mol, const std::string& filter);
+    void applyViamdScript(molecule_data_t& mol, const std::string& script);
     
     void initMolecule(molecule_data_t& mol, const std::string& file);
     void freeMolecule(molecule_data_t& mol);
     void initTrajectory(molecule_data_t& mol, const std::string& file);
     void freeTrajectory(molecule_data_t& mol);
 
-    void updateRepresentation(molecule_data_t& mol);
-    
+
     double _frame;
     md_gl_shaders_t _shaders;
     
