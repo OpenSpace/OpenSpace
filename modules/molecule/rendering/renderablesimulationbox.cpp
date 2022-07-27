@@ -93,6 +93,11 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 }
 )";
 
+
+enum AtomBit {
+    AtomBitVisible = 0x4,
+};
+
 namespace {
     constexpr const char* _loggerCat = "RenderableSimulationBox";
 
@@ -187,6 +192,12 @@ namespace {
         "Radius of the collision sphere around molecules"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ViamdFilterInfo = {
+        "ViamdFilter",
+        "Viamd Filter",
+        "VIA-MD script filter for atom visibility"
+    };
+
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         // [[codegen::verbatim(MoleculeFilesInfo.description)]]
         std::vector<std::string> moleculeFiles;
@@ -242,6 +253,9 @@ namespace {
 
         // [[codegen::verbatim(CollisionRadiusInfo.description)]]
         float collisionRadius;
+
+        // [[codegen::verbatim(ViamdFilterInfo.description)]]
+        std::optional<std::string> viamdFilter;
     };
 
 #include "renderablesimulationbox_codegen.cpp"
@@ -260,13 +274,14 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _repType(RepTypeInfo),
     _coloring(ColoringInfo),
     _repScale(RepScaleInfo, 1.f, 0.1f, 10.f),
-    _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 1000.f),
-    _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 1000.f),
+    _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f),
+    _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 100.f),
     _moleculeCounts(MoleculeCountsInfo),
     _linearVelocity(LinearVelocityInfo),
     _angularVelocity(AngularVelocityInfo),
     _simulationBox(SimulationBoxInfo),
-    _collisionRadius(CollisionRadiusInfo)
+    _collisionRadius(CollisionRadiusInfo),
+    _viamdFilter(ViamdFilterInfo)
 {
     _repType.addOptions({
         { static_cast<int>(RepresentationType::SpaceFill), "Space Fill" },
@@ -321,6 +336,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
             nullptr, //trajectory
             {},      //drawRep
             {},      //drawMol
+            {},      // visibilityMask
         };
         
         for (int i = 0; i < count; i++) {
@@ -344,12 +360,23 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         }
     });
 
+    _viamdFilter = p.viamdFilter.value_or("");
+    
+    _viamdFilter.onChange([this] () {
+        for (molecule_data_t& mol: _molecules) {
+            if (mol.moleculeApi) {
+                applyViamdFilter(mol, _viamdFilter);
+            }
+        }
+    });
+    
     addProperty(_repType);
     addProperty(_coloring);
     addProperty(_repScale);
     addProperty(_animationSpeed);
     addProperty(_simulationBox);
     addProperty(_simulationSpeed);
+    addProperty(_viamdFilter);
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {
@@ -371,9 +398,6 @@ void RenderableSimulationBox::initializeGL() {
     md_gl_shaders_init(&_shaders, shader_output_snippet);
     billboardGlInit();
 
-    std::string viamdFilter =
-        "not(element('O'))";
-
     size_t i = 0;
     for (molecule_data_t& mol : _molecules) {
         std::string molFile = _moleculeFiles.value().at(i);
@@ -383,8 +407,7 @@ void RenderableSimulationBox::initializeGL() {
         if (trajFile != "")
             initTrajectory(mol, trajFile);
 
-        if (mol.trajectory)
-            applyViamdFilter(mol, viamdFilter);
+        applyViamdFilter(mol, _viamdFilter);
 
         i++;
     }
@@ -599,7 +622,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         value_ptr(projMatrix),
         nullptr, nullptr
     };
-    args.atom_mask = 0;
+    args.atom_mask = AtomBitVisible;
     args.options = 0;
         
     args.draw_operations = {
@@ -654,6 +677,7 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::stri
     // duplicate the molecule data n times. This is done for performance reasons, because
     // the molecule simulation can be treated as 1 big molecule with a single draw call.
     mol.concatMolecule = concat_molecule_init(&mol.molecule, mol.states.size(), default_allocator);
+    md_bitfield_init(&mol.visibilityMask, default_allocator);
     
     double sphere = glm::compMax(_simulationBox.value()) / 2.0;
     setBoundingSphere(sphere);
@@ -745,27 +769,43 @@ void RenderableSimulationBox::updateRepresentation(molecule_data_t& mol) {
 }
 
 void RenderableSimulationBox::applyViamdFilter(molecule_data_t& mol, const std::string& filter) {
-    str_t str = str_from_cstr(filter.data());
-    md_filter_result_t res{};
-
-    md_script_ir_t* filterIR = md_script_ir_create(default_temp_allocator);
-
-    bool success = md_filter_evaluate(&res, str, &mol.molecule, filterIR, default_temp_allocator);
+    md_bitfield_clear(&mol.visibilityMask);
     
-    if (success) {
-        LINFO("Compiled filter");
-        // md_bitfield_clear(mol.drawRep);
-        // for (int64_t i = 0; i < res.num_bitfields; ++i) {
-        //     md_bitfield_or_inplace(mask, &res.bitfields[i]);
-        // }
+    if (!mol.concatMolecule.atom.flags)
+        return;
+    
+    if (!filter.empty()) {
+        str_t str = str_from_cstr(filter.data());
+        md_filter_result_t res{};
+        md_script_ir_t* filterIR = md_script_ir_create(default_temp_allocator);
+        bool success = md_filter_evaluate(&res, str, &mol.concatMolecule, filterIR, default_temp_allocator);
+    
+        if (success) {
+            LDEBUG("Compiled viamd filter");
+            for (int64_t i = 0; i < res.num_bitfields; ++i) {
+                md_bitfield_or_inplace(&mol.visibilityMask, &res.bitfields[i]);
+            }
+        }
+        else {
+            LERROR("Failed to evaluate viamd filter");
+        }
+
+        for (int64_t i = 0; i < mol.concatMolecule.atom.count; ++i) {
+            uint8_t& flags = mol.concatMolecule.atom.flags[i];
+            flags = md_bitfield_test_bit(&mol.visibilityMask, i) ? AtomBitVisible : 0; 
+        }
+
+        md_filter_free(&res, default_temp_allocator);
+        md_script_ir_free(filterIR);
     }
 
     else {
-        LERROR("Failed to evaluate IR from source");
+        for (int64_t i = 0; i < mol.concatMolecule.atom.count; ++i) {
+            mol.concatMolecule.atom.flags[i] = AtomBitVisible;
+        }
     }
 
-    md_filter_free(&res, default_temp_allocator);
-    md_script_ir_free(filterIR);
+    md_gl_molecule_set_atom_flags(&mol.drawMol, 0, static_cast<uint32_t>(mol.concatMolecule.atom.count), mol.concatMolecule.atom.flags, 0);
 }
 
 void RenderableSimulationBox::applyViamdScript(molecule_data_t& mol, const std::string& script) {
@@ -797,6 +837,8 @@ void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {
     mol.moleculeApi->free(&mol.molecule, default_allocator);
     mol.moleculeApi = nullptr;
     concat_molecule_free(&mol.concatMolecule, default_allocator);
+    md_bitfield_free(&mol.visibilityMask);
+    mol.visibilityMask = {};
     mol.concatMolecule = {};
     mol.molecule = {};
     mol.drawMol = {};

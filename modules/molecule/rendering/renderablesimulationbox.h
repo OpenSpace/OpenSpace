@@ -38,6 +38,7 @@
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
+#include <core/md_bitfield.h>
 
 namespace openspace {
 
@@ -75,6 +76,7 @@ private:
         md_trajectory_i* trajectory;
         md_gl_representation_t drawRep;
         md_gl_molecule_t drawMol;
+        md_bitfield_t visibilityMask;
     };
     
     void updateAnimation(molecule_data_t& mol, double t);
@@ -107,6 +109,7 @@ private:
     properties::FloatProperty _angularVelocity;
     properties::DVec3Property _simulationBox;
     properties::FloatProperty _collisionRadius;
+    properties::StringProperty _viamdFilter;
 };
 
 } // namespace openspace
