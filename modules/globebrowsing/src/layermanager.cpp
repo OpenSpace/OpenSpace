@@ -93,7 +93,7 @@ void LayerManager::deinitialize() {
 Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict) {
     ZoneScoped
 
-    ghoul_assert(id != layergroupid::Group::ID::Unknown, "Layer group ID must be known");
+    ghoul_assert(id != layers::Group::ID::Unknown, "Layer group ID must be known");
 
     try {
         return _layerGroups[static_cast<size_t>(id)]->addLayer(layerDict);
@@ -117,7 +117,7 @@ Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& lay
 void LayerManager::deleteLayer(layers::Group::ID id, const std::string& layerName) {
     ZoneScoped
 
-    ghoul_assert(id != layergroupid::Group::ID::Unknown, "Layer group ID must be known");
+    ghoul_assert(id != layers::Group::ID::Unknown, "Layer group ID must be known");
     _layerGroups[static_cast<size_t>(id)]->deleteLayer(layerName);
 }
 
