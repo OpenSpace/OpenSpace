@@ -25,16 +25,17 @@ out vec4 color;
 in vec2 pos;
 uniform float uStrokeWidth;
 uniform float uFragDepth;
+uniform vec4 uStrokeColor;
+uniform vec4 uFillColor;
 
 void main() {
   float len = length(pos) * 2.0;
 
   gl_FragDepth = uFragDepth;
-  color = vec4(1.0);
+  color = uStrokeColor;
 
   if (len < 1.0 - uStrokeWidth)
-    // color.a = 0.0;
-    color = vec4(0.0);
+    color = uFillColor;
   
   else if (len > 1)
     discard;
@@ -92,12 +93,14 @@ void billboardGlDeinit() {
   }
 }
 
-void billboardDraw(glm::mat4 const& transform, float width, float depth) {
+void billboardDraw(glm::mat4 const& transform, glm::vec4 const& fill, glm::vec4 const& stroke, float width, float depth) {
   glUseProgram(prog);
   glBindVertexArray(vao);
   glUniformMatrix4fv(glGetUniformLocation(prog, "uTransform"), 1, false, glm::value_ptr(transform));
   glUniform1f(glGetUniformLocation(prog, "uStrokeWidth"), width);
   glUniform1f(glGetUniformLocation(prog, "uFragDepth"), depth);
+  glUniform4fv(glGetUniformLocation(prog, "uFillColor"), 1, glm::value_ptr(fill));
+  glUniform4fv(glGetUniformLocation(prog, "uStrokeColor"), 1, glm::value_ptr(stroke));
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glBindVertexArray(0);
   glUseProgram(0);

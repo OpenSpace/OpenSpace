@@ -643,9 +643,9 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         mat4 transform = projMatrix * billboardModel * faceCamera;
         float circleWidth = distance / compMax(_simulationBox.value()) * 1E-2;
 
-        billboardDraw(transform, circleWidth, 1.f); // write depth=1 (clear depth buffer) in billboard
+        billboardDraw(transform, { 0.0, 0.0, 0.0, 1.0 }, vec4(1.0), circleWidth, 1.f); // write depth=1 (clear depth buffer) in billboard
         md_gl_draw(&args);                               // draw molecule
-        billboardDraw(transform, circleWidth, 0.f); // write depth=0 (lock depth buffer) in billboard
+        billboardDraw(transform, vec4(0.0), vec4(1.0), circleWidth, 0.f); // write depth=0 (lock depth buffer) in billboard
     }
 
 }
