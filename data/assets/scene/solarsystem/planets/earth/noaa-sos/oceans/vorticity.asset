@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Ocean Surface Vorticity"
 local Identifier = "noaa-sos-oceans-vorticity"
-local Description = [[ This animation shows daily values of the ocean surface relative 
+local Description = [[This animation shows daily values of the ocean surface relative 
 vorticity as simulated by the Parallel Ocean Program (POP). Vorticity, which can be 
 thought of as the rate of fluid rotation, is particularly useful for visualizing ocean 
 turbulent flow, highlighting the presence of swirling eddies. A significant amount of the 
 total kinetic energy in the world ocean is attributable to these turbulent motions, 
 making them an important component in balances of energy, momentum, heat, salt, and 
-chemical constituents (such as carbon dioxide) throughout the globe.   ]]
+chemical constituents (such as carbon dioxide) throughout the globe]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-surface-vorticity/"
 
 
@@ -61,7 +61,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

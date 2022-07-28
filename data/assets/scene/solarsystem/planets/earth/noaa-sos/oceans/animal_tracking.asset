@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Seal and Seabird Tracks: Pacific Ocean"
 local Identifier = "noaa-sos-oceans-animal_tracking"
-local Description = [[ "TOPP, Tagging of the Pacific Predators, began in 2000 as one of 
-17 projects of the Census of Marine Life, an ambitios 10-year, 80-nation endeavor to 
-assess and explain the diversity and abundance of life in the oceans, and where that life 
-has lived, is living, and will live." - From TOPP website . Out of this came the Tagging 
-of the Pacific Pelagics Project. Pelagaics are open ocean species such as sea birds and 
-elephant seals. Scientists put satellite tags on animals that collect information about 
-position, ocean temperature, pressure, salinity and more! This allows scientists to 
-better understand the migration patterns and habits of these animals.   ]]
+local Description = [["TOPP, Tagging of the Pacific Predators, began in 2000 as one of 
+  17 projects of the Census of Marine Life, an ambitios 10-year, 80-nation endeavor to 
+  assess and explain the diversity and abundance of life in the oceans, and where that
+  life has lived, is living, and will live." - From TOPP website . Out of this came the
+  Tagging of the Pacific Pelagics Project. Pelagaics are open ocean species such as sea
+  birds and elephant seals. Scientists put satellite tags on animals that collect
+  information about position, ocean temperature, pressure, salinity and more! This allows
+  scientists to better understand the migration patterns and habits of these animals]]
 local URL = "https://sos.noaa.gov/catalog/datasets/seal-and-seabird-tracks-pacific-ocean/"
 
 
@@ -68,7 +68,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

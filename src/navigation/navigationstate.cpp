@@ -98,14 +98,14 @@ CameraPose NavigationState::cameraPose() const {
 
     if (!anchorNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as anchor.", anchor
+            "Could not find scene graph node '{}' used as anchor", anchor
         ));
         return CameraPose();
     }
 
     if (!referenceFrameNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as reference frame.",
+            "Could not find scene graph node '{}' used as reference frame",
             referenceFrame
         ));
         return CameraPose();

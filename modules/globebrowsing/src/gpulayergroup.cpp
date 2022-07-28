@@ -39,7 +39,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
 
     ghoul_assert(
         layerGroup.activeLayers().size() == _gpuActiveLayers.size(),
-        "GPU and CPU active layers must have same size!"
+        "GPU and CPU active layers must have same size"
     );
 
     const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();

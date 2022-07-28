@@ -107,7 +107,7 @@ asset.export(MeridialCutplane)
 asset.meta = {
   Name = "Predictive Science Inc. Cutplanes Bastille Days",
   Version = "1.0",
-  Description = [[Cutplanes for the bastille day CME event]],
+  Description = "Cutplanes for the bastille day CME event",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "CC-BY"

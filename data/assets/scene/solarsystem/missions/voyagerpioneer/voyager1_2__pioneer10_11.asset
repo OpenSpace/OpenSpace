@@ -39,8 +39,8 @@ local voyager1 = {
   GUI = {
     Name = "Voyager 1 Trail",
     Path = "/Solar System/Missions/Voyager",
-    Description = [[Voyager 1 Trail, spanning September 6th, 1977 to January 1st,
-      2030. Data from JPL Horizons.]]
+    Description = [[Voyager 1 Trail, spanning September 6th, 1977 to January 1st, 2030.
+      Data from JPL Horizons]]
   }
 }
 
@@ -70,7 +70,7 @@ local voyager2 = {
     Name = "Voyager 2 Trail",
     Path = "/Solar System/Missions/Voyager",
     Description = [[Voyager 2 Trail, spanning August 21st, 1977 to January 1st, 2030.
-    Data from JPL Horizons.]]
+      Data from JPL Horizons]]
   }
 }
 
@@ -100,7 +100,7 @@ local pioneer10 = {
     Name = "Pioneer 10 Trail",
     Path = "/Solar System/Missions/Pioneer",
     Description = [[Pioneer 10 Trail, spanning March 4th, 1972 to January 1st, 2030.
-    Data from JPL Horizons.]]
+      Data from JPL Horizons]]
   }
 }
 
@@ -130,7 +130,7 @@ local pioneer11 ={
     Name = "Pioneer 11 Trail",
     Path = "/Solar System/Missions/Pioneer",
     Description = [[Pioneer 11 Trail, spanning April 7th, 1973 to January 1st, 2030.
-      Data from JPL Horizons.]]
+      Data from JPL Horizons]]
   }
 }
 
@@ -158,11 +158,10 @@ asset.export(pioneer11)
 asset.meta = {
   Name = "Pioneer and Voyager Trails",
   Version = "1.1",
-  Description = [[ Pioneer 10, Pioneer 11, Voyager 1 and Voyager 2 trails. Driven by JPL
-  Horizons data for better performance then spice but lower resolution. Data is from 
-  shortly after mission launches until January 1st, 2030.]],
+  Description = [[Pioneer 10, Pioneer 11, Voyager 1 and Voyager 2 trails. Driven by JPL
+    Horizons data for better performance then spice but lower resolution. Data is from 
+    shortly after mission launches until January 1st, 2030]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Pioneer10", "Pioneer11", "Voyager1", "Voyager2"}
+  License = "MIT license"
 }

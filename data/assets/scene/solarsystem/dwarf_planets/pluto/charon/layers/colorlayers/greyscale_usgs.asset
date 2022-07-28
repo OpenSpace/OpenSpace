@@ -20,13 +20,13 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Charon Black & White [USGS]",
   Version = "1.0",
-  Description = [[ Charon New Horizons LORRI MVIC Global Mosaic 300m v1. This detailed,
-    high-quality global mosaic of Pluto’s largest moon, Charon, was assembled from nearly
+  Description = [[Charon New Horizons LORRI MVIC Global Mosaic 300m v1. This detailed,
+    high-quality global mosaic of Pluto's largest moon, Charon, was assembled from nearly
     all of the highest-resolution images obtained by the Long-Range Reconnaissance Imager
     (LORRI) and the Multispectral Visible Imaging Camera (MVIC) on New Horizons. The
-    mosaic is the most detailed and comprehensive global view yet of Charon’s surface
+    mosaic is the most detailed and comprehensive global view yet of Charon's surface
     using New Horizons data. Standing out on Charon is an enormous trough at least 350
-    kilometers long, and reaching 14 kilometers deep –more than seven times as deep as the
+    kilometers long, and reaching 14 kilometers deep more than seven times as deep as the
     Grand Canyon. This mosaic is available in equirectangular projection at an equatorial
     pixel scale of 300 meters per pixel (m). (Description from URL)]],
   Author = "USGS",

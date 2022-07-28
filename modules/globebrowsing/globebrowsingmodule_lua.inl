@@ -230,7 +230,7 @@ namespace {
     else {
         n = global::navigationHandler->orbitalNavigator().anchorNode();
         if (!n) {
-            throw ghoul::lua::LuaError("No anchor node is set.");
+            throw ghoul::lua::LuaError("No anchor node is set");
         }
     }
 
@@ -286,7 +286,7 @@ namespace {
     else {
         n = global::navigationHandler->orbitalNavigator().anchorNode();
         if (!n) {
-            throw ghoul::lua::LuaError("No anchor node is set.");
+            throw ghoul::lua::LuaError("No anchor node is set");
         }
     }
 

@@ -61,14 +61,14 @@ namespace {
         "The texture path selected in this property is used as the base texture that is "
         "applied to the planet prior to any image projections. This menu always contains "
         "an empty option for not using a color map. If this value is specified in an "
-        "asset, the last texture is used."
+        "asset, the last texture is used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddColorTextureInfo = {
         "AddColorTexture",
         "Add Color Base Texture",
         "Adds a new base color texture to the list of selectable base maps used prior to "
-        "any image projection."
+        "any image projection"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightTexturePathsInfo = {
@@ -76,13 +76,13 @@ namespace {
         "Heightmap Texture",
         "The texture path selected in this property is used as the height map on the "
         "planet. This menu always contains an empty option for not using a heightmap. If "
-        "this value is specified in an asset, the last texture is used."
+        "this value is specified in an asset, the last texture is used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddHeightTextureInfo = {
         "AddHeightTexture",
         "Add Heightmap Texture",
-        "Adds a new height map texture to the list of selectable height maps used."
+        "Adds a new height map texture to the list of selectable height maps used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
@@ -90,7 +90,7 @@ namespace {
         "Height Exaggeration",
         "This value determines the level of height exaggeration that is applied to a "
         "potential height field. A value of '0' inhibits the height field, whereas a "
-        "value of '1' uses the measured height field."
+        "value of '1' uses the measured height field"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeridianShiftInfo = {
@@ -99,20 +99,20 @@ namespace {
         "If this value is enabled, a shift of the meridian by 180 degrees is performed. "
         "This is a fix especially for Pluto height maps, where the definition of the "
         "meridian has changed through the New Horizons mission and this requires this "
-        "shift."
+        "shift"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientBrightnessInfo = {
         "AmbientBrightness",
         "Ambient Brightness",
-        "This value determines the ambient brightness of the dark side of the planet."
+        "This value determines the ambient brightness of the dark side of the planet"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxProjectionsPerFrameInfo = {
         "MaxProjectionsPerFrame",
         "Max Projections Per Frame",
         "The maximum number of image projections to perform per frame. "
-        "Useful to avoid freezing the system for large delta times."
+        "Useful to avoid freezing the system for large delta times"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ProjectionsInBufferInfo = {
@@ -130,13 +130,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
-        "This value specifies the radius of this sphere in meters."
+        "This value specifies the radius of this sphere in meters"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
-        "This value specifies the number of segments that this sphere is split into."
+        "This value specifies the number of segments that this sphere is split into"
     };
 
     struct [[codegen::Dictionary(RenderablePlanetProjection)]] Parameters {

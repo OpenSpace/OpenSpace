@@ -127,7 +127,7 @@ Camera* Scene::camera() const {
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.count(node->identifier())) {
         throw Scene::InvalidSceneError(
-            "Node with identifier " + node->identifier() + " already exits."
+            "Node with identifier " + node->identifier() + " already exits"
         );
     }
 
@@ -276,7 +276,7 @@ void Scene::initialize() {
             );
         }
         catch (const ghoul::RuntimeError& e) {
-            LERROR(node->name() << " not initialized.");
+            LERROR(node->name() << " not initialized");
             LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
             OsEng.loadingScreen().updateItem(
                 node->name(),
@@ -312,7 +312,7 @@ void Scene::initializeGL() {
             node->initializeGL();
         }
         catch (const ghoul::RuntimeError& e) {
-            LERROR(node->name() << " not initialized.");
+            LERROR(node->name() << " not initialized");
             LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
         }
     }
@@ -846,7 +846,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "group tag expansion is performed and the first argument is used as an "
                 "ECMAScript style regular expression that matches against the fully "
                 "qualified IDs of properties. If the fifth argument is 'single' no "
-                "substitutions are performed and exactly 0 or 1 properties are changed."
+                "substitutions are performed and exactly 0 or 1 properties are changed"
             },
             {
                 "setPropertyValueSingle",
@@ -862,14 +862,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "specified. If 'duration' is 0, this parameter value is ignored. "
                 "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
                 "This is the same as calling the setValue method and passing 'single' as "
-                "the fourth argument to setPropertyValue."
+                "the fourth argument to setPropertyValue"
             },
             {
                 "getPropertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI."
+                "Returns the value the property, identified by the provided URI"
             },
             codegen::lua::HasProperty,
             codegen::lua::GetProperty,

@@ -48,14 +48,14 @@ namespace {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
-        "changed."
+        "changed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blend Mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
-        "mode determines how this layer is added to the underlying layers beneath."
+        "mode determines how this layer is added to the underlying layers beneath"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -63,28 +63,28 @@ namespace {
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
         "the planet. If this value is disabled, the layer will be ignored in the "
-        "composition."
+        "composition"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
-        "local cache for this layer and will trigger a fresh load of all tiles."
+        "local cache for this layer and will trigger a fresh load of all tiles"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
-        "layer before the next frame."
+        "layer before the next frame"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
-        "solid color is."
+        "solid color is"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
@@ -206,7 +206,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     if (p.type.has_value()) {
         typeID = ghoul::from_string<layers::Layer::ID>(*p.type);
         if (typeID == layers::Layer::ID::Unknown) {
-            throw ghoul::RuntimeError("Unknown layer type!");
+            throw ghoul::RuntimeError("Unknown layer type");
         }
     }
     else {
@@ -515,10 +515,9 @@ void Layer::addVisibleProperties() {
                 addPropertySubOwner(*_tileProvider);
             }
             break;
-        case layers::Layer::ID::SolidColor: {
+        case layers::Layer::ID::SolidColor:
             addProperty(_solidColor);
             break;
-        }
         default:
             throw ghoul::MissingCaseException();
     }

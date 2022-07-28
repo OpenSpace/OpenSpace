@@ -58,7 +58,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
             if (authorize(providedKey)) {
                 _connection->setAuthorized(true);
                 _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
-                LINFO("Client successfully authorized.");
+                LINFO("Client successfully authorized");
             }
             else {
                 _connection->sendJson(wrappedPayload({ KeyStatus, IncorrectKey }));

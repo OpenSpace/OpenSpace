@@ -453,7 +453,7 @@ void createExoplanetSystem(const std::string& starName) {
             "would trap any incoming infrared radiation, leading to the planet "
             "surface becoming so hot that water boils away. The outer boundary is where "
             "the greenhouse effect would not be able to maintain surface temperature "
-            "above freezing anywhere on the planet.";
+            "above freezing anywhere on the planet";
 
         const std::string hzTexture = module->habitableZoneTexturePath();
 

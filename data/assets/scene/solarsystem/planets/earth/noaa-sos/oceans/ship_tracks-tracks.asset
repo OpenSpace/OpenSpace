@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Ship Tracklines of Multibeam Bathymetric Surveys"
 local Identifier = "noaa-sos-oceans-ship_tracks-tracks"
-local Description = [[ Beneath the sea surface is an amazing sea floor that contains 
+local Description = [[Beneath the sea surface is an amazing sea floor that contains 
 mountain ranges, trenches and plains. The ocean covers 71% of the Earth's surface, has an 
 area of 139,400,000 square miles and an average depth of 2.3 miles. The first 
 measurements of the sea floor were made with weighted lines that were lowered until they 
@@ -17,7 +17,7 @@ how long it takes the beams to return to the ship after bouncing off the sea flo
 the speed of sound in water is known for the full water column, then the depth of the sea 
 floor can be calculated from the travel time. Multiple beams are sent out in a fan 
 shape to collect depth information in a swath beneath the boat as it travels through the 
-ocean.   ]]
+ocean]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ship-tracklines-of-multibeam-bathymetric-surveys/"
 
 
@@ -61,7 +61,7 @@ asset.export(legend)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

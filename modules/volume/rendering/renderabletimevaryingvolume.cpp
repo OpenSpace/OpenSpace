@@ -55,13 +55,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
-        "Specifies how often to sample on the raycaster. Lower step -> higher resolution."
+        "Specifies how often to sample on the raycaster. Lower step -> higher resolution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid Type",
-        "Spherical or Cartesian grid.",
+        "Spherical or Cartesian grid",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -69,44 +69,44 @@ namespace {
         "SecondsBefore",
         "Seconds before",
         "Specifies the number of seconds to show the first timestep before its "
-        "actual time. The default value is 0."
+        "actual time. The default value is 0"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
         "SecondsAfter",
         "Seconds after",
         "Specifies the number of seconds to show the the last timestep after its "
-        "actual time."
+        "actual time"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
         "SourceDirectory",
         "Source Directory",
-        "Specifies the path to load timesteps from."
+        "Specifies the path to load timesteps from"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer Function Path",
-        "Specifies the transfer function file path."
+        "Specifies the transfer function file path"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
         "TriggerTimeJump",
         "Jump",
-        "Sets the time to be the first time of the volume sequence."
+        "Sets the time to be the first time of the volume sequence"
     };
 
     constexpr openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
         "JumpToTimestep",
         "Jump to timestep",
-        "Lets you scrub through the sequence's time steps."
+        "Lets you scrub through the sequence's time steps"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrightnessInfo = {
         "Brightness",
         "Brightness",
-        "The volume renderer's general brightness."
+        "The volume renderer's general brightness"
     };
 
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {

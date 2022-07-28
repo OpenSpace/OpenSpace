@@ -50,34 +50,34 @@ namespace {
         "Password",
         "Password",
         "The general password that allows this OpenSpace instance access to the Wormhole "
-        "server."
+        "server"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HostPasswordInfo = {
         "HostPassword",
         "Host Password",
         "The password that is required to take control of the joint session and thus "
-        "send all commands to connected clients."
+        "send all commands to connected clients"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The port on which the Wormhole server is listening to connections from "
-        "OpenSpace."
+        "OpenSpace"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
-        "The address of the Wormhole server either as a DNS name or an IP address."
+        "The address of the Wormhole server either as a DNS name or an IP address"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "Name",
         "Connection Name",
         "The name of this OpenSpace instance that will be potentially broadcast to other "
-        "connected instances."
+        "connected instances"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
@@ -86,7 +86,7 @@ namespace {
         "This is the number of seconds that received keyframes are buffered before they "
         "get applied to the rendering. A higher value leads to smoother rendering, "
         "particularly when the internet connection is unstable, but also leads to higher "
-        "delay."
+        "delay"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
@@ -94,7 +94,7 @@ namespace {
         "Time keyframe interval",
         "Determines how often the information about the simulation time is sent (in "
         "seconds). Lower values mean more accurate representation of the time, but also "
-        "require higher internet bandwidth."
+        "require higher internet bandwidth"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
@@ -387,13 +387,12 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
             );
             break;
         }
-        default: {
+        default:
             LERROR(fmt::format(
                 "Unidentified message with identifier {} received in parallel connection",
                 type
             ));
             break;
-        }
     }
 }
 

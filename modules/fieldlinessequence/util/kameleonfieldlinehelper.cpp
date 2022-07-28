@@ -162,7 +162,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         default:
             LERROR(
                 "OpenSpace's fieldlines sequence currently only supports CDFs from the "
-                "BATSRUS and ENLIL models!"
+                "BATSRUS and ENLIL models"
             );
             return false;
     }
@@ -174,7 +174,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
     }
 
     bool success = false;
-    LINFO("Tracing field lines!");
+    LINFO("Tracing field lines");
     // LOOP THROUGH THE SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
     for (const glm::vec3& seed : seedPoints) {
         //--------------------------------------------------------------------------//

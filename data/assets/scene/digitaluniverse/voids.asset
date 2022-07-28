@@ -23,7 +23,7 @@ local object = {
   GUI = {
     Name = "Voids",
     Path = "/Universe/Galaxies",
-    Description = [[ Census: 24 cosmic voids. DU Version 1.2. <br>Cosmic voids are
+    Description = [[Census: 24 cosmic voids. DU Version 1.2. <br>Cosmic voids are
       vast, empty spaces where there are either no galaxies, or very few galaxies.
       They are associated with cold spots in the cosmic microwave background (CMB)
       light, the earliest picture we have of the universe (see page 58). Those cold
@@ -52,7 +52,7 @@ asset.meta = {
   Name = "Voids",
   Version = "2.1",
   Author = "Brian Abbott (AMNH)",
-  Description = [[Digital Universe asset for Cosmic voids.]],
+  Description = "Digital Universe asset for Cosmic voids",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

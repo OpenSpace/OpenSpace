@@ -6,7 +6,7 @@ local group = {
   Url = "https://celestrak.com/NORAD/elements/gp.php?GROUP=geo&FORMAT=TLE",
   TrailColor = { 0.9, 0.9, 0.0 },
   Description = [[Satellites that are currently active and in a Geosynchronous orbit, meaning 
-  their orbital period matches Earth's rotation.]]
+  their orbital period matches Earth's rotation]]
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
@@ -16,8 +16,8 @@ shared.registerSatelliteGroupObjects(asset, group, tle, true)
 asset.meta = {
   Name = "Satellites Communications - Geostationary",
   Version = "1.0",
-  Description = [[ Satellites asset for Communications - Geostationary. Data from 
-  Celestrak]],
+  Description = [[Satellites asset for Communications - Geostationary. Data from
+    Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

@@ -384,7 +384,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         nTotalStars = nValues / nValuesPerStar;
 
         progressCallback(0.3f);
-        LINFO("Constructing Octree.");
+        LINFO("Constructing Octree");
 
         // Insert star into octree. We assume the data already is in correct order.
         for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
@@ -418,7 +418,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
         if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file.");
+            LERROR("Error writing file - No values were read from file");
         }
         _octreeManager->writeToFile(outFileStream, true);
 
@@ -537,18 +537,18 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         }
         else {
             LERROR(fmt::format(
-                "Error opening file {} for loading preprocessed file!", inFilePath
+                "Error opening file {} for loading preprocessed file", inFilePath
             ));
         }
 
         // Slice LOD data.
-        LINFO("Slicing LOD data!");
+        LINFO("Slicing LOD data");
         _indexOctreeManager->sliceLodData(idx);
 
         progressCallback((idx + 1) * processOneFile);
         nStars += nStarsInfile;
 
-        LINFO(fmt::format("Writing {} stars to octree files!", nStarsInfile));
+        LINFO(fmt::format("Writing {} stars to octree files", nStarsInfile));
         LINFO(fmt::format(
             "Number leaf nodes: {}\n Number inner nodes: {}\n Total depth of tree: {}",
             _indexOctreeManager->numLeafNodes(),

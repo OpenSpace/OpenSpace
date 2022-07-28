@@ -50,14 +50,14 @@ namespace {
         "PerformProjection",
         "Perform Projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
-        "it is disabled, projections will be ignored."
+        "it is disabled, projections will be ignored"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClearProjectionInfo = {
         "ClearAllProjections",
         "Clear Projections",
         "If this property is triggered, it will remove all the projections that have "
-        "already been applied."
+        "already been applied"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadingInfo = {
@@ -65,7 +65,7 @@ namespace {
         "Projection Fading",
         "This value fades the previously performed projections in or out. If this value "
         "is equal to '1', the projections are fully visible, if the value is equal to "
-        "'0', the performed projections are completely invisible."
+        "'0', the performed projections are completely invisible"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureSizeInfo = {
@@ -74,14 +74,14 @@ namespace {
         "This value determines the size of the texture into which the images are "
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
-        "updated, but triggering the 'ApplyTextureSize' property is required."
+        "updated, but triggering the 'ApplyTextureSize' property is required"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyTextureSizeInfo = {
         "ApplyTextureSize",
         "Apply Texture Size",
         "Triggering this property applies a new size to the underlying projection "
-        "texture. The old texture is resized and interpolated to fit the new size."
+        "texture. The old texture is resized and interpolated to fit the new size"
     };
 
     struct [[codegen::Dictionary(ProjectionComponent)]] Parameters {

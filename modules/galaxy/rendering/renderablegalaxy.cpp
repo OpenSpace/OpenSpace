@@ -107,7 +107,7 @@ namespace {
         "EmissionMultiply",
         "Emission Multiplier",
         "A unit-less scale factor for the amount of light being emitted by dust in the "
-        "galaxy."
+        "galaxy"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
@@ -121,7 +121,7 @@ namespace {
         "StarRenderingMethod",
         "Star Rendering Method",
         "This value determines which rendering method is used for visualization of the "
-        "stars."
+        "stars"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
@@ -130,21 +130,21 @@ namespace {
         "The ratio of point-like stars that are rendered to produce the overall galaxy "
         "image. At a value of 0, no stars are rendered, at a value of 1 all points "
         "contained in the dataset are rendered. The specific value chosen is a "
-        "compromise between image fidelity and rendering performance."
+        "compromise between image fidelity and rendering performance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value sets the downscaling factor when rendering the current volume."
+        "This value sets the downscaling factor when rendering the current volume"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberOfRayCastingStepsInfo =
     {
         "Steps",
         "Number of RayCasting Steps",
-        "This value set the number of integration steps during the raycasting procedure."
+        "This value set the number of integration steps during the raycasting procedure"
     };
 
     struct [[codegen::Dictionary(RenderableGalaxy)]] Parameters {

@@ -11,7 +11,7 @@ local layer = {
   Description = [[This map is an AMNH version of the global mossaic produced by the
     Mars Global Surveyor Wide Angle Camera. This version has color added and the
     shadows subdued based on the MOLA DTM.  Data Reference:
-    https://www.jpl.nasa.gov/spaceimages/details.php?id=PIA03467.]],
+    https://www.jpl.nasa.gov/spaceimages/details.php?id=PIA03467]],
 }
 
 asset.onInitialize(function()
@@ -30,7 +30,7 @@ asset.meta = {
   Name = "MOC WA Color [Sweden]",
   Version = "1.1",
   Description = [[Main color map layer for Mars. This map is hosted
-    on the OpenSpace server in Sweden.]],
+    on the OpenSpace server in Sweden]],
   Author = "OpenSpace Team",
   URL = "http://www.openspaceproject.com",
   License = "NASA/PDS"

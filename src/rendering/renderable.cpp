@@ -45,14 +45,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not."
+        "This setting determines whether this object will be visible or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this renderable. A value of 0 means "
-        "completely transparent."
+        "completely transparent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
@@ -70,7 +70,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable Type",
-        "This tells the type of the renderable.",
+        "This tells the type of the renderable",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -79,7 +79,7 @@ namespace {
         "RenderBinMode",
         "Render Bin Mode",
         "This value specifies if the renderable should be rendered in the Background,"
-        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step.",
+        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -87,7 +87,7 @@ namespace {
         "DimInAtmosphere",
         "Dim In Atmosphere",
         "Enables/Disables if the object should be dimmed if the camera is in an "
-        "atmosphere.",
+        "atmosphere",
         openspace::properties::Property::Visibility::Developer
     };
 

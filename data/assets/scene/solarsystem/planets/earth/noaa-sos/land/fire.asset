@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Fires - 2009"
 local Identifier = "noaa-sos-land-fire"
-local Description = [[ In order to monitor the fires occurring globally, a special sensor 
+local Description = [[In order to monitor the fires occurring globally, a special sensor 
 has been mounted on the Terra and Aqua satellites. The sensor, named the Moderate 
 Resolution Imaging Spectroradiometer (MODIS), is able to provide daily satellite images 
 of the Earth's landmasses in near real-time using the MODIS Rapid Response System. There 
@@ -12,7 +12,7 @@ detecting the abnormally high temperature anomalies at the surface. When a locat
 much warmer than the surrounding area, it suggests the presence of a fire or a lava flow. 
 It is important to know the size, location and intensity of fires because of the damage 
 that they can cause, and also to help scientists understand the emissions from the fires 
-and their short- and long-term effects on ecosystems.   ]]
+and their short- and long-term effects on ecosystems]]
 local URL = "https://sos.noaa.gov/catalog/datasets/fires-2009/"
 
 
@@ -58,7 +58,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

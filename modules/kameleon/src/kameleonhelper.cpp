@@ -123,7 +123,7 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     else {
         LWARNING(
             "No starting time attribute could be found in the .cdf file. Starting "
-            "time is set to 01.JAN.2000 12:00."
+            "time is set to 01.JAN.2000 12:00"
         );
     }
 
@@ -138,8 +138,10 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
         );
     }
     else {
-        LWARNING("No starting time attribute could be found in the .cdf file."
-            "Starting time is set to 01.JAN.2000 12:00.");
+        LWARNING(
+            "No starting time attribute could be found in the .cdf file. Starting time "
+            "is set to 01.JAN.2000 12:00"
+        );
         seqStartDbl = 0.0;
     }
 
@@ -155,8 +157,10 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     }
     else {
         stateStartOffset = 0.0;
-        LWARNING("No time offset attribute could be found in the .cdf file."
-                    "The current state starts the same time as the sequence!");
+        LWARNING(
+            "No time offset attribute could be found in the .cdf file. The current state "
+            "starts the same time as the sequence"
+        );
     }
 
     return seqStartDbl + stateStartOffset + manualOffset;

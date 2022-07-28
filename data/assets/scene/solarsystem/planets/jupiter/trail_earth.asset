@@ -42,8 +42,8 @@ asset.export(JupiterTrailEarth)
 asset.meta = {
   Name = "Jupiter Trail from Earth",
   Version = "1.1",
-  Description = [[ Trail of Jupiter as observed by the Earth. Data from NASA
-    SPICE (see base spice asset)]],
+  Description = [[Trail of Jupiter as observed by the Earth. Data from NASA SPICE (see
+    base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

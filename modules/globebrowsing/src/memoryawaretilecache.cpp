@@ -38,14 +38,14 @@ namespace {
         "CpuAllocatedTileData",
         "CPU allocated tile data (MB)",
         "This value denotes the amount of RAM memory (in MB) that this tile cache is "
-        "utilizing."
+        "utilizing"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
         "GpuAllocatedTileData",
         "GPU allocated tile data (MB)",
         "This value denotes the amount of GPU memory (in MB) that this tile cache is "
-        "utilizing."
+        "utilizing"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
@@ -340,7 +340,7 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 
 void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
     ZoneScoped
-    ghoul_assert(!_textureContainerMap.empty(), "Texture containers must exist.");
+    ghoul_assert(!_textureContainerMap.empty(), "Texture containers must exist");
 
     LDEBUG("Resetting tile cache size");
 

@@ -40,7 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered."
+        "This value determines the color of the grid lines that are rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridSegmentsInfo = {
@@ -60,7 +60,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid."
+        "This value specifies the line width of the spherical grid"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiiInfo = {
@@ -68,7 +68,7 @@ namespace {
         "Inner and Outer Radius",
         "The radii values that determine the size of the circular grid. The first value "
         "is the radius of the inmost ring and the second is the radius of the outmost "
-        "ring."
+        "ring"
     };
 
     struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {

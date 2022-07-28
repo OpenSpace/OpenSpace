@@ -123,7 +123,7 @@ TileProvider::TileProvider() : properties::PropertyOwner({ "TileProvider" }) {}
 void TileProvider::initialize() {
     ZoneScoped
 
-    ghoul_assert(!isInitialized, "TileProvider can only be initialized once.");
+    ghoul_assert(!isInitialized, "TileProvider can only be initialized once");
 
     if (TileProvider::NumTileProviders >
         static_cast<unsigned int>(std::numeric_limits<uint16_t>::max()) - 1)
@@ -156,7 +156,7 @@ void TileProvider::internalDeinitialize() {}
 ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
     ZoneScoped
 
-    ghoul_assert(isInitialized, "TileProvider was not initialized.");
+    ghoul_assert(isInitialized, "TileProvider was not initialized");
 
     auto ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
         uv.uvOffset *= 0.5;
@@ -210,7 +210,7 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
 ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
     ZoneScoped
 
-    ghoul_assert(isInitialized, "TileProvider was not initialized.");
+    ghoul_assert(isInitialized, "TileProvider was not initialized");
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
 
     ChunkTilePile chunkTilePile;

@@ -854,7 +854,7 @@ public:
             //Read string length from file
             in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
             if (strLen > saveBufferStringSize_max) {
-                throw ConversionError("Invalid script size for conversion read.");
+                throw ConversionError("Invalid script size for conversion read");
             }
             //Read back full string
             std::vector<char> temp(strLen + 1);

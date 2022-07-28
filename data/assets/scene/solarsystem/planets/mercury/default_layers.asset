@@ -48,7 +48,7 @@ end)
 asset.meta = {
   Name = "Default Mercury Layers",
   Version = "1.0",
-  Description = [[ Default Mercury layers are: Messenger MDIS, Messenger Mosaic2,
+  Description = [[Default Mercury layers are: Messenger MDIS, Messenger Mosaic2,
     Messenger BDR, Messenger MDR, Messenger MP3, Messenger Hie, Messenger Hiw,
     Messenger LOI, Messenger SHADE, Aluminum Abundance, Calcium Abundance, Iron
     Abundance, Magnesium Abundance, and Silicon Abundance]],

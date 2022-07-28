@@ -64,13 +64,13 @@ namespace {
         "DistanceFraction",
         "Distance Fraction",
         "Distance fraction of original distance from light source to the globe to be "
-        "considered as the new light source distance."
+        "considered as the new light source distance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
         "Depth Map Size",
-        "The depth map size in pixels. You must entry the width and height values."
+        "The depth map size in pixels. You must entry the width and height values"
     };
 
     constexpr GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
@@ -81,30 +81,30 @@ namespace {
             GLenum fbErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             switch (fbErr) {
             case GL_FRAMEBUFFER_UNDEFINED:
-                LERROR("Indefined framebuffer.");
+                LERROR("Indefined framebuffer");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                LERROR("Incomplete, missing attachement.");
+                LERROR("Incomplete, missing attachement");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                LERROR("Framebuffer doesn't have at least one image attached to it.");
+                LERROR("Framebuffer doesn't have at least one image attached to it");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
                 LERROR(
                     "Returned if the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is "
-                    "GL_NONE for any color attachment point(s) named by GL_DRAW_BUFFERi."
+                    "GL_NONE for any color attachment point(s) named by GL_DRAW_BUFFERi"
                 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
                 LERROR(
                     "Returned if GL_READ_BUFFER is not GL_NONE and the value of "
                     "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color "
-                    "attachment point named by GL_READ_BUFFER.");
+                    "attachment point named by GL_READ_BUFFER");
                 break;
             case GL_FRAMEBUFFER_UNSUPPORTED:
                 LERROR(
                     "Returned if the combination of internal formats of the attached "
-                    "images violates an implementation - dependent set of restrictions."
+                    "images violates an implementation - dependent set of restrictions"
                 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
@@ -114,21 +114,21 @@ namespace {
                     "is the not same for all attached textures; or , if the attached "
                     "images are a mix of renderbuffers and textures, the value of "
                     "GL_RENDERBUFFE_r_samples does not match the value of "
-                    "GL_TEXTURE_SAMPLES."
+                    "GL_TEXTURE_SAMPLES"
                 );
                 LERROR(
                     "Returned if the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not "
                     "the same for all attached textures; or , if the attached images are "
                     "a mix of renderbuffers and textures, the value of "
                     "GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached "
-                    "textures."
+                    "textures"
                 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
                 LERROR(
                     "Returned if any framebuffer attachment is layered, and any "
                     "populated attachment is not layered, or if all populated color "
-                    "attachments are not from textures of the same target."
+                    "attachments are not from textures of the same target"
                 );
                 break;
             default:

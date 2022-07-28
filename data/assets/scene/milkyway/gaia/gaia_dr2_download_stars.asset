@@ -7,7 +7,7 @@ local gaia618Destination = asset.syncedResource({
   Identifier = "gaia_stars_618M_octree",
   Version = 1
 })
-local gaia618DestinationExtracted = gaia618Destination + "data";
+local gaia618DestinationExtracted = gaia618Destination .. "data";
 
 -- Download the full DR2 dataset with 24 values per star (preprocessed with theReadFitsTask (gaia_read.task) into 8 binary files).
 -- From these files new subsets can be created with the ConstructOctreeTask (gaia_octree.task). 
@@ -34,8 +34,16 @@ asset.meta = {
   Name = "GaiaDR2 Download Stars",
   Version = "1.1",
   Description = [[This asset contains code to sync gaia subsets from the OpenSpace
-  servers. Edit this file to choose which subsets to sync. WARNING can use 150GB],
+  servers. Edit this file to choose which subsets to sync. WARNING can use 150GB]],
   Author = "ESA/Gaia/DPAC",
   URL = "https://gea.esac.esa.int/archive/documentation/GDR2/index.html",
-  License = [[The Gaia data are open and free to use, provided credit is given to 'ESA/Gaia/DPAC'. In general, access to, and use of, ESA's Gaia Archive (hereafter called 'the website') constitutes acceptance of the following general terms and conditions. Neither ESA nor any other party involved in creating, producing, or delivering the website shall be liable for any direct, incidental, consequential, indirect, or punitive damages arising out of user access to, or use of, the website. The website does not guarantee the accuracy of information provided by external sources and accepts no responsibility or liability for any consequences arising from the use of such data.]]
+  License = [[The Gaia data are open and free to use, provided credit is given to
+    'ESA/Gaia/DPAC'. In general, access to, and use of, ESA's Gaia Archive (hereafter
+    called 'the website') constitutes acceptance of the following general terms and
+    conditions. Neither ESA nor any other party involved in creating, producing, or
+    delivering the website shall be liable for any direct, incidental, consequential,
+    indirect, or punitive damages arising out of user access to, or use of, the website.
+    The website does not guarantee the accuracy of information provided by external
+    sources and accepts no responsibility or liability for any consequences arising from
+    the use of such data]]
 }

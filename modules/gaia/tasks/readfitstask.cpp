@@ -109,7 +109,7 @@ std::string ReadFitsTask::description() {
         "Read the specified fits file (or all fits files in specified folder): {}\n and "
         "write raw star data into: {}\nAll columns required for default rendering and "
         "filtering parameters will always be read but user can define additional filter "
-        "columns to read.", _inFileOrFolderPath, _outFileOrFolderPath
+        "columns to read", _inFileOrFolderPath, _outFileOrFolderPath
     );
 }
 
@@ -147,7 +147,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
         LINFO("Number of values per star: " + std::to_string(nValuesPerStar));
 
         if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file.");
+            LERROR("Error writing file - No values were read from file");
         }
         outFileStream.write(
             reinterpret_cast<const char*>(&nValues),
@@ -261,7 +261,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
         jobManager.enqueueJob(readFileJob);
     }
 
-    LINFO("All files added to queue!");
+    LINFO("All files added to queue");
 
     // Check for finished jobs.
     while (finishedJobs < nInputFiles) {
@@ -295,7 +295,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
             }
         }
     }
-    LINFO(fmt::format("A total of {} stars were written to binary files.", totalStars));
+    LINFO(fmt::format("A total of {} stars were written to binary files", totalStars));
 }
 
 int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index,
@@ -310,7 +310,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
         LINFO("Write " + std::to_string(nValues) + " values to " + outPath);
 
         if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file.");
+            LERROR("Error writing file - No values were read from file");
         }
         // If this is the first write then write number of values per star!
         if (isFirstWrite[index]) {
@@ -331,7 +331,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
         return nValues / nValuesPerStar;
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as output data file.", outPath));
+        LERROR(fmt::format("Error opening file: {} as output data file", outPath));
         return 0;
     }
 }

@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Ice Extent: September Only"
 local Identifier = "noaa-sos-oceans-weeklyseaice-sept_seaice"
-local Description = [[ Sea ice is simply ocean water that has frozen. At least 15% of the 
+local Description = [[Sea ice is simply ocean water that has frozen. At least 15% of the 
 ocean is covered by sea ice some part of the year. This means that on average, sea ice 
 covers almost 10 million square miles (about 25 million square kilometers) of the Earth. 
 Sea ice is monitored closely by scientists because changing sea ice coverage can have a 
@@ -20,7 +20,7 @@ extent dataset that is available shows Sea Ice Extent from 1987-2013. In the Arc
 maximum coverage usually occurs in March and the minimum coverage occurs in September. 
 The opposite is true for Antarctic, where the minimum occurs in March and the maximum 
 occurs in September. An interesting point to note is that the extent of sea ice in the 
-Arctic is shrinking, while the Antarctic sea ice is not trending downward.   ]]
+Arctic is shrinking, while the Antarctic sea ice is not trending downward]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-extent-september-only/"
 
 
@@ -66,7 +66,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

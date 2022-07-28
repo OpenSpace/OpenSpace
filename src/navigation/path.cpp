@@ -115,7 +115,7 @@ Path::Path(Waypoint start, Waypoint end, Type type,
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
         default:
-            LERROR("Could not create curve. Type does not exist!");
+            LERROR("Could not create curve. Type does not exist");
             throw ghoul::MissingCaseException();
     }
 
@@ -689,9 +689,8 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, type) };
             break;
         }
-        default: {
+        default:
             throw ghoul::MissingCaseException();
-        }
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints
@@ -699,7 +698,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
     if (glm::distance(startPoint.position(), waypointToAdd.position()) < LengthEpsilon) {
         LINFO("Already at the requested target");
-        throw PathCurve::TooShortPathError("Path too short!");
+        throw PathCurve::TooShortPathError("Path too short");
     }
 
     checkVisibilityAndShowMessage(waypointToAdd.node());
@@ -719,7 +718,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
         LINFO(
             "Switching to a linear path, to avoid problems with precision due to "
-            "immense path length."
+            "immense path length"
         );
 
         return createPathFromDictionary(dictionary, Path::Type::Linear);

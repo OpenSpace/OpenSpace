@@ -135,7 +135,7 @@ void AsyncTileDataProvider::update() {
 
     // May reset
     switch (_resetMode) {
-        case ResetMode::ShouldResetAll: {
+        case ResetMode::ShouldResetAll:
             // Clean all finished jobs
             clearTiles();
             // Only allow resetting if there are no jobs currently running
@@ -144,8 +144,7 @@ void AsyncTileDataProvider::update() {
                 LINFO(fmt::format("Tile data reader '{}' reset successfully", _name));
             }
             break;
-        }
-        case ResetMode::ShouldResetAllButRawTileDataReader: {
+        case ResetMode::ShouldResetAllButRawTileDataReader:
             // Clean all finished jobs
             clearTiles();
             // Only allow resetting if there are no jobs currently running
@@ -154,8 +153,7 @@ void AsyncTileDataProvider::update() {
                 LINFO(fmt::format("Tile data reader '{}' reset successfully", _name));
             }
             break;
-        }
-        case ResetMode::ShouldBeDeleted: {
+        case ResetMode::ShouldBeDeleted:
             // Clean all finished jobs
             clearTiles();
             // Only allow resetting if there are no jobs currently running
@@ -163,10 +161,7 @@ void AsyncTileDataProvider::update() {
                 _shouldBeDeleted = true;
             }
             break;
-        }
-        case ResetMode::ShouldNotReset: {
-            break;
-        }
+        case ResetMode::ShouldNotReset:
         default:
             break;
     }

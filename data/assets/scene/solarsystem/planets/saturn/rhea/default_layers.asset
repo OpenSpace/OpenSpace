@@ -11,7 +11,7 @@ end)
 asset.meta = {
   Name = "Default Rhea Layers",
   Version = "1.0",
-  Description = [[ Default Rhea layers are: Rhea Texture]],
+  Description = "Default Rhea layers are: Rhea Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -52,28 +52,28 @@ namespace {
         "SourceType",
         "Source Type",
         "The type of position that is used as the source to calculate the distance. The "
-        "default value is 'Camera'."
+        "default value is 'Camera'"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
         "SourceNodeName",
         "Source Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the source for computing the distance."
+        "node that is to be used as the source for computing the distance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination Type",
         "The type of position that is used as the destination to calculate the distance. "
-        "The default value for this is 'Focus'."
+        "The default value for this is 'Focus'"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the destination for computing the distance."
+        "node that is to be used as the destination for computing the distance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
@@ -81,14 +81,14 @@ namespace {
         "Simplification",
         "If this value is enabled, the distance is displayed in nuanced units, such as "
         "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
-        "explicitly requested."
+        "explicitly requested"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this distance unit is used as a destination "
-        "to convert the meters into."
+        "to convert the meters into"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {

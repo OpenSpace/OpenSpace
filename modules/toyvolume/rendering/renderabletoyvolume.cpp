@@ -74,8 +74,7 @@ namespace {
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value set the downscaling factor"
-        " when rendering the current volume."
+        "This value set the downscaling factor when rendering the current volume"
     };
 } // namespace
 
@@ -133,8 +132,9 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         _rayCastSteps = static_cast<int>(dictionary.value<double>("Steps"));
     }
     else {
-        LINFO("Number of raycasting steps not specified for ToyVolume."
-            " Using default value.");
+        LINFO(
+            "Number of raycasting steps not specified for ToyVolume. Using default value"
+        );
     }
 }
 

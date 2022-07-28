@@ -59,52 +59,52 @@ namespace {
         "Texture Source",
         "This value specifies a directory of images that are loaded from disk and is "
         "used as a texture that is applied to this sphere. The images are expected to "
-        "be an equirectangular projection."
+        "be an equirectangular projection"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror Texture",
-        "Mirror the texture along the x-axis."
+        "Mirror the texture along the x-axis"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
-        "outside of the sphere, or both."
+        "outside of the sphere, or both"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that the sphere is separated in."
+        "This value specifies the number of segments that the sphere is separated in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the radius of the sphere in meters."
+        "This value specifies the radius of the sphere in meters"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
         "FadeOutThreshold",
         "Fade-Out Threshold",
         "This value determines percentage of the sphere is visible before starting "
-        "fading-out it."
+        "fading-out it"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
         "FadeInThreshold",
         "Fade-In Threshold",
         "Distance from center of MilkyWay from where the astronomical object starts to "
-        "fade in."
+        "fade in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable Fade-In/Fade-Out effects",
-        "Enables/Disables the Fade-In/Out effects."
+        "Enables/Disables the Fade-In/Out effects"
     };
 
     struct [[codegen::Dictionary(RenerableTimeVaryingSphere)]] Parameters {

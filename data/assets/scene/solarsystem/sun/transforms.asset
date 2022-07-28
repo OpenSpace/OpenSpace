@@ -14,7 +14,7 @@ local SolarSystemBarycenter = {
   GUI = {
     Name = "Solar System Barycenter",
     Path = "/Solar System",
-    Description = [[Barycenter of the solar system, expressed in the Galactic frame]],
+    Description = "Barycenter of the solar system, expressed in the Galactic frame",
     Hidden = true
   }
 }
@@ -32,7 +32,7 @@ local SunCenter = {
   GUI = {
     Name = "SUN Center",
     Path = "/Solar System/Sun",
-    Description = [[Spice frame for the Sun]],
+    Description = "Spice frame for the Sun",
     Hidden = true
   }
 }
@@ -56,7 +56,7 @@ local SunIAU = {
   GUI = {
     Name = "SUN IAU",
     Path = "/Solar System/Sun",
-    Description = [[Spice frame for the Sun]],
+    Description = "Spice frame for the Sun",
     Hidden = true
   }
 }
@@ -79,7 +79,7 @@ local SunECLIPJ2000 = {
   GUI = {
     Name = "SUN J2000",
     Path = "/Solar System/Sun",
-    Description = [[Spice rotation for Mean ecliptic and equinox of J2000]],
+    Description = "Spice rotation for Mean ecliptic and equinox of J2000",
     Hidden = true
   }
 }
@@ -108,8 +108,7 @@ asset.export(SunECLIPJ2000)
 asset.meta = {
   Name = "Sun Transforms",
   Version = "1.1",
-  Description = [[ Sun transforms: Solar System Barycenter, SUN IAU and
-   SUN J2000]],
+  Description = "Sun transforms: Solar System Barycenter, SUN IAU and SUN J2000",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

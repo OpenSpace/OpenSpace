@@ -18,8 +18,8 @@ local layer = {
       "png"
     )
   },
-  Description = [[ Temporal coverage: 02 July 2013 - Present. The imagery resolution
-    is 1 km, and the temporal resolution is daily.]]
+  Description = [[Temporal coverage: 02 July 2013 - Present. The imagery resolution
+    is 1 km, and the temporal resolution is daily]]
 }
 
 asset.onInitialize(function()
@@ -37,10 +37,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "MODIS Terra Chlorophyll A (Temporal)",
   Version = "1.1",
-  Description = [[ GIBS hosted layer created with
-    openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
-  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/" ..
-    "eosdis-components/gibs",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
   License = "NASA"
 }

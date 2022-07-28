@@ -21,8 +21,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Messenger HIE [Sweden]",
   Version = "1.0",
-  Description = [[ Mercury HIE layer for Mercury globe. 
-  This map is hosted on the OpenSpace server in Sweden.]],
+  Description = [[Mercury HIE layer for Mercury globe. This map is hosted on the OpenSpace
+    server in Sweden]],
   Author = "USGS",
   URL = "",
   License = "NASA/PDS"

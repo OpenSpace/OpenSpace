@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Fossil Fuel: CO2 Release - 2011-2012"
 local Identifier = "noaa-sos-atmosphere-fossil_fuel"
-local Description = [[ This dataset shows the result of emitting carbon dioxide from 
+local Description = [[This dataset shows the result of emitting carbon dioxide from 
 fossil fuel burning into the atmosphere over two years. A computer model of the 
 atmosphere called TM5 was used to create this powerful visualization. TM5 simulates the 
 movement of atmospheric gases globally, using winds and atmospheric mixing as derived 
@@ -17,7 +17,7 @@ observations and instead visualizes the transport of fossil fuel emissions.
 Visualizations such as this dataset and CarbonTracker, aim to improve our understanding 
 of atmospheric carbon and how various sources and sinks may respond to the changing 
 climate, increasing levels of atmospheric CO2 (via the CO2 fertilization effect), and 
-human management of global resources.   ]]
+human management of global resources]]
 local URL = "https://sos.noaa.gov/catalog/datasets/fossil-fuel-co2-release-2011-2012/"
 
 
@@ -75,7 +75,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

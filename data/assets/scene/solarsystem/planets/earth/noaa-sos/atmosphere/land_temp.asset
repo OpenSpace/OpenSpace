@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Land Surface Temperature - 1950 - 1999"
 local Identifier = "noaa-sos-atmosphere-land_temp"
-local Description = [[ The temperature of the air varies dramatically in both time and 
+local Description = [[The temperature of the air varies dramatically in both time and 
 space. Because the Earth's rotational axis is at a 23° tilt, the Northern Hemisphere and 
 Southern Hemisphere simultaneously experience opposite seasons. This dataset displays the 
 gridded, monthly, historical terrestrial air temperature from 1950 - 1999. The original 
 data is from the Global Historical Climatology Network, which is part of NOAA's National 
 Climatic Data Center. The data was interpolated by the Center for Climatic Research at 
-the University of Delaware.   ]]
+the University of Delaware]]
 local URL = "https://sos.noaa.gov/catalog/datasets/international-space-station-track/"
 
 
@@ -55,7 +55,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Climate Model: Temperature Change (GFDL b1) - 1870 - 2100"
 local Identifier = "noaa-sos-models-ipcc_temp-gfdl-b1"
-local Description = [[ "The Intergovernmental Panel on Climate Change (IPCC) was 
+local Description = [["The Intergovernmental Panel on Climate Change (IPCC) was 
 established by WMO and UNEP to assess scientific, technical and socio-economic 
 information relevant for the understanding of climate change, its potential impacts and 
 options for adaptation and mitigation. It is open to all members of the UN and of WMO." 
@@ -12,7 +12,7 @@ IPCC releases assessment reports on the current state of the atmosphere and what
 future could hold. Models from various atmospheric and oceanic organizations are included 
 in these reports in order to establish a broad understanding of the science. Data from 
 three of the IPCC models following temperature change from 1870 - 2100 have been 
-formatted for Science On a Sphere.   ]]
+formatted for Science On a Sphere]]
 local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-temperature-change-gfdl-b1-1870-2100/"
 
 
@@ -66,7 +66,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

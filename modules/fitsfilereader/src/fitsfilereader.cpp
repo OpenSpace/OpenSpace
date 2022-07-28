@@ -185,7 +185,7 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::p
     }
     catch (FitsException& e) {
         LERROR(fmt::format(
-            "Could not read FITS table from file '{}'. Make sure it's not an image file.",
+            "Could not read FITS table from file '{}'. Make sure it's not an image file",
             e.message()
         ));
     }
@@ -257,7 +257,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     int defaultCols = 17; // Number of columns that are copied by predefined code.
     if (nColumnsRead != defaultCols) {
         LINFO("Additional columns will be read! Consider add column in code for "
-            "significant speedup!");
+            "significant speedup");
     }
     // Declare how many values to save per star
     nValuesPerStar = nColumnsRead + 1; // +1 for B-V color value.
@@ -394,7 +394,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     size_t defaultCols = 9; // Number of columns that are copied by predefined code.
     if (nColumnsRead != defaultCols) {
         LINFO("Additional columns will be read! Consider add column in code for "
-            "significant speedup!");
+            "significant speedup");
     }
     // Declare how many values to save per star
     nValuesPerStar = 8;

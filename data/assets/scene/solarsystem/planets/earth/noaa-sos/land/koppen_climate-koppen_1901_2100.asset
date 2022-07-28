@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Koppen-Geiger Climate Changes - 1901 - 2100"
 local Identifier = "noaa-sos-land-koppen_climate-koppen_1901_2100"
-local Description = [[ Köppen climate classification is a widely used vegetation-based 
+local Description = [[Köppen climate classification is a widely used vegetation-based 
 empirical climate classification system developed by German botanist-climatologist 
 Wladimir Köppen. It's based on the idea that climate is best defined by native 
 vegetation. The formulas used in the classification correspond to those of the vegetation 
 zones (biomes) that were being mapped for the first time in the late 19th century. It was 
 first published in 1884 and was revised until 1940 with collaboration by German 
-climatologist Rudolf Geiger.   ]]
+climatologist Rudolf Geiger]]
 local URL = "https://sos.noaa.gov/catalog/datasets/koppen-geiger-climate-changes-1901-2100/"
 
 
@@ -74,7 +74,7 @@ asset.export(legend1)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

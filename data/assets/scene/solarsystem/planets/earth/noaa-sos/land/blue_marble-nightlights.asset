@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Blue Marble and Nighttime Lights"
 local Identifier = "noaa-sos-land-bluemarble_nightlights"
-local Description = [[ This dataset shows the Earth with daytime and nighttime views of 
+local Description = [[This dataset shows the Earth with daytime and nighttime views of 
 the Earth, to demonstrate how only half of the Earth is illumintated at one time. The 
 Blue Marble is an incredibly detailed, true-color depiction of the Earth, and is shown on 
 the daylight side of the Earth in this dataset. NASA is responsible for The Blue Marble, 
@@ -14,7 +14,7 @@ was created using data from June through September of 2001. This could not be do
 single day or even a week because on any given day clouds are blocking a significant 
 portion of the surface. The cloud image is a composite of three days worth of data. The 
 first two days of data were collected in the visible wavelength and the third day was 
-needed to get a view of the clouds over the poles using thermal infrared imagery.    ]]
+needed to get a view of the clouds over the poles using thermal infrared imagery]]
 local URL = "https://sos.noaa.gov/catalog/datasets/blue-marble-and-nighttime-lights/"
 
 
@@ -59,7 +59,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

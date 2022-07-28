@@ -49,7 +49,7 @@ asset.meta = {
   Name = "MilkyWay Galaxy (ESO)",
   Version = "1.0",
   Description = [[This asset contains an alternate to the Digital Universe image for the 
-  Milky Way from ESO.]],
+    Milky Way from ESO]],
   Author = "ESO/S. Brunier",
   URL = "https://www.eso.org/public/usa/images/eso0932a/",
   License = "Creative Commons Attribution 4.0 International License"

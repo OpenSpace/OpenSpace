@@ -52,19 +52,20 @@ namespace {
     #endif
 
     constexpr openspace::properties::Property::PropertyInfo
-    UpdateBrowserBetweenRenderablesInfo = {
+        UpdateBrowserBetweenRenderablesInfo =
+    {
         "UpdateBrowserBetweenRenderables",
         "Update Browser Between Renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs "
-        "once per frame."
+        "once per frame"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser Update Interval",
         "The time in microseconds between running the message loop of the browser. "
-        "Only used if UpdateBrowserBetweenRenderables is true."
+        "Only used if UpdateBrowserBetweenRenderables is true"
     };
 } // namespace
 
@@ -142,7 +143,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     LDEBUG(fmt::format("CEF using web helper executable: {}", _webHelperLocation));
     _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
-    LDEBUG("Starting CEF... done!");
+    LDEBUG("Starting CEF... done");
 
     if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
         _updateBrowserBetweenRenderables =

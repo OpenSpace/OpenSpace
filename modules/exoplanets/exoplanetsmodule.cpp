@@ -54,7 +54,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if the GUI for this module should be enabled."
+        "Decides if the GUI for this module should be enabled"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataFolderInfo = {

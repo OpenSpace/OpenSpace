@@ -32,20 +32,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
         "ChromaKeyColor",
         "Chroma Key Color",
-        "This color is used as the chroma key for the layer that is adjusted."
+        "This color is used as the chroma key for the layer that is adjusted"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
         "ChromaKeyTolerance",
         "Chroma Key Tolerance",
         "This value determines the tolerance that is used to determine whether a color "
-        "is matching the selected Chroma key."
+        "is matching the selected Chroma key"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
-        "The type of layer adjustment that is applied to the underlying layer."
+        "The type of layer adjustment that is applied to the underlying layer"
     };
 
     struct [[codegen::Dictionary(LayerAdjustment)]] Parameters {

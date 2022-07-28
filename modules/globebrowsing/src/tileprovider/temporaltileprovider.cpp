@@ -58,7 +58,7 @@ namespace {
         "FixedTime",
         "Fixed Time",
         "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
-        "time taken from OpenSpace for the displayed tiles."
+        "time taken from OpenSpace for the displayed tiles"
     };
 
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
@@ -414,10 +414,9 @@ DefaultTileProvider TemporalTileProvider::createTileProvider(
             value = FileSys.expandPathTokens(std::move(value), IgnoredTokens).string();
             break;
         }
-        case Mode::Folder: {
+        case Mode::Folder:
             value = std::string(timekey);
             break;
-        }
     }
 
     ghoul::Dictionary dict = _initDict;

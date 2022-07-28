@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Polar Orbiting: NOAA-17 Satellite Coverage"
 local Identifier = "noaa-sos-atmosphere-poes_sat"
-local Description = [[ Satellites allow scientists to observe the Earth from above the 
+local Description = [[Satellites allow scientists to observe the Earth from above the 
 atmosphere. The National Oceanic and Atmospheric Administration, NOAA, has several 
 different types of satellites, including geostationary and polar orbiting satellites. 
 These datasets show the path of Polar-orbiting Operational Environmental Satellites, or 
 POES for short. NOAA has two POES in operation currently, a morning and afternoon 
 satellite. The morning satellite crosses the equator on the sun-light side of the Earth 
 in the morning, and the afternoon satellite crosses in the afternoon. Both satellites 
-orbit the Earth 14.1 times per day.   ]]
+orbit the Earth 14.1 times per day]]
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-noaa-17-satellite-coverage/"
 
 
@@ -56,7 +56,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

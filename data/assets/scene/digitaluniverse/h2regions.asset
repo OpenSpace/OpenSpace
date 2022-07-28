@@ -20,7 +20,7 @@ local object = {
     Color = { 0.0, 0.5, 1.0 },
     Opacity = 0.70,
     File = speck .. "h2.speck",
-    Texture = textures .."point4.png",
+    Texture = textures .. "point4.png",
     PolygonSides = 6,
     LabelFile = speck .. "h2.label",
     Unit = "pc",
@@ -63,7 +63,7 @@ asset.export(object)
 asset.meta = {
   Name = "HII Regions",
   Version = "1.1",
-  Description = [[Digital Universe asset for HII Regions]],
+  Description = "Digital Universe asset for HII Regions",
   Author = "Carter Emmart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

@@ -47,13 +47,13 @@ namespace {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture to be used for the color."
+        "texture to be used for the color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the outer radius of the disc in meter."
+        "This value specifies the outer radius of the disc in meter"
     };
 
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
@@ -61,7 +61,7 @@ namespace {
         "Width",
         "This value is used to set the width of the disc. The actual width is set "
         "based on the given size and this value should be set between 0 and 1. A value "
-        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size."
+        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size"
     };
 
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {

@@ -41,10 +41,9 @@ size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
         case ghoul::opengl::Texture::Format::RGBA:
         case ghoul::opengl::Texture::Format::BGRA:
             return 4;
-        default: {
+        default:
             ghoul_assert(false, "Unknown format");
             throw ghoul::MissingCaseException();
-        }
     }
 }
 

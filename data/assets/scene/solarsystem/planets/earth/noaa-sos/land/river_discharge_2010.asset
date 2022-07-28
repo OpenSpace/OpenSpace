@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Rivers: Daily Discharge - 2010"
 local Identifier = "noaa-sos-land-river_discharge_2010"
-local Description = [[ This dataset illustrates hydrological conditions worldwide for the 
+local Description = [[This dataset illustrates hydrological conditions worldwide for the 
 year 2010. The data originates from a computational model, the Water Balance Model (WBM). 
 WBM takes daily rainfall and temperature data, maps of vegetation, land-use, irrigation 
 and soil properties, and then calculates the hydrological balance for each of its grid 
-cells.    ]]
+cells]]
 local URL = "https://sos.noaa.gov/catalog/datasets/rivers-daily-discharge-2010/"
 
 
@@ -60,7 +60,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

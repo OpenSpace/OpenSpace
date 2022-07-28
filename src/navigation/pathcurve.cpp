@@ -65,7 +65,7 @@ std::vector<glm::dvec3> PathCurve::points() const {
 
 void PathCurve::initializeParameterData() {
     _nSegments = static_cast<int>(_points.size() - 3);
-    ghoul_assert(_nSegments > 0, "Cannot have a curve with zero segments!");
+    ghoul_assert(_nSegments > 0, "Cannot have a curve with zero segments");
 
     _curveParameterSteps.clear();
     _lengthSums.clear();
@@ -91,7 +91,7 @@ void PathCurve::initializeParameterData() {
     _totalLength = _lengthSums.back();
 
     if (_totalLength < LengthEpsilon) {
-        throw TooShortPathError("Path too short!");
+        throw TooShortPathError("Path too short");
     }
 
     // Compute a map of arc lengths s and curve parameters u, for reparameterization

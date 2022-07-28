@@ -117,14 +117,14 @@ namespace {
         "Level by projected area (else distance)",
         "If this value is set to 'true', the tile level is determined by the area "
         "projected on screen. If it is 'false', the distance to the center of the tile "
-        "is used instead."
+        "is used instead"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
         "ResetTileProviders",
         "Reset tile providers",
         "If this property is triggered, all tile provides for the globe are reset and "
-        "data is reloaded from scratch."
+        "data is reloaded from scratch"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
@@ -133,7 +133,7 @@ namespace {
         "This value determines the tile level that is used as the cut off between "
         "rendering tiles using the globe model rendering vs the flat in-game rendering "
         "method. This value is a tradeoff between not having precision errors in the "
-        "rendering and represting a tile as flat or curved."
+        "rendering and represting a tile as flat or curved"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo =
@@ -150,7 +150,7 @@ namespace {
         "Perform shading",
         "This value determines whether there should be lighting applied to the surface "
         "of the globe. Note that if there is an atmosphere attached to the planet, there "
-        "is a separate setting to control the shadowing induced by the atmosphere part."
+        "is a separate setting to control the shadowing induced by the atmosphere part"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AccurateNormalsInfo = {
@@ -176,7 +176,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShadowMappingInfo = {
         "ShadowMapping",
         "Shadow Mapping",
-        "Enables shadow mapping algorithm. Used by renderable rings too."
+        "Enables shadow mapping algorithm. Used by renderable rings too"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderAtDistanceInfo = {
@@ -184,7 +184,7 @@ namespace {
         "Render at Distance",
         "Tells the rendering engine not to perform distance based performance culling "
         "for this globe. Turning this property on will let the globe to be seen at far "
-        "away distances when normally it would be hidden."
+        "away distances when normally it would be hidden"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
@@ -198,7 +198,7 @@ namespace {
         "NumberShadowSamples",
         "Number of Shadow Samples",
         "The number of samples used during shadow mapping calculation "
-        "(Percentage Closer Filtering)."
+        "(Percentage Closer Filtering)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
@@ -206,14 +206,14 @@ namespace {
         "Target Level of Detail Scale Factor",
         "Determines the targeted level-of-detail of the tiles for this globe. A higher "
         "value means that the tiles rendered are a higher resolution for the same "
-        "distance of the camera to the planet."
+        "distance of the camera to the planet"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentLodScaleFactorInfo = {
         "CurrentLodScaleFactor",
         "Current Level of Detail Scale Factor (Read Only)",
         "The currently used scale factor whose target value is deteremined by "
-        "'TargetLodScaleFactor'."
+        "'TargetLodScaleFactor'"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrenNayarRoughnessInfo = {
@@ -226,7 +226,7 @@ namespace {
         "NActiveLayers",
         "Number of active layers",
         "This is the number of currently active layers, if this value reaches the "
-        "maximum, bad things will happen."
+        "maximum, bad things will happen"
     };
 
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
@@ -1730,7 +1730,7 @@ void RenderableGlobe::recompileShaders() {
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
         shaderDictionary
     );
-    ghoul_assert(_localRenderer.program, "Failed to initialize programObject!");
+    ghoul_assert(_localRenderer.program, "Failed to initialize programObject");
     _localRenderer.updatedSinceLastCall = true;
 
     _localRenderer.program->setUniform("xSegments", _grid.xSegments);
@@ -1752,7 +1752,7 @@ void RenderableGlobe::recompileShaders() {
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
         shaderDictionary
     );
-    ghoul_assert(_globalRenderer.program, "Failed to initialize programObject!");
+    ghoul_assert(_globalRenderer.program, "Failed to initialize programObject");
 
     _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
 
@@ -2034,7 +2034,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         if ((sourceNode == nullptr) || (casterNode == nullptr)) {
             LERRORC(
                 "Renderableglobe",
-                "Invalid scenegraph node for the shadow's caster or shadow's receiver."
+                "Invalid scenegraph node for the shadow's caster or shadow's receiver"
             );
             return;
         }

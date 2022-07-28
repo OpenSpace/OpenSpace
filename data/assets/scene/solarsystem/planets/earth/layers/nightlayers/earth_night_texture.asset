@@ -11,7 +11,7 @@ local layer = {
   Identifier = "Earth_Night_Texture",
   Name = "Earth Night Texture",
   FilePath = texturesPath .. "earth_night.png",
-  Description = [[ Earth's city lights are clearly visible from space ]]
+  Description = "Earth's city lights are clearly visible from space"
 }
 
 asset.onInitialize(function()
@@ -28,7 +28,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Blue Marble Night",
   Version = "1.1",
-  Description = [[ Fallback layer for earth night image if no internet is available. ]],
+  Description = "Fallback layer for earth night image if no internet is available",
   Author = "OpenSpace Team",
   URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
   License = "NASA"

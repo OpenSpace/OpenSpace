@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Coral Reef Risk Outlook"
 local Identifier = "noaa-sos-oceans-reefs_risk"
-local Description = [[ From tourism to disease prevention, it's clear that reefs offer 
+local Description = [[From tourism to disease prevention, it's clear that reefs offer 
 much more than recreation. According to the newly released Reefs at Risk Revisited 
 report, coral reefs:
 
@@ -19,7 +19,7 @@ pressures pose the most immediate threat - especially from overfishing and destr
 fishing, which is particularly widespread in Southeast Asia. Global threats from climate 
 change and alterations in ocean chemistry (i.e. ocean acidification) are compounding the 
 pressures on reefs. Climate change is causing ocean temperatures to rise, which, in turn, 
-is leading to wide-spread coral bleaching.   ]]
+is leading to wide-spread coral bleaching]]
 local URL = "https://sos.noaa.gov/catalog/datasets/coral-reef-risk-outlook/"
 
 
@@ -84,7 +84,7 @@ asset.export(legend)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

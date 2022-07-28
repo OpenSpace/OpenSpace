@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Polar Orbiting: Aqua Satellite and MODIS Swath"
 local Identifier = "noaa-sos-atmosphere-aqua_swath"
-local Description = [[ Satellites are important to scientists because the instruments on 
+local Description = [[Satellites are important to scientists because the instruments on 
 board can provide almost daily global coverage of the Earth that would otherwise not be 
 available. There are six instruments on board NASA's Aqua satellite. One of them is 
 MODIS, the Moderate Resolution Imaging Spectroradiometer. MODIS measures 36 spectral 
@@ -14,7 +14,7 @@ circling the Earth at an altitude of 438 miles (705 kilometers) every 99 minutes
 polar orbit passing within 10 degrees of each pole every orbit. The orbit is 
 sun-synchronous, which means that the satellite passes over the same spot of the Earth at
 about the same local time everyday. Aqua crosses the equator from south to north at about 
-1:30 pm local time.  ]]
+1:30 pm local time]]
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-aqua-satellite-and-modis-swath/"
 
 
@@ -57,7 +57,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

@@ -5,7 +5,7 @@ local group = {
   Filename = "active.txt",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=active&FORMAT=TLE",
   TrailColor = { 0.45, 0.25, 0.45 },
-  Description = [[Satellites that employ active communication.]]
+  Description = "Satellites that employ active communication"
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
@@ -15,7 +15,7 @@ shared.registerSatelliteGroupObjects(asset, group, tle, true)
 asset.meta = {
   Name = "Satellites Active",
   Version = "1.0",
-  Description = [[ Satellites that employ active communication. Data from Celestrak]],
+  Description = "Satellites that employ active communication. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

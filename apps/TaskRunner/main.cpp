@@ -87,7 +87,7 @@ void performTasks(const std::string& path) {
         };
         task.perform(onProgress);
     }
-    std::cout << "Done performing tasks." << std::endl;
+    std::cout << "Done performing tasks" << std::endl;
 }
 
 int main(int argc, char** argv) {

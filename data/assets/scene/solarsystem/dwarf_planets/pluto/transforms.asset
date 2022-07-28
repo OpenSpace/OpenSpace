@@ -36,7 +36,7 @@ asset.export(PlutoBarycenter)
 asset.meta = {
   Name = "Pluto Transforms",
   Version = "1.0",
-  Description = [[ Pluto Barycenter transform]],
+  Description = "Pluto Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -266,7 +266,7 @@ bool HongKangParser::create() {
             if (captureStart != -1) {
                 // end of capture sequence for camera, store end time of this sequence
                 TimeRange cameraRange = { captureStart, time };
-                ghoul_assert(cameraRange.isDefined(), "Invalid time range!");
+                ghoul_assert(cameraRange.isDefined(), "Invalid time range");
                 _instrumentTimes.emplace_back(previousCamera, cameraRange);
                 captureStart = -1;
             }

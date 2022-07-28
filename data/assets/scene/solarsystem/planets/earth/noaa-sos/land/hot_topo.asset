@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Topography and Bathymetry with Nighttime Lights"
 local Identifier = "noaa-sos-land-hot_topo"
-local Description = [[ This planet Earth visualization shows a rotating planet in order 
+local Description = [[This planet Earth visualization shows a rotating planet in order 
 to display both a nighttime and daytime view. The daytime side of the visualization shows 
 the bathymetry and topography of the globe. Color coding is used to distinguish between 
 the elevations. Red and gray represent the highest terrain on the land, green and yellow 
@@ -15,7 +15,7 @@ the oceans, such as the mid-Atlantic Ridge in the middle of the Atlantic Ocean, 
 spreading. Also in the ocean is the Marianas Trench, which is south of Japan. This trench 
 is the deepest location in the ocean with an amazing depth of 36,201 feet, almost 7 
 miles. On land, the Himalayas are a noteworthy feature, as they are the home of Mount 
-Everest, the tallest point on earth at a height of 29,035 feet, almost 5.5 miles.   ]]
+Everest, the tallest point on earth at a height of 29,035 feet, almost 5.5 miles]]
 local URL = "https://sos.noaa.gov/catalog/datasets/topography-and-bathymetry-with-nighttime-lights/"
 
 
@@ -58,7 +58,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

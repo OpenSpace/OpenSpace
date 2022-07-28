@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Temperature Anomaly: Yearly - 500 - 2006 (Paleoclimate Evidence)"
 local Identifier = "noaa-sos-atmosphere-pclim"
-local Description = [[ This animation shows annual average temperature anomalies 
+local Description = [[This animation shows annual average temperature anomalies 
 (departure from normal) over the globe for the past 1,500 years compared to the average 
 temperature (normal) from 1961-1990. This data collected from over 1,000 paleoclimate 
 proxies. Areas shaded red are warmer than normal while areas shaded blue are cooler than 
-normal.   ]]
+normal]]
 local URL = "https://sos.noaa.gov/catalog/datasets/temperature-anomaly-yearly-500-2006-paleoclimate-evidence/"
 
 
@@ -59,7 +59,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

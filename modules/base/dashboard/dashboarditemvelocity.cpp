@@ -45,14 +45,14 @@ namespace {
         "Simplification",
         "If this value is enabled, the velocity is displayed in nuanced units, such as "
         "m/s, AU/s, light years / s etc. If this value is disabled, the unit can be "
-        "explicitly requested."
+        "explicitly requested"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this distance unit is used for the velocity "
-        "display."
+        "display"
     };
 
     std::vector<std::string> unitList() {

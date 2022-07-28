@@ -46,13 +46,13 @@ namespace {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
+        "internal name registered previously, or it can refer to a path that is used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "This value determines the size of the font that is used to render the date."
+        "This value determines the size of the font that is used to render the date"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
@@ -64,7 +64,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
         "Significant Digits",
-        "Determines the number of significant digits that are shown in the location text."
+        "Determines the number of significant digits that are shown in the location text"
     };
 
     struct [[codegen::Dictionary(DashboardItemGlobeLocation)]] Parameters {

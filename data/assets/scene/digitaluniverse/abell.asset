@@ -42,7 +42,7 @@ local object = {
     Path = "/Universe/Galaxies",
     Description = [[Census 2,246 galaxies. DU Version 1.4. <br> The Abell catalog
         includes all the nearby, and not so nearby, galaxy clusters. The northern
-        hemisphere survey, published in 1958, was compiled by George Abell (1927–1983)
+        hemisphere survey, published in 1958, was compiled by George Abell (1927-1983)
         from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog
         was published posthumously in 1989. Further analysis by Brent Tully determined
         their distance and three-dimensional distribution. Each point in this data set
@@ -71,7 +71,7 @@ asset.export(object)
 asset.meta = {
   Name = "Abell Galaxy Clusters",
   Version = "2.1",
-  Description = [[Digital Universe asset for The Abell catalog]],
+  Description = "Digital Universe asset for The Abell catalog",
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

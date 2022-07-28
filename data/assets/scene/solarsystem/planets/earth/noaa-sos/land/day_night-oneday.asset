@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Day/Night Terminator (single day)"
 local Identifier = "noaa-sos-land-day_night-oneday"
-local Description = [[ The line that separates day and night is called the terminator. It 
+local Description = [[The line that separates day and night is called the terminator. It 
 is also referred to as the "grey line" and the "twilight zone." It is a fuzzy line due to 
 our atmosphere bending sunlight. In fact, the atmosphere bends sunlight by half a degree, 
 which is about 37 miles (60 km). It is commonly thought that while half of the Earth is 
 covered in darkness, the other half is covered in sunlight. This is actually not true 
 because of the bending of the sunlight results in the land covered by sunlight having 
-greater area than the land covered by darkness.   ]]
+greater area than the land covered by darkness]]
 local URL = "https://sos.noaa.gov/catalog/datasets/daynight-terminator-single-day/"
 
 
@@ -49,7 +49,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

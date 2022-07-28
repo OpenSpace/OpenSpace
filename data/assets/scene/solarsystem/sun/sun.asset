@@ -16,7 +16,7 @@ local Sun = {
   GUI = {
     Name = "Sun",
     Path = "/Solar System/Sun",
-    Description = "Globe for the sun in our solar system."
+    Description = "Globe for the sun in our solar system"
   }
 }
 
@@ -41,7 +41,7 @@ local SunLabel = {
   GUI = {
     Name = "Sun Label",
     Path = "/Solar System/Sun",
-    Description = "Label for the sun in our solar system."
+    Description = "Label for the sun in our solar system"
   }
 }
 
@@ -71,7 +71,7 @@ asset.export("LightSource", LightSource)
 asset.meta = {
   Name = "Sun",
   Version = "1.1",
-  Description = [[ The Sun and label]],
+  Description = "The Sun and label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

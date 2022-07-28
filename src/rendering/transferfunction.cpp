@@ -57,7 +57,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     }
     std::filesystem::path f = absPath(filepath);
     if (!std::filesystem::is_regular_file(f)) {
-        LERROR("Could not find transfer function file.");
+        LERROR("Could not find transfer function file");
         _file = nullptr;
         return;
     }

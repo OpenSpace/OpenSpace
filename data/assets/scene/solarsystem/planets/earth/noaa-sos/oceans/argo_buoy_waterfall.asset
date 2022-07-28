@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Float Tracks: Argo (buoy depths animation)"
 local Identifier = "noaa-sos-oceans-argo_buoy_waterfall"
-local Description = [[ "Argo is a global array of 3,000 free-drifting profiling floats 
+local Description = [["Argo is a global array of 3,000 free-drifting profiling floats 
 that measures the temperature and salinity of the upper 2000 m of the ocean. This allows, 
 for the first time, continuous monitoring of the temperature, salinity, and velocity of 
 the upper ocean, with all data being relayed and made publicly available within hours 
@@ -12,7 +12,7 @@ Argo to capture a golden fleece. In the world of oceanography, Jason is a satell
 altimeter that allows scientists to measure the heights of the ocean surfaces. This 
 worldwide buoy program was named Argo because the data from the Jason project and from 
 this buoy project will be used together in computer models to help forecast ocean 
-climate.   ]]
+climate]]
 local URL = "https://sos.noaa.gov/catalog/datasets/float-tracks-argo-buoy-depths-animation/"
 
 
@@ -52,7 +52,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

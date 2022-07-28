@@ -2,12 +2,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "NOAA Science on a Sphere. Bird Migration Patterns - Western Hemisphere"
 local Identifier = "noaa-sos-land-birds"
-local Description = [[ This dataset shows the migration of 118 species of terrestrial 
+local Description = [[This dataset shows the migration of 118 species of terrestrial 
 bird populations in the Western Hemisphere. Each dot represents the estimated location of 
 the center of each species' population for each day of the year. These estimations come 
 from millions of observations from the eBird citizen-science database. eBird is a 
 real-time, online checklist program, launched in 2002 by the Cornell Lab of Ornithology 
-and National Audubon Society, that allows birdwatchers to enter their observations.   ]]
+and National Audubon Society, that allows birdwatchers to enter their observations]]
 local URL = "https://sos.noaa.gov/catalog/datasets/bird-migration-patterns-western-hemisphere/"
 
 
@@ -59,7 +59,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

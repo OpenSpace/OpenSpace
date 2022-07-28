@@ -68,17 +68,17 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        AppearanceInfo = {
-            "Appearance",
-            "Appearance",
-            "The appearance of the trail."
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo AppearanceInfo =
+    {
+        "Appearance",
+        "Appearance",
+        "The appearance of the trail"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
+        "This value determines the RGB main color for the lines and points of the trail"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadeInfo = {
@@ -86,7 +86,7 @@ namespace {
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
         "'true', the 'Fade' parameter determines the speed of fading. If this value is "
-        "'false', the entire trail is rendered at full opacity and color."
+        "'false', the entire trail is rendered at full opacity and color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
@@ -94,7 +94,7 @@ namespace {
         "Line fade",
         "The fading factor that is applied to the trail if the 'EnableFade' value is "
         "'true'. If it is 'false', this setting has no effect. The higher the number, "
-        "the less fading is applied."
+        "the less fading is applied"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -102,7 +102,7 @@ namespace {
         "Line Width",
         "This value specifies the line width of the trail if the selected rendering "
         "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
+        "ignored"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
@@ -111,7 +111,7 @@ namespace {
         "This value specifies the base size of the points along the line if the selected "
         "rendering method includes points. If the rendering mode is set the Lines, this "
         "value is ignored. If a subsampling of the values is performed, the subsampled "
-        "values are half this size."
+        "values are half this size"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
@@ -119,7 +119,7 @@ namespace {
         "Rendering Mode",
         "Determines how the trail should be rendered to the screen.If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
-        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts."
+        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts"
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {

@@ -42,7 +42,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
         "Speed of travel",
-        "The speed of light is the default value."
+        "The speed of light is the default value"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
@@ -54,26 +54,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line."
+        "This value determines the RGB color for the line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width."
+        "This value specifies the line width"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IndicatorLengthInfo = {
         "IndicatorLength",
         "Indicator Length",
-        "This value specifies the length of the light indicator set in light seconds."
+        "This value specifies the length of the light indicator set in light seconds"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeLengthInfo = {
         "FadeLength",
         "Fade Length",
         "This value specifies the length of the faded tail of the light indicator "
-        "set in light seconds."
+        "set in light seconds"
     };
 
     struct [[codegen::Dictionary(RenderableLightTravel)]] Parameters {

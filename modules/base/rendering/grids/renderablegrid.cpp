@@ -39,20 +39,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered."
+        "This value determines the color of the grid lines that are rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that are used to render the "
-        "grid in each direction."
+        "grid in each direction"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the grid."
+        "This value specifies the line width of the grid"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {

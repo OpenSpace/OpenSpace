@@ -57,7 +57,7 @@ namespace {
         "Default Path Type",
         "The default path type chosen when generating a path or flying to a target. "
         "See wiki for alternatives. The shape of the generated path will be different "
-        "depending on the path type."
+        "depending on the path type"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
@@ -71,14 +71,14 @@ namespace {
         "Speed Scale",
         "Scale factor that the speed will be multiplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
-        "value is larger than or smaller than one."
+        "value is larger than or smaller than one"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorOnFinishInfo = {
         "ApplyIdleBehaviorOnFinish",
         "Apply Idle Behavior on Finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
-        "triggered once the path has reached its target."
+        "triggered once the path has reached its target"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArrivalDistanceFactorInfo = {
@@ -87,7 +87,7 @@ namespace {
         "A factor used to compute the default distance from a target scene graph node "
         "when creating a camera path. The factor will be multipled with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
-        "object."
+        "object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationSpeedFactorInfo = {
@@ -95,7 +95,7 @@ namespace {
         "Rotation Speed Factor (Linear Path)",
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
-        "seconds. A value of 2 means twice that fast, and so on."
+        "seconds. A value of 2 means twice that fast, and so on"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
@@ -103,14 +103,14 @@ namespace {
         "Minimal Valid Bounding Sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
         "computation of target positions and path generation, to avoid issues when "
-        "there is no bounding sphere."
+        "there is no bounding sphere"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {
         "RelevantNodeTags",
         "Relevant Node Tags",
         "List of tags for the nodes that are relevant for path creation, for example "
-        "when avoiding collisions."
+        "when avoiding collisions"
     };
 } // namespace
 
@@ -399,7 +399,7 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
             if (result > _minValidBoundingSphere) {
                 LDEBUG(fmt::format(
                     "The scene graph node '{}' has no, or a very small, bounding sphere. "
-                    "Using bounding sphere of child node '{}' in computations.",
+                    "Using bounding sphere of child node '{}' in computations",
                     node->identifier(),
                     child->identifier()
                 ));
@@ -409,7 +409,7 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
 
         LDEBUG(fmt::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
-            "minimal value. This might lead to unexpected results.",
+            "minimal value. This might lead to unexpected results",
             node->identifier())
         );
 

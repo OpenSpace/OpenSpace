@@ -88,7 +88,7 @@ asset.export(PlutoLabel)
 asset.meta = {
   Name = "Pluto",
   Version = "1.0",
-  Description = [[ Pluto globe, and main planet label.]],
+  Description = "Pluto globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

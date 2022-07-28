@@ -52,32 +52,32 @@ namespace {
         "ColorMethod",
         "Color Method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
-        "examples, temperature or particle density."
+        "examples, temperature or particle density"
     };
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
         "Quantity to Color By",
-        "Quantity used to color lines if the 'By Quantity' color method is selected."
+        "Quantity used to color lines if the 'By Quantity' color method is selected"
     };
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorQuantityMinMax",
         "ColorTable Min Value",
-        "Value to map to the lowest and highest end of the color table."
+        "Value to map to the lowest and highest end of the color table"
     };
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to Color Table",
-        "Color Table/Transfer Function to use for 'By Quantity' coloring."
+        "Color Table/Transfer Function to use for 'By Quantity' coloring"
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "Color",
         "Uniform Line Color",
-        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'."
+        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'"
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
         "Additive Blending",
-        "Activate/deactivate additive blending."
+        "Activate/deactivate additive blending"
     };
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
@@ -107,33 +107,33 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow Color",
-        "Color of particles flow direction indication."
+        "Color of particles flow direction indication"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow Direction",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow."
+        "illustrate magnetic flow"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "Reversed",
         "Reversed Flow",
-        "Toggle to make the flow move in the opposite direction."
+        "Toggle to make the flow move in the opposite direction"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
         "Particle Size",
-        "Size of the particles."
+        "Size of the particles"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle Spacing",
-        "Spacing inbetween particles."
+        "Spacing inbetween particles"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "Speed",
         "Speed",
-        "Speed of the flow."
+        "Speed of the flow"
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
@@ -141,7 +141,7 @@ namespace {
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
-        "topologies like solar wind & closed lines."
+        "topologies like solar wind & closed lines"
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
@@ -151,7 +151,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
         "Quantity used for Masking",
-        "Quantity used for masking."
+        "Quantity used for masking"
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
@@ -161,7 +161,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
         "Jump to Start Of Sequence",
-        "Performs a time jump to the start of the sequence."
+        "Performs a time jump to the start of the sequence"
     };
 
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {

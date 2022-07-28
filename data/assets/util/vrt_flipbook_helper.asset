@@ -9,14 +9,14 @@ end
 
 local nextFlipbookPage = function (flipbook)
   if (flipbook.CurrentFlipIndex >= 0) then
-    local assetSring = flipbook.AssetPrefix .. flipbook.CurrentFlipIndex; 
-    openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetSring .. ".Enabled", false)
+    local assetString = flipbook.AssetPrefix .. flipbook.CurrentFlipIndex; 
+    openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetString .. ".Enabled", false)
   end
 
   if (flipbook.CurrentFlipIndex < flipbook.TotalCount - 1) then
     flipbook.CurrentFlipIndex = flipbook.CurrentFlipIndex + 1;
-    local assetSring = flipbook.AssetPrefix .. flipbook.CurrentFlipIndex; 
-    openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetSring .. ".Enabled", true)
+    local assetString = flipbook.AssetPrefix .. flipbook.CurrentFlipIndex; 
+    openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetString .. ".Enabled", true)
   end
 end
 
@@ -27,13 +27,13 @@ local previousFlipbookPage = function (flipbook)
     return
   end
 
-  local assetSring = flipbook.AssetPrefix .. localIndex; 
-  openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetSring .. ".Enabled", false)
+  local assetString = flipbook.AssetPrefix .. localIndex; 
+  openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetString .. ".Enabled", false)
   localIndex = localIndex - 1;
 
   if (localIndex >= 0 ) then
-    assetSring = flipbook.AssetPrefix .. localIndex; 
-    openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetSring .. ".Enabled", true)
+    assetString = flipbook.AssetPrefix .. localIndex; 
+    openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetString .. ".Enabled", true)
   end
 
   if (localIndex < -1) then

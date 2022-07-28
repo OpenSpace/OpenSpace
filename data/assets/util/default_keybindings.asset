@@ -15,7 +15,7 @@ local toggle_shutdown = {
   Identifier = "os_default.toggle_shutdown",
   Name = "Toggle Shutdown",
   Command = "openspace.toggleShutdown()",
-  Documentation = "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period.",
+  Documentation = "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period",
   IsLocal = true,
 
   Key = "ESC"
@@ -25,7 +25,7 @@ local take_screenshot = {
   Identifier = "os_default.take_screenshot",
   Name = "Take Screenshot",
   Command = "openspace.takeScreenshot()",
-  Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
+  Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory",
   GuiPath = "/System/Rendering",
   IsLocal = true,
 
@@ -36,7 +36,7 @@ local toggle_pause_interpolated = {
   Identifier = "os_default.toggle_pause_interpolated",
   Name = "Toggle Pause (Interpolated)",
   Command = "openspace.time.pauseToggleViaKeyboard()",
-  Documentation = "Smoothly starts and stops the simulation time.",
+  Documentation = "Smoothly starts and stops the simulation time",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
 
@@ -47,7 +47,7 @@ local toggle_pause_immediate = {
   Identifier = "os_default.toggle_pause_immediate",
   Name = "Toggle Pause (Immediate)",
   Command = "openspace.time.togglePause()",
-  Documentation = "Immediately starts and stops the simulation time.",
+  Documentation = "Immediately starts and stops the simulation time",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
 
@@ -58,7 +58,7 @@ local toggle_rotation_friction = {
   Identifier = "os_default.toggle_rotation_friction",
   Name = "Toggle Rotation friction",
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
-  Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely.",
+  Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely",
   GuiPath = "/Navigation",
   IsLocal = false,
 
@@ -69,7 +69,7 @@ local toggle_zoom_friction = {
   Identifier = "os_default.toggle_zoom_friction",
   Name = "Toggle Zoom Friction",
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
-  Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely.",
+  Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely",
   GuiPath = "/Navigation",
   IsLocal = false,
 
@@ -80,7 +80,7 @@ local toggle_roll_friction = {
   Identifier = "os_default.toggle_roll_friction",
   Name = "Toggle Roll Friction",
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
-  Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely.",
+  Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely",
   GuiPath = "/Navigation",
   IsLocal = false,
   
@@ -97,7 +97,7 @@ local fade_to_black = {
       openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1.0, 3)
     end
   ]],
-  Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds.",
+  Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds",
   GuiPath = "/Rendering",
   IsLocal = false,
   
@@ -146,7 +146,7 @@ local next_delta_step_interpolate = {
   Identifier = "os_default.next_delta_step_interpolate",
   Name = "Next Delta Time Step (Interpolate)",
   Command = "openspace.time.interpolateNextDeltaTimeStep()",
-  Documentation = "Smoothly interpolates the simulation speed to the next delta time step, if one exists.",
+  Documentation = "Smoothly interpolates the simulation speed to the next delta time step, if one exists",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
   
@@ -157,7 +157,7 @@ local next_delta_step_immediate = {
   Identifier = "os_default.next_delta_step_immediate",
   Name = "Next Delta Time Step (Immediate)",
   Command = "openspace.time.setNextDeltaTimeStep()",
-  Documentation = "Immediately set the simulation speed to the next delta time step, if one exists.",
+  Documentation = "Immediately set the simulation speed to the next delta time step, if one exists",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
   
@@ -168,7 +168,7 @@ local previous_delta_step_interpolate = {
   Identifier = "os_default.previous_delta_step_interpolate",
   Name = "Previous Delta Time Step (Interpolate)",
   Command = "openspace.time.interpolatePreviousDeltaTimeStep()",
-  Documentation = "Smoothly interpolates the simulation speed to the previous delta time step, if one exists.",
+  Documentation = "Smoothly interpolates the simulation speed to the previous delta time step, if one exists",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
   
@@ -179,7 +179,7 @@ local previous_delta_step_immediate = {
   Identifier = "os_default.previous_delta_step_immediate",
   Name = "Previous Delta Time Step (Immediate)",
   Command = "openspace.time.setPreviousDeltaTimeStep()",
-  Documentation = "Immediately set the simulation speed to the previous delta time step, if one exists.",
+  Documentation = "Immediately set the simulation speed to the previous delta time step, if one exists",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true,
   

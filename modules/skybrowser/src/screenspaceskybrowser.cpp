@@ -45,7 +45,7 @@ namespace {
         "Quality of Texture",
         "A parameter to set the resolution of the texture. 1 is full resolution and "
         "slower frame rate. Lower value means lower resolution of texture and faster "
-        "frame rate."
+        "frame rate"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
@@ -53,20 +53,20 @@ namespace {
         "Display Copy Position",
         "Display a copy of this sky browser at an additional position. This copy will not "
         "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates "
-        "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates."
+        "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
         "ShowDisplayCopy",
         "Show Display Copy",
-        "Show the display copy."
+        "Show the display copy"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IsHiddenInfo = {
         "IsHidden",
         "Is Hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
-        "be."
+        "be"
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {

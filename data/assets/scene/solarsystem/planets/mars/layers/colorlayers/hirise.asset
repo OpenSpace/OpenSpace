@@ -38,7 +38,7 @@ asset.meta = {
   Name = "HiRISE",
   Version = "1.1",
   Description = [[Updated HiRISE layer for Mars with raw unselected imagery. This map is
-    hosted by ESRI.]],
+    hosted by ESRI]],
   Author = "esri_astro",
   URL = "https://www.arcgis.com/home/item.html?id=c1c4c750a2154842ae523c984cc14fa5",
   License = "Esri Master License Agreement"

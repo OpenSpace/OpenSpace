@@ -31,7 +31,7 @@ local Pioneer11 = {
   GUI = {
     Name = "Pioneer 11 Spacecraft",
     Path = "/Solar System/Missions/Pioneer",
-    Description = [[Pioneer 11 Spacecraft. Positioned by SPICE data.]]
+    Description = "Pioneer 11 Spacecraft. Positioned by SPICE data"
   }
 }
 
@@ -57,7 +57,7 @@ local Pioneer11Trail = {
     Name = "Pioneer 11 Trail (SPICE)",
     Path = "/Solar System/Missions/Pioneer",
     Description = [[Pioneer 11 Trail, spanning April 6th, 1973 to January 2nd, 1990.
-      Data from SPICE.]]
+      Data from SPICE]]
   }
 }
 
@@ -79,10 +79,9 @@ asset.export(Pioneer11Trail)
 asset.meta = {
   Name = "Pioneer 11",
   Version = "1.0",
-  Description = [[ Pioneer 11 Model and Trail. Driven by SPICE data for high accuracy
-  from April 6th, 1973 to January 2nd, 1990.]],
+  Description = [[Pioneer 11 Model and Trail. Driven by SPICE data for high accuracy from
+    April 6th, 1973 to January 2nd, 1990]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Pioneer_11", "Pioneer_11Trail"}
+  License = "MIT license"
 }

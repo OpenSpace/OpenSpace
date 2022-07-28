@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Aerosols: Sulfate"
 local Identifier = "noaa-sos-atmosphere-aerosol-sulfate"
-local Description = [[ With so many uncertainties attached to climate change, it is 
+local Description = [[With so many uncertainties attached to climate change, it is 
 important to look at all of the factors. As early as 1896, scientists have been analyzing 
 the presence of black carbon in the atmosphere. This group of three datasets looks at the 
 presence of aerosols in the Earth's atmosphere. The first dataset contains only black 
@@ -15,7 +15,7 @@ result of incomplete combustion, especially of coal, diesel fuels, biofuels and 
 biomass burnings. Sulfate is the result of sulfur dioxide and sulfur trioxide interacting 
 with other compounds in the atmosphere. Sulfate aerosols in the atmosphere are associated 
 with the combustion of fossil fuels and also the eruption of volcanoes like Mt. 
-Pinatubo.   ]]
+Pinatubo]]
 local URL = "https://sos.noaa.gov/catalog/datasets/aerosols-sulfate/"
 
 
@@ -67,7 +67,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

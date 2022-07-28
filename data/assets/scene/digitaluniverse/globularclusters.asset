@@ -36,7 +36,7 @@ local object = {
     Path = "/Milky Way",
     Description = [[Census: 157 globular clusters. DU Version 2.6. <br>Globular star
       clusters are gravitationally bound groups of 100,000 to 1 million stars. They
-      are compact, spherical “balls” of stars with very high stellar densities in
+      are compact, spherical "balls" of stars with very high stellar densities in
       their centers (stars near their center are within a light year of one
       another). These clusters are typically 30 to 100 light years in diameter. If
       Earth were located inside one of these clusters, our sky would be lit by an
@@ -67,7 +67,7 @@ asset.meta = {
   Version = "2.1",
   Description = [[Census: 157 globular clusters. DU Version 2.6. Globular star clusters
   are gravitationally bound groups of 100,000 to 1 million stars. They are compact,
-  spherical “balls” of stars with very high stellar densities in their centers (stars
+  spherical "balls" of stars with very high stellar densities in their centers (stars
   near their center are within a light year of one another). These clusters are
   typically 30 to 100 light years in diameter. If Earth were located inside one of these
   clusters, our sky would be lit by an abundance of stars brighter than the Sun. The

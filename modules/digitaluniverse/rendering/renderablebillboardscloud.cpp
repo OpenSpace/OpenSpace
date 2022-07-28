@@ -72,14 +72,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite."
+        "The path to the texture that should be used as the point sprite"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
+        "size of each point"
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
@@ -87,83 +87,83 @@ namespace {
         "Use Color Map",
         "If this value is set to 'true', the provided color map is used (if one was "
         "provided in the configuration). If no color map was provided, changing this "
-        "setting does not do anything."
+        "setting does not do anything"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value is used to define the color of the astronomical object."
+        "This value is used to define the color of the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical object."
+        "The path to the color map file of the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
-        "The text color for the astronomical object."
+        "The text color for the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
         "Text Opacity",
         "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent."
+        "and 0 fully transparent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
-        "The text size for the astronomical object labels."
+        "The text size for the astronomical object labels"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
         "Text Min/Max Size",
         "The minimal and maximal size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered."
+        "astronomical objects being rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects."
+        "Enables/Disables the drawing of the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw Labels",
-        "Determines whether labels should be drawn or hidden."
+        "Determines whether labels should be drawn or hidden"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
         "This value determines which paramenter is used for default color of the "
-        "astronomical objects."
+        "astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OptionColorRangeInfo = {
         "OptionColorRange",
         "Option Color Range",
-        "This value changes the range of values to be mapped with the current color map."
+        "This value changes the range of values to be mapped with the current color map"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
         "This value determines which paramenter (datavar) is used for scaling "
-        "of the astronomical objects."
+        "of the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts."
+        "Debug option for rendering of billboards and texts"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -171,27 +171,27 @@ namespace {
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
-        "fading-in."
+        "fading-in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in Effect",
-        "Enables/Disables the Fade-in effect."
+        "Enables/Disables the Fade-in effect"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable Pixel Size Control",
         "Enable pixel size control for rectangular projections. If set to true, the "
-        "billboard size is restricted by the min/max size in pixels property."
+        "billboard size is restricted by the min/max size in pixels property"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BillboardMinMaxSizeInfo = {
         "BillboardMinMaxSize",
         "Billboard Min/Max Size in Pixels",
         "The minimum and maximum size (in pixels) for the billboard representing the "
-        "astronomical object."
+        "astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -199,7 +199,7 @@ namespace {
     {
         "CorrectionSizeEndDistance",
         "Distance in 10^X meters where correction size stops acting",
-        "Distance in 10^X meters where correction size stops acting."
+        "Distance in 10^X meters where correction size stops acting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {

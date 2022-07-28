@@ -47,7 +47,7 @@ local deepSkyPoints = {
   GUI = {
     Name = "Deep Sky Objects Points",
     Path = "/Universe/Galaxies",
-    Description = [[Point cloud and labels for Deep Sky Objects]]
+    Description = "Point cloud and labels for Deep Sky Objects"
   }
 }
 
@@ -108,7 +108,7 @@ asset.export(deepSkyImages)
 asset.meta = {
   Name = "Deep Sky Objects Images",
   Version = "1.1",
-  Description = [[Digital Universe asset for Deep Sky Objects and their Images]],
+  Description = "Digital Universe asset for Deep Sky Objects and their Images",
   Author = "Nate Greenstein, Matt Everhart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

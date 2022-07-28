@@ -10,7 +10,7 @@ end)
 asset.meta = {
   Name = "Default Uranus Layers",
   Version = "1.0",
-  Description = [[ Default Uranus layers are: Uranus texture]],
+  Description = "Default Uranus layers are: Uranus texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

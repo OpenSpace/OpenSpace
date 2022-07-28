@@ -59,7 +59,7 @@ asset.export(object)
 asset.meta = {
   Name = "Kepler Planetary Candidates",
   Version = "2.1",
-  Description = [[Digital Universe asset for Kepler Planetary Candidates]],
+  Description = "Digital Universe asset for Kepler Planetary Candidates",
   Author = "Brian Abbott, Emily Rice, and Jason No (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

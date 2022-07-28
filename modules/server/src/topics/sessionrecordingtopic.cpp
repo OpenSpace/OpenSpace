@@ -76,13 +76,13 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
 
     if (json.find(PropertiesKey) != json.end()) {
         if (!json.at(PropertiesKey).is_array()) {
-            LERROR("Properties must be an array of strings.");
+            LERROR("Properties must be an array of strings");
         }
         nlohmann::json requestedProperties = json.at(PropertiesKey).get<nlohmann::json>();
         for (const auto& p : requestedProperties) {
             if (!p.is_string()) {
                 _isDone = true;
-                LERROR("Properties must be an array of strings.");
+                LERROR("Properties must be an array of strings");
                 return;
             }
             const std::string v = p.get<std::string>();

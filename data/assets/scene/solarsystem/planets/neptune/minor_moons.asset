@@ -6,8 +6,8 @@ asset.require("./irregular_retrograde_moons")
 asset.meta = {
   Name = "Neptune Minor Moons",
   Version = "1.0",
-  Description = [[ Meta asset containing 3 moon groups: inner_moons, 
-  irregular_prograde_moons, and irregular_retrograde_moons]],
+  Description = [[Meta asset containing 3 moon groups: inner_moons, 
+    irregular_prograde_moons, and irregular_retrograde_moons]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

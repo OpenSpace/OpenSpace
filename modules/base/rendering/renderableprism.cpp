@@ -43,7 +43,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
-        "The number of segments the shape of the prism should have."
+        "The number of segments the shape of the prism should have"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LinesInfo = {
@@ -51,38 +51,38 @@ namespace {
         "Number of Lines",
         "The number of lines connecting the two shapes of the prism. "
         "They will be evenly distributed around the bounding circle that makes "
-        "up the shape of the prism."
+        "up the shape of the prism"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
-        "The radius of the prism's shape in meters."
+        "The radius of the prism's shape in meters"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
         "Base Radius",
         "The radius of the base of the prism's shape, in meters. By default it is "
-        "given the same radius as the outer shape."
+        "given the same radius as the outer shape"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width."
+        "This value specifies the line width"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line."
+        "This value determines the RGB color for the line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
-        "The length of the prism in meters."
+        "The length of the prism in meters"
     };
 
     // Generate vertices around the unit circle on the XY-plane

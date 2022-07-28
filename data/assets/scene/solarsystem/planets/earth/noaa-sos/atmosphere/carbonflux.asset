@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Carbon Flux"
 local Identifier = "noaa-sos-atmosphere-carbonflux"
-local Description = [[ The Global Monitoring Division at NOAA diligently monitors carbon 
+local Description = [[The Global Monitoring Division at NOAA diligently monitors carbon 
 dioxide and other trace gases in the atmosphere. One of the methods they use to sample 
 trace gases is collecting flasks of air from around the world that can be tested. They 
 have several other means for collecting samples as well. In this data set, the NOAA GMD 
@@ -13,7 +13,7 @@ they race from Australia and New Zealand to the US west coast or Japan, or from 
 to the US east coast. The coloration in the dataset represents the fluxes constructed by 
 the ocean, biosphere, and fossil fuel modules of the NOAA ESRL data assimilation system 
 for CO2 and related trace gases. The data set shows daily average fluxes constructed from 
-3-hour model output.  ]]
+3-hour model output]]
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-aqua-satellite-and-modis-swath/"
 
 
@@ -53,7 +53,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

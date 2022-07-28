@@ -59,7 +59,7 @@ GUIRenderHandler::GUIRenderHandler() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glBindVertexArray(0);
-    LDEBUG("Initializing CEF GL environment... done!");
+    LDEBUG("Initializing CEF GL environment... done");
 }
 
 GUIRenderHandler::~GUIRenderHandler() {

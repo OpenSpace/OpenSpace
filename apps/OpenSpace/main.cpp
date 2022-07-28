@@ -1083,7 +1083,7 @@ int main(int argc, char* argv[]) {
         commandlineArguments.configurationName, "--file", "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
-        "current working directory."
+        "current working directory"
     ));
 
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
@@ -1094,7 +1094,7 @@ int main(int argc, char* argv[]) {
         "configuration file without editing the file on disk, for example in a "
         "planetarium environment. Please not that the Lua script must not contain any - "
         "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace."
+        "evaluated before it is passed to OpenSpace"
     ));
 
     // setCommandLine returns a reference to the vector that will be filled later

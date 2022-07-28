@@ -277,7 +277,7 @@ void DateTime::decrementOnce(int value, char unit) {
         default:
             throw ghoul::RuntimeError(
                 "Invalid unit format in TQ decrementOnce '" + std::to_string(unit) +
-                "'. Expected 'y', 'M', 'd', 'h', or 'm'."
+                "'. Expected 'y', 'M', 'd', 'h', or 'm'"
             );
     }
 }

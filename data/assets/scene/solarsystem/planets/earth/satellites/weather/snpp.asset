@@ -109,8 +109,8 @@ end)
 asset.meta = {
   Name = "SNPP",
   Version = "1.0",
-  Description = [[ Trail for SNPP. trail from
-  CELESTRAK. Can be used in conjunction with VIIRS SNPP (Temporal) layer for Earth.]],
+  Description = [[Trail for SNPP. trail from Celestrak. Can be used in conjunction with
+    VIIRS SNPP (Temporal) layer for Earth]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/",
   License = "NASA"

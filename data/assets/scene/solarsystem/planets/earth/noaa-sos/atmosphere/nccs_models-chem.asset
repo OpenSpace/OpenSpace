@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Atmospheric Chemistry: GEOS-5 Model"
 local Identifier = "noaa-sos-atmosphere-nccs_models-chem"
-local Description = [[ Models create a dynamic portrait of the Earth through numerical 
+local Description = [[Models create a dynamic portrait of the Earth through numerical 
 experiments that simulate our current knowledge of the dynamical and physical processes 
 governing weather and climate variability. The simulation visualized here captures how 
 winds lift up aerosols from the Earth's surface and transport them around the globe 
 during the period September 1, 2006 to March 17, 2007. Such simulations allow scientists 
 to identify the sources and pathways of these tiny particulates that influence weather 
-and climate.   ]]
+and climate]]
 local URL = "https://sos.noaa.gov/catalog/datasets/atmospheric-chemistry-geos-5-model/"
 
 
@@ -92,7 +92,7 @@ asset.export(legend)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

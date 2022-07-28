@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Gray Earth"
 local Identifier = "noaa-sos-land-gray_earth"
-local Description = [[ This dataset provides a view of the topography and bathymetry of 
+local Description = [[This dataset provides a view of the topography and bathymetry of 
 Earth by shading the continents and sea floor. Gray Earth also shows major continental 
 river systems and drainages.
 
@@ -19,7 +19,7 @@ According to the dataset source, Natural Earth Data, the relief shading and hyps
 (study of Earth's topography; measurement and mapping of land elevations) are derived 
 from the modified SRTM - Shuttle Radar Topography Mission - Plus elevation data at 1km 
 resolution. Daniel Huffman, University of Wisconsin, Madison created the regionally 
-equalized hypsography that forms the foundation of the Gray Earth imagery.   ]]
+equalized hypsography that forms the foundation of the Gray Earth imagery]]
 local URL = "https://sos.noaa.gov/catalog/datasets/gray-earth/"
 
 
@@ -51,7 +51,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

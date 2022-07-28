@@ -122,14 +122,14 @@ namespace {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
-        "printed to the log."
+        "printed to the log"
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "PropertyVisibility",
         "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
-        "are."
+        "are"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
@@ -485,7 +485,8 @@ void OpenSpaceEngine::initializeGL() {
                     LFATAL(fmt::format(
                         "Module {} required OpenGL extension {} which is not available "
                         "on this system. Some functionality related to this module will "
-                        "probably not work.", m->guiName(), ext
+                        "probably not work",
+                        m->guiName(), ext
                     ));
                 }
             }

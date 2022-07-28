@@ -348,7 +348,7 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
         case LUA_TSTRING:
             LERROR(fmt::format("Library name '{}' specifies a string", name));
             break;
-        case LUA_TTABLE: {
+        case LUA_TTABLE:
             if (hasLibrary(name)) {
                 LERROR(fmt::format(
                     "Library with name '{}' has been registered before", name
@@ -358,7 +358,6 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
                 LERROR(fmt::format("Library name '{}' specifies a table", name));
             }
             break;
-        }
         case LUA_TFUNCTION:
             LERROR(fmt::format("Library name '{}' specifies a function", name));
             break;
@@ -702,7 +701,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Trace'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printDebug",
@@ -711,7 +710,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Debug'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printInfo",
@@ -720,7 +719,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Info'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printWarning",
@@ -729,7 +728,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Warning'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printError",
@@ -738,7 +737,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Error'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             {
                 "printFatal",
@@ -747,7 +746,7 @@ void ScriptEngine::addBaseLibrary() {
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Fatal'. For Boolean, numbers, and strings, the internal values are "
-                "printed, for all other types, the type is printed instead."
+                "printed, for all other types, the type is printed instead"
             },
             codegen::lua::AbsolutePath,
             codegen::lua::SetPathToken,

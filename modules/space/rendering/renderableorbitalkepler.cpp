@@ -178,7 +178,7 @@ namespace {
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
         "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit."
+        "these automatically increase according to the eccentricity of the orbit"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -186,13 +186,13 @@ namespace {
         "Line Width",
         "This value specifies the line width of the trail if the selected rendering "
         "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
+        "ignored"
     };
     
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
+        "This value determines the RGB main color for the lines and points of the trail"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
@@ -205,7 +205,7 @@ namespace {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
         "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored)."
+        "be ignored)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {

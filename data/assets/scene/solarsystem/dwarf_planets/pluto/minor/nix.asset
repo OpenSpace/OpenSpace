@@ -69,8 +69,8 @@ asset.export(NixTrail)
 asset.meta = {
   Name = "Nix",
   Version = "1.0",
-  Description = [[ Globe and trail for Pluto's moon Nix. Data from
-    NASA Spice (see base spice asset)]],
+  Description = [[Globe and trail for Pluto's moon Nix. Data from NASA Spice (see base
+    spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -95,9 +95,8 @@ void ConvertRecFileVersionTask::convert() {
     );
     if (!hasBinaryFileExtension && !hasAsciiFileExtension) {
         LERROR(fmt::format(
-            "Input filename does not have expected {} or {} extension.",
-            SessionRecording::FileExtensionBinary,
-            SessionRecording::FileExtensionAscii
+            "Input filename does not have expected {} or {} extension",
+            SessionRecording::FileExtensionBinary, SessionRecording::FileExtensionAscii
         ));
         return;
     }
@@ -114,7 +113,7 @@ documentation::Documentation ConvertRecFileVersionTask::documentation() {
                 "InputFilePath",
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,
-                "The filename to update to the current file format.",
+                "The filename to update to the current file format",
             },
         },
     };

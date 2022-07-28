@@ -56,13 +56,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line."
+        "This value determines the RGB color for the line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width."
+        "This value specifies the line width"
     };
 
     // Returns a position that is relative to the current anchor node. This is a method to

@@ -78,39 +78,39 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "A multiplier for ambient lighting."
+        "A multiplier for ambient lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse Intensity",
-        "A multiplier for diffuse lighting."
+        "A multiplier for diffuse lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular Intensity",
-        "A multiplier for specular lighting."
+        "A multiplier for specular lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform Shading",
         "This value determines whether this model should be shaded by using the position "
-        "of the Sun."
+        "of the Sun"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFaceCullingInfo = {
         "DisableFaceCulling",
         "Disable Face Culling",
-        "Disable OpenGL automatic face culling optimization."
+        "Disable OpenGL automatic face culling optimization"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
-        "all other transformations are applied."
+        "all other transformations are applied"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
@@ -122,26 +122,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light Sources",
-        "A list of light sources that this model should accept light from."
+        "A list of light sources that this model should accept light from"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableDepthTestInfo = {
         "DisableDepthTest",
         "Disable Depth Test",
-        "Disable Depth Testing for the Model."
+        "Disable Depth Testing for the Model"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
         "Changes the blending function used to calculate the colors of the model with "
-        "respect to the opacity."
+        "respect to the opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
         "EnableOpacityBlending",
         "Enable Opacity Blending",
-        "Enable Opacity Blending."
+        "Enable Opacity Blending"
     };
 
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {

@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Winds: GEOS-5 Model"
 local Identifier = "noaa-sos-atmosphere-nccs_models-winds"
-local Description = [[ Models create a dynamic portrait of the Earth through numerical 
+local Description = [[Models create a dynamic portrait of the Earth through numerical 
 experiments that simulate our current knowledge of the dynamical and physical processes 
 governing weather and climate variability. The simulation visualized here captures the 
 speed of winds at the tropopause, about 6-9 miles above the Earth's surface during the 
 period September 1, 2006 to March 17, 2007. Such simulations allow scientists to view the 
 intensity and turbulence of the polar and sub-tropic jet streams, which carry weather 
-around the globe. Red, orange and yellow are used for the fastest moving air.   ]]
+around the globe. Red, orange and yellow are used for the fastest moving air]]
 local URL = "https://sos.noaa.gov/catalog/datasets/winds-geos-5-model/"
 
 
@@ -80,7 +80,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

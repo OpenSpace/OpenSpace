@@ -132,8 +132,8 @@ void SelectionProperty::clearOptions() {
 std::set<std::string> SelectionProperty::fromLuaConversion(lua_State* state,
                                                            bool& success) const
 {
-    static const int KEY = -2;
-    static const int VAL = -1;
+    constexpr int KEY = -2;
+    constexpr int VAL = -1;
 
     if (!lua_istable(state, VAL)) {
         LERROR("Parameter passed to the property is not a table");

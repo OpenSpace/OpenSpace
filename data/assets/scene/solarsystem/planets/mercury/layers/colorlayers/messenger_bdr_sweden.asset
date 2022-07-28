@@ -12,7 +12,7 @@ local layer = {
   best fit the intended illumination geometry or low emission angle and incidence angle 
   near 74 degrees. It is controlled and projected onto a global digital elevation model. It uses 
   a Kasseleinin-Shkuratov photometric model, whose parameters are the same for any given 
-  wavelength band across all MESSENGER end-of-mission map data products.]]
+  wavelength band across all MESSENGER end-of-mission map data products]]
 }
 
 asset.onInitialize(function()
@@ -30,8 +30,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Messenger BDR [Sweden]",
   Version = "1.0",
-  Description = [[ Mercury MESSENGER MDIS Global Basemap BDR 166m layer for Mercury globe. 
-  This map is hosted on the OpenSpace server in Sweden.]],
+  Description = [[Mercury MESSENGER MDIS Global Basemap BDR 166m layer for Mercury globe. 
+    This map is hosted on the OpenSpace server in Sweden]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mercury/Messenger/Global/Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_166m",
   License = "NASA/PDS"

@@ -57,8 +57,8 @@ end
 asset.meta = {
   Name = "Uranus Irregular Prograde Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Uranus' irregular prograde
-    moon: Margaret. A blank globe and SPICE trail are generated for the moon.]],
+  Description = [[Procedural Globe asset containing Uranus' irregular prograde moon:
+    Margaret. A blank globe and SPICE trail are generated for the moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

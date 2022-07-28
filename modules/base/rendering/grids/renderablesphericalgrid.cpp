@@ -39,20 +39,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered."
+        "This value determines the color of the grid lines that are rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that are used to render the "
-        "surrounding sphere."
+        "surrounding sphere"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid."
+        "This value specifies the line width of the spherical grid"
     };
 
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {

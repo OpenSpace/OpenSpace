@@ -21,8 +21,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Messenger LOI [Utah]",
   Version = "1.0",
-  Description = [[ Mercury LOI layer for Mercury globe. 
-  This map is hosted on the OpenSpace server in Utah.]],
+  Description = [[Mercury LOI layer for Mercury globe. This map is hosted on the OpenSpace
+    server in Utah]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mercury/Messenger/Global/Mercury_MESSENGER_MDIS_Basemap_LOI_Mosaic_Global_166m",
   License = "NASA/PDS"

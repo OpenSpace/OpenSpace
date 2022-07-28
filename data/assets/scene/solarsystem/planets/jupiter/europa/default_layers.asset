@@ -14,7 +14,7 @@ end)
 asset.meta = {
   Name = "Default Europa Layers",
   Version = "1.0",
-  Description = [[ Default Europa layers are: Europa Texture]],
+  Description = "Default Europa layers are: Europa Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

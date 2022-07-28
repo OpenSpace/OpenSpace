@@ -36,7 +36,7 @@ namespace {
         "Time Frames",
         "A vector of time frames to combine into one. "
         "The time frame is active when any of the contained time frames are, "
-        "but not in gaps between contained time frames."
+        "but not in gaps between contained time frames"
     };
 
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {

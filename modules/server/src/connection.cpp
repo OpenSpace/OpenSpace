@@ -119,7 +119,7 @@ void Connection::handleMessage(const std::string& message) {
         if (!isAuthorized()) {
             _socket->disconnect();
             LERROR(fmt::format(
-                "Could not parse JSON: '{}'. Connection is unauthorized. Disconnecting.",
+                "Could not parse JSON: '{}'. Connection is unauthorized. Disconnecting",
                 message
             ));
             return;
@@ -182,7 +182,7 @@ void Connection::handleJson(const nlohmann::json& json) {
     }
     else {
         if (!isAuthorized()) {
-            LERROR("Connection isn't authorized.");
+            LERROR("Connection is not authorized");
             return;
         }
 

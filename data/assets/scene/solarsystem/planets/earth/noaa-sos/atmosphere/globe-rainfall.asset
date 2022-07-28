@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Solar Rainfall - Monthly (NASA)"
 local Identifier = "noaa-sos-atmosphere-globe-rainfall"
-local Description = [[ Globally, rain is the main source of fresh water for plants and 
+local Description = [[Globally, rain is the main source of fresh water for plants and 
 animals rainfall is essential for life across Earth's landscapes. In addition to moving 
 tremendous amounts of water through Earth's atmosphere, rain clouds also move tremendous 
 amounts of energy. When water evaporates from the surface and rises as vapor into the 
 atmosphere, it carries heat from the sun-warmed surface with it. Later, when the water 
 vapor condenses to form cloud droplets and rain, the heat is released into the 
-atmosphere. This heating is a major part of Earth's energy budget and climate.   ]]
+atmosphere. This heating is a major part of Earth's energy budget and climate]]
 local URL = "https://sos.noaa.gov/catalog/datasets/rainfall-monthly-nasa/"
 
 
@@ -68,7 +68,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

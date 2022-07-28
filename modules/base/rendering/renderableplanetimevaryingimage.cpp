@@ -45,14 +45,14 @@ namespace {
         "SourceFolder",
         "Source Folder",
         "This value specifies the image directory that is loaded from disk and "
-        "is used as a texture that is applied to this plane."
+        "is used as a texture that is applied to this plane"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderTypeInfo = {
        "RenderType",
        "Render Type",
        "This value specifies if the plane should be rendered in the Background, "
-       "Opaque, Transparent, or Overlay rendering step."
+       "Opaque, Transparent, or Overlay rendering step"
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {

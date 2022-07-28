@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Earthquakes and Nuclear Power Plants"
 local Identifier = "noaa-sos-land-nuclear_earthquake"
-local Description = [[ Earthquakes have been occurring on Earth since its formation. They 
+local Description = [[Earthquakes have been occurring on Earth since its formation. They 
 occur when tectonic plates that are sliding against or past each other build up enough 
 tension to slip, causing the rock to settle into a new position and the ground to shake. 
 The United States Geological Survey predicts that 500,000 earthquakes happen every year, 
@@ -14,7 +14,7 @@ there is debate over whether such a thing is even possible. Current prediction m
 involve measuring the tension that has been bled off by past earthquakes and how often 
 earthquakes have occurred at that location before. Due to the fact that the instruments 
 that can measure tension and accurate seismographs are a recent invention, earthquake 
-prediction continues to be inaccurate and imprecise.   ]]
+prediction continues to be inaccurate and imprecise]]
 local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-and-nuclear-power-plants/"
 
 
@@ -99,7 +99,7 @@ asset.export(legend)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

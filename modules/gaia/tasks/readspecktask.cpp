@@ -83,7 +83,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
         LINFO("nValues: " + std::to_string(nValues));
 
         if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file.");
+            LERROR("Error writing file - No values were read from file");
         }
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
         fileStream.write(reinterpret_cast<const char*>(&nRenderValues), sizeof(int32_t));
@@ -94,7 +94,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
         fileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as output data file.", _outFilePath));
+        LERROR(fmt::format("Error opening file: {} as output data file", _outFilePath));
     }
 
     onProgress(1.f);

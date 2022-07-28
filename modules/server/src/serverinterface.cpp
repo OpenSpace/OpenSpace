@@ -40,7 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this server interface is enabled or not."
+        "This setting determines whether this server interface is enabled or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {

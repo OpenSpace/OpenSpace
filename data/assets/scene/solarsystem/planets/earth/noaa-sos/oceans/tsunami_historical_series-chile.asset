@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Chile - 2010"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-chile"
-local Description = [[ At 3:34 on the morning of February 27, 2010 (06:34 UTC), an 8.8 
+local Description = [[At 3:34 on the morning of February 27, 2010 (06:34 UTC), an 8.8 
 moment magnitude earthquake struck near the coastline of central Chile. The Pacific 
 Tsunami Warning Center (PTWC) quickly determined that the large magnitude of this 
 earthquake, its location near the coastline, its relatively shallow depth within the 
@@ -23,7 +23,7 @@ high as 29 m or 95 ft. on the mainland, over 18 m or 60 ft. in its Juan Fernande
 Islands, and over 4 m or 14 ft. at Rapa Nui (Easter Island). Outside of Chile tsunami 
 wave heights exceeded 1 m or 3 ft. in the Marquesas Islands (French Polynesia), New 
 Zealand, the Kuril Islands (Russia), and in the United States in California and Hawaii, 
-and caused minor damage in San Diego, California and in Japan.   ]]
+and caused minor damage in San Diego, California and in Japan]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-chile-2010/"
 
 
@@ -86,7 +86,7 @@ asset.export(layer_null)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

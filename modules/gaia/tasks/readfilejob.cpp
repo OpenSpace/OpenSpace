@@ -261,8 +261,7 @@ void ReadFileJob::execute() {
         _octants[index].insert(_octants[index].end(), values.begin(), values.end());
     }
 
-    /*LINFO(std::to_string(nNullArr) + " out of " +
-        std::to_string(nStars) + " read stars were nullArrays.");*/
+    // LINFO(fmt::format("{} out of {} read stars were nullArrays", nNullArr, nStars));
 }
 
 std::vector<std::vector<float>> ReadFileJob::product() {

@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Aleutian Islands - 1957"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-aleutians_1957"
-local Description = [[ At 4:22 am on Saturday, March 9, 1957 (9 March, 14:22 Z UTC) the 
+local Description = [[At 4:22 am on Saturday, March 9, 1957 (9 March, 14:22 Z UTC) the 
 second great earthquake in 11 years struck Alaska's Aleutian Islands. This earthquake had 
 the same magnitude of the earlier earthquake--8.6 on the moment magnitude scale (Johnson 
 et al. 1994)--but was to the west of the 1946 earthquake, near the Andreanof Islands. As 
@@ -19,7 +19,7 @@ would reach heights of 6 m or 20 ft. in the Marquesas Islands (French Polynesia)
 Chile. Unlike the earlier event, however, it did not kill any people thanks to effective 
 tsunami alerts from to the Honolulu Observatory and the Seismic Sea Wave Warning System. 
 These efforts, established in 1948, would later become the Pacific Tsunami Warning Center 
-(PTWC) and Pacific Tsunami Warning System.   ]]
+(PTWC) and Pacific Tsunami Warning System]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-aleutian-islands-1957/"
 
 
@@ -83,7 +83,7 @@ asset.export(layer_null)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

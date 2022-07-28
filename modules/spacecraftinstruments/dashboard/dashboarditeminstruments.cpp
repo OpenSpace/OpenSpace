@@ -44,7 +44,7 @@ namespace {
         "Active Color",
         "This value determines the color that the active instrument is rendered in. "
         "Shortly after activation, the used color is mixture of this and the flash "
-        "color. The default value is (0.6, 1.0, 0.0)."
+        "color. The default value is (0.6, 1.0, 0.0)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlashColorInfo = {

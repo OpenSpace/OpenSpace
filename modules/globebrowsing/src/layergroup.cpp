@@ -40,7 +40,7 @@ namespace {
         "Blend between levels",
         "If this value is enabled, images between different levels are interpolated, "
         "rather than switching between levels abruptly. This makes transitions smoother "
-        "and more visually pleasing.",
+        "and more visually pleasing",
         openspace::properties::Property::Visibility::Hidden
     };
 } // namespace

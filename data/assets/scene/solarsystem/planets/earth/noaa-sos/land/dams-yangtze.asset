@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Dams and Reservoirs: Yangtze - 1800 - 2010"
 local Identifier = "noaa-sos-land-dams-yangtze"
-local Description = [[ Humans have manipulated rivers for thousands of years, but over 
+local Description = [[Humans have manipulated rivers for thousands of years, but over 
 the last 200 years dams on rivers have become rampant. Reservoirs and dams are 
 constructed for water storage, to reduce the risk of river flooding, and for the 
 generation of power. They are one of the major footprints of humans on Earth and change 
-the world's hydrological cycle.   ]]
+the world's hydrological cycle]]
 local URL = "https://sos.noaa.gov/catalog/datasets/dams-and-reservoirs-yangtze-1800-2010/"
 
 
@@ -47,7 +47,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

@@ -38,19 +38,19 @@
 namespace {
     constexpr std::string_view _loggerCat = "ScreenSpaceBrowser";
 
-    const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser windows."
+        "Set the dimensions of the web browser windows"
     };
 
-    const openspace::properties::Property::PropertyInfo UrlInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
         "The URL to load"
     };
 
-    const openspace::properties::Property::PropertyInfo ReloadInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Reload the web browser"

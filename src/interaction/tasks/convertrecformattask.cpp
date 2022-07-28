@@ -147,7 +147,7 @@ void ConvertRecFormatTask::convert() {
     }
     else {
         // Add error output for file type not recognized
-        LERROR("Session recording file unrecognized format type.");
+        LERROR("Session recording file unrecognized format type");
     }
 }
 
@@ -319,13 +319,13 @@ documentation::Documentation ConvertRecFormatTask::documentation() {
                 "InputFilePath",
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,
-                "The filename to convert to the opposite format.",
+                "The filename to convert to the opposite format",
             },
             {
                 "OutputFilePath",
                 new StringAnnotationVerifier("A valid output filename"),
                 Optional::No,
-                "The filename containing the converted result.",
+                "The filename containing the converted result",
             },
         },
     };

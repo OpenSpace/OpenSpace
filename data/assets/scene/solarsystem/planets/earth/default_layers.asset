@@ -51,13 +51,13 @@ end)
 asset.meta = {
   Name = "Default Earth Layers",
   Version = "1.0",
-  Description = [[ Default Earth layers are: ESRI VIIRS Combo, ESRI World Imagery, VIIRS
+  Description = [[Default Earth layers are: ESRI VIIRS Combo, ESRI World Imagery, VIIRS
     SNPP (Temporal), Aqua Modis (Temporal), Terra Modis (Temporal), BMNG, AMSR2 GCOM
     W1 Sea Ice Concentration (Temporal), MODIS Terra Chlorophyll A (Temporal), GHRSST,
     L4 G1SST Sea Surface Temperature (Temporal), GHRSST L4 MUR Sea Surface Temperature
     (Temporal), World Elevation (3D), Earth at Night 2012, Coastlines, Reference
     Features, Reference Labels, Tile Indicies, Size Reference, Gebco, and Modis Water
-    Mask.]],
+    Mask]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

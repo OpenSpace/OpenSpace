@@ -47,7 +47,7 @@ namespace {
         "ComputeScreenSpaceData",
         "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
-        "at regular intervals. If these values are set to 'false', they are not updated."
+        "at regular intervals. If these values are set to 'false', they are not updated"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {

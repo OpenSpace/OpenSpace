@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Buoy and Float Locations"
 local Identifier = "noaa-sos-oceans-buoy_locations"
-local Description = [[ Buoys and floats with the ability to collect data are scattered 
+local Description = [[Buoys and floats with the ability to collect data are scattered 
 through out the world's oceans in order to gain a better understanding of how the oceans 
 work and how they are changing. The data is being used for monitoring chemical levels in 
 the oceans, garnering accurate ocean temperatures and change in temperature, and many 
 other endless uses. Each dot on this visualization represents a buoy or float, and each 
 color indicates the use of the instrument. The buoy network is still expanding past what 
-can be seen on this visualization.   ]]
+can be seen on this visualization]]
 local URL = "https://sos.noaa.gov/catalog/datasets/buoy-and-float-locations/"
 
 
@@ -53,7 +53,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

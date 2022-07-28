@@ -26,8 +26,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Messenger SHADE [Sweden]",
   Version = "1.0",
-  Description = [[ Mercury SHADE layer for Mercury globe. 
-  This map is hosted on the OpenSpace server in Sweden.]],
+  Description = [[Mercury SHADE layer for Mercury globe. This map is hosted on the
+    OpenSpace server in Sweden]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mercury/Topography/MESSENGER/Mercury_Messenger_USGS_ClrShade_Global_2km",
   License = "NASA/PDS"

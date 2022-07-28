@@ -112,7 +112,7 @@ namespace {
         if (it->is_null()) {
             return "nil";
         }
-        throw ghoul::lua::LuaFormatException("Format error.");
+        throw ghoul::lua::LuaFormatException("Format error");
     }
 
     std::string generateScript(const std::string& function,

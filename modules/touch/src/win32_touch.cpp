@@ -173,7 +173,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
 Win32TouchHook::Win32TouchHook(void* nativeWindow) {
     HWND hWnd = reinterpret_cast<HWND>(nativeWindow);
     if (hWnd == nullptr) {
-        LINFO("No windowhandle available for touch input.");
+        LINFO("No windowhandle available for touch input");
         return;
     }
 
@@ -186,7 +186,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
     // stack ready, drivers installed and digitizer is ready for input
     if (value & NID_MULTI_INPUT) {
         // Digitizer is multitouch
-        LINFO("Found Multitouch input digitizer!");
+        LINFO("Found Multitouch input digitizer");
     }
     if (value & NID_INTEGRATED_TOUCH) {
         // Integrated touch
@@ -243,7 +243,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
                     0 //<- Global thread id (low-level mouse is global only)
                 );
                 if (!gMouseHook) {
-                    LINFO("Could not setup mousehook!");
+                    LINFO("Could not setup mousehook");
                 }
 
                 MSG msg;

@@ -25,7 +25,7 @@ local SunGlare = {
   GUI = {
     Name = "Sun Glare",
     Path = "/Solar System/Sun",
-    Description = [[ Sun glare effect. Enabled by default instead of sun orb.]]
+    Description = "Sun glare effect. Enabled by default instead of sun orb"
   }
 }
 
@@ -45,7 +45,7 @@ asset.export(SunGlare)
 asset.meta = {
   Name = "Sun Glare",
   Version = "1.1",
-  Description = [[ Image plane with sun glare effect.]],
+  Description = "Image plane with sun glare effect",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -627,7 +627,7 @@ int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData,
     }
 
     if (_valuesPerStar != (POS_SIZE + COL_SIZE + VEL_SIZE)) {
-        LERROR("Read file doesn't have the same structure of render parameters!");
+        LERROR("Read file doesn't have the same structure of render parameters");
     }
 
     // Use the same technique to construct octree from file.
@@ -723,7 +723,7 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
             outFileStream.close();
         }
         else {
-            LERROR(fmt::format("Error opening file: {} as output data file.", outPath));
+            LERROR(fmt::format("Error opening file: {} as output data file", outPath));
         }
     }
 
@@ -825,7 +825,7 @@ void OctreeManager::fetchNodeDataFromFile(OctreeNode& node) {
 void OctreeManager::removeNodesFromRam(
                                      const std::vector<unsigned long long>& nodesToRemove)
 {
-    // LINFO("Removed " + std::to_string(nodesToRemove.size()) + " nodes from RAM.");
+    // LINFO("Removed " + std::to_string(nodesToRemove.size()) + " nodes from RAM");
 
     for (unsigned long long nodePosIndex : nodesToRemove) {
         std::stack<int> indexStack;

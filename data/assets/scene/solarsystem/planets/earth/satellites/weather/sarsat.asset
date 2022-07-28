@@ -14,8 +14,8 @@ shared.registerSatelliteGroupObjects(asset, group, tle, true)
 asset.meta = {
   Name = "Satellites Weather - Search & Rescue (SARSAT)",
   Version = "1.0",
-  Description = [[ Satellites asset for Weather - Search & Rescue (SARSAT). Data from 
-  Celestrak]],
+  Description = [[Satellites asset for Weather - Search & Rescue (SARSAT). Data from 
+    Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

@@ -78,10 +78,10 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
     if (mission.phases().empty()) {
         return;
     }
-    static const glm::vec4 nextMissionColor(0.7f, 0.3f, 0.3f, 1.f);
-    static const glm::vec4 currentMissionColor(0.f, 0.5f, 0.5f, 1.f);
-    static const glm::vec4 missionProgressColor = currentMissionColor;
-    static const glm::vec4 nonCurrentMissionColor(0.3f, 0.3f, 0.3f, 1.f);
+    static constexpr glm::vec4 nextMissionColor = glm::vec4(0.7f, 0.3f, 0.3f, 1.f);
+    static constexpr glm::vec4 currentMissionColor = glm::vec4(0.f, 0.5f, 0.5f, 1.f);
+    static constexpr glm::vec4 missionProgressColor = currentMissionColor;
+    static constexpr glm::vec4 nonCurrentMissionColor = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
 
     // Add spacing
     RenderFont(

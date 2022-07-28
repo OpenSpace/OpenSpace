@@ -53,7 +53,7 @@ namespace {
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
         "always facing the camera. If this is false, it can be oriented using other "
-        "transformations."
+        "transformations"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
@@ -61,26 +61,26 @@ namespace {
         "Mirror backside of image plane",
         "If this value is set to false, the image plane will not be mirrored when "
         "looking from the backside. This is usually desirable when the image shows "
-        "data at a specific location, but not if it is displaying text for example."
+        "data at a specific location, but not if it is displaying text for example"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the size of the plane in meters."
+        "This value specifies the size of the plane in meters"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane."
+        "This determines the blending mode that is applied to this plane"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
         "If set, the plane's texture is multiplied with this color. "
-        "Useful for applying a color grayscale images."
+        "Useful for applying a color grayscale images"
     };
 
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {

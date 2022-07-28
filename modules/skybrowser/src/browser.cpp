@@ -36,22 +36,22 @@
 namespace {
     constexpr std::string_view _loggerCat = "Browser";
 
-    const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser window."
+        "Set the dimensions of the web browser window"
     };
 
-    const openspace::properties::Property::PropertyInfo UrlInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
-        "The URL to load."
+        "The URL to load"
     };
 
-    const openspace::properties::Property::PropertyInfo ReloadInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Reload the web browser."
+        "Reload the web browser"
     };
 
     struct [[codegen::Dictionary(Browser)]] Parameters {

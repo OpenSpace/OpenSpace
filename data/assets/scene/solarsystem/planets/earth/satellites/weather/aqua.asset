@@ -110,8 +110,8 @@ end
 asset.meta = {
   Name = "Aqua",
   Version = "1.0",
-  Description = [[ Trail for Aqua. trail from
-  CELESTRAK. Can be used in conjuntion with Aqua Modis (Temporal) layer for Earth]],
+  Description = [[Trail for Aqua. trail from Celestrak. Can be used in conjuntion with
+    Aqua Modis (Temporal) layer for Earth]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/",
   License = "NASA"

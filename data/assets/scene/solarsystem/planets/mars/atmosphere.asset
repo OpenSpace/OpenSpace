@@ -48,7 +48,7 @@ local Atmosphere = {
     GUI = {
       Name = "Mars Atmosphere",
       Path = "/Solar System/Planets/Mars",
-      Description = [[ Atmosphere of Mars.]]
+      Description = "Atmosphere of Mars"
     }
 }
 
@@ -67,7 +67,7 @@ asset.export(Atmosphere)
 asset.meta = {
   Name = "Mars Atmosphere",
   Version = "1.1",
-  Description = [[ RenderableAtmosphere for Mars.]],
+  Description = "RenderableAtmosphere for Mars",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

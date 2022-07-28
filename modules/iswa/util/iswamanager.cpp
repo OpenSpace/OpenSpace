@@ -714,7 +714,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
                 std::string fieldlineSeedsIndexFile = cdfGroup["fieldlinefile"];
 
                 if (_cdfInformation.find(groupName) != _cdfInformation.end()) {
-                    LWARNING("CdfGroup with name" + groupName + " already exists.");
+                    LWARNING("CdfGroup with name" + groupName + " already exists");
                     return;
                 }
 

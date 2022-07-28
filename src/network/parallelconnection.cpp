@@ -37,9 +37,6 @@ namespace {
 
 namespace openspace {
 
-// Gonna do some UTF-like magic once we reach 255 to introduce a second byte or something
-const uint8_t ParallelConnection::ProtocolVersion = 6;
-
 ParallelConnection::Message::Message(MessageType t, std::vector<char> c)
     : type(t)
     , content(std::move(c))

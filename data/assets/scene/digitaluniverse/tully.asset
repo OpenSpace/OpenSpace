@@ -98,7 +98,7 @@ local tullyImages = {
       come from The Galaxy Catalog. A handful of nearby galaxies are represented by
       their actual images, which come mostly from the National Optical Astronomy
       Observatory (NOAO). Each of these images has been altered from its original state.
-      These images were taken from Earth on some of the world’s largest telescopes, so
+      These images were taken from Earth on some of the world's largest telescopes, so
       foreground stars from our own Galaxy appear in each image. We are representing
       galaxies in extragalactic space, so we have removed the stars from each image.
       (Description from URL) <br><br> Data Reference: Tully Galaxy Catalog: Brent Tully
@@ -125,7 +125,7 @@ asset.meta = {
   Name = "Tully Galaxies",
   Version = "3.1",
   Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
-    images.]],
+    images]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

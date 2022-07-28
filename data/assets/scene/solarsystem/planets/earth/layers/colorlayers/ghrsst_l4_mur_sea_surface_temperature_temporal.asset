@@ -18,8 +18,8 @@ local layer = {
       "png"
     )
   },
-  Description = [[ Temporal coverage: 01 June 2002 - Present. The imagery resolution
-    is 1 km, and the temporal resolution is daily.]]
+  Description = [[Temporal coverage: 01 June 2002 - Present. The imagery resolution
+    is 1 km, and the temporal resolution is daily]]
 }
 
 asset.onInitialize(function()
@@ -37,10 +37,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "GHRSST L4 MUR Sea Surface Temperature (Temporal)",
   Version = "1.1",
-  Description = [[ GIBS hosted layer created with
-    openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
-  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/"..
-    "eosdis-components/gibs",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
   License = "NASA"
 }

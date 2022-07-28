@@ -40,19 +40,19 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
         "XColor",
         "X Color",
-        "This value determines the color of the x axis."
+        "This value determines the color of the x axis"
     };
 
     constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
         "YColor",
         "Y Color",
-        "This value determines the color of the y axis."
+        "This value determines the color of the y axis"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
         "ZColor",
         "Z Color",
-        "This value determines the color of the z axis."
+        "This value determines the color of the z axis"
     };
 
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
