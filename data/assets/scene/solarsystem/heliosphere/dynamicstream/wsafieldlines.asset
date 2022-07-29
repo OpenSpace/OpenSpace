@@ -1,0 +1,41 @@
+local transforms = asset.require('./transforms_heliosphere')
+local sunRadius = 695508000
+local fieldlines = {
+  Identifier = "WSA_Fieldlines_PFSS_IO",
+  Parent = transforms.TransformGONG.Identifier,
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    SourceFolder = ,
+    DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1178",
+    InputFileType = "Osfls",
+    LoadAtRuntime = true,
+    SimulationModel = "wsa"
+  },
+  GUI = {
+    Path = "/Solar System/Heliosphere",
+    Name = "WSA PFSS In to Out Lines"
+  },
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  }
+}
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(fieldlines)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(fieldlines)
+end)
+  
+asset.export(fieldlines)
+asset.meta = {
+  Name = "WSAStreaming",
+  Version = "1.1",
+  Description = "WSAStreaming",
+  Author = "Shyam Thyagarajan, CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

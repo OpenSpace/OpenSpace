@@ -25,16 +25,32 @@ local HEEQ180ReferenceFrame = {
   }
 }
 
+local TransformGONG = {
+  Identifier = "TransformGONG",
+  Parent = HEEQ180ReferenceFrame.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {0, 0, 2.09439510239} -- 120 degrees
+    }
+  },
+  GUI = {
+    Name = "Transform GONG fieldlines (w Rotation Offset)"
+  }
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HEEQ180ReferenceFrame)
+  openspace.addSceneGraphNode(TransformGONG)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TransformGONG)
   openspace.removeSceneGraphNode(HEEQ180ReferenceFrame)
 end)
 
 asset.export(HEEQ180ReferenceFrame)
-
+asset.export(TransformGONG)
 
 asset.meta = {
   Name = "Sun Transform, HEEQ180",

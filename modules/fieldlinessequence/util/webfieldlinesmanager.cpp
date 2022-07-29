@@ -144,7 +144,7 @@ void WebFieldlinesManager::preDownload(std::string dUrl){
     }
     /* End of experiment */
 
-    AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
+    HttpFileDownload ashd = HttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
     HttpRequest::RequestOptions opt = {};
     opt.requestTimeoutSeconds = 0;
     ashd.start(opt);
