@@ -44,7 +44,7 @@ public:
     // Returns true or false, wether a successful connection to the field line-providing server has been establish
     bool isConnected();
     
-    std::string initializeSyncDirectory(std::string identifier);
+    std::string initializeSyncDirectory();
     
     // Temporary function - this should be moved to the worker. It's to download
     // the start lines if the directory is empty or launching for the first time

@@ -62,20 +62,20 @@ bool WebFieldlinesManager::isConnected() {
 // Make sure that the sync directory exists
 // Also creates a new directory in the web_fieldlines directory corresponding to the
 // field line identifier
-std::string WebFieldlinesManager::initializeSyncDirectory(std::string identifier) {
-    std::string path =
-        absPath("${BASE}/sync/http/web_fieldlines") + FileSys.PathSeparator;
+std::string WebFieldlinesManager::initializeSyncDirectory() {
+    std::filesystem::path pathToDownloadTo =
+        absPath("${CACHE}");
         
-    if (!FileSys.directoryExists(path)) {
-        FileSys.createDirectory(path);
-    }
+    //if (!FileSys.directoryExists(path)) {
+    //    FileSys.createDirectory(path);
+    //}
 
-    path = absPath(path + identifier);
-    if(!FileSys.directoryExists(path)) {
-        FileSys.createDirectory(path);
-    }
+    //path = absPath(path + identifier);
+    //if(!FileSys.directoryExists(path)) {
+    //    FileSys.createDirectory(path);
+    //}
 
-    _syncDir = path;
+    _syncDir = pathToDownloadTo.string();
     return _syncDir;
 }
     
@@ -124,37 +124,37 @@ void WebFieldlinesManager::preDownload(std::string dUrl){
 
     // TODO(Axel): Change this endpoint to be dynamic for each dataset 
     std::string url = "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/WSA4.5/WSA4.5_fieldlines/" + type + "/2017/09/2017-09-28T00-23-22.000.osfls";
-    std::string destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "2017-09-28T00-23-22.000.osfls"); // what the downloaded filename is to be
+    std::filesystem::path destinationpath = absPath(_syncDir + "/2017-09-28T00-23-22.000.osfls"); // what the downloaded filename is to be
        
 
     /* For experimentation with suntexturemanager & parker solor probe, hopefully this hardcoding can go away */
     if (ID == 1180) {
         url = "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/WSA4.5/" + type + "/2017/09/wsa_201709280023R000_gong.fits";
-        destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "wsa_201709280023R000_gong.fits"); // what the downloaded filename is to be
+        destinationpath = absPath(_syncDir + "/wsa_201709280023R000_gong.fits"); // what the downloaded filename is to be
     }
     // For parker solar probe
     if (ID > 1190) {
         url = "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/ADAPT_WSA4.5/ADAPT_WSA4.5_fieldlines/" + type + "/2018/11/2018-11-01T00-00-00.000.osfls";
-        destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "2018-11-01T00-00-00.000.osfls"); // what the downloaded filename is to be
+        destinationpath = absPath(_syncDir + "/2018-11-01T00-00-00.000.osfls"); // what the downloaded filename is to be
     }
 
     if (ID == 1196) {
         url = "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/ADAPT_WSA4.5/" + type + "/2018/11/wsa_201811010000R007_agong.fits";
-        destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "wsa_201811010000R007_agong.fits"); // what the downloaded filename is to be
+        destinationpath = absPath(_syncDir + "/wsa_201811010000R007_agong.fits"); // what the downloaded filename is to be
     }
     /* End of experiment */
 
-    AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
-    HttpRequest::RequestOptions opt = {};
-    opt.requestTimeoutSeconds = 0;
-    ashd.start(opt);
-    ashd.wait();
+    //HttpFileDownload ashd = HttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
+    //HttpRequest::RequestOptions opt = {};
+    //opt.requestTimeoutSeconds = 0;
+    //ashd.start(opt);
+    //ashd.wait();
 }
     
     
 void WebFieldlinesManager::update(){
-    const double openspaceTime = global::timeManager.time().j2000Seconds();
-    const auto deltaTime = global::timeManager.deltaTime();
+    const double openspaceTime = global::timeManager->time().j2000Seconds();
+    const auto deltaTime = global::timeManager->deltaTime();
 
     // More than 2hrs a second would generally be unfeasable
     // for a regular internet connection to operate at

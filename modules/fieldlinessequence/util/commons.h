@@ -26,15 +26,16 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__
 
 #include <string>
+#include <map>
 
 namespace openspace::fls { // (F)ield(L)ines(S)equence
 
-enum class Model : int {
-    Batsrus = 0,
-    Enlil,
-    Pfss,
-    Invalid
-};
+    enum class Model : int {
+        Batsrus = 0,
+        Enlil,
+        Pfss,
+        Invalid
+    };
 
 Model stringToModel(const std::string& s);
 
