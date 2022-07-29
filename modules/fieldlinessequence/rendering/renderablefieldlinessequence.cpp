@@ -457,15 +457,15 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _loadingStatesDynamically = false;
     }
 
+#pragma optimize("", off)
     // obs that property differ from member variable name
     _dynWebContentUrl = p.dynamicWebContent.value_or(_dynWebContentUrl);
     if (!_dynWebContentUrl.empty()) {
         _dynamicWebContent = true;
         LINFO("Initializing sync-directory and downloading a startset");
-        std::string what = _webFieldlinesManager.initializeSyncDirectory("whyAStringHere");
-
+        std::string what = _webFieldlinesManager.initializeSyncDirectory();
     }
-
+#pragma optimize("", on)
     if (p.maskingRanges.has_value()) {
         _maskingRanges = *p.maskingRanges;
     }

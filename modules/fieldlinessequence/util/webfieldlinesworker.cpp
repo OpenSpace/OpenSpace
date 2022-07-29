@@ -51,18 +51,18 @@ WebFieldlinesWorker::WebFieldlinesWorker(std::string syncDir, std::string server
 WebFieldlinesWorker::~WebFieldlinesWorker() {
     // Deleting all files that were downloaded during the run.
     // Cancel any potential download
-    if (_downloading && _downloading->hasStarted())
+    if (_downloading)
         _downloading->wait();
     // Remove all files
-    std::vector<std::string> temp =
-        ghoul::filesystem::Directory(_syncDir).readFiles();
+
+    namespace fs = std::filesystem;
+    fs::path path = absPath(_syncDir);
+
     // Sneaky check, just want to make sure it is only deleting fieldlines for now
-    if (temp.back().substr(temp.back().size() - 5) == "osfls" &&
-        temp.front().substr(temp.front().size() - 5) == "osfls")
-    {
-        std::for_each(temp.begin(), temp.end(), [&](auto it) {
-            FileSys.deleteFile(it);
-        });
+    for (const fs::directory_entry& e : fs::directory_iterator(path)) {
+        if (fs::path(e).extension() == ".osfls") {
+            fs::remove(e);
+        }
     }
 }
     
@@ -74,7 +74,7 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
 {
     // We don't want to keep sending request, if we just get empty responses.
     if (!_noMoreRequests) {
-        auto time = global::timeManager.time().ISO8601();
+        auto time = global::timeManager->time().ISO8601();
         Time maxTime;
         Time minTime;
 
@@ -88,14 +88,14 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
         std::vector<std::string> urlList;
         std::vector<std::string> timeList;
 
-        maxTime.setTime(time);
-        minTime.setTime(time);
+        maxTime.setTime(static_cast<std::string>(time));
+        minTime.setTime(static_cast<std::string>(time));
         maxTime.advanceTime(timeSpan);
         minTime.advanceTime(-timeSpan);
 
         std::string url = _serverUrl +
-            "&time.min=" + minTime.ISO8601() +
-            "&time.max=" + maxTime.ISO8601();
+            "&time.min=" + static_cast<std::string>(minTime.ISO8601()) +
+            "&time.max=" + static_cast<std::string>(maxTime.ISO8601());
 
         SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
         HttpRequest::RequestOptions opt = {};
