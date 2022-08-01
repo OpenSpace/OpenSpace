@@ -185,7 +185,7 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
 
                 BrickSelection::SplitType childSplitType;
                 float childSplitPoints = splitPoints(childBrickIndex, childSplitType);
-                //std::cout << "Splitting spatially." << std::endl;
+                //std::cout << "Splitting spatially" << std::endl;
                 BrickSelection childSelection = bs.splitSpatially(
                     i % 2,
                     (i / 2) % 2, // abock: isn't this always 0?

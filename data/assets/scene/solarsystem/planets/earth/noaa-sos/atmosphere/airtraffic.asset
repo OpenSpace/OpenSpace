@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Air Traffic"
 local Identifier = "noaa-sos-atmosphere-air_traffic"
-local Description = [[ "On any given day, more than 87,000 flights are in the skies in 
+local Description = [["On any given day, more than 87,000 flights are in the skies in 
 the United States. Only one-third are commercial carriers, like American, United or 
 Southwest. On an average day, air traffic controllers handle 28,537 commercial flights 
 (major and regional airlines), 27,178 general aviation flights (private planes), 24,548 
 air taxi flights (planes for hire), 5,260 military flights and 2,148 air cargo flights 
 (Federal Express, UPS, etc.). At any given moment, roughly 5,000 planes are in the skies 
 above the United States. In one year, controllers handle an average of 64 million 
-takeoffs and landings." - From the National Air Traffic Controllers Association webpage ]]
+takeoffs and landings." - From the National Air Traffic Controllers Association webpage]]
 local URL = "https://sos.noaa.gov/catalog/datasets/air-traffic/"
 
 
@@ -52,7 +52,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

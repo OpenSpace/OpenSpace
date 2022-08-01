@@ -30,7 +30,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "StateMachine";
+    constexpr std::string_view _loggerCat = "StateMachine";
 
     struct [[codegen::Dictionary(StateMachine)]] Parameters {
         // A list of states
@@ -118,8 +118,8 @@ const State* StateMachine::currentState() const {
 void StateMachine::transitionTo(const std::string& newState) {
     if (!currentState()) {
         LERROR(
-            "Cannot perform transition as the machine is in no current state. "
-            "First set an initial state."
+            "Cannot perform transition as the machine is in no current state. First set "
+            "an initial state"
         );
         return;
     }

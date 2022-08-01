@@ -70,19 +70,19 @@
 #include "renderengine_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "RenderEngine";
+    constexpr std::string_view _loggerCat = "RenderEngine";
 
-    constexpr const std::chrono::seconds ScreenLogTimeToLive(15);
-    constexpr const char* RenderFsPath = "${SHADERS}/render.frag";
+    constexpr std::chrono::seconds ScreenLogTimeToLive(15);
+    constexpr std::string_view RenderFsPath = "${SHADERS}/render.frag";
 
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const char* KeyFontLight = "Light";
+    constexpr std::string_view KeyFontMono = "Mono";
+    constexpr std::string_view KeyFontLight = "Light";
 
     constexpr openspace::properties::Property::PropertyInfo ShowOverlayClientsInfo = {
         "ShowOverlayOnClients",
         "Show Overlay Information on Clients",
         "If this value is enabled, the overlay information text is also automatically "
-        "rendered on client nodes. This values is disabled by default."
+        "rendered on client nodes. This values is disabled by default"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowLogInfo = {
@@ -90,7 +90,7 @@ namespace {
         "Show the on-screen log",
         "This value determines whether the on-screen log will be shown or hidden. Even "
         "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
-        "log."
+        "log"
     };
 
     constexpr openspace::properties::Property::PropertyInfo VerticalLogOffsetInfo = {
@@ -104,7 +104,7 @@ namespace {
         "ShowVersion",
         "Shows the version on-screen information",
         "This value determines whether the Git version information (branch and commit) "
-        "hash are shown on the screen."
+        "hash are shown on the screen"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
@@ -119,7 +119,7 @@ namespace {
         "Screenshow Window Ids",
         "The list of window identifiers whose screenshot will be taken the next time "
         "anyone triggers a screenshot. If this list is empty (the default), all windows "
-        "will have their screenshot taken. Id's that do not exist are silently ignored."
+        "will have their screenshot taken. Id's that do not exist are silently ignored"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
@@ -128,7 +128,7 @@ namespace {
         "This value determines whether a warping should be applied before taking a "
         "screenshot. If it is enabled, all post processing is applied as well, which "
         "includes everything rendered on top of the rendering, such as the user "
-        "interface."
+        "interface"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
@@ -142,7 +142,7 @@ namespace {
         "ShowFrameInformation",
         "Show Frame Information",
         "If this value is enabled, the current frame number and frame times are rendered "
-        "into the window."
+        "into the window"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
@@ -152,7 +152,7 @@ namespace {
         "Every other aspect of the application will be unaffected by this and it will "
         "still respond to user input. This setting is reasonably only useful in the case "
         "of multi-pipeline environments, such as planetariums, where the output of the "
-        "master node is not required and performance can be gained by disabling it."
+        "master node is not required and performance can be gained by disabling it"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GlobalRotationInfo = {
@@ -168,7 +168,7 @@ namespace {
         "ScreenSpaceRotation",
         "Screen Space Rotation",
         "Applies a rotation to all screen space renderables. "
-        "Defined using pitch, yaw, roll in radians."
+        "Defined using pitch, yaw, roll in radians"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
@@ -176,7 +176,7 @@ namespace {
         "Master Rotation",
         "Applies a view rotation for only the master node, defined using "
         "pitch, yaw, roll in radians. This can be used to compensate the master view "
-        "direction for tilted display systems in clustered immersive environments."
+        "direction for tilted display systems in clustered immersive environments"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
@@ -184,21 +184,21 @@ namespace {
        "Disable HDR Rendering",
        "If this value is enabled, the rendering will disable the HDR color handling "
        "and the LDR color pipeline will be used. Be aware of possible over exposure "
-       "in the final colors."
+       "in the final colors"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
         "HDRExposure",
         "HDR Exposure",
         "This value determines the amount of light per unit area reaching the "
-        "equivalent of an electronic image sensor."
+        "equivalent of an electronic image sensor"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
-        "tristimulus values in the image."
+        "tristimulus values in the image"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HueInfo = {
@@ -231,7 +231,7 @@ namespace {
         "Horizontal Field of View",
         "Adjusts the degrees of the horizontal field of view. The vertical field of "
         "view will be automatically adjusted to match, according to the current "
-        "aspect ratio."
+        "aspect ratio"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GlobalBlackoutFactorInfo = {
@@ -250,13 +250,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledFontColorInfo = {
         "EnabledFontColor",
         "Enabled Font Color",
-        "The font color used for enabled options."
+        "The font color used for enabled options"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisabledFontColorInfo = {
         "DisabledFontColor",
         "Disabled Font Color",
-        "The font color used for disabled options."
+        "The font color used for disabled options"
     };
 } // namespace
 
@@ -726,7 +726,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 
 
     if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
-        constexpr const char* ToggleRotationFrictionScript = R"(
+        constexpr const char ToggleRotationFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
@@ -738,7 +738,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     }
 
     if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
-        constexpr const char* ToggleZoomFrictionScript = R"(
+        constexpr const char ToggleZoomFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
@@ -750,7 +750,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     }
 
     if (intersects(mousePosition, _cameraButtonLocations.roll)) {
-        constexpr const char* ToggleRollFrictionScript = R"(
+        constexpr const char ToggleRollFrictionScript[] = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
             openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
@@ -794,7 +794,7 @@ void RenderEngine::renderEndscreen() {
         glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
-    constexpr const std::string_view Text = "Shutting down";
+    constexpr std::string_view Text = "Shutting down";
     const glm::vec2 size = _fontShutdown->boundingBox(Text);
     glm::vec2 penPosition = glm::vec2(
         fontResolution().x / 2 - size.x / 2,
@@ -826,7 +826,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         return;
     }
 
-    constexpr const std::string_view FirstLine = "Shutdown in: {:.2f}s/{:.2f}s";
+    constexpr std::string_view FirstLine = "Shutdown in: {:.2f}s/{:.2f}s";
     const glm::vec2 size1 = _fontShutdown->boundingBox(
         fmt::format(FirstLine, timer, fullTime)
     );
@@ -1137,8 +1137,8 @@ void RenderEngine::renderCameraInformation() {
 
     float penPosY = fontResolution().y - rotationBox.y;
 
-    constexpr const float YSeparation = 5.f;
-    constexpr const float XSeparation = 5.f;
+    constexpr float YSeparation = 5.f;
+    constexpr float XSeparation = 5.f;
 
     const interaction::OrbitalNavigator& nav =
         global::navigationHandler->orbitalNavigator();
@@ -1258,10 +1258,10 @@ void RenderEngine::renderScreenLog() {
 
     _log->removeExpiredEntries();
 
-    constexpr const size_t MaxNumberMessages = 20;
-    constexpr const int CategoryLength = 30;
-    constexpr const int MessageLength = 280;
-    constexpr const std::chrono::seconds FadeTime(5);
+    constexpr size_t MaxNumberMessages = 20;
+    constexpr int CategoryLength = 30;
+    constexpr int MessageLength = 280;
+    constexpr std::chrono::seconds FadeTime(5);
 
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
     const glm::ivec2 fontRes = fontResolution();

@@ -41,9 +41,9 @@ end)
 asset.meta = {
   Name = "Default Mars Layers",
   Version = "1.1",
-  Description = [[ Default Mars layers are: MOC WA Color, Viking MDIM, MOLA Pseudo
-    Color, MOLA HRSC, Themis IR Day, Themis IR Night, CTX Mosaic, CTX Blended
-    beta01, HiRISE, and HiRISE Local Set]],
+  Description = [[Default Mars layers are: MOC WA Color, Viking MDIM, MOLA Pseudo Color,
+    MOLA HRSC, Themis IR Day, Themis IR Night, CTX Mosaic, CTX Blended beta01, HiRISE, and
+    HiRISE Local Set]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

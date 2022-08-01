@@ -18,12 +18,12 @@ local layer = {
       "png"
     )  
   },
-  Description = [[ Temporal coverage: 02 July 2012 - Present. The Advanced Microwave
-    Scanning Radiometer-E/Advanced Microwave Scanning Radiometer-2 (AMSR-E/AMSR2)
-    unified "Sea Ice Concentration (12 km)" layer displays the percent of sea ice
-    concentration in the polar regions as a daily composite of the AMSR2 1:30 a.m.
-    ascending and 1:30 p.m. descending half-orbit passes, at a spatial resolution
-    of 12 km. (Description from NASA Worldview)]]
+  Description = [[Temporal coverage: 02 July 2012 - Present. The Advanced Microwave
+    Scanning Radiometer-E/Advanced Microwave Scanning Radiometer-2 (AMSR-E/AMSR2) unified
+    "Sea Ice Concentration (12 km)" layer displays the percent of sea ice concentration in
+    the polar regions as a daily composite of the AMSR2 1:30 a.m. ascending and 1:30 p.m.
+    descending half-orbit passes, at a spatial resolution of 12 km. (Description from NASA
+    Worldview)]]
 }
 
 asset.onInitialize(function()
@@ -41,8 +41,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
   Version = "1.1",
-  Description = [[ GIBS hosted layer created with
-    openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
   License = "NASA"

@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Ocean Temperature at Depth - Seasonal"
 local Identifier = "noaa-sos-oceans-ocean_depths_temp"
-local Description = [[ Though satellites provide highly detailed analyses of the 
+local Description = [[Though satellites provide highly detailed analyses of the 
 temperature of the ocean surface, they cannot measure temperatures below the first 1 mm 
 of water. For that deeper understanding, NOAA relies on thousands of buoys, ships, 
 undersea gliders and other devices to measure temperatures at depth. The measurements are 
 consolidated every few years by the National Oceanographic Data Center into a product 
 known as the World Ocean Atlas. The measurements shown here go as deep as 5,000 m — far 
 deeper than many places in the ocean — which is why there is a lack of data (black areas) 
-in some of the deeper imagery.   ]]
+in some of the deeper imagery]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-temperature-at-depth-seasonal/"
 
 
@@ -76,7 +76,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

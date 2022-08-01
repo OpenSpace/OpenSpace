@@ -27,7 +27,7 @@ local Uranus = {
   GUI = {
     Name = "Uranus",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[Globe for Uranus.]]
+    Description = "Globe for Uranus"
   }
 }
 
@@ -48,7 +48,7 @@ local UranusLabel = {
   GUI = {
     Name = "Uranus Label",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[ Main planet label for Uranus.]],
+    Description = "Main planet label for Uranus",
   }
 }
 
@@ -70,7 +70,7 @@ asset.export(UranusLabel)
 asset.meta = {
   Name = "Uranus",
   Version = "1.1",
-  Description = [[ Uranus globe, and main planet label.]],
+  Description = "Uranus globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

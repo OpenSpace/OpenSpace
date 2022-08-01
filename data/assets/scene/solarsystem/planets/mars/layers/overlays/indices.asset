@@ -19,7 +19,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Mars Indices",
   Version = "1.0",
-  Description = [[ This asset supplies a tile index layer for the Mars globe.]],
+  Description = "This asset supplies a tile index layer for the Mars globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -41,10 +41,9 @@ size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
         case ghoul::opengl::Texture::Format::RGBA:
         case ghoul::opengl::Texture::Format::BGRA:
             return 4;
-        default: {
+        default:
             ghoul_assert(false, "Unknown format");
             throw ghoul::MissingCaseException();
-        }
     }
 }
 
@@ -105,11 +104,11 @@ openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
 
 namespace openspace::globebrowsing {
 
-TileTextureInitData tileTextureInitData(layergroupid::GroupID id, bool shouldPadTiles,
-    size_t preferredTileSize)
+TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTiles,
+                                        size_t preferredTileSize)
 {
     switch (id) {
-        case layergroupid::GroupID::HeightLayers: {
+        case layers::Group::ID::HeightLayers: {
             const size_t tileSize = preferredTileSize ? preferredTileSize : 64;
             return TileTextureInitData(
                 tileSize,
@@ -120,7 +119,7 @@ TileTextureInitData tileTextureInitData(layergroupid::GroupID id, bool shouldPad
                 TileTextureInitData::ShouldAllocateDataOnCPU::Yes
             );
         }
-        case layergroupid::GroupID::ColorLayers: {
+        case layers::Group::ID::ColorLayers: {
             const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(
                 tileSize,
@@ -130,7 +129,7 @@ TileTextureInitData tileTextureInitData(layergroupid::GroupID id, bool shouldPad
                 TileTextureInitData::PadTiles(shouldPadTiles)
             );
         }
-        case layergroupid::GroupID::Overlays: {
+        case layers::Group::ID::Overlays: {
             const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(
                 tileSize,
@@ -140,7 +139,7 @@ TileTextureInitData tileTextureInitData(layergroupid::GroupID id, bool shouldPad
                 TileTextureInitData::PadTiles(shouldPadTiles)
             );
         }
-        case layergroupid::GroupID::NightLayers: {
+        case layers::Group::ID::NightLayers: {
             const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(
                 tileSize,
@@ -150,7 +149,7 @@ TileTextureInitData tileTextureInitData(layergroupid::GroupID id, bool shouldPad
                 TileTextureInitData::PadTiles(shouldPadTiles)
             );
         }
-        case layergroupid::GroupID::WaterMasks: {
+        case layers::Group::ID::WaterMasks: {
             const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(
                 tileSize,

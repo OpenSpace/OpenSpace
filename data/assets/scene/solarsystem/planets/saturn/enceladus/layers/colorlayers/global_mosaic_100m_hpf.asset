@@ -4,12 +4,12 @@ local layer = {
   Identifier = "Global_Mosaic_100m_HPF",
   Name = "Cassini Global Mosaic 100m HPF",
   FilePath = asset.localResource("global_mosaic_100m_hpf.wms"),
-  Description = [[ This mosaic represents the completion of a global control network of
+  Description = [[This mosaic represents the completion of a global control network of
     Enceladus containing Cassini Imaging Science Subsystem (ISS) images. A total of
     586 images in CLR, GRN, UV3, and IR3 filters were selected for the control
     network. The image selection criteria were based on coverage, quality, and a
     spatial resolution between 50 and 500 meters per pixel (m) with phase angles less
-    than 120 degrees. (Description from URL).]]
+    than 120 degrees. (Description from URL)]]
 }
 
 asset.onInitialize(function()
@@ -27,8 +27,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Cassini Global Mosaic 100m HPF",
   Version = "1.0",
-  Description = [[ Cassini Global mosaic for Enceladus. This map is hosted on the
-    OpenSpace server Sweden.]],
+  Description = [[Cassini Global mosaic for Enceladus. This map is hosted on the OpenSpace
+    server in Sweden]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Enceladus/Cassini/" ..
     "Enceladus_Cassini_ISS_Global_Mosaic_100m_HPF",

@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Climate Model: Sea Ice Change (GFDL a1b) 1861 - 2100"
 local Identifier = "noaa-sos-models-gfdl_seaice"
-local Description = [[ In the coming decades, the Arctic region is projected to warm at 
+local Description = [[In the coming decades, the Arctic region is projected to warm at 
 about twice the rate of the global average according to the scientists at NOAA's 
 Geophysical Fluid Dynamics Laboratory. This is not good news for the Arctic sea ice. In 
 fact, the concentration of sea ice in the northern latitudes has been decreasing over the 
@@ -15,7 +15,7 @@ much of the sun's warming back to space. As the ice melts, more of this energy i
 absorbed in the darker ocean water. The temperature increases as more sunlight is 
 absorbed rather than reflected. This is a positive feedback loop because as temperature 
 rises, more sea ice melts causing increased absorption which leads to rising 
-temperatures.   ]]
+temperatures]]
 local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-sea-ice-change-gfdl-a1b-1861-2100/"
 
 
@@ -69,7 +69,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

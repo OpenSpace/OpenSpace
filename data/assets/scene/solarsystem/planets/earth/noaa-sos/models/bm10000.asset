@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Blue Marble: Sea Level, Ice and Vegetation Changes - 19,000BC - 10,000AD"
 local Identifier = "noaa-sos-models-bm10000"
-local Description = [[ The Earth has been through many changes and continues to change 
+local Description = [[The Earth has been through many changes and continues to change 
 today. To better understand these changes, the Zürich University of Applied Sciences 
 created a simulation using past climate data, observations, and computer models. The 
 simulation starts 21,000 years ago and ends 8,000 years in the future, showing the 
@@ -32,7 +32,7 @@ northern ice cap quickly disappears and the ice on Greenland and Antarctica begi
 melt steadily. By the year 3,000AD, there is predicted 6m (19ft) sea level rise. The 
 simulation continues from 3,000AD to 10,000 AD in 500 year time steps in a fictional 
 scenario of worldwide glacier meltdown and shows the impacts this would have on the 
-coasts.   ]]
+coasts]]
 local URL = "https://sos.noaa.gov/catalog/datasets/blue-marble-sea-level-ice-and-vegetation-changes-19000bc-10000ad/"
 
 
@@ -72,7 +72,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

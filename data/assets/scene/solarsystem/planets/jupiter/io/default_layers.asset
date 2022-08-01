@@ -13,7 +13,7 @@ end)
 asset.meta = {
   Name = "Default Io Layers",
   Version = "1.0",
-  Description = [[ Default Io layers are: Io Texture]],
+  Description = "Default Io layers are: Io Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

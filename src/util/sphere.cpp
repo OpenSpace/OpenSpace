@@ -28,7 +28,7 @@
 #include <cstring>
 
 namespace {
-    constexpr const char* _loggerCat = "PowerScaledSphere";
+    constexpr std::string_view _loggerCat = "PowerScaledSphere";
 } // namespace
 
 namespace openspace {

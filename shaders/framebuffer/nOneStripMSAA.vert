@@ -31,8 +31,8 @@ out vec2 vTexCoord;
 // flat out vec3 vPosition;
 
 void main() {
-    vTexCoord = texCoord;
-    // vPosition = position.xyz;
+  vTexCoord = texCoord;
+  // vPosition = position.xyz;
 
-    gl_Position = position;
+  gl_Position = position;
 }

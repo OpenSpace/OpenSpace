@@ -33,7 +33,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This scene contains a new rendering method to show the massive ESA Gaia stars dataset. By default, it loads the few million stars of the Gaia DR2 that contain radial velocities.",
+    "description": "This scene contains a new rendering method to show the massive ESA Gaia stars dataset. By default, it loads the few million stars of the Gaia DR2 that contain radial velocities",
     "license": "MIT License",
     "name": "Gaia",
     "url": "https://www.openspaceproject.com",

@@ -22,7 +22,7 @@ local IapetusTrail = {
   GUI = {
     Name = "Iapetus Trail",
     Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[ Trail of Saturn's moon Iapetus as observed by Saturn.]],
+    Description = "Trail of Saturn's moon Iapetus as observed by Saturn",
   }
 }
 
@@ -41,7 +41,7 @@ asset.export(IapetusTrail)
 asset.meta = {
   Name = "Iapetus Trail",
   Version = "1.1",
-  Description = [[Main trail for Iapetus. Data from NASA Spice (see base spice asset)]],
+  Description = "Main trail for Iapetus. Data from NASA Spice (see base spice asset)",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

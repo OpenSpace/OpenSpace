@@ -18,8 +18,8 @@ local layer = {
       "jpg"
     )
   },
-  Description = [[ Temporal coverage: 11 November 2015 - Present. The imagery resolution
-    is 0.25 km, and the temporal resolution is daily.]]
+  Description = [[Temporal coverage: 11 November 2015 - Present. The imagery resolution
+    is 0.25 km, and the temporal resolution is daily]]
 }
 
 asset.onInitialize(function()
@@ -37,10 +37,9 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "VIIRS SNPP (Temporal)",
   Version = "1.1",
-  Description = [[ This layer has the best daily Earth Image. GIBS hosted layer created
-    with openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Description = "This layer has the best daily Earth Image",
   Author = "NASA EOSDIS Global Imagery Browse Services",
-  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/" ..
-    "eosdis-components/gibs",
+  URL =
+    "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
   License = "NASA"
 }

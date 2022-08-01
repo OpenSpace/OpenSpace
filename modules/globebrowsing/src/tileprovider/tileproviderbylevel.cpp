@@ -50,18 +50,18 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    layergroupid::GroupID layerGroup = static_cast<layergroupid::GroupID>(p.layerGroupID);
+    layers::Group::ID group = static_cast<layers::Group::ID>(p.layerGroupID);
 
     for (Parameters::Provider provider : p.levelTileProviders) {
         ghoul::Dictionary& tileProviderDict = provider.tileProvider;
-        tileProviderDict.setValue("LayerGroupID", static_cast<int>(layerGroup));
+        tileProviderDict.setValue("LayerGroupID", static_cast<int>(group));
 
-        layergroupid::TypeID typeID = layergroupid::TypeID::DefaultTileLayer;
+        layers::Layer::ID typeID = layers::Layer::ID::DefaultTileLayer;
         if (tileProviderDict.hasValue<std::string>("Type")) {
             std::string type = tileProviderDict.value<std::string>("Type");
-            typeID = ghoul::from_string<layergroupid::TypeID>(type);
+            typeID = ghoul::from_string<layers::Layer::ID>(type);
 
-            if (typeID == layergroupid::TypeID::Unknown) {
+            if (typeID == layers::Layer::ID::Unknown) {
                 throw ghoul::RuntimeError("Unknown layer type: " + type);
             }
         }
@@ -86,7 +86,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             static_cast<int>(_levelTileProviders.size()) - 1;
     }
 
-    // Fill in the gaps (value -1 ) in provider indices, from back to end
+    // Fill in the gaps (value -1) in provider indices, from back to end
     for (int i = static_cast<int>(_providerIndices.size()) - 2; i >= 0; --i) {
         if (_providerIndices[i] == -1) {
             _providerIndices[i] = _providerIndices[i + 1];

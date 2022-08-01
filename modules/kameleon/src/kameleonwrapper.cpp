@@ -50,8 +50,8 @@
 #endif // WIN32
 
 namespace {
-    constexpr const char* _loggerCat = "KameleonWrapper";
-    constexpr const float RE_TO_METER = 6371000;
+    constexpr std::string_view _loggerCat = "KameleonWrapper";
+    constexpr float RE_TO_METER = 6371000;
 } // namespace
 
 namespace openspace {
@@ -200,7 +200,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     LDEBUG(fmt::format("{} Max: {}", var, varMax));
 
     // HISTOGRAM
-    constexpr const int NBins = 200;
+    constexpr int NBins = 200;
     std::vector<int> histogram(NBins, 0);
     // Explicitly mentioning the capture list provides either an error on MSVC (if NBins)
     // is not specified or a warning on Clang if it is specified. Sigh...
@@ -301,7 +301,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 
     int sum = 0;
     int stop = 0;
-    constexpr const float TruncationLimit = 0.9f;
+    constexpr float TruncationLimit = 0.9f;
     const int upperLimit = static_cast<int>(size * TruncationLimit);
     for (int i = 0; i < NBins; ++i) {
         sum += histogram[i];
@@ -473,7 +473,7 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
         zVar
     ));
 
-    constexpr const int NumChannels = 4;
+    constexpr int NumChannels = 4;
     const size_t size = NumChannels * outDimensions.x * outDimensions.y * outDimensions.z;
     float* data = new float[size];
 
@@ -786,7 +786,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
                                                                  TraceDirection direction,
                                                                   FieldlineEnd& end) const
 {
-    constexpr const int MaxSteps = 5000;
+    constexpr int MaxSteps = 5000;
 
     _model->loadVariable(xVar);
     const long int xID = _model->getVariableID(xVar);
@@ -876,7 +876,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
                                                                            float stepsize,
                                                                       float eCharge) const
 {
-    constexpr const int MaxSteps = 5000;
+    constexpr int MaxSteps = 5000;
 
     glm::vec3 step = glm::vec3(stepsize);
 

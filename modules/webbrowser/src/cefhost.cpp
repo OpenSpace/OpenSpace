@@ -35,7 +35,7 @@
 #endif // __APPLE__
 
 namespace {
-    constexpr const char* _loggerCat = "CefHost";
+    constexpr std::string_view _loggerCat = "CefHost";
 } // namespace
 
 namespace openspace {

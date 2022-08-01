@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Fukushima Radioactive Aerosol Dispersion Model"
 local Identifier = "noaa-sos-atmosphere-fukushima"
-local Description = [[ The Hybrid Single-Particle Lagrangian Integrated Trajectory 
+local Description = [[The Hybrid Single-Particle Lagrangian Integrated Trajectory 
 (HYSPLIT) model was developed by NOAA to follow the transport and dispersion of 
 pollutants in the atmosphere. In HYSPLIT, the computation is composed of four components: 
 transport by the mean wind, turbulent dispersion, scavenging and decay. A large number of 
 pollutant particles, which by convention are called "particles" but are just 
 computational "points" (particles or gases), are released at the source location and 
-passively follow the wind.  ]]
+passively follow the wind]]
 local URL = "https://sos.noaa.gov/catalog/datasets/fukushima-radioactive-aerosol-dispersion-model/"
 
 
@@ -61,7 +61,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

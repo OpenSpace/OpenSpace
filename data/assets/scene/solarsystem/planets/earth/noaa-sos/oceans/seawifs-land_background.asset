@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Biosphere: Marine Chlorophyll Concentration"
 local Identifier = "noaa-sos-oceans-seawifs-land_background"
-local Description = [[ The term biosphere refers to the regions of the surface, 
+local Description = [[The term biosphere refers to the regions of the surface, 
 atmosphere, and hydrosphere of the earth occupied by living organisms.This dataset shows 
-quantity of marine plant-life as it changes throughout the seasons of the year.   ]]
+quantity of marine plant-life as it changes throughout the seasons of the year]]
 local URL = "https://sos.noaa.gov/catalog/datasets/biosphere-marine-chlorophyll-concentration/"
 
 
@@ -57,7 +57,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

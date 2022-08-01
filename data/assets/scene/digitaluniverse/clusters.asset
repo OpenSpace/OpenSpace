@@ -51,7 +51,7 @@ asset.export(object)
 asset.meta = {
   Name = "Galaxy Clusters Labels",
   Version = "1.1",
-  Description = [[Digital Universe asset for Galaxy Clusters]],
+  Description = "Digital Universe asset for Galaxy Clusters",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

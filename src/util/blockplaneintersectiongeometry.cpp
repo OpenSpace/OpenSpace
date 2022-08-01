@@ -28,7 +28,7 @@
 #include <algorithm>
 
 namespace {
-    constexpr const char* _loggerCat = "BlockPlaneIntersectionGeometry";
+    constexpr std::string_view _loggerCat = "BlockPlaneIntersectionGeometry";
 } // namespace
 
 namespace openspace {

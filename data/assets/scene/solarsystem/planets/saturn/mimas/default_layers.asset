@@ -11,7 +11,7 @@ end)
 asset.meta = {
   Name = "Default Mimas Layers",
   Version = "1.0",
-  Description = [[ Default Mimas layers are: Mimas Texture]],
+  Description = "Default Mimas layers are: Mimas Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

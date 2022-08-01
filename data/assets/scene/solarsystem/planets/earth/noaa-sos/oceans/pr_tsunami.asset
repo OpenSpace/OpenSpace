@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Puerto Rico Hypothetical Tsunami"
 local Identifier = "noaa-sos-oceans-pr_tsunami"
-local Description = [[ After the devastation of the Indian Ocean Tsunami on December 26, 
+local Description = [[After the devastation of the Indian Ocean Tsunami on December 26, 
 2004, much attention has been given to tsunami research. The National Center for Tsunami 
 Research, which is part of the Pacific Marine Environmental Laboratory, spearheaded the 
 research efforts in the United States. A tsunami is a series of waves generated when a 
@@ -11,7 +11,7 @@ body of water, such as the ocean, is rapidly displaced on a massive scale. This 
 likely to happen where the tectonic plates meet and create trenches. An earthquake in 
 these regions can cause one plate to subduct under another and displace huge amounts of 
 water. One location that has garnered much attention from scientists is the Puerto Rico 
-Trench, the deepest location in the Atlantic Ocean.   ]]
+Trench, the deepest location in the Atlantic Ocean]]
 local URL = "https://sos.noaa.gov/catalog/datasets/puerto-rico-hypothetical-tsunami/"
 
 
@@ -51,7 +51,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

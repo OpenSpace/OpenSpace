@@ -34,6 +34,7 @@ out float vs_screenSpaceDepth;
 
 uniform mat4 modelViewProjectionTransform;
 
+
 void main() {
   vec4 position = vec4(in_position.xy, 0.0, 1.0);
   vec4 positionScreenSpace = z_normalization(modelViewProjectionTransform * position);

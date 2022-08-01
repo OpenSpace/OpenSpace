@@ -118,8 +118,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    constexpr static const int MinSplitDepth = 2;
-    constexpr static const int MaxSplitDepth = 22;
+    static constexpr int MinSplitDepth = 2;
+    static constexpr int MaxSplitDepth = 22;
 
     struct {
         properties::BoolProperty showChunkEdges;

@@ -40,7 +40,7 @@ asset.export(HyperionTrail)
 asset.meta = {
   Name = "Hyperion Trail",
   Version = "1.1",
-  Description = [[ Trail of Saturn's moon Hyperion as observed by Saturn. Data from NASA
+  Description = [[Trail of Saturn's moon Hyperion as observed by Saturn. Data from NASA
     Spice (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

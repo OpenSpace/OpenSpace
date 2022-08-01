@@ -49,7 +49,7 @@ local Mars = {
   GUI = {
     Name = "Mars",
     Path = "/Solar System/Planets/Mars",
-    Description = [[ Main globe for Mars with labels and map layers.]]
+    Description = "Main globe for Mars with labels and map layers"
   }
 }
 
@@ -76,7 +76,7 @@ local MarsLabel = {
   GUI = {
     Name = "Mars Label",
     Path = "/Solar System/Planets/Mars",
-    Description = [[ Main label for Mars]]
+    Description = "Main label for Mars"
   }
 }
 
@@ -98,7 +98,7 @@ asset.export(MarsLabel)
 asset.meta = {
   Name = "Mars",
   Version = "1.1",
-  Description = [[ Mars globe, and main globe label.]],
+  Description = "Mars globe, and main globe label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

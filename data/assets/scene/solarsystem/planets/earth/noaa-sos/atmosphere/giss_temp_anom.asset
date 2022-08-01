@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Temperature Anomaly: (NASA) - 1884 - 2012"
 local Identifier = "noaa-sos-atmosphere-giss_temp_anom"
-local Description = [[ These maps, developed by NASA's Goddard Institute for Space 
+local Description = [[These maps, developed by NASA's Goddard Institute for Space 
 Studies (GISS), depict how much various regions of the world have warmed or cooled when 
 compared with a base period of 1951-1980. They show temperature anomalies, or changes, 
-not absolute temperature.   ]]
+not absolute temperature]]
 local URL = "https://sos.noaa.gov/catalog/datasets/temperature-anomaly-nasa-1884-2012/"
 
 
@@ -58,7 +58,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

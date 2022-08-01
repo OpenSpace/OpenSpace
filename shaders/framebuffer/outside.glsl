@@ -25,8 +25,8 @@
 #include <#{fragmentPath}>
 
 void getEntry(inout vec3 entryPos, inout float entryDepth) {
-    // fetch entry point from rendered fragment
-    Fragment f = getFragment();
-    entryPos = f.color.xyz;
-    entryDepth = f.depth;
+  // fetch entry point from rendered fragment
+  Fragment f = getFragment();
+  entryPos = f.color.xyz;
+  entryDepth = f.depth;
 }

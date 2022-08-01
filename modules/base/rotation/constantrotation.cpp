@@ -34,7 +34,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "RotationAxis",
         "Rotation Axis",
-        "This value is the rotation axis around which the object will rotate."
+        "This value is the rotation axis around which the object will rotate"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationRateInfo = {

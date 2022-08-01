@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Earthquakes and Eruptions - 1960 - 2010"
 local Identifier = "noaa-sos-land-earthquakes_and_eruptions"
-local Description = [[ Most of Earth's earthquakes and volcanic eruptions occur at the 
+local Description = [[Most of Earth's earthquakes and volcanic eruptions occur at the 
 boundaries of the tectonic plates. This dataset shows all earthquakes of magnitude 5.0 or 
 greater from 1960 through 2010. The earthquakes are illustrated with a large white dot at 
 the time of the event. The size of the dot is proportional to the magnitude of the 
 earthquake. A musical tone is generated for the larger events. The larger the earthquake, 
 the lower the tone. The white dots eventually turn gray and slowly shrink to single-pixel 
-dots.   ]]
+dots]]
 local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-and-eruptions-1960-2010/"
 
 
@@ -61,7 +61,7 @@ asset.export(legend)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

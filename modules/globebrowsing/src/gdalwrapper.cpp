@@ -35,20 +35,20 @@
 #include <gdal.h>
 
 namespace {
-    constexpr const char* _loggerCat = "GdalWrapper";
+    constexpr std::string_view _loggerCat = "GdalWrapper";
 
     constexpr openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
         "LogGdalErrors",
         "Log GDAL errors",
         "If this value is enabled, any error that is raised by GDAL will be logged using "
-        "the logmanager. If this value is disabled, any error will be ignored."
+        "the logmanager. If this value is disabled, any error will be ignored"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GdalMaximumCacheInfo = {
         "GdalMaximumCacheSize",
         "GDAL maximum cache size",
         "This function sets the maximum amount of RAM memory in MB that GDAL is "
-        "permitted to use for caching."
+        "permitted to use for caching"
     };
 
     void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {

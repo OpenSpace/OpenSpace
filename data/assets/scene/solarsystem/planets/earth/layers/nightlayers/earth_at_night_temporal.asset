@@ -18,7 +18,7 @@ local layer =  {
       "png"
     )
   },
-  Description = [[ The VIIRS Nighttime Imagery (Day/Night Band, Enhanced Near Constant
+  Description = [[The VIIRS Nighttime Imagery (Day/Night Band, Enhanced Near Constant
     Contrast) layer shows the Earth's surface and atmosphere using a sensor designed
     to capture low-light emission sources, under varying illumination conditions. It
     is displayed as a grey-scale image. Sources of illumination include both natural
@@ -53,8 +53,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Earth at Night (Temporal)",
   Version = "1.1",
-  Description = [[Temporal layer for earth with daily night image. This layer is a GIBS
-    hosted layer created with openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Description = "Temporal layer for earth with daily night image",
   Author = "OpenSpace Team",
   URL = "https://worldview.earthdata.nasa.gov/?l=VIIRS_SNPP_DayNightBand_ENCC",
   License = "NASA"

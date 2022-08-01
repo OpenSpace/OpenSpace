@@ -30,7 +30,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Mercury Calcium Abundance",
   Version = "1.0",
-  Description = [[ Calcium Abundance layer for Mercury globe]],
+  Description = "Calcium Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

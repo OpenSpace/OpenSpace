@@ -43,7 +43,7 @@ asset.export(CharonTrailBarycentric)
 asset.meta = {
   Name = "Charon Barycentric Trail",
   Version = "1.0",
-  Description = [[ Trail of Charon as observed by Pluto Barycenter. Data from
+  Description = [[Trail of Charon as observed by Pluto Barycenter. Data from
     NASA Spice (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

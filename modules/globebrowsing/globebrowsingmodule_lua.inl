@@ -51,10 +51,8 @@ namespace {
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
-        layerGroupName
-        );
-    if (groupID == layergroupid::GroupID::Unknown) {
+    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroupName);
+    if (groupID == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
     }
 
@@ -91,10 +89,8 @@ namespace {
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
-        layerGroupName
-        );
-    if (groupID == layergroupid::GroupID::Unknown) {
+    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroupName);
+    if (groupID == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
     }
 
@@ -135,18 +131,17 @@ namespace {
         throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    globebrowsing::layergroupid::GroupID group =
-        ghoul::from_string<globebrowsing::layergroupid::GroupID>(layer);
-    if (group == globebrowsing::layergroupid::GroupID::Unknown) {
+    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layer);
+    if (group == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer groupd: " + layer);
     }
 
-    const globebrowsing::LayerGroup& lg = globe->layerManager().layerGroup(group);
-    std::vector<globebrowsing::Layer*> layers = lg.layers();
+    const LayerGroup& lg = globe->layerManager().layerGroup(group);
+    std::vector<Layer*> layers = lg.layers();
 
     std::vector<std::string> res;
     res.reserve(layers.size());
-    for (globebrowsing::Layer* l : layers) {
+    for (Layer* l : layers) {
         res.push_back(l->identifier());
     }
     return res;
@@ -181,13 +176,12 @@ namespace {
         throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    globebrowsing::layergroupid::GroupID group =
-        ghoul::from_string<globebrowsing::layergroupid::GroupID>(layer);
-    if (group == globebrowsing::layergroupid::GroupID::Unknown) {
+    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layer);
+    if (group == layers::Group::ID::Unknown) {
         throw ghoul::lua::LuaError("Unknown layer groupd: " + layer);
     }
 
-    globebrowsing::LayerGroup& lg = globe->layerManager().layerGroup(group);
+    LayerGroup& lg = globe->layerManager().layerGroup(group);
     lg.moveLayer(oldPosition, newPosition);
 }
 
@@ -236,7 +230,7 @@ namespace {
     else {
         n = global::navigationHandler->orbitalNavigator().anchorNode();
         if (!n) {
-            throw ghoul::lua::LuaError("No anchor node is set.");
+            throw ghoul::lua::LuaError("No anchor node is set");
         }
     }
 
@@ -292,7 +286,7 @@ namespace {
     else {
         n = global::navigationHandler->orbitalNavigator().anchorNode();
         if (!n) {
-            throw ghoul::lua::LuaError("No anchor node is set.");
+            throw ghoul::lua::LuaError("No anchor node is set");
         }
     }
 
@@ -313,7 +307,7 @@ namespace {
     const glm::dvec3 currentPosModelCoords =
         glm::inverse(gl->modelTransform()) * glm::dvec4(currentPosW, 1.0);
 
-    constexpr const double LengthEpsilon = 10.0; // meters
+    constexpr double LengthEpsilon = 10.0; // meters
     if (glm::distance(currentPosModelCoords, positionModelCoords) < LengthEpsilon) {
         LINFOC("GlobeBrowsing", "flyToGeo: Already at the requested position");
         return;
@@ -326,7 +320,7 @@ namespace {
     instruction.setValue("PathType", std::string("ZoomOutOverview"));
 
     if (duration.has_value()) {
-        constexpr const double Epsilon = 1e-5;
+        constexpr double Epsilon = 1e-5;
         if (*duration <= Epsilon) {
             throw ghoul::lua::LuaError("Duration must be larger than zero");
         }

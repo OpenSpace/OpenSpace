@@ -11,7 +11,7 @@ local layer = {
   Identifier = "Blue_Marble",
   Name = "Blue Marble",
   FilePath = texturesPath .. "earth_bluemarble.jpg",
-  Description = [[ Earth image from Blue Marble Next Generation ]],
+  Description = "Earth image from Blue Marble Next Generation",
 }
 
 
@@ -29,8 +29,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Blue Marble",
   Version = "1.1",
-  Description = [[ Fallback layer for earth image if no internet is available. Contains
-    Blue Marble Next Generation ]],
+  Description = [[Fallback layer for earth image if no internet is available. Contains
+    Blue Marble Next Generation]],
   Author = "OpenSpace Team",
   URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
   License = "NASA"

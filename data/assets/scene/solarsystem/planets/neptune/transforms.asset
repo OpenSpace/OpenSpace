@@ -15,7 +15,7 @@ local NeptuneBarycenter = {
     Name = "Neptune Barycenter",
     Path = "/Solar System/Planets/Neptune",
     Hidden = true,
-    Description = [[ Neptune Barycenter position]],
+    Description = "Neptune Barycenter position",
   }
 }
 
@@ -34,7 +34,7 @@ asset.export(NeptuneBarycenter)
 asset.meta = {
   Name = "Neptune Transforms",
   Version = "1.1",
-  Description = [[ Neptune Barycenter transform ]],
+  Description = "Neptune Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

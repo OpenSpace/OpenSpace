@@ -5,7 +5,7 @@ local layer = {
   Name = "Deimos Global Mosaic [USGS]",
   Enabled = true,
   FilePath = "WMS:https://wms.wr.usgs.gov/cgi-bin/mapserv?map=/maps/mars/deimos_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Deimos_Simple_Cylindrical_Rasters&SRS=EPSG:4326&BBOX=-180,-90,360,90",
-  Description = [[ This Viking-based cylindrical map of Deimos was created by Philip
+  Description = [[This Viking-based cylindrical map of Deimos was created by Philip
     Stooke with the assistance of Chris Jongkind and Megan Arntz. Control is based on a
     shape model and mosaic by Peter Thomas and colleagues at Cornell University. Date
     released 26 October 2001. (Description from URL)]]

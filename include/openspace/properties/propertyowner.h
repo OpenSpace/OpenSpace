@@ -52,7 +52,7 @@ class Property;
 class PropertyOwner : public DocumentationGenerator {
 public:
     /// The separator that is used while accessing the properties and/or sub-owners
-    static const char URISeparator = '.';
+    static constexpr char URISeparator = '.';
 
     struct PropertyOwnerInfo {
         std::string identifier;

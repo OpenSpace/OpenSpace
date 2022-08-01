@@ -49,7 +49,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Juice profile that visualizes the currently best known trajectory for the JUICE mission the Jupiter and its moons. See https://sci.esa.int/documents/33960/35865/1567260128466-JUICE_Red_Book_i1.0.pdf for more information about the JUICE mission. Currently, only the Janus and NavCam instruments are included in this profile, but the other instruments are available for a custom profile. Some of these are not behaving correctly, which will be addressed later.",
+    "description": "Juice profile that visualizes the currently best known trajectory for the JUICE mission the Jupiter and its moons. See https://sci.esa.int/documents/33960/35865/1567260128466-JUICE_Red_Book_i1.0.pdf for more information about the JUICE mission. Currently, only the Janus and NavCam instruments are included in this profile, but the other instruments are available for a custom profile. Some of these are not behaving correctly, which will be addressed later",
     "license": "MIT License",
     "name": "Juice",
     "url": "https://www.openspaceproject.com",

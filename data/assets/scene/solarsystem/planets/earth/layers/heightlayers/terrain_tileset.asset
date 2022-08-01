@@ -9,7 +9,7 @@ local layer = {
     per pixel resolution for the world. The elevation data includes 90m Shuttle Radar
     Topography Mission (SRTM) elevation data from NASA and National
     Geospatial-Intelligence Agency (NGA) where it is available and 1km GTOPO30
-    data from the USGS elsewhere. Vertical units are measured in meters.]],
+    data from the USGS elsewhere. Vertical units are measured in meters]],
 }
 
 asset.onInitialize(function()
@@ -27,7 +27,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "World Elevation (3D)",
   Version = "1.1",
-  Description = [[Main web loaded height layer for Earth. This layer is hosted by ESRI.]],
+  Description = "Main web loaded height layer for Earth. This layer is hosted by ESRI",
   Author = "ESRI",
   URL = "https://www.arcgis.com/home/item.html?id=1b48cd3b6276416784fe90a68c580a89",
   License = "Esri Master License Agreement"

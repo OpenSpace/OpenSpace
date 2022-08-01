@@ -26,7 +26,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Io Texutre",
   Version = "1.0",
-  Description = [[ Default jpg texture for Io]],
+  Description = "Default jpg texture for Io",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

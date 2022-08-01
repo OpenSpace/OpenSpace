@@ -51,7 +51,7 @@ local gaia_abundance_galah = {
   GUI = {
     Path = "/Milky Way/Gaia",
     Name = "Gaia Abundance Galah",
-    Description = "Data set of stars color coded by metallicity."
+    Description = "Data set of stars color coded by metallicity"
   }
 }
 
@@ -70,7 +70,7 @@ asset.export(gaia_abundance_galah)
 asset.meta = {
   Name = "Gaia Abundance Galah",
   Version = "1.0",
-  Description = [[This asset contains a RenderableStars dataset with metallicity data.]],
+  Description = "This asset contains a RenderableStars dataset with metallicity data",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT License"

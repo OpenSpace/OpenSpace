@@ -52,7 +52,7 @@ asset.meta = {
   Name = "Galaxy Group Labels",
   Version = "1.1",
   Author = "Brian Abbott (AMNH)",
-  Description = [[Digital Universe asset for Galaxy Groups]],
+  Description = "Digital Universe asset for Galaxy Groups",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

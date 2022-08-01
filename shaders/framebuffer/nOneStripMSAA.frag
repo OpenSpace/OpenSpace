@@ -33,7 +33,7 @@ uniform int currentSample;
 uniform sampler2DMS pixelSizeTexture;
 
 void main() {
-     finalColor = vec4(texelFetch(pixelSizeTexture, ivec2(vTexCoord), currentSample).rgb, 1.0);
-     //finalColor = vec4(0.5*vPosition.xy + 0.5, 1.0, 1.0);
-     //finalColor = vec4(vPosition.xy, 0.0, 1.0);
+  finalColor = vec4(texelFetch(pixelSizeTexture, ivec2(vTexCoord), currentSample).rgb, 1.0);
+  //finalColor = vec4(0.5*vPosition.xy + 0.5, 1.0, 1.0);
+  //finalColor = vec4(vPosition.xy, 0.0, 1.0);
 }

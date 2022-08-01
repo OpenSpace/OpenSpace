@@ -36,6 +36,7 @@ out vec4 colorMap;
 uniform dmat4 modelViewProjectionTransform;
 uniform float scaleFactor;
 
+
 void main() {
   vec4 positionClipSpace = vec4(modelViewProjectionTransform * in_position);
   vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));

@@ -11,7 +11,7 @@ end)
 asset.meta = {
   Name = "Default Charon Layers",
   Version = "1.0",
-  Description = [[ Default Charon layers are: Black & White USGS]],
+  Description = "Default Charon layers are: Black & White USGS",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

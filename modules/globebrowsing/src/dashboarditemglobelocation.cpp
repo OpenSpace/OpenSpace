@@ -42,20 +42,17 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
     constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
+        "internal name registered previously, or it can refer to a path that is used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "This value determines the size of the font that is used to render the date."
+        "This value determines the size of the font that is used to render the date"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
@@ -67,7 +64,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
         "Significant Digits",
-        "Determines the number of significant digits that are shown in the location text."
+        "Determines the number of significant digits that are shown in the location text"
     };
 
     struct [[codegen::Dictionary(DashboardItemGlobeLocation)]] Parameters {
@@ -100,11 +97,11 @@ documentation::Documentation DashboardItemGlobeLocation::Documentation() {
 DashboardItemGlobeLocation::DashboardItemGlobeLocation(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 10.f, 144.f, 1.f)
+    , _fontName(FontNameInfo, "Mono")
+    , _fontSize(FontSizeInfo, 10.f, 10.f, 144.f, 1.f)
     , _displayFormat(DisplayFormatInfo)
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
-    , _font(global::fontManager->font(KeyFontMono, 10))
+    , _font(global::fontManager->font("Mono", 10))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -181,7 +178,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     double lon = position.y;
     double altitude = position.z;
 
-    std::pair<double, std::string> dist = simplifyDistance(altitude);
+    std::pair<double, std::string_view> dist = simplifyDistance(altitude);
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     char* end = nullptr;

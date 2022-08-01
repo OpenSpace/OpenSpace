@@ -27,7 +27,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Ganymede Texutre",
   Version = "1.0",
-  Description = [[ Default jpg texture for Ganymede]],
+  Description = "Default jpg texture for Ganymede",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Earthquakes of the 20th Century"
 local Identifier = "noaa-sos-land-earthquakes_1901_2000"
-local Description = [[ This animation shows every recorded earthquake in sequence as they 
+local Description = [[This animation shows every recorded earthquake in sequence as they 
 occurred from January 1, 1901, through December 31, 2000, at a rate of 1 year per second. 
 The earthquake hypocenters first appear as flashes then remain as colored circles before 
 shrinking with time so as not to obscure subsequent earthquakes. The size of the circle 
@@ -14,7 +14,7 @@ earthquake size known to make a tsunami. It will then show only those earthquake
 magnitudes of 8.0 or larger, the "great" earthquakes most likely to pose a tsunami 
 threat when they occur under the ocean or near a coastline and when they are shallow 
 within the earth (less than 100 km or 60 mi. deep). The animation concludes by showing 
-the plate boundary faults responsible for the majority of all of these earthquakes.   ]]
+the plate boundary faults responsible for the majority of all of these earthquakes]]
 local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-of-the-20th-century/"
 
 
@@ -97,7 +97,7 @@ asset.export(layer_quakes_gte8)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

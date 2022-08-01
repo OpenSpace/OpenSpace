@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Buoy Locations (DART only)"
 local Identifier = "noaa-sos-oceans-dart_buoy"
-local Description = [[ After the horrific events of the Indian Ocean Tsunami on December 
+local Description = [[After the horrific events of the Indian Ocean Tsunami on December 
 26, 2004, the need for a tsunami warning system was apparent. As part of the U.S. 
 National Tsunami Hazard Mitigation Program (NTHMP), the Deep Ocean Assessment and 
 Reporting of Tsunamis (DART) Project is an ongoing effort to maintain and improve the 
@@ -11,7 +11,7 @@ capability for the early detection and real-time reporting of tsunamis in the op
 Developed by NOAA's Pacific Marine Environmental Laboratory (PMEL) and operated by NOAA's 
 National Data Buoy Center (NDBC), DART is essential to fulfilling NOAA's national 
 responsibility for tsunami hazard mitigation and warnings. When completed in mid2007, the 
-DART Project will consist of 32 DART buoys.   ]]
+DART Project will consist of 32 DART buoys]]
 local URL = "https://sos.noaa.gov/catalog/datasets/buoy-locations-dart-only/"
 
 
@@ -43,7 +43,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

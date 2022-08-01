@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Fisheries Catch Model - 2005 vs 2050"
 local Identifier = "noaa-sos-oceans-catch_model"
-local Description = [[ Climate change may pose a significant threat to fisheries 
+local Description = [[Climate change may pose a significant threat to fisheries 
 resources globally. This dataset shows percent change in global fisheries catch projected 
 to occur by 2050 due to climate change. Comparison is made with fisheries catch levels 
 reported in 2005. This study suggests that the distribution of major fish stocks will 
@@ -13,7 +13,7 @@ general pattern is a poleward shift in potential fisheries catches - that is fis
 distributions will shift to higher latitude areas (towards poles) and cooler waters as 
 ocean temperatures increase. The study also predicts species extinction to occur in areas 
 where species are most sensitive to temperature changes, resulting in reduced fisheries 
-catch in these areas.   ]]
+catch in these areas]]
 local URL = "https://sos.noaa.gov/catalog/datasets/fisheries-catch-model-2005-vs-2050/"
 
 
@@ -57,7 +57,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

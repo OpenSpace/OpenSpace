@@ -35,7 +35,7 @@
 #include <math.h>
 
 namespace {
-    constexpr const float KM_TO_M = 1000.f;
+    constexpr float KM_TO_M = 1000.f;
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
@@ -140,14 +140,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AtmosphereDimmingHeightInfo ={
         "AtmosphereDimmingHeight",
         "Atmosphere Dimming Height",
-        "Percentage of the atmosphere where other objects, such as the stars, are faded."
+        "Percentage of the atmosphere where other objects, such as the stars, are faded"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SunsetAngleInfo = {
         "AtmosphereDimmingSunsetAngle",
         "Atmosphere Dimming Sunset Angle",
         "The angle (degrees) between the Camera and the Sun where the sunset starts, and "
-        "the atmosphere starts to fade in objects such as the stars."
+        "the atmosphere starts to fade in objects such as the stars"
     };
 
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {

@@ -40,7 +40,7 @@ public:
     bool isDone() const override;
 
 private:
-    static const int UnsetOnChangeHandle = -1;
+    static constexpr int UnsetOnChangeHandle = -1;
 
     // Provides the mode int value in json message
     void sendJsonData();

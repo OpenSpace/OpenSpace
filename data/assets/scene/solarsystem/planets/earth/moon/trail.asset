@@ -39,8 +39,8 @@ asset.export(MoonTrail)
 asset.meta = {
   Name = "Moon Trail",
   Version = "1.1",
-  Description = [[ Moon Trail - This asset contains the trail of the Moon.
-    Data from NASA Spice (see base spice asset)]],
+  Description = [[Moon Trail - This asset contains the trail of the Moon. Data from NASA
+    Spice (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -31,7 +31,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Venus Texture",
   Version = "1.0",
-  Description = [[ This asset supplies a default texture for Venus.]],
+  Description = "This asset supplies a default texture for Venus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

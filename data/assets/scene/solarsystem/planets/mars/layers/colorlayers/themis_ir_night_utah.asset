@@ -15,7 +15,7 @@ local layer = {
     datasets: 1. Techniques and data processing for Thermal Emission Imaging System
     (THEMIS) multi-spectral data, J. Geophys. Res., 116, E10008,
     doi:10.1029/2010JE003755. http://dx.doi.org/10.1029/2010JE003755 (Description from
-    URL).]],
+    URL)]],
 }
 
 asset.onInitialize(function()
@@ -34,7 +34,7 @@ asset.meta = {
   Name = "Themis IR Night [Utah]",
   Version = "1.1",
   Description = [[Themis Night layer for Mars. This map is hosted on the OpenSpace
-    server in Utah.]],
+    server in Utah]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/Odyssey/THEMIS-IR-Mosaic-ASU/" ..
     "Mars_MO_THEMIS-IR-Night_mosaic_60N60S_100m_v14",

@@ -21,46 +21,26 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
+ 
 #version __CONTEXT__
 
-#include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform bool _exit_;
-out vec4 _out_color_;
+layout(location = 0) in vec3 vertPosition;
+
+out vec4 positionLocalSpace;
+out vec4 positionCameraSpace;
+
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
+
 
 void main() {
-    Fragment frag = getFragment();
+  positionLocalSpace = vec4(vertPosition, 1.0);
+  positionCameraSpace = modelViewTransform * positionLocalSpace;
 
-    int sampleMask = gl_SampleMaskIn[0];
-
-    if (frag.depth < 0) {
-    //        discard;
-        }
-
+  vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+  vec4 positionScreenSpace = z_normalization(positionClipSpace);
     
-    uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-    uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
-
-    ABufferFragment aBufferFrag;
-    _position_(aBufferFrag, frag.color.rgb);
-    _depth_(aBufferFrag, frag.depth);
-    _blend_(aBufferFrag, frag.blend);
-
-    int fragmentType = #{fragmentType};
-
-    if (_exit_) {
-        fragmentType *= -1;
-    }
-
-    _type_(aBufferFrag, fragmentType);
-    _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-    
-    _next_(aBufferFrag, prevHead);
-
-    storeFragment(newHead, aBufferFrag);
-    discard;
+  gl_Position = positionScreenSpace;
 }

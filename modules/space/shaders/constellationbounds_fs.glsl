@@ -29,6 +29,7 @@ in vec4 vs_position;
 
 uniform vec3 color;
 
+
 Fragment getFragment() {
   vec4 position = vs_position;
     

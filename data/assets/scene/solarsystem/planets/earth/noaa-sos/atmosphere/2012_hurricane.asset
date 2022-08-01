@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Season - 2012"
 local Identifier = "noaa-sos-atmosphere-2012_hurricane"
-local Description = [[ "It was an extremely devastating and destructive storm, hopefully 
+local Description = [["It was an extremely devastating and destructive storm, hopefully 
 one that people will only see once in their lifetime," National Weather Service 
 meteorologist, Joe Pollina, said of Hurricane Sandy. The 2012 Atlantic Hurricane season 
 was tied with 1887, 1995, 2010 and 2011 as the third most active year in recorded 
@@ -13,7 +13,7 @@ University fell short of the actual numbers despite raising their numbers after 
 active start to the season, which began on June 1st and ended on November 30th. The 
 Eastern Pacific season was moderately active. This dataset names all the Atlantic and 
 Pacific named tropical storms and hurricanes in 2012 from the Linear IR Satellite data 
-recorded by geostationary satellites.   ]]
+recorded by geostationary satellites]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-season-2012/"
 
 
@@ -80,7 +80,7 @@ asset.export(layer_sat)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

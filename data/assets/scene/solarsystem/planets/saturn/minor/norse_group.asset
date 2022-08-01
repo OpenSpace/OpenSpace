@@ -543,11 +543,11 @@ end
 asset.meta = {
   Name = "Saturn Norse Group Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Saturn's Norse Group
-    moons: Phoebe, Skathi, S2007S2, Skoll, S2004S13, Greip, Hyrrokkin, Jarnsaxa,
-    Mundilfari, S2006S1, S2004S17, Bergelmir, Narvi, Suttungr, Hati, S2004S12,
-    Farbauti, Thrymr, Aegir, S2007S3, Bestla, S2004S7, S2006S3, Fenrir, Kari, Ymir,
-    Loge, Fornjot. Blank globes and SPICE trails are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Saturn's Norse Group moons: Phoebe,
+    Skathi, S2007S2, Skoll, S2004S13, Greip, Hyrrokkin, Jarnsaxa, Mundilfari, S2006S1,
+    S2004S17, Bergelmir, Narvi, Suttungr, Hati, S2004S12, Farbauti, Thrymr, Aegir,
+    S2007S3, Bestla, S2004S7, S2006S3, Fenrir, Kari, Ymir, Loge, Fornjot. Blank globes and
+    SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

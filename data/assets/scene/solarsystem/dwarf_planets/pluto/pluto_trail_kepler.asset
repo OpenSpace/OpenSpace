@@ -29,7 +29,7 @@ local PlutoKeplerianTrail = {
   GUI = {
     Name = "Pluto Keplerian Trail",
     Path = "/Solar System/Dwarf Planets/Pluto",
-    Description = "Keplerian trail of Pluto. Contains full orbit."
+    Description = "Keplerian trail of Pluto. Contains full orbit"
   }
 }
 
@@ -48,8 +48,8 @@ asset.export(PlutoKeplerianTrail)
 asset.meta = {
   Name = "Pluto Keplerian Trail",
   Version = "1.0",
-  Description = [[ Full Keplerian trail of Pluto as observed by the Sun. Data from
-    JPL Horizons.]],
+  Description = [[Full Keplerian trail of Pluto as observed by the Sun. Data from
+    JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=pluto",
   License = "JPL/NASA"

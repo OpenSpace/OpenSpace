@@ -28,8 +28,8 @@ end)
 asset.meta = {
   Name = "SPICE Base",
   Version = "1.0",
-  Description = [[ This asset contains the spice base kernels. With positions
-    for Solar System bodies from 1850 to 2150]],
+  Description = [[This asset contains the spice base kernels. With positions for Solar
+    System bodies from 1850 to 2150]],
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/naif/data_generic.html",
   License = "NASA"

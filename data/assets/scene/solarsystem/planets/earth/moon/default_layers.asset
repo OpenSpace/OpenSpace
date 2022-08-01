@@ -29,7 +29,7 @@ end)
 asset.meta = {
   Name = "Default Moon layers",
   Version = "1.0",
-  Description = [[This asset adds the default layers to the Moon globe.]],
+  Description = "This asset adds the default layers to the Moon globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

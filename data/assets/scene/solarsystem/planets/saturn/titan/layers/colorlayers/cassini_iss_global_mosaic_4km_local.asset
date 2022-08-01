@@ -11,7 +11,7 @@ local layer = {
   Identifier = "Cassini_ISS_Global_Mosaic_4km_Local",
   Name = "Cassini ISS Global Mosaic 4km",
   FilePath = texturesPath .. "Titan_ISS_P19658_Mosaic_Global_4km_os.tif",
-  Description = [[ This global digital map of Saturn's moon Titan was created using
+  Description = [[This global digital map of Saturn's moon Titan was created using
     images taken by the Cassini spacecraft's Imaging Science Subsystem (ISS). The map
     was produced in June 2015 using data collected through Cassini's flyby on April 7,
     2014, known as "T100". The mean radius of Titan used for projection of this map is
@@ -36,7 +36,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Cassini ISS Global Mosaic",
   Version = "1.1",
-  Description = [[ Cassini global image layer for Titan]],
+  Description = "Cassini global image layer for Titan",
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Titan/Cassini/Global-Mosaic/" ..
     "Titan_ISS_P19658_Mosaic_Global_4km",

@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Carbon Monoxide - 2008 - 2011"
 local Identifier = "noaa-sos-atmosphere-co_gmd"
-local Description = [[ Carbon Monoxide (CO) is a colorless, odorless gas existing in the 
+local Description = [[Carbon Monoxide (CO) is a colorless, odorless gas existing in the 
 atmosphere at levels between 40 and 150 parts per billion (ppb). About 40% of that is 
 produced by burning (combustion) of fossil fuels (coal, oil and natural gas) and biomass 
 (for example, wood in forest fires). CO is the primary consumer of oxidant OH, the 
@@ -14,7 +14,7 @@ such as benzene, isoprene and halocarbons, which would otherwise give rise to sm
 reduce air quality. Therefore, an excess of atmospheric CO leads to a reduction of OH's 
 cleansing capacity. Another reason for measuring CO concentrations is that it is an 
 indicator of combustion, such as forest fires and urban emissions. A large forest fire or 
-emissions from heavy traffic can produce CO concentrations of 200 - 5000 ppb.   ]]
+emissions from heavy traffic can produce CO concentrations of 200 - 5000 ppb]]
 local URL = "https://sos.noaa.gov/catalog/datasets/carbon-monoxide-2008-2011/"
 
 
@@ -78,7 +78,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

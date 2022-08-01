@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Ice Animation - 2009"
 local Identifier = "noaa-sos-oceans-2009_ice_animation"
-local Description = [[ Sea ice is simply ocean water that has frozen. At least 15% of the 
+local Description = [[Sea ice is simply ocean water that has frozen. At least 15% of the 
 ocean is covered by sea ice some part of the year. This means that on average, sea ice 
 covers almost 10 million square miles (about 25 million square kilometers) of the Earth. 
 Sea ice concentrations are monitored closely by scientists because changing sea ice 
@@ -13,7 +13,7 @@ indicator of climate change. The Global Snow and Ice Cover Map that is used in t
 dataset is created from a combination of observations from NOAA Advanced Very High 
 Resolution Radiometer, Meteosat Second Generation Satellite Spectral Response 
 Characterisation, GOES Imager and Defense Meteorological Satellite Program Special Sensor 
-Microwave/Imager. The resolution is 2 km.   ]]
+Microwave/Imager. The resolution is 2 km]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-animation-2009/"
 
 
@@ -89,7 +89,7 @@ asset.export(colorbar_2009_iceconcentration)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

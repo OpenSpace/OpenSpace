@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Surface Temperature NOAA Model (black land)"
 local Identifier = "noaa-sos-oceans-gfdl_sst-black_background"
-local Description = [[ This dataset shows how the global ocean's surface water 
+local Description = [[This dataset shows how the global ocean's surface water 
 temperatures vary over the course of few years. In addition to seeing the effects of the 
 seasonal cycle, the viewer can see how surface ocean currents and eddies transport heat 
 and water around the globe. The images were generated not from observations, but from a 
 state-of-the-art computer model of Earth's climate created at NOAA's Geophysical Fluid 
-Dynamics Laboratory (GFDL).   ]]
+Dynamics Laboratory (GFDL)]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-temperature-noaa-model-black-land/"
 
 
@@ -68,7 +68,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

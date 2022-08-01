@@ -3,17 +3,17 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "International Space Station Track"
 local Identifier = "noaa-sos-atmosphere-iss_track"
-local Description = [[ The first piece of the International Space Station was sent into 
-orbit in 1998. Following two more pieces, astronauts first entered the space station in 
-November of 2000. Since then, the space station has been continuously inhabited by at 
-least 2 people. The station is currently designed to house 3 crew members. The 
-International Space Station is a cooperative space research facility being constructed 
-cooperatively by many nations. Several space organizations had planned their own space 
-stations and the groups decided to merge and work together. The original space station 
-was a combination of NASA's Space Station Freedom, Russia's Mir-2, and the European 
-Space Agency's Columbus. The project now involves NASA, the Russian Space agency, RKA; 
-the European Space Agency, ESA; the Japanese Space agency, JAXA; and the Canadian Space 
-agency, CSA.  ]]
+local Description = [[The first piece of the International Space Station was sent into 
+  orbit in 1998. Following two more pieces, astronauts first entered the space station in 
+  November of 2000. Since then, the space station has been continuously inhabited by at 
+  least 2 people. The station is currently designed to house 3 crew members. The 
+  International Space Station is a cooperative space research facility being constructed 
+  cooperatively by many nations. Several space organizations had planned their own space 
+  stations and the groups decided to merge and work together. The original space station 
+  was a combination of NASA's Space Station Freedom, Russia's Mir-2, and the European 
+  Space Agency's Columbus. The project now involves NASA, the Russian Space agency, RKA; 
+  the European Space Agency, ESA; the Japanese Space agency, JAXA; and the Canadian Space 
+  agency, CSA]]
 local URL = "https://sos.noaa.gov/catalog/datasets/international-space-station-track/"
 
 
@@ -45,7 +45,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

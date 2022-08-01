@@ -35,6 +35,7 @@ uniform float semiMajorAxis;
 
 const float Epsilon = 0.0000001;
 
+
 // Compute semi minor axis from major axis, a, and eccentricity, e
 float semiMinorAxis(float a, float e) {
   return a * sqrt(1.0 - e * e);
@@ -49,6 +50,7 @@ float ellipseTest(vec2 point, float a, float b, float cx) {
   float y = point.y;
   return (pow(x - cx, 2.0) / (a*a)) + ((y*y) / (b*b));
 }
+
 
 Fragment getFragment() {
   // Moving the origin to the center

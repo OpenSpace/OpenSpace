@@ -9,12 +9,13 @@ local layer = {
     Multiplier = 0.65
   },
   Description = [[The is a blend (or overlay) of the U.S. Geological Survey (USGS) 
-  Clementine Ultraviolet/Visible (UVVIS) V2 mosaic and the original USGS Lunar Orbiter 
-  mosaic. The Clementine 750 nm Version 2 mosaic is a grayscale data set representing the 
-  albedo (brightness of the lunar surface) as measured at the 750 nm wavelength by the 
-  UVVIS camera. The original base map was radiometrically and geometrically controlled, 
-  photometrically modeled global image mosaic compiled using more than 43,000 images 
-  from the 750 nanometer filter observations of the UVVIS (Lee et al., 2009).]]
+    Clementine Ultraviolet/Visible (UVVIS) V2 mosaic and the original USGS Lunar Orbiter 
+    mosaic. The Clementine 750 nm Version 2 mosaic is a grayscale data set representing
+    the albedo (brightness of the lunar surface) as measured at the 750 nm wavelength by
+    the UVVIS camera. The original base map was radiometrically and geometrically
+    controlled, photometrically modeled global image mosaic compiled using more than
+    43,000 images from the 750 nanometer filter observations of the UVVIS
+    (Lee et al., 2009)]]
 }
 
 asset.onInitialize(function()
@@ -33,8 +34,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Uvvis Hybrid [Sweden]",
   Version = "1.1",
-  Description = [[Moon Lunar Orbiter - Clementine UVVISv2 Hybrid Mosaic 59m v1
-  map of the Moon. This map is hosted on the OpenSpace server in Sweden.]],
+  Description = [[Moon Lunar Orbiter - Clementine UVVISv2 Hybrid Mosaic 59m v1 map of the
+    Moon. This map is hosted on the OpenSpace server in Sweden]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Moon/Lunar-Orbiter/Lunar_LO_UVVISv2_Hybrid_Mosaic_Global_59m",
   License = "NASA/PDS"

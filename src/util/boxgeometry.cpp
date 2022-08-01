@@ -28,7 +28,7 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "BoxGeometry";
+    constexpr std::string_view _loggerCat = "BoxGeometry";
 } // namespace
 
 namespace openspace {

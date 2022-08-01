@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Season - 2004"
 local Identifier = "noaa-sos-atmosphere-2004_ir_hurricane"
-local Description = [[ The 2004 hurricane season started on July 31 with Hurricane Alex 
+local Description = [[The 2004 hurricane season started on July 31 with Hurricane Alex 
 and continued all the way through to December 2 with Tropical Storm Otto. The season 
 featured 15 tropical storms, 9 of which became hurricanes, and 6 of those were classified 
 as major hurricanes. This over-active hurricane season tallied up a bill of $42 billion 
@@ -11,7 +11,7 @@ in damages, which at the time was record high. Florida took the brunt of the dam
 4 major hurricanes making landfall in the state. Two of the hurricanes, Frances and 
 Jeanne, landed in almost the same location on the east coast of Florida only 3 weeks 
 apart. It is estimated that one in every five homes in Florida was damaged in the 2004 
-hurricane season.   ]]
+hurricane season]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-season-2004/"
 
 
@@ -57,7 +57,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

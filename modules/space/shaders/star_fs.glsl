@@ -24,6 +24,22 @@
 
 #include "fragment.glsl"
 
+in vec3 vs_position;
+in vec2 texCoords;
+flat in float ge_bv;
+flat in vec3 ge_velocity;
+flat in float ge_speed;
+flat in float gs_screenSpaceDepth;
+
+uniform sampler1D colorTexture;
+uniform sampler2D psfTexture;
+uniform float alphaValue;
+uniform vec3 fixedColor;
+uniform int colorOption;
+uniform sampler1D otherDataTexture;
+uniform vec2 otherDataRange;
+uniform bool filterOutOfRange;
+
 // keep in sync with renderablestars.h:ColorOption enum
 const int ColorOptionColor = 0;
 const int ColorOptionVelocity = 1; 
@@ -31,24 +47,6 @@ const int ColorOptionSpeed = 2;
 const int ColorOptionOtherData = 3;
 const int ColorOptionFixedColor = 4;
 
-uniform sampler1D colorTexture;
-uniform sampler2D psfTexture;
-uniform float alphaValue;
-
-uniform vec3 fixedColor;
-
-uniform int colorOption;
-
-uniform sampler1D otherDataTexture;
-uniform vec2 otherDataRange;
-uniform bool filterOutOfRange;
-
-in vec3 vs_position;
-in vec2 texCoords;
-flat in float ge_bv;
-flat in vec3 ge_velocity;
-flat in float ge_speed;
-flat in float gs_screenSpaceDepth;
 
 vec4 bv2rgb(float bv) {
   // BV is [-0.4,2.0]
@@ -60,11 +58,13 @@ bool isOtherDataValueInRange() {
   float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
   return t >= 0.0 && t <= 1.0;
 }
+
 vec4 otherDataValue() {
   float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
   t = clamp(t, 0.0, 1.0);
   return texture(otherDataTexture, t);
 }
+
 
 Fragment getFragment() {
   vec4 color = vec4(0.0);

@@ -15,7 +15,7 @@ local SaturnBarycenter = {
     Name = "Saturn Barycenter",
     Path = "/Solar System/Planets/Saturn",
     Hidden = true,
-    Description = [[ Saturn Barycenter position]]
+    Description = "Saturn Barycenter position"
   }
 }
 
@@ -34,7 +34,7 @@ asset.export(SaturnBarycenter)
 asset.meta = {
   Name = "Saturn Transforms",
   Version = "1.1",
-  Description = [[ Saturn Barycenter transform]],
+  Description = "Saturn Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

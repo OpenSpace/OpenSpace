@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Lightning Detection - Jun 2011 - Aug 2012"
 local Identifier = "noaa-sos-atmosphere-ltg_vaisala"
-local Description = [[ The Global Lightning Dataset GLD360 network detects between 1 and 
+local Description = [[The Global Lightning Dataset GLD360 network detects between 1 and 
 3 million lightning events around the world every day of the year. Lightning activity is 
 not uniformly distributed across the globe. About ten times as many flashes occur over 
 land than over the oceans, and the majority of global lightning is concentrated in the 
@@ -14,7 +14,7 @@ patterns can be clearly seen in these images, which show the total number of eve
 detected in each month per square kilometer. The color scale ranges from less than .01 
 lightning pulses per square kilometer in the corresponding month to over 20 pulses per 
 square kilometer. Each color range corresponds to a factor of two of increase in the 
-number of events. This dataset runs from June 2011 through August 2012.   ]]
+number of events. This dataset runs from June 2011 through August 2012]]
 local URL = "c"
 
 
@@ -73,7 +73,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

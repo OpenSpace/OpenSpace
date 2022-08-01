@@ -32,7 +32,7 @@ local plane = {
   GUI = {
     Name = "Milky Way Arms Labels",
     Path = "/Universe/Galaxies",
-    Description = [[ Census: 1 image. DU Version:  1.2. This image contains labels for
+    Description = [[Census: 1 image. DU Version:  1.2. This image contains labels for
       the Milky Way's spiral arms. We label them in this manner ("hard coding" the
       labels into an image rather than having native labels) so that they can retain
       their size, shape, and location as they overlay the galaxy. (Description from
@@ -55,10 +55,10 @@ asset.export(plane)
 asset.meta = {
   Name = "Milky Way Arms Labels",
   Version = "1.1",
-  Description = [[ Image with arm labels for the Milky Way galaxy]],
+  Description = "Image with arm labels for the Milky Way galaxy",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = [[ Copyright &#169; American Museum of Natural History. All rights reserved.
+  License = [[Copyright &#169; American Museum of Natural History. All rights reserved.
     <br><br> Downloading the Atlas: AMNH offers the Atlas free of charge via our
     website, http://www.haydenplanetarium.org/. The User is free to download and/or
     duplicate verbatim copies of the Atlas provided this license and copyright

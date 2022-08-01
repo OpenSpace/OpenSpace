@@ -102,7 +102,7 @@ private:
 
     // Time variables
     // For capping the message passing to WWT
-    constexpr static const std::chrono::milliseconds TimeUpdateInterval =
+    static constexpr std::chrono::milliseconds TimeUpdateInterval =
         std::chrono::milliseconds(10);
     std::chrono::system_clock::time_point _lastUpdateTime;
 };

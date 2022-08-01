@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Plate Movement - 200 Million Years Ago to Today"
 local Identifier = "noaa-sos-land-plate_movement"
-local Description = [[ Our planet's surface has been shaped and re-shaped by plate 
+local Description = [[Our planet's surface has been shaped and re-shaped by plate 
 tectonics through cycles of supercontinent amalgamation and breakup. We can study the 
 motion of the tectonic plates, and the continents that they carry, by measuring the 
 magnetic signatures recorded in rocks that form the seafloor. As plates move apart at mid 
@@ -16,7 +16,7 @@ marine scientists use ocean-going scientific vessels to criss-cross the oceans i
 to reveal the entire "barcode" of seafloor spreading histories. This data enables the 
 creation of "plate tectonic reconstructions" where the seafloor spreading history can be 
 unwound to restore the past position of continents as they are pushed and pulled by the 
-motion of the oceanic plates.   ]]
+motion of the oceanic plates]]
 local URL = "https://sos.noaa.gov/catalog/datasets/plate-movement-200-million-years-ago-to-today/"
 
 
@@ -70,7 +70,7 @@ asset.export(age_scale)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

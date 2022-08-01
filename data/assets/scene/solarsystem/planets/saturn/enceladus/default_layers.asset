@@ -12,7 +12,7 @@ end)
 asset.meta = {
   Name = "Default Enceladus Layers",
   Version = "1.0",
-  Description = [[ Default Enceladus layers are: Enceladus Texture and Cassini Global
+  Description = [[Default Enceladus layers are: Enceladus Texture and Cassini Global
     Mosaic 100m HPF]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

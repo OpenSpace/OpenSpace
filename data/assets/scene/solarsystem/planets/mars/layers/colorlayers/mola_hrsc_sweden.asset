@@ -4,7 +4,7 @@ local layer = {
   Identifier = "MOLA_HRSC_Sweden",
   Name = "MOLA HRSC [Sweden]",
   FilePath = asset.localResource("mola_hrsc_sweden.wms"),
-  Description = [[ This map layer is colorzied based elevation data from MOLA and HRSC.
+  Description = [[This map layer is colorzied based elevation data from MOLA and HRSC.
     Compared to MOLA Psuedo Color, this layer has no terrain shading, which is
     suitable for use when combing with other layers. Data Reference:
     https://astrogeology.usgs.gov/search/map/Mars/Topography/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2]],
@@ -25,8 +25,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "MOLA HRSC [Sweden]",
   Version = "1.1",
-  Description = [[ Colorzied elevation data for Mars. This map is hosted on the
-    OpenSpace server in Sweden.]],
+  Description = [[Colorzied elevation data for Mars. This map is hosted on the OpenSpace
+    server in Sweden]],
   Author = "OpenSpace Team",
   URL = "http://www.openspaceproject.com",
   License = "NASA/PDS"

@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Turtle Track: Gulf of Mexico (94-7293)"
 local Identifier = "noaa-sos-oceans-mexico_turtles_947293"
-local Description = [[ Three Kemp's ridley sea turtles were captured near the Calcasieu 
+local Description = [[Three Kemp's ridley sea turtles were captured near the Calcasieu 
 Pass jetties at Cameron, Louisiana and tracked by National Oceanographic and Atmospheric 
 Administration's (NOAA) National Marine Fisheries Service Galveston Laboratory. Two adult 
 females (94-7293 and 94-7295) were captured on 11 August 1994 in a turtle entanglement 
@@ -11,7 +11,7 @@ net by Texas A&M University biologists. Turtle 94-7293's shell measured 65.6 cm 
 and 64.9 cm in width, and weighed 84.4 pounds (38.3 kg). Turtle 94-7295's shell measured 
 65.8 cm in length and 64.9 cm in width, and weighed 93.9 pounds (42.6 kg). Both were 
 fitted with Telonics ST-10 satellite transmitters and released within 2 days at the 
-capture site.   ]]
+capture site]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-turtle-track-gulf-of-mexico-94-7293/"
 
 
@@ -57,7 +57,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

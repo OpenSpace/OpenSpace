@@ -45,8 +45,6 @@
 #include <vector>
 
 namespace {
-    constexpr const char* ProgramName = "OrbitalKepler";
-
     constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
@@ -59,7 +57,7 @@ namespace {
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
         "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit."
+        "these automatically increase according to the eccentricity of the orbit"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -67,26 +65,26 @@ namespace {
         "Line Width",
         "This value specifies the line width of the trail if the selected rendering "
         "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
+        "ignored"
     };
     
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
+        "This value determines the RGB main color for the lines and points of the trail"
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade",
         "This value determines how fast the trail fades and is an appearance property. "
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
         "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored)."
+        "be ignored)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
@@ -210,10 +208,10 @@ void RenderableOrbitalKepler::initializeGL() {
     glGenBuffers(1, &_vertexBuffer);
 
     _programObject = SpaceModule::ProgramObjectManager.request(
-       ProgramName,
+        "OrbitalKepler",
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine->buildRenderProgram(
-               ProgramName,
+               "OrbitalKepler",
                absPath("${MODULE_SPACE}/shaders/debrisViz_vs.glsl"),
                absPath("${MODULE_SPACE}/shaders/debrisViz_fs.glsl")
            );
@@ -235,7 +233,7 @@ void RenderableOrbitalKepler::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArray);
 
     SpaceModule::ProgramObjectManager.release(
-        ProgramName,
+        "OrbitalKepler",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

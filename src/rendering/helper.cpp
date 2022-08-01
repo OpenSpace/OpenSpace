@@ -47,7 +47,7 @@ std::filesystem::path xyuvrgbaFragmentFile;
 std::filesystem::path screenFillingVertexFile;
 std::filesystem::path screenFillingFragmentFile;
 
-constexpr const char* XyuvrgbaVertexCode = R"(
+constexpr std::string_view XyuvrgbaVertexCode = R"(
 #version __CONTEXT__
 
 layout(location = 0) in vec2 in_position;
@@ -72,7 +72,7 @@ void main() {
 
 )";
 
-constexpr const char* ScreenFillingQuadVertexCode = R"(
+constexpr std::string_view ScreenFillingQuadVertexCode = R"(
 #version __CONTEXT__
 
 vec2 positions[6] = vec2[](
@@ -91,7 +91,7 @@ void main() {
 
 )";
 
-constexpr const char* XyuvrgbaFragmentCode = R"(
+constexpr std::string_view XyuvrgbaFragmentCode = R"(
 #version __CONTEXT__
 
 #include "fragment.glsl"

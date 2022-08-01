@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Level Trends - 1993 - 2012"
 local Identifier = "noaa-sos-oceans-sea_level_trends"
-local Description = [[ There are many questions surrounding climate change. One big 
+local Description = [[There are many questions surrounding climate change. One big 
 question is how the changing climate will affect the oceans. The sea level has been 
 steadily rising since 1900 at a rate of 1 to 2.5 millimeters per year. In fact, since 
 1992 new methods of satellite altimetry using the TOPEX/Poseidon satellite indicate a 
@@ -17,7 +17,7 @@ the oceans warm due to an increasing global temperature. The second mechanism is
 melting of ice over land, which then adds water to the ocean. The IPCC Fourth Assessment 
 Report predicts that total global-average sea level rise from 1990 - 2100 will be 7 - 15 
 inches (177 - 381 mm) for low emission scenarios and 10 - 23 inches (254 - 584 mm) for 
-high emission scenarios.   ]]
+high emission scenarios]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-level-trends-1993-2012/"
 
 
@@ -62,7 +62,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

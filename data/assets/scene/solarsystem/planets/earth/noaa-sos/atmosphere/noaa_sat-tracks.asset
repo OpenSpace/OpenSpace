@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Polar Orbiting: NOAA Satellite Tracks"
 local Identifier = "noaa-sos-atmosphere-noaa_sat-tracks"
-local Description = [[ NOAA has four POES, Polar Operational Environmental Satellites, 
+local Description = [[NOAA has four POES, Polar Operational Environmental Satellites, 
 currently in orbit. The satellites are named chronologically, based on launch date. NOAA 
 15 was launched in 1998, NOAA 16 was launched in 2000, NOAA 17 was launched in 2002 and 
 NOAA 18 was launched in 2005. In May and August of 2007 two older satellites, NOAA 14 and 
@@ -14,7 +14,7 @@ satellites to collect daily global data for land, ocean, and atmospheric applica
 This data is used a large variety of environmental monitoring applications such as 
 weather analysis and forecasting, climate research and prediction, global sea surface 
 temperature measurements, ocean dynamics research, global vegetation analysis and many 
-other applications.   ]]
+other applications]]
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-noaa-satellite-tracks/"
 
 
@@ -46,7 +46,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

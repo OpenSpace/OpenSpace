@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Turtle Track: Atlantic Ocean"
 local Identifier = "noaa-sos-oceans-atl_turtle"
-local Description = [[ The Virginia Institute of Marine Science found a sub-adult 
+local Description = [[The Virginia Institute of Marine Science found a sub-adult 
 juvenile loggerhead (Caretta caretta) sea turtle stranded off of Deltaville, Virginia 
 along the western Chesapeake Bay in July 2004. The sea turtle, appropriately named Delta 
 for the location where s/he was found stranded, had a broken left flipper and a severe 
@@ -12,7 +12,7 @@ the Virginia Aquarium Stranding Program for rehabilitation. After many months of
 and head surgery, Delta was ready for release in November of 2004. Before release, Delta 
 was outfitted with a satellite tag by Kate Mansfield, then a Ph.D. student at the 
   Virginia Institute of Marine Science (College of William and Mary). This was done in 
-  order to track Delta's movements and determine the success of the recovery.   ]]
+  order to track Delta's movements and determine the success of the recovery]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-turtle-track-atlantic-ocean/"
 
 
@@ -58,7 +58,7 @@ asset.export(layer)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

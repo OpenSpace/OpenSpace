@@ -90,7 +90,7 @@ asset.export("setCefRoute", setCefRoute)
 asset.meta = {
   Name = "WebGUI",
   Version = "0.1",
-  Description = [[ insert CEF rant ]],
+  Description = "insert CEF rant",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

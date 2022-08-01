@@ -40,38 +40,38 @@
 #include <optional>
 
 namespace {
-    constexpr const std::array<const char*, 6> UniformNames = {
+    constexpr std::array<const char*, 6> UniformNames = {
         "modelViewProjectionTransform", "offset", "opacity",
         "discTexture", "eccentricity", "semiMajorAxis"
     };
 
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for the color."
+        "texture which is used for the color"
     };
 
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the semi-major axis of the orbit, in meter."
+        "This value specifies the semi-major axis of the orbit, in meter"
     };
 
-    static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
-        "sphere, for this orbit."
+        "sphere, for this orbit"
     };
 
-    static const openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This property determines the width of the disc. The values specify the lower "
         "and upper deviation from the semi major axis, respectively. The values are "
         "relative to the size of the semi-major axis. That is, 0 means no deviation "
-        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation."
+        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation"
     };
 
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {

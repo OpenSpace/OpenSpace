@@ -89,44 +89,43 @@
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
-    constexpr const char _loggerCat[] = "GlobeBrowsingModule";
-    constexpr const char _factoryName[] = "TileProvider";
+    constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
         "WMSCacheEnabled",
         "WMS Cache Enabled",
         "Determines whether automatic caching of WMS servers is enabled. Changing the "
-        "value of this property will not affect already created WMS datasets."
+        "value of this property will not affect already created WMS datasets"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo OfflineModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OfflineModeInfo = {
         "OfflineMode",
         "Offline Mode",
         "Determines whether loaded WMS servers should be used in offline mode, that is "
         "not even try to retrieve images through an internet connection. Please note "
         "that this setting is only reasonable, if the caching is enabled and there is "
         "available cached data. Changing the value of this property will not affect "
-        "already created WMS datasets."
+        "already created WMS datasets"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
         "WMSCacheLocation",
         "WMS Cache Location",
         "The location of the cache folder for WMS servers. Changing the value of this "
-        "property will not affect already created WMS datasets."
+        "property will not affect already created WMS datasets"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
         "WMSCacheSize",
         "WMS Cache Size",
         "The maximum size of the cache for each WMS server. Changing the value of this "
-        "property will not affect already created WMS datasets."
+        "property will not affect already created WMS datasets"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile Cache Size",
-        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU."
+        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU"
     };
 
 
@@ -244,7 +243,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
             "WMS caching is disabled, but offline mode is enabled. Unless you know "
             "what you are doing, this will probably cause many servers to stop working. "
             "If you want to silence this warning, set the 'NoWarning' parameter to "
-            "'true'."
+            "'true'"
         );
     }
 
@@ -301,42 +300,22 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fRotation, "Rotation factory was not created");
     fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
 
-    FactoryManager::ref().addFactory<TileProvider>(_factoryName);
+    FactoryManager::ref().addFactory<TileProvider>("TileProvider");
 
     ghoul::TemplateFactory<TileProvider>* fTileProvider =
         FactoryManager::ref().factory<TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
-    {
-        using namespace layergroupid;
-        fTileProvider->registerClass<DefaultTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::DefaultTileLayer)]
-        );
-        fTileProvider->registerClass<SingleImageProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SingleImageTileLayer)]
-        );
-        fTileProvider->registerClass<ImageSequenceTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ImageSequenceTileLayer)]
-        );
-        fTileProvider->registerClass<SpoutImageProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SpoutImageTileLayer)]
-        );
-        fTileProvider->registerClass<TemporalTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::TemporalTileLayer)]
-        );
-        fTileProvider->registerClass<TileIndexTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::TileIndexTileLayer)]
-        );
-        fTileProvider->registerClass<SizeReferenceTileProvider>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::SizeReferenceTileLayer)]
-        );
-        fTileProvider->registerClass<TileProviderByLevel>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByLevelTileLayer)]
-        );
-        fTileProvider->registerClass<TileProviderByIndex>(
-            LAYER_TYPE_NAMES[static_cast<int>(TypeID::ByIndexTileLayer)]
-        );
-    }
+
+    fTileProvider->registerClass<DefaultTileProvider>("DefaultTileLayer");
+    fTileProvider->registerClass<SingleImageProvider>("SingleImageTileLayer");
+    fTileProvider->registerClass<ImageSequenceTileProvider>("ImageSequenceTileLayer");
+    fTileProvider->registerClass<SpoutImageProvider>("SpoutImageTileLayer");
+    fTileProvider->registerClass<TemporalTileProvider>("TemporalTileLayer");
+    fTileProvider->registerClass<TileIndexTileProvider>("TileIndexTileLayer");
+    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileLayer");
+    fTileProvider->registerClass<TileProviderByLevel>("ByLevelTileLayer");
+    fTileProvider->registerClass<TileProviderByIndex>("ByIndexTileLayer");
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
@@ -481,9 +460,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
-        LERROR(
-            "Cannot go to chunk. The renderable is not attached to a scene graph node."
-        );
+        LERROR("Cannot go to chunk. The renderable is not attached to scene graph node");
         return;
     }
     const glm::dmat4 inverseModelTransform = glm::inverse(
@@ -598,32 +575,6 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
     }
 }
 
-std::string GlobeBrowsingModule::layerGroupNamesList() {
-    std::string listLayerGroups;
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
-        listLayerGroups += globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i] +
-                           std::string(", ");
-    }
-    listLayerGroups += std::string(" and ") +
-        globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[
-            globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1
-        ];
-    return listLayerGroups;
-}
-
-std::string GlobeBrowsingModule::layerTypeNamesList() {
-    std::string listLayerTypes;
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
-        listLayerTypes += std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) +
-                          ", ";
-    }
-    listLayerTypes += std::string(" and ") +
-        globebrowsing::layergroupid::LAYER_TYPE_NAMES[
-            globebrowsing::layergroupid::NUM_LAYER_TYPES - 1
-        ];
-    return listLayerTypes;
-}
-
 void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,
                                               std::string url)
 {
@@ -695,7 +646,7 @@ void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
     }
 
     // Then remove the calues from the globe server list
-    for (auto it = _urlList.begin(); it != _urlList.end(); ) {
+    for (auto it = _urlList.begin(); it != _urlList.end();) {
         // We have to increment first because the erase will invalidate the iterator
         const auto eraseIt = it++;
 
@@ -738,8 +689,6 @@ uint64_t GlobeBrowsingModule::wmsCacheSize() const {
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
-    std::string listLayerGroups = layerGroupNamesList();
-
     scripting::LuaLibrary res;
     res.name = "globebrowsing";
     res.functions = {

@@ -34,41 +34,31 @@
 #include <openspace/scene/scenelicensewriter.h>
 #include <ghoul/logging/logmanager.h>
 
-
 using nlohmann::json;
-
-namespace {
-    constexpr const char* KeyType = "type";
-    constexpr const char* TypeLua = "lua";
-    constexpr const char* TypeFactories = "factories";
-    constexpr const char* TypeKeyboard = "keyboard";
-    constexpr const char* TypeAsset = "asset";
-    constexpr const char* TypeMeta= "meta";
-} // namespace
 
 namespace openspace {
 
 void DocumentationTopic::handleJson(const nlohmann::json& json) {
-    std::string requestedType = json.at(KeyType).get<std::string>();
+    std::string requestedType = json.at("type").get<std::string>();
 
     nlohmann::json response;
 
     // @emiax: Proposed future refector.
     // Do not parse generated json. Instead implement ability to get
     // ghoul::Dictionary objects from ScriptEngine, FactoryManager, and KeybindingManager.
-    if (requestedType == TypeLua) {
+    if (requestedType == "lua") {
         response = json::parse(global::scriptEngine->generateJson());
     }
-    else if (requestedType == TypeFactories) {
+    else if (requestedType == "factories") {
         response = json::parse(FactoryManager::ref().generateJson());
     }
-    else if (requestedType == TypeKeyboard) {
+    else if (requestedType == "keyboard") {
         response = json::parse(global::keybindingManager->generateJson());
     }
-    else if (requestedType == TypeAsset) {
+    else if (requestedType == "asset") {
         response = json::parse(global::keybindingManager->generateJson());
     }
-    else if (requestedType == TypeMeta) {
+    else if (requestedType == "meta") {
         std::string docs = SceneLicenseWriter().generateJson();
         nlohmann::json parsedDocs = json::parse(docs);
         response = parsedDocs;

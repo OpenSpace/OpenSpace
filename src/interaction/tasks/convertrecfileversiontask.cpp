@@ -34,9 +34,9 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ConvertRecFileVersionTask";
+    constexpr std::string_view _loggerCat = "ConvertRecFileVersionTask";
 
-    constexpr const char* KeyInFilePath = "InputFilePath";
+    constexpr std::string_view KeyInFilePath = "InputFilePath";
 } // namespace
 
 namespace openspace::interaction {
@@ -53,7 +53,7 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
     _inFilePath = absPath(_inFilename);
 
     std::string::size_type idx = _inFilename.find_last_of('/');
-    if( idx != std::string::npos ) {
+    if (idx != std::string::npos) {
         _inFilename = _inFilename.substr(idx + 1);
     }
 
@@ -95,9 +95,8 @@ void ConvertRecFileVersionTask::convert() {
     );
     if (!hasBinaryFileExtension && !hasAsciiFileExtension) {
         LERROR(fmt::format(
-            "Input filename does not have expected {} or {} extension.",
-            SessionRecording::FileExtensionBinary,
-            SessionRecording::FileExtensionAscii
+            "Input filename does not have expected {} or {} extension",
+            SessionRecording::FileExtensionBinary, SessionRecording::FileExtensionAscii
         ));
         return;
     }
@@ -111,10 +110,10 @@ documentation::Documentation ConvertRecFileVersionTask::documentation() {
         "convert_file_version_task",
         {
             {
-                KeyInFilePath,
+                "InputFilePath",
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,
-                "The filename to update to the current file format.",
+                "The filename to update to the current file format",
             },
         },
     };

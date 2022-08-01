@@ -21,8 +21,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Messenger HIW [Sweden]",
   Version = "1.0",
-  Description = [[ Messenger HIW layer for Mercury globe. 
-  This map is hosted on the OpenSpace server in Sweden.]],
+  Description = [[Messenger HIW layer for Mercury globe. This map is hosted on the
+    OpenSpace server in Sweden]],
   Author = "USGS",
   URL = "",
   License = "NASA/PDS"

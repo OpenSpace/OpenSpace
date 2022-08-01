@@ -43,10 +43,10 @@
 #include <glm/ext/quaternion_relational.hpp>
 
 namespace {
-    constexpr const char _loggerCat[] = "Path";
-    constexpr const float LengthEpsilon = 1e-5f;
+    constexpr std::string_view _loggerCat = "Path";
+    constexpr float LengthEpsilon = 1e-5f;
 
-    constexpr const char SunIdentifier[] = "Sun";
+    constexpr const char* SunIdentifier = "Sun";
 
     // TODO: where should this documentation be?
     // It's nice to have these to interpret the dictionary when creating the path, but
@@ -115,7 +115,7 @@ Path::Path(Waypoint start, Waypoint end, Type type,
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
         default:
-            LERROR("Could not create curve. Type does not exist!");
+            LERROR("Could not create curve. Type does not exist");
             throw ghoul::MissingCaseException();
     }
 
@@ -125,7 +125,7 @@ Path::Path(Waypoint start, Waypoint end, Type type,
     // computing how much faster/slower it should be
     _speedFactorFromDuration = 1.0;
     if (duration.has_value()) {
-        constexpr const double dt = 0.05; // 20 fps
+        constexpr double dt = 0.05; // 20 fps
         while (!hasReachedEnd()) {
             traversePath(dt);
         }
@@ -190,7 +190,7 @@ bool Path::hasReachedEnd() const {
 
     bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
 
-    constexpr const double RotationEpsilon = 0.0001;
+    constexpr double RotationEpsilon = 0.0001;
     bool isRotationFinished = ghoul::isSameOrientation(
         _prevPose.rotation,
         _end.rotation(),
@@ -378,7 +378,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     const double speed = distanceToClosestNode;
 
     // Dampen at the start and end
-    constexpr const double DampenDistanceFactor = 3.0;
+    constexpr double DampenDistanceFactor = 3.0;
     double startUpDistance = DampenDistanceFactor * _start.validBoundingSphere();
     double closeUpDistance = DampenDistanceFactor * _end.validBoundingSphere();
 
@@ -387,7 +387,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     // based on the order of magnitude of the solar system, which ofc is very specific to
     // our space content...
     // @TODO (2022-03-22, emmbr) Come up with a better more general solution
-    constexpr const double MaxDistance = 1E12;
+    constexpr double MaxDistance = 1E12;
     startUpDistance = glm::min(MaxDistance, startUpDistance);
     closeUpDistance = glm::min(MaxDistance, closeUpDistance);
 
@@ -450,7 +450,7 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
             continue;
         }
 
-        constexpr const float proximityRadiusFactor = 3.f;
+        constexpr float proximityRadiusFactor = 3.f;
 
         const float bs = static_cast<float>(n->boundingSphere());
         const float proximityRadius = proximityRadiusFactor * bs;
@@ -515,8 +515,8 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
             return glm::dvec3(0.0, 0.0, 1.0);
         }
 
-        constexpr const float defaultPositionOffsetAngle = -30.f; // degrees
-        constexpr const float angle = glm::radians(defaultPositionOffsetAngle);
+        constexpr float defaultPositionOffsetAngle = -30.f; // degrees
+        constexpr float angle = glm::radians(defaultPositionOffsetAngle);
         const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
         const glm::dquat offsetRotation = angleAxis(static_cast<double>(angle), axis);
 
@@ -689,9 +689,8 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             waypoints = { computeWaypointFromNodeInfo(info, startPoint, type) };
             break;
         }
-        default: {
+        default:
             throw ghoul::MissingCaseException();
-        }
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints
@@ -699,7 +698,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
     if (glm::distance(startPoint.position(), waypointToAdd.position()) < LengthEpsilon) {
         LINFO("Already at the requested target");
-        throw PathCurve::TooShortPathError("Path too short!");
+        throw PathCurve::TooShortPathError("Path too short");
     }
 
     checkVisibilityAndShowMessage(waypointToAdd.node());
@@ -719,7 +718,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
         LINFO(
             "Switching to a linear path, to avoid problems with precision due to "
-            "immense path length."
+            "immense path length"
         );
 
         return createPathFromDictionary(dictionary, Path::Type::Linear);

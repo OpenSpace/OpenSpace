@@ -47,7 +47,7 @@ namespace {
         "File",
         "Vertex File Path",
         "The file pointed to with this value contains the vertex locations of the "
-        "constellations."
+        "constellations"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ConstellationInfo = {
@@ -55,14 +55,14 @@ namespace {
         "Constellation File Path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full name of the constellation. If this value is empty, the "
-        "abbreviations are used as the full names."
+        "abbreviations are used as the full names"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color of constellation lines",
         "Specifies the color of the constellation lines. The lines are always drawn at "
-        "full opacity."
+        "full opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -74,7 +74,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
-        "The constellations that are selected are displayed on the celestial sphere."
+        "The constellations that are selected are displayed on the celestial sphere"
     };
 
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {

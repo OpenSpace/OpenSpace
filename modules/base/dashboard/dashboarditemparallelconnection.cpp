@@ -63,8 +63,8 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
     int nClients = static_cast<int>(nConnections);
     if (status == ParallelConnection::Status::Host) {
         nClients--;
-        constexpr const char* Singular = "Hosting session with {} client";
-        constexpr const char* Plural = "Hosting session with {} clients";
+        constexpr std::string_view Singular = "Hosting session with {} client";
+        constexpr std::string_view Plural = "Hosting session with {} clients";
 
         connectionInfo =
             (nClients == 1) ?
@@ -85,11 +85,11 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
         connectionInfo += "\n";
 
         if (nClients > 2) {
-            constexpr const char* Plural = "You and {} more clients are tuned in";
+            constexpr std::string_view Plural = "You and {} more clients are tuned in";
             connectionInfo += fmt::format(Plural, nClients - 1);
         }
         else if (nClients == 2) {
-            constexpr const char* Singular = "You and {} more client are tuned in";
+            constexpr std::string_view Singular = "You and {} more client are tuned in";
             connectionInfo += fmt::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {
@@ -136,11 +136,11 @@ glm::vec2 DashboardItemParallelConnection::size() const {
     {
         connectionInfo += "\n";
         if (nClients > 2) {
-            constexpr const char* Plural = "You and {} more clients are tuned in";
+            constexpr std::string_view Plural = "You and {} more clients are tuned in";
             connectionInfo += fmt::format(Plural, nClients);
         }
         else if (nClients == 2) {
-            constexpr const char* Singular = "You and {} more client are tuned in";
+            constexpr std::string_view Singular = "You and {} more client are tuned in";
             connectionInfo += fmt::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {

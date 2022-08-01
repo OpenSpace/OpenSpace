@@ -69,12 +69,12 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    layergroupid::TypeID typeID = layergroupid::TypeID::DefaultTileLayer;
+    layers::Layer::ID typeID = layers::Layer::ID::DefaultTileLayer;
     if (p.defaultProvider.hasValue<std::string>("Type")) {
         std::string type = p.defaultProvider.value<std::string>("Type");
-        typeID = ghoul::from_string<layergroupid::TypeID>(type);
+        typeID = ghoul::from_string<layers::Layer::ID>(type);
 
-        if (typeID == layergroupid::TypeID::Unknown) {
+        if (typeID == layers::Layer::ID::Unknown) {
             throw ghoul::RuntimeError("Unknown layer type: " + type);
         }
     }
@@ -88,18 +88,18 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             static_cast<uint8_t>(ip.tileIndex.level)
         );
 
-        layergroupid::TypeID providerTypeID = layergroupid::TypeID::DefaultTileLayer;
+        layers::Layer::ID providerID = layers::Layer::ID::DefaultTileLayer;
         if (ip.tileProvider.hasValue<std::string>("Type")) {
             std::string type = ip.tileProvider.value<std::string>("Type");
-            providerTypeID = ghoul::from_string<layergroupid::TypeID>(type);
+            providerID = ghoul::from_string<layers::Layer::ID>(type);
 
-            if (providerTypeID == layergroupid::TypeID::Unknown) {
+            if (providerID == layers::Layer::ID::Unknown) {
                 throw ghoul::RuntimeError("Unknown layer type: " + type);
             }
         }
 
         std::unique_ptr<TileProvider> stp = createFromDictionary(
-            providerTypeID,
+            providerID,
             ip.tileProvider
         );
         TileIndex::TileHashKey key = tileIndex.hashKey();

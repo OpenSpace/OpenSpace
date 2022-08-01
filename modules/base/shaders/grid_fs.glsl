@@ -30,15 +30,16 @@ in vec4 vs_positionViewSpace;
 uniform vec3 gridColor;
 uniform float opacity;
 
+
 Fragment getFragment() {
-    Fragment frag;
-    frag.color.rgb = gridColor;
-    frag.color.a = opacity;
-    frag.depth = vs_depthClipSpace;
-    frag.gPosition = vs_positionViewSpace;
+  Fragment frag;
+  frag.color.rgb = gridColor;
+  frag.color.a = opacity;
+  frag.depth = vs_depthClipSpace;
+  frag.gPosition = vs_positionViewSpace;
 
-    // There is no normal here
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+  // There is no normal here
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
-    return frag;
+  return frag;
 }
