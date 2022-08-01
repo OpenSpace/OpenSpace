@@ -27,6 +27,7 @@
 
 #include <ghoul/lua/luastate.h>
 #include <filesystem>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 
