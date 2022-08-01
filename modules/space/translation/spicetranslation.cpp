@@ -35,6 +35,7 @@
 #include <ghoul/misc/profiling.h>
 #include <filesystem>
 #include <optional>
+#include <variant>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
@@ -69,12 +70,10 @@ namespace {
 
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
-        std::string target
-            [[codegen::annotation("A valid SPICE NAIF name or identifier")]];
+        std::variant<std::string, int> target;
 
         // [[codegen::verbatim(ObserverInfo.description)]]
-        std::string observer
-            [[codegen::annotation("A valid SPICE NAIF name or identifier")]];
+        std::variant<std::string, int> observer;
 
         std::optional<std::string> frame
             [[codegen::annotation("A valid SPICE NAIF name for a reference frame")]];
@@ -162,8 +161,20 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
-    _target = p.target;
-    _observer = p.observer;
+    if (std::holds_alternative<std::string>(p.target)) {
+        _target = std::get<std::string>(p.target);
+    }
+    else {
+        _target = std::to_string(std::get<int>(p.target));
+    }
+
+    if (std::holds_alternative<std::string>(p.observer)) {
+        _observer = std::get<std::string>(p.observer);
+    }
+    else {
+        _observer = std::to_string(std::get<int>(p.observer));
+    }
+
     _frame = p.frame.value_or(_frame);
 }
 

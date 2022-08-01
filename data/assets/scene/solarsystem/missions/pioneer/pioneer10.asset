@@ -11,7 +11,7 @@ local kernelsFolder = asset.syncedResource({
 
 local kernelsList = { kernelsFolder .. "p10-a.bsp" }
 
-local Pioneer10NAIF = "-23"
+local Pioneer10NAIF = -23
 
 local Pioneer10 = {
   Identifier = "Pioneer_10",

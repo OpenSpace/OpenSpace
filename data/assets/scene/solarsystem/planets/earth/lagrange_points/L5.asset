@@ -21,7 +21,7 @@ local L5Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "395", -- L5
+      Target = 395, -- L5
       Observer = "SSB",
       Kernels = kernels .. "L5_de431.bsp"
     }

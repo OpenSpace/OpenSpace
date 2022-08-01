@@ -23,8 +23,8 @@ local lem_model = asset.syncedResource({
 
 
 --landing - 1969-07-20T20:17:40
-local apolloSpiceId = "-911"
-local apolloLemSpiceId = "-911500"
+local apolloSpiceId = -911
+local apolloLemSpiceId = -911500
 
 local Apollo11Position = {
   Identifier = "Apollo11Position",

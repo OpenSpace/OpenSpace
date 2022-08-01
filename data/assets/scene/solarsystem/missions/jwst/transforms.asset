@@ -23,22 +23,22 @@ local JWSTPosition = {
       Keyframes = {
         [launchTime] = {
           Type = 'SpiceTranslation',
-          Target = '170', -- JWST
+          Target = 170, -- JWST
           Observer = 'EARTH',
           Frame = 'IAU_EARTH',
           Kernels = { kernels .. "webb.bsp" }
         },
         [detachTime] = {
           Type = 'SpiceTranslation',
-          Target = '170', -- JWST
+          Target = 170, -- JWST
           Observer = 'EARTH',
           Frame = 'GALACTIC',
           Kernels = { kernels .. "webb.bsp" }
         },
         [L2orbitInsertionTime] = {
           Type = 'SpiceTranslation',
-          Target = '170', -- JWST
-          Observer = '392', -- L2
+          Target = 170, -- JWST
+          Observer = 392, -- L2
           Frame = 'GALACTIC',
           Kernels = { kernels .. "webb.bsp" }
         }
