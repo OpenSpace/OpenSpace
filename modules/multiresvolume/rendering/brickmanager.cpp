@@ -98,7 +98,7 @@ bool BrickManager::readHeader() {
 
 
     if (fileSize != calcFileSize) {
-        LERROR("Sizes don't match");
+        LERROR("Sizes do not match");
         LERROR(fmt::format("Calculated file size: {}", calcFileSize));
         LERROR(fmt::format("File size: {}", fileSize));
         return false;

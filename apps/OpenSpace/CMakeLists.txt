@@ -111,6 +111,7 @@ begin_header("Dependency: SGCT")
 set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_link_libraries(OpenSpace PRIVATE sgct)
