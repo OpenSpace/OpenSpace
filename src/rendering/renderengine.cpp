@@ -131,6 +131,12 @@ namespace {
         "interface"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
+        "ShowStatistics",
+        "Show Statistics",
+        "Show updating, rendering, and network statistics on all rendering nodes"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
         "ScreenshotUseDate",
         "Screenshot Folder uses Date",
@@ -271,6 +277,7 @@ RenderEngine::RenderEngine()
     , _showCameraInfo(ShowCameraInfo, true)
     , _screenshotWindowIds(ScreenshotWindowIdsInfo)
     , _applyWarping(ApplyWarpingInfo, false)
+    , _showStatistics(ShowStatisticsInfo, false)
     , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
@@ -337,6 +344,11 @@ RenderEngine::RenderEngine()
     addProperty(_globalBlackOutFactor);
     addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
+
+    _showStatistics.onChange([this]() {
+        global::windowDelegate->showStatistics(_showStatistics);
+    });
+    addProperty(_showStatistics);
 
     _screenshotUseDate.onChange([this]() {
         // If there is no screenshot folder, don't bother with handling the change

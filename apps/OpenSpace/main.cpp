@@ -942,6 +942,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setScreenshotFolder = [](std::string path) {
         Settings::instance().setCapturePath(std::move(path));
     };
+    sgctDelegate.showStatistics = [](bool enabled) {
+        Engine::instance().setStatsGraphVisibility(enabled);
+    };
 }
 
 void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
