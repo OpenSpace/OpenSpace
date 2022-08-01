@@ -282,47 +282,54 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (!_disableFadeInDistance) {
         if (_fadeInThreshold > -1.0) {
-            const float logDistCamera = glm::log(static_cast<float>(
-                glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
-                ));
+            const double d = glm::distance(
+                data.camera.positionVec3(),
+                data.modelTransform.translation
+            );
+            const float logDist =
+                d > 0.0 ?
+                std::log(static_cast<float>(d)) :
+                -std::numeric_limits<float>::max();
+
             const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-            if (logDistCamera > startLogFadeDistance && logDistCamera <
-                stopLogFadeDistance)
-            {
+            if (logDist > startLogFadeDistance && logDist < stopLogFadeDistance) {
                 const float fadeFactor = glm::clamp(
-                    (logDistCamera - startLogFadeDistance) /
+                    (logDist - startLogFadeDistance) /
                     (stopLogFadeDistance - startLogFadeDistance),
                     0.f,
                     1.f
                 );
                 adjustedOpacity *= fadeFactor;
             }
-            else if (logDistCamera <= startLogFadeDistance) {
+            else if (logDist <= startLogFadeDistance) {
                 adjustedOpacity = 0.f;
             }
         }
 
         if (_fadeOutThreshold > -1.0) {
-            const float logDistCamera = glm::log(static_cast<float>(
-                glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
-                ));
+            const double d = glm::distance(
+                data.camera.positionVec3(),
+                data.modelTransform.translation
+            );
+            const float logDist =
+                d > 0.0 ?
+                std::log(static_cast<float>(d)) :
+                -std::numeric_limits<float>::max();
             const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-            if (logDistCamera > startLogFadeDistance && logDistCamera <
-                stopLogFadeDistance)
-            {
+            if (logDist > startLogFadeDistance && logDist < stopLogFadeDistance) {
                 const float fadeFactor = glm::clamp(
-                    (logDistCamera - startLogFadeDistance) /
-                    (stopLogFadeDistance - startLogFadeDistance),
+                    (logDist - startLogFadeDistance) /
+                        (stopLogFadeDistance - startLogFadeDistance),
                     0.f,
                     1.f
                 );
                 adjustedOpacity *= (1.f - fadeFactor);
             }
-            else if (logDistCamera >= stopLogFadeDistance) {
+            else if (logDist >= stopLogFadeDistance) {
                 adjustedOpacity = 0.f;
             }
         }
