@@ -647,6 +647,10 @@ namespace {
         identifier = d.value<std::string>("Identifier");
     }
 
+    if (identifier == "Root") {
+        throw ghoul::lua::LuaError("Cannot remove the 'Root' scene graph node");
+    }
+
     SceneGraphNode* foundNode = sceneGraphNode(identifier);
     if (!foundNode) {
         throw ghoul::lua::LuaError(
@@ -662,9 +666,11 @@ namespace {
     // Remove the node and all its children
     std::function<void(SceneGraphNode*)> removeNode =
         [&removeNode](SceneGraphNode* localNode) {
-
         if (localNode == global::navigationHandler->anchorNode()) {
-            global::navigationHandler->setFocusNode(sceneGraph()->root());
+            global::navigationHandler->orbitalNavigator().setFocusNode(
+                sceneGraph()->root()
+            );
+            global::navigationHandler->orbitalNavigator().startRetargetAnchor();
         }
 
         if (localNode == global::navigationHandler->orbitalNavigator().aimNode()) {
