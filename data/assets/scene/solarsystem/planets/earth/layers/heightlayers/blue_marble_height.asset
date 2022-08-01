@@ -12,7 +12,7 @@ local layer = {
   Identifier = "Earth_Bluemarble_Height",
   Enabled = asset.enabled,
   FilePath = texturesPath .. "earth_bluemarble_height.jpg",
-  Description = [[ Topographic layer from Blue Marble Next Generation]]
+  Description = "Topographic layer from Blue Marble Next Generation"
 }
 
 asset.onInitialize(function()
@@ -29,7 +29,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Earth Bluemarble Height",
   Version = "1.1",
-  Description = [[ Fallback layer for earth height if no internet is available. Contains
+  Description = [[Fallback layer for earth height if no internet is available. Contains
     Blue Marble Next Generation Topographic]],
   Author = "NASA",
   URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",

@@ -46,9 +46,9 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "Satellites";
+    constexpr std::string_view _loggerCat = "Satellites";
 
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "The number of segments to use for each orbit ellipse"

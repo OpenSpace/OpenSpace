@@ -40,6 +40,7 @@ uniform dvec3 eyePosition;
 
 const double PARSEC = 3.08567756E16;
 
+
 void main() {
 	vs_position = vec4(in_position, 1.0);
 	dvec4 dpos = dvec4(vs_position);

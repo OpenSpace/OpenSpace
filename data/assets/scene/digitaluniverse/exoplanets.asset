@@ -61,7 +61,7 @@ asset.export(object)
 asset.meta = {
   Name = "Exoplanets",
   Version = "1.1",
-  Description = [[Digital Universe asset for Exoplanets]],
+  Description = "Digital Universe asset for Exoplanets",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

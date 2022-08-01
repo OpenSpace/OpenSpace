@@ -45,14 +45,14 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableModel";
-    constexpr const char* ProgramName = "ModelProgram";
+    constexpr std::string_view _loggerCat = "RenderableModel";
+    constexpr std::string_view ProgramName = "ModelProgram";
 
-    constexpr const int DefaultBlending = 0;
-    constexpr const int AdditiveBlending = 1;
-    constexpr const int PointsAndLinesBlending = 2;
-    constexpr const int PolygonBlending = 3;
-    constexpr const int ColorAddingBlending = 4;
+    constexpr int DefaultBlending = 0;
+    constexpr int AdditiveBlending = 1;
+    constexpr int PointsAndLinesBlending = 2;
+    constexpr int PolygonBlending = 3;
+    constexpr int ColorAddingBlending = 4;
 
     std::map<std::string, int> BlendingMapping = {
         { "Default", DefaultBlending },
@@ -68,7 +68,7 @@ namespace {
         "Enable or disable the animation for the model if it has any"
     };
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
@@ -78,39 +78,39 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "A multiplier for ambient lighting."
+        "A multiplier for ambient lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse Intensity",
-        "A multiplier for diffuse lighting."
+        "A multiplier for diffuse lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular Intensity",
-        "A multiplier for specular lighting."
+        "A multiplier for specular lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform Shading",
         "This value determines whether this model should be shaded by using the position "
-        "of the Sun."
+        "of the Sun"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFaceCullingInfo = {
         "DisableFaceCulling",
         "Disable Face Culling",
-        "Disable OpenGL automatic face culling optimization."
+        "Disable OpenGL automatic face culling optimization"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
-        "all other transformations are applied."
+        "all other transformations are applied"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
@@ -122,26 +122,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light Sources",
-        "A list of light sources that this model should accept light from."
+        "A list of light sources that this model should accept light from"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableDepthTestInfo = {
         "DisableDepthTest",
         "Disable Depth Test",
-        "Disable Depth Testing for the Model."
+        "Disable Depth Testing for the Model"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
         "Changes the blending function used to calculate the colors of the model with "
-        "respect to the opacity."
+        "respect to the opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
         "EnableOpacityBlending",
         "Enable Opacity Blending",
-        "Enable Opacity Blending."
+        "Enable Opacity Blending"
     };
 
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
@@ -509,7 +509,7 @@ void RenderableModel::initialize() {
 void RenderableModel::initializeGL() {
     ZoneScoped
 
-    std::string program = ProgramName;
+    std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
         program += "|vs=" + _vertexShaderPath;
     }
@@ -528,7 +528,7 @@ void RenderableModel::initializeGL() {
                 absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
                 std::filesystem::path(_fragmentShaderPath);
 
-            return global::renderEngine->buildRenderProgram(ProgramName, vs, fs);
+            return global::renderEngine->buildRenderProgram(program, vs, fs);
         }
     );
     // We don't really know what kind of shader the user provides us with, so we can't
@@ -547,7 +547,7 @@ void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
 
-    std::string program = ProgramName;
+    std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
         program += "|vs=" + _vertexShaderPath;
     }

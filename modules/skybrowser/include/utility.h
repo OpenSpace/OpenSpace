@@ -32,9 +32,9 @@
 namespace openspace::skybrowser {
 
 // Constants
-constexpr const double ScreenSpaceZ = -2.1;
-constexpr const glm::dvec3 NorthPole = { 0.0, 0.0, 1.0 };
-constexpr const double CelestialSphereRadius = 4 * distanceconstants::Parsec;
+constexpr double ScreenSpaceZ = -2.1;
+constexpr glm::dvec3 NorthPole = { 0.0, 0.0, 1.0 };
+constexpr double CelestialSphereRadius = 4 * distanceconstants::Parsec;
 
 // Conversion matrix - J2000 equatorial <-> galactic
 // https://arxiv.org/abs/1010.3773v1

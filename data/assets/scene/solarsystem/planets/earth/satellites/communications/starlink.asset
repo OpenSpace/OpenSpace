@@ -6,7 +6,7 @@ local group = {
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=starlink&FORMAT=TLE",
   TrailColor = { 0.65, 0.55, 0.55 },
   Description = [[LEO satellite constellation launched by SpaceX to provide 
-  broadband internet access.]]
+  broadband internet access]]
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
@@ -16,8 +16,7 @@ shared.registerSatelliteGroupObjects(asset, group, tle, true)
 asset.meta = {
   Name = "Satellites Communications - Starlink",
   Version = "1.0",
-  Description = [[ Satellites asset for Communications - Starlink. Data from 
-  Celestrak]],
+  Description = "Satellites asset for Communications - Starlink. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

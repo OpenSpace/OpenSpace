@@ -21,26 +21,19 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-layout(location = 0) in vec3 vertPosition;
-
-out vec4 positionLocalSpace;
-out vec4 positionCameraSpace;
-
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
+in vec4 positionLocalSpace;
+in vec4 positionCameraSpace;
 
 
-void main() {
-    positionLocalSpace = vec4(vertPosition, 1.0);
-    positionCameraSpace = modelViewTransform * positionLocalSpace;
+Fragment getFragment() {
+  vec4 position = positionCameraSpace;
 
-    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
-    
-    gl_Position = positionScreenSpace;
+  Fragment frag;
+  frag.color = vec4(positionLocalSpace.xyz + 0.5, 1.0);
+  frag.depth = -position.z;
+  return frag;
 }

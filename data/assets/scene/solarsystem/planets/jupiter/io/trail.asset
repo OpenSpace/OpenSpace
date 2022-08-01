@@ -41,7 +41,7 @@ asset.export(IoTrail)
 asset.meta = {
   Name = "Io Trail",
   Version = "1.1",
-  Description = [[ Trail of Io as observed by the Jupiter. Data from NASA Spice (see
+  Description = [[Trail of Io as observed by the Jupiter. Data from NASA Spice (see
     base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

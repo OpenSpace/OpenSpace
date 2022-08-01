@@ -37,48 +37,46 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableFieldlines";
+    constexpr std::string_view _loggerCat = "RenderableFieldlines";
 
-    constexpr const float DefaultFieldlineStepSize = 0.5f;
+    constexpr float DefaultFieldlineStepSize = 0.5f;
     const glm::vec4 DefaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
-    constexpr const char* KeyVectorField = "VectorField";
-    constexpr const char* KeyVectorFieldType = "Type";
-    constexpr const char* KeyVectorFieldFile = "File";
-    constexpr const char* KeyVectorFieldVolumeModel = "Model";
-    constexpr const char* KeyVectorFieldVolumeVariable = "Variables";
+    constexpr std::string_view KeyVectorField = "VectorField";
+    constexpr std::string_view KeyVectorFieldType = "Type";
+    constexpr std::string_view KeyVectorFieldFile = "File";
+    constexpr std::string_view KeyVectorFieldVolumeModel = "Model";
+    constexpr std::string_view KeyVectorFieldVolumeVariable = "Variables";
 
-    constexpr const char* KeyFieldlines = "Fieldlines";
-    constexpr const char* KeyFieldlinesStepSize = "Stepsize";
-    constexpr const char* KeyFieldlinesClassification = "Classification";
-    constexpr const char* KeyFieldlinesColor = "Color";
+    constexpr std::string_view KeyFieldlines = "Fieldlines";
+    constexpr std::string_view KeyFieldlinesColor = "Color";
 
-    constexpr const char* KeySeedPoints = "SeedPoints";
-    constexpr const char* KeySeedPointsType = "Type";
-    constexpr const char* KeySeedPointsFile = "File";
-    constexpr const char* KeySeedPointsTable = "SeedPoints";
+    constexpr std::string_view KeySeedPoints = "SeedPoints";
+    constexpr std::string_view KeySeedPointsType = "Type";
+    constexpr std::string_view KeySeedPointsFile = "File";
+    constexpr std::string_view KeySeedPointsTable = "SeedPoints";
 
-    constexpr const char* SeedPointsSourceFile = "File";
-    constexpr const char* SeedPointsSourceTable = "Table";
+    constexpr std::string_view SeedPointsSourceFile = "File";
+    constexpr std::string_view SeedPointsSourceTable = "Table";
 
-    constexpr const char* VectorFieldTypeVolumeKameleon = "VolumeKameleon";
+    constexpr std::string_view VectorFieldTypeVolumeKameleon = "VolumeKameleon";
 
-    constexpr const char* VectorFieldKameleonModelBATSRUS = "BATSRUS";
+    constexpr std::string_view VectorFieldKameleonModelBATSRUS = "BATSRUS";
 
-    constexpr const char* VectorFieldKameleonVariableLorentz = "Lorentz";
+    constexpr std::string_view VectorFieldKameleonVariableLorentz = "Lorentz";
 
-    constexpr const int SeedPointSourceFile = 0;
-    constexpr const int SeedPointSourceTable = 1;
+    constexpr int SeedPointSourceFile = 0;
+    constexpr int SeedPointSourceTable = 1;
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
-        KeyFieldlinesStepSize,
+        "Stepsize",
         //"StepSize",
         "Fieldline Step Size",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo Classification = {
-        KeyFieldlinesClassification,
+        "Classification",
         "Fieldline Classification",
         "" // @TODO Missing documentation
     };
@@ -170,13 +168,13 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableFieldlines::initializeDefaultPropertyValues() {
-    if (_fieldlineInfo.hasKey(KeyFieldlinesStepSize)) {
+    if (_fieldlineInfo.hasKey("Stepsize")) {
         _stepSize = static_cast<float>(
-            _fieldlineInfo.value<double>(KeyFieldlinesStepSize)
+            _fieldlineInfo.value<double>("Stepsize")
         );
     }
-    if (_fieldlineInfo.hasKey(KeyFieldlinesClassification)) {
-        _classification = _fieldlineInfo.value<bool>(KeyFieldlinesClassification);
+    if (_fieldlineInfo.hasKey("Classification")) {
+        _classification = _fieldlineInfo.value<bool>("Classification");
     }
     if (_fieldlineInfo.hasKey(KeyFieldlinesColor)) {
         _fieldlineColor = _fieldlineInfo.value<glm::dvec4>(KeyFieldlinesColor);

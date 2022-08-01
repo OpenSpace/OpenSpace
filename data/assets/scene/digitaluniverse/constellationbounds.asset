@@ -34,7 +34,7 @@ local object = {
     Name = "Constellation Bounds",
     Path = "/Milky Way/Constellations",
     Description = [[A Spherical mesh dividing the sky into regions that fit the
-    constellations.]],
+      constellations]],
   }
 }
 
@@ -54,7 +54,7 @@ asset.meta = {
   Name = "Constellation Bounds",
   Version = "1.1",
   Description = [[DU asset providing a Spherical mesh dividing the sky into regions that
-      fit the constellations.]],
+    fit the constellations]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

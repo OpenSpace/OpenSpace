@@ -36,8 +36,8 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "DataCygnet";
-    constexpr const int MaxTextures = 6;
+    constexpr std::string_view _loggerCat = "DataCygnet";
+    constexpr int MaxTextures = 6;
 
     constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",

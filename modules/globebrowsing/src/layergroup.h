@@ -39,7 +39,7 @@ struct TileProvider;
  * Convenience class for dealing with multiple <code>Layer</code>s.
  */
 struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(layergroupid::GroupID id);
+    LayerGroup(layers::Group group);
 
     void setLayersFromDict(const ghoul::Dictionary& dict);
 
@@ -66,8 +66,10 @@ struct LayerGroup : public properties::PropertyOwner {
 
     void onChange(std::function<void(Layer*)> callback);
 
+    bool isHeightLayer() const;
+
 private:
-    const layergroupid::GroupID _groupId;
+    const layers::Group::ID _groupId;
     std::vector<std::unique_ptr<Layer>> _layers;
     std::vector<Layer*> _activeLayers;
 

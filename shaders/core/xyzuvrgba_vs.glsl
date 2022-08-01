@@ -35,9 +35,9 @@ out vec4 out_color;
 uniform mat4 proj;
 
 void main() {
-    out_uv = in_uv;
-    out_color = in_color;
-    vec4 p = proj * vec4(in_position, 1.0);
-    gl_Position = p;
-    depth = p.w;
+  out_uv = in_uv;
+  out_color = in_color;
+  vec4 p = proj * vec4(in_position, 1.0);
+  gl_Position = p;
+  depth = p.w;
 }

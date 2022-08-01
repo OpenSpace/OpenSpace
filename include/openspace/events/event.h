@@ -113,7 +113,7 @@ void logAllEvents(const Event* e);
  * to the scene.
  */
 struct EventSceneGraphNodeAdded : public Event {
-    static const Type Type = Event::Type::SceneGraphNodeAdded;
+    static constexpr Type Type = Event::Type::SceneGraphNodeAdded;
 
     /**
      * Creates an instance of an EventSceneGraphNodeAdded event.
@@ -131,7 +131,7 @@ struct EventSceneGraphNodeAdded : public Event {
  * is signalled, the scene graph node has already been removed.
  */
 struct EventSceneGraphNodeRemoved : public Event {
-    static const Type Type = Event::Type::SceneGraphNodeRemoved;
+    static constexpr Type Type = Event::Type::SceneGraphNodeRemoved;
 
     /**
      * Creates an instance of an EventSceneGraphNodeRemoved event.
@@ -149,7 +149,7 @@ struct EventSceneGraphNodeRemoved : public Event {
  * The new state is sent as an argument with this event.
  */
 struct EventParallelConnection : public Event {
-    static const Type Type = Event::Type::ParallelConnection;
+    static constexpr Type Type = Event::Type::ParallelConnection;
 
     enum class State : uint8_t {
         Established,
@@ -173,7 +173,7 @@ struct EventParallelConnection : public Event {
  * regardless of whether it is the initial profile, or any subsequent profile is loaded.
  */
 struct EventProfileLoadingFinished : public Event {
-    static const Type Type = Event::Type::ProfileLoadingFinished;
+    static constexpr Type Type = Event::Type::ProfileLoadingFinished;
 
     /**
      * Creates an instance of an EventProfileLoadingFinished event.
@@ -187,7 +187,7 @@ struct EventProfileLoadingFinished : public Event {
  * which means that OpenSpace is just about the shutdown.
  */
 struct EventApplicationShutdown : public Event {
-    static const Type Type = Event::Type::ApplicationShutdown;
+    static constexpr Type Type = Event::Type::ApplicationShutdown;
 
     enum class State : uint8_t {
         Started,
@@ -210,7 +210,7 @@ struct EventApplicationShutdown : public Event {
  * this event is craeted, the screenspace renderable is already registered and available.
  */
 struct EventScreenSpaceRenderableAdded : public Event {
-    static const Type Type = Event::Type::ScreenSpaceRenderableAdded;
+    static constexpr Type Type = Event::Type::ScreenSpaceRenderableAdded;
 
     /**
      * Creates an instance of an EventScreenSpaceRenderableAdded event.
@@ -229,7 +229,7 @@ struct EventScreenSpaceRenderableAdded : public Event {
  * no longer available
  */
 struct EventScreenSpaceRenderableRemoved : public Event {
-    static const Type Type = Event::Type::ScreenSpaceRenderableRemoved;
+    static constexpr Type Type = Event::Type::ScreenSpaceRenderableRemoved;
 
     /**
      * Creates an instance of an EventScreenSpaceRenderableRemoved event.
@@ -259,7 +259,7 @@ Exiting                 Receding               Reaching                Approachi
 ```
  */
 struct EventCameraFocusTransition : public Event {
-    static const Type Type = Event::Type::CameraFocusTransition;
+    static constexpr Type Type = Event::Type::CameraFocusTransition;
 
     enum class Transition {
         Approaching,
@@ -294,7 +294,7 @@ struct EventCameraFocusTransition : public Event {
  * currently unused.
  */
 struct EventTimeOfInterestReached : public Event {
-    static const Type Type = Event::Type::TimeOfInterestReached;
+    static constexpr Type Type = Event::Type::TimeOfInterestReached;
 
     /**
      * Creates an instance of an EventTimeOfInterestReached event.
@@ -314,7 +314,7 @@ struct EventTimeOfInterestReached : public Event {
  * currently unused.
  */
 struct EventMissionEventReached : public Event {
-    static const Type Type = Event::Type::MissionEventReached;
+    static constexpr Type Type = Event::Type::MissionEventReached;
 
     // Not sure which kind of parameters we want to pass here
     EventMissionEventReached();
@@ -325,7 +325,7 @@ struct EventMissionEventReached : public Event {
  * event is currently unused.
  */
 struct EventPlanetEclipsed : public Event {
-    static const Type Type = Event::Type::PlanetEclipsed;
+    static constexpr Type Type = Event::Type::PlanetEclipsed;
 
     /**
      * Creates an instance of an EventPlanetEclipsed event.
@@ -347,7 +347,7 @@ struct EventPlanetEclipsed : public Event {
  * interpolation time of a property change is 0s, this event is not fired
  */
 struct EventInterpolationFinished : public Event {
-    static const Type Type = Event::Type::InterpolationFinished;
+    static constexpr Type Type = Event::Type::InterpolationFinished;
 
     /**
      * Creates an instance of an EventInterpolationFinished event.
@@ -366,7 +366,7 @@ struct EventInterpolationFinished : public Event {
  * same time.
  */
 struct EventFocusNodeChanged : public Event {
-    static const Type Type = Event::Type::FocusNodeChanged;
+    static constexpr Type Type = Event::Type::FocusNodeChanged;
 
     /**
      * Creates an instance of an EventFocusNodeChanged event.
@@ -387,7 +387,7 @@ struct EventFocusNodeChanged : public Event {
  * This event is created when a layer is added to to a globe.
  */
 struct EventLayerAdded : public Event {
-    static const Type Type = Event::Type::LayerAdded;
+    static constexpr Type Type = Event::Type::LayerAdded;
 
     /**
      * Creates an instance of an EventLayerAdded event.
@@ -412,7 +412,7 @@ struct EventLayerAdded : public Event {
  * This event is created when a layer is removed from a globe.
  */
 struct EventLayerRemoved : public Event {
-    static const Type Type = Event::Type::LayerRemoved;
+    static constexpr Type Type = Event::Type::LayerRemoved;
 
     /**
      * Creates an instance of an EventLayerRemoved event.
@@ -438,7 +438,7 @@ struct EventLayerRemoved : public Event {
  * The event contains information about the new state of the session recording subsystem.
  */
 struct EventSessionRecordingPlayback : public Event {
-    static const Type Type = Event::Type::SessionRecordingPlayback;
+    static constexpr Type Type = Event::Type::SessionRecordingPlayback;
 
     enum class State {
         Started,
@@ -465,7 +465,7 @@ struct EventSessionRecordingPlayback : public Event {
  * it should do the pointing.
  */
 struct EventPointSpacecraft : public Event {
-    static const Type Type = Event::Type::PointSpacecraft;
+    static constexpr Type Type = Event::Type::PointSpacecraft;
 
     /**
      * Creates an instance of an EventSessionRecordingPlayback event.
@@ -487,7 +487,7 @@ struct EventPointSpacecraft : public Event {
  * signalled, the renderable has already been enabled.
  */
 struct EventRenderableEnabled : public Event {
-    static const Type Type = Event::Type::RenderableEnabled;
+    static constexpr Type Type = Event::Type::RenderableEnabled;
 
     /**
      * Creates an instance of an EventRenderableEnabled event.
@@ -506,7 +506,7 @@ struct EventRenderableEnabled : public Event {
  * signalled, the renderable has already been disabled.
  */
 struct EventRenderableDisabled : public Event {
-    static const Type Type = Event::Type::RenderableDisabled;
+    static constexpr Type Type = Event::Type::RenderableDisabled;
 
     /**
      * Creates an instance of an EventRenderableDisabled event.
@@ -526,7 +526,7 @@ struct EventRenderableDisabled : public Event {
  * transitioned to a specific event type, if it is deemed to be useful.
  */
 struct CustomEvent : public Event {
-    static const Type Type = Event::Type::Custom;
+    static constexpr Type Type = Event::Type::Custom;
 
     /**
      * Creates an instance of a CustomEvent event.

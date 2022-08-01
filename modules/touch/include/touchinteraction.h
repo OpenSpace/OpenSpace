@@ -56,7 +56,7 @@ public:
     double averageFrameTime() const;
 
 private:
-    static const int TotalSamples = 10;
+    static constexpr int TotalSamples = 10;
     int _nSamples = 0;
     double _samples[TotalSamples];
     int _index = 0;

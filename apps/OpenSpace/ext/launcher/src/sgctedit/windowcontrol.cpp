@@ -118,7 +118,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
     )));
     layout->addWidget(_windowNumber, 0, 0, 1, 8, Qt::AlignCenter);
     {
-        QString tip = "The name for the window (displayed in title bar).";
+        QString tip = "The name for the window (displayed in title bar)";
 
         QLabel* labelName = new QLabel("Name");
         labelName->setToolTip(tip);
@@ -128,7 +128,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
         _windowName->setToolTip(tip);
         layout->addWidget(_windowName, 1, 1, 1, 7);
     }
-    QString tip = "The monitor where this window is located.";
+    QString tip = "The monitor where this window is located";
 
     _monitor = new QComboBox;
     _monitor->addItems(monitorNames(_monitorResolutions));
@@ -207,7 +207,7 @@ void WindowControl::createWidgets(const QColor& windowColor) {
         QLabel* offset = new QLabel("Offset");
         offset->setToolTip(
             "The x,y location of the window's upper left corner from monitor's "
-            "upper-left corner origin (pixels)."
+            "upper-left corner origin (pixels)"
         );
         offset->setFixedWidth(55);
         layout->addWidget(offset, 4, 0);
@@ -420,7 +420,7 @@ QWidget* WindowControl::createFisheyeWidget() {
         "This projection provides a rendering in a format that is suitable for "
         "planetariums and other immersive environments. A field-of-view of 180 degrees "
         "is presented as a circular image in the center of the screen. For this "
-        "projection a square window is suggested, but not necessary."
+        "projection a square window is suggested, but not necessary"
     );
     info->setObjectName("info");
     info->setWordWrap(true);
@@ -465,7 +465,7 @@ QWidget* WindowControl::createSphericalMirrorWidget() {
         "This projection is rendering a image suite for use with a spherical mirror "
         "projection as described by Paul Bourke (http://paulbourke.net/dome/mirrordome/) "
         "and which is a low-cost yet effective way to provide content for a sphericalal "
-        "display surface using a regular projector."
+        "display surface using a regular projector"
     );
     info->setObjectName("info");
     info->setWordWrap(true);
@@ -503,7 +503,7 @@ QWidget* WindowControl::createCylindricalWidget() {
         "This projection type provides a cylindrical rendering that covers 360 degrees "
         "around the camera, which can be useful in immersive environments that are not "
         "spherical, but where, for example, all walls of a room are covered with "
-        "projectors."
+        "projectors"
     );
     info->setObjectName("info");
     info->setWordWrap(true);
@@ -556,7 +556,7 @@ QWidget* WindowControl::createEquirectangularWidget() {
         "This projection provides the rendering as an image in equirectangular "
         "projection, which is a common display type for 360 surround video. When "
         "uploading a video in equirectangular projection to YouTube, for example, it "
-        "will use it as a 360 video."
+        "will use it as a 360 video"
     );
     info->setObjectName("info");
     info->setWordWrap(true);

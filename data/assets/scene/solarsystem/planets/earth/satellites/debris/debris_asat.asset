@@ -14,8 +14,8 @@ shared.registerSatelliteGroupObjects(asset, group, tle, true)
 asset.meta = {
   Name = "Satellites Debris - Indian ASAT test Debris",
   Version = "1.0",
-  Description = [[ Satellites asset for Debris - Indian ASAT test Debris. Data from 
-  Celestrak]],
+  Description = [[Satellites asset for Debris - Indian ASAT test Debris. Data from 
+    Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

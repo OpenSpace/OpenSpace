@@ -51,7 +51,7 @@ local toggle_trail = {
   Documentation = [[Toggles the visibility of the JWST trail with an
     approaching/exiting event. This action takes optional arguments to 1) determine which
     node is currently in focus and only hide JWST trail if it is in focus (as the
-    'Node') and 2) the transition direction (as 'Approaching' or 'Exiting').]],
+    'Node') and 2) the transition direction (as 'Approaching' or 'Exiting')]],
   GuiPath = "/JWST/Events",
   IsLocal = true
 }

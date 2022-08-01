@@ -171,6 +171,5 @@ asset.meta = {
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"JWSTTrailLaunch", "JWSTTrailOrbit", "JWSTSunTrail"}
+  License = "MIT license"
 }

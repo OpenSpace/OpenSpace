@@ -54,11 +54,10 @@ struct RaycasterTask;
 class Scene;
 struct UpdateStructures;
 
-class FramebufferRenderer : public RaycasterListener,
-                            public DeferredcasterListener
+class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
 {
 public:
-    virtual ~FramebufferRenderer() override final = default;
+    virtual ~FramebufferRenderer() override = default;
 
     void initialize();
     void deinitialize();

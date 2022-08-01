@@ -32,10 +32,9 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* EventKey = "event";
-    constexpr const char* SubscribeEvent = "start_subscription";
-    constexpr const char* UnsubscribeEvent = "stop_subscription";
-    constexpr const std::chrono::milliseconds TimeUpdateInterval(50);
+    constexpr std::string_view SubscribeEvent = "start_subscription";
+    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
+    constexpr std::chrono::milliseconds TimeUpdateInterval(50);
 } // namespace
 
 using nlohmann::json;
@@ -65,7 +64,7 @@ bool TimeTopic::isDone() const {
 }
 
 void TimeTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at(EventKey).get<std::string>();
+    std::string event = json.at("event").get<std::string>();
     if (event == UnsubscribeEvent) {
         _isDone = true;
         return;

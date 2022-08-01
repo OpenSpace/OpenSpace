@@ -36,13 +36,13 @@
 #include "moduleengine_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "ModuleEngine";
+    constexpr std::string_view _loggerCat = "ModuleEngine";
 
     constexpr openspace::properties::Property::PropertyInfo AllModulesInfo = {
         "AllModules",
         "All Modules",
         "The list of all modules that were compiled for this version of OpenSpace in the "
-        "same order in which they were initialized."
+        "same order in which they were initialized"
     };
 } // namespace
 

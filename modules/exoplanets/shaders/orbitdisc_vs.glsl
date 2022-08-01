@@ -34,6 +34,7 @@ out float vs_depth;
 
 uniform mat4 modelViewProjectionTransform;
 
+
 void main() {
   vs_st = in_st;
   vec4 pos = z_normalization(

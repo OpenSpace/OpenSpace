@@ -41,31 +41,31 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether the browser should be enabled or not."
+        "This setting determines whether the browser should be enabled or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Trigger this property to reload the browser."
+        "Trigger this property to reload the browser"
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "Visible",
         "Is Visible",
-        "This setting determines whether the browser should be visible or not."
+        "This setting determines whether the browser should be visible or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "GUI URL",
-        "The URL of the webpage that is used to load the WebGUI from."
+        "The URL of the webpage that is used to load the WebGUI from"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
         "GuiScale",
         "Gui Scale",
-        "GUI scale multiplier."
+        "GUI scale multiplier"
     };
 } // namespace
 

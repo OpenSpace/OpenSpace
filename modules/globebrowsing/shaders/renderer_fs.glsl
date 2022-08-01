@@ -153,6 +153,7 @@ in vec3 positionWorldSpace;
 
 uniform float opacity;
 
+
 Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(0.3, 0.3, 0.3, 1.0);
@@ -277,8 +278,8 @@ Fragment getFragment() {
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  0));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  NSSamples - #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               , -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               ,  NSSamples - #{i}));
+      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0, -NSSamples + #{i}));
+      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0,  NSSamples - #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));

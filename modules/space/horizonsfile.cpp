@@ -409,7 +409,7 @@ void HorizonsFile::displayErrorMessage(const HorizonsResultCode code) const {
         case HorizonsResultCode::ErrorNoData:
             LERROR(
                 "There is not enough data to compute the state of the target in "
-                "relation to the observer for the selected time range."
+                "relation to the observer for the selected time range"
             );
             break;
         case HorizonsResultCode::MultipleObserverStations: {

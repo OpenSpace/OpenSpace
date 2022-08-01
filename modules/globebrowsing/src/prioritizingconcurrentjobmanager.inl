@@ -67,7 +67,7 @@ void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
 
 template <typename P, typename KeyType>
 std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
-    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop!");
+    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop");
 
     std::lock_guard lock(_finishedJobsMutex);
     std::shared_ptr<Job<P>> result = _finishedJobs.pop();

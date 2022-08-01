@@ -5,7 +5,7 @@ local group = {
   Filename = "tle-new.txt",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=last-30-days&FORMAT=TLE",
   TrailColor = { 0.65, 0.25, 0.45 },
-  Description = [[All the satellites that have been launched in the last 30 days.]]
+  Description = [[All the satellites that have been launched in the last 30 days]]
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
@@ -15,7 +15,7 @@ shared.registerSatelliteGroupObjects(asset, group, tle, true)
 asset.meta = {
   Name = "Satellites Last 30 Days",
   Version = "1.0",
-  Description = [[ Satellites asset for Last 30 Days. Data from Celestrak]],
+  Description = "Satellites asset for Last 30 Days. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

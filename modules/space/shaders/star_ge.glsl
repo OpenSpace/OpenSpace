@@ -27,15 +27,13 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 4) out;
-
 in vec4 vs_bvLumAbsMagAppMag[];
 in vec3 vs_velocity[];
 in float vs_speed[];
 
+layout(triangle_strip, max_vertices = 4) out;
 out vec3 vs_position;
 out vec2 texCoords;
-
 flat out float ge_bv;
 flat out vec3 ge_velocity;
 flat out float ge_speed;
@@ -44,12 +42,10 @@ flat out float gs_screenSpaceDepth;
 uniform float magnitudeExponent;
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
-
 uniform int psfParamConf;
 uniform float lumCent;
 uniform float radiusCent;
 uniform float brightnessCent;
-
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
@@ -68,6 +64,7 @@ const int SizeCompositionOptionLumSizeDistanceModulus = 5;
 const float SunTemperature = 5800.0;
 const float SunAbsMagnitude = 4.83;
 const float SunRadius = 6.957E8; // meters
+
 
 float bvToKelvin(float bv) {
   float tmp = 0.92 * bv;
@@ -132,6 +129,7 @@ double scaleForApparentMagnitude(dvec3 dpos, float absMag) {
 double scaleForDistanceModulus(float absMag) {
   return exp((-30.623 - absMag) * 0.462) * pow(10.0, magnitudeExponent + 12.5) * 2000;
 }
+
 
 void main() {
   vec3 pos = gl_in[0].gl_Position.xyz;

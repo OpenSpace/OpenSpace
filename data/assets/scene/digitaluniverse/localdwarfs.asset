@@ -65,7 +65,7 @@ asset.export(object)
 asset.meta = {
   Name = "Local Group",
   Version = "2.1",
-  Description = [[Digital Universe asset for the Local Goup]],
+  Description = "Digital Universe asset for the Local Goup",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

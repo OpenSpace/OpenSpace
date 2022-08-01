@@ -22,19 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+#ifndef __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__
 
-in vec3 vPosition;
-in vec4 worldPosition;
+#include <modules/server/include/topics/topic.h>
+#include <chrono>
 
+namespace openspace {
 
-Fragment getFragment() {
-    vec4 position = worldPosition;
-    float depth = pscDepth(position);
+class CameraTopic : public Topic {
+public:
+    CameraTopic();
+    virtual ~CameraTopic();
 
-    Fragment frag;
-    frag.color = vec4(vPosition + 0.5, 1.0);
-    frag.depth = depth;
-    return frag;
-}
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+
+private:
+    const int UnsetOnChangeHandle = -1;
+
+    void sendCameraData();
+
+    int _dataCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
+    std::chrono::system_clock::time_point _lastUpdateTime;
+    glm::dvec3 _lastPosition = glm::dvec3(0);
+
+    std::chrono::milliseconds _cameraPositionUpdateTime = std::chrono::milliseconds(100);
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___CAMERATOPIC___H__

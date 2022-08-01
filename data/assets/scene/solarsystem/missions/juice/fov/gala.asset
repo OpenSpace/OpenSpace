@@ -27,7 +27,7 @@ local Gala = {
   GUI = {
     Name = "Gala FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
-    Description = "The field-of-view for the Ganymede Laster Altimeter (GALA) instrument."
+    Description = "The field-of-view for the Ganymede Laster Altimeter (GALA) instrument"
   }
 }
 

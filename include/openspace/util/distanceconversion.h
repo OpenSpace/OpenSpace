@@ -66,61 +66,61 @@ enum class DistanceUnit {
 };
 
 // Assumption:  Unit names are sequential in memory
-constexpr const char* DistanceUnitNanometer = "nanometer";
-constexpr const char* DistanceUnitMicrometer = "micrometer";
-constexpr const char* DistanceUnitMillimeter = "millimeter";
-constexpr const char* DistanceUnitCentimeter = "centimeter";
-constexpr const char* DistanceUnitDecimeter = "decimeter";
-constexpr const char* DistanceUnitMeter = "meter";
-constexpr const char* DistanceUnitKilometer = "km";
-constexpr const char* DistanceUnitAU = "AU";
-constexpr const char* DistanceUnitLighthour = "lighthour";
-constexpr const char* DistanceUnitLightday = "lightday";
-constexpr const char* DistanceUnitLightmonth = "lightmonth";
-constexpr const char* DistanceUnitLightyear = "lightyear";
-constexpr const char* DistanceUnitParsec = "parsec";
-constexpr const char* DistanceUnitKiloparsec = "kiloparsec";
-constexpr const char* DistanceUnitMegaparsec = "megaparsec";
-constexpr const char* DistanceUnitGigaparsec = "gigaparsec";
-constexpr const char* DistanceUnitGigalightyear = "gigalightyear";
-constexpr const char* DistanceUnitThou = "thou";
-constexpr const char* DistanceUnitInch = "inch";
-constexpr const char* DistanceUnitFoot = "foot";
-constexpr const char* DistanceUnitYard = "yard";
-constexpr const char* DistanceUnitChain = "chain";
-constexpr const char* DistanceUnitFurlong = "furlong";
-constexpr const char* DistanceUnitMile = "mile";
-constexpr const char* DistanceUnitLeague = "league";
+constexpr std::string_view DistanceUnitNanometer = "nanometer";
+constexpr std::string_view DistanceUnitMicrometer = "micrometer";
+constexpr std::string_view DistanceUnitMillimeter = "millimeter";
+constexpr std::string_view DistanceUnitCentimeter = "centimeter";
+constexpr std::string_view DistanceUnitDecimeter = "decimeter";
+constexpr std::string_view DistanceUnitMeter = "meter";
+constexpr std::string_view DistanceUnitKilometer = "km";
+constexpr std::string_view DistanceUnitAU = "AU";
+constexpr std::string_view DistanceUnitLighthour = "lighthour";
+constexpr std::string_view DistanceUnitLightday = "lightday";
+constexpr std::string_view DistanceUnitLightmonth = "lightmonth";
+constexpr std::string_view DistanceUnitLightyear = "lightyear";
+constexpr std::string_view DistanceUnitParsec = "parsec";
+constexpr std::string_view DistanceUnitKiloparsec = "kiloparsec";
+constexpr std::string_view DistanceUnitMegaparsec = "megaparsec";
+constexpr std::string_view DistanceUnitGigaparsec = "gigaparsec";
+constexpr std::string_view DistanceUnitGigalightyear = "gigalightyear";
+constexpr std::string_view DistanceUnitThou = "thou";
+constexpr std::string_view DistanceUnitInch = "inch";
+constexpr std::string_view DistanceUnitFoot = "foot";
+constexpr std::string_view DistanceUnitYard = "yard";
+constexpr std::string_view DistanceUnitChain = "chain";
+constexpr std::string_view DistanceUnitFurlong = "furlong";
+constexpr std::string_view DistanceUnitMile = "mile";
+constexpr std::string_view DistanceUnitLeague = "league";
 
 
 // Assumption:  Unit names are sequential in memory
-constexpr const char* DistanceUnitNanometers = "nanometers";
-constexpr const char* DistanceUnitMicrometers = "micrometers";
-constexpr const char* DistanceUnitMillimeters = "millimeters";
-constexpr const char* DistanceUnitCentimeters = "centimeters";
-constexpr const char* DistanceUnitDecimeters = "decimeters";
-constexpr const char* DistanceUnitMeters = "meters";
-constexpr const char* DistanceUnitKilometers = "km";
-constexpr const char* DistanceUnitAUs = "AU";
-constexpr const char* DistanceUnitLighthours = "lighthours";
-constexpr const char* DistanceUnitLightdays = "lightdays";
-constexpr const char* DistanceUnitLightmonths = "lightmonths";
-constexpr const char* DistanceUnitLightyears = "lightyears";
-constexpr const char* DistanceUnitParsecs = "parsecs";
-constexpr const char* DistanceUnitKiloparsecs = "kiloparsecs";
-constexpr const char* DistanceUnitMegaparsecs = "megaparsecs";
-constexpr const char* DistanceUnitGigaparsecs = "gigaparsecs";
-constexpr const char* DistanceUnitGigalightyears = "gigalightyears";
-constexpr const char* DistanceUnitThous = "thou";
-constexpr const char* DistanceUnitInches = "inches";
-constexpr const char* DistanceUnitFeet = "feet";
-constexpr const char* DistanceUnitYards = "yards";
-constexpr const char* DistanceUnitChains = "chains";
-constexpr const char* DistanceUnitFurlongs = "furlongs";
-constexpr const char* DistanceUnitMiles = "miles";
-constexpr const char* DistanceUnitLeagues = "leagues";
+constexpr std::string_view DistanceUnitNanometers = "nanometers";
+constexpr std::string_view DistanceUnitMicrometers = "micrometers";
+constexpr std::string_view DistanceUnitMillimeters = "millimeters";
+constexpr std::string_view DistanceUnitCentimeters = "centimeters";
+constexpr std::string_view DistanceUnitDecimeters = "decimeters";
+constexpr std::string_view DistanceUnitMeters = "meters";
+constexpr std::string_view DistanceUnitKilometers = "km";
+constexpr std::string_view DistanceUnitAUs = "AU";
+constexpr std::string_view DistanceUnitLighthours = "lighthours";
+constexpr std::string_view DistanceUnitLightdays = "lightdays";
+constexpr std::string_view DistanceUnitLightmonths = "lightmonths";
+constexpr std::string_view DistanceUnitLightyears = "lightyears";
+constexpr std::string_view DistanceUnitParsecs = "parsecs";
+constexpr std::string_view DistanceUnitKiloparsecs = "kiloparsecs";
+constexpr std::string_view DistanceUnitMegaparsecs = "megaparsecs";
+constexpr std::string_view DistanceUnitGigaparsecs = "gigaparsecs";
+constexpr std::string_view DistanceUnitGigalightyears = "gigalightyears";
+constexpr std::string_view DistanceUnitThous = "thou";
+constexpr std::string_view DistanceUnitInches = "inches";
+constexpr std::string_view DistanceUnitFeet = "feet";
+constexpr std::string_view DistanceUnitYards = "yards";
+constexpr std::string_view DistanceUnitChains = "chains";
+constexpr std::string_view DistanceUnitFurlongs = "furlongs";
+constexpr std::string_view DistanceUnitMiles = "miles";
+constexpr std::string_view DistanceUnitLeagues = "leagues";
 
-constexpr const std::array<DistanceUnit, static_cast<int>(DistanceUnit::League) + 1>
+constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::League) + 1>
 DistanceUnits = {
     DistanceUnit::Nanometer, DistanceUnit::Micrometer, DistanceUnit::Millimeter,
     DistanceUnit::Centimeter, DistanceUnit::Decimeter, DistanceUnit::Meter,
@@ -132,7 +132,7 @@ DistanceUnits = {
     DistanceUnit::Furlong, DistanceUnit::Mile, DistanceUnit::League
 };
 
-constexpr const std::array<const char*, static_cast<int>(DistanceUnit::League) + 1>
+constexpr std::array<std::string_view, static_cast<int>(DistanceUnit::League) + 1>
 DistanceUnitNamesSingular = {
     DistanceUnitNanometer, DistanceUnitMicrometer, DistanceUnitMillimeter,
     DistanceUnitCentimeter, DistanceUnitDecimeter, DistanceUnitMeter,
@@ -144,7 +144,7 @@ DistanceUnitNamesSingular = {
     DistanceUnitMile, DistanceUnitLeague
 };
 
-constexpr const std::array<const char*, static_cast<int>(DistanceUnit::League) + 1>
+constexpr std::array<std::string_view, static_cast<int>(DistanceUnit::League) + 1>
 DistanceUnitNamesPlural = {
     DistanceUnitNanometers, DistanceUnitMicrometers, DistanceUnitMillimeters,
     DistanceUnitCentimeters, DistanceUnitDecimeters, DistanceUnitMeters,
@@ -156,18 +156,18 @@ DistanceUnitNamesPlural = {
     DistanceUnitFurlongs, DistanceUnitMile, DistanceUnitLeague
 };
 
-constexpr bool isValidDistanceUnitName(const char* name) {
+constexpr bool isValidDistanceUnitName(std::string_view name) {
     int i = 0;
-    for (const char* val : DistanceUnitNamesSingular) {
-        if (ghoul::equal(name, val)) {
+    for (std::string_view val : DistanceUnitNamesSingular) {
+        if (val == name) {
             return true;
         }
         ++i;
     }
 
     i = 0;
-    for (const char* val : DistanceUnitNamesPlural) {
-        if (ghoul::equal(name, val)) {
+    for (std::string_view val : DistanceUnitNamesPlural) {
+        if (val == name) {
             return true;
         }
         ++i;
@@ -175,7 +175,8 @@ constexpr bool isValidDistanceUnitName(const char* name) {
     return false;
 }
 
-constexpr const char* nameForDistanceUnit(DistanceUnit unit, bool pluralForm = false) {
+constexpr std::string_view nameForDistanceUnit(DistanceUnit unit, bool pluralForm = false)
+{
     switch (unit) {
         case DistanceUnit::Nanometer:
         case DistanceUnit::Micrometer:
@@ -213,11 +214,11 @@ constexpr const char* nameForDistanceUnit(DistanceUnit unit, bool pluralForm = f
     }
 }
 
-constexpr DistanceUnit distanceUnitFromString(const char* unitName) {
+constexpr DistanceUnit distanceUnitFromString(std::string_view unitName) {
     int found = -1;
     int i = 0;
-    for (const char* val : DistanceUnitNamesSingular) {
-        if (ghoul::equal(unitName, val)) {
+    for (std::string_view val : DistanceUnitNamesSingular) {
+        if (val == unitName) {
             found = i;
             break;
         }
@@ -225,8 +226,8 @@ constexpr DistanceUnit distanceUnitFromString(const char* unitName) {
     }
 
     i = 0;
-    for (const char* val : DistanceUnitNamesPlural) {
-        if (ghoul::equal(unitName, val)) {
+    for (std::string_view val : DistanceUnitNamesPlural) {
+        if (val == unitName) {
             found = i;
             break;
         }
@@ -244,7 +245,7 @@ constexpr DistanceUnit distanceUnitFromString(const char* unitName) {
 
 
 
-std::pair<double, std::string> simplifyDistance(double meters,
+std::pair<double, std::string_view> simplifyDistance(double meters,
     bool forceSingularForm = false);
 
 constexpr double convertMeters(double meters, DistanceUnit requestedUnit) {

@@ -35,7 +35,7 @@
 #include <fmt/format.h>
 
 namespace {
-    constexpr const char* _loggerCat = "WebBrowser:EventHandler";
+    constexpr std::string_view _loggerCat = "WebBrowser:EventHandler";
 
     /**
      * Map from GLFW key codes to windows key codes, supported by JS and CEF.

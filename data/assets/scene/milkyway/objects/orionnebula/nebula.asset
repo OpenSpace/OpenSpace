@@ -28,7 +28,7 @@ local NebulaHolder = {
   GUI = {
     Name = "Orion Nebula",
     Path = "/Milky Way/Orion",
-    Description = [[ In the Digital Universe model of the Orion Nebula, we depict the 
+    Description = [[In the Digital Universe model of the Orion Nebula, we depict the 
       ionization front effectively as a terrain, with a flat Hubble image of the nebula mapped 
       on the undulating surface. In reality, the ionization front has a slight thickness to
       it - about a third of a light year - but is quite thin compared to the overall size of 
@@ -40,7 +40,7 @@ local NebulaHolder = {
       nebulas center. These enormous structures are bow shocks that delineate the region where 
       highspeed winds from the central star slow from supersonic to subsonic speeds. You can 
       think of an HII region as a sort of tremendous explosion, taking place over millennia, 
-      and the bow shocks are part of the outward rush of material. ]]
+      and the bow shocks are part of the outward rush of material]]
   }
 }
 
@@ -75,7 +75,7 @@ local OrionNebulaModel = {
   GUI = {
     Name = "Orion Nebula Model",
     Path = "/Milky Way/Orion",
-    Description = "Orion Nebula 3D model. See Orion Nebula for description."
+    Description = "Orion Nebula 3D model. See Orion Nebula for description"
   }
 }
 
@@ -111,7 +111,7 @@ local OrionNebulaShocksModel = {
     Name = "Orion Nebula Shocks",
     Path = "/Milky Way/Orion",
     Hidden = false,
-    Description = "Orion Nebula Shocks 3D model. See Orion Nebula for description."
+    Description = "Orion Nebula Shocks 3D model. See Orion Nebula for description"
   }
 }
 
@@ -147,7 +147,7 @@ local OrionNebulaProplydsModel = {
     Name = "Orion Nebula Proplyds",
     Path = "/Milky Way/Orion",
     Hidden = false,
-    Description = "Orion Nebula Proplyds 3D model. See Orion Nebula for description."
+    Description = "Orion Nebula Proplyds 3D model. See Orion Nebula for description"
   }
 }
 
@@ -175,9 +175,9 @@ asset.export(OrionNebulaProplydsModel)
 asset.meta = {
   Name = "Orion Nebula Model",
   Version = "1.1",
-  Description = [[ Digital Universe asset for the Orion nebula 3D model. This asset
+  Description = [[Digital Universe asset for the Orion nebula 3D model. This asset
     contains seperate models for the nebula, proplyds and shocks. To be used in
-    conjunction with orion star cluster. Use orionnebula.asset to include both.]],
+    conjunction with orion star cluster. Use orionnebula.asset to include both]],
   Author = "AMNH Digital Universe",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

@@ -184,9 +184,9 @@ end
 asset.meta = {
   Name = "Jupiter Pasiphae Other Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Jupiter's Other Group
-    moons: S2003J12, S/2003J3, S2011J1, S2003J19, S2003J10, S2003J23, S2003J9,
-    and S2003J2. Blank globes and SPICE trails are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Jupiter's Other Group moons: S2003J12,
+    S/2003J3, S2011J1, S2003J19, S2003J10, S2003J23, S2003J9, and S2003J2. Blank globes
+    and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

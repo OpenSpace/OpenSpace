@@ -33,13 +33,13 @@ namespace {
         "IdleTime",
         "Idle Time",
         "Time in seconds that has passed from latest registered interaction until the "
-        "application goes idle."
+        "application goes idle"
     };
     constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
         "IsInActiveState",
         "Is State Active",
         "Keeps track whether the interaction session is in active state or not. False if "
-        "application is in idle state, true if it is in active state."
+        "application is in idle state, true if it is in active state"
     };
 } // namespace
 

@@ -30,7 +30,7 @@
 out vec4 _out_color_;
 
 void main() {
-     Fragment f = getFragment();
-     _out_color_ = f.color;
-     gl_FragDepth = normalizeFloat(f.depth);
+  Fragment f = getFragment();
+  _out_color_ = f.color;
+  gl_FragDepth = normalizeFloat(f.depth);
 }

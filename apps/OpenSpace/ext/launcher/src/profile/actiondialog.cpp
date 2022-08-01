@@ -373,7 +373,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         "it is defined in an asset included in this profile, you can enter the "
         "identifier of that action manually here to associate a key with it. If the "
         "identifer does not exist, an error will be logged when trying to bind the key "
-        "at startup."
+        "at startup"
     );
     _keybindingWidgets.actionText->setEnabled(false);
     layout->addWidget(_keybindingWidgets.actionText, 13, 2);
@@ -557,7 +557,7 @@ void ActionDialog::actionSaved() {
                 this,
                 "Duplicate identifier",
                 "The chosen identifier was already used in another action. Identifiers "
-                "have to be unique. Please choose a different identfier."
+                "have to be unique. Please choose a different identfier"
             );
             return;
         }

@@ -109,8 +109,8 @@ end)
 asset.meta = {
   Name = "Terra",
   Version = "1.0",
-  Description = [[ Trail for Terra. trail from
-    CELESTRAK. Can be used in conjuntion with Terra Modis (Temporal) layer for Earth]],
+  Description = [[Trail for Terra. trail from Celestrak. Can be used in conjuntion with
+    Terra Modis (Temporal) layer for Earth]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/",
   License = "NASA"

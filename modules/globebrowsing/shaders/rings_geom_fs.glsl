@@ -31,6 +31,7 @@ in float vs_screenSpaceDepth;
 uniform sampler1D ringTexture;
 uniform vec2 textureOffset;
 
+
 Fragment getFragment() {
   // Moving the origin to the center
   vec2 st = (vs_st - vec2(0.5)) * 2.0;

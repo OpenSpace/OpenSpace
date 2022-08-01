@@ -33,10 +33,10 @@ in vec4 vs_position;
 uniform sampler1D texture1;
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
-
 uniform bool hasSunPosition;
 uniform vec3 sunPosition;
 uniform float _nightFactor;
+
 
 Fragment getFragment() {
   // Moving the origin to the center

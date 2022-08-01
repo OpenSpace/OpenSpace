@@ -45,7 +45,7 @@ documentation::Documentation SizeReferenceTileProvider::Documentation() {
 }
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-    : TextTileProvider(tileTextureInitData(layergroupid::GroupID::ColorLayers, false))
+    : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
 {
     ZoneScoped
 

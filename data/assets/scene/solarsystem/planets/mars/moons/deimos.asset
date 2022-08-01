@@ -50,7 +50,7 @@ local Deimos = {
   GUI = {
     Name = "Deimos",
     Path = "/Solar System/Planets/Mars",
-    Description = [[One of two moons of Mars.]]
+    Description = "One of two moons of Mars"
   }
 }
 
@@ -72,7 +72,7 @@ local DeimosTrail = {
   GUI = {
     Name = "Deimos Trail",
     Path = "/Solar System/Planets/Mars",
-    Description = [[Trail for Deimos]]
+    Description = "Trail for Deimos"
   }
 }
 
@@ -93,7 +93,7 @@ asset.export(DeimosTrail)
 asset.meta = {
   Name = "Deimos",
   Version = "1.0",
-  Description = [[ RenderableModel and Trail for Deimos.]],
+  Description = "RenderableModel and Trail for Deimos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

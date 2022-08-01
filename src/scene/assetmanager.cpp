@@ -36,7 +36,7 @@
 #include "assetmanager_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "AssetManager";
+    constexpr std::string_view _loggerCat = "AssetManager";
 
     constexpr const char* AssetGlobalVariableName = "asset";
 

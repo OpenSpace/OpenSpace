@@ -52,7 +52,7 @@ local Venus = {
   GUI = {
     Name = "Venus",
     Path = "/Solar System/Planets/Venus",
-    Description = "Venus globe with labels and map layers."
+    Description = "Venus globe with labels and map layers"
   }
 }
 
@@ -73,7 +73,7 @@ local VenusLabel = {
   GUI = {
       Name = "Venus Label",
       Path = "/Solar System/Planets/Venus",
-      Description = "Label for Venus, viewable within the solar system."
+      Description = "Label for Venus, viewable within the solar system"
   }
 }
 
@@ -95,7 +95,7 @@ asset.export(VenusLabel)
 asset.meta = {
     Name = "Venus",
     Version = "1.1",
-    Description = [[ Venus globe with labels, and main planet label.]],
+    Description = "Venus globe with labels, and main planet label",
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license"

@@ -38,19 +38,17 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr const char* DestinationFrame = "GALACTIC";
-
-    constexpr const std::array<const char*, 7> MainUniformNames = {
+    constexpr std::array<const char*, 7> MainUniformNames = {
         "performShading", "directionToSunViewSpace", "modelViewTransform",
         "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
     };
 
-    constexpr const std::array<const char*, 6> FboUniformNames = {
+    constexpr std::array<const char*, 6> FboUniformNames = {
         "projectionTexture", "depthTexture", "needShadowMap", "ProjectorMatrix",
         "ModelTransform", "boresight"
     };
 
-    constexpr const std::array<const char*, 2> DepthFboUniformNames = {
+    constexpr std::array<const char*, 2> DepthFboUniformNames = {
         "ProjectorMatrix", "ModelTransform"
     };
 
@@ -59,7 +57,7 @@ namespace {
         "Perform Shading",
         "If this value is enabled, the model will be shaded based on the relative "
         "location to the Sun. If this value is disabled, shading is disabled and the "
-        "entire model is rendered brightly."
+        "entire model is rendered brightly"
     };
 
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
@@ -385,7 +383,7 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
 {
     _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
         _projectionComponent.instrumentId(),
-        DestinationFrame,
+        "GALACTIC",
         time
     );
 
@@ -398,7 +396,7 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
     const glm::dvec3 p = SpiceManager::ref().targetPosition(
         _projectionComponent.projectorId(),
         _projectionComponent.projecteeId(),
-        DestinationFrame,
+        "GALACTIC",
         _projectionComponent.aberration(),
         time,
         lightTime

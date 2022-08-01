@@ -24,8 +24,8 @@ local states = {
   },
   {
     Identifier = "Earth",
-    Enter = "openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", true)",
-    Exit = "openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", false)"
+    Enter = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", true)',
+    Exit = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", false)'
   },
   {
     Identifier = "Moon"

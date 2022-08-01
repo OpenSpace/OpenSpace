@@ -31,6 +31,7 @@ uniform int sides;
 
 const float PI = 3.1415926;
 
+
 void main() {
   vec4 v0 = gl_in[0].gl_Position;
     

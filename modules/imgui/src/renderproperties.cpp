@@ -115,7 +115,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     int value = *p;
     const std::vector<OptionProperty::Option>& options = p->options();
     switch (p->displayType()) {
-        case OptionProperty::DisplayType::Radio: {
+        case OptionProperty::DisplayType::Radio:
             ImGui::Text("%s", name.c_str());
             ImGui::Separator();
             for (const OptionProperty::Option& o : options) {
@@ -126,7 +126,6 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
             }
             ImGui::Separator();
             break;
-        }
         case OptionProperty::DisplayType::Dropdown: {
             // The order of the options does not have to correspond with the value of the
             // option
@@ -218,7 +217,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 
     const std::string value = p->value();
 
-    static const int bufferSize = 256;
+    static constexpr int bufferSize = 256;
     static char buffer[bufferSize];
 #ifdef _MSC_VER
     strcpy_s(buffer, value.length() + 1, value.c_str());

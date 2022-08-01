@@ -21,7 +21,7 @@ local MarsTrail = {
   GUI = {
     Name = "Mars Trail",
     Path = "/Solar System/Planets/Mars",
-    Description = [[ Trail of Mars as observed by the Sun. Data from NASA Spice (see
+    Description = [[Trail of Mars as observed by the Sun. Data from NASA Spice (see
       base spice asset)]],
   }
 }
@@ -41,7 +41,7 @@ asset.export(MarsTrail)
 asset.meta = {
   Name = "Mars Trail",
   Version = "1.1",
-  Description = [[ Main Mars trail from SPICE.]],
+  Description = "Main Mars trail from SPICE",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

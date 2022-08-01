@@ -32,7 +32,7 @@ namespace {
         "Scale",
         "Scale",
         "This value is used as a scaling factor for the scene graph node that this "
-        "transformation is attached to relative to its parent."
+        "transformation is attached to relative to its parent"
     };
 
     struct [[codegen::Dictionary(StaticScale)]] Parameters {

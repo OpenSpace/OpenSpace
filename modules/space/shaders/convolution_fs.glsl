@@ -24,14 +24,15 @@
 
 #version __CONTEXT__
 
-out vec4 renderTableColor;
-
 in vec2 vs_uv;
+
+out vec4 renderTableColor;
 
 uniform int psfTextureSize;
 uniform int convolvedfTextureSize;
 uniform sampler2D psfTexture;
 uniform sampler2D shapeTexture;
+
 
 void main() {
   float fullColor = 0.0;

@@ -55,7 +55,7 @@ local Saturn = {
   GUI = {
     Name = "Saturn",
     Path = "/Solar System/Planets/Saturn",
-    Description = [[Saturn globe.]]
+    Description = "Saturn globe"
   }
 }
 
@@ -76,7 +76,7 @@ local SaturnLabel = {
   GUI = {
     Name = "Saturn Label",
     Path = "/Solar System/Planets/Saturn",
-    Description = [[ Main planet label for Saturn.]],
+    Description = "Main planet label for Saturn",
   }
 }
 
@@ -98,7 +98,7 @@ asset.export(SaturnLabel)
 asset.meta = {
   Name = "Saturn",
   Version = "1.1",
-  Description = [[ Saturn globe, and main planet label.]],
+  Description = "Saturn globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

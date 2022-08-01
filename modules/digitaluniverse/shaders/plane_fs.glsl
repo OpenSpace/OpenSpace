@@ -31,6 +31,7 @@ uniform sampler2D galaxyTexture;
 uniform float alphaValue;
 uniform float fadeInValue;
 
+
 Fragment getFragment() {
   Fragment frag;
 

@@ -30,6 +30,7 @@ uniform vec3 color;
 uniform float alphaValue;
 uniform sampler2D spriteTexture;
 
+
 Fragment getFragment() {
   Fragment frag;
 

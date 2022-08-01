@@ -22,45 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
+#include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
 
-uniform bool _exit_;
-out vec4 _out_color_;
+in vec3 vPosition;
+in vec4 worldPosition;
 
-void main() {
-    Fragment frag = getFragment();
 
-    int sampleMask = gl_SampleMaskIn[0];
+Fragment getFragment() {
+  vec4 position = worldPosition;
+  float depth = pscDepth(position);
 
-    if (frag.depth < 0) {
-    //        discard;
-        }
-
-    
-    uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-    uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
-
-    ABufferFragment aBufferFrag;
-    _position_(aBufferFrag, frag.color.rgb);
-    _depth_(aBufferFrag, frag.depth);
-    _blend_(aBufferFrag, frag.blend);
-
-    int fragmentType = #{fragmentType};
-
-    if (_exit_) {
-        fragmentType *= -1;
-    }
-
-    _type_(aBufferFrag, fragmentType);
-    _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-    
-    _next_(aBufferFrag, prevHead);
-
-    storeFragment(newHead, aBufferFrag);
-    discard;
+  Fragment frag;
+  frag.color = vec4(vPosition + 0.5, 1.0);
+  frag.depth = depth;
+  return frag;
 }

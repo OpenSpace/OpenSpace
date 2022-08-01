@@ -47,22 +47,23 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "SmallSolarSystemBody";
+    constexpr std::string_view _loggerCat = "SmallSolarSystemBody";
 
-    static const openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous Mode",
         "If enabled, then the contiguous set of objects starting from StartRenderIdx "
         "of size RenderSize will be rendered. If disabled, then the number of objects "
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
-        "full length of the data file."
+        "full length of the data file"
     };
-    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
+    
+    constexpr openspace::properties::Property::PropertyInfo UpperLimitInfo = {
         "UpperLimit",
         "Upper Limit",
         "Upper limit on the number of objects for this renderable, regardless of "
         "how many objects are contained in the data file. Produces an evenly-distributed"
-        "sample from the data file."
+        "sample from the data file"
     };
 
     double importAngleValue(const std::string& angle) {
@@ -166,7 +167,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
 void RenderableSmallBody::readDataFile(const std::string& filename) {
     if (!std::filesystem::is_regular_file(filename)) {
         throw ghoul::RuntimeError(fmt::format(
-            "JPL SBDB file {} does not exist.", filename
+            "JPL SBDB file {} does not exist", filename
         ));
     }
 
@@ -250,7 +251,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
                 catch (std::invalid_argument&) {
                     constexpr std::string_view errMsg = "Unable to convert field {} to "
                         "double value (invalid_argument exception). Ignoring line {}/{} "
-                        "of {}.";
+                        "of {}";
                     LINFO(fmt::format(
                         errMsg,
                         fieldCount, csvLine + 1, numberOfLines, filename
@@ -259,7 +260,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
                 catch (std::out_of_range&) {
                     constexpr std::string_view errMsg = "Unable to convert field {} to "
                         "double value (out_of_range exception). Ignoring line {}/{} of "
-                        "{}.";
+                        "{}";
                     LINFO(fmt::format(
                         errMsg,
                         fieldCount, csvLine + 1, numberOfLines, filename
@@ -273,7 +274,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
                     _data.clear();
                     _sbNames.clear();
                     LERROR(fmt::format(
-                        "Abandoning data file {} (too many sequential line errors).",
+                        "Abandoning data file {} (too many sequential line errors)",
                         filename
                     ));
                     break;

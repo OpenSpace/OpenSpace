@@ -38,6 +38,7 @@ uniform bool hasBaseMap;
 uniform vec4 objpos;
 uniform vec3 sun_pos;
 
+
 Fragment getFragment() {
   vec2 st = vs_st;
   if (meridianShift) {

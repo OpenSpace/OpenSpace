@@ -147,19 +147,19 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
         layout->addWidget(bottomBorder);
 
         _cancelButton = new QPushButton("Cancel");
-        _cancelButton->setToolTip("Cancel changes.");
+        _cancelButton->setToolTip("Cancel changes");
         _cancelButton->setFocusPolicy(Qt::NoFocus);
         connect(_cancelButton, &QPushButton::released, this, &SgctEdit::reject);
         layoutButtonBox->addWidget(_cancelButton);
 
         _saveButton = new QPushButton("Save As");
-        _saveButton->setToolTip("Save configuration changes.");
+        _saveButton->setToolTip("Save configuration changes");
         _saveButton->setFocusPolicy(Qt::NoFocus);
         connect(_saveButton, &QPushButton::released, this, &SgctEdit::save);
         layoutButtonBox->addWidget(_saveButton);
 
         _applyButton = new QPushButton("Apply Without Saving");
-        _applyButton->setToolTip("Apply configuration changes without saving to file.");
+        _applyButton->setToolTip("Apply configuration changes without saving to file");
         _applyButton->setFocusPolicy(Qt::NoFocus);
         connect(_applyButton, &QPushButton::released, this, &SgctEdit::apply);
         layoutButtonBox->addWidget(_applyButton);

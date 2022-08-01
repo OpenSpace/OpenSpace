@@ -32,7 +32,7 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "IswaDataGroup";
+    constexpr std::string_view _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {

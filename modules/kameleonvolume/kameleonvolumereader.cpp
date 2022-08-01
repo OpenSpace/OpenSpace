@@ -53,7 +53,7 @@
 #endif // WIN32
 
 namespace {
-    constexpr const char* _loggerCat = "KameleonVolumeReader";
+    constexpr std::string_view _loggerCat = "KameleonVolumeReader";
 
     template <typename T>
     T globalAttribute(ccmc::Model&, const std::string&) {

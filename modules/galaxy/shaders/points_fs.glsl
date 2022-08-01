@@ -32,6 +32,7 @@ in float vs_starBrightness;
 
 uniform float opacityCoefficient;
 
+
 Fragment getFragment() {
   Fragment frag;
 

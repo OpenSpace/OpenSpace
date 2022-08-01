@@ -159,7 +159,7 @@ private:
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-    inline static const double InteractionHystersis = 0.0125;
+    static constexpr double InteractionHystersis = 0.0125;
     bool _inAnchorApproachSphere = false;
     bool _inAnchorReachSphere = false;
 

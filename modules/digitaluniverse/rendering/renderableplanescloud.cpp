@@ -30,7 +30,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -48,10 +47,9 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderablePlanesCloud";
-    constexpr const char* ProgramObjectName = "RenderablePlanesCloud";
+    constexpr std::string_view _loggerCat = "RenderablePlanesCloud";
 
-    constexpr const int PlanesVertexDataSize = 36;
+    constexpr int PlanesVertexDataSize = 36;
 
     constexpr std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "alphaValue", "fadeInValue", "galaxyTexture"
@@ -66,110 +64,108 @@ namespace {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
+        "size of each point"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
-        "The text color for the astronomical object."
+        "The text color for the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
         "Text Opacity",
         "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent."
+        "and 0 fully transparent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
-        "The text size for the astronomical object labels."
+        "The text size for the astronomical object labels"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
         "Label File",
         "The path to the label file that contains information about the astronomical "
-        "objects being rendered."
+        "objects being rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
         "TextMinSize",
         "Text Min Size",
         "The minimal size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
+        "objects being rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
         "TextMaxSize",
         "Text Max Size",
         "The maximum size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
+        "objects being rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects."
+        "Enables/Disables the drawing of the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to each astronomical object."
+        "Transformation matrix to be applied to each astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane."
+        "This determines the blending mode that is applied to this plane"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture Path",
-        "This value specifies the path for the textures in disk."
+        "This value specifies the path for the textures in disk"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LuminosityInfo = {
         "Luminosity",
         "Luminosity variable",
-        "Datavar variable to control the luminosity/size of the astronomical objects."
+        "Datavar variable to control the luminosity/size of the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleLuminosityInfo = {
         "ScaleLuminosity",
         "ScaleLuminosity variable",
-        "Scaling control for the luminosity/size of the astronomical objects."
+        "Scaling control for the luminosity/size of the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts."
+        "Debug option for rendering of billboards and texts"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
-        "our galaxy from which the astronomical object will start and end "
-        "fading-in."
+        "our galaxy from which the astronomical object will start and end fading-in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in effect",
-        "Enables/Disables the Fade-in effect."
+        "Enables/Disables the Fade-in effect"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PlaneMinSizeInfo = {
         "PlaneMinSize",
         "Plane Min Size in Pixels",
-        "The min size (in pixels) for the plane representing the astronomical "
-        "object."
+        "The min size (in pixels) for the plane representing the astronomical object"
     };
 
     struct [[codegen::Dictionary(RenderablePlanesCloud)]] Parameters {
@@ -390,7 +386,7 @@ void RenderablePlanesCloud::initializeGL() {
     ZoneScoped
 
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
+        "RenderablePlanesCloud",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "RenderablePlanesCloud",
@@ -407,7 +403,7 @@ void RenderablePlanesCloud::initializeGL() {
 
     if (_hasLabel) {
         if (!_font) {
-            constexpr const int FontSize = 30;
+            constexpr int FontSize = 30;
             _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(FontSize),
@@ -431,7 +427,7 @@ void RenderablePlanesCloud::deinitializeGL() {
     deleteDataGPUAndCPU();
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
+        "RenderablePlanesCloud",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

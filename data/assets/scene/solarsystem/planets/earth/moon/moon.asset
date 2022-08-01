@@ -71,7 +71,7 @@ asset.export(Moon)
 asset.meta = {
   Name = "Moon",
   Version = "1.1",
-  Description = [[ Moon globe with labels. ]],
+  Description = "Moon globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -32,15 +32,16 @@ out vec4 vs_positionViewSpace;
 uniform dmat4 modelViewTransform;
 uniform dmat4 MVPTransform;
 
+
 void main() {
-    dvec4 objPosDouble = dvec4(in_position, 1.0);
-    dvec4 positionViewSpace = modelViewTransform * objPosDouble;
-    dvec4 positionClipSpace = MVPTransform * objPosDouble;
+  dvec4 objPosDouble = dvec4(in_position, 1.0);
+  dvec4 positionViewSpace = modelViewTransform * objPosDouble;
+  dvec4 positionClipSpace = MVPTransform * objPosDouble;
     
-    positionClipSpace.z = 0.0;
+  positionClipSpace.z = 0.0;
     
-    vs_depthClipSpace = float(positionClipSpace.w);
-    vs_positionViewSpace = vec4(positionViewSpace);
+  vs_depthClipSpace = float(positionClipSpace.w);
+  vs_positionViewSpace = vec4(positionViewSpace);
     
-    gl_Position = vec4(positionClipSpace);
+  gl_Position = vec4(positionClipSpace);
 }

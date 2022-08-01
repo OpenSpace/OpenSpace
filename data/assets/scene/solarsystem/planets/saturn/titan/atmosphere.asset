@@ -58,7 +58,7 @@ asset.export(Atmosphere)
 asset.meta = {
   Name = "Titan Atmosphere",
   Version = "1.1",
-  Description = [[ RenderableAtmosphere for Titan.]],
+  Description = "RenderableAtmosphere for Titan",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

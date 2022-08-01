@@ -31,8 +31,10 @@
 
 namespace openspace {
 
-std::pair<double, std::string> simplifyDistance(double meters, bool forceSingularForm) {
-    constexpr const double GraceFactor = 0.5;
+std::pair<double, std::string_view> simplifyDistance(double meters,
+                                                     bool forceSingularForm)
+{
+    constexpr double GraceFactor = 0.5;
 
     const double metersVal = glm::abs(meters);
 

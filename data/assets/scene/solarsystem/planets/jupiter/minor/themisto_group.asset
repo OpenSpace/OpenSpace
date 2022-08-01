@@ -56,8 +56,8 @@ end
 asset.meta = {
   Name = "Jupiter Themisto Group Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Jupiter's Themisto Group
-    moons: Themisto. Blank globes and SPICE trails are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Jupiter's Themisto Group moons:
+    Themisto. Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

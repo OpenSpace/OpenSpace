@@ -36,7 +36,7 @@
 #include <thread>
 
 namespace {
-    constexpr const char* _loggerCat = "DownloadManager";
+    constexpr std::string_view _loggerCat = "DownloadManager";
 
     struct ProgressInformation {
         std::shared_ptr<openspace::DownloadManager::FileFuture> future;
@@ -280,10 +280,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                 LWARNING(fmt::format("Error downloading '{}': {}", url, err));
             }
             curl_easy_cleanup(curl);
-            // Throw an error and use try-catch around call to future.get()
-            //throw std::runtime_error( err );
-
-            // or set a boolean variable in MemoryFile to determine if it is
+            // Set a boolean variable in MemoryFile to determine if it is
             // valid/corrupted or not.
             // Return MemoryFile even if it is not valid, and check if it is after
             // future.get() call.

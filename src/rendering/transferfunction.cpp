@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/transferfunction.h>
 
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -37,7 +36,7 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "TransferFunction";
+    constexpr std::string_view _loggerCat = "TransferFunction";
 } // namespace
 
 namespace openspace {
@@ -58,7 +57,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     }
     std::filesystem::path f = absPath(filepath);
     if (!std::filesystem::is_regular_file(f)) {
-        LERROR("Could not find transfer function file.");
+        LERROR("Could not find transfer function file");
         _file = nullptr;
         return;
     }

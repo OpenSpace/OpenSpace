@@ -6,7 +6,7 @@ local group = {
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=visual&FORMAT=TLE",
   TrailColor = { 0.55, 0.25, 0.65 },
   Description = [[The 100 (or so) satellites that will appear brightest when viewed 
-  from Earth.]]
+    from Earth]]
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
@@ -16,7 +16,7 @@ shared.registerSatelliteGroupObjects(asset, group, tle, true)
 asset.meta = {
   Name = "Satellites 100 Brightest",
   Version = "1.0",
-  Description = [[ Satellites asset for 100 Brightest. Data from Celestrak]],
+  Description = "Satellites asset for 100 Brightest. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

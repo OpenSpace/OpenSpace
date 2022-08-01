@@ -29,7 +29,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Coordinateconversion";
+    constexpr std::string_view _loggerCat = "Coordinateconversion";
 
     // J2000 Galactic reference frame
     // Equatorial coordinates of the Galactic north pole

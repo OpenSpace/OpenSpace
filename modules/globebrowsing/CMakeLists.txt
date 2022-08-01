@@ -87,6 +87,7 @@ set(SOURCE_FILES
   src/layer.cpp
   src/layeradjustment.cpp
   src/layergroup.cpp
+  src/layergroupid.cpp
   src/layermanager.cpp
   src/layerrendersettings.cpp
   src/memoryawaretilecache.cpp

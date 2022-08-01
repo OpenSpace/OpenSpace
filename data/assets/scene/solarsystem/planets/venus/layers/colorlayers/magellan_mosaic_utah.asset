@@ -4,7 +4,7 @@ local layer = {
   Identifier = "Magellan_Mosaic_Utah",
   Name = "Magellan Mosaic [Utah]",
   Enabled = asset.enabled,
-  Description = [[ Color layer for Venus. This mosaic was created from the Magellan
+  Description = [[Color layer for Venus. This mosaic was created from the Magellan
     F-BIDRs, (Full resolution Basic Image Data Records), the highest resolution
     radar images of the Venus surface (~75 m/pixel). Because Venus is shrouded by a
     dense, opaque atmosphere, conventional optical cameras cannot be used to image
@@ -43,7 +43,7 @@ asset.meta = {
   Name = "Venus Magellan Mosaic",
   Version = "1.0",
   Description = [[Map layer for Venus containting Venus Magellan Mosaic from the USGS.
-    Hosted on the OpenSpace servers in Utah.]],
+    Hosted on the OpenSpace servers in Utah]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Venus/Magellan/" ..
     "Venus_Magellan_LeftLook_mosaic_global_75m",

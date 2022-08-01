@@ -40,7 +40,7 @@ public:
     bool isDone() const override;
 
 private:
-    static const int UnsetOnChangeHandle = -1;
+    static constexpr int UnsetOnChangeHandle = -1;
 
     bool _sendState;
     bool _sendFiles;

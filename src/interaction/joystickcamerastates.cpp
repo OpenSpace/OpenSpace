@@ -32,7 +32,7 @@
 #include <utility>
 
 namespace {
-    constexpr const char* _loggerCat = "JoystickCameraStates";
+    constexpr std::string_view _loggerCat = "JoystickCameraStates";
 } // namespace
 
 namespace openspace::interaction {
@@ -356,7 +356,7 @@ void JoystickCameraStates::clearButtonCommand(const std::string& joystickName,
     }
 
     for (auto it = joystick->buttonMapping.begin();
-         it != joystick->buttonMapping.end(); )
+         it != joystick->buttonMapping.end();)
     {
         // If the current iterator is the button that we are looking for, delete it
         // (std::multimap::erase will return the iterator to the next element for us)

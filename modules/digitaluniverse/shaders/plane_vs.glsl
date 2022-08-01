@@ -34,6 +34,7 @@ out float vs_screenSpaceDepth;
 
 uniform dmat4 modelViewProjectionTransform;
 
+
 void main() {
   vs_st = in_st;
   vec4 positionClipSpace = vec4(modelViewProjectionTransform * dvec4(in_position));

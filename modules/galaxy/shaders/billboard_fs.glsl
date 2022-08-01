@@ -31,6 +31,7 @@ flat in float ge_screenSpaceDepth;
 
 uniform sampler2D psfTexture;
 
+
 Fragment getFragment() {
   vec4 textureColor = texture(psfTexture, 0.5 * psfCoords + 0.5);
   vec4 fullColor = vec4(ge_color * textureColor.a, textureColor.a);

@@ -41,9 +41,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "Sphere";
-
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr std::array<const char*, 5> UniformNames = {
         "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
         "mirrorTexture"
     };
@@ -59,52 +57,52 @@ namespace {
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
         "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection."
+        "projection"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror Texture",
-        "Mirror the texture along the x-axis."
+        "Mirror the texture along the x-axis"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
-        "outside of the sphere, or both."
+        "outside of the sphere, or both"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that the sphere is separated in."
+        "This value specifies the number of segments that the sphere is separated in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the radius of the sphere in meters."
+        "This value specifies the radius of the sphere in meters"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
         "FadeOutThreshold",
         "Fade-Out Threshold",
         "This value determines percentage of the sphere is visible before starting "
-        "fading-out it."
+        "fading-out it"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
         "FadeInThreshold",
         "Fade-In Threshold",
         "Distance from center of MilkyWay from where the astronomical object starts to "
-        "fade in."
+        "fade in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable Fade-In/Fade-Out effects",
-        "Enables/Disables the Fade-In/Out effects."
+        "Enables/Disables the Fade-In/Out effects"
     };
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
@@ -228,10 +226,10 @@ void RenderableSphere::initializeGL() {
     _sphere->initialize();
 
     _shader = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "Sphere",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "Sphere",
                 absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
             );
@@ -247,7 +245,7 @@ void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "Sphere",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }

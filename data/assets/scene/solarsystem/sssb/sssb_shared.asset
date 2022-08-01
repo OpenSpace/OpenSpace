@@ -43,7 +43,7 @@ asset.export("createSssbGroupObject", createSssbGroupObject)
 asset.meta = {
   Name = "SSSB shared",
   Version = "1.0",
-  Description = [[ UTILITY ASSET; This asset is for builders and coders.]],
+  Description = [[ UTILITY ASSET; This asset is for builders and coders]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

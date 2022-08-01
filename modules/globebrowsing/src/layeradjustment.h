@@ -43,7 +43,7 @@ public:
 
     void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
 
-    layergroupid::AdjustmentTypeID type() const;
+    layers::Adjustment::ID type() const;
 
     glm::vec3 chromaKeyColor() const;
     float chromaKeyTolerance() const;
@@ -59,7 +59,7 @@ private:
     properties::FloatProperty _chromaKeyTolerance;
 
     properties::OptionProperty _typeOption;
-    layergroupid::AdjustmentTypeID _type;
+    layers::Adjustment::ID _type;
 
     std::function<void(void)> _onChangeCallback;
 };

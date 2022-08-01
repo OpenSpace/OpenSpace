@@ -263,10 +263,10 @@ end
 asset.meta = {
   Name = "Uranus Irregular Retrograde Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Uranus' irregular retrograde
-    moons: Cordelia, Ophelia, Bianca, Cressida, Desdemona, Juliet, Portia, Rosalind,
-    Cupid, Belinda, Perdita, Puck and Mab. Blank globes and SPICE trails are
-    generated for each moon.]],
+  Description = [[Procedural Globe asset containing Uranus' irregular retrograde moons:
+    Cordelia, Ophelia, Bianca, Cressida, Desdemona, Juliet, Portia, Rosalind, Cupid,
+    Belinda, Perdita, Puck and Mab. Blank globes and SPICE trails are generated for each
+    moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

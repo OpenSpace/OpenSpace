@@ -63,6 +63,8 @@ public:
     glm::vec3 cartesianCoordinatesFromGeo(const globebrowsing::RenderableGlobe& globe,
         double latitude, double longitude, double altitude);
 
+    glm::dvec3 geoPosition() const;
+
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
@@ -110,17 +112,6 @@ private:
 
     glm::dquat lookDownCameraRotation(const globebrowsing::RenderableGlobe& globe,
         glm::dvec3 cameraPositionModelSpace, globebrowsing::Geodetic2 geo2);
-
-    /**
-     \return a comma separated list of layer group names.
-     */
-    static std::string layerGroupNamesList();
-
-    /**
-     \return a comma separated list of layer type names.
-     */
-    static std::string layerTypeNamesList();
-
 
     properties::BoolProperty _wmsCacheEnabled;
     properties::BoolProperty _offlineMode;

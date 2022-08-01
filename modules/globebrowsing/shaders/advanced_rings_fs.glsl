@@ -38,15 +38,14 @@ uniform sampler1D ringTextureBckwrd;
 uniform sampler1D ringTextureUnlit;
 uniform sampler1D ringTextureColor;
 uniform sampler1D ringTextureTransparency;
-
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
-
 uniform vec3 sunPosition;
 uniform vec3 sunPositionObj;
 uniform vec3 camPositionObj;
 uniform float nightFactor;
 uniform float zFightingPercentage;
+
 
 Fragment getFragment() {
   // Moving the origin to the center
@@ -98,8 +97,8 @@ Fragment getFragment() {
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  0));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  NSSamples - #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               , -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               ,  NSSamples - #{i}));
+      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0, -NSSamples + #{i}));
+      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0,  NSSamples - #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));

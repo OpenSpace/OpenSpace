@@ -35,6 +35,7 @@ uniform int SAMPLES_NU;
 uniform int layer;
 uniform sampler3D deltaSTexture;
 
+
 void main() {
   vec2 p = gl_FragCoord.xy - vec2(0.5);
 
