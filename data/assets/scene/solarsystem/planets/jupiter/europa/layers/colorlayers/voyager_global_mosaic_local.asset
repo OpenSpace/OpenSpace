@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Identifier = "Voyager_Global_Mosaic_Local",
   Name = "Voyager Global Mosaic [Local]",
+  Enabled = asset.enabled,
   FilePath = texturesPath .. "evgos.vrt",
   BlendMode = "Color"
 }

@@ -2,7 +2,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Coastlines",
-  FilePath = asset.localResource("coastlines.wms")
+  FilePath = asset.localResource("coastlines.wms"),
+  Enabled = asset.enabled
 }
 
 asset.onInitialize(function()

@@ -26,6 +26,7 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
@@ -33,6 +34,7 @@ local layer = {
 local layer_floods = {
   Identifier = Identifier .. "-floods",
   Name = Name .. " (Floods)",
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "flood_3600.png",
   Description = Description
 }

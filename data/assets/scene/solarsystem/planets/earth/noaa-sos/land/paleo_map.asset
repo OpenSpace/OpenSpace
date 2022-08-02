@@ -124,6 +124,7 @@ for i,v in ipairs(layers_names) do
   local layer = {
     Identifier = Identifier .. "-" .. v,
     Name = Name .. " " .. v,
+    Enabled = asset.enabled,
     FilePath = imagesDestination .. '/' .. v .. ".jpg",
     Description = Description
   }
@@ -134,6 +135,7 @@ end
 local legend = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "legend.jpg",
   FaceCamera = false,

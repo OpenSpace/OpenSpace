@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "MOC_WA_Color_LiU",
   Name = "MOC WA Color [Sweden]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("moc_wa_color_sweden.wms"),
   Settings = {
     Gamma = 1.6,

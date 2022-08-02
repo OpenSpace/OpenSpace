@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "HiRISE-LS",
   Name = "HiRISE Local Set",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("hirisels.vrt"),
   BlendMode = "Color",
   Description = [[HiRISE (High Resolution Imaging Science Experiment) is the most

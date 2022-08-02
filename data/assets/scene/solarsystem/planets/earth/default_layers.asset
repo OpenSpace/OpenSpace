@@ -1,51 +1,38 @@
 -- Color layers
-asset.require("./layers/colorlayers/blue_marble")
-local colorLayer = asset.require("./layers/colorlayers/esri_viirs_combo")
-asset.require("./layers/colorlayers/esri_world_imagery") 
-asset.require("./layers/colorlayers/esri_imagery_world_2D")
-asset.require("./layers/colorlayers/viirs_snpp_temporal")
-asset.require("./layers/colorlayers/aqua_modis_temporal")
-asset.require("./layers/colorlayers/terra_modis_temporal")
-asset.require("./layers/colorlayers/bmng_utah")
-asset.require("./layers/colorlayers/bmng_sweden")
-asset.require("./layers/colorlayers/amsr2_gcom_w1_sea_ice_concentration_temporal") 
-asset.require("./layers/colorlayers/modis_terra_chlorophyll_a_temporal")
-asset.require("./layers/colorlayers/ghrsst_l4_g1sst_sea_surface_temperature_temporal")
-asset.require("./layers/colorlayers/ghrsst_l4_mur_sea_surface_temperature_temporal")
+asset.require("./layers/colorlayers/blue_marble", false)
+asset.require("./layers/colorlayers/esri_viirs_combo", true)
+asset.require("./layers/colorlayers/esri_world_imagery", false) 
+asset.require("./layers/colorlayers/esri_imagery_world_2D", false)
+asset.require("./layers/colorlayers/viirs_snpp_temporal", false)
+asset.require("./layers/colorlayers/aqua_modis_temporal", false)
+asset.require("./layers/colorlayers/terra_modis_temporal", false)
+asset.require("./layers/colorlayers/bmng_utah", false)
+asset.require("./layers/colorlayers/bmng_sweden", false)
+asset.require("./layers/colorlayers/amsr2_gcom_w1_sea_ice_concentration_temporal", false) 
+asset.require("./layers/colorlayers/modis_terra_chlorophyll_a_temporal", false)
+asset.require("./layers/colorlayers/ghrsst_l4_g1sst_sea_surface_temperature_temporal", false)
+asset.require("./layers/colorlayers/ghrsst_l4_mur_sea_surface_temperature_temporal", false)
 
 -- Height layers
-asset.require("./layers/heightlayers/blue_marble_height")
-local heightLayer = asset.require("./layers/heightlayers/terrain_tileset")
+asset.require("./layers/heightlayers/blue_marble_height", false)
+asset.require("./layers/heightlayers/terrain_tileset", true)
 
 -- Night layers
-local nightLayer = asset.require("./layers/nightlayers/earth_at_night_2012")
-asset.require("./layers/nightlayers/earth_night_texture")
-asset.require("./layers/nightlayers/earth_at_night_temporal")
+ asset.require("./layers/nightlayers/earth_at_night_2012", true)
+asset.require("./layers/nightlayers/earth_night_texture", false)
+asset.require("./layers/nightlayers/earth_at_night_temporal", false)
 
 -- Overlays
-asset.require("./layers/overlays/coastlines")
-asset.require("./layers/overlays/reference_features")
-asset.require("./layers/overlays/reference_labels")
-asset.require("./layers/overlays/tile_indices")
-asset.require("./layers/overlays/size_reference")
+asset.require("./layers/overlays/coastlines", false)
+asset.require("./layers/overlays/reference_features", false)
+asset.require("./layers/overlays/reference_labels", false)
+asset.require("./layers/overlays/tile_indices", false)
+asset.require("./layers/overlays/size_reference", false)
 
 -- Watermasks
-asset.require("./layers/watermasks/gebco_sweden")
-asset.require("./layers/watermasks/gebco_utah") 
-local watermask = asset.require("./layers/watermasks/modis_water_mask")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.HeightLayers." ..
-    heightLayer.layer.Identifier .. ".Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers." ..
-    nightLayer.layer.Identifier .. ".Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.WaterMasks." ..
-    watermask.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/watermasks/gebco_sweden", false)
+asset.require("./layers/watermasks/gebco_utah", false)
+asset.require("./layers/watermasks/modis_water_mask", true)
 
 
 asset.meta = {
