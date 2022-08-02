@@ -29,6 +29,7 @@
 
 #include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -84,13 +85,15 @@ private:
         // "If you wish to draw a line between points, then numU will be 1 while
         // numV will equal the number of points to connect.
         // If you want a square, 4000×4000 grid with lines every 200 units,
-        // then numU numU will both equal 21
+        // then numU numV will both equal 21
         int numU;
         int numV;
         MeshType style;
         std::vector<GLuint> vaoArray;
         std::vector<GLuint> vboArray;
         std::vector<GLfloat> vertices;
+        bool isEnabled = true;
+        std::string name;
     };
 
     void createMeshes();
@@ -101,6 +104,15 @@ private:
 
     bool loadData();
     bool readSpeckFile();
+
+    /// Fills the <code>_selectedMeshes</code> property with all available meshes
+    void fillSelectionProperty();
+
+    /**
+     * Callback method that gets triggered when <code>_selectedMeshes</code>
+     * changes.
+     */
+    void selectionPropertyHasChanged();
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
@@ -114,6 +126,7 @@ private:
     properties::BoolProperty _drawLabels;
     properties::IVec2Property _textMinMaxSize;
     properties::FloatProperty _lineWidth;
+    properties::SelectionProperty _selectedMeshes;
 
     // DEBUG:
     properties::OptionProperty _renderOption;
