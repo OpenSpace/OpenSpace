@@ -56,6 +56,7 @@ public:
     explicit RenderableDUMeshes(const ghoul::Dictionary& dictionary);
     ~RenderableDUMeshes() override = default;
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -118,6 +119,7 @@ private:
     bool _dataIsDirty = true;
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
+    std::vector<std::string> _assetSelectedMeshes;
 
     properties::Vec3Property _textColor;
     properties::FloatProperty _textOpacity;

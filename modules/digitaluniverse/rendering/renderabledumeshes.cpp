@@ -262,22 +262,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     _selectedMeshes.onChange([this]() { selectionPropertyHasChanged(); });
     addProperty(_selectedMeshes);
 
-    if (p.selectedMeshes.has_value()) {
-        const std::vector<std::string> options = _selectedMeshes.options();
-        std::set<std::string> selectedNames;
-
-        for (const std::string& s : *p.selectedMeshes) {
-            const auto it = std::find(options.begin(), options.end(), s);
-            if (it == options.end()) {
-                // The user has specified a mesh name that doesn't exist
-                LWARNING(fmt::format("Option '{}' not found in list of meshes", s));
-            }
-            else {
-                selectedNames.insert(s);
-            }
-        }
-         _selectedMeshes = selectedNames;
-    }
+    _assetSelectedMeshes = p.selectedMeshes.value_or(_assetSelectedMeshes);
 }
 
 void RenderableDUMeshes::fillSelectionProperty() {
@@ -318,6 +303,30 @@ bool RenderableDUMeshes::isReady() const {
         (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
 }
 
+void RenderableDUMeshes::initialize() {
+    bool success = loadData();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
+    }
+
+    fillSelectionProperty();
+
+    const std::vector<std::string> options = _selectedMeshes.options();
+    std::set<std::string> selectedNames;
+
+    for (const std::string& s : _assetSelectedMeshes) {
+        const auto it = std::find(options.begin(), options.end(), s);
+        if (it == options.end()) {
+            // The user has specified a mesh name that doesn't exist
+            LWARNING(fmt::format("Option '{}' not found in list of meshes", s));
+        }
+        else {
+            selectedNames.insert(s);
+        }
+    }
+    _selectedMeshes = selectedNames;
+}
+
 void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         "RenderableDUMeshes",
@@ -331,11 +340,6 @@ void RenderableDUMeshes::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-
-    bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
-    }
 
     createMeshes();
 
@@ -690,8 +694,6 @@ bool RenderableDUMeshes::readSpeckFile() {
             }
         }
     }
-
-    fillSelectionProperty();
     setBoundingSphere(maxRadius);
 
     return true;
