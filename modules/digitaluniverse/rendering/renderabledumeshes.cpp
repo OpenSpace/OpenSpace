@@ -123,8 +123,8 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MeshSelectionInfo = {
         "MeshSelection",
-        "Mesh Selection",
-        "Property to select one or more of the meshes to be rendered."
+        "Selection",
+        "Selected objects"
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
