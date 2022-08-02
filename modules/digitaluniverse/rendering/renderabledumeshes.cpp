@@ -296,13 +296,6 @@ void RenderableDUMeshes::fillSelectionProperty() {
         }
         _selectedMeshes.addOption(pair.second.name);
     }
-
-    if (_selectedMeshes.options().empty()) {
-        _selectedMeshes.setVisibility(properties::Property::Visibility::Developer);
-    }
-    else {
-        _selectedMeshes.setVisibility(properties::Property::Visibility::NoviceUser);
-    }
 }
 
 void RenderableDUMeshes::selectionPropertyHasChanged() {
