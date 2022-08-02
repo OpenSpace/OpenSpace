@@ -226,21 +226,20 @@ void checkJoystickStatus() {
             state.isConnected = true;
             state.name = glfwGetJoystickName(i);
 
-            std::fill(state.axes.begin(), state.axes.end(), 0.f);
-            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
-
             // Check axes and buttons
             glfwGetJoystickAxes(i, &state.nAxes);
             glfwGetJoystickButtons(i, &state.nButtons);
+            state.axes.resize(state.nAxes);
+            state.buttons.resize(state.nButtons);
+
+            std::fill(state.axes.begin(), state.axes.end(), 0.f);
+            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
         }
 
         const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
-        state.axes.resize(state.nAxes);
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
         const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-        state.buttons.resize(state.nButtons);
-
         for (int j = 0; j < state.nButtons; ++j) {
             const bool currentlyPressed = buttons[j] == GLFW_PRESS;
 
