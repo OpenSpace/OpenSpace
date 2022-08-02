@@ -606,11 +606,15 @@ bool RenderableDUMeshes::readSpeckFile() {
             std::string dummyU, dummyV;
 
             // Try to read name of mesh if it exist
-            dimOrName >> dummyU; // numU or "name"
-            dimOrName >> dummyV; // numV or the name of the mesh
+            dimOrName >> dummyU;             // numU or "name"
+            std::getline(dimOrName, dummyV); // numV or the name of the mesh
 
             if (dummyU == "name") {
                 mesh.name = dummyV;
+                // Trim leading whitespace
+                if (!mesh.name.empty() && mesh.name[0] == ' ') {
+                    mesh.name = mesh.name.substr(1);
+                }
 
                 // Dimensions are specified in the next line as usual
                 std::getline(file, line);
