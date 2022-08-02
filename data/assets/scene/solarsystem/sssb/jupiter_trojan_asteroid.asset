@@ -1,16 +1,31 @@
-local sharedSssb = asset.require("./sssb_shared")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, "jupiter_trojan_asteroid",
-  "sssb_data_jupiter_trojan_asteroid")
-local object = sharedSssb.createSssbGroupObject("sssb_data_jupiter_trojan_asteroid.csv",
-  "Jupiter Trojan Asteroids", filepath, { 0.5, 0.8, 0.5 })
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 1
-object.Renderable.TrailFade = 5
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Jupiter Trojan Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_jupiter_trojan_asteroid",
+  Version = 1
+})
 
-object.GUI.Description = [[ Asteroids trapped in Jupiter's L4/L5 Lagrange points
-  (semimajor axis of between 4.6 and 5.5 au), with an eccentricity of less than 0.3. ]]
-
+local object = {
+  Identifier = "sssb_jupiter_trojan_asteroid",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_jupiter_trojan_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 1,
+    Color = { 0.5, 0.8, 0.5 },
+    TrailFade = 5
+  },
+  GUI = {
+    Name = "Jupiter Trojan Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Asteroids trapped in Jupiter's L4/L5 Lagrange points (semimajor axis
+      of between 4.6 and 5.5 AU), with an eccentricity of less than 0.3.]]
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)

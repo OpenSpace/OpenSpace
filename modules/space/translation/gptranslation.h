@@ -1,4 +1,4 @@
-/****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,50 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__
+#ifndef __OPENSPACE_MODULE_SPACE___GPTRANSLATION___H__
+#define __OPENSPACE_MODULE_SPACE___GPTRANSLATION___H__
 
-#include <modules/space/rendering/renderableorbitalkepler.h>
-#include <openspace/rendering/renderable.h>
-
-#include <modules/base/rendering/renderabletrail.h>
 #include <modules/space/translation/keplertranslation.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/uintproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/opengl/programobject.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-class RenderableSmallBody : public RenderableOrbitalKepler {
+/**
+ * A specialization of the KeplerTranslation that utilizes general pertubation file
+ * formats to extracts the Keplerian elements
+ */
+class GPTranslation : public KeplerTranslation {
 public:
-    RenderableSmallBody(const ghoul::Dictionary& dictionary);
+    /**
+     * Constructor for the GPTranslation class. The \p dictionary must contain a key for
+     * the file that contains the general pertubation information as well as the file
+     * format that is to be used.
+     *
+     * \param The ghoul::Dictionary that contains the information for this TLETranslation
+     */
+    explicit GPTranslation(const ghoul::Dictionary& dictionary);
+
+    /**
+     * Method returning the openspace::Documentation that describes the ghoul::Dictionary
+     * that can be passed to the constructor.
+     *
+     * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
+     * be passed to the constructor
+     */
     static documentation::Documentation Documentation();
-
-private:
-    void readOrbitalParamsFromThisLine(bool firstDataLine, int& fieldCount,
-        unsigned int& csvLine, std::ifstream& file);
-    virtual void readDataFile(const std::string& filename) override;
-    void initializeFileReading();
-    void skipSingleLineInFile(std::ifstream& file);
-
-    std::vector<std::string> _sbNames;
-    std::function<void()> _updateContiguousModeSelect;
-    std::function<void()> _updateRenderUpperLimitSelect;
-
-    /// The index array that is potentially used in the draw call. If this is empty, no
-    /// element draw call is used.
-    std::vector<unsigned int> _indexBufferData;
-    properties::BoolProperty _contiguousMode;
-    properties::UIntProperty _upperLimit;
-    properties::Property::OnChangeHandle _contiguousModeCallbackhandle;
-    properties::Property::OnChangeHandle _upperLimitCallbackHandle;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__
-
+#endif // __OPENSPACE_MODULE_SPACE___GPTRANSLATION___H__

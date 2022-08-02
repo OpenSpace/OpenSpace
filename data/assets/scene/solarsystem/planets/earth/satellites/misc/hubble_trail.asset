@@ -1,82 +1,77 @@
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local satelliteHelper = asset.require('util/tle_helper')
 
-local url = "https://celestrak.com/NORAD/elements/gp.php?CATNR=20580"
-local identifier = "HST"
-local filename = "HST.txt"
-local nodes = {}
-local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Hubble)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_hst",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=20580&FORMAT=kvn",
+  Filename = "hst.txt",
+  Override = true
+})
 
-local initializeAndAddNodes = function()
-  local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
-  local period = satelliteHelper.getPeriodFromElement(lineElement)
-  local path = tle .. "/" .. filename
 
-  local HubblePosition = {
-    Identifier = "HubblePosition",
-    Parent = transforms.EarthInertial.Identifier,
-    Transform = {
-      Translation = {
-        Type = "TLETranslation",
-        Body = identifier,
-        Observer = transforms.EarthInertial.Identifier,
-        File = path,
-        LineNumber = 1
-      },
-      Rotation = {
-        Type = "SpiceRotation",
-        SourceFrame = "GALACTIC",
-        DestinationFrame = "J2000",
-      }
+local HubblePosition = {
+  Identifier = "HubblePosition",
+  Parent = transforms.EarthInertial.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "hst.txt",
+      Format = "OMM"
     },
-    Tag = { "earth_satellite", "hubble" },
-    GUI = {
-      Name = "Hubble Position",
-      Path = "/Solar System/Planets/Earth/Satellites/Hubble",
-      Hidden = true
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "GALACTIC",
+      DestinationFrame = "J2000",
     }
+  },
+  Tag = { "earth_satellite", "hubble" },
+  GUI = {
+    Name = "Hubble Position",
+    Path = "/Solar System/Planets/Earth/Satellites/Hubble",
+    Hidden = true
   }
+}
 
-  local HubbleTrail = {
-    Identifier = "HubbleTrail",
-    Parent = transforms.EarthInertial.Identifier,
-    Renderable = {
-      Type = "RenderableTrailOrbit",
-      Translation = {
-        Type = "TLETranslation",
-        Body = identifier,
-        Observer = transforms.EarthInertial.Identifier,
-        File = path,
-        LineNumber = 1
-      },
-      RenderBinMode = "PostDeferredTransparent",
-      Color = { 0.0, 0.902, 0.6},
-      Fade = 1.5,
-      Period = period,
-      Resolution = 320
+local HubbleTrail = {
+  Identifier = "HubbleTrail",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "hst.txt",
+      Format = "OMM"
     },
-    Tag = { "earth_satellite", "hubble" },
-    GUI = {
-      Name = "Hubble Trail",
-      Path = "/Solar System/Planets/Earth/Satellites/Hubble"
-    }
+    RenderBinMode = "PostDeferredTransparent",
+    Color = { 0.0, 0.902, 0.6},
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellite", "hubble" },
+  GUI = {
+    Name = "Hubble Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/Hubble"
   }
-
-  return { HubblePosition, HubbleTrail }
-end
+}
 
 asset.onInitialize(function ()
-  nodes = initializeAndAddNodes()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  local hubble = openspace.space.readKeplerFile(omm .. "hst.txt", "OMM")
+  HubbleTrail.Renderable.Period = hubble[0].Period / (60 * 60 * 24)
+
+  openspace.addSceneGraphNode(HubblePosition)
+  openspace.addSceneGraphNode(HubbleTrail)
 end)
 
 asset.onDeinitialize(function ()
-  for i=1, #nodes do
-    openspace.removeSceneGraphNode(nodes[#nodes + 1 - i].Identifier)
-  end
+  openspace.removeSceneGraphNode(HubbleTrail)
+  openspace.removeSceneGraphNode(HubblePosition)
 end)
+
+asset.export(HubblePosition)
+asset.export(HubbleTrail)
 
 asset.meta = {
   Name = "Hubble Space Telescope Trail",

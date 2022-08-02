@@ -27,14 +27,13 @@
 #include <modules/space/rendering/renderableconstellationbounds.h>
 #include <modules/space/rendering/renderablefluxnodes.h>
 #include <modules/space/rendering/renderablehabitablezone.h>
+#include <modules/space/rendering/renderableorbitalkepler.h>
 #include <modules/space/rendering/renderablerings.h>
-#include <modules/space/rendering/renderablesatellites.h>
-#include <modules/space/rendering/renderablesmallbody.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/renderabletravelspeed.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
-#include <modules/space/translation/tletranslation.h>
+#include <modules/space/translation/gptranslation.h>
 #include <modules/space/translation/horizonstranslation.h>
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
@@ -83,8 +82,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableFluxNodes>("RenderableFluxNodes");
     fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
-    fRenderable->registerClass<RenderableSatellites>("RenderableSatellites");
-    fRenderable->registerClass<RenderableSmallBody>("RenderableSmallBody");
+    fRenderable->registerClass<RenderableOrbitalKepler>("RenderableOrbitalKepler");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
 
@@ -94,7 +92,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     fTranslation->registerClass<KeplerTranslation>("KeplerTranslation");
     fTranslation->registerClass<SpiceTranslation>("SpiceTranslation");
-    fTranslation->registerClass<TLETranslation>("TLETranslation");
+    fTranslation->registerClass<GPTranslation>("GPTranslation");
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
     ghoul::TemplateFactory<Rotation>* fRotation =
@@ -120,13 +118,12 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableFluxNodes::Documentation(),
         RenderableHabitableZone::Documentation(),
         RenderableRings::Documentation(),
-        RenderableSatellites::Documentation(),
-        RenderableSmallBody::Documentation(),
+        RenderableOrbitalKepler::Documentation(),
         RenderableStars::Documentation(),
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        TLETranslation::Documentation()
+        GPTranslation::Documentation()
     };
 }
 
@@ -135,7 +132,8 @@ scripting::LuaLibrary SpaceModule::luaLibrary() const {
         "space",
         {
             codegen::lua::ConvertFromRaDec,
-            codegen::lua::ConvertToRaDec
+            codegen::lua::ConvertToRaDec,
+            codegen::lua::ReadKeplerFile
         }
     };
 }

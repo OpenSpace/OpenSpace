@@ -1,16 +1,31 @@
-local sharedSssb = asset.require("./sssb_shared")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, "mars-crossing_asteroid",
-  "sssb_data_mars-crossing_asteroid")
-local object = sharedSssb.createSssbGroupObject("sssb_data_mars-crossing_asteroid.csv",
-  "Mars-crossing Asteroids", filepath, { 0.814, 0.305, 0.220 })
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 1
-object.Renderable.TrailFade = 13
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Mars-Crossing Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_mars-crossing_asteroid",
+  Version = 1
+})
 
-object.GUI.Description = [[ Asteroids that cross the orbit of Mars, with a semi-major axis
-  of less than 3.2 au, and a perihelion distance of between 1.3 and 1.666 au. ]]
-
+local object = {
+  Identifier = "sssb_mars-crossing_asteroid",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_mars-crossing_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 1,
+    Color = { 0.814, 0.305, 0.22 },
+    TrailFade = 13
+  },
+  GUI = {
+    Name = "Mars-crossing Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Asteroids that cross the orbit of Mars, with a semi-major axis
+      of less than 3.2 AU, and a perihelion distance of between 1.3 and 1.666 AU.]]
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)

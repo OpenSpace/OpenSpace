@@ -1,15 +1,30 @@
-local sharedSssb = asset.require("./sssb_shared")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, "halley-type_comet",
-  "sssb_data_halley-type_comet")
-local object = sharedSssb.createSssbGroupObject("sssb_data_halley-type_comet.csv",
-  "Halley-type Comets", filepath, { 0.66, 0.66, 0.66 })
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 9
-object.Renderable.TrailFade = 18
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Halley-type Comet)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_halley-type_comet",
+  Version = 1
+})
 
-object.GUI.Description = [[ Periodic comets with an orbital period between 20 and 200
-  years. ]]
+local object = {
+  Identifier = "sssb_halley-type_comet",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_halley-type_comet.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 9,
+    Color = { 0.66, 0.66, 0.66 },
+    TrailFade = 18
+  },
+  GUI = {
+    Name = "Halley-type Comets",
+    Path = "/Solar System/Small Bodies",
+    Description = "Periodic comets with an orbital period between 20 and 200 years."
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
