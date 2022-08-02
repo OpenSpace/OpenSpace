@@ -97,10 +97,9 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
             "&time.min=" + static_cast<std::string>(minTime.ISO8601()) +
             "&time.max=" + static_cast<std::string>(maxTime.ISO8601());
 
-        SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
-        HttpRequest::RequestOptions opt = {};
-        opt.requestTimeoutSeconds = 0;
-        mmryDld.download(opt);
+        HttpMemoryDownload mmryDld = HttpMemoryDownload(url);
+        mmryDld.start(std::chrono::milliseconds(0));
+        mmryDld.wait();
 
         // TODO emiax: std::copy or similar should be possible here
         std::transform(
@@ -129,8 +128,8 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
             );
         }
 
-        std::sort(_triggerTimesWeb.begin(), _triggerTimesWeb.end());
         // If by any chance it would not sort in properly
+        std::sort(_triggerTimesWeb.begin(), _triggerTimesWeb.end());
 
         if (_triggerTimesWeb.size() == 0 ||
             std::equal(temp.begin(),
@@ -164,7 +163,7 @@ void WebFieldlinesWorker::downloadWindow(
     int startingPoint = triggerTimes.size() / 2;
     bool downloaded = false;
     bool oneUpdate = false;
-    bool fastDownload = global::timeManager.deltaTime() > 1800.0;
+    bool fastDownload = global::timeManager->deltaTime() > 1800.0;
 
     if (fastDownload) {
         startingPoint = triggerTimes.size() - 1;
@@ -237,7 +236,9 @@ void WebFieldlinesWorker::updateRFSSourceFiles(std::vector<std::string>& _source
             _downloadedTriggerTimes.end(),
             std::back_inserter(toInsert),
             [this] (auto const& pair) {
-                return _syncDir + FileSys.PathSeparator + pair.second;
+                // TODO Elon, path separator / or \\
+
+                return _syncDir + "/" + pair.second;
             }
         );
 
@@ -290,7 +291,7 @@ void WebFieldlinesWorker::newWindowToDownload() {
 }
 
 bool WebFieldlinesWorker::edgeMode() {
-    const double currentTime = global::timeManager.time().j2000Seconds();
+    const double currentTime = global::timeManager->time().j2000Seconds();
 
     if (currentTime < acceptableToStartRequestingAgain.first ||
         currentTime > acceptableToStartRequestingAgain.second)
@@ -301,7 +302,7 @@ bool WebFieldlinesWorker::edgeMode() {
     return _noMoreRequests && _bigWindowHasData;
 }
     
-std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> downloadKey)
+void WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> downloadKey)
 {
     _downloadedSomething = true;
     _latestDownload = downloadKey;
@@ -312,21 +313,17 @@ std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> dow
         downloadKey.second.substr(downloadKey.second.size() - fileNameLength);
 
     std::string url = downloadKey.second;
-    std::string destinationPath =
-        absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + fileName);
-    // what the downloaded filename is to be
+    // TODO Elon, path separator / or \\
 
-    _downloading = std::make_unique<AsyncHttpFileDownload>(
+    // what the downloaded filename is to be
+    std::filesystem::path destinationPath = absPath(_syncDir + "/" + fileName);
+
+    _downloading = std::make_unique<HttpFileDownload>(
         url, destinationPath, HttpFileDownload::Overwrite::Yes
     );
 
-    HttpRequest::RequestOptions opt = {};
-    opt.requestTimeoutSeconds = 0;
-
-    _downloading->start(opt);
+    _downloading->start(std::chrono::milliseconds(0));
     _readyToDownload = false;
-
-    return destinationPath;
 }
 
 // This function searches for triggerTime in _downloadedTriggerTimes, 

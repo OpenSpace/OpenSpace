@@ -103,7 +103,7 @@ private:
     std::pair<double, double> acceptableToStartRequestingAgain = std::make_pair(0.0, 0.0);
     
     // Download one file to sync directory
-    std::string downloadOsfls(std::pair<double, std::string> downloadKey);
+    void downloadOsfls(std::pair<double, std::string> downloadKey);
     
     bool fileIsOnDisk(double triggerTime);
     

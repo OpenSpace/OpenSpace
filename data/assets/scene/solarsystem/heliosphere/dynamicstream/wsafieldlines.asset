@@ -25,11 +25,11 @@ local fieldlines = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(fieldlines)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(fieldlines)
 end)
-  
+
 asset.export(fieldlines)
 asset.meta = {
   Name = "WSAStreaming",

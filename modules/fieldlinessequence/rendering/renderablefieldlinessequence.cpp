@@ -273,6 +273,7 @@ documentation::Documentation RenderableFieldlinesSequence::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequence");
 }
 
+#pragma optimize("", off)
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -457,7 +458,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _loadingStatesDynamically = false;
     }
 
-#pragma optimize("", off)
     // obs that property differ from member variable name
     _dynWebContentUrl = p.dynamicWebContent.value_or(_dynWebContentUrl);
     if (!_dynWebContentUrl.empty()) {
@@ -465,7 +465,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         LINFO("Initializing sync-directory and downloading a startset");
         std::string what = _webFieldlinesManager.initializeSyncDirectory();
     }
-#pragma optimize("", on)
     if (p.maskingRanges.has_value()) {
         _maskingRanges = *p.maskingRanges;
     }
@@ -483,6 +482,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 }
+#pragma optimize("", on)
 
 void RenderableFieldlinesSequence::initialize() {
     _transferFunction = std::make_unique<TransferFunction>(
