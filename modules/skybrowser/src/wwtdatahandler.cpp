@@ -267,7 +267,7 @@ int WwtDataHandler::nLoadedImages() const {
     return static_cast<int>(_images.size());
 }
 
-const ImageData& WwtDataHandler::getImage(int i) const {
+const ImageData& WwtDataHandler::image(int i) const {
     ghoul_assert(i < static_cast<int>(_images.size()), "Index outside of vector size");
     return _images[i];
 }

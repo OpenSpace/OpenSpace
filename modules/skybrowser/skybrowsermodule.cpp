@@ -304,7 +304,7 @@ void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
 }
 
 void SkyBrowserModule::moveHoverCircle(int i, bool useScript) {
-    const ImageData& image = _dataHandler->getImage(i);
+    const ImageData& image = _dataHandler->image(i);
 
     // Only move and show circle if the image has coordinates
     if (_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem) {
@@ -374,11 +374,12 @@ int SkyBrowserModule::nLoadedImages() const {
     return _dataHandler->nLoadedImages();
 }
 
-const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWwtDataHandler() const {
-    return _dataHandler;
+const WwtDataHandler& SkyBrowserModule::wwtDataHandler() const {
+    ghoul_assert(_dataHandler, "Data handler not initialized");
+    return *_dataHandler;
 }
 
-std::vector<std::unique_ptr<TargetBrowserPair>>& SkyBrowserModule::getPairs() {
+std::vector<std::unique_ptr<TargetBrowserPair>>& SkyBrowserModule::pairs() {
     return _targetsBrowsers;
 }
 

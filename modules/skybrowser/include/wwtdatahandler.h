@@ -25,10 +25,6 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 
-#include <modules/space/speckloader.h>
-#include <openspace/documentation/documentation.h>
-#include <unordered_map>
-
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
@@ -41,9 +37,13 @@
 #pragma GCC diagnostic pop
 #endif
 
-namespace openspace::documentation { struct Documentation; }
+#include <filesystem>
 
-namespace openspace::wwt {
+namespace openspace {
+
+namespace documentation { struct Documentation; }
+
+namespace wwt {
     const std::string Thumbnail = "Thumbnail";
     const std::string Name = "Name";
     const std::string ImageSet = "ImageSet";
@@ -59,9 +59,7 @@ namespace openspace::wwt {
     const std::string ZoomLevel = "ZoomLevel";
     const std::string DataSetType = "DataSetType";
     const std::string Sky = "Sky";
-} // namespace openspace::wwt
-
-namespace openspace {
+} // namespace wwt
 
 struct ImageData {
     std::string name = wwt::Undefined;
@@ -83,7 +81,7 @@ public:
 
     void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages() const;
-    const ImageData& getImage(int i) const;
+    const ImageData& image(int i) const;
 
 private:
     void saveImageFromNode(tinyxml2::XMLElement* node, std::string collection);

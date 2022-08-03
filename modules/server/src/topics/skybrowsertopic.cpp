@@ -101,7 +101,7 @@ void SkyBrowserTopic::sendBrowserData() {
 
     // Pass data for all the browsers and the corresponding targets
     if (module->isCameraInSolarSystem()) {
-        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
         ghoul::Dictionary targets;
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();

@@ -26,8 +26,6 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___TARGETBROWSERPAIR___H__
 
 #include <modules/skybrowser/include/utility.h>
-#include <openspace/documentation/documentation.h>
-#include <deque>
 
 namespace ghoul { class Dictionary; }
 

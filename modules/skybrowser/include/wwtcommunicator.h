@@ -27,10 +27,6 @@
 
 #include <modules/skybrowser/include/browser.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/vector/dvec2property.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/ivec3property.h>
 #include <deque>
 
 namespace openspace {
