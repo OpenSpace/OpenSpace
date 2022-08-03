@@ -1,0 +1,28 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
+
+local RenderableNodeDirectionHintExample = {
+  Identifier = "RenderableNodeDirectionHintExample",
+  Renderable = {
+    Type = "RenderableNodeDirectionHint",
+    StartNode = earth.Earth.Identifier,
+    EndNode = mars.Mars.Identifier,
+    Color = { 0.8, 1.0, 0.8 },
+    Thickness = 2
+  },
+  GUI = {
+    Name = "RenderableNodeDirectionHint Example",
+    Path = "/Example",
+    Description = [[.]] -- TODO
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RenderableNodeDirectionHintExample)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RenderableNodeDirectionHintExample)
+end)
+
+asset.export(RenderableNodeDirectionHintExample)
