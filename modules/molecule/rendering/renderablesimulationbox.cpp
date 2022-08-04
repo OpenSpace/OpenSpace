@@ -265,8 +265,8 @@ namespace {
 
 static GLuint fbo = 0;
 static GLuint colorTex = 0;
-static GLuint depthRbo = 0;
-static int useCount = 0;
+static GLuint depthTex = 0;
+static int glUseCount = 0;
 
 namespace openspace {
 
@@ -384,8 +384,6 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_simulationBox);
     addProperty(_simulationSpeed);
     addProperty(_viamdFilter);
-    
-    useCount++;
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {
@@ -395,16 +393,6 @@ RenderableSimulationBox::~RenderableSimulationBox() {
         if (mol.trajectoryApi)
             freeTrajectory(mol);
     }
-    
-    useCount--;
-    if (useCount == 0) {
-        glDeleteRenderbuffers(1, &depthRbo);
-        glDeleteTextures(1, &colorTex);
-        glDeleteFramebuffers(1, &fbo);
-        depthRbo = 0;
-        colorTex = 0;
-        fbo = 0;
-    }
 }
 
 void RenderableSimulationBox::initialize() {
@@ -413,9 +401,36 @@ void RenderableSimulationBox::initialize() {
 
 void RenderableSimulationBox::initializeGL() {
     ZoneScoped
-    md_gl_initialize();
-    md_gl_shaders_init(&_shaders, shader_output_snippet);
-    billboardGlInit();
+    
+    if (!fbo) { // initialize static gl things (common to all renderable instances)
+        glGenFramebuffers(1, &fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        ivec2 size = global::windowDelegate->currentWindowSize();
+        
+        glGenTextures(1, &colorTex);
+        glBindTexture(GL_TEXTURE_2D, colorTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glGenTextures(1, &depthTex);
+        glBindTexture(GL_TEXTURE_2D, depthTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            LERROR("Mold Framebuffer is not complete");
+
+        md_gl_initialize();
+        md_gl_shaders_init(&_shaders, shader_output_snippet);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        billboardGlInit();
+    }
 
     size_t i = 0;
     for (molecule_data_t& mol : _molecules) {
@@ -431,33 +446,21 @@ void RenderableSimulationBox::initializeGL() {
         i++;
     }
     
-    if (!fbo) { // initialize fbo (static, common to all renderables)
-        glGenFramebuffers(1, &fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        ivec2 size = global::windowDelegate->currentWindowSize();
-        
-        glGenTextures(1, &colorTex);
-        glBindTexture(GL_TEXTURE_2D, colorTex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        glGenRenderbuffers(1, &depthRbo);
-        glBindRenderbuffer(GL_TEXTURE_2D, depthRbo);
-        glRenderbufferStorage(GL_TEXTURE_2D, GL_DEPTH24_STENCIL8, size.x, size.y);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRbo);
-        glBindRenderbuffer(GL_TEXTURE_2D, 0);
-
-        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            LERROR("Mold Framebuffer is not complete");
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
+    glUseCount++;
 }
 
 void RenderableSimulationBox::deinitializeGL() {
+    glUseCount--;
+    if (glUseCount == 0 && fbo) {
+        glDeleteTextures(1, &depthTex);
+        glDeleteTextures(1, &colorTex);
+        glDeleteFramebuffers(1, &fbo);
+        depthTex = 0;
+        colorTex = 0;
+        fbo = 0;
+        billboardGlDeinit();
+    }
+
     billboardGlDeinit();
     md_gl_shaders_free(&_shaders);
     md_gl_shutdown();
