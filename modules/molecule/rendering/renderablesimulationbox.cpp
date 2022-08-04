@@ -265,6 +265,8 @@ namespace {
 
 static GLuint fbo = 0;
 static GLuint colorTex = 0;
+static GLuint depthRbo = 0;
+static int useCount = 0;
 
 namespace openspace {
 
@@ -382,6 +384,8 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_simulationBox);
     addProperty(_simulationSpeed);
     addProperty(_viamdFilter);
+    
+    useCount++;
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {
@@ -390,6 +394,16 @@ RenderableSimulationBox::~RenderableSimulationBox() {
             freeMolecule(mol);
         if (mol.trajectoryApi)
             freeTrajectory(mol);
+    }
+    
+    useCount--;
+    if (useCount == 0) {
+        glDeleteRenderbuffers(1, &depthRbo);
+        glDeleteTextures(1, &colorTex);
+        glDeleteFramebuffers(1, &fbo);
+        depthRbo = 0;
+        colorTex = 0;
+        fbo = 0;
     }
 }
 
@@ -430,11 +444,10 @@ void RenderableSimulationBox::initializeGL() {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        GLuint depth;
-        glGenRenderbuffers(1, &depth);
-        glBindRenderbuffer(GL_TEXTURE_2D, depth);
+        glGenRenderbuffers(1, &depthRbo);
+        glBindRenderbuffer(GL_TEXTURE_2D, depthRbo);
         glRenderbufferStorage(GL_TEXTURE_2D, GL_DEPTH24_STENCIL8, size.x, size.y);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRbo);
         glBindRenderbuffer(GL_TEXTURE_2D, 0);
 
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -674,17 +687,20 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         drawOps.data(),
     };
 
-    GLint defaultFbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    { // draw molecule offscreen
+        GLint defaultFbo;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
     
-    md_gl_draw(&args); // draw molecule
+        md_gl_draw(&args);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    }
 
-    { // draw billboard
+    { // draw billboard pre-rendered with molecule inside 
         dmat4 billboardModel = 
             camCopy.combinedViewMatrix() *
             translate(I, data.modelTransform.translation) *
@@ -700,11 +716,8 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         dvec4 depth_ = dmat4(data.camera.sgctInternal.projectionMatrix()) * billboardModel * dvec4(0.0, 0.0, 0.0, 1.0);
         double depth = normalizeDouble(depth_.w);
 
-        vec4 black = { 0.f, 0.f, 0.f, 1.f };
-        vec4 white = { 1.f, 1.f, 1.f, 1.f };
-        vec4 transp = { 0.f, 0.f, 0.f, 0.f };
         
-        billboardDraw(transform, colorTex, white, circleWidth, depth); // write proper depth in billboard
+        billboardDraw(transform, colorTex, vec4(1.0), circleWidth, depth);
     }
     
 
