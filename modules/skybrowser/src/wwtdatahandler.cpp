@@ -138,25 +138,8 @@ namespace {
             std::string(Undefined);
     }
 
-    void parseWtmlsFromDisc(std::vector<std::unique_ptr<tinyxml2::XMLDocument>>& xmls,
-                            const std::filesystem::path& directory)
-    {
-        for (const auto& entry : std::filesystem::directory_iterator(directory)) {
-            auto document = std::make_unique<tinyxml2::XMLDocument>();
-            std::string path = entry.path().string();
-            tinyxml2::XMLError successCode = document->LoadFile(path.c_str());
-
-            if (successCode == tinyxml2::XMLError::XML_SUCCESS) {
-                xmls.push_back(std::move(document));
-            }
-        }
-    }
-
-    bool downloadAndParseWtmlFilesFromUrl(
-                                std::vector<std::unique_ptr<tinyxml2::XMLDocument>>& xmls,
-                                                   const std::filesystem::path& directory,
-                                                                   const std::string& url,
-                                                              const std::string& fileName)
+    bool downloadWtmlFiles(const std::filesystem::path& directory, const std::string& url,
+                           const std::string& fileName)
     {
         using namespace openspace;
         // Download file from url
@@ -182,7 +165,6 @@ namespace {
         // If the file contains no folders, or there are folders but without urls,
         // stop recursion
         if (!folderExists || folderContainNoUrls) {
-            xmls.push_back(std::move(document));
             LINFO(fmt::format("Saving {}", url));
             return true;
         }
@@ -193,7 +175,7 @@ namespace {
             if (hasAttribute(element, Url) && hasAttribute(element, Name)) {
                 std::string urlAttr = attribute(element, Url);
                 std::string fileNameAttr = attribute(element, Name);
-                downloadAndParseWtmlFilesFromUrl(xmls, directory, urlAttr, fileNameAttr);
+                downloadWtmlFiles(directory, urlAttr, fileNameAttr);
             }
             element = element->NextSiblingElement();
         }
@@ -233,6 +215,11 @@ namespace {
 
         // Collect name, image url and credits
         std::string name = attribute(node, Name);
+        if (std::islower(name[0])) {
+            // convert string to upper case
+            name[0] = static_cast<char>(std::toupper(name[0]));
+        }
+
         std::string imageUrl = attribute(imageSet, Url);
         std::string credits = childNodeContentFromImageSet(imageSet, Credits);
         std::string creditsUrl = childNodeContentFromImageSet(imageSet, CreditsUrl);
@@ -283,12 +270,13 @@ void WwtDataHandler::loadImages(const std::string& root,
     //    local file. If the hash has changed, nuke the folder
     // 3. If the folder is empty, download files
 
-
+    // 1.
     if (!directoryExists(directory)) {
         LINFO(fmt::format("Creating directory {}", directory));
         std::filesystem::create_directory(directory);
     }
 
+    // Get the hash from the remote. If no such hash exists, the remoteHash will be empty
     std::string remoteHash;
     {
         std::string remoteHashFile = root.substr(0, root.find_last_of('/')) + "/hash.md5";
@@ -297,21 +285,22 @@ void WwtDataHandler::loadImages(const std::string& root,
         // in which case we assume that the underlying data has not changed
         if (success) {
             std::ifstream(directory / "hash.tmp") >> remoteHash;
-
             std::filesystem::remove(directory / "hash.tmp");
         }
     }
 
+    // Load the local hash. If no such hash exists, the localHash will be empty
     std::string localHash;
     std::filesystem::path localHashFile = directory / "hash.md5";
     if (std::filesystem::exists(localHashFile)) {
         std::ifstream(localHashFile) >> localHash;
-        std::filesystem::remove(localHashFile);
     }
     
+    // Check if the hash has changed. This will be ignored if either the local of remote
+    // hash does not exist
     if (!localHash.empty() && !remoteHash.empty() && localHash != remoteHash) {
         LINFO(fmt::format(
-            "Local hash {} differs from remote hash {}. Cleaning directory",
+            "Local hash '{}' differs from remote hash '{}'. Cleaning directory",
             localHash, remoteHash
         ));
 
@@ -319,36 +308,27 @@ void WwtDataHandler::loadImages(const std::string& root,
         std::filesystem::create_directory(directory);
     }
     
-    std::vector<std::unique_ptr<tinyxml2::XMLDocument>> xmls;
+    // If there is no directory (either because it is the first start, or the previous
+    // contents were deleted because of a change in hash) we have to download the files
     if (std::filesystem::is_empty(directory)) {
         LINFO("Loading images from url");
-        downloadAndParseWtmlFilesFromUrl(xmls, directory, root, "root");
-    }
-    else {
-        LINFO("Loading images from directory");
-        parseWtmlsFromDisc(xmls, directory);
+        downloadWtmlFiles(directory, root, "root");
+        std::ofstream(localHashFile) << remoteHash;
     }
 
-    std::ofstream(localHashFile) << remoteHash;
+    // Finally, we can load the files that are now on disk
+    LINFO("Loading images from directory");
+    for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+        tinyxml2::XMLDocument document;
+        std::string path = entry.path().string();
+        tinyxml2::XMLError successCode = document.LoadFile(path.c_str());
 
-    // Traverse through the collected wtml documents and collect the images
-    for (const std::unique_ptr<tinyxml2::XMLDocument>& doc : xmls) {
-        tinyxml2::XMLElement* rootNode = doc->FirstChildElement();
-        std::string collectionName = attribute(rootNode, Name);
-        saveImagesFromXml(rootNode, collectionName);
-    }
-
-    std::for_each(
-        _images.begin(),
-        _images.end(),
-        [](ImageData& a) {
-            // If the first character in the names are lowercase, make it upper case
-            if (std::islower(a.name[0])) {
-                // convert string to upper case
-                a.name[0] = static_cast<char>(std::toupper(a.name[0]));
-            }
+        if (successCode == tinyxml2::XMLError::XML_SUCCESS) {
+            tinyxml2::XMLElement* rootNode = document.FirstChildElement();
+            std::string collectionName = attribute(rootNode, Name);
+            saveImagesFromXml(rootNode, collectionName);
         }
-    );
+    }
 
     // Sort images in alphabetical order
     std::sort(
