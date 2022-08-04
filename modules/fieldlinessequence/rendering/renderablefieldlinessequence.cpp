@@ -174,7 +174,7 @@ namespace {
         SourceFileType inputFileType;
 
         // Path to folder containing the input files
-        std::filesystem::path sourceFolder [[codegen::directory()]];
+        std::optional<std::filesystem::path> sourceFolder [[codegen::directory()]];
 
         // Path to a .txt file containing seed points. Mandatory if CDF as input.
         // Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
@@ -198,7 +198,16 @@ namespace {
         std::optional<bool> loadAtRuntime;
 
         // API call to where data will be downloaded dynamically
-        std::optional<std::string> dynamicWebContent;
+        std::optional<bool> dynamicWebContent;
+
+        // Specify model name for dynamic download
+        std::optional<std::string> modelName;
+
+        // Specify version number for dynamic download
+        std::optional<std::string> versionNumber;
+
+        // Specify special options of model (i.e. Adapt, Gong)
+        std::optional<std::string> modelOption;
 
         // [[codegen::verbatim(ColorUniformInfo.description)]]
         std::optional<glm::vec4> color [[codegen::color()]];
@@ -356,52 +365,78 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             break;
     }
 
-    // Ensure that the source folder exists and then extract
-    // the files with the same extension as fileTypeString
-    std::filesystem::path sourcePath = p.sourceFolder;
-    if (!std::filesystem::is_directory(sourcePath)) {
-        LERROR(fmt::format(
-            "FieldlinesSequence {} is not a valid directory",
-            sourcePath.string()
-        ));
+    _loadingStatesDynamically = p.loadAtRuntime.value_or(_loadingStatesDynamically);
+    if (_loadingStatesDynamically && _inputFileType != SourceFileType::Osfls) {
+        LWARNING("Load at run time is only supported for osfls file type");
+        _loadingStatesDynamically = false;
+    }
+ 
+    _dynamicWebContent = p.dynamicWebContent.value_or(_dynamicWebContent);
+
+    _modelName = p.modelName.value_or(_modelName);
+    _versionNumber = p.versionNumber.value_or(_versionNumber);
+    _modelOption = p.modelOption.value_or(_modelOption);
+    if (_dynamicWebContent &&
+        (_modelName.empty() || _versionNumber.empty() || _modelOption.empty()))
+    {
+        LERROR("If running with dynamic web content, model name, version number"),
+            (" and option needs to be specified");
     }
 
-    // Extract all file paths from the provided folder
-    namespace fs = std::filesystem;
-    for (const fs::directory_entry& e : fs::directory_iterator(sourcePath)) {
-        if (e.is_regular_file()) {
-            std::string eStr = e.path().string();
-            _sourceFiles.push_back(eStr);
+    std::filesystem::path sourcePath;
+    //no specified way of data reading
+    if (!p.sourceFolder.has_value() && _dynamicWebContent == false) {
+        LERROR("specify dynamic downloading parameters or a syncfolder");
+    }
+    // dynamic is specified, disregards what source folder is.
+    else if (p.dynamicWebContent == true) {
+        _loadingStatesDynamically = true;
+
+        LINFO("Initializing sync-directory and downloading a startset");
+        _dynamicCachePath = _webFieldlinesManager.initializeSyncDirectory(_modelName,
+            _versionNumber, _modelOption);
+    }
+    // source folder, but not dynamic
+    else if (p.sourceFolder.has_value()) {
+        sourcePath = p.sourceFolder.value();
+        // Extract all file paths from the provided folder
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(sourcePath)) {
+            if (e.is_regular_file()) {
+                std::string eStr = e.path().string();
+                _sourceFiles.push_back(eStr);
+            }
+        }
+        std::sort(_sourceFiles.begin(), _sourceFiles.end());
+
+        // Remove all files that don't have fileTypeString as file extension
+        _sourceFiles.erase(
+            std::remove_if(
+                _sourceFiles.begin(),
+                _sourceFiles.end(),
+                [&fileTypeString](const std::string& str) {
+                    const size_t extLength = fileTypeString.length();
+                    std::string sub = str.substr(str.length() - extLength, extLength);
+                    std::transform(
+                        sub.begin(),
+                        sub.end(),
+                        sub.begin(),
+                        [](char c) { return static_cast<char>(::tolower(c)); }
+                    );
+                    return sub != fileTypeString;
+                }
+            ),
+            _sourceFiles.end()
+        );
+
+        // Ensure that there are available and valid source files left
+        if (_sourceFiles.empty()) {
+            LERROR(fmt::format(
+                "{} contains no {} files", sourcePath.string(), fileTypeString
+            ));
         }
     }
-    std::sort(_sourceFiles.begin(), _sourceFiles.end());
-
-    // Remove all files that don't have fileTypeString as file extension
-    _sourceFiles.erase(
-        std::remove_if(
-            _sourceFiles.begin(),
-            _sourceFiles.end(),
-            [&fileTypeString](const std::string& str) {
-                const size_t extLength = fileTypeString.length();
-                std::string sub = str.substr(str.length() - extLength, extLength);
-                std::transform(
-                    sub.begin(),
-                    sub.end(),
-                    sub.begin(),
-                    [](char c) { return static_cast<char>(::tolower(c)); }
-                );
-                return sub != fileTypeString;
-            }
-        ),
-        _sourceFiles.end()
-    );
-
-    // Ensure that there are available and valid source files left
-    if (_sourceFiles.empty()) {
-        LERROR(fmt::format(
-            "{} contains no {} files", sourcePath.string(), fileTypeString
-        ));
-    }
+  
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
     _flowColor = p.flowColor.value_or(_flowColor);
@@ -452,19 +487,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
     }
 
-    _loadingStatesDynamically = p.loadAtRuntime.value_or(_loadingStatesDynamically);
-    if (_loadingStatesDynamically && _inputFileType != SourceFileType::Osfls) {
-        LWARNING("Load at run time is only supported for osfls file type");
-        _loadingStatesDynamically = false;
-    }
-
-    // obs that property differ from member variable name
-    _dynWebContentUrl = p.dynamicWebContent.value_or(_dynWebContentUrl);
-    if (!_dynWebContentUrl.empty()) {
-        _dynamicWebContent = true;
-        LINFO("Initializing sync-directory and downloading a startset");
-        std::string what = _webFieldlinesManager.initializeSyncDirectory();
-    }
     if (p.maskingRanges.has_value()) {
         _maskingRanges = *p.maskingRanges;
     }

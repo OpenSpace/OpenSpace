@@ -102,8 +102,13 @@ private:
     bool _loadingStatesDynamically  = false;
     // Stated whether the asset is fetching dynamic web content
     bool _dynamicWebContent = false;
-    // The URL to the content
-    std::string _dynWebContentUrl = "";
+    // Specifics if using dynamicWebContent
+    std::string _modelName;
+    std::string _modelOption;
+    std::string _versionNumber;
+    // path to dynamic cacheing
+    std::string _dynamicCachePath;
+
     //  Web Fieldlines manager downloads and updates renderable field lines with
     //  field lines downloaded from the web.
     WebFieldlinesManager _webFieldlinesManager;

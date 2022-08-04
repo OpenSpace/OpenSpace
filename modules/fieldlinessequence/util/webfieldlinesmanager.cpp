@@ -62,19 +62,13 @@ bool WebFieldlinesManager::isConnected() {
 // Make sure that the sync directory exists
 // Also creates a new directory in the web_fieldlines directory corresponding to the
 // field line identifier
-std::string WebFieldlinesManager::initializeSyncDirectory() {
+std::string WebFieldlinesManager::initializeSyncDirectory(std::string name, 
+                                                          std::string version, 
+                                                          std::string option)
+{
     std::filesystem::path pathToDownloadTo =
-        absPath("${CACHE}");
+        absPath("${CACHE}/web_fieldlines/" + name + "/" + version + "/" + option);
         
-    //if (!FileSys.directoryExists(path)) {
-    //    FileSys.createDirectory(path);
-    //}
-
-    //path = absPath(path + identifier);
-    //if(!FileSys.directoryExists(path)) {
-    //    FileSys.createDirectory(path);
-    //}
-
     _syncDir = pathToDownloadTo.string();
     return _syncDir;
 }
