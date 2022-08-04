@@ -34,6 +34,7 @@
 #include <core/md_array.inl>
 #include <md_script.h>
 #include <md_filter.h>
+#include "openspace/engine/windowdelegate.h"
 #include "viamd/coloring.h"
 #include "viamd/loader.h"
 
@@ -64,6 +65,7 @@
 #endif
 
 using namespace glm;
+using namespace gl;
 
 constexpr const char* shader_output_snippet = R"(
 layout(location = 0) out vec4 out_color;
@@ -261,6 +263,9 @@ namespace {
 #include "renderablesimulationbox_codegen.cpp"
 }
 
+static GLuint fbo = 0;
+static GLuint colorTex = 0;
+
 namespace openspace {
 
 documentation::Documentation RenderableSimulationBox::Documentation() {
@@ -412,6 +417,31 @@ void RenderableSimulationBox::initializeGL() {
         i++;
     }
     
+    if (!fbo) { // initialize fbo (static, common to all renderables)
+        glGenFramebuffers(1, &fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        ivec2 size = global::windowDelegate->currentWindowSize();
+        
+        glGenTextures(1, &colorTex);
+        glBindTexture(GL_TEXTURE_2D, colorTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        GLuint depth;
+        glGenRenderbuffers(1, &depth);
+        glBindRenderbuffer(GL_TEXTURE_2D, depth);
+        glRenderbufferStorage(GL_TEXTURE_2D, GL_DEPTH24_STENCIL8, size.x, size.y);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth);
+        glBindRenderbuffer(GL_TEXTURE_2D, 0);
+
+        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            LERROR("Mold Framebuffer is not complete");
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
 }
 
 void RenderableSimulationBox::deinitializeGL() {
@@ -571,6 +601,14 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     }
 }
 
+static double normalizeDouble(double input) {
+    if (input > 1.0) {
+        return input / pow(10, 30);
+    } else {
+        return input - 1.0;
+    }
+}
+
 void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     using namespace glm;
     const dmat4 I(1.0);
@@ -578,8 +616,14 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     // compute distance from camera to molecule
     // we apply artificial scaling to everything to cheat a bit with the unit system:
     // TODO explain
-    float distance = length(data.modelTransform.translation - data.camera.positionVec3());
+    vec3 forward = data.modelTransform.translation - data.camera.positionVec3();
+    vec3 dir = data.camera.viewDirectionWorldSpace();
+    float distance = length(forward) * sign(dot(dir, forward)); // "signed" distance from camera to object.
     float fakeScaling = 100.f / distance;
+
+    if (distance < 0.f) // distance < 0 means behind the camera
+        return; 
+
 
     // because the molecule is small, a scaling of the view matrix causes the molecule
     // to be moved out of view in clip space. Reset the scaling for the molecule
@@ -630,8 +674,18 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         drawOps.data(),
     };
 
-    { // draw billboard & molecule
-        mat4 billboardModel = 
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    md_gl_draw(&args); // draw molecule
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+
+    { // draw billboard
+        dmat4 billboardModel = 
             camCopy.combinedViewMatrix() *
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
@@ -640,13 +694,19 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             scale(I, dvec3(fakeScaling)) *
             I;
         mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
-        mat4 transform = projMatrix * billboardModel * faceCamera;
-        float circleWidth = distance / compMax(_simulationBox.value()) * 1E-2;
+        mat4 transform = projMatrix * mat4(billboardModel) * faceCamera;
+        float circleWidth = distance / compMax(_simulationBox.value() * data.modelTransform.scale) * 1E-2;
 
-        billboardDraw(transform, { 0.0, 0.0, 0.0, 1.0 }, vec4(1.0), circleWidth, 1.f); // write depth=1 (clear depth buffer) in billboard
-        md_gl_draw(&args);                               // draw molecule
-        billboardDraw(transform, vec4(0.0), vec4(1.0), circleWidth, 0.f); // write depth=0 (lock depth buffer) in billboard
+        dvec4 depth_ = dmat4(data.camera.sgctInternal.projectionMatrix()) * billboardModel * dvec4(0.0, 0.0, 0.0, 1.0);
+        double depth = normalizeDouble(depth_.w);
+
+        vec4 black = { 0.f, 0.f, 0.f, 1.f };
+        vec4 white = { 1.f, 1.f, 1.f, 1.f };
+        vec4 transp = { 0.f, 0.f, 0.f, 0.f };
+        
+        billboardDraw(transform, colorTex, white, circleWidth, depth); // write proper depth in billboard
     }
+    
 
 }
 
@@ -681,7 +741,7 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::stri
     
     double sphere = glm::compMax(_simulationBox.value()) / 2.0;
     setBoundingSphere(sphere);
-    setInteractionSphere(sphere);
+    // setInteractionSphere(sphere);
 
     md_gl_molecule_init(&mol.drawMol, &mol.concatMolecule);
     md_gl_representation_init(&mol.drawRep, &mol.drawMol);

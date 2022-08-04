@@ -96,7 +96,7 @@ private:
     md_gl_shaders_t _shaders;
     
     std::vector<molecule_data_t> _molecules;
-
+    
     properties::StringListProperty _moleculeFiles;
     properties::StringListProperty _trajectoryFiles;
     properties::OptionProperty _repType;
