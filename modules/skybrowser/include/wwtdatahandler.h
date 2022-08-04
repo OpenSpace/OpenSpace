@@ -38,36 +38,38 @@
 #endif
 
 #include <filesystem>
+#include <memory>
+#include <string_view>
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
 namespace wwt {
-    const std::string Thumbnail = "Thumbnail";
-    const std::string Name = "Name";
-    const std::string ImageSet = "ImageSet";
-    const std::string Dec = "Dec";
-    const std::string RA = "RA";
-    const std::string Undefined = "";
-    const std::string Folder = "Folder";
-    const std::string Place = "Place";
-    const std::string ThumbnailUrl = "ThumbnailUrl";
-    const std::string Url = "Url";
-    const std::string Credits = "Credits";
-    const std::string CreditsUrl = "CreditsUrl";
-    const std::string ZoomLevel = "ZoomLevel";
-    const std::string DataSetType = "DataSetType";
-    const std::string Sky = "Sky";
+    constexpr std::string_view Thumbnail = "Thumbnail";
+    constexpr std::string_view Name = "Name";
+    constexpr std::string_view ImageSet = "ImageSet";
+    constexpr std::string_view Dec = "Dec";
+    constexpr std::string_view RA = "RA";
+    constexpr std::string_view Undefined = "";
+    constexpr std::string_view Folder = "Folder";
+    constexpr std::string_view Place = "Place";
+    constexpr std::string_view ThumbnailUrl = "ThumbnailUrl";
+    constexpr std::string_view Url = "Url";
+    constexpr std::string_view Credits = "Credits";
+    constexpr std::string_view CreditsUrl = "CreditsUrl";
+    constexpr std::string_view ZoomLevel = "ZoomLevel";
+    constexpr std::string_view DataSetType = "DataSetType";
+    constexpr std::string_view Sky = "Sky";
 } // namespace wwt
 
 struct ImageData {
-    std::string name = wwt::Undefined;
-    std::string thumbnailUrl = wwt::Undefined;
-    std::string imageUrl = wwt::Undefined;
-    std::string credits = wwt::Undefined;
-    std::string creditsUrl = wwt::Undefined;
-    std::string collection = wwt::Undefined;
+    std::string name;
+    std::string thumbnailUrl;
+    std::string imageUrl;
+    std::string credits;
+    std::string creditsUrl;
+    std::string collection;
     bool hasCelestialCoords = false;
     float fov = 0.f;
     glm::dvec2 equatorialSpherical = glm::dvec2(0.0);
@@ -77,7 +79,6 @@ struct ImageData {
 class WwtDataHandler {
 public:
     WwtDataHandler() = default;
-    ~WwtDataHandler();
 
     void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages() const;
@@ -89,7 +90,7 @@ private:
 
     // Images
     std::vector<ImageData> _images;
-    std::vector<tinyxml2::XMLDocument*> _xmls;
+    std::vector<std::unique_ptr<tinyxml2::XMLDocument>> _xmls;
 };
 } // namespace openspace
 

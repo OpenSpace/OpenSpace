@@ -257,7 +257,7 @@ namespace {
     // Send image list to GUI
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     std::string url = module->wwtImageCollectionUrl();
-    // If no data has been loaded yet, download the data from the web!
+    // If no data has been loaded yet, download the data from the web
     if (module->nLoadedImages() == 0) {
         std::filesystem::path directory = absPath("${SYNC}/wwtimagedata/");
         module->loadImages(url, directory);
