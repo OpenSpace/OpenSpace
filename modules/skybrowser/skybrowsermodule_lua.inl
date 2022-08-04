@@ -147,7 +147,7 @@ namespace {
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->hideChromeInterface();
-        pair->loadImageCollection(module->wwtImageCollectionUrl());
+        pair->browser()->loadImageCollection(module->wwtImageCollectionUrl());
     }
 }
 
@@ -561,7 +561,7 @@ namespace {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->removeSelectedImage(imageIndex);
+        pair->browser()->removeSelectedImage(imageIndex);
     }
 }
 

@@ -159,20 +159,6 @@ namespace {
                                                               const std::string& fileName)
     {
         using namespace openspace;
-
-        // Look for WWT image data folder, create folder if it doesn't exist
-        if (!directoryExists(directory)) {
-            std::string newDir = directory.string();
-            ghoul_assert(
-                newDir.back() == '/' || newDir.back() == '\\',
-                "Directory must have a / at the end"
-            );
-            // Remove the '/' at the end
-            newDir.pop_back();
-            LINFO(fmt::format("Creating directory {}", newDir));
-            std::filesystem::create_directory(newDir);
-        }
-
         // Download file from url
         std::filesystem::path file = directory.string() + fileName + ".aspx";
         const bool success = downloadFile(url, file);
@@ -291,17 +277,59 @@ namespace openspace {
 void WwtDataHandler::loadImages(const std::string& root,
                                 const std::filesystem::path& directory)
 {
-    std::vector<std::unique_ptr<tinyxml2::XMLDocument>> xmls;
+    // Steps to download new images
+    // 1. Create the target directory if it doesn't already exist
+    // 2. If the 'root' has an associated hash file, download and compare it with the
+    //    local file. If the hash has changed, nuke the folder
+    // 3. If the folder is empty, download files
 
-    // Collect the wtml files, either by reading from disc or from a url
-    if (directoryExists(directory) && !std::filesystem::is_empty(directory)) {
-        parseWtmlsFromDisc(xmls, directory);
-        LINFO("Loading images from directory");
+
+    if (!directoryExists(directory)) {
+        LINFO(fmt::format("Creating directory {}", directory));
+        std::filesystem::create_directory(directory);
+    }
+
+    std::string remoteHash;
+    {
+        std::string remoteHashFile = root.substr(0, root.find_last_of('/')) + "/hash.md5";
+        bool success = downloadFile(remoteHashFile, directory / "hash.tmp");
+        // The hash download might fail if the provided 'root' does not have a hash
+        // in which case we assume that the underlying data has not changed
+        if (success) {
+            std::ifstream(directory / "hash.tmp") >> remoteHash;
+
+            std::filesystem::remove(directory / "hash.tmp");
+        }
+    }
+
+    std::string localHash;
+    std::filesystem::path localHashFile = directory / "hash.md5";
+    if (std::filesystem::exists(localHashFile)) {
+        std::ifstream(localHashFile) >> localHash;
+        std::filesystem::remove(localHashFile);
+    }
+    
+    if (!localHash.empty() && !remoteHash.empty() && localHash != remoteHash) {
+        LINFO(fmt::format(
+            "Local hash {} differs from remote hash {}. Cleaning directory",
+            localHash, remoteHash
+        ));
+
+        std::filesystem::remove_all(directory);
+        std::filesystem::create_directory(directory);
+    }
+    
+    std::vector<std::unique_ptr<tinyxml2::XMLDocument>> xmls;
+    if (std::filesystem::is_empty(directory)) {
+        LINFO("Loading images from url");
+        downloadAndParseWtmlFilesFromUrl(xmls, directory, root, "root");
     }
     else {
-        downloadAndParseWtmlFilesFromUrl(xmls, directory, root, "root");
-        LINFO("Loading images from url");
+        LINFO("Loading images from directory");
+        parseWtmlsFromDisc(xmls, directory);
     }
+
+    std::ofstream(localHashFile) << remoteHash;
 
     // Traverse through the collected wtml documents and collect the images
     for (const std::unique_ptr<tinyxml2::XMLDocument>& doc : xmls) {
