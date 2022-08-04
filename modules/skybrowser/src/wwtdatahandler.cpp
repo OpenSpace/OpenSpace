@@ -25,17 +25,40 @@
 #include <modules/skybrowser/include/wwtdatahandler.h>
 
 #include <modules/skybrowser/include/utility.h>
-#include <modules/space/speckloader.h>
 #include <openspace/util/httprequest.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <algorithm>
-#include <filesystem>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <string_view>
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
+
+#include <modules/skybrowser/ext/tinyxml2/tinyxml2.h>
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 namespace {
     constexpr std::string_view _loggerCat = "WwtDataHandler";
+
+    constexpr std::string_view Thumbnail = "Thumbnail";
+    constexpr std::string_view Name = "Name";
+    constexpr std::string_view ImageSet = "ImageSet";
+    constexpr std::string_view Dec = "Dec";
+    constexpr std::string_view RA = "RA";
+    constexpr std::string_view Undefined = "";
+    constexpr std::string_view Folder = "Folder";
+    constexpr std::string_view Place = "Place";
+    constexpr std::string_view ThumbnailUrl = "ThumbnailUrl";
+    constexpr std::string_view Url = "Url";
+    constexpr std::string_view Credits = "Credits";
+    constexpr std::string_view CreditsUrl = "CreditsUrl";
+    constexpr std::string_view ZoomLevel = "ZoomLevel";
+    constexpr std::string_view DataSetType = "DataSetType";
+    constexpr std::string_view Sky = "Sky";
 
     bool hasAttribute(const tinyxml2::XMLElement* element, std::string_view name) {
         std::string n = std::string(name);
@@ -47,18 +70,14 @@ namespace {
             std::string n = std::string(name);
             return element->FindAttribute(n.c_str())->Value();
         }
-        return std::string(openspace::wwt::Undefined);
+        return std::string(Undefined);
     }
-
 
     // Parsing and downloading of wtml files
     bool downloadFile(const std::string& url, const std::filesystem::path& destination) {
-        // Get the web page and save to file
-        openspace::HttpFileDownload wtmlRoot(
-            url,
-            destination,
-            openspace::HttpFileDownload::Overwrite::Yes
-        );
+        using namespace openspace;
+
+        HttpFileDownload wtmlRoot(url, destination, HttpFileDownload::Overwrite::Yes);
         wtmlRoot.start(std::chrono::milliseconds(10000));
         return wtmlRoot.wait();
     }
@@ -67,29 +86,8 @@ namespace {
         return std::filesystem::exists(path) && std::filesystem::is_directory(path);
     }
 
-    std::string createSearchableString(std::string str) {
-        // Remove white spaces and all special characters
-        str.erase(
-            std::remove_if(
-                str.begin(), str.end(),
-                [](char c) {
-                    const bool isNumberOrLetter = std::isdigit(c) || std::isalpha(c);
-                    return !isNumberOrLetter;
-                }
-            ),
-            str.end()
-        );
-        // Make the word lower case
-        std::transform(
-            str.begin(), str.end(),
-            str.begin(),
-            [](char c) { return static_cast<char>(std::tolower(c)); }
-        );
-        return str;
-    }
-
-    tinyxml2::XMLElement* directChildNode(tinyxml2::XMLElement* node,
-                                          std::string_view name)
+    const tinyxml2::XMLElement* directChildNode(const tinyxml2::XMLElement* node,
+                                                std::string_view name)
     {
         while (node && node->Name() != name) {
             node = node->FirstChildElement();
@@ -97,13 +95,14 @@ namespace {
         return node;
     }
 
-    tinyxml2::XMLElement* childNode(tinyxml2::XMLElement* node, std::string_view name) {
-        tinyxml2::XMLElement* child = node->FirstChildElement();
+    const tinyxml2::XMLElement* childNode(const tinyxml2::XMLElement* node,
+                                          std::string_view name)
+    {
+        const tinyxml2::XMLElement* child = node->FirstChildElement();
 
         // Traverse the children and look at all their first child to find ImageSet
         while (child) {
-            tinyxml2::XMLElement* imageSet = directChildNode(child, name);
-            // Found
+            const tinyxml2::XMLElement* imageSet = directChildNode(child, name);
             if (imageSet) {
                 return imageSet;
             }
@@ -112,47 +111,38 @@ namespace {
         return nullptr;
     }
 
-    std::string childNodeContentFromImageSet(tinyxml2::XMLElement* imageSet,
+    std::string childNodeContentFromImageSet(const tinyxml2::XMLElement* imageSet,
                                              std::string_view elementName)
     {
         // Find the thumbnail image url
         // The thumbnail is the last node so traverse backwards for speed
         std::string n = std::string(elementName);
-        tinyxml2::XMLElement* imageSetChild = imageSet->FirstChildElement(n.c_str());
-        if (imageSetChild && imageSetChild->GetText()) {
-            return imageSetChild->GetText();
-        }
-        else {
-            return std::string(openspace::wwt::Undefined);
-        }
+        const tinyxml2::XMLElement* child = imageSet->FirstChildElement(n.c_str());
+        return child && child->GetText() ? child->GetText() : std::string(Undefined);
     }
 
-    std::string urlFromPlace(tinyxml2::XMLElement* place) {
+    std::string urlFromPlace(const tinyxml2::XMLElement* place) {
         // If the place has a thumbnail url, return it
-        if (hasAttribute(place, openspace::wwt::Thumbnail)) {
-            return attribute(place, openspace::wwt::Thumbnail);
+        if (hasAttribute(place, Thumbnail)) {
+            return attribute(place, Thumbnail);
         }
 
         // If the place doesn't have a thumbnail url data attribute,
         // Load the image set it stores instead
-        tinyxml2::XMLElement* imageSet = childNode(place, openspace::wwt::ImageSet);
+        const tinyxml2::XMLElement* imageSet = childNode(place, ImageSet);
 
-        // If there is an imageSet, collect thumbnail url
-        if (imageSet) {
-            return childNodeContentFromImageSet(imageSet, openspace::wwt::ThumbnailUrl);
-        }
-        else {
-            // If it doesn't contain an ImageSet, it doesn't have an url
-            return std::string(openspace::wwt::Undefined);
-        }
+        // If there is an imageSet, collect thumbnail url, if it doesn't contain an
+        // ImageSet, it doesn't have an url
+        return imageSet ?
+            childNodeContentFromImageSet(imageSet, ThumbnailUrl) :
+            std::string(Undefined);
     }
 
     void parseWtmlsFromDisc(std::vector<std::unique_ptr<tinyxml2::XMLDocument>>& xmls,
                             const std::filesystem::path& directory)
     {
         for (const auto& entry : std::filesystem::directory_iterator(directory)) {
-            std::unique_ptr<tinyxml2::XMLDocument> document =
-                std::make_unique<tinyxml2::XMLDocument>();
+            auto document = std::make_unique<tinyxml2::XMLDocument>();
             std::string path = entry.path().string();
             tinyxml2::XMLError successCode = document->LoadFile(path.c_str());
 
@@ -170,50 +160,53 @@ namespace {
     {
         using namespace openspace;
 
-        // Look for WWT image data folder, create folder  if it doesn't exist
+        // Look for WWT image data folder, create folder if it doesn't exist
         if (!directoryExists(directory)) {
             std::string newDir = directory.string();
+            ghoul_assert(
+                newDir.back() == '/' || newDir.back() == '\\',
+                "Directory must have a / at the end"
+            );
             // Remove the '/' at the end
             newDir.pop_back();
-            LINFO("Creating directory" + newDir);
+            LINFO(fmt::format("Creating directory {}", newDir));
             std::filesystem::create_directory(newDir);
         }
 
         // Download file from url
         std::filesystem::path file = directory.string() + fileName + ".aspx";
-        if (!downloadFile(url, file)) {
+        const bool success = downloadFile(url, file);
+        if (!success) {
             LINFO(fmt::format(
-                "Could not download file '{}' to directory '{}'", url, directory
+                "Could not download file '{}' to directory {}", url, directory
             ));
             return false;
         }
 
         // Parse file to XML
-        using namespace tinyxml2;
-        std::unique_ptr<tinyxml2::XMLDocument> doc =
-            std::make_unique<tinyxml2::XMLDocument>();
-        doc->LoadFile(file.string().c_str());
+        auto document = std::make_unique<tinyxml2::XMLDocument>();
+        document->LoadFile(file.string().c_str());
 
         // Search XML file for folders with urls
-        XMLElement* root = doc->RootElement();
-        XMLElement* element = root->FirstChildElement(wwt::Folder.data());
-        const bool folderExists = element;
-        const bool folderContainNoUrls = folderExists && !hasAttribute(element, wwt::Url);
+        const tinyxml2::XMLElement* root = document->RootElement();
+        const tinyxml2::XMLElement* element = root->FirstChildElement(Folder.data());
+        const bool folderExists = element != nullptr;
+        const bool folderContainNoUrls = folderExists && !hasAttribute(element, Url);
 
         // If the file contains no folders, or there are folders but without urls,
         // stop recursion
         if (!folderExists || folderContainNoUrls) {
-            xmls.push_back(std::move(doc));
-            LINFO("Saving " + url);
+            xmls.push_back(std::move(document));
+            LINFO(fmt::format("Saving {}", url));
             return true;
         }
 
         // Iterate through all the folders in the XML file
-        while (element && std::string(element->Value()) == wwt::Folder) {
+        while (element && std::string(element->Value()) == Folder) {
             // If folder contains urls, download and parse those urls
-            if (hasAttribute(element, wwt::Url) && hasAttribute(element, wwt::Name)) {
-                std::string urlAttr = attribute(element, wwt::Url);
-                std::string fileNameAttr = attribute(element, wwt::Name);
+            if (hasAttribute(element, Url) && hasAttribute(element, Name)) {
+                std::string urlAttr = attribute(element, Url);
+                std::string fileNameAttr = attribute(element, Name);
                 downloadAndParseWtmlFilesFromUrl(xmls, directory, urlAttr, fileNameAttr);
             }
             element = element->NextSiblingElement();
@@ -221,6 +214,76 @@ namespace {
         return true;
     }
 
+    std::optional<openspace::ImageData> loadImageFromNode(
+                                                         const tinyxml2::XMLElement* node,
+                                                                   std::string collection)
+    {
+        using namespace openspace;
+
+        // Collect the image set of the node. The structure is different depending on if
+        // it is a Place or an ImageSet
+        std::string thumbnailUrl = std::string(Undefined);
+        const tinyxml2::XMLElement* imageSet = nullptr;
+        std::string type = node->Name();
+
+        if (type == ImageSet) {
+            thumbnailUrl = childNodeContentFromImageSet(node, ThumbnailUrl);
+            imageSet = node;
+        }
+        else if (type == Place) {
+            thumbnailUrl = urlFromPlace(node);
+            imageSet = childNode(node, ImageSet);
+        }
+
+        // Only collect the images that have a thumbnail image, that are sky images and
+        // that have an image
+        const bool hasThumbnailUrl = thumbnailUrl != Undefined;
+        const bool isSkyImage = attribute(node, DataSetType) == Sky;
+        const bool hasImageUrl = imageSet ? hasAttribute(imageSet, Url) : false;
+
+        if (!(hasThumbnailUrl && isSkyImage && hasImageUrl)) {
+            return std::nullopt;
+        }
+
+        // Collect name, image url and credits
+        std::string name = attribute(node, Name);
+        std::string imageUrl = attribute(imageSet, Url);
+        std::string credits = childNodeContentFromImageSet(imageSet, Credits);
+        std::string creditsUrl = childNodeContentFromImageSet(imageSet, CreditsUrl);
+
+        // Collect equatorial coordinates. All-sky surveys do not have these coordinates
+        bool hasCelestialCoords = hasAttribute(node, RA) && hasAttribute(node, Dec);
+        glm::dvec2 equatorialSpherical = glm::dvec2(0.0);
+        glm::dvec3 equatorialCartesian = glm::dvec3(0.0);
+
+        if (hasCelestialCoords) {
+            // The RA from WWT is in the unit hours:
+            // to convert to degrees, multiply with 360 (deg) /24 (h) = 15
+            double ra = 15.0 * std::stod(attribute(node, RA));
+            double dec = std::stod(attribute(node, Dec));
+            equatorialSpherical = glm::dvec2(ra, dec);
+            equatorialCartesian = skybrowser::sphericalToCartesian(equatorialSpherical);
+        }
+
+        // Collect field of view. The WWT definition of ZoomLevel is: VFOV = ZoomLevel / 6
+        float fov = 0.f;
+        if (hasAttribute(node, ZoomLevel)) {
+            fov = std::stof(attribute(node, ZoomLevel)) / 6.f;
+        }
+
+        return ImageData{
+            name,
+            thumbnailUrl,
+            imageUrl,
+            credits,
+            creditsUrl,
+            collection,
+            hasCelestialCoords,
+            fov,
+            equatorialSpherical,
+            equatorialCartesian
+        };
+    }
 } //namespace
 
 namespace openspace {
@@ -228,38 +291,42 @@ namespace openspace {
 void WwtDataHandler::loadImages(const std::string& root,
                                 const std::filesystem::path& directory)
 {
+    std::vector<std::unique_ptr<tinyxml2::XMLDocument>> xmls;
+
     // Collect the wtml files, either by reading from disc or from a url
     if (directoryExists(directory) && !std::filesystem::is_empty(directory)) {
-        parseWtmlsFromDisc(_xmls, directory);
+        parseWtmlsFromDisc(xmls, directory);
         LINFO("Loading images from directory");
     }
     else {
-        downloadAndParseWtmlFilesFromUrl(_xmls, directory, root, "root");
+        downloadAndParseWtmlFilesFromUrl(xmls, directory, root, "root");
         LINFO("Loading images from url");
     }
 
     // Traverse through the collected wtml documents and collect the images
-    for (const std::unique_ptr<tinyxml2::XMLDocument>& doc : _xmls) {
+    for (const std::unique_ptr<tinyxml2::XMLDocument>& doc : xmls) {
         tinyxml2::XMLElement* rootNode = doc->FirstChildElement();
-        std::string collectionName = attribute(rootNode, wwt::Name);
+        std::string collectionName = attribute(rootNode, Name);
         saveImagesFromXml(rootNode, collectionName);
     }
+
+    std::for_each(
+        _images.begin(),
+        _images.end(),
+        [](ImageData& a) {
+            // If the first character in the names are lowercase, make it upper case
+            if (std::islower(a.name[0])) {
+                // convert string to upper case
+                a.name[0] = static_cast<char>(std::toupper(a.name[0]));
+            }
+        }
+    );
 
     // Sort images in alphabetical order
     std::sort(
         _images.begin(),
         _images.end(),
-        [](ImageData& a, ImageData& b) {
-            // If the first character in the names are lowercase, make it upper case
-            if (std::islower(a.name[0])) {
-                // convert string to upper case
-                a.name[0] = static_cast<char>(::toupper(a.name[0]));
-            }
-            if (std::islower(b.name[0])) {
-                b.name[0] = static_cast<char>(::toupper(b.name[0]));
-            }
-            return a.name < b.name;
-        }
+        [](ImageData& a, ImageData& b) { return a.name < b.name; }
     );
 
     LINFO(fmt::format("Loaded {} WorldWide Telescope images", _images.size()));
@@ -274,95 +341,28 @@ const ImageData& WwtDataHandler::image(int i) const {
     return _images[i];
 }
 
-void WwtDataHandler::saveImageFromNode(tinyxml2::XMLElement* node, std::string collection)
-{
-    // Collect the image set of the node. The structure is different depending on if
-    // it is a Place or an ImageSet
-    std::string thumbnailUrl = std::string(wwt::Undefined);
-    tinyxml2::XMLElement* imageSet = nullptr;
-    std::string type = std::string(node->Name());
-
-    if (type == wwt::ImageSet) {
-        thumbnailUrl = childNodeContentFromImageSet(node, wwt::ThumbnailUrl);
-        imageSet = node;
-    }
-    else if (type == wwt::Place) {
-        thumbnailUrl = urlFromPlace(node);
-        imageSet = childNode(node, wwt::ImageSet);
-    }
-
-    // Only collect the images that have a thumbnail image, that are sky images and
-    // that have an image
-    const bool hasThumbnailUrl = thumbnailUrl != wwt::Undefined;
-    const bool isSkyImage = attribute(node, wwt::DataSetType) == wwt::Sky;
-    const bool hasImageUrl = imageSet ? hasAttribute(imageSet, wwt::Url) : false;
-
-    if (!(hasThumbnailUrl && isSkyImage && hasImageUrl)) {
-        return;
-    }
-
-    // Collect name, image url and credits
-    std::string  name = attribute(node, wwt::Name);
-    std::string imageUrl = attribute(imageSet, wwt::Url);
-    std::string credits = childNodeContentFromImageSet(imageSet, wwt::Credits);
-    std::string creditsUrl = childNodeContentFromImageSet(imageSet, wwt::CreditsUrl);
-
-    // Collect equatorial coordinates. All-sky surveys do not have this kind of
-    // coordinate
-    bool hasCelestialCoords = hasAttribute(node, wwt::RA) && hasAttribute(node, wwt::Dec);
-    glm::dvec2 equatorialSpherical = glm::dvec2(0.0);
-    glm::dvec3 equatorialCartesian = glm::vec3(0.0);
-
-    if (hasCelestialCoords) {
-        // The RA from WWT is in the unit hours:
-        // to convert to degrees, multiply with 360 (deg) /24 (h) = 15
-        double ra = 15.0 * std::stod(attribute(node, wwt::RA));
-        double dec = std::stod(attribute(node, wwt::Dec));
-        equatorialSpherical = glm::dvec2(ra, dec);
-        equatorialCartesian = skybrowser::sphericalToCartesian(equatorialSpherical);
-    }
-
-    // Collect field of view. The WWT definition of ZoomLevel is: VFOV = ZoomLevel / 6
-    float fov = 0.f;
-    if (hasAttribute(node, wwt::ZoomLevel)) {
-        fov = std::stof(attribute(node, wwt::ZoomLevel)) / 6.f;
-    }
-
-    ImageData image = {
-        name,
-        thumbnailUrl,
-        imageUrl,
-        credits,
-        creditsUrl,
-        collection,
-        hasCelestialCoords,
-        fov,
-        equatorialSpherical,
-        equatorialCartesian
-    };
-
-    _images.push_back(image);
-}
-
-void WwtDataHandler::saveImagesFromXml(tinyxml2::XMLElement* root, std::string collection)
+void WwtDataHandler::saveImagesFromXml(const tinyxml2::XMLElement* root,
+                                       std::string collection)
 {
     // Get direct child of node called Place
-    using namespace tinyxml2;
-    XMLElement* node = root->FirstChildElement();
+    const tinyxml2::XMLElement* node = root->FirstChildElement();
 
     // Iterate through all siblings of node. If sibling is folder, open recursively.
     // If sibling is image, save it.
     while (node) {
         const std::string name = node->Name();
         // If node is an image or place, load it
-        if (name == wwt::ImageSet || name == wwt::Place) {
-            saveImageFromNode(node, collection);
+        if (name == ImageSet || name == Place) {
+            std::optional<ImageData> image = loadImageFromNode(node, collection);
+            if (image.has_value()) {
+                _images.push_back(std::move(*image));
+            }
+
         }
         // If node is another folder, open recursively
-        else if (name == wwt::Folder) {
-            std::string newCollectionName = collection + "/";
-            newCollectionName += attribute(node, wwt::Name);
-
+        else if (name == Folder) {
+            std::string nodeName = attribute(node, Name);
+            std::string newCollectionName = fmt::format("{}/{}", collection, nodeName);
             saveImagesFromXml(node, newCollectionName);
         }
         node = node->NextSiblingElement();

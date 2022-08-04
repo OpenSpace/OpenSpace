@@ -64,7 +64,7 @@ public:
     explicit Browser(const ghoul::Dictionary& dictionary);
     virtual ~Browser();
 
-    bool initializeGL();
+    void initializeGL();
     void deinitializeGL();
     bool isReady() const;
 
@@ -78,7 +78,7 @@ public:
     void setCallbackDimensions(const std::function<void(const glm::dvec2&)>& function);
 
 protected:
-    properties::Vec2Property _browserPixeldimensions;
+    properties::Vec2Property _browserDimension;
     properties::StringProperty _url;
     properties::TriggerProperty _reload;
 

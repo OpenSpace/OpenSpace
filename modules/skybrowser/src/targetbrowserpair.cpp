@@ -294,16 +294,16 @@ void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {
     // Animate the target before the field of view starts to animate
     if (_targetAnimation.isAnimating()) {
-        aimTargetGalactic(_targetAnimation.getNewValue());
+        aimTargetGalactic(_targetAnimation.newValue());
     }
     else if (!_targetAnimation.isAnimating() && _targetIsAnimating) {
         // Set the finished position
-        aimTargetGalactic(_targetAnimation.getNewValue());
+        aimTargetGalactic(_targetAnimation.newValue());
         _fovAnimation.start();
         _targetIsAnimating = false;
     }
     if (_fovAnimation.isAnimating()) {
-        _browser->setVerticalFov(_fovAnimation.getNewValue());
+        _browser->setVerticalFov(_fovAnimation.newValue());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
