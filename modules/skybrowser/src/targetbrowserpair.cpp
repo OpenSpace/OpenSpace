@@ -85,22 +85,14 @@ void TargetBrowserPair::startFinetuningTarget() {
 // The fine tune of the target is a way to "drag and drop" the target with right click
 // drag on the sky browser window. This is to be able to drag the target around when it
 // has a very small field of view
-void TargetBrowserPair::fineTuneTarget(const glm::vec2& startMouse,
-                                       const glm::vec2& translation)
+void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation)
 {
-    glm::vec2 fineTune = _browser->fineTuneVector(translation);
-    glm::vec2 endMouse = startMouse + fineTune;
-
-    // Translation world
-    glm::dvec3 startWorld = skybrowser::localCameraToGalactic(
-        glm::vec3(startMouse, skybrowser::ScreenSpaceZ)
+    glm::dvec2 startRaDec = skybrowser::cartesianToSpherical(
+        skybrowser::galacticToEquatorial(glm::normalize(_startTargetPosition))
     );
-    glm::dvec3 endWorld = skybrowser::localCameraToGalactic(
-        glm::vec3(endMouse, skybrowser::ScreenSpaceZ)
-    );
-
-    glm::dvec3 translationWorld = endWorld - startWorld;
-    aimTargetGalactic(_startTargetPosition + translationWorld);
+    glm::dvec2 newRaDec = startRaDec + glm::dvec2(translation);
+    glm::dvec3 newCartesian = skybrowser::sphericalToCartesian(newRaDec);
+    aimTargetGalactic(skybrowser::equatorialToGalactic(newCartesian));
 }
 
 void TargetBrowserPair::synchronizeAim() {

@@ -55,7 +55,7 @@ public:
 
     // Mouse interaction
     void startFinetuningTarget();
-    void fineTuneTarget(const glm::vec2& startMouse, const glm::vec2& translation);
+    void fineTuneTarget(const glm::vec2& translation);
     void synchronizeAim();
 
     // Browser
