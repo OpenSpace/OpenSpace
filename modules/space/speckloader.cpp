@@ -679,7 +679,7 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
             // Remove the 'id' text
             rest = rest.substr(std::string_view("id ").size());
             size_t index = rest.find("text");
-            entry.identifier = rest.substr(0, index);
+            entry.identifier = rest.substr(0, index - 1);
 
             // update the rest, remove the identifier
             rest = rest.substr(index);

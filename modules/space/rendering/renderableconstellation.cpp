@@ -181,9 +181,8 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
     }
     addProperty(_renderOption);
 
-    // Avoid reading the translation file here, instead do it in the initialize()
+    _constellationNamesFilename.onChange([&]() { loadConstellationFile(); });
     _constellationNamesFilename = p.constellationNamesFile;
-    _constellationNamesFilename.onChange([&](){ loadConstellationFile(); });
     addProperty(_constellationNamesFilename);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -262,7 +261,7 @@ bool RenderableConstellation::loadConstellationFile() {
         std::string fullName;
         std::getline(s, fullName);
         ghoul::trimWhitespace(fullName);
-        _constellationNamesTranslation.insert({ abbreviation, fullName });
+        _constellationNamesTranslation[abbreviation] = fullName;
 
         ++index;
     }
@@ -277,8 +276,6 @@ void RenderableConstellation::fillSelectionProperty() {
 }
 
 void RenderableConstellation::initialize() {
-    loadConstellationFile();
-
     if (!_hasLabel) {
         return;
     }
@@ -300,12 +297,16 @@ void RenderableConstellation::initialize() {
 
     for (speck::Labelset::Entry& entry : _labelset.entries) {
         if (!entry.identifier.empty()) {
-            entry.text = _constellationNamesTranslation[entry.identifier];
+            entry.text = _constellationNamesTranslation.at(entry.identifier);
         }
     }
 }
 
 void RenderableConstellation::render(const RenderData& data, RendererTasks&) {
+    if (!_hasLabel || !_drawLabels) {
+        return;
+    }
+
     const glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -333,12 +334,10 @@ void RenderableConstellation::render(const RenderData& data, RendererTasks&) {
         );
     }
 
-    if (_drawLabels && _hasLabel) {
-        const glm::vec3 orthoUp = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
-        );
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
-    }
+    const glm::vec3 orthoUp = glm::normalize(
+        glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
+    );
+    renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
 }
 
 void RenderableConstellation::renderLabels(const RenderData& data,
@@ -364,6 +363,12 @@ void RenderableConstellation::renderLabels(const RenderData& data,
     glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
     for (const speck::Labelset::Entry& e : _labelset.entries) {
+        if (_constellationSelection.hasSelected() &&
+           !_constellationSelection.isSelected(e.text))
+        {
+            continue;
+        }
+
         glm::vec3 scaledPos(e.position);
         scaledPos *= scale;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
