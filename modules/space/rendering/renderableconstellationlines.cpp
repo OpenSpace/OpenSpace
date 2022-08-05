@@ -371,7 +371,7 @@ bool RenderableConstellationLines::readSpeckFile() {
 
             if (dummyU == "id") {
                 ghoul::trimWhitespace(dummyV);
-                mesh.identifier = _constellationNamesTranslation[dummyV];
+                mesh.identifier = constellationFullName(dummyV);
 
                 // Dimensions are specified in the next line as usual
                 std::getline(file, line);

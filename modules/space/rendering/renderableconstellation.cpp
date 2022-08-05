@@ -219,6 +219,20 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
     _assetSelectedMeshes = p.constellationSelection.value_or(_assetSelectedMeshes);
 }
 
+std::string RenderableConstellation::constellationFullName(
+                                                      const std::string& identifier) const
+{
+    try {
+        return _constellationNamesTranslation.at(identifier);
+    }
+    catch (const std::out_of_range&) {
+        std::string message = fmt::format(
+            "Identifier '{}' could not be found in list of constellations", identifier
+        );
+        throw ghoul::RuntimeError(message, "RenderableConstellation");
+    }
+}
+
 void RenderableConstellation::loadConstellationFile() {
     if (_constellationNamesFilename.value().empty()) {
         return;
@@ -305,16 +319,7 @@ void RenderableConstellation::initialize() {
 
     for (speck::Labelset::Entry& entry : _labelset.entries) {
         if (!entry.identifier.empty()) {
-            try {
-                entry.text = _constellationNamesTranslation.at(entry.identifier);
-            }
-            catch (const std::out_of_range&) {
-                std::string message = fmt::format(
-                    "Identifier '{}' could not be found in list of constellations",
-                    entry.identifier
-                );
-                throw ghoul::RuntimeError(message, "RenderableConstellation");
-            }
+            entry.text = constellationFullName(entry.identifier);
         }
     }
 }

@@ -74,9 +74,7 @@ protected:
      */
     virtual void selectionPropertyHasChanged() = 0;
 
-    // Map over the constellations names and theis abbreviations
-    // key = abbreviations, value = full name
-    std::map<std::string, std::string> _constellationNamesTranslation;
+    std::string constellationFullName(const std::string& identifier) const;
 
     // Linewidth for the constellation bounds
     properties::FloatProperty _lineWidth;
@@ -89,6 +87,10 @@ protected:
     speck::Labelset _labelset;
 
 private:
+    // Map over the constellations names and theis abbreviations
+    // key = abbreviations, value = full name
+    std::map<std::string, std::string> _constellationNamesTranslation;
+
     std::vector<std::string> _assetSelectedMeshes;
 
     /**

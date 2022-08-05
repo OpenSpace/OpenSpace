@@ -139,6 +139,9 @@ void RenderableConstellationBounds::deinitializeGL() {
 }
 
 bool RenderableConstellationBounds::isReady() const {
+    if (!_hasLabel) {
+        return _program && _vao != 0 && _vbo != 0;
+    }
     return _program && _vao != 0 && _vbo != 0 && !_labelset.entries.empty();
 }
 
@@ -214,8 +217,8 @@ bool RenderableConstellationBounds::loadVertexFile() {
         float dec;
         s >> dec;
 
-        std::string constellationName;
-        s >> constellationName;
+        std::string abbreviation;
+        s >> abbreviation;
 
         if (!s.good()) {
             // If this evaluates to true, the stream was not completely filled, which
@@ -230,7 +233,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
         }
 
         // Did we arrive at a new constellation?
-        if (constellationName != currentBound.constellationAbbreviation) {
+        if (abbreviation != currentBound.constellationAbbreviation) {
             // Store how many vertices we read during the active time of the constellation
             currentBound.nVertices = static_cast<GLsizei>(
                 _vertexValues.size() - currentBound.startIndex
@@ -239,8 +242,8 @@ bool RenderableConstellationBounds::loadVertexFile() {
             _constellationBounds.push_back(currentBound);
             currentBound = ConstellationBound();
             currentBound.isEnabled = true;
-            currentBound.constellationAbbreviation = constellationName;
-            currentBound.constellationFullName = constellationName;
+            currentBound.constellationAbbreviation = abbreviation;
+            currentBound.constellationFullName = constellationFullName(abbreviation);
             currentBound.startIndex = static_cast<GLsizei>(_vertexValues.size());
         }
 
