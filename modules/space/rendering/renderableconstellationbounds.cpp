@@ -50,14 +50,6 @@ namespace {
         "constellations"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ConstellationInfo = {
-        "ConstellationFile",
-        "Constellation File Path",
-        "Specifies the file that contains the mapping between constellation "
-        "abbreviations and full name of the constellation. If this value is empty, the "
-        "abbreviations are used as the full names"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color of constellation lines",
@@ -65,33 +57,12 @@ namespace {
         "full opacity"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "The line width of the constellation bounds"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
-        "ConstellationSelection",
-        "Constellation Selection",
-        "The constellations that are selected are displayed on the celestial sphere"
-    };
-
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
         // [[codegen::verbatim(VertexInfo.description)]]
         std::string file;
 
-        // [[codegen::verbatim(ConstellationInfo.description)]]
-        std::optional<std::string> constellationFile;
-
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
-
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
-
-        // [[codegen::verbatim(SelectionInfo.description)]]
-        std::optional<std::vector<std::string>> constellationSelection;
     };
 #include "renderableconstellationbounds_codegen.cpp"
 } // namespace
@@ -103,54 +74,27 @@ documentation::Documentation RenderableConstellationBounds::Documentation() {
 }
 
 RenderableConstellationBounds::RenderableConstellationBounds(
-    const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+                                                      const ghoul::Dictionary& dictionary)
+    : RenderableConstellation(dictionary)
     , _vertexFilename(VertexInfo)
-    , _constellationFilename(ConstellationInfo)
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 32.f)
-    , _constellationSelection(SelectionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    // Avoid loading the vertex file here, do it in multithreded initialize() instead
+    _vertexFilename = p.file;
     _vertexFilename.onChange([&](){ loadVertexFile(); });
     addProperty(_vertexFilename);
-    _vertexFilename = p.file;
-
-    _constellationFilename.onChange([&](){ loadConstellationFile(); });
-    _constellationFilename = p.constellationFile.value_or(_constellationFilename);
-    addProperty(_constellationFilename);
 
     _color.setViewOption(properties::Property::ViewOptions::Color);
     _color = p.color.value_or(_color);
     addProperty(_color);
+}
 
-    _lineWidth = p.lineWidth.value_or(_lineWidth);
-    addProperty(_lineWidth);
+void RenderableConstellationBounds::initialize() {
+    RenderableConstellation::initialize();
 
-    fillSelectionProperty();
-    _constellationSelection.onChange([this]() { selectionPropertyHasChanged(); });
-    addProperty(_constellationSelection);
-
-    if (p.constellationSelection.has_value()) {
-        const std::vector<std::string> options = _constellationSelection.options();
-
-        std::set<std::string> selectedNames;
-        for (const std::string& s : *p.constellationSelection) {
-            const auto it = std::find(options.begin(), options.end(), s);
-            if (it == options.end()) {
-                // The user has specified a constellation name that doesn't exist
-                LWARNINGC(
-                    "RenderableConstellationBounds",
-                    fmt::format("Option '{}' not found in list of constellations", s)
-                );
-            }
-            else {
-                selectedNames.insert(s);
-            }
-        }
-        _constellationSelection = selectedNames;
-    }
+    loadVertexFile();
 }
 
 void RenderableConstellationBounds::initializeGL() {
@@ -179,6 +123,9 @@ void RenderableConstellationBounds::initializeGL() {
     glBindVertexArray(0);
 }
 
+void RenderableConstellationBounds::deinitialize() {
+}
+
 void RenderableConstellationBounds::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
@@ -192,10 +139,10 @@ void RenderableConstellationBounds::deinitializeGL() {
 }
 
 bool RenderableConstellationBounds::isReady() const {
-    return (_vao != 0) && (_vbo != 0) && _program;
+    return _program && _vao != 0 && _vbo != 0 && !_labelset.entries.empty();
 }
 
-void RenderableConstellationBounds::render(const RenderData& data, RendererTasks&) {
+void RenderableConstellationBounds::render(const RenderData& data, RendererTasks& tasks) {
     _program->activate();
 
     _program->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
@@ -223,6 +170,12 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     }
     glBindVertexArray(0);
     _program->deactivate();
+
+    RenderableConstellation::render(data, tasks);
+}
+
+void RenderableConstellationBounds::update(const UpdateData& data) {
+
 }
 
 bool RenderableConstellationBounds::loadVertexFile() {
@@ -324,61 +277,6 @@ bool RenderableConstellationBounds::loadVertexFile() {
     _constellationBounds.push_back(currentBound);
 
     return true;
-}
-
-bool RenderableConstellationBounds::loadConstellationFile() {
-    if (_constellationFilename.value().empty()) {
-        return true;
-    }
-
-    std::ifstream file;
-    file.exceptions(std::ifstream::goodbit);
-    file.open(absPath(_constellationFilename));
-
-    std::string line;
-    int index = 0;
-    while (file.good()) {
-        std::getline(file, line);
-        if (line.empty()) {
-            continue;
-        }
-
-        std::string abbreviation;
-        std::stringstream s(line);
-        s >> abbreviation;
-
-        const auto it = std::find_if(
-            _constellationBounds.begin(),
-            _constellationBounds.end(),
-            [abbreviation](const ConstellationBound& bound) {
-                return bound.constellationAbbreviation == abbreviation;
-            }
-        );
-        if (it == _constellationBounds.end()) {
-            LERRORC(
-                "RenderableConstellationBounds",
-                fmt::format("Could not find constellation '{}' in list", abbreviation)
-            );
-            return false;
-        }
-
-        // Update the constellations full name
-        std::string fullName;
-        std::getline(s, fullName);
-        ghoul::trimWhitespace(fullName);
-        it->constellationFullName = std::move(fullName);
-
-        ++index;
-    }
-
-    return true;
-}
-
-void RenderableConstellationBounds::fillSelectionProperty() {
-    for (int i = 0 ; i < static_cast<int>(_constellationBounds.size()); ++i) {
-        const ConstellationBound& bound = _constellationBounds[i];
-        _constellationSelection.addOption(bound.constellationFullName);
-    }
 }
 
 void RenderableConstellationBounds::selectionPropertyHasChanged() {

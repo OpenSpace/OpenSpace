@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
+#include <modules/space/rendering/renderableconstellationlines.h>
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -35,6 +35,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -49,7 +50,7 @@
 #include <optional>
 
 namespace {
-    constexpr std::string_view _loggerCat = "RenderableDUMeshes";
+    constexpr std::string_view _loggerCat = "RenderableConstellationLines";
 
     constexpr std::array<const char*, 4> UniformNames = {
         "modelViewTransform", "projectionTransform", "alphaValue", "color"
@@ -58,55 +59,10 @@ namespace {
     constexpr int RenderOptionViewDirection = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
-    constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
-        "TextColor",
-        "Text Color",
-        "The text color for the astronomical object"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
-        "TextOpacity",
-        "Text Opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
-        "TextSize",
-        "Text Size",
-        "The text size for the astronomical object labels"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
-        "LabelFile",
-        "Label File",
-        "The path to the label file that contains information about the astronomical "
-        "objects being rendered"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
-        "TextMinMaxSize",
-        "Text Min/Max Size",
-        "The minimum and maximum size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "If the DU mesh is of wire type, this value determines the width of the lines"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
         "Enables/Disables the drawing of the astronomical objects"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
@@ -115,25 +71,10 @@ namespace {
         "The defined colors for the meshes to be rendered"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOption",
-        "Render Option",
-        "Debug option for rendering of billboards and texts"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MeshSelectionInfo = {
-        "MeshSelection",
-        "Selection",
-        "Selected objects"
-    };
-
-    struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
+    struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered
         std::string file;
-
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -146,77 +87,29 @@ namespace {
         };
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor [[codegen::color()]];
-
-        // [[codegen::verbatim(TextOpacityInfo.description)]]
-        std::optional<float> textOpacity;
-
-        // [[codegen::verbatim(TextSizeInfo.description)]]
-        std::optional<float> textSize;
-
-        // [[codegen::verbatim(LabelFileInfo.description)]]
-        std::optional<std::string> labelFile;
-
-        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> textMinMaxSize;
-
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
-
         // [[codegen::verbatim(MeshColorInfo.description)]]
         std::optional<std::vector<glm::vec3>> meshColor;
-
-        // [[codegen::verbatim(MeshSelectionInfo.description)]]
-        std::optional<std::vector<std::string>> selectedMeshes;
     };
-#include "renderabledumeshes_codegen.cpp"
+#include "renderableconstellationlines_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableDUMeshes::Documentation() {
-    return codegen::doc<Parameters>("digitaluniverse_renderabledumeshes");
+documentation::Documentation RenderableConstellationLines::Documentation() {
+    return codegen::doc<Parameters>("space_renderable_constellationlines");
 }
 
-RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
-    , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
+RenderableConstellationLines::RenderableConstellationLines(
+                                                      const ghoul::Dictionary& dictionary)
+    : RenderableConstellation(dictionary)
     , _drawElements(DrawElementsInfo, true)
-    , _drawLabels(DrawLabelInfo, false)
-    , _textMinMaxSize(
-        LabelMinMaxSizeInfo,
-        glm::ivec2(8, 500),
-        glm::ivec2(0),
-        glm::ivec2(1000)
-    )
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _selectedMeshes(MeshSelectionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _speckFile = absPath(p.file).string();
     _hasSpeckFile = true;
     _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
-
-    _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
-    _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
-    // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum, and
-    // doing it based on the fisheye rendering seems a bit brittle?
-    if (global::windowDelegate->isFisheyeRendering()) {
-        _renderOption = RenderOptionPositionNormal;
-    }
-    else {
-        _renderOption = RenderOptionViewDirection;
-    }
-    addProperty(_renderOption);
 
     if (p.unit.has_value()) {
         _unit = codegen::map<DistanceUnit>(*p.unit);
@@ -225,67 +118,17 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _unit = DistanceUnit::Meter;
     }
 
-    _lineWidth = p.lineWidth.value_or(_lineWidth);
-    addProperty(_lineWidth);
-
-    if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile).string();
-        _hasLabel = true;
-
-        _drawLabels = p.drawLabels.value_or(_drawLabels);
-        addProperty(_drawLabels);
-
-        _textColor = p.textColor.value_or(_textColor);
-        _hasLabel = p.textColor.has_value();
-        _textColor.setViewOption(properties::Property::ViewOptions::Color);
-        addProperty(_textColor);
-        _textColor.onChange([&]() { _textColorIsDirty = true; });
-
-        _textOpacity = p.textOpacity.value_or(_textOpacity);
-        addProperty(_textOpacity);
-
-        _textSize = p.textSize.value_or(_textSize);
-        addProperty(_textSize);
-
-        _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
-        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-        addProperty(_textMinMaxSize);
-    }
-
     if (p.meshColor.has_value()) {
         std::vector<glm::vec3> ops = *p.meshColor;
         for (size_t i = 0; i < ops.size(); ++i) {
             _meshColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }
-
-    _selectedMeshes.onChange([this]() { selectionPropertyHasChanged(); });
-    addProperty(_selectedMeshes);
-
-    _assetSelectedMeshes = p.selectedMeshes.value_or(_assetSelectedMeshes);
 }
 
-void RenderableDUMeshes::fillSelectionProperty() {
-    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
-        if (pair.second.name.empty()) {
-            continue;
-        }
-
-        auto it = std::find(
-            _selectedMeshes.options().begin(),
-            _selectedMeshes.options().end(),
-            pair.second.name
-        );
-        if (it != _selectedMeshes.options().end()) {
-            continue;
-        }
-        _selectedMeshes.addOption(pair.second.name);
-    }
-}
-
-void RenderableDUMeshes::selectionPropertyHasChanged() {
+void RenderableConstellationLines::selectionPropertyHasChanged() {
     // If no values are selected (the default), we want to show all constellations
-    if (!_selectedMeshes.hasSelected()) {
+    if (!_constellationSelection.hasSelected()) {
         for (std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
             pair.second.isEnabled = true;
         }
@@ -293,52 +136,34 @@ void RenderableDUMeshes::selectionPropertyHasChanged() {
     else {
         // Enable all constellations that are selected
         for (std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
-            pair.second.isEnabled = _selectedMeshes.isSelected(pair.second.name);
+            pair.second.isEnabled =
+                _constellationSelection.isSelected(pair.second.identifier);
         }
     }
 }
 
-bool RenderableDUMeshes::isReady() const {
-    return (_program != nullptr) &&
-        (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
+bool RenderableConstellationLines::isReady() const {
+    return (_program != nullptr) && !_renderingMeshesMap.empty() &&
+        !_labelset.entries.empty();
 }
 
-void RenderableDUMeshes::initialize() {
+void RenderableConstellationLines::initialize() {
+    RenderableConstellation::initialize();
+
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
     }
-
-    fillSelectionProperty();
-
-    if (_assetSelectedMeshes.empty()) {
-        return;
-    }
-
-    const std::vector<std::string> options = _selectedMeshes.options();
-    std::set<std::string> selectedNames;
-
-    for (const std::string& s : _assetSelectedMeshes) {
-        const auto it = std::find(options.begin(), options.end(), s);
-        if (it == options.end()) {
-            // The user has specified a mesh name that doesn't exist
-            LWARNING(fmt::format("Option '{}' not found in list of meshes", s));
-        }
-        else {
-            selectedNames.insert(s);
-        }
-    }
-    _selectedMeshes = selectedNames;
 }
 
-void RenderableDUMeshes::initializeGL() {
+void RenderableConstellationLines::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        "RenderableDUMeshes",
+        "RenderableConstellationLines",
         []() {
             return global::renderEngine->buildRenderProgram(
-                "RenderableDUMeshes",
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
+                "RenderableConstellationLines",
+                absPath("${MODULE_SPACE}/shaders/constellationlines_vs.glsl"),
+                absPath("${MODULE_SPACE}/shaders/constellationlines_fs.glsl")
             );
         }
     );
@@ -346,21 +171,12 @@ void RenderableDUMeshes::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     createMeshes();
-
-    if (_hasLabel) {
-        if (!_font) {
-            constexpr int FontSize = 50;
-            _font = global::fontManager->font(
-                "Mono",
-                static_cast<float>(FontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes,
-                ghoul::fontrendering::FontManager::LoadGlyphs::No
-            );
-        }
-    }
 }
 
-void RenderableDUMeshes::deinitializeGL() {
+void RenderableConstellationLines::deinitialize() {
+}
+
+void RenderableConstellationLines::deinitializeGL() {
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         for (int i = 0; i < pair.second.numU; ++i) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
@@ -369,16 +185,16 @@ void RenderableDUMeshes::deinitializeGL() {
     }
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        "RenderableDUMeshes",
+        "RenderableConstellationLines",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
 }
 
-void RenderableDUMeshes::renderMeshes(const RenderData&,
-                                      const glm::dmat4& modelViewMatrix,
-                                      const glm::dmat4& projectionMatrix)
+void RenderableConstellationLines::renderMeshes(const RenderData&,
+                                                const glm::dmat4& modelViewMatrix,
+                                                const glm::dmat4& projectionMatrix)
 {
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -425,42 +241,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     global::renderEngine->openglStateCache().resetBlendState();
 }
 
-void RenderableDUMeshes::renderLabels(const RenderData& data,
-                                      const glm::dmat4& modelViewProjectionMatrix,
-                                      const glm::vec3& orthoRight,
-                                      const glm::vec3& orthoUp)
-{
-    float scale = static_cast<float>(toMeter(_unit));
-
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _textMinMaxSize.value().x;
-    labelInfo.maxSize = _textMinMaxSize.value().y;
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _renderOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _textSize);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
-
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
-
-    for (const speck::Labelset::Entry& e : _labelset.entries) {
-        glm::vec3 scaledPos(e.position);
-        scaledPos *= scale;
-        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
-            *_font,
-            scaledPos,
-            e.text,
-            textColor,
-            labelInfo
-        );
-    }
-}
-
-void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
+void RenderableConstellationLines::render(const RenderData& data, RendererTasks& tasks) {
     const glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -468,46 +249,22 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
 
     const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
-    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
-
-    const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-    const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-    glm::vec3 right = glm::cross(viewDirection, lookup);
-    const glm::vec3 up = glm::cross(right, viewDirection);
-
-    const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-    glm::vec3 orthoRight = glm::normalize(
-        glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-    );
-
-    if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
-        right = glm::cross(viewDirection, otherVector);
-        orthoRight = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-        );
-    }
 
     if (_hasSpeckFile) {
         renderMeshes(data, modelViewMatrix, projectionMatrix);
     }
 
-    if (_drawLabels && _hasLabel) {
-        const glm::vec3 orthoUp = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
-        );
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
-    }
+    RenderableConstellation::render(data, tasks);
 }
 
-void RenderableDUMeshes::update(const UpdateData&) {
+void RenderableConstellationLines::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 }
 
-bool RenderableDUMeshes::loadData() {
+bool RenderableConstellationLines::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
         LINFO(fmt::format("Loading Speck file {}", std::filesystem::path(_speckFile)));
@@ -517,15 +274,10 @@ bool RenderableDUMeshes::loadData() {
         }
     }
 
-    std::string labelFile = _labelFile;
-    if (!labelFile.empty()) {
-        _labelset = speck::label::loadFileWithCache(_labelFile);
-    }
-
     return success;
 }
 
-bool RenderableDUMeshes::readSpeckFile() {
+bool RenderableConstellationLines::readSpeckFile() {
     std::ifstream file(_speckFile);
     if (!file.good()) {
         LERROR(fmt::format(
@@ -614,15 +366,12 @@ bool RenderableDUMeshes::readSpeckFile() {
             std::string dummyU, dummyV;
 
             // Try to read name of mesh if it exist
-            dimOrName >> dummyU;             // numU or "name"
-            std::getline(dimOrName, dummyV); // numV or the name of the mesh
+            dimOrName >> dummyU;             // numU or "id"
+            std::getline(dimOrName, dummyV); // numV or the identifier of the mesh
 
             if (dummyU == "id") {
-                mesh.name = dummyV;
-                // Trim leading whitespace
-                if (!mesh.name.empty() && mesh.name[0] == ' ') {
-                    mesh.name = mesh.name.substr(1);
-                }
+                ghoul::trimWhitespace(dummyV);
+                mesh.identifier = _constellationNamesTranslation[dummyV];
 
                 // Dimensions are specified in the next line as usual
                 std::getline(file, line);
@@ -703,7 +452,7 @@ bool RenderableDUMeshes::readSpeckFile() {
     return true;
 }
 
-void RenderableDUMeshes::createMeshes() {
+void RenderableConstellationLines::createMeshes() {
     if (!(_dataIsDirty && _hasSpeckFile)) {
         return;
     }

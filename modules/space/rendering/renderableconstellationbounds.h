@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONBOUNDS___H__
 #define __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONBOUNDS___H__
 
-#include <openspace/rendering/renderable.h>
+#include <modules/space/rendering/renderableconstellation.h>
 
-#include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -48,16 +47,19 @@ namespace documentation { struct Documentation; }
  * <code>_distance</code> property. Currently, all constellation bounds are lines, which
  * leads to artifacts if the radius is very small.
  */
-class RenderableConstellationBounds : public Renderable {
+class RenderableConstellationBounds : public RenderableConstellation {
 public:
     RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
     void initializeGL() override;
+    void deinitialize() override;
     void deinitializeGL() override;
 
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
@@ -81,33 +83,16 @@ private:
     bool loadVertexFile();
 
     /**
-     * Loads the file specified in _constellationFilename that contains the mapping
-     * between abbreviations and full names of constellations.
-     *
-     * \return <code>true</code> if the loading succeeded, <code>false</code> otherwise
-     */
-    bool loadConstellationFile();
-
-    /// Fills the <code>_constellationSelection</code> property with all constellations
-    void fillSelectionProperty();
-
-    /**
      * Callback method that gets triggered when <code>_constellationSelection</code>
      * changes.
      */
-    void selectionPropertyHasChanged();
+    void selectionPropertyHasChanged() override;
 
     /// The filename containing the constellation bounds
     properties::StringProperty _vertexFilename;
 
-    /// The file containing constellation names
-    properties::StringProperty _constellationFilename;
-
     /// Determines the color of the constellation lines
     properties::Vec3Property _color;
-
-    // Linewidth for the constellation bounds
-    properties::FloatProperty _lineWidth;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
@@ -120,9 +105,6 @@ private:
         float z;
     };
     std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
-
-    /// The property that stores all indices of constellations that should be drawn
-    properties::SelectionProperty _constellationSelection;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

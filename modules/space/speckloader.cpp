@@ -321,7 +321,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
 
         if (!str.good()) {
             // Need to subtract one of the line number here as we increase the current
-            // line count in the beginning of the while loop we are currently in 
+            // line count in the beginning of the while loop we are currently in
             throw ghoul::RuntimeError(fmt::format(
                 "Error loading position information out of data line {} in file {}. "
                 "Value was not a number",
@@ -346,7 +346,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
                 if (valueStream.fail()) {
                     // Need to subtract one of the line number here as we increase the
                     // current line count in the beginning of the while loop we are
-                    // currently in 
+                    // currently in
                     throw ghoul::RuntimeError(fmt::format(
                         "Error loading data value {} out of data line {} in file {}. "
                         "Value was not a number",
@@ -674,10 +674,20 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
         std::getline(str, rest);
         strip(rest);
 
+        if (startsWith(rest, "id")) {
+            // optional arument with identifier
+            // Remove the 'id' text
+            rest = rest.substr(std::string_view("id ").size());
+            size_t index = rest.find("text");
+            entry.identifier = rest.substr(0, index);
+
+            // update the rest, remove the identifier
+            rest = rest.substr(index);
+        }
         if (!startsWith(rest, "text")) {
             throw ghoul::RuntimeError(fmt::format(
-                "Error loading label file {}: File contains some value between "
-                "positions and text label, which is unsupported", path
+                "Error loading label file {}: File contains an unsupported value "
+                "between positions and text label", path
             ));
         }
 
