@@ -181,8 +181,9 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
     }
     addProperty(_renderOption);
 
-    _constellationNamesFilename.onChange([&]() { loadConstellationFile(); });
+    // Read all files in the initialize() instead, multithreaded
     _constellationNamesFilename = p.constellationNamesFile;
+    _constellationNamesFilename.onChange([&]() { loadConstellationFile(); });
     addProperty(_constellationNamesFilename);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -212,35 +213,20 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
         addProperty(_textMinMaxSize);
     }
 
-    fillSelectionProperty();
     _constellationSelection.onChange([this]() { selectionPropertyHasChanged(); });
     addProperty(_constellationSelection);
 
-    if (p.constellationSelection.has_value()) {
-        const std::vector<std::string> options = _constellationSelection.options();
-
-        std::set<std::string> selectedNames;
-        for (const std::string& s : *p.constellationSelection) {
-            const auto it = std::find(options.begin(), options.end(), s);
-            if (it == options.end()) {
-                // The user has specified a constellation name that doesn't exist
-                LWARNINGC(
-                    "RenderableConstellation",
-                    fmt::format("Option '{}' not found in list of constellations", s)
-                );
-            }
-            else {
-                selectedNames.insert(s);
-            }
-        }
-        _constellationSelection = selectedNames;
-    }
+    _assetSelectedMeshes = p.constellationSelection.value_or(_assetSelectedMeshes);
 }
 
-bool RenderableConstellation::loadConstellationFile() {
+void RenderableConstellation::loadConstellationFile() {
     if (_constellationNamesFilename.value().empty()) {
-        return true;
+        return;
     }
+
+    // Reset
+    _constellationSelection.clearOptions();
+    _constellationNamesTranslation.clear();
 
     std::ifstream file;
     file.exceptions(std::ifstream::goodbit);
@@ -266,7 +252,7 @@ bool RenderableConstellation::loadConstellationFile() {
         ++index;
     }
 
-    return true;
+    fillSelectionProperty();
 }
 
 void RenderableConstellation::fillSelectionProperty() {
@@ -276,6 +262,28 @@ void RenderableConstellation::fillSelectionProperty() {
 }
 
 void RenderableConstellation::initialize() {
+    loadConstellationFile();
+
+    if (!_assetSelectedMeshes.empty()) {
+        const std::vector<std::string> options = _constellationSelection.options();
+        std::set<std::string> selectedConstellations;
+
+        for (const std::string& s : _assetSelectedMeshes) {
+            const auto it = std::find(options.begin(), options.end(), s);
+            if (it == options.end()) {
+                // The user has specified a mesh name that doesn't exist
+                LWARNINGC(
+                    "RenderableConstellation",
+                    fmt::format("Option '{}' not found in list of meshes", s)
+                );
+            }
+            else {
+                selectedConstellations.insert(s);
+            }
+        }
+        _constellationSelection = selectedConstellations;
+    }
+
     if (!_hasLabel) {
         return;
     }

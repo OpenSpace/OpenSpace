@@ -89,13 +89,15 @@ protected:
     speck::Labelset _labelset;
 
 private:
+    std::vector<std::string> _assetSelectedMeshes;
+
     /**
      * Loads the file specified in _constellationNamesFilename that contains the mapping
      * between abbreviations and full names of constellations.
      *
      * \return <code>true</code> if the loading succeeded, <code>false</code> otherwise
      */
-    bool loadConstellationFile();
+    void loadConstellationFile();
 
     /// Fills the <code>_constellationSelection</code> property with all constellations
     void fillSelectionProperty();
