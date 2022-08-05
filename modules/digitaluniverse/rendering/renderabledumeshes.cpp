@@ -121,12 +121,6 @@ namespace {
         "Debug option for rendering of billboards and texts"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MeshSelectionInfo = {
-        "MeshSelection",
-        "Selection",
-        "Selected objects"
-    };
-
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered
@@ -166,9 +160,6 @@ namespace {
 
         // [[codegen::verbatim(MeshColorInfo.description)]]
         std::optional<std::vector<glm::vec3>> meshColor;
-
-        // [[codegen::verbatim(MeshSelectionInfo.description)]]
-        std::optional<std::vector<std::string>> selectedMeshes;
     };
 #include "renderabledumeshes_codegen.cpp"
 }  // namespace
@@ -194,7 +185,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     )
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _selectedMeshes(MeshSelectionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -258,44 +248,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
             _meshColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }
-
-    _selectedMeshes.onChange([this]() { selectionPropertyHasChanged(); });
-    addProperty(_selectedMeshes);
-
-    _assetSelectedMeshes = p.selectedMeshes.value_or(_assetSelectedMeshes);
-}
-
-void RenderableDUMeshes::fillSelectionProperty() {
-    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
-        if (pair.second.name.empty()) {
-            continue;
-        }
-
-        auto it = std::find(
-            _selectedMeshes.options().begin(),
-            _selectedMeshes.options().end(),
-            pair.second.name
-        );
-        if (it != _selectedMeshes.options().end()) {
-            continue;
-        }
-        _selectedMeshes.addOption(pair.second.name);
-    }
-}
-
-void RenderableDUMeshes::selectionPropertyHasChanged() {
-    // If no values are selected (the default), we want to show all constellations
-    if (!_selectedMeshes.hasSelected()) {
-        for (std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
-            pair.second.isEnabled = true;
-        }
-    }
-    else {
-        // Enable all constellations that are selected
-        for (std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
-            pair.second.isEnabled = _selectedMeshes.isSelected(pair.second.name);
-        }
-    }
 }
 
 bool RenderableDUMeshes::isReady() const {
@@ -308,27 +260,6 @@ void RenderableDUMeshes::initialize() {
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
     }
-
-    fillSelectionProperty();
-
-    if (_assetSelectedMeshes.empty()) {
-        return;
-    }
-
-    const std::vector<std::string> options = _selectedMeshes.options();
-    std::set<std::string> selectedNames;
-
-    for (const std::string& s : _assetSelectedMeshes) {
-        const auto it = std::find(options.begin(), options.end(), s);
-        if (it == options.end()) {
-            // The user has specified a mesh name that doesn't exist
-            LWARNING(fmt::format("Option '{}' not found in list of meshes", s));
-        }
-        else {
-            selectedNames.insert(s);
-        }
-    }
-    _selectedMeshes = selectedNames;
 }
 
 void RenderableDUMeshes::initializeGL() {
@@ -393,10 +324,6 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     _program->setUniform(_uniformCache.alphaValue, opacity());
 
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
-        if (!pair.second.isEnabled) {
-            continue;
-        }
-
         _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
         for (size_t i = 0; i < pair.second.vaoArray.size(); ++i) {
             glBindVertexArray(pair.second.vaoArray[i]);
@@ -610,30 +537,8 @@ bool RenderableDUMeshes::readSpeckFile() {
             } while (dummy != "{");
 
             std::getline(file, line);
-            std::stringstream dimOrName(line);
-            std::string dummyU, dummyV;
-
-            // Try to read name of mesh if it exist
-            dimOrName >> dummyU;             // numU or "name"
-            std::getline(dimOrName, dummyV); // numV or the name of the mesh
-
-            if (dummyU == "id") {
-                mesh.name = dummyV;
-                // Trim leading whitespace
-                if (!mesh.name.empty() && mesh.name[0] == ' ') {
-                    mesh.name = mesh.name.substr(1);
-                }
-
-                // Dimensions are specified in the next line as usual
-                std::getline(file, line);
-                std::stringstream dim(line);
-                dim >> mesh.numU; // numU
-                dim >> mesh.numV; // numV
-            }
-            else {
-                mesh.numU = stoi(dummyU);
-                mesh.numV = stoi(dummyV);
-            }
+            std::stringstream dim(line);
+            dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
             for (int l = 0; l < mesh.numU * mesh.numV; ++l) {

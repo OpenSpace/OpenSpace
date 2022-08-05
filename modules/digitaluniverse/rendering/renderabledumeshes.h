@@ -29,7 +29,6 @@
 
 #include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -93,8 +92,6 @@ private:
         std::vector<GLuint> vaoArray;
         std::vector<GLuint> vboArray;
         std::vector<GLfloat> vertices;
-        bool isEnabled = true;
-        std::string name;
     };
 
     void createMeshes();
@@ -106,20 +103,10 @@ private:
     bool loadData();
     bool readSpeckFile();
 
-    /// Fills the <code>_selectedMeshes</code> property with all available meshes
-    void fillSelectionProperty();
-
-    /**
-     * Callback method that gets triggered when <code>_selectedMeshes</code>
-     * changes.
-     */
-    void selectionPropertyHasChanged();
-
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
-    std::vector<std::string> _assetSelectedMeshes;
 
     properties::Vec3Property _textColor;
     properties::FloatProperty _textOpacity;
@@ -128,7 +115,6 @@ private:
     properties::BoolProperty _drawLabels;
     properties::IVec2Property _textMinMaxSize;
     properties::FloatProperty _lineWidth;
-    properties::SelectionProperty _selectedMeshes;
 
     // DEBUG:
     properties::OptionProperty _renderOption;
