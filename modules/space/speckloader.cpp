@@ -37,7 +37,7 @@
 
 namespace {
     constexpr int8_t DataCacheFileVersion = 10;
-    constexpr int8_t LabelCacheFileVersion = 10;
+    constexpr int8_t LabelCacheFileVersion = 11;
     constexpr int8_t ColorCacheFileVersion = 10;
 
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {
@@ -741,6 +741,13 @@ std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
         file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
         file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
 
+        // Identifier
+        uint8_t idLen;
+        file.read(reinterpret_cast<char*>(&idLen), sizeof(uint8_t));
+        e.identifier.resize(idLen);
+        file.read(e.identifier.data(), idLen);
+
+        // Text
         uint16_t len;
         file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
         e.text.resize(len);
@@ -773,6 +780,13 @@ void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
         file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
         file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
 
+        // Identifier
+        checkSize<uint8_t>(e.identifier.size(), "Identifier too long");
+        uint8_t idLen = static_cast<uint8_t>(e.identifier.size());
+        file.write(reinterpret_cast<const char*>(&idLen), sizeof(uint8_t));
+        file.write(e.identifier.data(), idLen);
+
+        // Text
         checkSize<uint16_t>(e.text.size(), "Text too long");
         uint16_t len = static_cast<uint16_t>(e.text.size());
         file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));

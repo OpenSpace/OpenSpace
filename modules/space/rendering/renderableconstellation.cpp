@@ -305,7 +305,16 @@ void RenderableConstellation::initialize() {
 
     for (speck::Labelset::Entry& entry : _labelset.entries) {
         if (!entry.identifier.empty()) {
-            entry.text = _constellationNamesTranslation.at(entry.identifier);
+            try {
+                entry.text = _constellationNamesTranslation.at(entry.identifier);
+            }
+            catch (const std::out_of_range&) {
+                std::string message = fmt::format(
+                    "Identifier '{}' could not be found in list of constellations",
+                    entry.identifier
+                );
+                throw ghoul::RuntimeError(message, "RenderableConstellation");
+            }
         }
     }
 }
