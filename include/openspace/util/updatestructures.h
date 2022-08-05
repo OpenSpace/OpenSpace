@@ -86,11 +86,11 @@ struct DeferredcastData {
 struct SurfacePositionHandle {
     /// Vector from the center of the object to the reference surface of the object
     glm::dvec3 centerToReferenceSurface = glm::dvec3(0.0);
-    /// Direction out from the reference. Can conincide with the surface normal but does
-    /// not have to.
+    /// Direction out from the reference. Can coincide with the surface normal but does
+    /// not have to
     glm::dvec3 referenceSurfaceOutDirection = glm::dvec3(0.0);
     /// Height from the reference surface out to the actual surface in the direction of
-    /// the surface normal. Can be positive or negative.
+    /// the surface normal. Can be positive or negative
     double heightToSurface = 0.0;
 };
 

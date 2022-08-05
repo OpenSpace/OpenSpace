@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Name = "Gebco [Utah]",
   Identifier = "Gebco_Utah",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("gebco_utah.wms")
 }
 

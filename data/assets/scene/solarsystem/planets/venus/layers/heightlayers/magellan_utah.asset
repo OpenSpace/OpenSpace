@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../venus").Venus.Identifier
 local layer = {
   Identifier = "Magellan",
   Name = "Magellan Elevation [Utah]",
+  Enabled = asset.enabled,
   Description = [[Elevation layer for Venus. The represents the version 2
     (1997 release) of the Global Topographic Data Record (GTDR-SINUS.3;2).
     The range to surface is derived by fitting altimeter echoes from the fan-beam

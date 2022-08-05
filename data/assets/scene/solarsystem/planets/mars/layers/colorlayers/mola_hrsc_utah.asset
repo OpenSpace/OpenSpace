@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "MOLA_HRSC_Utah",
   Name = "MOLA HRSC [Utah]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("mola_hrsc_utah.wms"),
   Description = [[This map layer is colorzied based elevation data from MOLA and HRSC.
     Compared to MOLA Psuedo Color, this layer has no terrain shading, which is

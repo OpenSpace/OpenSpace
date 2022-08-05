@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   horizonsfile.h
+  kepler.h
   speckloader.h
   rendering/renderableconstellation.h
   rendering/renderableconstellationbounds.h
@@ -34,13 +35,11 @@ set(HEADER_FILES
   rendering/renderablehabitablezone.h
   rendering/renderablerings.h
   rendering/renderableorbitalkepler.h
-  rendering/renderablesatellites.h
-  rendering/renderablesmallbody.h
   rendering/renderablestars.h
   rendering/renderabletravelspeed.h
+  translation/gptranslation.h
   translation/keplertranslation.h
   translation/spicetranslation.h
-  translation/tletranslation.h
   translation/horizonstranslation.h
   rotation/spicerotation.h
 )
@@ -48,6 +47,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   horizonsfile.cpp
+  kepler.cpp
   spacemodule_lua.inl
   speckloader.cpp
   rendering/renderableconstellation.cpp
@@ -57,13 +57,11 @@ set(SOURCE_FILES
   rendering/renderablehabitablezone.cpp
   rendering/renderablerings.cpp
   rendering/renderableorbitalkepler.cpp
-  rendering/renderablesatellites.cpp
-  rendering/renderablesmallbody.cpp
   rendering/renderablestars.cpp
   rendering/renderabletravelspeed.cpp
+  translation/gptranslation.cpp
   translation/keplertranslation.cpp
   translation/spicetranslation.cpp
-  translation/tletranslation.cpp
   translation/horizonstranslation.cpp
   rotation/spicerotation.cpp
 )

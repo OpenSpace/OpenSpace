@@ -1,14 +1,43 @@
-local shared = asset.require("util/tle_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Breeze-M Breakup",
-  Filename = "2021-044.txt",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=2012-044&FORMAT=TLE",
-  TrailColor = { 0.25, 0.35, 0.45 }
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Breeze-M Breakup)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_2012-044",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=2012-044&FORMAT=kvn",
+  Filename = "2012-044.txt",
+  Override = true
+})
+
+local satellites = {
+  Identifier = "2012-044",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "2012-044.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.25, 0.35, 0.45 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Breeze-M Breakup",
+    Path = "/Solar System/Planets/Earth/Satellites"
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
+
 
 
 asset.meta = {

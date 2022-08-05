@@ -22,37 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
+#include <modules/space/translation/gptranslation.h>
 
-#include <modules/space/rendering/renderableorbitalkepler.h>
-#include <openspace/rendering/renderable.h>
+#include <modules/space/kepler.h>
+#include <openspace/documentation/verifier.h>
+#include <filesystem>
+#include <optional>
 
-#include <modules/base/rendering/renderabletrail.h>
-#include <modules/space/translation/keplertranslation.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/uintproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/opengl/programobject.h>
+namespace {
+    struct [[codegen::Dictionary(GPTranslation)]] Parameters {
+        // Specifies the filename of the general pertubation file
+        std::filesystem::path file;
+
+        enum class [[codegen::map(openspace::kepler::Format)]] Format {
+            // A NORAD-style Two-Line element
+            TLE,
+            // Orbit Mean-Elements Message in the KVN notation
+            OMM,
+            // JPL's Small Bodies Database
+            SBDB
+        };
+        // The file format that is contained in the file
+        Format format;
+
+        // Specifies the element within the file that should be used in case the file
+        // provides multiple general pertubation elements. Defaults to 1.
+        std::optional<int> element [[codegen::greater(0)]];
+    };
+#include "gptranslation_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+documentation::Documentation GPTranslation::Documentation() {
+    return codegen::doc<Parameters>("space_transform_gp");
+}
 
-class RenderableSatellites : public RenderableOrbitalKepler {
-public:
-    RenderableSatellites(const ghoul::Dictionary& dictionary);
-    virtual void readDataFile(const std::string& filename) override;
-    static documentation::Documentation Documentation();
-    void initializeFileReading();
+GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    if (!std::filesystem::is_regular_file(p.file)) {
+        throw ghoul::RuntimeError("The provided TLE file must exist");
+    }
 
-private:
-    void skipSingleEntryInFile(std::ifstream& file);
-    const unsigned int nLineEntriesPerSatellite = 3;
-};
+    int element = p.element.value_or(1);
+
+    std::vector<kepler::Parameters> parameters = kepler::readFile(
+        p.file,
+        codegen::map<kepler::Format>(p.format)
+    );
+    if (parameters.size() < element) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Requested element {} but only {} are available", element, parameters.size()
+        ));
+    }
+
+    kepler::Parameters param = parameters[element - 1];
+    setKeplerElements(
+        param.eccentricity,
+        param.semiMajorAxis,
+        param.inclination,
+        param.ascendingNode,
+        param.argumentOfPeriapsis,
+        param.meanAnomaly,
+        param.period,
+        param.epoch
+    );
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-

@@ -1010,6 +1010,8 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
 SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
+    ghoul_assert(glm::length(targetModelSpace) > 0.0, "Cannot have degenerate vector");
+
     if (_renderable) {
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
     }

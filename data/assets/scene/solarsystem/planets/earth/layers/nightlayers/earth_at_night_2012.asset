@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "Earth_at_Night_2012",
   Name = "Earth at Night 2012",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("earth_at_night_2012.wms"),
   Description = [[The lights of cities and villages trace the outlines of civilization
     in this global view]],

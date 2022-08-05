@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "CTX_Mosaic_Sweden",
   Name = "CTX Mosaic [Sweden]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("ctx_mosaic_sweden.wms"),
   BlendMode = "Color"
 }

@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Identifier = "Cassini_ISS_Global_Mosaic_4km_Local",
   Name = "Cassini ISS Global Mosaic 4km",
+  Enabled = asset.enabled,
   FilePath = texturesPath .. "Titan_ISS_P19658_Mosaic_Global_4km_os.tif",
   Description = [[This global digital map of Saturn's moon Titan was created using
     images taken by the Cassini spacecraft's Imaging Science Subsystem (ISS). The map

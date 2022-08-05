@@ -87,6 +87,10 @@
 #include "nvToolsExt.h"
 #endif // OPENSPACE_HAS_NVTOOLS
 
+#ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+#include <float.h>
+#endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+
 #include <launcherwindow.h>
 #include <QApplication>
 
@@ -938,6 +942,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setScreenshotFolder = [](std::string path) {
         Settings::instance().setCapturePath(std::move(path));
     };
+    sgctDelegate.showStatistics = [](bool enabled) {
+        Engine::instance().setStatsGraphVisibility(enabled);
+    };
 }
 
 void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
@@ -1037,6 +1044,11 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
 }
 
 int main(int argc, char* argv[]) {
+#ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+    _clearfp();
+    _controlfp(_controlfp(0, 0) & ~(_EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
+#endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32

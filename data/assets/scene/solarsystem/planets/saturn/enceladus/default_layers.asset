@@ -1,12 +1,5 @@
-asset.require("./layers/colorlayers/enceladus_texture")
-local colorLayer = asset.require("./layers/colorlayers/global_mosaic_100m_hpf")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Enceladus.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/enceladus_texture", false)
+asset.require("./layers/colorlayers/global_mosaic_100m_hpf", true)
 
 
 asset.meta = {

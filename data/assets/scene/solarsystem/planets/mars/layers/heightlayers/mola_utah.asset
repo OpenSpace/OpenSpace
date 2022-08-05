@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "Mola_Utah",
   Name = "Mola Elevation [Utah]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("mola_utah.wms"),
   TilePixelSize = 90,
   Description = [[This digital elevation model (DEM) is based on data from the Mars

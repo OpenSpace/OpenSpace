@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "kepler.h"
+
 namespace {
 
 /**
@@ -75,6 +77,43 @@ namespace {
     glm::dvec3 deg = galacticCartesianToIcrs(x, y, z);
     std::pair<std::string, std::string> raDecPair = decimalDegreesToIcrs(deg.x, deg.y);
     return { raDecPair.first, raDecPair.second, deg.z };
+}
+
+[[codegen::luawrap]]
+std::vector<ghoul::Dictionary> readKeplerFile(std::filesystem::path p, std::string type)
+{
+    openspace::kepler::Format f;
+    if (type == "TLE") {
+        f = openspace::kepler::Format::TLE;
+    }
+    else if (type == "OMM") {
+        f = openspace::kepler::Format::OMM;
+    }
+    else if (type == "SBDB") {
+        f = openspace::kepler::Format::SBDB;
+    }
+    else {
+        throw ghoul::lua::LuaError(fmt::format("Unsupported format '{}'", type));
+    }
+
+    std::vector<openspace::kepler::Parameters> params = openspace::kepler::readFile(p, f);
+    std::vector<ghoul::Dictionary> res;
+    res.reserve(params.size());
+    for (const openspace::kepler::Parameters& param : params) {
+        ghoul::Dictionary d;
+        d.setValue("Name", param.name);
+        d.setValue("ID", param.id);
+        d.setValue("inclination", param.inclination);
+        d.setValue("SemiMajorAxis", param.semiMajorAxis);
+        d.setValue("AscendingNode", param.ascendingNode);
+        d.setValue("Eccentricity", param.eccentricity);
+        d.setValue("ArgumentOfPeriapsis", param.argumentOfPeriapsis);
+        d.setValue("MeanAnomaly", param.meanAnomaly);
+        d.setValue("Epoch", param.epoch);
+        d.setValue("Period", param.period);
+        res.push_back(d);
+    }
+    return res;
 }
 
 #include "spacemodule_lua_codegen.cpp"

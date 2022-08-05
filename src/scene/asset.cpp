@@ -41,9 +41,11 @@ namespace {
     constexpr std::string_view _loggerCat = "Asset";
 } // namespace
 
-Asset::Asset(AssetManager& manager, std::filesystem::path assetPath)
+Asset::Asset(AssetManager& manager, std::filesystem::path assetPath,
+             std::optional<bool> explicitEnabled)
     : _manager(manager)
     , _assetPath(std::move(assetPath))
+    , _explicitEnabled(explicitEnabled)
 {
     ghoul_precondition(!_assetPath.empty(), "Asset path must not be empty");
     ghoul_precondition(
@@ -155,6 +157,14 @@ bool Asset::isSyncingOrResolved() const {
 bool Asset::isFailed() const {
     return _state == State::LoadingFailed || _state == State::SyncRejected ||
            _state == State::InitializationFailed;
+}
+
+std::optional<bool> Asset::explicitEnabled() const {
+    return _explicitEnabled;
+}
+
+Asset* Asset::firstParent() const {
+    return !_parentAssets.empty() ? _parentAssets[0] : nullptr;
 }
 
 bool Asset::hasLoadedParent() {
