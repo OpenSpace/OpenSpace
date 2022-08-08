@@ -1,5 +1,8 @@
 #include "billboard.h"
 
+#include "openspace/engine/globals.h"
+#include "openspace/engine/windowdelegate.h"
+
 #include <glbinding/gl/gl.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -28,16 +31,16 @@ uniform float uFragDepth;
 uniform vec4 uStrokeColor;
 uniform vec4 uFillColor;
 uniform sampler2D uColorTex;
+uniform ivec2 uScreenSize;
 
 void main() {
   float len = length(pos) * 2.0;
-  vec2 screenSize = vec2(1280, 720);
 
   gl_FragDepth = uFragDepth;
   color = uStrokeColor;
 
   if (len < 1.0 - uStrokeWidth)
-    color = texture(uColorTex, gl_FragCoord.xy / screenSize);
+    color = texture(uColorTex, gl_FragCoord.xy / uScreenSize);
 
   else if (len > 1)
     discard;
@@ -104,6 +107,8 @@ void billboardDraw(glm::mat4 const& transform, GLuint colorTex, glm::vec4 const&
   glUniform1f(glGetUniformLocation(prog, "uFragDepth"), depth);
   // glUniform4fv(glGetUniformLocation(prog, "uFillColor"), 1, glm::value_ptr(fill));
   glUniform4fv(glGetUniformLocation(prog, "uStrokeColor"), 1, glm::value_ptr(stroke));
+  glm::ivec2 size = openspace::global::windowDelegate->currentWindowSize();
+  glUniform2iv(glGetUniformLocation(prog, "uScreenSize"), 1, glm::value_ptr(size));
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glBindVertexArray(0);
   glUseProgram(0);

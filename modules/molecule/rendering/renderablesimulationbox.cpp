@@ -689,7 +689,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         static_cast<uint32_t>(drawOps.size()),
         drawOps.data(),
     };
-
+    
     { // draw molecule offscreen
         GLint defaultFbo;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
@@ -697,6 +697,18 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
+
+        // resize the fbo if needed
+        if (global::windowDelegate->windowHasResized()) {
+            ivec2 size = global::windowDelegate->currentWindowSize();
+            glBindTexture(GL_TEXTURE_2D, colorTex);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            glBindTexture(GL_TEXTURE_2D, depthTex);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
     
         md_gl_draw(&args);
 
