@@ -36,14 +36,17 @@ uniform ivec2 uScreenSize;
 void main() {
   float len = length(pos) * 2.0;
 
-  gl_FragDepth = uFragDepth;
-  color = uStrokeColor;
-
-  if (len < 1.0 - uStrokeWidth)
-    color = texture(uColorTex, gl_FragCoord.xy / uScreenSize);
-
-  else if (len > 1)
+  if (len > 1) {
     discard;
+  }
+  else {
+    gl_FragDepth = uFragDepth;
+
+    if (len < 1.0 - uStrokeWidth)
+      color = texture(uColorTex, gl_FragCoord.xy / uScreenSize);
+    else
+      color = uStrokeColor;
+  }
 }
 )";
 

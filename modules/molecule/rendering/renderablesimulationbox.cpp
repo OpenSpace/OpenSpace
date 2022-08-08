@@ -267,6 +267,7 @@ static GLuint fbo = 0;
 static GLuint colorTex = 0;
 static GLuint depthTex = 0;
 static int glUseCount = 0;
+static md_gl_shaders_t shaders;
 
 namespace openspace {
 
@@ -425,7 +426,7 @@ void RenderableSimulationBox::initializeGL() {
             LERROR("Mold Framebuffer is not complete");
 
         md_gl_initialize();
-        md_gl_shaders_init(&_shaders, shader_output_snippet);
+        md_gl_shaders_init(&shaders, shader_output_snippet);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -462,7 +463,7 @@ void RenderableSimulationBox::deinitializeGL() {
     }
 
     billboardGlDeinit();
-    md_gl_shaders_free(&_shaders);
+    md_gl_shaders_free(&shaders);
     md_gl_shutdown();
 }
 
@@ -638,8 +639,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     float fakeScaling = 100.f / distance;
 
     if (distance < 0.f) // distance < 0 means behind the camera
-        return; 
-
+        return;
 
     // because the molecule is small, a scaling of the view matrix causes the molecule
     // to be moved out of view in clip space. Reset the scaling for the molecule
@@ -676,7 +676,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     }
 
     md_gl_draw_args_t args = {};
-    args.shaders = &_shaders;
+    args.shaders = &shaders;
     args.view_transform = {
         value_ptr(viewMatrix),
         value_ptr(projMatrix),
@@ -709,7 +709,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-    
+        
         md_gl_draw(&args);
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
@@ -731,7 +731,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         dvec4 depth_ = dmat4(data.camera.sgctInternal.projectionMatrix()) * billboardModel * dvec4(0.0, 0.0, 0.0, 1.0);
         double depth = normalizeDouble(depth_.w);
 
-        
         billboardDraw(transform, colorTex, vec4(1.0), circleWidth, depth);
     }
     

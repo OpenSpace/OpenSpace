@@ -93,7 +93,6 @@ private:
 
 
     double _frame;
-    md_gl_shaders_t _shaders;
     
     std::vector<molecule_data_t> _molecules;
     
