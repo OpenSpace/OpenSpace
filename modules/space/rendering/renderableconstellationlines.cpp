@@ -24,7 +24,6 @@
 
 #include <modules/space/rendering/renderableconstellationlines.h>
 
-#include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
@@ -56,24 +55,26 @@ namespace {
         "modelViewTransform", "projectionTransform", "alphaValue", "color"
     };
 
-    constexpr int RenderOptionViewDirection = 0;
-    constexpr int RenderOptionPositionNormal = 1;
-
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects"
+        "Enables/Disables the drawing of the constellations"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
-        "MeshColor",
-        "Meshes colors",
-        "The defined colors for the meshes to be rendered"
+    constexpr openspace::properties::Property::PropertyInfo ConstellationUnitInfo = {
+        "ConstellationUnit",
+        "Constellation Unit",
+        "The unit used for the constellation data"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ConstellationColorInfo = {
+        "ConstellationColor",
+        "Constellation colors",
+        "The defined colors for the constellations to be rendered"
     };
 
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
-        // The path to the SPECK file that contains information about the astronomical
-        // object being rendered
+        // The path to the SPECK file that contains constellation lines data
         std::string file;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
@@ -85,10 +86,11 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
-        std::optional<Unit> unit;
+        // [[codegen::verbatim(ConstellationUnitInfo.description)]]
+        std::optional<Unit> constellationUnit;
 
-        // [[codegen::verbatim(MeshColorInfo.description)]]
-        std::optional<std::vector<glm::vec3>> meshColor;
+        // [[codegen::verbatim(ConstellationColorInfo.description)]]
+        std::optional<std::vector<glm::vec3>> constellationColor;
     };
 #include "renderableconstellationlines_codegen.cpp"
 }  // namespace
@@ -111,17 +113,17 @@ RenderableConstellationLines::RenderableConstellationLines(
     _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
-    if (p.unit.has_value()) {
-        _unit = codegen::map<DistanceUnit>(*p.unit);
+    if (p.constellationUnit.has_value()) {
+        _constellationUnit = codegen::map<DistanceUnit>(*p.constellationUnit);
     }
     else {
-        _unit = DistanceUnit::Meter;
+        _constellationUnit = DistanceUnit::Meter;
     }
 
-    if (p.meshColor.has_value()) {
-        std::vector<glm::vec3> ops = *p.meshColor;
+    if (p.constellationColor.has_value()) {
+        std::vector<glm::vec3> ops = *p.constellationColor;
         for (size_t i = 0; i < ops.size(); ++i) {
-            _meshColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
+            _constellationColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }
 }
@@ -129,13 +131,17 @@ RenderableConstellationLines::RenderableConstellationLines(
 void RenderableConstellationLines::selectionPropertyHasChanged() {
     // If no values are selected (the default), we want to show all constellations
     if (!_constellationSelection.hasSelected()) {
-        for (std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
+        for (std::pair<const int, ConstellationLine>& pair :
+            _renderingConstellationsMap)
+        {
             pair.second.isEnabled = true;
         }
     }
     else {
         // Enable all constellations that are selected
-        for (std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
+        for (std::pair<const int, ConstellationLine>& pair :
+            _renderingConstellationsMap)
+        {
             pair.second.isEnabled =
                 _constellationSelection.isSelected(pair.second.identifier);
         }
@@ -143,7 +149,7 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
 }
 
 bool RenderableConstellationLines::isReady() const {
-    return (_program != nullptr) && !_renderingMeshesMap.empty() &&
+    return (_program != nullptr) && !_renderingConstellationsMap.empty() &&
         !_labelset.entries.empty();
 }
 
@@ -157,44 +163,37 @@ void RenderableConstellationLines::initialize() {
 }
 
 void RenderableConstellationLines::initializeGL() {
-    _program = DigitalUniverseModule::ProgramObjectManager.request(
+    _program = global::renderEngine->buildRenderProgram(
         "RenderableConstellationLines",
-        []() {
-            return global::renderEngine->buildRenderProgram(
-                "RenderableConstellationLines",
-                absPath("${MODULE_SPACE}/shaders/constellationlines_vs.glsl"),
-                absPath("${MODULE_SPACE}/shaders/constellationlines_fs.glsl")
-            );
-        }
+        absPath("${MODULE_SPACE}/shaders/constellationlines_vs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/constellationlines_fs.glsl")
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    createMeshes();
+    createConstellations();
 }
 
 void RenderableConstellationLines::deinitialize() {
 }
 
 void RenderableConstellationLines::deinitializeGL() {
-    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
+    for (const std::pair<const int, ConstellationLine>& pair : _renderingConstellationsMap) {
         for (int i = 0; i < pair.second.numU; ++i) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
             glDeleteBuffers(1, &pair.second.vboArray[i]);
         }
     }
 
-    DigitalUniverseModule::ProgramObjectManager.release(
-        "RenderableConstellationLines",
-        [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine->removeRenderProgram(p);
-        }
-    );
+    if (_program) {
+        global::renderEngine->removeRenderProgram(_program.get());
+        _program = nullptr;
+    }
 }
 
-void RenderableConstellationLines::renderMeshes(const RenderData&,
-                                                const glm::dmat4& modelViewMatrix,
-                                                const glm::dmat4& projectionMatrix)
+void RenderableConstellationLines::renderConstellations(const RenderData&,
+                                                        const glm::dmat4& modelViewMatrix,
+                                                       const glm::dmat4& projectionMatrix)
 {
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -208,28 +207,24 @@ void RenderableConstellationLines::renderMeshes(const RenderData&,
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
     _program->setUniform(_uniformCache.alphaValue, opacity());
 
-    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
+    for (const std::pair<const int, ConstellationLine>& pair :
+        _renderingConstellationsMap)
+    {
         if (!pair.second.isEnabled) {
             continue;
         }
 
-        _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
+        _program->setUniform(
+            _uniformCache.color,
+            _constellationColorMap[pair.second.colorIndex]
+        );
         for (size_t i = 0; i < pair.second.vaoArray.size(); ++i) {
             glBindVertexArray(pair.second.vaoArray[i]);
-            switch (pair.second.style) {
-                case Solid:
-                    break;
-                case Wire:
-                    glLineWidth(_lineWidth);
-                    glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
-                    global::renderEngine->openglStateCache().resetLineState();
-                    break;
-                case Point:
-                    glDrawArrays(GL_POINTS, 0, pair.second.numV);
-                    break;
-                default:
-                    break;
-            }
+
+            // Always render as lines
+            glLineWidth(_lineWidth);
+            glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
+            global::renderEngine->openglStateCache().resetLineState();
         }
     }
 
@@ -251,7 +246,7 @@ void RenderableConstellationLines::render(const RenderData& data, RendererTasks&
     const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
 
     if (_hasSpeckFile) {
-        renderMeshes(data, modelViewMatrix, projectionMatrix);
+        renderConstellations(data, modelViewMatrix, projectionMatrix);
     }
 
     RenderableConstellation::render(data, tasks);
@@ -286,10 +281,10 @@ bool RenderableConstellationLines::readSpeckFile() {
         return false;
     }
 
-    const float scale = static_cast<float>(toMeter(_unit));
+    const float scale = static_cast<float>(toMeter(_constellationUnit));
     double maxRadius = 0.0;
 
-    int meshIndex = 0;
+    int lineIndex = 0;
 
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
@@ -324,8 +319,8 @@ bool RenderableConstellationLines::readSpeckFile() {
             // and style is solid, wire or point (for now we support only wire)
             std::stringstream str(line);
 
-            RenderingMesh mesh;
-            mesh.meshIndex = meshIndex;
+            ConstellationLine constellationLine;
+            constellationLine.lineIndex = lineIndex;
 
             std::string dummy;
             str >> dummy; // mesh command
@@ -334,28 +329,11 @@ bool RenderableConstellationLines::readSpeckFile() {
             do {
                 if (dummy == "-t") {
                     dummy.clear();
-                    str >> mesh.textureIndex; // texture index
+                    str >> constellationLine.textureIndex; // texture index
                 }
                 else if (dummy == "-c") {
                     dummy.clear();
-                    str >> mesh.colorIndex; // color index command
-                }
-                else if (dummy == "-s") {
-                    dummy.clear();
-                    str >> dummy; // style value command
-                    if (dummy == "solid") {
-                        mesh.style = Solid;
-                    }
-                    else if (dummy == "wire") {
-                        mesh.style = Wire;
-                    }
-                    else if (dummy == "point") {
-                        mesh.style = Point;
-                    }
-                    else {
-                        mesh.style = INVALID;
-                        break;
-                    }
+                    str >> constellationLine.colorIndex; // color index command
                 }
                 dummy.clear();
                 str >> dummy;
@@ -371,21 +349,21 @@ bool RenderableConstellationLines::readSpeckFile() {
 
             if (dummyU == "id") {
                 ghoul::trimWhitespace(dummyV);
-                mesh.identifier = constellationFullName(dummyV);
+                constellationLine.identifier = constellationFullName(dummyV);
 
                 // Dimensions are specified in the next line as usual
                 std::getline(file, line);
                 std::stringstream dim(line);
-                dim >> mesh.numU; // numU
-                dim >> mesh.numV; // numV
+                dim >> constellationLine.numU; // numU
+                dim >> constellationLine.numV; // numV
             }
             else {
-                mesh.numU = stoi(dummyU);
-                mesh.numV = stoi(dummyV);
+                constellationLine.numU = stoi(dummyU);
+                constellationLine.numV = stoi(dummyV);
             }
 
             // We can now read the vertices data:
-            for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
+            for (int l = 0; l < constellationLine.numU * constellationLine.numV; ++l) {
                 std::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;
@@ -407,13 +385,13 @@ bool RenderableConstellationLines::readSpeckFile() {
 
                     GLfloat scaledValue = value * scale;
                     pos[i] = scaledValue;
-                    mesh.vertices.push_back(scaledValue);
+                    constellationLine.vertices.push_back(scaledValue);
                 }
 
                 if (!success) {
                     LERROR(fmt::format(
                         "Failed reading position on line {} of mesh {} in file: '{}'. "
-                        "Stopped reading mesh data", l, meshIndex, _speckFile
+                        "Stopped reading mesh data", l, lineIndex, _speckFile
                     ));
                     break;
                 }
@@ -440,7 +418,7 @@ bool RenderableConstellationLines::readSpeckFile() {
 
             std::getline(file, line);
             if (line.substr(0, 1) == "}") {
-                _renderingMeshesMap.insert({ meshIndex++, mesh });
+                _renderingConstellationsMap.insert({ lineIndex++, constellationLine });
             }
             else {
                 return false;
@@ -452,13 +430,13 @@ bool RenderableConstellationLines::readSpeckFile() {
     return true;
 }
 
-void RenderableConstellationLines::createMeshes() {
+void RenderableConstellationLines::createConstellations() {
     if (!(_dataIsDirty && _hasSpeckFile)) {
         return;
     }
     LDEBUG("Creating planes");
 
-    for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
+    for (std::pair<const int, ConstellationLine>& p : _renderingConstellationsMap) {
         for (int i = 0; i < p.second.numU; ++i) {
             GLuint vao;
             glGenVertexArrays(1, &vao);

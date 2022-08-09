@@ -104,6 +104,12 @@ namespace {
         "Debug option for rendering of billboards and texts"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LabelUnitInfo = {
+        "LabelUnit",
+        "Label Unit",
+        "The unit used for the label data"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
@@ -134,6 +140,18 @@ namespace {
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
+
+        enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("Km")]],
+            Parsec [[codegen::key("pc")]],
+            Kiloparsec [[codegen::key("Kpc")]],
+            Megaparsec [[codegen::key("Mpc")]],
+            Gigaparsec [[codegen::key("Gpc")]],
+            Gigalightyear [[codegen::key("Gly")]]
+        };
+        // [[codegen::verbatim(LabelUnitInfo.description)]]
+        std::optional<Unit> labelUnit;
 
         // [[codegen::verbatim(SelectionInfo.description)]]
         std::optional<std::vector<std::string>> constellationSelection;
@@ -200,7 +218,6 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
         _hasLabel = p.textColor.has_value();
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
-        _textColor.onChange([&]() { _textColorIsDirty = true; });
 
         _textOpacity = p.textOpacity.value_or(_textOpacity);
         addProperty(_textOpacity);
@@ -211,12 +228,20 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
         _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
         _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
         addProperty(_textMinMaxSize);
+
+        if (p.labelUnit.has_value()) {
+            _labelUnit = codegen::map<DistanceUnit>(*p.labelUnit);
+        }
+        else {
+            _labelUnit = DistanceUnit::Meter;
+        }
     }
 
     _constellationSelection.onChange([this]() { selectionPropertyHasChanged(); });
     addProperty(_constellationSelection);
 
-    _assetSelectedMeshes = p.constellationSelection.value_or(_assetSelectedMeshes);
+    _assetSelectedConstellations =
+        p.constellationSelection.value_or(_assetSelectedConstellations);
 }
 
 std::string RenderableConstellation::constellationFullName(
@@ -278,11 +303,11 @@ void RenderableConstellation::fillSelectionProperty() {
 void RenderableConstellation::initialize() {
     loadConstellationFile();
 
-    if (!_assetSelectedMeshes.empty()) {
+    if (!_assetSelectedConstellations.empty()) {
         const std::vector<std::string> options = _constellationSelection.options();
         std::set<std::string> selectedConstellations;
 
-        for (const std::string& s : _assetSelectedMeshes) {
+        for (const std::string& s : _assetSelectedConstellations) {
             const auto it = std::find(options.begin(), options.end(), s);
             if (it == options.end()) {
                 // The user has specified a mesh name that doesn't exist

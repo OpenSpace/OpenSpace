@@ -162,6 +162,7 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("ModelTransform", glm::mat4(modelTransform));
     _program->setUniform("color", _color);
+    _program->setUniform("alphaValue", opacity());
 
     glLineWidth(_lineWidth);
 
@@ -178,7 +179,6 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
 }
 
 void RenderableConstellationBounds::update(const UpdateData& data) {
-
 }
 
 bool RenderableConstellationBounds::loadVertexFile() {

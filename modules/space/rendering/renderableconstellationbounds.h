@@ -27,11 +27,6 @@
 
 #include <modules/space/rendering/renderableconstellation.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <vector>
-
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
@@ -94,10 +89,10 @@ private:
     /// Determines the color of the constellation lines
     properties::Vec3Property _color;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
     struct Vertex {
         float x;

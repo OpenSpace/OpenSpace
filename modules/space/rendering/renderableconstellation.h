@@ -29,10 +29,7 @@
 
 #include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/distanceconversion.h>
@@ -70,52 +67,54 @@ protected:
 
     /**
      * Callback method that gets triggered when <code>_constellationSelection</code>
-     * changes.
+     * changes
      */
     virtual void selectionPropertyHasChanged() = 0;
 
+    /// Takes the given constellation <code>identifier</code> and returns the coresponding
+    /// full name
     std::string constellationFullName(const std::string& identifier) const;
 
-    // Linewidth for the constellation bounds
+    // Width for the rendered lines
     properties::FloatProperty _lineWidth;
 
-    /// The property that stores all indices of constellations that should be drawn
+    // Property that stores all constellations chosen by the user to be drawn
     properties::SelectionProperty _constellationSelection;
 
+    // Label text settings
     bool _hasLabel = false;
-    properties::BoolProperty _drawLabels;
     speck::Labelset _labelset;
+    properties::BoolProperty _drawLabels;
 
 private:
-    // Map over the constellations names and theis abbreviations
-    // key = abbreviations, value = full name
+    // Map over the constellations names and their abbreviations
+    // key = abbreviation, value = full name
     std::map<std::string, std::string> _constellationNamesTranslation;
 
-    std::vector<std::string> _assetSelectedMeshes;
+    // Temporary storage of which constellations should be rendered as stated in the
+    // asset file
+    std::vector<std::string> _assetSelectedConstellations;
 
     /**
-     * Loads the file specified in _constellationNamesFilename that contains the mapping
-     * between abbreviations and full names of constellations.
-     *
-     * \return <code>true</code> if the loading succeeded, <code>false</code> otherwise
+     * Loads the file specified in <code>_constellationNamesFilename</code> that contains
+     * the mapping between abbreviations and full names of constellations
      */
     void loadConstellationFile();
 
     /// Fills the <code>_constellationSelection</code> property with all constellations
     void fillSelectionProperty();
 
-    /// The file containing constellation names and abbreviations
+    // The file containing constellation names and abbreviations
     properties::StringProperty _constellationNamesFilename;
 
-    //Label text settings
+    // Label text settings
     std::string _labelFile;
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
+    DistanceUnit _labelUnit = DistanceUnit::Parsec;
     properties::Vec3Property _textColor;
-    bool _textColorIsDirty = true;
     properties::FloatProperty _textOpacity;
     properties::FloatProperty _textSize;
     properties::IVec2Property _textMinMaxSize;
-    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
-    DistanceUnit _labelUnit = DistanceUnit::Parsec;
 
     properties::OptionProperty _renderOption;
 };
