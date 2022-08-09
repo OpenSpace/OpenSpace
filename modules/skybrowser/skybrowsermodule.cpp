@@ -166,8 +166,9 @@ SkyBrowserModule::SkyBrowserModule()
     _wwtImageCollectionUrl.setReadOnly(true);
 
     // Set callback functions
-    global::callback::mouseButton->emplace(global::callback::mouseButton->begin(),
-        [&](MouseButton, MouseAction action, KeyModifier) -> bool {
+    global::callback::mouseButton->emplace(
+        global::callback::mouseButton->begin(),
+        [&](MouseButton button, MouseAction action, KeyModifier, IsGuiWindow) -> bool {
             if (action == MouseAction::Press) {
                 _cameraRotation.stop();
             }
