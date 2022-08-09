@@ -151,6 +151,26 @@ void RenderableConstellationLines::initialize() {
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
     }
+
+    if (!_assetSelectedConstellations.empty()) {
+        const std::vector<std::string> options = _constellationSelection.options();
+        std::set<std::string> selectedConstellations;
+
+        for (const std::string& s : _assetSelectedConstellations) {
+            const auto it = std::find(options.begin(), options.end(), s);
+            if (it == options.end()) {
+                // The user has specified a mesh name that doesn't exist
+                LWARNINGC(
+                    "RenderableConstellation",
+                    fmt::format("Option '{}' not found in list of meshes", s)
+                );
+            }
+            else {
+                selectedConstellations.insert(s);
+            }
+        }
+        _constellationSelection = selectedConstellations;
+    }
 }
 
 void RenderableConstellationLines::initializeGL() {
@@ -165,11 +185,10 @@ void RenderableConstellationLines::initializeGL() {
     createConstellations();
 }
 
-void RenderableConstellationLines::deinitialize() {
-}
-
 void RenderableConstellationLines::deinitializeGL() {
-    for (const std::pair<const int, ConstellationLine>& pair : _renderingConstellationsMap) {
+    for (const std::pair<const int, ConstellationLine>& pair :
+        _renderingConstellationsMap)
+    {
         glDeleteVertexArrays(1, &pair.second.vaoArray);
         glDeleteBuffers(1, &pair.second.vboArray);
     }

@@ -48,7 +48,6 @@ public:
 
     void initialize() override;
     void initializeGL() override;
-    void deinitialize() override;
     void deinitializeGL() override;
 
     bool isReady() const override;

@@ -300,26 +300,6 @@ void RenderableConstellation::fillSelectionProperty() {
 void RenderableConstellation::initialize() {
     loadConstellationFile();
 
-    if (!_assetSelectedConstellations.empty()) {
-        const std::vector<std::string> options = _constellationSelection.options();
-        std::set<std::string> selectedConstellations;
-
-        for (const std::string& s : _assetSelectedConstellations) {
-            const auto it = std::find(options.begin(), options.end(), s);
-            if (it == options.end()) {
-                // The user has specified a mesh name that doesn't exist
-                LWARNINGC(
-                    "RenderableConstellation",
-                    fmt::format("Option '{}' not found in list of meshes", s)
-                );
-            }
-            else {
-                selectedConstellations.insert(s);
-            }
-        }
-        _constellationSelection = selectedConstellations;
-    }
-
     if (!_hasLabel) {
         return;
     }

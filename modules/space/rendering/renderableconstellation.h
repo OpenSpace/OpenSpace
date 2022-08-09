@@ -50,7 +50,6 @@ public:
 
     virtual void initialize() override;
     virtual void initializeGL() override = 0;
-    virtual void deinitialize() override = 0;
     virtual void deinitializeGL() override = 0;
 
     virtual bool isReady() const override = 0;
@@ -81,6 +80,10 @@ protected:
     // Property that stores all constellations chosen by the user to be drawn
     properties::SelectionProperty _constellationSelection;
 
+    // Temporary storage of which constellations should be rendered as stated in the
+    // asset file
+    std::vector<std::string> _assetSelectedConstellations;
+
     // Label text settings
     bool _hasLabel = false;
     speck::Labelset _labelset;
@@ -91,9 +94,7 @@ private:
     // key = abbreviation, value = full name
     std::map<std::string, std::string> _constellationNamesTranslation;
 
-    // Temporary storage of which constellations should be rendered as stated in the
-    // asset file
-    std::vector<std::string> _assetSelectedConstellations;
+
 
     /**
      * Loads the file specified in <code>_constellationNamesFilename</code> that contains

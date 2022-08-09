@@ -93,6 +93,26 @@ void RenderableConstellationBounds::initialize() {
     RenderableConstellation::initialize();
 
     loadVertexFile();
+
+    if (!_assetSelectedConstellations.empty()) {
+        const std::vector<std::string> options = _constellationSelection.options();
+        std::set<std::string> selectedConstellations;
+
+        for (const std::string& s : _assetSelectedConstellations) {
+            const auto it = std::find(options.begin(), options.end(), s);
+            if (it == options.end()) {
+                // The user has specified a mesh name that doesn't exist
+                LWARNINGC(
+                    "RenderableConstellation",
+                    fmt::format("Option '{}' not found in list of meshes", s)
+                );
+            }
+            else {
+                selectedConstellations.insert(s);
+            }
+        }
+        _constellationSelection = selectedConstellations;
+    }
 }
 
 void RenderableConstellationBounds::initializeGL() {
@@ -119,9 +139,6 @@ void RenderableConstellationBounds::initializeGL() {
     glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
-}
-
-void RenderableConstellationBounds::deinitialize() {
 }
 
 void RenderableConstellationBounds::deinitializeGL() {

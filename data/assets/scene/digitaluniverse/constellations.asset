@@ -1,8 +1,8 @@
 local speck = asset.syncedResource({
-  Name = "Constellation Speck Files",
+  Name = "Constellation Files",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_constellations_speck",
-  Version = 2
+  Identifier = "digitaluniverse_constellations_data",
+  Version = 1
 })
 
 local constellationsExtragalactic = {
@@ -34,7 +34,7 @@ local constellations = {
     Opacity = 0.3,
     File = speck .. "constellations.speck",
     LabelFile = speck .. "constellations.label",
-    ConstellationNamesFile = "C:/Users/malej60/Documents/Sync/http/digitaluniverse_constellationbounds_data/1/constellations.dat",
+    ConstellationNamesFile = speck .. "constellations.dat",
     TextColor = { 0.8, 0.8, 0.8 },
     TextOpacity = 0.3,
     TextSize = 14.5,

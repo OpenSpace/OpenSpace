@@ -33,7 +33,6 @@ uniform float alphaValue;
 
 Fragment getFragment() {
   Fragment frag;
-
   if (alphaValue == 0.0) {
     discard;
   }
@@ -44,6 +43,6 @@ Fragment getFragment() {
   // JCC: Need to change the position to camera space
   frag.gPosition = vs_positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    
+
   return frag;
 }

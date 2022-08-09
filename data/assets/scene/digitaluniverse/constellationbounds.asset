@@ -1,7 +1,7 @@
 local data = asset.syncedResource({
-  Name = "Constellation Bounds Data",
+  Name = "Constellation Files",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_constellationbounds_data",
+  Identifier = "digitaluniverse_constellations_data",
   Version = 1
 })
 
