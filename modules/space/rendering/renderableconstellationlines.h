@@ -64,7 +64,6 @@ private:
         std::string identifier;
         int lineIndex;
         int colorIndex;
-        int textureIndex;
         // From: Partiview User's Guide
         // Brian Abbott
         // Hayden Planetarium American Museum of Natural History New York, USA
@@ -73,10 +72,9 @@ private:
         // numV will equal the number of points to connect.
         // If you want a square, 4000×4000 grid with lines every 200 units,
         // then numU numV will both equal 21
-        int numU;
         int numV;
-        std::vector<GLuint> vaoArray;
-        std::vector<GLuint> vboArray;
+        GLuint vaoArray;
+        GLuint vboArray;
         std::vector<GLfloat> vertices;
     };
 

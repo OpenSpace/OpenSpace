@@ -25,25 +25,16 @@
 #include <modules/space/rendering/renderableconstellationlines.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/misc.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <array>
-#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <optional>
@@ -179,10 +170,8 @@ void RenderableConstellationLines::deinitialize() {
 
 void RenderableConstellationLines::deinitializeGL() {
     for (const std::pair<const int, ConstellationLine>& pair : _renderingConstellationsMap) {
-        for (int i = 0; i < pair.second.numU; ++i) {
-            glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
-            glDeleteBuffers(1, &pair.second.vboArray[i]);
-        }
+        glDeleteVertexArrays(1, &pair.second.vaoArray);
+        glDeleteBuffers(1, &pair.second.vboArray);
     }
 
     if (_program) {
@@ -197,7 +186,6 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
 {
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
     glEnable(GL_DEPTH_TEST);
 
@@ -218,14 +206,12 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
             _uniformCache.color,
             _constellationColorMap[pair.second.colorIndex]
         );
-        for (size_t i = 0; i < pair.second.vaoArray.size(); ++i) {
-            glBindVertexArray(pair.second.vaoArray[i]);
 
-            // Always render as lines
-            glLineWidth(_lineWidth);
-            glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
-            global::renderEngine->openglStateCache().resetLineState();
-        }
+        glBindVertexArray(pair.second.vaoArray);
+
+        glLineWidth(_lineWidth);
+        glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
+        global::renderEngine->openglStateCache().resetLineState();
     }
 
     glBindVertexArray(0);
@@ -327,11 +313,7 @@ bool RenderableConstellationLines::readSpeckFile() {
             dummy.clear();
             str >> dummy; // texture index command?
             do {
-                if (dummy == "-t") {
-                    dummy.clear();
-                    str >> constellationLine.textureIndex; // texture index
-                }
-                else if (dummy == "-c") {
+                if (dummy == "-c") {
                     dummy.clear();
                     str >> constellationLine.colorIndex; // color index command
                 }
@@ -340,30 +322,23 @@ bool RenderableConstellationLines::readSpeckFile() {
             } while (dummy != "{");
 
             std::getline(file, line);
-            std::stringstream dimOrName(line);
-            std::string dummyU, dummyV;
 
-            // Try to read name of mesh if it exist
-            dimOrName >> dummyU;             // numU or "id"
-            std::getline(dimOrName, dummyV); // numV or the identifier of the mesh
+            // Read the identifier
+            std::stringstream name(line);
+            std::string identifier;
 
-            if (dummyU == "id") {
-                ghoul::trimWhitespace(dummyV);
-                constellationLine.identifier = constellationFullName(dummyV);
+            name >> dummy;
+            std::getline(name, identifier);
+            ghoul::trimWhitespace(identifier);
+            constellationLine.identifier = constellationFullName(identifier);
 
-                // Dimensions are specified in the next line as usual
-                std::getline(file, line);
-                std::stringstream dim(line);
-                dim >> constellationLine.numU; // numU
-                dim >> constellationLine.numV; // numV
-            }
-            else {
-                constellationLine.numU = stoi(dummyU);
-                constellationLine.numV = stoi(dummyV);
-            }
+            // Read the number of vertices
+            std::getline(file, line);
+            std::stringstream dim(line);
+            dim >> constellationLine.numV;
 
             // We can now read the vertices data:
-            for (int l = 0; l < constellationLine.numU * constellationLine.numV; ++l) {
+            for (int l = 0; l < constellationLine.numV; ++l) {
                 std::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;
@@ -399,21 +374,6 @@ bool RenderableConstellationLines::readSpeckFile() {
                 // Check if new max radius
                 const double r = glm::length(glm::dvec3(pos));
                 maxRadius = std::max(maxRadius, r);
-
-                // OLD CODE:
-                // (2022-03-23, emmbr)  None of our files included texture coordinates,
-                // and if they would they would still not be used by the shader
-                //for (int i = 0; i < 7; ++i) {
-                //    GLfloat value;
-                //    lineData >> value;
-                //    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
-                //    if (!errorReading) {
-                //        mesh.vertices.push_back(value);
-                //    }
-                //    else {
-                //        break;
-                //    }
-                //}
             }
 
             std::getline(file, line);
@@ -434,121 +394,28 @@ void RenderableConstellationLines::createConstellations() {
     if (!(_dataIsDirty && _hasSpeckFile)) {
         return;
     }
-    LDEBUG("Creating planes");
+    LDEBUG("Creating constellations");
 
     for (std::pair<const int, ConstellationLine>& p : _renderingConstellationsMap) {
-        for (int i = 0; i < p.second.numU; ++i) {
-            GLuint vao;
-            glGenVertexArrays(1, &vao);
-            p.second.vaoArray.push_back(vao);
+        GLuint vao;
+        glGenVertexArrays(1, &vao);
+        p.second.vaoArray = vao;
 
-            GLuint vbo;
-            glGenBuffers(1, &vbo);
-            p.second.vboArray.push_back(vbo);
+        GLuint vbo;
+        glGenBuffers(1, &vbo);
+        p.second.vboArray = vbo;
 
-            glBindVertexArray(vao);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            //glBufferData(GL_ARRAY_BUFFER, it->second.numV * sizeof(GLfloat),
-            glBufferData(
-                GL_ARRAY_BUFFER,
-                p.second.vertices.size() * sizeof(GLfloat),
-                &p.second.vertices[0],
-                GL_STATIC_DRAW
-            );
-            // in_position
-            glEnableVertexAttribArray(0);
-            // (2022-03-23, emmbr) This code was actually never used. We only read three
-            // values per line and did not handle any texture cooridnates, even if there
-            // would have been some in the file
-            //// U and V may not be given by the user
-            //if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
-            //    glVertexAttribPointer(
-            //        0,
-            //        3,
-            //        GL_FLOAT,
-            //        GL_FALSE,
-            //        sizeof(GLfloat) * 5,
-            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
-            //    );
-
-            //    // texture coords
-            //    glEnableVertexAttribArray(1);
-            //    glVertexAttribPointer(
-            //        1,
-            //        2,
-            //        GL_FLOAT,
-            //        GL_FALSE,
-            //        sizeof(GLfloat) * 7,
-            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
-            //    );
-            //}
-            //else { // no U and V:
-                glVertexAttribPointer(
-                    0,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    0,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
-                );
-            //}
-        }
-
-        // Grid: we need columns
-        if (p.second.numU > 1) {
-            for (int i = 0; i < p.second.numV; ++i) {
-                GLuint cvao;
-                glGenVertexArrays(1, &cvao);
-                p.second.vaoArray.push_back(cvao);
-
-                GLuint cvbo;
-                glGenBuffers(1, &cvbo);
-                p.second.vboArray.push_back(cvbo);
-
-                glBindVertexArray(cvao);
-                glBindBuffer(GL_ARRAY_BUFFER, cvbo);
-                glBufferData(
-                    GL_ARRAY_BUFFER,
-                    p.second.vertices.size() * sizeof(GLfloat),
-                    &p.second.vertices[0],
-                    GL_STATIC_DRAW
-                );
-                // in_position
-                glEnableVertexAttribArray(0);
-                // U and V may not be given by the user
-                if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
-                    glVertexAttribPointer(
-                        0,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        p.second.numV * sizeof(GLfloat) * 5,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i)
-                    );
-
-                    // texture coords
-                    glEnableVertexAttribArray(1);
-                    glVertexAttribPointer(
-                        1,
-                        2,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        p.second.numV * sizeof(GLfloat) * 7,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
-                    );
-                }
-                else { // no U and V:
-                    glVertexAttribPointer(
-                        0,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        p.second.numV * sizeof(GLfloat) * 3,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
-                    );
-                }
-            }
-        }
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            p.second.vertices.size() * sizeof(GLfloat),
+            p.second.vertices.data(),
+            GL_STATIC_DRAW
+        );
+        // in_position
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
 
     glBindVertexArray(0);
