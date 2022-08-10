@@ -45,7 +45,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
        "TextColor",
        "Text Color",
-       "The text color for the astronomical object"
+       "The text color of the labels for the constellations"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
@@ -58,28 +58,27 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
-        "The text size for the astronomical object labels"
+        "The text size of the labels for the constellations"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
         "Label File",
-        "The path to the label file that contains information about the astronomical "
-        "objects being rendered"
+        "The path to the label file that contains information about the constellations"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
         "Text Min/Max Size",
-        "The minimum and maximum size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered"
+        "The minimum and maximum size (in pixels) for the text of the labels for the "
+        "constellations"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ConstellationInfo = {
         "ConstellationFile",
         "Constellation File Path",
         "Specifies the file that contains the mapping between constellation "
-        "abbreviations and full name of the constellation. If this value is empty, the "
+        "abbreviations and full names of the constellations. If this value is empty, the "
         "abbreviations are used as the full names"
     };
 
@@ -118,7 +117,7 @@ namespace {
         std::optional<bool> drawLabels;
 
         // [[codegen::verbatim(ConstellationInfo.description)]]
-        std::string constellationNamesFile;
+        std::optional<std::string> constellationNamesFile;
 
         // [[codegen::verbatim(TextColorInfo.description)]]
         std::optional<glm::vec3> textColor [[codegen::color()]];
@@ -197,7 +196,8 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
     addProperty(_renderOption);
 
     // Read all files in the initialize() instead, multithreaded
-    _constellationNamesFilename = p.constellationNamesFile;
+    _constellationNamesFilename =
+        p.constellationNamesFile.value_or(_constellationNamesFilename);
     _constellationNamesFilename.onChange([&]() { loadConstellationFile(); });
     addProperty(_constellationNamesFilename);
 
@@ -244,6 +244,12 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
 std::string RenderableConstellation::constellationFullName(
                                                       const std::string& identifier) const
 {
+    if (_constellationNamesTranslation.empty() || identifier.empty()) {
+        std::string message = "List of constellations or the given identifier was empty";
+        LWARNINGC("RenderableConstellation", message);
+        return "";
+    }
+
     try {
         return _constellationNamesTranslation.at(identifier);
     }
@@ -321,7 +327,10 @@ void RenderableConstellation::initialize() {
 
     for (speck::Labelset::Entry& entry : _labelset.entries) {
         if (!entry.identifier.empty()) {
-            entry.text = constellationFullName(entry.identifier);
+            std::string fullName = constellationFullName(entry.identifier);
+            if (!fullName.empty()) {
+                entry.text = fullName;
+            }
         }
     }
 }

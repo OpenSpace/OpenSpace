@@ -5,6 +5,11 @@ local speck = asset.syncedResource({
   Version = 1
 })
 
+local zodiacs = {
+  "Cancer", "Taurus", "Pisces", "Aries", "Libra", "Aquarius", "Capricornus", "Scorpius",
+  "Virgo", "Sagittarius", "Gemini", "Leo"
+}
+
 local constellationsExtragalactic = {
   Identifier = "ConstellationsExtragalactic",
   Renderable = {
@@ -39,12 +44,13 @@ local constellations = {
     TextOpacity = 0.3,
     TextSize = 14.5,
     TextMinMaxSize = { 8, 170 },
-    LabelUnit = "pc",
     ConstellationColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
-    ConstellationUnit = "pc"
+    LabelUnit = "pc",
+    ConstellationUnit = "pc",
+    -- ConstellationSelection = zodiacs
   },
   GUI = {
-      Name = "Constellations",
+    Name = "Constellations",
     Path = "/Milky Way/Constellations",
     Description = [[Census 88 constellations and labels. DU Version 2.3. <br> These
       modern constellations are largely based on those of the Babylonians and
@@ -62,12 +68,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(constellationsExtragalactic)
   openspace.addSceneGraphNode(constellations)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(constellations)
   openspace.removeSceneGraphNode(constellationsExtragalactic)
 end)
-  
+
 asset.export(constellationsExtragalactic)
 asset.export(constellations)
 
@@ -75,7 +81,7 @@ asset.export(constellations)
 
 asset.meta = {
   Name = "Constellations",
-  Version = "1.1",
+  Version = "1.2",
   Description = "Digital Universe asset for constellation lines",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

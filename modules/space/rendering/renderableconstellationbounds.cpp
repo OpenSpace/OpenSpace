@@ -101,10 +101,10 @@ void RenderableConstellationBounds::initialize() {
         for (const std::string& s : _assetSelectedConstellations) {
             const auto it = std::find(options.begin(), options.end(), s);
             if (it == options.end()) {
-                // The user has specified a mesh name that doesn't exist
+                // The user has specified a constellation name that doesn't exist
                 LWARNINGC(
                     "RenderableConstellation",
-                    fmt::format("Option '{}' not found in list of meshes", s)
+                    fmt::format("Option '{}' not found in list of constellations", s)
                 );
             }
             else {
@@ -258,7 +258,8 @@ bool RenderableConstellationBounds::loadVertexFile() {
             currentBound = ConstellationBound();
             currentBound.isEnabled = true;
             currentBound.constellationAbbreviation = abbreviation;
-            currentBound.constellationFullName = constellationFullName(abbreviation);
+            std::string name = constellationFullName(abbreviation);
+            currentBound.constellationFullName = name.empty() ? abbreviation : name;
             currentBound.startIndex = static_cast<GLsizei>(_vertexValues.size());
         }
 

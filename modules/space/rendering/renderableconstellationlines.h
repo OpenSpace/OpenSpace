@@ -60,17 +60,9 @@ public:
 private:
     struct ConstellationLine {
         bool isEnabled = true;
-        std::string identifier;
+        std::string name;
         int lineIndex;
         int colorIndex;
-        // From: Partiview User's Guide
-        // Brian Abbott
-        // Hayden Planetarium American Museum of Natural History New York, USA
-        // "Specifies the dimensions of the mesh"
-        // "If you wish to draw a line between points, then numU will be 1 while
-        // numV will equal the number of points to connect.
-        // If you want a square, 4000×4000 grid with lines every 200 units,
-        // then numU numV will both equal 21
         int numV;
         GLuint vaoArray;
         GLuint vboArray;

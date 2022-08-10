@@ -134,7 +134,7 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
             _renderingConstellationsMap)
         {
             pair.second.isEnabled =
-                _constellationSelection.isSelected(pair.second.identifier);
+                _constellationSelection.isSelected(pair.second.name);
         }
     }
 }
@@ -159,10 +159,10 @@ void RenderableConstellationLines::initialize() {
         for (const std::string& s : _assetSelectedConstellations) {
             const auto it = std::find(options.begin(), options.end(), s);
             if (it == options.end()) {
-                // The user has specified a mesh name that doesn't exist
+                // The user has specified a constellation name that doesn't exist
                 LWARNINGC(
                     "RenderableConstellation",
-                    fmt::format("Option '{}' not found in list of meshes", s)
+                    fmt::format("Option '{}' not found in list of constellations", s)
                 );
             }
             else {
@@ -318,10 +318,8 @@ bool RenderableConstellationLines::readSpeckFile() {
         }
         else {
             // mesh lines are structured as follows:
-            // mesh -t texnum -c colorindex -s style {
-            // where textnum is the index of the texture;
+            // mesh -c colorindex {
             // colorindex is the index of the color for the mesh
-            // and style is solid, wire or point (for now we support only wire)
             std::stringstream str(line);
 
             ConstellationLine constellationLine;
@@ -343,13 +341,16 @@ bool RenderableConstellationLines::readSpeckFile() {
             std::getline(file, line);
 
             // Read the identifier
-            std::stringstream name(line);
+            std::stringstream id(line);
             std::string identifier;
 
-            name >> dummy;
-            std::getline(name, identifier);
+            id >> dummy;
+            std::getline(id, identifier);
             ghoul::trimWhitespace(identifier);
-            constellationLine.identifier = constellationFullName(identifier);
+            std::string name = constellationFullName(identifier);
+            if (!name.empty()) {
+                constellationLine.name = name;
+            }
 
             // Read the number of vertices
             std::getline(file, line);
@@ -385,7 +386,7 @@ bool RenderableConstellationLines::readSpeckFile() {
                 if (!success) {
                     LERROR(fmt::format(
                         "Failed reading position on line {} of mesh {} in file: '{}'. "
-                        "Stopped reading mesh data", l, lineIndex, _speckFile
+                        "Stopped reading constellation data", l, lineIndex, _speckFile
                     ));
                     break;
                 }

@@ -16,7 +16,7 @@ local object = {
     Type = "RenderableConstellationBounds",
     Enabled = false,
     File = data .. "bound_20.dat",
-    ConstellationNamesFile = data .. "constellations.dat"
+    ConstellationNamesFile = data .. "constellations.dat",
     -- ConstellationSelection = zodiacs
   },
   Transform = {
@@ -52,7 +52,7 @@ asset.export(object)
 
 asset.meta = {
   Name = "Constellation Bounds",
-  Version = "1.1",
+  Version = "1.2",
   Description = [[DU asset providing a Spherical mesh dividing the sky into regions that
     fit the constellations]],
   Author = "Brian Abbott (AMNH)",

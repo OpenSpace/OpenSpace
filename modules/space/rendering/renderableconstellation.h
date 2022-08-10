@@ -94,8 +94,6 @@ private:
     // key = abbreviation, value = full name
     std::map<std::string, std::string> _constellationNamesTranslation;
 
-
-
     /**
      * Loads the file specified in <code>_constellationNamesFilename</code> that contains
      * the mapping between abbreviations and full names of constellations
