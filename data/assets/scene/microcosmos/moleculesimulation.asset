@@ -38,19 +38,20 @@ local MoleculeSimulation = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = { 10E3, 0, 0 }, -- some distance away from the comet
+      Position = { 5E3, 0, 0 }, -- some distance away from the comet
     }
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = { moleculeFiles .. "h2o.arc", moleculeFiles .. "o2.arc" },
-    TrajectoryFiles = { "", moleculeFiles .. "o2.arc" },
-    MoleculeCounts = { 500, 500 },
+    MoleculeFiles = { moleculeFiles .. "ice.gro" },
+    TrajectoryFiles = { moleculeFiles .. "ice.xtc" },
+    MoleculeCounts = { 1 },
     LinearVelocity = 10.0,
     AngularVelocity = 60.0 / 360.0 * 3.14,
     SimulationBox = { 200.0, 200.0, 200.0 },
     CollisionRadius = 2.0,
-    AnimationSpeed = 100,
+    SimulationSpeed = 0,
+    AnimationSpeed = 1,
   },
   GUI = {
     Path = "/Microcosmos/Molecules/Simulation"
@@ -66,3 +67,39 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(MoleculeSimulation)
+
+local MoleculeSimulation2 = {
+  Identifier = "MoleculeSimulation2",
+  -- Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = choury.Barycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 6E3, 0, 0 }, -- some distance away from the comet
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = { moleculeFiles .. "h2o.arc", moleculeFiles .. "o2.arc" },
+    TrajectoryFiles = { "", moleculeFiles .. "o2.arc" },
+    MoleculeCounts = { 500, 500 },
+    LinearVelocity = 10.0,
+    AngularVelocity = 60.0 / 360.0 * 3.14,
+    SimulationBox = { 200.0, 200.0, 200.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100,
+  },
+  GUI = {
+    Path = "/Microcosmos/Molecules/Simulation2"
+  }
+}
+
+-- asset.onInitialize(function()
+--   openspace.addSceneGraphNode(MoleculeSimulation2)
+-- end)
+    
+-- asset.onDeinitialize(function()
+--   openspace.removeSceneGraphNode(MoleculeSimulation2)
+-- end)
+    
+-- asset.export(MoleculeSimulation2)

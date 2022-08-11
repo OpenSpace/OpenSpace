@@ -39,6 +39,7 @@
 #include <md_molecule.h>
 #include <md_trajectory.h>
 #include <core/md_bitfield.h>
+#include "viamd/gfx/conetracing_utils.h"
 
 namespace openspace {
 
@@ -77,6 +78,7 @@ private:
         md_gl_representation_t drawRep;
         md_gl_molecule_t drawMol;
         md_bitfield_t visibilityMask;
+        cone_trace::GPUVolume occupancyVolume;
     };
     
     void updateAnimation(molecule_data_t& mol, double t);

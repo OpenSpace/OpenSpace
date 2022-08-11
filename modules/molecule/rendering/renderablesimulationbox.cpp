@@ -37,6 +37,8 @@
 #include "openspace/engine/windowdelegate.h"
 #include "viamd/coloring.h"
 #include "viamd/loader.h"
+#include "viamd/gfx/conetracing_utils.h"
+#include "viamd/gfx/postprocessing_utils.h"
 
 #include <glm/gtc/random.hpp>
 
@@ -69,6 +71,12 @@ using namespace gl;
 
 constexpr const char* shader_output_snippet = R"(
 layout(location = 0) out vec4 out_color;
+layout(location = 1) out vec4 out_normal;
+
+vec2 encode_normal (vec3 n) {
+   float p = sqrt(n.z * 8 + 8);
+   return n.xy / p + 0.5;
+}
 
 // this is a basic blinn-phong taken from learnopengl.com.
 
@@ -92,10 +100,30 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
     vec3 specular = vec3(0.3) * spec; // assuming bright white light color
 
     out_color = vec4(ambient + diffuse + specular, color.a);
+    out_normal = vec4(encode_normal(view_normal), 0, 0);
+    // out_color = color;
 }
 )";
 
+static void compute_aabb(vec3_t* aabb_min, vec3_t* aabb_max, const float* x, const float* y, const float* z, int64_t count) {
+    ASSERT(count >= 0);
 
+    if (count < 1) {
+        *aabb_min = *aabb_max = {{0, 0, 0}};
+        return;
+    }
+
+    *aabb_min = {{x[0], y[0], z[0]}};
+    *aabb_max = {{x[0], y[0], z[0]}};
+    for (int64_t i = 1; i < count; ++i) {
+        aabb_min->x = MIN(aabb_min->x, x[i]);
+        aabb_max->x = MAX(aabb_max->x, x[i]);
+        aabb_min->y = MIN(aabb_min->y, y[i]);
+        aabb_max->y = MAX(aabb_max->y, y[i]);
+        aabb_min->z = MIN(aabb_min->z, z[i]);
+        aabb_max->z = MAX(aabb_max->z, z[i]);
+    }
+}
 enum AtomBit {
     AtomBitVisible = 0x4,
 };
@@ -265,6 +293,7 @@ namespace {
 
 static GLuint fbo = 0;
 static GLuint colorTex = 0;
+static GLuint normalTex = 0;
 static GLuint depthTex = 0;
 static int glUseCount = 0;
 static md_gl_shaders_t shaders;
@@ -337,19 +366,21 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     for (int count : _moleculeCounts.value()) {
         molecule_data_t mol {
             {},      // states
-            nullptr, //moleculeApi
-            nullptr, //trajectoryApi
-            {},      //molecule
-            {},      //concatMolecule
-            nullptr, //trajectory
-            {},      //drawRep
-            {},      //drawMol
+            nullptr, // moleculeApi
+            nullptr, // trajectoryApi
+            {},      // molecule
+            {},      // concatMolecule
+            nullptr, // trajectory
+            {},      // drawRep
+            {},      // drawMol
             {},      // visibilityMask
+            {},      // occupancy volume
         };
         
         for (int i = 0; i < count; i++) {
             molecule_state_t demoMolecule {
-                linearRand(dvec3(0.0), _simulationBox.value()),  // position
+                _simulationBox.value() / 2.0,  // position
+                // linearRand(dvec3(0.0), _simulationBox.value()),  // position
                 0.0,                                             // angle
                 sphericalRand(_linearVelocity.value()),          // direction
                 sphericalRand(_angularVelocity.value()),         // rotation
@@ -413,12 +444,28 @@ void RenderableSimulationBox::initializeGL() {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glGenTextures(1, &normalTex);
+        glBindTexture(GL_TEXTURE_2D, normalTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, size.x, size.y, 0, GL_RG, GL_UNSIGNED_SHORT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTex, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glGenTextures(1, &depthTex);
         glBindTexture(GL_TEXTURE_2D, depthTex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -427,6 +474,9 @@ void RenderableSimulationBox::initializeGL() {
 
         md_gl_initialize();
         md_gl_shaders_init(&shaders, shader_output_snippet);
+        
+        cone_trace::initialize();
+        postprocessing::initialize(size.x, size.y);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -454,12 +504,15 @@ void RenderableSimulationBox::deinitializeGL() {
     glUseCount--;
     if (glUseCount == 0 && fbo) {
         glDeleteTextures(1, &depthTex);
+        glDeleteTextures(1, &normalTex);
         glDeleteTextures(1, &colorTex);
         glDeleteFramebuffers(1, &fbo);
         depthTex = 0;
         colorTex = 0;
         fbo = 0;
         billboardGlDeinit();
+        cone_trace::shutdown();
+        postprocessing::shutdown();
     }
 
     billboardGlDeinit();
@@ -626,6 +679,12 @@ static double normalizeDouble(double input) {
     }
 }
 
+static mat4_t mat4_from_glm(glm::mat4 const& src) {
+    mat4_t dst;
+    memcpy(&dst, &src, 4 * 4 * sizeof(float));
+    return dst;
+}
+
 void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     using namespace glm;
     const dmat4 I(1.0);
@@ -647,18 +706,13 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     Camera camCopy = data.camera;
     camCopy.setScaling(1.f);
 
-    // having the view matrix in the model matrix is better because
-    // mold uses single precision but that's not enough
-    mat4 modelMatrix =
+    mat4 viewMatrix =
         camCopy.combinedViewMatrix() *
         translate(I, data.modelTransform.translation) *
         scale(I, data.modelTransform.scale) *
         dmat4(data.modelTransform.rotation) *
         scale(I, dvec3(fakeScaling)) *
         translate(I, -_simulationBox.value() / 2.0) *
-        I;
-
-    mat4 viewMatrix =
         I;
 
     mat4 projMatrix =
@@ -668,6 +722,9 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     std::vector<md_gl_draw_op_t> drawOps;
     for (molecule_data_t& mol : _molecules) {
         if (mol.concatMolecule.atom.count) {
+            mat4 modelMatrix =
+                I;
+
             md_gl_draw_op_t drawOp = {};
             drawOp.model_matrix = value_ptr(modelMatrix);
             drawOp.rep = &mol.drawRep;
@@ -694,6 +751,10 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         GLint defaultFbo;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        // deferred rendering of mold
+        const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, bufs);
+
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
@@ -705,12 +766,75 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
             glBindTexture(GL_TEXTURE_2D, 0);
 
+            glBindTexture(GL_TEXTURE_2D, normalTex);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, size.x, size.y, 0, GL_RG, GL_UNSIGNED_SHORT, nullptr);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
             glBindTexture(GL_TEXTURE_2D, depthTex);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         
         md_gl_draw(&args);
+        
+        // conetracing
+        // glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        // for (molecule_data_t& mol : _molecules) {
+
+        //     cone_trace::free_volume(&mol.occupancyVolume);
+        //     vec3_t min, max;
+        //     compute_aabb(&min, &max, mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z, mol.concatMolecule.atom.count);
+        //     std::cout << min[0] << " " << min[1] << " " << min[2] << std::endl;
+        //     std::cout << max[0] << " " << max[1] << " " << max[2] << std::endl;
+        //     cone_trace::init_occlusion_volume(&mol.occupancyVolume, min, max, 8.0f);
+
+        //     cone_trace::compute_occupancy_volume(
+        //         mol.occupancyVolume, mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z,
+        //         mol.concatMolecule.atom.radius, mol.concatMolecule.atom.count
+        //     );
+
+        //     cone_trace::render_directional_occlusion(
+        //         depthTex, normalTex, mol.occupancyVolume,
+        //         mat4_from_glm(viewMatrix), mat4_from_glm(projMatrix),
+        //         1.0, 1.0
+        //     );
+
+        // }
+        
+        { // postprocessing
+            postprocessing::Descriptor desc;
+            desc.background.intensity = {{ 0, 0, 0 }};
+            desc.ambient_occlusion.enabled = true;
+            desc.ambient_occlusion.intensity = 12.f;
+            desc.ambient_occlusion.radius = 12.f;
+            desc.bloom.enabled = false;
+            desc.depth_of_field.enabled = false;
+            desc.temporal_reprojection.enabled = false;
+            desc.tonemapping.enabled = false;
+            desc.input_textures.depth = depthTex;
+            desc.input_textures.color = colorTex;
+            desc.input_textures.normal = normalTex;
+
+            ViewParam param;
+            // camCopy.maxFov()
+            param.clip_planes.near = 0.1f;
+            param.clip_planes.far = 1000.f;
+            // param.fov_y
+            param.jitter.current = vec2_t{{ 0, 0 }};
+            param.jitter.next = vec2_t{{ 0, 0 }};
+            param.jitter.previous = vec2_t{{ 0, 0 }};
+            param.matrix.current.proj = mat4_from_glm(projMatrix);
+            param.matrix.current.proj_jittered = mat4_from_glm(projMatrix);
+            // param.matrix.current.norm = mat4_transpose(mat4_inverse(param.matrix.current.proj));
+            // param.matrix.current.view = 
+            param.matrix.inverse.proj = mat4_inverse(param.matrix.current.proj);
+            param.matrix.inverse.proj_jittered = mat4_inverse(param.matrix.current.proj_jittered);
+            // param.resolution
+            
+            postprocessing::postprocess(desc, param);
+        }
+
+        glDrawBuffer(GL_FRONT_AND_BACK);
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     }
@@ -733,8 +857,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
         billboardDraw(transform, colorTex, vec4(1.0), circleWidth, depth);
     }
-    
-
 }
 
 void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::string& file) {
@@ -773,6 +895,21 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::stri
     md_gl_molecule_init(&mol.drawMol, &mol.concatMolecule);
     md_gl_representation_init(&mol.drawRep, &mol.drawMol);
     updateRepresentation(mol);
+
+    // conetracing
+    vec3_t min, max;
+    compute_aabb(&min, &max, mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z, mol.concatMolecule.atom.count);
+    std::cout << min[0] << " " << min[1] << " " << min[2] << std::endl;
+    std::cout << max[0] << " " << max[1] << " " << max[2] << std::endl;
+    cone_trace::init_occlusion_volume(&mol.occupancyVolume, min, max, 8.0f);
+
+    // vec3 box = _simulationBox.value();
+    // cone_trace::init_occlusion_volume(&mol.occupancyVolume, { {0, 0, 0} }, {{ box.x, box.y, box.z }}, 8.0f);
+
+    cone_trace::compute_occupancy_volume(
+        mol.occupancyVolume, mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z,
+        mol.concatMolecule.atom.radius, mol.concatMolecule.atom.count
+    );
 }
 
 void RenderableSimulationBox::initTrajectory(molecule_data_t& mol, const std::string& file) {
@@ -919,6 +1056,7 @@ void RenderableSimulationBox::applyViamdScript(molecule_data_t& mol, const std::
 }
 
 void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {
+    cone_trace::free_volume(&mol.occupancyVolume);
     md_gl_representation_free(&mol.drawRep);
     md_gl_molecule_free(&mol.drawMol);
     mol.moleculeApi->free(&mol.molecule, default_allocator);
@@ -930,6 +1068,7 @@ void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {
     mol.molecule = {};
     mol.drawMol = {};
     mol.drawRep = {};
+    mol.occupancyVolume = {};
 }
 
 void RenderableSimulationBox::freeTrajectory(molecule_data_t& mol) {

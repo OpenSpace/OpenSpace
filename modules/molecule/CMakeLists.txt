@@ -39,6 +39,10 @@ set(SOURCE_FILES
   rendering/viamd/coloring.cpp
   rendering/viamd/color_utils.cpp
   rendering/viamd/loader.cpp
+  rendering/viamd/gfx/gl_utils.cpp
+  rendering/viamd/gfx/immediate_draw_utils.cpp
+  rendering/viamd/gfx/conetracing_utils.cpp
+  rendering/viamd/gfx/postprocessing_utils.cpp
   rendering/billboard.cpp
   md_concat.cpp
 )

@@ -104,6 +104,7 @@ void billboardGlDeinit() {
 void billboardDraw(glm::mat4 const& transform, GLuint colorTex, glm::vec4 const& stroke, float width, float depth) {
   glUseProgram(prog);
   glBindVertexArray(vao);
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, colorTex);
   glUniformMatrix4fv(glGetUniformLocation(prog, "uTransform"), 1, false, glm::value_ptr(transform));
   glUniform1f(glGetUniformLocation(prog, "uStrokeWidth"), width);
