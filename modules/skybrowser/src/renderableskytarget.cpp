@@ -151,6 +151,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("ratio", _ratio);
     _shader->setUniform("lineColor", color);
     _shader->setUniform("fov", static_cast<float>(_verticalFov));
+    _shader->setUniform("borderRadius", static_cast<float>(_borderRadius));
 
     glm::dvec3 objectPositionWorld = glm::dvec3(
         glm::translate(
@@ -229,6 +230,10 @@ void RenderableSkyTarget::removeHighlight(const glm::ivec3& removal) {
 
 void RenderableSkyTarget::setVerticalFov(double fov) {
     _verticalFov = fov;
+}
+
+void RenderableSkyTarget::setBorderRadius(double radius) {
+    _borderRadius = radius;
 }
 
 } // namespace openspace

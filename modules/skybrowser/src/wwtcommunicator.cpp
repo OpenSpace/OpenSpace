@@ -94,6 +94,10 @@ std::vector<double> WwtCommunicator::opacities() const {
     return opacities;
 }
 
+double WwtCommunicator::borderRadius() const {
+    return _borderRadius;
+}
+
 void WwtCommunicator::setTargetRoll(double roll) {
     _targetRoll = roll;
 }
@@ -105,7 +109,7 @@ void WwtCommunicator::setVerticalFov(double vfov) {
 
 void WwtCommunicator::setWebpageBorderColor(glm::ivec3 color) const {
     std::string stringColor = fmt::format("{},{},{}", color.x, color.y, color.z);
-    std::string scr = "document.body.style.backgroundColor = 'rgb(" + stringColor + ")';";
+    std::string scr = "setBackgroundColor('rgb(" + stringColor + ")');";
     executeJavascript(scr);
 }
 
@@ -117,6 +121,12 @@ void WwtCommunicator::setEquatorialAim(glm::dvec2 equatorial) {
 void WwtCommunicator::setBorderColor(glm::ivec3 color) {
     _borderColor = std::move(color);
     _borderColorIsDirty = true;
+}
+
+void WwtCommunicator::setBorderRadius(double radius) {
+    _borderRadius = radius;
+    std::string scr = "setBorderRadius(" + std::to_string(radius) + ");";
+    executeJavascript(scr);
 }
 
 void WwtCommunicator::updateBorderColor() const {

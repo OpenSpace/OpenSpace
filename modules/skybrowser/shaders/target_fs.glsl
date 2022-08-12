@@ -36,6 +36,7 @@ uniform float lineWidth;
 uniform float ratio;
 uniform vec4 lineColor;
 uniform float fov;
+uniform float borderRadius;
 
 uniform bool additiveBlending;
 uniform float opacity;
@@ -45,17 +46,12 @@ uniform vec3 multiplyColor;
 // This compensates for the optical illusion that vertical lines appear thinner
 const float VerticalThickness = 1.1;
 
-
 float createLine(float lineCenter, float lineWidth, float coord) {
   // Calculate edges of line
   float startEdge = lineCenter - (lineWidth * 0.5);
   float endEdge = lineCenter + (lineWidth * 0.5);
 
   return step(startEdge, coord) - step(endEdge, coord);
-}
-
-float createFilledRectangle(float width, float height, vec2 coord) {
-  return createLine(0.5, width, coord.x) * createLine(0.5, height, coord.y);
 }
 
 float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
@@ -66,6 +62,13 @@ float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
   return crosshairHorizontal + crosshairVertical;
 }
 
+float roundedRectangle(vec2 coord, vec2 size, vec4 radius) {
+    radius.xy = (coord.x > 0.0) ? radius.xy : radius.zw;
+    radius.x  = (coord.y > 0.0) ? radius.x  : radius.y;
+
+    vec2 q = abs(coord) - size + radius.x;
+    return min(max(q.x, q.y),0.0) + length(max(q, 0.0)) - radius.x;
+}
 
 Fragment getFragment() {
   float rectangle = 0.0;
@@ -78,13 +81,34 @@ Fragment getFragment() {
   crosshair *= crossHairBox;
 
   if (showRectangle) {
-    float lineWidthX = lineWidth * 2 * VerticalThickness;
     float lineWidthY = lineWidth * 2;
-    float height = ((fov * 0.5)/maxWwtFov)-lineWidthX;
+    float lineWidthX = lineWidth * 2 * VerticalThickness;
+    float height = ((fov * 0.5)/maxWwtFov)-lineWidth;
     float width = (height * ratio) - lineWidthY;
-    float outerEdge = createFilledRectangle(width, height, vs_st);
-    float innerEdge = createFilledRectangle(width-lineWidthY, height-lineWidthX, vs_st);
-    rectangle = outerEdge - innerEdge;
+    vec2 size = vec2(width, height);
+
+    // The radius of the corners (in pixels) clockwise starting in the top left
+    vec4 radius = vec4(clamp(borderRadius * 0.5 * min(height, width), 0.0, 0.5 * min(height, width)));
+
+    // Calculate distance to edge
+    float distance = roundedRectangle(vs_st.xy - vec2(0.5), size / 2.0f, radius);
+
+    // How soft the edges should be (in pixels)
+    // Higher values could be used to simulate a drop shadow
+    float edgeSoftness  = 2.0f;
+    // Smooth the result (free antialiasing)
+    float smoothedAlpha =  1.0f - smoothstep(0.0f, edgeSoftness, distance);
+
+    // Border
+    float borderThickness = lineWidth * 0.5;
+    float borderSoftness  = 0.000f;
+    float borderAlpha     = 1.0f-smoothstep(borderThickness - borderSoftness, borderThickness, abs(distance));
+
+    // Colors
+    float borderColor = 1.0;
+    float bgColor = 0.0;
+
+    rectangle = mix(bgColor, mix(bgColor, borderColor, borderAlpha), smoothedAlpha);
   }
 
   float result = clamp(crosshair + rectangle, 0.0, 1.0);

@@ -629,6 +629,20 @@ namespace {
 }
 
 /**
+ * Takes an identifier to a sky browser and a radius value between 0 and 1, where 0 is
+ * rectangular and 1 is circular
+ */
+[[codegen::luawrap]] void setBorderRadius(std::string identifier, double radius) {
+    using namespace openspace;
+
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    TargetBrowserPair* pair = module->pair(identifier);
+    if (pair) {
+        pair->setBorderRadius(radius);
+    }
+}
+
+/**
  * Sets the screen space size of the sky browser to the numbers specified by the input
  * [x, y].
  */

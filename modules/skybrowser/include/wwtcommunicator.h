@@ -60,11 +60,13 @@ public:
     glm::dvec2 fieldsOfView() const;
     std::vector<int> selectedImages() const;
     std::vector<double> opacities() const;
+    double borderRadius() const;
 
     void setImageCollectionIsLoaded(bool isLoaded);
     void setVerticalFov(double vfov);
     void setEquatorialAim(glm::dvec2 equatorial);
     void setBorderColor(glm::ivec3 color);
+    void setBorderRadius(double radius);
     void setTargetRoll(double roll);
 
     void updateBorderColor() const;
@@ -73,7 +75,8 @@ public:
 protected:
     void setIdInBrowser(const std::string& id) const;
     std::deque<std::pair<int, double>>::iterator findSelectedImage(int i);
-
+    
+    double _borderRadius = 0;
     double _verticalFov = 10.0f;
     glm::ivec3 _borderColor = glm::ivec3(70);
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
