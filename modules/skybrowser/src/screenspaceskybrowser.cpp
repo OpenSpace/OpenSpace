@@ -201,6 +201,7 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     _browserPixeldimensions = glm::ivec2(newSize);
     _texture->setDimensions(glm::ivec3(newSize, 1));
     _objectSize = glm::ivec3(_texture->dimensions());
+    _radiusIsDirty = true;
 }
 
 void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
@@ -324,8 +325,12 @@ void ScreenSpaceSkyBrowser::update() {
         _isInitialized = false;
     }
 
-    WwtCommunicator::update();
+    if (_radiusIsDirty) {
+        setBorderRadius(_borderRadius);
+    }
+
     ScreenSpaceRenderable::update();
+    WwtCommunicator::update();
 }
 
 void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {

@@ -54,6 +54,10 @@ float createLine(float lineCenter, float lineWidth, float coord) {
   return step(startEdge, coord) - step(endEdge, coord);
 }
 
+float createFilledRectangle(float width, float height, vec2 coord) {
+  return createLine(0.5, width, coord.x) * createLine(0.5, height, coord.y);
+}
+
 float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
   const float Center = 0.5;
   float crosshairVertical = createLine(Center, linewidth * VerticalThickness, coord.x);

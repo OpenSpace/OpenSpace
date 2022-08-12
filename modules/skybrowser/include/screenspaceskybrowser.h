@@ -78,6 +78,7 @@ private:
     bool _isSyncedWithWwt = false;
     bool _textureDimensionsIsDirty = false;
     bool _ratioIsDirty = false;
+    bool _radiusIsDirty = false;
     bool _isInitialized = false;
 
     float _ratio = 1.f;
