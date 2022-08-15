@@ -7,7 +7,7 @@ local kernels = asset.syncedResource({
   Name = "JWST Kernel",
   Type = "HttpSynchronization",
   Identifier = "jwst_kernels",
-  Version = 2
+  Version = 3
 })
 
 local launchTime = "2021 DEC 25 12:20:00"
@@ -85,7 +85,7 @@ local JWSTTrailCruise = {
 -- Gives a better trail history of the orbit around L2 than if it was relative to Earth
 local JWSTTrailOrbit = {
   Identifier = "JWSTTrailOrbit",
-  Parent = transforms.L2.Identifier,
+  Parent = transforms.L2Position.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = L2orbitInsertionTime,
@@ -109,6 +109,39 @@ local JWSTTrailOrbit = {
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
       James Webb Space Telescope Orbit Trail relative to L2.
+    ]],
+  }
+}
+
+local JWSTTrailCoOrbit = {
+  Identifier = "JWSTTrailCoOrbit",
+  Parent = transforms.L2CoRotFrame.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = L2orbitInsertionTime,
+    End = endTime
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+			Type = 'SpiceTranslation',
+			Target = 170, -- JWST
+			Observer = 392, -- L2
+			Frame = 'L2_COROT',
+			Kernels = {
+        kernels .. "webb.bsp",
+        kernels .. "l2_corot.tf"
+      }
+		},
+    Color = { 0.0, 0.9, 0.9 },
+    Period = 182.621099, -- About 6 months
+    Resolution = 183 -- About a sample rate of once per day
+  },
+  GUI = {
+    Name = "JWST L2 Co Orbit Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Orbit Trail co-revolving with L2.
     ]],
   }
 }
@@ -147,11 +180,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTTrailLaunch)
   openspace.addSceneGraphNode(JWSTTrailCruise)
   openspace.addSceneGraphNode(JWSTTrailOrbit)
+  openspace.addSceneGraphNode(JWSTTrailCoOrbit)
   openspace.addSceneGraphNode(JWSTSunTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTSunTrail)
+  openspace.removeSceneGraphNode(JWSTTrailCoOrbit)
   openspace.removeSceneGraphNode(JWSTTrailOrbit)
   openspace.removeSceneGraphNode(JWSTTrailCruise)
   openspace.removeSceneGraphNode(JWSTTrailLaunch)
@@ -160,6 +195,7 @@ end)
 asset.export(JWSTTrailLaunch)
 asset.export(JWSTTrailCruise)
 asset.export(JWSTTrailOrbit)
+asset.export(JWSTTrailCoOrbit)
 asset.export(JWSTSunTrail)
 
 

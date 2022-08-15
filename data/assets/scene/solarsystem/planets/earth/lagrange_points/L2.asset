@@ -15,6 +15,13 @@ local kernels = asset.syncedResource({
   Version = 1
 })
 
+local corotkernels = asset.syncedResource({
+  Name = "JWST Kernel",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_kernels",
+  Version = 3
+})
+
 local L2Position = {
   Identifier = "L2Position",
   Parent = transforms.SolarSystemBarycenter.Identifier,
@@ -29,6 +36,34 @@ local L2Position = {
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
   GUI = {
     Name = "L2 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Hidden = true
+  }
+}
+
+local L2CoRotFrame = {
+  Identifier = "L2CoRotFrame",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = 392, -- L2
+      Observer = "SSB",
+      Kernels = kernels .. "L2_de431.bsp"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "L2_COROT",
+      DestinationFrame = 'GALACTIC',
+      Kernels = {
+        kernels .. "L2_de431.bsp",
+        corotkernels .. "l2_corot.tf"
+      }
+    }
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
+  GUI = {
+    Name = "L2 CoRot Position",
     Path = "/Solar System/Planets/Earth/Lagrange points",
     Hidden = true
   }
@@ -131,6 +166,7 @@ local L2SunLine = {
 
 local nodes = {
   L2Position,
+  L2CoRotFrame,
   L2Small,
   L2,
   L2SunLine,
