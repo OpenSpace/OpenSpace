@@ -83,6 +83,7 @@ local JWSTTrailCruise = {
 
 -- Trail of JWST relative to L2 after first month to reach L2
 -- Gives a better trail history of the orbit around L2 than if it was relative to Earth
+-- This does NOT co-rotate withe L2 and gives a saddle look of the trail
 local JWSTTrailOrbit = {
   Identifier = "JWSTTrailOrbit",
   Parent = transforms.L2Position.Identifier,
@@ -113,6 +114,8 @@ local JWSTTrailOrbit = {
   }
 }
 
+-- Trail of JWST in orbit around L2 that co-rotates with L2 around the Sun
+-- This gives the trail a look of a wheel going along L2 around the Sun
 local JWSTTrailCoRotOrbit = {
   Identifier = "JWSTTrailCoRotOrbit",
   Parent = transforms.L2CoRotFrame.Identifier,
@@ -130,7 +133,7 @@ local JWSTTrailCoRotOrbit = {
 			Frame = 'L2_COROT',
 			Kernels = { kernels .. "webb.bsp" }
 		},
-    Color = { 0.0, 0.9, 0.9 },
+    Color = { 0.9, 0.0, 0.9 },
     Period = 182.621099, -- About 6 months
     Resolution = 183 -- About a sample rate of once per day
   },

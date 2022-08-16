@@ -34,16 +34,12 @@ local L2Position = {
   }
 }
 
+-- This ref. frame co-rotates with L2 and is needed for a more intuitive trail of JWST in
+-- relation to L2
 local L2CoRotFrame = {
   Identifier = "L2CoRotFrame",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Parent = L2Position.Identifier,
   Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = 392, -- L2
-      Observer = "SSB",
-      Kernels = kernels .. "L2_de431.bsp"
-    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "L2_COROT",
