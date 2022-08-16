@@ -12,14 +12,7 @@ local kernels = asset.syncedResource({
   Name = "Lagrange Kernels",
   Type = "HttpSynchronization",
   Identifier = "earth_lagrange_kernels",
-  Version = 1
-})
-
-local corotkernels = asset.syncedResource({
-  Name = "JWST Kernel",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_kernels",
-  Version = 3
+  Version = 2
 })
 
 local L2Position = {
@@ -57,13 +50,13 @@ local L2CoRotFrame = {
       DestinationFrame = 'GALACTIC',
       Kernels = {
         kernels .. "L2_de431.bsp",
-        corotkernels .. "l2_corot.tf"
+        kernels .. "L2_corot.tf"
       }
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
   GUI = {
-    Name = "L2 CoRot Position",
+    Name = "L2 Co-rotation Frame",
     Path = "/Solar System/Planets/Earth/Lagrange points",
     Hidden = true
   }
