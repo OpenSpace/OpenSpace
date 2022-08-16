@@ -1,22 +1,31 @@
-local sharedSssb = asset.require("./sssb_shared")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset,
-  "transneptunian_object_asteroid",
-  "sssb_data_transneptunian_object_asteroid"
-)
-local object = sharedSssb.createSssbGroupObject(
-  "sssb_data_transneptunian_object_asteroid.csv",
-  "Transneptunian Object Asteroids",
-  filepath,
-  { 0.56, 0.64, 0.95 }
-)
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 8
-object.Renderable.TrailFade = 10
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Trans-Neptunian Object Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_transneptunian_object_asteroid",
+  Version = 1
+})
 
-object.GUI.Description = [[ Any minor or dwarf planets in the solar system that orbit
-  the Sun at a greater average distance than Neptune (semi-major axis of 30.1 AU). ]]
-
+local object = {
+  Identifier = "sssb_transneptunian_object_asteroid",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_transneptunian_object_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 8,
+    Color = { 0.56, 0.64, 0.95 },
+    TrailFade = 10
+  },
+  GUI = {
+    Name = "Transneptunian Object Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Any minor or dwarf planets in the solar system that orbit the Sun at a
+      greater average distance than Neptune (semi-major axis of 30.1 AU).]]
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)

@@ -87,6 +87,10 @@
 #include "nvToolsExt.h"
 #endif // OPENSPACE_HAS_NVTOOLS
 
+#ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+#include <float.h>
+#endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+
 #include <launcherwindow.h>
 #include <QApplication>
 
@@ -269,6 +273,15 @@ void checkJoystickStatus() {
             }
         }
     }
+}
+
+bool isGuiWindow(sgct::Window* window) {
+    if (Engine::instance().windows().size() == 1) {
+        // If we only have one window, assume it's also the GUI window.
+        // It might not have been given the 'GUI' tag
+        return true;
+    }
+    return window->hasTag("GUI");
 }
 
 //
@@ -569,7 +582,7 @@ void mainPostDrawFunc() {
 
 
 void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action action,
-                          int)
+                          int, sgct::Window* window)
 {
     ZoneScoped
     LTRACE("main::mainKeyboardCallback(begin)");
@@ -577,7 +590,9 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
     const openspace::Key k = openspace::Key(key);
     const KeyModifier m = KeyModifier(modifiers);
     const KeyAction a = KeyAction(action);
-    global::openSpaceEngine->keyboardCallback(k, m, a);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->keyboardCallback(k, m, a, isGui);
 
     LTRACE("main::mainKeyboardCallback(begin)");
 }
@@ -585,7 +600,7 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
 
 
 void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
-                             sgct::Action action)
+                             sgct::Action action, sgct::Window* window)
 {
     ZoneScoped
     LTRACE("main::mainMouseButtonCallback(begin)");
@@ -593,36 +608,42 @@ void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
     const openspace::MouseButton k = openspace::MouseButton(key);
     const openspace::MouseAction a = openspace::MouseAction(action);
     const openspace::KeyModifier m = openspace::KeyModifier(modifiers);
-    global::openSpaceEngine->mouseButtonCallback(k, a, m);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->mouseButtonCallback(k, a, m, isGui);
 
     LTRACE("main::mainMouseButtonCallback(end)");
 }
 
 
 
-void mainMousePosCallback(double x, double y) {
+void mainMousePosCallback(double x, double y, sgct::Window* window) {
     ZoneScoped
-    global::openSpaceEngine->mousePositionCallback(x, y);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+    global::openSpaceEngine->mousePositionCallback(x, y, isGui);
 }
 
 
 
-void mainMouseScrollCallback(double posX, double posY) {
+void mainMouseScrollCallback(double posX, double posY, sgct::Window* window) {
     ZoneScoped
     LTRACE("main::mainMouseScrollCallback(begin");
 
-    global::openSpaceEngine->mouseScrollWheelCallback(posX, posY);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+    global::openSpaceEngine->mouseScrollWheelCallback(posX, posY, isGui);
 
     LTRACE("main::mainMouseScrollCallback(end)");
 }
 
 
 
-void mainCharCallback(unsigned int codepoint, int modifiers) {
+void mainCharCallback(unsigned int codepoint, int modifiers, sgct::Window* window) {
     ZoneScoped
 
     const KeyModifier m = KeyModifier(modifiers);
-    global::openSpaceEngine->charCallback(codepoint, m);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->charCallback(codepoint, m, isGui);
 }
 
 
@@ -937,6 +958,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setScreenshotFolder = [](std::string path) {
         Settings::instance().setCapturePath(std::move(path));
     };
+    sgctDelegate.showStatistics = [](bool enabled) {
+        Engine::instance().setStatsGraphVisibility(enabled);
+    };
 }
 
 void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
@@ -1036,6 +1060,11 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
 }
 
 int main(int argc, char* argv[]) {
+#ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+    _clearfp();
+    _controlfp(_controlfp(0, 0) & ~(_EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
+#endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32

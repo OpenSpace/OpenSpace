@@ -149,48 +149,58 @@ namespace {
 namespace openspace {
 
 void EventHandler::initialize() {
-    global::callback::character->emplace_back(
-        [this](unsigned int charCode, KeyModifier mod) -> bool {
-            if (_browserInstance) {
+    global::callback::character->emplace(
+        global::callback::character->begin(),
+        [this](unsigned int charCode, KeyModifier mod, IsGuiWindow isGuiWindow) -> bool {
+            if (_browserInstance && isGuiWindow) {
                 return charCallback(charCode, mod);
             }
             return false;
         }
     );
-    global::callback::keyboard->emplace_back(
-        [this](Key key, KeyModifier mod, KeyAction action) -> bool {
-            if (_browserInstance) {
+    global::callback::keyboard->emplace(
+        global::callback::keyboard->begin(),
+        [this](Key key, KeyModifier mod, KeyAction action,
+            IsGuiWindow isGuiWindow) -> bool
+        {
+            if (_browserInstance && isGuiWindow) {
                 return keyboardCallback(key, mod, action);
             }
             return false;
         }
     );
-    global::callback::mousePosition->emplace_back(
-        [this](double x, double y) -> bool {
-            if (_browserInstance) {
+    global::callback::mousePosition->emplace(
+        global::callback::mousePosition->begin(),
+        [this](double x, double y, IsGuiWindow isGuiWindow) -> bool {
+            if (_browserInstance && isGuiWindow) {
                 return mousePositionCallback(x, y);
             }
             return false;
         }
     );
-    global::callback::mouseButton->emplace_back(
-        [this](MouseButton button, MouseAction action, KeyModifier mods) -> bool {
-            if (_browserInstance) {
+    global::callback::mouseButton->emplace(
+        global::callback::mouseButton->begin(),
+        [this](MouseButton button, MouseAction action,
+               KeyModifier mods, IsGuiWindow isGuiWindow) -> bool
+        {
+            if (_browserInstance && isGuiWindow) {
                 return mouseButtonCallback(button, action, mods);
             }
             return false;
         }
     );
-    global::callback::mouseScrollWheel->emplace_back(
-        [this](double x, double y) -> bool {
-            if (_browserInstance) {
+    global::callback::mouseScrollWheel->emplace(
+        global::callback::mouseScrollWheel->begin(),
+        [this](double x, double y, IsGuiWindow isGuiWindow) -> bool {
+            if (_browserInstance && isGuiWindow) {
                 return mouseWheelCallback(glm::ivec2(x, y));
             }
             return false;
         }
     );
 
-    global::callback::touchDetected->emplace_back(
+    global::callback::touchDetected->emplace(
+        global::callback::touchDetected->begin(),
         [&](TouchInput input) -> bool {
             if (!_browserInstance) {
                 return false;
@@ -229,7 +239,8 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchUpdated->emplace_back(
+    global::callback::touchUpdated->emplace(
+        global::callback::touchUpdated->begin(),
         [&](TouchInput input) -> bool {
             if (!_browserInstance || _validTouchStates.empty()) {
                 return false;
@@ -267,7 +278,8 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchExit->emplace_back(
+    global::callback::touchExit->emplace(
+        global::callback::touchExit->begin(),
         [&](TouchInput input) {
             if (!_browserInstance) {
                 return;

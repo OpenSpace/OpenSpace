@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../europa").Europa.Identifier
 local layer = {
   Identifier = "Voyager_Global_Mosaic",
   Name = "Voyager Global Mosaic [Sweden]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("voyager_global_mosaic_sweden.wms"),
   BlendMode = "Color",
 }

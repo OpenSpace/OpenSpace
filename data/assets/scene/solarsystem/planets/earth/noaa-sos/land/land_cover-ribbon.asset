@@ -28,6 +28,7 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "2048.jpg",
   Description = Description
 }
@@ -35,6 +36,7 @@ local layer = {
 local label = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "lcc_ribbon_label.jpg",
   FaceCamera = false,

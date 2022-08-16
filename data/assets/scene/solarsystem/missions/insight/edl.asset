@@ -104,7 +104,7 @@ local TranslationKeyframes = {
       Frame = "IAU_MARS",
       Kernels = iKernels,
       FixedDate = "2018 NOV 26 19:45:34"
-  },
+  }
 }
 
 local RotationKeyframes = {
@@ -770,7 +770,7 @@ local Insight_Trail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "-189",
+      Target = -189,
       Observer = "MARS",
       Frame = "IAU_MARS",
       Kernels = iKernels

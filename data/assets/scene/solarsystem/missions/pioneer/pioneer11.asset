@@ -14,7 +14,7 @@ local kernelsList = {
   kernelsFolder .. "p11_sat336.bsp"
 }
 
-local Pioneer11NAIF = "-24"
+local Pioneer11NAIF = -24
 
 local Pioneer11 = {
   Identifier = "Pioneer_11",

@@ -106,6 +106,10 @@ target_compile_definitions(OpenSpace PRIVATE
   ${SPOUT_DEFINITIONS}
 )
 
+if (OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION)
+  target_compile_definitions(OpenSpace PRIVATE "OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION")
+endif ()
+
 begin_header("Dependency: SGCT")
 
 set(SGCT_TEXT OFF CACHE BOOL "" FORCE)

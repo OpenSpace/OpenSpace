@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../moon").Moon.Identifier
 local layer = {
   Identifier = "WAC_Sweden",
   Name = "WAC [Sweden]",
+  Enabled = asset.enabled,
   Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera (WAC)
     aboard the Lunar Reconnaissance Orbiter (LRO) has allowed the instrument team to
     create a global mosaic comprised of over 15,000 images acquired between November 2009

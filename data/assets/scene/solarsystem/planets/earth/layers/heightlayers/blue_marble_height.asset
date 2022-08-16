@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Name = "Earth Bluemarble Height",
   Identifier = "Earth_Bluemarble_Height",
+  Enabled = asset.enabled,
   FilePath = texturesPath .. "earth_bluemarble_height.jpg",
   Description = "Topographic layer from Blue Marble Next Generation"
 }

@@ -21,6 +21,7 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
@@ -28,6 +29,7 @@ local layer = {
 local legend = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "legend.jpg",
   FaceCamera = false,

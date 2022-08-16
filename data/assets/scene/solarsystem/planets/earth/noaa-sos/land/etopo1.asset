@@ -25,6 +25,7 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
@@ -32,6 +33,7 @@ local layer = {
 local colorbar = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "etopo1_color_scale.png",
   FaceCamera = false,

@@ -1,15 +1,44 @@
-local shared = asset.require("util/tle_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Active",
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Active)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_active",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=active&FORMAT=kvn",
   Filename = "active.txt",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=active&FORMAT=TLE",
-  TrailColor = { 0.45, 0.25, 0.45 },
-  Description = "Satellites that employ active communication"
+  Override = true
+})
+
+local satellites = {
+  Identifier = "active",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "active.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.45, 0.25, 0.45 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Active",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Description = [[Satellites that employ active communication.]]
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
+
 
 
 asset.meta = {

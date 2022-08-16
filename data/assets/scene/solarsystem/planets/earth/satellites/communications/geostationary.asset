@@ -1,22 +1,51 @@
-local shared = asset.require("util/tle_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "Geostationary",
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Geostationary)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_geo",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=geo&FORMAT=kvn",
   Filename = "geo.txt",
-  Url = "https://celestrak.com/NORAD/elements/gp.php?GROUP=geo&FORMAT=TLE",
-  TrailColor = { 0.9, 0.9, 0.0 },
-  Description = [[Satellites that are currently active and in a Geosynchronous orbit, meaning 
-  their orbital period matches Earth's rotation]]
+  Override = true
+})
+
+local satellites = {
+  Identifier = "geo",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "geo.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.9, 0.9, 0.0 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Geostationary",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Description = [[Satellites that are currently active and in a Geosynchronous orbit,
+      meaning their orbital period matches Earth's rotation.]]
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title, group.Filename)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
+
 
 
 asset.meta = {
   Name = "Satellites Communications - Geostationary",
   Version = "1.0",
-  Description = [[Satellites asset for Communications - Geostationary. Data from
+  Description = [[Satellites asset for Communications - Geostationary. Data from 
     Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

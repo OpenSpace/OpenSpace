@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local BENNU_BODY = "2101955"
+local BENNU_BODY = 2101955
 
 local BennuBarycenter = {
   Identifier = "BennuBarycenter",
