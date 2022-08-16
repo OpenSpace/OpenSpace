@@ -83,7 +83,7 @@ local JWSTTrailCruise = {
 
 -- Trail of JWST relative to L2 after first month to reach L2
 -- Gives a better trail history of the orbit around L2 than if it was relative to Earth
--- This does NOT co-rotate withe L2 and gives a saddle look of the trail
+-- This does NOT co-rotate with L2 and gives a saddle look of the trail
 local JWSTTrailOrbit = {
   Identifier = "JWSTTrailOrbit",
   Parent = transforms.L2Position.Identifier,
@@ -203,7 +203,7 @@ asset.meta = {
   Name = "James Webb Space Telescope Trails",
   Version = "1.0",
   Description = [[
-    Trail of James Webb Space Telescope in respect to Earth, L2, and the Sun
+    Trail of James Webb Space Telescope in respect to Earth, L2 and the Sun
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
