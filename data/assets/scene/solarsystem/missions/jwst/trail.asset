@@ -101,7 +101,7 @@ local JWSTTrailOrbit = {
 			Frame = 'GALACTIC',
 			Kernels = { kernels .. "webb.bsp" }
 		},
-    Color = { 0.9, 0.9, 0.0 },
+    Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months
     Resolution = 183 -- About a sample rate of once per day
   },
@@ -133,7 +133,7 @@ local JWSTTrailCoRotOrbit = {
 			Frame = 'L2_COROT',
 			Kernels = { kernels .. "webb.bsp" }
 		},
-    Color = { 0.9, 0.0, 0.9 },
+    Color = { 1.0, 0.663, 0.157 },
     Period = 182.621099, -- About 6 months
     Resolution = 183 -- About a sample rate of once per day
   },

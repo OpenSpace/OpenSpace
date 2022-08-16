@@ -295,6 +295,11 @@
       "value": "false"
     },
     {
+      "name": "Scene.JWSTTrailOrbit.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
       "name": "Scene.JWSTSunTrail.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
