@@ -114,11 +114,11 @@ local JWSTTrailOrbit = {
   }
 }
 
--- Trail of JWST in orbit around L2 that co-rotates with L2 around the Sun
+-- Trail of JWST in orbit around L2 that co-revolves with L2 around the Sun
 -- This gives the trail a look of a wheel going along L2 around the Sun
-local JWSTTrailCoRotOrbit = {
-  Identifier = "JWSTTrailCoRotOrbit",
-  Parent = transforms.L2CoRotFrame.Identifier,
+local JWSTTrailCoRevOrbit = {
+  Identifier = "JWSTTrailCoRevOrbit",
+  Parent = transforms.L2CoRevFrame.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = L2orbitInsertionTime,
@@ -130,7 +130,7 @@ local JWSTTrailCoRotOrbit = {
 			Type = 'SpiceTranslation',
 			Target = 170, -- JWST
 			Observer = 392, -- L2
-			Frame = 'L2_COROT',
+			Frame = 'L2_COREV',
 			Kernels = { kernels .. "webb.bsp" }
 		},
     Color = { 1.0, 0.663, 0.157 },
@@ -138,10 +138,10 @@ local JWSTTrailCoRotOrbit = {
     Resolution = 365 -- About a sample rate of once per day
   },
   GUI = {
-    Name = "JWST L2 Co-rotating Orbit Trail",
+    Name = "JWST L2 Co-revolving Orbit Trail",
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
-      James Webb Space Telescope Orbit Trail that Co-rotates with L2.
+      James Webb Space Telescope Orbit Trail that Co-revolves with L2.
     ]],
   }
 }
@@ -180,13 +180,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTTrailLaunch)
   openspace.addSceneGraphNode(JWSTTrailCruise)
   openspace.addSceneGraphNode(JWSTTrailOrbit)
-  openspace.addSceneGraphNode(JWSTTrailCoRotOrbit)
+  openspace.addSceneGraphNode(JWSTTrailCoRevOrbit)
   openspace.addSceneGraphNode(JWSTSunTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTSunTrail)
-  openspace.removeSceneGraphNode(JWSTTrailCoRotOrbit)
+  openspace.removeSceneGraphNode(JWSTTrailCoRevOrbit)
   openspace.removeSceneGraphNode(JWSTTrailOrbit)
   openspace.removeSceneGraphNode(JWSTTrailCruise)
   openspace.removeSceneGraphNode(JWSTTrailLaunch)
@@ -195,7 +195,7 @@ end)
 asset.export(JWSTTrailLaunch)
 asset.export(JWSTTrailCruise)
 asset.export(JWSTTrailOrbit)
-asset.export(JWSTTrailCoRotOrbit)
+asset.export(JWSTTrailCoRevOrbit)
 asset.export(JWSTSunTrail)
 
 

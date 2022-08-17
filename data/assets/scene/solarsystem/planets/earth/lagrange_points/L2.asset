@@ -34,25 +34,25 @@ local L2Position = {
   }
 }
 
--- This ref. frame co-rotates with L2 and is needed for a more intuitive trail of JWST in
+-- This ref. frame co-revolves with L2 and is needed for a more intuitive trail of JWST in
 -- relation to L2
-local L2CoRotFrame = {
-  Identifier = "L2CoRotFrame",
+local L2CoRevFrame = {
+  Identifier = "L2CoRevFrame",
   Parent = L2Position.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "L2_COROT",
+      SourceFrame = "L2_COREV",
       DestinationFrame = 'GALACTIC',
       Kernels = {
         kernels .. "L2_de431.bsp",
-        kernels .. "L2_corot.tf"
+        kernels .. "L2_corev.tf"
       }
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
   GUI = {
-    Name = "L2 Co-rotating Reference Frame",
+    Name = "L2 Co-revolving Reference Frame",
     Path = "/Solar System/Planets/Earth/Lagrange points",
     Hidden = true
   }
@@ -155,7 +155,7 @@ local L2SunLine = {
 
 local nodes = {
   L2Position,
-  L2CoRotFrame,
+  L2CoRevFrame,
   L2Small,
   L2,
   L2SunLine,

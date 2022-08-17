@@ -78,7 +78,7 @@
       "identifier": "profile.toggle.jwst_trails",
       "is_local": false,
       "name": "Toggle JWST trail",
-      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailCruise.Renderable.Enabled', 'Scene.JWSTTrailCoRotOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
+      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailCruise.Renderable.Enabled', 'Scene.JWSTTrailCoRevOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
     }
   ],
   "additional_scripts": [
