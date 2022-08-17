@@ -127,12 +127,12 @@ local JWSTTrailCoRevOrbit = {
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
-			Type = 'SpiceTranslation',
-			Target = 170, -- JWST
-			Observer = 392, -- L2
-			Frame = 'L2_COREV',
-			Kernels = { kernels .. "webb.bsp" }
-		},
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 392, -- L2
+      Frame = 'L2_COREV',
+      Kernels = { kernels .. "webb.bsp" }
+    },
     Color = { 1.0, 0.663, 0.157 },
     Period = 365.242198, -- About a year, 2 orbits. 1 orbit would be 182.621099 (6 months)
     Resolution = 365 -- About a sample rate of once per day
