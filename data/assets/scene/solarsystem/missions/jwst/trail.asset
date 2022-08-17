@@ -134,8 +134,8 @@ local JWSTTrailCoRotOrbit = {
 			Kernels = { kernels .. "webb.bsp" }
 		},
     Color = { 1.0, 0.663, 0.157 },
-    Period = 182.621099, -- About 6 months
-    Resolution = 183 -- About a sample rate of once per day
+    Period = 365.242198, -- About a year, 2 orbits. 1 orbit would be 182.621099 (6 months)
+    Resolution = 365 -- About a sample rate of once per day
   },
   GUI = {
     Name = "JWST L2 Co-rotating Orbit Trail",

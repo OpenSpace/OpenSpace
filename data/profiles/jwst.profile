@@ -73,12 +73,12 @@
       "script": "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled') for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Enabled', true)"
     },
     {
-      "documentation": "Toggle JWST launch, cruise and orbit trails, not the Sun trail",
+      "documentation": "Toggle JWST launch, cruise and L2 co-revolving orbit trails, not the Sun trail",
       "gui_path": "/JWST",
       "identifier": "profile.toggle.jwst_trails",
       "is_local": false,
       "name": "Toggle JWST trail",
-      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailCruise.Renderable.Enabled', 'Scene.JWSTTrailOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
+      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailCruise.Renderable.Enabled', 'Scene.JWSTTrailCoRotOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
     }
   ],
   "additional_scripts": [
