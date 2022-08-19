@@ -29,9 +29,7 @@ in vec2 pos;
 uniform float uStrokeWidth;
 uniform float uFragDepth;
 uniform vec4 uStrokeColor;
-uniform vec4 uFillColor;
 uniform sampler2D uColorTex;
-uniform ivec2 uScreenSize;
 
 void main() {
   float len = length(pos) * 2.0;
@@ -43,7 +41,7 @@ void main() {
     gl_FragDepth = uFragDepth;
 
     if (len < 1.0 - uStrokeWidth)
-      color = texture(uColorTex, gl_FragCoord.xy / uScreenSize);
+      color = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
     else
       color = uStrokeColor;
   }
@@ -109,10 +107,7 @@ void billboardDraw(glm::mat4 const& transform, GLuint colorTex, glm::vec4 const&
   glUniformMatrix4fv(glGetUniformLocation(prog, "uTransform"), 1, false, glm::value_ptr(transform));
   glUniform1f(glGetUniformLocation(prog, "uStrokeWidth"), width);
   glUniform1f(glGetUniformLocation(prog, "uFragDepth"), depth);
-  // glUniform4fv(glGetUniformLocation(prog, "uFillColor"), 1, glm::value_ptr(fill));
   glUniform4fv(glGetUniformLocation(prog, "uStrokeColor"), 1, glm::value_ptr(stroke));
-  glm::ivec2 size = openspace::global::windowDelegate->currentWindowSize();
-  glUniform2iv(glGetUniformLocation(prog, "uScreenSize"), 1, glm::value_ptr(size));
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glBindVertexArray(0);
   glUseProgram(0);

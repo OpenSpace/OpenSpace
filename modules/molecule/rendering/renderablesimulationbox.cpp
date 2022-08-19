@@ -741,8 +741,8 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         return;
 
     // because the molecule is small, a scaling of the view matrix causes the molecule
-    // to be moved out of view in clip space. Reset the scaling for the molecule
-    // is fine for now.
+    // to be moved out of view in clip space. Resetting the scaling for the molecule
+    // is fine for now. This will have an impact on stereoscopic depth though.
     Camera camCopy = data.camera;
     camCopy.setScaling(1.f);
 
@@ -762,9 +762,9 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     std::vector<md_gl_draw_op_t> drawOps;
     for (molecule_data_t& mol : _molecules) {
         if (mol.concatMolecule.atom.count) {
-            mat4 modelMatrix =
-                I;
-
+            // the modelMatrix was put in the viewMatrix to perform multiplication in
+            // double precision (dmat4).
+            mat4 modelMatrix(1.f);
             md_gl_draw_op_t drawOp = {};
             drawOp.model_matrix = value_ptr(modelMatrix);
             drawOp.rep = &mol.drawRep;
@@ -798,6 +798,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // resize the fbo if needed
         if (global::windowDelegate->windowHasResized()) {
@@ -875,11 +876,10 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         }
 
         glDrawBuffer(GL_FRONT_AND_BACK);
-
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     }
 
-    { // draw billboard pre-rendered with molecule inside 
+    { // draw billboard pre-rendered with molecule inside
         dmat4 billboardModel = 
             camCopy.combinedViewMatrix() *
             translate(I, data.modelTransform.translation) *
