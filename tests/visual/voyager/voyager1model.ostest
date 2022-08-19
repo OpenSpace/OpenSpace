@@ -8,7 +8,7 @@
     { "type": "action", 
       "value": "os.fade_down_trails"}, 
     { "type": "script", 
-      "value": "openspace.setPropertyValue('Scene.Voyager_*_Trail_*.Enabled',false);"}, 
+      "value": "openspace.setPropertyValue('Scene.Voyager_1_Trail_*.Enabled',false);"},
     { "type": "wait", 
       "value": "2"}, 
     { "type": "screenshot", 
