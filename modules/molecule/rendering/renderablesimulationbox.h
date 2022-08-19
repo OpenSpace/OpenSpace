@@ -111,6 +111,9 @@ private:
     properties::DVec3Property _simulationBox;
     properties::FloatProperty _collisionRadius;
     properties::StringProperty _viamdFilter;
+    properties::BoolProperty _ssaoEnabled;
+    properties::FloatProperty _ssaoIntensity;
+    properties::FloatProperty _ssaoRadius;
 };
 
 } // namespace openspace

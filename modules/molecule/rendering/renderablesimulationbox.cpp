@@ -228,6 +228,24 @@ namespace {
         "VIA-MD script filter for atom visibility"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
+        "SSAOEnabled",
+        "Enable SSAO",
+        "Enable SSAO"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SSAOIntensityInfo = {
+        "SSAOIntensity",
+        "SSAO Intensity",
+        "SSAO Intensity"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SSAORadiusInfo = {
+        "SSAORadius",
+        "SSAO Radius",
+        "SSAO Radius"
+    };
+
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         // [[codegen::verbatim(MoleculeFilesInfo.description)]]
         std::vector<std::string> moleculeFiles;
@@ -286,6 +304,15 @@ namespace {
 
         // [[codegen::verbatim(ViamdFilterInfo.description)]]
         std::optional<std::string> viamdFilter;
+        
+        // [[codegen::verbatim(SSAOEnabledInfo.description)]]
+        std::optional<bool> ssaoEnabled;
+        
+        // [[codegen::verbatim(SSAOIntensityInfo.description)]]
+        std::optional<float> ssaoIntensity;
+        
+        // [[codegen::verbatim(SSAORadiusInfo.description)]]
+        std::optional<float> ssaoRadius;
     };
 
 #include "renderablesimulationbox_codegen.cpp"
@@ -318,7 +345,10 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _angularVelocity(AngularVelocityInfo),
     _simulationBox(SimulationBoxInfo),
     _collisionRadius(CollisionRadiusInfo),
-    _viamdFilter(ViamdFilterInfo)
+    _viamdFilter(ViamdFilterInfo),
+    _ssaoEnabled(SSAOEnabledInfo),
+    _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f),
+    _ssaoRadius(SSAORadiusInfo, 12.f, 0.f, 100.f)
 {
     _repType.addOptions({
         { static_cast<int>(RepresentationType::SpaceFill), "Space Fill" },
@@ -341,12 +371,19 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 
     _moleculeFiles = p.moleculeFiles;
     _trajectoryFiles = p.trajectoryFiles;
+    _repScale = p.repScale.value_or(1.f);
+    _animationSpeed = p.animationSpeed.value_or(1.f);
     _simulationSpeed = p.simulationSpeed.value_or(1.f);
     _moleculeCounts = p.moleculeCounts;
     _linearVelocity = p.linearVelocity;
     _angularVelocity = p.angularVelocity;
     _simulationBox = p.simulationBox;
     _collisionRadius = p.collisionRadius;
+    _viamdFilter = p.viamdFilter.value_or("");
+    _ssaoEnabled = p.ssaoEnabled.value_or(true);
+    _ssaoIntensity = p.ssaoIntensity.value_or(12.f);
+    _ssaoRadius = p.ssaoRadius.value_or(12.f);
+
 
     if (p.repType.has_value()) {
         _repType = static_cast<int>(codegen::map<RepresentationType>(*p.repType));
@@ -359,9 +396,6 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     } else {
         _coloring = static_cast<int>(Coloring::Cpk);
     }
-    
-    _repScale = p.repScale.value_or(1.f);
-    _animationSpeed = p.animationSpeed.value_or(1.f);
     
     for (int count : _moleculeCounts.value()) {
         molecule_data_t mol {
@@ -379,11 +413,12 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         
         for (int i = 0; i < count; i++) {
             molecule_state_t demoMolecule {
-                _simulationBox.value() / 2.0,  // position
-                // linearRand(dvec3(0.0), _simulationBox.value()),  // position
-                0.0,                                             // angle
-                sphericalRand(_linearVelocity.value()),          // direction
-                sphericalRand(_angularVelocity.value()),         // rotation
+                i == 0 ?
+                    _simulationBox.value() / 2.0 :
+                    linearRand(dvec3(0.0), _simulationBox.value()), // position
+                0.0,                                                // angle
+                sphericalRand(_linearVelocity.value()),             // direction
+                sphericalRand(_angularVelocity.value()),            // rotation
             };
             mol.states.push_back(demoMolecule);
         }
@@ -391,16 +426,18 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         _molecules.push_back(mol);
     }
     
-    _repScale.onChange([this] () {
+    auto onUpdateRepr = [this]() {
         for (molecule_data_t& mol: _molecules) {
             if (mol.moleculeApi) {
                 updateRepresentation(mol);
             }
         }
-    });
-
-    _viamdFilter = p.viamdFilter.value_or("");
+    };
     
+    _repType.onChange(onUpdateRepr);
+    _coloring.onChange(onUpdateRepr);
+    _repScale.onChange(onUpdateRepr);
+
     _viamdFilter.onChange([this] () {
         for (molecule_data_t& mol: _molecules) {
             if (mol.moleculeApi) {
@@ -416,6 +453,9 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_simulationBox);
     addProperty(_simulationSpeed);
     addProperty(_viamdFilter);
+    addProperty(_ssaoEnabled);
+    addProperty(_ssaoIntensity);
+    addProperty(_ssaoRadius);
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {
@@ -804,9 +844,9 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         { // postprocessing
             postprocessing::Descriptor desc;
             desc.background.intensity = {{ 0, 0, 0 }};
-            desc.ambient_occlusion.enabled = true;
-            desc.ambient_occlusion.intensity = 12.f;
-            desc.ambient_occlusion.radius = 12.f;
+            desc.ambient_occlusion.enabled = _ssaoEnabled;
+            desc.ambient_occlusion.intensity = _ssaoIntensity;
+            desc.ambient_occlusion.radius = _ssaoRadius;
             desc.bloom.enabled = false;
             desc.depth_of_field.enabled = false;
             desc.temporal_reprojection.enabled = false;
@@ -845,7 +885,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             scale(I, dvec3(_simulationBox)) *
-            scale(I, dvec3(3.0)) * // billboard circle radius (wrt. simbox)
+            scale(I, dvec3(0.5)) * // billboard circle radius (wrt. simbox)
             scale(I, dvec3(fakeScaling)) *
             I;
         mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
@@ -896,11 +936,10 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::stri
     md_gl_representation_init(&mol.drawRep, &mol.drawMol);
     updateRepresentation(mol);
 
-    // conetracing
     vec3_t min, max;
     compute_aabb(&min, &max, mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z, mol.concatMolecule.atom.count);
-    std::cout << min[0] << " " << min[1] << " " << min[2] << std::endl;
-    std::cout << max[0] << " " << max[1] << " " << max[2] << std::endl;
+
+    // conetracing
     cone_trace::init_occlusion_volume(&mol.occupancyVolume, min, max, 8.0f);
 
     // vec3 box = _simulationBox.value();
