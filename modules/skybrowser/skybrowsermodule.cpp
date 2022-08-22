@@ -250,10 +250,6 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Register ScreenSpaceSkyTarget
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
-
-    // Create data handler dynamically to avoid the linking error that
-    // came up when including the include file in the module header file
-    //_dataHandler = std::make_unique<WwtDataHandler>();
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,

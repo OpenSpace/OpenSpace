@@ -78,7 +78,7 @@ public:
     void setCallbackDimensions(const std::function<void(const glm::dvec2&)>& function);
 
 protected:
-    properties::Vec2Property _browserDimension;
+    properties::Vec2Property _browserDimensions;
     properties::StringProperty _url;
     properties::TriggerProperty _reload;
 

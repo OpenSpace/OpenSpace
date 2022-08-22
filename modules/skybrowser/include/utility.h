@@ -33,7 +33,7 @@ namespace openspace::skybrowser {
 
 // Constants
 constexpr double ScreenSpaceZ = -2.1;
-constexpr double CelestialSphereRadius = 4 * distanceconstants::Parsec;
+constexpr double CelestialSphereRadius = 4.0 * distanceconstants::Parsec;
 
 /**
  * Converts from Cartesian coordinates to spherical coordinates with unit length.

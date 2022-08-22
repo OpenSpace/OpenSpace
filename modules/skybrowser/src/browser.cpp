@@ -76,7 +76,7 @@ void Browser::RenderHandler::setTexture(GLuint t) {
 }
 
 Browser::Browser(const ghoul::Dictionary& dictionary)
-    : _browserDimension(
+    : _browserDimensions(
         DimensionsInfo,
         global::windowDelegate->currentSubwindowSize(),
         glm::vec2(10.f),
@@ -90,7 +90,7 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     _url = p.url.value_or(_url);
     _url.onChange([this]() { _isUrlDirty = true; });
     
-    _browserDimension.onChange([this]() { _isDimensionsDirty = true; });
+    _browserDimensions.onChange([this]() { _isDimensionsDirty = true; });
     _reload.onChange([this]() { _shouldReload = true; });
 
     // Create browser and render handler
@@ -111,7 +111,7 @@ Browser::~Browser() {}
 
 void Browser::initializeGL() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(glm::ivec2(_browserDimension.value()), 1),
+        glm::uvec3(glm::ivec2(_browserDimensions.value()), 1),
         GL_TEXTURE_2D
     );
 
@@ -153,7 +153,7 @@ void Browser::update() {
     }
 
     if (_isDimensionsDirty) {
-        glm::vec2 dim = _browserDimension;
+        glm::vec2 dim = _browserDimensions;
         if (dim.x > 0 && dim.y > 0) {
             _browserInstance->reshape(dim);
             _isDimensionsDirty = false;
@@ -171,12 +171,12 @@ bool Browser::isReady() const {
 }
 
 glm::vec2 Browser::browserPixelDimensions() const {
-    return _browserDimension;
+    return _browserDimensions;
 }
 
 // Updates the browser size to match the size of the texture
 void Browser::updateBrowserSize() {
-    _browserDimension = _texture->dimensions();
+    _browserDimensions = _texture->dimensions();
 }
 
 float Browser::browserRatio() const {
@@ -185,8 +185,8 @@ float Browser::browserRatio() const {
 }
 
 void Browser::setCallbackDimensions(const std::function<void(const glm::dvec2&)>& func) {
-    _browserDimension.onChange([&]() {
-        func(_browserDimension.value());
+    _browserDimensions.onChange([&]() {
+        func(_browserDimensions.value());
     });
 }
 
