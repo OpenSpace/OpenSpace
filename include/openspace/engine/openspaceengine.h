@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
@@ -92,11 +93,14 @@ public:
     void drawOverlays();
     void postDraw();
     void resetPropertyChangeFlags();
-    void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
-    void charCallback(unsigned int codepoint, KeyModifier modifier);
-    void mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
-    void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double posX, double posY);
+    void keyboardCallback(Key key, KeyModifier mod, KeyAction action,
+        IsGuiWindow isGuiWindow);
+    void charCallback(unsigned int codepoint, KeyModifier modifier,
+        IsGuiWindow isGuiWindow);
+    void mouseButtonCallback(MouseButton button, MouseAction action,
+        KeyModifier mods, IsGuiWindow isGuiWindow);
+    void mousePositionCallback(double x, double y, IsGuiWindow isGuiWindow);
+    void mouseScrollWheelCallback(double posX, double posY, IsGuiWindow isGuiWindow);
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);

@@ -236,7 +236,9 @@ void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCo
 void ScreenSpaceSkyBrowser::removeDisplayCopy() {
     if (!_displayCopies.empty()) {
         removeProperty(_displayCopies.back().get());
+        removeProperty(_showDisplayCopies.back().get());
         _displayCopies.pop_back();
+        _showDisplayCopies.pop_back();
     }
 }
 

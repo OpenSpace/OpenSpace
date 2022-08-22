@@ -153,30 +153,49 @@ ImGUIModule::ImGUIModule()
     });
 
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier mod, KeyAction action) -> bool {
+        [&](Key key, KeyModifier mod, KeyAction action,
+            IsGuiWindow isGuiWindow) -> bool
+        {
             ZoneScopedN("ImGUI")
 
-            return _isEnabled ? keyCallback(key, mod, action) : false;
+            if (!isGuiWindow || !_isEnabled) {
+                return false;
+            }
+            return keyCallback(key, mod, action);
         }
     );
 
     global::callback::character->emplace_back(
-        [&](unsigned int codepoint, KeyModifier modifier) -> bool {
+        [&](unsigned int codepoint, KeyModifier modifier,
+            IsGuiWindow isGuiWindow) -> bool
+        {
             ZoneScopedN("ImGUI")
 
-            return _isEnabled ? charCallback(codepoint, modifier) : false;
+            if (!isGuiWindow || !_isEnabled) {
+                return false;
+            }
+            return charCallback(codepoint, modifier);
         }
     );
 
     global::callback::mousePosition->emplace_back(
-        [&](double x, double y) {
+        [&](double x, double y, IsGuiWindow isGuiWindow) {
+            if (!isGuiWindow) {
+                return; // do nothing
+            }
             _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
         }
     );
 
     global::callback::mouseButton->emplace_back(
-        [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
+        [&](MouseButton button, MouseAction action, KeyModifier,
+            IsGuiWindow isGuiWindow) -> bool
+        {
             ZoneScopedN("ImGUI")
+
+            if (!isGuiWindow) {
+                return false;
+            }
 
             if (action == MouseAction::Press) {
                 _mouseButtons |= (1 << static_cast<int>(button));
@@ -190,10 +209,13 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseScrollWheel->emplace_back(
-        [&](double, double posY) -> bool {
+        [&](double, double posY, IsGuiWindow isGuiWindow) -> bool {
             ZoneScopedN("ImGUI")
 
-            return _isEnabled ? mouseWheelCallback(posY) : false;
+            if (!isGuiWindow || !_isEnabled) {
+                return false;
+            }
+            return mouseWheelCallback(posY);
         }
     );
 
@@ -225,7 +247,7 @@ void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
             const std::vector<SceneGraphNode*>& nodes = scene ?
                 scene->allSceneGraphNodes() :
                 std::vector<SceneGraphNode*>();
-            
+
             return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
         }
     );
@@ -412,7 +434,7 @@ void ImGUIModule::internalInitializeGL() {
         sizeof(ImDrawVert),
         nullptr
     );
-    
+
     glEnableVertexAttribArray(uvAttrib);
     glVertexAttribPointer(
         uvAttrib,
@@ -422,7 +444,7 @@ void ImGUIModule::internalInitializeGL() {
         sizeof(ImDrawVert),
         reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
     );
-    
+
     glEnableVertexAttribArray(colorAttrib);
     glVertexAttribPointer(
         colorAttrib,
