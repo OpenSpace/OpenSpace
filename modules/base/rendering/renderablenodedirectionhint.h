@@ -76,7 +76,9 @@ private:
     properties::StringProperty _end;
     properties::Vec3Property _color;
     properties::FloatProperty _offsetDistance;
+    properties::BoolProperty _useRelativeOffset;
     properties::FloatProperty _length;
+    properties::BoolProperty _useRelativeLength;
     properties::FloatProperty _lineWidth;
 };
 

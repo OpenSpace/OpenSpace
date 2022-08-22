@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
@@ -39,6 +40,8 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableNodeDirectionHint";
+
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start Node",
@@ -60,21 +63,40 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetDistanceInfo = {
-        "OffsetDistance",
+        "Offset",
         "Offset Distance",
-        "in meter from center" // TODO
+        "The distance from the center of the start node where the arrow starts. "
+        "If 'UseRelativeOffset' is true, the value should be given as a factor to "
+        "multiply with the boudning sphere of the node. Otherwise, the value is "
+        "specified in meters"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RelativeOffsetInfo = {
+        "UseRelativeOffset",
+        "Use Relative Offset Distance",
+        "Decide whether to use relative distances (in units of start node bounding "
+        "sphere) for the offset distance. If false, meters is used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
-        "in meter" // TODO
+        "The length of the arrow, given either in meters or as a factor to be "
+        "multiplied with the bounding sphere of the start node (if "
+        "'UseRelativeLength' is true)"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RelativeLengthInfo = {
+        "UseRelativeLength",
+        "Use Relative Length",
+        "Decide whether to use relative size (in units of start node bounding "
+        "sphere) for the length of the arrow. If false, meters is used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width"
+        "This value specifies the line width of the arrow shape"
     };
 
     // Returns a position that is relative to the current anchor node. This is a method to
@@ -104,10 +126,16 @@ namespace {
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(OffsetDistanceInfo.description)]]
-        std::optional<float> offsetDistance;
+        std::optional<float> offset;
+
+        // [[codegen::verbatim(RelativeOffsetInfo.description)]]
+        std::optional<bool> useRelativeOffset;
 
         // [[codegen::verbatim(LengthInfo.description)]]
         std::optional<float> length;
+
+        // [[codegen::verbatim(RelativeLengthInfo.description)]]
+        std::optional<bool> useRelativeLength;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -126,8 +154,10 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     , _start(StartNodeInfo, "Root")
     , _end(EndNodeInfo, "Root")
     , _color(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _offsetDistance(OffsetDistanceInfo, 0.f, 0.f, 1e11f) // TODO: what are resonable values?
-    , _length(LengthInfo, 100.f, 0.f, 1e11f) // TODO: what are resonable values?
+    , _offsetDistance(OffsetDistanceInfo, 0.f, 0.f, 1e11f)
+    , _useRelativeOffset(RelativeOffsetInfo, false)
+    , _length(LengthInfo, 100.f, 0.f, 1e11f)
+    , _useRelativeLength(RelativeLengthInfo, false)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -142,21 +172,84 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    _offsetDistance = p.offsetDistance.value_or(_offsetDistance);
-    _offsetDistance.setExponent(10.f);
-    addProperty(_offsetDistance);
-
-    _length = p.length.value_or(_length);
-    _length.setExponent(10.f);
-    addProperty(_length);
+    addProperty(_opacity);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    // TODO: checkbox property to say that we want the sizes in
-    // units relative to start node bounding sphere
+    _useRelativeOffset.onChange([this]() {
+        SceneGraphNode* startNode = sceneGraphNode(_start);
+        if (!startNode) {
+            LERROR(fmt::format("Could not find start node '{}'", _start.value()));
+            return;
+        }
+        const double boundingSphere = startNode->boundingSphere();
 
-    addProperty(_opacity);
+        if (!_useRelativeOffset) {
+            // Recompute distance (previous value was relative)
+            _offsetDistance = _offsetDistance * startNode->boundingSphere();
+            _offsetDistance.setExponent(10.f);
+            _offsetDistance.setMaxValue(1e11f);
+        }
+        else {
+            // Recompute distance (previous value was in meters)
+            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
+                LERROR(fmt::format(
+                    "Start node '{}' has invalid bounding sphere", _start.value()
+                ));
+                return;
+            }
+            _offsetDistance = _offsetDistance / startNode->boundingSphere();
+            _offsetDistance.setExponent(3.f);
+            _offsetDistance.setMaxValue(1000.f);
+        }
+    });
+    // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
+
+    _useRelativeOffset = p.useRelativeOffset.value_or(_useRelativeOffset);
+    addProperty(_useRelativeOffset);
+
+    _offsetDistance = p.offset.value_or(_offsetDistance);
+    addProperty(_offsetDistance);
+
+    _useRelativeLength.onChange([this]() {
+        SceneGraphNode* startNode = sceneGraphNode(_start);
+        if (!startNode) {
+            LERROR(fmt::format("Could not find start node '{}'", _start.value()));
+            return;
+        }
+        const double boundingSphere = startNode->boundingSphere();
+
+        if (!_useRelativeLength) {
+            // Recompute distance (previous value was relative)
+            _length = _length * startNode->boundingSphere();
+            _length.setExponent(10.f);
+            _length.setMaxValue(1e11f);
+        }
+        else {
+            // Recompute distance (previous value was in meters)
+            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
+                LERROR(fmt::format(
+                    "Start node '{}' has invalid bounding sphere", _start.value()
+                ));
+                return;
+            }
+            _length = _length / startNode->boundingSphere();
+            _length.setExponent(3.f);
+            _length.setMaxValue(1000.f);
+        }
+    });
+    // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
+
+    _useRelativeLength = p.useRelativeLength.value_or(_useRelativeLength);
+    addProperty(_useRelativeLength);
+
+    _length = p.length.value_or(_length);
+    addProperty(_length);
+
+    if (!_useRelativeLength) {
+        _length.setExponent(10.f);
+    }
 }
 
 std::string RenderableNodeDirectionHint::start() const {
@@ -224,31 +317,49 @@ void RenderableNodeDirectionHint::bindGL() {
 }
 
 void RenderableNodeDirectionHint::updateVertexData() {
-    SceneGraphNode* startNode = global::renderEngine->scene()->sceneGraphNode(_start);
-    SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);
+    SceneGraphNode* startNode = sceneGraphNode(_start);
+    SceneGraphNode* endNode = sceneGraphNode(_end);
 
-    if (!startNode || !endNode) {
-        LERRORC(
-            "RenderableNodeDirectionHint",
-            fmt::format(
-                "Could not find starting '{}' or ending '{}'",
-                _start.value(), _end.value()
-            )
-        );
+    if (!startNode) {
+        LERROR(fmt::format("Could not find start node '{}'", _start.value()));
+        return;
+    }
 
+    if (!endNode) {
+        LERROR(fmt::format("Could not find end node '{}'", _end.value()));
         return;
     }
 
     _vertexArray.clear();
+
+    const double boundingSphere = startNode->boundingSphere();
+    bool hasNoBoundingSphere = boundingSphere < std::numeric_limits<double>::epsilon();
+
+    if (hasNoBoundingSphere && (_useRelativeLength || _useRelativeOffset)) {
+        LERROR(fmt::format(
+            "Node '{}' has no valid bounding sphere. Can not use relative values", 
+            _end.value()
+        ));
+        return;
+    }
+
+    double offset = static_cast<double>(_offsetDistance);
+    if (_useRelativeOffset) {
+        offset *= boundingSphere;
+    }
+
+    double length = static_cast<double>(_length);
+    if (_useRelativeLength) {
+        length *= boundingSphere;
+    }
 
     // Update the position based on the arrowDirection of the nodes
     const glm::dvec3 startNodePos = coordinatePosFromAnchorNode(startNode->worldPosition());
     const glm::dvec3 endNodePos = coordinatePosFromAnchorNode(endNode->worldPosition());
 
     const glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
-    const glm::dvec3 startPos =
-        startNodePos + static_cast<double>(_offsetDistance) * arrowDirection;
-    const glm::dvec3 endPos = startPos + static_cast<double>(_length) * arrowDirection;
+    const glm::dvec3 startPos = startNodePos + offset * arrowDirection;
+    const glm::dvec3 endPos = startPos + length * arrowDirection;
 
     _vertexArray.push_back(static_cast<float>(startPos.x));
     _vertexArray.push_back(static_cast<float>(startPos.y));
@@ -262,15 +373,14 @@ void RenderableNodeDirectionHint::updateVertexData() {
 
     // Angle and vector lengths
     const float arrowAngle = 45.f; // degrees
-    double adjacent = (0.1f * static_cast<double>(_length));
+    double adjacent = (0.1f * length);
     double hypotenuse = adjacent / std::cos(glm::radians(arrowAngle));
     double opposite = glm::sqrt(hypotenuse * hypotenuse - adjacent * adjacent);
 
     // TODO: should probably compute arrow head size in view space size instead of physical..
     // TODO: Make editable propeies to control arrow size
 
-    const glm::dvec3 arrowHeadStartPos =
-        startPos + (static_cast<double>(_length) - adjacent) * arrowDirection;
+    const glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
 
     const Camera* camera = global::renderEngine->scene()->camera();
     const glm::dvec3 cameraPos = coordinatePosFromAnchorNode(camera->positionVec3());
