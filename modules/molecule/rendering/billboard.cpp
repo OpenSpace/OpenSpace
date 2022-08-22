@@ -102,6 +102,7 @@ void billboardGlDeinit() {
 void billboardDraw(glm::mat4 const& transform, GLuint colorTex, glm::vec4 const& stroke, float width, float depth) {
   glUseProgram(prog);
   glBindVertexArray(vao);
+  glDisable(GL_CULL_FACE);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, colorTex);
   glUniformMatrix4fv(glGetUniformLocation(prog, "uTransform"), 1, false, glm::value_ptr(transform));
@@ -109,6 +110,7 @@ void billboardDraw(glm::mat4 const& transform, GLuint colorTex, glm::vec4 const&
   glUniform1f(glGetUniformLocation(prog, "uFragDepth"), depth);
   glUniform4fv(glGetUniformLocation(prog, "uStrokeColor"), 1, glm::value_ptr(stroke));
   glDrawArrays(GL_TRIANGLES, 0, 6);
+  glEnable(GL_CULL_FACE);
   glBindVertexArray(0);
   glUseProgram(0);
 }

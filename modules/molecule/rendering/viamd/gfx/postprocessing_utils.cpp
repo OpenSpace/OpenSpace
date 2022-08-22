@@ -1735,7 +1735,7 @@ void postprocess(const Descriptor& desc, const ViewParam& view_param) {
         initialize(width, height);
     }
 
-    //glViewport(0, 0, gl.tex_width, gl.tex_height);
+    // glViewport(0, 0, gl.tex_width, gl.tex_height);
     glViewport(0, 0, width, height);
     glBindVertexArray(gl.vao);
 
