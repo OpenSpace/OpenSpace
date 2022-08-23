@@ -38,7 +38,7 @@ This repository contains the source code and example profiles for OpenSpace, but
 
 Requirements for compiling are:
  - CMake version 3.10 or above
- - C++ compiler supporting C++17 (MSVC 16.10, GCC9, Clang10)
+ - C++ compiler supporting C++20 (MSVC 19.31, GCC11, Clang14, AppleClang 13.1.6)
  - [Boost](http://www.boost.org/)
  - [Qt](http://www.qt.io/download)
 
