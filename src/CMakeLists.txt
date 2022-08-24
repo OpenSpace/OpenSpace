@@ -453,12 +453,15 @@ target_precompile_headers(openspace-core PRIVATE
   [["ghoul/misc/exception.h"]]
   [["ghoul/misc/invariants.h"]]
   [["ghoul/misc/profiling.h"]]
+  [["ghoul/opengl/ghoul_gl.h"]]
   <algorithm>
   <array>
+  <filesystem>
   <map>
   <memory>
   <string>
   <utility>
+  <variant>
   <vector>
 )
 

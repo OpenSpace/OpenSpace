@@ -82,6 +82,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
@@ -93,6 +94,10 @@
 #include <future>
 #include <numeric>
 #include <sstream>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 #ifdef __APPLE__
 #include <openspace/interaction/touchbar.h>

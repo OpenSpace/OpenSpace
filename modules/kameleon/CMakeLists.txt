@@ -71,6 +71,10 @@ if (TARGET cdf)
   set_folder_location(cdf "External")
 endif ()
 
+target_precompile_headers(ccmc PRIVATE
+  "$<$<COMPILE_LANGUAGE:CXX>:iostream>"
+)
+
 if (WIN32)
   target_compile_options(ccmc PRIVATE /MP)
   if (TARGET cdf)

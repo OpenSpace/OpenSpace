@@ -25,6 +25,7 @@
 #include <openspace/util/planegeometry.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 
 namespace openspace {
