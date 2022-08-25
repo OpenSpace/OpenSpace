@@ -116,7 +116,7 @@ namespace {
     }
 
     // @TODO (emmbr) put in some helper file?
-    // Generate vertices around the unit circle in a plane 
+    // Generate vertices around a circle with the given radius, in a plane 
     // with with the given center point and normal
     std::vector<glm::vec3> circleVertices(unsigned int count, float radius,
                                           glm::vec3 center, glm::vec3 normal)
@@ -428,27 +428,42 @@ void RenderableNodeDirectionHint::updateVertexData() {
     const glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
     const glm::dvec3 startPos = startNodePos + offset * arrowDirection;
     const glm::dvec3 endPos = startPos + length * arrowDirection;
-    const glm::dvec3 startToEnd = endPos - startPos;
+
+    // TODO: make properties
+    const float arrowAngle = 35.f; // degrees 
+    const float arrowHeadWidthFactor = 2.0;
+    unsigned int nSegments = 10;
+
+    double opposite = arrowHeadWidthFactor * _width;
+    double hypotenuse = opposite / std::sin(glm::radians(arrowAngle));
+    double adjacent = glm::sqrt(hypotenuse * hypotenuse - opposite * opposite);
+    const glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
 
     _vertexArray.clear();
     _indexArray.clear();
 
     // Get unit circle vertices on the XY-plane
-    unsigned int nSegments = 10;
-    std::vector<glm::vec3> bottomVertices = circleVertices(
+    const std::vector<glm::vec3> bottomVertices = circleVertices(
         nSegments,
         _width,
         startPos,
-        glm::normalize(startToEnd)
+        arrowDirection
     );
 
-    std::vector<glm::vec3> topVertices = circleVertices(
+    const std::vector<glm::vec3> topVertices = circleVertices(
         nSegments,
         _width,
-        endPos,
-        glm::normalize(startToEnd)
+        arrowHeadStartPos,
+        arrowDirection
     );
-    
+
+    const std::vector<glm::vec3> arrowHeadVertices = circleVertices(
+        nSegments,
+        _width * 2.0,
+        arrowHeadStartPos,
+        arrowDirection
+    );
+
     // Center bot vertex
     _vertexArray.push_back(static_cast<float>(startPos.x));
     _vertexArray.push_back(static_cast<float>(startPos.y));
@@ -461,6 +476,10 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _vertexArray.push_back(v.z);
     }
 
+    auto botRingIndex = [](unsigned int i) {
+        return i + 1;
+    };
+
     // Then all top vertices
     for (const glm::vec3& v : topVertices) {
         _vertexArray.push_back(v.x);
@@ -468,20 +487,28 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _vertexArray.push_back(v.z);
     }
 
-    // Center top vertex
-    _vertexArray.push_back(static_cast<float>(endPos.x));
-    _vertexArray.push_back(static_cast<float>(endPos.y));
-    _vertexArray.push_back(static_cast<float>(endPos.z));
-
-    auto botRingIndex = [](unsigned int i) {
-        return i + 1;
-    };
-
     auto topRingIndex = [&nSegments](unsigned int i) {
         return 1 + nSegments + i;
     };
 
+    // Then all arrow head bottom vertices
+    for (const glm::vec3& v : arrowHeadVertices) {
+        _vertexArray.push_back(v.x);
+        _vertexArray.push_back(v.y);
+        _vertexArray.push_back(v.z);
+    }
+
+    auto arrowHeadRingIndex = [&nSegments](unsigned int i) {
+        return 1 + 2 * nSegments + i;
+    };
+
+    // Center top vertex (arrow head point)
+    _vertexArray.push_back(static_cast<float>(endPos.x));
+    _vertexArray.push_back(static_cast<float>(endPos.y));
+    _vertexArray.push_back(static_cast<float>(endPos.z));
+
     unsigned int botCenterIndex = 0;
+    unsigned int topCenterIndex = _vertexArray.size() / 3 - 1;
 
     // Build triangle list from the given vertices
     for (unsigned int i = 0; i < nSegments; ++i) {
@@ -509,66 +536,23 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _indexArray.push_back(v1);
         _indexArray.push_back(v0);
         
-        // TODO: arrow head
+        // Arrow head
+        v0 = arrowHeadRingIndex(i);
+        v1 = arrowHeadRingIndex(isLast ? 0 : i + 1);
+
+        _indexArray.push_back(v0);
+        _indexArray.push_back(v1);
+        _indexArray.push_back(topCenterIndex);
+
+        // TODO: arrow head bottom
     }
-
-
-    //// Arrow head 
-
-    //// Angle and vector lengths
-    //const float arrowAngle = 45.f; // degrees
-    //double adjacent = (0.1f * length);
-    //double hypotenuse = adjacent / std::cos(glm::radians(arrowAngle));
-    //double opposite = glm::sqrt(hypotenuse * hypotenuse - adjacent * adjacent);
-
-    //// TODO: should probably compute arrow head size in view space size instead of physical..
-    //// TODO: Make editable propeies to control arrow size
-
-    //const glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
-
-    //const Camera* camera = global::renderEngine->scene()->camera();
-    //const glm::dvec3 cameraPos = coordinatePosFromAnchorNode(camera->positionVec3());
-    //const glm::dvec3 cameraToLineDirection = glm::normalize(cameraPos - arrowHeadStartPos);
-
-    //// Compute orthogonal arrow arrowDirection
-    //const glm::dvec3 stepDirection = glm::cross(cameraToLineDirection, arrowDirection);
-
-    //const glm::dvec3 leftArrowPos = arrowHeadStartPos + opposite * stepDirection;
-    //const glm::dvec3 rightArrowPos = arrowHeadStartPos - opposite * stepDirection;
-
-    //_vertexArray.push_back(static_cast<float>(endPos.x));
-    //_vertexArray.push_back(static_cast<float>(endPos.y));
-    //_vertexArray.push_back(static_cast<float>(endPos.z));
-    //_vertexArray.push_back(static_cast<float>(leftArrowPos.x));
-    //_vertexArray.push_back(static_cast<float>(leftArrowPos.y));
-    //_vertexArray.push_back(static_cast<float>(leftArrowPos.z));
-
-    //_vertexArray.push_back(static_cast<float>(endPos.x));
-    //_vertexArray.push_back(static_cast<float>(endPos.y));
-    //_vertexArray.push_back(static_cast<float>(endPos.z));
-    //_vertexArray.push_back(static_cast<float>(rightArrowPos.x));
-    //_vertexArray.push_back(static_cast<float>(rightArrowPos.y));
-    //_vertexArray.push_back(static_cast<float>(rightArrowPos.z));
-
-    //bindGL();
-    //glBufferData(
-    //    GL_ARRAY_BUFFER,
-    //    _vertexArray.size() * sizeof(float),
-    //    _vertexArray.data(),
-    //    GL_DYNAMIC_DRAW
-    //);
-
-    //// update vertex attributes
-    //glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-
-    //unbindGL();
 }
 
 void RenderableNodeDirectionHint::update(const UpdateData&) {
     updateVertexData();
     updateBufferData();
 
-    // TODO: mimic renderable prism update function
+    // TODO: mimic renderable prism update function (is dirty flag etc)
 }
 
 void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&) {
@@ -604,9 +588,9 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
 
     glDrawElements(
-        GL_TRIANGLES, 
+        GL_TRIANGLES,
         static_cast<GLsizei>(_indexArray.size()),
-        GL_UNSIGNED_INT, 
+        GL_UNSIGNED_INT,
         nullptr
     );
 
@@ -615,7 +599,6 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     global::renderEngine->openglStateCache().resetBlendState();
 
     _shaderProgram->deactivate();
-
 }
 
 } // namespace openspace
