@@ -20,6 +20,10 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
+local lightDay = 2.59020684E13
+local lightMonth = 7.771E14
+local lightYear = 9.4605284E15
+
 local radio = {
   Identifier = "RadioSphere",
   Parent = earth_transforms.EarthBarycenter.Identifier,
@@ -233,16 +237,13 @@ local plane1ld = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "1ld.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1ld.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 10.3,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Km"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightDay, 2*lightDay },
   },
   GUI = {
     Name = "1ld Grid",
@@ -260,16 +261,13 @@ local plane1lm = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "1lm.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1lm.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 11.8,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightMonth, 2*lightMonth },
   },
   GUI = {
     Name = "1lm Grid",
@@ -287,16 +285,13 @@ local plane1ly = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "1ly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1ly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 13.0,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
     Name = "1ly Grid",
@@ -311,19 +306,20 @@ local plane10ly = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 10
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "10ly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "10ly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 14.17,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
     Name = "10ly Grid",
@@ -338,19 +334,20 @@ local plane100ly = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "100ly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "100ly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 15.0,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
     Name = "100ly Grid",
@@ -365,19 +362,20 @@ local plane1kly = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1000
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "1kly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1kly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 16.0,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
     Name = "1kly Grid",
@@ -392,19 +390,20 @@ local plane10kly = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 10000
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "10kly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "10kly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 17.25,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
     Name = "10kly Grid",
@@ -431,6 +430,29 @@ local plane100kly = {
     Path = "/Other/Grids"
   }
 }
+--[[
+local plane100klynew = {
+  Identifier = "100klyGridnew",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100000
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
+  },
+  GUI = {
+    Name = "100kly Grid new",
+    Path = "/Other/Grids"
+  }
+}]]
 
 local plane1Mly = {
   Identifier = "1MlyGrid",
@@ -451,6 +473,29 @@ local plane1Mly = {
     Path = "/Other/Grids"
   }
 }
+--[[
+local plane1Mlynew = {
+  Identifier = "1MlyGridnew",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1000000
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
+  },
+  GUI = {
+    Name = "1Mly Grid new",
+    Path = "/Other/Grids"
+  }
+}]]
 
 local plane10Mly = {
   Identifier = "10MlyGrid",
@@ -471,6 +516,29 @@ local plane10Mly = {
     Path = "/Other/Grids"
   }
 }
+--[[
+local plane10Mlynew = {
+  Identifier = "10MlyGridnew",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 10000000
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
+  },
+  GUI = {
+    Name = "10Mly Grid new",
+    Path = "/Other/Grids"
+  }
+}]]
 
 local plane100Mly = {
   Identifier = "100MlyGrid",
@@ -491,6 +559,29 @@ local plane100Mly = {
     Path = "/Other/Grids"
   }
 }
+--[[
+local plane100Mlynew = {
+  Identifier = "100MlyGridnew",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100000000
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
+  },
+  GUI = {
+    Name = "100Mly Grid new",
+    Path = "/Other/Grids"
+  }
+}]]
 
 local plane20Gly = {
   Identifier = "20GlyGrid",
@@ -511,6 +602,29 @@ local plane20Gly = {
     Path = "/Other/Grids"
   }
 }
+--[[
+local plane20Glynew = {
+  Identifier = "20GlyGridnew",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 20000000000
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear },
+  },
+  GUI = {
+    Name = "20Gly Grid new",
+    Path = "/Other/Grids"
+  }
+}]]
 
 local nodes = {
   radio, oort, ecliptic, eclipticLabels, equatorial, equatorialLabels,
