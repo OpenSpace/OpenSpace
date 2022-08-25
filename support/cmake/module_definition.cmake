@@ -117,17 +117,11 @@ function (handle_module_dependencies target_name module_name)
     [["ghoul/misc/invariants.h"]]
     [["ghoul/misc/profiling.h"]]
     [["ghoul/opengl/ghoul_gl.h"]]
-    <algorithm>
     <array>
-    <chrono>
     <filesystem>
-    <functional>
-    <future>
-    <map>
     <memory>
     <string>
     <string_view>
-    <utility>
     <variant>
     <vector>
   )

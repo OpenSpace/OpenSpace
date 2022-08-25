@@ -128,9 +128,12 @@ target_link_libraries(
 )
 
 target_precompile_headers(openspace-ui-launcher PRIVATE
+  <openspace/scene/profile.h>
+  <ghoul/glm.h>
   <QDialog>
   <QObject>
   <QWidget>
+  <filesystem>
 )
 
 if (MSVC)

@@ -100,6 +100,10 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 endif ()
 
 target_precompile_headers(libcef_dll_wrapper PRIVATE
+  [["include/cef_client.h"]]
+  [["include/capi/cef_browser_capi.h"]]
+  [["include/capi/cef_client_capi.h"]]
+  [["include/cef_client.h"]]
   [["include/capi/cef_base_capi.h"]]
   [["include/cef_render_handler.h"]]
   <Windows.h>

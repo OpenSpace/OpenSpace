@@ -457,6 +457,7 @@ target_precompile_headers(openspace-core PRIVATE
   <algorithm>
   <array>
   <filesystem>
+  <future>
   <map>
   <memory>
   <string>
