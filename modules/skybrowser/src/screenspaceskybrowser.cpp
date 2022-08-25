@@ -116,7 +116,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
     addProperty(_isHidden);
     addProperty(_url);
-    addProperty(_browserPixeldimensions);
+    addProperty(_browserDimensions);
     addProperty(_reload);
     addProperty(_textureQuality);
 
@@ -198,7 +198,7 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     float newResX = newResY * _ratio;
     glm::vec2 newSize = glm::vec2(newResX , newResY) * _textureQuality.value();
 
-    _browserPixeldimensions = glm::ivec2(newSize);
+    _browserDimensions = glm::ivec2(newSize);
     _texture->setDimensions(glm::ivec3(newSize, 1));
     _objectSize = glm::ivec3(_texture->dimensions());
     _radiusIsDirty = true;

@@ -29,9 +29,9 @@
 #include <modules/skybrowser/include/wwtcommunicator.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 

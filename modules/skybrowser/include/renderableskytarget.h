@@ -29,7 +29,6 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace::documentation { struct Documentation; }
 

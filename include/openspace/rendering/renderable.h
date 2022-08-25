@@ -96,6 +96,8 @@ public:
     void setRenderBin(RenderBin bin);
     bool matchesRenderBinMask(int binMask);
 
+    void setFade(float fade);
+
     bool isVisible() const;
 
     void onEnabledChange(std::function<void(bool)> callback);

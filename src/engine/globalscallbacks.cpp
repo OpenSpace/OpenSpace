@@ -138,7 +138,7 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    keyboard = new (currentPos) std::vector<KeyboardCallback>
+    keyboard = new (currentPos) std::vector<KeyboardCallback>();
     ghoul_assert(keyboard, "No keyboard");
     currentPos += sizeof(std::vector<KeyboardCallback>);
 #else // ^^^ WIN32 / !WIN32 vvv

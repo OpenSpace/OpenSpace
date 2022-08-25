@@ -150,8 +150,10 @@ SkyBrowserModule::SkyBrowserModule()
     , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
     , _inverseZoomDirection(InverseZoomInfo, false)
     , _spaceCraftAnimationTime(SpaceCraftTimeInfo, 2.0, 0.0, 10.0)
-    , _wwtImageCollectionUrl(ImageCollectionInfo,
-        "https://data.openspaceproject.com/wwt/1/imagecollection.wtml")
+    , _wwtImageCollectionUrl(
+        ImageCollectionInfo,
+        "https://data.openspaceproject.com/wwt/1/imagecollection.wtml"
+    )
 {
     addProperty(_enabled);
     addProperty(_showTitleInGuiBrowser);
@@ -189,7 +191,8 @@ SkyBrowserModule::SkyBrowserModule()
         if (vizModeChanged) {
             constexpr float FadeDuration = 2.f;
 
-            if (camWasInSolarSystem) { // Camera moved out of the solar system => fade out
+            if (camWasInSolarSystem) {
+                // Camera moved out of the solar system => fade out
                 for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
                     pair->startFading(0.f, FadeDuration);
                 }
@@ -197,7 +200,8 @@ SkyBrowserModule::SkyBrowserModule()
                 // Also hide the hover circle
                 disableHoverCircle();
             }
-            else { // Camera moved into the solar system => fade in
+            else {
+                // Camera moved into the solar system => fade in
                 for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
                     pair->startFading(1.f, FadeDuration);
                 }
@@ -246,10 +250,6 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Register ScreenSpaceSkyTarget
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
-
-    // Create data handler dynamically to avoid the linking error that
-    // came up when including the include file in the module header file
-    _dataHandler = std::make_unique<WwtDataHandler>();
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
@@ -281,8 +281,6 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
         [&](const std::unique_ptr<TargetBrowserPair>& pair) {
-            // should this be?
-            // found == pair.get()
             return found == pair.get();
         }
     );
@@ -298,6 +296,7 @@ void SkyBrowserModule::lookAtTarget(const std::string& id) {
 }
 
 void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
+    ghoul_assert(circle, "No circle specified");
     _hoverCircle = circle;
 
     // Always disable it per default. It should only be visible on interaction
@@ -305,46 +304,48 @@ void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
 }
 
 void SkyBrowserModule::moveHoverCircle(int i, bool useScript) {
-    const ImageData& image = _dataHandler->getImage(i);
+    const ImageData& image = _dataHandler.image(i);
 
     // Only move and show circle if the image has coordinates
-    if (_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem) {
-        const std::string id = _hoverCircle->identifier();
+    if (!(_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem)) {
+        return;
+    }
 
-        // Show the circle
-        if (useScript) {
-            const std::string script = fmt::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
-                id
-            );
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
-        }
-        else {
-            Renderable* renderable = _hoverCircle->renderable();
-            if (renderable) {
-                renderable->property("Fade")->set(1.f);
-            }
-        }
+    const std::string id = _hoverCircle->identifier();
 
-        // Set the exact target position
-        // Move it slightly outside of the celestial sphere so it doesn't overlap with
-        // the target
-        glm::dvec3 pos = skybrowser::equatorialToGalactic(image.equatorialCartesian);
-        pos *= skybrowser::CelestialSphereRadius * 1.1;
-
-        // Note that the position can only be set through the script engine
+    // Show the circle
+    if (useScript) {
         const std::string script = fmt::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
-            id, ghoul::to_string(pos)
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
+            id
         );
         global::scriptEngine->queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
+    else {
+        Renderable* renderable = _hoverCircle->renderable();
+        if (renderable) {
+            renderable->setFade(1.f);
+        }
+    }
+
+    // Set the exact target position
+    // Move it slightly outside of the celestial sphere so it doesn't overlap with
+    // the target
+    glm::dvec3 pos = skybrowser::equatorialToGalactic(image.equatorialCartesian);
+    pos *= skybrowser::CelestialSphereRadius * 1.1;
+
+    // Note that the position can only be set through the script engine
+    const std::string script = fmt::format(
+        "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
+        id, ghoul::to_string(pos)
+    );
+    global::scriptEngine->queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void SkyBrowserModule::disableHoverCircle(bool useScript) {
@@ -368,18 +369,18 @@ void SkyBrowserModule::disableHoverCircle(bool useScript) {
 void SkyBrowserModule::loadImages(const std::string& root,
                                   const std::filesystem::path& directory)
 {
-    _dataHandler->loadImages(root, directory);
+    _dataHandler.loadImages(root, directory);
 }
 
 int SkyBrowserModule::nLoadedImages() const {
-    return _dataHandler->nLoadedImages();
+    return _dataHandler.nLoadedImages();
 }
 
-const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWwtDataHandler() const {
+const WwtDataHandler& SkyBrowserModule::wwtDataHandler() const {
     return _dataHandler;
 }
 
-std::vector<std::unique_ptr<TargetBrowserPair>>& SkyBrowserModule::getPairs() {
+std::vector<std::unique_ptr<TargetBrowserPair>>& SkyBrowserModule::pairs() {
     return _targetsBrowsers;
 }
 
@@ -387,7 +388,7 @@ int SkyBrowserModule::nPairs() const {
     return static_cast<int>(_targetsBrowsers.size());
 }
 
-TargetBrowserPair* SkyBrowserModule::pair(const std::string& id) const {
+TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
     auto it = std::find_if(
         _targetsBrowsers.begin(),
         _targetsBrowsers.end(),
@@ -416,7 +417,7 @@ void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
 
 void SkyBrowserModule::incrementallyRotateCamera() {
     if (_cameraRotation.isAnimating()) {
-        glm::dmat4 rotMat = _cameraRotation.getRotationMatrix();
+        glm::dmat4 rotMat = _cameraRotation.rotationMatrix();
         global::navigationHandler->camera()->rotate(glm::quat_cast(rotMat));
     }
 }
@@ -445,9 +446,9 @@ std::string SkyBrowserModule::wwtImageCollectionUrl() const {
     return _wwtImageCollectionUrl;
 }
 
-void SkyBrowserModule::setSelectedBrowser(const std::string& id) {
-    TargetBrowserPair* found = pair(id);
-    if (found) {
+void SkyBrowserModule::setSelectedBrowser(std::string_view id) {
+    TargetBrowserPair* p = pair(id);
+    if (p) {
         _selectedBrowser = id;
     }
 }
