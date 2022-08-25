@@ -316,6 +316,7 @@ glm::dquat Path::linearPathRotation(double t) const {
 }
 
 glm::dquat Path::lookAtTargetsRotation(double t) const {
+    t = glm::clamp(t, 0.0, 1.0);
     const double t1 = 0.2;
     const double t2 = 0.8;
 
@@ -331,13 +332,15 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
         const glm::dvec3 viewDir = ghoul::viewDirection(_start.rotation());
         const glm::dvec3 inFrontOfStart = startPos + inFrontDistance * viewDir;
 
-        const double tScaled = ghoul::cubicEaseInOut(t / t1);
+        const double tScaled = glm::clamp(t / t1, 0.0, 1.0);
+        const double tEased = ghoul::cubicEaseInOut(tScaled);
         lookAtPos =
-            ghoul::interpolateLinear(tScaled, inFrontOfStart, startNodePos);
+            ghoul::interpolateLinear(tEased, inFrontOfStart, startNodePos);
     }
     else if (t <= t2) {
-        const double tScaled = ghoul::cubicEaseInOut((t - t1) / (t2 - t1));
-        lookAtPos = ghoul::interpolateLinear(tScaled, startNodePos, endNodePos);
+        const double tScaled = glm::clamp((t - t1) / (t2 - t1), 0.0, 1.0);
+        const double tEased = ghoul::cubicEaseInOut(tScaled);
+        lookAtPos = ghoul::interpolateLinear(tEased, startNodePos, endNodePos);
     }
     else {
         // (t > t2)
@@ -346,8 +349,9 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
         const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
         const glm::dvec3 inFrontOfEnd = endPos + inFrontDistance * viewDir;
 
-        const double tScaled = ghoul::cubicEaseInOut((t - t2) / (1.0 - t2));
-        lookAtPos = ghoul::interpolateLinear(tScaled, endNodePos, inFrontOfEnd);
+        const double tScaled = glm::clamp((t - t2) / (1.0 - t2), 0.0, 1.0);
+        const double tEased = ghoul::cubicEaseInOut(tScaled);
+        lookAtPos = ghoul::interpolateLinear(tEased, endNodePos, inFrontOfEnd);
     }
 
     // Handle up vector separately
@@ -416,6 +420,7 @@ double Path::speedAlongPath(double traveledDistance) const {
         const double remainingDistance = pathLength() - traveledDistance;
         dampeningFactor = remainingDistance / closeUpDistance;
     }
+    dampeningFactor = glm::clamp(dampeningFactor, 0.0, 1.0);
     dampeningFactor = ghoul::sineEaseOut(dampeningFactor);
 
     // Prevent multiplying with 0 (and hence a speed of 0.0 => no movement)
@@ -706,7 +711,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     try {
         return Path(startPoint, waypointToAdd, type, duration);
     }
-    catch (const PathCurve::TooShortPathError& e) {
+    catch (const PathCurve::TooShortPathError&) {
         LINFO("Already at the requested target");
         // Rethrow e, so the pathnavigator can handle it as well
         throw;
