@@ -339,7 +339,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _coloring(ColoringInfo),
     _repScale(RepScaleInfo, 1.f, 0.1f, 10.f),
     _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f),
-    _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 100.f),
+    _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 1000.f),
     _moleculeCounts(MoleculeCountsInfo),
     _linearVelocity(LinearVelocityInfo),
     _angularVelocity(AngularVelocityInfo),
@@ -583,7 +583,7 @@ void RenderableSimulationBox::updateAnimation(molecule_data_t& mol, double time)
         else { // animation backward
             t = 1.0 - t;
             int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
-            if (frame < 0) frame += nFrames;
+            if (frame >= nFrames) frame -= nFrames;
             frames[0] = std::max<int64_t>(0, frame - 2);
             frames[1] = std::max<int64_t>(0, frame - 1);
             frames[2] = frame;
@@ -664,6 +664,8 @@ void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) 
     double collRadiusSquared = _collisionRadius * _collisionRadius;
 
     // compute collisions
+    // those collisions are really simplistic, they assume spherical boundaries, equal
+    // mass, and are order-dependent.
     for (auto it1 = mol.states.begin(); it1 != mol.states.end(); ++it1) {
         for (auto it2 = std::next(it1); it2 != mol.states.end(); ++it2) {
 
@@ -692,6 +694,12 @@ void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) 
 }
 
 void RenderableSimulationBox::update(const UpdateData& data) {
+    // avoid updating if not in view, as it can be quite expensive.
+    if (!renderableInView)
+        return;
+    else
+        renderableInView = false;
+
     double t = data.time.j2000Seconds();
     double dt = t - data.previousFrameTime.j2000Seconds();
     
@@ -737,8 +745,10 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     float distance = length(forward) * sign(dot(dir, forward)); // "signed" distance from camera to object.
     float fakeScaling = 100.f / distance;
 
-    if (distance < 0.f) // distance < 0 means behind the camera
+    if (distance < 0.f || distance > 1E4) // distance < 0 means behind the camera, 1E4 is arbitrary.
         return;
+    else
+        renderableInView = true;
 
     // because the molecule is small, a scaling of the view matrix causes the molecule
     // to be moved out of view in clip space. Resetting the scaling for the molecule
@@ -798,7 +808,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // resize the fbo if needed
@@ -889,7 +898,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             scale(I, dvec3(_simulationBox)) *
-            scale(I, dvec3(0.5)) * // billboard circle radius (wrt. simbox)
+            scale(I, dvec3(1.0)) * // billboard circle radius (wrt. simbox)
             scale(I, dvec3(fakeScaling)) *
             I;
         mat4 faceCamera = inverse(camCopy.viewRotationMatrix());

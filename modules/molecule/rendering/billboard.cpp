@@ -16,7 +16,7 @@ out vec2 pos;
 
 void main() {
   gl_Position = uTransform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
-  gl_Position /= gl_Position.w;
+  // gl_Position /= gl_Position.w;
   gl_Position.z = 0.0; // always visible
   pos = aPos.xy;
 }
