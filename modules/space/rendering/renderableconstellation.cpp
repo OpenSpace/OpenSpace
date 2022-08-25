@@ -85,7 +85,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The line width of the constellation "
+        "The line width of the constellation"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
@@ -117,7 +117,7 @@ namespace {
         std::optional<bool> drawLabels;
 
         // [[codegen::verbatim(ConstellationInfo.description)]]
-        std::optional<std::string> constellationNamesFile;
+        std::optional<std::filesystem::path> constellationNamesFile;
 
         // [[codegen::verbatim(TextColorInfo.description)]]
         std::optional<glm::vec3> textColor [[codegen::color()]];
@@ -185,7 +185,7 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
 
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
-    // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum, and
+    // @TODO (abock. 2021-01-31) In the other classes, this is done with an enum, and
     // doing it based on the fisheye rendering seems a bit brittle?
     if (global::windowDelegate->isFisheyeRendering()) {
         _renderOption = RenderOptionPositionNormal;
@@ -195,9 +195,11 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
     }
     addProperty(_renderOption);
 
-    // Read all files in the initialize() instead, multithreaded
-    _constellationNamesFilename =
-        p.constellationNamesFile.value_or(_constellationNamesFilename);
+    // Avoid reading files here, instead do it in multithreaded initialize()
+    if (p.constellationNamesFile.has_value()) {
+        _constellationNamesFilename =
+            absPath(p.constellationNamesFile.value().string()).string();
+    }
     _constellationNamesFilename.onChange([&]() { loadConstellationFile(); });
     addProperty(_constellationNamesFilename);
 
@@ -275,7 +277,6 @@ void RenderableConstellation::loadConstellationFile() {
     file.open(absPath(_constellationNamesFilename));
 
     std::string line;
-    int index = 0;
     while (file.good()) {
         std::getline(file, line);
         if (line.empty()) {
@@ -290,8 +291,6 @@ void RenderableConstellation::loadConstellationFile() {
         std::getline(s, fullName);
         ghoul::trimWhitespace(fullName);
         _constellationNamesTranslation[abbreviation] = fullName;
-
-        ++index;
     }
 
     fillSelectionProperty();

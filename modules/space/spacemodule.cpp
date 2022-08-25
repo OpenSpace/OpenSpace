@@ -82,7 +82,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     );
     fRenderable->registerClass<RenderableConstellationLines>(
         "RenderableConstellationLines"
-        );
+    );
     fRenderable->registerClass<RenderableFluxNodes>("RenderableFluxNodes");
     fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
     fRenderable->registerClass<RenderableRings>("RenderableRings");

@@ -57,7 +57,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
         // [[codegen::verbatim(VertexInfo.description)]]
-        std::string file;
+        std::filesystem::path file;
 
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -79,8 +79,8 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // Avoid loading the vertex file here, do it in multithreded initialize() instead
-    _vertexFilename = p.file;
+    // Avoid reading files here, instead do it in multithreaded initialize()
+    _vertexFilename = absPath(p.file.string()).string();
     _vertexFilename.onChange([&](){ loadVertexFile(); });
     addProperty(_vertexFilename);
 

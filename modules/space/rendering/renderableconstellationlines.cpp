@@ -66,7 +66,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
         // The path to the SPECK file that contains constellation lines data
-        std::string file;
+        std::filesystem::path file;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -99,7 +99,7 @@ RenderableConstellationLines::RenderableConstellationLines(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _speckFile = absPath(p.file).string();
+    _speckFile = absPath(p.file.string()).string();
     _hasSpeckFile = true;
     _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
@@ -140,7 +140,10 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
 }
 
 bool RenderableConstellationLines::isReady() const {
-    return (_program != nullptr) && !_renderingConstellationsMap.empty() &&
+    if (!_hasLabel) {
+        return _program && !_renderingConstellationsMap.empty();
+    }
+    return _program && !_renderingConstellationsMap.empty() &&
         !_labelset.entries.empty();
 }
 
@@ -328,10 +331,9 @@ bool RenderableConstellationLines::readSpeckFile() {
             std::string dummy;
             str >> dummy; // mesh command
             dummy.clear();
-            str >> dummy; // texture index command?
+            str >> dummy; // color index command?
             do {
                 if (dummy == "-c") {
-                    dummy.clear();
                     str >> constellationLine.colorIndex; // color index command
                 }
                 dummy.clear();
@@ -344,8 +346,9 @@ bool RenderableConstellationLines::readSpeckFile() {
             std::stringstream id(line);
             std::string identifier;
 
-            id >> dummy;
-            std::getline(id, identifier);
+            id >> dummy; // id command
+            dummy.clear();
+            std::getline(id, identifier); // identifier
             ghoul::trimWhitespace(identifier);
             std::string name = constellationFullName(identifier);
             if (!name.empty()) {
