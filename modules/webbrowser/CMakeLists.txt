@@ -99,6 +99,16 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
 endif ()
 
+target_precompile_headers(libcef_dll_wrapper PRIVATE
+  [["include/capi/cef_base_capi.h"]]
+  [["include/cef_render_handler.h"]]
+  <Windows.h>
+  <string>
+  <sstream>
+  <istream>
+  <ostream>
+)
+
 ##########################################################################################
 # Add CEF client files
 

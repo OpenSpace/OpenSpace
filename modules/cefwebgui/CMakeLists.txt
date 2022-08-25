@@ -48,4 +48,14 @@ create_new_module(
   ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
 )
 
+target_precompile_headers(${cefwebgui_module} PRIVATE
+  [["include/capi/cef_base_capi.h"]]
+  [["include/cef_render_handler.h"]]
+  <Windows.h>
+  <string>
+  <sstream>
+  <istream>
+  <ostream>
+)
+
 set_modules_dependency_on_cef_libraries(${cefwebgui_module})
