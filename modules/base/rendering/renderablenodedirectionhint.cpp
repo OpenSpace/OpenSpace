@@ -192,9 +192,9 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     , _start(StartNodeInfo, "Root")
     , _end(EndNodeInfo, "Root")
     , _color(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _offsetDistance(OffsetDistanceInfo, 0.f, 0.f, 1e11f)
+    , _offsetDistance(OffsetDistanceInfo, 0.f, 0.f, 1e20f)
     , _useRelativeOffset(RelativeOffsetInfo, false)
-    , _length(LengthInfo, 100.f, 0.f, 1e11f) // TODO: not zero?
+    , _length(LengthInfo, 100.f, 0.f, 1e20f)
     , _useRelativeLength(RelativeLengthInfo, false)
     , _width(WidthInfo, 10.f, 0.f, 1e11f)
 {
@@ -227,8 +227,8 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
         if (!_useRelativeOffset) {
             // Recompute distance (previous value was relative)
             _offsetDistance = _offsetDistance * startNode->boundingSphere();
-            _offsetDistance.setExponent(10.f);
-            _offsetDistance.setMaxValue(1e11f);
+            _offsetDistance.setExponent(11.f);
+            _offsetDistance.setMaxValue(1e20f);
         }
         else {
             // Recompute distance (previous value was in meters)
@@ -251,6 +251,10 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     _offsetDistance = p.offset.value_or(_offsetDistance);
     addProperty(_offsetDistance);
 
+    if (!_useRelativeOffset) {
+        _offsetDistance.setExponent(11.f);
+    }
+
     _useRelativeLength.onChange([this]() {
         SceneGraphNode* startNode = sceneGraphNode(_start);
         if (!startNode) {
@@ -262,8 +266,8 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
         if (!_useRelativeLength) {
             // Recompute distance (previous value was relative)
             _length = _length * startNode->boundingSphere();
-            _length.setExponent(10.f);
-            _length.setMaxValue(1e11f);
+            _length.setExponent(11.f);
+            _length.setMaxValue(1e20f);
         }
         else {
             // Recompute distance (previous value was in meters)
@@ -287,7 +291,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     addProperty(_length);
 
     if (!_useRelativeLength) {
-        _length.setExponent(10.f);
+        _length.setExponent(11.f);
     }
 }
 
