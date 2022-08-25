@@ -136,6 +136,8 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+  shaders/arrow_fs.glsl
+  shaders/arrow_vs.glsl
   shaders/axes_fs.glsl
   shaders/axes_vs.glsl
   shaders/disc_fs.glsl
