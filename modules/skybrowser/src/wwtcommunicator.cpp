@@ -236,7 +236,7 @@ void WwtCommunicator::setBorderRadius(double radius) {
 
 void WwtCommunicator::updateBorderColor() const {
     std::string script = fmt::format(
-        "document.body.style.backgroundColor = 'rgb({},{},{})';",
+        "setBackgroundColor('rgb({},{},{})');",
         _borderColor.x, _borderColor.y, _borderColor.z
     );
     executeJavascript(script);
