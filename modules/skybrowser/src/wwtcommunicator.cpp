@@ -230,7 +230,7 @@ void WwtCommunicator::setBorderColor(glm::ivec3 color) {
 
 void WwtCommunicator::setBorderRadius(double radius) {
     _borderRadius = radius;
-    std::string scr = "setBorderRadius(" + std::to_string(radius) + ");";
+    std::string scr = fmt::format("setBorderRadius({});", radius);
     executeJavascript(scr);
 }
 

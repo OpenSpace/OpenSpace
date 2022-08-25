@@ -66,12 +66,11 @@ float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
   return crosshairHorizontal + crosshairVertical;
 }
 
-float roundedRectangle(vec2 coord, vec2 size, vec4 radius) {
-    radius.xy = (coord.x > 0.0) ? radius.xy : radius.zw;
-    radius.x  = (coord.y > 0.0) ? radius.x  : radius.y;
-
-    vec2 q = abs(coord) - size + radius.x;
-    return min(max(q.x, q.y),0.0) + length(max(q, 0.0)) - radius.x;
+// Creates a rounded rectangle where radius is [0, 1] from completely square
+// to completely round
+float roundedRectangle(vec2 coord, vec2 size, float radius) {
+    vec2 q = abs(coord) - size + vec2(radius);
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
 }
 
 Fragment getFragment() {
@@ -87,26 +86,26 @@ Fragment getFragment() {
   if (showRectangle) {
     float lineWidthY = lineWidth * 2;
     float lineWidthX = lineWidth * 2 * VerticalThickness;
-    float height = ((fov * 0.5)/maxWwtFov)-lineWidth;
+    float height = ((fov * 0.5) / maxWwtFov) - lineWidth;
     float width = (height * ratio) - lineWidthY;
     vec2 size = vec2(width, height);
 
     // The radius of the corners (in pixels) clockwise starting in the top left
-    vec4 radius = vec4(clamp(borderRadius * 0.5 * min(height, width), 0.0, 0.5 * min(height, width)));
+    float radius = clamp(borderRadius * 0.5 * min(height, width), 0.0, 0.5 * min(height, width));
 
     // Calculate distance to edge
-    float distance = roundedRectangle(vs_st.xy - vec2(0.5), size / 2.0f, radius);
+    float distance = roundedRectangle(vs_st.xy - vec2(0.5), size * 0.5, radius);
 
     // How soft the edges should be (in pixels)
     // Higher values could be used to simulate a drop shadow
-    float edgeSoftness  = 2.0f;
+    float edgeSoftness = 2.0;
     // Smooth the result (free antialiasing)
-    float smoothedAlpha =  1.0f - smoothstep(0.0f, edgeSoftness, distance);
+    float smoothedAlpha =  1.0 - smoothstep(0.0, edgeSoftness, distance);
 
     // Border
     float borderThickness = lineWidth * 0.5;
-    float borderSoftness  = 0.000f;
-    float borderAlpha     = 1.0f-smoothstep(borderThickness - borderSoftness, borderThickness, abs(distance));
+    float borderSoftness  = 0.0;
+    float borderAlpha     = 1.0-smoothstep(borderThickness - borderSoftness, borderThickness, abs(distance));
 
     // Colors
     float borderColor = 1.0;
