@@ -93,10 +93,10 @@ namespace {
         "sphere) for the length of the arrow. If false, meters is used"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the arrow shape"
+    constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
+        "Width",
+        "Width",
+        "This value specifies the width of the arrow shape"
     };
 
     // Returns a position that is relative to the current anchor node. This is a method to
@@ -113,6 +113,44 @@ namespace {
         }
         glm::dvec3 diffPos = worldPos - anchorNodePos;
         return diffPos;
+    }
+
+    // @TODO (emmbr) put in some helper file?
+    // Generate vertices around the unit circle in a plane 
+    // with with the given center point and normal
+    std::vector<glm::vec3> circleVertices(unsigned int count, float radius,
+                                          glm::vec3 center, glm::vec3 normal)
+    {
+        normal = glm::normalize(normal); // should be normalized, but want to be sure
+
+        std::vector<glm::vec3> vertices;
+        vertices.reserve(count);
+        float angleStep = glm::two_pi<float>() / count;
+
+        // Find the quaternion that represents a rotation from positive Z to normal. 
+        // (this approach is the shortest arc)
+        // https://www.xarg.org/proof/quaternion-from-two-vectors/
+        constexpr const glm::vec3 Z = glm::vec3(0.f, 0.f, 1.f);
+        float w = 1 + glm::dot(Z, normal);
+        glm::quat zToNormal = glm::quat(w, glm::cross(Z, normal));
+        zToNormal = glm::normalize(zToNormal);
+        // TODO: handle parallel case
+
+        for (int i = 0; i < count; ++i) {
+            const float angle = i * angleStep;
+
+            // Start with xy plane
+            glm::vec3 v(0.f);
+            v.x = cos(angle) * radius;
+            v.y = sin(angle) * radius;
+
+            // Tranform to match input plane
+            v = glm::rotate(zToNormal, v);
+            v += center; // translate
+
+            vertices.push_back(v);
+        }
+        return vertices;
     }
 
     struct [[codegen::Dictionary(RenderableNodeDirectionHint)]] Parameters {
@@ -137,8 +175,8 @@ namespace {
         // [[codegen::verbatim(RelativeLengthInfo.description)]]
         std::optional<bool> useRelativeLength;
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        // [[codegen::verbatim(WidthInfo.description)]]
+        std::optional<float> width;
     };
 #include "renderablenodedirectionhint_codegen.cpp"
 } // namespace
@@ -156,9 +194,9 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     , _color(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _offsetDistance(OffsetDistanceInfo, 0.f, 0.f, 1e11f)
     , _useRelativeOffset(RelativeOffsetInfo, false)
-    , _length(LengthInfo, 100.f, 0.f, 1e11f)
+    , _length(LengthInfo, 100.f, 0.f, 1e11f) // TODO: not zero?
     , _useRelativeLength(RelativeLengthInfo, false)
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , _width(WidthInfo, 10.f, 0.f, 1e11f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -174,8 +212,9 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
 
     addProperty(_opacity);
 
-    _lineWidth = p.lineWidth.value_or(_lineWidth);
-    addProperty(_lineWidth);
+    _width = p.width.value_or(_width);
+    _width.setExponent(10.f);
+    addProperty(_width);
 
     _useRelativeOffset.onChange([this]() {
         SceneGraphNode* startNode = sceneGraphNode(_start);
@@ -262,12 +301,12 @@ std::string RenderableNodeDirectionHint::end() const {
 
 void RenderableNodeDirectionHint::initializeGL() {
     _shaderProgram = BaseModule::ProgramObjectManager.request(
-        "NodeLineProgram",
+        "3DArrowProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                "NodeLineProgram",
-                absPath("${MODULE_BASE}/shaders/line_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/line_fs.glsl")
+                "3DArrowProgram",
+                absPath("${MODULE_BASE}/shaders/arrow_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/arrow_fs.glsl")
             );
         }
     );
@@ -275,13 +314,16 @@ void RenderableNodeDirectionHint::initializeGL() {
     // Generate
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vBufferId);
+    glGenBuffers(1, &_iboId);
 
-    bindGL();
+    glBindVertexArray(_vaoId);
 
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    updateBufferData();
+
     glEnableVertexAttribArray(_locVertex);
+    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
-    unbindGL();
+    glBindVertexArray(0);
 }
 
 void RenderableNodeDirectionHint::deinitializeGL() {
@@ -290,6 +332,9 @@ void RenderableNodeDirectionHint::deinitializeGL() {
 
     glDeleteBuffers(1, &_vBufferId);
     _vBufferId = 0;
+
+    glDeleteBuffers(1, &_iboId);
+    _iboId = 0;
 
     BaseModule::ProgramObjectManager.release(
         "NodeLineProgram",
@@ -316,6 +361,27 @@ void RenderableNodeDirectionHint::bindGL() {
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
 }
 
+void RenderableNodeDirectionHint::updateBufferData() {
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertexArray.size() * sizeof(float),
+        _vertexArray.data(),
+        GL_STREAM_DRAW
+    );
+
+    // update vertex attributes
+    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        _indexArray.size() * sizeof(unsigned int),
+        _indexArray.data(),
+        GL_STREAM_DRAW
+    );
+}
+
 void RenderableNodeDirectionHint::updateVertexData() {
     SceneGraphNode* startNode = sceneGraphNode(_start);
     SceneGraphNode* endNode = sceneGraphNode(_end);
@@ -329,8 +395,6 @@ void RenderableNodeDirectionHint::updateVertexData() {
         LERROR(fmt::format("Could not find end node '{}'", _end.value()));
         return;
     }
-
-    _vertexArray.clear();
 
     const double boundingSphere = startNode->boundingSphere();
     bool hasNoBoundingSphere = boundingSphere < std::numeric_limits<double>::epsilon();
@@ -360,74 +424,150 @@ void RenderableNodeDirectionHint::updateVertexData() {
     const glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
     const glm::dvec3 startPos = startNodePos + offset * arrowDirection;
     const glm::dvec3 endPos = startPos + length * arrowDirection;
+    const glm::dvec3 startToEnd = endPos - startPos;
 
+    _vertexArray.clear();
+    _indexArray.clear();
+
+    // Get unit circle vertices on the XY-plane
+    unsigned int nSegments = 10;
+    std::vector<glm::vec3> bottomVertices = circleVertices(
+        nSegments,
+        _width,
+        startPos,
+        glm::normalize(startToEnd)
+    );
+
+    std::vector<glm::vec3> topVertices = circleVertices(
+        nSegments,
+        _width,
+        endPos,
+        glm::normalize(startToEnd)
+    );
+    
+    // Center bot vertex
     _vertexArray.push_back(static_cast<float>(startPos.x));
     _vertexArray.push_back(static_cast<float>(startPos.y));
     _vertexArray.push_back(static_cast<float>(startPos.z));
 
+    // All bottom vertices (same number as number of segments)
+    for (const glm::vec3& v : bottomVertices) {
+        _vertexArray.push_back(v.x);
+        _vertexArray.push_back(v.y);
+        _vertexArray.push_back(v.z);
+    }
+
+    // Then all top vertices
+    for (const glm::vec3& v : topVertices) {
+        _vertexArray.push_back(v.x);
+        _vertexArray.push_back(v.y);
+        _vertexArray.push_back(v.z);
+    }
+
+    // Center top vertex
     _vertexArray.push_back(static_cast<float>(endPos.x));
     _vertexArray.push_back(static_cast<float>(endPos.y));
     _vertexArray.push_back(static_cast<float>(endPos.z));
 
-    // Arrow head (@TODO: generate in geometry shader instead)
+    auto botRingIndex = [](unsigned int i) {
+        return i + 1;
+    };
 
-    // Angle and vector lengths
-    const float arrowAngle = 45.f; // degrees
-    double adjacent = (0.1f * length);
-    double hypotenuse = adjacent / std::cos(glm::radians(arrowAngle));
-    double opposite = glm::sqrt(hypotenuse * hypotenuse - adjacent * adjacent);
+    auto topRingIndex = [&nSegments](unsigned int i) {
+        return 1 + nSegments + i;
+    };
 
-    // TODO: should probably compute arrow head size in view space size instead of physical..
-    // TODO: Make editable propeies to control arrow size
+    unsigned int botCenterIndex = 0;
 
-    const glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
+    // Build triangle list from the given vertices
+    for (unsigned int i = 0; i < nSegments; ++i) {
+        bool isLast = (i == nSegments - 1);
 
-    const Camera* camera = global::renderEngine->scene()->camera();
-    const glm::dvec3 cameraPos = coordinatePosFromAnchorNode(camera->positionVec3());
-    const glm::dvec3 cameraToLineDirection = glm::normalize(cameraPos - arrowHeadStartPos);
+        // Bottom vertex indices
+        unsigned int v0 = botRingIndex(i);
+        unsigned int v1 = botRingIndex(isLast ? 0 : i + 1);
 
-    // Compute orthogonal arrow arrowDirection
-    const glm::dvec3 stepDirection = glm::cross(cameraToLineDirection, arrowDirection);
+        // Top vertex indices
+        unsigned int v2 = topRingIndex(i);
+        unsigned int v3 = topRingIndex(isLast ? 0 : i + 1);
 
-    const glm::dvec3 leftArrowPos = arrowHeadStartPos + opposite * stepDirection;
-    const glm::dvec3 rightArrowPos = arrowHeadStartPos - opposite * stepDirection;
+        // Side of cylinder
+        _indexArray.push_back(v0);
+        _indexArray.push_back(v1);
+        _indexArray.push_back(v2);
 
-    _vertexArray.push_back(static_cast<float>(endPos.x));
-    _vertexArray.push_back(static_cast<float>(endPos.y));
-    _vertexArray.push_back(static_cast<float>(endPos.z));
-    _vertexArray.push_back(static_cast<float>(leftArrowPos.x));
-    _vertexArray.push_back(static_cast<float>(leftArrowPos.y));
-    _vertexArray.push_back(static_cast<float>(leftArrowPos.z));
+        _indexArray.push_back(v1);
+        _indexArray.push_back(v3);
+        _indexArray.push_back(v2);
 
-    _vertexArray.push_back(static_cast<float>(endPos.x));
-    _vertexArray.push_back(static_cast<float>(endPos.y));
-    _vertexArray.push_back(static_cast<float>(endPos.z));
-    _vertexArray.push_back(static_cast<float>(rightArrowPos.x));
-    _vertexArray.push_back(static_cast<float>(rightArrowPos.y));
-    _vertexArray.push_back(static_cast<float>(rightArrowPos.z));
+        // Bot triangle
+        _indexArray.push_back(botCenterIndex);
+        _indexArray.push_back(v1);
+        _indexArray.push_back(v0);
+        
+        // TODO: arrow head
+    }
 
 
-    bindGL();
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexArray.size() * sizeof(float),
-        _vertexArray.data(),
-        GL_DYNAMIC_DRAW
-    );
+    //// Arrow head 
 
-    // update vertex attributes
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    //// Angle and vector lengths
+    //const float arrowAngle = 45.f; // degrees
+    //double adjacent = (0.1f * length);
+    //double hypotenuse = adjacent / std::cos(glm::radians(arrowAngle));
+    //double opposite = glm::sqrt(hypotenuse * hypotenuse - adjacent * adjacent);
 
-    unbindGL();
+    //// TODO: should probably compute arrow head size in view space size instead of physical..
+    //// TODO: Make editable propeies to control arrow size
+
+    //const glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
+
+    //const Camera* camera = global::renderEngine->scene()->camera();
+    //const glm::dvec3 cameraPos = coordinatePosFromAnchorNode(camera->positionVec3());
+    //const glm::dvec3 cameraToLineDirection = glm::normalize(cameraPos - arrowHeadStartPos);
+
+    //// Compute orthogonal arrow arrowDirection
+    //const glm::dvec3 stepDirection = glm::cross(cameraToLineDirection, arrowDirection);
+
+    //const glm::dvec3 leftArrowPos = arrowHeadStartPos + opposite * stepDirection;
+    //const glm::dvec3 rightArrowPos = arrowHeadStartPos - opposite * stepDirection;
+
+    //_vertexArray.push_back(static_cast<float>(endPos.x));
+    //_vertexArray.push_back(static_cast<float>(endPos.y));
+    //_vertexArray.push_back(static_cast<float>(endPos.z));
+    //_vertexArray.push_back(static_cast<float>(leftArrowPos.x));
+    //_vertexArray.push_back(static_cast<float>(leftArrowPos.y));
+    //_vertexArray.push_back(static_cast<float>(leftArrowPos.z));
+
+    //_vertexArray.push_back(static_cast<float>(endPos.x));
+    //_vertexArray.push_back(static_cast<float>(endPos.y));
+    //_vertexArray.push_back(static_cast<float>(endPos.z));
+    //_vertexArray.push_back(static_cast<float>(rightArrowPos.x));
+    //_vertexArray.push_back(static_cast<float>(rightArrowPos.y));
+    //_vertexArray.push_back(static_cast<float>(rightArrowPos.z));
+
+    //bindGL();
+    //glBufferData(
+    //    GL_ARRAY_BUFFER,
+    //    _vertexArray.size() * sizeof(float),
+    //    _vertexArray.data(),
+    //    GL_DYNAMIC_DRAW
+    //);
+
+    //// update vertex attributes
+    //glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+
+    //unbindGL();
 }
 
 void RenderableNodeDirectionHint::update(const UpdateData&) {
     updateVertexData();
+    updateBufferData();
+
+    // TODO: mimic renderable prism update function
 }
 
 void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&) {
-    _shaderProgram->activate();
-
     glm::dmat4 anchorTranslation(1.0);
     // Update anchor node information, used to counter precision problems
     if (global::navigationHandler->orbitalNavigator().anchorNode()) {
@@ -445,6 +585,8 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
         modelTransform * anchorTranslation;
 
+    _shaderProgram->activate();
+
     _shaderProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _shaderProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
     _shaderProgram->setUniform("color", glm::vec4(_color.value(), opacity()));
@@ -452,18 +594,24 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
-    glEnable(GL_LINE_SMOOTH);
-    glLineWidth(_lineWidth);
 
-    // Bind and draw
-    bindGL();
-    glDrawArrays(GL_LINES, 0, _vertexArray.size() / 3);
+    // Bind and draw shape
+    glBindVertexArray(_vaoId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
+
+    glDrawElements(
+        GL_TRIANGLES, 
+        static_cast<GLsizei>(_indexArray.size()),
+        GL_UNSIGNED_INT, 
+        nullptr
+    );
 
     // Restore GL State
-    unbindGL();
-    _shaderProgram->deactivate();
+    glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetBlendState();
-    global::renderEngine->openglStateCache().resetLineState();
+
+    _shaderProgram->deactivate();
+
 }
 
 } // namespace openspace

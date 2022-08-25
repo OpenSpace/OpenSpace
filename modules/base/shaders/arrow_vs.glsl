@@ -22,69 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLENODEDIRECTIONHINT___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLENODEDIRECTIONHINT___H__
+#version __CONTEXT__
 
-#include <openspace/rendering/renderable.h>
+layout(location = 0) in vec3 in_position;
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
+out float vs_depth;
+out vec4 vs_positionViewSpace;
 
-namespace ghoul::opengl { class ProgramObject; }
-namespace openspace::documentation { struct Documentation; }
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
-namespace openspace {
 
-class Translation;
+void main() {
+  vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1));
+  vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;
+  vs_depth = positionScreenSpace.w;
+  gl_Position  = positionScreenSpace;
 
-/**
- * TODO
- */
-class RenderableNodeDirectionHint : public Renderable {
-public:
-    RenderableNodeDirectionHint(const ghoul::Dictionary& dictionary);
-    ~RenderableNodeDirectionHint() override = default;
-
-    static documentation::Documentation Documentation();
-
-    std::string start() const;
-    std::string end() const;
-
-private:
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-    void updateBufferData();
-    void updateVertexData();
-    void update(const UpdateData& data) override;
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-
-    void unbindGL();
-    void bindGL();
-
-    ghoul::opengl::ProgramObject* _shaderProgram;
-
-    const GLuint _locVertex = 0;
-    GLuint _vaoId = 0;
-    GLuint _iboId = 0;
-    GLuint _vBufferId = 0;
-    std::vector<float> _vertexArray;
-    std::vector<unsigned int> _indexArray;
-
-    properties::StringProperty _start;
-    properties::StringProperty _end;
-    properties::Vec3Property _color;
-    properties::FloatProperty _offsetDistance;
-    properties::BoolProperty _useRelativeOffset;
-    properties::FloatProperty _length;
-    properties::BoolProperty _useRelativeLength;
-    properties::FloatProperty _width;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLENODEDIRECTIONHINT___H__
+  // Set z to 0 to disable near and far plane, unique handling for perspective in space
+  gl_Position.z = 0.f;
+}
