@@ -79,6 +79,9 @@ target_precompile_headers(cdf PRIVATE
 
 target_precompile_headers(ccmc PRIVATE
   "$<$<COMPILE_LANGUAGE:CXX>:iostream>"
+  "$<$<COMPILE_LANGUAGE:CXX>:map>"
+  "$<$<COMPILE_LANGUAGE:CXX>:unordered_map>"
+  "$<$<COMPILE_LANGUAGE:CXX>:vector>"
   "$<$<COMPILE_LANGUAGE:CXX>:boost/unordered_map.hpp>"
 )
 
