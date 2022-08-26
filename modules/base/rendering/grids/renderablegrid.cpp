@@ -129,7 +129,8 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    _highlightColor = p.highlightColor.value_or(_highlightColor);
+    // If no highlight color is specified then use the base color
+    _highlightColor = p.highlightColor.value_or(_color);
     _highlightColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_highlightColor);
 
@@ -144,7 +145,8 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    _highlightLineWidth = p.highlightLineWidth.value_or(_highlightLineWidth);
+    // If no highlight line width is specified then use the base line width
+    _highlightLineWidth = p.highlightLineWidth.value_or(_lineWidth);
     addProperty(_highlightLineWidth);
 
     _size.setExponent(10.f);

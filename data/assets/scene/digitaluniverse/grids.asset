@@ -413,26 +413,6 @@ local plane10kly = {
 
 local plane100kly = {
   Identifier = "100klyGrid",
-  Renderable = {
-    Type = "RenderableDUMeshes",
-    Enabled = false,
-    Opacity = 0.4,
-    File = speck .. "100kly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "100kly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 18.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
-  },
-  GUI = {
-    Name = "100kly Grid",
-    Path = "/Other/Grids"
-  }
-}
---[[
-local plane100klynew = {
-  Identifier = "100klyGridnew",
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -444,38 +424,20 @@ local plane100klynew = {
     Enabled = false,
     Opacity = 0.4,
     Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
+    HighlightRate = { 5, 5},
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
-    Name = "100kly Grid new",
-    Path = "/Other/Grids"
-  }
-}]]
-
-local plane1Mly = {
-  Identifier = "1MlyGrid",
-  Renderable = {
-    Type = "RenderableDUMeshes",
-    Enabled = false,
-    Opacity = 0.4,
-    File = speck .. "1Mly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1Mly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 19.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
-  },
-  GUI = {
-    Name = "1Mly Grid",
+    Name = "100kly Grid",
     Path = "/Other/Grids"
   }
 }
---[[
-local plane1Mlynew = {
-  Identifier = "1MlyGridnew",
+
+local plane1Mly = {
+  Identifier = "1MlyGrid",
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -487,38 +449,20 @@ local plane1Mlynew = {
     Enabled = false,
     Opacity = 0.4,
     Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = {0.3, 0.7, 0.8 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
+    HighlightRate = { 5, 5},
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
-    Name = "1Mly Grid new",
-    Path = "/Other/Grids"
-  }
-}]]
-
-local plane10Mly = {
-  Identifier = "10MlyGrid",
-  Renderable = {
-    Type = "RenderableDUMeshes",
-    Enabled = false,
-    Opacity = 0.4,
-    File = speck .. "10Mly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "10Mly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 20.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
-  },
-  GUI = {
-    Name = "10Mly Grid",
+    Name = "1Mly Grid",
     Path = "/Other/Grids"
   }
 }
---[[
-local plane10Mlynew = {
-  Identifier = "10MlyGridnew",
+
+local plane10Mly = {
+  Identifier = "10MlyGrid",
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -530,38 +474,20 @@ local plane10Mlynew = {
     Enabled = false,
     Opacity = 0.4,
     Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
+    HighlightRate = { 5, 5},
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
-    Name = "10Mly Grid new",
-    Path = "/Other/Grids"
-  }
-}]]
-
-local plane100Mly = {
-  Identifier = "100MlyGrid",
-  Renderable = {
-    Type = "RenderableDUMeshes",
-    Enabled = false,
-    Opacity = 0.4,
-    File = speck .. "100Mly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "100Mly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 21.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
-  },
-  GUI = {
-    Name = "100Mly Grid",
+    Name = "10Mly Grid",
     Path = "/Other/Grids"
   }
 }
---[[
-local plane100Mlynew = {
-  Identifier = "100MlyGridnew",
+
+local plane100Mly = {
+  Identifier = "100MlyGrid",
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -573,38 +499,20 @@ local plane100Mlynew = {
     Enabled = false,
     Opacity = 0.4,
     Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
+    HighlightRate = { 5, 5},
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
-    Name = "100Mly Grid new",
-    Path = "/Other/Grids"
-  }
-}]]
-
-local plane20Gly = {
-  Identifier = "20GlyGrid",
-  Renderable = {
-    Type = "RenderableDUMeshes",
-    Enabled = false,
-    Opacity = 0.4,
-    File = speck .. "20Gly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "20Gly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 23.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
-  },
-  GUI = {
-    Name = "20Gly Grid",
+    Name = "100Mly Grid",
     Path = "/Other/Grids"
   }
 }
---[[
-local plane20Glynew = {
-  Identifier = "20GlyGridnew",
+
+local plane20Gly = {
+  Identifier = "20GlyGrid",
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -616,15 +524,17 @@ local plane20Glynew = {
     Enabled = false,
     Opacity = 0.4,
     Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
     LineWidth = 2.0,
-    Segments = { 20, 20 },
+    Segments = { 40, 40 },
+    HighlightRate = { 5, 5},
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
-    Name = "20Gly Grid new",
+    Name = "20Gly Grid",
     Path = "/Other/Grids"
   }
-}]]
+}
 
 local nodes = {
   radio, oort, ecliptic, eclipticLabels, equatorial, equatorialLabels,
