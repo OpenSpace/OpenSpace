@@ -56,6 +56,7 @@ set_folder_location(GhoulTest "Unit Tests")
 begin_dependency("Spice")
 set(SPICE_BUILD_SHARED_LIBRARY OFF CACHE BOOL "" FORCE)
 add_subdirectory(spice)
+target_compile_features(spice PUBLIC cxx_std_20)
 set_folder_location(spice "External")
 end_dependency()
 

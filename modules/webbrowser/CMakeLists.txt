@@ -99,6 +99,25 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
 endif ()
 
+target_precompile_headers(libcef_dll_wrapper PRIVATE
+  [["include/cef_client.h"]]
+  [["include/capi/cef_browser_capi.h"]]
+  [["include/capi/cef_client_capi.h"]]
+  [["include/cef_client.h"]]
+  [["include/capi/cef_base_capi.h"]]
+  [["include/cef_render_handler.h"]]
+  <string>
+  <sstream>
+  <istream>
+  <ostream>
+)
+
+if (WIN32)
+  target_precompile_headers(libcef_dll_wrapper PRIVATE
+    <Windows.h>
+  )
+endif ()
+
 ##########################################################################################
 # Add CEF client files
 
@@ -241,9 +260,14 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 
+target_precompile_headers(${webbrowser_module} PRIVATE
+  <include/cef_browser.h>
+  <include/cef_client.h>
+  <include/wrapper/cef_helpers.h>
+)
+
 set_folder_location(libcef_dll_wrapper "Helper")
 set_folder_location(openspace_web_helper "Helper")
-
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()

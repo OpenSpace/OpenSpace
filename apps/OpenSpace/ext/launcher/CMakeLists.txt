@@ -127,11 +127,24 @@ target_link_libraries(
     Qt${QT_VERSION_MAJOR}::Network
 )
 
-if (MSVC)
-set(MSVC_WARNINGS
-  "/wd4619"   # #pragma warning: there is no warning number (raised by Qt headers)
-  "/wd4946"   # reinterpret_cast used between related classes: 
+target_precompile_headers(openspace-ui-launcher PRIVATE
+  <openspace/scene/profile.h>
+  <ghoul/glm.h>
+  <QAbstractItemDelegate>
+  <QAbstractItemModel>
+  <QDialog>
+  <QLineEdit>
+  <QObject>
+  <QStyleOption>
+  <QTextCursor>
+  <QWidget>
+  <filesystem>
 )
-target_compile_options(openspace-ui-launcher INTERFACE ${MSVC_WARNINGS})
 
+if (MSVC)
+  set(MSVC_WARNINGS
+    "/wd4619"   # #pragma warning: there is no warning number (raised by Qt headers)
+    "/wd4946"   # reinterpret_cast used between related classes: 
+  )
+  target_compile_options(openspace-ui-launcher INTERFACE ${MSVC_WARNINGS})
 endif ()
