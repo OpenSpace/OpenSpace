@@ -479,22 +479,27 @@ void RenderableNodeDirectionHint::updateVertexData() {
     }
 
     // Update the position based on the arrowDirection of the nodes
-    const glm::dvec3 startNodePos = coordinatePosFromAnchorNode(startNode->worldPosition());
-    const glm::dvec3 endNodePos = coordinatePosFromAnchorNode(endNode->worldPosition());
+    glm::dvec3 startNodePos = coordinatePosFromAnchorNode(startNode->worldPosition());
+    glm::dvec3 endNodePos = coordinatePosFromAnchorNode(endNode->worldPosition());
 
-    const glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
-    const glm::dvec3 startPos = startNodePos + offset * arrowDirection;
-    const glm::dvec3 endPos = startPos + length * arrowDirection;
+    glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
+    glm::dvec3 startPos = startNodePos + offset * arrowDirection;
+    glm::dvec3 endPos = startPos + length * arrowDirection;
+
+    if (_invertArrowDirection) {
+        std::swap(startPos, endPos);
+        arrowDirection *= -1;
+    }
 
     double opposite = _arrowHeadWidthFactor * _width;
     double hypotenuse = opposite / std::tan(glm::radians(_arrowHeadAngle.value()));
     double adjacent = glm::sqrt(hypotenuse * hypotenuse - opposite * opposite);
-    const glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
+    glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
 
     _vertexArray.clear();
     _indexArray.clear();
 
-    // Get unit circle vertices on the XY-plane
+    // Vertice positions for arrow bottom
     const std::vector<glm::vec3> bottomVertices = circleVertices(
         _segments,
         _width,
@@ -502,6 +507,7 @@ void RenderableNodeDirectionHint::updateVertexData() {
         arrowDirection
     );
 
+    // Vertice positions for arrow top (close to head)
     const std::vector<glm::vec3> topVertices = circleVertices(
         _segments,
         _width,
@@ -509,6 +515,7 @@ void RenderableNodeDirectionHint::updateVertexData() {
         arrowDirection
     );
 
+    // Vertice positions for arrow head
     const std::vector<glm::vec3> arrowHeadVertices = circleVertices(
         _segments,
         _width * _arrowHeadWidthFactor,
