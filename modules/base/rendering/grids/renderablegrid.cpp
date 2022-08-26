@@ -42,6 +42,12 @@ namespace {
         "This value determines the color of the grid lines that are rendered"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
+        "HighlightColor",
+        "Highlight Color",
+        "This value determines the color of the highlighted lines in the grid"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
@@ -49,10 +55,22 @@ namespace {
         "grid in each direction"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo HighlightRateInfo = {
+        "HighlightRate",
+        "Highlight Rate",
+        "The rate the columns and rows are highlighted"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "This value specifies the line width of the grid"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
+        "HighlightLineWidth",
+        "HighlightLine Width",
+        "This value specifies the line width of the highlighted lines in the grid"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
@@ -65,11 +83,20 @@ namespace {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
+        // [[codegen::verbatim(HighlightColorInfo.description)]]
+        std::optional<glm::vec3> highlightColor [[codegen::color()]];
+
         // [[codegen::verbatim(SegmentsInfo.description)]]
         std::optional<glm::ivec2> segments;
 
+        // [[codegen::verbatim(HighlightRateInfo.description)]]
+        std::optional<glm::ivec2> highlightRate;
+
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(HighlightLineWidthInfo.description)]]
+        std::optional<float> highlightLineWidth;
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec2> size;
@@ -86,8 +113,11 @@ documentation::Documentation RenderableGrid::Documentation() {
 RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
+    , _highlightColor(HighlightColorInfo, glm::vec3(0.8f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200))
+    , _highlightRate(HighlightRateInfo, glm::uvec2(5), glm::uvec2(0), glm::uvec2(200))
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
+    , _highlightLineWidth(HighlightLineWidthInfo, 0.5f, 1.f, 20.f)
     , _size(SizeInfo, glm::vec2(1.f), glm::vec2(1.f), glm::vec2(1e11f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -99,12 +129,23 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
+    _highlightColor = p.highlightColor.value_or(_highlightColor);
+    _highlightColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_highlightColor);
+
     _segments = p.segments.value_or(_segments);
     _segments.onChange([&]() { _gridIsDirty = true; });
     addProperty(_segments);
 
+    _highlightRate = p.highlightRate.value_or(_highlightRate);
+    _highlightRate.onChange([&]() { _gridIsDirty = true; });
+    addProperty(_highlightRate);
+
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    _highlightLineWidth = p.highlightLineWidth.value_or(_highlightLineWidth);
+    addProperty(_highlightLineWidth);
 
     _size.setExponent(10.f);
     _size = p.size.value_or(_size);
@@ -130,9 +171,14 @@ void RenderableGrid::initializeGL() {
 
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vBufferID);
+    glGenVertexArrays(1, &_highlightVaoID);
+    glGenBuffers(1, &_highlightVBufferID);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
+    glBindVertexArray(_highlightVaoID);
+    glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
+
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
@@ -140,9 +186,13 @@ void RenderableGrid::initializeGL() {
 void RenderableGrid::deinitializeGL() {
     glDeleteVertexArrays(1, &_vaoID);
     _vaoID = 0;
+    glDeleteVertexArrays(1, &_highlightVaoID);
+    _highlightVaoID = 0;
 
     glDeleteBuffers(1, &_vBufferID);
     _vBufferID = 0;
+    glDeleteBuffers(1, &_highlightVBufferID);
+    _highlightVBufferID = 0;
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
@@ -182,13 +232,24 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     glEnable(GL_LINE_SMOOTH);
     glDepthMask(false);
 
+    // Render minor grid
     glBindVertexArray(_vaoID);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
-    glBindVertexArray(0);
 
-    _gridProgram->deactivate();
+    // Render major grid
+#ifndef __APPLE__
+    glLineWidth(_highlightLineWidth);
+#else
+    glLineWidth(1.f);
+#endif
+    _gridProgram->setUniform("gridColor", _highlightColor);
+
+    glBindVertexArray(_highlightVaoID);
+    glDrawArrays(_mode, 0, static_cast<GLsizei>(_highlightArray.size()));
 
     // Restore GL State
+    glBindVertexArray(0);
+    _gridProgram->deactivate();
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -205,10 +266,14 @@ void RenderableGrid::update(const UpdateData&) {
 
     const int nLines = (2 * nSegments.x * nSegments.y) + nSegments.x + nSegments.y;
     const int nVertices = 2 * nLines;
-    _varray.resize(nVertices);
+    _varray.clear();
+    _varray.reserve(nVertices);
+    _highlightArray.clear();
+    _highlightArray.reserve(nVertices);
     // OBS! Could be optimized further by removing duplicate vertices
 
-    int nr = 0;
+    const glm::uvec2 center = glm::uvec2(nSegments.x / 2.f, nSegments.y / 2.f);
+
     for (unsigned int i = 0; i < nSegments.x; ++i) {
         for (unsigned int j = 0; j < nSegments.y; ++j) {
             const float y0 = -halfSize.y + j * step.y;
@@ -217,11 +282,39 @@ void RenderableGrid::update(const UpdateData&) {
             const float x0 = -halfSize.x + i * step.x;
             const float x1 = x0 + step.x;
 
-            _varray[nr++] = { x0, y0, 0.f };
-            _varray[nr++] = { x0, y1, 0.f };
+            // Line in y direction
+            if (_highlightRate.value().y != 0) {
+                int rest = static_cast<int>(i - center.y) % _highlightRate.value().y;
+                if (abs(rest) == 0) {
+                    _highlightArray.push_back({ x0, y0, 0.f });
+                    _highlightArray.push_back({ x0, y1, 0.f });
+                }
+                else {
+                    _varray.push_back({ x0, y0, 0.f });
+                    _varray.push_back({ x0, y1, 0.f });
+                }
+            }
+            else {
+                _varray.push_back({ x0, y0, 0.f });
+                _varray.push_back({ x0, y1, 0.f });
+            }
 
-            _varray[nr++] = { x0, y0, 0.f };
-            _varray[nr++] = { x1, y0, 0.f };
+            // Line in x direction
+            if (_highlightRate.value().x != 0) {
+                int rest = static_cast<int>(j - center.x) % _highlightRate.value().x;
+                if (abs(rest) == 0) {
+                    _highlightArray.push_back({ x0, y0, 0.f });
+                    _highlightArray.push_back({ x1, y0, 0.f });
+                }
+                else {
+                    _varray.push_back({ x0, y0, 0.f });
+                    _varray.push_back({ x1, y0, 0.f });
+                }
+            }
+            else {
+                _varray.push_back({ x0, y0, 0.f });
+                _varray.push_back({ x1, y0, 0.f });
+            }
         }
     }
 
@@ -229,20 +322,49 @@ void RenderableGrid::update(const UpdateData&) {
     for (unsigned int i = 0; i < nSegments.x; ++i) {
         const float x0 = -halfSize.x + i * step.x;
         const float x1 = x0 + step.x;
-        _varray[nr++] = { x0, halfSize.y, 0.f };
-        _varray[nr++] = { x1, halfSize.y, 0.f };
+
+        if (_highlightRate.value().x != 0) {
+            int rest = static_cast<int>(nSegments.y - center.x) % _highlightRate.value().x;
+            if (abs(rest) == 0) {
+                _highlightArray.push_back({ x0, halfSize.y, 0.f });
+                _highlightArray.push_back({ x1, halfSize.y, 0.f });
+            }
+            else {
+                _varray.push_back({ x0, halfSize.y, 0.f });
+                _varray.push_back({ x1, halfSize.y, 0.f });
+            }
+        }
+        else {
+            _varray.push_back({ x0, halfSize.y, 0.f });
+            _varray.push_back({ x1, halfSize.y, 0.f });
+        }
     }
 
     // last y col
     for (unsigned int i = 0; i < nSegments.y; ++i) {
         const float y0 = -halfSize.y + i * step.y;
         const float y1 = y0 + step.y;
-        _varray[nr++] = { halfSize.x, y0, 0.f };
-        _varray[nr++] = { halfSize.x, y1, 0.f };
+
+        if (_highlightRate.value().y != 0) {
+            int rest = static_cast<int>(nSegments.x - center.y) % _highlightRate.value().y;
+            if (abs(rest) == 0) {
+                _highlightArray.push_back({ halfSize.x, y0, 0.f });
+                _highlightArray.push_back({ halfSize.x, y1, 0.f });
+            }
+            else {
+                _varray.push_back({ halfSize.x, y0, 0.f });
+                _varray.push_back({ halfSize.x, y1, 0.f });
+            }
+        }
+        else {
+            _varray.push_back({ halfSize.x, y0, 0.f });
+            _varray.push_back({ halfSize.x, y1, 0.f });
+        }
     }
 
     setBoundingSphere(glm::length(glm::dvec2(halfSize)));
 
+    // Minor grid
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
     glBufferData(
@@ -251,7 +373,19 @@ void RenderableGrid::update(const UpdateData&) {
         _varray.data(),
         GL_STATIC_DRAW
     );
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
+    // Major grid
+    glBindVertexArray(_highlightVaoID);
+    glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _highlightArray.size() * sizeof(Vertex),
+        _highlightArray.data(),
+        GL_STATIC_DRAW
+    );
+    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
     glBindVertexArray(0);

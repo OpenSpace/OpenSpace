@@ -61,19 +61,25 @@ protected:
     ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
     properties::Vec3Property _color;
+    properties::Vec3Property _highlightColor;
     // @TODO (abock, 2021-01-28)  This was a UVec2Property before, but it wasn't supported
     // be the codegen.  As soon as it does, this should be changed back
     properties::IVec2Property _segments;
+    properties::IVec2Property _highlightRate;
     properties::FloatProperty _lineWidth;
+    properties::FloatProperty _highlightLineWidth;
     properties::Vec2Property _size;
 
     bool _gridIsDirty = true;
 
     GLuint _vaoID = 0;
     GLuint _vBufferID = 0;
+    GLuint _highlightVaoID = 0;
+    GLuint _highlightVBufferID = 0;
 
     GLenum _mode = GL_LINES;
     std::vector<Vertex> _varray;
+    std::vector<Vertex> _highlightArray;
 };
 
 }// namespace openspace
