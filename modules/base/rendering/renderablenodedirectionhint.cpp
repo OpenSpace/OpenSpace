@@ -62,6 +62,34 @@ namespace {
         "This value determines the RGB color for the arrow"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
+        "Segments",
+        "Number of Segments",
+        "This value pecifies the number of segments that the shapes for the arrow are "
+        "separated in. A higher number leads to a higher resolution"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InvertInfo = {
+        "Invert",
+        "Invert Direction",
+        "If set to true, the arrow direction is inverted so that it points to the "
+        "strat node instead of the end node"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ArrowHeadAngleInfo = {
+        "ArrowHeadAngle",
+        "Arrow Head Angle",
+        "This value is used to set the angle of the arrow head, to make it etiher "
+        "wider or pointier"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ArrowHeadWidthInfo = {
+        "ArrowHeadWidthFactor",
+        "Arrow Head Width Factor",
+        "A factor that is multiplied with the width or the arrow itself, to determine "
+        "the width of the base of the arrow head"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo OffsetDistanceInfo = {
         "Offset",
         "Offset Distance",
@@ -163,6 +191,18 @@ namespace {
         // [[codegen::verbatim(LineColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
+        // [[codegen::verbatim(SegmentsInfo.description)]]
+        std::optional<int> segments;
+
+        // [[codegen::verbatim(InvertInfo.description)]]
+        std::optional<bool> invert;
+
+        // [[codegen::verbatim(ArrowHeadAngleInfo.description)]]
+        std::optional<float> arrowHeadAngle;
+
+        // [[codegen::verbatim(ArrowHeadWidthInfo.description)]]
+        std::optional<float> arrowHeadWidthFactor;
+
         // [[codegen::verbatim(OffsetDistanceInfo.description)]]
         std::optional<float> offset;
 
@@ -192,6 +232,10 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     , _start(StartNodeInfo, "Root")
     , _end(EndNodeInfo, "Root")
     , _color(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _segments(SegmentsInfo, 10, 3, 100)
+    , _invertArrowDirection(InvertInfo, false)
+    , _arrowHeadAngle(ArrowHeadAngleInfo, 30.f, 5.f, 45.f)
+    , _arrowHeadWidthFactor(ArrowHeadWidthInfo, 2.f, 1.f, 10.f)
     , _offsetDistance(OffsetDistanceInfo, 0.f, 0.f, 1e20f)
     , _useRelativeOffset(RelativeOffsetInfo, false)
     , _length(LengthInfo, 100.f, 0.f, 1e20f)
@@ -212,48 +256,25 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
 
     addProperty(_opacity);
 
+    _segments = p.segments.value_or(_segments);
+    _segments.onChange([this]() { _shapeIsDirty = true; });
+    addProperty(_segments);
+
+    _invertArrowDirection = p.invert.value_or(_invertArrowDirection);
+    _invertArrowDirection.onChange([this]() { _shapeIsDirty = true; });
+    addProperty(_invertArrowDirection);
+
+    _arrowHeadAngle = p.arrowHeadAngle.value_or(_arrowHeadAngle);
+    _arrowHeadAngle.onChange([this]() { _shapeIsDirty = true; });
+    addProperty(_arrowHeadAngle);
+
+    _arrowHeadWidthFactor = p.arrowHeadWidthFactor.value_or(_arrowHeadWidthFactor);
+    _arrowHeadWidthFactor.onChange([this]() { _shapeIsDirty = true; });
+    addProperty(_arrowHeadWidthFactor);
+
     _width = p.width.value_or(_width);
     _width.setExponent(10.f);
     addProperty(_width);
-
-    _useRelativeOffset.onChange([this]() {
-        SceneGraphNode* startNode = sceneGraphNode(_start);
-        if (!startNode) {
-            LERROR(fmt::format("Could not find start node '{}'", _start.value()));
-            return;
-        }
-        const double boundingSphere = startNode->boundingSphere();
-
-        if (!_useRelativeOffset) {
-            // Recompute distance (previous value was relative)
-            _offsetDistance = _offsetDistance * startNode->boundingSphere();
-            _offsetDistance.setExponent(11.f);
-            _offsetDistance.setMaxValue(1e20f);
-        }
-        else {
-            // Recompute distance (previous value was in meters)
-            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
-                LERROR(fmt::format(
-                    "Start node '{}' has invalid bounding sphere", _start.value()
-                ));
-                return;
-            }
-            _offsetDistance = _offsetDistance / startNode->boundingSphere();
-            _offsetDistance.setExponent(3.f);
-            _offsetDistance.setMaxValue(1000.f);
-        }
-    });
-    // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
-
-    _useRelativeOffset = p.useRelativeOffset.value_or(_useRelativeOffset);
-    addProperty(_useRelativeOffset);
-
-    _offsetDistance = p.offset.value_or(_offsetDistance);
-    addProperty(_offsetDistance);
-
-    if (!_useRelativeOffset) {
-        _offsetDistance.setExponent(11.f);
-    }
 
     _useRelativeLength.onChange([this]() {
         SceneGraphNode* startNode = sceneGraphNode(_start);
@@ -292,6 +313,45 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
 
     if (!_useRelativeLength) {
         _length.setExponent(11.f);
+    }
+
+    _useRelativeOffset.onChange([this]() {
+        SceneGraphNode* startNode = sceneGraphNode(_start);
+        if (!startNode) {
+            LERROR(fmt::format("Could not find start node '{}'", _start.value()));
+            return;
+        }
+        const double boundingSphere = startNode->boundingSphere();
+
+        if (!_useRelativeOffset) {
+            // Recompute distance (previous value was relative)
+            _offsetDistance = _offsetDistance * startNode->boundingSphere();
+            _offsetDistance.setExponent(11.f);
+            _offsetDistance.setMaxValue(1e20f);
+        }
+        else {
+            // Recompute distance (previous value was in meters)
+            if (boundingSphere < std::numeric_limits<double>::epsilon()) {
+                LERROR(fmt::format(
+                    "Start node '{}' has invalid bounding sphere", _start.value()
+                ));
+                return;
+            }
+            _offsetDistance = _offsetDistance / startNode->boundingSphere();
+            _offsetDistance.setExponent(3.f);
+            _offsetDistance.setMaxValue(1000.f);
+        }
+        });
+    // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
+
+    _useRelativeOffset = p.useRelativeOffset.value_or(_useRelativeOffset);
+    addProperty(_useRelativeOffset);
+
+    _offsetDistance = p.offset.value_or(_offsetDistance);
+    addProperty(_offsetDistance);
+
+    if (!_useRelativeOffset) {
+        _offsetDistance.setExponent(11.f);
     }
 }
 
@@ -426,13 +486,8 @@ void RenderableNodeDirectionHint::updateVertexData() {
     const glm::dvec3 startPos = startNodePos + offset * arrowDirection;
     const glm::dvec3 endPos = startPos + length * arrowDirection;
 
-    // TODO: make properties
-    const float arrowAngle = 35.f; // degrees 
-    const float arrowHeadWidthFactor = 2.0;
-    unsigned int nSegments = 10;
-
-    double opposite = arrowHeadWidthFactor * _width;
-    double hypotenuse = opposite / std::sin(glm::radians(arrowAngle));
+    double opposite = _arrowHeadWidthFactor * _width;
+    double hypotenuse = opposite / std::tan(glm::radians(_arrowHeadAngle.value()));
     double adjacent = glm::sqrt(hypotenuse * hypotenuse - opposite * opposite);
     const glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
 
@@ -441,22 +496,22 @@ void RenderableNodeDirectionHint::updateVertexData() {
 
     // Get unit circle vertices on the XY-plane
     const std::vector<glm::vec3> bottomVertices = circleVertices(
-        nSegments,
+        _segments,
         _width,
         startPos,
         arrowDirection
     );
 
     const std::vector<glm::vec3> topVertices = circleVertices(
-        nSegments,
+        _segments,
         _width,
         arrowHeadStartPos,
         arrowDirection
     );
 
     const std::vector<glm::vec3> arrowHeadVertices = circleVertices(
-        nSegments,
-        _width * 2.0,
+        _segments,
+        _width * _arrowHeadWidthFactor,
         arrowHeadStartPos,
         arrowDirection
     );
@@ -484,6 +539,8 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _vertexArray.push_back(v.z);
     }
 
+    const unsigned int nSegments = _segments;
+
     auto topRingIndex = [&nSegments](unsigned int i) {
         return 1 + nSegments + i;
     };
@@ -508,8 +565,8 @@ void RenderableNodeDirectionHint::updateVertexData() {
     unsigned int topCenterIndex = _vertexArray.size() / 3 - 1;
 
     // Build triangle list from the given vertices
-    for (unsigned int i = 0; i < nSegments; ++i) {
-        bool isLast = (i == nSegments - 1);
+    for (unsigned int i = 0; i < _segments; ++i) {
+        bool isLast = (i == _segments - 1);
 
         // Bottom vertex indices
         unsigned int v0 = botRingIndex(i);
@@ -543,15 +600,17 @@ void RenderableNodeDirectionHint::updateVertexData() {
 
         // TODO: arrow head bottom
     }
+
+    _shapeIsDirty = false;
 }
 
 void RenderableNodeDirectionHint::update(const UpdateData&) {
     SceneGraphNode* startNode = sceneGraphNode(_start);
     SceneGraphNode* endNode = sceneGraphNode(_end);
 
-    bool shouldUpdate = false;
+    bool shouldUpdate = _shapeIsDirty;
     if (startNode && endNode) {
-        const float Epsilon = std::numeric_limits<float>::epsilon();
+        constexpr float Epsilon = std::numeric_limits<float>::epsilon();
         float combinedDistanceChange =
             glm::distance(startNode->worldPosition(), _prevStartNodePosition) +
             glm::distance(endNode->worldPosition(), _prevEndNodePosition);
