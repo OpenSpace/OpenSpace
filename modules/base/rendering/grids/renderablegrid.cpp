@@ -274,8 +274,8 @@ void RenderableGrid::update(const UpdateData&) {
     _highlightArray.reserve(nVertices);
     // OBS! Could be optimized further by removing duplicate vertices
 
+    // If the number of segments are uneven the center won't be completly centered
     const glm::uvec2 center = glm::uvec2(nSegments.x / 2.f, nSegments.y / 2.f);
-
     for (unsigned int i = 0; i < nSegments.x; ++i) {
         for (unsigned int j = 0; j < nSegments.y; ++j) {
             const float y0 = -halfSize.y + j * step.y;
@@ -375,7 +375,6 @@ void RenderableGrid::update(const UpdateData&) {
         _varray.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
     // Major grid
@@ -387,7 +386,6 @@ void RenderableGrid::update(const UpdateData&) {
         _highlightArray.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
     glBindVertexArray(0);
