@@ -73,7 +73,7 @@ documentation::Documentation RenderableConstellationBounds::Documentation() {
 
 RenderableConstellationBounds::RenderableConstellationBounds(
                                                       const ghoul::Dictionary& dictionary)
-    : RenderableConstellation(dictionary)
+    : RenderableConstellationsBase(dictionary)
     , _vertexFilename(VertexInfo)
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
 {
@@ -90,20 +90,20 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 }
 
 void RenderableConstellationBounds::initialize() {
-    RenderableConstellation::initialize();
+    RenderableConstellationsBase::initialize();
 
     loadVertexFile();
 
-    if (!_assetSelectedConstellations.empty()) {
-        const std::vector<std::string> options = _constellationSelection.options();
+    if (!_assetSelection.empty()) {
+        const std::vector<std::string> options = _selection.options();
         std::set<std::string> selectedConstellations;
 
-        for (const std::string& s : _assetSelectedConstellations) {
+        for (const std::string& s : _assetSelection) {
             const auto it = std::find(options.begin(), options.end(), s);
             if (it == options.end()) {
                 // The user has specified a constellation name that doesn't exist
                 LWARNINGC(
-                    "RenderableConstellation",
+                    "RenderableConstellationsBase",
                     fmt::format("Option '{}' not found in list of constellations", s)
                 );
             }
@@ -111,7 +111,7 @@ void RenderableConstellationBounds::initialize() {
                 selectedConstellations.insert(s);
             }
         }
-        _constellationSelection = selectedConstellations;
+        _selection = selectedConstellations;
     }
 }
 
@@ -154,10 +154,13 @@ void RenderableConstellationBounds::deinitializeGL() {
 }
 
 bool RenderableConstellationBounds::isReady() const {
-    if (!_hasLabel) {
-        return _program && _vao != 0 && _vbo != 0;
+    bool isReady = _program && _vao != 0 && _vbo != 0;
+
+    // If we have labels, they also need to be loaded
+    if (_hasLabel) {
+        return isReady && !_labelset.entries.empty();
     }
-    return _program && _vao != 0 && _vbo != 0 && !_labelset.entries.empty();
+    return isReady;
 }
 
 void RenderableConstellationBounds::render(const RenderData& data, RendererTasks& tasks) {
@@ -177,7 +180,7 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("ModelTransform", glm::mat4(modelTransform));
     _program->setUniform("color", _color);
-    _program->setUniform("alphaValue", opacity());
+    _program->setUniform("opacity", opacity());
 
     glLineWidth(_lineWidth);
 
@@ -190,11 +193,10 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     glBindVertexArray(0);
     _program->deactivate();
 
-    RenderableConstellation::render(data, tasks);
+    RenderableConstellationsBase::render(data, tasks);
 }
 
-void RenderableConstellationBounds::update(const UpdateData& data) {
-}
+void RenderableConstellationBounds::update(const UpdateData& data) { }
 
 bool RenderableConstellationBounds::loadVertexFile() {
     if (_vertexFilename.value().empty()) {
@@ -300,7 +302,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
 
 void RenderableConstellationBounds::selectionPropertyHasChanged() {
     // If no values are selected (the default), we want to show all constellations
-    if (!_constellationSelection.hasSelected()) {
+    if (!_selection.hasSelected()) {
         for (ConstellationBound& b : _constellationBounds) {
             b.isEnabled = true;
         }
@@ -308,7 +310,7 @@ void RenderableConstellationBounds::selectionPropertyHasChanged() {
     else {
         // Enable all constellations that are selected
         for (ConstellationBound& b : _constellationBounds) {
-            b.isEnabled = _constellationSelection.isSelected(b.constellationFullName);
+            b.isEnabled = _selection.isSelected(b.constellationFullName);
         }
     }
 }

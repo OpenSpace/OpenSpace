@@ -16,8 +16,8 @@ local object = {
     Type = "RenderableConstellationBounds",
     Enabled = false,
     File = data .. "bound_20.dat",
-    ConstellationNamesFile = data .. "constellations.dat",
-    -- ConstellationSelection = zodiacs
+    NamesFile = data .. "constellations.dat",
+    -- Selection = zodiacs
   },
   Transform = {
     Rotation = {

@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONBOUNDS___H__
 #define __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONBOUNDS___H__
 
-#include <modules/space/rendering/renderableconstellation.h>
+#include <modules/space/rendering/renderableconstellationsbase.h>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -42,7 +42,7 @@ namespace documentation { struct Documentation; }
  * <code>_distance</code> property. Currently, all constellation bounds are lines, which
  * leads to artifacts if the radius is very small.
  */
-class RenderableConstellationBounds : public RenderableConstellation {
+class RenderableConstellationBounds : public RenderableConstellationsBase {
 public:
     RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
 

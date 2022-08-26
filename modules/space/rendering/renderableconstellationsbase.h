@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATION___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATION___H__
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONSBASE___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONSBASE___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -44,9 +44,12 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderableConstellation : public Renderable {
+/**
+ * This is a base class for constellation lines and bounds
+ */
+class RenderableConstellationsBase : public Renderable {
 public:
-    virtual ~RenderableConstellation() override = default;
+    virtual ~RenderableConstellationsBase() override = default;
 
     virtual void initialize() override;
     virtual void initializeGL() override = 0;
@@ -62,7 +65,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    explicit RenderableConstellation(const ghoul::Dictionary& dictionary);
+    explicit RenderableConstellationsBase(const ghoul::Dictionary& dictionary);
 
     /**
      * Callback method that gets triggered when <code>_constellationSelection</code>
@@ -78,11 +81,11 @@ protected:
     properties::FloatProperty _lineWidth;
 
     // Property that stores all constellations chosen by the user to be drawn
-    properties::SelectionProperty _constellationSelection;
+    properties::SelectionProperty _selection;
 
     // Temporary storage of which constellations should be rendered as stated in the
     // asset file
-    std::vector<std::string> _assetSelectedConstellations;
+    std::vector<std::string> _assetSelection;
 
     // Label text settings
     bool _hasLabel = false;
@@ -92,7 +95,7 @@ protected:
 private:
     // Map over the constellations names and their abbreviations
     // key = abbreviation, value = full name
-    std::map<std::string, std::string> _constellationNamesTranslation;
+    std::map<std::string, std::string> _namesTranslation;
 
     /**
      * Loads the file specified in <code>_constellationNamesFilename</code> that contains
@@ -104,7 +107,7 @@ private:
     void fillSelectionProperty();
 
     // The file containing constellation names and abbreviations
-    properties::StringProperty _constellationNamesFilename;
+    properties::StringProperty _namesFilename;
 
     // Label text settings
     std::string _labelFile;
@@ -120,4 +123,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATION___H__
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONSBASE___H__

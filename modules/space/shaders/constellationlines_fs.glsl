@@ -28,19 +28,18 @@ in float vs_screenSpaceDepth;
 in vec4 vs_positionViewSpace;
 
 uniform vec3 color;
-uniform float alphaValue;
+uniform float opacity;
 
 
 Fragment getFragment() {
   Fragment frag;
-  if (alphaValue == 0.0) {
+  if (opacity == 0.0) {
     discard;
   }
 
-  frag.color = vec4(color, alphaValue);
+  frag.color = vec4(color, opacity);
   frag.depth = vs_screenSpaceDepth;
 
-  // JCC: Need to change the position to camera space
   frag.gPosition = vs_positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 

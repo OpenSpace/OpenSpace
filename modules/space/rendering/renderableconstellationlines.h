@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLECONSTELLATIONLINES___H__
 #define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLECONSTELLATIONLINES___H__
 
-#include <modules/space/rendering/renderableconstellation.h>
+#include <modules/space/rendering/renderableconstellationsbase.h>
 
 #include <ghoul/opengl/uniformcache.h>
 #include <unordered_map>
@@ -41,7 +41,7 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderableConstellationLines : public RenderableConstellation {
+class RenderableConstellationLines : public RenderableConstellationsBase {
 public:
     explicit RenderableConstellationLines(const ghoul::Dictionary& dictionary);
     ~RenderableConstellationLines() override = default;
@@ -88,7 +88,7 @@ private:
     properties::BoolProperty _drawElements;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
-    UniformCache(modelViewTransform, projectionTransform, alphaValue,
+    UniformCache(modelViewTransform, projectionTransform, opacity,
         color) _uniformCache;
 
     std::string _speckFile;

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/space/rendering/renderableconstellation.h>
+#include <modules/space/rendering/renderableconstellationsbase.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -74,9 +74,9 @@ namespace {
         "constellations"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ConstellationInfo = {
-        "ConstellationFile",
-        "Constellation File Path",
+    constexpr openspace::properties::Property::PropertyInfo NamesFileInfo = {
+        "NamesFile",
+        "Constellation Names File Path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
         "abbreviations are used as the full names"
@@ -112,12 +112,12 @@ namespace {
         "The constellations that are selected are displayed on the celestial sphere"
     };
 
-    struct [[codegen::Dictionary(RenderableConstellation)]] Parameters {
+    struct [[codegen::Dictionary(RenderableConstellationsBase)]] Parameters {
         // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
 
-        // [[codegen::verbatim(ConstellationInfo.description)]]
-        std::optional<std::filesystem::path> constellationNamesFile;
+        // [[codegen::verbatim(NamesFileInfo.description)]]
+        std::optional<std::filesystem::path> namesFile;
 
         // [[codegen::verbatim(TextColorInfo.description)]]
         std::optional<glm::vec3> textColor [[codegen::color()]];
@@ -150,18 +150,18 @@ namespace {
         std::optional<Unit> labelUnit;
 
         // [[codegen::verbatim(SelectionInfo.description)]]
-        std::optional<std::vector<std::string>> constellationSelection;
+        std::optional<std::vector<std::string>> selection;
     };
-#include "renderableconstellation_codegen.cpp"
+#include "renderableconstellationsbase_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableConstellation::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_constellation");
+documentation::Documentation RenderableConstellationsBase::Documentation() {
+    return codegen::doc<Parameters>("space_renderable_constellationsbase");
 }
 
-RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictionary)
+RenderableConstellationsBase::RenderableConstellationsBase(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
@@ -175,8 +175,8 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
     )
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _constellationNamesFilename(ConstellationInfo)
-    , _constellationSelection(SelectionInfo)
+    , _namesFilename(NamesFileInfo)
+    , _selection(SelectionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -196,12 +196,11 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
     addProperty(_renderOption);
 
     // Avoid reading files here, instead do it in multithreaded initialize()
-    if (p.constellationNamesFile.has_value()) {
-        _constellationNamesFilename =
-            absPath(p.constellationNamesFile.value().string()).string();
+    if (p.namesFile.has_value()) {
+        _namesFilename = absPath(p.namesFile.value().string()).string();
     }
-    _constellationNamesFilename.onChange([&]() { loadConstellationFile(); });
-    addProperty(_constellationNamesFilename);
+    _namesFilename.onChange([&]() { loadConstellationFile(); });
+    addProperty(_namesFilename);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
@@ -236,45 +235,44 @@ RenderableConstellation::RenderableConstellation(const ghoul::Dictionary& dictio
         }
     }
 
-    _constellationSelection.onChange([this]() { selectionPropertyHasChanged(); });
-    addProperty(_constellationSelection);
+    _selection.onChange([this]() { selectionPropertyHasChanged(); });
+    addProperty(_selection);
 
-    _assetSelectedConstellations =
-        p.constellationSelection.value_or(_assetSelectedConstellations);
+    _assetSelection = p.selection.value_or(_assetSelection);
 }
 
-std::string RenderableConstellation::constellationFullName(
+std::string RenderableConstellationsBase::constellationFullName(
                                                       const std::string& identifier) const
 {
-    if (_constellationNamesTranslation.empty() || identifier.empty()) {
+    if (_namesTranslation.empty() || identifier.empty()) {
         std::string message = "List of constellations or the given identifier was empty";
-        LWARNINGC("RenderableConstellation", message);
+        LWARNINGC("RenderableConstellationsBase", message);
         return "";
     }
 
     try {
-        return _constellationNamesTranslation.at(identifier);
+        return _namesTranslation.at(identifier);
     }
     catch (const std::out_of_range&) {
         std::string message = fmt::format(
             "Identifier '{}' could not be found in list of constellations", identifier
         );
-        throw ghoul::RuntimeError(message, "RenderableConstellation");
+        throw ghoul::RuntimeError(message, "RenderableConstellationsBase");
     }
 }
 
-void RenderableConstellation::loadConstellationFile() {
-    if (_constellationNamesFilename.value().empty()) {
+void RenderableConstellationsBase::loadConstellationFile() {
+    if (_namesFilename.value().empty()) {
         return;
     }
 
     // Reset
-    _constellationSelection.clearOptions();
-    _constellationNamesTranslation.clear();
+    _selection.clearOptions();
+    _namesTranslation.clear();
 
     std::ifstream file;
     file.exceptions(std::ifstream::goodbit);
-    file.open(absPath(_constellationNamesFilename));
+    file.open(absPath(_namesFilename));
 
     std::string line;
     while (file.good()) {
@@ -290,19 +288,19 @@ void RenderableConstellation::loadConstellationFile() {
         std::string fullName;
         std::getline(s, fullName);
         ghoul::trimWhitespace(fullName);
-        _constellationNamesTranslation[abbreviation] = fullName;
+        _namesTranslation[abbreviation] = fullName;
     }
 
     fillSelectionProperty();
 }
 
-void RenderableConstellation::fillSelectionProperty() {
-    for (const std::pair<std::string, std::string>& pair : _constellationNamesTranslation) {
-        _constellationSelection.addOption(pair.second);
+void RenderableConstellationsBase::fillSelectionProperty() {
+    for (const std::pair<std::string, std::string>& pair : _namesTranslation) {
+        _selection.addOption(pair.second);
     }
 }
 
-void RenderableConstellation::initialize() {
+void RenderableConstellationsBase::initialize() {
     loadConstellationFile();
 
     if (!_hasLabel) {
@@ -334,7 +332,7 @@ void RenderableConstellation::initialize() {
     }
 }
 
-void RenderableConstellation::render(const RenderData& data, RendererTasks&) {
+void RenderableConstellationsBase::render(const RenderData& data, RendererTasks&) {
     if (!_hasLabel || !_drawLabels) {
         return;
     }
@@ -372,7 +370,7 @@ void RenderableConstellation::render(const RenderData& data, RendererTasks&) {
     renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
 }
 
-void RenderableConstellation::renderLabels(const RenderData& data,
+void RenderableConstellationsBase::renderLabels(const RenderData& data,
                                            const glm::dmat4& modelViewProjectionMatrix,
                                            const glm::vec3& orthoRight,
                                            const glm::vec3& orthoUp)
@@ -395,9 +393,7 @@ void RenderableConstellation::renderLabels(const RenderData& data,
     glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
     for (const speck::Labelset::Entry& e : _labelset.entries) {
-        if (_constellationSelection.hasSelected() &&
-           !_constellationSelection.isSelected(e.text))
-        {
+        if (_selection.hasSelected() && !_selection.isSelected(e.text)) {
             continue;
         }
 

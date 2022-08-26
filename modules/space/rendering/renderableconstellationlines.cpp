@@ -25,13 +25,13 @@
 #include <modules/space/rendering/renderableconstellationlines.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/util/updatestructures.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/glm.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <array>
@@ -43,7 +43,7 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableConstellationLines";
 
     constexpr std::array<const char*, 4> UniformNames = {
-        "modelViewTransform", "projectionTransform", "alphaValue", "color"
+        "modelViewTransform", "projectionTransform", "opacity", "color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
@@ -52,16 +52,17 @@ namespace {
         "Enables/Disables the drawing of the constellations"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ConstellationUnitInfo = {
-        "ConstellationUnit",
-        "Constellation Unit",
-        "The unit used for the constellation data"
+    constexpr openspace::properties::Property::PropertyInfo LineUnitInfo = {
+        "LineUnit",
+        "Line Unit",
+        "The distance unit used for the constellation lines data"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ConstellationColorInfo = {
-        "ConstellationColor",
-        "Constellation colors",
-        "The defined colors for the constellations to be rendered"
+    constexpr openspace::properties::Property::PropertyInfo ColorsInfo = {
+        "Colors",
+        "Constellation Colors",
+        "The defined colors for the constellations to be rendered. "
+        "There can be several groups of constellaitons that can have distinct colors."
     };
 
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
@@ -77,11 +78,11 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
-        // [[codegen::verbatim(ConstellationUnitInfo.description)]]
-        std::optional<Unit> constellationUnit;
+        // [[codegen::verbatim(LineUnitInfo.description)]]
+        std::optional<Unit> lineUnit;
 
-        // [[codegen::verbatim(ConstellationColorInfo.description)]]
-        std::optional<std::vector<glm::vec3>> constellationColor;
+        // [[codegen::verbatim(ColorsInfo.description)]]
+        std::optional<std::vector<glm::vec3>> colors;
     };
 #include "renderableconstellationlines_codegen.cpp"
 }  // namespace
@@ -94,7 +95,7 @@ documentation::Documentation RenderableConstellationLines::Documentation() {
 
 RenderableConstellationLines::RenderableConstellationLines(
                                                       const ghoul::Dictionary& dictionary)
-    : RenderableConstellation(dictionary)
+    : RenderableConstellationsBase(dictionary)
     , _drawElements(DrawElementsInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -104,15 +105,15 @@ RenderableConstellationLines::RenderableConstellationLines(
     _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
-    if (p.constellationUnit.has_value()) {
-        _constellationUnit = codegen::map<DistanceUnit>(*p.constellationUnit);
+    if (p.lineUnit.has_value()) {
+        _constellationUnit = codegen::map<DistanceUnit>(*p.lineUnit);
     }
     else {
         _constellationUnit = DistanceUnit::Meter;
     }
 
-    if (p.constellationColor.has_value()) {
-        std::vector<glm::vec3> ops = *p.constellationColor;
+    if (p.colors.has_value()) {
+        std::vector<glm::vec3> ops = *p.colors;
         for (size_t i = 0; i < ops.size(); ++i) {
             _constellationColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
@@ -121,7 +122,7 @@ RenderableConstellationLines::RenderableConstellationLines(
 
 void RenderableConstellationLines::selectionPropertyHasChanged() {
     // If no values are selected (the default), we want to show all constellations
-    if (!_constellationSelection.hasSelected()) {
+    if (!_selection.hasSelected()) {
         for (std::pair<const int, ConstellationLine>& pair :
             _renderingConstellationsMap)
         {
@@ -133,38 +134,39 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
         for (std::pair<const int, ConstellationLine>& pair :
             _renderingConstellationsMap)
         {
-            pair.second.isEnabled =
-                _constellationSelection.isSelected(pair.second.name);
+            pair.second.isEnabled = _selection.isSelected(pair.second.name);
         }
     }
 }
 
 bool RenderableConstellationLines::isReady() const {
-    if (!_hasLabel) {
-        return _program && !_renderingConstellationsMap.empty();
+    bool isReady = _program && !_renderingConstellationsMap.empty();
+
+    // If we have labels, they also need to be loaded
+    if (_hasLabel) {
+        return isReady && !_labelset.entries.empty();
     }
-    return _program && !_renderingConstellationsMap.empty() &&
-        !_labelset.entries.empty();
+    return isReady;
 }
 
 void RenderableConstellationLines::initialize() {
-    RenderableConstellation::initialize();
+    RenderableConstellationsBase::initialize();
 
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
     }
 
-    if (!_assetSelectedConstellations.empty()) {
-        const std::vector<std::string> options = _constellationSelection.options();
+    if (!_assetSelection.empty()) {
+        const std::vector<std::string> options = _selection.options();
         std::set<std::string> selectedConstellations;
 
-        for (const std::string& s : _assetSelectedConstellations) {
+        for (const std::string& s : _assetSelection) {
             const auto it = std::find(options.begin(), options.end(), s);
             if (it == options.end()) {
                 // The user has specified a constellation name that doesn't exist
                 LWARNINGC(
-                    "RenderableConstellation",
+                    "RenderableConstellationsBase",
                     fmt::format("Option '{}' not found in list of constellations", s)
                 );
             }
@@ -172,7 +174,7 @@ void RenderableConstellationLines::initialize() {
                 selectedConstellations.insert(s);
             }
         }
-        _constellationSelection = selectedConstellations;
+        _selection = selectedConstellations;
     }
 }
 
@@ -215,7 +217,7 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
 
     _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
-    _program->setUniform(_uniformCache.alphaValue, opacity());
+    _program->setUniform(_uniformCache.opacity, opacity());
 
     for (const std::pair<const int, ConstellationLine>& pair :
         _renderingConstellationsMap)
@@ -257,7 +259,7 @@ void RenderableConstellationLines::render(const RenderData& data, RendererTasks&
         renderConstellations(data, modelViewMatrix, projectionMatrix);
     }
 
-    RenderableConstellation::render(data, tasks);
+    RenderableConstellationsBase::render(data, tasks);
 }
 
 void RenderableConstellationLines::update(const UpdateData&) {
@@ -331,10 +333,15 @@ bool RenderableConstellationLines::readSpeckFile() {
             std::string dummy;
             str >> dummy; // mesh command
             dummy.clear();
-            str >> dummy; // color index command?
+            str >> dummy; // color index command
             do {
                 if (dummy == "-c") {
-                    str >> constellationLine.colorIndex; // color index command
+                    str >> constellationLine.colorIndex; // color index
+                }
+                else {
+                    std::string message = fmt::format("Unknown command '{}' found in "
+                        "constellation file '{}'", dummy, _speckFile);
+                    LWARNING(message);
                 }
                 dummy.clear();
                 str >> dummy;
