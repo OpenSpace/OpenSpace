@@ -29,6 +29,7 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
@@ -78,12 +79,20 @@ private:
     properties::StringProperty _start;
     properties::StringProperty _end;
     properties::Vec3Property _color;
+
+    properties::UIntProperty _segments; 
+    properties::BoolProperty _invertArrowDirection;
+
+    properties::FloatProperty _arrowHeadAngle;
+    properties::FloatProperty _arrowHeadWidthFactor;
+
     properties::FloatProperty _offsetDistance;
     properties::BoolProperty _useRelativeOffset;
     properties::FloatProperty _length;
     properties::BoolProperty _useRelativeLength;
     properties::FloatProperty _width;
 
+    bool _shapeIsDirty = true;
     glm::dvec3 _prevStartNodePosition = glm::dvec3(0.0);
     glm::dvec3 _prevEndNodePosition = glm::dvec3(0.0);
 };
