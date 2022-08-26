@@ -255,15 +255,14 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 
-set_folder_location(libcef_dll_wrapper "Helper")
-set_folder_location(openspace_web_helper "Helper")
-
 target_precompile_headers(${webbrowser_module} PRIVATE
   <include/cef_browser.h>
   <include/cef_client.h>
   <include/wrapper/cef_helpers.h>
 )
 
+set_folder_location(libcef_dll_wrapper "Helper")
+set_folder_location(openspace_web_helper "Helper")
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()

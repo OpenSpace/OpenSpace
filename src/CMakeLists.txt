@@ -446,6 +446,8 @@ target_include_directories(openspace-core
 )
 
 target_precompile_headers(openspace-core PRIVATE
+  <openspace/json.h>
+  <openspace/properties/numericalproperty.h>
   [["ghoul/fmt.h"]]
   [["ghoul/glm.h"]]
   [["ghoul/misc/assert.h"]]
@@ -455,8 +457,11 @@ target_precompile_headers(openspace-core PRIVATE
   [["ghoul/misc/profiling.h"]]
   [["ghoul/opengl/ghoul_gl.h"]]
   <algorithm>
+  <any>
   <array>
+  <deque>
   <filesystem>
+  <fstream>
   <future>
   <map>
   <memory>
