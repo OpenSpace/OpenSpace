@@ -45,21 +45,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start Node",
-        "The identifier of the node the line starts from. "
+        "The identifier of the node the arrow starts from. "
         "Defaults to 'Root' if not specified. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
         "End Node",
-        "The identifier of the node the line ends at. "
+        "The identifier of the node the arrow should point towards. "
         "Defaults to 'Root' if not specified. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line"
+        "This value determines the RGB color for the arrow"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetDistanceInfo = {
@@ -546,10 +546,27 @@ void RenderableNodeDirectionHint::updateVertexData() {
 }
 
 void RenderableNodeDirectionHint::update(const UpdateData&) {
-    updateVertexData();
-    updateBufferData();
+    SceneGraphNode* startNode = sceneGraphNode(_start);
+    SceneGraphNode* endNode = sceneGraphNode(_end);
 
-    // TODO: mimic renderable prism update function (is dirty flag etc)
+    bool shouldUpdate = false;
+    if (startNode && endNode) {
+        const float Epsilon = std::numeric_limits<float>::epsilon();
+        float combinedDistanceChange =
+            glm::distance(startNode->worldPosition(), _prevStartNodePosition) +
+            glm::distance(endNode->worldPosition(), _prevEndNodePosition);
+        if (combinedDistanceChange > Epsilon) {
+            shouldUpdate = true;
+        }
+
+        _prevStartNodePosition = startNode->worldPosition();
+        _prevEndNodePosition = endNode->worldPosition();
+    }
+
+    if (shouldUpdate) {
+        updateVertexData();
+        updateBufferData();
+    }
 }
 
 void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&) {

@@ -83,6 +83,9 @@ private:
     properties::FloatProperty _length;
     properties::BoolProperty _useRelativeLength;
     properties::FloatProperty _width;
+
+    glm::dvec3 _prevStartNodePosition = glm::dvec3(0.0);
+    glm::dvec3 _prevEndNodePosition = glm::dvec3(0.0);
 };
 
 } // namespace openspace
