@@ -51,11 +51,15 @@ create_new_module(
 target_precompile_headers(${cefwebgui_module} PRIVATE
   [["include/capi/cef_base_capi.h"]]
   [["include/cef_render_handler.h"]]
-  <Windows.h>
   <string>
   <sstream>
   <istream>
   <ostream>
 )
+if (WIN32)
+  target_precompile_headers(${cefwebgui_module} PRIVATE
+    <Windows.h>
+  )
+endif ()
 
 set_modules_dependency_on_cef_libraries(${cefwebgui_module})
