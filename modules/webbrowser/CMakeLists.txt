@@ -106,12 +106,17 @@ target_precompile_headers(libcef_dll_wrapper PRIVATE
   [["include/cef_client.h"]]
   [["include/capi/cef_base_capi.h"]]
   [["include/cef_render_handler.h"]]
-  <Windows.h>
   <string>
   <sstream>
   <istream>
   <ostream>
 )
+
+if (WIN32)
+  target_precompile_headers(libcef_dll_wrapper PRIVATE
+    <Windows.h>
+  )
+endif ()
 
 ##########################################################################################
 # Add CEF client files
