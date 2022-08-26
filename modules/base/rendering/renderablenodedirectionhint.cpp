@@ -374,9 +374,6 @@ void RenderableNodeDirectionHint::updateBufferData() {
         GL_STREAM_DRAW
     );
 
-    // update vertex attributes
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
