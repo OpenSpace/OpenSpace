@@ -45,11 +45,13 @@ local moleculeInfos = {
         id = "H2O",
         name = "Water (H2O)",
         file = "h2o.arc",
+        traj = "h2o.arc",
         distance = 20.0,
     }, {
         id = "CO2",
         name = "Carbon Dioxyde (CO2)",
         file = "co2.arc",
+        traj = "co2.arc",
         repr = "Licorice",
         distance = 20.0,
     }, {
@@ -85,7 +87,7 @@ for i, info in ipairs(moleculeInfos) do
         Renderable = {
             Type = "RenderableMolecule",
             MoleculeFile = moleculeFiles .. info.file,
-            TrajectoryFile = moleculeFiles .. (info.traj or info.file),
+            TrajectoryFile = (moleculeFiles .. info.traj) or "",
             AnimSpeed = info.speed or animSpeed,
             RepType = info.repr or "SpaceFill",
         },

@@ -39,7 +39,17 @@ void main() {
     discard;
   }
   else if (len < 1.0 - uStrokeWidth) {
-    gl_FragDepth = texelFetch(uDepthTex, ivec2(gl_FragCoord.xy), 0).r;
+    float depth = texelFetch(uDepthTex, ivec2(gl_FragCoord.xy), 0).r;
+
+    // TODO: should convert depth from the range used by Mold to the one used by OpenSpace.
+    if (depth > 1 - 1E-5) {
+      discard;
+      return;
+    }
+    else {
+      gl_FragDepth = uFragDepth;
+    }
+
     color = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
   }
   else {
