@@ -738,11 +738,10 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     const dmat4 I(1.0);
     
     // compute distance from camera to molecule
-    // we apply artificial scaling to everything to cheat a bit with the unit system:
-    // TODO explain
     vec3 forward = data.modelTransform.translation - data.camera.positionVec3();
     vec3 dir = data.camera.viewDirectionWorldSpace();
     float distance = length(forward) * sign(dot(dir, forward)); // "signed" distance from camera to object.
+    // we apply artificial scaling to everything to cheat a bit with the unit system:
     float fakeScaling = 100.f / distance;
 
     if (distance < 0.f || distance > 1E4) // distance < 0 means behind the camera, 1E4 is arbitrary.
@@ -808,6 +807,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // resize the fbo if needed
