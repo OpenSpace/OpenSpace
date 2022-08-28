@@ -24,21 +24,22 @@
 
 #pragma once
 
+#include "openspace/properties/listproperty.h"
 #include "openspace/properties/optionproperty.h"
 #include "openspace/properties/selectionproperty.h"
 #include <openspace/rendering/renderable.h>
 
-//#include <openspace/properties/scalar/floatproperty.h>
-//#include <openspace/properties/vector/vec3property.h>
-//#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-//#include <ghoul/opengl/ghoul_gl.h>
-//#include <ghoul/opengl/uniformcache.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/list/doublelistproperty.h>
+#include <openspace/properties/vector/dvec3property.h>
 
 
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
+#include <core/md_bitfield.h>
+#include "viamd/gfx/conetracing_utils.h"
 
 namespace openspace {
 
@@ -60,43 +61,49 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum class GlDeferredTask {
-        None,
-        LoadMolecule,
-    } _deferredTask;
-    
-    void handleDeferredTasks();
-    void updateAnimation(double t);
-    
-    void initMolecule();
-    void freeMolecule();
-    void initTrajectory();
-    void freeTrajectory();
 
-    void updateRepresentation();
+    struct molecule_data_t {
+        glm::vec3 extent;
+        glm::vec3 center;
+        float radius;
+        md_molecule_api* moleculeApi;
+        md_trajectory_api* trajectoryApi;
+        md_molecule_t molecule;
+        md_trajectory_i* trajectory;
+        md_gl_representation_t drawRep;
+        md_gl_molecule_t drawMol;
+        md_bitfield_t visibilityMask;
+        cone_trace::GPUVolume occupancyVolume;
+    };
     
-    void computeAABB();
+    void computeAABB(molecule_data_t& mol);
+    void updateAnimation(molecule_data_t& mol, double t);
+    void updateRepresentation(molecule_data_t& mol);
+    void applyTransforms();
+    void applyViamdFilter(molecule_data_t& mol, const std::string& filter);
+    void applyViamdScript(molecule_data_t& mol, const std::string& script);
+    
+    void initMolecule(molecule_data_t& mol, const std::string& file);
+    void freeMolecule(molecule_data_t& mol);
+    void initTrajectory(molecule_data_t& mol, const std::string& file);
+    void freeTrajectory(molecule_data_t& mol);
+
+    bool _renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
 
     double _frame;
-    md_gl_shaders_t _shaders;
-
-    md_molecule_api* _moleculeApi;
-    md_trajectory_api* _trajectoryApi;
-    md_molecule_t _molecule;
-    md_trajectory_i* _trajectory;
-    md_gl_representation_t _drawRep;
-    md_gl_molecule_t _drawMol;
-
-    glm::vec3 _center;
-    glm::vec3 _extent;
-
+    
+    molecule_data_t _molecule;
+    
     properties::StringProperty _moleculeFile;
     properties::StringProperty _trajectoryFile;
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
     properties::FloatProperty _animationSpeed;
+    properties::StringProperty _viamdFilter;
+    properties::BoolProperty _ssaoEnabled;
+    properties::FloatProperty _ssaoIntensity;
+    properties::FloatProperty _ssaoRadius;
 };
 
 } // namespace openspace
-

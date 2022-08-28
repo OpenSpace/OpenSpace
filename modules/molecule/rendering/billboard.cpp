@@ -30,6 +30,7 @@ uniform float uStrokeWidth;
 uniform float uFragDepth;
 uniform vec4 uStrokeColor;
 uniform sampler2D uColorTex;
+uniform sampler2D uDepthTex;
 
 void main() {
   float len = length(pos) * 2.0;
@@ -37,13 +38,13 @@ void main() {
   if (len > 1) {
     discard;
   }
+  else if (len < 1.0 - uStrokeWidth) {
+    gl_FragDepth = texelFetch(uDepthTex, ivec2(gl_FragCoord.xy), 0).r;
+    color = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
+  }
   else {
     gl_FragDepth = uFragDepth;
-
-    if (len < 1.0 - uStrokeWidth)
-      color = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
-    else
-      color = uStrokeColor;
+    color = uStrokeColor;
   }
 }
 )";
@@ -99,12 +100,16 @@ void billboardGlDeinit() {
   }
 }
 
-void billboardDraw(glm::mat4 const& transform, GLuint colorTex, glm::vec4 const& stroke, float width, float depth) {
+void billboardDraw(glm::mat4 const& transform, GLuint colorTex, GLuint depthTex, glm::vec4 const& stroke, float width, float depth) {
   glUseProgram(prog);
   glBindVertexArray(vao);
   glDisable(GL_CULL_FACE);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, colorTex);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, depthTex);
+  glUniform1i(glGetUniformLocation(prog, "uColorTex"), 0);
+  glUniform1i(glGetUniformLocation(prog, "uDepthTex"), 1);
   glUniformMatrix4fv(glGetUniformLocation(prog, "uTransform"), 1, false, glm::value_ptr(transform));
   glUniform1f(glGetUniformLocation(prog, "uStrokeWidth"), width);
   glUniform1f(glGetUniformLocation(prog, "uFragDepth"), depth);

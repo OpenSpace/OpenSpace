@@ -695,10 +695,10 @@ void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) 
 
 void RenderableSimulationBox::update(const UpdateData& data) {
     // avoid updating if not in view, as it can be quite expensive.
-    if (!renderableInView)
+    if (!_renderableInView)
         return;
     else
-        renderableInView = false;
+        _renderableInView = false;
 
     double t = data.time.j2000Seconds();
     double dt = t - data.previousFrameTime.j2000Seconds();
@@ -748,13 +748,13 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     if (distance < 0.f || distance > 1E4) // distance < 0 means behind the camera, 1E4 is arbitrary.
         return;
     else
-        renderableInView = true;
+        _renderableInView = true;
 
     // because the molecule is small, a scaling of the view matrix causes the molecule
     // to be moved out of view in clip space. Resetting the scaling for the molecule
     // is fine for now. This will have an impact on stereoscopic depth though.
     Camera camCopy = data.camera;
-    camCopy.setScaling(1.f);
+    camCopy.setScaling(0.1f);
 
     mat4 viewMatrix =
         camCopy.combinedViewMatrix() *
@@ -908,7 +908,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         dvec4 depth_ = dmat4(data.camera.sgctInternal.projectionMatrix()) * billboardModel * dvec4(0.0, 0.0, 0.0, 1.0);
         double depth = normalizeDouble(depth_.w);
 
-        billboardDraw(transform, colorTex, vec4(1.0), circleWidth, depth);
+        billboardDraw(transform, colorTex, depthTex, vec4(1.0), circleWidth, depth);
     }
 }
 

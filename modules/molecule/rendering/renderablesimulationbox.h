@@ -93,7 +93,7 @@ private:
     void initTrajectory(molecule_data_t& mol, const std::string& file);
     void freeTrajectory(molecule_data_t& mol);
 
-    bool renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
+    bool _renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
 
     double _frame;
     
