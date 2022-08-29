@@ -38,6 +38,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <glm/gtx/projection.hpp>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableNodeDirectionHint";
@@ -125,6 +126,31 @@ namespace {
         "Width",
         "Width",
         "This value specifies the width of the arrow shape"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
+        "AmbientIntensity",
+        "Ambient Intensity",
+        "A multiplier for ambient lighting"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
+        "DiffuseIntensity",
+        "Diffuse Intensity",
+        "A multiplier for diffuse lighting"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
+        "SpecularIntensity",
+        "Specular Intensity",
+        "A multiplier for specular lighting"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ShadingEnabledInfo = {
+        "PerformShading",
+        "Perform Shading",
+        "This value determines whether the arrow model should be shaded by using the "
+        "position of the Sun"
     };
 
     // Returns a position that is relative to the current anchor node. This is a method to
@@ -217,6 +243,18 @@ namespace {
 
         // [[codegen::verbatim(WidthInfo.description)]]
         std::optional<float> width;
+
+        // [[codegen::verbatim(ShadingEnabledInfo.description)]]
+        std::optional<float> performShading;
+
+        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
+        std::optional<float> ambientIntensity;
+
+        // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
+        std::optional<float> diffuseIntensity;
+
+        // [[codegen::verbatim(SpecularIntensityInfo.description)]]
+        std::optional<float> specularIntensity;
     };
 #include "renderablenodedirectionhint_codegen.cpp"
 } // namespace
@@ -225,6 +263,19 @@ namespace openspace {
 
 documentation::Documentation RenderableNodeDirectionHint::Documentation() {
     return codegen::doc<Parameters>("base_renderable_renderablenodedirectionhint");
+}
+
+RenderableNodeDirectionHint::Shading::Shading() 
+    : properties::PropertyOwner({ "Shading" }) 
+    , enabled(ShadingEnabledInfo, true)
+    , ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
+    , diffuseIntensity(DiffuseIntensityInfo, 0.7f, 0.f, 1.f)
+    , specularIntensity(SpecularIntensityInfo, 0.f, 0.f, 1.f)
+{
+    addProperty(enabled);
+    addProperty(ambientIntensity);
+    addProperty(diffuseIntensity);
+    addProperty(specularIntensity);
 }
 
 RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary& dictionary)
@@ -243,6 +294,12 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     , _width(WidthInfo, 10.f, 0.f, 1e11f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addPropertySubOwner(_shading);
+    _shading.enabled = p.performShading.value_or(_shading.enabled);
+    _shading.ambientIntensity = p.ambientIntensity.value_or(_shading.ambientIntensity);
+    _shading.diffuseIntensity = p.diffuseIntensity.value_or(_shading.diffuseIntensity);
+    _shading.specularIntensity = p.specularIntensity.value_or(_shading.specularIntensity);
 
     _start = p.startNode.value_or(_start);
     addProperty(_start);
@@ -384,8 +441,20 @@ void RenderableNodeDirectionHint::initializeGL() {
 
     updateBufferData();
 
-    glEnableVertexAttribArray(_locVertex);
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    // Vertices
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+
+    // Normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        6 * sizeof(float),
+        reinterpret_cast<void*>(3 * sizeof(float))
+    );
 
     glBindVertexArray(0);
 }
@@ -483,8 +552,8 @@ void RenderableNodeDirectionHint::updateVertexData() {
     glm::dvec3 endNodePos = coordinatePosFromAnchorNode(endNode->worldPosition());
 
     glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
-    glm::dvec3 startPos = startNodePos + offset * arrowDirection;
-    glm::dvec3 endPos = startPos + length * arrowDirection;
+    glm::dvec3 startPos = glm::vec3(startNodePos + offset * arrowDirection);
+    glm::dvec3 endPos = glm::vec3(startPos + length * arrowDirection);
 
     if (_invertArrowDirection) {
         std::swap(startPos, endPos);
@@ -498,6 +567,9 @@ void RenderableNodeDirectionHint::updateVertexData() {
 
     _vertexArray.clear();
     _indexArray.clear();
+
+    // TODO: Simplify. Just generate a simple cone and a cylinder or correctl size then
+    // Transform it to be located in teh same position
 
     // Vertice positions for arrow bottom
     const std::vector<glm::vec3> bottomVertices = circleVertices(
@@ -523,67 +595,120 @@ void RenderableNodeDirectionHint::updateVertexData() {
         arrowDirection
     );
 
-    // Center bot vertex
+    // Center bot vertex and normal
     _vertexArray.push_back(static_cast<float>(startPos.x));
     _vertexArray.push_back(static_cast<float>(startPos.y));
     _vertexArray.push_back(static_cast<float>(startPos.z));
 
-    // All bottom vertices (same number as number of segments)
+    _vertexArray.push_back(static_cast<float>(-arrowDirection.x));
+    _vertexArray.push_back(static_cast<float>(-arrowDirection.y));
+    _vertexArray.push_back(static_cast<float>(-arrowDirection.z));
+
+    // Ring 0
+    // Vertices of bottom circle, with normals pointing down
     for (const glm::vec3& v : bottomVertices) {
         _vertexArray.push_back(v.x);
         _vertexArray.push_back(v.y);
         _vertexArray.push_back(v.z);
+
+        _vertexArray.push_back(static_cast<float>(-arrowDirection.x));
+        _vertexArray.push_back(static_cast<float>(-arrowDirection.y));
+        _vertexArray.push_back(static_cast<float>(-arrowDirection.z));
     }
 
-    auto botRingIndex = [](unsigned int i) {
-        return i + 1;
-    };
-
-    // Then all top vertices
-    for (const glm::vec3& v : topVertices) {
+    // Ring 1
+    // Bottom vertices of cylider sides with normals pointing outwards
+    for (const glm::vec3& v : bottomVertices) {
         _vertexArray.push_back(v.x);
         _vertexArray.push_back(v.y);
         _vertexArray.push_back(v.z);
+
+        glm::vec3 normal = glm::normalize(glm::dvec3(v) - startPos);
+        _vertexArray.push_back(normal.x);
+        _vertexArray.push_back(normal.y);
+        _vertexArray.push_back(normal.z);
     }
 
     const unsigned int nSegments = _segments;
 
-    auto topRingIndex = [&nSegments](unsigned int i) {
-        return 1 + nSegments + i;
+    auto ringVerticeIndex = [&nSegments](unsigned int ringIndex, unsigned int i) {
+        return 1 + ringIndex * nSegments + i;
     };
 
-    // Then all arrow head bottom vertices
+    // Ring 2
+    // Then all top vertices of cylinder sides
+    for (const glm::vec3& v : topVertices) {
+        _vertexArray.push_back(v.x);
+        _vertexArray.push_back(v.y);
+        _vertexArray.push_back(v.z);
+
+        glm::vec3 normal = glm::normalize(glm::dvec3(v) - arrowHeadStartPos);
+        _vertexArray.push_back(normal.x);
+        _vertexArray.push_back(normal.y);
+        _vertexArray.push_back(normal.z);
+    }
+
+    // TODO: when generalizing, add another circle on top
+
+    // Ring 3
+    // Then all arrow head bottom vertices. Sore normal for top position use
+    std::vector<glm::vec3> coneNormals;
+    coneNormals.reserve(nSegments);
     for (const glm::vec3& v : arrowHeadVertices) {
         _vertexArray.push_back(v.x);
         _vertexArray.push_back(v.y);
         _vertexArray.push_back(v.z);
+
+        // Project vector from end to center on cone side to find normal
+        glm::vec3 c = glm::vec3(arrowHeadStartPos);
+        glm::vec3 side = glm::normalize(endPos - glm::dvec3(v));
+        glm::vec3 edgeToCenter = glm::normalize(c - v);
+        glm::vec3 projected = glm::proj(edgeToCenter, side);
+        glm::vec3 normal = glm::normalize(-edgeToCenter + projected);
+        coneNormals.push_back(normal);
+
+        _vertexArray.push_back(normal.x);
+        _vertexArray.push_back(normal.y);
+        _vertexArray.push_back(normal.z);
     }
 
-    auto arrowHeadRingIndex = [&nSegments](unsigned int i) {
-        return 1 + 2 * nSegments + i;
-    };
+    // Ring 4
+    // Center top vertex (arrow head point). Note that we need multiple vertices
+    // to get correct normal
+    int normalCounter = 0;
+    for (const glm::vec3& v : arrowHeadVertices) {
+        _vertexArray.push_back(static_cast<float>(endPos.x));
+        _vertexArray.push_back(static_cast<float>(endPos.y));
+        _vertexArray.push_back(static_cast<float>(endPos.z));
 
-    // Center top vertex (arrow head point)
-    _vertexArray.push_back(static_cast<float>(endPos.x));
-    _vertexArray.push_back(static_cast<float>(endPos.y));
-    _vertexArray.push_back(static_cast<float>(endPos.z));
+        glm::vec3 normal = coneNormals[normalCounter++];
+        _vertexArray.push_back(normal.x);
+        _vertexArray.push_back(normal.y);
+        _vertexArray.push_back(normal.z);
+    }
 
     unsigned int botCenterIndex = 0;
-    unsigned int topCenterIndex = _vertexArray.size() / 3 - 1;
 
     // Build triangle list from the given vertices
     for (unsigned int i = 0; i < _segments; ++i) {
         bool isLast = (i == _segments - 1);
+        unsigned int v0, v1, v2, v3;
 
-        // Bottom vertex indices
-        unsigned int v0 = botRingIndex(i);
-        unsigned int v1 = botRingIndex(isLast ? 0 : i + 1);
-
-        // Top vertex indices
-        unsigned int v2 = topRingIndex(i);
-        unsigned int v3 = topRingIndex(isLast ? 0 : i + 1);
+        // Bot triangle
+        v0 = ringVerticeIndex(0, i);
+        v1 = ringVerticeIndex(0, isLast ? 0 : i + 1);
+        _indexArray.push_back(botCenterIndex);
+        _indexArray.push_back(v1);
+        _indexArray.push_back(v0);
 
         // Side of cylinder
+
+        // Bottom ring
+        v0 = ringVerticeIndex(1, i);
+        v1 = ringVerticeIndex(1, isLast ? 0 : i + 1);
+        // Top ring
+        v2 = ringVerticeIndex(2, i);
+        v3 = ringVerticeIndex(2, isLast ? 0 : i + 1);
         _indexArray.push_back(v0);
         _indexArray.push_back(v1);
         _indexArray.push_back(v2);
@@ -591,19 +716,18 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _indexArray.push_back(v1);
         _indexArray.push_back(v3);
         _indexArray.push_back(v2);
-
-        // Bot triangle
-        _indexArray.push_back(botCenterIndex);
-        _indexArray.push_back(v1);
-        _indexArray.push_back(v0);
         
         // Arrow head
-        v0 = arrowHeadRingIndex(i);
-        v1 = arrowHeadRingIndex(isLast ? 0 : i + 1);
+
+        // Bottom vertices
+        v0 = ringVerticeIndex(3, i);
+        v1 = ringVerticeIndex(3, isLast ? 0 : i + 1);
+        // Top vertex
+        v3 = ringVerticeIndex(4, i);
 
         _indexArray.push_back(v0);
         _indexArray.push_back(v1);
-        _indexArray.push_back(topCenterIndex);
+        _indexArray.push_back(v3);
 
         // TODO: arrow head bottom
     }
@@ -653,11 +777,20 @@ void RenderableNodeDirectionHint::render(const RenderData& data, RendererTasks&)
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
         modelTransform * anchorTranslation;
 
+    glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
+
     _shaderProgram->activate();
 
     _shaderProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _shaderProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
-    _shaderProgram->setUniform("color", glm::vec4(_color.value(), opacity()));
+    _shaderProgram->setUniform("normalTransform", glm::mat3(normalTransform));
+    _shaderProgram->setUniform("color", _color);
+    _shaderProgram->setUniform("opacity", opacity());
+
+    _shaderProgram->setUniform("ambientIntensity", _shading.ambientIntensity);
+    _shaderProgram->setUniform("diffuseIntensity", _shading.diffuseIntensity);
+    _shaderProgram->setUniform("specularIntensity", _shading.specularIntensity);
+    _shaderProgram->setUniform("performShading", _shading.enabled);
 
     // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
