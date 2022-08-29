@@ -115,7 +115,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _highlightColor(HighlightColorInfo, glm::vec3(0.8f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200))
-    , _highlightRate(HighlightRateInfo, glm::uvec2(5), glm::uvec2(0), glm::uvec2(200))
+    , _highlightRate(HighlightRateInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(200))
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _highlightLineWidth(HighlightLineWidthInfo, 0.5f, 1.f, 20.f)
     , _size(SizeInfo, glm::vec2(1.f), glm::vec2(1.f), glm::vec2(1e11f))
@@ -375,6 +375,7 @@ void RenderableGrid::update(const UpdateData&) {
         _varray.data(),
         GL_STATIC_DRAW
     );
+    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
     // Major grid
