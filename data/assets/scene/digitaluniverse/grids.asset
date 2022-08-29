@@ -427,7 +427,7 @@ local plane100kly = {
     HighlightColor = { 0.3, 0.7, 0.8 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    HighlightRate = { 5, 5},
+    HighlightRate = { 5, 5 },
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
@@ -449,10 +449,10 @@ local plane1Mly = {
     Enabled = false,
     Opacity = 0.4,
     Color = { 0.1, 0.5, 0.6 },
-    HighlightColor = {0.3, 0.7, 0.8 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    HighlightRate = { 5, 5},
+    HighlightRate = { 5, 5 },
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
@@ -477,7 +477,7 @@ local plane10Mly = {
     HighlightColor = { 0.3, 0.7, 0.8 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    HighlightRate = { 5, 5},
+    HighlightRate = { 5, 5 },
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
@@ -502,7 +502,7 @@ local plane100Mly = {
     HighlightColor = { 0.3, 0.7, 0.8 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    HighlightRate = { 5, 5},
+    HighlightRate = { 5, 5 },
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
@@ -527,7 +527,7 @@ local plane20Gly = {
     HighlightColor = { 0.3, 0.7, 0.8 },
     LineWidth = 2.0,
     Segments = { 40, 40 },
-    HighlightRate = { 5, 5},
+    HighlightRate = { 5, 5 },
     Size = { 2*lightYear, 2*lightYear },
   },
   GUI = {
