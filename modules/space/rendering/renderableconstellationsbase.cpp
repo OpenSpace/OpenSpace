@@ -250,15 +250,15 @@ std::string RenderableConstellationsBase::constellationFullName(
         return "";
     }
 
-    try {
+    if (_namesTranslation.contains(identifier)) {
         return _namesTranslation.at(identifier);
     }
-    catch (const std::out_of_range&) {
-        std::string message = fmt::format(
-            "Identifier '{}' could not be found in list of constellations", identifier
-        );
-        throw ghoul::RuntimeError(message, "RenderableConstellationsBase");
-    }
+
+    std::string message = fmt::format(
+        "Identifier '{}' could not be found in list of constellations", identifier
+    );
+    LERRORC("RenderableConstellationsBase", message);
+    return "";
 }
 
 void RenderableConstellationsBase::loadConstellationFile() {
@@ -353,19 +353,19 @@ void RenderableConstellationsBase::render(const RenderData& data, RendererTasks&
 
     const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
     glm::vec3 orthoRight = glm::normalize(
-        glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+        glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
     );
 
-    if (orthoRight == glm::vec3(0.0)) {
+    if (orthoRight == glm::vec3(0.f)) {
         glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
         );
     }
 
     const glm::vec3 orthoUp = glm::normalize(
-        glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
+        glm::vec3(worldToModelTransform * glm::dvec4(up, 0.f))
     );
     renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
 }

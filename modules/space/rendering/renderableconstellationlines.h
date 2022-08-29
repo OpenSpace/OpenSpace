@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLECONSTELLATIONLINES___H__
-#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLECONSTELLATIONLINES___H__
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONLINES___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONLINES___H__
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
@@ -82,16 +82,13 @@ private:
      */
     void selectionPropertyHasChanged() override;
 
-    bool _hasSpeckFile = false;
-    bool _dataIsDirty = true;
-
     properties::BoolProperty _drawElements;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, opacity,
         color) _uniformCache;
 
-    std::string _speckFile;
+    std::filesystem::path _speckFile;
 
     DistanceUnit _constellationUnit = DistanceUnit::Parsec;
 
@@ -102,4 +99,4 @@ private:
 };
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLECONSTELLATIONLINES___H__
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONLINES___H__

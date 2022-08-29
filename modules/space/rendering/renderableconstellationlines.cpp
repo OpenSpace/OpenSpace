@@ -100,9 +100,7 @@ RenderableConstellationLines::RenderableConstellationLines(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _speckFile = absPath(p.file.string()).string();
-    _hasSpeckFile = true;
-    _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+    _speckFile = absPath(p.file);
     addProperty(_drawElements);
 
     if (p.lineUnit.has_value()) {
@@ -255,7 +253,7 @@ void RenderableConstellationLines::render(const RenderData& data, RendererTasks&
     const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
 
-    if (_hasSpeckFile) {
+    if (_drawElements) {
         renderConstellations(data, modelViewMatrix, projectionMatrix);
     }
 
@@ -270,24 +268,14 @@ void RenderableConstellationLines::update(const UpdateData&) {
 }
 
 bool RenderableConstellationLines::loadData() {
-    bool success = false;
-    if (_hasSpeckFile) {
-        LINFO(fmt::format("Loading Speck file {}", std::filesystem::path(_speckFile)));
-        success = readSpeckFile();
-        if (!success) {
-            return false;
-        }
-    }
-
-    return success;
+    return readSpeckFile();
 }
 
 bool RenderableConstellationLines::readSpeckFile() {
+    LINFO(fmt::format("Loading Speck file {}", _speckFile));
     std::ifstream file(_speckFile);
     if (!file.good()) {
-        LERROR(fmt::format(
-            "Failed to open Speck file {}", std::filesystem::path(_speckFile)
-        ));
+        LERROR(fmt::format("Failed to open Speck file {}", _speckFile));
         return false;
     }
 
@@ -421,9 +409,6 @@ bool RenderableConstellationLines::readSpeckFile() {
 }
 
 void RenderableConstellationLines::createConstellations() {
-    if (!(_dataIsDirty && _hasSpeckFile)) {
-        return;
-    }
     LDEBUG("Creating constellations");
 
     for (std::pair<const int, ConstellationLine>& p : _renderingConstellationsMap) {
@@ -449,8 +434,6 @@ void RenderableConstellationLines::createConstellations() {
     }
 
     glBindVertexArray(0);
-
-    _dataIsDirty = false;
 }
 
 } // namespace openspace
