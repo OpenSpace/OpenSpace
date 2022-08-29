@@ -1,5 +1,4 @@
 -- local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local choury = asset.require("scene/solarsystem/missions/rosetta/67p.asset")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
@@ -33,45 +32,9 @@ local moleculeFiles = asset.syncedResource({
   }
 })
 
-local MoleculeSimulation = {
-  Identifier = "MoleculeSimulation",
-  -- Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-  Parent = choury.Barycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 5E3, 0, 0 }, -- some distance away from the comet
-    }
-  },
-  Renderable = {
-    Type = "RenderableSimulationBox",
-    MoleculeFiles = { moleculeFiles .. "ice.gro" },
-    TrajectoryFiles = { moleculeFiles .. "ice.xtc" },
-    MoleculeCounts = { 1 },
-    LinearVelocity = 10.0,
-    AngularVelocity = 60.0 / 360.0 * 3.14,
-    SimulationBox = { 200.0, 200.0, 200.0 },
-    CollisionRadius = 2.0,
-    SimulationSpeed = 0,
-    AnimationSpeed = 1,
-  },
-  GUI = {
-    Path = "/Microcosmos/Molecules/Simulation"
-  }
-}
-
-asset.onInitialize(function()
-  openspace.addSceneGraphNode(MoleculeSimulation)
-end)
-    
-asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MoleculeSimulation)
-end)
-    
-asset.export(MoleculeSimulation)
-
 -- Troposphere
 
+-- see https://en.wikipedia.org/wiki/Density_of_air
 local molPerVolume = 2700 -- there are roughly 2700 molecules per 100*100*100 ångström volume at atmospheric pressure.
 
 local EarthMolecules1 = {
@@ -90,7 +53,7 @@ local EarthMolecules1 = {
   Renderable = {
     Type = "RenderableSimulationBox",
     MoleculeFiles = { moleculeFiles .. "n2.arc", moleculeFiles .. "o2.arc", moleculeFiles .. "h2o.arc" },
-    TrajectoryFiles = { moleculeFiles .. "n2.arc", moleculeFiles .. "o2.arc", moleculeFiles .. "h2o.arc" },
+    TrajectoryFiles = { moleculeFiles .. "n2.arc", moleculeFiles .. "o2.arc", "" },
     MoleculeCounts = { 0.78 * molPerVolume, 0.21 * molPerVolume, 0.03 * molPerVolume },
     LinearVelocity = 10.0,
     AngularVelocity = 60.0 / 360.0 * 3.14,
@@ -100,16 +63,52 @@ local EarthMolecules1 = {
     SSAOEnabled = true,
   },
   GUI = {
-    Path = "/Microcosmos/Molecules/EarthMolecules1"
+    Path = "/Microcosmos/Molecules/Earth/EarthMolecules1"
+  }
+}
+
+-- Thermosphere
+
+local EarthMolecules2 = {
+  Identifier = "EarthMolecules2",
+  Parent = transforms.EarthIAU.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.5877, -- above the vis-C center
+      Longitude = 16.1924,
+      Altitude = 100E3, -- 100 km = in the thermosphere
+      UseHeightmap = true,
+    },
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = { moleculeFiles .. "n2.arc", moleculeFiles .. "o2.arc" },
+    TrajectoryFiles = { moleculeFiles .. "n2.arc", moleculeFiles .. "o2.arc" },
+    MoleculeCounts = { 5, 5 },
+    LinearVelocity = 10.0,
+    AngularVelocity = 60.0 / 360.0 * 3.14,
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 4.0,
+    AnimationSpeed = 100,
+    SimulationSpeed = 50,
+    SSAOEnabled = true,
+  },
+  GUI = {
+    Path = "/Microcosmos/Molecules/Earth/EarthMolecules2"
   }
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthMolecules1)
+  openspace.addSceneGraphNode(EarthMolecules2)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthMolecules1)
+  openspace.removeSceneGraphNode(EarthMolecules2)
 end)
 
 asset.export(EarthMolecules1)
+asset.export(EarthMolecules2)

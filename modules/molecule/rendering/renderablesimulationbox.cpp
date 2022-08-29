@@ -416,7 +416,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
                 i == 0 ?
                     _simulationBox.value() / 2.0 :
                     linearRand(dvec3(0.0), _simulationBox.value()), // position
-                0.0,                                                // angle
+                linearRand(0.0, two_pi<double>()),                  // angle
                 sphericalRand(_linearVelocity.value()),             // direction
                 sphericalRand(_angularVelocity.value()),            // rotation
             };
@@ -639,7 +639,7 @@ void RenderableSimulationBox::applyTransforms() {
             const molecule_state_t& state = mol.states[i];
             dmat4 transform =
                 translate(dmat4(1.0), state.position) *
-                rotate(dmat4(1.0), state.angle, state.rotation) *
+                rotate(dmat4(1.0), state.angle, state.rotationAxis) *
                 dmat4(1.0);
         
             for (int j = 0; j < mol.molecule.atom.count; j++) {
@@ -658,7 +658,7 @@ void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) 
     for (auto& molecule : mol.states) {
         molecule.position += molecule.direction * dt;
         molecule.position = mod(molecule.position, _simulationBox.value());
-        molecule.angle += length(molecule.rotation) * dt;
+        molecule.angle += length(molecule.rotationAxis) * dt;
     }
 
     double collRadiusSquared = _collisionRadius * _collisionRadius;
@@ -672,19 +672,20 @@ void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) 
             molecule_state_t& m1 = *it1;
             molecule_state_t& m2 = *it2;
 
-            double distSquared = dot(m1.position, m2.position);
+            dvec3 distVec = m2.position - m1.position;
+            double distSquared = dot(distVec, distVec);
 
-            if (distSquared < collRadiusSquared) { // collision detected
+            if (distSquared < collRadiusSquared && dot(m1.direction, m2.direction) < 0) { // collision detected
                 double dist = sqrt(distSquared);
                 double intersection = 2.0 * _collisionRadius - dist;
                 // swap the direction components normal to the collision plane from the 2
                 // molecules. (simplistic elastic collision of 2 spheres with same mass)
-                dvec3 dir = (m2.position - m1.position) / dist;
+                dvec3 dir = distVec / dist;
                 dvec3 compM1 = dir * dot(m1.direction, dir);
                 dvec3 compM2 = -dir * dot(m2.direction, -dir);
                 m1.direction = m1.direction - compM1 + compM2;
                 m2.direction = m2.direction - compM2 + compM1;
-
+                
                 // move the spheres away from each other (not intersecting)
                 m1.position += -dir * intersection;
                 m2.position += dir * intersection;

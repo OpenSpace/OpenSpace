@@ -65,7 +65,7 @@ private:
         glm::dvec3 position;
         double angle;
         glm::dvec3 direction; // moving direction where magnitude is linear velocity
-        glm::dvec3 rotation;  // rotation axis where magnitude is angular velocity
+        glm::dvec3 rotationAxis;  // rotation axis where magnitude is angular velocity
     };
 
     struct molecule_data_t {
