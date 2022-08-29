@@ -25,15 +25,51 @@
 #include "fragment.glsl"
 
 in float vs_depth;
+in vec3 vs_normal;
 in vec4 vs_positionViewSpace;
 
-uniform vec4 color;
+uniform vec3 color;
+uniform float opacity;
+uniform float ambientIntensity = 0.2;
+uniform float diffuseIntensity = 1.0;
+uniform float specularIntensity = 1.0;
+uniform bool performShading = true;
+
+const vec3 LightColor = vec3(1.0);
 
 Fragment getFragment() {
   Fragment frag;
 
-  frag.color = color;
+  frag.color = vec4(color, opacity);
 
+  // Simple phong shading (same color for diffuse and ambient. White specular)
+  if (performShading) {
+    const vec3 lightDirectionViewSpace = vec3(0.0, 0.0, 1.0); // TODO: send from code and make configurable
+    const float lightIntensity = 1.0;
+    const float specularPower = 100.0;
+
+    vec3 c = normalize(vs_positionViewSpace.xyz);
+    vec3 n = normalize(vs_normal);
+    vec3 l = lightDirectionViewSpace;
+    vec3 r = reflect(l, n);
+
+    // Ambient color 
+    vec3 shadedColor = ambientIntensity  * color;
+
+    // Diffuse
+    shadedColor += diffuseIntensity * max(dot(n,l), 0.0) * color;
+
+    // Specular
+    shadedColor += specularIntensity * pow(max(dot(c,r), 0), specularPower)  * color;
+
+    // Light contribution (one light soruce)
+    shadedColor *= lightIntensity * LightColor;
+
+    frag.color.xyz = shadedColor;
+  }
+
+//  frag.color.xyz *= vs_normal;
+//
   frag.depth = vs_depth;
   frag.gPosition = vs_positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);

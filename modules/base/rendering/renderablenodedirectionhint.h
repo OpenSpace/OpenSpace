@@ -69,7 +69,6 @@ private:
 
     ghoul::opengl::ProgramObject* _shaderProgram;
 
-    const GLuint _locVertex = 0;
     GLuint _vaoId = 0;
     GLuint _iboId = 0;
     GLuint _vBufferId = 0;
@@ -82,6 +81,15 @@ private:
 
     properties::UIntProperty _segments; 
     properties::BoolProperty _invertArrowDirection;
+
+    struct Shading : properties::PropertyOwner {
+        Shading();
+        properties::BoolProperty enabled;
+        properties::FloatProperty ambientIntensity;
+        properties::FloatProperty diffuseIntensity;
+        properties::FloatProperty specularIntensity;
+    };
+    Shading _shading;
 
     properties::FloatProperty _arrowHeadAngle;
     properties::FloatProperty _arrowHeadWidthFactor;
