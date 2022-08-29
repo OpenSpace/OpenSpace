@@ -81,7 +81,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     _vertexFilename = absPath(p.file.string()).string();
-    _vertexFilename.onChange([&](){ loadVertexFile(); });
+    _vertexFilename.onChange([&](){ loadData(); });
     addProperty(_vertexFilename);
 
     _color.setViewOption(properties::Property::ViewOptions::Color);
@@ -92,7 +92,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 void RenderableConstellationBounds::initialize() {
     RenderableConstellationsBase::initialize();
 
-    loadVertexFile();
+    loadData();
 
     if (!_assetSelection.empty()) {
         const std::vector<std::string> options = _selection.options();
@@ -197,6 +197,14 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
 }
 
 void RenderableConstellationBounds::update(const UpdateData& data) { }
+
+bool RenderableConstellationBounds::loadData() {
+    bool success = loadVertexFile();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
+    }
+    return success;
+}
 
 bool RenderableConstellationBounds::loadVertexFile() {
     if (_vertexFilename.value().empty()) {

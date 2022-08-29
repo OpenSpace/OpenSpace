@@ -75,6 +75,7 @@ private:
      * \return \c true if the loading succeeded, \c false otherwise
      */
     bool loadVertexFile();
+    bool loadData();
 
     /**
      * Callback method that gets triggered when <code>_constellationSelection</code>

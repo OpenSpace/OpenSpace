@@ -101,6 +101,7 @@ RenderableConstellationLines::RenderableConstellationLines(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _speckFile = absPath(p.file);
+
     addProperty(_drawElements);
 
     if (p.lineUnit.has_value()) {
@@ -150,10 +151,7 @@ bool RenderableConstellationLines::isReady() const {
 void RenderableConstellationLines::initialize() {
     RenderableConstellationsBase::initialize();
 
-    bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
-    }
+    loadData();
 
     if (!_assetSelection.empty()) {
         const std::vector<std::string> options = _selection.options();
@@ -268,7 +266,11 @@ void RenderableConstellationLines::update(const UpdateData&) {
 }
 
 bool RenderableConstellationLines::loadData() {
-    return readSpeckFile();
+    bool success = readSpeckFile();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
+    }
+    return success;
 }
 
 bool RenderableConstellationLines::readSpeckFile() {
