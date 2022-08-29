@@ -86,7 +86,7 @@ void create() {
     ghoul_assert(initializeGL, "No initializeGL");
     currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^ WIN32 / !WIN32 vvv
-    initializeGL = new std::vector<std::function<void()>();
+    initializeGL = new std::vector<std::function<void()>>();
 #endif // WIN32
 
 #ifdef WIN32
