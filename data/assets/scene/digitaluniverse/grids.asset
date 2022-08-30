@@ -365,7 +365,7 @@ local plane1kly = {
     },
     Scale = {
       Type = "StaticScale",
-      Scale = 1000
+      Scale = 1E3
     }
   },
   Renderable = {
@@ -393,7 +393,7 @@ local plane10kly = {
     },
     Scale = {
       Type = "StaticScale",
-      Scale = 10000
+      Scale = 10E3
     }
   },
   Renderable = {
@@ -416,7 +416,7 @@ local plane100kly = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 100000
+      Scale = 100E3
     }
   },
   Renderable = {
@@ -441,7 +441,7 @@ local plane1Mly = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 1000000
+      Scale = 1E6
     }
   },
   Renderable = {
@@ -466,7 +466,7 @@ local plane10Mly = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 10000000
+      Scale = 10E6
     }
   },
   Renderable = {
@@ -491,7 +491,7 @@ local plane100Mly = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 100000000
+      Scale = 100E6
     }
   },
   Renderable = {
@@ -516,7 +516,7 @@ local plane20Gly = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 20000000000
+      Scale = 20E9
     }
   },
   Renderable = {

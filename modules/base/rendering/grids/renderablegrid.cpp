@@ -58,7 +58,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HighlightRateInfo = {
         "HighlightRate",
         "Highlight Rate",
-        "The rate the columns and rows are highlighted"
+        "The rate that the columns and rows are highlighted, counted with respect to the "
+        "center of the grid. If the number of segments in the grid is odd, the "
+        "highlighting might be offsett from the center."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -285,16 +287,15 @@ void RenderableGrid::update(const UpdateData&) {
             const float x1 = x0 + step.x;
 
             // Line in y direction
+            bool shouldHighlight = false;
             if (_highlightRate.value().y != 0) {
                 int rest = static_cast<int>(i - center.y) % _highlightRate.value().y;
-                if (abs(rest) == 0) {
-                    _highlightArray.push_back({ x0, y0, 0.f });
-                    _highlightArray.push_back({ x0, y1, 0.f });
-                }
-                else {
-                    _varray.push_back({ x0, y0, 0.f });
-                    _varray.push_back({ x0, y1, 0.f });
-                }
+                shouldHighlight = abs(rest) == 0;
+            }
+
+            if (shouldHighlight) {
+                _highlightArray.push_back({ x0, y0, 0.f });
+                _highlightArray.push_back({ x0, y1, 0.f });
             }
             else {
                 _varray.push_back({ x0, y0, 0.f });
@@ -302,16 +303,15 @@ void RenderableGrid::update(const UpdateData&) {
             }
 
             // Line in x direction
+            shouldHighlight = false;
             if (_highlightRate.value().x != 0) {
                 int rest = static_cast<int>(j - center.x) % _highlightRate.value().x;
-                if (abs(rest) == 0) {
-                    _highlightArray.push_back({ x0, y0, 0.f });
-                    _highlightArray.push_back({ x1, y0, 0.f });
-                }
-                else {
-                    _varray.push_back({ x0, y0, 0.f });
-                    _varray.push_back({ x1, y0, 0.f });
-                }
+                shouldHighlight = abs(rest) == 0;
+            }
+
+            if (shouldHighlight) {
+                _highlightArray.push_back({ x0, y0, 0.f });
+                _highlightArray.push_back({ x1, y0, 0.f });
             }
             else {
                 _varray.push_back({ x0, y0, 0.f });
