@@ -139,6 +139,12 @@ create_new_module(
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
+target_precompile_headers(${globebrowsing_module} PRIVATE
+  <modules/globebrowsing/src/tileprovider/tileprovider.h>
+  <modules/globebrowsing/globebrowsingmodule.h>
+  <future>
+  <map>
+)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 

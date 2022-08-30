@@ -28,21 +28,15 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/keys.h>
+#include <openspace/openspace.h>
 #include <ghoul/ghoul.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
+#include <ghoul/glm.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/stacktrace.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
@@ -54,25 +48,17 @@
 #include <sgct/log.h>
 #include <sgct/projection/fisheye.h>
 #include <sgct/projection/nonlinearprojection.h>
-#include <sgct/screencapture.h>
 #include <sgct/settings.h>
 #include <sgct/user.h>
-#include <sgct/viewport.h>
+#include <sgct/window.h>
 #include <stb_image.h>
 #include <Tracy.hpp>
-#include <chrono>
-#include <ctime>
-#include <filesystem>
-#include <memory>
+#include <iostream>
+#include <string_view>
 
 #ifdef WIN32
-#include <openspace/openspace.h>
-#include <ghoul/misc/stacktrace.h>
-#include <ghoul/fmt.h>
 #include <Windows.h>
 #include <dbghelp.h>
-#include <shellapi.h>
-#include <shlobj.h>
 #endif // WIN32
 
 #ifdef OPENVR_SUPPORT
@@ -274,6 +260,15 @@ void checkJoystickStatus() {
             }
         }
     }
+}
+
+bool isGuiWindow(sgct::Window* window) {
+    if (Engine::instance().windows().size() == 1) {
+        // If we only have one window, assume it's also the GUI window.
+        // It might not have been given the 'GUI' tag
+        return true;
+    }
+    return window->hasTag("GUI");
 }
 
 //
@@ -574,7 +569,7 @@ void mainPostDrawFunc() {
 
 
 void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action action,
-                          int)
+                          int, sgct::Window* window)
 {
     ZoneScoped
     LTRACE("main::mainKeyboardCallback(begin)");
@@ -582,7 +577,9 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
     const openspace::Key k = openspace::Key(key);
     const KeyModifier m = KeyModifier(modifiers);
     const KeyAction a = KeyAction(action);
-    global::openSpaceEngine->keyboardCallback(k, m, a);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->keyboardCallback(k, m, a, isGui);
 
     LTRACE("main::mainKeyboardCallback(begin)");
 }
@@ -590,7 +587,7 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
 
 
 void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
-                             sgct::Action action)
+                             sgct::Action action, sgct::Window* window)
 {
     ZoneScoped
     LTRACE("main::mainMouseButtonCallback(begin)");
@@ -598,36 +595,42 @@ void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
     const openspace::MouseButton k = openspace::MouseButton(key);
     const openspace::MouseAction a = openspace::MouseAction(action);
     const openspace::KeyModifier m = openspace::KeyModifier(modifiers);
-    global::openSpaceEngine->mouseButtonCallback(k, a, m);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->mouseButtonCallback(k, a, m, isGui);
 
     LTRACE("main::mainMouseButtonCallback(end)");
 }
 
 
 
-void mainMousePosCallback(double x, double y) {
+void mainMousePosCallback(double x, double y, sgct::Window* window) {
     ZoneScoped
-    global::openSpaceEngine->mousePositionCallback(x, y);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+    global::openSpaceEngine->mousePositionCallback(x, y, isGui);
 }
 
 
 
-void mainMouseScrollCallback(double posX, double posY) {
+void mainMouseScrollCallback(double posX, double posY, sgct::Window* window) {
     ZoneScoped
     LTRACE("main::mainMouseScrollCallback(begin");
 
-    global::openSpaceEngine->mouseScrollWheelCallback(posX, posY);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+    global::openSpaceEngine->mouseScrollWheelCallback(posX, posY, isGui);
 
     LTRACE("main::mainMouseScrollCallback(end)");
 }
 
 
 
-void mainCharCallback(unsigned int codepoint, int modifiers) {
+void mainCharCallback(unsigned int codepoint, int modifiers, sgct::Window* window) {
     ZoneScoped
 
     const KeyModifier m = KeyModifier(modifiers);
-    global::openSpaceEngine->charCallback(codepoint, m);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->charCallback(codepoint, m, isGui);
 }
 
 

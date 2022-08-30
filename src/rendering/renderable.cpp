@@ -86,8 +86,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
         "DimInAtmosphere",
         "Dim In Atmosphere",
-        "Enables/Disables if the object should be dimmed if the camera is in an "
-        "atmosphere",
+        "Enables/Disables if the object should be dimmed when the camera is in the "
+        "sunny part of an atmosphere",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -265,6 +265,10 @@ void Renderable::setRenderBin(RenderBin bin) {
 
 bool Renderable::matchesRenderBinMask(int binMask) {
     return binMask & static_cast<int>(renderBin());
+}
+
+void Renderable::setFade(float fade) {
+    _fade = fade;
 }
 
 bool Renderable::isVisible() const {

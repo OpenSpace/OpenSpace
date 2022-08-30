@@ -40,6 +40,22 @@
 #include <functional>
 #include <chrono>
 
+namespace {
+    void aimTargetGalactic(std::string id, glm::dvec3 direction) {
+        glm::dvec3 positionCelestial = glm::normalize(direction) *
+            openspace::skybrowser::CelestialSphereRadius;
+
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
+            id, ghoul::to_string(positionCelestial)
+        );
+        openspace::global::scriptEngine->queueScript(
+            script,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+} // namespace
+
 namespace openspace {
 
 TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
@@ -53,29 +69,8 @@ TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
 }
 
-TargetBrowserPair& TargetBrowserPair::operator=(TargetBrowserPair other) {
-    std::swap(_targetNode, other._targetNode);
-    std::swap(_browser, other._browser);
-    return *this;
-}
-
 void TargetBrowserPair::setImageOrder(int i, int order) {
     _browser->setImageOrder(i, order);
-}
-
-void TargetBrowserPair::aimTargetGalactic(glm::dvec3 direction) {
-    std::string id = _targetNode->identifier();
-    glm::dvec3 positionCelestial = glm::normalize(direction) *
-        skybrowser::CelestialSphereRadius;
-
-    std::string script = fmt::format(
-        "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
-        id, ghoul::to_string(positionCelestial)
-    );
-    openspace::global::scriptEngine->queueScript(
-        script,
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
 }
 
 void TargetBrowserPair::startFinetuningTarget() {
@@ -100,7 +95,7 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& startMouse,
     );
 
     glm::dvec3 translationWorld = endWorld - startWorld;
-    aimTargetGalactic(_startTargetPosition + translationWorld);
+    aimTargetGalactic(_targetNode->identifier(), _startTargetPosition + translationWorld);
 }
 
 void TargetBrowserPair::synchronizeAim() {
@@ -114,11 +109,6 @@ void TargetBrowserPair::synchronizeAim() {
 void TargetBrowserPair::setEnabled(bool enable) {
     _browser->setEnabled(enable);
     _targetRenderable->property("Enabled")->set(enable);
-}
-
-void TargetBrowserPair::setOpacity(float opacity) {
-    _browser->property("Opacity")->set(opacity);
-    _targetRenderable->property("Opacity")->set(opacity);
 }
 
 bool TargetBrowserPair::isEnabled() const {
@@ -165,10 +155,6 @@ std::string TargetBrowserPair::targetNodeId() const {
     return _targetNode->identifier();
 }
 
-float TargetBrowserPair::browserRatio() const {
-    return _browser->browserRatio();
-}
-
 double TargetBrowserPair::verticalFov() const {
     return _browser->verticalFov();
 }
@@ -190,7 +176,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("roll", targetRoll());
     res.setValue("color", borderColor());
     res.setValue("cartesianDirection", cartesian);
-    res.setValue("ratio", static_cast<double>(browserRatio()));
+    res.setValue("ratio", static_cast<double>(_browser->browserRatio()));
     res.setValue("isFacingCamera", isFacingCamera());
     res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
     res.setValue("selectedImages", selectedImages());
@@ -248,17 +234,8 @@ void TargetBrowserPair::hideChromeInterface() {
 void TargetBrowserPair::sendIdToBrowser() const {
     _browser->setIdInBrowser();
 }
-
-void TargetBrowserPair::updateBrowserSize() {
-    _browser->updateBrowserSize();
-}
-
 std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::displayCopies() const {
     return _browser->displayCopies();
-}
-
-bool TargetBrowserPair::isImageCollectionLoaded() {
-    return _browser->isImageCollectionLoaded();
 }
 
 void TargetBrowserPair::setVerticalFov(double vfov) {
@@ -268,6 +245,7 @@ void TargetBrowserPair::setVerticalFov(double vfov) {
 
 void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
     aimTargetGalactic(
+        _targetNode->identifier(),
         skybrowser::equatorialToGalactic(skybrowser::sphericalToCartesian(aim))
     );
     _browser->setEquatorialAim(aim);
@@ -294,16 +272,16 @@ void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {
     // Animate the target before the field of view starts to animate
     if (_targetAnimation.isAnimating()) {
-        aimTargetGalactic(_targetAnimation.getNewValue());
+        aimTargetGalactic(_targetNode->identifier(), _targetAnimation.newValue());
     }
     else if (!_targetAnimation.isAnimating() && _targetIsAnimating) {
         // Set the finished position
-        aimTargetGalactic(_targetAnimation.getNewValue());
+        aimTargetGalactic(_targetNode->identifier(), _targetAnimation.newValue());
         _fovAnimation.start();
         _targetIsAnimating = false;
     }
     if (_fovAnimation.isAnimating()) {
-        _browser->setVerticalFov(_fovAnimation.getNewValue());
+        _browser->setVerticalFov(_fovAnimation.newValue());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
@@ -377,20 +355,8 @@ bool TargetBrowserPair::isUsingRadiusAzimuthElevation() const {
     return _browser->isUsingRaeCoords();
 }
 
-SceneGraphNode* TargetBrowserPair::targetNode() const {
-    return _targetNode;
-}
-
 ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
     return _browser;
-}
-
-bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {
-    return lhs._targetNode == rhs._targetNode && lhs._browser == rhs._browser;
-}
-
-bool operator!=(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {
-    return !(lhs == rhs);
 }
 
 } // namespace openspace

@@ -71,6 +71,20 @@ if (TARGET cdf)
   set_folder_location(cdf "External")
 endif ()
 
+target_precompile_headers(cdf PRIVATE
+  [["stdio.h"]]
+  [["stdlib.h"]]
+  [["string.h"]]
+)
+
+target_precompile_headers(ccmc PRIVATE
+  "$<$<COMPILE_LANGUAGE:CXX>:iostream>"
+  "$<$<COMPILE_LANGUAGE:CXX>:map>"
+  "$<$<COMPILE_LANGUAGE:CXX>:unordered_map>"
+  "$<$<COMPILE_LANGUAGE:CXX>:vector>"
+  "$<$<COMPILE_LANGUAGE:CXX>:boost/unordered_map.hpp>"
+)
+
 if (WIN32)
   target_compile_options(ccmc PRIVATE /MP)
   if (TARGET cdf)

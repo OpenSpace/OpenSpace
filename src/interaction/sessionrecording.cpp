@@ -55,7 +55,7 @@
 #include <iomanip>
 
 #ifdef WIN32
-#include <windows.h>
+#include <Windows.h>
 #endif // WIN32
 
 #include "sessionrecording_lua.inl"
