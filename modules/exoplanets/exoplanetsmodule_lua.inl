@@ -443,18 +443,21 @@ void createExoplanetSystem(const std::string& starName) {
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
+    float meanSemimajorAxisInAu = 0.f;
+    float maxSemimajorAxisInAu = 0.f;
+    for (const ExoplanetDataEntry& p : system.planetsData) {
+        meanSemimajorAxisInAu += p.a;
+        maxSemimajorAxisInAu = std::max(p.a, maxSemimajorAxisInAu);
+    }
+    meanSemimajorAxisInAu /= static_cast<float>(system.planetsData.size());
+
     // 90 degrees inclination plane
     const glm::dmat4 inclinationPlaneRotation = computeOrbitPlaneRotationMatrix(90.f);
     const glm::dmat3 inclinationPlaneRotationMatrix =
         static_cast<glm::dmat3>(inclinationPlaneRotation);
 
-    float meanSemimajorAxisInAu = 0.f;
-    for (const ExoplanetDataEntry& p : system.planetsData) {
-        meanSemimajorAxisInAu += p.a;
-    }
-    meanSemimajorAxisInAu /= static_cast<float>(system.planetsData.size());
-    const double planeSize =
-        2.0 * meanSemimajorAxisInAu * distanceconstants::AstronomicalUnit;
+    const float planeSize = 2.f * meanSemimajorAxisInAu
+        * static_cast<float>(distanceconstants::AstronomicalUnit);
 
     const std::string inclinationPlane = "{"
         "Identifier = '" + starIdentifier + "_EdgeOnInclinationPlane',"
@@ -474,13 +477,39 @@ void createExoplanetSystem(const std::string& starName) {
             "},"
         "},"
         "GUI = {"
-            "Name = 'Edge-on Inclination Plane',"
+            "Name = 'Edge-on Inclination Plane (" + sanitizedStarName + ")',"
             "Path = '" + guiPath + "'"
         "}"
     "}";
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + inclinationPlane + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    // Arrow pointing to Earth
+    const float maxSemiMajor = maxSemimajorAxisInAu
+        * static_cast<float>(distanceconstants::AstronomicalUnit);
+
+    const std::string toEarthArrow = "{"
+        "Identifier = '" + starIdentifier + "_EarthDirectionArrow',"
+        "Renderable = {"
+            "Type = 'RenderableNodeDirectionHint',"
+            "StartNode = '" + starIdentifier + "',"
+            "EndNode = 'Earth',"
+            "Offset = " + std::to_string(1.5 * maxSemiMajor) + ","
+            "Length = " + std::to_string(0.5 * maxSemiMajor) + ","
+            "Width = " + std::to_string(0.015f * maxSemiMajor) + ","
+        "},"
+        "GUI = {"
+            "Name = 'Earth Direction Arrow (" + sanitizedStarName + ")',"
+            "Path = '" + guiPath + "'"
+        "}"
+    "}";
+
+
+    global::scriptEngine->queueScript(
+        "openspace.addSceneGraphNode(" + toEarthArrow + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 

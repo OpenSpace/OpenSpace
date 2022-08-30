@@ -2088,7 +2088,7 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 }
                 ImGui::SameLine();
                 renderHelpMarker(
-                    "Show a ring with a radius of 1 AU around the star of the system."
+                    "Show a ring with a radius of 1 AU around the star of the system"
                 );
             }
 
@@ -2102,7 +2102,21 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 ImGui::SameLine();
                 renderHelpMarker(
                     "Show a grid plane that represents 90 degree inclinaiton, "
-                    "i.e. orbits in this plane are visible \"edge-on\" from Earth."
+                    "i.e. orbits in this plane are visible \"edge-on\" from Earth"
+                );
+            }
+
+            const std::string arrowId = hostIdentifier + "_EarthDirectionArrow";
+            const Renderable* arrow = renderable(arrowId);
+            if (arrow) {
+                bool enabled = arrow->isEnabled();
+                if (ImGui::Checkbox("Show direction to Earth", &enabled)) {
+                    setRenderableEnabled(arrowId, enabled);
+                }
+                ImGui::SameLine();
+                renderHelpMarker(
+                    "Show an arrow pointing in the direction from the host star "
+                    "to Earth"
                 );
             }
 
@@ -2133,9 +2147,9 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                     if (ImGui::Checkbox("Show orbit uncertainty", &enabled)) {
                         for (size_t i : planetIndexes) {
                             const ExoplanetItem& p = _data[i];
-                            const std::string planetDiscId = planetIdentifier(p) + "_Disc";
-                            if (renderable(planetDiscId)) {
-                                setRenderableEnabled(planetDiscId, enabled);
+                            const std::string discId = planetIdentifier(p) + "_Disc";
+                            if (renderable(discId)) {
+                                setRenderableEnabled(discId, enabled);
                             }
                         }
                     }
