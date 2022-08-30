@@ -191,7 +191,7 @@ namespace {
         zToNormal = glm::normalize(zToNormal);
         // TODO: handle parallel case
 
-        for (int i = 0; i < count; ++i) {
+        for (unsigned int i = 0; i < count; ++i) {
             const float angle = i * angleStep;
 
             // Start with xy plane
@@ -344,7 +344,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
 
         if (!_useRelativeLength) {
             // Recompute distance (previous value was relative)
-            _length = _length * startNode->boundingSphere();
+            _length = static_cast<float>(_length * startNode->boundingSphere());
             _length.setExponent(11.f);
             _length.setMaxValue(1e20f);
         }
@@ -356,7 +356,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
                 ));
                 return;
             }
-            _length = _length / startNode->boundingSphere();
+            _length = static_cast<float>(_length / startNode->boundingSphere());
             _length.setExponent(3.f);
             _length.setMaxValue(1000.f);
         }
@@ -382,7 +382,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
 
         if (!_useRelativeOffset) {
             // Recompute distance (previous value was relative)
-            _offsetDistance = _offsetDistance * startNode->boundingSphere();
+            _offsetDistance = static_cast<float>(_offsetDistance * boundingSphere);
             _offsetDistance.setExponent(11.f);
             _offsetDistance.setMaxValue(1e20f);
         }
@@ -394,7 +394,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
                 ));
                 return;
             }
-            _offsetDistance = _offsetDistance / startNode->boundingSphere();
+            _offsetDistance = static_cast<float>(_offsetDistance / boundingSphere);
             _offsetDistance.setExponent(3.f);
             _offsetDistance.setMaxValue(1000.f);
         }
@@ -685,7 +685,7 @@ void RenderableNodeDirectionHint::updateVertexData() {
     // Center top vertex (arrow head point). Note that we need multiple vertices
     // to get correct normal
     int normalCounter = 0;
-    for (const glm::vec3& v : arrowHeadVertices) {
+    for (int i = 0; i < arrowHeadVertices.size(); ++i) {
         _vertexArray.push_back(static_cast<float>(endPos.x));
         _vertexArray.push_back(static_cast<float>(endPos.y));
         _vertexArray.push_back(static_cast<float>(endPos.z));
@@ -718,7 +718,8 @@ void RenderableNodeDirectionHint::updateVertexData() {
     _vertexArray.push_back(static_cast<float>(-arrowDirection.z));
 
     unsigned int botCenterIndex = 0;
-    unsigned int headBotCenterIndex = _vertexArray.size() / 6 - 1; // last
+    unsigned int headBotCenterIndex =
+        static_cast<unsigned int>(_vertexArray.size()) / 6 - 1; // last
 
     // Build triangle list from the given vertices
     for (unsigned int i = 0; i < _segments; ++i) {
@@ -779,9 +780,10 @@ void RenderableNodeDirectionHint::update(const UpdateData&) {
     bool shouldUpdate = _shapeIsDirty;
     if (startNode && endNode) {
         constexpr float Epsilon = std::numeric_limits<float>::epsilon();
-        float combinedDistanceChange =
+        const float combinedDistanceChange = static_cast<float>(
             glm::distance(startNode->worldPosition(), _prevStartNodePosition) +
-            glm::distance(endNode->worldPosition(), _prevEndNodePosition);
+            glm::distance(endNode->worldPosition(), _prevEndNodePosition)
+        );
         if (combinedDistanceChange > Epsilon) {
             shouldUpdate = true;
         }
