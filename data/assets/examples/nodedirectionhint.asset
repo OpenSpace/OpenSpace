@@ -11,12 +11,13 @@ local NodeDirectionHintExample = {
     Color = { 0.8, 1.0, 0.8 },
     Thickness = 2,
     Offset = 6371000.0 * 2,
-    Length = 6371000.0 * 5
+    Length = 6371000.0 * 5,
+    Width = 900000.0
   },
   GUI = {
     Name = "NodeDirectionHint Example",
     Path = "/Example",
-    Description = [[.]] -- TODO
+    Description = [[Example node direciton hint arrow, using absolute sizes]] 
   }
 }
 
@@ -32,12 +33,13 @@ local NodeDirectionHintExample_RelativeUnits = {
     UseRelativeOffset = true,
     UseRelativeLength = true,
     Offset = 2.0, -- Same size as Earth
-    Length = 5.0  -- Twice the size of Earth
+    Length = 5.0,  -- Twice the size of Earth
+    Width = 900000.0
   },
   GUI = {
     Name = "NodeDirectionHint Example (relative units)",
     Path = "/Example",
-    Description = [[.]] -- TODO
+    Description = [[Example node direciton hint arrow, using relative sizes]] 
   }
 }
 

@@ -171,7 +171,7 @@ namespace {
     }
 
     // @TODO (emmbr) put in some helper file?
-    // Generate vertices around a circle with the given radius, in a plane 
+    // Generate vertices around a circle with the given radius, in a plane
     // with with the given center point and normal
     std::vector<glm::vec3> circleVertices(unsigned int count, float radius,
                                           glm::vec3 center, glm::vec3 normal)
@@ -182,7 +182,7 @@ namespace {
         vertices.reserve(count);
         float angleStep = glm::two_pi<float>() / count;
 
-        // Find the quaternion that represents a rotation from positive Z to normal. 
+        // Find the quaternion that represents a rotation from positive Z to normal.
         // (this approach is the shortest arc)
         // https://www.xarg.org/proof/quaternion-from-two-vectors/
         constexpr const glm::vec3 Z = glm::vec3(0.f, 0.f, 1.f);
@@ -266,8 +266,8 @@ documentation::Documentation RenderableNodeDirectionHint::Documentation() {
     return codegen::doc<Parameters>("base_renderable_renderablenodedirectionhint");
 }
 
-RenderableNodeDirectionHint::Shading::Shading() 
-    : properties::PropertyOwner({ "Shading" }) 
+RenderableNodeDirectionHint::Shading::Shading()
+    : properties::PropertyOwner({ "Shading" })
     , enabled(ShadingEnabledInfo, true)
     , ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , diffuseIntensity(DiffuseIntensityInfo, 0.7f, 0.f, 1.f)
@@ -534,7 +534,7 @@ void RenderableNodeDirectionHint::updateVertexData() {
 
     if (hasNoBoundingSphere && (_useRelativeLength || _useRelativeOffset)) {
         LERROR(fmt::format(
-            "Node '{}' has no valid bounding sphere. Can not use relative values", 
+            "Node '{}' has no valid bounding sphere. Can not use relative values",
             _end.value()
         ));
         return;
@@ -569,8 +569,15 @@ void RenderableNodeDirectionHint::updateVertexData() {
     _vertexArray.clear();
     _indexArray.clear();
 
+    // OBS! These variables have to be kept in sync
+    constexpr int nVertexRingsRings = 6;
+    const int nVertices = nVertexRingsRings * _segments + 2;
+    const int nTriangles = 5 * _segments;
+    _vertexArray.reserve(nVertices);
+    _indexArray.reserve(nTriangles);
+
     // TODO: Simplify. Just generate a simple cone and a cylinder or correctl size then
-    // Transform it to be located in teh same position
+    // Transform it to be located in the same position
 
     // Vertice positions for arrow bottom
     const std::vector<glm::vec3> bottomVertices = circleVertices(
@@ -625,6 +632,7 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _vertexArray.push_back(v.z);
 
         glm::vec3 normal = glm::normalize(glm::dvec3(v) - startPos);
+
         _vertexArray.push_back(normal.x);
         _vertexArray.push_back(normal.y);
         _vertexArray.push_back(normal.z);
@@ -739,7 +747,7 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _indexArray.push_back(v1);
         _indexArray.push_back(v3);
         _indexArray.push_back(v2);
-        
+
         // Arrow head cone sides
 
         // Bottom vertices
