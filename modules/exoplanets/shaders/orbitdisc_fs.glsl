@@ -32,6 +32,7 @@ uniform vec2 offset; // relative to semi major axis
 uniform float opacity;
 uniform float eccentricity;
 uniform float semiMajorAxis;
+uniform vec3 multiplyColor = vec3(1.0);
 
 const float Epsilon = 0.0000001;
 
@@ -122,6 +123,7 @@ Fragment getFragment() {
 
   vec4 diffuse = texture(discTexture, textureCoord);
   diffuse.a *= opacity;
+  diffuse.rgb *= multiplyColor;
 
   Fragment frag;
   frag.color = diffuse;

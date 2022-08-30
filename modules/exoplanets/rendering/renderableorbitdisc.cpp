@@ -40,9 +40,9 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 6> UniformNames = {
+    constexpr std::array<const char*, 7> UniformNames = {
         "modelViewProjectionTransform", "offset", "opacity",
-        "discTexture", "eccentricity", "semiMajorAxis"
+        "discTexture", "eccentricity", "semiMajorAxis", "multiplyColor"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -74,6 +74,13 @@ namespace {
         "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+        "MultiplyColor",
+        "Multiply Color",
+        "If set, the disc's texture is multiplied with this color. "
+        "Useful for applying a color grayscale images"
+    };
+
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
@@ -86,6 +93,9 @@ namespace {
 
         // [[codegen::verbatim(OffsetInfo.description)]]
         std::optional<glm::vec2> offset;
+
+        // [[codegen::verbatim(MultiplyColorInfo.description)]]
+        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
     };
 #include "renderableorbitdisc_codegen.cpp"
 } // namespace
@@ -102,6 +112,7 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
     , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
     , _offset(OffsetInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -118,6 +129,10 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     _texturePath = p.texture.string();
     _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
+
+    _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
+    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_multiplyColor);
 
     _eccentricity = p.eccentricity;
     _eccentricity.onChange([&]() { _planeIsDirty = true; });
@@ -179,6 +194,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(_uniformCache.eccentricity, _eccentricity);
     _shader->setUniform(_uniformCache.semiMajorAxis, _size);
+    _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
