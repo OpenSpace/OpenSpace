@@ -1,20 +1,26 @@
 {
   "version": 1,
-  "masteraddress": "127.0.0.1",
+  "masteraddress": "localhost",
+  "externalcontrolport": 20500,
+  "settings": {
+    "display": {
+      "swapinterval": 0
+    }
+  },
   "nodes": [
     {
-      "address": "127.0.0.1",
+      "address": "localhost",
       "port": 20401,
       "windows": [
         {
-          "fullscreen": false,
           "name": "GUI",
           "tags": [ "GUI" ],
+          "fullscreen": false,
           "draw3d": false,
+          "border": true,
           "stereo": "none",
-          "pos": { "x": 50, "y": 50 },
-          "size": { "x": 1280, "y": 720 },
-          "res": { "x": 2048, "y": 2048 },
+          "pos": { "x": 0, "y": 30 },
+          "size": { "x": 1120, "y": 1140 },
           "viewports": [
             {
               "pos": { "x": 0.0, "y": 0.0 },
@@ -22,8 +28,8 @@
               "projection": {
                 "type": "PlanarProjection",
                 "fov": {
-                  "hfov": 80.0,
-                  "vfov": 50.534015846724
+                  "hfov": 44.0,
+                  "vfov": 38.89
                 },
                 "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
               }
@@ -31,24 +37,25 @@
           ]
         },
         {
+          "name": "OpenSpace",
           "fullscreen": false,
-          "name": "Spherical Projection",
-          "stereo": "none",
           "draw2d": false,
-          "pos": { "x": 0, "y": 100 },
-          "size": { "x": 1280, "y": 720 },
-          "res": { "x": 2048, "y": 2048 },
+          "border": true,
+          "stereo": "none",
+          "pos": { "x": 1120, "y": 30 },
+          "size": { "x": 800, "y": 1140 },
           "viewports": [
             {
-              "mesh": "mesh/standard_16x9.data",
+              "tracked": true,
               "pos": { "x": 0.0, "y": 0.0 },
               "size": { "x": 1.0, "y": 1.0 },
               "projection": {
-                "type": "FisheyeProjection",
-                "fov": 180.0,
-                "quality": "2k",
-                "tilt": 30.0,
-                "background": { "r": 0.1, "g": 0.1, "b": 0.1, "a": 1.0 }
+                "type": "PlanarProjection",
+                "fov": {
+                  "hfov": 44.0,
+                  "vfov": 54.45
+                },
+                "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
               }
             }
           ]
@@ -58,7 +65,7 @@
   ],
   "users": [
     {
-      "eyeseparation": 0.06,
+      "eyeseparation": 0.065,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
   ]

@@ -13,10 +13,34 @@
       "port": 20401,
       "windows": [
         {
+          "name": "GUI",
+          "tags": [ "GUI" ],
+          "fullscreen": false,
+          "draw3d": false,
+          "stereo": "none",
+          "pos": { "x": 50, "y": 50 },
+          "size": { "x": 1280, "y": 720 },
+          "viewports": [
+            {
+              "pos": { "x": 0.0, "y": 0.0 },
+              "size": { "x": 1.0, "y": 1.0 },
+              "projection": {
+                "type": "PlanarProjection",
+                "fov": {
+                  "hfov": 80.0,
+                  "vfov": 50.534015846724
+                },
+                "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
+              }
+            }
+          ]
+        },
+        {
           "name": "OpenSpace",
           "fullscreen": false,
-          "stereo": "side_by_side",
-          "pos": { "x": 50, "y": 50 },
+          "draw2d": false,
+          "stereo": "none",
+          "pos": { "x": 100, "y": 100 },
           "size": { "x": 1280, "y": 720 },
           "viewports": [
             {

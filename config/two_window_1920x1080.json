@@ -1,6 +1,12 @@
 {
   "version": 1,
   "masteraddress": "localhost",
+  "externalcontrolport": 20500,
+  "settings": {
+    "display": {
+      "swapinterval": 0
+    }
+  },
   "nodes": [
     {
       "address": "localhost",
@@ -11,9 +17,10 @@
           "tags": [ "GUI" ],
           "fullscreen": false,
           "draw3d": false,
+          "border": true,
           "stereo": "none",
-          "pos": { "x": 50, "y": 50 },
-          "size": { "x": 1024, "y": 1024 },
+          "pos": { "x": 0, "y": 40 },
+          "size": { "x": 1120, "y": 1000 },
           "viewports": [
             {
               "pos": { "x": 0.0, "y": 0.0 },
@@ -21,8 +28,8 @@
               "projection": {
                 "type": "PlanarProjection",
                 "fov": {
-                  "hfov": 80.0,
-                  "vfov": 50.534015846724
+                  "hfov": 44.0,
+                  "vfov": 38.89
                 },
                 "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
               }
@@ -33,18 +40,22 @@
           "name": "OpenSpace",
           "fullscreen": false,
           "draw2d": false,
+          "border": true,
           "stereo": "none",
-          "size": { "x": 1024, "y": 1024 },
+          "pos": { "x": 1120, "y": 40 },
+          "size": { "x": 800, "y": 1000 },
           "viewports": [
             {
+              "tracked": true,
               "pos": { "x": 0.0, "y": 0.0 },
               "size": { "x": 1.0, "y": 1.0 },
               "projection": {
-                "type": "FisheyeProjection",
-                "fov": 180.0,
-                "quality": "1k",
-                "tilt": 27.0,
-                "background": { "r": 0.1, "g": 0.1, "b": 0.1, "a": 1.0 }
+                "type": "PlanarProjection",
+                "fov": {
+                  "hfov": 44.0,
+                  "vfov": 54.45
+                },
+                "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
               }
             }
           ]
@@ -54,7 +65,7 @@
   ],
   "users": [
     {
-      "eyeseparation": 0.06,
+      "eyeseparation": 0.065,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
   ]

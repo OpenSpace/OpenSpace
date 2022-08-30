@@ -17,9 +17,10 @@
           "tags": [ "GUI" ],
           "fullscreen": false,
           "draw3d": false,
+          "border": true,
           "stereo": "none",
-          "pos": { "x": 50, "y": 50 },
-          "size": { "x": 1280, "y": 720 },
+          "pos": { "x": 0, "y": 40 },
+          "size": { "x": 1504, "y": 1350 },
           "viewports": [
             {
               "pos": { "x": 0.0, "y": 0.0 },
@@ -27,8 +28,8 @@
               "projection": {
                 "type": "PlanarProjection",
                 "fov": {
-                  "hfov": 80.0,
-                  "vfov": 50.534015846724
+                  "hfov": 44.0,
+                  "vfov": 38.324
                 },
                 "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
               }
@@ -39,9 +40,10 @@
           "name": "OpenSpace",
           "fullscreen": false,
           "draw2d": false,
+          "border": true,
           "stereo": "none",
-          "pos": { "x": 50, "y": 50 },
-          "size": { "x": 1280, "y": 720 },
+          "pos": { "x": 1504, "y": 40 },
+          "size": { "x": 1052, "y": 1350 },
           "viewports": [
             {
               "tracked": true,
@@ -50,8 +52,8 @@
               "projection": {
                 "type": "PlanarProjection",
                 "fov": {
-                  "hfov": 80.0,
-                  "vfov": 50.534015846724
+                  "hfov": 44.0,
+                  "vfov": 54.79
                 },
                 "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
               }
