@@ -1,0 +1,47 @@
+local identifier = "ExoplanetDataPoints"
+
+local hide_glyphs = {
+  Identifier = "os.hide_exo_glyphs",
+  Name = "Hide ExoExplorer Renderable",
+  Command = [[
+      local identifier = "]] .. identifier .. [["
+      openspace.setPropertyValueSingle("Scene." .. identifier .. ".Renderable.Fade", 0.0, 1.0)
+  ]],
+  Documentation = [[]],
+  GuiPath = "/ExoplanetExplorer",
+  IsLocal = false
+}
+asset.export("hide_glyphs", hide_glyphs.Identifier)
+
+local show_glyphs = {
+  Identifier = "os.show_exo_glyphs",
+  Name = "Show ExoExplorer Renderable",
+  Command = [[
+      local identifier = "]] .. identifier .. [["
+      openspace.setPropertyValueSingle("Scene." .. identifier .. ".Renderable.Fade", 1.0, 1.0)
+  ]],
+  Documentation = [[]],
+  GuiPath = "/ExoplanetExplorer",
+  IsLocal = false
+}
+asset.export("show_glyphs", show_glyphs.Identifier)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(show_glyphs)
+  openspace.action.registerAction(hide_glyphs)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(show_glyphs)
+  openspace.action.removeAction(hide_glyphs)
+end)
+
+
+asset.meta = {
+  Name = "Actions - Show/Hide Exoplanet Explorer Renderable",
+  Version = "1.0",
+  Description = [[ ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,74 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+local hundredParsecInMeters = 3.08567758E18;
+local oneAuInMeters = 149597870700;
+
+local hundredParsecSphere = {
+  Identifier = "100ParsecSphere",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = hundredParsecInMeters;
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = false,
+    LineWidth = 2.0,
+    Opacity = 0.5,
+    Color = { 0.3, 0.6, 0.6 },
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Name = "100 Parsec Sphere",
+    Path = "/ExoplanetExplorer"
+  }
+}
+
+local oneAuGrid = {
+  Identifier = "1AuGrid",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 2 * oneAuInMeters; -- Want distance from the center to be 1 AU
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Color = { 0.533, 0.145, 0.75 },
+    Opacity = 0.5,
+    LineWidth = 2.0,
+    Segments = { 20, 20 }
+  },
+  GUI = {
+    Name = "1 AU Grid",
+    Path = "/ExoplanetExplorer"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(hundredParsecSphere)
+  openspace.addSceneGraphNode(oneAuGrid)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(oneAuGrid)
+  openspace.removeSceneGraphNode(hundredParsecSphere)
+end)
+  
+asset.export(hundredParsecSphere)
+asset.export(oneAuGrid)
+
+
+asset.meta = {
+  Name = "Size indicators",
+  Version = "1.0",
+  Description = [[Some size indicators used for the Exoplnaet Explorer tool. ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT License"
+}

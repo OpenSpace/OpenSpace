@@ -1,0 +1,42 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local milkyway = asset.require("scene/milkyway/milkyway/volume")
+
+local MilkyWayEarthLine = {
+  Identifier = "MilkyWayEarthLine",
+  Renderable = {
+    Type = "RenderableNodeLine",
+    StartNode = earth.Earth.Identifier,
+    EndNode = "MilkyWayVolume",
+    Color = { 0.5, 0.5, 0.5 },
+    LineWidth = 2,
+    Opacity = 0.5
+  },
+  GUI = {
+    Name = "Line to Milky Way Center",
+    Path = "/ExoplanetExplorer",
+    Description = [[
+      Line from Earth to the Milky Way center
+    ]],
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MilkyWayEarthLine)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MilkyWayEarthLine)
+end)
+  
+asset.export(MilkyWayEarthLine)
+
+
+
+asset.meta = {
+  Name = "Milky Way Center Line",
+  Version = "1.0",
+  Description = [[A line to the MIlky Way center, from Earth]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT License"
+}

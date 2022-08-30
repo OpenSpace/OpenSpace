@@ -1,0 +1,83 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+local ra = 19.3777778
+local dec = 41.8 -- This is not completely correct, but works with the rotation below
+
+local equatorialRotationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,
+  -0.8734371 , -0.4448296, -0.1980764,
+  -0.483835  ,  0.7469823,  0.4559838
+}
+
+local KeplerPrismBase = {
+  Identifier = "KeplerPrismBase",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = equatorialRotationMatrix
+    }
+  },
+  GUI = {
+    Name = "Kepler Prism Base",
+    Path = "/ExoplanetExplorer",
+    Description = [[
+      Base SGN for the Kepler prism node. 
+      Makes it easier to tranform ra dec coordinates
+    ]],
+    Hidden = true
+  }
+}
+
+local KeplerPrism = {
+  Identifier = "KeplerPrism",
+  Parent = KeplerPrismBase.Identifier,
+  Renderable = {
+    Type = "RenderablePrism",
+    Segments = 4,
+    Lines = 4,
+    Radius = 15013346654976737280.000000,
+    BaseRadius = 10,
+    LineWidth = 2.0,
+    Opacity = 0.5,
+    Color = { 0.5, 0.5, 0.5 },
+    Length = 0.9E20 --2.838E19 = 3000 light years
+  },
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { math.rad(dec), math.rad(ra), 0.0 }
+    }
+  },
+  GUI = {
+    Name = "Kepler Prism",
+    Path = "/ExoplanetExplorer",
+    Description = [[
+      The iconic cone of the Kepler telescope
+    ]],
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(KeplerPrismBase)
+  openspace.addSceneGraphNode(KeplerPrism)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(KeplerPrism)
+  openspace.removeSceneGraphNode(KeplerPrismBase)
+end)
+  
+asset.export(KeplerPrism)
+
+
+
+asset.meta = {
+  Name = "Kepler Field of View",
+  Version = "1.0",
+  Description = [[A prism showing the Kepler field of view]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT License"
+}
