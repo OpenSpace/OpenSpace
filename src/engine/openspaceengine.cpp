@@ -31,7 +31,6 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
@@ -83,6 +82,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
@@ -94,6 +94,10 @@
 #include <future>
 #include <numeric>
 #include <sstream>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 #ifdef __APPLE__
 #include <openspace/interaction/touchbar.h>
@@ -1408,7 +1412,9 @@ void OpenSpaceEngine::resetPropertyChangeFlagsOfSubowners(properties::PropertyOw
     }
 }
 
-void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
+void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action,
+                                       IsGuiWindow isGuiWindow)
+{
     ZoneScoped
 
     if (_loadingScreen) {
@@ -1421,9 +1427,9 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
-    using F = std::function<bool (Key, KeyModifier, KeyAction)>;
+    using F = global::callback::KeyboardCallback;
     for (const F& func : *global::callback::keyboard) {
-        const bool isConsumed = func(key, mod, action);
+        const bool isConsumed = func(key, mod, action, isGuiWindow);
         if (isConsumed) {
             return;
         }
@@ -1441,12 +1447,14 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
     global::interactionMonitor->markInteraction();
 }
 
-void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
+void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
+                                   IsGuiWindow isGuiWindow)
+{
     ZoneScoped
 
-    using F = std::function<bool (unsigned int, KeyModifier)>;
+    using F = global::callback::CharacterCallback;
     for (const F& func : *global::callback::character) {
-        bool isConsumed = func(codepoint, modifier);
+        bool isConsumed = func(codepoint, modifier, isGuiWindow);
         if (isConsumed) {
             return;
         }
@@ -1456,22 +1464,22 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     global::interactionMonitor->markInteraction();
 }
 
-void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
-                                          MouseAction action,
-                                          KeyModifier mods)
+void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action,
+                                          KeyModifier mods, IsGuiWindow isGuiWindow)
 {
     ZoneScoped
 
-    using F = std::function<bool (MouseButton, MouseAction, KeyModifier)>;
+    using F = global::callback::MouseButtonCallback;
     for (const F& func : *global::callback::mouseButton) {
-        bool isConsumed = func(button, action, mods);
+        bool isConsumed = func(button, action, mods, isGuiWindow);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
-            // handler in order to reliably terminate a rotation or zoom. Accidentally
+            // handler in order to reliably terminate a rotation or zoom, or to the other
+            // callbacks to for example release a drag and drop of a UI window. Accidentally
             // moving the cursor over a UI window is easy to miss and leads to weird
             // continuing movement
             if (action == MouseAction::Release) {
-                break;
+                continue;
             }
             else {
                 return;
@@ -1479,8 +1487,9 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
         }
     }
 
-    // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing
-    if (action == MouseAction::Press) {
+    // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing.
+    // Only handle the clicks if we are in a GUI window
+    if (action == MouseAction::Press && isGuiWindow) {
         bool isConsumed = global::renderEngine->mouseActivationCallback(_mousePosition);
         if (isConsumed) {
             return;
@@ -1491,12 +1500,14 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
     global::interactionMonitor->markInteraction();
 }
 
-void OpenSpaceEngine::mousePositionCallback(double x, double y) {
+void OpenSpaceEngine::mousePositionCallback(double x, double y,
+                                            IsGuiWindow isGuiWindow)
+{
     ZoneScoped
 
-    using F = std::function<void (double, double)>;
+    using F = global::callback::MousePositionCallback;
     for (const F& func : *global::callback::mousePosition) {
-        func(x, y);
+        func(x, y, isGuiWindow);
     }
 
     global::navigationHandler->mousePositionCallback(x, y);
@@ -1505,12 +1516,14 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
+void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
+                                               IsGuiWindow isGuiWindow)
+{
     ZoneScoped
 
-    using F = std::function<bool (double, double)>;
+    using F = global::callback::MouseScrollWheelCallback;
     for (const F& func : *global::callback::mouseScrollWheel) {
-        bool isConsumed = func(posX, posY);
+        bool isConsumed = func(posX, posY, isGuiWindow);
         if (isConsumed) {
             return;
         }

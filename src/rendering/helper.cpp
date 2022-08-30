@@ -29,6 +29,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>

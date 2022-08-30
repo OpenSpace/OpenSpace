@@ -32,6 +32,20 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <cmath>
 
+namespace {
+    // Galactic coordinates are projected onto the celestial sphere
+    // Equatorial coordinates are unit length
+    // Conversion spherical <-> Cartesian
+
+    // Conversion matrix - J2000 equatorial <-> galactic
+    // https://arxiv.org/abs/1010.3773v1
+    constexpr glm::dmat3 ConversionMatrix = glm::dmat3(
+        -0.054875539390, 0.494109453633, -0.867666135681, // col 0
+        -0.873437104725, -0.444829594298, -0.198076389622, // col 1
+        -0.483834991775, 0.746982248696, 0.455983794523 // col 2
+    );
+} // namespace
+
 namespace openspace::skybrowser {
 
 // Converts from spherical coordinates in the unit of degrees to cartesian coordianates
@@ -53,26 +67,26 @@ glm::dvec2 cartesianToSpherical(const glm::dvec3& coord) {
     double ra = atan2(coord.y, coord.x);
     double dec = atan2(coord.z, glm::sqrt((coord.x * coord.x) + (coord.y * coord.y)));
 
-    ra = ra > 0 ? ra : ra + glm::two_pi<double>();
+    ra = ra > 0.0 ? ra : ra + glm::two_pi<double>();
 
     glm::dvec2 celestialCoords = glm::dvec2(ra, dec);
     return glm::degrees(celestialCoords);
 }
 
 glm::dvec3 galacticToEquatorial(const glm::dvec3& coords) {
-    return glm::transpose(conversionMatrix) * glm::normalize(coords);
+    return glm::transpose(ConversionMatrix) * glm::normalize(coords);
 }
 
 glm::dvec3 equatorialToGalactic(const glm::dvec3& coords) {
     // On the unit sphere
-    glm::dvec3 rGalactic = conversionMatrix * glm::normalize(coords);
+    glm::dvec3 rGalactic = ConversionMatrix * glm::normalize(coords);
     return rGalactic;
 }
 
 glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords) {
     // Ensure that if the coord is behind the camera,
     // the converted coordinate will be there too
-    double zCoord = coords.z > 0 ? -ScreenSpaceZ : ScreenSpaceZ;
+    double zCoord = coords.z > 0.0 ? -ScreenSpaceZ : ScreenSpaceZ;
 
     // Calculate screen space coords x and y
     double tanX = coords.x / coords.z;
@@ -91,15 +105,15 @@ glm::dvec3 localCameraToGalactic(const glm::dvec3& coords) {
     // Subtract camera position to get the view direction
     glm::dvec3 galactic = glm::dvec3(camMat * coordsVec4) - camPos;
 
-    return glm::normalize(galactic) * skybrowser::CelestialSphereRadius;
+    return glm::normalize(galactic) * CelestialSphereRadius;
 }
 
 glm::dvec3 localCameraToEquatorial(const glm::dvec3& coords) {
     // Calculate the galactic coordinate of the target direction
     // projected onto the celestial sphere
     glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
-    glm::dvec3 galactic = camPos + skybrowser::localCameraToGalactic(coords);
-    return skybrowser::galacticToEquatorial(galactic);
+    glm::dvec3 galactic = camPos + localCameraToGalactic(coords);
+    return galacticToEquatorial(galactic);
 }
 
 glm::dvec3 equatorialToLocalCamera(const glm::dvec3& coords) {
@@ -117,8 +131,10 @@ glm::dvec3 galacticToLocalCamera(const glm::dvec3& coords) {
 }
 
 double targetRoll(const glm::dvec3& up, const glm::dvec3& forward) {
-    glm::dvec3 upJ2000 = skybrowser::galacticToEquatorial(up);
-    glm::dvec3 forwardJ2000 = skybrowser::galacticToEquatorial(forward);
+    constexpr glm::dvec3 NorthPole = glm::dvec3(0.0, 0.0, 1.0);
+    
+    glm::dvec3 upJ2000 = galacticToEquatorial(up);
+    glm::dvec3 forwardJ2000 = galacticToEquatorial(forward);
 
     glm::dvec3 crossUpNorth = glm::cross(upJ2000, NorthPole);
     double dotNorthUp = glm::dot(NorthPole, upJ2000);
@@ -129,14 +145,15 @@ double targetRoll(const glm::dvec3& up, const glm::dvec3& forward) {
 
 glm::dvec3 cameraDirectionEquatorial() {
     // Get the view direction of the screen in cartesian J2000 coordinates
-    return galacticToEquatorial(cameraDirectionGalactic());
+    glm::dvec3 camDirGalactic = cameraDirectionGalactic();
+    return galacticToEquatorial(camDirGalactic);
 }
 
 glm::dvec3 cameraDirectionGalactic() {
     // Get the view direction of the screen in galactic coordinates
     glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
     glm::dvec3 view = global::navigationHandler->camera()->viewDirectionWorldSpace();
-    glm::dvec3 galCoord = camPos + (skybrowser::CelestialSphereRadius * view);
+    glm::dvec3 galCoord = camPos + CelestialSphereRadius * view;
 
     return galCoord;
 }
@@ -150,11 +167,10 @@ bool isCoordinateInView(const glm::dvec3& equatorial) {
     // Check if image coordinate is within current FOV
     glm::dvec3 localCamera = equatorialToLocalCamera(equatorial);
     glm::dvec3 coordsScreen = localCameraToScreenSpace3d(localCamera);
-    double r = static_cast<float>(windowRatio());
+    double r = windowRatio();
 
-    bool isCoordInView = abs(coordsScreen.x) < r && abs(coordsScreen.y) < 1.f &&
-                         coordsScreen.z < 0;
-
+    bool isCoordInView =
+        abs(coordsScreen.x) < r && abs(coordsScreen.y) < 1.f && coordsScreen.z < 0.f;
     return isCoordInView;
 }
 
@@ -200,31 +216,18 @@ glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3&
 }
 
 double sizeFromFov(double fov, glm::dvec3 worldPosition) {
-
     // Calculate the size with trigonometry
     //  /|
     // /_|    Adjacent is the horizontal line, opposite the vertical
     // \ |    Calculate for half the triangle first, then multiply with 2
     //  \|
     double adjacent = glm::length(worldPosition);
-    double opposite = 2 * adjacent * glm::tan(glm::radians(fov * 0.5));
+    double opposite = 2.0 * adjacent * glm::tan(glm::radians(fov * 0.5));
     return opposite;
 }
 
 template <>
-float Animation<float>::getNewValue() {
-    if (!isAnimating()) {
-        return _goal;
-    }
-    else {
-        float percentage = static_cast<float>(percentageSpent());
-        float diff = static_cast<float>((_goal - _start) * ghoul::exponentialEaseOut(percentage));
-        return _start + diff;
-    }
-}
-
-template <>
-double Animation<double>::getNewValue() {
+double Animation<double>::newValue() const {
     if (!isAnimating()) {
         return _goal;
     }
@@ -236,7 +239,7 @@ double Animation<double>::getNewValue() {
 }
 
 template <>
-glm::dmat4 Animation<glm::dvec3>::getRotationMatrix() {
+glm::dmat4 Animation<glm::dvec3>::rotationMatrix() {
     if (!isAnimating()) {
         return glm::dmat4(1.0);
     }
@@ -254,7 +257,7 @@ glm::dmat4 Animation<glm::dvec3>::getRotationMatrix() {
 }
 
 template <>
-glm::dvec3 Animation<glm::dvec3>::getNewValue() {
+glm::dvec3 Animation<glm::dvec3>::newValue() const {
     if (!isAnimating()) {
         return _goal;
     }

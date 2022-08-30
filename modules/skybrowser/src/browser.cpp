@@ -55,9 +55,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(Browser)]] Parameters {
-        // [[codegen::verbatim(DimensionsInfo.description)]]
-        std::optional<glm::vec2> dimensions;
-
         // [[codegen::verbatim(UrlInfo.description)]]
         std::optional<std::string> url;
 
@@ -66,7 +63,6 @@ namespace {
     };
 
 #include "browser_codegen.cpp"
-
 } // namespace
 
 namespace openspace {
@@ -80,29 +76,21 @@ void Browser::RenderHandler::setTexture(GLuint t) {
 }
 
 Browser::Browser(const ghoul::Dictionary& dictionary)
-    : _browserPixeldimensions(
+    : _browserDimensions(
         DimensionsInfo,
-        glm::vec2(500.f),
+        global::windowDelegate->currentSubwindowSize(),
         glm::vec2(10.f),
         glm::vec2(3000.f)
     )
     , _url(UrlInfo)
     , _reload(ReloadInfo)
 {
-    if (dictionary.hasValue<std::string>(UrlInfo.identifier)) {
-        _url = dictionary.value<std::string>(UrlInfo.identifier);
-    }
-
-    // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
     _url = p.url.value_or(_url);
-    _browserPixeldimensions = p.dimensions.value_or(_browserPixeldimensions);
-
-    glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
-    _browserPixeldimensions = windowDimensions;
-
     _url.onChange([this]() { _isUrlDirty = true; });
-    _browserPixeldimensions.onChange([this]() { _isDimensionsDirty = true; });
+    
+    _browserDimensions.onChange([this]() { _isDimensionsDirty = true; });
     _reload.onChange([this]() { _shouldReload = true; });
 
     // Create browser and render handler
@@ -121,9 +109,9 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
 
 Browser::~Browser() {}
 
-bool Browser::initializeGL() {
+void Browser::initializeGL() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(glm::ivec2(_browserPixeldimensions.value()), 1),
+        glm::uvec3(glm::ivec2(_browserDimensions.value()), 1),
         GL_TEXTURE_2D
     );
 
@@ -131,7 +119,6 @@ bool Browser::initializeGL() {
 
     _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
-    return isReady();
 }
 
 void Browser::deinitializeGL() {
@@ -164,11 +151,11 @@ void Browser::update() {
         _browserInstance->loadUrl(_url);
         _isUrlDirty = false;
     }
+
     if (_isDimensionsDirty) {
-        if (_browserPixeldimensions.value().x > 0 &&
-            _browserPixeldimensions.value().y > 0)
-        {
-            _browserInstance->reshape(_browserPixeldimensions.value());
+        glm::vec2 dim = _browserDimensions;
+        if (dim.x > 0 && dim.y > 0) {
+            _browserInstance->reshape(dim);
             _isDimensionsDirty = false;
         }
     }
@@ -184,12 +171,12 @@ bool Browser::isReady() const {
 }
 
 glm::vec2 Browser::browserPixelDimensions() const {
-    return _browserPixeldimensions;
+    return _browserDimensions;
 }
 
 // Updates the browser size to match the size of the texture
 void Browser::updateBrowserSize() {
-    _browserPixeldimensions = _texture->dimensions();
+    _browserDimensions = _texture->dimensions();
 }
 
 float Browser::browserRatio() const {
@@ -198,23 +185,19 @@ float Browser::browserRatio() const {
 }
 
 void Browser::setCallbackDimensions(const std::function<void(const glm::dvec2&)>& func) {
-    _browserPixeldimensions.onChange([&]() {
-        func(_browserPixeldimensions.value());
+    _browserDimensions.onChange([&]() {
+        func(_browserDimensions.value());
     });
 }
 
 void Browser::executeJavascript(const std::string& script) const {
     // Make sure that the browser has a main frame
-    const bool browserExists = _browserInstance && _browserInstance->getBrowser();
-    const bool frameIsLoaded = browserExists &&
-        _browserInstance->getBrowser()->GetMainFrame();
+    bool browserExists = _browserInstance && _browserInstance->getBrowser();
+    bool frameIsLoaded = browserExists && _browserInstance->getBrowser()->GetMainFrame();
 
     if (frameIsLoaded) {
-        _browserInstance->getBrowser()->GetMainFrame()->ExecuteJavaScript(
-            script,
-            _browserInstance->getBrowser()->GetMainFrame()->GetURL(),
-            0
-        );
+        CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
+        frame->ExecuteJavaScript(script, frame->GetURL(), 0);
     }
 }
 

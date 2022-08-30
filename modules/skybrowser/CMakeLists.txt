@@ -63,3 +63,7 @@ create_new_module(
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
+target_precompile_headers(${skybrowser_module} PRIVATE
+  [["include/cef_accessibility_handler.h"]]
+  [["include/cef_render_handler.h"]]
+)

@@ -98,8 +98,8 @@ public:
 
     void addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s);
     void removeScreenSpaceRenderable(ScreenSpaceRenderable* s);
-    void removeScreenSpaceRenderable(const std::string& identifier);
-    ScreenSpaceRenderable* screenSpaceRenderable(const std::string& identifier);
+    void removeScreenSpaceRenderable(std::string_view identifier);
+    ScreenSpaceRenderable* screenSpaceRenderable(std::string_view identifier);
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(

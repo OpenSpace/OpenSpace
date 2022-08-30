@@ -39,6 +39,8 @@
 #endif // WIN32
 
 #include <ccmc/Kameleon.h>
+#include <ccmc/Constants.h>
+#include <ccmc/FileReader.h>
 #include <ccmc/Model.h>
 #include <ccmc/Interpolator.h>
 #include <ccmc/BATSRUS.h>

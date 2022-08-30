@@ -25,6 +25,7 @@
 #include <modules/statemachine/include/statemachine.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <fstream>
 #include <optional>
