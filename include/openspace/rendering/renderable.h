@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -125,6 +126,8 @@ protected:
     SceneGraphNode* _parent = nullptr;
     bool _shouldUpdateIfDisabled = false;
     RenderBin _renderBin = RenderBin::Opaque;
+
+    properties::OptionProperty _explicitRenderBinMode;
 
 private:
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want

@@ -30,7 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/navigation/navigationhandler.h> 
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
@@ -41,6 +41,15 @@
 
 namespace {
     constexpr std::string_view KeyType = "Type";
+
+    enum class RenderBinOption : int {
+        Background,
+        Opaque,
+        PreDeferredTransparent,
+        PostDeferredTransparent,
+        Overlay,
+        OpacityBased
+    };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
@@ -79,7 +88,9 @@ namespace {
         "RenderBinMode",
         "Render Bin Mode",
         "This value specifies if the renderable should be rendered in the Background,"
-        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step",
+        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step. If "
+        "'OpacityBased' is selected, the engine will automatically set the render bin "
+        "based on the current opacity of the renderable.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -106,12 +117,13 @@ namespace {
         std::optional<std::string> type;
 
         // Fragile! Keep in sync with documentation
-        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderBinMode {
+        enum class [[codegen::map(RenderBinOption)]] RenderBinMode {
             Background,
             Opaque,
             PreDeferredTransparent,
             PostDeferredTransparent,
-            Overlay
+            Overlay,
+            OpacityBased
         };
 
         // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
@@ -159,6 +171,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
+    , _explicitRenderBinMode(RenderableRenderBinModeInfo)
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
 {
     ZoneScoped
@@ -203,11 +216,59 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
 
+    _explicitRenderBinMode.addOptions({
+       { static_cast<int>(RenderBinOption::Background), "Background" },
+       { static_cast<int>(RenderBinOption::Opaque), "Opaque" },
+       {
+           static_cast<int>(RenderBinOption::PreDeferredTransparent),
+           "PreDeferredTransparent"
+       },
+       {
+           static_cast<int>(RenderBinOption::PostDeferredTransparent),
+           "PostDeferredTransparent"
+       },
+       { static_cast<int>(RenderBinOption::Overlay), "Overlay" },
+       { static_cast<int>(RenderBinOption::OpacityBased), "OpacityBased"}
+    });
+
+    _explicitRenderBinMode.onChange([this]() {
+        const RenderBinOption option =
+            static_cast<RenderBinOption>(_explicitRenderBinMode.value());
+
+        switch (option) {
+            case RenderBinOption::OpacityBased:
+                setRenderBinFromOpacity();
+                break;
+            case RenderBinOption::Background:
+                setRenderBin(RenderBin::Background);
+                break;
+            case RenderBinOption::Opaque:
+                setRenderBin(RenderBin::Opaque);
+                break;
+            case RenderBinOption::PreDeferredTransparent:
+                setRenderBin(RenderBin::PreDeferredTransparent);
+                break;
+            case RenderBinOption::PostDeferredTransparent:
+                setRenderBin(RenderBin::PostDeferredTransparent);
+                break;
+            case RenderBinOption::Overlay:
+                setRenderBin(RenderBin::Overlay);
+                break;
+            default:
+                setRenderBinFromOpacity();
+        }
+    });
+    addProperty(_explicitRenderBinMode);
+
     // only used by a few classes such as RenderableTrail and RenderableSphere
     if (p.renderBinMode.has_value()) {
-        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
+        _explicitRenderBinMode =
+            static_cast<int>(codegen::map<RenderBinOption>(*p.renderBinMode));
     }
-    
+    else {
+        _explicitRenderBinMode = static_cast<int>(RenderBinOption::OpacityBased);
+    }
+
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
     addProperty(_dimInAtmosphere);
 }
@@ -294,6 +355,8 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
 }
 
 void Renderable::setRenderBinFromOpacity() {
+    // TODO: figure out if these checks are really needed and handle the default behavior
+    // for when explicit renderbin mode is not set
     if ((_renderBin != Renderable::RenderBin::PostDeferredTransparent) &&
         (_renderBin != Renderable::RenderBin::Overlay))
     {
@@ -313,7 +376,7 @@ void Renderable::registerUpdateRenderBinFromOpacity() {
 }
 
 float Renderable::opacity() const {
-    // Rendering should depend on if camera is in the atmosphere and if camera is at the 
+    // Rendering should depend on if camera is in the atmosphere and if camera is at the
     // dark part of the globe
     return _dimInAtmosphere ?
         _opacity * _fade * global::navigationHandler->camera()->atmosphereDimmingFactor() :
