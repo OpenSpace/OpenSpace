@@ -310,6 +310,7 @@ void createExoplanetSystem(const std::string& starName) {
             "Transform = { "
                 "Translation = " + planetKeplerTranslation + ""
             "},"
+            "Tag = {'exoplanet'},"
             "GUI = {"
                 "Name = '" + planetName + "',"
                 "Path = '" + guiPath + "'"
@@ -334,6 +335,7 @@ void createExoplanetSystem(const std::string& starName) {
                 "Translation = " + planetKeplerTranslation + ","
                 "Color = { 1, 1, 1 }"
             "},"
+            "Tag = {'exoplanet'},"
             "GUI = {"
                 "Name = '" + planetName + " Trail',"
                 "Path = '" + guiPath + "'"
@@ -384,6 +386,7 @@ void createExoplanetSystem(const std::string& starName) {
                         "Rotation = " + ghoul::to_string(rotationMat3) + ""
                     "}"
                 "},"
+                "Tag = {'exoplanet'},"
                 "GUI = {"
                     "Name = '" + planetName + " Disc',"
                     "Path = '" + guiPath + "'"
@@ -440,6 +443,47 @@ void createExoplanetSystem(const std::string& starName) {
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
+    // 90 degrees inclination plane
+    const glm::dmat4 inclinationPlaneRotation = computeOrbitPlaneRotationMatrix(90.f);
+    const glm::dmat3 inclinationPlaneRotationMatrix =
+        static_cast<glm::dmat3>(inclinationPlaneRotation);
+
+    float meanSemimajorAxisInAu = 0.f;
+    for (const ExoplanetDataEntry& p : system.planetsData) {
+        meanSemimajorAxisInAu += p.a;
+    }
+    meanSemimajorAxisInAu /= static_cast<float>(system.planetsData.size());
+    const double planeSize =
+        2.0 * meanSemimajorAxisInAu * distanceconstants::AstronomicalUnit;
+
+    const std::string inclinationPlane = "{"
+        "Identifier = '" + starIdentifier + "_EdgeOnInclinationPlane',"
+        "Parent = '" + starIdentifier + "',"
+        "Renderable = {"
+            "Type = 'RenderableGrid',"
+            "Enabled = false," // TODO: make property if we want to keep this around
+            "Size = { " + fmt::format("{0}, {0}", planeSize) + "}, "
+            "Color = { 0.4, 0.4, 0.4 }, "
+            "Segments = { 10, 10 },"
+            "LineWidth = 1.0,"
+        "},"
+        "Transform = {"
+            "Rotation = {"
+                "Type = 'StaticRotation',"
+                "Rotation = " + ghoul::to_string(inclinationPlaneRotationMatrix) + ""
+            "},"
+        "},"
+        "GUI = {"
+            "Name = 'Edge-on Inclination Plane',"
+            "Path = '" + guiPath + "'"
+        "}"
+    "}";
+
+    global::scriptEngine->queueScript(
+        "openspace.addSceneGraphNode(" + inclinationPlane + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
     // Habitable Zone
     bool hasTeff = !std::isnan(system.starData.teff);
     bool hasLuminosity = !std::isnan(system.starData.luminosity);
@@ -483,6 +527,7 @@ void createExoplanetSystem(const std::string& starName) {
                     "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
                 "}"
             "},"
+            "Tag = {'exoplanet_system_habitable_zone'},"
             "GUI = {"
                 "Name = '" + starName + " Habitable Zone',"
                 "Path = '" + guiPath + "',"
