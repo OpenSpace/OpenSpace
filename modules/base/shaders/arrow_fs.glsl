@@ -44,7 +44,8 @@ Fragment getFragment() {
 
   // Simple phong shading (same color for diffuse and ambient. White specular)
   if (performShading) {
-    const vec3 lightDirectionViewSpace = vec3(0.0, 0.0, 1.0); // TODO: send from code and make configurable
+  // TODO: send from code and make configurable
+    const vec3 lightDirectionViewSpace = vec3(0.0, 0.0, 1.0);
     const float lightIntensity = 1.0;
     const float specularPower = 100.0;
 

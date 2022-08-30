@@ -91,7 +91,7 @@ private:
     };
     Shading _shading;
 
-    properties::FloatProperty _arrowHeadAngle;
+    properties::FloatProperty _arrowHeadSize;
     properties::FloatProperty _arrowHeadWidthFactor;
 
     properties::FloatProperty _offsetDistance;
