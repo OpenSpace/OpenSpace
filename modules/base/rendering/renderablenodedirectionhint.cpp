@@ -554,6 +554,8 @@ void RenderableNodeDirectionHint::updateVertexData() {
     glm::dvec3 startNodePos = coordinatePosFromAnchorNode(startNode->worldPosition());
     glm::dvec3 endNodePos = coordinatePosFromAnchorNode(endNode->worldPosition());
 
+    // TODO: check that distance is larger than arrow length?
+
     glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
     glm::dvec3 startPos = glm::vec3(startNodePos + offset * arrowDirection);
     glm::dvec3 endPos = glm::vec3(startPos + length * arrowDirection);
