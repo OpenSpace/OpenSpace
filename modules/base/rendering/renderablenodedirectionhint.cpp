@@ -77,11 +77,12 @@ namespace {
         "strat node instead of the end node"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ArrowHeadAngleInfo = {
-        "ArrowHeadAngle",
-        "Arrow Head Angle",
-        "This value is used to set the angle of the arrow head, to make it etiher "
-        "wider or pointier"
+    constexpr openspace::properties::Property::PropertyInfo ArrowHeadSizeInfo = {
+        "ArrowHeadSize",
+        "Arrow Head Size",
+        "This size of the arrow head, given in relative value of the entire length of "
+        "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
+        "arrow length."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArrowHeadWidthInfo = {
@@ -223,8 +224,8 @@ namespace {
         // [[codegen::verbatim(InvertInfo.description)]]
         std::optional<bool> invert;
 
-        // [[codegen::verbatim(ArrowHeadAngleInfo.description)]]
-        std::optional<float> arrowHeadAngle;
+        // [[codegen::verbatim(ArrowHeadSizeInfo.description)]]
+        std::optional<float> arrowHeadSize;
 
         // [[codegen::verbatim(ArrowHeadWidthInfo.description)]]
         std::optional<float> arrowHeadWidthFactor;
@@ -285,8 +286,8 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     , _color(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, 10, 3, 100)
     , _invertArrowDirection(InvertInfo, false)
-    , _arrowHeadAngle(ArrowHeadAngleInfo, 30.f, 5.f, 45.f)
-    , _arrowHeadWidthFactor(ArrowHeadWidthInfo, 2.f, 1.f, 10.f)
+    , _arrowHeadSize(ArrowHeadSizeInfo, 0.1f, 0.f, 1.f)
+    , _arrowHeadWidthFactor(ArrowHeadWidthInfo, 2.f, 1.f, 100.f)
     , _offsetDistance(OffsetDistanceInfo, 0.f, 0.f, 1e20f)
     , _useRelativeOffset(RelativeOffsetInfo, false)
     , _length(LengthInfo, 100.f, 0.f, 1e20f)
@@ -321,9 +322,9 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     _invertArrowDirection.onChange([this]() { _shapeIsDirty = true; });
     addProperty(_invertArrowDirection);
 
-    _arrowHeadAngle = p.arrowHeadAngle.value_or(_arrowHeadAngle);
-    _arrowHeadAngle.onChange([this]() { _shapeIsDirty = true; });
-    addProperty(_arrowHeadAngle);
+    _arrowHeadSize = p.arrowHeadSize.value_or(_arrowHeadSize);
+    _arrowHeadSize.onChange([this]() { _shapeIsDirty = true; });
+    addProperty(_arrowHeadSize);
 
     _arrowHeadWidthFactor = p.arrowHeadWidthFactor.value_or(_arrowHeadWidthFactor);
     _arrowHeadWidthFactor.onChange([this]() { _shapeIsDirty = true; });
@@ -363,7 +364,6 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
 
     _useRelativeLength = p.useRelativeLength.value_or(_useRelativeLength);
-    addProperty(_useRelativeLength);
 
     _length = p.length.value_or(_length);
     addProperty(_length);
@@ -402,7 +402,6 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
 
     _useRelativeOffset = p.useRelativeOffset.value_or(_useRelativeOffset);
-    addProperty(_useRelativeOffset);
 
     _offsetDistance = p.offset.value_or(_offsetDistance);
     addProperty(_offsetDistance);
@@ -410,6 +409,10 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     if (!_useRelativeOffset) {
         _offsetDistance.setExponent(11.f);
     }
+
+    addProperty(_useRelativeLength);
+    addProperty(_useRelativeOffset);
+
 }
 
 std::string RenderableNodeDirectionHint::start() const {
@@ -560,9 +563,7 @@ void RenderableNodeDirectionHint::updateVertexData() {
         arrowDirection *= -1;
     }
 
-    double opposite = _arrowHeadWidthFactor * _width;
-    double hypotenuse = opposite / std::tan(glm::radians(_arrowHeadAngle.value()));
-    double adjacent = glm::sqrt(hypotenuse * hypotenuse - opposite * opposite);
+    double adjacent = _arrowHeadSize * length;
     glm::dvec3 arrowHeadStartPos = startPos + (length - adjacent) * arrowDirection;
 
     _vertexArray.clear();
