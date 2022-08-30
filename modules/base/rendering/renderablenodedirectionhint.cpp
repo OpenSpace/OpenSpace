@@ -688,7 +688,29 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _vertexArray.push_back(normal.z);
     }
 
+    // Ring 5
+    // Bottom circle of cone
+    for (const glm::vec3& v : arrowHeadVertices) {
+        _vertexArray.push_back(static_cast<float>(v.x));
+        _vertexArray.push_back(static_cast<float>(v.y));
+        _vertexArray.push_back(static_cast<float>(v.z));
+
+        _vertexArray.push_back(static_cast<float>(-arrowDirection.x));
+        _vertexArray.push_back(static_cast<float>(-arrowDirection.y));
+        _vertexArray.push_back(static_cast<float>(-arrowDirection.z));
+    }
+
+    // Final vertex is the bottom center of the cone
+    _vertexArray.push_back(static_cast<float>(arrowHeadStartPos.x));
+    _vertexArray.push_back(static_cast<float>(arrowHeadStartPos.y));
+    _vertexArray.push_back(static_cast<float>(arrowHeadStartPos.z));
+
+    _vertexArray.push_back(static_cast<float>(-arrowDirection.x));
+    _vertexArray.push_back(static_cast<float>(-arrowDirection.y));
+    _vertexArray.push_back(static_cast<float>(-arrowDirection.z));
+
     unsigned int botCenterIndex = 0;
+    unsigned int headBotCenterIndex = _vertexArray.size() / 6 - 1; // last
 
     // Build triangle list from the given vertices
     for (unsigned int i = 0; i < _segments; ++i) {
@@ -718,7 +740,7 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _indexArray.push_back(v3);
         _indexArray.push_back(v2);
         
-        // Arrow head
+        // Arrow head cone sides
 
         // Bottom vertices
         v0 = ringVerticeIndex(3, i);
@@ -730,7 +752,13 @@ void RenderableNodeDirectionHint::updateVertexData() {
         _indexArray.push_back(v1);
         _indexArray.push_back(v3);
 
-        // TODO: arrow head bottom
+        // Arrow head bottom
+        v0 = ringVerticeIndex(5, i);
+        v1 = ringVerticeIndex(5, isLast ? 0 : i + 1);
+
+        _indexArray.push_back(headBotCenterIndex);
+        _indexArray.push_back(v1);
+        _indexArray.push_back(v0);
     }
 
     _shapeIsDirty = false;
