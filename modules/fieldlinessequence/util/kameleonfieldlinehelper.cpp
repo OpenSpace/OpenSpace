@@ -41,6 +41,7 @@
 
 #include <ccmc/Kameleon.h>
 #include <ccmc/KameleonInterpolator.h>
+#include <ccmc/Tracer.h>
 #include <modules/kameleon/include/kameleonhelper.h>
 
 #ifdef _MSC_VER

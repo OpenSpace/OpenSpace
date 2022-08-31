@@ -63,6 +63,7 @@
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
@@ -1099,15 +1100,14 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     }
 }
 
-void RenderEngine::removeScreenSpaceRenderable(const std::string& identifier) {
+void RenderEngine::removeScreenSpaceRenderable(std::string_view identifier) {
     ScreenSpaceRenderable* s = screenSpaceRenderable(identifier);
     if (s) {
         removeScreenSpaceRenderable(s);
     }
 }
 
-ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(const std::string& identifier)
-{
+ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(std::string_view identifier) {
     const auto it = std::find_if(
         global::screenSpaceRenderables->begin(),
         global::screenSpaceRenderables->end(),

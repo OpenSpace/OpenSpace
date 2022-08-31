@@ -267,6 +267,10 @@ bool Renderable::matchesRenderBinMask(int binMask) {
     return binMask & static_cast<int>(renderBin());
 }
 
+void Renderable::setFade(float fade) {
+    _fade = fade;
+}
+
 bool Renderable::isVisible() const {
     return _enabled && _opacity > 0.f && _fade > 0.f;
 }

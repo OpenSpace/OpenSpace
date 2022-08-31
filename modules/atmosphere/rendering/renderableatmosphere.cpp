@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <ghoul/misc/profiling.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <math.h>
