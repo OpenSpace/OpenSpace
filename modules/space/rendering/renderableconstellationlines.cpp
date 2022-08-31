@@ -34,6 +34,7 @@
 #include <ghoul/misc/misc.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <scn/scn.h>
 #include <array>
 #include <filesystem>
 #include <fstream>
@@ -120,18 +121,18 @@ RenderableConstellationLines::RenderableConstellationLines(
 }
 
 void RenderableConstellationLines::selectionPropertyHasChanged() {
+    using ConstellationKeyValuePair = std::pair<const int, ConstellationLine>;
+
     // If no values are selected (the default), we want to show all constellations
     if (!_selection.hasSelected()) {
-        for (std::pair<const int, ConstellationLine>& pair :
-            _renderingConstellationsMap)
+        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap)
         {
             pair.second.isEnabled = true;
         }
     }
     else {
         // Enable all constellations that are selected
-        for (std::pair<const int, ConstellationLine>& pair :
-            _renderingConstellationsMap)
+        for (ConstellationKeyValuePair& pair : _renderingConstellationsMap)
         {
             pair.second.isEnabled = _selection.isSelected(pair.second.name);
         }
@@ -187,8 +188,8 @@ void RenderableConstellationLines::initializeGL() {
 }
 
 void RenderableConstellationLines::deinitializeGL() {
-    for (const std::pair<const int, ConstellationLine>& pair :
-        _renderingConstellationsMap)
+    using ConstellationKeyValuePair = std::pair<const int, ConstellationLine>;
+    for (const ConstellationKeyValuePair& pair : _renderingConstellationsMap)
     {
         glDeleteVertexArrays(1, &pair.second.vaoArray);
         glDeleteBuffers(1, &pair.second.vboArray);
@@ -215,8 +216,8 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
     _program->setUniform(_uniformCache.opacity, opacity());
 
-    for (const std::pair<const int, ConstellationLine>& pair :
-        _renderingConstellationsMap)
+    using ConstellationKeyValuePair = std::pair<const int, ConstellationLine>;
+    for (const ConstellationKeyValuePair& pair : _renderingConstellationsMap)
     {
         if (!pair.second.isEnabled) {
             continue;
@@ -364,31 +365,22 @@ bool RenderableConstellationLines::readSpeckFile() {
                     break;
                 }
 
-                std::stringstream lineData(line);
-
                 // Try to read three values for the position
                 glm::vec3 pos;
                 bool success = true;
-                for (int i = 0; i < 3; ++i) {
-                    GLfloat value;
-                    lineData >> value;
-                    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
-                    if (errorReading) {
-                        success = false;
-                        break;
-                    }
-
-                    GLfloat scaledValue = value * scale;
-                    pos[i] = scaledValue;
-                    constellationLine.vertices.push_back(scaledValue);
+                auto reading = scn::scan(line, "{} {} {}", pos.x, pos.y, pos.z);
+                if (reading) {
+                    pos *= scale;
+                    constellationLine.vertices.push_back(pos.x);
+                    constellationLine.vertices.push_back(pos.y);
+                    constellationLine.vertices.push_back(pos.z);
                 }
-
-                if (!success) {
+                else {
+                    success = false;
                     LERROR(fmt::format(
                         "Failed reading position on line {} of mesh {} in file: '{}'. "
                         "Stopped reading constellation data", l, lineIndex, _speckFile
                     ));
-                    break;
                 }
 
                 // Check if new max radius
