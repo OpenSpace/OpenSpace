@@ -325,16 +325,16 @@ void RenderableGrid::update(const UpdateData&) {
         const float x0 = -halfSize.x + i * step.x;
         const float x1 = x0 + step.x;
 
+        bool shouldHighlight = false;
         if (_highlightRate.value().x != 0) {
-            int rest = static_cast<int>(nSegments.y - center.x) % _highlightRate.value().x;
-            if (abs(rest) == 0) {
-                _highlightArray.push_back({ x0, halfSize.y, 0.f });
-                _highlightArray.push_back({ x1, halfSize.y, 0.f });
-            }
-            else {
-                _varray.push_back({ x0, halfSize.y, 0.f });
-                _varray.push_back({ x1, halfSize.y, 0.f });
-            }
+            int rest =
+                static_cast<int>(nSegments.y - center.x) % _highlightRate.value().x;
+            shouldHighlight = abs(rest) == 0;
+        }
+
+        if (shouldHighlight) {
+            _highlightArray.push_back({ x0, halfSize.y, 0.f });
+            _highlightArray.push_back({ x1, halfSize.y, 0.f });
         }
         else {
             _varray.push_back({ x0, halfSize.y, 0.f });
@@ -347,16 +347,15 @@ void RenderableGrid::update(const UpdateData&) {
         const float y0 = -halfSize.y + i * step.y;
         const float y1 = y0 + step.y;
 
+        bool shouldHighlight = false;
         if (_highlightRate.value().y != 0) {
-            int rest = static_cast<int>(nSegments.x - center.y) % _highlightRate.value().y;
-            if (abs(rest) == 0) {
-                _highlightArray.push_back({ halfSize.x, y0, 0.f });
-                _highlightArray.push_back({ halfSize.x, y1, 0.f });
-            }
-            else {
-                _varray.push_back({ halfSize.x, y0, 0.f });
-                _varray.push_back({ halfSize.x, y1, 0.f });
-            }
+            int rest =
+                static_cast<int>(nSegments.x - center.y) % _highlightRate.value().y;
+            shouldHighlight = abs(rest) == 0;
+        }
+        if (shouldHighlight) {
+            _highlightArray.push_back({ halfSize.x, y0, 0.f });
+            _highlightArray.push_back({ halfSize.x, y1, 0.f });
         }
         else {
             _varray.push_back({ halfSize.x, y0, 0.f });
