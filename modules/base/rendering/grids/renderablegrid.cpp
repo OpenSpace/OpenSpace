@@ -60,7 +60,7 @@ namespace {
         "Highlight Rate",
         "The rate that the columns and rows are highlighted, counted with respect to the "
         "center of the grid. If the number of segments in the grid is odd, the "
-        "highlighting might be offsett from the center."
+        "highlighting might be offset from the center."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {

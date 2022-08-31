@@ -307,10 +307,6 @@ local plane10ly = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
     },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 10
-    }
   },
   Renderable = {
     Type = "RenderableGrid",
@@ -319,7 +315,7 @@ local plane10ly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 10*2*lightYear, 10*2*lightYear },
   },
   GUI = {
     Name = "10ly Grid",
@@ -335,10 +331,6 @@ local plane100ly = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
     },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 100
-    }
   },
   Renderable = {
     Type = "RenderableGrid",
@@ -347,7 +339,7 @@ local plane100ly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 100*2*lightYear, 100*2*lightYear },
   },
   GUI = {
     Name = "100ly Grid",
@@ -363,10 +355,6 @@ local plane1kly = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
     },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1E3
-    }
   },
   Renderable = {
     Type = "RenderableGrid",
@@ -375,7 +363,7 @@ local plane1kly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 1E3*2*lightYear, 1E3*2*lightYear },
   },
   GUI = {
     Name = "1kly Grid",
@@ -391,10 +379,6 @@ local plane10kly = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
     },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 10E3
-    }
   },
   Renderable = {
     Type = "RenderableGrid",
@@ -403,7 +387,7 @@ local plane10kly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 10E3*2*lightYear, 10E3*2*lightYear },
   },
   GUI = {
     Name = "10kly Grid",
@@ -413,12 +397,6 @@ local plane10kly = {
 
 local plane100kly = {
   Identifier = "100klyGrid",
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 100E3
-    }
-  },
   Renderable = {
     Type = "RenderableGrid",
     Enabled = false,
@@ -428,7 +406,7 @@ local plane100kly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 100E3*2*lightYear, 100E3*2*lightYear },
   },
   GUI = {
     Name = "100kly Grid",
@@ -438,12 +416,6 @@ local plane100kly = {
 
 local plane1Mly = {
   Identifier = "1MlyGrid",
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1E6
-    }
-  },
   Renderable = {
     Type = "RenderableGrid",
     Enabled = false,
@@ -453,7 +425,7 @@ local plane1Mly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 1E6*2*lightYear, 1E6*2*lightYear },
   },
   GUI = {
     Name = "1Mly Grid",
@@ -463,12 +435,6 @@ local plane1Mly = {
 
 local plane10Mly = {
   Identifier = "10MlyGrid",
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 10E6
-    }
-  },
   Renderable = {
     Type = "RenderableGrid",
     Enabled = false,
@@ -478,7 +444,7 @@ local plane10Mly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 10E6*2*lightYear, 10E6*2*lightYear },
   },
   GUI = {
     Name = "10Mly Grid",
@@ -488,12 +454,6 @@ local plane10Mly = {
 
 local plane100Mly = {
   Identifier = "100MlyGrid",
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 100E6
-    }
-  },
   Renderable = {
     Type = "RenderableGrid",
     Enabled = false,
@@ -503,7 +463,7 @@ local plane100Mly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 100E6*2*lightYear, 100E6*2*lightYear },
   },
   GUI = {
     Name = "100Mly Grid",
@@ -513,12 +473,6 @@ local plane100Mly = {
 
 local plane20Gly = {
   Identifier = "20GlyGrid",
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 20E9
-    }
-  },
   Renderable = {
     Type = "RenderableGrid",
     Enabled = false,
@@ -528,7 +482,7 @@ local plane20Gly = {
     LineWidth = 2.0,
     Segments = { 40, 40 },
     HighlightRate = { 5, 5 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 20E9*2*lightYear, 20E9*2*lightYear },
   },
   GUI = {
     Name = "20Gly Grid",
