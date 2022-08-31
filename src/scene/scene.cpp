@@ -51,6 +51,7 @@
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 #include <stack>
 

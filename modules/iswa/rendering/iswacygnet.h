@@ -93,6 +93,7 @@ protected:
      * \return \c true if update was successful
      */
     virtual bool updateTexture() = 0;
+
     /**
      * Is called before updateTexture. For IswaCygnets getting data from a HTTP request,
      * this function should get the dataFile from the future object.
@@ -100,6 +101,7 @@ protected:
      * \return \c true if update was successful
      */
     virtual bool updateTextureResource() = 0;
+
     /**
      * Should send a HTTP request to get the resource it needs to create a texture. For
      * Texture cygnets, this should be an image. For DataCygnets, this should be the data

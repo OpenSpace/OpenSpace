@@ -94,3 +94,12 @@ create_new_module(
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
+target_precompile_headers(${space_module} PRIVATE
+  <openspace/documentation/documentation.h>
+  <openspace/documentation/verifier.h>
+  <openspace/properties/numericalproperty.h>
+  <openspace/rendering/renderable.h>
+  <ghoul/opengl/programobject.h>
+  <ghoul/opengl/shaderobject.h>
+  <ghoul/opengl/uniformcache.h>
+)

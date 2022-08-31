@@ -82,3 +82,10 @@ create_new_module(
   server_module
   ${HEADER_FILES} ${SOURCE_FILES}
 )
+
+target_precompile_headers(${server_module} PRIVATE
+  <modules/server/include/connection.h>
+  <modules/server/include/topics/topic.h>
+  <openspace/json.h>
+  <ghoul/misc/templatefactory.h>
+)

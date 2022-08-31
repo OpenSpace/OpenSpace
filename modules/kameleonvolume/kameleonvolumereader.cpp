@@ -42,6 +42,7 @@
 
 #include <ccmc/Kameleon.h>
 #include <ccmc/Model.h>
+#include <ccmc/FileReader.h>
 #include <ccmc/BATSRUS.h>
 #include <ccmc/ENLIL.h>
 #include <ccmc/CCMCTime.h>

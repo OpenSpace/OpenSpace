@@ -28,21 +28,15 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/keys.h>
+#include <openspace/openspace.h>
 #include <ghoul/ghoul.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
+#include <ghoul/glm.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/stacktrace.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
@@ -54,25 +48,17 @@
 #include <sgct/log.h>
 #include <sgct/projection/fisheye.h>
 #include <sgct/projection/nonlinearprojection.h>
-#include <sgct/screencapture.h>
 #include <sgct/settings.h>
 #include <sgct/user.h>
-#include <sgct/viewport.h>
+#include <sgct/window.h>
 #include <stb_image.h>
 #include <Tracy.hpp>
-#include <chrono>
-#include <ctime>
-#include <filesystem>
-#include <memory>
+#include <iostream>
+#include <string_view>
 
 #ifdef WIN32
-#include <openspace/openspace.h>
-#include <ghoul/misc/stacktrace.h>
-#include <ghoul/fmt.h>
 #include <Windows.h>
 #include <dbghelp.h>
-#include <shellapi.h>
-#include <shlobj.h>
 #endif // WIN32
 
 #ifdef OPENVR_SUPPORT
