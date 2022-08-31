@@ -28,12 +28,12 @@ local JWSTTrailLaunch = {
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
-			Type = 'SpiceTranslation',
-			Target = 170, -- JWST
-			Observer = 'EARTH',
-			Frame = 'IAU_EARTH',
-			Kernels = { kernels .. "webb.bsp" }
-		},
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 'EARTH',
+      Frame = 'IAU_EARTH',
+      Kernels = { kernels .. "webb.bsp" }
+    },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = launchTime,
     EndTime = detachTime,
@@ -61,12 +61,12 @@ local JWSTTrailCruise = {
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
-			Type = 'SpiceTranslation',
-			Target = 170, -- JWST
-			Observer = 'EARTH',
-			Frame = 'GALACTIC',
-			Kernels = { kernels .. "webb.bsp" }
-		},
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 'EARTH',
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "webb.bsp" }
+    },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = detachTime,
     EndTime = L2orbitInsertionTime,
@@ -95,12 +95,12 @@ local JWSTTrailOrbit = {
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
-			Type = 'SpiceTranslation',
-			Target = 170, -- JWST
-			Observer = 392, -- L2
-			Frame = 'GALACTIC',
-			Kernels = { kernels .. "webb.bsp" }
-		},
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 392, -- L2
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "webb.bsp" }
+    },
     Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months
     Resolution = 183 -- About a sample rate of once per day
@@ -157,12 +157,12 @@ local JWSTSunTrail = {
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
-			Type = 'SpiceTranslation',
-			Target = 170, -- JWST
-			Observer = 'SSB',
-			Frame = 'GALACTIC',
-			Kernels = { kernels .. "webb.bsp" }
-		},
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 'SSB',
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "webb.bsp" }
+    },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,
     Resolution = 365 -- About a sample rate of once per day
