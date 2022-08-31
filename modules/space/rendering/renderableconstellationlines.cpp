@@ -47,6 +47,12 @@ namespace {
         "modelViewTransform", "projectionTransform", "opacity", "color"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SpeckInfo = {
+        "File",
+        "Constellation Data File Path",
+        "The file that contains the data for the constellation lines"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -97,11 +103,15 @@ documentation::Documentation RenderableConstellationLines::Documentation() {
 RenderableConstellationLines::RenderableConstellationLines(
                                                       const ghoul::Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
+    , _speckFile(SpeckInfo)
     , _drawElements(DrawElementsInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _speckFile = absPath(p.file);
+    // Avoid reading files here, instead do it in multithreaded initialize()
+    _speckFile = absPath(p.file.string()).string();
+    _speckFile.onChange([&]() { loadData(); });
+    addProperty(_speckFile);
 
     addProperty(_drawElements);
 
@@ -275,10 +285,15 @@ bool RenderableConstellationLines::loadData() {
 }
 
 bool RenderableConstellationLines::readSpeckFile() {
-    LINFO(fmt::format("Loading Speck file {}", _speckFile));
-    std::ifstream file(_speckFile);
+    if (_speckFile.value().empty()) {
+        return false;
+    }
+    std::filesystem::path fileName = absPath(_speckFile);
+
+    LINFO(fmt::format("Loading Speck file {}", fileName));
+    std::ifstream file(fileName);
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file {}", _speckFile));
+        LERROR(fmt::format("Failed to open Speck file {}", fileName));
         return false;
     }
 
@@ -331,7 +346,7 @@ bool RenderableConstellationLines::readSpeckFile() {
                 }
                 else {
                     std::string message = fmt::format("Unknown command '{}' found in "
-                        "constellation file '{}'", dummy, _speckFile);
+                        "constellation file '{}'", dummy, fileName);
                     LWARNING(message);
                 }
                 dummy.clear();
@@ -379,7 +394,7 @@ bool RenderableConstellationLines::readSpeckFile() {
                     success = false;
                     LERROR(fmt::format(
                         "Failed reading position on line {} of mesh {} in file: '{}'. "
-                        "Stopped reading constellation data", l, lineIndex, _speckFile
+                        "Stopped reading constellation data", l, lineIndex, fileName
                     ));
                 }
 

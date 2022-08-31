@@ -196,8 +196,6 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     RenderableConstellationsBase::render(data, tasks);
 }
 
-void RenderableConstellationBounds::update(const UpdateData& data) { }
-
 bool RenderableConstellationBounds::loadData() {
     bool success = loadVertexFile();
     if (!success) {

@@ -88,7 +88,7 @@ private:
     UniformCache(modelViewTransform, projectionTransform, opacity,
         color) _uniformCache;
 
-    std::filesystem::path _speckFile;
+    properties::StringProperty _speckFile;
 
     DistanceUnit _constellationUnit = DistanceUnit::Parsec;
 

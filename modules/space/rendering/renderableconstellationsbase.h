@@ -60,7 +60,6 @@ public:
     virtual void render(const RenderData& data, RendererTasks& rendererTask) override;
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::vec3& orthoRight, const glm::vec3& orthoUp);
-    virtual void update(const UpdateData& data) override = 0;
 
     static documentation::Documentation Documentation();
 
