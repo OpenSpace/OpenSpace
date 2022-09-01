@@ -27,6 +27,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
   horizonsfile.h
   kepler.h
+  specklabels.h
   speckloader.h
   rendering/renderableconstellationbounds.h
   rendering/renderablefluxnodes.h
@@ -47,6 +48,7 @@ set(SOURCE_FILES
   horizonsfile.cpp
   kepler.cpp
   spacemodule_lua.inl
+  specklabels.cpp
   speckloader.cpp
   rendering/renderableconstellationbounds.cpp
   rendering/renderablefluxnodes.cpp

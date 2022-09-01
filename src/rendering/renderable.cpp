@@ -30,7 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/navigation/navigationhandler.h> 
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
@@ -207,7 +207,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     if (p.renderBinMode.has_value()) {
         setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
     }
-    
+
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
     addProperty(_dimInAtmosphere);
 }
@@ -313,7 +313,7 @@ void Renderable::registerUpdateRenderBinFromOpacity() {
 }
 
 float Renderable::opacity() const {
-    // Rendering should depend on if camera is in the atmosphere and if camera is at the 
+    // Rendering should depend on if camera is in the atmosphere and if camera is at the
     // dark part of the globe
     return _dimInAtmosphere ?
         _opacity * _fade * global::navigationHandler->camera()->atmosphereDimmingFactor() :
