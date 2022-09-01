@@ -128,8 +128,6 @@ SpeckLabels::SpeckLabels(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    //setRenderBin(RenderBin::Overlay);
-
     _labelFile = absPath(p.file);
 
     if (p.unit.has_value()) {
