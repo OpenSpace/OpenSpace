@@ -36,15 +36,20 @@ public:
     // Constructor
     WebFieldlinesManager() = default;
 
-    // To replace the constructor, takes the identifier of the field line, is used for storing the field lines mainly
-    // Also takes a second parameter containing the name of the field line model used.
+    // To replace the constructor, takes the identifier of the field line, 
+    // is used for storing the field lines mainly. Also takes a second parameter 
+    // containing the name of the field line model used.
     // These may in the future be the same.
-    void initializeWebFieldlinesManager(std::string identifier, std::string url, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
+    void initializeWebFieldlinesManager(std::string identifier, std::string url,
+                                        size_t& _nStates, 
+                                        std::vector<std::string>& _sourceFiles, 
+                                        std::vector<double>& _startTimes);
 
-    // Returns true or false, wether a successful connection to the field line-providing server has been establish
+    // Is connection to the field line-providing server established?
     bool isConnected();
     
-    std::string initializeSyncDirectory(std::string name, std::string version, std::string option);
+    std::string initializeSyncDirectory(std::string name, std::string version, 
+                                                                      std::string option);
     
     // Temporary function - this should be moved to the worker. It's to download
     // the start lines if the directory is empty or launching for the first time

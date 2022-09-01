@@ -200,14 +200,8 @@ namespace {
         // API call to where data will be downloaded dynamically
         std::optional<bool> dynamicWebContent;
 
-        // Specify model name for dynamic download
-        std::optional<std::string> modelName;
-
-        // Specify version number for dynamic download
-        std::optional<std::string> versionNumber;
-
-        // Specify special options of model (i.e. Adapt, Gong)
-        std::optional<std::string> modelOption;
+        // dataID that corresponds to what dataset to use if using dynamicWebContent
+        std::optional<int> dataID;
 
         // [[codegen::verbatim(ColorUniformInfo.description)]]
         std::optional<glm::vec4> color [[codegen::color()]];
@@ -359,10 +353,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             _inputFileType = SourceFileType::Json;
             fileTypeString = "json";
             break;
+
         case Parameters::SourceFileType::Osfls:
             _inputFileType = SourceFileType::Osfls;
             fileTypeString = "osfls";
             break;
+        default:
+            throw ghoul::MissingCaseException();
     }
 
     _loadingStatesDynamically = p.loadAtRuntime.value_or(_loadingStatesDynamically);
@@ -372,15 +369,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
  
     _dynamicWebContent = p.dynamicWebContent.value_or(_dynamicWebContent);
-
-    _modelName = p.modelName.value_or(_modelName);
-    _versionNumber = p.versionNumber.value_or(_versionNumber);
-    _modelOption = p.modelOption.value_or(_modelOption);
-    if (_dynamicWebContent &&
-        (_modelName.empty() || _versionNumber.empty() || _modelOption.empty()))
-    {
-        LERROR("If running with dynamic web content, model name, version number"),
-            (" and option needs to be specified");
+    _dataID = p.dataID.value_or(_dataID);
+    if (_dynamicWebContent && !_dataID){
+        throw ghoul::RuntimeError(
+            "If running with dynamic web content, dataID needs to be specified"
+        );
     }
 
     std::filesystem::path sourcePath;
@@ -390,11 +383,15 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
     // dynamic is specified, disregards what source folder is.
     else if (p.dynamicWebContent == true) {
-        _loadingStatesDynamically = true;
+        LINFO("Initializing dynamicDownloaderManager and sync-directory ");
 
-        LINFO("Initializing sync-directory and downloading a startset");
-        _dynamicCachePath = _webFieldlinesManager.initializeSyncDirectory(_modelName,
-            _versionNumber, _modelOption);
+        _loadingStatesDynamically = true;
+        // right now, dynamic downloading only supported from iswa
+        // should be either a property from asset 
+        std::string baseURL =
+            "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=";
+        _dynamicdownloaderManager = DynamicDownloaderManager(_dataID, baseURL);
+        //initializeWebManager();
     }
     // source folder, but not dynamic
     else if (p.sourceFolder.has_value()) {
@@ -528,14 +525,17 @@ void RenderableFieldlinesSequence::initializeGL() {
                 return;
             }
             break;
-        case SourceFileType::Json:
-            if (!loadJsonStatesIntoRAM()) {
+        case SourceFileType::Json: {
+            bool success = loadJsonStatesIntoRAM();
+            if (!success) {
                 return;
             }
             break;
+        }
         case SourceFileType::Osfls:
-            if (_loadingStatesDynamically) {
-                if (!prepareForOsflsStreaming()) {
+            if (_loadingStatesDynamically && !_dynamicWebContent) {
+                bool success = prepareForOsflsStreaming();
+                if (!success) {
                     return;
                 }
             }
@@ -858,6 +858,12 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
     return true;
 }
 
+//void RenderableFieldlinesSequence::initializeWebManager() {
+//    _webFieldlinesManager.initializeWebFieldlinesManager(
+//        _identifier, _dynWebContentUrl, _nStates, _sourceFiles, _startTimes
+//    );
+//}
+
 std::unordered_map<std::string, std::vector<glm::vec3>>
     extractSeedPointsFromFiles(std::filesystem::path filePath)
 {
@@ -1078,6 +1084,14 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     // False => the previous frame's state should still be shown
     bool needUpdate = false;
     const double currentTime = data.time.j2000Seconds();
+    const double deltaTime = global::timeManager->deltaTime();
+
+    if (_dynamicWebContent) {
+        ghoul_assert(_dynamicdownloaderManager.has_value(), 
+                                                  "DynamicDownloaderManager must excist");
+        _dynamicdownloaderManager->update(currentTime, deltaTime);
+    }
+
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
     

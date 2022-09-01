@@ -22,61 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
 
-#include <modules/fieldlinessequence/util/commons.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <string>
-#include <vector>
+#include <modules/fieldlinessequence/util/dynamicdownloaderwindow.h>
 
-namespace openspace {
+namespace {
+    constexpr const char* _loggerCat = "WebFieldlinesWindow";
 
-class FieldlinesState {
-public:
-    void convertLatLonToCartesian(float scale = 1.f);
-    void scalePositions(float scale);
+} // namespace
 
-    bool loadStateFromOsfls(const std::string& pathToOsflsFile);
-    void saveStateToOsfls(const std::string& pathToOsflsFile);
+namespace openspace{
 
-    bool loadStateFromJson(const std::string& pathToJsonFile, fls::Model model,
-        float coordToMeters);
-    void saveStateToJson(const std::string& pathToJsonFile);
 
-    const std::vector<std::vector<float>>& extraQuantities() const;
-    const std::vector<std::string>& extraQuantityNames() const;
-    const std::vector<GLsizei>& lineCount() const;
-    const std::vector<GLint>& lineStart() const;
+void DynamicDownloaderWindow::updateWindow(const double time, const double deltaTime, 
+                                                           std::filesystem::path& syncDir)
+{
+    //if in big window
+    // download
+    // if finished downloading sliding window, expand it
+    //
+    //if downloaded file is at, or almost at, edge of sliding window:
+    // move sliding window
+    // 
+    //if sliding window is at edge of big window
+    // request new big window
+    // 
+    //if at now && the whole big window is downloaded
+    // do nothing? Maybe every now and then request new big window to see if a new dataset
+    // is available
+    //
 
-    fls::Model model() const;
-    size_t nExtraQuantities() const;
-    double triggerTime() const;
-    const std::vector<glm::vec3>& vertexPositions() const;
 
-    // Special getter. Returns extraQuantities[index].
-    std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
+}
 
-    void setModel(fls::Model m);
-    void setTriggerTime(double t);
-    void setExtraQuantityNames(std::vector<std::string> names);
-
-    void addLine(std::vector<glm::vec3>& line);
-    void appendToExtra(size_t idx, float val);
-
-private:
-    uint8_t _isMorphable = 0;
-    double _triggerTime = -1.0;
-    fls::Model _model;
-
-    std::vector<std::vector<float>> _extraQuantities;
-    std::vector<std::string> _extraQuantityNames;
-    std::vector<GLsizei> _lineCount;
-    std::vector<GLint> _lineStart;
-    std::vector<glm::vec3> _vertexPositions;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
+} // namespace

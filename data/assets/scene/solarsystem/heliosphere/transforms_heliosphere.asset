@@ -1,6 +1,6 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
-local HEEQ180Kernel = asset.localResource("./kernels/HEEQ180.tf")
+local HEEQ180Kernel = asset.localResource("../sun/kernels/HEEQ180.tf")
 
 local HEEQ180ReferenceFrame = {
   Identifier = "HEEQ180ReferenceFrame",

@@ -29,6 +29,7 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/webfieldlinesmanager.h>
+#include <modules/fieldlinessequence/util/dynamicdownloadermanager.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -66,6 +67,8 @@ private:
     void setupProperties();
     bool prepareForOsflsStreaming();
 
+    //void initializeWebManager();
+
     void readNewState(const std::string& filePath);
     void updateActiveTriggerTimeIndex(double currentTime);
     void updateVertexPositionBuffer();
@@ -102,16 +105,13 @@ private:
     bool _loadingStatesDynamically  = false;
     // Stated whether the asset is fetching dynamic web content
     bool _dynamicWebContent = false;
-    // Specifics if using dynamicWebContent
-    std::string _modelName;
-    std::string _modelOption;
-    std::string _versionNumber;
-    // path to dynamic cacheing
-    std::string _dynamicCachePath;
+    // dataID that corresponds to what dataset to use if using dynamicWebContent
+    int _dataID;
 
     //  Web Fieldlines manager downloads and updates renderable field lines with
     //  field lines downloaded from the web.
-    WebFieldlinesManager _webFieldlinesManager;
+    //WebFieldlinesManager _webFieldlinesManager;
+    std::optional<DynamicDownloaderManager> _dynamicdownloaderManager;
     // Used for 'runtime-states'. True when finished loading a new state from disk on
     // another thread.
     std::atomic_bool _newStateIsReady = false;

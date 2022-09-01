@@ -68,9 +68,8 @@ WebFieldlinesWorker::~WebFieldlinesWorker() {
     
 // PUBLIC FUNCTIONS
 void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
-                                                            double endTime,
-                                                            std::vector<std::pair<double,
-                                                    std::string>> &_triggerTimesWeb)
+                                                          double endTime,
+                            std::vector<std::pair<double, std::string>> &_triggerTimesWeb)
 {
     // We don't want to keep sending request, if we just get empty responses.
     if (!_noMoreRequests) {

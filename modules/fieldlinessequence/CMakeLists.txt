@@ -28,11 +28,11 @@ set(HEADER_FILES
   rendering/renderablefieldlinessequence.h
   util/fieldlinesstate.h
   util/commons.h
-  util/kameleonfieldlinehelper.h
   util/webfieldlinesmanager.h
   util/webfieldlineswindow.h
   util/webfieldlinesworker.h
   util/kameleonfieldlinehelper.h
+  util/dynamicdownloadermanager.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -42,6 +42,7 @@ set(SOURCE_FILES
   util/webfieldlinesmanager.cpp
   util/webfieldlineswindow.cpp
   util/webfieldlinesworker.cpp
+  util/dynamicdownloadermanager.cpp
   util/commons.cpp
   util/kameleonfieldlinehelper.cpp
 )

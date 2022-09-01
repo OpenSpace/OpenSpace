@@ -89,7 +89,8 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     // Read single value variables
     ifs.read(reinterpret_cast<char*>(&_triggerTime), sizeof(double));
     ifs.read(reinterpret_cast<char*>(&_model), sizeof(int32_t));
-    ifs.read(reinterpret_cast<char*>(&_isMorphable), sizeof(bool));
+    //size of bool flagged to change to be more exact size.
+    ifs.read(reinterpret_cast<char*>(&_isMorphable), sizeof(uint8_t));
     ifs.read(reinterpret_cast<char*>(&nLines), sizeof(uint64_t));
     ifs.read(reinterpret_cast<char*>(&nPoints), sizeof(uint64_t));
     ifs.read(reinterpret_cast<char*>(&nExtras), sizeof(uint64_t));
@@ -225,7 +226,8 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
  *                              CurrentVersion)
  *  1. double                 - _triggerTime
  *  2. int                    - _model
- *  3. bool                   - _isMorphable
+ *  3. uint8_t works like bool- _isMorphable
+ *     0 for false, 1 for true
  *  4. size_t                 - Number of lines in the state  == _lineStart.size()
  *                                                            == _lineCount.size()
  *  5. size_t                 - Total number of vertex points == _vertexPositions.size()
@@ -276,7 +278,7 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
     //-------------------- WRITE META DATA FOR STATE --------------------------------
     ofs.write(reinterpret_cast<const char*>(&_triggerTime), sizeof(_triggerTime));
     ofs.write(reinterpret_cast<const char*>(&_model), sizeof(int32_t));
-    ofs.write(reinterpret_cast<const char*>(&_isMorphable), sizeof(bool));
+    ofs.write(reinterpret_cast<const char*>(&_isMorphable), sizeof(uint8_t));
 
     ofs.write(reinterpret_cast<const char*>(&nLines), sizeof(uint64_t));
     ofs.write(reinterpret_cast<const char*>(&nPoints), sizeof(uint64_t));

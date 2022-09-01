@@ -62,7 +62,7 @@ WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string server
     _nAvailableWeb = 0; // haven't downloaded that list yet
         
     _worker = WebFieldlinesWorker(syncDir, serverUrl);
-                
+
 }
        
 // Returns true if time is inside the current window

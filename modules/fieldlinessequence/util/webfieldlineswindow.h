@@ -46,22 +46,22 @@ struct Window {
     int nTriggerTimes;
 };
 
-    /***********************************************************************************************
-                                        DataID, DataDescription
+    /*************************************************************************************
+                                   DataID, DataDescription
 
-        '1176', 'WSA 4.5 field line trace from the Earth through the WSA model (SCS and PFSS)'
+    '1176', 'WSA 4.5 field line trace from the Earth through the WSA model (SCS and PFSS)'
 
-        '1177', 'WSA 4.5 field line trace from the SCS outer boundary to the source surface'
+    '1177', 'WSA 4.5 field line trace from the SCS outer boundary to the source surface'
 
-        '1178', 'WSA 4.5 field line trace from the solar surface to the source surface'
+    '1178', 'WSA 4.5 field line trace from the solar surface to the source surface'
 
-        '1179', 'WSA 4.5 field line trace from the source surface to the solar surface'
+    '1179', 'WSA 4.5 field line trace from the source surface to the solar surface'
 
-        '1180', 'WSA 4.5 output fit file'
+    '1180', 'WSA 4.5 output fit file'
 
-        '1181', 'WSA 4.5 velocity output fits file'
+    '1181', 'WSA 4.5 velocity output fits file'
 
-    ***********************************************************************************************/
+    *************************************************************************************/
     
 class WebFieldlinesWindow{
 public:
@@ -88,7 +88,8 @@ public:
     // and will probably need to update window
     bool timeIsInWindowMargin(double time, double direction);
 
-    // Release the worker for execution, the worker is taking care of the downloading-priorities and logic
+    // Release the worker for execution, the worker is taking care of the
+    // downloading-priorities and logic
     void executeDownloadWorker();
     
     void newWindow(double time);
@@ -100,13 +101,15 @@ public:
     // Check if the worker has downloaded a window and put all the files into _sourceFiles
     bool workerWindowIsReady();
 
-    // Check if the future potential window, is going to be out of bounds of the current timetriggerweb-list
+    // Check if the future potential window is going to be out of bounds of 
+    // the current timetriggerweb-list
     bool expectedWindowIsOutOfBounds(double time);
 
     // Calling the functioh in worker that renderable fieldlinessequence has updated.
 	void rfsHasUpdated();
 
-    // Returns true if big window is fetching files from the end or beginning of a data segment
+    // Returns true if big window is fetching files from the 
+    // end or beginning of a data segment
     // Returns false if not.
     bool checkWorkerEdgeMode();
 
@@ -125,9 +128,9 @@ private:
     bool _edgeWindowReady = false;
         
     // This is a long list of everything available online,
-    // they are tuples of 3; double is timetrigger, string is donwload key, int is index to where it is on disk
-    // and indices to the respective files on disk if they exist/are downloaded
-    // -1 means not downloaded
+    // they are tuples of 3; double is timetrigger, string is donwload key,
+    // int is index to where it is on disk and indices to the
+    // respective files on disk if they exist/are downloaded -1 means not downloaded
     std::vector<std::pair<double, std::string>> _triggerTimesWeb;
 
     int _nAvailableWeb;

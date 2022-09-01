@@ -1,4 +1,4 @@
-local transforms = asset.require('./transforms_heliosphere')
+local transforms = asset.require('../transforms_heliosphere')
 local sunRadius = 695508000
 local fieldlines = {
   Identifier = "WSA_Fieldlines_PFSS_IO",
@@ -13,9 +13,7 @@ local fieldlines = {
     DynamicWebContent = true,
     --LoadAtRuntime is redundant if using DynamicWebContent since it will have to be true
     --LoadAtRuntime = true,
-    ModelName = "wsa",
-    VersionNumber = "5.x",
-    modelOption = "gong"
+    DataID = 1177
   },
   GUI = {
     Path = "/Solar System/Heliosphere",
