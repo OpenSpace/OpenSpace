@@ -243,7 +243,7 @@ local plane1ld = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightDay, 2*lightDay },
+    Size = { 2*lightDay, 2*lightDay }
   },
   GUI = {
     Name = "1ld Grid",
@@ -267,7 +267,7 @@ local plane1lm = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightMonth, 2*lightMonth },
+    Size = { 2*lightMonth, 2*lightMonth }
   },
   GUI = {
     Name = "1lm Grid",
@@ -291,7 +291,7 @@ local plane1ly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 2*lightYear, 2*lightYear },
+    Size = { 2*lightYear, 2*lightYear }
   },
   GUI = {
     Name = "1ly Grid",
@@ -306,7 +306,7 @@ local plane10ly = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
-    },
+    }
   },
   Renderable = {
     Type = "RenderableGrid",
@@ -315,7 +315,7 @@ local plane10ly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 10*2*lightYear, 10*2*lightYear },
+    Size = { 10*2*lightYear, 10*2*lightYear }
   },
   GUI = {
     Name = "10ly Grid",
@@ -330,7 +330,7 @@ local plane100ly = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
-    },
+    }
   },
   Renderable = {
     Type = "RenderableGrid",
@@ -339,7 +339,7 @@ local plane100ly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 100*2*lightYear, 100*2*lightYear },
+    Size = { 100*2*lightYear, 100*2*lightYear }
   },
   GUI = {
     Name = "100ly Grid",
@@ -354,7 +354,7 @@ local plane1kly = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
-    },
+    }
   },
   Renderable = {
     Type = "RenderableGrid",
@@ -363,7 +363,7 @@ local plane1kly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 1E3*2*lightYear, 1E3*2*lightYear },
+    Size = { 1E3*2*lightYear, 1E3*2*lightYear }
   },
   GUI = {
     Name = "1kly Grid",
@@ -378,7 +378,7 @@ local plane10kly = {
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
-    },
+    }
   },
   Renderable = {
     Type = "RenderableGrid",
@@ -387,7 +387,7 @@ local plane10kly = {
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
     Segments = { 20, 20 },
-    Size = { 10E3*2*lightYear, 10E3*2*lightYear },
+    Size = { 10E3*2*lightYear, 10E3*2*lightYear }
   },
   GUI = {
     Name = "10kly Grid",
@@ -406,7 +406,7 @@ local plane100kly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 100E3*2*lightYear, 100E3*2*lightYear },
+    Size = { 100E3*2*lightYear, 100E3*2*lightYear }
   },
   GUI = {
     Name = "100kly Grid",
@@ -425,7 +425,7 @@ local plane1Mly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 1E6*2*lightYear, 1E6*2*lightYear },
+    Size = { 1E6*2*lightYear, 1E6*2*lightYear }
   },
   GUI = {
     Name = "1Mly Grid",
@@ -444,7 +444,7 @@ local plane10Mly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 10E6*2*lightYear, 10E6*2*lightYear },
+    Size = { 10E6*2*lightYear, 10E6*2*lightYear }
   },
   GUI = {
     Name = "10Mly Grid",
@@ -463,7 +463,7 @@ local plane100Mly = {
     LineWidth = 2.0,
     Segments = { 20, 20 },
     HighlightRate = { 5, 5 },
-    Size = { 100E6*2*lightYear, 100E6*2*lightYear },
+    Size = { 100E6*2*lightYear, 100E6*2*lightYear }
   },
   GUI = {
     Name = "100Mly Grid",
@@ -482,7 +482,7 @@ local plane20Gly = {
     LineWidth = 2.0,
     Segments = { 40, 40 },
     HighlightRate = { 5, 5 },
-    Size = { 20E9*2*lightYear, 20E9*2*lightYear },
+    Size = { 20E9*2*lightYear, 20E9*2*lightYear }
   },
   GUI = {
     Name = "20Gly Grid",
@@ -502,7 +502,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     local node = nodes[i]
