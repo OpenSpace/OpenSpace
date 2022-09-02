@@ -27,17 +27,17 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/speckloader.h>
+#include <modules/space/specklabels.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/distanceconversion.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <map>
 #include <vector>
 
-namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
@@ -55,11 +55,9 @@ public:
     virtual void initializeGL() override = 0;
     virtual void deinitializeGL() override = 0;
 
-    virtual bool isReady() const override = 0;
+    virtual bool isReady() const override;
 
     virtual void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-        const glm::vec3& orthoRight, const glm::vec3& orthoUp);
 
     static documentation::Documentation Documentation();
 
@@ -87,8 +85,7 @@ protected:
     std::vector<std::string> _assetSelection;
 
     // Label text settings
-    bool _hasLabel = false;
-    speck::Labelset _labelset;
+    bool _hasLabels = false;
     properties::BoolProperty _drawLabels;
 
 private:
@@ -108,16 +105,8 @@ private:
     // The file containing constellation names and abbreviations
     properties::StringProperty _namesFilename;
 
-    // Label text settings
-    std::string _labelFile;
-    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
-    DistanceUnit _labelUnit = DistanceUnit::Parsec;
-    properties::Vec3Property _textColor;
-    properties::FloatProperty _textOpacity;
-    properties::FloatProperty _textSize;
-    properties::IVec2Property _textMinMaxSize;
-
-    properties::OptionProperty _renderOption;
+    // Everything related to the labels are handles by speck::SpeckLabels
+    std::unique_ptr<speck::SpeckLabels> _labels = nullptr;
 };
 
 } // namespace openspace

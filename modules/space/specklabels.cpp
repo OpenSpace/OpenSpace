@@ -114,7 +114,7 @@ documentation::Documentation SpeckLabels::Documentation() {
 }
 
 SpeckLabels::SpeckLabels(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "SpeckLabels" })
+    : properties::PropertyOwner({ "Labels" })
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _size(SizeInfo, 8.f, 0.5f, 24.f)
@@ -162,6 +162,14 @@ SpeckLabels::SpeckLabels(const ghoul::Dictionary& dictionary)
         _renderOption = RenderOptionViewDirection;
     }
     addProperty(_renderOption);
+}
+
+speck::Labelset& SpeckLabels::labelSet() {
+    return _labelset;
+}
+
+const speck::Labelset& SpeckLabels::labelSet() const {
+    return _labelset;
 }
 
 void SpeckLabels::initialize() {

@@ -50,6 +50,9 @@ public:
     explicit SpeckLabels(const ghoul::Dictionary& dictionary);
     ~SpeckLabels() override = default;
 
+    speck::Labelset& labelSet();
+    const speck::Labelset& labelSet() const;
+
     void initialize();
 
     void loadLabels();
