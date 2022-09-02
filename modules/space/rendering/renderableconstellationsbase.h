@@ -84,7 +84,7 @@ protected:
     // asset file
     std::vector<std::string> _assetSelection;
 
-    // Label text settings
+    // Labels
     bool _hasLabels = false;
     properties::BoolProperty _drawLabels;
 

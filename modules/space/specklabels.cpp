@@ -193,7 +193,8 @@ bool SpeckLabels::isReady() const {
 }
 
 void SpeckLabels::render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-    const glm::vec3& orthoRight, const glm::vec3& orthoUp)
+                         const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+                         float fadeInVariable)
 {
     float scale = static_cast<float>(toMeter(_unit));
 
@@ -210,7 +211,7 @@ void SpeckLabels::render(const RenderData& data, const glm::dmat4& modelViewProj
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_color), _opacity);
+    glm::vec4 textColor = glm::vec4(glm::vec3(_color), _opacity * fadeInVariable);
 
     for (const speck::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);

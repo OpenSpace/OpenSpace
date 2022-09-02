@@ -158,7 +158,7 @@ bool RenderableConstellationBounds::isReady() const {
 
     // If we have labels, they also need to be loaded
     if (_hasLabels) {
-        return isReady && RenderableConstellationsBase::isReady();
+        isReady = isReady && RenderableConstellationsBase::isReady();
     }
     return isReady;
 }

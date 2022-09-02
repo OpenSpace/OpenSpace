@@ -60,7 +60,8 @@ public:
     bool isReady() const;
 
     void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-        const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+        float fadeInVariable = 1.f);
 
     static documentation::Documentation Documentation();
 
