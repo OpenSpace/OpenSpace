@@ -27,6 +27,15 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <ghoul/glm.h>
+
+// FFMPEG
+#include <libavcodec/avcodec.h> // avcodec_alloc_context3
+#include <libavformat/avformat.h> // avformat_open_input, AVFormatContext
+#include <libavutil/imgutils.h> // av_image_get_buffer_size
+
+namespace openspace { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 class FfmpegTileProvider : public TileProvider {
@@ -41,6 +50,26 @@ public:
     int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
+
+    static documentation::Documentation Documentation();
+
+private:
+    std::filesystem::path _videoFile;
+    glm::ivec2 _nativeSize;
+    std::chrono::microseconds _frameTime;
+    std::chrono::steady_clock::time_point _lastFrameTime;
+
+    AVFormatContext* _formatContext = nullptr;
+    int _streamIndex = -1;
+    AVStream* _videoStream = nullptr;
+    AVCodecContext* _codecContext = nullptr;
+    const AVCodec* _decoder = nullptr;
+    AVFrame* _avFrame = nullptr;
+    AVFrame* _glFrame = nullptr;
+    AVPacket* _packet = nullptr;
+
+    void internalInitialize() override final;
+    void internalDeinitialize() override final;
 };
 
 } // namespace openspace::globebrowsing
