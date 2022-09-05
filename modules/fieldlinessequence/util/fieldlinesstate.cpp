@@ -502,8 +502,8 @@ glm::vec3 FieldlinesState::criticalPoint(size_t i) {
     glm::vec3 criticalPoint =
         (_allMatchingFieldlines[i].pathLines.first.line[beforeReconnection] +
         _allMatchingFieldlines[i].pathLines.first.line[afterReconnection] +
-        _allMatchingFieldlines[i].pathLines.first.line[beforeReconnection] +
-        _allMatchingFieldlines[i].pathLines.first.line[afterReconnection]) / 4.0f;
+        _allMatchingFieldlines[i].pathLines.second.line[beforeReconnection] +
+        _allMatchingFieldlines[i].pathLines.second.line[afterReconnection]) / 4.0f;
 
     return fls::ReToMeter*criticalPoint;
 }
