@@ -32,8 +32,6 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>

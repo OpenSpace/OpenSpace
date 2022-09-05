@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/speckloader.h>
+#include <modules/space/specklabels.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -42,7 +42,6 @@
 #include <unordered_map>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -83,25 +82,15 @@ private:
     void createPlanes();
     void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
         const glm::dmat4& projectionMatrix, float fadeInVariable);
-    void renderLabels(const RenderData& data,
-        const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
-        const glm::dvec3& orthoUp, float fadeInVariable);
 
     void loadTextures();
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
     bool _textColorIsDirty = true;
-    bool _hasLabel = false;
-    bool _labelDataIsDirty = true;
-
-    int _textMinSize = 0;
-    int _textMaxSize = 200;
+    bool _hasLabels = false;
 
     properties::FloatProperty _scaleFactor;
-    properties::Vec3Property _textColor;
-    properties::FloatProperty _textOpacity;
-    properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::OptionProperty _blendMode;
     properties::Vec2Property _fadeInDistances;
@@ -113,20 +102,20 @@ private:
     UniformCache(
         modelViewProjectionTransform, alphaValue, fadeInValue, galaxyTexture
     ) _uniformCache;
-    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
     std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
     std::unordered_map<int, std::string> _textureFileMap;
     std::unordered_map<int, PlaneAggregate> _planesMap;
 
     std::filesystem::path _speckFile;
-    std::filesystem::path _labelFile;
     std::filesystem::path _texturesPath;
     std::string _luminosityVar;
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     speck::Dataset _dataset;
-    speck::Labelset _labelset;
+
+    // Everything related to the labels are handles by speck::SpeckLabels
+    std::unique_ptr<speck::SpeckLabels> _labels = nullptr;
 
     float _sluminosity = 1.f;
 

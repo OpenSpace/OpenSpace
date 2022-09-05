@@ -23,7 +23,7 @@ local object = {
       Color = { 0.0, 0.8, 0.0 },
       Size = 22,
       MinMaxSize = { 10, 12 },
-      Unit = "Mpc",
+      Unit = "Mpc"
     },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,

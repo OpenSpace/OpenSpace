@@ -185,6 +185,7 @@ void SpeckLabels::initialize() {
 }
 
 void SpeckLabels::loadLabels() {
+    LINFOC("SpeckLabels", fmt::format("Loading Label file {}", _labelFile));
     _labelset = speck::label::loadFileWithCache(_labelFile);
 }
 

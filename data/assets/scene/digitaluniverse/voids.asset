@@ -10,15 +10,18 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "voids.label",
+      Color = { 0.296, 0.629, 1.0 },
+      Size = 20.9,
+      MinMaxSize = { 8, 20 },
+      Unit = "Mpc"
+    },
     DrawElements = false,
     DrawLabels = true,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "voids.label",
-    Unit = "Mpc",
-    TextColor = { 0.296, 0.629, 1.0 },
-    TextSize = 20.9,
-    TextMinMaxSize = { 8, 20 }
+    Unit = "Mpc"
   },
   GUI = {
     Name = "Voids",
@@ -39,11 +42,11 @@ local object = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 
