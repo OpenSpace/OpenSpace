@@ -210,14 +210,6 @@ namespace openspace::fls {
 
             double birthTime = birthTimes[i];
 
-            // hard coding for the sake of the smurfsaft
-            // adjusting the nightside according to when the
-            // dayside reaches the approximal 
-            //if (i >= 2) {
-            //    birthTime = birthTime + 495;
-            //}
-
-
             // Here all points on the pathLine will be used at seedpoints for 
             // the actual fieldlines (traced with "b" by default)
             // - 1 because arrays start at 0
@@ -272,9 +264,6 @@ namespace openspace::fls {
             else {
                 deathTime = birthTime + 2000;
             }
-
-            //deathTime = birthTime + 3000;
-
 
             // TODO: Make it work dynamically
             state.setDeathTimes(deathTime, deathTime, i);

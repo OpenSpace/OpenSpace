@@ -309,6 +309,7 @@ namespace openspace {
                 }
             }
             else {
+                // hard coding
                 double timeToNightsideReconnection = 2400;
                 _traversers[traverserIndex].setStartPoint(
                     timeToNightsideReconnection,
@@ -431,11 +432,6 @@ namespace openspace {
                         cdfPath
                     ));
                 }
-
-                /************* TEMPORARY MAGIC VALUE ****************/
-                // smurfsaft
-                //startTime = -28700.0;
-                /****************************************************/
 
                 extractSeedPointsFromFile(_seedFilePath, seedPoints, birthTimes, startTime);
                 shouldExtractSeedPoints = false;

@@ -60,6 +60,7 @@ public:
         //float lifetime; // for when multiple cdf-files come into play ?
     };
 
+    // struct to keep a matching fieldlines, might be better to do in another way
     struct MatchingFieldlines {
         std::pair<PathLine, PathLine> pathLines;
     };
