@@ -60,6 +60,7 @@ set(HEADER_FILES
   src/tiletextureinitdata.h
   src/timequantizer.h
   src/tileprovider/defaulttileprovider.h
+  src/tileprovider/ffmpegtileprovider.h
   src/tileprovider/imagesequencetileprovider.h
   src/tileprovider/singleimagetileprovider.h
   src/tileprovider/sizereferencetileprovider.h
@@ -101,6 +102,7 @@ set(SOURCE_FILES
   src/tiletextureinitdata.cpp
   src/timequantizer.cpp
   src/tileprovider/defaulttileprovider.cpp
+  src/tileprovider/ffmpegtileprovider.cpp
   src/tileprovider/imagesequencetileprovider.cpp
   src/tileprovider/singleimagetileprovider.cpp
   src/tileprovider/sizereferencetileprovider.cpp
@@ -146,6 +148,36 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
   <map>
 )
 
+# Ffmpeg
+if (WIN32)
+  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec.lib)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avdevice.lib)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avfilter.lib)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat.lib)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil.lib)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/postproc.lib)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swresample.lib)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swscale.lib)
+
+  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec-59.dll")
+  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avdevice-59.dll")
+  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avfilter-8.dll")
+  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat-59.dll")
+  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil-57.dll")
+  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/postproc-56.dll")
+  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swresample-4.dll")
+  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swscale-6.dll")
+
+else (WIN32)
+  find_package(FFMPEG REQUIRED)
+
+  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${FFMPEG_INCLUDE_DIR})
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${FFMPEG_LIBRARY})
+  mark_as_advanced(FFMPEG_CONFIG FFMPEG_INCLUDE_DIR FFMPEG_LIBRARY)
+endif () # WIN32
+
+# Gdal
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (WIN32)
