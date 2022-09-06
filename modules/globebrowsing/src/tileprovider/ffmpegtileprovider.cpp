@@ -25,9 +25,12 @@
 #include <modules/globebrowsing/src/tileprovider/ffmpegtileprovider.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
+    constexpr std::string_view _loggerCat = "FfmpegTileProvider";
+
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
@@ -35,9 +38,19 @@ namespace {
         "video that is then loaded and used for all tiles"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
+        "StartTime",
+        "Start Time",
+        "The date and time that the video should start in the format "
+        "'YYYY MM DD hh:mm:ss'."
+    };
+
     struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
+
+        // [[codegen::verbatim(StartTimeInfo.description)]]
+        std::string startTime [[codegen::datetime()]];
     };
 #include "ffmpegtileprovider_codegen.cpp"
 } // namespace
@@ -57,6 +70,7 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.file;
+    _startTime = p.startTime;
 
     reset();
 }
@@ -74,7 +88,67 @@ TileDepthTransform FfmpegTileProvider::depthTransform() {
     return { 0.f, 1.f };
 }
 
-void FfmpegTileProvider::update() {}
+void FfmpegTileProvider::update() {
+    ZoneScoped
+
+    // Check if it is time for a new frame
+    double now = Time::now().j2000Seconds();
+    double diff = now - _lastFrameTime;
+    const bool hasNewFrame = (now > Time::convertTime(_startTime)) &&
+        (now - _lastFrameTime) > _frameTime;
+
+    if (!hasNewFrame) {
+        return;
+    }
+
+    // Read frame
+    do {
+        int result = av_read_frame(_formatContext, _packet);
+        if (result < 0) {
+            av_packet_unref(_packet);
+            break;
+        }
+
+        // Does this packet belong to this video stream?
+        if (_packet->stream_index != _streamIndex) {
+            continue;
+        }
+
+        // Send packet to the decoder
+        result = avcodec_send_packet(_codecContext, _packet);
+        if (result < 0) {
+            LERROR(fmt::format("Sending packet failed with {}", result));
+            av_packet_unref(_packet);
+            break;
+        }
+
+        // Get result from decoder
+        result = avcodec_receive_frame(
+            _codecContext,
+            _avFrame
+        );
+
+        // Is the frame finished? If not then we need to wait for more packets
+        // to finish the frame
+        if (result == AVERROR(EAGAIN)) {
+            continue;
+        }
+        if (result < 0) {
+            LERROR(fmt::format("Receiving packet failed with {}", result));
+            av_packet_unref(_packet);
+            break;
+        }
+
+        // We have a new full frame!
+        _lastFrameTime = now;
+
+       // @TODO Do something with it!
+
+        break;
+
+        av_packet_unref(_packet);
+    } while (true);
+}
 
 int FfmpegTileProvider::minLevel() {
     return 1;
@@ -100,19 +174,13 @@ void FfmpegTileProvider::internalInitialize() {
         nullptr
     );
     if (result < 0) {
-        LERRORC(
-            "FfmpegTileProvider",
-            fmt::format("Failed to open input for video file {}", _videoFile)
-        );
+        LERROR(fmt::format("Failed to open input for video file {}", _videoFile));
         return;
     }
 
     // Get stream info
     if (avformat_find_stream_info(_formatContext, nullptr) < 0) {
-        LERRORC(
-            "FfmpegTileProvider",
-            fmt::format("Failed to get stream info for {}", _videoFile)
-        );
+        LERROR(fmt::format("Failed to get stream info for {}", _videoFile));
         return;
     }
 
@@ -128,10 +196,7 @@ void FfmpegTileProvider::internalInitialize() {
         }
     }
     if (_streamIndex == -1) {
-        LERRORC(
-            "FfmpegTileProvider",
-            fmt::format("Failed to find video stream for {}", _videoFile)
-        );
+        LERROR(fmt::format("Failed to find video stream for {}", _videoFile));
         return;
     }
 
@@ -142,10 +207,7 @@ void FfmpegTileProvider::internalInitialize() {
         _videoStream->codecpar
     );
     if (result) {
-        LERRORC(
-            "FfmpegTileProvider",
-            fmt::format("Failed to create codec context for {}", _videoFile)
-        );
+        LERROR(fmt::format("Failed to create codec context for {}", _videoFile));
         return;
     }
 
@@ -155,20 +217,14 @@ void FfmpegTileProvider::internalInitialize() {
     // Get the decoder
     _decoder = avcodec_find_decoder(_codecContext->codec_id);
     if (!_decoder) {
-        LERRORC(
-            "FfmpegTileProvider",
-            fmt::format("Failed to find decoder for {}", _videoFile)
-        );
+        LERROR(fmt::format("Failed to find decoder for {}", _videoFile));
         return;
     }
 
     // Open the decoder
     result = avcodec_open2(_codecContext, _decoder, nullptr);
     if (result < 0) {
-        LERRORC(
-            "FfmpegTileProvider",
-            fmt::format("Failed to open codec for {}", _videoFile)
-        );
+        LERROR(fmt::format("Failed to open codec for {}", _videoFile));
         return;
     }
 
@@ -193,10 +249,7 @@ void FfmpegTileProvider::internalInitialize() {
         1
     );
     if (result < 0) {
-        LERRORC(
-            "FfmpegTileProvider",
-            fmt::format("Failed to fill buffer data for video {}", _videoFile)
-        );
+        LERROR(fmt::format("Failed to fill buffer data for video {}", _videoFile));
         return;
     }
     // Allocate packet
@@ -207,15 +260,13 @@ void FfmpegTileProvider::internalInitialize() {
         av_read_frame(_formatContext, _packet);
         avcodec_send_packet(_codecContext, _packet);
 
-        double s = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
-        _frameTime =
-            std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::duration<double>(s));
+        _frameTime = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
     }
     else {
-        LERRORC("SlideItemVideo", fmt::format("Error loading video {}", path));
+        LERROR(fmt::format("Error loading video {}", path));
     }
 
-    _lastFrameTime = std::chrono::high_resolution_clock::now();
+    _lastFrameTime = std::max(Time::convertTime(_startTime), Time::now().j2000Seconds());
 
 }
 

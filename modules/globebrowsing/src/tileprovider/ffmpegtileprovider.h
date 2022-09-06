@@ -56,8 +56,9 @@ public:
 private:
     std::filesystem::path _videoFile;
     glm::ivec2 _nativeSize;
-    std::chrono::microseconds _frameTime;
-    std::chrono::steady_clock::time_point _lastFrameTime;
+    double _frameTime;  // Seconds per frame
+    double _lastFrameTime;  // The in gmae time of the last frame in J2000 seconds
+    std::string _startTime;
 
     AVFormatContext* _formatContext = nullptr;
     int _streamIndex = -1;
