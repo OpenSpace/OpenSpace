@@ -30,9 +30,9 @@
 #include <ghoul/glm.h>
 
 // FFMPEG
-#include <libavcodec/avcodec.h> // avcodec_alloc_context3
-#include <libavformat/avformat.h> // avformat_open_input, AVFormatContext
-#include <libavutil/imgutils.h> // av_image_get_buffer_size
+#include <avcodec> // avcodec_alloc_context3
+#include <avformat> // avformat_open_input, AVFormatContext
+#include <imgutils.h> // av_image_get_buffer_size
 
 namespace openspace { struct Documentation; }
 
@@ -59,6 +59,10 @@ private:
     double _frameTime;  // Seconds per frame
     double _lastFrameTime;  // The in gmae time of the last frame in J2000 seconds
     std::string _startTime;
+
+    GLuint _frameTexture;
+    GLuint  _FBO = 1; ///Frame-buffer Object
+
 
     AVFormatContext* _formatContext = nullptr;
     int _streamIndex = -1;

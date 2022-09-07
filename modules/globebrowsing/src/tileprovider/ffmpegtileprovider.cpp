@@ -143,6 +143,93 @@ void FfmpegTileProvider::update() {
         _lastFrameTime = now;
 
        // @TODO Do something with it!
+        _glFrame = av_frame_alloc();
+        int sz = av_image_get_buffer_size(
+            AV_PIX_FMT_RGB24,
+            _codecContext->width,
+            _codecContext->height,
+            1
+        );
+        uint8_t* internalBuffer = reinterpret_cast<uint8_t*>(av_malloc(sz * sizeof(uint8_t)));
+        av_image_fill_arrays(
+            _glFrame->data,
+            _glFrame->linesize,
+            internalBuffer,
+            AV_PIX_FMT_RGB24,
+            _codecContext->width,
+            _codecContext->height,
+            1
+        );
+        _packet = av_packet_alloc();
+
+        glGenTextures(1, &_frameTexture);
+        glBindTexture(GL_TEXTURE_2D, _frameTexture);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGB,
+            _codecContext->width,
+            _codecContext->height,
+            0,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            nullptr
+        );
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+
+        glBindTexture(GL_TEXTURE_2D, _frameTexture);
+
+        glFlush();
+        glDisable(GL_TEXTURE_2D);
+
+        ///FBO
+        glGenFramebuffers(1, &_FBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, _FBO);
+        //Attach 2D texture to this FBO
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _frameTexture, 0);
+
+        // Print to file
+        FILE* output_image;
+        int     output_width, output_height;
+
+        output_width = _codecContext->width,
+        output_height = _codecContext->height;
+
+        /// READ THE PIXELS VALUES from FBO AND SAVE TO A .PPM FILE
+        int             i, j, k;
+        unsigned char* pixels = (unsigned char*)malloc(output_width * output_height * 3);
+
+        /// READ THE CONTENT FROM THE FBO
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glReadPixels(0, 0, output_width, output_height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+        output_image = fopen("C:\\Users\\ylvaselling\\Documents\\Work\\Dataset\\output.ppm", "wt");
+        fprintf(output_image, "P3\n");
+        fprintf(output_image, "# Created by Ricao\n");
+        fprintf(output_image, "%d %d\n", output_width, output_height);
+        fprintf(output_image, "255\n");
+        k = 0;
+        for (i = 0; i < output_width; i++)
+        {
+            for (j = 0; j < output_height; j++)
+            {
+                fprintf(output_image, "%u %u %u ", (unsigned int)pixels[k], (unsigned int)pixels[k + 1],
+                    (unsigned int)pixels[k + 2]);
+                k = k + 3;
+            }
+            fprintf(output_image, "\n");
+        }
+        free(pixels);
+
 
         break;
 
