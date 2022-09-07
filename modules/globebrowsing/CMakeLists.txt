@@ -149,27 +149,35 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
 )
 
 # Ffmpeg
-if (WIN32)
-  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec.lib)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avdevice.lib)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avfilter.lib)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat.lib)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil.lib)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/postproc.lib)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swresample.lib)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swscale.lib)
+if(WIN32)
+  add_library(Avcodec SHARED IMPORTED)
+  set_target_properties(Avcodec PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec-59.dll"
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec.lib"
+  )
 
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec-59.dll")
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avdevice-59.dll")
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avfilter-8.dll")
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat-59.dll")
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil-57.dll")
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/postproc-56.dll")
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swresample-4.dll")
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swscale-6.dll")
+  target_include_directories(Avcodec INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include")
+  target_link_libraries(openspace-module-globebrowsing INTERFACE Avcodec)
 
-else (WIN32)
+  add_library(Avformat SHARED IMPORTED)
+  set_target_properties(Avformat PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat-59.dll"
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat.lib"
+  )
+
+  target_include_directories(Avformat INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include")
+  target_link_libraries(openspace-module-globebrowsing INTERFACE Avformat)
+
+  add_library(Avutil SHARED IMPORTED)
+  set_target_properties(Avutil PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil-57.dll"
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil.lib"
+  )
+
+  target_include_directories(Avutil INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include")
+  target_link_libraries(openspace-module-globebrowsing INTERFACE Avutil)
+
+else(WIN32)
   find_package(FFMPEG REQUIRED)
 
   target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${FFMPEG_INCLUDE_DIR})
