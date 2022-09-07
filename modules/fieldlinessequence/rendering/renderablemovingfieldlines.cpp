@@ -79,6 +79,12 @@ namespace {
     "Path to Color Table",
     "Color Table/Transfer Function to use for 'By Quantity' coloring."
     };
+    //for the button to restart fieldline sequence
+    constexpr openspace::properties::Property::PropertyInfo RestartFieldlineSequenceInfo = {
+    "RestartFieldlineSequence",
+    "Restart Sequence",
+    "Restarts the fieldline sequence by resetting positions."
+    };
 
     struct [[codegen::Dictionary(RenderableMovingFieldlines)]] Parameters {
         // Path to folder containing the input .cdf files
@@ -141,6 +147,7 @@ namespace openspace {
         const ghoul::Dictionary& dictionary)
         :Renderable(dictionary)
         , _colorGroup({ "Color" })
+        , _restartSequence(RestartFieldlineSequenceInfo)
         , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
         , _renderFlowLine(RenderFlowLineInfo, false)
         , _colorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Radio)
@@ -159,6 +166,14 @@ namespace openspace {
         )
         , _colorTablePath(ColorTablePathInfo) {
         const Parameters p = codegen::bake<Parameters>(dictionary);
+
+        // add the restart property
+        addProperty(_restartSequence);
+
+        // call the reset traversers on click
+        _restartSequence.onChange([this]() {
+            resetTraversers();
+            });
 
         std::filesystem::path sourceFolder = p.sourceFolder;
         if (!std::filesystem::is_directory(sourceFolder)) {
@@ -599,6 +614,58 @@ namespace openspace {
 
     bool RenderableMovingFieldlines::isReady() const {
         return _shaderProgram != nullptr;
+    }
+
+    // calls the reset traverser for each traverser
+    void RenderableMovingFieldlines::resetTraversers() {
+        for (auto i = _traversers.begin(); i != _traversers.end(); ++i) {
+            i->resetTraverser();
+        }
+
+        std::string targetTime = "2000-01-01T04:00:00";
+        global::timeManager->setTimeNextFrame(Time(Time::convertTime(targetTime)));
+
+        for (size_t travindex = 0; travindex < _traversers.size(); travindex += 2) {
+
+
+            // calculate time here and chose start position for _traverser
+            //_traversers.push_back(PathLineTraverser{ const_cast<std::vector<openspace::FieldlinesState::Fieldline>&>(mf.pathLines.first.keyFrames) });
+            double timeToReconTrav1 = _traversers[travindex].
+                getTimeToReconnectionPoint(_nPointsOnPathLine);
+
+            //_traversers.push_back(PathLineTraverser{ const_cast<std::vector<openspace::FieldlinesState::Fieldline>&>(mf.pathLines.second.keyFrames) });
+            double timeToReconTrav2 = _traversers[travindex + 1].
+                getTimeToReconnectionPoint(_nPointsOnPathLine);
+
+            // hard coding for the sake of the smurfsaft 
+            if (travindex < _fieldlineState.getAllMatchingFieldlines().size()) {
+
+                //    // ---------This part works for dayside separate---------
+                //    // find out which traverser has the longest traveling time to point of
+                //    // reconnection and adjust the startpoint according to the shorter 
+                //    // traverser traveltime
+                if (timeToReconTrav1 > timeToReconTrav2) {
+                    _traversers[travindex].setStartPoint(
+                        timeToReconTrav2,
+                        _nPointsOnPathLine);
+                }
+                else {
+                    _traversers[travindex + 1].setStartPoint(
+                        timeToReconTrav1,
+                        _nPointsOnPathLine);
+                }
+            }
+            else {
+                double timeToNightsideReconnection = 2400;
+                _traversers[travindex].setStartPoint(
+                    timeToNightsideReconnection,
+                    _nPointsOnPathLine - 1);
+                _traversers[travindex + 1].setStartPoint(
+                    timeToNightsideReconnection,
+                    _nPointsOnPathLine - 1);
+            }
+        } /**/
+
     }
 
     void RenderableMovingFieldlines::render(const RenderData& data, RendererTasks&) {
@@ -1138,6 +1205,19 @@ namespace openspace {
         keyFrames(fieldlines_),
         backKeyFrame(keyFrames.begin()),
         frontKeyFrame{ backKeyFrame + 1 } {}
+
+    /**
+   * Function to reset the traverser to start of sequence, its like a replay
+   */
+    void RenderableMovingFieldlines::PathLineTraverser::resetTraverser() {
+        backKeyFrame = keyFrames.begin();
+        frontKeyFrame = backKeyFrame + 1;
+        timeSinceInterpolation = 0.0;
+        timeInterpolationDenominator = backKeyFrame->timeToNextKeyFrame;
+        isNewTimeDirection = false;
+        hasTemporaryKeyFrame = false;
+        forward = true;
+    }
 
     void RenderableMovingFieldlines::PathLineTraverser::advanceKeyFrames() {
         if (forward) {

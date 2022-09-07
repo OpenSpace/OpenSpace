@@ -26,6 +26,9 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEMOVINGFIELDLINES___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/engine/globals.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/movingfieldlinehelper.h>
@@ -33,6 +36,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/triggerproperty.h>
 
 #include <openspace/rendering/transferfunction.h>
 
@@ -46,6 +50,7 @@ class RenderableMovingFieldlines : public Renderable {
 public:
     struct PathLineTraverser {
         PathLineTraverser(std::vector<FieldlinesState::Fieldline>& fieldlines_);
+        void resetTraverser();
         void advanceKeyFrames();
         void skipKeyFrame(FieldlinesState::Fieldline::Topology desiredTopology);
         FieldlinesState::Fieldline::Topology nextTopology();
@@ -79,6 +84,7 @@ public:
     void deinitializeGL() override;
 
     bool isReady() const override;
+    void resetTraversers();
 
     void render(const RenderData& data, RendererTasks& rendertask) override;
     void update(const UpdateData& data) override;
@@ -138,6 +144,8 @@ private:
     std::vector<std::string> _colorTablePaths;
     // Color table/transfer function for "By Quantity" coloring
     properties::StringProperty _colorTablePath;
+    // Trigger the restart fieldline sequence function from GUI
+    properties::TriggerProperty _restartSequence;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
     // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
