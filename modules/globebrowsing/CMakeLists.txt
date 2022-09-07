@@ -150,32 +150,32 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
 
 # Ffmpeg
 if(WIN32)
-  add_library(Avcodec SHARED IMPORTED)
-  set_target_properties(Avcodec PROPERTIES
+  add_library(avcodec SHARED IMPORTED)
+  set_target_properties(avcodec PROPERTIES
     IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec-59.dll"
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec.lib"
+    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec.lib"
   )
 
-  target_include_directories(Avcodec INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include")
-  target_link_libraries(openspace-module-globebrowsing INTERFACE Avcodec)
+  target_include_directories(avcodec INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include")
+  target_link_libraries(openspace-module-globebrowsing PUBLIC avcodec)
 
-  add_library(Avformat SHARED IMPORTED)
-  set_target_properties(Avformat PROPERTIES
+  add_library(avformat SHARED IMPORTED)
+  set_target_properties(avformat PROPERTIES
     IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat-59.dll"
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat.lib"
+    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avformat.lib"
   )
 
-  target_include_directories(Avformat INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include")
-  target_link_libraries(openspace-module-globebrowsing INTERFACE Avformat)
+  target_include_directories(avformat INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include")
+  target_link_libraries(openspace-module-globebrowsing PUBLIC avformat)
 
-  add_library(Avutil SHARED IMPORTED)
-  set_target_properties(Avutil PROPERTIES
+  add_library(avutil SHARED IMPORTED)
+  set_target_properties(avutil PROPERTIES
     IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil-57.dll"
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil.lib"
+    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avutil.lib"
   )
 
-  target_include_directories(Avutil INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include")
-  target_link_libraries(openspace-module-globebrowsing INTERFACE Avutil)
+  target_include_directories(avutil INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include")
+  target_link_libraries(openspace-module-globebrowsing PUBLIC avutil)
 
 else(WIN32)
   find_package(FFMPEG REQUIRED)
