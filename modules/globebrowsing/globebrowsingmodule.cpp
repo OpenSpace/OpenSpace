@@ -47,6 +47,7 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
+#include <modules/globebrowsing/src/tileprovider/ffmpegtileprovider.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -316,6 +317,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileLayer");
     fTileProvider->registerClass<TileProviderByLevel>("ByLevelTileLayer");
     fTileProvider->registerClass<TileProviderByIndex>("ByIndexTileLayer");
+    fTileProvider->registerClass<FfmpegTileProvider>("VideoTileLayer");
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();

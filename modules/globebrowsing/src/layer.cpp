@@ -477,6 +477,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
         case layers::Layer::ID::TileIndexTileLayer:
         case layers::Layer::ID::ByIndexTileLayer:
         case layers::Layer::ID::ByLevelTileLayer:
+        case layers::Layer::ID::VideoTileLayer:
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
             initDict.setValue(
@@ -488,6 +489,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
             _tileProvider = TileProvider::createFromDictionary(id, std::move(initDict));
+            
             break;
         case layers::Layer::ID::SolidColor:
             if (initDict.hasValue<glm::dvec3>(ColorInfo.identifier)) {

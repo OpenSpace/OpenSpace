@@ -68,6 +68,7 @@ struct Layer {
         ByLevelTileLayer,
         SolidColor,
         SpoutImageTileLayer,
+        VideoTileLayer,
         Unknown
     };
 

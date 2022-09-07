@@ -66,7 +66,8 @@ enum class Type {
     TileIndexTileProvider,
     ByIndexTileProvider,
     ByLevelTileProvider,
-    InterpolateTileProvider
+    InterpolateTileProvider, 
+    FfmpegTileProvider
 };
 
 
