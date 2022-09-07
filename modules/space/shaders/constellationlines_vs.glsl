@@ -22,25 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+#version __CONTEXT__
 
-in vec4 vs_position;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform vec3 color;
-uniform float opacity;
+in vec3 in_position;
+
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
+
+uniform dmat4 modelViewTransform;
+uniform dmat4 projectionTransform;
 
 
-Fragment getFragment() {
-  Fragment frag;
-  if (opacity == 0.0) {
-    discard;
-  }
+void main() {
+  dvec4 positionViewSpace = modelViewTransform * dvec4(in_position, 1.0);
+  vec4 positionClipSpace = vec4(projectionTransform * positionViewSpace);
+  vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
 
-  vec4 position = vs_position;
+  vs_screenSpaceDepth = positionScreenSpace.w;
+  vs_positionViewSpace = vec4(positionViewSpace);
 
-  frag.color = vec4(color, opacity);
-  frag.depth = pscDepth(position);
-
-  return frag;
+  gl_Position = positionScreenSpace;
 }
