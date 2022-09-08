@@ -16,7 +16,7 @@ local toggle_trail = {
 
     local launchTrail = "JWSTTrailLaunch"
     local cruiseTrail = "JWSTTrailCruise"
-    local orbitTrail = "JWSTTrailOrbit"
+    local coRevOrbitTrail = "JWSTTrailCoRevOrbit"
 
     local visibility
     if is_declared("args") then
@@ -31,7 +31,7 @@ local toggle_trail = {
       visibility = not (
         openspace.getPropertyValue("Scene." .. launchTrail .. ".Renderable.Enabled") or
         openspace.getPropertyValue("Scene." .. cruiseTrail .. ".Renderable.Enabled") or
-        openspace.getPropertyValue("Scene." .. orbitTrail .. ".Renderable.Enabled")
+        openspace.getPropertyValue("Scene." .. coRevOrbitTrail .. ".Renderable.Enabled")
       )
     end
 
@@ -44,7 +44,7 @@ local toggle_trail = {
       visibility
     )
     openspace.setPropertyValueSingle(
-      "Scene." .. orbitTrail .. ".Renderable.Enabled",
+      "Scene." .. coRevOrbitTrail .. ".Renderable.Enabled",
       visibility
     )
   ]],
