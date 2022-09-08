@@ -115,7 +115,7 @@ namespace {
         std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
             "SingleImageTileLayer", "ImageSequenceTileLayer", "SizeReferenceTileLayer",
             "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
-            "ByLevelTileLayer", "SolidColor", "SpoutImageTileLayer")]];
+            "ByLevelTileLayer", "SolidColor", "SpoutImageTileLayer", "VideoTileLayer")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -308,6 +308,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             case layers::Layer::ID::TileIndexTileLayer:
             case layers::Layer::ID::ByIndexTileLayer:
             case layers::Layer::ID::ByLevelTileLayer:
+            case layers::Layer::ID::VideoTileLayer:
                 if (_tileProvider) {
                     removePropertySubOwner(*_tileProvider);
                 }
@@ -513,6 +514,7 @@ void Layer::addVisibleProperties() {
         case layers::Layer::ID::TileIndexTileLayer:
         case layers::Layer::ID::ByIndexTileLayer:
         case layers::Layer::ID::ByLevelTileLayer:
+        case layers::Layer::ID::VideoTileLayer:
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }

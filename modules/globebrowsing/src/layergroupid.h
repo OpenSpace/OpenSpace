@@ -76,7 +76,7 @@ struct Layer {
     std::string_view identifier;
 };
 
-constexpr std::array<Layer, 10> Layers = {
+constexpr std::array<Layer, 11> Layers = {
     Layer{ Layer::ID::DefaultTileLayer, "DefaultTileLayer" },
     Layer{ Layer::ID::SingleImageTileLayer, "SingleImageTileLayer" },
     Layer{ Layer::ID::ImageSequenceTileLayer, "ImageSequenceTileLayer" },
@@ -86,7 +86,8 @@ constexpr std::array<Layer, 10> Layers = {
     Layer{ Layer::ID::ByIndexTileLayer, "ByIndexTileLayer" },
     Layer{ Layer::ID::ByLevelTileLayer, "ByLevelTileLayer" },
     Layer{ Layer::ID::SolidColor, "SolidColor" },
-    Layer{ Layer::ID::SpoutImageTileLayer, "SpoutImageTileLayer" }
+    Layer{ Layer::ID::SpoutImageTileLayer, "SpoutImageTileLayer" },
+    Layer{ Layer::ID::VideoTileLayer, "VideoTileLayer" }
 };
 
 
