@@ -1,0 +1,28 @@
+local layer = {
+  Identifier = "TestVideo",
+  File = "C:/Users/ylvaselling/Downloads/equirectangular-projection-testmovie02.mp4",
+  StartTime = '2022 09 03 21:00:00',
+  Name = "Test Video",
+  Enabled = asset.enabled,
+  Type = "VideoTileLayer",
+  Description = [[Testing video]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer("Earth", "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer("Earth", "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Aqua Modis (Temporal)",
+  Version = "1.1",
+  Description = "GIBS hosted layer",
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
+  License = "NASA"
+}
