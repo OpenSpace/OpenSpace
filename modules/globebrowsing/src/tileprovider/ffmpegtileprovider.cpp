@@ -103,6 +103,9 @@ void FfmpegTileProvider::update() {
 
     // Read frame
     do {
+        if (!_formatContext || !_packet) {
+            break;
+        }
         int result = av_read_frame(_formatContext, _packet);
         if (result < 0) {
             av_packet_unref(_packet);
