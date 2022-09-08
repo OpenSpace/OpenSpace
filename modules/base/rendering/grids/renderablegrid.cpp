@@ -213,7 +213,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -264,9 +264,10 @@ void RenderableGrid::update(const UpdateData&) {
         return;
     }
 
-    const glm::vec2 halfSize = _size.value() / 2.f;
+    const glm::dvec2 halfSize = static_cast<glm::dvec2>(_size.value()) / 2.0;
     const glm::uvec2 nSegments = _segments.value();
-    const glm::vec2 step = _size.value() / static_cast<glm::vec2>(nSegments);
+    const glm::dvec2 step =
+        static_cast<glm::dvec2>(_size.value()) / static_cast<glm::dvec2>(nSegments);
 
     const int nLines = (2 * nSegments.x * nSegments.y) + nSegments.x + nSegments.y;
     const int nVertices = 2 * nLines;
@@ -280,11 +281,11 @@ void RenderableGrid::update(const UpdateData&) {
     const glm::uvec2 center = glm::uvec2(nSegments.x / 2.f, nSegments.y / 2.f);
     for (unsigned int i = 0; i < nSegments.x; ++i) {
         for (unsigned int j = 0; j < nSegments.y; ++j) {
-            const float y0 = -halfSize.y + j * step.y;
-            const float y1 = y0 + step.y;
+            const double y0 = -halfSize.y + j * step.y;
+            const double y1 = y0 + step.y;
 
-            const float x0 = -halfSize.x + i * step.x;
-            const float x1 = x0 + step.x;
+            const double x0 = -halfSize.x + i * step.x;
+            const double x1 = x0 + step.x;
 
             // Line in y direction
             bool shouldHighlight = false;
@@ -294,12 +295,12 @@ void RenderableGrid::update(const UpdateData&) {
             }
 
             if (shouldHighlight) {
-                _highlightArray.push_back({ x0, y0, 0.f });
-                _highlightArray.push_back({ x0, y1, 0.f });
+                _highlightArray.push_back({ x0, y0, 0.0 });
+                _highlightArray.push_back({ x0, y1, 0.0 });
             }
             else {
-                _varray.push_back({ x0, y0, 0.f });
-                _varray.push_back({ x0, y1, 0.f });
+                _varray.push_back({ x0, y0, 0.0 });
+                _varray.push_back({ x0, y1, 0.0 });
             }
 
             // Line in x direction
@@ -310,20 +311,20 @@ void RenderableGrid::update(const UpdateData&) {
             }
 
             if (shouldHighlight) {
-                _highlightArray.push_back({ x0, y0, 0.f });
-                _highlightArray.push_back({ x1, y0, 0.f });
+                _highlightArray.push_back({ x0, y0, 0.0 });
+                _highlightArray.push_back({ x1, y0, 0.0 });
             }
             else {
-                _varray.push_back({ x0, y0, 0.f });
-                _varray.push_back({ x1, y0, 0.f });
+                _varray.push_back({ x0, y0, 0.0 });
+                _varray.push_back({ x1, y0, 0.0 });
             }
         }
     }
 
     // last x row
     for (unsigned int i = 0; i < nSegments.x; ++i) {
-        const float x0 = -halfSize.x + i * step.x;
-        const float x1 = x0 + step.x;
+        const double x0 = -halfSize.x + i * step.x;
+        const double x1 = x0 + step.x;
 
         bool shouldHighlight = false;
         if (_highlightRate.value().x != 0) {
@@ -333,19 +334,19 @@ void RenderableGrid::update(const UpdateData&) {
         }
 
         if (shouldHighlight) {
-            _highlightArray.push_back({ x0, halfSize.y, 0.f });
-            _highlightArray.push_back({ x1, halfSize.y, 0.f });
+            _highlightArray.push_back({ x0, halfSize.y, 0.0 });
+            _highlightArray.push_back({ x1, halfSize.y, 0.0 });
         }
         else {
-            _varray.push_back({ x0, halfSize.y, 0.f });
-            _varray.push_back({ x1, halfSize.y, 0.f });
+            _varray.push_back({ x0, halfSize.y, 0.0 });
+            _varray.push_back({ x1, halfSize.y, 0.0 });
         }
     }
 
     // last y col
     for (unsigned int i = 0; i < nSegments.y; ++i) {
-        const float y0 = -halfSize.y + i * step.y;
-        const float y1 = y0 + step.y;
+        const double y0 = -halfSize.y + i * step.y;
+        const double y1 = y0 + step.y;
 
         bool shouldHighlight = false;
         if (_highlightRate.value().y != 0) {
@@ -354,12 +355,12 @@ void RenderableGrid::update(const UpdateData&) {
             shouldHighlight = abs(rest) == 0;
         }
         if (shouldHighlight) {
-            _highlightArray.push_back({ halfSize.x, y0, 0.f });
-            _highlightArray.push_back({ halfSize.x, y1, 0.f });
+            _highlightArray.push_back({ halfSize.x, y0, 0.0 });
+            _highlightArray.push_back({ halfSize.x, y1, 0.0 });
         }
         else {
-            _varray.push_back({ halfSize.x, y0, 0.f });
-            _varray.push_back({ halfSize.x, y1, 0.f });
+            _varray.push_back({ halfSize.x, y0, 0.0 });
+            _varray.push_back({ halfSize.x, y1, 0.0 });
         }
     }
 
@@ -375,7 +376,7 @@ void RenderableGrid::update(const UpdateData&) {
         GL_STATIC_DRAW
     );
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), nullptr);
 
     // Major grid
     glBindVertexArray(_highlightVaoID);
@@ -386,7 +387,7 @@ void RenderableGrid::update(const UpdateData&) {
         _highlightArray.data(),
         GL_STATIC_DRAW
     );
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), nullptr);
 
     glBindVertexArray(0);
 

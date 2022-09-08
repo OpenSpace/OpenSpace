@@ -55,7 +55,7 @@ public:
 
 protected:
     struct Vertex {
-        float location[3];
+        double location[3];
     };
 
     ghoul::opengl::ProgramObject* _gridProgram = nullptr;
