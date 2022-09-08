@@ -61,6 +61,19 @@ namespace {
         "This value species the size of each dimensions of the grid"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+        "DrawLabels",
+        "Draw Labels",
+        "Determines whether labels should be drawn or hidden"
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
+    {
+        "Labels",
+        "Labels",
+        "The labels for the astronomical objects"
+    };
+
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -73,6 +86,13 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec2> size;
+
+        // [[codegen::verbatim(DrawLabelInfo.description)]]
+        std::optional<bool> drawLabels;
+
+        // [[codegen::verbatim(LabelsInfo.description)]]
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("space_labelscomponent")]];
     };
 #include "renderablegrid_codegen.cpp"
 } // namespace
@@ -89,6 +109,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200))
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _size(SizeInfo, glm::vec2(1.f), glm::vec2(1.f), glm::vec2(1e11f))
+    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -110,10 +131,31 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     _size = p.size.value_or(_size);
     _size.onChange([&]() { _gridIsDirty = true; });
     addProperty(_size);
+
+    if (p.labels.has_value()) {
+        _drawLabels = p.drawLabels.value_or(_drawLabels);
+        addProperty(_drawLabels);
+
+        _labels = std::make_unique<speck::LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+    }
 }
 
 bool RenderableGrid::isReady() const {
-    return _gridProgram != nullptr;
+    bool isReady = _gridProgram != nullptr;
+
+    if (_hasLabels) {
+        isReady = isReady && _labels->isReady();
+    }
+    return isReady;
+}
+
+void RenderableGrid::initialize() {
+    if (_hasLabels) {
+        _labels->initialize();
+        _labels->loadLabels();
+    }
 }
 
 void RenderableGrid::initializeGL() {
@@ -162,12 +204,13 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+
+    glm::dmat4 modelViewProjectionMatrix =
+        glm::dmat4(projectionMatrix) * modelViewTransform;
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform(
-        "MVPTransform",
-        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
-    );
+    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
@@ -192,6 +235,26 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
+
+    // Draw labels
+    if (_drawLabels && _hasLabels) {
+        glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+        glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+        glm::dvec3 orthoRight = glm::normalize(
+            glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+        );
+        if (orthoRight == glm::dvec3(0.0)) {
+            glm::dvec3 otherVector(
+                cameraUpDirectionWorld.y,
+                cameraUpDirectionWorld.x,
+                cameraUpDirectionWorld.z
+            );
+            orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
+        }
+        glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+
+        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+    }
 }
 
 void RenderableGrid::update(const UpdateData&) {

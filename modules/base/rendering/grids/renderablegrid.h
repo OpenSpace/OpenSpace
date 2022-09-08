@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/labelscomponent.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -43,6 +44,7 @@ class RenderableGrid : public Renderable {
 public:
     RenderableGrid(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -74,6 +76,13 @@ protected:
 
     GLenum _mode = GL_LINES;
     std::vector<Vertex> _varray;
+
+    // Labels
+    bool _hasLabels = false;
+    properties::BoolProperty _drawLabels;
+
+    // Everything related to the labels are handles by speck::LabelsComponent
+    std::unique_ptr<speck::LabelsComponent> _labels = nullptr;
 };
 
 }// namespace openspace

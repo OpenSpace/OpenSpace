@@ -105,7 +105,7 @@ private:
     // The file containing constellation names and abbreviations
     properties::StringProperty _namesFilename;
 
-    // Everything related to the labels are handles by speck::SpeckLabels
+    // Everything related to the labels are handles by speck::LabelsComponent
     std::unique_ptr<speck::LabelsComponent> _labels = nullptr;
 };
 
