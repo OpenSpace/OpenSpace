@@ -30,9 +30,14 @@
 #include <ghoul/glm.h>
 
 // FFMPEG
-#include <avcodec> // avcodec_alloc_context3
-#include <avformat> // avformat_open_input, AVFormatContext
-#include <imgutils.h> // av_image_get_buffer_size
+extern "C" {
+
+#include <libavcodec/avcodec.h> // avcodec_alloc_context3
+#include <libavformat/avformat.h> // avformat_open_input, AVFormatContext
+#include <libavutil/imgutils.h> // av_image_get_buffer_size
+#include <libavutil/frame.h>
+#include <libavutil/mem.h>
+}
 
 namespace openspace { struct Documentation; }
 

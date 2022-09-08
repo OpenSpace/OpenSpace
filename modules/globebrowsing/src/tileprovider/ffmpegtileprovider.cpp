@@ -245,6 +245,9 @@ int FfmpegTileProvider::maxLevel() {
     return 1337; // unlimited
 }
 
+void FfmpegTileProvider::reset() {}
+
+
 float FfmpegTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
