@@ -252,16 +252,33 @@ void RenderableGrid::deinitializeGL() {
 void RenderableGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    glm::dmat4 modelTransform =
+    const glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelMatrix;
+    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
 
-    glm::dmat4 modelViewProjectionMatrix =
-        glm::dmat4(projectionMatrix) * modelViewTransform;
+    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
+
+    const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+    const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+    glm::vec3 right = glm::cross(viewDirection, lookup);
+    const glm::vec3 up = glm::cross(right, viewDirection);
+
+    const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+    glm::vec3 orthoRight = glm::normalize(
+        glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+    );
+
+    if (orthoRight == glm::vec3(0.0)) {
+        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
+        right = glm::cross(viewDirection, otherVector);
+        orthoRight = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+        );
+    }
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
     _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
@@ -303,22 +320,10 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
 
     // Draw labels
     if (_drawLabels && _hasLabels) {
-        glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
-        glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
-        glm::dvec3 orthoRight = glm::normalize(
-            glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+        const glm::vec3 orthoUp = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
         );
-        if (orthoRight == glm::dvec3(0.0)) {
-            glm::dvec3 otherVector(
-                cameraUpDirectionWorld.y,
-                cameraUpDirectionWorld.x,
-                cameraUpDirectionWorld.z
-            );
-            orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
-        }
-        glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
-
-        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+         _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
     }
 }
 

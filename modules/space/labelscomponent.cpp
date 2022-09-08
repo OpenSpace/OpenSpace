@@ -194,8 +194,8 @@ bool LabelsComponent::isReady() const {
 }
 
 void LabelsComponent::render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-                         const glm::vec3& orthoRight, const glm::vec3& orthoUp,
-                         float fadeInVariable)
+                             const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+                             float fadeInVariable)
 {
     float scale = static_cast<float>(toMeter(_unit));
 
