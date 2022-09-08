@@ -24,6 +24,7 @@
 
 #include <modules/space/spacemodule.h>
 
+#include <modules/space/labelscomponent.h>
 #include <modules/space/rendering/renderableconstellationbounds.h>
 #include <modules/space/rendering/renderableconstellationlines.h>
 #include <modules/space/rendering/renderablefluxnodes.h>
@@ -32,7 +33,6 @@
 #include <modules/space/rendering/renderablerings.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/renderabletravelspeed.h>
-#include <modules/space/specklabels.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/gptranslation.h>
@@ -129,7 +129,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        speck::SpeckLabels::Documentation(),
+        speck::LabelsComponent::Documentation(),
         GPTranslation::Documentation()
     };
 }

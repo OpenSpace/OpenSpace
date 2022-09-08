@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/space/specklabels.h>
+#include <modules/space/labelscomponent.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -77,7 +77,7 @@ namespace {
         "Debug option for rendering of billboards and texts"
     };
 
-    struct [[codegen::Dictionary(SpeckLabels)]] Parameters {
+    struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
 
@@ -104,16 +104,16 @@ namespace {
         };
         std::optional<Unit> unit;
     };
-#include "specklabels_codegen.cpp"
+#include "labelscomponent_codegen.cpp"
 } // namespace
 
 namespace openspace::speck {
 
-documentation::Documentation SpeckLabels::Documentation() {
-    return codegen::doc<Parameters>("space_specklabels");
+documentation::Documentation LabelsComponent::Documentation() {
+    return codegen::doc<Parameters>("space_labelscomponent");
 }
 
-SpeckLabels::SpeckLabels(const ghoul::Dictionary& dictionary)
+LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Labels" })
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -164,15 +164,15 @@ SpeckLabels::SpeckLabels(const ghoul::Dictionary& dictionary)
     addProperty(_renderOption);
 }
 
-speck::Labelset& SpeckLabels::labelSet() {
+speck::Labelset& LabelsComponent::labelSet() {
     return _labelset;
 }
 
-const speck::Labelset& SpeckLabels::labelSet() const {
+const speck::Labelset& LabelsComponent::labelSet() const {
     return _labelset;
 }
 
-void SpeckLabels::initialize() {
+void LabelsComponent::initialize() {
     if (!_font) {
         constexpr int FontSize = 50;
         _font = global::fontManager->font(
@@ -184,16 +184,16 @@ void SpeckLabels::initialize() {
     }
 }
 
-void SpeckLabels::loadLabels() {
-    LINFOC("SpeckLabels", fmt::format("Loading Label file {}", _labelFile));
+void LabelsComponent::loadLabels() {
+    LINFOC("LabelsComponent", fmt::format("Loading Label file {}", _labelFile));
     _labelset = speck::label::loadFileWithCache(_labelFile);
 }
 
-bool SpeckLabels::isReady() const {
+bool LabelsComponent::isReady() const {
     return !(_labelset.entries.empty());
 }
 
-void SpeckLabels::render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+void LabelsComponent::render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
                          const glm::vec3& orthoRight, const glm::vec3& orthoUp,
                          float fadeInVariable)
 {

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SPECKLABELS___H__
-#define __OPENSPACE_MODULE_SPACE___SPECKLABELS___H__
+#ifndef __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#define __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -45,10 +45,10 @@ namespace documentation { struct Documentation; }
 
 namespace speck {
 
-class SpeckLabels : public properties::PropertyOwner {
+class LabelsComponent : public properties::PropertyOwner {
 public:
-    explicit SpeckLabels(const ghoul::Dictionary& dictionary);
-    ~SpeckLabels() override = default;
+    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+    ~LabelsComponent() override = default;
 
     speck::Labelset& labelSet();
     const speck::Labelset& labelSet() const;
@@ -86,4 +86,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___SPECKLABELS___H__
+#endif // __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__

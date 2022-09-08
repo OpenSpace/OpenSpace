@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/specklabels.h>
+#include <modules/space/labelscomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -106,7 +106,7 @@ private:
     properties::StringProperty _namesFilename;
 
     // Everything related to the labels are handles by speck::SpeckLabels
-    std::unique_ptr<speck::SpeckLabels> _labels = nullptr;
+    std::unique_ptr<speck::LabelsComponent> _labels = nullptr;
 };
 
 } // namespace openspace

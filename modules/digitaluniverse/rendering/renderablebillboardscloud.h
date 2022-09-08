@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/specklabels.h>
+#include <modules/space/labelscomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -136,7 +136,7 @@ private:
     speck::ColorMap _colorMap;
 
     // Everything related to the labels are handles by speck::SpeckLabels
-    std::unique_ptr<speck::SpeckLabels> _labels = nullptr;
+    std::unique_ptr<speck::LabelsComponent> _labels = nullptr;
 
     std::vector<glm::vec2> _colorRangeData;
     std::unordered_map<int, std::string> _optionConversionMap;

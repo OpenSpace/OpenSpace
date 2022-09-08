@@ -143,7 +143,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_specklabels")]];
+            [[codegen::reference("space_labelscomponent")]];
 
         // [[codegen::verbatim(TransformationMatrixInfo.description)]]
         std::optional<glm::dmat4x4> transformationMatrix;
@@ -239,7 +239,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _scaleFactor.onChange([&]() { _dataIsDirty = true; });
 
     if (p.labels.has_value()) {
-        _labels = std::make_unique<speck::SpeckLabels>(*p.labels);
+        _labels = std::make_unique<speck::LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
     }

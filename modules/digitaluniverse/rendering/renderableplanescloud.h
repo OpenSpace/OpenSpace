@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/specklabels.h>
+#include <modules/space/labelscomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -115,7 +115,7 @@ private:
     speck::Dataset _dataset;
 
     // Everything related to the labels are handles by speck::SpeckLabels
-    std::unique_ptr<speck::SpeckLabels> _labels = nullptr;
+    std::unique_ptr<speck::LabelsComponent> _labels = nullptr;
 
     float _sluminosity = 1.f;
 
