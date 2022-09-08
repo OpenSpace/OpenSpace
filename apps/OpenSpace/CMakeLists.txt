@@ -140,15 +140,17 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
 target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)
 end_header("Dependency: Profile Editor")
 
-# Find the windeployqt application
-get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
-add_custom_command(
-  TARGET OpenSpace POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime \"$<TARGET_FILE:OpenSpace>\"
-  COMMENT "Deploying Qt libraries"
-)
+if (WIN32)
+  # Find the windeployqt application
+  get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+  get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+  find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+  add_custom_command(
+    TARGET OpenSpace POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime \"$<TARGET_FILE:OpenSpace>\"
+    COMMENT "Deploying Qt libraries"
+  )
+endif ()
 
 
 # Web Browser and Web gui
