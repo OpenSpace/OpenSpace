@@ -87,8 +87,8 @@ protected:
     bool _hasLabels = false;
     properties::BoolProperty _drawLabels;
 
-    // Everything related to the labels are handles by speck::LabelsComponent
-    std::unique_ptr<speck::LabelsComponent> _labels = nullptr;
+    // Everything related to the labels are handled by LabelsComponent
+    std::unique_ptr<LabelsComponent> _labels = nullptr;
 };
 
 }// namespace openspace

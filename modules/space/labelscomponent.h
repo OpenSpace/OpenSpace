@@ -43,8 +43,6 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-namespace speck {
-
 class LabelsComponent : public properties::PropertyOwner {
 public:
     explicit LabelsComponent(const ghoul::Dictionary& dictionary);
@@ -81,8 +79,6 @@ private:
     // DEBUG:
     properties::OptionProperty _renderOption;
 };
-
-} // namespace speck
 
 } // namespace openspace
 

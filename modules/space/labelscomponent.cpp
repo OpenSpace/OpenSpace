@@ -107,7 +107,7 @@ namespace {
 #include "labelscomponent_codegen.cpp"
 } // namespace
 
-namespace openspace::speck {
+namespace openspace {
 
 documentation::Documentation LabelsComponent::Documentation() {
     return codegen::doc<Parameters>("space_labelscomponent");
@@ -227,4 +227,4 @@ void LabelsComponent::render(const RenderData& data, const glm::dmat4& modelView
     }
 }
 
-} // namespace openspace::speck
+} // namespace openspace

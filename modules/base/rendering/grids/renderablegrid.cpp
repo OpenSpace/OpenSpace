@@ -91,7 +91,7 @@ namespace {
     {
         "Labels",
         "Labels",
-        "The labels for the astronomical objects"
+        "The labels for the grid"
     };
 
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
@@ -181,7 +181,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
         _drawLabels = p.drawLabels.value_or(_drawLabels);
         addProperty(_drawLabels);
 
-        _labels = std::make_unique<speck::LabelsComponent>(*p.labels);
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
     }

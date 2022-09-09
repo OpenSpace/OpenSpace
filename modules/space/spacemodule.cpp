@@ -129,7 +129,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        speck::LabelsComponent::Documentation(),
+        LabelsComponent::Documentation(),
         GPTranslation::Documentation()
     };
 }

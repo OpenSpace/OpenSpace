@@ -444,7 +444,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _drawLabels = p.drawLabels.value_or(_drawLabels);
         addProperty(_drawLabels);
 
-        _labels = std::make_unique<speck::LabelsComponent>(*p.labels);
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
     }

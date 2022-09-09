@@ -239,7 +239,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _scaleFactor.onChange([&]() { _dataIsDirty = true; });
 
     if (p.labels.has_value()) {
-        _labels = std::make_unique<speck::LabelsComponent>(*p.labels);
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
     }

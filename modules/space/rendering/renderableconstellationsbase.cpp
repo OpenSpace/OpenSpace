@@ -67,7 +67,7 @@ namespace {
     {
         "Labels",
         "Labels",
-        "The labels for the astronomical objects"
+        "The labels for the constellations"
     };
 
     struct [[codegen::Dictionary(RenderableConstellationsBase)]] Parameters {
@@ -122,7 +122,7 @@ RenderableConstellationsBase::RenderableConstellationsBase(const ghoul::Dictiona
         _drawLabels = p.drawLabels.value_or(_drawLabels);
         addProperty(_drawLabels);
 
-        _labels = std::make_unique<speck::LabelsComponent>(*p.labels);
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
     }
