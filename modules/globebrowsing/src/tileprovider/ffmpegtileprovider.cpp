@@ -159,6 +159,9 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
         return;
     }
 
+    _tileTexture = std::make_unique<ghoul::opengl::Texture>(
+        ghoul::opengl::Texture(glm::uvec3(_nativeSize, 0), GL_TEXTURE_2D)
+        );
     _lastFrameTime = std::max(Time::convertTime(_startTime), Time::now().j2000Seconds());
 }
 
@@ -229,6 +232,21 @@ void FfmpegTileProvider::update() {
         std::cout << "frame: " << _codecContext->frame_number << std::endl;
         break;
     }
+
+    // TODO: Get the image data and make it into a ghoul texture and then a tile
+    /* uint8_t* internalBuffer = new uint8_t[_avFrame->height * _avFrame->width * 3];
+    for (int y = 0; y < _avFrame->height; y++) {
+        internalBuffer[y] = *(_avFrame->data[0] + y * _avFrame->linesize[0]);
+    }
+        
+    _tileTexture.get()->setPixelData(
+        reinterpret_cast<char*>(_avFrame->data[0]),
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+    _tileTexture->uploadTexture();
+    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+    _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
+    */
 
     // TEST save a grayscale frame into a .pgm file
     // This ends up in OpenSpace\build\apps\OpenSpace

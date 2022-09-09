@@ -33,6 +33,7 @@
 extern "C" {
 #include <libavcodec/avcodec.h> // avcodec_alloc_context3
 #include <libavformat/avformat.h> // avformat_open_input, AVFormatContext
+#include <libavutil/imgutils.h> // av_image_get_buffer_size
 }
 
 namespace openspace { struct Documentation; }
