@@ -31,12 +31,8 @@
 
 // FFMPEG
 extern "C" {
-
 #include <libavcodec/avcodec.h> // avcodec_alloc_context3
 #include <libavformat/avformat.h> // avformat_open_input, AVFormatContext
-#include <libavutil/imgutils.h> // av_image_get_buffer_size
-#include <libavutil/frame.h>
-#include <libavutil/mem.h>
 }
 
 namespace openspace { struct Documentation; }
@@ -45,7 +41,8 @@ namespace openspace::globebrowsing {
 
 class FfmpegTileProvider : public TileProvider {
 public:
-    FfmpegTileProvider(const ghoul::Dictionary& dictionary);
+    FfmpegTileProvider(const ghoul::Dictionary& dictionary); 
+    ~FfmpegTileProvider();
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -65,18 +62,17 @@ private:
     double _lastFrameTime;  // The in gmae time of the last frame in J2000 seconds
     std::string _startTime;
 
-    GLuint _frameTexture;
-    GLuint  _FBO = 1; ///Frame-buffer Object
-
-
     AVFormatContext* _formatContext = nullptr;
-    int _streamIndex = -1;
-    AVStream* _videoStream = nullptr;
     AVCodecContext* _codecContext = nullptr;
     const AVCodec* _decoder = nullptr;
     AVFrame* _avFrame = nullptr;
     AVFrame* _glFrame = nullptr;
+    int _streamIndex = -1;
+    AVStream* _videoStream = nullptr;
     AVPacket* _packet = nullptr;
+
+    std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
+    Tile _tile;
 
     void internalInitialize() override final;
     void internalDeinitialize() override final;
