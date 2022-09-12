@@ -143,15 +143,6 @@ void SessionRecording::removeTrailingPathSlashes(std::string& filename) {
     }
 }
 
-void SessionRecording::extractFilenameFromPath(std::string& filename) {
-    size_t unixDelimiter = filename.find_last_of("/");
-    if (unixDelimiter != std::string::npos)
-        filename = filename.substr(unixDelimiter + 1);
-    size_t windowsDelimiter = filename.find_last_of("\\");
-    if (windowsDelimiter != std::string::npos)
-        filename = filename.substr(windowsDelimiter + 1);
-}
-
 bool SessionRecording::handleRecordingFile(std::string filenameIn) {
     if (isPath(filenameIn)) {
         LERROR("Recording filename must not contain path (/) elements");
@@ -2303,6 +2294,10 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     inputFstream.close();
 }
 
+void SessionRecording::convertFileRelativePath(std::string filenameRelative) {
+    convertFile(absPath(filenameRelative).string());
+}
+
 std::string SessionRecording::convertFile(std::string filename, int depth) {
     std::string conversionOutFilename = filename;
     std::ifstream conversionInFile;
@@ -2331,9 +2326,6 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
             //conversionInStream.seekg(conversionInStream.beg);
             newFilename = getLegacyConversionResult(filename, depth + 1);
             removeTrailingPathSlashes(newFilename);
-            if (isPath(newFilename)) {
-                extractFilenameFromPath(newFilename);
-            }
             if (filename == newFilename) {
                 return filename;
             }
@@ -2572,7 +2564,7 @@ std::string SessionRecording::determineConversionOutFilename(const std::string f
         filenameSansExtension = filename.substr(0, filename.find_last_of("."));
     }
     filenameSansExtension += "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
-    return absPath("${RECORDINGS}/" + filenameSansExtension + fileExtension).string();
+    return filenameSansExtension + fileExtension;
 }
 
 bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,
