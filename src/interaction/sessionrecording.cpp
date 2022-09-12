@@ -1615,7 +1615,7 @@ std::string SessionRecording::isolateTermFromQuotes(std::string s) {
     }
     //If no quotes found, remove other possible characters from end
     std::string unwantedChars = " );";
-    while (unwantedChars.find(s.back()) != std::string::npos) {
+    while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
         s.pop_back();
     }
     return s;
