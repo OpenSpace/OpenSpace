@@ -9,6 +9,9 @@
       "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
     }
   ],
+  "additional_scripts": [
+    "openspace.time.setPause(true)"
+  ],
   "assets": [
     "base_exoplanets",
     "exoplanetexplorer/events/fade_glyphs",
@@ -23,9 +26,9 @@
     "anchor": "Earth",
     "frame": "",
     "position": {
-      "x": -4.756513860834684e+15,
-      "y": 1.723419176627404e+15,
-      "z": 8.355647493211236e+15
+      "x": 3.2880097113726516e+16,
+      "y": -1.5814411415922362e+17,
+      "z": -2.1204404236347456e+16
     },
     "type": "setNavigationState",
     "up": {
