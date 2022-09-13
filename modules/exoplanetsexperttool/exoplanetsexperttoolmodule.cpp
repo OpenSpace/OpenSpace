@@ -41,15 +41,26 @@
 namespace {
     constexpr const char _loggerCat[] = "ExoplanetsExpertToolModule";
 
-    constexpr const openspace::properties::Property::PropertyInfo FilteredDataRowsInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Decides if the GUI for this module should be enabled"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FilteredDataRowsInfo = {
         "FilteredDataRows",
         "Filtered Data Rows",
         "Contains the indices of the rows in the data file that are currently being "
         "shown in the tool.",
         openspace::properties::Property::Visibility::Hidden
     };
-}
+
+    struct [[codegen::Dictionary(ExoplanetsExpertToolModule)]] Parameters {
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+    };
+#include "exoplanetsexperttoolmodule_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
@@ -57,9 +68,11 @@ using namespace exoplanets;
 
 ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     : OpenSpaceModule(Name)
+    , _enabled(EnabledInfo, false)
     , _filteredRows(FilteredDataRowsInfo)
     , _gui("ExoplanetsToolGui")
 {
+    addProperty(_enabled);
     addPropertySubOwner(_gui);
 
     _filteredRows.setReadOnly(true);
@@ -86,6 +99,10 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     });
 
     global::callback::draw2D->emplace_back([&]() {
+        if (!_enabled) {
+            return;
+        }
+
         WindowDelegate& delegate = *global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
@@ -113,7 +130,7 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
 
     global::callback::keyboard->emplace_back(
         [&](Key key, KeyModifier mod, KeyAction action, bool isGuiWindow) -> bool {
-            if (!isGuiWindow) {
+            if (!_enabled || !isGuiWindow) {
                 return false;
             }
             return _gui.keyCallback(key, mod, action);
@@ -131,7 +148,7 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
 
     global::callback::mousePosition->emplace_back(
         [&](double x, double y, bool isGuiWindow) {
-            if (!isGuiWindow) {
+            if (!_enabled || !isGuiWindow) {
                 return; // do nothing
             }
             _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
@@ -142,7 +159,7 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
         [&](MouseButton button, MouseAction action,
             KeyModifier, bool isGuiWindow) -> bool
         {
-            if (!isGuiWindow) {
+            if (!_enabled || !isGuiWindow) {
                 return false;
             }
 
@@ -159,7 +176,7 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
 
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double posY, bool isGuiWindow) -> bool {
-            if (!isGuiWindow) {
+            if (!_enabled || !isGuiWindow) {
                 return false;
             }
             return _gui.mouseWheelCallback(posY);
@@ -170,6 +187,10 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     // and still get correct depth informaiton when close to planet systems
     // OBS! This is kind of ugly, imo. Would have been nice to do it with events instead
     global::callback::preSync->emplace_back([this]() {
+        if (!_enabled) {
+            return;
+        }
+
         constexpr const double ThreshHoldDistance = 1.0e19;
 
         // TODO: this should be done for any current focus?
@@ -197,7 +218,14 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     });
 }
 
-void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary&) {
+bool ExoplanetsExpertToolModule::enabled() const {
+    return _enabled;
+}
+
+void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dict) {
+    const Parameters p = codegen::bake<Parameters>(dict);
+    _enabled = p.enabled.value_or(false);
+
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableExoplanetGlyphCloud>(

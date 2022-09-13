@@ -30,6 +30,7 @@
 #include <modules/exoplanetsexperttool/gui.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <string_view>
 
 namespace openspace {
@@ -44,11 +45,14 @@ public:
     ExoplanetsExpertToolModule();
     virtual ~ExoplanetsExpertToolModule() = default;
 
+    bool enabled() const;
+
     std::vector<documentation::Documentation> documentations() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
+    properties::BoolProperty _enabled;
     properties::IntListProperty _filteredRows;
 
     exoplanets::gui::Gui _gui;
