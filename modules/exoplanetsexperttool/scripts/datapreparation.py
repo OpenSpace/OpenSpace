@@ -347,11 +347,53 @@ for name, molecules in dict_iac.items():
     rows.append([name, '&'.join(detections), '&'.join(upperLimits), '&'.join(noDetections)])
 
 res_df_iac = pd.DataFrame(rows, columns=['name', 'molecule_detection', 'molecule_upperLimit', 'molecule_noDetection'])
+
+print ('IAC Detected Molecules in Atmosphere: ')
+print ('--------------------------------')
 print (res_df_iac)
 
 df = df.merge(res_df_iac, left_on='pl_name', right_on='name', how='left')
 df.drop(columns=['name'], inplace=True) # drop extra name column
-print (res_df_iac)
+
+##################################################################
+# Planned JWST observations
+# Dataset from: https://tess.mit.edu/science/tess-acwg/
+##################################################################
+
+jwst_csv_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQfgw6NlQb3h86hlzo1zFZeLizKZ7ZzunZERWMP0l8LT-F1on-O5FobVlveeTEuEKq6iwSxG0rof326/pub?output=csv'
+df_jwst_data = pd.read_csv(
+    jwst_csv_url, 
+    sep=',', 
+    skiprows=7, # 7 rows of metadata before columns names start
+    usecols=['Planet', 'Observation', 'Instrument', 'Mode', 'Data to be obtained'],
+    index_col=False
+)
+
+# Combine observation technical details into one column and drop old columns
+df_jwst_data['jwst_obs_ins_mode'] = '(' + df_jwst_data['Observation'] + ' / ' + df_jwst_data['Instrument'] + ' / ' + df_jwst_data['Mode'] + ')'
+df_jwst_data.drop(columns=['Observation', 'Instrument', 'Mode'], inplace=True) 
+df_jwst_data = df_jwst_data.fillna('')
+df_jwst_data.rename(columns = {'Data to be obtained':'jwst_dates'}, inplace = True)
+
+# Remove commas from dates
+df_jwst_data['jwst_dates'] = df_jwst_data['jwst_dates'].str.replace(',', '')
+
+# # Create dataset with one row per planet
+df_jwst_merged = df_jwst_data.groupby('Planet')['jwst_obs_ins_mode'].agg('; '.join).reset_index()
+df_jwst_merged = df_jwst_merged.merge(df_jwst_data.groupby('Planet')['jwst_dates'].agg('; '.join).reset_index())
+
+# Include number of observations
+n_observation_counts = df_jwst_data['Planet'].value_counts().to_dict()
+df_jwst_merged['jwst_n_obs'] = df_jwst_merged['Planet'].map(n_observation_counts)
+
+print ('JWST Observations: ')
+print ('--------------------------------')
+print (df_jwst_merged)
+
+# Add columns to big table
+df = df.merge(df_jwst_merged, left_on='pl_name', right_on='Planet', how='left')
+df.drop(columns=['Planet'], inplace=True) # drop extra name column
+
 
 ##################################################################
 # Other custom attributes
@@ -453,6 +495,9 @@ df.drop(columns=['hz_score_scale', 'hz_orbsmax'], inplace=True)
 
 # Remove single quotes in names, etc.. Causes problems when saving to javascript
 df.replace({'\'': ''}, regex=True, inplace=True)
+
+# NaN values should be considered missing values. Replace with empty strings
+df = df.fillna('')
 
 print("Writing data to file...")
 df.to_csv(dataFileName + ".csv", index=False)
