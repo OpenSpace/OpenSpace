@@ -256,12 +256,9 @@ df = df.merge(galah, on='gaia_id', how='left')
 ##################################################################
 
 csv_url = 'http://research.iac.es/proyecto/muscat/exoatm/export'
-df_iac_columns = pd.read_csv(csv_url, sep=',', nrows=0) # note that the header has another separator...
 df_iac_data = pd.read_csv(
     csv_url, 
     sep=';', 
-    skiprows=1, 
-    names=df_iac_columns.columns, 
     quotechar="'" # keep all the double quotes around, to not break the json column
 )
 
@@ -414,7 +411,7 @@ rows = (df['hz_orbsmax'] > df['hz_outer_opt']) & (df['hz_orbsmax'] < df['hz_oute
 df.loc[rows, 'hz_score'] = 1.0 - (df['hz_orbsmax'] - df['hz_outer_opt']) / (df['hz_outer_opt'] - df['hz_outer_opt'])
 
 
-# TODO: account for high eccentricity and high luminosity, according to results from Bomont et al. 
+# Account for high eccentricity and high luminosity, according to results from Bomont et al. 
 # https://www.aanda.org/articles/aa/pdf/2016/07/aa28073-16.pdf 
 
 # Just using the eccentricity scores based on the circular orbit that represents the average flux
