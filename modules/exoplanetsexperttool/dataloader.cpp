@@ -39,6 +39,7 @@
 #include <charconv>
 #include <cmath>
 #include <fstream>
+#include <limits>
 #include <string>
 #include <string_view>
 
@@ -63,6 +64,11 @@ namespace {
         else {
             return false;
         }
+    }
+
+    bool isNumber(const std::string& s) {
+        return !s.empty() && std::find_if(s.begin(),
+            s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
     }
 
 } // namespace
@@ -107,6 +113,8 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
 
     std::vector<ExoplanetItem> planets;
     planets.reserve(nRows);
+
+    int nOtherColumns = -1;
 
     for (int row = 1; row < nRows; row++) {
         ExoplanetItem p;
@@ -273,7 +281,6 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
             }
             // Any other columns that might be in the datset
             else {
-                float parsedNumeric = data::parseFloatData(data);
                 std::string key = column;
 
                 // For now, ignore any empty, limit and error columns
@@ -285,18 +292,21 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
                     continue;
                 }
 
-                // For now, always add as numeric column
-                p.otherColumns[key] = parsedNumeric;
 
-                // TODO: allow categorical / string columns
-                //if (!std::isnan(parsedNumeric)) {
-                //    p.otherColumns[key] = parsedNumeric;
-                //}
-                //else {
-                //    p.otherColumns[key] = data;
-                //}
+                float parsedNumeric = data::parseFloatData(data);
 
-                // TODO: verify that all resulting planets have the same number of columns
+                // All columns should have empty string for missing values
+                if (data.empty()) {
+                    p.otherColumns[key] = ""; // Empty string
+                }
+                else if (!std::isnan(parsedNumeric)) {
+                    p.otherColumns[key] = parsedNumeric;
+                }
+                else {
+                    // Non empty string value
+                    p.otherColumns[key] = data;
+                }
+
             }
         }
 
@@ -350,10 +360,72 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
             p.surfaceGravity.value = static_cast<float>((G * M) / (r * r));
         }
 
+        // Virification related to "other columns"
+        if (nOtherColumns == -1) {
+            nOtherColumns = p.otherColumns.size();
+        }
+        else {
+            if (p.otherColumns.size() != nOtherColumns) {
+                throw; // TODO: throw something meaningful
+            }
+        }
+
         planets.push_back(p);
     }
-
     planets.shrink_to_fit();
+
+    if (planets.empty()) {
+        return planets;
+    }
+
+    // Handle missing values in "other columns"
+
+    std::map<std::string, bool> colIsNumeric;
+    auto first = planets.front().otherColumns;
+
+    // Determine the type of all other columns
+    for (auto iter = first.begin(); iter != first.end(); ++iter) {
+        const std::string key = iter->first;
+
+        // Default value if we have no vlaue for any planet is false
+        colIsNumeric[key] = false;
+
+        // Find first entry with a value and use that to determine category
+        for (auto p : planets) {
+            std::variant<std::string, float> value = p.otherColumns[key];
+            if (std::holds_alternative<std::string>(value) &&
+                std::get<std::string>(value).empty())
+            {
+                continue; // do nothing
+            }
+            else {
+                colIsNumeric[key] = std::holds_alternative<float>(value);
+                break;
+            }
+        }
+    }
+
+    // Replace all the missing values in the numeric columns with something meaningful
+    for (auto iter = first.begin(); iter != first.end(); ++iter) {
+        const std::string key = iter->first;
+
+        if (!colIsNumeric[key]) {
+            continue;
+        }
+
+        // Find first entry with a value and use that to determine category
+        for (ExoplanetItem& p : planets) {
+            std::variant<std::string, float> value = p.otherColumns[key];
+            if (std::holds_alternative<std::string>(value) &&
+                std::get<std::string>(value).empty())
+            {
+                p.otherColumns[key] = std::numeric_limits<float>::quiet_NaN();
+            }
+        }
+    }
+
+    // At this stage all values in the other columns should have the correct type
+
     return planets;
 }
 

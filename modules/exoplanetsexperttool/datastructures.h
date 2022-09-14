@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATASTRUCTURES___H__
 
 #include <ghoul/glm.h>
+#include <limits>
 #include <map>
 #include <optional>
 #include <string>
