@@ -890,39 +890,46 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Render pass 2
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+        // Screen-space quad should not be discarded due to depth test
+        glDisable(GL_DEPTH_TEST);
 
         _screenShader->activate();
 
-        _program->setUniform(_uniformOpacityCache.opacity, opacity());
-        _program->setUniform(_uniformOpacityCache.opacityBlending, _enableOpacityBlending);
+        _screenShader->setUniform(_uniformOpacityCache.opacity, opacity());
+        _screenShader->setUniform(
+            _uniformOpacityCache.opacityBlending,
+            _enableOpacityBlending
+        );
 
         // Bind textures
         ghoul::opengl::TextureUnit colorTextureUnit;
         colorTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _colorTexture);
-        _program->setUniform(_uniformOpacityCache.modelColorTexture, colorTextureUnit);
-        /*
+        _screenShader->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
+
         ghoul::opengl::TextureUnit positionTextureUnit;
         positionTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _positionTexture);
-        _program->setUniform(_uniformOpacityCache.moedlPositionTexture, positionTextureUnit);
+        _screenShader->setUniform(
+           _uniformOpacityCache.positionTexture,
+            positionTextureUnit
+        );
 
         ghoul::opengl::TextureUnit normalTextureUnit;
         normalTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _normalTexture);
-        _program->setUniform(_uniformOpacityCache.modelNormalTexture, normalTextureUnit);
+        _screenShader->setUniform(_uniformOpacityCache.normalTexture, normalTextureUnit);
 
         ghoul::opengl::TextureUnit depthTextureUnit;
         depthTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _depthTexture);
-        _program->setUniform(_uniformOpacityCache.modelDepthTexture, depthTextureUnit);
+        _screenShader->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 
         // Draw
         glBindVertexArray(_quadVao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         _screenShader->deactivate();
-        */
+
         // End
         global::renderEngine->openglStateCache().resetBlendState();
         glEnable(GL_DEPTH_TEST);

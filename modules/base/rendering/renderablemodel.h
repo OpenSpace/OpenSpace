@@ -129,8 +129,8 @@ private:
     void createFramebuffers();
     ghoul::opengl::ProgramObject* _screenShader = nullptr;
 
-    UniformCache(opacity, opacityBlending, modelColorTexture, modelDepthTexture,
-        modelPositionTexture, modelNormalTexture) _uniformOpacityCache;
+    UniformCache(opacity, opacityBlending, colorTexture, depthTexture, positionTexture,
+        normalTexture) _uniformOpacityCache;
 };
 
 }  // namespace openspace
