@@ -34,7 +34,7 @@
 #include <optional>
 
 namespace {
-    constexpr int RenderOptionViewDirection = 0;
+    constexpr int RenderOptionFaceCamera = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
@@ -55,26 +55,37 @@ namespace {
         "Determines the transparency of the labels, where 1 is completely opaque "
         "and 0 fully transparent"
     };
+
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the labels"
     };
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the labels in pixels"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
+        "FontSize",
+        "Font Size",
+        "Font size for the labels. This is different from the text size"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo MinMaxInfo = {
         "MinMaxSize",
         "Min/Max Size",
         "The minimum and maximum size (in pixels) of the labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOption",
-        "Render Option",
-        "Debug option for rendering of billboards and texts"
+    constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
+        "FaceCamera",
+        "Face Camera",
+        "If enabled, the labels will be rotated to face the camera. "
+        "For non-linear display rendering (for example fisheye) this should be set to "
+        "false."
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
@@ -90,6 +101,9 @@ namespace {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size;
 
+        // [[codegen::verbatim(FontSizeInfo.description)]]
+        std::optional<float> fontSize;
+
         // [[codegen::verbatim(MinMaxInfo.description)]]
         std::optional<glm::ivec2> minMaxSize;
 
@@ -103,6 +117,9 @@ namespace {
             Gigalightyear [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
+
+        // [[codegen::verbatim(FaceCameraInfo.description)]]
+        std::optional<bool> faceCamera;
     };
 #include "labelscomponent_codegen.cpp"
 } // namespace
@@ -118,13 +135,14 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _size(SizeInfo, 8.f, 0.5f, 24.f)
+    , _fontSize(FontSizeInfo, 50.f, 1.f, 300.f)
     , _minMaxSize(
         MinMaxInfo,
         glm::ivec2(8, 500),
         glm::ivec2(0),
         glm::ivec2(1000)
     )
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _faceCamera(FaceCameraInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -147,21 +165,30 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     _size = p.size.value_or(_size);
     addProperty(_size);
 
+    _fontSize = p.fontSize.value_or(_fontSize);
+    _fontSize.onChange([this]() { initialize(); });
+    addProperty(_fontSize);
+    // @TODO (emmbr, 2021-05-31): Temporarily set as read only, to avoid errors from font
+    // rendering (avoid filling font atlas)
+    _fontSize.setReadOnly(true);
+
     _minMaxSize = p.minMaxSize.value_or(_minMaxSize);
     _minMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_minMaxSize);
 
-    _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
-    _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
-    // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum, and
-    // doing it based on the fisheye rendering seems a bit brittle?
-    if (global::windowDelegate->isFisheyeRendering()) {
-        _renderOption = RenderOptionPositionNormal;
+    if (p.faceCamera.has_value()) {
+        _faceCamera = *p.faceCamera;
     }
     else {
-        _renderOption = RenderOptionViewDirection;
+        // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum, and
+        // doing it based on the fisheye rendering seems a bit brittle?
+
+        // (malej 2022-SEP-14)
+        // For non-linear display rendering (for example fisheye) _faceCamera should be false,
+        // otherwise true.
+        _faceCamera = !global::windowDelegate->isFisheyeRendering();
     }
-    addProperty(_renderOption);
+    addProperty(_faceCamera);
 }
 
 speck::Labelset& LabelsComponent::labelSet() {
@@ -173,15 +200,12 @@ const speck::Labelset& LabelsComponent::labelSet() const {
 }
 
 void LabelsComponent::initialize() {
-    if (!_font) {
-        constexpr int FontSize = 50;
-        _font = global::fontManager->font(
-            "Mono",
-            static_cast<float>(FontSize),
-            ghoul::fontrendering::FontManager::Outline::Yes,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
-        );
-    }
+    _font = global::fontManager->font(
+        "Mono",
+        _fontSize,
+        ghoul::fontrendering::FontManager::Outline::Yes,
+        ghoul::fontrendering::FontManager::LoadGlyphs::No
+    );
 }
 
 void LabelsComponent::loadLabels() {
@@ -199,6 +223,8 @@ void LabelsComponent::render(const RenderData& data, const glm::dmat4& modelView
 {
     float scale = static_cast<float>(toMeter(_unit));
 
+    int renderOption = _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
+
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
@@ -206,7 +232,7 @@ void LabelsComponent::render(const RenderData& data, const glm::dmat4& modelView
     labelInfo.maxSize = _minMaxSize.value().y;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _renderOption;
+    labelInfo.renderType = renderOption;
     labelInfo.mvpMatrix = modelViewProjectionMatrix;
     labelInfo.scale = pow(10.f, _size);
     labelInfo.enableDepth = true;

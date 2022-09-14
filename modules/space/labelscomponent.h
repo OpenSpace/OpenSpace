@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/space/speckloader.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -74,10 +74,9 @@ private:
     properties::FloatProperty _opacity;
     properties::Vec3Property _color;
     properties::FloatProperty _size;
+    properties::FloatProperty _fontSize;
     properties::IVec2Property _minMaxSize;
-
-    // DEBUG:
-    properties::OptionProperty _renderOption;
+    properties::BoolProperty _faceCamera;
 };
 
 } // namespace openspace
