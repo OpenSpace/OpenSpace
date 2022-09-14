@@ -294,7 +294,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
-    glDepthMask(false);
+    glEnable(GL_DEPTH_TEST);
 
     // Render minor grid
     glBindVertexArray(_vaoID);
