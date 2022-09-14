@@ -40,6 +40,7 @@
 #include <memory>
 
 namespace ghoul::opengl {
+    class FramebufferObject;
     class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl
@@ -104,10 +105,10 @@ private:
     std::string _vertexShaderPath;
     std::string _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
+    UniformCache(nLightSources, lightDirectionsViewSpace, lightIntensities,
         modelViewTransform, normalTransform, projectionTransform,
         performShading, ambientIntensity, diffuseIntensity,
-        specularIntensity, opacityBlending) _uniformCache;
+        specularIntensity) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
 
@@ -116,6 +117,20 @@ private:
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
 
     properties::PropertyOwner _lightSourcePropertyOwner;
+
+    // Frame buffer stuff
+    GLuint _framebuffer;
+    GLuint _colorTexture;
+    GLuint _depthTexture;
+    GLuint _positionTexture;
+    GLuint _normalTexture;
+    GLuint _quadVao;
+    GLuint _quadVbo;
+    void createFramebuffers();
+    ghoul::opengl::ProgramObject* _screenShader = nullptr;
+
+    UniformCache(opacity, opacityBlending, modelColorTexture, modelDepthTexture,
+        modelPositionTexture, modelNormalTexture) _uniformOpacityCache;
 };
 
 }  // namespace openspace

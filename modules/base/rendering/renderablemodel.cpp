@@ -28,6 +28,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
@@ -39,10 +41,14 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <optional>
+
+#include <iostream>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableModel";
@@ -62,17 +68,30 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
+    constexpr glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
+
+    const GLenum ColorAttachmentArray[3] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT1,
+       GL_COLOR_ATTACHMENT2
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable Animation",
         "Enable or disable the animation for the model if it has any"
     };
 
-    constexpr std::array<const char*, 12> UniformNames = {
-        "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
+    constexpr std::array<const char*, 10> UniformNames = {
+        "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "opacityBlending"
+        "specularIntensity"
+    };
+
+    constexpr std::array<const char*, 6> UniformOpacityNames = {
+        "opacity", "opacityBlending", "colorTexture", "depthTexture", "positionTexture",
+        "normalTexture"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
@@ -486,7 +505,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableModel::isReady() const {
-    return _program;
+    return _program && _screenShader;
 }
 
 void RenderableModel::initialize() {
@@ -539,13 +558,197 @@ void RenderableModel::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
+    _screenShader = BaseModule::ProgramObjectManager.request(
+        "ModelOpacityProgram",
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            std::filesystem::path vs =
+                absPath("${MODULE_BASE}/shaders/modelOpacity_vs.glsl");
+            std::filesystem::path fs =
+                absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
+
+            return global::renderEngine->buildRenderProgram("ModelOpacityProgram", vs, fs);
+        }
+    );
+    ghoul::opengl::updateUniformLocations(
+        *_screenShader,
+        _uniformOpacityCache,
+        UniformOpacityNames
+    );
+
+    // Screen quad VAO
+    const GLfloat quadVertices[] = {
+        // x     y
+        -1.f, -1.f,
+         1.f,  1.f,
+        -1.f,  1.f,
+        -1.f, -1.f,
+         1.f, -1.f,
+         1.f,  1.f,
+    };
+
+    glGenVertexArrays(1, &_quadVao);
+    glBindVertexArray(_quadVao);
+
+    glGenBuffers(1, &_quadVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);
+
+    createFramebuffers();
+
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
+}
+
+void RenderableModel::createFramebuffers() {
+    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
+
+    // Generate textures and the frame buffer
+    glGenTextures(1, &_colorTexture);
+    glGenTextures(1, &_positionTexture);
+    glGenTextures(1, &_normalTexture);
+    glGenTextures(1, &_depthTexture);
+    glGenFramebuffers(1, &_framebuffer);
+
+    // Create the textures
+    // Color
+    glBindTexture(GL_TEXTURE_2D, _colorTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        static_cast<GLsizei>(resolution.x),
+        static_cast<GLsizei>(resolution.y),
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _colorTexture, -1, "RenderableModel Color");
+    }
+
+
+    // Position
+    glBindTexture(GL_TEXTURE_2D, _positionTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        static_cast<GLsizei>(resolution.x),
+        static_cast<GLsizei>(resolution.y),
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _positionTexture, -1, "RenderableModel Position");
+    }
+
+    // Normal
+    glBindTexture(GL_TEXTURE_2D, _normalTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        static_cast<GLsizei>(resolution.x),
+        static_cast<GLsizei>(resolution.y),
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _normalTexture, -1, "RenderableModel Normal");
+    }
+
+    // Depth
+    glBindTexture(GL_TEXTURE_2D, _depthTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        static_cast<GLsizei>(resolution.x),
+        static_cast<GLsizei>(resolution.y),
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _depthTexture, -1, "RenderableModel Depth");
+    }
+
+    // Create buffers
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        _colorTexture,
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        _positionTexture,
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT2,
+        _normalTexture,
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        _depthTexture,
+        0
+    );
+
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Opacity");
+    }
+
+    // Check status
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status  != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Framebuffer is not complete!");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
+
+    glDeleteFramebuffers(1, &_framebuffer);
+    glDeleteTextures(1, &_colorTexture);
+    glDeleteTextures(1, &_depthTexture);
+    glDeleteTextures(1, &_positionTexture);
+    glDeleteTextures(1, &_normalTexture);
+
+    glDeleteBuffers(1, &_quadVbo);
+    glDeleteVertexArrays(1, &_quadVao);
 
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
@@ -561,6 +764,8 @@ void RenderableModel::deinitializeGL() {
         }
     );
     _program = nullptr;
+    _screenShader = nullptr;
+    ghoul::opengl::FramebufferObject::deactivate();
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
@@ -579,7 +784,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     if (distanceToCamera < maxDistance) {
         _program->activate();
 
-        _program->setUniform(_uniformCache.opacity, opacity());
+
 
         // Model transform and view transform needs to be in double precision
         const glm::dmat4 modelTransform =
@@ -636,7 +841,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
         _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
         _program->setUniform(_uniformCache.performShading, _performShading);
-        _program->setUniform(_uniformCache.opacityBlending, _enableOpacityBlending);
+
 
         if (_disableFaceCulling) {
             glDisable(GL_CULL_FACE);
@@ -665,18 +870,63 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             glDisable(GL_DEPTH_TEST);
         }
 
+        // Frame buffer stuff
+        GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+        glDrawBuffers(3, ColorAttachmentArray);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
+
+        // Render Pass 1
         _geometry->render(*_program);
         if (_disableFaceCulling) {
             glEnable(GL_CULL_FACE);
         }
-
-        global::renderEngine->openglStateCache().resetBlendState();
+        _program->deactivate();
 
         if (_disableDepthTest) {
             glEnable(GL_DEPTH_TEST);
         }
 
-        _program->deactivate();
+        // Render pass 2
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+        glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+
+        _screenShader->activate();
+
+        _program->setUniform(_uniformOpacityCache.opacity, opacity());
+        _program->setUniform(_uniformOpacityCache.opacityBlending, _enableOpacityBlending);
+
+        // Bind textures
+        ghoul::opengl::TextureUnit colorTextureUnit;
+        colorTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _colorTexture);
+        _program->setUniform(_uniformOpacityCache.modelColorTexture, colorTextureUnit);
+        /*
+        ghoul::opengl::TextureUnit positionTextureUnit;
+        positionTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _positionTexture);
+        _program->setUniform(_uniformOpacityCache.moedlPositionTexture, positionTextureUnit);
+
+        ghoul::opengl::TextureUnit normalTextureUnit;
+        normalTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _normalTexture);
+        _program->setUniform(_uniformOpacityCache.modelNormalTexture, normalTextureUnit);
+
+        ghoul::opengl::TextureUnit depthTextureUnit;
+        depthTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _depthTexture);
+        _program->setUniform(_uniformOpacityCache.modelDepthTexture, depthTextureUnit);
+
+        // Draw
+        glBindVertexArray(_quadVao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        _screenShader->deactivate();
+        */
+        // End
+        global::renderEngine->openglStateCache().resetBlendState();
+        glEnable(GL_DEPTH_TEST);
+        glActiveTexture(GL_TEXTURE0);
     }
 }
 

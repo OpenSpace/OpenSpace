@@ -22,48 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in vec2 vs_st;
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
-layout(location = 3) in vec3 in_tangent;
+uniform float opacity = 1.0;
+uniform bool opacityBlending = false;
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
-out mat3 TBN;
+uniform sampler2D colorTexture;
+uniform sampler2D depthTexture;
+uniform sampler2D positionTexture;
+uniform sampler2D normalTexture;
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
-uniform mat4 meshTransform;
-uniform mat4 meshNormalTransform;
+Fragment getFragment() {
+  Fragment frag;
 
+  if (opacity == 0.0) {
+    discard;
+  }
 
-void main() {
-  vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
-  vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-  vec4 positionScreenSpace = z_normalization(positionClipSpace);
+  if (opacityBlending) {
+    // frag.color.a = opacity * (frag.color.r + frag.color.g + frag.color.b)/3.0;
+    frag.color.a = opacity * max(max(frag.color.r, frag.color.g), frag.color.b);
+  }
+  else {
+    frag.color.a = opacity;
+  }
 
-  gl_Position = positionScreenSpace;
-  vs_st = in_st;
-  vs_screenSpaceDepth = positionScreenSpace.w;
+  frag.color.rgb = texture(colorTexture, vs_st).rgb;
+  frag.depth = denormalizeFloat(texture(depthTexture, vs_st).x);
+  frag.gPosition = texture(positionTexture, vs_st);
+  frag.gNormal = vec4(texture(normalTexture, vs_st).rgb, 0.0);
 
-  vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
-
-	// TBN matrix for normal mapping
-	vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
-	vec3 N = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
-
-	// Re-orthogonalize T with respect to N
-	T = normalize(T - dot(T, N) * N);
-
-	// Retrieve perpendicular vector B with cross product of T and N
-	vec3 B = normalize(cross(N, T));
-
-	TBN = mat3(T, B, N);
+  return frag;
 }

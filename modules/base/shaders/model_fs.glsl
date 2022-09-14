@@ -39,7 +39,6 @@ uniform bool has_texture_diffuse;
 uniform bool has_texture_normal;
 uniform bool has_texture_specular;
 uniform bool has_color_specular;
-uniform bool opacityBlending = false;
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_specular;
@@ -48,7 +47,6 @@ uniform vec3 color_specular;
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
 uniform float lightIntensities[8];
-uniform float opacity = 1.0;
 
 
 Fragment getFragment() {
@@ -63,7 +61,7 @@ Fragment getFragment() {
     // Pink and complementary green in a chessboard pattern
     frag.color.rgb = mix(vec3(1.0, 0.0, 0.8), vec3(0.0, 1.0, 0.2), chessboard);
 
-    frag.color.a = opacity;
+    frag.color.a = 1.0;
     frag.depth = vs_screenSpaceDepth;
     frag.gPosition = vs_positionCameraSpace;
     frag.gNormal = vec4(vs_normalViewSpace, 0.0);
@@ -78,10 +76,6 @@ Fragment getFragment() {
   }
   else {
     diffuseAlbedo = color_diffuse;
-  }
-
-  if (opacity == 0.0) {
-    discard;
   }
 
   Fragment frag;
@@ -103,7 +97,7 @@ Fragment getFragment() {
     // Some of these values could be passed in as uniforms
     const vec3 lightColorAmbient = vec3(1.0);
     const vec3 lightColor = vec3(1.0);
-        
+
     vec3 n;
     if (has_texture_normal) {
       vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
@@ -141,18 +135,7 @@ Fragment getFragment() {
     frag.color.rgb = diffuseAlbedo;
   }
 
-  if (opacityBlending) {
-    // frag.color.a = opacity * (frag.color.r + frag.color.g + frag.color.b)/3.0;
-    frag.color.a = opacity * max(max(frag.color.r, frag.color.g), frag.color.b);
-  }
-  else {
-    frag.color.a = opacity;
-  }
-
-  if (frag.color.a < 0.1) {
-    discard;
-  }
-
+  frag.color.a = 1.0;
   frag.depth = vs_screenSpaceDepth;
   frag.gPosition = vs_positionCameraSpace;
   frag.gNormal = vec4(vs_normalViewSpace, 0.0);
