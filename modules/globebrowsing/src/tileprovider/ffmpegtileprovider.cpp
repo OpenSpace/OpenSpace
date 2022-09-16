@@ -89,11 +89,6 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
     _startTime = p.startTime;
 
     reset();
-    
-    // Allocate the video frames
-    _packet = av_packet_alloc();
-    _avFrame = av_frame_alloc();
-    _glFrame = av_frame_alloc();
 
     std::string path = absPath(_videoFile).string();
 
@@ -130,7 +125,7 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
         LERRORC("FfmpegTileProvider", "Failed to find video stream for " + path);
         return;
     }
-    
+
     // Find decoder
     _decoder = avcodec_find_decoder(_videoStream->codecpar->codec_id);
     if (!_decoder) {
@@ -159,9 +154,30 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
         return;
     }
 
-    _tileTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture(glm::uvec3(_nativeSize, 0), GL_TEXTURE_2D)
-        );
+    // Allocate the video frames
+    _packet = av_packet_alloc();
+    _avFrame = av_frame_alloc();
+    _glFrame = av_frame_alloc();
+
+    // Fill the destination frame for the convertion
+    int glFrameSize = av_image_get_buffer_size(
+        AV_PIX_FMT_RGB24,
+        _codecContext->width,
+        _codecContext->height,
+        1
+    );
+    uint8_t* internalBuffer =
+        reinterpret_cast<uint8_t*>(av_malloc(glFrameSize * sizeof(uint8_t)));
+    av_image_fill_arrays(
+        _glFrame->data,
+        _glFrame->linesize,
+        internalBuffer,
+        AV_PIX_FMT_RGB24,
+        _codecContext->width,
+        _codecContext->height,
+        1
+    );
+
     _lastFrameTime = std::max(Time::convertTime(_startTime), Time::now().j2000Seconds());
 }
 
@@ -180,6 +196,13 @@ TileDepthTransform FfmpegTileProvider::depthTransform() {
 
 void FfmpegTileProvider::update() {
     ZoneScoped
+
+    if (_tileTexture) {
+        return;
+    }
+
+    // New frame, new texture make sure it gets reset properly
+    reset();
 
     // Check if it is time for a new frame
     double now = Time::now().j2000Seconds();
@@ -229,31 +252,73 @@ void FfmpegTileProvider::update() {
             return;
         }
         // Successfully collected a frame
-        std::cout << "frame: " << _codecContext->frame_number << std::endl;
+        LINFO(fmt::format(
+            "Successfully decoded frame {}", _codecContext->frame_number
+        ));
         break;
     }
 
-    // TODO: Get the image data and make it into a ghoul texture and then a tile
-    /* uint8_t* internalBuffer = new uint8_t[_avFrame->height * _avFrame->width * 3];
-    for (int y = 0; y < _avFrame->height; y++) {
-        internalBuffer[y] = *(_avFrame->data[0] + y * _avFrame->linesize[0]);
+    // TODO: Need to check the format of the video and decide what formats we want to
+    // support and how they relate to the GL formats
+
+    // Convert the color format to AV_PIX_FMT_RGB24
+    // Only create the conversion context once
+    if (!_conversionContext) {
+        _conversionContext = sws_getContext(
+            _codecContext->width,
+            _codecContext->height,
+            _codecContext->pix_fmt,
+            _codecContext->width,
+            _codecContext->height,
+            AV_PIX_FMT_RGB24,
+            SWS_BICUBIC,
+            nullptr,
+            nullptr,
+            nullptr
+        );
     }
-        
-    _tileTexture.get()->setPixelData(
-        reinterpret_cast<char*>(_avFrame->data[0]),
-        ghoul::opengl::Texture::TakeOwnership::No
+
+    // NOTE: This crashes at the moment somewhere inside the sws_scale function
+    sws_scale(
+        _conversionContext,
+        _avFrame->data,
+        _avFrame->linesize,
+        0,
+        _codecContext->height,
+        _glFrame->data,
+        _glFrame->linesize
     );
+
+    // Create the texture
+    // TODO: We should probably create a deep copy of the data that the Texture object
+    // can have ownership of, otherwise the destructor crashes and can have other bugs too
+    _tileTexture = std::make_unique<ghoul::opengl::Texture>(
+        reinterpret_cast<char*>(_glFrame->data[0]),
+        glm::uvec3(_nativeSize, 1),
+        GL_TEXTURE_2D,
+        ghoul::opengl::Texture::Format::RGB,
+        GL_RGB
+    );
+    if (!_tileTexture) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Unable to load texture for frame '{}' in video {}",
+            _codecContext->frame_number, _videoFile
+        ));
+    }
+
+    // Binds the texture to the tile
     _tileTexture->uploadTexture();
     _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
-    */
+
 
     // TEST save a grayscale frame into a .pgm file
     // This ends up in OpenSpace\build\apps\OpenSpace
     // https://github.com/leandromoreira/ffmpeg-libav-tutorial/blob/master/0_hello_world.c
-    char frame_filename[1024];
+    /*char frame_filename[1024];
     snprintf(frame_filename, sizeof(frame_filename), "%s-%d.pgm", "frame", _codecContext->frame_number);
     save_gray_frame(_avFrame->data[0], _avFrame->linesize[0], _avFrame->width, _avFrame->height, frame_filename);
+    */
 
     av_packet_unref(_packet);
 }
@@ -266,7 +331,13 @@ int FfmpegTileProvider::maxLevel() {
     return 1337; // unlimited
 }
 
-void FfmpegTileProvider::reset() {}
+void FfmpegTileProvider::reset() {
+    if (_videoFile.empty() || !_tileTexture) {
+        return;
+    }
+
+    _tileTexture.reset();
+}
 
 
 float FfmpegTileProvider::noDataValueAsFloat() {
@@ -279,7 +350,7 @@ void FfmpegTileProvider::internalInitialize() {
 }
 
 FfmpegTileProvider::~FfmpegTileProvider() {
-    // TODO: Check so internalDeinitialize is called after the last 
+    // TODO: Check so internalDeinitialize is called after the last
     // update function and move code there
     avformat_close_input(&_formatContext);
     av_free(_avFrame);
@@ -289,7 +360,7 @@ FfmpegTileProvider::~FfmpegTileProvider() {
 }
 
 void FfmpegTileProvider::internalDeinitialize() {
-    
+
 }
 
 } // namespace openspace::globebrowsing

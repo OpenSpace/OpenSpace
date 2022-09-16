@@ -34,6 +34,7 @@ extern "C" {
 #include <libavcodec/avcodec.h> // avcodec_alloc_context3
 #include <libavformat/avformat.h> // avformat_open_input, AVFormatContext
 #include <libavutil/imgutils.h> // av_image_get_buffer_size
+#include <libswscale/swscale.h> // SwsContext
 }
 
 namespace openspace { struct Documentation; }
@@ -42,7 +43,7 @@ namespace openspace::globebrowsing {
 
 class FfmpegTileProvider : public TileProvider {
 public:
-    FfmpegTileProvider(const ghoul::Dictionary& dictionary); 
+    FfmpegTileProvider(const ghoul::Dictionary& dictionary);
     ~FfmpegTileProvider();
 
     Tile tile(const TileIndex& tileIndex) override final;
@@ -65,6 +66,7 @@ private:
 
     AVFormatContext* _formatContext = nullptr;
     AVCodecContext* _codecContext = nullptr;
+    struct SwsContext* _conversionContext;
     const AVCodec* _decoder = nullptr;
     AVFrame* _avFrame = nullptr;
     AVFrame* _glFrame = nullptr;

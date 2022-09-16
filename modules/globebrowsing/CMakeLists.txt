@@ -177,6 +177,15 @@ if(WIN32)
 
   target_link_libraries(openspace-module-globebrowsing PUBLIC avutil)
 
+  add_library(swscale SHARED IMPORTED)
+  set_target_properties(swscale PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swscale-6.dll"
+    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/swscale.lib"
+    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/include"
+  )
+
+  target_link_libraries(openspace-module-globebrowsing PUBLIC swscale)
+
 else(WIN32)
   find_package(FFMPEG REQUIRED)
 
