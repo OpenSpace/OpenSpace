@@ -79,7 +79,7 @@ private:
     properties::StringProperty _end;
     properties::Vec3Property _color;
 
-    properties::UIntProperty _segments; 
+    properties::UIntProperty _segments;
     properties::BoolProperty _invertArrowDirection;
 
     struct Shading : properties::PropertyOwner {
@@ -101,6 +101,7 @@ private:
     properties::FloatProperty _width;
 
     bool _shapeIsDirty = true;
+    std::string _prevAnchor = "";
     glm::dvec3 _prevStartNodePosition = glm::dvec3(0.0);
     glm::dvec3 _prevEndNodePosition = glm::dvec3(0.0);
 };
