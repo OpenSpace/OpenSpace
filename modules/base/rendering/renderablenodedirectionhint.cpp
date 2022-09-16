@@ -331,6 +331,7 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     addProperty(_arrowHeadWidthFactor);
 
     _width = p.width.value_or(_width);
+    _width.onChange([this]() { _shapeIsDirty = true; });
     _width.setExponent(10.f);
     addProperty(_width);
 
@@ -402,8 +403,10 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
     // @TODO (emmbr, 2022-08-22): make GUI update when min/max value is updated
 
     _useRelativeOffset = p.useRelativeOffset.value_or(_useRelativeOffset);
+    _useRelativeOffset.onChange([this]() { _shapeIsDirty = true; });
 
     _offsetDistance = p.offset.value_or(_offsetDistance);
+    _offsetDistance.onChange([this]() { _shapeIsDirty = true; });
     addProperty(_offsetDistance);
 
     if (!_useRelativeOffset) {
@@ -412,7 +415,6 @@ RenderableNodeDirectionHint::RenderableNodeDirectionHint(const ghoul::Dictionary
 
     addProperty(_useRelativeLength);
     addProperty(_useRelativeOffset);
-
 }
 
 std::string RenderableNodeDirectionHint::start() const {
@@ -779,6 +781,7 @@ void RenderableNodeDirectionHint::update(const UpdateData&) {
     SceneGraphNode* startNode = sceneGraphNode(_start);
     SceneGraphNode* endNode = sceneGraphNode(_end);
 
+    // Check if any of the targetted nodes moved
     bool shouldUpdate = _shapeIsDirty;
     if (startNode && endNode) {
         constexpr float Epsilon = std::numeric_limits<float>::epsilon();
@@ -793,6 +796,14 @@ void RenderableNodeDirectionHint::update(const UpdateData&) {
         _prevStartNodePosition = startNode->worldPosition();
         _prevEndNodePosition = endNode->worldPosition();
     }
+
+    // Check if the anchor changed: We might have to recompute the positions
+    // in relation to that anchor
+    const SceneGraphNode* anchor = global::navigationHandler->orbitalNavigator().anchorNode();
+    if (!shouldUpdate && (_prevAnchor != anchor->identifier())) {
+        shouldUpdate = true;
+    }
+    _prevAnchor = anchor->identifier();
 
     if (shouldUpdate) {
         updateVertexData();
