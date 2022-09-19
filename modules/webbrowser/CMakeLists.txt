@@ -202,8 +202,8 @@ if (OS_MACOSX)
     endif ()
   endforeach()
 
-  set_property(TARGET ${CEF_HELPER_TARGET_GPU} PROPERTY FOLDER "Helper")
-  set_property(TARGET ${CEF_HELPER_TARGET_RENDERER} PROPERTY FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "Helper")
 else()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
@@ -219,7 +219,7 @@ else()
   endif (OS_WINDOWS)
 endif ()
 
-set_property(TARGET ${CEF_HELPER_TARGET} PROPERTY FOLDER "Helper")
+set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
 
 ##########################################################################################
 # Create OpenSpace module.
