@@ -257,39 +257,37 @@ df = df.merge(galah, on='gaia_id', how='left')
 # IAC Exoplanet Atmospheres
 # Dataset from: http://research.iac.es/proyecto/exoatmospheres/ 
 ##################################################################
-
+IAC_COLUMNS = ['name', 'molecules']
 csv_url = 'http://research.iac.es/proyecto/muscat/exoatm/export'
 df_iac_data = pd.read_csv(
-    csv_url, 
-    sep=';', 
+    csv_url,
+    sep=';',
+    usecols=IAC_COLUMNS,
     quotechar="'" # keep all the double quotes around, to not break the json column
 )
-
-IAC_COLUMNS = ['name', 'molecules']
-df_iac_reduced = df_iac_data[IAC_COLUMNS]
 
 # Remove all outer quotes from the strings
 def strip_quotes(item):
     return item.str.strip('"')
 
-df_iac_reduced = df_iac_reduced.apply(strip_quotes)
+df_iac_data = df_iac_data.apply(strip_quotes)
 
 # Remove duplicates and empty observations
-df_iac_reduced = df_iac_reduced[df_iac_reduced.molecules != '[]']
-df_iac_reduced.drop_duplicates()
+df_iac_data = df_iac_data[df_iac_data.molecules != '[]']
+df_iac_data.drop_duplicates()
 
 # Drop a faulty row (something must be wrong with the formatting... 
 # it gets part of the publication data in the molecules list) # 2022-06-28
-df_iac_reduced = df_iac_reduced[df_iac_reduced['molecules'].str.contains("author") == False]
+df_iac_data = df_iac_data[df_iac_data['molecules'].str.contains("author") == False]
 
 # Convert molcecules column to actual json
 import json
 def molecules_to_json(item):
     return json.loads(item)
 
-df_iac_reduced['molecules'] = df_iac_reduced['molecules'].map(molecules_to_json)
+df_iac_data['molecules'] = df_iac_data['molecules'].map(molecules_to_json)
 
-# print(df_iac_reduced)
+# print(df_iac_data)
 
 def add_value(dict_obj, key, value):
     ''' Adds a key-value pair to the dictionary.
@@ -306,7 +304,7 @@ def add_value(dict_obj, key, value):
 # The resulting dataset has multiple rows per planet (each row is one observation).
 # Combine into one row per planet, in a python dictionary
 dict_iac = {}
-for index, row in df_iac_reduced.iterrows():
+for index, row in df_iac_data.iterrows():
     key = row['name']
     values = row['molecules']
     if key not in dict_iac:
