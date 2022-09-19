@@ -224,6 +224,8 @@ df.dec.fillna(temp_df.dec, inplace=True)
 # Chemical Abundances
 ##################################################################
 
+print("Reading data from prepared APOGEE and GALAH files...")
+
 abundanceDatafolder = "https://weber.itn.liu.se/~emmbr26/exo_star_abundances/"
 apogeePath = abundanceDatafolder + "abundances_apogee.csv"
 galahPath = abundanceDatafolder + "abundances_galah.csv"
@@ -232,19 +234,20 @@ apogee = pd.read_csv(apogeePath)
 apogee = apogee.add_suffix('_apogee')
 apogee.rename(columns={'gaia_id_apogee':'gaia_id'}, inplace=True) # remove suffix from id column
 
-# Drop any unnamed columns
-apogee = apogee.loc[:, ~apogee.columns.str.contains('^Unnamed')]
-
-print(apogee.columns)
-
 galah = pd.read_csv(galahPath)
 galah = galah.add_suffix('_galah')
 galah.rename(columns={'gaia_id_galah':'gaia_id'}, inplace=True) # remove suffix from id column
 
 # Drop any unnamed columns
+apogee = apogee.loc[:, ~apogee.columns.str.contains('^Unnamed')]
 galah = galah.loc[:, ~galah.columns.str.contains('^Unnamed')]
 
+print(apogee.columns)
 print(galah.columns)
+
+# Drop duplicates (just keep first entry)
+apogee = apogee.drop_duplicates('gaia_id')
+galah = galah.drop_duplicates('gaia_id')
 
 # Add apogee and galah columns
 df = df.merge(apogee, on='gaia_id', how='left')
