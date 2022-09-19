@@ -54,6 +54,19 @@ namespace {
         "This value species the size of each dimensions of the box"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+        "DrawLabels",
+        "Draw Labels",
+        "Determines whether labels should be drawn or hidden"
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
+    {
+        "Labels",
+        "Labels",
+        "The labels for the grid"
+    };
+
     struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -63,6 +76,13 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec3> size;
+
+        // [[codegen::verbatim(DrawLabelInfo.description)]]
+        std::optional<bool> drawLabels;
+
+        // [[codegen::verbatim(LabelsInfo.description)]]
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("space_labelscomponent")]];
     };
 #include "renderableboxgrid_codegen.cpp"
 } // namespace
@@ -78,6 +98,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _size(SizeInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(100.f))
+    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -94,10 +115,31 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     _size = p.size.value_or(_size);
     _size.onChange([&]() { _gridIsDirty = true; });
     addProperty(_size);
+
+    if (p.labels.has_value()) {
+        _drawLabels = p.drawLabels.value_or(_drawLabels);
+        addProperty(_drawLabels);
+
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+    }
 }
 
 bool RenderableBoxGrid::isReady() const {
-    return _gridProgram != nullptr;
+    bool isReady = _gridProgram != nullptr;
+
+    if (_hasLabels) {
+        isReady = isReady && _labels->isReady();
+    }
+    return isReady;
+}
+
+void RenderableBoxGrid::initialize() {
+    if (_hasLabels) {
+        _labels->initialize();
+        _labels->loadLabels();
+    }
 }
 
 void RenderableBoxGrid::initializeGL() {
@@ -146,12 +188,12 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+
+    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform(
-        "MVPTransform",
-        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
-    );
+    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
@@ -176,6 +218,31 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
+
+    // Draw labels
+    if (_drawLabels && _hasLabels) {
+        const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+        const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+        glm::vec3 right = glm::cross(viewDirection, lookup);
+        const glm::vec3 up = glm::cross(right, viewDirection);
+
+        const glm::dmat4 worldToModelTransform = glm::inverse(modelTransform);
+        glm::vec3 orthoRight = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+        );
+
+        if (orthoRight == glm::vec3(0.0)) {
+            glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
+            right = glm::cross(viewDirection, otherVector);
+            orthoRight = glm::normalize(
+                glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+            );
+        }
+        const glm::vec3 orthoUp = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
+        );
+        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+    }
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {
