@@ -71,7 +71,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
-        "HighlightLine Width",
+        "Highlight Line Width",
         "This value specifies the line width of the highlighted lines in the grid"
     };
 
@@ -357,9 +357,10 @@ void RenderableGrid::update(const UpdateData&) {
 
             // Line in y direction
             bool shouldHighlight = false;
-            if (_highlightRate.value().y != 0) {
-                int rest = static_cast<int>(i - center.y) % _highlightRate.value().y;
-                shouldHighlight = abs(rest) == 0;
+            if (_highlightRate.value().x != 0) {
+                int dist = abs(static_cast<int>(i) - static_cast<int>(center.x));
+                int rest = dist % _highlightRate.value().x;
+                shouldHighlight = rest == 0;
             }
 
             if (shouldHighlight) {
@@ -373,8 +374,9 @@ void RenderableGrid::update(const UpdateData&) {
 
             // Line in x direction
             shouldHighlight = false;
-            if (_highlightRate.value().x != 0) {
-                int rest = static_cast<int>(j - center.x) % _highlightRate.value().x;
+            if (_highlightRate.value().y != 0) {
+                int dist = abs(static_cast<int>(j) - static_cast<int>(center.y));
+                int rest = dist % _highlightRate.value().y;
                 shouldHighlight = abs(rest) == 0;
             }
 
@@ -395,9 +397,9 @@ void RenderableGrid::update(const UpdateData&) {
         const double x1 = x0 + step.x;
 
         bool shouldHighlight = false;
-        if (_highlightRate.value().x != 0) {
-            int rest =
-                static_cast<int>(nSegments.y - center.x) % _highlightRate.value().x;
+        if (_highlightRate.value().y != 0) {
+            int dist = abs(static_cast<int>(nSegments.y) - static_cast<int>(center.y));
+            int rest = dist % _highlightRate.value().y;
             shouldHighlight = abs(rest) == 0;
         }
 
@@ -412,14 +414,14 @@ void RenderableGrid::update(const UpdateData&) {
     }
 
     // last y col
-    for (unsigned int i = 0; i < nSegments.y; ++i) {
-        const double y0 = -halfSize.y + i * step.y;
+    for (unsigned int j = 0; j < nSegments.y; ++j) {
+        const double y0 = -halfSize.y + j * step.y;
         const double y1 = y0 + step.y;
 
         bool shouldHighlight = false;
-        if (_highlightRate.value().y != 0) {
-            int rest =
-                static_cast<int>(nSegments.x - center.y) % _highlightRate.value().y;
+        if (_highlightRate.value().x != 0) {
+            int dist = abs(static_cast<int>(nSegments.x) - static_cast<int>(center.x));
+            int rest = dist % _highlightRate.value().x;
             shouldHighlight = abs(rest) == 0;
         }
         if (shouldHighlight) {

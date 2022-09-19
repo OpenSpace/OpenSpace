@@ -36,9 +36,12 @@ local planarGrid = {
     Type = "RenderableGrid",
     Color = { 0.0, 1.0, 0.8 },
     LineWidth = 2.0,
-    Segments = { 5, 10 },
+    Segments = { 6, 10 },
     Size = { 1, 2 },
-    Enabled = false
+    Enabled = false,
+    HighlightColor =  {1.0, 0.8, 0.0 },
+    HighlightLineWidth = 3.2,
+    HighlightRate = { 3, 3 }
   },
   GUI = {
     Name = "Example Grid",
