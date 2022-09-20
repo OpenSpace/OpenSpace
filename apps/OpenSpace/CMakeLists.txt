@@ -186,7 +186,9 @@ if (OPENSPACE_NVTOOLS_ENABLED)
   target_link_libraries(OpenSpace PRIVATE "${OPENSPACE_NVTOOLS_PATH}/lib/x64/nvToolsExt64_1.lib")
 endif ()
 
-add_custom_command(TARGET OpenSpace POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:OpenSpace> $<TARGET_FILE_DIR:OpenSpace>
-  COMMAND_EXPAND_LISTS
-)
+if (WIN32)
+  add_custom_command(TARGET OpenSpace POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:OpenSpace> $<TARGET_FILE_DIR:OpenSpace>
+    COMMAND_EXPAND_LISTS
+  )
+endif ()
