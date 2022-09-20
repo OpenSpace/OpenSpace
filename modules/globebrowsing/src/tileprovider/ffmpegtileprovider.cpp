@@ -197,9 +197,6 @@ TileDepthTransform FfmpegTileProvider::depthTransform() {
 void FfmpegTileProvider::update() {
     ZoneScoped
 
-    // New frame, new texture make sure it gets reset properly
-    reset();
-
     // Check if it is time for a new frame
     double now = Time::now().j2000Seconds();
     double diff = now - _lastFrameTime;
@@ -293,10 +290,8 @@ void FfmpegTileProvider::update() {
             ghoul::opengl::Texture::Format::RGB,
             GL_RGB
             );
-        _tileTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-        _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     }
-
+    _tileTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     // Update the pixel data with the new frame
     _tileTexture->setPixelData(
         reinterpret_cast<char*>(_glFrame->data[0]),
@@ -304,6 +299,7 @@ void FfmpegTileProvider::update() {
     );
     // Binds the texture to the tile
     _tileTexture->uploadTexture();
+    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     
     if (!_tileTexture) {
         throw ghoul::RuntimeError(fmt::format(
