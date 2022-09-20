@@ -274,7 +274,6 @@ void FfmpegTileProvider::update() {
         );
     }
 
-    // NOTE: This crashes SOMETIMES somewhere inside the sws_scale function
     sws_scale(
         _conversionContext,
         _avFrame->data,
@@ -285,15 +284,27 @@ void FfmpegTileProvider::update() {
         _glFrame->linesize
     );
 
-    // Create the texture
-    _tileTexture = std::make_unique<ghoul::opengl::Texture>(
+    // Create the texture if it doesn't exist already
+    if (!_tileTexture) {
+        _tileTexture = std::make_unique<ghoul::opengl::Texture>(
+            reinterpret_cast<char*>(_glFrame->data[0]),
+            glm::uvec3(_nativeSize, 1),
+            GL_TEXTURE_2D,
+            ghoul::opengl::Texture::Format::RGB,
+            GL_RGB
+            );
+        _tileTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
+        _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+    }
+
+    // Update the pixel data with the new frame
+    _tileTexture->setPixelData(
         reinterpret_cast<char*>(_glFrame->data[0]),
-        glm::uvec3(_nativeSize, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGB,
-        GL_RGB
+        ghoul::opengl::Texture::TakeOwnership::No
     );
-    _tileTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
+    // Binds the texture to the tile
+    _tileTexture->uploadTexture();
+    
     if (!_tileTexture) {
         throw ghoul::RuntimeError(fmt::format(
             "Unable to load texture for frame '{}' in video {}",
@@ -301,11 +312,7 @@ void FfmpegTileProvider::update() {
         ));
     }
 
-    // Binds the texture to the tile
-    _tileTexture->uploadTexture();
-    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
-
 
     // TEST save a grayscale frame into a .pgm file
     // This ends up in OpenSpace\build\apps\OpenSpace

@@ -66,7 +66,7 @@ private:
 
     AVFormatContext* _formatContext = nullptr;
     AVCodecContext* _codecContext = nullptr;
-    struct SwsContext* _conversionContext;
+    struct SwsContext* _conversionContext = nullptr;
     const AVCodec* _decoder = nullptr;
     AVFrame* _avFrame = nullptr;
     AVFrame* _glFrame = nullptr;
@@ -74,7 +74,7 @@ private:
     AVStream* _videoStream = nullptr;
     AVPacket* _packet = nullptr;
 
-    std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _tileTexture = nullptr;
     Tile _tile;
 
     void internalInitialize() override final;
