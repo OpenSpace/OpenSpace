@@ -197,10 +197,6 @@ TileDepthTransform FfmpegTileProvider::depthTransform() {
 void FfmpegTileProvider::update() {
     ZoneScoped
 
-    if (_tileTexture) {
-        return;
-    }
-
     // New frame, new texture make sure it gets reset properly
     reset();
 
@@ -278,7 +274,7 @@ void FfmpegTileProvider::update() {
         );
     }
 
-    // NOTE: This crashes at the moment somewhere inside the sws_scale function
+    // NOTE: This crashes SOMETIMES somewhere inside the sws_scale function
     sws_scale(
         _conversionContext,
         _avFrame->data,
@@ -290,8 +286,6 @@ void FfmpegTileProvider::update() {
     );
 
     // Create the texture
-    // TODO: We should probably create a deep copy of the data that the Texture object
-    // can have ownership of, otherwise the destructor crashes and can have other bugs too
     _tileTexture = std::make_unique<ghoul::opengl::Texture>(
         reinterpret_cast<char*>(_glFrame->data[0]),
         glm::uvec3(_nativeSize, 1),
@@ -299,6 +293,7 @@ void FfmpegTileProvider::update() {
         ghoul::opengl::Texture::Format::RGB,
         GL_RGB
     );
+    _tileTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     if (!_tileTexture) {
         throw ghoul::RuntimeError(fmt::format(
             "Unable to load texture for frame '{}' in video {}",
