@@ -948,6 +948,12 @@ void setSgctDelegateFunctions() {
     sgctDelegate.showStatistics = [](bool enabled) {
         Engine::instance().setStatsGraphVisibility(enabled);
     };
+    sgctDelegate.numberOfNodes = []() {
+        return ClusterManager::instance().numberOfNodes();
+    };
+    sgctDelegate.currentNode = []() {
+        return ClusterManager::instance().thisNodeId();
+    };
 }
 
 void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
