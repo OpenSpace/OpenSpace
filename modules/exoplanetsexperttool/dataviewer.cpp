@@ -170,6 +170,10 @@ namespace {
 #endif
     }
 
+    // Format stirng for system window name
+    std::string systemWindowName(std::string_view host) {
+        return fmt::format("System: {}", host);
+    }
 
     constexpr const openspace::properties::Property::PropertyInfo ExternalSelectionInfo =
     {
@@ -564,7 +568,7 @@ void DataViewer::render() {
             bool isOpen = true;
 
             ImGui::SetNextWindowSize(ImVec2(500.f, 0.f), ImGuiCond_Appearing);
-            if (ImGui::Begin(fmt::format("System: {}", host).c_str(), &isOpen)) {
+            if (ImGui::Begin(systemWindowName(host).c_str(), &isOpen)) {
                 renderSystemViewContent(host);
             }
             ImGui::End();
@@ -1205,6 +1209,21 @@ void DataViewer::renderTable(const std::string& tableId,
                         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
                             LINFO(fmt::format("Double click: {}", item.planetName));
                             addOrTargetPlanet(item);
+
+                            // Also open the system view for that system
+                            bool isAlreadyOpen = std::find(
+                                _shownPlanetSystemWindows.begin(),
+                                _shownPlanetSystemWindows.end(),
+                                item.hostName
+                            ) != _shownPlanetSystemWindows.end();
+
+                            if (!isAlreadyOpen) {
+                                _shownPlanetSystemWindows.push_back(item.hostName);
+                            }
+                            else {
+                                // Bring window to front
+                                ImGui::SetWindowFocus(systemWindowName(item.hostName).c_str());
+                            }
                         }
 
                         if (changed) {
