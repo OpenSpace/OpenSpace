@@ -328,12 +328,13 @@ void ScreenSpaceSkyBrowser::update() {
     ScreenSpaceRenderable::update();
 }
 
-void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
+double ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     // Make scroll more sensitive the smaller the FOV
     double x = _verticalFov;
     double zoomFactor = atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
     double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
     _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
+    return _verticalFov;
 }
 
 void ScreenSpaceSkyBrowser::bindTexture() {
