@@ -524,7 +524,8 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::ShowAllTargetsAndBrowsers,
             codegen::lua::PointSpaceCraft,
             codegen::lua::GetWwtImageCollectionUrl,
-            codegen::lua::StopAnimations
+            codegen::lua::StopAnimations,
+            codegen::lua::ReloadDisplayCopyOnNode
         }
     };
 }

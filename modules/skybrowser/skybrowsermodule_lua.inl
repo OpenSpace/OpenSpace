@@ -39,6 +39,33 @@
 namespace {
     constexpr std::string_view _loggerCat = "SkyBrowserModule";
 
+
+/**
+* Reloads the sky browser display copy for the node index that is sent in.
+* .If no ID is sent in, it will reload all display copies on that node.
+*/
+[[codegen::luawrap]] void reloadDisplayCopyOnNode(int nodeIndex, std::string id = "all") {
+    using namespace openspace;
+
+    if (global::windowDelegate->currentNode() != nodeIndex)
+        return;
+
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    if (id != "all") {
+        TargetBrowserPair* pair = module->pair(id);
+        if (pair) {
+            pair->browser()->reload();
+        }
+    }
+    else {
+        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
+        for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
+            pair->browser()->reload();
+        }
+    }
+}
+
+
 /**
  * Takes an index to an image and selects that image in the currently
  * selected sky browser.
