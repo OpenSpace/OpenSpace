@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 
 #include <modules/skybrowser/include/browser.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 #include <deque>
 
@@ -69,7 +70,8 @@ protected:
     void setIdInBrowser(const std::string& id) const;
     std::deque<std::pair<int, double>>::iterator findSelectedImage(int i);
 
-    double _verticalFov = 10.0f;
+    properties::DoubleProperty _verticalFov;
+
     glm::ivec3 _borderColor = glm::ivec3(70);
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     double _targetRoll = 0.0;

@@ -119,6 +119,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_browserDimensions);
     addProperty(_reload);
     addProperty(_textureQuality);
+    addProperty(_verticalFov);
 
     _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 

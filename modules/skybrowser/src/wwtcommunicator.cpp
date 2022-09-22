@@ -116,13 +116,31 @@ namespace {
         MessageCounter++;
         return msg;
     }
+
+    constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
+        "VerticalFov",
+        "Vertical Field Of View",
+        "The vertical field of view of the target."
+    };
+
+    struct [[codegen::Dictionary(WwtCommunicator)]] Parameters {
+        // [[codegen::verbatim(VerticalFovInfo.description)]]
+        std::optional<double> verticalFov;
+    };
+    #include "wwtcommunicator_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 WwtCommunicator::WwtCommunicator(const ghoul::Dictionary& dictionary)
     : Browser(dictionary)
-{}
+    , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
+{
+    // Handle target dimension property
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _verticalFov = p.verticalFov.value_or(_verticalFov);
+    _verticalFov.setReadOnly(true);
+}
 
 void WwtCommunicator::update() {
     // Cap how messages are passed
