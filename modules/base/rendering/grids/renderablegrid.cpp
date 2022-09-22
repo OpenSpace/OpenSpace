@@ -188,12 +188,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableGrid::isReady() const {
-    bool isReady = _gridProgram != nullptr;
-
-    if (_hasLabels) {
-        isReady = isReady && _labels->isReady();
-    }
-    return isReady;
+    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
 }
 
 void RenderableGrid::initialize() {
@@ -273,7 +268,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     );
 
     if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
+        glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
             glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))

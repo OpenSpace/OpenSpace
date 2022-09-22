@@ -86,9 +86,7 @@ protected:
     // Labels
     bool _hasLabels = false;
     properties::BoolProperty _drawLabels;
-
-    // Everything related to the labels are handled by LabelsComponent
-    std::unique_ptr<LabelsComponent> _labels = nullptr;
+    std::unique_ptr<LabelsComponent> _labels;
 };
 
 }// namespace openspace

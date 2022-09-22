@@ -39,7 +39,7 @@
 namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
-    struct RenderData;
+struct RenderData;
 
 namespace documentation { struct Documentation; }
 

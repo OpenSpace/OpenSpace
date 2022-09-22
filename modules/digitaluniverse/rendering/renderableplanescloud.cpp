@@ -440,23 +440,24 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
 
     const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     const glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-    const glm::dmat4 mvpMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
-
-    const glm::dmat4 invMVPParts = glm::inverse(modelMatrix) *
-                                   glm::inverse(data.camera.combinedViewMatrix()) *
-                                   glm::inverse(glm::dmat4(projectionMatrix));
-    const glm::dvec3 orthoRight = glm::normalize(
-        glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))
-    );
-    const glm::dvec3 orthoUp = glm::normalize(
-        glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))
-    );
 
     if (_hasSpeckFile) {
         renderPlanes(data, modelViewMatrix, projectionMatrix, fadeInVariable);
     }
 
     if (_hasLabels) {
+        const glm::dmat4 mvpMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+
+        const glm::dmat4 invMVPParts = glm::inverse(modelMatrix) *
+            glm::inverse(data.camera.combinedViewMatrix()) *
+            glm::inverse(glm::dmat4(projectionMatrix));
+        const glm::dvec3 orthoRight = glm::normalize(
+            glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))
+        );
+        const glm::dvec3 orthoUp = glm::normalize(
+            glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))
+        );
+
         _labels->render(data, mvpMatrix, orthoRight, orthoUp, fadeInVariable);
     }
 }

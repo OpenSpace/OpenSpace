@@ -114,8 +114,8 @@ private:
 
     speck::Dataset _dataset;
 
-    // Everything related to the labels are handled by LabelsComponent
-    std::unique_ptr<LabelsComponent> _labels = nullptr;
+    // Everything related to the labels is handled by LabelsComponent
+    std::unique_ptr<LabelsComponent> _labels;
 
     float _sluminosity = 1.f;
 

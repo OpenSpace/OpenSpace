@@ -214,11 +214,7 @@ void RenderableConstellationsBase::initialize() {
 }
 
 bool RenderableConstellationsBase::isReady() const {
-    // If we have labels, they also need to be loaded
-    if (_hasLabels) {
-        return _labels->isReady();
-    }
-    return true;
+    return _hasLabels ? _labels->isReady() : true;
 }
 
 void RenderableConstellationsBase::render(const RenderData& data, RendererTasks&) {

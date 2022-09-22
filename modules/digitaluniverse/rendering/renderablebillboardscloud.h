@@ -135,8 +135,8 @@ private:
     speck::Dataset _dataset;
     speck::ColorMap _colorMap;
 
-    // Everything related to the labels are handled by LabelsComponent
-    std::unique_ptr<LabelsComponent> _labels = nullptr;
+    // Everything related to the labels is handled by LabelsComponent
+    std::unique_ptr<LabelsComponent> _labels;
 
     std::vector<glm::vec2> _colorRangeData;
     std::unordered_map<int, std::string> _optionConversionMap;

@@ -708,7 +708,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
     );
     if (orthoRight == glm::dvec3(0.0)) {
-        glm::dvec3 otherVector(
+        glm::dvec3 otherVector = glm::vec3(
             cameraUpDirectionWorld.y,
             cameraUpDirectionWorld.x,
             cameraUpDirectionWorld.z
