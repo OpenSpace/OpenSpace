@@ -75,7 +75,6 @@ private:
     AVPacket* _packet = nullptr;
 
     std::unique_ptr<ghoul::opengl::Texture> _tileTexture = nullptr;
-    Tile _tile;
 
     void internalInitialize() override final;
     void internalDeinitialize() override final;

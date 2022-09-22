@@ -100,14 +100,12 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
         nullptr
     );
     if (openRes < 0) {
-        LERRORC("FfmpegTileProvider", "Failed to open input for file " + path);
-        return;
+        throw ghoul::RuntimeError(fmt::format("Failed to open input for file {}", path));
     }
 
     // Find stream info
     if (avformat_find_stream_info(_formatContext, nullptr) < 0) {
-        LERRORC("FfmpegTileProvider", "Failed to get stream info for " + path);
-        return;
+        throw ghoul::RuntimeError(fmt::format("Failed to get stream info for {}", path));
     }
     // Dump debug info
     av_dump_format(_formatContext, 0, path.c_str(), false);
@@ -122,15 +120,13 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     if (_streamIndex == -1 || _videoStream == nullptr) {
-        LERRORC("FfmpegTileProvider", "Failed to find video stream for " + path);
-        return;
+        throw ghoul::RuntimeError(fmt::format("Failed to find video stream for {}", path));
     }
 
     // Find decoder
     _decoder = avcodec_find_decoder(_videoStream->codecpar->codec_id);
     if (!_decoder) {
-        LERRORC("FfmpegTileProvider", "Failed to find decoder for " + path);
-        return;
+        throw ghoul::RuntimeError(fmt::format("Failed to find decoder for {}", path));
     }
 
     _codecContext = avcodec_alloc_context3(nullptr);
@@ -140,18 +136,15 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
         _videoStream->codecpar
     );
     if (contextSuccess < 0) {
-        LERRORC(
-            "FfmpegTileProvider",
-            "Failed to create codec context for " + path
+        throw ghoul::RuntimeError(
+            fmt::format("Failed to create codec context for {}", path)
         );
-        return;
     }
     _nativeSize = { _codecContext->width, _codecContext->height };
 
     // Open the decoder
     if (avcodec_open2(_codecContext, _decoder, nullptr) < 0) {
-        LERRORC("FfmpegTileProvider", "Failed to open codec for " + path);
-        return;
+        throw ghoul::RuntimeError(fmt::format("Failed to open codec for {}", path));
     }
 
     // Allocate the video frames
@@ -183,11 +176,43 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
 
 Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
-    return _tile;
+
+    if (!_glFrame || !_codecContext) {
+        return Tile{nullptr, std::nullopt, Tile::Status::Unavailable };
+    }
+
+    // Create the texture if it doesn't exist already
+    if (!_tileTexture) {
+        _tileTexture = std::make_unique<ghoul::opengl::Texture>(
+            reinterpret_cast<char*>(_glFrame->data[0]),
+            glm::uvec3(_nativeSize, 1),
+            GL_TEXTURE_2D,
+            ghoul::opengl::Texture::Format::RGB,
+            GL_RGB
+        );
+    }
+    _tileTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
+
+    // Update the pixel data with the new frame
+    _tileTexture->setPixelData(
+        reinterpret_cast<char*>(_glFrame->data[0]),
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+
+    // Bind the texture to the tile
+    _tileTexture->uploadTexture();
+    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+    if (!_tileTexture) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Unable to load texture for frame '{}' in video {}",
+            _codecContext->frame_number, _videoFile
+        ));
+    }
+    return Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
 }
 
 Tile::Status FfmpegTileProvider::tileStatus(const TileIndex&) {
-    return _tile.status;
+    return Tile::Status::OK;
 }
 
 TileDepthTransform FfmpegTileProvider::depthTransform() {
@@ -204,7 +229,7 @@ void FfmpegTileProvider::update() {
         (now - _lastFrameTime) > _frameTime;
 
     if(!hasNewFrame) {
-        //return; wait with this for now
+        //return; // wait with this for now
     }
 
     // Read frame
@@ -281,35 +306,6 @@ void FfmpegTileProvider::update() {
         _glFrame->linesize
     );
 
-    // Create the texture if it doesn't exist already
-    if (!_tileTexture) {
-        _tileTexture = std::make_unique<ghoul::opengl::Texture>(
-            reinterpret_cast<char*>(_glFrame->data[0]),
-            glm::uvec3(_nativeSize, 1),
-            GL_TEXTURE_2D,
-            ghoul::opengl::Texture::Format::RGB,
-            GL_RGB
-            );
-    }
-    _tileTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-    // Update the pixel data with the new frame
-    _tileTexture->setPixelData(
-        reinterpret_cast<char*>(_glFrame->data[0]),
-        ghoul::opengl::Texture::TakeOwnership::No
-    );
-    // Binds the texture to the tile
-    _tileTexture->uploadTexture();
-    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-    
-    if (!_tileTexture) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Unable to load texture for frame '{}' in video {}",
-            _codecContext->frame_number, _videoFile
-        ));
-    }
-
-    _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
-
     // TEST save a grayscale frame into a .pgm file
     // This ends up in OpenSpace\build\apps\OpenSpace
     // https://github.com/leandromoreira/ffmpeg-libav-tutorial/blob/master/0_hello_world.c
@@ -326,7 +322,10 @@ int FfmpegTileProvider::minLevel() {
 }
 
 int FfmpegTileProvider::maxLevel() {
-    return 1337; // unlimited
+    // Every tile needs to be 512 by 512, how far can we subdivide this video
+    // TODO: Maybe set this vlaue (512) as a constant somehere?
+    // TODO: Check if it should be floor or ceil
+    return std::floor(std::log2(_nativeSize.x) - std::log2(1024));
 }
 
 void FfmpegTileProvider::reset() {
