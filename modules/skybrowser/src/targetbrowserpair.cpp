@@ -263,7 +263,7 @@ void TargetBrowserPair::setBrowserRatio(float ratio) {
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
     double fov = _browser->setVerticalFovWithScroll(scroll);
-    _target->setVerticalFov(fov);
+    _targetRenderable->setVerticalFov(fov);
 }
 
 void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
