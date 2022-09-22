@@ -18,6 +18,7 @@
     "exoplanetexplorer/kepler_prism",
     "exoplanetexplorer/milkyway_center_line",
     "exoplanetexplorer/size_indicators",
+    "exoplanetexplorer/show_info_at_startup",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/default_layers"
   ],

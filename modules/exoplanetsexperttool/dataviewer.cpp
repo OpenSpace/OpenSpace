@@ -69,6 +69,17 @@ namespace {
 
     constexpr const char WebpagePath[] = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
 
+    constexpr const char AboutTheTool[] =
+        "This is a research tool under development and we are currently \n"
+        "looking for qualitative feedback from potential users. This feedback \n"
+        "will be included in our scientific publication covering the tool. \n"
+        "\n"
+        "Thank you for taking the time to trying it out, and please do not \n"
+        "hesitate to reach out with any questions, input or feedback";
+
+    constexpr const char GetInTouchLink[] =
+        "https://weber.itn.liu.se/~emmbr26/ExoplanetExplorer/get_in_touch";
+
     bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
         int res = _stricmp(lhs, rhs);
         return res < 0;
@@ -386,6 +397,49 @@ void DataViewer::initializeGL() {
     //ImPlot::AddColormap("Winter", winter, 8, false);
 }
 
+void DataViewer::renderStartupInfo() {
+
+    constexpr const int nPerColumn = 20;
+
+    // Always center this window when appearing
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    int nSelected = 0;
+    bool canSelectMore = true;
+    ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
+
+    ImGui::OpenPopup("We need your help!");
+    if (ImGui::BeginPopupModal("We need your help!", NULL, flags)) {
+        ImGui::Text("Welcome to the Exoplanet Explorer");
+        ImGui::Spacing();
+        ImGui::Text(AboutTheTool);
+        ImGui::Spacing();
+
+        if (ImGui::Button("Get in touch!")) {
+            system(fmt::format("start {}", GetInTouchLink).c_str());
+        }
+        ImGui::SameLine();
+        ImGui::TextDisabled("(opens a webpage in your browser)");
+        ImGui::Spacing();
+        ImGui::Spacing();
+
+        ImGui::Separator();
+
+        // Ok
+        ImGuiIO& io = ImGui::GetIO();
+        if (ImGui::Button("Continue", ImVec2(120, 0)) ||
+            ImGui::IsKeyPressed(io.KeyMap[ImGuiKey_Enter]))
+        {
+            ImGui::CloseCurrentPopup();
+            _shouldOpenInfoWindow = false;
+        }
+        ImGui::SetItemDefaultFocus();
+
+        ImGui::EndPopup();
+    }
+}
+
 void DataViewer::initializeRenderables() {
     using namespace std::string_literals;
 
@@ -471,12 +525,23 @@ void DataViewer::render() {
     static bool showScatterPlotWindow = false;
     static bool showHelpers = false;
 
+    auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
+    if (mod->showInfoWindowAtStartup() && _shouldOpenInfoWindow) {
+        renderStartupInfo();
+        return;
+    }
+
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Windows")) {
             ImGui::MenuItem("Table", NULL, &showTable);
             ImGui::MenuItem("Filters", NULL, &showFilterSettingsWindow);
             ImGui::MenuItem("Color mapping", NULL, &showColormapWindow);
             ImGui::MenuItem("Scatter plot", NULL, &showScatterPlotWindow);
+            if (mod->showInfoWindowAtStartup()) {
+                ImGui::Separator();
+                ImGui::MenuItem("Start-up info", NULL, &_shouldOpenInfoWindow);
+            }
+
 #ifdef SHOW_IMGUI_HELPERS
             ImGui::MenuItem("ImGui Helpers", NULL, &showHelpers);
 #endif
@@ -2225,7 +2290,7 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 }
             };
 
-            auto setTrailThickness = [](const ExoplanetItem& p, float width, float fade) {
+            auto setTrailThicknessAndFade = [](const ExoplanetItem& p, float width, float fade) {
                 const std::string id = planetIdentifier(p) + "_Trail";
                 if (!renderable(id)) {
                     return;
@@ -2243,8 +2308,8 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 );
             };
 
-            auto resetTrailWidth = [&setTrailThickness](const ExoplanetItem& p) {
-                setTrailThickness(p, 10.f, 1.f);
+            auto resetTrailWidth = [&setTrailThicknessAndFade](const ExoplanetItem& p) {
+                setTrailThicknessAndFade(p, 10.f, 1.f);
             };
 
             if (colorOrbits) {
@@ -2255,7 +2320,7 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                         const ExoplanetItem& p = _data[planetIndex];
                         if (colorOptionChanged) {
                             // First time we change color
-                            setTrailThickness(p, 20.f, 8.f);
+                            setTrailThicknessAndFade(p, 20.f, 30.f);
                         }
 
                         glm::vec3 color = glm::vec3(colorFromColormap(p, variable));

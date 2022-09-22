@@ -99,19 +99,22 @@ private:
         float colorScaleMax = 100.f;
     };
 
+    void renderStartupInfo();
+    bool _shouldOpenInfoWindow = true;
+
     void initializeRenderables();
     void initializeCallbacks();
     void renderHelpMarker(const char* text);
 
-    void renderTable(const std::string& tableId, std::vector<size_t>& planetRows, 
+    void renderTable(const std::string& tableId, std::vector<size_t>& planetRows,
         bool useFixedHeight, std::string_view search = "");
 
     void renderTableWindow(bool* open);
     void renderScatterPlotWindow(bool* open);
 
-    // Returns true if value was changed. If relevantSystem given, 
+    // Returns true if value was changed. If relevantSystem given,
     // also show a button to color based on planets in that system
-    bool renderColormapEdit(ColorMappedVariable& variable, 
+    bool renderColormapEdit(ColorMappedVariable& variable,
         std::string_view relevantSystem = "");
 
     void renderColormapWindow(bool* open);
@@ -144,7 +147,7 @@ private:
     // Check if a column is numeric. If it isn't, then it is text based
     bool isNumericColumn(int index) const;
 
-    glm::vec4 colorFromColormap(const ExoplanetItem& item, 
+    glm::vec4 colorFromColormap(const ExoplanetItem& item,
         const ColorMappedVariable& variable);
 
     // Write the information about the rendered points to a file

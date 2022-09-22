@@ -46,6 +46,7 @@ public:
     virtual ~ExoplanetsExpertToolModule() = default;
 
     bool enabled() const;
+    bool showInfoWindowAtStartup() const;
 
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -53,6 +54,7 @@ protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
     properties::BoolProperty _enabled;
+    properties::BoolProperty _showInfoWindowAtStartup;
     properties::IntListProperty _filteredRows;
 
     exoplanets::gui::Gui _gui;

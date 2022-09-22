@@ -47,6 +47,13 @@ namespace {
         "Decides if the GUI for this module should be enabled"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShowInfoAtStartupInfo = {
+        "ShowInfoAtStartup",
+        "Show Info at Startup",
+        "If true, an info window is shown when starting the application, containing "
+        "information about the research projecs and contact info for feedback."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FilteredDataRowsInfo = {
         "FilteredDataRows",
         "Filtered Data Rows",
@@ -58,6 +65,9 @@ namespace {
     struct [[codegen::Dictionary(ExoplanetsExpertToolModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
+
+        // [[codegen::verbatim(ShowInfoAtStartupInfo.description)]]
+        std::optional<bool> showInfoAtStartup;
     };
 #include "exoplanetsexperttoolmodule_codegen.cpp"
 } // namespace
@@ -68,15 +78,19 @@ using namespace exoplanets;
 
 ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     : OpenSpaceModule(Name)
-    , _enabled(EnabledInfo, false)
+    , _enabled(EnabledInfo)
+    , _showInfoWindowAtStartup(ShowInfoAtStartupInfo)
     , _filteredRows(FilteredDataRowsInfo)
     , _gui("ExoplanetsToolGui")
 {
     addProperty(_enabled);
+    addProperty(_showInfoWindowAtStartup);
     addPropertySubOwner(_gui);
 
     _filteredRows.setReadOnly(true);
     addProperty(_filteredRows);
+
+    // TODO: Renderables are initialized even if modules is disabled
 
     global::callback::initialize->emplace_back([&]() {
         LDEBUG("Initializing Exoplanets Expert Tool GUI");
@@ -222,9 +236,14 @@ bool ExoplanetsExpertToolModule::enabled() const {
     return _enabled;
 }
 
+bool ExoplanetsExpertToolModule::showInfoWindowAtStartup() const {
+    return _showInfoWindowAtStartup;
+}
+
 void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     _enabled = p.enabled.value_or(false);
+    _showInfoWindowAtStartup = p.showInfoAtStartup.value_or(false);
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
