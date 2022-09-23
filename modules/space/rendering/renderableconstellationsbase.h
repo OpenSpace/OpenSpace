@@ -105,8 +105,8 @@ private:
     // The file containing constellation names and abbreviations
     properties::StringProperty _namesFilename;
 
-    // Everything related to the labels are handled by LabelsComponent
-    std::unique_ptr<LabelsComponent> _labels = nullptr;
+    // Everything related to the labels is handled by LabelsComponent
+    std::unique_ptr<LabelsComponent> _labels;
 };
 
 } // namespace openspace
