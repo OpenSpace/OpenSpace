@@ -54,6 +54,7 @@ namespace {
     if (id != "all") {
         TargetBrowserPair* pair = module->pair(id);
         if (pair) {
+            pair->browser()->setIsInitialized(false);
             pair->browser()->reload();
         }
     }
