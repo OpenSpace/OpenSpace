@@ -92,6 +92,12 @@ namespace {
         "inversed"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SynchronizeAimInfo = {
+        "SynchronizeAim",
+        "Synchronize Aim",
+        "If checked, the target and the browser will have synchronized aim."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SpaceCraftTimeInfo = {
         "SpaceCraftAnimationTime",
         "Space Craft Animation Time",
@@ -127,6 +133,9 @@ namespace {
         // [[codegen::verbatim(InverseZoomInfo.description)]]
         std::optional<bool> inverseZoomDirection;
 
+        // [[codegen::verbatim(SynchronizeAimInfo.description)]]
+        std::optional<bool> synchronizeAim;
+
         // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
         std::optional<double> spaceCraftAnimationTime;
 
@@ -149,6 +158,7 @@ SkyBrowserModule::SkyBrowserModule()
     , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
     , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
     , _inverseZoomDirection(InverseZoomInfo, false)
+    , _synchronizeAim(SynchronizeAimInfo, true)
     , _spaceCraftAnimationTime(SpaceCraftTimeInfo, 2.0, 0.0, 10.0)
     , _wwtImageCollectionUrl(
         ImageCollectionInfo,
@@ -165,6 +175,7 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_inverseZoomDirection);
     addProperty(_spaceCraftAnimationTime);
     addProperty(_wwtImageCollectionUrl);
+    addProperty(_synchronizeAim);
     _wwtImageCollectionUrl.setReadOnly(true);
 
     // Set callback functions
@@ -209,8 +220,10 @@ SkyBrowserModule::SkyBrowserModule()
         }
 
         if (_isCameraInSolarSystem) {
-            for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
-                pair->synchronizeAim();
+            if (_synchronizeAim) {
+                for (const std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
+                    pair->synchronizeAim();
+                }
             }
             incrementallyAnimateTargets();
         }
@@ -230,6 +243,7 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     _browserAnimationSpeed = p.browserSpeed.value_or(_browserAnimationSpeed);
     _inverseZoomDirection = p.inverseZoomDirection.value_or(_inverseZoomDirection);
     _wwtImageCollectionUrl = p.wwtImageCollectionUrl.value_or(_wwtImageCollectionUrl);
+    _synchronizeAim = p.synchronizeAim.value_or(_synchronizeAim);
     _hideTargetsBrowsersWithGui = p.hideTargetsBrowsersGui.value_or(
         _hideTargetsBrowsersWithGui
     );
