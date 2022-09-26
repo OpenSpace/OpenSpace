@@ -2271,7 +2271,7 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
     ZoneScoped
 
     const int currLevel = chunk.tileIndex.level;
-    
+
     for (const layers::Group& gi : layers::Groups) {
         const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
         for (Layer* layer : lyrs) {

@@ -38,6 +38,7 @@
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/ffmpegtileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
@@ -47,7 +48,6 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
-#include <modules/globebrowsing/src/tileprovider/ffmpegtileprovider.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -345,6 +345,7 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::TemporalTileProvider::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
+        globebrowsing::FfmpegTileProvider::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation()

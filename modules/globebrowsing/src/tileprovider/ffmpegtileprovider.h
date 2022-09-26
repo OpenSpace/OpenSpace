@@ -47,7 +47,7 @@ public:
     ~FfmpegTileProvider();
 
     Tile tile(const TileIndex& tileIndex) override final;
-    Tile::Status tileStatus(const TileIndex& index) override final;
+    Tile::Status tileStatus(const TileIndex& tileIndex) override final;
     TileDepthTransform depthTransform() override final;
     void update() override final;
     void reset() override final;
@@ -60,9 +60,10 @@ public:
 private:
     std::filesystem::path _videoFile;
     glm::ivec2 _nativeSize;
-    double _frameTime;  // Seconds per frame
-    double _lastFrameTime;  // The in gmae time of the last frame in J2000 seconds
+    double _frameTime = -1.0;   // Seconds per frame
+    double _lastFrameTime;      // The in game time of the last frame in J2000 seconds
     std::string _startTime;
+    bool _tileIsReady = false;
 
     AVFormatContext* _formatContext = nullptr;
     AVCodecContext* _codecContext = nullptr;
@@ -75,6 +76,7 @@ private:
     AVPacket* _packet = nullptr;
 
     std::unique_ptr<ghoul::opengl::Texture> _tileTexture = nullptr;
+    GLubyte* _tilePixels = nullptr;
 
     void internalInitialize() override final;
     void internalDeinitialize() override final;
