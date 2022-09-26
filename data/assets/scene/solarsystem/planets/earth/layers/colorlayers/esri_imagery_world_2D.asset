@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "ESRI_Imagery_World_2D",
   Name = "ESRI Imagery World 2D",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("esri_imagery_world_2D.wms"),
   Description = [[This map presents low-resolution imagery for the world and
     high-resolution imagery for the United States and other metropolitan areas around

@@ -33,20 +33,7 @@ namespace openspace::skybrowser {
 
 // Constants
 constexpr double ScreenSpaceZ = -2.1;
-constexpr glm::dvec3 NorthPole = { 0.0, 0.0, 1.0 };
-constexpr double CelestialSphereRadius = 4 * distanceconstants::Parsec;
-
-// Conversion matrix - J2000 equatorial <-> galactic
-// https://arxiv.org/abs/1010.3773v1
-const glm::dmat3 conversionMatrix = glm::dmat3(
-    -0.054875539390,  0.494109453633, -0.867666135681, // col 0
-    -0.873437104725, -0.444829594298, -0.198076389622, // col 1
-    -0.483834991775,  0.746982248696,  0.455983794523 // col 2
-);
-
-// Galactic coordinates are projected onto the celestial sphere
-// Equatorial coordinates are unit length
-// Conversion spherical <-> Cartesian
+constexpr double CelestialSphereRadius = 4.0 * distanceconstants::Parsec;
 
 /**
  * Converts from Cartesian coordinates to spherical coordinates with unit length.
@@ -205,9 +192,8 @@ public:
     Animation(T start, T goal, double time)
         : _goal(std::move(goal))
         , _start(std::move(start))
-    {
-        _animationTime = std::chrono::milliseconds(static_cast<int>(time * 1000));
-    }
+        , _animationTime(std::chrono::milliseconds(static_cast<int>(time * 1000)))
+    {}
 
     void start() {
         _isStarted = true;
@@ -219,12 +205,12 @@ public:
     }
 
     bool isAnimating() const {
-        bool timeLeft = timeSpent().count() < _animationTime.count() ? true : false;
+        bool timeLeft = timeSpent().count() < _animationTime.count();
         return timeLeft && _isStarted;
     }
 
-    T getNewValue();
-    glm::dmat4 getRotationMatrix();
+    T newValue() const;
+    glm::dmat4 rotationMatrix();
 
 private:
     std::chrono::duration<double, std::milli> timeSpent() const {

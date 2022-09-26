@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "GHRSST_L4_MUR_Sea_Surface_Temperature_Temporal",
   Name = "GHRSST L4 MUR Sea Surface Temperature (Temporal)",
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
   Mode = "Prototyped",
   Prototyped = {

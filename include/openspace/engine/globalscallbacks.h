@@ -28,10 +28,22 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
+#include <ghoul/misc/boolean.h>
 #include <functional>
 #include <vector>
 
+namespace openspace {
+    BooleanType(IsGuiWindow);
+} // namespace openspace
+
 namespace openspace::global::callback {
+
+using KeyboardCallback = std::function<bool(Key, KeyModifier, KeyAction, IsGuiWindow)>;
+using CharacterCallback = std::function<bool(unsigned int, KeyModifier, IsGuiWindow)>;
+using MouseButtonCallback =
+    std::function<bool(MouseButton, MouseAction, KeyModifier, IsGuiWindow)>;
+using MousePositionCallback = std::function<void(double, double, IsGuiWindow)>;
+using MouseScrollWheelCallback = std::function<bool(double, double, IsGuiWindow)>;
 
 inline std::vector<std::function<void()>>* initialize;
 inline std::vector<std::function<void()>>* deinitialize;
@@ -42,12 +54,11 @@ inline std::vector<std::function<void()>>* postSyncPreDraw;
 inline std::vector<std::function<void()>>* render;
 inline std::vector<std::function<void()>>* draw2D;
 inline std::vector<std::function<void()>>* postDraw;
-inline std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>* keyboard;
-inline std::vector<std::function<bool(unsigned int, KeyModifier)>>* character;
-inline std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>*
-    mouseButton;
-inline std::vector<std::function<void(double, double)>>* mousePosition;
-inline std::vector<std::function<bool(double, double)>>* mouseScrollWheel;
+inline std::vector<KeyboardCallback>* keyboard;
+inline std::vector<CharacterCallback>* character;
+inline std::vector<MouseButtonCallback>* mouseButton;
+inline std::vector<MousePositionCallback>* mousePosition;
+inline std::vector<MouseScrollWheelCallback>* mouseScrollWheel;
 inline std::vector<std::function<bool(TouchInput)>>* touchDetected;
 inline std::vector<std::function<bool(TouchInput)>>* touchUpdated;
 inline std::vector<std::function<void(TouchInput)>>* touchExit;

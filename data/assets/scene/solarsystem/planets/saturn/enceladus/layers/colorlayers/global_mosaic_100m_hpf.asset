@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../enceladus").Enceladus.Identifier
 local layer = {
   Identifier = "Global_Mosaic_100m_HPF",
   Name = "Cassini Global Mosaic 100m HPF",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("global_mosaic_100m_hpf.wms"),
   Description = [[This mosaic represents the completion of a global control network of
     Enceladus containing Cassini Imaging Science Subsystem (ISS) images. A total of

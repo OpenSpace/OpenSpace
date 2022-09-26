@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Name = "Iron Abundance",
   Identifier = "fesimap_02122015",
+  Enabled = asset.enabled,
   FilePath = texturesPath .. "fesimap_02122015.png",
   BlendMode = "Multiply",
 }

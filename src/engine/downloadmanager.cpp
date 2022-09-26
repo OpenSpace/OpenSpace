@@ -33,6 +33,7 @@
 #include <curl/curl.h>
 #include <chrono>
 #include <filesystem>
+#include <sstream>
 #include <thread>
 
 namespace {

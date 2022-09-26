@@ -1,21 +1,30 @@
-local sharedSssb = asset.require("./sssb_shared")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(
-  asset,
-  "outer_main_belt_asteroid",
-  "sssb_data_outer_main_belt_asteroid"
-)
-local object = sharedSssb.createSssbGroupObject(
-  "sssb_data_outer_main_belt_asteroid.csv",
-  "Outer Main Asteroid Belt",
-  filepath,
-  { 0.4, 0.4, 1.0 }
-)
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 1
-object.Renderable.TrailFade = 2
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Outer Main Belt Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_outer_main_belt_asteroid",
+  Version = 1
+})
 
-object.GUI.Description = [[ Asteroids with a semi-major axis of between 3.2 and 4.6 au. ]]
+local object = {
+  Identifier = "sssb_outer_main_belt_asteroid",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_outer_main_belt_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 1,
+    Color = { 0.4, 0.4, 1.0 },
+    TrailFade = 2
+  },
+  GUI = {
+    Name = "Outer Main Asteroid Belt",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Asteroids with a semi-major axis of between 3.2 and 4.6 AU.]]
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)

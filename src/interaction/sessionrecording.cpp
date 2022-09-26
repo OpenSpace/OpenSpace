@@ -55,7 +55,7 @@
 #include <iomanip>
 
 #ifdef WIN32
-#include <windows.h>
+#include <Windows.h>
 #endif // WIN32
 
 #include "sessionrecording_lua.inl"
@@ -141,15 +141,6 @@ void SessionRecording::removeTrailingPathSlashes(std::string& filename) {
     while (filename.substr(filename.length() - 1, 1) == "\\") {
         filename.pop_back();
     }
-}
-
-void SessionRecording::extractFilenameFromPath(std::string& filename) {
-    size_t unixDelimiter = filename.find_last_of("/");
-    if (unixDelimiter != std::string::npos)
-        filename = filename.substr(unixDelimiter + 1);
-    size_t windowsDelimiter = filename.find_last_of("\\");
-    if (windowsDelimiter != std::string::npos)
-        filename = filename.substr(windowsDelimiter + 1);
 }
 
 bool SessionRecording::handleRecordingFile(std::string filenameIn) {
@@ -875,14 +866,14 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
 bool SessionRecording::doesStartWithSubstring(const std::string& s,
                                               const std::string& matchSubstr)
 {
-    return (s.substr(0, matchSubstr.length()).compare(matchSubstr) == 0);
+    return s.substr(0, matchSubstr.length()) == matchSubstr;
 }
 
 void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script) {
-    Timestamps times
-        = generateCurrentTimestamp3(global::windowDelegate->applicationTime());
-    size_t indexIntoScriptKeyframesFromMainTimeline
-        = _keyframesSavePropertiesBaseline_scripts.size();
+    Timestamps times =
+        generateCurrentTimestamp3(global::windowDelegate->applicationTime());
+    size_t indexIntoScriptKeyframesFromMainTimeline =
+        _keyframesSavePropertiesBaseline_scripts.size();
     _keyframesSavePropertiesBaseline_scripts.push_back(std::move(script));
     addKeyframeToTimeline(
         _keyframesSavePropertiesBaseline_timeline,
@@ -1624,7 +1615,7 @@ std::string SessionRecording::isolateTermFromQuotes(std::string s) {
     }
     //If no quotes found, remove other possible characters from end
     std::string unwantedChars = " );";
-    while (unwantedChars.find(s.back()) != std::string::npos) {
+    while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
         s.pop_back();
     }
     return s;
@@ -2303,6 +2294,10 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     inputFstream.close();
 }
 
+void SessionRecording::convertFileRelativePath(std::string filenameRelative) {
+    convertFile(absPath(filenameRelative).string());
+}
+
 std::string SessionRecording::convertFile(std::string filename, int depth) {
     std::string conversionOutFilename = filename;
     std::ifstream conversionInFile;
@@ -2327,13 +2322,10 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         // correct version of the file to be converted, then call getLegacy() to recurse
         // to the next level down in the legacy subclasses until we get the right
         // version, then proceed with conversion from there.
-        if (fileVersion.compare(fileFormatVersion()) != 0) {
+        if (fileVersion != fileFormatVersion()) {
             //conversionInStream.seekg(conversionInStream.beg);
             newFilename = getLegacyConversionResult(filename, depth + 1);
             removeTrailingPathSlashes(newFilename);
-            if (isPath(newFilename)) {
-                extractFilenameFromPath(newFilename);
-            }
             if (filename == newFilename) {
                 return filename;
             }
@@ -2572,7 +2564,7 @@ std::string SessionRecording::determineConversionOutFilename(const std::string f
         filenameSansExtension = filename.substr(0, filename.find_last_of("."));
     }
     filenameSansExtension += "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
-    return absPath("${RECORDINGS}/" + filenameSansExtension + fileExtension).string();
+    return filenameSansExtension + fileExtension;
 }
 
 bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,

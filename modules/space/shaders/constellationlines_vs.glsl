@@ -22,37 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
+#version __CONTEXT__
 
-#include <modules/space/rendering/renderableorbitalkepler.h>
-#include <openspace/rendering/renderable.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#include <modules/base/rendering/renderabletrail.h>
-#include <modules/space/translation/keplertranslation.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/uintproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/opengl/programobject.h>
+in vec3 in_position;
 
-namespace openspace {
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
 
-namespace documentation { struct Documentation; }
+uniform dmat4 modelViewTransform;
+uniform dmat4 projectionTransform;
 
-class RenderableSatellites : public RenderableOrbitalKepler {
-public:
-    RenderableSatellites(const ghoul::Dictionary& dictionary);
-    virtual void readDataFile(const std::string& filename) override;
-    static documentation::Documentation Documentation();
-    void initializeFileReading();
 
-private:
-    void skipSingleEntryInFile(std::ifstream& file);
-    const unsigned int nLineEntriesPerSatellite = 3;
-};
+void main() {
+  dvec4 positionViewSpace = modelViewTransform * dvec4(in_position, 1.0);
+  vec4 positionClipSpace = vec4(projectionTransform * positionViewSpace);
+  vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
 
-} // namespace openspace
+  vs_screenSpaceDepth = positionScreenSpace.w;
+  vs_positionViewSpace = vec4(positionViewSpace);
 
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-
+  gl_Position = positionScreenSpace;
+}

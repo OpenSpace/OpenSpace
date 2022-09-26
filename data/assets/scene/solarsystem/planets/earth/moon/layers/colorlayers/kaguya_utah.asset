@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../moon").Moon.Identifier
 local layer = {
   Identifier = "Kaguya_Utah",
   Name = "Kaguya [Utah]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("kaguya_utah.vrt"),
   Settings = {
     Gamma = 1.0,

@@ -25,23 +25,30 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/state.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/transition.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/statemachine.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/state.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/transition.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/statemachine.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/statemachinemodule_lua.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/state.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/transition.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/statemachine.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/statemachinemodule_lua.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/transition.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/statemachine.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-    "StateMachine"
-    statemachine_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES}
+  "StateMachine"
+  statemachine_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES}
+)
+target_precompile_headers(${statemachine_module} PRIVATE
+  <ghoul/glm.h>
+  <ghoul/lua/ghoul_lua.h>
+  <chrono>
+  <filesystem>
+  <string>
 )

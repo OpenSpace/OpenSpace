@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../moon").Moon.Identifier
 local layer = {
   Identifier = "UvvisHybrid_Sweden",
   Name = "Uvvis Hybrid [Sweden]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("uvvishybrid_sweden.wms"),
   Settings = {
     Gamma = 0.52,

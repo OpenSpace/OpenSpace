@@ -10,7 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "europa_os.tif",
-  Enabled = true
+  Enabled = asset.enabled
 }
 
 asset.onInitialize(function()

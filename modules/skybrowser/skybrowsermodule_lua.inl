@@ -52,7 +52,7 @@ namespace {
     if (module->isCameraInSolarSystem()) {
         TargetBrowserPair* selected = module->pair(module->selectedBrowserId());
         if (selected) {
-            const ImageData& image = module->getWwtDataHandler()->getImage(imageIndex);
+            const ImageData& image = module->wwtDataHandler().image(imageIndex);
             // Load image into browser
             std::string str = image.name;
             // Check if character is ASCII - if it isn't, remove
@@ -147,7 +147,7 @@ namespace {
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->hideChromeInterface();
-        pair->loadImageCollection(module->wwtImageCollectionUrl());
+        pair->browser()->loadImageCollection(module->wwtImageCollectionUrl());
     }
 }
 
@@ -162,7 +162,7 @@ namespace {
     // Set all border colors to the border color in the master node
     if (global::windowDelegate->isMaster()) {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();
             glm::ivec3 color = pair->borderColor();
@@ -194,7 +194,7 @@ namespace {
     // This is called when the sky_browser website is connected to OpenSpace
     // Send out identifiers to the browsers
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+    const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
     for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
         pair->sendIdToBrowser();
     }
@@ -257,9 +257,9 @@ namespace {
     // Send image list to GUI
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     std::string url = module->wwtImageCollectionUrl();
-    // If no data has been loaded yet, download the data from the web!
+    // If no data has been loaded yet, download the data from the web
     if (module->nLoadedImages() == 0) {
-        std::filesystem::path directory = absPath("${MODULE_SKYBROWSER}/wwtimagedata/");
+        std::filesystem::path directory = absPath("${SYNC}/wwtimagedata/");
         module->loadImages(url, directory);
     }
 
@@ -267,7 +267,7 @@ namespace {
     ghoul::Dictionary list;
 
     for (int i = 0; i < module->nLoadedImages(); i++) {
-        const ImageData& img = module->getWwtDataHandler()->getImage(i);
+        const ImageData& img = module->wwtDataHandler().image(i);
 
         // Push ("Key", value)
         ghoul::Dictionary image;
@@ -327,7 +327,7 @@ namespace {
 
     // Pass data for all the browsers and the corresponding targets
     if (module->isCameraInSolarSystem()) {
-        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
 
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();
@@ -561,7 +561,7 @@ namespace {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->removeSelectedImage(imageIndex);
+        pair->browser()->removeSelectedImage(imageIndex);
     }
 }
 
@@ -722,7 +722,7 @@ namespace {
         std::for_each(
             images.rbegin(), images.rend(),
             [&](int index) {
-                const ImageData& image = module->getWwtDataHandler()->getImage(index);
+                const ImageData& image = module->wwtDataHandler().image(index);
                 // Index of image is used as layer ID as it is unique in the image data set
                 pair->browser()->addImageLayerToWwt(image.imageUrl, index);
             }
@@ -737,7 +737,7 @@ namespace {
 [[codegen::luawrap]] void showAllTargetsAndBrowsers(bool show) {
     using namespace openspace;
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+    const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
     for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
         pair->setEnabled(show);
     }

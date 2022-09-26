@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("./../../deimos_globe").Deimos_Globe.Ident
 local layer = {
   Identifier = "Deimos_Global_Mosaic_USGS",
   Name = "Deimos Global Mosaic [USGS]",
-  Enabled = true,
+  Enabled = asset.enabled,
   FilePath = "WMS:https://wms.wr.usgs.gov/cgi-bin/mapserv?map=/maps/mars/deimos_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Deimos_Simple_Cylindrical_Rasters&SRS=EPSG:4326&BBOX=-180,-90,360,90",
   Description = [[This Viking-based cylindrical map of Deimos was created by Philip
     Stooke with the assistance of Chris Jongkind and Megan Arntz. Control is based on a

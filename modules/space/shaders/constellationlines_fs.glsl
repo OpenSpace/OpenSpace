@@ -1,4 +1,4 @@
-/****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,50 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__
+#include "fragment.glsl"
 
-#include <modules/space/rendering/renderableorbitalkepler.h>
-#include <openspace/rendering/renderable.h>
+in float vs_screenSpaceDepth;
+in vec4 vs_positionViewSpace;
 
-#include <modules/base/rendering/renderabletrail.h>
-#include <modules/space/translation/keplertranslation.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/uintproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/opengl/programobject.h>
+uniform vec3 color;
+uniform float opacity;
 
-namespace openspace {
 
-namespace documentation { struct Documentation; }
+Fragment getFragment() {
+  Fragment frag;
+  if (opacity == 0.0) {
+    discard;
+  }
 
-class RenderableSmallBody : public RenderableOrbitalKepler {
-public:
-    RenderableSmallBody(const ghoul::Dictionary& dictionary);
-    static documentation::Documentation Documentation();
+  frag.color = vec4(color, opacity);
+  frag.depth = vs_screenSpaceDepth;
 
-private:
-    void readOrbitalParamsFromThisLine(bool firstDataLine, int& fieldCount,
-        unsigned int& csvLine, std::ifstream& file);
-    virtual void readDataFile(const std::string& filename) override;
-    void initializeFileReading();
-    void skipSingleLineInFile(std::ifstream& file);
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
-    std::vector<std::string> _sbNames;
-    std::function<void()> _updateContiguousModeSelect;
-    std::function<void()> _updateRenderUpperLimitSelect;
-
-    /// The index array that is potentially used in the draw call. If this is empty, no
-    /// element draw call is used.
-    std::vector<unsigned int> _indexBufferData;
-    properties::BoolProperty _contiguousMode;
-    properties::UIntProperty _upperLimit;
-    properties::Property::OnChangeHandle _contiguousModeCallbackhandle;
-    properties::Property::OnChangeHandle _upperLimitCallbackHandle;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__
-
+  return frag;
+}
