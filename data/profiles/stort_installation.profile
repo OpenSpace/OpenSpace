@@ -252,6 +252,11 @@
       "name": "Scene.Apollo11.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma",
+      "type": "setPropertyValueSingle",
+      "value": "0.5"
     }
   ],
   "time": {
