@@ -68,12 +68,13 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
+    constexpr glm::vec4 PosBufferClearVal = { 0.f, 0.f, 0.f, 0.f };
 
-    const GLenum ColorAttachmentArray[3] = {
+    const GLenum ColorAttachmentArray[4] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
-       GL_COLOR_ATTACHMENT2
+       GL_COLOR_ATTACHMENT2,
+       GL_COLOR_ATTACHMENT3
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
@@ -577,13 +578,13 @@ void RenderableModel::initializeGL() {
 
     // Screen quad VAO
     const GLfloat quadVertices[] = {
-        // x     y
-        -1.f, -1.f,
-         1.f,  1.f,
-        -1.f,  1.f,
-        -1.f, -1.f,
-         1.f, -1.f,
-         1.f,  1.f,
+        // x     y    s    t
+        -1.f, -1.f, 0.f, 0.f,
+         1.f,  1.f, 1.f, 1.f,
+        -1.f,  1.f, 0.f, 1.f,
+        -1.f, -1.f, 0.f, 0.f,
+         1.f, -1.f, 1.f, 0.f,
+         1.f,  1.f, 1.f, 1.f
     };
 
     glGenVertexArrays(1, &_quadVao);
@@ -593,8 +594,18 @@ void RenderableModel::initializeGL() {
     glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        4 * sizeof(GLfloat),
+        (void*)(2 * sizeof(GLfloat))
+    );
+
 
     createFramebuffers();
 
@@ -873,7 +884,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Frame buffer stuff
         GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-        glDrawBuffers(3, ColorAttachmentArray);
+        glDrawBuffers(4, ColorAttachmentArray);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
@@ -932,7 +943,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // End
         global::renderEngine->openglStateCache().resetBlendState();
-        glEnable(GL_DEPTH_TEST);
+        global::renderEngine->openglStateCache().resetDepthState();
         glActiveTexture(GL_TEXTURE0);
     }
 }

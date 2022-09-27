@@ -54,6 +54,7 @@ Fragment getFragment() {
   frag.depth = denormalizeFloat(texture(depthTexture, vs_st).x);
   frag.gPosition = texture(positionTexture, vs_st);
   frag.gNormal = vec4(texture(normalTexture, vs_st).rgb, 0.0);
+  frag.disableLDR2HDR = true;
 
   return frag;
 }
