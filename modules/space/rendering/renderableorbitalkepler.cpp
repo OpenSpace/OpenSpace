@@ -160,7 +160,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addProperty(_opacity);
 
     _segmentQuality = static_cast<unsigned int>(p.segmentQuality);
-    _segmentQuality.onChange([this]() { initializeGL(); });
+    _segmentQuality.onChange([this]() { updateBuffers(); });
     addProperty(_segmentQuality);
 
     _appearance.lineColor = p.color;
@@ -169,7 +169,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addPropertySubOwner(_appearance);
 
     _path = p.path.string();
-    _path.onChange([this]() { initializeGL(); });
+    _path.onChange([this]() { updateBuffers(); });
     addProperty(_path);
 
     _format = codegen::map<kepler::Format>(p.format);

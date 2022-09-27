@@ -50,7 +50,7 @@ target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ex
 target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/minvr/external/GLFW/src/include)
 
 
-target_link_libraries(OpenSpace-MinVR openspace-core MinVR)
+target_link_libraries(OpenSpace-MinVR PUBLIC openspace-core MinVR)
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
@@ -71,16 +71,7 @@ elseif (OPENSPACE_MODULE_WEBBROWSER)
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
 
-if (OPENSPACE_MODULE_WEBGUI AND WEBGUI_MODULE_PATH)
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBGUI_MODULE_PATH}/cmake")
-  include(webgui_helpers)
-  build_webgui_source(OpenSpace-MinVR)
-elseif (OPENSPACE_MODULE_WEBGUI)
-  message(WARNING "WebGui is configured to be included, but the web source could not be found. Try configuring CMake again.")
-endif ()
-# End Web Browser and Web gui
-
 if (MSVC)
   # This library is used for being able to output the callstack if an exception escapes
-  target_link_libraries(OpenSpace-MinVR Dbghelp.lib)
+  target_link_libraries(OpenSpace-MinVR PUBLIC Dbghelp.lib)
 endif ()
