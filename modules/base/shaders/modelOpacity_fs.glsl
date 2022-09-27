@@ -38,7 +38,8 @@ uniform sampler2D normalTexture;
 Fragment getFragment() {
   Fragment frag;
 
-  if (opacity == 0.0) {
+  vec4 textureColor = texture(colorTexture, vs_st);
+  if (textureColor.a == 0.0 || opacity == 0.0) {
     discard;
   }
 
@@ -50,7 +51,7 @@ Fragment getFragment() {
     frag.color.a = opacity;
   }
 
-  frag.color.rgb = texture(colorTexture, vs_st).rgb;
+  frag.color.rgb = textureColor.rgb;
   frag.depth = denormalizeFloat(texture(depthTexture, vs_st).x);
   frag.gPosition = texture(positionTexture, vs_st);
   frag.gNormal = vec4(texture(normalTexture, vs_st).rgb, 0.0);
