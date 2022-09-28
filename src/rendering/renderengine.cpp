@@ -162,6 +162,16 @@ namespace {
         "master node is not required and performance can be gained by disabling it"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo IsInNonLinearDisplayModeInfo =
+    {
+        "IsInNonLinearDisplayMode",
+        "Is In Non-Linear Display Mode",
+        "This should be false if OpenSpace is currently being rendered on a planar "
+        "display. If instead OpenSpace is rendered on a non-linear display environment, "
+        "then this should be set to true. Examples of a non-linear display environment "
+        "could be a dome theater or planetarium, fisheye or any curved display."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GlobalRotationInfo = {
         "GlobalRotation",
         "Global Rotation",
@@ -282,6 +292,7 @@ RenderEngine::RenderEngine()
     , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
+    , _isInNonLinearDisplayMode(IsInNonLinearDisplayModeInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _enableFXAA(FXAAInfo, true)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
@@ -403,6 +414,7 @@ RenderEngine::RenderEngine()
     addProperty(_screenSpaceRotation);
     addProperty(_masterRotation);
     addProperty(_disableMasterRendering);
+    addProperty(_isInNonLinearDisplayMode);
 
     _enabledFontColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
     addProperty(_enabledFontColor);
@@ -422,6 +434,7 @@ void RenderEngine::initialize() {
     _screenSpaceRotation = global::configuration->screenSpaceRotation;
     _masterRotation = global::configuration->masterRotation;
     _disableMasterRendering = global::configuration->isRenderingOnMasterDisabled;
+    _isInNonLinearDisplayMode = global::configuration->isInNonLinearDisplayMode;
     _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
 
     ghoul::io::TextureReader::ref().addReader(
@@ -910,6 +923,10 @@ float RenderEngine::hdrExposure() const {
 
 bool RenderEngine::isHdrDisabled() const {
     return _disableHDRPipeline;
+}
+
+bool RenderEngine::isInNonLinearDisplayMode() const {
+    return _isInNonLinearDisplayMode;
 }
 
 /**

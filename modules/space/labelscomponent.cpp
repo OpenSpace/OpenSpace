@@ -24,9 +24,9 @@
 
 #include <modules/space/labelscomponent.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
@@ -182,13 +182,15 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
         _faceCamera = *p.faceCamera;
     }
     else {
-        // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum, and
-        // doing it based on the fisheye rendering seems a bit brittle?
+        // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum,
+        // and doing it based on the fisheye rendering seems a bit brittle?
 
-        // (malej 2022-SEP-14)
-        // For non-linear display rendering (for example fisheye) _faceCamera should be false,
-        // otherwise true.
-        _faceCamera = !global::windowDelegate->isFisheyeRendering();
+        // @TODO (malej 2022-SEP-14)
+        // For non-linear display rendering (for example fisheye) _faceCamera should be
+        // false, for planar displays it should be true.
+        // This should be automatically detected in the future by SGCT but for now we
+        // listen to a property in the RenderEngine
+        _faceCamera = !global::renderEngine->isInNonLinearDisplayMode();
     }
     addProperty(_faceCamera);
 }

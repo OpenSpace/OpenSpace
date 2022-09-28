@@ -96,6 +96,8 @@ public:
     float hdrExposure() const;
     bool isHdrDisabled() const;
 
+    bool isInNonLinearDisplayMode() const;
+
     void addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s);
     void removeScreenSpaceRenderable(ScreenSpaceRenderable* s);
     void removeScreenSpaceRenderable(std::string_view identifier);
@@ -184,6 +186,7 @@ private:
     properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;
+    properties::BoolProperty _isInNonLinearDisplayMode;
 
     properties::FloatProperty _globalBlackOutFactor;
 

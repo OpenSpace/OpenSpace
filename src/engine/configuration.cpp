@@ -149,6 +149,11 @@ namespace {
         // master computer does not have the resources to render a scene
         std::optional<bool> disableRenderingOnMaster;
 
+        // This should be false for planar displays and true for non-linear display
+        // environments such as curved displays, fisheye rendering, dome theaters and
+        // planetariums
+        std::optional<bool> isInNonLinearDisplayMode;
+
         // Applies a global view rotation. Use this to rotate the position of the focus
         // node away from the default location on the screen. This setting persists even
         // when a new focus node is selected. Defined using roll, pitch, yaw in radians
@@ -358,6 +363,8 @@ void parseLuaState(Configuration& configuration) {
     c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
     c.isRenderingOnMasterDisabled =
         p.disableRenderingOnMaster.value_or(c.isRenderingOnMasterDisabled);
+    c.isInNonLinearDisplayMode =
+        p.isInNonLinearDisplayMode.value_or(c.isInNonLinearDisplayMode);
     c.globalRotation = p.globalRotation.value_or(c.globalRotation);
     c.masterRotation = p.masterRotation.value_or(c.masterRotation);
     c.screenSpaceRotation = p.screenSpaceRotation.value_or(c.screenSpaceRotation);

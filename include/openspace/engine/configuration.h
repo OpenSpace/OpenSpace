@@ -99,6 +99,7 @@ struct Configuration {
     bool usePerProfileCache = false;
 
     bool isRenderingOnMasterDisabled = false;
+    bool isInNonLinearDisplayMode = false;
     glm::vec3 globalRotation = glm::vec3(0.0);
     glm::vec3 screenSpaceRotation = glm::vec3(0.0);
     glm::vec3 masterRotation = glm::vec3(0.0);
