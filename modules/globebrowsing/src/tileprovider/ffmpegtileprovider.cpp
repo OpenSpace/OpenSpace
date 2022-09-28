@@ -228,12 +228,15 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     // Copy every row inside the part of the texture we want for the tile
     GLubyte* destination = &_tilePixels[0];
     GLubyte* source = &_glFrame->data[0][0];
-    for (int row = rowRange.x; row < rowRange.y; ++row) {
+    // Traverse backwards so texture is placed correctly
+    for (int row = rowRange.y - 1; row > rowRange.x; --row) {
         // Find index of first item of this row
-        int index = row * wholeRowSize;
+        int rowIndex = row * wholeRowSize;
+        // Find index of the first item of this column
+        int columnIndex = tileRowSize * tileIndex.x;
 
         // Copy
-        memcpy(destination, source + index, tileRowSize);
+        memcpy(destination, source + rowIndex + columnIndex, tileRowSize);
 
         // Advance the destination pointer
         destination += tileRowSize;
