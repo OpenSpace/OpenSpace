@@ -24,7 +24,11 @@
 
 #include <modules/globebrowsing/src/tileprovider/ffmpegtileprovider.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
+#include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 
@@ -235,19 +239,46 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         destination += tileRowSize;
     }
 
+    Tile ourTile;
+    ghoul::opengl::Texture* writeTexture;
+
+    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+
+    // The data for initializing the texture
+    TileTextureInitData initData(
+        512,
+        512,
+        GL_UNSIGNED_BYTE,
+        ghoul::opengl::Texture::Format::RGB,
+        TileTextureInitData::PadTiles::No,
+        TileTextureInitData::ShouldAllocateDataOnCPU::No
+    );
+
+    cache::MemoryAwareTileCache* tileCache =
+        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
+    if (tileCache->exist(key)) {
+        ourTile = tileCache->get(key);
+        writeTexture = ourTile.texture;
+    }
+    else {
+        // Create a texture with the initialization data
+        writeTexture = tileCache->texture(initData);
+        ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
+        tileCache->put(key, initData.hashKey, ourTile);
+    }
     // Update the pixel data for this tile
-    _tileTexture->setPixelData(
+    writeTexture->setPixelData(
         _tilePixels,
         ghoul::opengl::Texture::TakeOwnership::No
     );
 
     // Bind the texture to the tile
-    _tileTexture->uploadTexture();
+    writeTexture->uploadTexture();
 
     // Right after upload we can delete the hard copy
     delete[] static_cast<GLubyte*>(_tilePixels);
 
-    return Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
+    return ourTile;
 }
 
 Tile::Status FfmpegTileProvider::tileStatus(const TileIndex& tileIndex) {
