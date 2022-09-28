@@ -34,6 +34,8 @@
 #include <optional>
 
 namespace {
+    constexpr std::string_view _loggerCat = "LabelsComponent";
+
     constexpr int RenderOptionFaceCamera = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
@@ -209,7 +211,7 @@ void LabelsComponent::initialize() {
 }
 
 void LabelsComponent::loadLabels() {
-    LINFOC("LabelsComponent", fmt::format("Loading Label file {}", _labelFile));
+    LINFO(fmt::format("Loading label file {}", _labelFile));
     _labelset = speck::label::loadFileWithCache(_labelFile);
 }
 
