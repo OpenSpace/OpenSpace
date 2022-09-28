@@ -32,8 +32,6 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -102,32 +100,6 @@ namespace {
         "The path to the color map file of the astronomical object"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
-        "TextColor",
-        "Text Color",
-        "The text color for the astronomical object"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
-        "TextOpacity",
-        "Text Opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
-        "TextSize",
-        "Text Size",
-        "The text size for the astronomical object labels"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
-        "TextMinMaxSize",
-        "Text Min/Max Size",
-        "The minimal and maximal size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -138,6 +110,13 @@ namespace {
         "DrawLabels",
         "Draw Labels",
         "Determines whether labels should be drawn or hidden"
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
+    {
+        "Labels",
+        "Labels",
+        "The labels for the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
@@ -163,7 +142,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts"
+        "Option wether the billboards should face the camera or not. Used for "
+        "non-linear display envierments such as fisheye."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -274,21 +254,9 @@ namespace {
         // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
 
-        // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor [[codegen::color()]];
-
-        // [[codegen::verbatim(TextOpacityInfo.description)]]
-        std::optional<float> textOpacity;
-
-        // [[codegen::verbatim(TextSizeInfo.description)]]
-        std::optional<float> textSize;
-
-        // The path to the label file that contains information about the astronomical
-        // objects being rendered
-        std::optional<std::string> labelFile;
-
-        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> textMinMaxSize;
+        // [[codegen::verbatim(LabelsInfo.description)]]
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("space_labelscomponent")]];
 
         // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::vector<std::string>> colorOption;
@@ -339,15 +307,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _useColorMap(UseColorMapInfo, true)
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
-    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
-    , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
-    , _textMinMaxSize(
-        LabelMinMaxSizeInfo,
-        glm::ivec2(8, 20),
-        glm::ivec2(0),
-        glm::ivec2(100)
-    )
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
@@ -481,28 +440,13 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _polygonSides = p.polygonSides.value_or(_polygonSides);
     _hasPolygon = p.polygonSides.has_value();
 
-    if (p.labelFile.has_value()) {
+    if (p.labels.has_value()) {
         _drawLabels = p.drawLabels.value_or(_drawLabels);
         addProperty(_drawLabels);
 
-        _labelFile = absPath(*p.labelFile).string();
-        _hasLabel = true;
-
-        _textColor = p.textColor.value_or(_textColor);
-        _hasLabel = p.textColor.has_value();
-        _textColor.setViewOption(properties::Property::ViewOptions::Color);
-        addProperty(_textColor);
-        _textColor.onChange([&]() { _textColorIsDirty = true; });
-
-        _textOpacity = p.textOpacity.value_or(_textOpacity);
-        addProperty(_textOpacity);
-
-        _textSize = p.textSize.value_or(_textSize);
-        addProperty(_textSize);
-
-        _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
-        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-        addProperty(_textMinMaxSize);
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -557,7 +501,13 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 }
 
 bool RenderableBillboardsCloud::isReady() const {
-    return (_program && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
+    bool isReady = _program && !_dataset.entries.empty();
+
+    // If we have labels, they also need to be loaded
+    if (_hasLabels) {
+        isReady = isReady || _labels->isReady();
+    }
+    return isReady;
 }
 
 void RenderableBillboardsCloud::initialize() {
@@ -571,11 +521,9 @@ void RenderableBillboardsCloud::initialize() {
         _colorMap = speck::color::loadFileWithCache(_colorMapFile);
     }
 
-    if (!_labelFile.empty()) {
-        _labelset = speck::label::loadFileWithCache(_labelFile);
-        for (speck::Labelset::Entry& e : _labelset.entries) {
-            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
-        }
+    if (_hasLabels) {
+        _labels->initialize();
+        _labels->loadLabels();
     }
 
     if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
@@ -618,18 +566,6 @@ void RenderableBillboardsCloud::initializeGL() {
 
     if (_hasPolygon) {
         createPolygonTexture();
-    }
-
-    if (_hasLabel) {
-        if (!_font) {
-            size_t _fontSize = 50;
-            _font = global::fontManager->font(
-                "Mono",
-                static_cast<float>(_fontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes,
-                ghoul::fontrendering::FontManager::LoadGlyphs::No
-            );
-        }
     }
 }
 
@@ -739,40 +675,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     global::renderEngine->openglStateCache().resetDepthState();
 }
 
-void RenderableBillboardsCloud::renderLabels(const RenderData& data,
-                                             const glm::dmat4& modelViewProjectionMatrix,
-                                             const glm::dvec3& orthoRight,
-                                             const glm::dvec3& orthoUp,
-                                             float fadeInVariable)
-{
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity * fadeInVariable);
-
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _textMinMaxSize.value().x;
-    labelInfo.maxSize = _textMinMaxSize.value().y;
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _renderOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _textSize);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
-
-    for (const speck::Labelset::Entry& e : _labelset.entries) {
-        glm::vec3 scaledPos(e.position);
-        scaledPos *= toMeter(_unit);
-        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
-            *_font,
-            scaledPos,
-            e.text,
-            textColor,
-            labelInfo
-        );
-    }
-}
-
 void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     float fadeInVar = 1.f;
     if (!_disableFadeInDistance) {
@@ -806,7 +708,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
     );
     if (orthoRight == glm::dvec3(0.0)) {
-        glm::dvec3 otherVector(
+        glm::dvec3 otherVector = glm::vec3(
             cameraUpDirectionWorld.y,
             cameraUpDirectionWorld.x,
             cameraUpDirectionWorld.z
@@ -819,8 +721,8 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         renderBillboards(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
     }
 
-    if (_drawLabels && _hasLabel) {
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
+    if (_drawLabels && _hasLabels) {
+        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
     }
 }
 

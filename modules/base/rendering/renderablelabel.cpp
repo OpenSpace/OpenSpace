@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablelabels.h>
+#include <modules/base/rendering/renderablelabel.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -166,7 +166,7 @@ namespace {
         "Distance unit for fade-in/-out distance calculations. Defaults to \"au\""
     };
 
-    struct [[codegen::Dictionary(RenderableLabels)]] Parameters {
+    struct [[codegen::Dictionary(RenderableLabel)]] Parameters {
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
             Additive
@@ -228,16 +228,16 @@ namespace {
         // [[codegen::verbatim(FadeWidthsInfo.description)]]
         std::optional<glm::vec2> fadeWidths;
     };
-#include "renderablelabels_codegen.cpp"
+#include "renderablelabel_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableLabels::Documentation() {
+documentation::Documentation RenderableLabel::Documentation() {
     return codegen::doc<Parameters>("base_renderable_labels");
 }
 
-RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
+RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -357,17 +357,17 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     addProperty(_fadeWidths);
 }
 
-bool RenderableLabels::isReady() const {
+bool RenderableLabel::isReady() const {
     return true;
 }
 
-void RenderableLabels::initialize() {
+void RenderableLabel::initialize() {
     ZoneScoped
 
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
 }
 
-void RenderableLabels::initializeGL() {
+void RenderableLabel::initializeGL() {
     if (_font == nullptr) {
         _font = global::fontManager->font(
             "Mono",
@@ -378,9 +378,9 @@ void RenderableLabels::initializeGL() {
     }
 }
 
-void RenderableLabels::deinitializeGL() {}
+void RenderableLabel::deinitializeGL() {}
 
-void RenderableLabels::render(const RenderData& data, RendererTasks&) {
+void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     glDepthMask(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -421,11 +421,11 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
 }
 
 
-void RenderableLabels::setLabelText(const std::string & newText) {
+void RenderableLabel::setLabelText(const std::string & newText) {
     _text = newText;
 }
 
-void RenderableLabels::renderLabels(const RenderData& data,
+void RenderableLabel::renderLabels(const RenderData& data,
                                     const glm::dmat4& modelViewProjectionMatrix,
                                     const glm::dvec3& orthoRight,
                                     const glm::dvec3& orthoUp, float fadeInVariable)
@@ -463,7 +463,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
     );
 }
 
-float RenderableLabels::computeFadeFactor(float distanceNodeToCamera) const {
+float RenderableLabel::computeFadeFactor(float distanceNodeToCamera) const {
     float distanceUnit = unit(_fadeUnitOption);
 
     float x = distanceNodeToCamera;
@@ -487,7 +487,7 @@ float RenderableLabels::computeFadeFactor(float distanceNodeToCamera) const {
     }
 }
 
-float RenderableLabels::unit(int unit) const {
+float RenderableLabel::unit(int unit) const {
     switch (static_cast<Unit>(unit)) {
         case Meter: return 1.f;
         case Kilometer: return 1e3f;
@@ -505,7 +505,7 @@ float RenderableLabels::unit(int unit) const {
     }
 }
 
-std::string_view RenderableLabels::toString(int unit) const {
+std::string_view RenderableLabel::toString(int unit) const {
     switch (static_cast<Unit>(unit)) {
         case Meter: return MeterUnit;
         case Kilometer: return KilometerUnit;

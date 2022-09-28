@@ -17,17 +17,20 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "oc.label",
+      Color = { 0.05, 0.4, 0.2 },
+      Size = 15.5,
+      MinMaxSize = { 4, 30 },
+      Unit = "pc"
+    },
     Color = { 0.1, 0.8, 0.4 },
     Opacity = 0.5,
     File = speck .. "oc.speck",
     Unit = "pc",
     Texture = textures .. "point4.png",
     PolygonSides = 12,
-    TextColor = { 0.05, 0.4, 0.2 },
-    LabelFile = speck .. "oc.label",
     ScaleFactor = 405.75,
-    TextSize = 15.5,
-    TextMinMaxSize = { 4, 30 },
     BillboardMinMaxSize = { 0.0, 604.0 },
     EnablePixelSizeControl = true
   },
@@ -48,18 +51,18 @@ local object = {
       as Galactic clusters, but this term fell out of favor once astronomers
       began to understand that the Galaxy includes objects beyond the
       Milky Way's disk. <br><br> Data Reference: Optically
-      visible open clusters and Candidates (Dias+ 2002-2015)]],
+      visible open clusters and Candidates (Dias+ 2002-2015)]]
   }
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 

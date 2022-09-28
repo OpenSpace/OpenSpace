@@ -59,9 +59,9 @@ namespace {
         "Enables/Disables the drawing of the constellations"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineUnitInfo = {
-        "LineUnit",
-        "Line Unit",
+    constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
+        "Unit",
+        "Unit",
         "The distance unit used for the constellation lines data"
     };
 
@@ -85,8 +85,8 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
-        // [[codegen::verbatim(LineUnitInfo.description)]]
-        std::optional<Unit> lineUnit;
+        // [[codegen::verbatim(UnitInfo.description)]]
+        std::optional<Unit> unit;
 
         // [[codegen::verbatim(ColorsInfo.description)]]
         std::optional<std::vector<glm::vec3>> colors;
@@ -115,8 +115,8 @@ RenderableConstellationLines::RenderableConstellationLines(
 
     addProperty(_drawElements);
 
-    if (p.lineUnit.has_value()) {
-        _constellationUnit = codegen::map<DistanceUnit>(*p.lineUnit);
+    if (p.unit.has_value()) {
+        _constellationUnit = codegen::map<DistanceUnit>(*p.unit);
     }
     else {
         _constellationUnit = DistanceUnit::Meter;
@@ -153,8 +153,8 @@ bool RenderableConstellationLines::isReady() const {
     bool isReady = _program && !_renderingConstellationsMap.empty();
 
     // If we have labels, they also need to be loaded
-    if (_hasLabel) {
-        return isReady && !_labelset.entries.empty();
+    if (_hasLabels) {
+        return isReady && RenderableConstellationsBase::isReady();
     }
     return isReady;
 }

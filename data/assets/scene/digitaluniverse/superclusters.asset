@@ -17,19 +17,22 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "superclust.label",
+      Color = { 0.9, 0.9, 0.9 },
+      Size = 22.44,
+      MinMaxSize = { 8, 20 },
+      Unit = "Mpc"
+    },
     DrawElements = false,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     File = speck .. "superclust.speck",
     Texture = textures .. "point3A.png",
-    LabelFile = speck .. "superclust.label",
     Unit = "Mpc",
-    TextColor = { 0.9, 0.9, 0.9 },
     ScaleFactor = 531.0,
-    TextSize = 22.44,
-    TextMinMaxSize = { 8, 20 },
     DrawLabels = true,
-    --BillboardMinMaxSize = { 0.0, 7.2 },
+    -- BillboardMinMaxSize = { 0.0, 7.2 },
     EnablePixelSizeControl = true
   },
   GUI = {
@@ -47,11 +50,11 @@ local object = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 
