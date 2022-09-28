@@ -186,6 +186,15 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
         ghoul::opengl::Texture::TakeOwnership::No
     );
 
+
+    const int tileNumPixels = 512 * 512;
+    const int pixelSize = _tileTexture->bytesPerPixel();
+
+    // Allocate data for this tile
+    const unsigned int arraySize = tileNumPixels * pixelSize;
+    _tilePixels = new GLubyte[arraySize];
+    std::memset(_tilePixels, 0, arraySize);
+
     // Update times
     _lastFrameTime = std::max(Time::convertTime(_startTime), Time::now().j2000Seconds());
 }
@@ -209,16 +218,10 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         return Tile{ nullptr, std::nullopt, Tile::Status::IOError };
     }
 
-    const int tileNumPixels = tileSize.x * tileSize.y;
-    const int pixelSize = _tileTexture->bytesPerPixel();
+    int pixelSize = _tileTexture->bytesPerPixel();
     const int wholeRowSize = _nativeSize.x * pixelSize;
     const int tileRowSize = tileSize.x * pixelSize;
-
-    // Allocate data for this tile
-    const unsigned int arraySize = tileNumPixels * pixelSize;
-    _tilePixels = new GLubyte[arraySize];
-    std::memset(_tilePixels, 0, arraySize);
-
+    
     // The range of rows of the whole image that this tile needs
     const glm::ivec2 rowRange = glm::ivec2(
         tileSize.y * tileIndex.y,
@@ -277,9 +280,6 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
 
     // Bind the texture to the tile
     writeTexture->uploadTexture();
-
-    // Right after upload we can delete the hard copy
-    delete[] static_cast<GLubyte*>(_tilePixels);
 
     return ourTile;
 }
@@ -462,6 +462,9 @@ FfmpegTileProvider::~FfmpegTileProvider() {
     av_free(_glFrame);
     av_free(_packet);
     avformat_free_context(_formatContext);
+
+    // Delete the hard copy
+    delete[] static_cast<GLubyte*>(_tilePixels);
 }
 
 void FfmpegTileProvider::internalDeinitialize() {
