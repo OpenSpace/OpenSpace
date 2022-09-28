@@ -60,7 +60,7 @@
 
 #include <implot.h>
 
-#define SHOW_IMGUI_HELPERS
+//#define SHOW_IMGUI_HELPERS
 
 namespace {
     constexpr const char _loggerCat[] = "ExoplanetsDataViewer";
@@ -71,8 +71,8 @@ namespace {
 
     constexpr const char AboutTheTool[] =
         "This is a research tool under development and we are currently \n"
-        "looking for qualitative feedback from potential users. This feedback \n"
-        "will be included in our scientific publication covering the tool. \n"
+        "looking for feedback from users. This feedback will be included \n"
+        "in our scientific publication covering the tool. \n"
         "\n"
         "Thank you for taking the time to trying it out, and please do not \n"
         "hesitate to reach out with any questions, input or feedback";
