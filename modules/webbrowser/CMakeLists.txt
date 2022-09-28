@@ -202,8 +202,8 @@ if (OS_MACOSX)
     endif ()
   endforeach()
 
-  set_property(TARGET ${CEF_HELPER_TARGET_GPU} PROPERTY FOLDER "Helper")
-  set_property(TARGET ${CEF_HELPER_TARGET_RENDERER} PROPERTY FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "Helper")
 else()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
@@ -219,7 +219,7 @@ else()
   endif (OS_WINDOWS)
 endif ()
 
-set_property(TARGET ${CEF_HELPER_TARGET} PROPERTY FOLDER "Helper")
+set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
 
 ##########################################################################################
 # Create OpenSpace module.
@@ -292,13 +292,4 @@ if (UNIX AND NOT (${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
     DESTINATION ${CEF_ROOT}/${CMAKE_BUILD_TYPE}/
     FILES_MATCHING PATTERN *
   )
-  endif ()
-
-# Rename to "OpenSpace Helper" after build & link as spaces in targets are not allowed
-# add_custom_command(
-#   TARGET ${CEF_HELPER_TARGET} POST_BUILD
-#   COMMAND ${CMAKE_COMMAND} -E rename
-#     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/${CEF_HELPER_TARGET}"
-#     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/OpenSpace Helper"
-#   COMMENT "Renaming ${CEF_HELPER_TARGET} to 'OpenSpace Helper'"
-# )
+endif ()
