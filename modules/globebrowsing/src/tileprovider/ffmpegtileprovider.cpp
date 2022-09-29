@@ -140,8 +140,6 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
         );
     }
 
-    _nativeSize = { _codecContext->width, _codecContext->height };
-
     // Open the decoder
     if (avcodec_open2(_codecContext, _decoder, nullptr) < 0) {
         throw ghoul::RuntimeError(fmt::format("Failed to open codec for {}", path));
@@ -155,8 +153,8 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
     // Fill the destination frame for the convertion
     int glFrameSize = av_image_get_buffer_size(
         AV_PIX_FMT_RGB24,
-        _codecContext->width,
-        _codecContext->height,
+        FinalResolution.x,
+        FinalResolution.y,
         1
     );
     uint8_t* internalBuffer =
@@ -166,8 +164,8 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
         _glFrame->linesize,
         internalBuffer,
         AV_PIX_FMT_RGB24,
-        _codecContext->width,
-        _codecContext->height,
+        FinalResolution.x,
+        FinalResolution.y,
         1
     );
 
@@ -182,7 +180,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         return Tile{nullptr, std::nullopt, Tile::Status::Unavailable };
     }
 
-    const int wholeRowSize = _nativeSize.x * BytesPerPixel;
+    const int wholeRowSize = FinalResolution.x * BytesPerPixel;
     const int tileRowSize = TileSize.x * BytesPerPixel;
     
     // The range of rows of the whole image that this tile needs
@@ -332,13 +330,15 @@ void FfmpegTileProvider::update() {
 
     // Convert the color format to AV_PIX_FMT_RGB24
     // Only create the conversion context once
+    // Scale all videos to 2048 * 1024 pixels
+    // TODO: support higher resolutions
     if (!_conversionContext) {
         _conversionContext = sws_getContext(
             _codecContext->width,
             _codecContext->height,
-            _codecContext->pix_fmt,
-            _codecContext->width,
-            _codecContext->height,
+            _codecContext->pix_fmt, 
+            FinalResolution.x,
+            FinalResolution.y,
             AV_PIX_FMT_RGB24,
             SWS_BICUBIC,
             nullptr,
@@ -377,7 +377,7 @@ int FfmpegTileProvider::maxLevel() {
     // Every tile needs to be 512 by 512, how far can we subdivide this video
     // TODO: Maybe set this vlaue (512) as a constant somehere?
     // TODO: Check if it should be floor or ceil
-    return std::floor(std::log2(_nativeSize.x) - std::log2(1024)) + 1;
+    return std::floor(std::log2(FinalResolution.x) - std::log2(1024)) + 1;
 }
 
 void FfmpegTileProvider::reset() {

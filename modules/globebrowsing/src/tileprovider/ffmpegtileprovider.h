@@ -44,6 +44,7 @@ namespace openspace::globebrowsing {
 class FfmpegTileProvider : public TileProvider {
 public:
     static constexpr glm::ivec2 TileSize = { 512, 512 };
+    static constexpr glm::ivec2 FinalResolution = { 2048, 1024 };
     static constexpr int NoTilePixels = 262144;
     static constexpr int BytesPerPixel = 3;
     static constexpr int BytesPerTile = 786432;
@@ -64,7 +65,6 @@ public:
 
 private:
     std::filesystem::path _videoFile;
-    glm::ivec2 _nativeSize;
     double _frameTime = -1.0;   // Seconds per frame
     double _lastFrameTime;      // The in game time of the last frame in J2000 seconds
     std::string _startTime;
