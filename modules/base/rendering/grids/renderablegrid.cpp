@@ -257,24 +257,6 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
 
     const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
 
-    const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-    const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-    glm::vec3 right = glm::cross(viewDirection, lookup);
-    const glm::vec3 up = glm::cross(right, viewDirection);
-
-    const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-    glm::vec3 orthoRight = glm::normalize(
-        glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-    );
-
-    if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
-        right = glm::cross(viewDirection, otherVector);
-        orthoRight = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-        );
-    }
-
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
     _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
     _gridProgram->setUniform("opacity", opacity());
@@ -315,10 +297,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
 
     // Draw labels
     if (_drawLabels && _hasLabels) {
-        const glm::vec3 orthoUp = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
-        );
-         _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+         _labels->render(data, modelMatrix);
     }
 }
 

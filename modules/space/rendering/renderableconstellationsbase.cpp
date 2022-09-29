@@ -227,32 +227,7 @@ void RenderableConstellationsBase::render(const RenderData& data, RendererTasks&
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
-    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
-
-    const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-    const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-    glm::vec3 right = glm::cross(viewDirection, lookup);
-    const glm::vec3 up = glm::cross(right, viewDirection);
-
-    const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-    glm::vec3 orthoRight = glm::normalize(
-        glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
-    );
-
-    if (orthoRight == glm::vec3(0.f)) {
-        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
-        right = glm::cross(viewDirection, otherVector);
-        orthoRight = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
-        );
-    }
-
-    const glm::vec3 orthoUp = glm::normalize(
-        glm::vec3(worldToModelTransform * glm::dvec4(up, 0.f))
-    );
-    _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+    _labels->render(data, modelMatrix);
 }
 
 } // namespace openspace

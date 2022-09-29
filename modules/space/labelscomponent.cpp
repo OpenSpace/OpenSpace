@@ -221,14 +221,40 @@ bool LabelsComponent::isReady() const {
     return !(_labelset.entries.empty());
 }
 
-void LabelsComponent::render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-                             const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+void LabelsComponent::render(const RenderData& data, const glm::dmat4& modelMatrix,
                              float fadeInVariable)
 {
     float scale = static_cast<float>(toMeter(_unit));
-
     int renderOption = _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
 
+    // Calculate the matrices
+    const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
+
+    const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+    const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+    glm::vec3 right = glm::cross(viewDirection, lookup);
+    const glm::vec3 up = glm::cross(right, viewDirection);
+
+    const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+    glm::vec3 orthoRight = glm::normalize(
+        glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
+    );
+
+    if (orthoRight == glm::vec3(0.f)) {
+        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
+        right = glm::cross(viewDirection, otherVector);
+        orthoRight = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
+        );
+    }
+
+    const glm::vec3 orthoUp = glm::normalize(
+        glm::vec3(worldToModelTransform * glm::dvec4(up, 0.f))
+    );
+
+    // Render
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;

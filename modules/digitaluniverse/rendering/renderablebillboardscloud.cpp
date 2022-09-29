@@ -697,11 +697,6 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-
-    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
-
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
     glm::dvec3 orthoRight = glm::normalize(
@@ -722,7 +717,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_drawLabels && _hasLabels) {
-        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
+        _labels->render(data, modelMatrix, fadeInVar);
     }
 }
 
