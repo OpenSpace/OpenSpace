@@ -191,7 +191,7 @@ void WebFieldlinesWorker::downloadWindow(
                 downloadOsfls(it);
                 downloaded = true;
                 _doneUpdating = false;
-            }
+            }   
         });
 
         // Backwards

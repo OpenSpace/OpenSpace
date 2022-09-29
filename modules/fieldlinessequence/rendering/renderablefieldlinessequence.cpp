@@ -367,7 +367,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         LWARNING("Load at run time is only supported for osfls file type");
         _loadingStatesDynamically = false;
     }
- 
+
     _dynamicWebContent = p.dynamicWebContent.value_or(_dynamicWebContent);
     _dataID = p.dataID.value_or(_dataID);
     if (_dynamicWebContent && !_dataID){
@@ -376,26 +376,25 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         );
     }
 
-    std::filesystem::path sourcePath;
     //no specified way of data reading
     if (!p.sourceFolder.has_value() && _dynamicWebContent == false) {
         LERROR("specify dynamic downloading parameters or a syncfolder");
     }
     // dynamic is specified, disregards what source folder is.
-    else if (p.dynamicWebContent == true) {
+    else if (_dynamicWebContent == true) {
         LINFO("Initializing dynamicDownloaderManager and sync-directory ");
 
         _loadingStatesDynamically = true;
         // right now, dynamic downloading only supported from iswa
-        // should be either a property from asset 
-        std::string baseURL =
-            "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=";
-        _dynamicdownloaderManager = DynamicDownloaderManager(_dataID, baseURL);
-        //initializeWebManager();
+        // should be either a property from asset
+        const std::string baseURL =
+            "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=";
+        _dynamicdownloaderManager =
+            std::make_unique<DynamicDownloaderManager>(_dataID, baseURL);
     }
     // source folder, but not dynamic
     else if (p.sourceFolder.has_value()) {
-        sourcePath = p.sourceFolder.value();
+        std::filesystem::path sourcePath = p.sourceFolder.value();
         // Extract all file paths from the provided folder
         namespace fs = std::filesystem;
         for (const fs::directory_entry& e : fs::directory_iterator(sourcePath)) {
@@ -404,7 +403,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                 _sourceFiles.push_back(eStr);
             }
         }
-        std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         // Remove all files that don't have fileTypeString as file extension
         _sourceFiles.erase(
@@ -426,6 +424,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             _sourceFiles.end()
         );
 
+        std::sort(_sourceFiles.begin(), _sourceFiles.end());
+
         // Ensure that there are available and valid source files left
         if (_sourceFiles.empty()) {
             LERROR(fmt::format(
@@ -433,7 +433,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             ));
         }
     }
-  
+
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
     _flowColor = p.flowColor.value_or(_flowColor);
@@ -521,28 +521,34 @@ void RenderableFieldlinesSequence::initializeGL() {
     // & get states from source
     switch (_inputFileType) {
         case SourceFileType::Cdf:
-            if (!getStatesFromCdfFiles()) {
+            bool success = getStatesFromCdfFiles();
+            if (!success) {
                 return;
             }
             break;
-        case SourceFileType::Json: {
+        case SourceFileType::Json:
             bool success = loadJsonStatesIntoRAM();
             if (!success) {
                 return;
             }
             break;
-        }
         case SourceFileType::Osfls:
+            // dynamic loading, but not dynamic downloading
             if (_loadingStatesDynamically && !_dynamicWebContent) {
                 bool success = prepareForOsflsStreaming();
                 if (!success) {
                     return;
                 }
             }
-            else {
+            // not dynamic. Sourcefolder specified
+            else if (!_loadingStatesDynamically) {
                 loadOsflsStatesIntoRAM();
             }
             break;
+            // else: would be if dynamic downloading, and therefor also dynamic loading,
+            // where true. Don't need to do anything here.
+        // TODO: A default case would mean a faulty sourefiletyp is specified. Terminate
+        // and throw with message.
         default:
             return;
     }
@@ -858,12 +864,6 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
     return true;
 }
 
-//void RenderableFieldlinesSequence::initializeWebManager() {
-//    _webFieldlinesManager.initializeWebFieldlinesManager(
-//        _identifier, _dynWebContentUrl, _nStates, _sourceFiles, _startTimes
-//    );
-//}
-
 std::unordered_map<std::string, std::vector<glm::vec3>>
     extractSeedPointsFromFiles(std::filesystem::path filePath)
 {
@@ -1087,14 +1087,29 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     const double deltaTime = global::timeManager->deltaTime();
 
     if (_dynamicWebContent) {
-        ghoul_assert(_dynamicdownloaderManager.has_value(), 
-                                                  "DynamicDownloaderManager must excist");
+        // ghoul_assert(
+        //     *_dynamicdownloaderManager, "DynamicDownloaderManager must excist"
+        // );
         _dynamicdownloaderManager->update(currentTime, deltaTime);
-    }
+        std::vector<std::filesystem::path>& filesToRead =
+            _dynamicdownloaderManager->downloadedFiles();
+        bool needsSorting = false;
+        for (auto file : filesToRead) {
+            _sourceFiles.push_back(file.string());
+            needsSorting = true;
+        }
+        // if all files are moved into _sourceFiles then we can
+        // empty the DynamicDownloaderManager _downloadedFiles;
+        filesToRead.clear();
 
+        if (needsSorting) {
+            // if this is to slow, some sort of insert instead of push_back above, is needed
+            std::sort(_sourceFiles.begin(), _sourceFiles.end());
+        }
+    }
+    //TODO: if dynamic downloading -> guarantee a startTime at [0]?
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
-    
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
@@ -1106,7 +1121,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             // true => We stepped forward to a time represented by another state
             (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
         {
-            updateActiveTriggerTimeIndex(currentTime);
+            _activeTriggerTimeIndex = updateActiveTriggerTimeIndex(currentTime);
 
             if (_loadingStatesDynamically) {
                 mustLoadNewStateFromDisk = true;
@@ -1182,7 +1197,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 }
 
 // Assumes we already know that currentTime is within the sequence interval
-void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTime) {
+int RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTime) {
+    int index;
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if (iter != _startTimes.begin()) {
@@ -1191,15 +1207,16 @@ void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTi
             ) - 1;
         }
         else {
-            _activeTriggerTimeIndex = 0;
+            index = 0;
         }
     }
     else {
-        _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
+        index = static_cast<int>(_nStates) - 1;
     }
     if (_nStates == 1) {
-        _activeTriggerTimeIndex = 0;
+        index = 0;
     }
+    return index;
 }
 
 // Reading state from disk. Must be thread safe

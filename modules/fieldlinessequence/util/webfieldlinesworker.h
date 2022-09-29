@@ -70,8 +70,8 @@ public:
 private:
 
     // This list is the keep all the started downloads alive between frames, the second argument is a pair, used for identifying which download it is
-    std::vector<HttpDownload> _downloadList;
-    std::vector<std::pair<double,std::string>> _downloadListIdentifier;
+    //std::vector<HttpDownload> _downloadList;
+    //std::vector<std::pair<double,std::string>> _downloadListIdentifier;
 
     // Asynchttpdownloader worker.
     std::unique_ptr<HttpDownload> _downloading;

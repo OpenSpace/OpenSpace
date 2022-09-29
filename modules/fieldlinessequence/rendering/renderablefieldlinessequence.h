@@ -70,7 +70,7 @@ private:
     //void initializeWebManager();
 
     void readNewState(const std::string& filePath);
-    void updateActiveTriggerTimeIndex(double currentTime);
+    int updateActiveTriggerTimeIndex(double currentTime);
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexMaskingBuffer();
@@ -108,10 +108,9 @@ private:
     // dataID that corresponds to what dataset to use if using dynamicWebContent
     int _dataID;
 
-    //  Web Fieldlines manager downloads and updates renderable field lines with
+    //  DynamicDownloaderManager downloads and updates renderable field lines with
     //  field lines downloaded from the web.
-    //WebFieldlinesManager _webFieldlinesManager;
-    std::optional<DynamicDownloaderManager> _dynamicdownloaderManager;
+    std::unique_ptr<DynamicDownloaderManager> _dynamicdownloaderManager;
     // Used for 'runtime-states'. True when finished loading a new state from disk on
     // another thread.
     std::atomic_bool _newStateIsReady = false;

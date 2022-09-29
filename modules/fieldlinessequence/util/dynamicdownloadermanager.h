@@ -25,18 +25,19 @@
 #ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___DYNAMICDOWNLOADERMANAGER___H__
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___DYNAMICDOWNLOADERMANAGER___H__
 
-#include <modules/fieldlinessequence/util/dynamicdownloaderwindow.h>
+#include <openspace/util/httprequest.h>
 #include <ghoul/logging/logmanager.h>
 #include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
+#include <queue>
 
 namespace openspace {
 
 // Two things can be generalized here instead.
 // 1. the options could/should be read from a json file hosted on a server
-// 2. if things other than fieldlines are being supported, 
+// 2. if things other than fieldlines are being supported,
 // they could be added in another struct
 struct FieldlineOption {
     // Question: What can I use instead of map to guarantee the value is also unique
@@ -47,7 +48,7 @@ struct FieldlineOption {
         {1769, "WSA 5.X real"}, // - time output of the field line trace from the source surface to the solar surface using GONGZ as input
         {1770, "WSA 5.X real"}, // - time output of the field line trace from the SCS outer boundary to the source surface using GONGZ as input
         {1771, "WSA 5.X real"}, // - time output of the field line trace from the Earth using GONGZ as input
-        
+
         // WSA 4.4
         {1176, "trace_sun_earth"},
         {1177, "trace_scs_outtoin"},
@@ -96,25 +97,95 @@ struct FieldlineOption {
     }
 };
 
-struct BigWindow {
-    //This is the big window. pair.first is timestep, pair.second is url to be downloaded
-    std::vector<std::pair<std::string, std::string>> _listOfFiles;
-    double _cadence;
+//struct BigWindow {
+//    //This is the big window. pair.first is timestep, pair.second is url to be downloaded
+//    std::vector<std::pair<std::string, std::string>> listOfFiles;
+//    double cadence;
+//    std::pair<std::string, std::string>* whereInList;
+//    std::string absoluteMin;
+//    std::string absoluteMax;
+//};
+
+//struct Info {
+//    HttpFileDownload* download;
+//    enum class State {
+//        Available,
+//        OnQueue,
+//        Downloading,
+//        Downloaded
+//    };
+//    State state;
+//    std::string timestep;
+//    //double timestep;
+//};
+
+struct File {
+    HttpFileDownload* download;
+    //pair.first is timestep, pair.second is url to be downloaded
+    std::string timestep;
+    std::string URL;
+    double cadence;
+    int availableIndex;
+    enum class State {
+        Available,
+        OnQueue,
+        Downloading,
+        Downloaded
+    };
+    State state;
 };
-    
+
+
 class DynamicDownloaderManager {
 public:
     //DynamicDownloaderManager() = default;
-    DynamicDownloaderManager(int dataID, std::string baseURL);
+    DynamicDownloaderManager(int dataID, const std::string baseURL);
+    void requestDataInfo(std::string httpInfoRequest);
+    void requestAvailableFiles(std::string httpDataRequest);
+    //std::pair<std::string, std::string> findMostRelevantFileToDownload(const double time);
+    //std::unique_ptr<HttpFileDownload>&
+    //    findMostRelevantFileToPutOnQueue(const double time, const double deltaTime);
+    //std::pair<std::string, std::string>* closestFileToNow(const double time);
+    File& closestFileToNow(const double time);
     void update(const double time, const double deltaTime);
-    BigWindow requestBigWindow(std::pair<int, std::string> dataID);
+    std::vector<std::filesystem::path>& downloadedFiles();
+    void checkForFinishedDownloads();
+
 private:
+
+    void putOnQueue(std::unique_ptr<HttpFileDownload>& file, const int prioNumber);
+    void putOnQueue(std::string fileInfo);
+    void downloadFile();
+    double calculateCadence();
+    void prioritizeQueue(const double& time, const double& deltaTime);
+
+    bool _fistFrame = true;
+    //int _MaxNumberOfDownloadedFiles = 20;
+    //bool _deltaTimeChanged = false;
+    bool _forward = true;
+    bool _firstFrame = true;
+
     std::filesystem::path _syncDir;
     std::pair<int, std::string> _dataID;
-    DynamicDownloaderWindow _downloaderWindow;
-    std::string _baseURL;
-    std::string _httpRequest;
-    BigWindow _bigWindow;
+    std::string _dataIdDescription;
+    const std::string _baseURL;
+    //BigWindow _bigWindow;
+
+    double _dataMinTime;
+    double _dataMaxTime;
+    //temporary having a global cadence. To be replaced with a cadence for each file.
+    double _tempCadence = 0;
+
+    std::vector<std::unique_ptr<HttpFileDownload>> _availableFiles;
+    std::vector<File> _availableData;
+
+    // Number 0 is highest priority in Queue. Higher number is lower prio
+    std::priority_queue<std::unique_ptr<HttpFileDownload>> _queuedFilesToDownload;
+    bool _queueIsPrioritized = false;
+    std::vector<std::unique_ptr<HttpFileDownload>> _filesCurrentlyDownloading;
+    //std::vector<std::unique_ptr<HttpFileDownload>> _downloadedFiles;
+    std::vector<std::filesystem::path> _downloadedFiles;
+
 
 
 };
