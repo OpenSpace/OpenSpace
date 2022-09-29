@@ -43,6 +43,11 @@ namespace openspace::globebrowsing {
 
 class FfmpegTileProvider : public TileProvider {
 public:
+    static constexpr glm::ivec2 TileSize = { 512, 512 };
+    static constexpr int NoTilePixels = 262144;
+    static constexpr int BytesPerPixel = 3;
+    static constexpr int BytesPerTile = 786432;
+
     FfmpegTileProvider(const ghoul::Dictionary& dictionary);
     ~FfmpegTileProvider();
 
@@ -75,8 +80,7 @@ private:
     AVStream* _videoStream = nullptr;
     AVPacket* _packet = nullptr;
 
-    std::unique_ptr<ghoul::opengl::Texture> _tileTexture = nullptr;
-    GLubyte* _tilePixels = nullptr;
+    GLubyte _tilePixels[BytesPerTile] = { 0 };
 
     void internalInitialize() override final;
     void internalDeinitialize() override final;

@@ -81,9 +81,7 @@ documentation::Documentation FfmpegTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_ffmpegtileprovider");
 }
 
-FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
-    : TileProvider()
-{
+FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
     ZoneScoped
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -173,28 +171,6 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
         1
     );
 
-    // Create the texture
-    _tileTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(512, 512, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGB,
-        GL_RGB,
-        GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::Repeat,
-        ghoul::opengl::Texture::AllocateData::No,
-        ghoul::opengl::Texture::TakeOwnership::No
-    );
-
-
-    const int tileNumPixels = 512 * 512;
-    const int pixelSize = _tileTexture->bytesPerPixel();
-
-    // Allocate data for this tile
-    const unsigned int arraySize = tileNumPixels * pixelSize;
-    _tilePixels = new GLubyte[arraySize];
-    std::memset(_tilePixels, 0, arraySize);
-
     // Update times
     _lastFrameTime = std::max(Time::convertTime(_startTime), Time::now().j2000Seconds());
 }
@@ -202,30 +178,17 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary)
 Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
 
-    if (!_glFrame || !_codecContext || !_tileTexture) {
+    if (!_glFrame || !_codecContext ) {
         return Tile{nullptr, std::nullopt, Tile::Status::Unavailable };
     }
 
-    // Calculate the size of the requested tile in number of pixels
-    const glm::ivec2 tileSize = glm::ivec2(
-        _nativeSize.x / std::pow(2, tileIndex.level),
-        _nativeSize.y / std::pow(2, tileIndex.level - 1)
-    );
-
-    // TODO: If the size of the tile is larger than 512 x 512, we need to scale it down
-    if (tileSize.x > 512 || tileSize.y > 512) {
-        LERROR(fmt::format("Tile size {} x {} too large", tileSize.x, tileSize.y));
-        return Tile{ nullptr, std::nullopt, Tile::Status::IOError };
-    }
-
-    int pixelSize = _tileTexture->bytesPerPixel();
-    const int wholeRowSize = _nativeSize.x * pixelSize;
-    const int tileRowSize = tileSize.x * pixelSize;
+    const int wholeRowSize = _nativeSize.x * BytesPerPixel;
+    const int tileRowSize = TileSize.x * BytesPerPixel;
     
     // The range of rows of the whole image that this tile needs
     const glm::ivec2 rowRange = glm::ivec2(
-        tileSize.y * tileIndex.y,
-        tileSize.y * (tileIndex.y + 1)
+        TileSize.y * tileIndex.y,
+        TileSize.y * (tileIndex.y + 1)
     );
 
     // Copy every row inside the part of the texture we want for the tile
@@ -233,40 +196,38 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     GLubyte* source = &_glFrame->data[0][0];
     // Traverse backwards so texture is placed correctly
     for (int row = rowRange.y - 1; row > rowRange.x; --row) {
-        // Find index of first item of this row
+        // Find index of first item, row & col
         int rowIndex = row * wholeRowSize;
-        // Find index of the first item of this column
         int columnIndex = tileRowSize * tileIndex.x;
 
-        // Copy
+        // Copy row
         memcpy(destination, source + rowIndex + columnIndex, tileRowSize);
 
         // Advance the destination pointer
         destination += tileRowSize;
     }
-
+    // Look for tile in cache. If not found, create it
+    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    cache::MemoryAwareTileCache* tileCache =
+        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     Tile ourTile;
     ghoul::opengl::Texture* writeTexture;
 
-    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
-
-    // The data for initializing the texture
-    TileTextureInitData initData(
-        512,
-        512,
-        GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::Format::RGB,
-        TileTextureInitData::PadTiles::No,
-        TileTextureInitData::ShouldAllocateDataOnCPU::No
-    );
-
-    cache::MemoryAwareTileCache* tileCache =
-        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     if (tileCache->exist(key)) {
         ourTile = tileCache->get(key);
         writeTexture = ourTile.texture;
     }
     else {
+        // The data for initializing the texture
+        TileTextureInitData initData(
+            TileSize.x,
+            TileSize.y,
+            GL_UNSIGNED_BYTE,
+            ghoul::opengl::Texture::Format::RGB,
+            TileTextureInitData::PadTiles::No,
+            TileTextureInitData::ShouldAllocateDataOnCPU::No
+        );
+
         // Create a texture with the initialization data
         writeTexture = tileCache->texture(initData);
         ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
@@ -312,7 +273,7 @@ void FfmpegTileProvider::update() {
         (now - _lastFrameTime) > _frameTime;
 
     if(!hasNewFrame) {
-        return; // wait with this for now
+        return; 
     }
     _tileIsReady = false;
 
@@ -420,27 +381,12 @@ int FfmpegTileProvider::maxLevel() {
 }
 
 void FfmpegTileProvider::reset() {
-    if (_videoFile.empty() || !_tileTexture) {
+    if (_videoFile.empty()) {
         return;
     }
 
-    _tileTexture.reset();
-
     // TODO: This should probalby be repolaced with a call to internal
     // initialize when that is fixed
-    // Create the texture
-    _tileTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(512, 512, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGB,
-        GL_RGB,
-        GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::Repeat,
-        ghoul::opengl::Texture::AllocateData::No,
-        ghoul::opengl::Texture::TakeOwnership::No
-    );
-
     _tileIsReady = false;
 }
 
@@ -462,9 +408,6 @@ FfmpegTileProvider::~FfmpegTileProvider() {
     av_free(_glFrame);
     av_free(_packet);
     avformat_free_context(_formatContext);
-
-    // Delete the hard copy
-    delete[] static_cast<GLubyte*>(_tilePixels);
 }
 
 void FfmpegTileProvider::internalDeinitialize() {
