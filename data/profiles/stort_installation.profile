@@ -144,11 +144,6 @@
       "value": "false"
     },
     {
-      "name": "NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationFactor",
-      "type": "setPropertyValueSingle",
-      "value": "0.05"
-    },
-    {
       "name": "Scene.Constellations.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"
@@ -159,12 +154,12 @@
       "value": "0.0"
     },
     {
-      "name": "Scene.ConstellationArt*.Renderable.Enabled",
+      "name": "Scene.ImageConstellation*.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "true"
     },
     {
-      "name": "Scene.ConstellationArt*.Renderable.Opacity",
+      "name": "Scene.ImageConstellation*.Renderable.Opacity",
       "type": "setPropertyValue",
       "value": "0.0"
     },
