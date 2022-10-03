@@ -65,8 +65,8 @@ public:
 
 private:
     std::filesystem::path _videoFile;
-    double _frameTime = -1.0;   // Seconds per frame
-    double _lastFrameTime;      // The in game time of the last frame in J2000 seconds
+    std::chrono::milliseconds _frameTime = std::chrono::milliseconds(0);
+    std::chrono::system_clock::time_point _lastFrameTime;
     std::string _startTime;
     bool _tileIsReady = false;
 

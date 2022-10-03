@@ -170,7 +170,7 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
     );
 
     // Update times
-    _lastFrameTime = std::max(Time::convertTime(_startTime), Time::now().j2000Seconds());
+    _lastFrameTime = std::chrono::system_clock::now();
 }
 
 Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
@@ -265,10 +265,12 @@ void FfmpegTileProvider::update() {
     ZoneScoped
 
     // Check if it is time for a new frame
-    double now = Time::now().j2000Seconds();
-    double diff = now - _lastFrameTime;
-    const bool hasNewFrame = (now > Time::convertTime(_startTime)) &&
-        (now - _lastFrameTime) > _frameTime;
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    std::chrono::system_clock::duration diff = now - _lastFrameTime;
+    const double j2000Time = Time::now().j2000Seconds();
+
+    const bool hasNewFrame = (j2000Time > Time::convertTime(_startTime)) &&
+        diff > _frameTime;
 
     if(!hasNewFrame) {
         return; 
@@ -320,11 +322,14 @@ void FfmpegTileProvider::update() {
     }
 
     // Update times
-    if (_frameTime < 0) {
-        _frameTime = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
+    if (_frameTime.count() <= 0) {
+        // Calculate frame time
+        double sPerFrame = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
+        int msPerFrame = static_cast<int>(sPerFrame * 1000);
+        _frameTime = std::chrono::milliseconds(msPerFrame);
     }
     _lastFrameTime = now;
-
+    
     // TODO: Need to check the format of the video and decide what formats we want to
     // support and how they relate to the GL formats
 
