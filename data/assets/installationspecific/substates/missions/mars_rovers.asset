@@ -30,7 +30,7 @@ local marsRoversState = {
 local goToMarsOverview = [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   openspace.time.setPause(true)
-  openspace.pathnavigation.goTo('Mars', true)
+  openspace.pathnavigation.flyTo('Mars', true)
 ]]
 
 -----
@@ -134,13 +134,13 @@ local leaveTransition = [[
 local toPerseveranceTransition = [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
-  openspace.pathnavigation.goToNavigationState( ]] .. perseverance_TiltedNavState_Path .. [[)
+  openspace.pathnavigation.flyToNavigationState( ]] .. perseverance_TiltedNavState_Path .. [[)
 ]]
 
 local toCuriosityTransition = [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
-  openspace.pathnavigation.goToNavigationState( ]] .. galeCrater_TiltedNavState .. [[)
+  openspace.pathnavigation.flyToNavigationState( ]] .. galeCrater_TiltedNavState .. [[)
 ]]
 
 local betweenGaleAndJezero_NavState = [[{ 
@@ -161,7 +161,7 @@ local betweenGaleAndJezero_NavState = [[{
 
 --   openspace.scriptScheduler.loadScheduledScript(
 --     tostring(now), -- 0 seconds after this script was triggered
---     "openspace.pathnavigation.goToNavigationState( ]] .. util.removeLineBreaks(betweenGaleAndJezero_NavState) .. [[);"
+--     "openspace.pathnavigation.flyToNavigationState( ]] .. util.removeLineBreaks(betweenGaleAndJezero_NavState) .. [[);"
 --   );
 --   openspace.scriptScheduler.loadScheduledScript(
 --     tostring(now + 10), -- 10 seconds after this script was triggered

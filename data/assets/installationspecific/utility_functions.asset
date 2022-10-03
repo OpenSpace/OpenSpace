@@ -99,35 +99,6 @@ local changeAnchor = function(name, interpolationTime)
   ]]
 end
 
-local applyLinearFlight = function(height, zoomSpeedFactor)
-  if (zoomSpeedFactor == nil) then
-    zoomSpeedFactor = 3.5 -- the default value
-  end
-  return [[
-    openspace.setPropertyValueSingle(
-      'NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance',
-      ]] .. tostring(height) .. [[
-    )
-    openspace.setPropertyValueSingle(
-      'NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl',
-      ]] .. tostring(zoomSpeedFactor) .. [[
-    )
-    openspace.setPropertyValueSingle(
-      'NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight',
-      true
-    )
-  ]]
-end
-
-local disableLinearFlight = function() 
-  return [[
-    openspace.setPropertyValueSingle(
-      'NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight',
-      false
-    )
-  ]]
-end
-
 local enableRoll = function()
   return [[
     openspace.setPropertyValueSingle('NavigationHandler.PathNavigator.IncludeRoll', true)
@@ -142,7 +113,24 @@ end
 
 local flyToNavState = function(state)
   return [[
-    openspace.pathnavigation.goToNavigationState(]] .. state .. [[)
+    openspace.pathnavigation.flyToNavigationState(]] .. state .. [[)
+  ]]
+end
+
+local flyLinearlyToHeight = function(height)
+  return [[
+    openspace.pathnavigation.zoomToDistance(]] .. tostring(height) .. [[)
+  ]]
+end
+
+local flyLinearlyToNode = function(node, distance)
+  return [[
+    openspace.pathnavigation.createPath({
+      TargetType = 'Node', 
+      Target = ']] .. node ..[[', 
+      Height = ']] .. tostring(distance or nil) .. [[', 
+      PathType = 1 -- linear
+    })
   ]]
 end
 
@@ -154,6 +142,8 @@ local setCurveType = function(type)
     typeAsInt = 0
   elseif (type == "AvoidCollisionWithLookAt") then
     typeAsInt = 3
+  elseif (type == "Linear") then
+    typeAsInt = 1
   end
 
   return [[
@@ -230,11 +220,11 @@ asset.export("startOrbiting", startOrbiting)
 asset.export("stopOrbiting", stopOrbiting)
 asset.export("setOrbitSpeedFactor", setOrbitSpeedFactor)
 asset.export("changeAnchor", changeAnchor)
-asset.export("applyLinearFlight", applyLinearFlight)
-asset.export("disableLinearFlight", disableLinearFlight)
 asset.export("enableRoll", enableRoll)
 asset.export("disableRoll", disableRoll)
 asset.export("flyToNavState", flyToNavState)
+asset.export("flyLinearlyToHeight", flyLinearlyToHeight)
+asset.export("flyLinearlyToNode", flyLinearlyToNode)
 asset.export("setCurveType", setCurveType)
 asset.export("setTime", setTime)
 asset.export("interpolateTime", interpolateTime)

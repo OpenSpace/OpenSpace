@@ -225,33 +225,28 @@ local leaveState = [[
 ]]
 
 local flyToMoon = [[
-  ]] .. util.disableLinearFlight() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   openspace.time.setPause(true)
-  openspace.pathnavigation.goTo('Moon', true)
+  openspace.pathnavigation.flyTo('Moon', true)
 ]]
 
 local flyToApollo8 = [[
-  ]] .. util.disableLinearFlight() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.flyToNavState(apollo8NavigationState) .. [[
 ]]
 
 local jumpToApollo8 = [[
-  ]] .. util.disableLinearFlight() .. [[
   openspace.navigation.setNavigationState(]] .. tostring(apollo8NavigationState) .. [[)
 ]]
 
 local flyToApollo11 = [[
-  ]] .. util.disableLinearFlight() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.flyToNavState(apollo11LandingState) .. [[
 ]]
 
 local jumpToApollo11 = [[
-  ]] .. util.disableLinearFlight() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.flyToNavState(apollo11LandingState) .. [[

@@ -22,14 +22,12 @@ local homeNavState = [[{
 
 local cameraPath = [[
   openspace.time.setPause(true)
-  ]] .. util.disableLinearFlight() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   ]] .. util.flyToNavState(homeNavState) .. [[
 ]]
 
 local linearFlight = [[
-  ]] .. util.changeAnchor('Sun-Handle', 2.0) .. [[
-  ]] .. util.applyLinearFlight(solarTargetDistance, 1.2) .. [[
+  ]] .. util.flyLinearlyToNode('Sun-Handle', solarTargetDistance) .. [[
 ]]
 
 asset.export("cameraPath", cameraPath)
