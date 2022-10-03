@@ -69,6 +69,7 @@ private:
     std::chrono::system_clock::time_point _lastFrameTime;
     std::string _startTime;
     bool _tileIsReady = false;
+    bool _isInitialized = false;
 
     AVFormatContext* _formatContext = nullptr;
     AVCodecContext* _codecContext = nullptr;
