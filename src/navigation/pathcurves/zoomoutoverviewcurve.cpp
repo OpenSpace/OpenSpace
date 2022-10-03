@@ -92,9 +92,8 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         // rewrite of the path types. This has explicitly been added just to allow
         // collision free paths between two nodes on a planet surface but might work weird in
         // other cases
-        const PathNavigator& pn = global::navigationHandler->pathNavigator();
-        const SceneGraphNode* closeNode1 = pn.findNodeNearTarget(start.node());
-        const SceneGraphNode* closeNode2 = pn.findNodeNearTarget(end.node());
+        const SceneGraphNode* closeNode1 = PathNavigator::findNodeNearTarget(start.node());
+        const SceneGraphNode* closeNode2 = PathNavigator::findNodeNearTarget(end.node());
         bool hasCloseNode = closeNode1 || closeNode2;
         if (hasCloseNode) {
             // Step outwards from the  node

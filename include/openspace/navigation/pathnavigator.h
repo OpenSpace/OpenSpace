@@ -79,7 +79,12 @@ public:
 
     const std::vector<SceneGraphNode*>& relevantNodes();
 
-    SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) const;
+    /**
+     * Find a node close to the given node. Closeness is determined by a factor times 
+     * the bounding sphere of the object
+     * \return pointer to the SGN if one was found, nullptr otherwise
+     */
+    static SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
 
     /**
     * \return The Lua library that contains all Lua functions available to affect the
