@@ -1,7 +1,0 @@
-local TexturesPath = asset.syncedResource({
-  Name = "Tethys textures",
-  Type = "HttpSynchronization",
-  Identifier = "tethys_textures",
-  Version = 1
-})
-asset.export("TexturesPath", TexturesPath)

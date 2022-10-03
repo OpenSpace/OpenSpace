@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "ZoomOutOverviewCurve";
+    constexpr std::string_view _loggerCat = "ZoomOutOverviewCurve";
 } // namespace
 
 namespace openspace::interaction {
@@ -67,7 +67,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     _points.push_back(start.position() + startTangentLength * startTangentDir);
 
     const glm::dvec3 startPosToEndPos = end.position() - start.position();
-    constexpr const double Epsilon = 1E-4;
+    constexpr double Epsilon = 1E-4;
 
     // Zoom out
     if (start.nodeIdentifier() != end.nodeIdentifier() &&

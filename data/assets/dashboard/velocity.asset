@@ -1,8 +1,8 @@
 local item = {
   Type = "DashboardItemVelocity",
-  Identifier = "GlobeLocation",
+  Identifier = "CameraVelocity",
   Simplification = true,
-  GuiName = "Velocity"
+  GuiName = "Camera Velocity"
 }
 
 asset.onInitialize(function()
@@ -10,5 +10,17 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(item.Identifier)
+  openspace.dashboard.removeDashboardItem(item)
 end)
+
+asset.export(item)
+
+
+asset.meta = {
+  Name = "Dashboard - Velocity",
+  Version = "1.0",
+  Description = "This asset provides a dashboard item that shows the camera's velocity",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
   "actions": [
     {
       "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
+      "gui_path": "/Solar System/Earth",
       "identifier": "profile.toggle.satellitetrails",
       "is_local": false,
       "name": "Toggle satellite trails",
@@ -41,20 +41,28 @@
       "script": "local list = openspace.getProperty('{mission_jwst_fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
-      "documentation": "Set the time to the 2018 launch time of JWST",
+      "documentation": "Set the time to the launch time of JWST",
       "gui_path": "/JWST",
-      "identifier": "profile.set.2018_launch",
+      "identifier": "profile.set.jwst_launch",
       "is_local": false,
-      "name": "Set to 2018 launch time",
-      "script": "openspace.time.setTime('2018-10-01T14:06:03'); openspace.time.setDeltaTime(1)"
+      "name": "Set to JWST launch time",
+      "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:20:01');"
     },
     {
-      "documentation": "Set the time to 2021 where the JWST Sun trail has valid data (2020-2024)",
+      "documentation": "Set the time to the detach time of JWST",
       "gui_path": "/JWST",
-      "identifier": "profile.set.2021_sun",
+      "identifier": "profile.set.jwst_detach",
       "is_local": false,
-      "name": "Set to 2021 Sun trail",
-      "script": "openspace.time.setTime('2021-12-18T14:06:03'); openspace.time.setDeltaTime(1)"
+      "name": "Set to JWST detach time",
+      "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:50:00');"
+    },
+    {
+      "documentation": "Toggle JWST trail relative to the Sun",
+      "gui_path": "/JWST",
+      "identifier": "profile.toggle.sun_trail",
+      "is_local": false,
+      "name": "Toggle JWST Sun trail",
+      "script": "local value = openspace.getPropertyValue('Scene.JWSTSunTrail.Renderable.Enabled'); openspace.setPropertyValueSingle('Scene.JWSTSunTrail.Renderable.Enabled', not value);"
     },
     {
       "documentation": "Toggle all planet and moon trails, except the Moon",
@@ -65,12 +73,12 @@
       "script": "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled') for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Enabled', true)"
     },
     {
-      "documentation": "Toggle JWST launch and orbit trails",
+      "documentation": "Toggle JWST launch, cruise and L2 co-revolving orbit trails, not the Sun trail",
       "gui_path": "/JWST",
       "identifier": "profile.toggle.jwst_trails",
       "is_local": false,
-      "name": "Toggle JWST trails",
-      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
+      "name": "Toggle JWST trail",
+      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailCruise.Renderable.Enabled', 'Scene.JWSTTrailCoRevOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
     }
   ],
   "additional_scripts": [
@@ -80,11 +88,14 @@
     "base",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
+    "scene/solarsystem/planets/earth/satellites/misc/hubble_trail",
     "scene/solarsystem/planets/earth/lagrange_points/lagrange_points",
     "scene/solarsystem/missions/jwst/jwst",
     "scene/solarsystem/missions/jwst/trail",
-    "scene/solarsystem/missions/jwst/hudf",
+    "scene/solarsystem/missions/jwst/targets/targets",
     "scene/solarsystem/missions/jwst/timelapse",
+    "scene/solarsystem/missions/jwst/toggle_trail",
+    "scene/solarsystem/missions/jwst/point_jwst",
     "scene/digitaluniverse/hdf"
   ],
   "camera": {
@@ -149,11 +160,11 @@
       "key": "V"
     },
     {
-      "action": "profile.set.2018_launch",
+      "action": "profile.set.jwst_launch",
       "key": "J"
     },
     {
-      "action": "profile.set.2021_sun",
+      "action": "profile.toggle.sun_trail",
       "key": "K"
     },
     {
@@ -191,7 +202,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "James Webb Space Telescope Profile. Adds the James Webb Space Telescope model with an estimated trajectery.",
+    "description": "James Webb Space Telescope Profile. Adds the James Webb Space Telescope model with an estimated trajectery",
     "license": "MIT License",
     "name": "James Webb Space Telescope",
     "url": "https://www.openspaceproject.com",
@@ -210,6 +221,11 @@
     },
     {
       "name": "Scene.JWSTTrailLaunch.Renderable.Appearance.EnableFade",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTTrailCruise.Renderable.Appearance.EnableFade",
       "type": "setPropertyValueSingle",
       "value": "false"
     },
@@ -267,11 +283,61 @@
       "name": "Scene.L2SunLine.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "{mission_jwst_target}.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.HUDFJWSTLine.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTTrailOrbit.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTSunTrail.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTBand.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTFov.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTModel.ApproachFactor",
+      "type": "setPropertyValueSingle",
+      "value": "900"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.Terra_Modis_Temporal.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.ISS_trail.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {
     "type": "absolute",
-    "value": "2018-10-01T14:06:03"
+    "value": "2021-12-25T12:50:01"
   },
   "version": {
     "major": 1,

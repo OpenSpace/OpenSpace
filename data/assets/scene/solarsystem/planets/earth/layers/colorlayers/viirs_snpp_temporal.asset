@@ -1,36 +1,46 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "VIIRS_SNPP_Temporal",
   Name = "VIIRS SNPP (Temporal)",
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "VIIRS_SNPP_CorrectedReflectance_TrueColor",
-    "2015-11-24",
-    "Yesterday",
-    "1d",
-    "250m",
-    "jpg"
-  ),
-  Description = [[ Temporal coverage: 11 November 2015 - Present. The imagery resolution
-    is 0.25 km, and the temporal resolution is daily.]]
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2015-11-24",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+      "250m",
+      "jpg"
+    )
+  },
+  Description = [[Temporal coverage: 11 November 2015 - Present. The imagery resolution
+    is 0.25 km, and the temporal resolution is daily]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "VIIRS SNPP (Temporal)",
-  Version = "1.0",
-  Description = [[ This layer has the best daily Earth Image. GIBS hosted layer created
-    with openspace.globebrowsing.createTemporalGibsGdalXml ]],
+  Version = "1.1",
+  Description = "This layer has the best daily Earth Image",
   Author = "NASA EOSDIS Global Imagery Browse Services",
-  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/" ..
-    "eosdis-components/gibs",
-  License = "NASA",
-  Identifiers = {"VIIRS_SNPP_Temporal"}
+  URL =
+    "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
+  License = "NASA"
 }

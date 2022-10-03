@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,8 @@
 
 namespace openspace {
 
+uint32_t EventEngine::nextRegisteredEventId = 0;
+
 #ifdef _DEBUG
 uint64_t EventEngine::nEvents = 0;
 #endif // _DEBUG
@@ -53,6 +55,9 @@ void EventEngine::registerEventAction(events::Event::Type type,
                                       std::optional<ghoul::Dictionary> filter)
 {
     ActionInfo ai;
+    ai.id = nextRegisteredEventId;
+    ai.isEnabled = true;
+    ai.type = type;
     ai.action = std::move(identifier);
     ai.filter = std::move(filter);
     const auto it = _eventActions.find(type);
@@ -62,6 +67,8 @@ void EventEngine::registerEventAction(events::Event::Type type,
     else {
         _eventActions[type] = { std::move(ai) };
     }
+
+    nextRegisteredEventId++;
 }
 
 void EventEngine::unregisterEventAction(events::Event::Type type,
@@ -84,6 +91,62 @@ void EventEngine::unregisterEventAction(events::Event::Type type,
     }
 }
 
+void EventEngine::unregisterEventAction(uint32_t identifier) {
+    for (auto it = _eventActions.begin(); it != _eventActions.end(); it++) {
+        for (auto jt = it->second.begin(); jt != it->second.end(); jt++) {
+            if (jt->id == identifier) {
+                it->second.erase(jt);
+
+                // This might have been the last action so we might need to remove the
+                // entry alltogether
+                if (it->second.empty()) {
+                    _eventActions.erase(it);
+                }
+
+                // The identifier is unique so we can stop after this
+                return;
+            }
+        }
+    }
+
+    // If we get this far, we haven't found the identifier
+    throw ghoul::RuntimeError(fmt::format(
+        "Could not find event with identifier {}", identifier
+    ));
+}
+
+std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
+    std::vector<EventEngine::ActionInfo> result;
+    result.reserve(_eventActions.size());
+    for (const std::pair<const events::Event::Type, std::vector<ActionInfo>>& p : _eventActions)
+    {
+        result.insert(result.end(), p.second.begin(), p.second.end());
+    }
+    return result;
+}
+
+void EventEngine::enableEvent(uint32_t identifier) {
+    for (std::pair<const events::Event::Type, std::vector<ActionInfo>>& p : _eventActions) {
+        for (ActionInfo& ai : p.second) {
+            if (ai.id == identifier) {
+                ai.isEnabled = true;
+                break;
+            }
+        }
+    }
+}
+
+void EventEngine::disableEvent(uint32_t identifier) {
+    for (std::pair<const events::Event::Type, std::vector<ActionInfo>>& p : _eventActions) {
+        for (ActionInfo& ai : p.second) {
+            if (ai.id == identifier) {
+                ai.isEnabled = false;
+                break;
+            }
+        }
+    }
+}
+
 void EventEngine::triggerActions() const {
     if (_eventActions.empty()) {
         // Nothing to do here
@@ -96,7 +159,9 @@ void EventEngine::triggerActions() const {
         if (it != _eventActions.end()) {
             ghoul::Dictionary params = toParameter(*e);
             for (const ActionInfo& ai : it->second) {
-                if (!ai.filter.has_value() || params.isSubset(*ai.filter)) {
+                if (ai.isEnabled &&
+                    (!ai.filter.has_value() || params.isSubset(*ai.filter)))
+                {
                     global::actionManager->triggerAction(ai.action, params);
                 }
             }
@@ -107,25 +172,16 @@ void EventEngine::triggerActions() const {
 }
 
 scripting::LuaLibrary EventEngine::luaLibrary() {
-    scripting::LuaLibrary res;
-    res.name = "event";
-    res.functions.push_back({
-        "registerEventAction",
-        &luascriptfunctions::registerEventAction,
-        "string, string [, table]",
-        "Registers an action (second parameter) to be executed whenever an event (first "
-        "parameter) is encountered. If the optional third parameter is provided, it "
-        "describes a filter that the event is being checked against and only if it "
-        "passes the filter, the action is triggered"
-    });
-    res.functions.push_back({
-        "unregisterEventAction",
-        &luascriptfunctions::unregisterEventAction,
-        "string, string [, table]",
-        "Unregisters a specific combination of event (first parameter), action (second "
-        "parameter), and potentially a filter (optional third argument)"
-    });
-    return res;
+    return {
+        "event",
+        {
+            codegen::lua::RegisterEventAction,
+            codegen::lua::UnregisterEventAction,
+            codegen::lua::RegisteredEvents,
+            codegen::lua::EnableEvent,
+            codegen::lua::DisableEvent
+        }
+    };
 }
 
 } // namespace openspace

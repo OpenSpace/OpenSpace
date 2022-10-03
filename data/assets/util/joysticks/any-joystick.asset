@@ -1,0 +1,72 @@
+local propertyHelper = asset.require("../property_helper")
+local joystickHelper = asset.require("./joystick_helper")
+local initializeAll = false
+
+-- Add the asset cooresponding to the joystick name
+local function addJoystickAsset(joystick)
+  if joystick == "Wireless Controller" then
+    openspace.asset.add("./util/joysticks/ps4")
+  elseif joystick == "Xbox Controller" then
+    openspace.asset.add("./util/joysticks/xbox")
+  elseif joystick == "Wireless Xbox Controller" then
+    openspace.asset.add("./util/joysticks/xbox-wireless")
+  elseif joystick == "SpaceNavigator" then
+    openspace.asset.add("./util/joysticks/space-mouse-compact")
+  elseif joystick == "SpaceMouse Enterprise" then
+    openspace.asset.add("./util/joysticks/space-mouse-enterprise")
+  elseif joystick == "3Dconnexion Universal Receiver" then
+    openspace.printWarning("SpaceMouse in wireless mode cannot be automatically detected and added. Please add the matching asset file manually")
+  else
+    openspace.printWarning("Could not find a matching asset for joystick: " .. joystick)
+  end
+end
+
+asset.onInitialize(function()
+  local rawJoysticks = openspace.navigation.listAllJoysticks()
+  local numJoysticks = #rawJoysticks
+  local joystick = ""
+
+  -- Remove the SpaceMouse emulator if it exists
+  local joysticks = {}
+  for _, joyStickName in ipairs(rawJoysticks) do
+    if joyStickName == "3Dconnexion KMJ Emulator" then
+      numJoysticks = numJoysticks - 1
+    else
+      table.insert(joysticks, joyStickName)
+    end
+  end
+
+  if numJoysticks == 0 then
+    openspace.printWarning("Could not find any connected joysticks")
+  elseif numJoysticks == 1 then
+    addJoystickAsset(joysticks[1])
+  elseif numJoysticks > 1 and initializeAll then
+    for _, joyStickName in ipairs(joysticks) do
+      addJoystickAsset(joyStickName)
+    end
+  else
+    openspace.printWarning("Cannot auto detect and add several joysticks")
+  end
+end)
+
+asset.onDeinitialize(function()
+  if openspace.asset.isLoaded("./util/joysticks/ps4") then
+    openspace.asset.remove("./util/joysticks/ps4")
+  end
+
+  if openspace.asset.isLoaded("./util/joysticks/xbox") then
+    openspace.asset.remove("./util/joysticks/xbox")
+  end
+
+  if openspace.asset.isLoaded("./util/joysticks/xbox-wireless") then
+    openspace.asset.remove("./util/joysticks/xbox-wireless")
+  end
+
+  if openspace.asset.isLoaded("./util/joysticks/space-mouse-compact") then
+    openspace.asset.remove("./util/joysticks/space-mouse-compact")
+  end
+
+  if openspace.asset.isLoaded("./util/joysticks/space-mouse-enterprise") then
+    openspace.asset.remove("./util/joysticks/space-mouse-enterprise")
+  end
+end)

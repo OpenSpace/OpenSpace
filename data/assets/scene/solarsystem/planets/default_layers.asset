@@ -1,39 +1,37 @@
-asset.require('./earth/default_layers')
-asset.require('./earth/moon/default_layers')
+asset.require("./earth/default_layers")
+asset.require("./earth/moon/default_layers")
 
-asset.require('./jupiter/default_layers')
-asset.require('./jupiter/callisto/default_layers')
-asset.require('./jupiter/europa/default_layers')
-asset.require('./jupiter/ganymede/default_layers')
-asset.require('./jupiter/io/default_layers')
+asset.require("./jupiter/default_layers")
+asset.require("./jupiter/callisto/default_layers")
+asset.require("./jupiter/europa/default_layers")
+asset.require("./jupiter/ganymede/default_layers")
+asset.require("./jupiter/io/default_layers")
 
 asset.require('./mars/default_layers')
-asset.require('./mars/moons/layers/colorlayers/deimos_viking')
-asset.require('./mars/moons/layers/colorlayers/phobos_viking')
 
-asset.require('./mercury/default_layers')
+asset.require("./mercury/default_layers")
 
-asset.require('./neptune/default_layers')
+asset.require("./neptune/default_layers")
 
-asset.require('./saturn/default_layers')
-asset.require('./saturn/dione/default_layers')
-asset.require('./saturn/enceladus/default_layers')
-asset.require('./saturn/hyperion/default_layers')
-asset.require('./saturn/iapetus/default_layers')
-asset.require('./saturn/mimas/default_layers')
-asset.require('./saturn/rhea/default_layers')
-asset.require('./saturn/tethys/default_layers')
-asset.require('./saturn/titan/default_layers')
+asset.require("./saturn/default_layers")
+asset.require("./saturn/dione/default_layers")
+asset.require("./saturn/enceladus/default_layers")
+asset.require("./saturn/hyperion/default_layers")
+asset.require("./saturn/iapetus/default_layers")
+asset.require("./saturn/mimas/default_layers")
+asset.require("./saturn/rhea/default_layers")
+asset.require("./saturn/tethys/default_layers")
+asset.require("./saturn/titan/default_layers")
 
-asset.require('./uranus/default_layers')
+asset.require("./uranus/default_layers")
 
-asset.require('./venus/default_layers')
+asset.require("./venus/default_layers")
 
 
 asset.meta = {
   Name = "Default Solar System Layers",
   Version = "1.0",
-  Description = [[ Adds default layers for all planets. Remove this asset and include
+  Description = [[Adds default layers for all planets. Remove this asset and include
     individual layers for planets to customize planet layers]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___MODULES___H__
-#define __OPENSPACE_UI_LAUNCHER___MODULES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___MODULESDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___MODULESDIALOG___H__
 
 #include <QDialog>
 
@@ -54,7 +54,9 @@ public:
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
-private slots:
+private:
+    void createWidgets();
+
     void listItemSelected();
     void listItemAdded();
     void listItemRemove();
@@ -62,9 +64,6 @@ private slots:
     void listItemCancelSave();
     void transitionToEditMode();
     void parseSelections();
-
-private:
-    void createWidgets();
 
     QString createOneLineSummary(openspace::Profile::Module m);
     void transitionFromEditMode();
@@ -92,4 +91,4 @@ private:
     QLabel* _errorMsg = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___MODULES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___MODULESDIALOG___H__

@@ -1,7 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local proceduralGlobes = asset.require('util/procedural_globe')
-local transforms = asset.require('../transforms')
-local kernel = asset.require('../kernels').jup341
+local proceduralGlobes = asset.require("util/procedural_globe")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").jup341
 
 
 
@@ -88,18 +87,31 @@ local innerMoons = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(innerMoons)
-)
+local nodes = proceduralGlobes.createGlobes(innerMoons)
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+  
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end
 
 
 asset.meta = {
   Name = "Jupiter Inner Group Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Jupiter's Inner Group
-    moons: Metis, Adrastea, Amalthea, and Thebe. Blank globes and SPICE trails
-    are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Jupiter's Inner Group moons: Metis,
+    Adrastea, Amalthea, and Thebe. Blank globes and SPICE trails are generated for each
+    moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

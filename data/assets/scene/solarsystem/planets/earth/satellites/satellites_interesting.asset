@@ -1,16 +1,16 @@
-asset.require('./misc/brightest')
-asset.require('./communications/geostationary')
-asset.require('./navigation/gps')
-asset.require('./misc/spacestations')
-asset.require('./misc/iss')
-asset.require('./misc/tle-new')
+asset.require("./misc/brightest")
+asset.require("./communications/geostationary")
+asset.require("./navigation/gps")
+asset.require("./misc/spacestations")
+asset.require("./misc/iss")
+asset.require("./misc/tle-new")
 
 
 asset.meta = {
   Name = "Satellites Interesting",
   Version = "1.0",
-  Description = [[ Meta asset for interesting satellites of Earth. Containing groups:
-    brightest, geostationary, gps, spacestations, iss, and tle-new.]],
+  Description = [[Meta asset for interesting satellites of Earth. Containing groups:
+    brightest, geostationary, gps, spacestations, iss, and tle-new]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

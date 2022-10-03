@@ -1,27 +1,49 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local circle = asset.require('util/circle').circle
-local kernels = asset.require('scene/solarsystem/planets/earth/lagrange_points/lagrange_kernels').kernels
-asset.require('spice/base')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
 
-local L1 = {
-  Identifier = "L1",
+local circle = asset.syncedResource({
+  Name = "Circle",
+  Type = "HttpSynchronization",
+  Identifier = "circle_image",
+  Version = 1
+})
+
+local kernels = asset.syncedResource({
+  Name = "Lagrange Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_lagrange_kernels",
+  Version = 1
+})
+
+local L1Position = {
+  Identifier = "L1Position",
   Parent = transforms.SolarSystemBarycenter.Identifier,
-  Renderable = {
-    Type = "RenderablePlaneImageLocal",
-    RenderableType = "Opaque",
-    Billboard = true,
-    Size = 700E5,
-    Texture = circle .. "/circle.png",
-    BlendMode = "Additive"
-  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "391", -- L1
+      Target = 391, -- L1
       Observer = "SSB",
-      Kernels = kernels .. "/L1_de431.bsp"
+      Kernels = kernels .. "L1_de431.bsp"
     }
+  },
+  Tag = { "lagrange_points_earth" , "lagrange_points_earth_l1" },
+  GUI = {
+    Name = "L1 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Hidden = true
+  }
+}
+
+local L1 = {
+  Identifier = "L1",
+  Parent = L1Position.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    RenderBinMode = "Opaque",
+    Billboard = true,
+    Size = 700E5,
+    Texture = circle .. "circle.png",
+    BlendMode = "Additive"
   },
   Tag = { "lagrange_points_earth" , "lagrange_points_earth_l1" },
   GUI = {
@@ -32,11 +54,11 @@ local L1 = {
 
 local L1Label = {
   Identifier = "L1Label",
-  Parent = L1.Identifier,
+  Parent = L1Position.Identifier,
   Renderable = {
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "L1",
-    FontSize = 20,
+    FontSize = 50,
     Size = 7.5,
     MinMaxSize = { 1.0, 100.0},
     OrientationOption = "Camera View Direction",
@@ -51,7 +73,28 @@ local L1Label = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  L1,
-  L1Label
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L1Position)
+  openspace.addSceneGraphNode(L1)
+  openspace.addSceneGraphNode(L1Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L1Label)
+  openspace.removeSceneGraphNode(L1)
+  openspace.removeSceneGraphNode(L1Position)
+end)
+
+asset.export(L1Label)
+asset.export(L1)
+asset.export(L1Label)
+
+
+asset.meta = {
+  Name = "Lagrange point L1",
+  Version = "1.0",
+  Description = "Lagrange point L1 node and label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

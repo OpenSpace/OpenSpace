@@ -1,44 +1,53 @@
---perseverance/shortcuts.asset
-
 local PerseveranceLaunchTime = "2020 JUL 17 13:56:42"
 local PerseveranceLandingTime = "2021 FEB 18 20:32:16"
 
-local PerseveranceNavigationState = "{" ..
-  "Anchor = 'Perseverance'," ..
-  "Pitch = 0.567457E-4," ..
-  "Position = { 1.240506E1,-1.369270E1,-2.423553E0 }," ..
-  "ReferenceFrame = 'Root',"..
-  "Up = { 0.441211E0,0.247019E0,0.862737E0 }," ..
-  "Yaw = -0.446853E-4}"
+local PerseveranceNavigationState = [[
+{
+  Anchor = "Perseverance",
+  Pitch = 0.567457E-4,
+  Position = { 1.240506E1,-1.369270E1,-2.423553E0 },
+  ReferenceFrame = "Root",
+  Up = { 0.441211E0,0.247019E0,0.862737E0 },
+  Yaw = -0.446853E-4
+}
+]]
 
 local Shortcuts = {
   {
-    Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -1677.088867);" ..
-    "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', -1677.088867);",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", -1677.088867);
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset", -1677.088867);
+    ]],
     Documentation = "Enable height layer offset for Perseverance landing trail",
     Name = "Perseverance Height Offset",
     GuiPath = "/Missions/Insight",
     Local = false
   },
   {
-    Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', 0);" .. 
-    "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', 0);",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", 0);
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset", 0);
+    ]],
     Documentation = "Disable Perseverance landing height layer offset",
     Name = "Default Height Offset",
     GuiPath = "/Missions/Insight",
     Local = false
   },
   {
-    Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', true);" ..
-    "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', true);",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled", true);
+    ]],
     Documentation = "Enables HiRISE layer for Perseverance",
     Name = "Enable HiRISE",
     GuiPath = "/Missions/Insight",
     Local = false
   },
   {
-    Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', false);" ..
-    "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', false);",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled", false);
+    ]],
     Documentation = "Disables HiRISE layer used for Perseverance",
     Name = "Disable HiRISE",
     GuiPath = "/Missions/Insight",
@@ -52,14 +61,14 @@ local Shortcuts = {
     Local = false
   },
   {
-    Command = "openspace.time.setPause(true);openspace.time.setTime('" .. PerseveranceLaunchTime .. "');",
+    Command = 'openspace.time.setPause(true);openspace.time.setTime("' .. PerseveranceLaunchTime .. '");',
     Documentation = "Change the time for Perseverance launch",
     Name = "Perseverance launch time",
     GuiPath = "/Missions/Perseverance",
     Local = false
   },
   {
-    Command = "openspace.time.setPause(true);openspace.time.setTime('" .. PerseveranceLandingTime .. "');",
+    Command = 'openspace.time.setPause(true);openspace.time.setTime("' .. PerseveranceLandingTime .. '");',
     Documentation = "Change the time for when Perseverance has landed",
     Name = "Perseverance landed time",
     GuiPath = "/Missions/Perseverance",

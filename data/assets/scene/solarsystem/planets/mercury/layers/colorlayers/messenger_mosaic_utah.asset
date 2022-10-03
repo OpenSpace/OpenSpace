@@ -1,14 +1,30 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
   Identifier = "Messenger_Mosaic_Utah",
   Name = "Messenger Mosaic [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/MessengerMosaic.wms"
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("messenger_mosaic_utah.wms")
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Messenger Mosaic [Utah]",
+  Version = "1.0",
+  Description = [[Mercury Messenger Mosaic layer for Mercury globe. This map is hosted on
+    the OpenSpace server in Utah]],
+  Author = "USGS",
+  URL = "",
+  License = "NASA/PDS"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,12 +25,13 @@
 #include <modules/statemachine/include/statemachine.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <fstream>
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "StateMachine";
+    constexpr std::string_view _loggerCat = "StateMachine";
 
     struct [[codegen::Dictionary(StateMachine)]] Parameters {
         // A list of states
@@ -118,8 +119,8 @@ const State* StateMachine::currentState() const {
 void StateMachine::transitionTo(const std::string& newState) {
     if (!currentState()) {
         LERROR(
-            "Cannot perform transition as the machine is in no current state. "
-            "First set an initial state."
+            "Cannot perform transition as the machine is in no current state. First set "
+            "an initial state"
         );
         return;
     }

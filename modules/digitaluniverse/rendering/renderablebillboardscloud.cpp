@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,10 +31,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -55,110 +52,98 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableBillboardsCloud";
-    constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
-    constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
+    constexpr std::string_view _loggerCat = "RenderableBillboardsCloud";
 
-    constexpr const std::array<const char*, 20> UniformNames = {
+    constexpr std::array<const char*, 21> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
-        "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
+        "hasColorMap", "useColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
-    constexpr double PARSEC = 0.308567756E17;
-
-    constexpr const int RenderOptionViewDirection = 0;
-    constexpr const int RenderOptionPositionNormal = 1;
+    enum RenderOption {
+        ViewDirection = 0,
+        PositionNormal
+    };
 
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite."
+        "The path to the texture that should be used as the point sprite"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
+        "size of each point"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
+        "UseColorMap",
+        "Use Color Map",
+        "If this value is set to 'true', the provided color map is used (if one was "
+        "provided in the configuration). If no color map was provided, changing this "
+        "setting does not do anything"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value is used to define the color of the astronomical object."
+        "This value is used to define the color of the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical object."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
-        "TextColor",
-        "Text Color",
-        "The text color for the astronomical object."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
-        "TextOpacity",
-        "Text Opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
-        "TextSize",
-        "Text Size",
-        "The text size for the astronomical object labels."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
-        "TextMinMaxSize",
-        "Text Min/Max Size",
-        "The minimal and maximal size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered."
+        "The path to the color map file of the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects."
+        "Enables/Disables the drawing of the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw Labels",
-        "Determines whether labels should be drawn or hidden."
+        "Determines whether labels should be drawn or hidden"
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
+    {
+        "Labels",
+        "Labels",
+        "The labels for the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
         "This value determines which paramenter is used for default color of the "
-        "astronomical objects."
+        "astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OptionColorRangeInfo = {
         "OptionColorRange",
         "Option Color Range",
-        "This value changes the range of values to be mapped with the current color map."
+        "This value changes the range of values to be mapped with the current color map"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
         "This value determines which paramenter (datavar) is used for scaling "
-        "of the astronomical objects."
+        "of the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts."
+        "Option wether the billboards should face the camera or not. Used for "
+        "non-linear display envierments such as fisheye."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -166,27 +151,27 @@ namespace {
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
-        "fading-in."
+        "fading-in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in Effect",
-        "Enables/Disables the Fade-in effect."
+        "Enables/Disables the Fade-in effect"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable Pixel Size Control",
         "Enable pixel size control for rectangular projections. If set to true, the "
-        "billboard size is restricted by the min/max size in pixels property."
+        "billboard size is restricted by the min/max size in pixels property"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BillboardMinMaxSizeInfo = {
         "BillboardMinMaxSize",
         "Billboard Min/Max Size in Pixels",
         "The minimum and maximum size (in pixels) for the billboard representing the "
-        "astronomical object."
+        "astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -194,7 +179,7 @@ namespace {
     {
         "CorrectionSizeEndDistance",
         "Distance in 10^X meters where correction size stops acting",
-        "Distance in 10^X meters where correction size stops acting."
+        "Distance in 10^X meters where correction size stops acting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
@@ -230,21 +215,21 @@ namespace {
         // [[codegen::verbatim(DrawElementsInfo.description)]]
         std::optional<bool> drawElements;
 
-        enum class RenderOption {
+        enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
         // [[codegen::verbatim(RenderOptionInfo.description)]]
         std::optional<RenderOption> renderOption;
 
-        enum class Unit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
             Parsec [[codegen::key("pc")]],
             Kiloparsec [[codegen::key("Kpc")]],
             Megaparsec [[codegen::key("Mpc")]],
             Gigaparsec [[codegen::key("Gpc")]],
-            GigalightYears [[codegen::key("Gly")]]
+            Gigalightyear [[codegen::key("Gly")]]
         };
         // The unit used for all distances. Must match the unit of any
         // distances/positions in the data files
@@ -252,6 +237,9 @@ namespace {
 
         // [[codegen::verbatim(ScaleFactorInfo.description)]]
         std::optional<float> scaleFactor;
+
+        // [[codegen::verbatim(UseColorMapInfo.description)]]
+        std::optional<bool> useColorMap;
 
         // [[codegen::verbatim(ColorMapInfo.description)]]
         std::optional<std::string> colorMap;
@@ -266,21 +254,9 @@ namespace {
         // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
 
-        // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor [[codegen::color()]];
-
-        // [[codegen::verbatim(TextOpacityInfo.description)]]
-        std::optional<float> textOpacity;
-
-        // [[codegen::verbatim(TextSizeInfo.description)]]
-        std::optional<float> textSize;
-
-        // The path to the label file that contains information about the astronomical
-        // objects being rendered
-        std::optional<std::string> labelFile;
-
-        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> textMinMaxSize;
+        // [[codegen::verbatim(LabelsInfo.description)]]
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("space_labelscomponent")]];
 
         // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::vector<std::string>> colorOption;
@@ -328,17 +304,9 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
+    , _useColorMap(UseColorMapInfo, true)
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
-    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
-    , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
-    , _textMinMaxSize(
-        LabelMinMaxSizeInfo,
-        glm::ivec2(8, 20),
-        glm::ivec2(0),
-        glm::ivec2(100)
-    )
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
@@ -374,56 +342,28 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
     _hasSpeckFile = p.file.has_value();
 
+    _useColorMap = p.useColorMap.value_or(_useColorMap);
+
     _drawElements = p.drawElements.value_or(_drawElements);
     _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
-    _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
-    _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
+    _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
+    _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
 
     if (p.renderOption.has_value()) {
-        switch (*p.renderOption) {
-            case Parameters::RenderOption::ViewDirection:
-                _renderOption = RenderOptionViewDirection;
-                break;
-            case Parameters::RenderOption::PositionNormal:
-                _renderOption = RenderOptionPositionNormal;
-                break;
-        }
+        _renderOption = codegen::map<RenderOption>(*p.renderOption);
     }
     else {
-        _renderOption = RenderOptionViewDirection;
+        _renderOption = RenderOption::ViewDirection;
     }
     addProperty(_renderOption);
 
     if (p.unit.has_value()) {
-        switch (*p.unit) {
-            case Parameters::Unit::Meter:
-                _unit = Meter;
-                break;
-            case Parameters::Unit::Kilometer:
-                _unit = Kilometer;
-                break;
-            case Parameters::Unit::Parsec:
-                _unit = Parsec;
-                break;
-            case Parameters::Unit::Kiloparsec:
-                _unit = Kiloparsec;
-                break;
-            case Parameters::Unit::Megaparsec:
-                _unit = Megaparsec;
-                break;
-            case Parameters::Unit::Gigaparsec:
-                _unit = Gigaparsec;
-                break;
-            case Parameters::Unit::GigalightYears:
-                _unit = GigalightYears;
-                break;
-        }
+        _unit = codegen::map<DistanceUnit>(*p.unit);
     }
     else {
-        LWARNING("No unit given for RenderableBillboardsCloud. Using meters as units");
-        _unit = Meter;
+        _unit = DistanceUnit::Meter;
     }
 
     if (p.texture.has_value()) {
@@ -470,11 +410,10 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         _isColorMapExact = p.exactColorMap.value_or(_isColorMapExact);
     }
-    else {
-        _pointColor = p.color;
-        _pointColor.setViewOption(properties::Property::ViewOptions::Color);
-        addProperty(_pointColor);
-    }
+
+    _pointColor = p.color;
+    _pointColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_pointColor);
 
     addProperty(_opacity);
 
@@ -501,28 +440,13 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _polygonSides = p.polygonSides.value_or(_polygonSides);
     _hasPolygon = p.polygonSides.has_value();
 
-    if (p.labelFile.has_value()) {
+    if (p.labels.has_value()) {
         _drawLabels = p.drawLabels.value_or(_drawLabels);
         addProperty(_drawLabels);
 
-        _labelFile = absPath(*p.labelFile).string();
-        _hasLabel = true;
-
-        _textColor = p.textColor.value_or(_textColor);
-        _hasLabel = p.textColor.has_value();
-        _textColor.setViewOption(properties::Property::ViewOptions::Color);
-        addProperty(_textColor);
-        _textColor.onChange([&]() { _textColorIsDirty = true; });
-
-        _textOpacity = p.textOpacity.value_or(_textOpacity);
-        addProperty(_textOpacity);
-
-        _textSize = p.textSize.value_or(_textSize);
-        addProperty(_textSize);
-
-        _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
-        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-        addProperty(_textMinMaxSize);
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -568,13 +492,22 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     });
     addProperty(_setRangeFromData);
 
+    _useColorMap.onChange([this]() { _dataIsDirty = true; });
+    addProperty(_useColorMap);
+
     _useLinearFiltering = p.useLinearFiltering.value_or(_useLinearFiltering);
     _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
     addProperty(_useLinearFiltering);
 }
 
 bool RenderableBillboardsCloud::isReady() const {
-    return (_program && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
+    bool isReady = _program && !_dataset.entries.empty();
+
+    // If we have labels, they also need to be loaded
+    if (_hasLabels) {
+        isReady = isReady || _labels->isReady();
+    }
+    return isReady;
 }
 
 void RenderableBillboardsCloud::initialize() {
@@ -588,11 +521,9 @@ void RenderableBillboardsCloud::initialize() {
         _colorMap = speck::color::loadFileWithCache(_colorMapFile);
     }
 
-    if (!_labelFile.empty()) {
-        _labelset = speck::label::loadFileWithCache(_labelFile);
-        for (speck::Labelset::Entry& e : _labelset.entries) {
-            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
-        }
+    if (_hasLabels) {
+        _labels->initialize();
+        _labels->loadLabels();
     }
 
     if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
@@ -608,10 +539,10 @@ void RenderableBillboardsCloud::initializeGL() {
     ZoneScoped
 
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
+        "RenderableBillboardsCloud",
         []() {
             return global::renderEngine->buildRenderProgram(
-                ProgramObjectName,
+                "RenderableBillboardsCloud",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
@@ -620,10 +551,10 @@ void RenderableBillboardsCloud::initializeGL() {
     );
 
     _renderToPolygonProgram = DigitalUniverseModule::ProgramObjectManager.request(
-        RenderToPolygonProgram,
+        "RenderableBillboardsCloud_Polygon",
         []() {
             return ghoul::opengl::ProgramObject::Build(
-                RenderToPolygonProgram,
+                "RenderableBillboardsCloud_Polygon",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
@@ -636,18 +567,6 @@ void RenderableBillboardsCloud::initializeGL() {
     if (_hasPolygon) {
         createPolygonTexture();
     }
-
-    if (_hasLabel) {
-        if (!_font) {
-            size_t _fontSize = 50;
-            _font = global::fontManager->font(
-                "Mono",
-                static_cast<float>(_fontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes,
-                ghoul::fontrendering::FontManager::LoadGlyphs::No
-            );
-        }
-    }
 }
 
 void RenderableBillboardsCloud::deinitializeGL() {
@@ -657,14 +576,16 @@ void RenderableBillboardsCloud::deinitializeGL() {
     _vao = 0;
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
+        "RenderableBillboardsCloud",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
     _program = nullptr;
 
-    DigitalUniverseModule::ProgramObjectManager.release(RenderToPolygonProgram);
+    DigitalUniverseModule::ProgramObjectManager.release(
+        "RenderableBillboardsCloud_Polygon"
+    );
     _renderToPolygonProgram = nullptr;
 
     DigitalUniverseModule::TextureManager.release(_spriteTexture);
@@ -713,7 +634,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.minBillboardSize, minBillboardSize);
     _program->setUniform(_uniformCache.maxBillboardSize, maxBillboardSize);
     _program->setUniform(_uniformCache.color, _pointColor);
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
@@ -743,6 +664,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     }
     _program->setUniform(_uniformCache.spriteTexture, textureUnit);
     _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
+    _program->setUniform(_uniformCache.useColormap, _useColorMap);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
@@ -753,47 +675,13 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     global::renderEngine->openglStateCache().resetDepthState();
 }
 
-void RenderableBillboardsCloud::renderLabels(const RenderData& data,
-                                             const glm::dmat4& modelViewProjectionMatrix,
-                                             const glm::dvec3& orthoRight,
-                                             const glm::dvec3& orthoUp,
-                                             float fadeInVariable)
-{
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity * fadeInVariable);
-
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _textMinMaxSize.value().x;
-    labelInfo.maxSize = _textMinMaxSize.value().y;
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _renderOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _textSize);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
-
-    for (const speck::Labelset::Entry& e : _labelset.entries) {
-        glm::vec3 scaledPos(e.position);
-        scaledPos *= unitToMeter(_unit);
-        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
-            *_font,
-            scaledPos,
-            e.text,
-            textColor,
-            labelInfo
-        );
-    }
-}
-
 void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     float fadeInVar = 1.f;
     if (!_disableFadeInDistance) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
         const glm::vec2 fadeRange = _fadeInDistances;
         const float a = static_cast<float>(
-            1.f / ((fadeRange.y - fadeRange.x) * unitToMeter(_unit))
+            1.f / ((fadeRange.y - fadeRange.x) * toMeter(_unit))
         );
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         const float funcValue = a * distCamera + b;
@@ -820,7 +708,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
     );
     if (orthoRight == glm::dvec3(0.0)) {
-        glm::dvec3 otherVector(
+        glm::dvec3 otherVector = glm::vec3(
             cameraUpDirectionWorld.y,
             cameraUpDirectionWorld.x,
             cameraUpDirectionWorld.z
@@ -833,8 +721,8 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         renderBillboards(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
     }
 
-    if (_drawLabels && _hasLabel) {
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
+    if (_drawLabels && _hasLabels) {
+        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
     }
 }
 
@@ -970,9 +858,10 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         _spriteTexture = DigitalUniverseModule::TextureManager.request(
             std::to_string(hash),
             [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-                LINFO(fmt::format("Loaded texture from {}", absPath(path)));
+                std::filesystem::path p = absPath(path);
+                LINFO(fmt::format("Loaded texture from {}", p));
                 std::unique_ptr<ghoul::opengl::Texture> t =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path).string());
+                    ghoul::io::TextureReader::ref().loadTexture(p.string(), 2);
                 t->uploadTexture();
                 t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
                 t->purgeFromRAM();
@@ -982,20 +871,6 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 
         DigitalUniverseModule::TextureManager.release(texture);
         _spriteTextureIsDirty = false;
-    }
-}
-
-double RenderableBillboardsCloud::unitToMeter(Unit unit) const {
-    // @TODO (abock, 2021-05-10)  This should be moved to a centralized conversion code
-    switch (unit) {
-        case Meter:          return 1.0;
-        case Kilometer:      return 1e3;
-        case Parsec:         return PARSEC;
-        case Kiloparsec:     return 1000 * PARSEC;
-        case Megaparsec:     return 1e6 * PARSEC;
-        case Gigaparsec:     return 1e9 * PARSEC;
-        case GigalightYears: return 306391534.73091 * PARSEC;
-        default:             throw ghoul::MissingCaseException();
     }
 }
 
@@ -1015,7 +890,8 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     }
 
     // what datavar in use for the index color
-    int colorMapInUse = _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
+    int colorMapInUse =
+        _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
 
     // what datavar in use for the size scaling (if present)
     int sizeScalingInUse =
@@ -1041,14 +917,44 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
         glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::vec4(
             e.position, 1.0
         ));
-        glm::vec4 position(transformedPos, static_cast<float>(_unit));
 
-        const double unitMeter = unitToMeter(_unit);
+        float unitValue = 0.f;
+        // (abock, 2022-01-02)  This is vestigial from a previous rewrite. I just want to
+        // make it work for now and we can rewrite it properly later
+        switch (_unit) {
+            case DistanceUnit::Meter:
+                unitValue = 0.f;
+                break;
+            case DistanceUnit::Kilometer:
+                unitValue = 1.f;
+                break;
+            case DistanceUnit::Parsec:
+                unitValue = 2;
+                break;
+            case DistanceUnit::Kiloparsec:
+                unitValue = 3;
+                break;
+            case DistanceUnit::Megaparsec:
+                unitValue = 4;
+                break;
+            case DistanceUnit::Gigaparsec:
+                unitValue = 5;
+                break;
+            case DistanceUnit::Gigalightyear:
+                unitValue = 6;
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+
+        glm::vec4 position(transformedPos, unitValue);
+
+        const double unitMeter = toMeter(_unit);
         glm::dvec3 p = glm::dvec3(position) * unitMeter;
         const double r = glm::length(p);
         maxRadius = std::max(maxRadius, r);
 
-        if (_hasColorMapFile) {
+        if (_hasColorMapFile && _useColorMap && !_colorMap.entries.empty()) {
             for (int j = 0; j < 4; ++j) {
                 result.push_back(position[j]);
             }
@@ -1069,7 +975,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             }
 
             if (_isColorMapExact) {
-                int colorIndex = variableColor + cmin;
+                int colorIndex = static_cast<int>(variableColor + cmin);
                 for (int j = 0; j < 4; ++j) {
                     result.push_back(_colorMap.entries[colorIndex][j]);
                 }
@@ -1102,11 +1008,14 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                 }
                 else {
                     float ncmap = static_cast<float>(_colorMap.entries.size());
-                    float normalization = ((cmax != cmin) && (ncmap > 2)) ?
-                        (ncmap - 2) / (cmax - cmin) : 0;
-                    int colorIndex = (variableColor - cmin) * normalization + 1;
+                    float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
+                        (ncmap - 2.f) / (cmax - cmin) : 0;
+                    int colorIndex = static_cast<int>(
+                        (variableColor - cmin) * normalization + 1.f
+                    );
                     colorIndex = colorIndex < 0 ? 0 : colorIndex;
-                    colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
+                    colorIndex = colorIndex >= ncmap ?
+                        static_cast<int>(ncmap - 1.f) : colorIndex;
 
                     for (int j = 0; j < 4; ++j) {
                         result.push_back(_colorMap.entries[colorIndex][j]);
@@ -1192,7 +1101,7 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
     glBindVertexArray(_polygonVao);
     glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
 
-    constexpr const std::array<GLfloat, 4> VertexData = {
+    constexpr std::array<GLfloat, 4> VertexData = {
         //      x      y     z     w
         0.f, 0.f, 0.f, 1.f,
     };
@@ -1213,7 +1122,7 @@ void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
         );
 
     program->activate();
-    constexpr const glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _polygonSides);

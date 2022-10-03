@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,9 +68,9 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
+    constexpr std::string_view _loggerCat = "AtmosphereDeferredcaster";
 
-    constexpr const std::array<const char*, 27> UniformNames = {
+    constexpr std::array<const char*, 27> UniformNames = {
         "cullAtmosphere", "Rg", "Rt", "groundRadianceEmission", "HR", "betaRayleigh",
         "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "HO",
         "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU",
@@ -80,8 +80,8 @@ namespace {
         "inscatterTexture"
     };
 
-    constexpr const float ATM_EPS = 2000.f;
-    constexpr const float KM_TO_M = 1000.f;
+    constexpr float ATM_EPS = 2000.f;
+    constexpr float KM_TO_M = 1000.f;
 
     template <GLenum colorBufferAttachment = GL_COLOR_ATTACHMENT0>
     void saveTextureFile(const std::filesystem::path& fileName, const glm::ivec2& size) {
@@ -235,7 +235,7 @@ namespace openspace {
 AtmosphereDeferredcaster::AtmosphereDeferredcaster(float textureScale,
                                        std::vector<ShadowConfiguration> shadowConfigArray,
                                                               bool saveCalculatedTextures)
-    : _transmittanceTableSize(glm::ivec2(256 * textureScale, 64 * textureScale) )
+    : _transmittanceTableSize(glm::ivec2(256 * textureScale, 64 * textureScale))
     , _irradianceTableSize(glm::ivec2(64 * textureScale, 16 * textureScale))
     , _deltaETableSize(glm::ivec2(64 * textureScale, 16 * textureScale))
     , _muSSamples(static_cast<int>(32 * textureScale))
@@ -287,7 +287,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     // Number of planet radii to use as distance threshold for culling
     prg.setUniform(_uniformCache.cullAtmosphere, 1);
 
-    constexpr const double DistanceCullingRadii = 5000;
+    constexpr double DistanceCullingRadii = 5000;
     glm::dmat4 MV = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
         data.camera.combinedViewMatrix();
     if (distance <= scaledRadius * DistanceCullingRadii &&
@@ -350,7 +350,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
 
         // Shadow calculations..
         _shadowDataArrayCache.clear();
-        for (const ShadowConfiguration& shadowConf : _shadowConfArray) {
+        for (ShadowConfiguration& shadowConf : _shadowConfArray) {
             // TO REMEMBER: all distances and lengths in world coordinates are in
             // meters!!! We need to move this to view space...
             double lt;
@@ -374,10 +374,19 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
             casterPos *= KM_TO_M; // converting to meters
 
             SceneGraphNode* sourceNode = sceneGraphNode(shadowConf.source.first);
+            if (!sourceNode) {
+                if (!shadowConf.printedSourceError) {
+                    LERROR("Invalid scenegraph node for the shadow's receiver");
+                    shadowConf.printedSourceError = true;
+                }
+                return;
+            }
             SceneGraphNode* casterNode = sceneGraphNode(shadowConf.caster.first);
-
-            if (!sourceNode || !casterNode) {
-                LERROR("Invalid scenegraph node for the shadow's caster or receiver");
+            if (!casterNode) {
+                if (!shadowConf.printedCasterError) {
+                    LERROR("Invalid scenegraph node for the shadow's caster");
+                    shadowConf.printedCasterError = true;
+                }
                 return;
             }
 
@@ -555,7 +564,7 @@ void AtmosphereDeferredcaster::calculateTransmittance() {
     program->setUniform("HO", _ozoneHeightScale);
     program->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 
-    constexpr const float Black[] = { 0.f, 0.f, 0.f, 0.f };
+    constexpr float Black[] = { 0.f, 0.f, 0.f, 0.f };
     glClearBufferfv(GL_COLOR, 0, Black);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (_saveCalculationTextures) {

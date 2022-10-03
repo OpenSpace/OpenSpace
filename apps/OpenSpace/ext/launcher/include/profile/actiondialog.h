@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,8 +41,7 @@ class QTextEdit;
 class ActionDialog final : public QDialog {
 Q_OBJECT
 public:
-    ActionDialog(QWidget* parent,
-        std::vector<openspace::Profile::Action>* actions,
+    ActionDialog(QWidget* parent, std::vector<openspace::Profile::Action>* actions,
         std::vector<openspace::Profile::Keybinding>* keybindings);
 
 private:
@@ -58,6 +57,8 @@ private:
     void actionSaved();
     void clearActionFields();
     void actionRejected();
+    void chooseScripts();
+    void appendScriptsToTextfield(std::string scripts);
 
     openspace::Profile::Keybinding* selectedKeybinding();
     void keybindingAdd();
@@ -80,6 +81,7 @@ private:
         QLineEdit* guiPath = nullptr;
         QLineEdit* documentation = nullptr;
         QCheckBox* isLocal = nullptr;
+        QPushButton* chooseScripts = nullptr;
         QTextEdit* script = nullptr;
         QPushButton* addButton = nullptr;
         QPushButton* removeButton = nullptr;

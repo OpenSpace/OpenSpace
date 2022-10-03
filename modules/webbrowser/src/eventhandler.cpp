@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,14 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interactionmonitor.h>
+#include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 
 namespace {
-    constexpr const char* _loggerCat = "WebBrowser:EventHandler";
+    constexpr std::string_view _loggerCat = "WebBrowser:EventHandler";
 
     /**
      * Map from GLFW key codes to windows key codes, supported by JS and CEF.
@@ -149,48 +149,58 @@ namespace {
 namespace openspace {
 
 void EventHandler::initialize() {
-    global::callback::character->emplace_back(
-        [this](unsigned int charCode, KeyModifier mod) -> bool {
-            if (_browserInstance) {
+    global::callback::character->emplace(
+        global::callback::character->begin(),
+        [this](unsigned int charCode, KeyModifier mod, IsGuiWindow isGuiWindow) -> bool {
+            if (_browserInstance && isGuiWindow) {
                 return charCallback(charCode, mod);
             }
             return false;
         }
     );
-    global::callback::keyboard->emplace_back(
-        [this](Key key, KeyModifier mod, KeyAction action) -> bool {
-            if (_browserInstance) {
+    global::callback::keyboard->emplace(
+        global::callback::keyboard->begin(),
+        [this](Key key, KeyModifier mod, KeyAction action,
+            IsGuiWindow isGuiWindow) -> bool
+        {
+            if (_browserInstance && isGuiWindow) {
                 return keyboardCallback(key, mod, action);
             }
             return false;
         }
     );
-    global::callback::mousePosition->emplace_back(
-        [this](double x, double y) -> bool {
-            if (_browserInstance) {
+    global::callback::mousePosition->emplace(
+        global::callback::mousePosition->begin(),
+        [this](double x, double y, IsGuiWindow isGuiWindow) -> bool {
+            if (_browserInstance && isGuiWindow) {
                 return mousePositionCallback(x, y);
             }
             return false;
         }
     );
-    global::callback::mouseButton->emplace_back(
-        [this](MouseButton button, MouseAction action, KeyModifier mods) -> bool {
-            if (_browserInstance) {
+    global::callback::mouseButton->emplace(
+        global::callback::mouseButton->begin(),
+        [this](MouseButton button, MouseAction action,
+               KeyModifier mods, IsGuiWindow isGuiWindow) -> bool
+        {
+            if (_browserInstance && isGuiWindow) {
                 return mouseButtonCallback(button, action, mods);
             }
             return false;
         }
     );
-    global::callback::mouseScrollWheel->emplace_back(
-        [this](double x, double y) -> bool {
-            if (_browserInstance) {
+    global::callback::mouseScrollWheel->emplace(
+        global::callback::mouseScrollWheel->begin(),
+        [this](double x, double y, IsGuiWindow isGuiWindow) -> bool {
+            if (_browserInstance && isGuiWindow) {
                 return mouseWheelCallback(glm::ivec2(x, y));
             }
             return false;
         }
     );
 
-    global::callback::touchDetected->emplace_back(
+    global::callback::touchDetected->emplace(
+        global::callback::touchDetected->begin(),
         [&](TouchInput input) -> bool {
             if (!_browserInstance) {
                 return false;
@@ -229,7 +239,8 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchUpdated->emplace_back(
+    global::callback::touchUpdated->emplace(
+        global::callback::touchUpdated->begin(),
         [&](TouchInput input) -> bool {
             if (!_browserInstance || _validTouchStates.empty()) {
                 return false;
@@ -267,7 +278,8 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchExit->emplace_back(
+    global::callback::touchExit->emplace(
+        global::callback::touchExit->begin(),
         [&](TouchInput input) {
             if (!_browserInstance) {
                 return;
@@ -462,7 +474,7 @@ CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     event.y = windowPos.y;
     event.type = eventType;
     const std::vector<std::pair<Key, KeyModifier>>& keyMods =
-        global::navigationHandler->inputState().pressedKeys();
+        global::navigationHandler->keyboardInputState().pressedKeys();
     for (const std::pair<Key, KeyModifier>& p : keyMods) {
         const KeyModifier mods = p.second;
         event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));

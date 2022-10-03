@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,17 +23,25 @@
  ****************************************************************************************/
 
 #include <openspace/scene/profile.h>
-#include <openspace/scene/scene.h>
 
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/scene/scene.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ctime>
+#include <filesystem>
 #include <set>
 #include <json/json.hpp>
 
@@ -109,7 +117,6 @@ namespace {
         }
     }
 } // namespace
-
 
 //
 // Current version:
@@ -483,7 +490,39 @@ void from_json(const nlohmann::json& j, version10::Keybinding& v) {
         { "key", "documentation", "name", "gui_path", "is_local", "script" }
     );
 
-    v.key = stringToKey(j.at("key").get<std::string>());
+    std::string key = j.at("key").get<std::string>();
+    if (key == "KP0") {
+        key = "KP_0";
+    }
+    else if (key == "KP1") {
+        key = "KP_1";
+    }
+    else if (key == "KP2") {
+        key = "KP_2";
+    }
+    else if (key == "KP3") {
+        key = "KP_3";
+    }
+    else if (key == "KP4") {
+        key = "KP_4";
+    }
+    else if (key == "KP5") {
+        key = "KP_5";
+    }
+    else if (key == "KP6") {
+        key = "KP_6";
+    }
+    else if (key == "KP7") {
+        key = "KP_7";
+    }
+    else if (key == "KP8") {
+        key = "KP_8";
+    }
+    else if (key == "KP9") {
+        key = "KP_9";
+    }
+
+    v.key = stringToKey(key);
     j["documentation"].get_to(v.documentation);
     j["name"].get_to(v.name);
     j["gui_path"].get_to(v.guiPath);
@@ -493,6 +532,7 @@ void from_json(const nlohmann::json& j, version10::Keybinding& v) {
 
 void convertVersion10to11(nlohmann::json& profile) {
     // Version 1.1 introduced actions and remove Lua function calling from keybindings
+    profile["version"] = Profile::Version{ 1, 1 };
 
     if (profile.find("keybindings") == profile.end()) {
         // We didn't find any keybindings, so there is nothing to do
@@ -525,8 +565,6 @@ void convertVersion10to11(nlohmann::json& profile) {
 
     profile["actions"] = actions;
     profile["keybindings"] = keybindings;
-
-    profile["version"] = Profile::Version{ 1, 1 };
 }
 
 } // namespace version10
@@ -688,10 +726,10 @@ Profile::Profile(const std::string& content) {
         }
         if (profile.find("camera") != profile.end()) {
             nlohmann::json c = profile.at("camera");
-            if (c["type"] == CameraNavState::Type) {
+            if (c["type"].get<std::string>() == CameraNavState::Type) {
                 camera = c.get<CameraNavState>();
             }
-            else if (c["type"] == CameraGoToGeo::Type) {
+            else if (c["type"].get<std::string>() == CameraGoToGeo::Type) {
                 camera = c.get<CameraGoToGeo>();
             }
             else {
@@ -715,20 +753,7 @@ scripting::LuaLibrary Profile::luaLibrary() {
     return {
         "",
         {
-            {
-                "saveSettingsToProfile",
-                &luascriptfunctions::saveSettingsToProfile,
-                "[string, bool]",
-                "Collects all changes that have been made since startup, including all "
-                "property changes and assets required, requested, or removed. All "
-                "changes will be added to the profile that OpenSpace was started with, "
-                "and the new saved file will contain all of this information. If the "
-                "arugment is provided, the settings will be saved into new profile with "
-                "that name. If the argument is blank, the current profile will be saved "
-                "to a backup file and the original profile will be overwritten. The "
-                "second argument determines if a file that already exists should be "
-                "overwritten, which is 'false' by default"
-            }
+            codegen::lua::SaveSettingsToProfile
         }
     };
 }

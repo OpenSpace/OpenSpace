@@ -1,34 +1,15 @@
 openspace.globebrowsing.documentation = {
     {
         Name = "createTemporalGibsGdalXml",
-        Arguments = "string, string, string, string, string, string, [string]",
-        Documentation =
-            "Creates an XML configuration for a temporal GIBS dataset." ..
-            "Arguments are: Name, Start date, end date, time resolution, time format," ..
-            "resolution, file format. The last parameter is the temporal format and " ..
-            "defaults to YYYY-MM-DD. For all specifications, see " ..
-            "https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products" ..
-            "Usage:" ..
-            "openspace.globebrowsing.addLayer(" ..
-                "\"Earth\"," ..
-                "\"ColorLayers\"," ..
-                "{" ..
-                    "Type = \"TemporalTileLayer\"," ..
-                    "Name = \"MODIS_Terra_Chlorophyll_A\"," ..
-                    "FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(" ..
-                        "\"MODIS_Terra_Chlorophyll_A\"," ..
-                        "\"2013-07-02\"," ..
-                        "\"Yesterday\"," ..
-                        "\"1d\"," ..
-                        "\"1km\"," ..
-                        "\"png\"" ..
-                    ")" ..
-                "}" ..
-            ")"
+        Arguments = { layerName = "String", resolution = "String", format = "String" },
+        Documentation = [[
+            Creates an XML configuration for a temporal GIBS dataset to be used in
+            a TemporalTileprovider
+        ]]
     },
     {
         Name = "createGibsGdalXml",
-        Arguments = "string, string, string, string",
+        Arguments = { layerName = "String", date = "String", resolution = "String", format = "String" },
         Documentation = 
             "Creates an XML configuration for a GIBS dataset." ..
             "Arguments are: layerName, date, resolution, format." ..
@@ -40,7 +21,7 @@ openspace.globebrowsing.documentation = {
                 "\"ColorLayers\"," ..
                 "{" ..
                     "Name = \"MODIS_Terra_Chlorophyll_A\"," ..
-                    "FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(" ..
+                    "FilePath = openspace.globebrowsing.createGibsGdalXml(" ..
                         "\"MODIS_Terra_Chlorophyll_A\"," ..
                         "\"2013-07-02\"," ..
                         "\"1km\"," ..
@@ -51,7 +32,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addGibsLayer",
-        Arguments = "string, string, string, string, string",
+        Arguments = { layer = "String", resolution = "String", format = "String", startDate = "String", endDate = "String" },
         Documentation = "Adds a new layer from NASA GIBS to the Earth globe. Arguments " ..
             "are: imagery layer name, imagery resolution, start date, end date, format. " ..
              "For all specifications, see " ..
@@ -61,7 +42,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "parseInfoFile",
-        Arguments = "string",
+        Arguments = { file = "String" },
         Documentation =
             "Parses the passed info file and return the table with the information " ..
             "provided in the info file. The return table contains the optional keys: " ..
@@ -72,7 +53,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addBlendingLayersFromDirectory",
-        Arguments = "string, string",
+        Arguments = { directory = "String", nodeName = "String" },
         Documentation =
             "Retrieves all info files recursively in the directory passed as the first " ..
             "argument to this function. The color and height tables retrieved from these " ..
@@ -82,7 +63,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addFocusNodesFromDirectory",
-        Arguments = "string, string",
+        Arguments = { directory = "String", nodeName = "String" },
         Documentation =
             "Retrieves all info files recursively in the directory passed as the first " ..
             "argument to this function. The name and location retrieved from these info " ..
@@ -92,7 +73,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addFocusNodeFromLatLong",
-        Arguments = "string, string, number, number, number",
+        Arguments = { name = "String", globeIdentifier = "String", latitude = "Number", longitude = "Number", altitude = "Number" },
         Documentation =
             "Creates a new SceneGraphNode that can be used as focus node. " ..
             "Usage: openspace.globebrowsing.addFocusNodeFromLatLong(" ..
@@ -100,7 +81,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "loadWMSServersFromFile",
-        Arguments = "string",
+        Arguments = { filePath = "String" },
         Documentation =
             "Loads all WMS servers from the provided file and passes them to the " ..
             "'openspace.globebrowsing.loadWMSCapabilities' file."
@@ -111,21 +92,27 @@ openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, start
     if endDate == 'Present' then
         endDate = ''
     end
-    local xml = openspace.globebrowsing.createTemporalGibsGdalXml(layer, startDate, endDate, '1d', resolution, format)
-    openspace.globebrowsing.addLayer('Earth', 'ColorLayers', { Identifier = layer,  Type = "TemporalTileLayer", FilePath = xml })
-end
 
-openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, resolution, format, temporalFormat)
-    temporalFormat = temporalFormat or 'YYYY-MM-DD'
-    local temporalTemplate =
-        "<OpenSpaceTemporalGDALDataset>" ..
-        "<OpenSpaceTimeStart>" .. startDate .. "</OpenSpaceTimeStart>" ..
-        "<OpenSpaceTimeEnd>" .. endDate .. "</OpenSpaceTimeEnd>" ..
-        "<OpenSpaceTimeResolution>" .. timeResolution .. "</OpenSpaceTimeResolution>" ..
-        "<OpenSpaceTimeIdFormat>" .. temporalFormat .. "</OpenSpaceTimeIdFormat>" ..
-        openspace.globebrowsing.createGibsGdalXml(layerName, "${OpenSpaceTimeId}", resolution, format) ..
-        "</OpenSpaceTemporalGDALDataset>"
-    return temporalTemplate
+    local layer = {
+        Identifier = layerName, 
+        Type = "TemporalTileLayer",
+        Mode = "Prototyped",
+        Prototyped = {
+            Time = {
+                Start = startDate,
+                End = endDate
+            },
+            TemporalResolution = "1d",
+            TimeFormat = "YYYY-MM-DD",
+            Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(layerName, resolution, format)
+        }
+    }
+
+    openspace.globebrowsing.addLayer(
+        'Earth',
+        'ColorLayers',
+        layer
+    )
 end
 
 openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolution, format)
@@ -194,6 +181,10 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
     "</GDAL_WMS>"
 
     return gdalWmsTemplate
+end
+
+openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, resolution, format)
+    return openspace.globebrowsing.createGibsGdalXml(layerName, "${OpenSpaceTimeId}", resolution, format)
 end
 
 openspace.globebrowsing.parseInfoFile = function (file)

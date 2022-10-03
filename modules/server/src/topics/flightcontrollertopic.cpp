@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -59,7 +58,8 @@ namespace {
 
     using AxisType = openspace::interaction::WebsocketCameraStates::AxisType;
 
-    constexpr const char* _loggerCat = "FlightControllerTopic";
+    constexpr std::string_view _loggerCat = "FlightControllerTopic";
+
     constexpr const char* TypeKey = "type";
     constexpr const char* ValuesKey = "values";
 

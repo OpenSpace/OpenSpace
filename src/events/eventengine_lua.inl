@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,28 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::luascriptfunctions {
+namespace {
 
-int registerEventAction(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::registerEventAction");
-    auto [event, action, filter] =
-        ghoul::lua::values<std::string, std::string, std::optional<ghoul::Dictionary>>(L);
-
+/**
+ * Registers an action to be executed whenever an event is encountered. If the optional
+ * third parameter is provided, it describes a filter that the event is being checked
+ * against and only if it passes the filter, the action is triggered.
+ */
+[[codegen::luawrap]] void registerEventAction(std::string event, std::string action,
+                                    std::optional<ghoul::Dictionary> filter)
+{
+    using namespace openspace;
     events::Event::Type type = events::fromString(event);
-
     global::eventEngine->registerEventAction(type, std::move(action), std::move(filter));
-    return 0;
 }
 
-int unregisterEventAction(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::unregisterEventAction");
-    auto [event, action, filter] =
-        ghoul::lua::values<std::string, std::string, std::optional<ghoul::Dictionary>>(L);
-
+/**
+ * Unregisters a specific combination of event, action, and potentially a filter.
+ */
+[[codegen::luawrap]] void unregisterEventAction(std::string event, std::string action,
+                                                std::optional<ghoul::Dictionary> filter)
+{
+    using namespace openspace;
     events::Event::Type type = events::fromString(event);
-
     global::eventEngine->unregisterEventAction(type, action, filter);
-    return 0;
 }
 
-} // namespace openspace::luascriptfunctions
+/**
+ * Returns the list of registered events.
+ */
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> registeredEvents() {
+    using namespace openspace;
+    
+    std::vector<EventEngine::ActionInfo> actions =
+        global::eventEngine->registeredActions();
+
+    std::vector<ghoul::Dictionary> result;
+    result.reserve(actions.size());
+    for (const EventEngine::ActionInfo& ai : actions) {
+        ghoul::Dictionary d;
+        d.setValue("Identifier", static_cast<int>(ai.id));
+        d.setValue("Type", std::string(events::toString(ai.type)));
+        d.setValue("Enabled", ai.isEnabled);
+        d.setValue("Action", ai.action);
+        if (ai.filter.has_value()) {
+            d.setValue("Filter", *ai.filter);
+        }
+        result.push_back(d);
+
+    }
+    return result;
+}
+
+/**
+ * Enables the event with the provided identifier.
+ */
+[[codegen::luawrap]] void enableEvent(int identifier) {
+    openspace::global::eventEngine->enableEvent(static_cast<uint32_t>(identifier));
+}
+
+/**
+ * Disables the event with the provided identifier.
+ */
+[[codegen::luawrap]] void disableEvent(int identifier) {
+    openspace::global::eventEngine->disableEvent(static_cast<uint32_t>(identifier));
+}
+
+#include "eventengine_lua_codegen.cpp"
+
+} // namespace

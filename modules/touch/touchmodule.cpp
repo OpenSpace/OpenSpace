@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,16 +28,9 @@
 #include <modules/touch/include/win32_touch.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/logging/logmanager.h>
-#include <sstream>
-#include <string>
 
 using namespace TUIO;
 
@@ -231,10 +224,14 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
 
 
     global::callback::preSync->push_back([&]() {
+        if (!_touchActive) {
+            return;
+        }
+
         _touch.setCamera(global::navigationHandler->camera());
         _touch.setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
 
-        if (processNewInput() && global::windowDelegate->isMaster() && _touchActive) {
+        if (processNewInput() && global::windowDelegate->isMaster()) {
             _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
         }
         else if (_touchPoints.empty()) {

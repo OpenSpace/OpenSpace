@@ -1,14 +1,30 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
   Identifier = "Messenger_Mosaic2_Sweden",
   Name = "Messenger Mosaic2 [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Messenger_Mosaic_2.wms",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("messenger_mosaic2_sweden.wms")
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Messenger Mosaic2 [Sweden]",
+  Version = "1.0",
+  Description = [[Mercury Messenger Mosaic2 layer for Mercury globe. This map is hosted on
+    the OpenSpace server in Sweden]],
+  Author = "USGS",
+  URL = "",
+  License = "NASA/PDS"
+}

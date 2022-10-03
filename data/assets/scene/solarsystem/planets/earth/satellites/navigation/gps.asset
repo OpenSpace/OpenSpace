@@ -1,11 +1,51 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('util/tle_helper')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local group = {
-  Title = "GPS",
-  Url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
-  TrailColor = { 0.9, 0.5, 0.0 }
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (GPS)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_gps-ops",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=kvn",
+  Filename = "gps-ops.txt",
+  Override = true
+})
+
+local satellites = {
+  Identifier = "gps-ops",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "gps-ops.txt",
+    Format = "OMM",
+    SegmentQuality = 3,
+    Color = { 0.9, 0.5, 0.0 },
+    Fade = 1.5,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "GPS",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Description = [[The GPS satellites that give us our precise locations back on Earth.]]
+  }
 }
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(satellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(satellites)
+end)
+
+asset.export(satellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Navigation GPS",
+  Version = "1.0",
+  Description = "Satellites asset for Navigation GPS. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

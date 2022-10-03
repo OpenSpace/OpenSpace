@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./67p')
+local sun = asset.require("scene/solarsystem/sun/sun")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./67p")
 
 
 local models = asset.syncedResource({
@@ -18,67 +18,52 @@ local kernels = asset.syncedResource({
 })
 
 local RosettaKernels = {
-  kernels .. "/ROS_160718_STEP.TSC",
-  kernels .. "/ros_triv.tsc",
+  kernels .. "ROS_160718_STEP.TSC",
+  kernels .. "ros_triv.tsc",
 
-  kernels .. "/CORB_DV_243_01___T19_00325.BSP",
-  kernels .. "/CORB_DV_223_01___T19_00302.BSP",
-  kernels .. "/CORB_DV_145_01___T19_00216.BSP",
+  kernels .. "CORB_DV_243_01___T19_00325.BSP",
+  kernels .. "CORB_DV_223_01___T19_00302.BSP",
+  kernels .. "CORB_DV_145_01___T19_00216.BSP",
 
-  kernels .. "/LORB_DV_236_01___T19_00318.BSP",
-  kernels .. "/LORB_DV_223_01___T19_00302.BSP",
-  kernels .. "/LORB_DV_145_01___T19_00216.BSP",
+  kernels .. "LORB_DV_236_01___T19_00318.BSP",
+  kernels .. "LORB_DV_223_01___T19_00302.BSP",
+  kernels .. "LORB_DV_145_01___T19_00216.BSP",
   
-  kernels .. "/RORB_DV_243_01___T19_00325.BSP",
-  kernels .. "/RORB_DV_223_01___T19_00302.BSP",
-  kernels .. "/RORB_DV_145_01___T19_00216.BSP",
+  kernels .. "RORB_DV_243_01___T19_00325.BSP",
+  kernels .. "RORB_DV_223_01___T19_00302.BSP",
+  kernels .. "RORB_DV_145_01___T19_00216.BSP",
 
-  kernels .. "/ATNR_P040302093352_00127.BC",
+  kernels .. "ATNR_P040302093352_00127.BC",
 
-  kernels .. "/ROS_STRUCT_V5.BSP",
+  kernels .. "ROS_STRUCT_V5.BSP",
 
-  kernels .. "/ROS_NAVCAM_V01.TI",
+  kernels .. "ROS_NAVCAM_V01.TI",
   
-  kernels .. "/ROS_CHURYUMOV_V01.TF",
-  kernels .. "/ROS_V26.TF",
+  kernels .. "ROS_CHURYUMOV_V01.TF",
+  kernels .. "ROS_V26.TF",
 
   -- CK
   -- Rosetta attitude
-  kernels .. "/RATT_DV_243_01_01____00325.BC",
-  kernels .. "/RATT_DV_223_01_01____00302.BC",
-  kernels .. "/RATT_DV_145_01_01____00216.BC",
+  kernels .. "RATT_DV_243_01_01____00325.BC",
+  kernels .. "RATT_DV_223_01_01____00302.BC",
+  kernels .. "RATT_DV_145_01_01____00216.BC",
 
   -- Comet attitude
-  kernels .. "/CATT_DV_243_01_______00325.BC",
-  kernels .. "/CATT_DV_223_01_______00302.BC",
-  kernels .. "/CATT_DV_145_01_______00216.BC",
+  kernels .. "CATT_DV_243_01_______00325.BC",
+  kernels .. "CATT_DV_223_01_______00302.BC",
+  kernels .. "CATT_DV_145_01_______00216.BC",
 
   -- High gain antenna
-  kernels .. "/ROS_HGA_2016_V0035.BC",
-  kernels .. "/ROS_HGA_2015_V0053.BC",
-  kernels .. "/ROS_HGA_2014_V0044.BC",
+  kernels .. "ROS_HGA_2016_V0035.BC",
+  kernels .. "ROS_HGA_2015_V0053.BC",
+  kernels .. "ROS_HGA_2014_V0044.BC",
 
   -- Solar arrays
-  kernels .. "/ROS_SA_2016_V0034.BC",
-  kernels .. "/ROS_SA_2015_V0042.BC",
-  kernels .. "/ROS_SA_2014_V0047.BC",
+  kernels .. "ROS_SA_2016_V0034.BC",
+  kernels .. "ROS_SA_2015_V0042.BC",
+  kernels .. "ROS_SA_2014_V0047.BC",
 
-
-  kernels .. "/ROS_CGS_RSOC_V03.TPC"
-}
-
-local LightSources = {
-  {
-    Type = "SceneGraphLightSource",
-    Identifier = "Sun",
-    Node = sunTransforms.SolarSystemBarycenter.Identifier,
-    Intensity = 1.0
-  },
-  {
-    Identifier = "Camera",
-    Type = "CameraLightSource",
-    Intensity = 0.5
-  }
+  kernels .. "ROS_CGS_RSOC_V03.TPC"
 }
 
 local RotationMatrix = {
@@ -130,9 +115,16 @@ local RosettaBlackFoil = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/black_foil.obj",
+    GeometryFile = models .. "black_foil.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Rosetta Model Part Black Foil",
@@ -146,9 +138,16 @@ local RosettaBlackParts = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/black_parts.obj",
+    GeometryFile = models .. "black_parts.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Rosetta Model Part Black Parts",
@@ -162,9 +161,16 @@ local RosettaDish = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/dish.obj",
+    GeometryFile = models .. "dish.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Rosetta Model Part Dish",
@@ -178,9 +184,16 @@ local RosettaParts = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/parts.obj",
+    GeometryFile = models .. "parts.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Rosetta Model Part Parts",
@@ -194,9 +207,16 @@ local RosettaSilverFoil = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/silver_foil.obj",
+    GeometryFile = models .. "silver_foil.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Rosetta Model Part Silver Foil",
@@ -210,9 +230,16 @@ local RosettaVents = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/vents.obj",
+    GeometryFile = models .. "vents.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Rosetta Model Part Vents",
@@ -226,9 +253,16 @@ local RosettaWingA = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .."/wingA.obj",
+    GeometryFile = models .."wingA.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Rosetta Model Part Wing A",
@@ -242,9 +276,16 @@ local RosettaWingB = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/wingB.obj",
+    GeometryFile = models .. "wingB.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Rosetta Model Part Wing B",
@@ -258,9 +299,16 @@ local RosettaYellowFoil = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/yellow_foil.obj",
+    GeometryFile = models .. "yellow_foil.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Rosetta Model Part Yellow Foil",
@@ -303,9 +351,16 @@ local PhilaeFoil = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/lander_foil.obj",
+    GeometryFile = models .. "lander_foil.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Philae Model Part Foil",
@@ -319,9 +374,16 @@ local PhilaeLids = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/lander_lids.obj",
+    GeometryFile = models .. "lander_lids.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Philae Model Part Lids",
@@ -335,9 +397,16 @@ local PhilaeParts = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/lander_parts.obj",
+    GeometryFile = models .. "lander_parts.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Philae Model Part Parts",
@@ -351,9 +420,16 @@ local PhilaeSolarPanels = {
   Renderable = {
     Type = "RenderableModel",
     Body = "ROSETTA",
-    GeometryFile = models .. "/lander_solarp.obj",
+    GeometryFile = models .. "lander_solarp.obj",
     ModelTransform = RotationMatrix,
-    LightSources = LightSources
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Philae Model Parts Solar Panels",
@@ -403,7 +479,7 @@ local ImagePlane = {
     Spacecraft = "ROSETTA",
     Instrument = "ROS_NAVCAM-A",
     Moving = false,
-    Texture = models .. "/defaultProj.png"
+    Texture = models .. "defaultProj.png"
   },
   GUI = {
     Name = "Rosetta Image Plane",
@@ -453,7 +529,7 @@ local PhilaeTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Rosetta,
   RosettaModel,
   RosettaBlackFoil,
@@ -478,4 +554,20 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 
   RosettaCometTrail,
   PhilaeTrail
-})
+}
+
+asset.onInitialize(function ()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+
+asset.onDeinitialize(function ()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node);
+end

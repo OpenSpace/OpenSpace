@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/util/timemanager.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
@@ -37,7 +38,7 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* _loggerCat = "TimeManager";
+    constexpr std::string_view _loggerCat = "TimeManager";
 
     // Properties for time interpolation
     // These are used when setting the time from lua time interpolation functions,
@@ -73,7 +74,7 @@ namespace {
         "when interpolating"
     };
 
-    constexpr const char* DeltaTimeStepsKeybindsGuiPath = "/Delta Time Steps";
+    constexpr std::string_view DeltaTimeStepsKeybindsGuiPath = "/Time/Delta Time Steps";
 }
 
 namespace openspace {
@@ -114,6 +115,12 @@ TimeManager::TimeManager()
 
 void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+
+    OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
+    if (m == OpenSpaceEngine::Mode::CameraPath) {
+        LERROR("Cannot change simulation time during camera path");
+        return;
+    }
 
     const double now = currentApplicationTimeForInterpolation();
     const bool pause = isPaused();
@@ -240,6 +247,12 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
 void TimeManager::progressTime(double dt) {
     ZoneScoped
 
+    OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
+    if (m == OpenSpaceEngine::Mode::CameraPath) {
+        // We don't want to progress time when a camera path is playing, so return
+        return;
+    }
+
     _integrateFromTime = static_cast<Time&>(_currentTime);
     // Frames     |    1                    2          |
     //            |------------------------------------|
@@ -256,6 +269,10 @@ void TimeManager::progressTime(double dt) {
         // will override any timeline operations.
         _currentTime.data().setTime(_timeNextFrame.j2000Seconds());
         _integrateFromTime.data().setTime(_timeNextFrame.j2000Seconds());
+
+        // Also make sure the script scheduler is up to date
+        global::scriptScheduler->setCurrentTime(_timeNextFrame.j2000Seconds());
+
         _shouldSetTime = false;
 
         using K = CallbackHandle;
@@ -270,8 +287,9 @@ void TimeManager::progressTime(double dt) {
     const std::deque<Keyframe<TimeKeyframeData>>& keyframes = _timeline.keyframes();
 
     std::function<bool(const KeyframeBase&, double)> comparisonFunc =
-        (global::sessionRecording->isPlayingBack()) ?
+        (isPlayingBackSessionRecording()) ?
         &compareKeyframeTimeWithTime_playbackWithFrames : &compareKeyframeTimeWithTime;
+
     auto firstFutureKeyframe = std::lower_bound(
         keyframes.begin(),
         keyframes.end(),
@@ -362,7 +380,7 @@ TimeKeyframeData TimeManager::interpolate(const Keyframe<TimeKeyframeData>& past
 void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData, double dt) {
     const Time& currentTime = keyframeData.time;
     _deltaTime = _timePaused ? 0.0 : _targetDeltaTime;
-    if (global::sessionRecording->isPlayingBack()) {
+    if (isPlayingBackSessionRecording()) {
         _currentTime.data().advanceTime(dt * _deltaTime);
     }
     else {
@@ -403,10 +421,14 @@ void TimeManager::clearKeyframes() {
 }
 
 void TimeManager::setTimeNextFrame(Time t) {
+    OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
+    if (m == OpenSpaceEngine::Mode::CameraPath) {
+        LERROR("Cannot change simulation time during camera path");
+        return;
+    }
     _shouldSetTime = true;
     _timeNextFrame = std::move(t);
     clearKeyframes();
-    global::scriptScheduler->setCurrentTime(t.j2000Seconds());
 }
 
 void TimeManager::setDeltaTime(double deltaTime) {
@@ -438,7 +460,7 @@ void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
 }
 
 void TimeManager::addDeltaTimesKeybindings() {
-    constexpr const std::array<Key, 10> Keys = {
+    constexpr std::array<Key, 10> Keys = {
         Key::Num1,
         Key::Num2,
         Key::Num3,
@@ -643,14 +665,6 @@ void TimeManager::removeDeltaTimeStepsChangeCallback(CallbackHandle handle) {
     _deltaTimeStepsChangeCallbacks.erase(it);
 }
 
-void TimeManager::triggerPlaybackStart() {
-    _playbackModeEnabled = true;
-}
-
-void TimeManager::stopPlayback() {
-    _playbackModeEnabled = false;
-}
-
 void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {
     const auto it = std::find_if(
         _timeJumpCallbacks.begin(),
@@ -730,7 +744,6 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
         return;
     }
 
-    double now = currentApplicationTimeForInterpolation();
     Time newTime(
         time().j2000Seconds() + (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration
     );
@@ -740,9 +753,10 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
 
     _targetDeltaTime = newDeltaTime;
 
-    if (global::sessionRecording->isPlayingBack()) {
-        now = previousApplicationTimeForInterpolation();
-    }
+    double now = isPlayingBackSessionRecording() ?
+        previousApplicationTimeForInterpolation() :
+        currentApplicationTimeForInterpolation();
+
     addKeyframe(now, currentKeyframe);
     addKeyframe(now + interpolationDuration, futureKeyframe);
 }
@@ -829,7 +843,12 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         return;
     }
 
-    double now = currentApplicationTimeForInterpolation();
+    OpenSpaceEngine::Mode engineMode = global::openSpaceEngine->currentMode();
+    if (!pause && engineMode == OpenSpaceEngine::Mode::CameraPath) {
+        LERROR("Cannot unpause simulation time during camera path");
+        return;
+    }
+
     double targetDelta = pause ? 0.0 : _targetDeltaTime;
     Time newTime(
         time().j2000Seconds() + (_deltaTime + targetDelta) * 0.5 * interpolationDuration
@@ -839,9 +858,10 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
     TimeKeyframeData futureKeyframe = { newTime, _targetDeltaTime, pause, false };
     _timePaused = pause;
 
-    if (global::sessionRecording->isPlayingBack()) {
-        now = previousApplicationTimeForInterpolation();
-    }
+    double now = isPlayingBackSessionRecording() ?
+        previousApplicationTimeForInterpolation() :
+        currentApplicationTimeForInterpolation();
+
     clearKeyframes();
     if (interpolationDuration > 0) {
         addKeyframe(now, currentKeyframe);
@@ -859,7 +879,7 @@ double TimeManager::currentApplicationTimeForInterpolation() const {
 }
 
 double TimeManager::previousApplicationTimeForInterpolation() const {
-    //If playing back with frames, this function needs to be called when a time rate
+    // If playing back with frames, this function needs to be called when a time rate
     // interpolation (either speed change or pause) begins and ends. If the application
     // time of the interpolation keyframe timestamp (when it was added to timeline) is
     // exactly the same as when it is evaluated, then the interpolation math fails and
@@ -870,25 +890,30 @@ double TimeManager::previousApplicationTimeForInterpolation() const {
     return _previousApplicationTime;
 }
 
-void TimeManager::setTimeFromProfile(const Profile& p) {
-    Time t;
+bool TimeManager::isPlayingBackSessionRecording() const {
+    return (global::openSpaceEngine->currentMode() ==
+        OpenSpaceEngine::Mode::SessionRecordingPlayback);
+}
 
+void TimeManager::setTimeFromProfile(const Profile& p) {
     if (p.time.has_value()) {
         switch (p.time.value().type) {
-        case Profile::Time::Type::Relative:
-            t.setTimeRelativeFromProfile(p.time.value().value);
-            break;
+            case Profile::Time::Type::Relative:
+                Time::setTimeRelativeFromProfile(p.time.value().value);
+                break;
 
-        case Profile::Time::Type::Absolute:
-            t.setTimeAbsoluteFromProfile(p.time.value().value);
-            break;
+            case Profile::Time::Type::Absolute:
+                Time::setTimeAbsoluteFromProfile(p.time.value().value);
+                break;
 
-        default:
-            throw ghoul::MissingCaseException();
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
     else {
-        throw ghoul::RuntimeError("No 'time' entry exists in the startup profile");
+        // No value was specified so we are using 'now' instead
+        std::string now = std::string(Time::now().UTC());
+        Time::setTimeAbsoluteFromProfile(now);
     }
 }
 

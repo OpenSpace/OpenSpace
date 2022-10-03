@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,21 +48,20 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
+    constexpr std::string_view _loggerCat = "RenderableTimeVaryingVolume";
 
     const float SecondsInOneDay = 60 * 60 * 24;
-    constexpr const float VolumeMaxOpacity = 500;
 
-    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
-        "Specifies how often to sample on the raycaster. Lower step -> higher resolution."
+        "Specifies how often to sample on the raycaster. Lower step -> higher resolution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid Type",
-        "Spherical or Cartesian grid.",
+        "Spherical or Cartesian grid",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -70,44 +69,44 @@ namespace {
         "SecondsBefore",
         "Seconds before",
         "Specifies the number of seconds to show the first timestep before its "
-        "actual time. The default value is 0."
+        "actual time. The default value is 0"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
         "SecondsAfter",
         "Seconds after",
         "Specifies the number of seconds to show the the last timestep after its "
-        "actual time."
+        "actual time"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
         "SourceDirectory",
         "Source Directory",
-        "Specifies the path to load timesteps from."
+        "Specifies the path to load timesteps from"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer Function Path",
-        "Specifies the transfer function file path."
+        "Specifies the transfer function file path"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
         "TriggerTimeJump",
         "Jump",
-        "Sets the time to be the first time of the volume sequence."
+        "Sets the time to be the first time of the volume sequence"
     };
 
     constexpr openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
         "JumpToTimestep",
         "Jump to timestep",
-        "Lets you scrub through the sequence's time steps."
+        "Lets you scrub through the sequence's time steps"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "The volumes general opacity."
+    constexpr openspace::properties::Property::PropertyInfo BrightnessInfo = {
+        "Brightness",
+        "Brightness",
+        "The volume renderer's general brightness"
     };
 
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
@@ -138,11 +137,11 @@ namespace {
         // Specifies if you want to invert the volume data at it z-axis.
         std::optional<bool> invertDataAtZ;
 
-        // [[codegen::verbatim(OpacityInfo.description)]]
-        std::optional<float> opacity;
+        // [[codegen::verbatim(BrightnessInfo.description)]]
+        std::optional<float> brightness;
 
         // [[codegen::verbatim(StepSizeInfo.description)]]
-        std::optional<double> stepSize;
+        std::optional<float> stepSize;
 
         // [[codegen::verbatim(GridTypeInfo.description)]]
         std::optional<std::string> gridType;
@@ -164,7 +163,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
-    , _opacity(OpacityInfo, 10.f, 0.f, VolumeMaxOpacity)
+    , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -183,7 +182,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {}
     );
-    
+
     _invertDataAtZ = p.invertDataAtZ.value_or(_invertDataAtZ);
 
     _gridType.addOptions({
@@ -193,11 +192,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
     _stepSize = p.stepSize.value_or(_stepSize);
-    
-    if (p.opacity.has_value()) {
-        _opacity = *p.opacity * VolumeMaxOpacity;
-    }
 
+    _brightness = p.brightness.value_or(_brightness);
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
     _secondsAfter = p.secondsAfter;
 
@@ -211,6 +207,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
 
+    addProperty(_brightness);
     addProperty(_opacity);
 }
 
@@ -255,6 +252,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
             t.metadata.dimensions,
+            GL_TEXTURE_3D,
             ghoul::opengl::Texture::Format::Red,
             GL_RED,
             GL_FLOAT,
@@ -451,7 +449,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
-        _raycaster->setOpacity(_opacity);
+        _raycaster->setBrightness(_brightness * opacity());
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
     }

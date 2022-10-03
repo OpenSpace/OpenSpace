@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,17 +33,37 @@
 #include <modules/globebrowsing/src/globerotation.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
+#include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/renderablegeojsonobject.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
+#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/spoutimageprovider.h>
+#include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
@@ -70,44 +90,43 @@
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
-    constexpr const char _loggerCat[] = "GlobeBrowsingModule";
-    constexpr const char _factoryName[] = "TileProvider";
+    constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
         "WMSCacheEnabled",
         "WMS Cache Enabled",
         "Determines whether automatic caching of WMS servers is enabled. Changing the "
-        "value of this property will not affect already created WMS datasets."
+        "value of this property will not affect already created WMS datasets"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo OfflineModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OfflineModeInfo = {
         "OfflineMode",
         "Offline Mode",
         "Determines whether loaded WMS servers should be used in offline mode, that is "
         "not even try to retrieve images through an internet connection. Please note "
         "that this setting is only reasonable, if the caching is enabled and there is "
         "available cached data. Changing the value of this property will not affect "
-        "already created WMS datasets."
+        "already created WMS datasets"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
         "WMSCacheLocation",
         "WMS Cache Location",
         "The location of the cache folder for WMS servers. Changing the value of this "
-        "property will not affect already created WMS datasets."
+        "property will not affect already created WMS datasets"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
         "WMSCacheSize",
         "WMS Cache Size",
         "The maximum size of the cache for each WMS server. Changing the value of this "
-        "property will not affect already created WMS datasets."
+        "property will not affect already created WMS datasets"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile Cache Size",
-        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU."
+        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU"
     };
 
 
@@ -225,7 +244,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
             "WMS caching is disabled, but offline mode is enabled. Unless you know "
             "what you are doing, this will probably cause many servers to stop working. "
             "If you want to silence this warning, set the 'NoWarning' parameter to "
-            "'true'."
+            "'true'"
         );
     }
 
@@ -237,7 +256,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
         addPropertySubOwner(_tileCache.get());
 
-        tileprovider::initializeDefaultTile();
+        TileProvider::initializeDefaultTile();
 
         // Convert from MB to Bytes
         GdalWrapper::create(
@@ -250,9 +269,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     global::callback::deinitializeGL->emplace_back([]() {
         ZoneScopedN("GlobeBrowsingModule")
 
-        tileprovider::deinitializeDefaultTile();
+        TileProvider::deinitializeDefaultTile();
     });
-
 
     // Render
     global::callback::render->emplace_back([&]() {
@@ -268,64 +286,43 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         GdalWrapper::destroy();
     });
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
     fRenderable->registerClass<globebrowsing::RenderableGeoJsonObject>(
         "RenderableGeoJsonObject"
     );
 
-    auto fTranslation = FactoryManager::ref().factory<Translation>();
+    ghoul::TemplateFactory<Translation>* fTranslation =
+        FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Translation factory was not created");
     fTranslation->registerClass<globebrowsing::GlobeTranslation>("GlobeTranslation");
 
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
+    ghoul::TemplateFactory<Rotation>* fRotation =
+        FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
     fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
 
-    auto fTileProvider =
-        std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
+    FactoryManager::ref().addFactory<TileProvider>("TileProvider");
+
+    ghoul::TemplateFactory<TileProvider>* fTileProvider =
+        FactoryManager::ref().factory<TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
-    fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::DefaultTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::SingleImageProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::SingleImageTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::TemporalTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::TileIndexTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::SizeReferenceTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::TileProviderByLevel>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::ByLevelTileLayer
-        )]
-    );
-    fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
-            layergroupid::TypeID::ByIndexTileLayer
-        )]
-    );
 
-    FactoryManager::ref().addFactory(std::move(fTileProvider), _factoryName);
+    fTileProvider->registerClass<DefaultTileProvider>("DefaultTileLayer");
+    fTileProvider->registerClass<SingleImageProvider>("SingleImageTileLayer");
+    fTileProvider->registerClass<ImageSequenceTileProvider>("ImageSequenceTileLayer");
+    fTileProvider->registerClass<SpoutImageProvider>("SpoutImageTileLayer");
+    fTileProvider->registerClass<TemporalTileProvider>("TemporalTileLayer");
+    fTileProvider->registerClass<TileIndexTileProvider>("TileIndexTileLayer");
+    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileLayer");
+    fTileProvider->registerClass<TileProviderByLevel>("ByLevelTileLayer");
+    fTileProvider->registerClass<TileProviderByIndex>("ByIndexTileLayer");
 
-    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+        FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemGlobeLocation>("DashboardItemGlobeLocation");
@@ -335,147 +332,22 @@ globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
     return _tileCache.get();
 }
 
-scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
-    std::string listLayerGroups = layerGroupNamesList();
-
-    scripting::LuaLibrary res;
-    res.name = "globebrowsing";
-    res.functions = {
-        {
-            "addLayer",
-            &globebrowsing::luascriptfunctions::addLayer,
-            "string, string, table",
-            "Adds a layer to the specified globe. The first argument specifies the "
-            "name of the scene graph node of which to add the layer. The renderable "
-            "of the specified scene graph node needs to be a renderable globe. "
-            "The second argument is the layer group which can be any of "
-            + listLayerGroups + ". The third argument is the dictionary defining the "
-            "layer."
-        },
-        {
-            "deleteLayer",
-            &globebrowsing::luascriptfunctions::deleteLayer,
-            "string, string",
-            "Removes a layer from the specified globe. The first argument specifies "
-            "the name of the scene graph node of which to remove the layer. "
-            "The renderable of the specified scene graph node needs to be a "
-            "renderable globe. The second argument is the layer group which can be "
-            "any of " + listLayerGroups + ". The third argument is the dictionary"
-            "defining the layer."
-        },
-        {
-            "getLayers",
-            &globebrowsing::luascriptfunctions::getLayers,
-            "string, string",
-            "Returns the list of layers for the scene graph node specified in the first "
-            "parameter. The second parameter specifies which layer type should be "
-            "queried."
-        },
-        {
-            "moveLayer",
-            &globebrowsing::luascriptfunctions::moveLayer,
-            "string, string, number, number",
-            "Rearranges the order of a single layer in a scene graph node. The first "
-            "parameter specifies the scene graph node, the second parameter specifies "
-            "the name of the layer group, the third parameter is the original position "
-            "of the layer that should be moved and the last parameter is the new "
-            "position. The new position may be -1 to place the layer at the top or any "
-            "large number bigger than the number of layers to place it at the bottom."
-        },
-        {
-            "goToChunk",
-            &globebrowsing::luascriptfunctions::goToChunk,
-            "void",
-            "Go to chunk with given index x, y, level"
-        },
-        {
-            "goToGeo",
-            &globebrowsing::luascriptfunctions::goToGeo,
-            "[string], number, number, [number]",
-            "Go to geographic coordinates of a globe. The first (optional) argument is "
-            "the identifier of a scene graph node that has a RenderableGlobe attached. "
-            "If no globe is passed in, the current anchor will be used. "
-            "The second argument is latitude and the third is longitude (degrees). "
-            "North and East are expressed as positive angles, while South and West are "
-            "negative. The optional fourh argument is the altitude in meters. If no "
-            "altitude is provided, the altitude will be kept as the current distance to "
-            "the surface of the specified globe."
-        },
-        {
-            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
-            // paths work really well close to surfaces
-            "flyToGeo",
-            &globebrowsing::luascriptfunctions::flyToGeo,
-            "[string], number, number, number [, bool, number]",
-            "Fly the camera to geographic coordinates of a globe, using the path "
-            "navigation system. The first (optional) argument is the identifier of a "
-            "scene graph node with a RenderableGlobe. If no globe is passed in, the "
-            "current anchor will be used. The second and third argument is latitude and "
-            "longitude (degrees). The fourth argument is the altitude, in meters. The "
-            "last two optional arguments are: a bool specifying whether the up vector "
-            "at the target position should be set to the globe's North vector, and a "
-            "duration for the motion, in seconds. Either of the two can be left out."
-        },
-        {
-            "getLocalPositionFromGeo",
-            &globebrowsing::luascriptfunctions::getLocalPositionFromGeo,
-            "string, number, number, number",
-            "Returns a position in the local Cartesian coordinate system of the globe "
-            "identified by the first argument, that corresponds to the given geographic "
-            "coordinates: latitude, longitude and altitude (in degrees and meters). In "
-            "the local coordinate system, the position (0,0,0) corresponds to the "
-            "globe's center."
-        },
-        {
-            "getGeoPositionForCamera",
-            &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
-            "void",
-            "Get geographic coordinates of the camera position in latitude, "
-            "longitude, and altitude (degrees and meters)."
-        },
-        {
-            "loadWMSCapabilities",
-            &globebrowsing::luascriptfunctions::loadWMSCapabilities,
-            "string, string, string",
-            "Loads and parses the WMS capabilities xml file from a remote server. "
-            "The first argument is the name of the capabilities that can be used to "
-            "later refer to the set of capabilities. The second argument is the "
-            "globe for which this server is applicable. The third argument is the "
-            "URL at which the capabilities file can be found."
-        },
-        {
-            "removeWMSServer",
-            &globebrowsing::luascriptfunctions::removeWMSServer,
-            "string",
-            "Removes the WMS server identified by the first argument from the list "
-            "of available servers. The parameter corrsponds to the first argument in "
-            "the loadWMSCapabilities call that was used to load the WMS server."
-        },
-        {
-            "capabilitiesWMS",
-            &globebrowsing::luascriptfunctions::capabilities,
-            "string",
-            "Returns an array of tables that describe the available layers that are "
-            "supported by the WMS server identified by the provided name. The 'URL'"
-            "component of the returned table can be used in the 'FilePath' argument "
-            "for a call to the 'addLayer' function to add the value to a globe."
-        }
-    };
-    res.scripts = {
-        absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
-    };
-
-    return res;
-}
-
 std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() const {
     return {
         globebrowsing::Layer::Documentation(),
         globebrowsing::LayerAdjustment::Documentation(),
         globebrowsing::LayerManager::Documentation(),
         globebrowsing::GlobeTranslation::Documentation(),
+        globebrowsing::GlobeRotation::Documentation(),
         globebrowsing::RenderableGeoJsonObject::Documentation(),
         globebrowsing::RenderableGlobe::Documentation(),
+        globebrowsing::DefaultTileProvider::Documentation(),
+        globebrowsing::ImageSequenceTileProvider::Documentation(),
+        globebrowsing::SingleImageProvider::Documentation(),
+        globebrowsing::SizeReferenceTileProvider::Documentation(),
+        globebrowsing::TemporalTileProvider::Documentation(),
+        globebrowsing::TileProviderByIndex::Documentation(),
+        globebrowsing::TileProviderByLevel::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation()
@@ -533,6 +405,46 @@ glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
     return glm::vec3(globe.ellipsoid().cartesianPosition(pos));
 }
 
+glm::dvec3 GlobeBrowsingModule::geoPosition() const {
+    using namespace globebrowsing;
+
+    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
+    if (!n) {
+        return glm::dvec3(0.0);
+    }
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        return glm::dvec3(0.0);
+    }
+
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
+    const glm::dvec3 cameraPositionModelSpace =
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+    const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
+        cameraPositionModelSpace
+    );
+
+    const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
+        posHandle.centerToReferenceSurface
+    );
+
+    double lat = glm::degrees(geo2.lat);
+    double lon = glm::degrees(geo2.lon);
+
+    double altitude = glm::length(
+        cameraPositionModelSpace - posHandle.centerToReferenceSurface
+    );
+
+    if (glm::length(cameraPositionModelSpace) <
+        glm::length(posHandle.centerToReferenceSurface))
+    {
+        altitude = -altitude;
+    }
+
+    return glm::dvec3(lat, lon, altitude);
+}
+
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     const globebrowsing::TileIndex& ti,
                                     glm::vec2 uv, bool doResetCameraDirection)
@@ -553,9 +465,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
-        LERROR(
-            "Cannot go to chunk. The renderable is not attached to a scene graph node."
-        );
+        LERROR("Cannot go to chunk. The renderable is not attached to scene graph node");
         return;
     }
     const glm::dmat4 inverseModelTransform = glm::inverse(
@@ -670,32 +580,6 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
     }
 }
 
-std::string GlobeBrowsingModule::layerGroupNamesList() {
-    std::string listLayerGroups;
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
-        listLayerGroups += globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i] +
-                           std::string(", ");
-    }
-    listLayerGroups += std::string(" and ") +
-        globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[
-            globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1
-        ];
-    return listLayerGroups;
-}
-
-std::string GlobeBrowsingModule::layerTypeNamesList() {
-    std::string listLayerTypes;
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
-        listLayerTypes += std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) +
-                          ", ";
-    }
-    listLayerTypes += std::string(" and ") +
-        globebrowsing::layergroupid::LAYER_TYPE_NAMES[
-            globebrowsing::layergroupid::NUM_LAYER_TYPES - 1
-        ];
-    return listLayerTypes;
-}
-
 void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,
                                               std::string url)
 {
@@ -767,7 +651,7 @@ void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
     }
 
     // Then remove the calues from the globe server list
-    for (auto it = _urlList.begin(); it != _urlList.end(); ) {
+    for (auto it = _urlList.begin(); it != _urlList.end();) {
         // We have to increment first because the erase will invalidate the iterator
         const auto eraseIt = it++;
 
@@ -807,6 +691,32 @@ std::string GlobeBrowsingModule::wmsCacheLocation() const {
 uint64_t GlobeBrowsingModule::wmsCacheSize() const {
     uint64_t size = _wmsCacheSizeMB;
     return size * 1024 * 1024;
+}
+
+scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
+    scripting::LuaLibrary res;
+    res.name = "globebrowsing";
+    res.functions = {
+        codegen::lua::AddLayer,
+        codegen::lua::DeleteLayer,
+        codegen::lua::GetLayers,
+        codegen::lua::MoveLayer,
+        codegen::lua::GoToChunk,
+        codegen::lua::GoToGeo,
+        // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
+        // paths work really well close to surfaces
+        codegen::lua::FlyToGeo,
+        codegen::lua::GetLocalPositionFromGeo,
+        codegen::lua::GetGeoPositionForCamera,
+        codegen::lua::LoadWMSCapabilities,
+        codegen::lua::RemoveWMSServer,
+        codegen::lua::CapabilitiesWMS
+    };
+    res.scripts = {
+        absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
+    };
+
+    return res;
 }
 
 } // namespace openspace

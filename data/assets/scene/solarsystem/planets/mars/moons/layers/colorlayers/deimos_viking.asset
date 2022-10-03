@@ -1,28 +1,32 @@
-local globeIdentifier = asset.require("./../../deimos").Deimos.Identifier
+local globeIdentifier = asset.require("./../../deimos_globe").Deimos_Globe.Identifier
 
 local layer = {
   Identifier = "Deimos_Global_Mosaic_USGS",
   Name = "Deimos Global Mosaic [USGS]",
-  Enabled = true,
+  Enabled = asset.enabled,
   FilePath = "WMS:https://wms.wr.usgs.gov/cgi-bin/mapserv?map=/maps/mars/deimos_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Deimos_Simple_Cylindrical_Rasters&SRS=EPSG:4326&BBOX=-180,-90,360,90",
-  Description = [[ This Viking-based cylindrical map of Deimos was created by Philip
+  Description = [[This Viking-based cylindrical map of Deimos was created by Philip
     Stooke with the assistance of Chris Jongkind and Megan Arntz. Control is based on a
     shape model and mosaic by Peter Thomas and colleagues at Cornell University. Date
     released 26 October 2001. (Description from URL)]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Deimos Global Mosaic [USGS]",
-  Version = "1.0",
+  Version = "1.1",
   Author = "Philip Stooke/NASA",
   URL = "https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html",
-  License = "NASA/PDS",
-  Identifiers = {'Deimos_Global_Mosaic_USGS'}
+  License = "NASA/PDS"
 }

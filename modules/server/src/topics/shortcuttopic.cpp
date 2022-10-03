@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,12 +28,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-
-namespace {
-    constexpr const char* EventKey = "event";
-    constexpr const char* StartSubscription = "start_subscription";
-    constexpr const char* StopSubscription = "stop_subscription";
-} // namespace
 
 using nlohmann::json;
 
@@ -91,12 +85,12 @@ void ShortcutTopic::sendData() const {
 }
 
 void ShortcutTopic::handleJson(const nlohmann::json& input) {
-    const std::string& event = input.at(EventKey).get<std::string>();
-    if (event == StartSubscription) {
+    const std::string& event = input.at("event").get<std::string>();
+    if (event == "start_subscription") {
         // TODO: Subscribe to shortcuts and keybindings
         // shortcutManager.subscribe(); ...
     }
-    else if (event == StopSubscription) {
+    else if (event == "stop_subscription") {
         // TODO: Unsubscribe to shortcuts and keybindings
         // shortcutManager.unsubscribe(); ...
         return;

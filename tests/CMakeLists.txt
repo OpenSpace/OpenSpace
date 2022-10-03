@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -26,11 +26,11 @@ add_executable(
   OpenSpaceTest
   main.cpp
   test_assetloader.cpp
-  test_concurrentjobmanager.cpp
   test_concurrentqueue.cpp
   test_distanceconversion.cpp
   test_configuration.cpp
   test_documentation.cpp
+  test_horizons.cpp
   test_iswamanager.cpp
   test_jsonformatting.cpp
   test_latlonpatch.cpp
@@ -40,7 +40,6 @@ add_executable(
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
   test_spicemanager.cpp
-  test_temporaltileprovider.cpp
   test_timequantizer.cpp
   test_timeline.cpp
 
@@ -65,7 +64,7 @@ foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)
   if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
     target_link_libraries(OpenSpaceTest PRIVATE ${library_name})
-  endif()
+  endif ()
 endforeach ()
 
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)

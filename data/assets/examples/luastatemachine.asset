@@ -1,4 +1,4 @@
-local stateMachineHelper = asset.require('util/lua_state_machine_helper')
+local stateMachineHelper = asset.require("util/lua_state_machine_helper")
 
 local states = {
   {
@@ -33,15 +33,15 @@ function previous()
   stateMachine.goToPreviousState()
 end
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   stateMachine = stateMachineHelper.createStateMachine(states)
-  openspace.bindKey('RIGHT', 'next()')
-  openspace.bindKey('LEFT', 'previous()')
+  openspace.bindKey("RIGHT", "next()")
+  openspace.bindKey("LEFT", "previous()")
 end)
 
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   stateMachine = nil
-  openspace.clearKey('RIGHT')
-  openspace.clearKey('LEFT')
+  openspace.clearKey("RIGHT")
+  openspace.clearKey("LEFT")
 end)

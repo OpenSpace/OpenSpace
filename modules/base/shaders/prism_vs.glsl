@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@ layout (location = 0) in vec3 in_position;
 out float vs_depth;
 
 uniform mat4 modelViewProjectionTransform;
+
 
 void main() {
   vec4 position = vec4(in_position, 1.0);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,6 +48,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/component_wise.hpp>
 #include <filesystem>
 #include <fstream>
 #include <optional>
@@ -55,14 +56,19 @@
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr const char* _loggerCat = "Renderable Galaxy";
+    constexpr std::string_view _loggerCat = "RenderableGalaxy";
 
-    constexpr const std::array<const char*, 4> UniformNamesPoints = {
+    enum StarRenderingMethod {
+        Points,
+        Billboards
+    };
+
+    constexpr std::array<const char*, 4> UniformNamesPoints = {
         "modelMatrix", "viewProjectionMatrix", "eyePosition",
         "opacityCoefficient"
     };
 
-    constexpr const std::array<const char*, 5> UniformNamesBillboards = {
+    constexpr std::array<const char*, 5> UniformNamesBillboards = {
         "modelMatrix", "viewProjectionMatrix",
         "cameraUp", "eyePosition", "psfTexture"
     };
@@ -70,65 +76,75 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VolumeRenderingEnabledInfo = {
         "VolumeRenderingEnabled",
         "Volume Rendering",
-        "" // @TODO Missing documentation
+        "If this value is enabled, the volume rendering component of the galaxy "
+        "rendering is turned on. Otherwise, the volume rendering is skipped"
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingEnabledInfo = {
         "StarRenderingEnabled",
         "Star Rendering",
-        "" // @TODO Missing documentation
+        "If this value is enabled, the point-based star rendering component of the "
+        "galaxy rendering is turned on. Otherwise, the volume rendering is skipped"
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
-        "" // @TODO Missing documentation
+        "Determines the distance between steps taken in the volume rendering. The lower "
+        "the number is, the better the rendering looks, but also takes more "
+        "computational resources to render"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AbsorptionMultiplyInfo = {
         "AbsorptionMultiply",
         "Absorption Multiplier",
-        "" // @TODO Missing documentation
+        "A unit-less scale factor for the probability of dust absorbing a light "
+        "particle. The amount of absorption determines the spectrum of the light that is "
+        "emitted from the galaxy"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EmissionMultiplyInfo = {
         "EmissionMultiply",
         "Emission Multiplier",
-        "" // @TODO Missing documentation
+        "A unit-less scale factor for the amount of light being emitted by dust in the "
+        "galaxy"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
-        "" // @TODO Missing documentation
+        "The internal rotation of the volume rendering in Euler angles",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingMethodInfo = {
         "StarRenderingMethod",
         "Star Rendering Method",
         "This value determines which rendering method is used for visualization of the "
-        "stars."
+        "stars"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
         "EnabledPointsRatio",
         "Enabled points",
-        "" // @TODO Missing documentation
+        "The ratio of point-like stars that are rendered to produce the overall galaxy "
+        "image. At a value of 0, no stars are rendered, at a value of 1 all points "
+        "contained in the dataset are rendered. The specific value chosen is a "
+        "compromise between image fidelity and rendering performance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value set the downscaling factor"
-        " when rendering the current volume."
+        "This value sets the downscaling factor when rendering the current volume"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberOfRayCastingStepsInfo =
     {
         "Steps",
         "Number of RayCasting Steps",
-        "This value set the number of integration steps during the raycasting procedure."
+        "This value set the number of integration steps during the raycasting procedure"
     };
 
     struct [[codegen::Dictionary(RenderableGalaxy)]] Parameters {
@@ -147,7 +163,7 @@ namespace {
         // [[codegen::verbatim(EmissionMultiplyInfo.description)]]
         std::optional<float> emissionMultiply;
 
-        enum class StarRenderingMethod {
+        enum class [[codegen::map(StarRenderingMethod)]] StarRenderingMethod {
             Points,
             Billboards
         };
@@ -224,13 +240,17 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation RenderableGalaxy::Documentation() {
+    return codegen::doc<Parameters>("galaxy_renderablegalaxy");
+}
+
 RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
     , _starRenderingEnabled(StarRenderingEnabledInfo, true)
     , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
-    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 200.0f)
-    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.0f, 1000.0f)
+    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.f, 200.0f)
+    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.f, 1000.0f)
     , _starRenderingMethod(
         StarRenderingMethodInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -255,18 +275,11 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     _emissionMultiply = p.emissionMultiply.value_or(_emissionMultiply);
 
     _starRenderingMethod.addOptions({
-        { 0, "Points" },
-        { 1, "Billboards" }
+        { StarRenderingMethod::Points, "Points" },
+        { StarRenderingMethod::Billboards, "Billboards" }
     });
     if (p.starRenderingMethod.has_value()) {
-        switch (*p.starRenderingMethod) {
-            case Parameters::StarRenderingMethod::Points:
-                _starRenderingMethod = 0;
-                break;
-            case Parameters::StarRenderingMethod::Billboards:
-                _starRenderingMethod = 1;
-                break;
-        }
+        _starRenderingMethod = codegen::map<StarRenderingMethod>(*p.starRenderingMethod);
     }
 
     _rotation = p.rotation.value_or(_rotation);
@@ -306,6 +319,10 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
     addProperty(_downScaleVolumeRendering);
     addProperty(_numberOfRayCastingSteps);
+
+    // Use max component instead of length, to avoid problems with taking square
+    // of huge value
+    setBoundingSphere(glm::compMax(0.5f * _volumeSize));
 }
 
 void RenderableGalaxy::initialize() {
@@ -370,6 +387,7 @@ void RenderableGalaxy::initializeGL() {
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
         _volumeDimensions,
+        GL_TEXTURE_3D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,
         GL_UNSIGNED_BYTE,
@@ -414,7 +432,8 @@ void RenderableGalaxy::initializeGL() {
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath).string()
+            absPath(_pointSpreadFunctionTexturePath).string(),
+            2
         );
 
         if (_pointSpreadFunctionTexture) {
@@ -479,6 +498,11 @@ void RenderableGalaxy::deinitializeGL() {
         global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
+
+    global::renderEngine->removeRenderProgram(_pointsProgram.get());
+    _pointsProgram = nullptr;
+    global::renderEngine->removeRenderProgram(_billboardsProgram.get());
+    _billboardsProgram = nullptr;
 
     glDeleteVertexArrays(1, &_pointsVao);
     glDeleteBuffers(1, &_positionVbo);

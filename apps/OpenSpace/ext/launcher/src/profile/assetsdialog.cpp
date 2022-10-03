@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,19 +24,21 @@
 
 #include "profile/assetsdialog.h"
 
+#include "profile/assetedit.h"
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <ghoul/fmt.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QTextEdit>
 #include <QTreeView>
 
 namespace {
-    bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model,
-                                       int rows, QModelIndex parent)
+    bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model, int rows,
+                                       QModelIndex parent)
     {
         bool isExpanded = false;
 
@@ -104,8 +106,8 @@ namespace {
             for (int r = 0; r < nRows; r++) {
                 QModelIndex idx = model.index(r, 0, parent);
                 std::string assetName = model.name(idx).toStdString();
-
-                if (path == assetName) {
+                // Need to check if it actually is an asset to prevent issue #2154
+                if (model.isAsset(idx) && path == assetName) {
                     foundFileMatch = true;
                     model.setChecked(idx, true);
                     break;
@@ -134,16 +136,29 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
 
     QBoxLayout* layout = new QVBoxLayout(this);
     {
+        QGridLayout* container = new QGridLayout;
+        container->setColumnStretch(1, 1);
+
         QLabel* heading = new QLabel("Select assets from /data/assets");
         heading->setObjectName("heading");
-        layout->addWidget(heading);
+        container->addWidget(heading, 0, 0);
+
+        QPushButton* newAssetButton = new QPushButton("New Asset");
+        connect(
+            newAssetButton, &QPushButton::released,
+            this, &AssetsDialog::openAssetEditor
+        );
+        newAssetButton->setCursor(Qt::PointingHandCursor);
+        newAssetButton->setDefault(false);
+        container->addWidget(newAssetButton, 0, 2);
+        layout->addLayout(container);
     }
     {
         _assetTree = new QTreeView;
         _assetTree->setToolTip(
             "Expand arrow entries to browse assets in this OpenSpace installation. "
             "Enable checkbox to include an asset. Those assets highlighted in red are "
-            "present in the profile but do not exist in this OpenSpace installation."
+            "present in the profile but do not exist in this OpenSpace installation"
         );
         _assetTree->setAlternatingRowColors(true);
         _assetTree->setModel(&_assetTreeModel);
@@ -222,6 +237,11 @@ QString AssetsDialog::createTextSummary() {
         summary += QString::fromStdString(s);
     }
     return summary;
+}
+
+void AssetsDialog::openAssetEditor() {
+    AssetEdit editor(this);
+    editor.exec();
 }
 
 void AssetsDialog::parseSelections() {

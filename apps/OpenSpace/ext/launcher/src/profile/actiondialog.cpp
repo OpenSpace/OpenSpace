@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include "profile/actiondialog.h"
 
 #include "profile/line.h"
+#include "profile/scriptlogdialog.h"
 #include <openspace/util/keys.h>
 #include <ghoul/fmt.h>
 #include <ghoul/misc/assert.h>
@@ -81,10 +82,10 @@ void ActionDialog::createWidgets() {
     //  |                      | Name          | [oooooooooooo] |    Row 2
     //  |                      | GUI Path      | [oooooooooooo] |    Row 3
     //  |                      | Documentation | [oooooooooooo] |    Row 4
-    //  |                      | Is Local      | []             |    Row 5
+    //  |                      | Is Local      | [] [choosescr] |    Row 5
     //  |                      | Script        | [oooooooooooo] |    Row 6
     //  *----------------------*---------------*----------------*
-    //  | [+] [-]              |               | [Save] [Cancel]|    Row 7
+    //  | [+] [-]              |               | <Save> <Cancel>|    Row 7
     //  *----------------------*---------------*----------------*
     //  |=======================================================|    Row 8
     //  | Keybindings                                           |    Row 9
@@ -94,11 +95,11 @@ void ActionDialog::createWidgets() {
     //  |                      | Add actions   | DDDDDDDDDDDD>  |    Row 12
     //  |                      | Action        | [oooooooooooo] |    Row 13
     //  *----------------------*---------------*----------------*
-    //  | [+] [-]              |               | [Save] [Cancel]|    Row 14
+    //  | [+] [-]              |               | <Save> <Cancel>|    Row 14
     //  *----------------------*---------------*----------------*
     //  |=======================================================|    Row 14
     //  *----------------------*---------------*----------------*
-    //  |                                      | [Save] [Cancel]|    Row 15
+    //  |                                      | <Save> <Cancel>|    Row 15
     //  *----------------------*---------------*----------------*
 
     QGridLayout* layout = new QGridLayout(this);
@@ -204,6 +205,17 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
     );
     _actionWidgets.isLocal->setEnabled(false);
     layout->addWidget(_actionWidgets.isLocal, 5, 2);
+
+    _actionWidgets.chooseScripts = new QPushButton("Choose Scripts");
+    _actionWidgets.chooseScripts->setToolTip(
+        "Press this button to choose scripts for your action from the logs/scriptlog.txt"
+    );
+    connect(
+        _actionWidgets.chooseScripts, &QPushButton::clicked,
+        this, &ActionDialog::chooseScripts
+    );
+    _actionWidgets.chooseScripts->setEnabled(false);
+    layout->addWidget(_actionWidgets.chooseScripts, 5, 2, Qt::AlignRight);
 
     layout->addWidget(new QLabel("Script"), 6, 1);
     _actionWidgets.script = new QTextEdit;
@@ -361,7 +373,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         "it is defined in an asset included in this profile, you can enter the "
         "identifier of that action manually here to associate a key with it. If the "
         "identifer does not exist, an error will be logged when trying to bind the key "
-        "at startup."
+        "at startup"
     );
     _keybindingWidgets.actionText->setEnabled(false);
     layout->addWidget(_keybindingWidgets.actionText, 13, 2);
@@ -473,9 +485,15 @@ void ActionDialog::actionRemove() {
 
     for (size_t i = 0; i < _actionData.size(); ++i) {
         if (_actionData[i].identifier == action->identifier) {
+            clearActionFields();
             _actionData.erase(_actionData.begin() + i);
             delete _actionWidgets.list->takeItem(static_cast<int>(i));
-            clearActionFields();
+
+            _keybindingWidgets.action->clear();
+            for (const Profile::Action& a : _actionData) {
+                _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
+            }
+            clearKeybindingFields();
             return;
         }
     }
@@ -499,6 +517,7 @@ void ActionDialog::actionSelected() {
         _actionWidgets.documentation->setEnabled(true);
         _actionWidgets.isLocal->setChecked(action->isLocal);
         _actionWidgets.isLocal->setEnabled(true);
+        _actionWidgets.chooseScripts->setEnabled(true);
         _actionWidgets.script->setText(QString::fromStdString(action->script));
         _actionWidgets.script->setEnabled(true);
         _actionWidgets.addButton->setEnabled(false);
@@ -538,7 +557,7 @@ void ActionDialog::actionSaved() {
                 this,
                 "Duplicate identifier",
                 "The chosen identifier was already used in another action. Identifiers "
-                "have to be unique. Please choose a different identfier."
+                "have to be unique. Please choose a different identfier"
             );
             return;
         }
@@ -546,7 +565,7 @@ void ActionDialog::actionSaved() {
         // If we got this far, we have a new identifier and it is a new one, so we need to
         // update other keybinds now
         ghoul_assert(
-            _keybindingWidgets.list->count() == _keybindingsData.size(),
+            _keybindingWidgets.list->count() == static_cast<int>(_keybindingsData.size()),
             "The list and data got out of sync"
         );
         for (int i = 0; i < _keybindingWidgets.list->count(); ++i) {
@@ -574,6 +593,13 @@ void ActionDialog::actionSaved() {
     action->script = _actionWidgets.script->toPlainText().toStdString();
 
     updateListItem(_actionWidgets.list->currentItem(), *action);
+
+    // Update the list of actions available in the action chooser
+    _keybindingWidgets.action->clear();
+    for (const Profile::Action& a : _actionData) {
+        _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
+    }
+    clearKeybindingFields();
     clearActionFields();
 }
 
@@ -589,6 +615,7 @@ void ActionDialog::clearActionFields() {
     _actionWidgets.documentation->setEnabled(false);
     _actionWidgets.isLocal->setChecked(false);
     _actionWidgets.isLocal->setEnabled(false);
+    _actionWidgets.chooseScripts->setEnabled(false);
     _actionWidgets.script->clear();
     _actionWidgets.script->setEnabled(false);
     _actionWidgets.saveButtons->setEnabled(false);
@@ -602,6 +629,16 @@ void ActionDialog::actionRejected() {
     }
 
     clearActionFields();
+}
+
+void ActionDialog::chooseScripts() {
+    ScriptlogDialog d(this);
+    connect(&d, &ScriptlogDialog::scriptsSelected, this, &ActionDialog::appendScriptsToTextfield);
+    d.exec();
+}
+
+void ActionDialog::appendScriptsToTextfield(std::string scripts) {
+    _actionWidgets.script->append(QString::fromStdString(std::move(scripts)));
 }
 
 Profile::Keybinding* ActionDialog::selectedKeybinding() {
@@ -624,9 +661,9 @@ void ActionDialog::keybindingRemove() {
         if (_keybindingsData[i].key == keybinding->key &&
             _keybindingsData[i].action == keybinding->action)
         {
+            clearKeybindingFields();
             _keybindingsData.erase(_keybindingsData.begin() + i);
             delete _keybindingWidgets.list->takeItem(static_cast<int>(i));
-            clearKeybindingFields();
             return;
         }
     }

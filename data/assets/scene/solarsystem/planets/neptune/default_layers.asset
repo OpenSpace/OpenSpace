@@ -1,19 +1,10 @@
-local colorLayersPath = "./layers/colorlayers"
-
-local colorLayer = asset.require(colorLayersPath .. "/neptune_texture")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Neptune.Renderable.Layers.ColorLayers." ..
-  colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/neptune_texture", false)
 
 
 asset.meta = {
   Name = "Default Neptune Layers",
   Version = "1.0",
-  Description = [[ Default Neptune layers are: Neptune Texture]],
+  Description = "Default Neptune layers are: Neptune Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,0 +1,101 @@
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
+
+
+local Name = "Atmospheric Chemistry: GEOS-5 Model"
+local Identifier = "noaa-sos-atmosphere-nccs_models-chem"
+local Description = [[Models create a dynamic portrait of the Earth through numerical 
+experiments that simulate our current knowledge of the dynamical and physical processes 
+governing weather and climate variability. The simulation visualized here captures how 
+winds lift up aerosols from the Earth's surface and transport them around the globe 
+during the period September 1, 2006 to March 17, 2007. Such simulations allow scientists 
+to identify the sources and pathways of these tiny particulates that influence weather 
+and climate]]
+local URL = "https://sos.noaa.gov/catalog/datasets/atmospheric-chemistry-geos-5-model/"
+
+
+local syncedDirectory = asset.syncedResource({
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
+})
+
+local imagesDestination = syncedDirectory .. "images"
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "TemporalTileLayer",
+  Mode = "Folder",
+  Folder = {
+    Folder = imagesDestination,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "chem_%Y-%m-%d_%H-%M.png"
+  },      
+  Description = Description
+}
+
+local legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "geos-5-legend.jpg",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
+}
+
+asset.onInitialize(function() 
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "4000-1.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-2.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-3.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-4.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-5.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-6.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-7.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-8.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-9.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-10.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-11.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-12.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-13.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-14.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-15.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-16.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-17.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-18.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-19.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-20.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-21.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-22.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-23.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-24.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-25.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-26.zip", imagesDestination, true)
+  end
+
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(legend);  
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(legend)
+end)
+
+asset.export(layer)
+asset.export(legend)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

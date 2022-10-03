@@ -1,0 +1,39 @@
+local globeIdentifier = asset.require("../../europa").Europa.Identifier
+
+local layer = {
+  Identifier = "Voyager_Global_Mosaic",
+  Name = "Voyager Global Mosaic [Sweden]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("voyager_global_mosaic_sweden.wms"),
+  BlendMode = "Color",
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Voyager Global Mosaic",
+  Version = "1.1",
+  Description = [[Europa Voyager - Galileo SSI Global Mosaic 500m v2. This global map
+    base of Europa utilizes the best image quality and moderate resolution coverage
+    supplied by the Galileo SSI (Solid-State Imaging) instrument and Voyager 1 and 2.
+    The image data was selected on the basis of overall image quality, reasonable
+    input resolution (from 20 km/pixel for gap fill to as high as 200 meters per
+    pixel[m]), and availability of moderate viewing and sun angles for topography.
+    The map projections are based on a sphere having a radius of 1,562.09 kilometers.
+    A Simple Cylindrical projection was used at a resolution of 500 m. (Description
+    from URL)]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Europa/Voyager-Galileo/" ..
+    "Europa_Voyager_GalileoSSI_global_mosaic_500m",
+  License = "NASA/PDS"
+}

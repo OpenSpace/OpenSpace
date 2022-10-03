@@ -1,12 +1,12 @@
 --testing_keybindings.asset
 
-local propertyHelper = asset.require('./property_helper')
+local propertyHelper = asset.require("./property_helper")
 
 local take_screenshot = {
   Identifier = "testing_keyboard.take_screenshot",
   Name = "Take Screenshot",
   Command = "openspace.takeScreenshot()",
-  Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
+  Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory",
   GuiPath = "/Rendering",
   IsLocal = true
 }
@@ -17,6 +17,6 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(take_screenshot.Identifier)
+  openspace.action.removeAction(take_screenshot)
   openspace.clearKey("F7")
 end)

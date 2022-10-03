@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -48,38 +47,36 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderablePoints";
+    constexpr std::string_view _loggerCat = "RenderablePoints";
 
-    constexpr const std::array<const char*, 7> UniformNames = {
+    constexpr std::array<const char*, 7> UniformNames = {
         "modelViewProjectionTransform", "color", "sides", "alphaValue", "scaleFactor",
         "spriteTexture", "hasColorMap"
     };
 
-    constexpr double PARSEC = 0.308567756E17;
-
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite."
+        "The path to the texture that should be used as the point sprite"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
+        "size of each point"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value is used to define the color of the astronomical object."
+        "This value is used to define the color of the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical onject."
+        "The path to the color map file of the astronomical object"
     };
 
     struct [[codegen::Dictionary(RenderablePoints)]] Parameters {
@@ -90,14 +87,14 @@ namespace {
         // Astronomical Object Color (r,g,b)
         glm::vec3 color [[codegen::color()]];
 
-        enum class Unit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
             Parsec [[codegen::key("pc")]],
             Kiloparsec [[codegen::key("Kpc")]],
             Megaparsec [[codegen::key("Mpc")]],
             Gigaparsec [[codegen::key("Gpc")]],
-            Gigalightyears [[codegen::key("Gly")]]
+            Gigalightyear [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
 
@@ -138,33 +135,10 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     _speckFile = absPath(p.file);
 
     if (p.unit.has_value()) {
-        switch (*p.unit) {
-            case Parameters::Unit::Meter:
-                _unit = Meter;
-                break;
-            case Parameters::Unit::Kilometer:
-                _unit = Kilometer;
-                break;
-            case Parameters::Unit::Parsec:
-                _unit = Parsec;
-                break;
-            case Parameters::Unit::Kiloparsec:
-                _unit = Kiloparsec;
-                break;
-            case Parameters::Unit::Megaparsec:
-                _unit = Megaparsec;
-                break;
-            case Parameters::Unit::Gigaparsec:
-                _unit = Gigaparsec;
-                break;
-            case Parameters::Unit::Gigalightyears:
-                _unit = GigalightYears;
-                break;
-        }
+        _unit = codegen::map<DistanceUnit>(*p.unit);
     }
     else {
-        LWARNING("No unit given for RenderablePoints. Using meters as units.");
-        _unit = Meter;
+        _unit = DistanceUnit::Meter;
     }
 
     _pointColor = p.color;
@@ -267,7 +241,7 @@ void RenderablePoints::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.sides, 4);
-    _program->setUniform(_uniformCache.alphaValue, _opacity);
+    _program->setUniform(_uniformCache.alphaValue, opacity());
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
     if (_hasSpriteTexture) {
@@ -344,7 +318,8 @@ void RenderablePoints::update(const UpdateData&) {
         _spriteTexture = nullptr;
         if (!_spriteTexturePath.value().empty()) {
             _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_spriteTexturePath).string()
+                absPath(_spriteTexturePath).string(),
+                2
             );
             if (_spriteTexture) {
                 LDEBUG(
@@ -383,7 +358,7 @@ void RenderablePoints::readColorMapFile() {
         // std::streampos position = file.tellg();
         std::getline(file, line);
 
-        if (line[0] == '#' || line.empty()) {
+        if (line.empty() || line[0] == '#') {
             continue;
         }
 
@@ -421,29 +396,16 @@ std::vector<double> RenderablePoints::createDataSlice() {
         slice.reserve(4 * _dataset.entries.size());
     }
 
+    double maxRadius = 0.0;
+
     int colorIndex = 0;
     for (const speck::Dataset::Entry& e : _dataset.entries) {
         glm::dvec3 p = e.position;
+        double scale = toMeter(_unit);
+        p *= scale;
 
-        // Converting units
-        if (_unit == Kilometer) {
-            p *= 1E3;
-        }
-        else if (_unit == Parsec) {
-            p *= PARSEC;
-        }
-        else if (_unit == Kiloparsec) {
-            p *= 1E3 * PARSEC;
-        }
-        else if (_unit == Megaparsec) {
-            p *= 1E6 * PARSEC;
-        }
-        else if (_unit == Gigaparsec) {
-            p *= 1E9 * PARSEC;
-        }
-        else if (_unit == GigalightYears) {
-            p *= 306391534.73091 * PARSEC;
-        }
+        const double r = glm::length(p);
+        maxRadius = std::max(maxRadius, r);
 
         glm::dvec4 position(p, 1.0);
 
@@ -465,6 +427,7 @@ std::vector<double> RenderablePoints::createDataSlice() {
             0 :
             colorIndex + 1;
     }
+    setBoundingSphere(maxRadius);
 
     return slice;
 }

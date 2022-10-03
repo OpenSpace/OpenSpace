@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,10 +34,10 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ConvertRecFormatTask";
+    constexpr std::string_view _loggerCat = "ConvertRecFormatTask";
 
-    constexpr const char* KeyInFilePath = "InputFilePath";
-    constexpr const char* KeyOutFilePath = "OutputFilePath";
+    constexpr std::string_view KeyInFilePath = "InputFilePath";
+    constexpr std::string_view KeyOutFilePath = "OutputFilePath";
 } // namespace
 
 namespace openspace::interaction {
@@ -147,7 +147,7 @@ void ConvertRecFormatTask::convert() {
     }
     else {
         // Add error output for file type not recognized
-        LERROR("Session recording file unrecognized format type.");
+        LERROR("Session recording file unrecognized format type");
     }
 }
 
@@ -187,7 +187,6 @@ void ConvertRecFormatTask::convertToAscii() {
     datamessagestructures::TimeKeyframe   tkf;
     datamessagestructures::ScriptMessage  skf;
     int lineNum = 1;
-    unsigned char frameType;
     _oFile.open(_outFilePath, std::ifstream::app);
     char tmpType = SessionRecording::DataFormatAsciiTag;
     _oFile.write(&tmpType, 1);
@@ -195,7 +194,7 @@ void ConvertRecFormatTask::convertToAscii() {
 
     bool fileReadOk = true;
     while (fileReadOk) {
-        frameType = readFromPlayback<unsigned char>(_iFile);
+        unsigned char frameType = readFromPlayback<unsigned char>(_iFile);
         // Check if have reached EOF
         if (!_iFile) {
             LINFO(fmt::format(
@@ -317,16 +316,16 @@ documentation::Documentation ConvertRecFormatTask::documentation() {
         "convert_format_task",
         {
             {
-                KeyInFilePath,
+                "InputFilePath",
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,
-                "The filename to convert to the opposite format.",
+                "The filename to convert to the opposite format",
             },
             {
-                KeyOutFilePath,
+                "OutputFilePath",
                 new StringAnnotationVerifier("A valid output filename"),
                 Optional::No,
-                "The filename containing the converted result.",
+                "The filename containing the converted result",
             },
         },
     };

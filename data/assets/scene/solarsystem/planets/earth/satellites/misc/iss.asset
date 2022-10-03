@@ -1,164 +1,149 @@
-local assetHelper = asset.require('util/asset_helper')
-local satelliteHelper = asset.require('util/tle_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-
-local url = "http://celestrak.com/satcat/tle.php?CATNR=25544"
-local identifier = "ISS"
-local filename = "ISS.txt"
-local nodes = {}
-local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local models = asset.syncedResource({
-    Name = "ISS Models",
-    Type = "HttpSynchronization",
-    Identifier = "iss_model",
-    Version = 3
+  Name = "ISS Models",
+  Type = "HttpSynchronization",
+  Identifier = "iss_model",
+  Version = 3
 })
 
-local initializeAndAddNodes = function()
-  local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
-  local period = 0.0645675984
-  local path = tle .. "/" .. filename
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (ISS)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_iss",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=kvn",
+  Filename = "ISS.txt",
+  Override = true
+})
 
-  local iss = {
-    Identifier = "ISS",
-    Parent = transforms.EarthInertial.Identifier,
-    InteractionSphere = 30,
-    Transform = {
-      Translation = {
-        Type = "KeplerTranslation",
-        Eccentricity = 0.000419,
-        SemiMajorAxis = 6798.414219,
-        Inclination = 51.6428,
-        AscendingNode = 157,
-        ArgumentOfPeriapsis = 132.4567,
-        MeanAnomaly = 288.2541,
-        Epoch = '2021 OCT 22T05:03:31.470',
-        Period = 5578.640506
+local iss = {
+  Identifier = "ISS",
+  Parent = transforms.EarthInertial.Identifier,
+  BoundingSphere = 54.5, -- half the width
+  InteractionSphere = 30,
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "ISS.txt",
+      Format = "OMM"
     },
-      Rotation = {
-        Type = "SpiceRotation",
-        SourceFrame = "GALACTIC",
-        DestinationFrame = "J2000",
-      }
-    },
-    Tag = { "earth_satellite", "ISS" },
-    GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/ISS"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "GALACTIC",
+      DestinationFrame = "J2000",
     }
+  },
+  Tag = { "earth_satellite", "ISS" },
+  GUI = {
+    Name = "ISS",
+    Path = "/Solar System/Planets/Earth/Satellites/ISS"
   }
+}
 
-  local parentNode = {
-     Identifier = "ISSModel",
-      Parent = iss.Identifier,
-      Transform = {
-        Rotation = {
-          Type = "FixedRotation",
-          Attached = "ISSModel",
-          XAxis = { 0.01, -1.0, 0.56 },
-          XAxisOrthogonal = true,
-          YAxis = transforms.EarthInertial.Identifier
-        }
-      },
-      Renderable = {
-        Type = "RenderableModel",
-        GeometryFile = models .. "/ISS.fbx",
-        ModelScale = "Centimeter",
-        LightSources = {
-          {
-            Type = "SceneGraphLightSource",
-            Identifier = "Sun",
-            Node = sunTransforms.SolarSystemBarycenter.Identifier,
-            Intensity = 1.0
-          }
-        },
-        PerformShading = true,
-        DisableFaceCulling = true
-      },
-      GUI = {
-        Name = "ISS Model",
-        Path = "/Solar System/Planets/Earth/Satellites/ISS"
-      }
-  }
-
-  local issTrail = {
-    Identifier = identifier .. "_trail",
-    Parent = transforms.EarthInertial.Identifier,
-    Renderable = {
-      Type = "RenderableTrailOrbit",
-      Translation = {
-        Type = "KeplerTranslation",
-        Eccentricity = 0.000419,
-        SemiMajorAxis = 6798.414219,
-        Inclination = 51.6428,
-        AscendingNode = 157,
-        ArgumentOfPeriapsis = 132.4567,
-        MeanAnomaly = 288.2541,
-        Epoch = '2021 OCT 22T05:03:31.470',
-        Period = 5578.640506
-      },
-      Color = { 0.9, 0.6715, 0.0 },
-      Fade = 1.5,
-      Period = period,
-      Resolution = 320
-    },
-    Tag = { "earth_satellite", "ISS" },
-    GUI = {
-      Name = "ISS Trail",
-      Path = "/Solar System/Planets/Earth/Satellites/ISS"
+local parentNode = {
+  Identifier = "ISSModel",
+  Parent = iss.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "ISSModel",
+      XAxis = { 0.01, -1.0, 0.56 },
+      XAxisOrthogonal = true,
+      YAxis = transforms.EarthInertial.Identifier
     }
-  }
-
-  -- @TODO (emmbr, 2021-05-27) add to scene when label rendering issues have been fixed
-  local IssLabel = {
-    Identifier = "IssLabel",
-    Parent = iss.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabels",
-      Text = "ISS",
-      FontSize = 70.0,
-      Size = 3.4,
-      MinMaxSize = { 1, 100 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeDistances = { 0.15, 15.0 },
-      FadeWidths = { 1.0, 25.0 }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "ISS.fbx",
+    ModelScale = "Centimeter",
+    LightSources = {
+      sun.LightSource
     },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-      Name = "ISS Label",
-      Path = "/Solar System/Planets/Earth/Satellites"
-    }
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "ISS Model",
+    Path = "/Solar System/Planets/Earth/Satellites/ISS"
   }
+}
 
-  return { iss, parentNode, issTrail }
-end
+local issTrail = {
+  Identifier = "ISS_trail",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "ISS.txt",
+      Format = "OMM"
+    },
+    RenderBinMode = "PostDeferredTransparent",
+    Color = { 0.9, 0.6715, 0.0 },
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellite", "ISS" },
+  GUI = {
+    Name = "ISS Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/ISS"
+  }
+}
+
+-- @TODO (emmbr, 2021-05-27) add to scene when label rendering issues have been fixed
+local IssLabel = {
+  Identifier = "IssLabel",
+  Parent = iss.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "ISS",
+    FontSize = 70.0,
+    Size = 3.4,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeDistances = { 0.15, 15.0 },
+    FadeWidths = { 1.0, 25.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "ISS Label",
+    Path = "/Solar System/Planets/Earth/Satellites"
+  }
+}
 
 asset.onInitialize(function ()
-  nodes = initializeAndAddNodes()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
+  issTrail.Renderable.Period = i[0].Period / (60 * 60 * 24)
+
+  openspace.addSceneGraphNode(iss)
+  openspace.addSceneGraphNode(parentNode)
   openspace.setPropertyValueSingle("Scene.ISSModel.Rotation.yAxisInvertObject", true)
+  openspace.addSceneGraphNode(issTrail)
 
 end)
 
 asset.onDeinitialize(function ()
-  for i=1, #nodes do
-    openspace.removeSceneGraphNode(nodes[#nodes + 1 - i].Identifier)
-  end
+  openspace.removeSceneGraphNode(issTrail)
+  openspace.removeSceneGraphNode(parentNode)
+  openspace.removeSceneGraphNode(iss)
 end)
 
+asset.export(issTrail)
+asset.export(parentNode)
+asset.export(iss)
 
 
 asset.meta = {
   Name = "ISS",
   Version = "1.0",
-  Description = [[ Model and Trail for ISS. Model from NASA 3D models, trail from
-  CELESTRAK]],
+  Description = [[Model and Trail for ISS. Model from NASA 3D models, trail from
+    Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/",
   License = "NASA"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <modules/server/servermodule.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/server/include/serverinterface.h>
 #include <modules/server/include/connection.h>
 #include <modules/server/include/topics/topic.h>
@@ -40,7 +41,7 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyInterfaces = "Interfaces";
+    constexpr std::string_view KeyInterfaces = "Interfaces";
 } // namespace
 
 namespace openspace {
@@ -50,6 +51,15 @@ ServerModule::ServerModule()
     , _interfaceOwner({"Interfaces", "Interfaces", "Server Interfaces"})
 {
     addPropertySubOwner(_interfaceOwner);
+
+    global::callback::preSync->emplace_back([this]() {
+        // Trigger callbacks
+        using K = CallbackHandle;
+        using V = CallbackFunction;
+        for (const std::pair<const K, V>& it : _preSyncCallbacks) {
+            it.second(); // call function
+        }
+    });
 }
 
 ServerModule::~ServerModule() {
@@ -70,6 +80,10 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
         return nullptr;
     }
     return si->get();
+}
+
+int ServerModule::skyBrowserUpdateTime() const {
+    return _skyBrowserUpdateTime;
 }
 
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
@@ -110,6 +124,11 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
             _interfaces.push_back(std::move(serverInterface));
         }
     }
+    if (configuration.hasValue<double>("SkyBrowserUpdateTime")) {
+        _skyBrowserUpdateTime = static_cast<int>(
+            configuration.value<double>("SkyBrowserUpdateTime")
+        );
+    }
 }
 
 void ServerModule::preSync() {
@@ -137,7 +156,7 @@ void ServerModule::preSync() {
                 continue;
             }
             socket->startStreams();
-            std::shared_ptr<Connection> connection = std::make_shared<Connection>(
+            auto connection = std::make_shared<Connection>(
                 std::move(socket),
                 address,
                 false,
@@ -207,7 +226,7 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
     messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
         std::lock_guard lock(_messageQueueMutex);
-        _messageQueue.push_back({ connection, std::move(messageString) });
+        _messageQueue.push_back({ connection, messageString });
     }
 }
 
@@ -222,6 +241,30 @@ void ServerModule::consumeMessages() {
         }
         _messageQueue.pop_front();
     }
+}
+
+ServerModule::CallbackHandle ServerModule::addPreSyncCallback(CallbackFunction cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _preSyncCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void ServerModule::removePreSyncCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _preSyncCallbacks.begin(),
+        _preSyncCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, CallbackFunction>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _preSyncCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _preSyncCallbacks.erase(it);
 }
 
 } // namespace openspace

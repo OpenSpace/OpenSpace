@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,14 @@ namespace events { struct Event; }
 
 class EventEngine {
 public:
+    struct ActionInfo {
+        events::Event::Type type;
+        uint32_t id = std::numeric_limits<uint32_t>::max();
+        bool isEnabled = true;
+        std::string action;
+        std::optional<ghoul::Dictionary> filter;
+    };
+
     /**
      * This function returns the first event stored in the EventEngine, or \c nullptr if
      * no event exists. To navigate the full list of events, you can access the returned
@@ -91,6 +99,36 @@ public:
         std::optional<ghoul::Dictionary> filter = std::nullopt);
 
     /**
+     * Removing registration for a specific event identified by the \p identifier.
+     * 
+     * \param identifier The unique identifier of the event that should be removed.
+     */
+    void unregisterEventAction(uint32_t identifier);
+
+    /**
+     * Returns the list of all registered actions, sorted by their identifiers.
+     *
+     * \return The list of all registered actions
+     */
+    std::vector<ActionInfo> registeredActions() const;
+
+    /**
+     * Enables the event identified by the \p identifier. If the event is already enabled,
+     * this function does nothing.
+     *
+     * \param identifier The identifier of the event that should be enabled
+     */
+    void enableEvent(uint32_t identifier);
+
+    /**
+     * Disables the event identified by the \p identifier. If the event is already
+     * disabled, this function does nothing.
+     *
+     * \param identifier The identifier of the event that should be disabled
+     */
+    void disableEvent(uint32_t identifier);
+
+    /**
      * Triggers all actions that are registered for events that are in the current event
      * queue
      */
@@ -106,11 +144,13 @@ private:
     /// The last event in the chain of events stored in the memory pool
     events::Event* _lastEvent = nullptr;
 
-    struct ActionInfo {
-        std::string action;
-        std::optional<ghoul::Dictionary> filter;
-    };
+
+    // The type is duplicated in the ActionInfo as well, but we want it in the ActionInfo
+    // to be able to return them to a caller and we want it in this unordered_map to make
+    // the lookup really fast. So having this extra wasted memory is probably worth it
     std::unordered_map<events::Event::Type, std::vector<ActionInfo>> _eventActions;
+
+    static uint32_t nextRegisteredEventId;
 
 #ifdef _DEBUG
     /// Stores the total number of events during this frame for debugging purposes

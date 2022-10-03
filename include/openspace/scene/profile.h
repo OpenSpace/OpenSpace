@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -80,18 +80,21 @@ public:
         std::string name;
         std::string value;
     };
+
     struct Action {
         std::string identifier;
         std::string documentation;
         std::string name;
         std::string guiPath;
-        bool isLocal;
+        bool isLocal = false;
         std::string script;
     };
+
     struct Keybinding {
         KeyWithModifier key;
         std::string action;
     };
+
     struct Time {
         enum class Type {
             Absolute,
@@ -101,8 +104,9 @@ public:
         Type type;
         std::string value;
     };
+
     struct CameraNavState {
-        static constexpr const char* Type = "setNavigationState";
+        static constexpr std::string_view Type = "setNavigationState";
 
         std::string anchor;
         std::optional<std::string> aim;
@@ -112,14 +116,16 @@ public:
         std::optional<double> yaw;
         std::optional<double> pitch;
     };
+
     struct CameraGoToGeo {
-        static constexpr const char* Type = "goToGeo";
+        static constexpr std::string_view Type = "goToGeo";
 
         std::string anchor;
         double latitude;
         double longitude;
         std::optional<double> altitude;
     };
+
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
@@ -140,7 +146,7 @@ public:
     /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    static constexpr const Version CurrentVersion = Version{ 1, 1 };
+    static constexpr Version CurrentVersion = Version{ 1, 1 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,32 +38,32 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyLazyLoading = "LazyLoading";
-    constexpr const char* _loggerCat = "RenderablePlaneTimeVaryingImage";
+    constexpr std::string_view KeyLazyLoading = "LazyLoading";
+    constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
     constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
         "Source Folder",
         "This value specifies the image directory that is loaded from disk and "
-        "is used as a texture that is applied to this plane."
+        "is used as a texture that is applied to this plane"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderTypeInfo = {
        "RenderType",
        "Render Type",
        "This value specifies if the plane should be rendered in the Background, "
-       "Opaque, Transparent, or Overlay rendering step."
+       "Opaque, Transparent, or Overlay rendering step"
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
         // [[codegen::verbatim(SourceFolderInfo.description)]]
         std::string sourceFolder;
 
-        enum class RenderType {
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderType {
             Background,
             Opaque,
-            PreDeferredTransparency,
-            PostDeferredTransparency,
+            PreDeferredTransparent [[codegen::key("PreDeferredTransparency")]],
+            PostDeferredTransparent [[codegen::key("PostDeferredTransparency")]],
             Overlay
         };
 
@@ -76,20 +76,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "base_renderable_plane_time_varying_image"
+    return codegen::doc<Parameters>(
+        "base_renderable_plane_time_varying_image",
+        RenderablePlane::Documentation()
     );
-
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderablePlane::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-
-    return doc;
 }
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
@@ -98,9 +88,9 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     , _sourceFolder(SourceFolderInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    
+
     addProperty(_blendMode);
-    
+
     _sourceFolder = p.sourceFolder;
     if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
         LERROR(fmt::format(
@@ -113,23 +103,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     _sourceFolder.onChange([this]() { _texture = loadTexture(); });
 
     if (p.renderType.has_value()) {
-        switch (*p.renderType) {
-            case Parameters::RenderType::Background:
-                setRenderBin(Renderable::RenderBin::Background);
-                break;
-            case Parameters::RenderType::Opaque:
-                setRenderBin(Renderable::RenderBin::Opaque);
-                break;
-            case Parameters::RenderType::PreDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-                break;
-            case Parameters::RenderType::PostDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-                break;
-            case Parameters::RenderType::Overlay:
-                setRenderBin(Renderable::RenderBin::Overlay);
-                break;
-        }
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderType));
     }
     else {
         setRenderBin(Renderable::RenderBin::Opaque);
@@ -159,7 +133,7 @@ void RenderablePlaneTimeVaryingImage::initialize() {
         return;
     }
     extractTriggerTimesFromFileNames();
-    computeSequenceEndTime();    
+    computeSequenceEndTime();
 }
 
 void RenderablePlaneTimeVaryingImage::initializeGL() {
@@ -168,7 +142,8 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
     _textureFiles.resize(_sourceFiles.size());
     for (size_t i = 0; i < _sourceFiles.size(); ++i) {
         _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_sourceFiles[i]).string()
+            absPath(_sourceFiles[i]).string(),
+            2
         );
         _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
         _textureFiles[i]->uploadTexture();
@@ -222,7 +197,7 @@ void RenderablePlaneTimeVaryingImage::bindTexture() {
 void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     ZoneScoped
     RenderablePlane::update(data);
-        
+
     if (!_enabled || _startTimes.empty()) {
         return;
     }
@@ -233,6 +208,8 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
+            // true => we were not in an interval the previous frame but now we are
+            _activeTriggerTimeIndex == -1 ||
             // true => We stepped back to a time represented by another state
             currentTime < _startTimes[_activeTriggerTimeIndex] ||
             // true => We stepped forward to a time represented by another state
@@ -256,8 +233,8 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
 
 void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTasks& t) {
     if (!_startTimes.empty() &&
-        data.time.j2000Seconds() < _sequenceEndTime && 
-        data.time.j2000Seconds() > _startTimes[0]) 
+        data.time.j2000Seconds() < _sequenceEndTime &&
+        data.time.j2000Seconds() > _startTimes[0])
     {
         glDisable(GL_CULL_FACE);
         RenderablePlane::render(data, t);
@@ -306,7 +283,7 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
         const double lastTriggerTime = _startTimes[_sourceFiles.size() - 1];
         const double sequenceDuration = lastTriggerTime - _startTimes[0];
         const double averageStateDuration = sequenceDuration /
-            (static_cast<double>(_sourceFiles.size() - 1.0));
+            static_cast<double>(_sourceFiles.size() - 1);
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
 }

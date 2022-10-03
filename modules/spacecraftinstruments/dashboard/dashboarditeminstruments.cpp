@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,7 @@ namespace {
         "Active Color",
         "This value determines the color that the active instrument is rendered in. "
         "Shortly after activation, the used color is mixture of this and the flash "
-        "color. The default value is (0.6, 1.0, 0.0)."
+        "color. The default value is (0.6, 1.0, 0.0)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlashColorInfo = {
@@ -85,7 +85,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemInstruments::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_dashboarditem_instuments");
+    return codegen::doc<Parameters>(
+        "spacecraftinstruments_dashboarditem_instuments",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dictionary)
@@ -124,12 +127,13 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
     penPosition.y -= 25.f;
 
-    constexpr const glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
+    constexpr glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
 
     double previous = sequencer.prevCaptureTime(currentTime);
     double next = sequencer.nextCaptureTime(currentTime);
-    double remaining = sequencer.nextCaptureTime(currentTime) - currentTime;
-    const float t = static_cast<float>(1.0 - remaining / (next - previous));
+    double remaining = next - currentTime;
+    float t = static_cast<float>(1.0 - remaining / (next - previous));
+    t = std::clamp(t, 0.f, 1.f);
 
     if (remaining > 0.0) {
         RenderFont(

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,6 +41,7 @@ uniform vec3 cameraDirectionWorldSpace;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
+
 void main() {
   vec4 position = meshTransform * in_position;
   vs_positionCameraSpace = modelViewTransform * position;
@@ -52,5 +53,7 @@ void main() {
   gl_Position = p;
   
   // The normal transform should be the transposed inverse of the model transform?
-  vs_normalViewSpace = normalize(mat3(modelViewTransform) * (mat3(meshNormalTransform) * in_normal));
+  vs_normalViewSpace = normalize(
+    mat3(modelViewTransform) * (mat3(meshNormalTransform) * in_normal)
+  );
 }

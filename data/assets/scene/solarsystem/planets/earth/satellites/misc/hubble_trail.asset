@@ -1,0 +1,83 @@
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Hubble)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_hst",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=20580&FORMAT=kvn",
+  Filename = "hst.txt",
+  Override = true
+})
+
+
+local HubblePosition = {
+  Identifier = "HubblePosition",
+  Parent = transforms.EarthInertial.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "hst.txt",
+      Format = "OMM"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "GALACTIC",
+      DestinationFrame = "J2000",
+    }
+  },
+  Tag = { "earth_satellite", "hubble" },
+  GUI = {
+    Name = "Hubble Position",
+    Path = "/Solar System/Planets/Earth/Satellites/Hubble",
+    Hidden = true
+  }
+}
+
+local HubbleTrail = {
+  Identifier = "HubbleTrail",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "hst.txt",
+      Format = "OMM"
+    },
+    RenderBinMode = "PostDeferredTransparent",
+    Color = { 0.0, 0.902, 0.6},
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellite", "hubble" },
+  GUI = {
+    Name = "Hubble Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/Hubble"
+  }
+}
+
+asset.onInitialize(function ()
+  local hubble = openspace.space.readKeplerFile(omm .. "hst.txt", "OMM")
+  HubbleTrail.Renderable.Period = hubble[0].Period / (60 * 60 * 24)
+
+  openspace.addSceneGraphNode(HubblePosition)
+  openspace.addSceneGraphNode(HubbleTrail)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(HubbleTrail)
+  openspace.removeSceneGraphNode(HubblePosition)
+end)
+
+asset.export(HubblePosition)
+asset.export(HubbleTrail)
+
+asset.meta = {
+  Name = "Hubble Space Telescope Trail",
+  Version = "1.0",
+  Description = "Position and Trail for Hubble Space Telescope, trail from Celestrak",
+  Author = "Dan Tell",
+  URL = "www.calacademy.org",
+  License = "CC-BY"
+}

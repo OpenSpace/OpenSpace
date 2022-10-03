@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,9 +43,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "Timevarying Sphere";
-    constexpr const char* _loggerCat = "RenderableTimeVaryingSphere";
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr std::array<const char*, 5> UniformNames = {
         "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
         "mirrorTexture"
     };
@@ -61,67 +59,53 @@ namespace {
         "Texture Source",
         "This value specifies a directory of images that are loaded from disk and is "
         "used as a texture that is applied to this sphere. The images are expected to "
-        "be an equirectangular projection."
+        "be an equirectangular projection"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror Texture",
-        "Mirror the texture along the x-axis."
+        "Mirror the texture along the x-axis"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
-        "outside of the sphere, or both."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo UseAdditiveBlendingInfo = {
-        "UseAdditiveBlending",
-        "Use Additive Blending",
-        "Render the object using additive blending."
+        "outside of the sphere, or both"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that the sphere is separated in."
+        "This value specifies the number of segments that the sphere is separated in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the radius of the sphere in meters."
+        "This value specifies the radius of the sphere in meters"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
         "FadeOutThreshold",
         "Fade-Out Threshold",
         "This value determines percentage of the sphere is visible before starting "
-        "fading-out it."
+        "fading-out it"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
         "FadeInThreshold",
         "Fade-In Threshold",
         "Distance from center of MilkyWay from where the astronomical object starts to "
-        "fade in."
+        "fade in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable Fade-In/Fade-Out effects",
-        "Enables/Disables the Fade-In/Out effects."
+        "Enables/Disables the Fade-In/Out effects"
     };
-
-    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
-        "Background",
-        "Render as Background",
-        "If this value is set, the sphere is rendered in the background rendering bin, "
-        "causing it to be rendered before most other scene graph nodes"
-    };
-
 
     struct [[codegen::Dictionary(RenerableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
@@ -133,7 +117,7 @@ namespace {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
         std::string textureSource;
 
-        enum class Orientation {
+        enum class [[codegen::map(Orientation)]] Orientation {
             Outside,
             Inside,
             Both
@@ -141,9 +125,6 @@ namespace {
 
         // [[codegen::verbatim(OrientationInfo.description)]]
         std::optional<Orientation> orientation;
-
-        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
-        std::optional<bool> useAdditiveBlending;
 
         // [[codegen::verbatim(MirrorTextureInfo.description)]]
         std::optional<bool> mirrorTexture;
@@ -156,9 +137,6 @@ namespace {
 
         // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
         std::optional<bool> disableFadeInOut;
-
-        // [[codegen::verbatim(BackgroundInfo.description)]]
-        std::optional<bool> background;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -179,9 +157,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _mirrorTexture(MirrorTextureInfo, false)
-    , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
     , _disableFadeInDistance(DisableFadeInOutInfo, true)
-    , _backgroundRendering(BackgroundInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, -1.f, -1.f, 1.f)
     , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, -1.f, 1.f)
 {
@@ -201,19 +177,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     });
 
     if (p.orientation.has_value()) {
-        switch (*p.orientation) {
-            case Parameters::Orientation::Inside:
-                _orientation = static_cast<int>(Orientation::Inside);
-                break;
-            case Parameters::Orientation::Outside:
-                _orientation = static_cast<int>(Orientation::Outside);
-                break;
-            case Parameters::Orientation::Both:
-                _orientation = static_cast<int>(Orientation::Both);
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        _orientation = static_cast<int>(codegen::map<Orientation>(*p.orientation));
     }
     else {
         _orientation = static_cast<int>(Orientation::Outside);
@@ -231,28 +195,16 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     _segments.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_mirrorTexture);
-    addProperty(_useAdditiveBlending);
     addProperty(_fadeOutThreshold);
     addProperty(_fadeInThreshold);
 
     _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
-    _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
     _fadeOutThreshold = p.fadeOutThreshold.value_or(_fadeOutThreshold);
     _fadeInThreshold = p.fadeInThreshold.value_or(_fadeInThreshold);
-
-    if (_useAdditiveBlending) {
-        setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-    }
 
     if (_fadeOutThreshold || _fadeInThreshold) {
         _disableFadeInDistance = false;
         addProperty(_disableFadeInDistance);
-    }
-
-    _backgroundRendering = p.background.value_or(_backgroundRendering);
-
-    if (_backgroundRendering) {
-        setRenderBin(Renderable::RenderBin::Background);
     }
 
     setBoundingSphere(_size);
@@ -268,10 +220,10 @@ void RenderableTimeVaryingSphere::initializeGL() {
     _sphere->initialize();
 
     _shader = BaseModule::ProgramObjectManager.request(
-        ProgramName,
+        "Timevarying Sphere",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "Timevarying Sphere",
                 absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
             );
@@ -291,7 +243,7 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
     _texture = nullptr;
 
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        "Timevarying Sphere",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -321,7 +273,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
     );
     _shader->setUniform(_uniformCache.modelViewRotation, modelViewRotation);
 
-    float adjustedOpacity = _opacity;
+    float adjustedOpacity = opacity();
 
     if (!_disableFadeInDistance) {
         if (_fadeInThreshold > -1.0) {
@@ -354,7 +306,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
             const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-            if (logDistCamera > startLogFadeDistance && 
+            if (logDistCamera > startLogFadeDistance &&
                 logDistCamera < stopLogFadeDistance)
             {
                 const float fadeFactor = glm::clamp(
@@ -395,14 +347,14 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         glDisable(GL_CULL_FACE);
     }
 
-    if (_useAdditiveBlending) {
+    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (_useAdditiveBlending) {
+    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(true);
     }
@@ -439,7 +391,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         std::string filePath = e.path().string();
         double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(filePath);
+            ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
 
         t->setInternalFormat(GL_COMPRESSED_RGBA);
         t->uploadTexture();
@@ -450,7 +402,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     }
 
     std::sort(
-        _files.begin(), _files.end(), 
+        _files.begin(), _files.end(),
         [](const FileData& a, const FileData& b) {
             return a.time < b.time;
         }
@@ -482,7 +434,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             // true => We stepped forward to a time represented by another state
             (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
         {
-            updateActiveTriggerTimeIndex(currentTime); 
+            updateActiveTriggerTimeIndex(currentTime);
             _sphereIsDirty = true;
         } // else {we're still in same state as previous frame (no changes needed)}
     }
@@ -546,7 +498,7 @@ void RenderableTimeVaryingSphere::computeSequenceEndTime() {
 }
 
 void RenderableTimeVaryingSphere::loadTexture() {
-    if (_activeTriggerTimeIndex != -1) { 
+    if (_activeTriggerTimeIndex != -1) {
         _texture = _files[_activeTriggerTimeIndex].texture.get();
     }
 }

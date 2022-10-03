@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,10 +33,10 @@ in vec4 vs_position;
 uniform sampler1D texture1;
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
-
 uniform bool hasSunPosition;
 uniform vec3 sunPosition;
 uniform float _nightFactor;
+
 
 Fragment getFragment() {
   // Moving the origin to the center

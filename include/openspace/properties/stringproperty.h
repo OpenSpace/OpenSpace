@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,9 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<std::string>::operator=;
+    
+    operator std::string_view();
+    operator std::string_view() const;
 
 protected:
     std::string fromLuaConversion(lua_State* state, bool& success) const override;

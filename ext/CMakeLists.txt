@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -56,22 +56,27 @@ set_folder_location(GhoulTest "Unit Tests")
 begin_dependency("Spice")
 set(SPICE_BUILD_SHARED_LIBRARY OFF CACHE BOOL "" FORCE)
 add_subdirectory(spice)
+target_compile_features(spice PUBLIC cxx_std_20)
 set_folder_location(spice "External")
 end_dependency()
 
 # Curl
 begin_dependency("CURL")
-add_library(external-curl INTERFACE)
 if (WIN32)
-  target_include_directories(external-curl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/curl/include")
-  target_link_libraries(external-curl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libcurl.lib")
-  target_compile_definitions(external-curl INTERFACE "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
+  add_library(external-curl SHARED IMPORTED GLOBAL)
+  target_include_directories(external-curl INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/curl/include)
+  set_property(TARGET external-curl PROPERTY IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libcurl.lib)
+  set_property(TARGET external-curl PROPERTY IMPORTED_LOCATION
+    ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libcurl.dll
+    ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libeay32.dll
+    ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/ssleay32.dll
+  )
 else ()
   find_package(CURL)
   if (CURL_FOUND)
+    add_library(external-curl INTERFACE)
     target_include_directories(external-curl INTERFACE ${CURL_INCLUDE_DIRS})
     target_link_libraries(external-curl INTERFACE ${CURL_LIBRARIES})
-    target_compile_definitions(external-curl INTERFACE "OPENSPACE_CURL_ENABLED")
   endif ()
 endif ()
 end_dependency()

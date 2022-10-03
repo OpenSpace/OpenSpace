@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,9 @@ uniform float alphaValue;
 uniform vec3 color;
 uniform sampler2D spriteTexture;
 uniform bool hasColorMap;
+uniform bool useColorMap;
 uniform float fadeInValue;
+
 
 Fragment getFragment() {
   if (gs_colorMap.a == 0.0 || ta == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
@@ -47,7 +49,7 @@ Fragment getFragment() {
 
   vec4 fullColor = textureColor;
     
-  if (hasColorMap) {
+  if (hasColorMap && useColorMap) {
     fullColor *= gs_colorMap;
   }
   else {

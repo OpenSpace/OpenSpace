@@ -1,20 +1,11 @@
-local colorLayersPath = "./layers/colorlayers"
-
-asset.require(colorLayersPath .. "/enceladus_texture")
-local colorLayer = asset.require(colorLayersPath .. "/global_mosaic_100m_hpf")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Enceladus.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/enceladus_texture", false)
+asset.require("./layers/colorlayers/global_mosaic_100m_hpf", true)
 
 
 asset.meta = {
   Name = "Default Enceladus Layers",
   Version = "1.0",
-  Description = [[ Default Enceladus layers are: Enceladus Texture and Cassini Global
+  Description = [[Default Enceladus layers are: Enceladus Texture and Cassini Global
     Mosaic 100m HPF]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

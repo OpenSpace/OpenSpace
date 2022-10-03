@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,9 +40,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableHabitableZone";
-
-    constexpr const std::array<const char*, 6> UniformNames = {
+    constexpr std::array<const char*, 6> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "transferFunctionTexture",
         "conservativeBounds", "showOptimistic"
     };
@@ -51,21 +49,21 @@ namespace {
         "EffectiveTemperature",
         "Effective Temperature",
         "The effective temperature of the corresponding star, in Kelvin. "
-        "Used to compute the width and size of the disc."
+        "Used to compute the width and size of the disc"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LuminosityInfo = {
         "Luminosity",
         "Luminosity",
         "The luminosity of the corresponding star, in units of solar luminosities. "
-        "Used to compute the width and size of the disc."
+        "Used to compute the width and size of the disc"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OptimisticInfo = {
         "Optimistic",
         "Optimistic" ,
         "If true, the habitable zone disc is rendered with the optimistic boundaries "
-        "rather than the conservative ones."
+        "rather than the conservative ones"
     };
 
     constexpr openspace::properties::Property::PropertyInfo KopparapuTeffIntervalInfo = {
@@ -74,7 +72,7 @@ namespace {
         "The effective temperature interval for which Kopparapu's formula is used for "
         "the habitable zone computation. For stars with temperatures outside the range, "
         "a simpler method by Tom E. Harris is used. This method only uses the star "
-        "luminosity and does not include computation of the optimistic boundaries."
+        "luminosity and does not include computation of the optimistic boundaries"
     };
 
     struct [[codegen::Dictionary(RenderableHabitableZone)]] Parameters {
@@ -96,21 +94,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableHabitableZone::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "space_renderablehabitablezone"
+    return codegen::doc<Parameters>(
+        "space_renderablehabitablezone",
+        RenderableDisc::Documentation()
     );
-
-    // @TODO cleanup
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderableDisc::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-
-    return doc;
 }
 
 RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictionary)
@@ -163,7 +150,7 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.width, _width);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(_uniformCache.conservativeBounds, _conservativeBounds);
     _shader->setUniform(_uniformCache.showOptimistic, _showOptimistic);
 
@@ -202,7 +189,7 @@ void RenderableHabitableZone::updateUniformLocations() {
 
 void RenderableHabitableZone::computeZone() {
     glm::dvec4 distancesInAu = computeKopparapuZoneBoundaries(_teff, _luminosity);
-    constexpr const double AU = distanceconstants::AstronomicalUnit;
+    constexpr double AU = distanceconstants::AstronomicalUnit;
     const double inner = distancesInAu[0] * AU;
     const double innerConservative = distancesInAu[1] * AU;
     const double outerConservative = distancesInAu[2] * AU;
@@ -248,15 +235,15 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
 
     // Coefficients for planets of 1 Earth mass. Received from:
     // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
-    constexpr const Coefficients coefficients[] = {
+    constexpr Coefficients coefficients[] = {
         // Optimistic Inner boundary - Recent Venus
-        {1.77600E+00, 2.13600E-04, 2.53300E-08, -1.33200E-11, -3.09700E-15},
+        { 1.77600E+00, 2.13600E-04, 2.53300E-08, -1.33200E-11, -3.09700E-15 },
         // Conservative Inner boundary - Runaway greenhouse
-        {1.10700E+00, 1.33200E-04, 1.58000E-08, -8.30800E-12, -1.93100E-15},
+        { 1.10700E+00, 1.33200E-04, 1.58000E-08, -8.30800E-12, -1.93100E-15 },
         // Conservative Outer boundary - Maximum greenhouse
-        {3.56000E-01, 6.17100E-05, 1.69800E-09, -3.19800E-12, -5.57500E-16},
+        { 3.56000E-01, 6.17100E-05, 1.69800E-09, -3.19800E-12, -5.57500E-16 },
         // Optimistic Outer boundary - Early Mars
-        {3.20000E-01, 5.54700E-05, 1.52600E-09, -2.87400E-12, -5.01100E-16}
+        { 3.20000E-01, 5.54700E-05, 1.52600E-09, -2.87400E-12, -5.01100E-16 }
     };
 
     const double tstar = static_cast<double>(teff - 5780.f);

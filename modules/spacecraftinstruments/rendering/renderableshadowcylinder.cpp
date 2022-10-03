@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,10 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr const char* ProgramName = "ShadowCylinderProgram";
-    constexpr const char* MainFrame = "GALACTIC";
-
-    constexpr const std::array<const char*, 3> UniformNames = {
+    constexpr std::array<const char*, 3> UniformNames = {
         "modelViewProjectionTransform", "shadowColor", "opacity"
     };
 
@@ -46,7 +43,7 @@ namespace {
         "Points",
         "This value determines the number of control points that is used to construct "
         "the shadow geometry. The higher this number, the more detailed the shadow is, "
-        "but it will have a negative impact on the performance."
+        "but it will have a negative impact on the performance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
@@ -54,55 +51,55 @@ namespace {
         "Shadow Length",
         "This value determines the length of the shadow that is cast by the target "
         "object. The total distance of the shadow is equal to the distance from the "
-        "target to the Sun multiplied with this value."
+        "target to the Sun multiplied with this value"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow Color",
-        "This value determines the color that is used for the shadow cylinder."
+        "This value determines the color that is used for the shadow cylinder"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator Type",
         "This value determines the type of the terminator that is used to calculate the "
-        "shadow eclipse."
+        "shadow eclipse"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light Source",
         "This value determines the SPICE name of the object that is used as the "
-        "illuminator for computing the shadow cylinder."
+        "illuminator for computing the shadow cylinder"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "This value specifies the SPICE name of the object that is the observer of the "
-        "shadow cylinder."
+        "shadow cylinder"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
         "Body",
         "Target Body",
         "This value is the SPICE name of target body that is used as the shadow caster "
-        "for the shadow cylinder."
+        "for the shadow cylinder"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
         "Body Frame",
         "This value is the SPICE name of the reference frame in which the shadow "
-        "cylinder is expressed."
+        "cylinder is expressed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AberrationInfo = {
         "Aberration",
         "Aberration",
         "This value determines the aberration method that is used to compute the shadow "
-        "cylinder."
+        "cylinder"
     };
 
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
@@ -115,12 +112,12 @@ namespace {
         // [[codegen::verbatim(ShadowColorInfo.description)]]
         std::optional<glm::vec3> shadowColor [[codegen::color()]];
 
-        enum class TerminatorType {
+        enum class [[codegen::map(openspace::SpiceManager::TerminatorType)]] Terminator {
             Umbral [[codegen::key("UMBRAL")]],
             Penumbral [[codegen::key("PENUMBRAL")]]
         };
         // [[codegen::verbatim(TerminatorTypeInfo.description)]]
-        TerminatorType terminatorType;
+        Terminator terminatorType;
 
         // [[codegen::verbatim(LightSourceInfo.description)]]
         std::string lightSource;
@@ -143,7 +140,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableShadowCylinder::Documentation() {
-    return codegen::doc<Parameters>("newhorizons_renderable_shadowcylinder");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderableshadowcylinder");
 }
 
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
@@ -180,14 +177,8 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         { static_cast<int>(SpiceManager::TerminatorType::Umbral), "Umbral" },
         { static_cast<int>(SpiceManager::TerminatorType::Penumbral), "Penumbral" }
     });
-    switch (p.terminatorType) {
-        case Parameters::TerminatorType::Umbral:
-            _terminatorType = static_cast<int>(SpiceManager::TerminatorType::Umbral);
-            break;
-        case Parameters::TerminatorType::Penumbral:
-            _terminatorType = static_cast<int>(SpiceManager::TerminatorType::Penumbral);
-            break;
-    }
+    _terminatorType =
+        static_cast<int>(codegen::map<SpiceManager::TerminatorType>(p.terminatorType));
     addProperty(_terminatorType);
 
 
@@ -216,10 +207,10 @@ void RenderableShadowCylinder::initializeGL() {
     glGenBuffers(1, &_vbo);
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
-        ProgramName,
+        "ShadowCylinderProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
-                ProgramName,
+                "ShadowCylinderProgram",
                 absPath(
                     "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"
                 ),
@@ -235,7 +226,7 @@ void RenderableShadowCylinder::initializeGL() {
 
 void RenderableShadowCylinder::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
-        ProgramName,
+        "ShadowCylinderProgram",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -271,7 +262,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     );
 
     _shader->setUniform(_uniformCache.shadowColor, _shadowColor);
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, opacity());
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
@@ -286,7 +277,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
 void RenderableShadowCylinder::update(const UpdateData& data) {
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(
         _bodyFrame,
-        MainFrame,
+        "GALACTIC",
         data.time.j2000Seconds()
     );
 
@@ -324,7 +315,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
     glm::dvec3 vecLightSource = SpiceManager::ref().targetPosition(
         _body,
         _lightSource,
-        MainFrame,
+        "GALACTIC",
         {
             SpiceManager::AberrationCorrection::Type(_aberration.value()),
             SpiceManager::AberrationCorrection::Direction::Reception

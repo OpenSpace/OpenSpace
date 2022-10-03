@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,21 +38,17 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableModelProjection";
-
-    constexpr const char* DestinationFrame = "GALACTIC";
-
-    constexpr const std::array<const char*, 7> MainUniformNames = {
+    constexpr std::array<const char*, 7> MainUniformNames = {
         "performShading", "directionToSunViewSpace", "modelViewTransform",
         "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
     };
 
-    constexpr const std::array<const char*, 6> FboUniformNames = {
+    constexpr std::array<const char*, 6> FboUniformNames = {
         "projectionTexture", "depthTexture", "needShadowMap", "ProjectorMatrix",
         "ModelTransform", "boresight"
     };
 
-    constexpr const std::array<const char*, 2> DepthFboUniformNames = {
+    constexpr std::array<const char*, 2> DepthFboUniformNames = {
         "ProjectorMatrix", "ModelTransform"
     };
 
@@ -61,19 +57,19 @@ namespace {
         "Perform Shading",
         "If this value is enabled, the model will be shaded based on the relative "
         "location to the Sun. If this value is disabled, shading is disabled and the "
-        "entire model is rendered brightly."
+        "entire model is rendered brightly"
     };
 
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
         // The file or files that should be loaded in this RenderableModel. The file can
         // contain filesystem tokens or can be specified relatively to the
-        // location of the .mod file.
+        // location of the .asset file.
         // This specifies the model that is rendered by the Renderable.
         std::filesystem::path geometryFile;
 
         // Contains information about projecting onto this planet.
         ghoul::Dictionary projection
-            [[codegen::reference("newhorizons_projectioncomponent")]];
+            [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
@@ -90,7 +86,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModelProjection::Documentation() {
-    return codegen::doc<Parameters>("newhorizons_renderable_modelprojection");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderablemodelprojection");
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
@@ -321,11 +317,14 @@ void RenderableModelProjection::update(const UpdateData& data) {
         }
     }
 
-    glm::dvec3 p =
-        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
-        data.modelTransform.translation;
-
-    _sunPosition = static_cast<glm::vec3>(p);
+    SceneGraphNode* sun = global::renderEngine->scene()->sceneGraphNode("Sun");
+    if (sun) {
+        _sunPosition = sun->worldPosition() - data.modelTransform.translation;
+    }
+    else {
+        // If the Sun node doesn't exist, we assume that the light source is in the origin
+        _sunPosition = -data.modelTransform.translation;
+    }
 }
 
 void RenderableModelProjection::imageProjectGPU(
@@ -384,7 +383,7 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
 {
     _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
         _projectionComponent.instrumentId(),
-        DestinationFrame,
+        "GALACTIC",
         time
     );
 
@@ -397,7 +396,7 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
     const glm::dvec3 p = SpiceManager::ref().targetPosition(
         _projectionComponent.projectorId(),
         _projectionComponent.projecteeId(),
-        DestinationFrame,
+        "GALACTIC",
         _projectionComponent.aberration(),
         time,
         lightTime

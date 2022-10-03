@@ -1,13 +1,13 @@
 -- Function that returns the string that inverts the fully qualified boolean property 'property'
 local invert = function(prop)
-  local escaped_property = "'" .. prop .. "'"
+  local escaped_property = '"' .. prop .. '"'
   return "openspace.setPropertyValueSingle(" .. escaped_property .. ", not openspace.getPropertyValue(" .. escaped_property .. "));"
 end
 
 -- Function that returns the string that increments the 'property' by the 'value'
 local increment = function(prop, value)
   local v = value or 1
-  local escaped_property = "'" .. prop .. "'"
+  local escaped_property = '"' .. prop .. '"'
   return "openspace.setPropertyValueSingle(" .. escaped_property .. ", openspace.getPropertyValue(" .. escaped_property .. ") + " .. v .. ");"
 end
 
@@ -20,7 +20,7 @@ local fade = function(prop, value, duration)
   assert(type(prop) == "string", "prop must be a number")
   assert(type(duration) == "number", "duration must be a number")
 
-  local escaped_property = "'" .. prop .. "'"
+  local escaped_property = '"' .. prop .. '"'
   return "openspace.setPropertyValueSingle(" .. escaped_property ..", " .. tostring(value) .. ", " .. tostring(duration) .. ")"
 end
 
@@ -36,15 +36,15 @@ local fadeInOut = function(prop, duration)
   assert(type(prop) == "string", "prop must be a number")
   assert(type(duration) == "number", "duration must be a number")
 
-  local escaped_property = "'" .. prop .. "'"
+  local escaped_property = '"' .. prop .. '"'
   -- If the value is > 0.5 fade out, otherwise fade in
   return "local v = openspace.getPropertyValue(" .. escaped_property .. "); if v <= 0.5 then " .. fadeIn(prop, duration) .. " else " .. fadeOut(prop, duration) .. " end"
 end
 
-asset.export('invert', invert)
-asset.export('increment', increment)
-asset.export('decrement', decrement)
-asset.export('fade', fade)
-asset.export('fadeIn', fadeIn)
-asset.export('fadeOut', fadeOut)
-asset.export('fadeInOut', fadeInOut)
+asset.export("invert", invert)
+asset.export("increment", increment)
+asset.export("decrement", decrement)
+asset.export("fade", fade)
+asset.export("fadeIn", fadeIn)
+asset.export("fadeOut", fadeOut)
+asset.export("fadeInOut", fadeInOut)

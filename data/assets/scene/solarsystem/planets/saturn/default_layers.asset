@@ -1,18 +1,10 @@
-local colorLayersPath = "./layers/colorlayers"
-
-local colorLayer = asset.require(colorLayersPath .. "/saturn_texture")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Saturn.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/saturn_texture", true)
 
 
 asset.meta = {
   Name = "Default Saturn Layers",
   Version = "1.0",
-  Description = [[ Default Saturn layers are: Saturn texture]],
+  Description = "Default Saturn layers are: Saturn texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

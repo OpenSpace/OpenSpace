@@ -1,0 +1,231 @@
+*******************************************************************************
+ Revised: Mar 27, 2018          Tesla Roadster (spacecraft)             -143205
+          (solution #10)
+ 
+ Tesla Roadster (AKA: Starman, 2018-017A)
+
+ NOTE:
+
+  Visibility: 
+   20th magnitude until Feb 20, 
+   22nd magnitude through mid-April 
+   Brighter than 26th magnitude into mid-June
+
+  2018-Mar-01: Radial non-gravitational acceleration A1 estimated from data
+               (nominally solar radiation pressure)
+  2018-Mar-27: Two reporting sites (J04 & K93) extend data arc one month.
+               A1 estimate of s10 is reduced 1.2-sigma compared to s9. 
+
+ LAUNCHED: 
+  2018-Feb-06 20:45 UTC by Falcon Heavy (FH-1) from Kennedy Space Center, USA 
+  (launchpad 39A)
+
+ BACKGROUND:
+  Dummy payload from the first launch of SpaceX Falcon Heavy launch vehicle. 
+  Consists of a standard Tesla Roadster automobile and a spacesuit-wearing 
+  mannequin nicknamed "Starman". 
+ 
+  Also includes a Hot Wheels toy model Roadster on the car's dash with a 
+  mini-Starman inside. A data storage device placed inside the car contains 
+  a copy of Isaac Asimov's "Foundation" novels. A plaque on the attachment 
+  fitting between the Falcon Heavy upper stage and the Tesla is etched with 
+  the names of more than 6,000 SpaceX employees.
+ 
+  After orbiting the Earth for 5 hours, a third burn by the second stage was 
+  completed at approximately 02:30 UTC Feb 7, placing the dummy payload in a 
+  heliocentric orbit having a perihelion of 0.99 au and aphelion ~1.67 au.
+
+  The object stack consists of a Merlin 1D Vacuum second stage with Extended 
+  Nozzle, Payload Attachment Fitting, and Tesla Roadster on mount.
+
+  Roadster mass: ~1250 kg (with batteries), ~800 kg (without ESS/batteries)
+
+ TRAJECTORY:
+  This trajectory is based on JPL solution #10, a fit to 364 ground-based 
+  optical astrometric measurements spanning 2018 Feb 8.2 to March 19.1
+
+  Trajectory name                       Start (TDB)          Stop (TDB)
+  --------------------------------   -----------------   -----------------
+  tesla_s10                          2018-Feb-07 03:00   2090-Jan-01 00:00
+
+  Encounter predictions for s10 (w/radial 1/r^2 non-gravitational acceleration)
+
+   Date (TDB)       Body  CA Dist  MinDist  MaxDist  Vrel  TCA3Sg  Nsigs P_i/p
+  ----------------- ----- -------  -------  ------- ------ ------ ------ ------
+  2018 Feb 08.09690 Moon  .000936  .000936  .000936  3.961   0.41 47509. 0.000
+  2020 Oct 07.26768 Mars  .049530  .048923  .050242  8.150  27.40 6.63E5 0.000
+  2035 Apr 22.35934 Mars  .015504  .004378  .027978  8.219 170.47 31247. 0.000
+  2047 Jan 11.89023 Earth .031919  .031716  .032123  4.493 249.70 78398. 0.000
+  2050 Mar 19.52949 Earth .119113  .113778  .124369  7.397 538.54 2.61E5 0.000
+  2052 Sep 05.15606 Mars  .176363  .172469  .180319  5.738 2185.5 8.68E5 0.000
+  2067 Apr 15.90202 Mars  .043270  .025712  .061471  7.192 1115.0 42565. 0.000
+  2084 Sep 17.92284 Mars  .116962  .093449  .141170  9.753 787.45 6.55E5 0.000
+  2085 Jan 01.96490 Earth .083063  .049368  .112186  6.224 5208.9 1.00E5 0.000
+  2088 Mar 09.95754 Earth .049146  .033491  .063322  5.106 4505.2 1.17E5 0.000
+
+     Date    = Nominal encounter time (Barycentric Dynamical Time)
+     CA_Dist = Highest probability close approach distance to body, au
+     MinDist = 3-sigma minimum encounter distance, au
+     MaxDist = 3-sigma maximum encounter distance, au
+     Vrel    = Relative velocity at nominal encounter time, km/s
+     TCA3Sg  = 3-sigma uncertainty in close encounter time, minutes
+     Nsigs   = Number of sigmas to encounter body at nominal encounter time 
+     P_i/p   = Linearized probability of impact
+
+  NOTE: 
+  How to obtain optional statistical uncertainty output & generate an SPK file:
+
+  Since this is a spacecraft and not part of the asteroid and comet database 
+  which normally holds orbit covariance data, some functions like statistical 
+  output and SPK file generation aren't automatically available for this object.
+
+  However, such optional extended output is possible with some extra steps. 
+
+  To propagate statistical uncertainties for this object, the full statistical
+  orbit solution (given below) can be manually input back into Horizons as a 
+  "user-defined object" using the telnet or e-mail interfaces (not possible
+  with the browser interface).
+ 
+  To do this and activate statistical or SPK file output ...
+
+  Using the telnet interface (command-line "telnet ssd.jpl.nasa.gov 6775"),
+  enter ";" to drop into user-input mode then cut-and-paste each line shown 
+  below, one at a time. The lines of numbers after SRC must be in the order 
+  shown.
+
+  For SPK file generation, only the first four lines need be input: the
+  EPOCH, orbital element lines starting with "EC" and "OM", and  the
+  non-gravitational acceleration model (line starting with "A1").
+
+  SRC lines are needed only for (optional) statistical output and the 
+  H & G values only for (optional) visual magnitude output. 
+
+ EPOCH= 2458164.5
+  EC= .2585469914787243  QR= .9860596231806226  TP= 2458153.620483722645
+  OM= 317.3549094214575  W = 177.3203028023227  IN= 1.088451292866039
+  EST=A1 A1= 2.960683526738534E-9  R0= 1.  ALN= 1.  NM= 2.  NK= 0.
+  SRC= -2.057839421666802E-7  7.966781900129693E-9  -1.720426606925749E-9
+       -4.722542923190676E-7  2.197679131968537E-9  -1.230413802372471E-6
+       -2.500290306870021E-7 -3.361070889248183E-9  -1.765963020682463E-5
+       -3.047907547965759E-7 -4.640202045440381E-7  -4.271481116360573E-9
+        2.657789409005983E-5  1.726818074599357E-6  -1.359673746135991E-6
+       -2.478836748687631E-5 -2.309863204867099E-8   -.0002351644867403515
+       -1.875169281895894E-6 -2.063647245529267E-6  -1.670539551586607E-6
+       -4.019207817588603E-6 -3.128134469402375E-9  -3.034540373576942E-5
+        1.733661692209129E-7 -7.052327854535979E-7  -2.650181216776434E-7
+       -1.310976135791957E-10
+    H= 25.289 G= 0.15
+
+  When done, press a blank return to exit input mode. 
+
+  Enter "J" at the prompt to indicate heliocentric J2000 ecliptic data has 
+  been supplied. Then at the next prompt, input an arbitrary name 
+  (i.e., Roadster).
+ 
+  Horizons will then proceed as usual, but with statistical output and SPK 
+  file generation now available as options.
+
+  A basic and identical tracking ephemeris can be produced without doing any 
+  of this, but statistical uncertainty quantities requested will be marked
+  "n.a.", meaning not available, and SPK generation won't be an option.
+
+  NOTE: long-term predictions
+  Over time, trajectory prediction errors could increase more rapidly than 
+  the formal statistics indicate due to unmodeled thermal re-radiation or 
+  outgassing accelerations that are not currently characterized but may exist.
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / API_USER Mon May 23 04:45:58 2022 Pasadena, USA      / Horizons    
+*******************************************************************************
+Target body name: SpaceX Roadster (spacecraft) (-143205) {source: tesla_s10}
+Center body name: Solar System Barycenter (0)     {source: DE441}
+Center-site name: BODYCENTRIC
+*******************************************************************************
+Start time      : A.D. 2022-May-22 00:00:00.0000 UT      
+Stop  time      : A.D. 2022-May-23 00:00:00.0000 UT      
+Step-size       : 720 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : (unavailable)                                                
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : ICRF
+Center radii    : (undefined)                                                  
+Target primary  : Earth
+Vis. interferer : None
+Rel. light bend : Sun                             {source: DE441}
+Rel. lght bnd GM: 1.3271E+11 km^3/s^2                                          
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : CAL 
+EOP file        : eop.220519.p220812                                           
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2022-MAY-19. PREDICTS-> 2022-AUG-11
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s 
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass     n.a.    , Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )                           
+*******************************************************************************
+ Date__(UT)__HR:MN                delta      GlxLon     GlxLat
+**************************************************************
+$$SOE
+ 2022-May-22 00:00     1.8974772217E+08  153.481630 -41.900757
+ 2022-May-22 12:00     1.8945940676E+08  153.792612 -41.651777
+ 2022-May-23 00:00     1.8917095486E+08  154.102144 -41.401193
+$$EOE
+*******************************************************************************
+Column meaning:
+ 
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion from TDB on Earth
+regardless of observer location within the solar system, although clock
+rates may differ due to the local gravity field and no analog to "UT"
+may be defined for that location.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+ 
+ 'delta' =
+   Apparent range ("delta", light-time aberrated) of the target center relative
+to the observer.  Units: KM
+ 
+ 'GlxLon     GlxLat' =
+   Observer-centered Galactic System II (post WW II) longitude and latitude
+of the target centers' apparent position, with light-time, gravitational
+deflection of light, and stellar aberrations. Units: DEGREES
+
+Computations by ...
+
+    Solar System Dynamics Group, Horizons On-Line Ephemeris System
+    4800 Oak Grove Drive, Jet Propulsion Laboratory
+    Pasadena, CA  91109   USA
+
+    General site: https://ssd.jpl.nasa.gov/
+    Mailing list: https://ssd.jpl.nasa.gov/email_list.html
+    System news : https://ssd.jpl.nasa.gov/horizons/news.html
+    User Guide  : https://ssd.jpl.nasa.gov/horizons/manual.html
+    Connect     : browser        https://ssd.jpl.nasa.gov/horizons/app.html#/x
+                  API            https://ssd-api.jpl.nasa.gov/doc/horizons.html
+                  command-line   telnet ssd.jpl.nasa.gov 6775
+                  e-mail/batch   https://ssd.jpl.nasa.gov/ftp/ssd/hrzn_batch.txt
+                  scripts        https://ssd.jpl.nasa.gov/ftp/ssd/SCRIPTS
+    Author      : Jon.D.Giorgini@jpl.nasa.gov
+
+*******************************************************************************
+

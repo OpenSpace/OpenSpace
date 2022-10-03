@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,14 +59,14 @@
 #include <iterator>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableMultiresVolume";
-    constexpr const char* KeyDataSource = "Source";
-    constexpr const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    constexpr const char* KeyTransferFunction = "TransferFunction";
+    constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
+    constexpr std::string_view KeyDataSource = "Source";
+    constexpr std::string_view KeyErrorHistogramsSource = "ErrorHistogramsSource";
+    constexpr std::string_view KeyTransferFunction = "TransferFunction";
 
-    constexpr const char* KeyBrickSelector = "BrickSelector";
-    constexpr const char* KeyStartTime = "StartTime";
-    constexpr const char* KeyEndTime = "EndTime";
+    constexpr std::string_view KeyBrickSelector = "BrickSelector";
+    constexpr std::string_view KeyStartTime = "StartTime";
+    constexpr std::string_view KeyEndTime = "EndTime";
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",

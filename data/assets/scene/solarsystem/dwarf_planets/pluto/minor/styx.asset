@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels').PlutoKernels
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels").PlutoKernels
 
 
 local Styx = {
@@ -51,14 +50,26 @@ local StyxTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Styx, StyxTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Styx)
+  openspace.addSceneGraphNode(StyxTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StyxTrail)
+  openspace.removeSceneGraphNode(Styx)
+end)
+    
+asset.export(Styx)
+asset.export(StyxTrail)
+
 
 
 asset.meta = {
   Name = "Styx",
   Version = "1.0",
-  Description = [[ Globe and trail for Pluto's moon Styx. Data from
-    NASA Spice (see base spice asset)]],
+  Description = [[Globe and trail for Pluto's moon Styx. Data from NASA Spice (see base
+    spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

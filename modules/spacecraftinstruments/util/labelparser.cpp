@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,9 +35,9 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "LabelParser";
-    constexpr const char* keySpecs = "Read";
-    constexpr const char* keyConvert = "Convert";
+    constexpr std::string_view _loggerCat = "LabelParser";
+    constexpr std::string_view keySpecs = "Read";
+    constexpr std::string_view keyConvert = "Convert";
 } // namespace
 
 namespace openspace {
@@ -182,13 +182,13 @@ bool LabelParser::create() {
 
             line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
             line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end() );
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
             std::string read = line.substr(0, line.find_first_of('='));
 
             _detectorType = "CAMERA"; // default value
 
-            constexpr const char* ErrorMsg =
+            constexpr std::string_view ErrorMsg =
                 "Unrecognized '{}' in line {} in file {}. The 'Convert' table must "
                 "contain the identity tranformation for all values encountered in the "
                 "label files, for example: ROSETTA = {{ \"ROSETTA\" }}";

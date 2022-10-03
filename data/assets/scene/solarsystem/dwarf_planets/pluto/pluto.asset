@@ -1,10 +1,14 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
-local labelsPath = asset.require('./pluto_globelabels').LabelsPath
+asset.require("./trail")
 
 
+local labelsPath = asset.syncedResource({
+  Name = "Pluto Labels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_labels",
+  Version = 1
+})
 
 local Pluto = {
   Identifier = "Pluto",
@@ -28,7 +32,7 @@ local Pluto = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/pluto.labels",
+      FileName = labelsPath .. "pluto.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 8.5,
@@ -50,7 +54,7 @@ local PlutoLabel = {
   Parent = Pluto.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Pluto",
     FontSize = 70.0,
     Size = 9.05,
@@ -61,17 +65,30 @@ local PlutoLabel = {
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Pluto Label",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Description = "Label for Pluto, visible at the solarsystem overview zoom level"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Pluto, PlutoLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Pluto)
+  openspace.addSceneGraphNode(PlutoLabel)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoLabel)
+  openspace.removeSceneGraphNode(Pluto)
+end)
+  
+asset.export(Pluto)
+asset.export(PlutoLabel)
+
 
 
 asset.meta = {
   Name = "Pluto",
   Version = "1.0",
-  Description = [[ Pluto globe, and main planet label.]],
+  Description = "Pluto globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

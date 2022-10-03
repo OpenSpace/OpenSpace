@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #endif // _MSC_VER
 
 #include <ccmc/Kameleon.h>
+#include <ccmc/FileReader.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -42,13 +43,13 @@
 
 
 namespace {
-    constexpr const char* _loggerCat = "KameleonHelper";
+    constexpr std::string_view _loggerCat = "KameleonHelper";
 } // namespace
 
 namespace openspace::kameleonHelper {
 
 std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath) {
-    std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
+    auto kameleon = std::make_unique<ccmc::Kameleon>();
     LDEBUG(fmt::format("\tOpening the cdf file: {}", cdfFilePath));
     long kamStatus = kameleon->open(cdfFilePath);
 
@@ -123,7 +124,7 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     else {
         LWARNING(
             "No starting time attribute could be found in the .cdf file. Starting "
-            "time is set to 01.JAN.2000 12:00."
+            "time is set to 01.JAN.2000 12:00"
         );
     }
 
@@ -138,8 +139,10 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
         );
     }
     else {
-        LWARNING("No starting time attribute could be found in the .cdf file."
-            "Starting time is set to 01.JAN.2000 12:00.");
+        LWARNING(
+            "No starting time attribute could be found in the .cdf file. Starting time "
+            "is set to 01.JAN.2000 12:00"
+        );
         seqStartDbl = 0.0;
     }
 
@@ -155,8 +158,10 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     }
     else {
         stateStartOffset = 0.0;
-        LWARNING("No time offset attribute could be found in the .cdf file."
-                    "The current state starts the same time as the sequence!");
+        LWARNING(
+            "No time offset attribute could be found in the .cdf file. The current state "
+            "starts the same time as the sequence"
+        );
     }
 
     return seqStartDbl + stateStartOffset + manualOffset;

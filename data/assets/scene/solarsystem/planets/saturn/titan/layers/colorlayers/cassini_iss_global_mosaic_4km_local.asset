@@ -1,11 +1,18 @@
-local texturesPath = asset.require("./../../titan_textures").TexturesPath
-local globeIdentifier = asset.require("./../../titan").Titan.Identifier
+local globeIdentifier = asset.require("../../titan").Titan.Identifier
+
+local texturesPath = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Titan textures",
+  Identifier = "titan_textures",
+  Version = 2
+})
 
 local layer = {
   Identifier = "Cassini_ISS_Global_Mosaic_4km_Local",
   Name = "Cassini ISS Global Mosaic 4km",
-  FilePath = texturesPath .. "/Titan_ISS_P19658_Mosaic_Global_4km_os.tif",
-  Description = [[ This global digital map of Saturn's moon Titan was created using
+  Enabled = asset.enabled,
+  FilePath = texturesPath .. "Titan_ISS_P19658_Mosaic_Global_4km_os.tif",
+  Description = [[This global digital map of Saturn's moon Titan was created using
     images taken by the Cassini spacecraft's Imaging Science Subsystem (ISS). The map
     was produced in June 2015 using data collected through Cassini's flyby on April 7,
     2014, known as "T100". The mean radius of Titan used for projection of this map is
@@ -15,20 +22,24 @@ local layer = {
     is created at some point in the future. (Description from URL)]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Cassini ISS Global Mosaic",
-  Version = "1.0",
-  Description = [[ Cassini global image layer for Titan]],
+  Version = "1.1",
+  Description = "Cassini global image layer for Titan",
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Titan/Cassini/Global-Mosaic/" ..
     "Titan_ISS_P19658_Mosaic_Global_4km",
-  License = "NASA/PDS",
-  Identifiers = {"Cassini_ISS_Global_Mosaic_4km_Local"}
+  License = "NASA/PDS"
 }

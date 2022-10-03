@@ -1,0 +1,66 @@
+local habitableZoneTextures = asset.require(
+  "scene/milkyway/habitable_zones/habitable_zone_textures"
+).TexturesPath
+
+local sunTextures = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Sun textures",
+  Identifier = "sun_textures",
+  Version = 4
+})
+
+local TexturesPath = asset.syncedResource({
+  Name = "Exoplanet Textures",
+  Type = "HttpSynchronization",
+  Identifier = "exoplanets_textures",
+  Version = 2
+})
+
+asset.onInitialize(function ()
+  local starTexture = TexturesPath .. "sun.jpg"
+  local noDataTexture = TexturesPath .. "grid-32.png"
+  local discTexture = TexturesPath .. "disc_bw_texture.png"
+
+  local starGlareTexture = sunTextures .. "halo.png"
+
+  local hzTexture = habitableZoneTextures .. "hot_to_cold_faded.png"
+
+  -- Set the default textures used for the exoplanet system creation
+  -- (Check if already set, to not override value set in another file)
+  local p = "Modules.Exoplanets.StarTexture";
+  if (openspace.getPropertyValue(p) == "") then
+    openspace.setPropertyValueSingle(p, starTexture)
+  end
+
+  local p = "Modules.Exoplanets.StarGlareTexture";
+  if (openspace.getPropertyValue(p) == "") then
+    openspace.setPropertyValueSingle(p, starGlareTexture)
+  end
+
+  p = "Modules.Exoplanets.NoDataTexture";
+  if (openspace.getPropertyValue(p) == "") then
+    openspace.setPropertyValueSingle(p, noDataTexture)
+  end
+
+  p = "Modules.Exoplanets.OrbitDiscTexture";
+  if (openspace.getPropertyValue(p) == "") then
+    openspace.setPropertyValueSingle(p, discTexture)
+  end
+
+  p = "Modules.Exoplanets.HabitableZoneTexture";
+  if (openspace.getPropertyValue(p) == "") then
+    openspace.setPropertyValueSingle(p, hzTexture)
+  end
+end)
+
+asset.export("TexturesPath", TexturesPath)
+
+asset.meta = {
+  Name = "Exoplanet Textures",
+  Version = "2.0",
+  Description = [[Adds all textures that are required for the exoplanet system
+    visualizations]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+}

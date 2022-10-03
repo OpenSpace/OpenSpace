@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local models = asset.syncedResource({
   Name = "New Horizons Model",
@@ -37,11 +36,19 @@ local Example_GlobeRotation = {
   Renderable = {
     Type = "RenderableModel",
     Body = "NEW HORIZONS",
-    GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+    GeometryFile = models .. "NewHorizonsCleanModel.obj"
   },
   GUI = {
     Path = "/Example"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Example_GlobeRotation })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Example_GlobeRotation)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Example_GlobeRotation)
+end)
+
+asset.export(Example_GlobeRotation)

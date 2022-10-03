@@ -1,7 +1,20 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernels = asset.require('../mar097').Kernels
+local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sun = asset.require("scene/solarsystem/sun/sun")
 
+local model = asset.syncedResource({
+  Name = "Deimos Model",
+  Type = "HttpSynchronization",
+  Identifier = "deimos_model",
+  Version = 1
+})
+
+local kernels = asset.syncedResource({
+  Name = "Mars Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_kernels",
+  Version = 1
+})
 
 local Deimos = {
   Identifier = "Deimos",
@@ -11,26 +24,33 @@ local Deimos = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_DEIMOS",
       DestinationFrame = "GALACTIC",
-      Kernels = kernels
+      Kernels = kernels .. "mar097.bsp"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "DEIMOS",
       Observer = "MARS BARYCENTER",
-      Kernels = kernels
+      Kernels = kernels .. "mar097.bsp"
     }
   },
   Renderable = {
-    Type = "RenderableGlobe",
-    Radii = { 15000, 12200, 11000 },
-    SegmentsPerPatch = 90,
-    Layers = {}
+    Type = "RenderableModel",
+    GeometryFile = model .. "/Deimos_1_1000.glb",
+    ModelScale = 'Kilometer',
+    RotationVector = { 180, 0, 180 },
+    AmbientIntensity = 0.02,
+    SpecularIntensity = 0.0,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
   },
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
     Name = "Deimos",
     Path = "/Solar System/Planets/Mars",
-    Description = [[One of two moons of Mars.]]
+    Description = "One of two moons of Mars"
   }
 }
 
@@ -52,19 +72,29 @@ local DeimosTrail = {
   GUI = {
     Name = "Deimos Trail",
     Path = "/Solar System/Planets/Mars",
-    Description = [[Trail for Deimos]]
+    Description = "Trail for Deimos"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Deimos)
+  openspace.addSceneGraphNode(DeimosTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DeimosTrail)
+  openspace.removeSceneGraphNode(Deimos)
+end)
+    
+asset.export(Deimos)
+asset.export(DeimosTrail)
 
 
 asset.meta = {
   Name = "Deimos",
   Version = "1.0",
-  Description = [[ RenderableGlobe and Trail for Deimos.]],
+  Description = "RenderableModel and Trail for Deimos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Deimos", "DeimosTrail"}
+  License = "MIT license"
 }

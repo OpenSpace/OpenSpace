@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,20 +28,15 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
-#include <openspace/util/keys.h>
+#include <openspace/openspace.h>
 #include <ghoul/ghoul.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
+#include <ghoul/glm.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/stacktrace.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
@@ -53,25 +48,17 @@
 #include <sgct/log.h>
 #include <sgct/projection/fisheye.h>
 #include <sgct/projection/nonlinearprojection.h>
-#include <sgct/screencapture.h>
 #include <sgct/settings.h>
 #include <sgct/user.h>
-#include <sgct/viewport.h>
+#include <sgct/window.h>
 #include <stb_image.h>
 #include <Tracy.hpp>
-#include <chrono>
-#include <ctime>
-#include <filesystem>
-#include <memory>
+#include <iostream>
+#include <string_view>
 
 #ifdef WIN32
-#include <openspace/openspace.h>
-#include <ghoul/misc/stacktrace.h>
-#include <ghoul/fmt.h>
 #include <Windows.h>
 #include <dbghelp.h>
-#include <shellapi.h>
-#include <shlobj.h>
 #endif // WIN32
 
 #ifdef OPENVR_SUPPORT
@@ -79,12 +66,16 @@
 #endif // OPENVR_SUPPORT
 
 #ifdef OPENSPACE_HAS_SPOUT
-#include "SpoutLibrary.h"
+#include <modules/spout/spoutwrapper.h>
 #endif // OPENSPACE_HAS_SPOUT
 
 #ifdef OPENSPACE_HAS_NVTOOLS
 #include "nvToolsExt.h"
 #endif // OPENSPACE_HAS_NVTOOLS
+
+#ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+#include <float.h>
+#endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 
 #include <launcherwindow.h>
 #include <QApplication>
@@ -94,9 +85,9 @@ using namespace sgct;
 
 namespace {
 
-constexpr const char* _loggerCat = "main";
-constexpr const char* SpoutTag = "Spout";
-constexpr const char* OpenVRTag = "OpenVR";
+constexpr std::string_view _loggerCat = "main";
+constexpr std::string_view SpoutTag = "Spout";
+constexpr std::string_view OpenVRTag = "OpenVR";
 
 // @TODO (abock, 2020-04-09): These state variables should disappear
 const Window* currentWindow = nullptr;
@@ -120,16 +111,11 @@ Window* FirstOpenVRWindow = nullptr;
  * the \c leftOrMain and \c right members respectively.
  */
 struct SpoutWindow {
-    struct SpoutData {
-        SPOUTHANDLE handle = nullptr;
-        bool initialized = false;
-    };
-
     /// The left framebuffer (or main, if there is no stereo rendering)
-    SpoutData leftOrMain;
+    openspace::spout::SpoutSender leftOrMain;
 
     /// The right framebuffer
-    SpoutData right;
+    openspace::spout::SpoutSender right;
 
     /// The window ID of this windows
     size_t windowId = size_t(-1);
@@ -211,6 +197,80 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 }
 #endif // WIN32
 
+void checkJoystickStatus() {
+    using namespace interaction;
+
+    for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
+        ZoneScopedN("Joystick state");
+
+        JoystickInputState& state = global::joystickInputStates->at(i);
+
+        int present = glfwJoystickPresent(i);
+        if (present == GLFW_FALSE) {
+            state.isConnected = false;
+            continue;
+        }
+
+        if (!state.isConnected) {
+            // Joystick was added
+            state.isConnected = true;
+            state.name = glfwGetJoystickName(i);
+
+            std::fill(state.axes.begin(), state.axes.end(), 0.f);
+            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
+
+            // Check axes and buttons
+            glfwGetJoystickAxes(i, &state.nAxes);
+            glfwGetJoystickButtons(i, &state.nButtons);
+        }
+
+        const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
+        state.axes.resize(state.nAxes);
+        std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
+
+        const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
+        state.buttons.resize(state.nButtons);
+
+        for (int j = 0; j < state.nButtons; ++j) {
+            const bool currentlyPressed = buttons[j] == GLFW_PRESS;
+
+            if (currentlyPressed) {
+                switch (state.buttons[j]) {
+                    case JoystickAction::Idle:
+                    case JoystickAction::Release:
+                        state.buttons[j] = JoystickAction::Press;
+                        break;
+                    case JoystickAction::Press:
+                    case JoystickAction::Repeat:
+                        state.buttons[j] = JoystickAction::Repeat;
+                        break;
+                }
+            }
+            else {
+                switch (state.buttons[j]) {
+                    case JoystickAction::Idle:
+                    case JoystickAction::Release:
+                        state.buttons[j] = JoystickAction::Idle;
+                        break;
+                    case JoystickAction::Press:
+                    case JoystickAction::Repeat:
+                        state.buttons[j] = JoystickAction::Release;
+                        break;
+                }
+            }
+        }
+    }
+}
+
+bool isGuiWindow(sgct::Window* window) {
+    if (Engine::instance().windows().size() == 1) {
+        // If we only have one window, assume it's also the GUI window.
+        // It might not have been given the 'GUI' tag
+        return true;
+    }
+    return window->hasTag("GUI");
+}
+
 //
 //  Init function
 //
@@ -291,45 +351,40 @@ void mainInitFunc(GLFWwindow*) {
 
 #ifdef OPENSPACE_HAS_SPOUT
         SpoutWindow w;
-
-        w.windowId = i;
+        bool retValue = true;
+        std::string mainWindowName = window.name();
 
         const Window::StereoMode sm = window.stereoMode();
         const bool hasStereo = (sm != Window::StereoMode::NoStereo) &&
                                (sm < Window::StereoMode::SideBySide);
 
         if (hasStereo) {
-            SpoutWindow::SpoutData& left = w.leftOrMain;
-            left.handle = GetSpout();
-            left.initialized = left.handle->CreateSender(
-                (window.name() + "_left").c_str(),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
-            );
-
-            SpoutWindow::SpoutData& right = w.right;
-            right.handle = GetSpout();
-            right.initialized = right.handle->CreateSender(
-                (window.name() + "_right").c_str(),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
-            );
-        }
-        else {
-            SpoutWindow::SpoutData& main = w.leftOrMain;
-            main.handle = GetSpout();
-            main.initialized = main.handle->CreateSender(
-                window.name().c_str(),
+            mainWindowName = window.name() + "_left";
+            retValue &= w.right.updateSenderName((window.name() + "_right").c_str());
+            retValue &= w.right.updateSenderSize(
                 window.framebufferResolution().x,
                 window.framebufferResolution().y
             );
         }
 
-        SpoutWindows.push_back(std::move(w));
+        retValue &= w.leftOrMain.updateSenderName(mainWindowName.c_str());
+        retValue &= w.leftOrMain.updateSenderSize(
+            window.framebufferResolution().x,
+            window.framebufferResolution().y
+        );
+
+        w.windowId = i;
+
+        if (retValue) {
+            SpoutWindows.push_back(std::move(w));
+        }
 #else
         LWARNING("Spout was requested, but program was compiled without Spout support");
 #endif // OPENSPACE_HAS_SPOUT
     }
+
+    // Query joystick status, those connected before start up
+    checkJoystickStatus();
 
     LTRACE("main::mainInitFunc(end)");
 }
@@ -348,80 +403,8 @@ void mainPreSyncFunc() {
         Engine::instance().terminate();
     }
 
-    // Query joystick status
-    using namespace interaction;
-
-    for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
-        ZoneScopedN("Joystick state");
-
-        JoystickInputState& state = global::joystickInputStates->at(i);
-
-        int present = glfwJoystickPresent(i);
-        if (present == GLFW_FALSE) {
-            state.isConnected = false;
-            continue;
-        }
-
-        if (!state.isConnected) {
-            // Joystick was added
-            state.isConnected = true;
-            state.name = glfwGetJoystickName(i);
-
-            std::fill(state.axes.begin(), state.axes.end(), 0.f);
-            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
-        }
-
-        const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
-        if (state.nAxes > JoystickInputState::MaxAxes) {
-            LWARNING(fmt::format(
-                "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
-                "All excess axes are ignored",
-                state.name, state.nAxes, JoystickInputState::MaxAxes
-            ));
-            state.nAxes = JoystickInputState::MaxAxes;
-        }
-        std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
-
-        const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-
-        if (state.nButtons > JoystickInputState::MaxButtons) {
-            LWARNING(fmt::format(
-                "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
-                "supported. All excess buttons are ignored",
-                state.name, state.nButtons, JoystickInputState::MaxButtons
-            ));
-            state.nButtons = JoystickInputState::MaxButtons;
-        }
-
-        for (int j = 0; j < state.nButtons; ++j) {
-            const bool currentlyPressed = buttons[j] == GLFW_PRESS;
-
-            if (currentlyPressed) {
-                switch (state.buttons[j]) {
-                    case JoystickAction::Idle:
-                    case JoystickAction::Release:
-                        state.buttons[j] = JoystickAction::Press;
-                        break;
-                    case JoystickAction::Press:
-                    case JoystickAction::Repeat:
-                        state.buttons[j] = JoystickAction::Repeat;
-                        break;
-                }
-            }
-            else {
-                switch (state.buttons[j]) {
-                    case JoystickAction::Idle:
-                    case JoystickAction::Release:
-                        state.buttons[j] = JoystickAction::Idle;
-                        break;
-                    case JoystickAction::Press:
-                    case JoystickAction::Repeat:
-                        state.buttons[j] = JoystickAction::Release;
-                        break;
-                }
-            }
-        }
-    }
+    // Query joystick status, those connected at run time
+    checkJoystickStatus();
 
     LTRACE("main::mainPreSyncFunc(end)");
 }
@@ -506,6 +489,29 @@ void mainRenderFunc(const sgct::RenderData& data) {
         currentModelMatrix = modelMatrix;
         currentModelViewProjectionMatrix = modelMatrix * viewMatrix * projectionMatrix;
         global::openSpaceEngine->render(modelMatrix, viewMatrix, projectionMatrix);
+
+#ifdef OPENSPACE_HAS_SPOUT
+        for (SpoutWindow& w : SpoutWindows) {
+            sgct::Window& window = *Engine::instance().windows()[w.windowId];
+            int width = window.framebufferResolution().x;
+            int height = window.framebufferResolution().y;
+
+            w.leftOrMain.saveGLState();
+
+            if (w.leftOrMain.isCreated() && w.leftOrMain.updateSenderSize(width, height))
+            {
+                GLuint texId = window.frameBufferTexture(Window::TextureIndex::LeftEye);
+                w.leftOrMain.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
+            }
+
+            if (w.right.isCreated() && w.right.updateSenderSize(width, height)) {
+                GLuint texId = window.frameBufferTexture(Window::TextureIndex::RightEye);
+                w.right.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
+            }
+
+            w.leftOrMain.restoreGLState();
+        }
+#endif // OPENSPACE_HAS_SPOUT
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -557,41 +563,13 @@ void mainPostDrawFunc() {
 
     global::openSpaceEngine->postDraw();
 
-#ifdef OPENSPACE_HAS_SPOUT
-    for (const SpoutWindow& w : SpoutWindows) {
-        sgct::Window& window = *Engine::instance().windows()[w.windowId];
-        if (w.leftOrMain.initialized) {
-            const GLuint texId = window.frameBufferTexture(Window::TextureIndex::LeftEye);
-            glBindTexture(GL_TEXTURE_2D, texId);
-            w.leftOrMain.handle->SendTexture(
-                texId,
-                GLuint(GL_TEXTURE_2D),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
-            );
-        }
-
-        if (w.right.initialized) {
-            const GLuint tId = window.frameBufferTexture(Window::TextureIndex::RightEye);
-            glBindTexture(GL_TEXTURE_2D, tId);
-            w.right.handle->SendTexture(
-                tId,
-                GLuint(GL_TEXTURE_2D),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
-            );
-        }
-    }
-    glBindTexture(GL_TEXTURE_2D, 0);
-#endif // OPENSPACE_HAS_SPOUT
-
     LTRACE("main::mainPostDrawFunc(end)");
 }
 
 
 
 void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action action,
-                          int)
+                          int, sgct::Window* window)
 {
     ZoneScoped
     LTRACE("main::mainKeyboardCallback(begin)");
@@ -599,7 +577,9 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
     const openspace::Key k = openspace::Key(key);
     const KeyModifier m = KeyModifier(modifiers);
     const KeyAction a = KeyAction(action);
-    global::openSpaceEngine->keyboardCallback(k, m, a);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->keyboardCallback(k, m, a, isGui);
 
     LTRACE("main::mainKeyboardCallback(begin)");
 }
@@ -607,7 +587,7 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
 
 
 void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
-                             sgct::Action action)
+                             sgct::Action action, sgct::Window* window)
 {
     ZoneScoped
     LTRACE("main::mainMouseButtonCallback(begin)");
@@ -615,36 +595,42 @@ void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
     const openspace::MouseButton k = openspace::MouseButton(key);
     const openspace::MouseAction a = openspace::MouseAction(action);
     const openspace::KeyModifier m = openspace::KeyModifier(modifiers);
-    global::openSpaceEngine->mouseButtonCallback(k, a, m);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->mouseButtonCallback(k, a, m, isGui);
 
     LTRACE("main::mainMouseButtonCallback(end)");
 }
 
 
 
-void mainMousePosCallback(double x, double y) {
+void mainMousePosCallback(double x, double y, sgct::Window* window) {
     ZoneScoped
-    global::openSpaceEngine->mousePositionCallback(x, y);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+    global::openSpaceEngine->mousePositionCallback(x, y, isGui);
 }
 
 
 
-void mainMouseScrollCallback(double posX, double posY) {
+void mainMouseScrollCallback(double posX, double posY, sgct::Window* window) {
     ZoneScoped
     LTRACE("main::mainMouseScrollCallback(begin");
 
-    global::openSpaceEngine->mouseScrollWheelCallback(posX, posY);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+    global::openSpaceEngine->mouseScrollWheelCallback(posX, posY, isGui);
 
     LTRACE("main::mainMouseScrollCallback(end)");
 }
 
 
 
-void mainCharCallback(unsigned int codepoint, int modifiers) {
+void mainCharCallback(unsigned int codepoint, int modifiers, sgct::Window* window) {
     ZoneScoped
 
     const KeyModifier m = KeyModifier(modifiers);
-    global::openSpaceEngine->charCallback(codepoint, m);
+    const IsGuiWindow isGui = IsGuiWindow(isGuiWindow(window));
+
+    global::openSpaceEngine->charCallback(codepoint, m, isGui);
 }
 
 
@@ -790,8 +776,8 @@ void setSgctDelegateFunctions() {
         Viewport* viewport = currentWindow->viewports().front().get();
         if (viewport != nullptr) {
             if (viewport->hasSubViewports() && viewport->nonLinearProjection()) {
-                int res = viewport->nonLinearProjection()->cubemapResolution();
-                return glm::ivec2(res, res);
+                ivec2 dim = viewport->nonLinearProjection()->cubemapResolution();
+                return glm::ivec2(dim.x, dim.y);
             }
             else if (currentWindow->viewports().size() > 1) {
                 // @TODO (abock, 2020-04-09) This should probably be based on the current
@@ -820,6 +806,36 @@ void setSgctDelegateFunctions() {
 
         vec2 scale = currentWindow->scale();
         return glm::vec2(scale.x, scale.y);
+    };
+    sgctDelegate.osDpiScaling = []() {
+        ZoneScoped
+
+        // Detect which DPI scaling to use
+        // 1. If there is a GUI window, use the GUI window's content scale value
+        const Window* dpiWindow = nullptr;
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->hasTag("GUI")) {
+                dpiWindow = window.get();
+                break;
+            }
+        }
+
+        // 2. If there isn't a GUI window, use the first window's value
+        if (!dpiWindow) {
+            dpiWindow = Engine::instance().windows().front().get();
+        }
+
+        glm::vec2 scale = glm::vec2(1.f, 1.f);
+        glfwGetWindowContentScale(dpiWindow->windowHandle(), &scale.x, &scale.y);
+
+        if (scale.x != scale.y) {
+            LWARNING(fmt::format(
+                "Non-square window scaling detected ({0}x{1}), using {0}x{0} instead",
+                scale.x, scale.y
+            ));
+        }
+
+        return scale.x;
     };
     sgctDelegate.hasGuiWindow = []() {
         ZoneScoped
@@ -858,11 +874,11 @@ void setSgctDelegateFunctions() {
             currentWindow->viewports().front()->nonLinearProjection()
         ) != nullptr;
     };
-    sgctDelegate.takeScreenshot = [](bool applyWarping) {
+    sgctDelegate.takeScreenshot = [](bool applyWarping, std::vector<int> windowIds) {
         ZoneScoped
 
         Settings::instance().setCaptureFromBackBuffer(applyWarping);
-        Engine::instance().takeScreenshot();
+        Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {
@@ -929,6 +945,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setScreenshotFolder = [](std::string path) {
         Settings::instance().setCapturePath(std::move(path));
     };
+    sgctDelegate.showStatistics = [](bool enabled) {
+        Engine::instance().setStatsGraphVisibility(enabled);
+    };
 }
 
 void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
@@ -982,8 +1001,7 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
 
 std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
                                             std::string windowConfiguration,
-                                            const std::string& labelFromCfgFile,
-                                            const std::string& xmlExt)
+                                            const std::string& labelFromCfgFile)
 {
     std::string config = windowConfiguration;
     if (!hasCliSGCTConfig) {
@@ -997,14 +1015,31 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            if ( (config.length() >= xmlExt.length())
-                && (0 == config.compare(config.length() - xmlExt.length(), xmlExt.length(), xmlExt)) ) {
-                //user customzied sgct config
+            std::filesystem::path c = absPath(config);
+
+            std::filesystem::path cj = c;
+            cj.replace_extension(".json");
+
+            std::filesystem::path cx = c;
+            cx.replace_extension(".xml");
+
+            if (c.extension().empty()) {
+                if (std::filesystem::exists(cj)) {
+                    config += ".json";
+                }
+                else if (std::filesystem::exists(cx)) {
+                    config += ".xml";
+                }
+                else {
+                    throw ghoul::RuntimeError(fmt::format(
+                        "Error loading configuration file {}. File could not be found",
+                        config
+                    ));
+                }
             }
             else {
-                config += xmlExt;
+                // user customzied sgct config
             }
-
         }
         global::configuration->windowConfiguration = config;
     }
@@ -1012,6 +1047,11 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
 }
 
 int main(int argc, char* argv[]) {
+#ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+    _clearfp();
+    _controlfp(_controlfp(0, 0) & ~(_EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
+#endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
+
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
@@ -1039,9 +1079,10 @@ int main(int argc, char* argv[]) {
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
+        std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
+    LDEBUG(fmt::format("Registering ${{BIN}} to {}", absPath("${BIN}")));
 
     //
     // Parse commandline arguments
@@ -1057,7 +1098,7 @@ int main(int argc, char* argv[]) {
         commandlineArguments.configurationName, "--file", "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
-        "current working directory."
+        "current working directory"
     ));
 
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
@@ -1068,7 +1109,7 @@ int main(int argc, char* argv[]) {
         "configuration file without editing the file on disk, for example in a "
         "planetarium environment. Please not that the Lua script must not contain any - "
         "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace."
+        "evaluated before it is passed to OpenSpace"
     ));
 
     // setCommandLine returns a reference to the vector that will be filled later
@@ -1115,10 +1156,27 @@ int main(int argc, char* argv[]) {
         std::filesystem::path base = configurationFilePath.parent_path();
         FileSys.registerPathToken("${BASE}", base);
 
+        // The previous incarnation of this was initializing GLFW to get the primary
+        // monitor's resolution, but that had some massive performance implications as
+        // there was some issue with the swap buffer handling inside of GLFW. My
+        // assumption is that GLFW doesn't like being initialized, destroyed, and then
+        // initialized again. Therefore we are using the platform specific functions now
+        glm::ivec2 size = glm::ivec2(1920, 1080);
+#ifdef WIN32
+        DEVMODEW dm = { 0 };
+        dm.dmSize = sizeof(DEVMODEW);
+        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+        if (success) {
+            size.x = dm.dmPelsWidth;
+            size.y = dm.dmPelsHeight;
+        }
+#endif // WIN32
+
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = configuration::loadConfigurationFromFile(
             configurationFilePath.string(),
+            size,
             commandlineArguments.configurationOverride
         );
 
@@ -1157,7 +1215,6 @@ int main(int argc, char* argv[]) {
 
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
-    const std::string xmlExt = ".xml";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
         hasSGCTConfig,
@@ -1205,8 +1262,7 @@ int main(int argc, char* argv[]) {
             win,
             hasSGCTConfig,
             windowConfiguration,
-            labelFromCfgFile,
-            xmlExt
+            labelFromCfgFile
         );
     } else {
         glfwInit();
@@ -1298,7 +1354,7 @@ int main(int argc, char* argv[]) {
 #endif // __APPLE__
 
 
-    // Do not print message if slaves are waiting for the master
+    // Do not print message if clients are waiting for the master
     // Only timeout after 15 minutes
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
 
@@ -1323,14 +1379,8 @@ int main(int argc, char* argv[]) {
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (SpoutWindow& w : SpoutWindows) {
-        if (w.leftOrMain.handle) {
-            w.leftOrMain.handle->ReleaseReceiver();
-            w.leftOrMain.handle->Release();
-        }
-        if (w.right.handle) {
-            w.right.handle->ReleaseReceiver();
-            w.right.handle->Release();
-        }
+        w.leftOrMain.release();
+        w.right.release();
     }
 #endif // OPENSPACE_HAS_SPOUT
 

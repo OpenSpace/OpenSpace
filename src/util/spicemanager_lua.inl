@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,132 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/filesystem/filesystem.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/logging/logmanager.h>
-#include <filesystem>
-
-namespace openspace::luascriptfunctions {
+namespace {
 
 /**
- * \ingroup LuaScripts
- * loadKernel(string):
  * Loads the provided SPICE kernel by name. The name can contain path tokens, which are
  * automatically resolved.
  */
-
-int loadKernel(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadKernel");
-    std::string argument = ghoul::lua::value<std::string>(L);
-
-    if (!std::filesystem::is_regular_file(argument)) {
-        return ghoul::lua::luaError(
-            L,
-            fmt::format("Kernel file '{}' did not exist", argument)
-        );
+[[codegen::luawrap]] int loadKernel(std::string kernel) {
+    if (!std::filesystem::is_regular_file(kernel)) {
+        throw ghoul::lua::LuaError(fmt::format("Kernel file '{}' did not exist", kernel));
     }
-    unsigned int result = SpiceManager::ref().loadKernel(argument);
-    ghoul::lua::push(L, result);
-    return 1;
+    unsigned int result = openspace::SpiceManager::ref().loadKernel(kernel);
+    return static_cast<int>(result);
 }
 
 /**
- * unloadKernel({string, number}):
  * Unloads the provided SPICE kernel. The name can contain path tokens, which are
  * automatically resolved.
  */
-int unloadKernel(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::unloadKernel");
-    std::variant<std::string, unsigned int> argument =
-        ghoul::lua::value<std::variant<std::string, unsigned int>>(L);
-
-    if (std::holds_alternative<std::string>(argument)) {
-        SpiceManager::ref().unloadKernel(std::get<std::string>(argument));
+[[codegen::luawrap]] void unloadKernel(std::variant<std::string, int> kernel) {
+    if (std::holds_alternative<std::string>(kernel)) {
+        openspace::SpiceManager::ref().unloadKernel(std::get<std::string>(kernel));
     }
     else {
-        SpiceManager::ref().unloadKernel(std::get<unsigned int>(argument));
+        openspace::SpiceManager::ref().unloadKernel(std::get<int>(kernel));
     }
-    return 0;
 }
 
 /**
- * spiceBodies():
- * Returns the list of bodies loaded into the spicemanager
+ * Returns a list of Spice Bodies loaded into the system. Returns SPICE built in frames if
+ * builtInFrames. Returns User loaded frames if !builtInFrames.
  */
-int spiceBodies(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::spiceBodies");
-    const bool buildInBodies = ghoul::lua::value<bool>(L);
+[[codegen::luawrap]] std::map<std::string, std::string> spiceBodies(bool includeBuiltIn) {
+    std::vector<std::pair<int, std::string>> bodies =
+        openspace::SpiceManager::ref().spiceBodies(includeBuiltIn);
 
-    std::vector<std::pair<int, std::string>> bodies = SpiceManager::ref().spiceBodies(
-        buildInBodies
-    );
-
-    lua_newtable(L);
-    int number = 1;
-    for (const std::pair<int, std::string>& body : bodies) {
-        lua_newtable(L);
-        ghoul::lua::push(L, 1, body.first);
-        lua_rawset(L, -3);
-        ghoul::lua::push(L, 2, body.second);
-        lua_rawset(L, -3);
-        lua_rawseti(L, -2, number);
-        ++number;
+    std::map<std::string, std::string> res;
+    for (const std::pair<int, std::string>& p : bodies) {
+        res[std::to_string(p.first)] = p.second;
     }
-    return 1;
+    return res;
 }
 
-// internal function for getSpk and getCk coverages
-void buildLuaCoverageStack(lua_State* L,
-                           const std::vector<std::pair<double, double>>& coverage)
+/**
+ * Returns the rotationMatrix for a given body in a frame of reference at a specific time.
+ * Example:
+ * openspace.spice.rotationMatrix('INSIGHT_LANDER_CRUISE','MARS', '2018 NOV 26 19:45:34')
+ */
+[[codegen::luawrap]] glm::dmat3 rotationMatrix(std::string body, std::string frame,
+                                               std::string date)
 {
-    lua_newtable(L);
-    int number = 1;
-    for (const std::pair<double, double>& window : coverage) {
-        std::string start = SpiceManager::ref().dateFromEphemerisTime(window.first);
-        std::string end = SpiceManager::ref().dateFromEphemerisTime(window.second);
-
-        lua_newtable(L);
-        ghoul::lua::push(L, 1, start);
-        lua_rawset(L, -3);
-        ghoul::lua::push(L, 2, end);
-        lua_rawset(L, -3);
-        lua_rawseti(L, -2, number);
-        ++number;
-    }
-}
-
-/**
- * spkCoverage(string):
- * Returns the spk coverage for given body
- */
-int spkCoverage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::spkCoverage");
-    std::string argument = ghoul::lua::value<std::string>(L);
-
-    buildLuaCoverageStack(L, SpiceManager::ref().spkCoverage(argument));
-    return 1;
-}
-
-/**
- * ckCoverage(string):
- * Returns the spk coverage for given body
- */
-int ckCoverage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::ckCoverage");
-    std::string argument = ghoul::lua::value<std::string>(L);
-
-    buildLuaCoverageStack(L, SpiceManager::ref().ckCoverage(argument));
-    return 1;
-}
-
-/**
- * rotationMatrix({string, string, string}):
- * Returns the rotationMatrix for a given body in a frame of reference at a specific time
- */
-int rotationMatrix(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::rotationMatrix");
-    auto [body, frame, date] =
-        ghoul::lua::values<std::string, std::string, std::string>(L);
+    using namespace openspace;
 
     const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
     glm::dmat3 rotationMatrix = SpiceManager::ref().frameTransformationMatrix(
@@ -155,31 +80,31 @@ int rotationMatrix(lua_State* L) {
         frame,
         ephemerisTime
     );
-    ghoul::lua::push(L, 1, rotationMatrix);
-    return 1;
+    return rotationMatrix;
 }
 
 /**
- * position({string, string, string, string}):
- * Returns the position for a given body relative to another body,
- * in a given frame of reference, at a specific time.
+ * Returns the position for a given body relative to another body, in a given frame of
+ * reference, at a specific time.
+ * Example:
+ * openspace.spice.position('INSIGHT', 'MARS',' GALACTIC', '2018 NOV 26 19:45:34')
  */
-int position(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::position");
-    auto [target, observer, frame, date] =
-        ghoul::lua::values<std::string, std::string, std::string, std::string>(L);
+[[codegen::luawrap]] glm::dvec3 position(std::string target, std::string observer,
+                                         std::string frame, std::string date)
+{
+    using namespace openspace;
 
     const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
-    glm::dvec3 postion = SpiceManager::ref().targetPosition(
+    glm::dvec3 position = SpiceManager::ref().targetPosition(
         target,
         observer,
         frame,
         {},
         ephemerisTime
     );
-    ghoul::lua::push(L, 1, postion);
-
-    return 1;
+    return position;
 }
 
-} // namespace openspace::luascriptfunctions
+#include "spicemanager_lua_codegen.cpp"
+
+} // namespace

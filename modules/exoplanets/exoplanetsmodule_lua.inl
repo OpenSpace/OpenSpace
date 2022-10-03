@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,44 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanets/exoplanetshelper.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/query/query.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/distanceconstants.h>
-#include <openspace/util/timeconversion.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <fstream>
-#include <sstream>
+#include <algorithm>
+#include <string>
+#include <string_view>
 
 namespace {
-    constexpr const char _loggerCat[] = "ExoplanetsModule";
 
-    constexpr const char ExoplanetsGuiPath[] = "/Milky Way/Exoplanets/Exoplanet Systems/";
+constexpr std::string_view _loggerCat = "ExoplanetsModule";
 
-    // Lua cannot handle backslashes, so replace these with forward slashes
-    std::string formatPathToLua(const std::string& path) {
-        std::string resPath = path;
-        std::replace(resPath.begin(), resPath.end(), '\\', '/');
-        return resPath;
-    }
-} // namespace
+constexpr std::string_view ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
-namespace openspace::exoplanets::luascriptfunctions {
+// Lua cannot handle backslashes, so replace these with forward slashes
+std::string formatPathToLua(const std::string& path) {
+    std::string resPath = path;
+    std::replace(resPath.begin(), resPath.end(), '\\', '/');
+    return resPath;
+}
 
-constexpr const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
-constexpr const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
-constexpr const float JupiterRadius =
-    static_cast<float>(distanceconstants::JupiterRadius);
+openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
+                                                                std::string_view starName)
+{
+    using namespace openspace;
+    using namespace exoplanets;
 
-ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
     const std::string binPath = module->exoplanetsDataPath();
@@ -135,12 +120,15 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
 }
 
 void createExoplanetSystem(const std::string& starName) {
+    using namespace openspace;
+    using namespace exoplanets;
+
     const std::string starIdentifier = createIdentifier(starName);
 
     std::string sanitizedStarName = starName;
     sanitizeNameString(sanitizedStarName);
 
-    const std::string guiPath = ExoplanetsGuiPath + sanitizedStarName;
+    const std::string guiPath = fmt::format("{}{}", ExoplanetsGuiPath, sanitizedStarName);
 
     SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
@@ -173,7 +161,7 @@ void createExoplanetSystem(const std::string& starName) {
     const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPos);
 
     // Star
-    float radiusInMeter = SolarRadius;
+    double radiusInMeter = distanceconstants::SolarRadius;
     if (!std::isnan(system.starData.radius)) {
         radiusInMeter *= system.starData.radius;
     }
@@ -242,7 +230,7 @@ void createExoplanetSystem(const std::string& starName) {
         "}"
     "}";
 
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + starParent + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
@@ -278,25 +266,25 @@ void createExoplanetSystem(const std::string& starName) {
             sEpoch = "2009-05-19T07:11:34.080";
         }
 
-        float planetRadius;
+        double planetRadius;
         std::string enabled;
         if (std::isnan(planet.r)) {
             if (std::isnan(planet.rStar)) {
-                planetRadius = planet.a * 0.001f * AU;
+                planetRadius = planet.a * 0.001 * distanceconstants::AstronomicalUnit;
             }
             else {
-                planetRadius = planet.rStar * 0.1f * SolarRadius;
+                planetRadius = planet.rStar * 0.1 * distanceconstants::SolarRadius;
             }
             enabled = "false";
         }
         else {
-            planetRadius = static_cast<float>(planet.r) * JupiterRadius;
+            planetRadius = planet.r * distanceconstants::JupiterRadius;
             enabled = "true";
         }
 
-        const float periodInSeconds = static_cast<float>(planet.per * SecondsPerDay);
-        const float semiMajorAxisInMeter = planet.a * AU;
-        const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
+        float periodInSeconds = static_cast<float>(planet.per * SecondsPerDay);
+        double semiMajorAxisInMeter = planet.a * distanceconstants::AstronomicalUnit;
+        double semiMajorAxisInKm = semiMajorAxisInMeter * 0.001;
 
         const std::string planetIdentifier = createIdentifier(planetName);
 
@@ -356,7 +344,7 @@ void createExoplanetSystem(const std::string& starName) {
             "}"
         "}";
 
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + planetTrailNode + ");"
             "openspace.addSceneGraphNode(" + planetNode + ");",
             scripting::ScriptEngine::RemoteScripting::Yes
@@ -406,7 +394,7 @@ void createExoplanetSystem(const std::string& starName) {
                 "}"
             "}";
 
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + discNode + ");",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -442,7 +430,7 @@ void createExoplanetSystem(const std::string& starName) {
             "},"
             "Scale = {"
                 "Type = 'StaticScale',"
-                "Scale = " + std::to_string(AU) + ""
+                "Scale = " + std::to_string(distanceconstants::AstronomicalUnit) + ""
             "}"
         "},"
         "GUI = {"
@@ -451,7 +439,7 @@ void createExoplanetSystem(const std::string& starName) {
         "}"
     "}";
 
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + circle + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
@@ -461,7 +449,7 @@ void createExoplanetSystem(const std::string& starName) {
     bool hasLuminosity = !std::isnan(system.starData.luminosity);
 
     if (hasTeff && hasLuminosity) {
-        constexpr const char* description =
+        constexpr std::string_view description =
             "The habitable zone is the region around a star in which an Earth-like "
             "planet can potentially have liquid water on its surface."
             "<br><br>"
@@ -469,7 +457,7 @@ void createExoplanetSystem(const std::string& starName) {
             "would trap any incoming infrared radiation, leading to the planet "
             "surface becoming so hot that water boils away. The outer boundary is where "
             "the greenhouse effect would not be able to maintain surface temperature "
-            "above freezing anywhere on the planet.";
+            "above freezing anywhere on the planet";
 
         const std::string hzTexture = module->habitableZoneTexturePath();
 
@@ -502,11 +490,11 @@ void createExoplanetSystem(const std::string& starName) {
             "GUI = {"
                 "Name = '" + starName + " Habitable Zone',"
                 "Path = '" + guiPath + "',"
-                "Description = '" + description + "'"
+                "Description = '" + std::string(description) + "'"
             "}"
         "}";
 
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -520,7 +508,7 @@ void createExoplanetSystem(const std::string& starName) {
             // magnitude or star luminosity, but for now this looks good enough.
             double size = 59.0 * radiusInMeter;
             if (hasTeff) {
-                constexpr const float sunTeff = 5780.f;
+                constexpr float sunTeff = 5780.f;
                 size *= std::pow(system.starData.teff / sunTeff, 2.0);
             }
 
@@ -547,7 +535,7 @@ void createExoplanetSystem(const std::string& starName) {
                 "}"
             "}";
 
-            openspace::global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + starGlare + ");",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -555,47 +543,16 @@ void createExoplanetSystem(const std::string& starName) {
     }
 }
 
-int addExoplanetSystem(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addExoplanetSystem");
-    std::variant<std::string, ghoul::Dictionary> v =
-        ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
-
-    if (std::holds_alternative<std::string>(v)) {
-        // The user provided a single name
-        std::string starName = std::get<std::string>(v);
-        createExoplanetSystem(starName);
-    }
-    else {
-        // A list of names was provided
-        ghoul::Dictionary starNames = ghoul::lua::value<ghoul::Dictionary>(L);
-        for (size_t i = 1; i <= starNames.size(); ++i) {
-            if (!starNames.hasValue<std::string>(std::to_string(i))) {
-                return ghoul::lua::luaError(
-                    L,
-                    fmt::format("List item {} is of invalid type", i)
-                );
-            }
-            const std::string& starName = starNames.value<std::string>(std::to_string(i));
-            createExoplanetSystem(starName);
-        }
-    }
-    return 0;
-}
-
-int removeExoplanetSystem(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeExoplanetSystem");
-    std::string starName = ghoul::lua::value<std::string>(L);
-
-    const std::string starIdentifier = createIdentifier(std::move(starName));
-    openspace::global::scriptEngine->queueScript(
-        "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-    return 0;
-}
-
 std::vector<std::string> hostStarsWithSufficientData() {
+    using namespace openspace;
+    using namespace exoplanets;
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
+
+    if (!module->hasDataFiles()) {
+        // If no data file path has been configured at all, we just bail out early here
+        LINFO("No data path was configured for the exoplanets");
+        return {};
+    }
 
     const std::string lutPath = module->lookUpTablePath();
     std::ifstream lookupTableFile(absPath(lutPath));
@@ -651,23 +608,42 @@ std::vector<std::string> hostStarsWithSufficientData() {
     return names;
 }
 
-int getListOfExoplanets(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getListOfExoplanets");
-
-    std::vector<std::string> names = hostStarsWithSufficientData();
-    lua_newtable(L);
-    int number = 1;
-    for (const std::string& s : names) {
-        ghoul::lua::push(L, s);
-        lua_rawseti(L, -2, number);
-        ++number;
+/**
+ * Add one or multiple exoplanet systems to the scene, as specified by the input. An input
+ * string should be the name of the system host star.
+ */
+[[codegen::luawrap]] void addExoplanetSystem(
+                            std::variant<std::string, std::vector<std::string>> starNames)
+{
+    if (std::holds_alternative<std::string>(starNames)) {
+        // The user provided a single name
+        std::string starName = std::get<std::string>(starNames);
+        createExoplanetSystem(starName);
     }
-    return 1;
+    else {
+        std::vector<std::string> sns = std::get<std::vector<std::string>>(starNames);
+        for (const std::string& starName : sns) {
+            createExoplanetSystem(starName);
+        }
+    }
 }
 
-int listAvailableExoplanetSystems(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::listAvailableExoplanetSystems");
+[[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
+    using namespace openspace;
+    using namespace exoplanets;
+    const std::string starIdentifier = createIdentifier(std::move(starName));
+    global::scriptEngine->queueScript(
+        "openspace.removeSceneGraphNode('" + starIdentifier + "');",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
 
+[[codegen::luawrap]] std::vector<std::string> getListOfExoplanets() {
+    std::vector<std::string> names = hostStarsWithSufficientData();
+    return names;
+}
+
+[[codegen::luawrap]] void listAvailableExoplanetSystems() {
     std::vector<std::string> names = hostStarsWithSufficientData();
 
     std::string output;
@@ -681,7 +657,8 @@ int listAvailableExoplanetSystems(lua_State* L) {
         "There is data available for the following {} exoplanet systems: {}",
         names.size(), output
     ));
-    return 0;
 }
 
-} //namespace openspace::exoplanets::luascriptfunctions
+#include "exoplanetsmodule_lua_codegen.cpp"
+
+} // namespace

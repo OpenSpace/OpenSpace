@@ -1,9 +1,13 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local labelsPath = asset.require('./mercury_globelabels').LabelsPath
-
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Mercury Labels",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_labels",
+  Version = 1
+})
 
 local Mercury = {
   Identifier = "Mercury",
@@ -30,7 +34,7 @@ local Mercury = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/Mercury.labels",
+      FileName = labelsPath .. "Mercury.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 10.1,
@@ -52,7 +56,7 @@ local MercuryLabel = {
   Parent = Mercury.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Mercury",
     FontSize = 70.0,
     Size = 8.46,
@@ -67,15 +71,26 @@ local MercuryLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury, MercuryLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Mercury)
+  openspace.addSceneGraphNode(MercuryLabel)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MercuryLabel)
+  openspace.removeSceneGraphNode(Mercury)
+end)
+    
+asset.export(Mercury)
+asset.export(MercuryLabel)
+
 
 
 asset.meta = {
   Name = "Mercury",
-  Version = "1.0",
-  Description = [[ Mercury globe with labels, and main planet label.]],
+  Version = "1.1",
+  Description = "Mercury globe with labels, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Mercury" , "MercuryLabel"}
+  License = "MIT license"
 }

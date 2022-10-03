@@ -5,15 +5,15 @@ local Kernels = asset.syncedResource({
   Version = 1
 })
 
-asset.export("ura091", Kernels .. "/ura091-rocks-merge.bsp")
-asset.export("ura111", Kernels .. "/ura111.bsp")
-asset.export("ura112", Kernels .. "/ura112.bsp")
+asset.export("ura091", Kernels .. "ura091-rocks-merge.bsp")
+asset.export("ura111", Kernels .. "ura111.bsp")
+asset.export("ura112", Kernels .. "ura112.bsp")
 
 
 asset.meta = {
   Name = "Uranus Spice Kernels",
   Version = "1.0",
-  Description = [[ Generic SPICE kernels for Uranus.]],
+  Description = "Generic SPICE kernels for Uranus",
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
   License = "NASA"

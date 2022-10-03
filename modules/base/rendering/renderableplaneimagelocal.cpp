@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,30 +42,12 @@ namespace {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
-        "RenderableType",
-        "RenderableType",
-        "This value specifies if the plane should be rendered in the Background,"
-        "Opaque, Transparent, or Overlay rendering step."
+        "that is applied to this plane. This image has to be square"
     };
 
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
-
-        enum class RenderType {
-            Background,
-            Opaque,
-            PreDeferredTransparency,
-            PostDeferredTransparency,
-            Overlay
-        };
-
-        // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<RenderType> renderType [[codegen::key("RenderableType")]];
 
         // If this value is set to 'true', the image for this plane will not be loaded at
         // startup but rather when image is shown for the first time. Additionally, if the
@@ -78,20 +60,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageLocal::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "base_renderable_plane_image_local"
+    return codegen::doc<Parameters>(
+        "base_renderable_plane_image_local",
+        RenderablePlane::Documentation()
     );
-
-    // @TODO cleanup
-    // Insert the parents documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = RenderablePlane::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
-    return doc;
 }
 
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
@@ -108,29 +80,6 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
-
-    if (p.renderType.has_value()) {
-        switch (*p.renderType) {
-            case Parameters::RenderType::Background:
-                setRenderBin(Renderable::RenderBin::Background);
-                break;
-            case Parameters::RenderType::Opaque:
-                setRenderBin(Renderable::RenderBin::Opaque);
-                break;
-            case Parameters::RenderType::PreDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-                break;
-            case Parameters::RenderType::PostDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-                break;
-            case Parameters::RenderType::Overlay:
-                setRenderBin(Renderable::RenderBin::Overlay);
-                break;
-        }
-    }
-    else {
-        setRenderBin(Renderable::RenderBin::Opaque);
-    }
 
     _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
     if (_isLoadingLazily) {
@@ -192,7 +141,10 @@ void RenderablePlaneImageLocal::loadTexture() {
             std::to_string(hash),
             [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path).string());
+                    ghoul::io::TextureReader::ref().loadTexture(
+                        absPath(path).string(),
+                        2
+                    );
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",

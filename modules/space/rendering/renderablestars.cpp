@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,6 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/templatefactory.h>
@@ -49,23 +48,34 @@
 #include <type_traits>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableStars";
+    constexpr std::string_view _loggerCat = "RenderableStars";
 
-    constexpr const std::array<const char*, 17> UniformNames = {
+    constexpr std::array<const char*, 17> UniformNames = {
         "modelMatrix", "cameraUp", "cameraViewProjectionMatrix", "colorOption",
         "magnitudeExponent", "eyePosition", "psfParamConf", "lumCent", "radiusCent",
         "brightnessCent", "colorTexture", "alphaValue", "psfTexture", "otherDataTexture",
         "otherDataRange", "filterOutOfRange", "fixedColor"
     };
 
-    constexpr const int RenderOptionPointSpreadFunction = 0;
-    constexpr const int RenderOptionTexture = 1;
+    enum RenderMethod {
+        PointSpreadFunction = 0,
+        TextureBased
+    };
 
-    constexpr const int PsfMethodSpencer = 0;
-    constexpr const int PsfMethodMoffat = 1;
+    enum SizeComposition {
+        AppBrightness = 0,
+        LumSize,
+        LumSizeAppBrightness,
+        AbsMagnitude,
+        AppMagnitude,
+        DistanceModulus
+    };
 
-    constexpr const int PsfTextureSize = 64;
-    constexpr const int ConvolvedfTextureSize = 257;
+    constexpr int PsfMethodSpencer = 0;
+    constexpr int PsfMethodMoffat = 1;
+
+    constexpr int PsfTextureSize = 64;
+    constexpr int ConvolvedfTextureSize = 257;
 
     constexpr double PARSEC = 0.308567756E17;
 
@@ -110,14 +120,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
         "Speck File",
-        "The speck file that is loaded to get the data for rendering these stars."
+        "The speck file that is loaded to get the data for rendering these stars"
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "ColorBV Texture",
         "The path to the texture that is used to convert from the B-V value of the star "
-        "to its color. The texture is used as a one dimensional lookup function."
+        "to its color. The texture is used as a one dimensional lookup function"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingBvInfo = {
@@ -179,7 +189,7 @@ namespace {
         "ColorOption",
         "Color Option",
         "This value determines which quantity is used for determining the color of the "
-        "stars."
+        "stars"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataOptionInfo = {
@@ -192,13 +202,13 @@ namespace {
         "OtherDataValueRange",
         "Range of the other data values",
         "This value is the min/max value range that is used to normalize the other data "
-        "values so they can be used by the specified color map."
+        "values so they can be used by the specified color map"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedColorInfo = {
         "FixedColorValue",
         "Color used for fixed star colors",
-        "The color that should be used if the 'Fixed Color' value is used."
+        "The color that should be used if the 'Fixed Color' value is used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataColorMapInfo = {
@@ -219,13 +229,13 @@ namespace {
         "Texture",
         "Point Spread Function Texture",
         "The path to the texture that should be used as a point spread function for the "
-        "stars."
+        "stars"
     };
 
     //constexpr openspace::properties::Property::PropertyInfo ShapeTextureInfo = {
     //    "ShapeTexture",
     //    "Shape Texture to be convolved",
-    //    "The path to the texture that should be used as the base shape for the stars."
+    //    "The path to the texture that should be used as the base shape for the stars"
     //};
 
     // PSF
@@ -234,30 +244,33 @@ namespace {
         "Magnitude Exponent",
         "Adjust star magnitude by 10^MagnitudeExponent. "
         "Stars closer than this distance are given full opacity. "
-        "Farther away, stars dim proportionally to the logarithm of their distance."
+        "Farther away, stars dim proportionally to the logarithm of their distance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderMethodOptionInfo = {
         "RenderMethod",
         "Render Method",
-        "Render method for the stars."
+        "Render method for the stars"
     };
 
-    openspace::properties::PropertyOwner::PropertyOwnerInfo
-    UserProvidedTextureOptionInfo =
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo
+        UserProvidedTextureOptionInfo =
     {
         "UserProvidedTexture",
         "User Provided Texture",
         ""
     };
 
-    openspace::properties::PropertyOwner::PropertyOwnerInfo ParametersOwnerOptionInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo
+        ParametersOwnerOptionInfo =
+    {
         "ParametersOwner",
         "Parameters Options",
         ""
     };
 
-    openspace::properties::PropertyOwner::PropertyOwnerInfo MoffatMethodOptionInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo MoffatMethodOptionInfo =
+    {
         "MoffatMethodOption",
         "Moffat Method",
         ""
@@ -266,34 +279,36 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PSFMethodOptionInfo = {
         "PSFMethodOptionInfo",
         "PSF Method Option",
-        "Debug option for PSF main function: Spencer or Moffat."
+        "Debug option for PSF main function: Spencer or Moffat"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeCompositionOptionInfo = {
         "SizeComposition",
         "Size Composition Option",
-        "Base multiplyer for the final stars' sizes."
+        "Base multiplyer for the final stars' sizes"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LumPercentInfo = {
         "LumPercent",
         "Luminosity Contribution",
-        "Luminosity Contribution."
+        "Luminosity Contribution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusPercentInfo = {
         "RadiusPercent",
         "Radius Contribution",
-        "Radius Contribution."
+        "Radius Contribution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrightnessPercentInfo = {
         "BrightnessPercen",
         "App Brightness Contribution",
-        "App Brightness Contribution."
+        "App Brightness Contribution"
     };
 
-    openspace::properties::PropertyOwner::PropertyOwnerInfo SpencerPSFParamOwnerInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo
+        SpencerPSFParamOwnerInfo =
+    {
         "SpencerPSFParamOwner",
         "Spencer PSF Paramameters",
         "PSF parameters for Spencer"
@@ -302,28 +317,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo P0ParamInfo = {
         "P0Param",
         "P0",
-        "P0 parameter contribution."
+        "P0 parameter contribution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo P1ParamInfo = {
         "P1Param",
         "P1",
-        "P1 parameter contribution."
+        "P1 parameter contribution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo P2ParamInfo = {
         "P2Param",
         "P2",
-        "P2 parameter contribution."
+        "P2 parameter contribution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlphaConstInfo = {
         "AlphaConst",
         "Alpha",
-        "Empirical Alpha Constant."
+        "Empirical Alpha Constant"
     };
 
-    openspace::properties::PropertyOwner::PropertyOwnerInfo MoffatPSFParamOwnerInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo
+        MoffatPSFParamOwnerInfo =
+    {
         "MoffatPSFParam",
         "Moffat PSF Parameters",
         "PSF parameters for Moffat"
@@ -338,7 +355,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BetaInfo = {
         "Beta",
         "Beta",
-        "Moffat's Beta Constant."
+        "Moffat's Beta Constant"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -346,13 +363,13 @@ namespace {
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
-        "fading-in."
+        "fading-in"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in effect",
-        "Enables/Disables the Fade-in effect."
+        "Enables/Disables the Fade-in effect"
     };
 
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
@@ -393,8 +410,8 @@ namespace {
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
         std::optional<float> magnitudeExponent;
 
-        enum class RenderMethod {
-            PSF,
+        enum class [[codegen::map(RenderMethod)]] RenderMethod {
+            PointSpreadFunction [[codegen::key("PSF")]],
             TextureBased [[codegen::key("Texture Based")]]
         };
 
@@ -404,7 +421,7 @@ namespace {
         // [[codegen::verbatim(PsfTextureInfo.description)]]
         std::filesystem::path texture;
 
-        enum class SizeComposition {
+        enum class [[codegen::map(SizeComposition)]] SizeComposition {
             AppBrightness [[codegen::key("App Brightness")]],
             LumSize [[codegen::key("Lum and Size")]],
             LumSizeAppBrightness [[codegen::key("Lum, Size and App Brightness")]],
@@ -608,7 +625,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _colorOption.onChange([&] { _dataIsDirty = true; });
     addProperty(_colorOption);
 
-    _colorTexturePath.onChange([&] { _colorTextureIsDirty = true; });
+    _colorTexturePath.onChange([&] {
+        if (std::filesystem::exists(_colorTexturePath.value())) {
+            _colorTextureIsDirty = true;
+        }
+        else {
+            LWARNING(fmt::format("File not found: {}", _colorTexturePath));
+        }
+    });
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
     addProperty(_colorTexturePath);
 
@@ -621,7 +645,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_otherDataRange);
 
     addProperty(_otherDataColorMapPath);
-    _otherDataColorMapPath.onChange([&]() { _otherDataColorMapIsDirty = true; });
+    _otherDataColorMapPath.onChange([&]() {
+        if (std::filesystem::exists(_otherDataColorMapPath.value())) {
+            _otherDataColorMapIsDirty = true;
+        }
+        else {
+            LWARNING(fmt::format("File not found: {}", _otherDataColorMapPath));
+        }
+    });
 
     _staticFilterValue = p.staticFilter;
     _staticFilterReplacementValue =
@@ -630,18 +661,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_filterOutOfRange);
 
     _renderingMethodOption.addOption(
-        RenderOptionPointSpreadFunction,
+        RenderMethod::PointSpreadFunction,
         "Point Spread Function Based"
     );
-    _renderingMethodOption.addOption(RenderOptionTexture, "Textured Based");
+    _renderingMethodOption.addOption(RenderMethod::TextureBased, "Textured Based");
     addProperty(_renderingMethodOption);
 
-    if (p.renderMethod == Parameters::RenderMethod::PSF) {
-        _renderingMethodOption = RenderOptionPointSpreadFunction;
-    }
-    else {
-        _renderingMethodOption = RenderOptionTexture;
-    }
+    _renderingMethodOption = codegen::map<RenderMethod>(p.renderMethod);
 
     _pointSpreadFunctionTexturePath = absPath(p.texture.string()).string();
     _pointSpreadFunctionFile = std::make_unique<File>(
@@ -661,35 +687,20 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _psfMethodOption.onChange([&]() { renderPSFToTexture(); });
     _parametersOwner.addProperty(_psfMethodOption);
 
-    _psfMultiplyOption.addOption(0, "Use Star's Apparent Brightness");
-    _psfMultiplyOption.addOption(1, "Use Star's Luminosity and Size");
-    _psfMultiplyOption.addOption(2, "Luminosity, Size, App Brightness");
-    _psfMultiplyOption.addOption(3, "Absolute Magnitude");
-    _psfMultiplyOption.addOption(4, "Apparent Magnitude");
-    _psfMultiplyOption.addOption(5, "Distance Modulus");
+    _psfMultiplyOption.addOption(AppBrightness, "Use Star's Apparent Brightness");
+    _psfMultiplyOption.addOption(LumSize, "Use Star's Luminosity and Size");
+    _psfMultiplyOption.addOption(
+        LumSizeAppBrightness,
+        "Luminosity, Size, App Brightness"
+    );
+    _psfMultiplyOption.addOption(AbsMagnitude, "Absolute Magnitude");
+    _psfMultiplyOption.addOption(AppMagnitude, "Apparent Magnitude");
+    _psfMultiplyOption.addOption(DistanceModulus, "Distance Modulus");
 
 
     if (p.sizeComposition.has_value()) {
-        switch (*p.sizeComposition) {
-            case Parameters::SizeComposition::AppBrightness:
-                _psfMultiplyOption = 0;
-                break;
-            case Parameters::SizeComposition::LumSize:
-                _psfMultiplyOption = 1;
-                break;
-            case Parameters::SizeComposition::LumSizeAppBrightness:
-                _psfMultiplyOption = 2;
-                break;
-            case Parameters::SizeComposition::AbsMagnitude:
-                _psfMultiplyOption = 3;
-                break;
-            case Parameters::SizeComposition::AppMagnitude:
-                _psfMultiplyOption = 4;
-                break;
-            case Parameters::SizeComposition::DistanceModulus:
-                _psfMultiplyOption = 5;
-                break;
-        }
+        _psfMultiplyOption =
+            static_cast<int>(codegen::map<SizeComposition>(*p.sizeComposition));
     }
     else {
         _psfMultiplyOption = 5;
@@ -776,7 +787,7 @@ void RenderableStars::initializeGL() {
     glBindVertexArray(_psfVao);
     glBindBuffer(GL_ARRAY_BUFFER, _psfVbo);
 
-    constexpr const std::array<GLfloat, 24> VertexData = {
+    constexpr std::array<GLfloat, 24> VertexData = {
         //x      y     s     t
         -1.f, -1.f, 0.f, 0.f,
          1.f,  1.f, 1.f, 1.f,
@@ -860,7 +871,8 @@ void RenderableStars::loadPSFTexture() {
         std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
     {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath).string()
+            absPath(_pointSpreadFunctionTexturePath).string(),
+            2
         );
 
         if (_pointSpreadFunctionTexture) {
@@ -903,7 +915,7 @@ void RenderableStars::renderPSFToTexture() {
         );
 
     program->activate();
-    constexpr const std::array<float, 4> Black = { 0.f, 0.f, 0.f, 0.f };
+    constexpr std::array<float, 4> Black = { 0.f, 0.f, 0.f, 0.f };
     glClearBufferfv(GL_COLOR, 0, Black.data());
 
     program->setUniform("psfMethod", _psfMethodOption.value());
@@ -1042,21 +1054,21 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         const double funcValue = a * distCamera + b;
         fadeInVariable *= static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
 
-        _program->setUniform(_uniformCache.alphaValue, _opacity * fadeInVariable);
+        _program->setUniform(_uniformCache.alphaValue, opacity() * fadeInVariable);
     }
     else {
-        _program->setUniform(_uniformCache.alphaValue, _opacity);
+        _program->setUniform(_uniformCache.alphaValue, opacity());
     }
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
 
-    if (_renderingMethodOption.value() == 0) { // PSF Based Methods
+    if (_renderingMethodOption.value() == RenderMethod::PointSpreadFunction) {
         glBindTexture(GL_TEXTURE_2D, _psfTexture);\
         // Convolutioned texture
         //glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
     }
-    else if (_renderingMethodOption.value() == 1) { // Textured based Method
+    else if (_renderingMethodOption.value() == RenderMethod::TextureBased) {
         _pointSpreadFunctionTexture->bind();
     }
 
@@ -1264,7 +1276,8 @@ void RenderableStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (_colorTexturePath.value() != "") {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath).string()
+                absPath(_colorTexturePath).string(),
+                1
             );
             if (_colorTexture) {
                 LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
@@ -1286,7 +1299,8 @@ void RenderableStars::update(const UpdateData&) {
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
             _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_otherDataColorMapPath).string()
+                absPath(_otherDataColorMapPath).string(),
+                1
             );
             if (_otherDataColorMapTexture) {
                 LDEBUG(fmt::format(

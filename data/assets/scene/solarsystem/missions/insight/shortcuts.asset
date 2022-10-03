@@ -2,42 +2,53 @@
 
 local InsightEntryTime = "2018 NOV 26 19:39:03.68"
 
-local insightNavigationState = "{" ..
-  "Anchor = 'Insight'," ..
-  "Pitch = 0.567457E-4," ..
-  "Position = { 1.240506E1,-1.369270E1,-2.423553E0 }," ..
-  "ReferenceFrame = 'Root',"..
-  "Up = { 0.441211E0,0.247019E0,0.862737E0 }," ..
-  "Yaw = -0.446853E-4}"
+local insightNavigationState = [[
+{
+  Anchor = "Insight",
+  Pitch = 0.567457E-4,
+  Position = { 1.240506E1,-1.369270E1,-2.423553E0 },
+  ReferenceFrame = "Root",
+  Up = { 0.441211E0,0.247019E0,0.862737E0 },
+  Yaw = -0.446853E-4
+}
+]]
 
 local Shortcuts = {
   {
-    Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -469.300000);" .. 
-    "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', -470.800006);",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", -469.300000); 
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset", -470.800006);
+    ]],
     Documentation = "Enable Insight landing height layer offset",
     Name = "Insight Height Offset",
     GuiPath = "/Missions/Insight",
     Local = false
   },
   {
-    Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', 0);" .. 
-    "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', 0);",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", 0); 
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset", 0);
+    ]],
     Documentation = "Disable Insight landing height layer offset",
     Name = "Default Height Offset",
     GuiPath = "/Missions/Insight",
     Local = false
   },
   {
-    Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', true);" ..
-    "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', true);",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled", true);
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled", true);
+    ]],
     Documentation = "Enables HiRISE layer for insight landing",
     Name = "Enable HiRISE",
     GuiPath = "/Missions/Insight",
     Local = false
   },
   {
-    Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', false);" ..
-    "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', false);",
+    Command = [[
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled", false);
+      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled", false);
+    ]],
     Documentation = "Disables HiRISE layer used for insight landing",
     Name = "Disable HiRISE",
     GuiPath = "/Missions/Insight",
@@ -51,7 +62,7 @@ local Shortcuts = {
     Local = false
   },
   {
-    Command = "openspace.time.setPause(true);openspace.time.setTime('" .. InsightEntryTime .. "');",
+    Command = 'openspace.time.setPause(true);openspace.time.setTime("' .. InsightEntryTime .. '");',
     Documentation = "Change the time for the start of Insight EDL",
     Name = "Insight EDL Time",
     GuiPath = "/Missions/Insight",

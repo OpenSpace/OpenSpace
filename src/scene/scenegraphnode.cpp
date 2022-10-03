@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/translation/statictranslation.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
@@ -38,23 +37,17 @@
 #include <openspace/scene/timeframe.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <cmath>
-#include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "SceneGraphNode";
+    constexpr std::string_view _loggerCat = "SceneGraphNode";
 
-    constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo = {
         "ComputeScreenSpaceData",
         "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
-        "at regular intervals. If these values are set to 'false', they are not updated."
+        "at regular intervals. If these values are set to 'false', they are not updated"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
@@ -63,24 +56,28 @@ namespace {
         "The x,y position in screen space. Can be used for placing GUI elements",
         openspace::properties::Property::Visibility::Hidden
     };
+
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
         "Determines if the node is currently visible on screen",
         openspace::properties::Property::Visibility::Hidden
     };
+
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
         "The distance from the camera to the node surface",
         openspace::properties::Property::Visibility::Hidden
     };
+
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
         "The screen size of the radius of the node",
         openspace::properties::Property::Visibility::Hidden
     };
+
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "VisibilityDistance",
@@ -505,8 +502,8 @@ SceneGraphNode::SceneGraphNode()
     }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
     , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
-    , _approachFactor(ApproachFactorInfo, 5.0)
-    , _reachFactor(ReachFactorInfo, 1.25)
+    , _approachFactor(ApproachFactorInfo, 5.0, 0.0, 1e4)
+    , _reachFactor(ReachFactorInfo, 1.25, 0.0, 1e4)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
     , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
     , _screenVisibility(ScreenVisibilityInfo, false)
@@ -545,8 +542,13 @@ SceneGraphNode::SceneGraphNode()
     // negative values
     //_interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
+
+    _reachFactor.setExponent(3.f);
     addProperty(_reachFactor);
+
+    _approachFactor.setExponent(3.f);
     addProperty(_approachFactor);
+
     addProperty(_showDebugSphere);
 }
 
@@ -715,8 +717,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     const bool visible = _renderable && _renderable->isVisible() &&
-        _renderable->isReady() && _renderable->isEnabled() &&
-        _renderable->matchesRenderBinMask(data.renderBinMask);
+        _renderable->isReady() && _renderable->matchesRenderBinMask(data.renderBinMask);
 
     if (!visible) {
         return;
@@ -986,19 +987,19 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
         glm::vec2(centerScreenSpace) - glm::vec2(radiusScreenSpace)
     );
 
-    constexpr const double RadiusThreshold = 2.0;
+    constexpr double RadiusThreshold = 2.0;
     const double r = std::fabs(_screenSizeRadius - screenSpaceRadius);
     if (r > RadiusThreshold) {
         _screenSizeRadius = screenSpaceRadius;
     }
 
-    constexpr const double ZoomThreshold = 0.1;
+    constexpr double ZoomThreshold = 0.1;
     const double d = std::fabs(_distFromCamToNode - distFromCamToNode);
     if (d > (ZoomThreshold * distFromCamToNode)) {
         _distFromCamToNode = distFromCamToNode;
     }
 
-    constexpr const double MoveThreshold = 1.0;
+    constexpr double MoveThreshold = 1.0;
     const glm::ivec2 ssp = _screenSpacePosition;
     const glm::dvec2 c = glm::abs(ssp - centerScreenSpace);
     if (c.x > MoveThreshold || c.y > MoveThreshold) {
@@ -1009,6 +1010,8 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
 SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
+    ghoul_assert(glm::length(targetModelSpace) > 0.0, "Cannot have degenerate vector");
+
     if (_renderable) {
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
     }

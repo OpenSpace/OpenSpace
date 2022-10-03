@@ -1,18 +1,17 @@
-asset.require('./satellites_communications')
+asset.require("./satellites_communications")
 -- The debris contains a **lot** of nodes, so we disable it on default
--- asset.require('./satellites_debris')
-asset.require('./satellites_interesting')
-asset.require('./satellites_misc')
-asset.require('./satellites_navigation')
-asset.require('./satellites_science')
-asset.require('./satellites_weather')
+-- asset.require("./satellites_debris")
+asset.require("./satellites_interesting")
+asset.require("./satellites_misc")
+asset.require("./satellites_navigation")
+asset.require("./satellites_science")
+asset.require("./satellites_weather")
 
 
 asset.meta = {
   Name = "Satellites All",
   Version = "1.0",
-  Description = [[ Meta asset for all satellites of Earth. Containing all other meta
-  assets.]],
+  Description = "Meta asset for all satellites of Earth. Containing other meta assets",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

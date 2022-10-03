@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ namespace {
         "UseMainDashboard",
         "Use main dashboard",
         "If this value is set to 'true', this ScreenSpaceDashboard will use the "
-        "main dashboard instead of creating an independent one."
+        "main dashboard instead of creating an independent one"
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
@@ -91,7 +91,7 @@ bool ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w );
+        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w);
 
         if (_useMainDashboard) {
             global::dashboard->render(penPosition);
@@ -136,18 +136,8 @@ scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
     return {
         "dashboard",
         {
-            {
-                "addDashboardItemToScreenSpace",
-                &luascriptfunctions::addDashboardItemToScreenSpace,
-                "string, table",
-                "Adds a new dashboard item to an existing SceenSpaceDashboard."
-            },
-            {
-                "removeDashboardItemsFromScreenSpace",
-                &luascriptfunctions::removeDashboardItemsFromScreenSpace,
-                "string",
-                "Removes all dashboard items from an existing ScreenSpaceDashboard."
-            }
+            codegen::lua::AddDashboardItemToScreenSpace,
+            codegen::lua::RemoveDashboardItemsFromScreenSpace
         }
     };
 }

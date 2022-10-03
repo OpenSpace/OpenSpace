@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,10 @@
 
 #include <openspace/camera/camera.h>
 
+#include <openspace/camera/camerapose.h>
 #include <sstream>
 
 namespace openspace {
-
-// (2021-07-16, emmbr) Note that this hard coded vector for the view direction is also
-// used in a qauternion -> view direction helper function in ghoul/glm.h
-const glm::dvec3 Camera::ViewDirectionCameraSpace = glm::dvec3(0.0, 0.0, -1.0);
-const glm::dvec3 Camera::UpDirectionCameraSpace = glm::dvec3(0.0, 1.0, 0.0);
 
 Camera::Camera(const Camera& o)
     : sgctInternal(o.sgctInternal)
@@ -42,6 +38,11 @@ Camera::Camera(const Camera& o)
     , _cachedViewDirection(o._cachedViewDirection)
     , _cachedLookupVector(o._cachedLookupVector)
 {}
+
+void Camera::setPose(CameraPose pose) {
+    setPositionVec3(std::move(pose.position));
+    setRotation(std::move(pose.rotation));
+}
 
 void Camera::setPositionVec3(glm::dvec3 pos) {
     if (!glm::any(glm::isnan(pos))) {
@@ -148,6 +149,14 @@ float Camera::sinMaxFov() const {
         _cachedSinMaxFov.isDirty = true;
     }
     return _cachedSinMaxFov.datum;
+}
+
+void Camera::setAtmosphereDimmingFactor(float atmosphereDimmingFactor) {
+    _atmosphereDimmingFactor = atmosphereDimmingFactor;
+}
+
+float Camera::atmosphereDimmingFactor() const {
+    return _atmosphereDimmingFactor;
 }
 
 SceneGraphNode* Camera::parent() const {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,9 +36,9 @@
 #include <string_view>
 
 namespace {
-    constexpr const int8_t DataCacheFileVersion = 10;
-    constexpr const int8_t LabelCacheFileVersion = 10;
-    constexpr const int8_t ColorCacheFileVersion = 10;
+    constexpr int8_t DataCacheFileVersion = 10;
+    constexpr int8_t LabelCacheFileVersion = 11;
+    constexpr int8_t ColorCacheFileVersion = 10;
 
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {
         for (size_t i = 0; i < lhs.size(); i++) {
@@ -145,10 +145,13 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
     Dataset res;
 
     int nDataValues = 0;
+    int currentLineNumber = 0;
 
     std::string line;
     // First phase: Loading the header information
     while (std::getline(file, line)) {
+        currentLineNumber++;
+
         // Ignore empty line or commented-out lines
         if (line.empty() || line[0] == '#') {
             continue;
@@ -280,6 +283,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
     // std::getline, we'd miss the first data value line
     bool isFirst = true;
     while (isFirst || std::getline(file, line)) {
+        currentLineNumber++;
         isFirst = false;
 
         // Ignore empty line or commented-out lines
@@ -315,10 +319,41 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
         str >> entry.position.x >> entry.position.y >> entry.position.z;
         allZero &= (entry.position == glm::vec3(0.0));
 
+        if (!str.good()) {
+            // Need to subtract one of the line number here as we increase the current
+            // line count in the beginning of the while loop we are currently in
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading position information out of data line {} in file {}. "
+                "Value was not a number",
+                currentLineNumber - 1, path
+            ));
+        }
+
         entry.data.resize(nDataValues);
+        std::stringstream valueStream;
         for (int i = 0; i < nDataValues; i += 1) {
-            str >> entry.data[i];
-            allZero &= (entry.data[i] == 0.0);
+            std::string value;
+            str >> value;
+            if (value == "nan" || value == "NaN") {
+                entry.data[i] = std::numeric_limits<float>::quiet_NaN();
+            }
+            else {
+                valueStream.clear();
+                valueStream.str(value);
+                valueStream >> entry.data[i];
+
+                allZero &= (entry.data[i] == 0.0);
+                if (valueStream.fail()) {
+                    // Need to subtract one of the line number here as we increase the
+                    // current line count in the beginning of the while loop we are
+                    // currently in
+                    throw ghoul::RuntimeError(fmt::format(
+                        "Error loading data value {} out of data line {} in file {}. "
+                        "Value was not a number",
+                        i, currentLineNumber - 1, path
+                    ));
+                }
+            }
         }
 
         if (skipAllZeroLines && allZero) {
@@ -639,10 +674,20 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
         std::getline(str, rest);
         strip(rest);
 
+        if (startsWith(rest, "id")) {
+            // optional arument with identifier
+            // Remove the 'id' text
+            rest = rest.substr(std::string_view("id ").size());
+            size_t index = rest.find("text");
+            entry.identifier = rest.substr(0, index - 1);
+
+            // update the rest, remove the identifier
+            rest = rest.substr(index);
+        }
         if (!startsWith(rest, "text")) {
             throw ghoul::RuntimeError(fmt::format(
-                "Error loading label file {}: File contains some value between "
-                "positions and text label, which is unsupported", path
+                "Error loading label file {}: File contains an unsupported value "
+                "between positions and text label", path
             ));
         }
 
@@ -696,6 +741,13 @@ std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
         file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
         file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
 
+        // Identifier
+        uint8_t idLen;
+        file.read(reinterpret_cast<char*>(&idLen), sizeof(uint8_t));
+        e.identifier.resize(idLen);
+        file.read(e.identifier.data(), idLen);
+
+        // Text
         uint16_t len;
         file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
         e.text.resize(len);
@@ -728,6 +780,13 @@ void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
         file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
         file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
 
+        // Identifier
+        checkSize<uint8_t>(e.identifier.size(), "Identifier too long");
+        uint8_t idLen = static_cast<uint8_t>(e.identifier.size());
+        file.write(reinterpret_cast<const char*>(&idLen), sizeof(uint8_t));
+        file.write(e.identifier.data(), idLen);
+
+        // Text
         checkSize<uint16_t>(e.text.size(), "Text too long");
         uint16_t len = static_cast<uint16_t>(e.text.size());
         file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));

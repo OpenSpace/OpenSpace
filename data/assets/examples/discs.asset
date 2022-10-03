@@ -1,8 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-
 -- @TODO (emmbr 2020-02-03) Potential threading issue later on? This will run on the main thread
-local cyanTexture = openspace.createSingleColorImage("example_disc_color1", {0.0, 1.0, 1.0})
-local purpleTexture = openspace.createSingleColorImage("example_disc_color2", {0.5, 0.0, 0.5})
+local cyanTexture = openspace.createSingleColorImage("example_disc_color1", { 0.0, 1.0, 1.0 })
+local purpleTexture = openspace.createSingleColorImage("example_disc_color2", { 0.5, 0.0, 0.5 })
 
 local BasicDisc = {
   Identifier = "BasicDisc",
@@ -25,7 +23,7 @@ local FullEllipticDisc = {
   Transform = {
     Scale = {
       Type = "NonUniformStaticScale",
-      Scale = {2.0, 1.0, 1.0}
+      Scale = { 2.0, 1.0, 1.0 }
     }
   },
   Renderable = {
@@ -40,7 +38,16 @@ local FullEllipticDisc = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  BasicDisc,
-  FullEllipticDisc
-})
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(BasicDisc)
+  openspace.addSceneGraphNode(FullEllipticDisc)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(FullEllipticDisc)
+  openspace.removeSceneGraphNode(BasicDisc)
+end)
+
+asset.export(BasicDisc)
+asset.export(FullEllipticDisc)

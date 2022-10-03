@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,7 @@ uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
+
 
 void main() {
   vec4 raw_pos = psc_to_meter(meshTransform * in_position, vec2(1.0, 0.0));

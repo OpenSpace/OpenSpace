@@ -1,6 +1,6 @@
-local assetHelper = asset.require("util/asset_helper")
-local propertyHelper = asset.require('util/property_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local propertyHelper = asset.require("util/property_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 local densityDirectory = asset.syncedResource({
   Name = "Bastille Day MAS Density",
@@ -13,6 +13,9 @@ local sunRadius = 6.957E8
 
 local densityVolume = {
   Identifier = "MAS-MHD-Density-bastille-day-2000",
+  -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
+  -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
+  InteractionSphere = 1/695700000,
   Parent = sunTransforms.SunIAU.Identifier,
   Transform = {
     Scale = {
@@ -29,7 +32,7 @@ local densityVolume = {
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
     StepSize = 0.004,
-    Opacity = 0.3,
+    Brightness = 0.3,
     TransferFunction = asset.localResource("transferfunctions/mas-mhd-r-squared-old.txt"),
     SourceDirectory = densityDirectory,
     GridType = "Spherical",
@@ -56,18 +59,22 @@ local toggle_volume = {
 
 asset.onInitialize(function ()
   openspace.action.registerAction(toggle_volume)
+  openspace.addSceneGraphNode(densityVolume)
 end)
+
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_volume.Identifier)
+  openspace.removeSceneGraphNode(densityVolume)
+  openspace.action.removeAction(toggle_volume)
 end)
-assetHelper.registerSceneGraphNodesAndExport(asset, { densityVolume })
+
+asset.export(densityVolume)
+
 
 asset.meta = {
   Name = "Predictive Science Inc. Volume Rendering Bastille Day",
   Version = "1.0",
-  Description = [[Volumetric rendering for the bastille day CME event]],
+  Description = "Volumetric rendering for the bastille day CME event",
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "CC-BY",
-  Identifier = {"MAS-MHD-Density-bastille-day-2000"}
+  License = "CC-BY"
 }

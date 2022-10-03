@@ -6,9 +6,9 @@ local targetNode = function(nodeIdentifier)
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
     openspace.setPropertyValueSingle(
       "NavigationHandler.OrbitalNavigator.Anchor", 
-      ']] .. nodeIdentifier ..  [['
+      "]] .. nodeIdentifier ..  [["
     )
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", '')
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
   ]]
 end
 
@@ -16,16 +16,16 @@ local states = {
   {
     Identifier = "Constellations",
     Enter = [[
-      openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Opacity', 1.0, 1.0)
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 1.0, 1.0)
     ]],
     Exit = [[
-      openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Opacity', 0.0, 1.0)
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 0.0, 1.0)
     ]]
   },
   {
     Identifier = "Earth",
-    Enter = "openspace.setPropertyValueSingle('Scene.EarthLabel.Renderable.Enabled', true)",
-    Exit = "openspace.setPropertyValueSingle('Scene.EarthLabel.Renderable.Enabled', false)"
+    Enter = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", true)',
+    Exit = 'openspace.setPropertyValueSingle("Scene.EarthLabel.Renderable.Enabled", false)'
   },
   {
     Identifier = "Moon"
@@ -65,8 +65,8 @@ local transitions = {
 
 asset.onInitialize(function()
   -- Setup (could be done in the profile)
-  openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', true)
-  openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Opacity', 0.0)
+  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 0.0)
 
   openspace.statemachine.createStateMachine(states, transitions, "Earth")
 end)

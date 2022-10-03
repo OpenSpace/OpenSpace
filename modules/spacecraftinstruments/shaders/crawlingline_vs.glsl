@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@ out vec4 vs_color;
 out float vs_depth;
 
 uniform mat4 modelViewProjection;
+
 
 void main() {
   vec4 positionClipSpace = modelViewProjection * vec4(in_position, 1.0);

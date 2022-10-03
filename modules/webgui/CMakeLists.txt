@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -23,6 +23,8 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(../webbrowser/cmake/webbrowser_helpers.cmake)
+
 set(WEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBGUI_MODULE_PATH")
 
 set(OPENSPACE_HEADER_FILES
@@ -49,3 +51,5 @@ create_new_module(
   STATIC
   ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
 )
+
+set_modules_dependency_on_cef_libraries(${webgui_module})

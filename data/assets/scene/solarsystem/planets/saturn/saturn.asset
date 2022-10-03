@@ -1,9 +1,13 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
+asset.require("./trail")
 
-local texturesPath = asset.require("./saturn_textures").TexturesPath
+local texturesPath = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Saturn textures",
+  Identifier = "saturn_textures",
+  Version = 4
+})
 
 local Saturn = {
   Identifier = "Saturn",
@@ -31,11 +35,11 @@ local Saturn = {
       --ColorFilter = 0.15,
 
       -- MultiTexture Valeus:
-      TextureFwrd = texturesPath .. "/forward_original_single.png",
-      TextureBckwrd = texturesPath .. "/back_original_single.png",
-      TextureUnlit = texturesPath .. "/unlit_original_single.png",
-      TextureColor = texturesPath .. "/color_original_single.png",
-      TextureTransparency = texturesPath .. "/trans_original_single.png",
+      TextureFwrd = texturesPath .. "forward_original_single.png",
+      TextureBckwrd = texturesPath .. "back_original_single.png",
+      TextureUnlit = texturesPath .. "unlit_original_single.png",
+      TextureColor = texturesPath .. "color_original_single.png",
+      TextureTransparency = texturesPath .. "trans_original_single.png",
       ColorFilter = 0.8,
       
       NightFactor = 1.0,
@@ -51,7 +55,7 @@ local Saturn = {
   GUI = {
     Name = "Saturn",
     Path = "/Solar System/Planets/Saturn",
-    Description = [[Saturn globe.]]
+    Description = "Saturn globe"
   }
 }
 
@@ -60,7 +64,7 @@ local SaturnLabel = {
   Parent = Saturn.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Saturn",
     FontSize = 70.0,
     Size = 8.85,
@@ -72,19 +76,30 @@ local SaturnLabel = {
   GUI = {
     Name = "Saturn Label",
     Path = "/Solar System/Planets/Saturn",
-    Description = [[ Main planet label for Saturn.]],
+    Description = "Main planet label for Saturn",
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Saturn)
+  openspace.addSceneGraphNode(SaturnLabel)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SaturnLabel)
+  openspace.removeSceneGraphNode(Saturn)
+end)
+    
+asset.export(Saturn)
+asset.export(SaturnLabel)
+
 
 
 asset.meta = {
   Name = "Saturn",
-  Version = "1.0",
-  Description = [[ Saturn globe, and main planet label.]],
+  Version = "1.1",
+  Description = "Saturn globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Saturn", "SaturnLabel"}
+  License = "MIT license"
 }

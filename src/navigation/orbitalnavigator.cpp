@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/camera/camerapose.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/mouseinputstate.h>
+#include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
@@ -38,43 +41,39 @@
 #include <cmath>
 
 namespace {
-    constexpr const char* _loggerCat = "OrbitalNavigator";
+    constexpr std::string_view _loggerCat = "OrbitalNavigator";
 
-    constexpr const double AngleEpsilon = 1E-7;
-    constexpr const double DistanceRatioAimThreshold = 1E-4;
+    constexpr double AngleEpsilon = 1E-7;
+    constexpr double DistanceRatioAimThreshold = 1E-4;
 
-    constexpr const openspace::properties::Property::PropertyInfo AnchorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
         "Anchor",
         "The name of the scene graph node that is the origin of the camera interaction. "
         "The camera follows, orbits and dollies towards this node. "
-        "Any scene graph node can be the anchor node."
+        "Any scene graph node can be the anchor node"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo AimInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AimInfo = {
         "Aim",
         "Aim",
         "The name of the scene graph node that is the aim of the camera. "
         "The camera direction is relative to the vector from the camera position "
-        "to this node."
+        "to this node"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-        RetargetAnchorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo RetargetAnchorInfo = {
         "RetargetAnchor",
         "Retarget Anchor",
         "When triggered, this property starts an interpolation to reset the "
-        "camera direction to the anchor node."
+        "camera direction to the anchor node"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo
-        RetargetAimInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo RetargetAimInfo = {
         "RetargetAim",
         "Retarget Aim",
         "When triggered, this property starts an interpolation to reset the "
-        "camera direction to the aim node."
+        "camera direction to the aim node"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RollFrictionInfo = {
@@ -82,16 +81,15 @@ namespace {
         "Roll Friction",
         "If this is enabled, a small friction is applied to the rolling part of the "
         "camera motion, thus slowing it down within a small time period. If this value "
-        "is disabled, the camera will roll forever."
+        "is disabled, the camera will roll forever"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationalFrictionInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo RotationalFrictionInfo = {
         "RotationalFriction",
         "Rotational Friction",
         "If this is enabled, a small friction is applied to the rotational part of the "
         "camera motion, thus slowing it down within a small time period. If this value "
-        "is disabled, the camera will rotate forever."
+        "is disabled, the camera will rotate forever"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomFrictionInfo = {
@@ -99,28 +97,28 @@ namespace {
         "Zoom Friction",
         "If this is enabled, a small friction is applied to the zoom part of the camera "
         "motion, thus slowing it down within a small time period. If this value is "
-        "disabled, the camera will zoom in or out forever."
+        "disabled, the camera will zoom in or out forever"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
         "MouseSensitivity",
         "Mouse Sensitivity",
         "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
-        "the sensitivity is the less impact a mouse motion will have."
+        "the sensitivity is the less impact a mouse motion will have"
     };
 
     constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
         "JoystickSensitivity",
         "Joystick Sensitivity",
         "Determines the sensitivity of the camera motion thorugh a joystick. The lower "
-        "the sensitivity is the less impact a joystick motion will have."
+        "the sensitivity is the less impact a joystick motion will have"
     };
 
     constexpr openspace::properties::Property::PropertyInfo WebsocketSensitivityInfo = {
         "WebsocketSensitivity",
         "Websocket Sensitivity",
         "Determines the sensitivity of the camera motion thorugh a websocket. The lower "
-        "the sensitivity is the less impact a webstick motion will have."
+        "the sensitivity is the less impact a webstick motion will have"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
@@ -128,149 +126,154 @@ namespace {
         "Friction Factor",
         "Determines the factor that is applied if the 'Roll Friction', 'Rotational "
         "Friction', and 'Zoom Friction' values are enabled. The lower this value is, the "
-        "faster the camera movements will stop."
+        "faster the camera movements will stop"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FollowAnchorNodeInfo = {
+        "FollowAnchorNodeRotation",
+        "Follow Anchor Node Rotation",
+        "If true, the camera will rotate with the current achor node if within a "
+        "certain distance from it. When this happens, the object will appear fixed in "
+        "relation to the camera. The distance at which the change happens is controlled "
+        "through another property"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FollowAnchorNodeDistanceInfo =
+    {
         "FollowAnchorNodeRotationDistance",
-        "Follow anchor node rotation distance",
+        "Follow Anchor Node Rotation Distance",
         "A factor used to determine the distance at which the camera starts rotating "
-        "with the anchor node. When this happends, a the object will appear fixed in "
-        "relation to the camera. The actual distance will be computed by multiplying "
-        "this factor with the approximate radius of the node."
+        "with the anchor node. The actual distance will be computed by multiplying "
+        "this factor with the approximate radius of the node"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
         "MinimumAllowedDistance",
-        "Minimum allowed distance",
+        "Minimum Allowed Distance",
         "Limits how close the camera can get to an object. The distance is given in "
-        "meters above the surface."
+        "meters above the surface"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VelocityZoomControlInfo = {
-        "VelocityZoomControl",
-        "Velocity zoom control",
-        "Controls the velocity of the camera motion when zooming in to the focus node "
-        "on a linear flight. The higher the value the faster the camera will move "
-        "towards the focus."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ApplyLinearFlightInfo = {
-        "ApplyLinearFlight",
-        "Apply Linear Flight",
-        "This property makes the camera move to the specified distance "
-        "'DestinationDistance' while facing the anchor"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FlightDestinationDistInfo = {
-        "FlightDestinationDistance",
-        "Flight Destination Distance",
-        "The final distance we want to fly to, with regards to the anchor node."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FlightDestinationFactorInfo =
+    constexpr openspace::properties::Property::PropertyInfo StereoInterpolationTimeInfo =
     {
-        "FlightDestinationFactor",
-        "Flight Destination Factor",
-        "The minimal distance factor that we need to reach to end linear flight."
+        "StereoInterpolationTime",
+        "Stereo Interpolation Time",
+        "The time to interpolate to a new stereoscopic depth "
+        "when the anchor node is changed, in seconds"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        StereoInterpolationTimeInfo = {
-            "StereoInterpolationTime",
-            "Stereo interpolation time",
-            "The time to interpolate to a new stereoscopic depth "
-            "when the anchor node is changed, in seconds."
+        RetargetInterpolationTimeInfo =
+    {
+        "RetargetAnchorInterpolationTime",
+        "Retarget Interpolation Time",
+        "The time to interpolate the camera rotation "
+        "when the anchor or aim node is changed, in seconds"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        RetargetInterpolationTimeInfo = {
-            "RetargetAnchorInterpolationTime",
-            "Retarget interpolation time",
-            "The time to interpolate the camera rotation "
-            "when the anchor or aim node is changed, in seconds."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo
-        FollowRotationInterpTimeInfo = {
-            "FollowRotationInterpolationTime",
-            "Follow rotation interpolation time",
-            "The interpolation time when toggling following focus node rotation."
+    constexpr openspace::properties::Property::PropertyInfo FollowRotationInterpTimeInfo =
+    {
+        "FollowRotationInterpolationTime",
+        "Follow Rotation Interpolation Time",
+        "The interpolation time when toggling following focus node rotation"
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
         "InvertMouseButtons",
-        "Invert left and right mouse buttons",
+        "Invert Left and Right Mouse Buttons",
         "If this value is 'false', the left mouse button causes the camera to rotate "
         "around the object and the right mouse button causes the zooming motion. If this "
-        "value is 'true', these two functionalities are reversed."
+        "value is 'true', these two functionalities are reversed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        UseAdaptiveStereoscopicDepthInfo = {
-            "UseAdaptiveStereoscopicDepth",
-            "Adaptive Steroscopic Depth",
-            "Dynamically adjust the view scaling based on the distance to the surface of "
-            "the anchor and aim nodes. If enabled, view scale will be set to "
-            "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). "
-            "If disabled, view scale will be set to 10^StaticViewScaleExponent."
-        };
+        UseAdaptiveStereoscopicDepthInfo =
+    {
+        "UseAdaptiveStereoscopicDepth",
+        "Adaptive Steroscopic Depth",
+        "Dynamically adjust the view scaling based on the distance to the surface of "
+        "the anchor and aim nodes. If enabled, view scale will be set to "
+        "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). "
+        "If disabled, view scale will be set to 10^StaticViewScaleExponent"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo StaticViewScaleExponentInfo =
+    {
+        "StaticViewScaleExponent",
+        "Static View Scale Exponent",
+        "Statically scale the world by 10^StaticViewScaleExponent. "
+        "Only used if UseAdaptiveStereoscopicDepthInfo is set to false"
+    };
 
     constexpr openspace::properties::Property::PropertyInfo
-        StaticViewScaleExponentInfo = {
-            "StaticViewScaleExponent",
-            "Static View Scale Exponent",
-            "Statically scale the world by 10^StaticViewScaleExponent. "
-            "Only used if UseAdaptiveStereoscopicDepthInfo is set to false."
-        };
-
-    constexpr openspace::properties::Property::PropertyInfo
-        StereoscopicDepthOfFocusSurfaceInfo = {
-            "StereoscopicDepthOfFocusSurface",
-            "Stereoscopic depth of the surface in focus",
-            "Set the stereoscopically perceived distance (in meters) to the closest "
-            "point out of the surface of the anchor and the center of the aim node. "
-            "Only used if UseAdaptiveStereoscopicDepthInfo is set to true."
-        };
+        StereoscopicDepthOfFocusSurfaceInfo =
+    {
+        "StereoscopicDepthOfFocusSurface",
+        "Stereoscopic Depth of the Surface in Focus",
+        "Set the stereoscopically perceived distance (in meters) to the closest "
+        "point out of the surface of the anchor and the center of the aim node. "
+        "Only used if UseAdaptiveStereoscopicDepthInfo is set to true"
+    };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
         "ApplyIdleBehavior",
         "Apply Idle Behavior",
         "When set to true, the chosen idle behavior will be applied to the camera, "
-        "moving the camera accordingly."
+        "moving the camera accordingly"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorInfo = {
         "IdleBehavior",
         "Idle Behavior",
         "The chosen camera behavior that will be triggered when the idle behavior is "
-        "applied. Each option represents a predefined camera behavior."
+        "applied. Each option represents a predefined camera behavior"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        ShouldTriggerIdleBehaviorWhenIdleInfo =
+    {
+        "ShouldTriggerWhenIdle",
+        "Should Trigger When Idle",
+        "If true, the chosen idle behavior will trigger automatically after "
+        "a certain time (see 'IdleWaitTime' property)"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IdleWaitTimeInfo = {
+        "IdleWaitTime",
+        "Idle Wait Time",
+        "The time (seconds) until idle behavior starts, if no camera interaction "
+        "has been performed. Note that friction counts as camera interaction"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorSpeedInfo = {
         "SpeedFactor",
         "Speed Factor",
         "A factor that can be used to increase or slow down the speed of an applied "
-        "idle behavior."
+        "idle behavior"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        AbortOnCameraInteractionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AbortOnCameraInteractionInfo =
+    {
         "AbortOnCameraInteraction",
         "Abort on Camera Interaction",
         "If set to true, the idle behavior is aborted on camera interaction. If false, "
         "the behavior will be reapplied after the interaction. Examples of camera "
         "interaction are: changing the anchor node, starting a camera path or session "
-        "recording playback, or navigating manually using an input device."
+        "recording playback, or navigating manually using an input device"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        IdleBehaviorDampenInterpolationTimeInfo = {
+        IdleBehaviorDampenInterpolationTimeInfo =
+    {
         "DampenInterpolationTime",
         "Start/End Dampen Interpolation Time",
         "The time to interpolate to/from full speed when an idle behavior is triggered "
-        "or canceled, in seconds."
+        "or canceled, in seconds"
     };
+
+    constexpr std::string_view IdleKeyOrbit = "Orbit";
+    constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
+    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
 } // namespace
 
 namespace openspace::interaction {
@@ -288,36 +291,36 @@ OrbitalNavigator::Friction::Friction()
     addProperty(friction);
 }
 
-OrbitalNavigator::LinearFlight::LinearFlight()
-    : properties::PropertyOwner({ "LinearFlight" })
-    , apply(ApplyLinearFlightInfo, false)
-    , destinationDistance(FlightDestinationDistInfo, 2e8f, 10.f, 1e10f)
-    , destinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5, 1E-3)
-    , velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)
-{
-    addProperty(apply);
-    addProperty(velocitySensitivity);
-    destinationDistance.setExponent(5.f);
-    addProperty(destinationDistance);
-    addProperty(destinationFactor);
-}
-
 OrbitalNavigator::IdleBehavior::IdleBehavior()
     : properties::PropertyOwner({ "IdleBehavior" })
     , apply(ApplyIdleBehaviorInfo, false)
-    , chosenBehavior(IdleBehaviorInfo)
-    , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
+    , shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
+    , idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f)
     , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
+    , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
     , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
+    , defaultBehavior(IdleBehaviorInfo)
 {
     addProperty(apply);
-    chosenBehavior.addOptions({
-        { IdleBehavior::Behavior::Orbit, "Orbit" },
-        { IdleBehavior::Behavior::OrbitAtConstantLat, "OrbitAtConstantLatitude" },
-        { IdleBehavior::Behavior::OrbitAroundUp, "OrbitAroundUp" }
+    defaultBehavior.addOptions({
+        {
+            static_cast<int>(Behavior::Orbit),
+            std::string(IdleKeyOrbit)
+        },
+        {
+            static_cast<int>(Behavior::OrbitAtConstantLat),
+            std::string(IdleKeyOrbitAtConstantLat)
+        },
+        {
+            static_cast<int>(Behavior::OrbitAroundUp),
+            std::string(IdleKeyOrbitAroundUp)
+        }
     });
-    chosenBehavior = IdleBehavior::Behavior::Orbit;
-    addProperty(chosenBehavior);
+    defaultBehavior = static_cast<int>(IdleBehavior::Behavior::Orbit);
+    addProperty(defaultBehavior);
+    addProperty(shouldTriggerWhenIdle);
+    addProperty(idleWaitTime);
+    idleWaitTime.setExponent(2.2f);
     addProperty(speedScale);
     addProperty(abortOnCameraInteraction);
     addProperty(dampenInterpolationTime);
@@ -329,7 +332,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _aim(AimInfo)
     , _retargetAnchor(RetargetAnchorInfo)
     , _retargetAim(RetargetAimInfo)
-    , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.f, 0.f, 20.f)
+    , _followAnchorNodeRotation(FollowAnchorNodeInfo, true)
+    , _followAnchorNodeRotationDistance(FollowAnchorNodeDistanceInfo, 5.f, 0.f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
@@ -365,7 +369,7 @@ OrbitalNavigator::OrbitalNavigator()
         }
         else {
             LERROR(fmt::format(
-                "No scenegraph node with identifier {} exists.", _anchor.value()
+                "No scenegraph node with identifier {} exists", _anchor.value()
             ));
         }
     });
@@ -381,7 +385,7 @@ OrbitalNavigator::OrbitalNavigator()
         }
         else {
             LERROR(fmt::format(
-                "No scenegraph node with identifier {} exists.", _aim.value()
+                "No scenegraph node with identifier {} exists", _aim.value()
             ));
         }
     });
@@ -413,7 +417,7 @@ OrbitalNavigator::OrbitalNavigator()
     // lerp(endValue, startValue, interpolationParameter).
     //
     // The transfer functions are derived from:
-    // f(t) = d/dt ( ln(1 / f_orig(t)) ) where f_orig is the transfer function that would
+    // f(t) = d/dt (ln(1 / f_orig(t))) where f_orig is the transfer function that would
     // be used if the interpolation was sinply linear between a start value and an end
     // value instead of current value and end value (0) as we use it when inerpoláting.
     // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear
@@ -460,7 +464,6 @@ OrbitalNavigator::OrbitalNavigator()
     });
 
     addPropertySubOwner(_friction);
-    addPropertySubOwner(_linearFlight);
     addPropertySubOwner(_idleBehavior);
 
     _idleBehaviorDampenInterpolator.setTransferFunction(
@@ -485,10 +488,18 @@ OrbitalNavigator::OrbitalNavigator()
             _idleBehavior.dampenInterpolationTime
         );
     });
+    _idleBehavior.shouldTriggerWhenIdle.onChange([&]() {
+        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
+    });
+    _idleBehavior.idleWaitTime.onChange([&]() {
+        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
+    });
+
     addProperty(_anchor);
     addProperty(_aim);
     addProperty(_retargetAnchor);
     addProperty(_retargetAim);
+    addProperty(_followAnchorNodeRotation);
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
 
@@ -543,13 +554,14 @@ void OrbitalNavigator::resetVelocities() {
     }
 }
 
-void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
+void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputState,
+                                             const KeyboardInputState& keyboardInputState,
                                              double deltaTime)
 {
-    _mouseStates.updateStateFromInput(inputState, deltaTime);
-    _joystickStates.updateStateFromInput(inputState, deltaTime);
-    _websocketStates.updateStateFromInput(inputState, deltaTime);
-    _scriptStates.updateStateFromInput(inputState, deltaTime);
+    _mouseStates.updateStateFromInput(mouseInputState, keyboardInputState, deltaTime);
+    _joystickStates.updateStateFromInput(*global::joystickInputStates, deltaTime);
+    _websocketStates.updateStateFromInput(*global::websocketInputStates, deltaTime);
+    _scriptStates.updateStateFromInput(deltaTime);
 
     bool interactionHappened = _mouseStates.hasNonZeroVelocities() ||
         _joystickStates.hasNonZeroVelocities() ||
@@ -558,6 +570,9 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 
     if (interactionHappened) {
         updateOnCameraInteraction();
+    }
+    else {
+        tickIdleBehaviorTimer(deltaTime);
     }
 }
 
@@ -578,37 +593,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _camera->positionVec3() + anchorDisplacement,
         _camera->rotationQuaternion()
     };
-
-    if (_linearFlight.apply) {
-        // Calculate a position handle based on the camera position in world space
-        glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
-        // Use the interaction sphere to get an approximate distance to the node surface
-        double nodeRadius = _anchorNode->interactionSphere();
-        double distFromCameraToFocus =
-            glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
-
-        // Make the approximation delta size depending on the flight distance
-        double arrivalThreshold =
-            _linearFlight.destinationDistance * _linearFlight.destinationFactor;
-
-        const double distToDestination =
-            std::fabs(distFromCameraToFocus - _linearFlight.destinationDistance);
-
-        // Fly towards the flight destination distance. When getting closer than
-        // arrivalThreshold terminate the flight
-        if (distToDestination > arrivalThreshold) {
-            pose.position = moveCameraAlongVector(
-                pose.position,
-                distFromCameraToFocus,
-                camPosToAnchorPosDiff,
-                _linearFlight.destinationDistance,
-                deltaTime
-            );
-        }
-        else {
-            _linearFlight.apply = false;
-        }
-    }
 
     const bool hasPreviousPositions =
         _previousAnchorNodePosition.has_value() &&
@@ -652,8 +636,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     // Rotate with the object by finding a differential rotation from the previous
     // to the current rotation
-    glm::dquat anchorRotation =
-        glm::quat_cast(_anchorNode->worldRotationMatrix());
+    glm::dquat anchorRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
 
     glm::dquat anchorNodeRotationDiff = _previousAnchorNodeRotation.has_value() ?
         *_previousAnchorNodeRotation * glm::inverse(anchorRotation) :
@@ -727,9 +710,9 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         posHandle
     );
 
-    // Update the camera state
-    _camera->setPositionVec3(pose.position);
-    _camera->setRotation(composeCameraRotation(camRot));
+    pose.rotation = composeCameraRotation(camRot);
+
+    _camera->setPose(pose);
 }
 
 void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
@@ -759,7 +742,8 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
             _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
                 deltaTime,
                 _currentCameraToSurfaceDistance,
-                targetCameraToSurfaceDistance);
+                targetCameraToSurfaceDistance
+            );
         }
 
         _camera->setScaling(
@@ -775,9 +759,19 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
 void OrbitalNavigator::updateOnCameraInteraction() {
     // Disable idle behavior if camera interaction happened
     if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
-        _idleBehavior.apply = false;
-        // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
-        _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
+        resetIdleBehavior();
+    }
+}
+
+void OrbitalNavigator::tickIdleBehaviorTimer(double deltaTime) {
+    if (!_idleBehavior.shouldTriggerWhenIdle) {
+        return;
+    }
+    if (_idleBehaviorTriggerTimer > 0.f) {
+        _idleBehaviorTriggerTimer -= static_cast<float>(deltaTime);
+    }
+    else {
+        triggerIdleBehavior();
     }
 }
 
@@ -845,34 +839,22 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
         resetVelocities();
     }
 
-    // Mark a changed anchor node as a camera interaction
     if (changedAnchor) {
-        updateOnCameraInteraction();
-    }
-
-    if (_anchorNode) {
-        _previousAnchorNodePosition = _anchorNode->worldPosition();
-        _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
-    }
-    else {
-        _previousAnchorNodePosition.reset();
-        _previousAnchorNodeRotation.reset();
+        updateOnCameraInteraction(); // Mark a changed anchor node as a camera interaction
+        updatePreviousAnchorState();
     }
 }
 
 void OrbitalNavigator::clearPreviousState() {
-    _previousAnchorNodePosition.reset();
-    _previousAnchorNodeRotation.reset();
-    _previousAimNodePosition.reset();
+    _previousAnchorNodePosition = std::nullopt;
+    _previousAnchorNodeRotation = std::nullopt;
+    _previousAimNodePosition = std::nullopt;
 }
 
 void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
     _retargetAimInterpolator.end();
     _aimNode = aimNode;
-
-    if (_aimNode) {
-        _previousAimNodePosition = _aimNode->worldPosition();
-    }
+    updatePreviousAimState();
 }
 
 void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
@@ -883,17 +865,29 @@ void OrbitalNavigator::setAimNode(const std::string& aimNode) {
     _aim.set(aimNode);
 }
 
-void OrbitalNavigator::resetNodeMovements() {
+void OrbitalNavigator::updatePreviousAnchorState() {
     if (_anchorNode) {
         _previousAnchorNodePosition = _anchorNode->worldPosition();
         _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
     }
     else {
-        _previousAnchorNodePosition = glm::dvec3(0.0);
-        _previousAnchorNodeRotation = glm::dquat();
+        _previousAnchorNodePosition = std::nullopt;
+        _previousAnchorNodeRotation = std::nullopt;
     }
+}
 
-    _previousAimNodePosition = _aimNode ? _aimNode->worldPosition() : glm::dvec3(0.0);
+void OrbitalNavigator::updatePreviousAimState() {
+    if (_aimNode) {
+        _previousAimNodePosition = _aimNode->worldPosition();
+    }
+    else {
+        _previousAimNodePosition = std::nullopt;
+    }
+}
+
+void OrbitalNavigator::updatePreviousStateVariables() {
+    updatePreviousAnchorState();
+    updatePreviousAimState();
 }
 
 void OrbitalNavigator::startRetargetAnchor() {
@@ -940,7 +934,6 @@ void OrbitalNavigator::startRetargetAim() {
     _cameraToSurfaceDistanceInterpolator.start();
 }
 
-
 float OrbitalNavigator::retargetInterpolationTime() const {
     return _retargetInterpolationTime;
 }
@@ -951,7 +944,7 @@ void OrbitalNavigator::setRetargetInterpolationTime(float durationInSeconds) {
 
 bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPosition) const
 {
-    if (!_anchorNode) {
+    if (!_anchorNode || !_followAnchorNodeRotation) {
         return false;
     }
 
@@ -1318,7 +1311,7 @@ double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,
     _cameraToSurfaceDistanceInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _cameraToSurfaceDistanceInterpolator.step();
 
-    // Interpolate distance logarithmically.
+    // Interpolate distance logarithmically
     double result = glm::exp(glm::mix(
         glm::log(currentDistance),
         glm::log(targetDistance),
@@ -1401,28 +1394,6 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 
     // Add difference to position
     return cameraPosition + rotationDiffVec3;
-}
-
-glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
-                                                  double distFromCameraToFocus,
-                                                  const glm::dvec3& camPosToAnchorPosDiff,
-                                                  double destination,
-                                                  double deltaTime) const
-{
-    // This factor adapts the velocity so it slows down when getting closer
-    // to our final destination
-    double velocity = 0.0;
-
-    if (destination < distFromCameraToFocus) { // When flying towards anchor
-        velocity = 1.0 - destination / distFromCameraToFocus;
-    }
-    else { // When flying away from anchor
-        velocity = distFromCameraToFocus / destination - 1.0;
-    }
-    velocity *= _linearFlight.velocitySensitivity * deltaTime;
-
-    // Return the updated camera position
-    return camPos - velocity * camPosToAnchorPosDiff;
 }
 
 glm::dvec3 OrbitalNavigator::followAnchorNodeRotation(const glm::dvec3& cameraPosition,
@@ -1552,6 +1523,11 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
                                                 const SceneGraphNode& node,
                                                 const glm::dvec3 cameraPositionWorldSpace)
 {
+    ghoul_assert(
+        glm::length(cameraPositionWorldSpace) > 0.0,
+        "Cannot have degenerate vector"
+    );
+
     const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
@@ -1583,6 +1559,49 @@ ScriptCameraStates& OrbitalNavigator::scriptStates() {
 
 const ScriptCameraStates& OrbitalNavigator::scriptStates() const {
     return _scriptStates;
+}
+
+void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode != OpenSpaceEngine::Mode::UserControl) {
+        LERROR(
+            "Could not start idle behavior. The camera is being controlled "
+            "by some other part of the system"
+        );
+        return;
+    }
+
+    if (choice.empty()) {
+        _idleBehavior.chosenBehavior = std::nullopt;
+    }
+    else {
+        IdleBehavior::Behavior behavior;
+        if (choice == IdleKeyOrbit) {
+            behavior = IdleBehavior::Behavior::Orbit;
+        }
+        else if (choice == IdleKeyOrbitAtConstantLat) {
+            behavior = IdleBehavior::Behavior::OrbitAtConstantLat;
+        }
+        else if (choice == IdleKeyOrbitAroundUp) {
+            behavior = IdleBehavior::Behavior::OrbitAroundUp;
+        }
+        else {
+            throw ghoul::RuntimeError(
+                fmt::format("No existing IdleBehavior with identifier '{}'", choice)
+            );
+        }
+        _idleBehavior.chosenBehavior = behavior;
+    }
+
+    _idleBehavior.apply = true;
+}
+
+void OrbitalNavigator::resetIdleBehavior() {
+    _idleBehavior.apply = false;
+    _idleBehavior.chosenBehavior = std::nullopt;
+    // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
+    _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
+    _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
 }
 
 void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
@@ -1624,10 +1643,11 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
     speedScale *= _invertIdleBehaviorInterpolation ? (1.0 - s) : s;
 
     // Apply the chosen behavior
-    const IdleBehavior::Behavior chosen =
-        static_cast<IdleBehavior::Behavior>(_idleBehavior.chosenBehavior.value());
+    const IdleBehavior::Behavior choice = _idleBehavior.chosenBehavior.value_or(
+        static_cast<IdleBehavior::Behavior>(_idleBehavior.defaultBehavior.value())
+    );
 
-    switch (chosen) {
+    switch (choice) {
         case IdleBehavior::Behavior::Orbit:
             orbitAnchor(deltaTime, position, globalRotation, speedScale);
             break;
@@ -1654,7 +1674,7 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
 void OrbitalNavigator::orbitAnchor(double deltaTime, glm::dvec3& position,
                                    glm::dquat& globalRotation, double speedScale)
 {
-    ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set!");
+    ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
 
     // Apply a rotation to the right, in camera space
     // (Maybe we should also let the user decide which direction to rotate?
@@ -1678,7 +1698,7 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime,
                                        glm::dvec3& position, glm::dquat& globalRotation,
                                        double speedScale)
 {
-    ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set!");
+    ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
 
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
     const glm::dvec3 axisInWorldCoords =

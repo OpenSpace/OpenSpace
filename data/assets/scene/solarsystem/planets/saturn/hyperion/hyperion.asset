@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Hyperion = {
   Identifier = "Hyperion",
@@ -28,7 +33,7 @@ local Hyperion = {
     Labels = {
       -- @TODO (2021-05-21, emmbr26) These labels do not seem to be visible
       Enabled = false,
-      FileName = labelsPath .. "/hyperion.labels",
+      FileName = labelsPath .. "hyperion.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 8.6,
@@ -45,15 +50,23 @@ local Hyperion = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Hyperion })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Hyperion)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Hyperion)
+end)
+  
+asset.export(Hyperion)
+
 
 
 asset.meta = {
   Name = "Hyperion",
-  Version = "1.0",
-  Description = [[ Hyperion globe with labels]],
+  Version = "1.1",
+  Description = "Hyperion globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Hyperion"}
+  License = "MIT license"
 }

@@ -1,0 +1,35 @@
+local image = asset.require("./crab_image").image
+
+local CrabImage = {
+  Identifier = "CrabImage",
+  Type = "ScreenSpaceImageLocal",
+  Name = "Crab Nebula",
+  UseRadiusAzimuthElevation = true,
+  FaceCamera = false,
+  RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
+  UsePerspectiveProjection = false,
+  Opacity = 1.0,
+  TexturePath = image .. "crab-nebula.png",
+  Tag = { "mission_jwst_target" },
+  Description = [[
+    Image of the Crab Nebula by NASA, ESA and Allison Loll/Jeff Hester.
+  ]],
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(CrabImage)
+end)
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(CrabImage)
+end)
+
+asset.export(CrabImage)
+
+asset.meta = {
+  Name = "Crab Nebula Image",
+  Version = "1.0",
+  Description = "Screenspace image of the Crab Nebula",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

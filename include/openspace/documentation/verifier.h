@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -525,10 +525,6 @@ struct LessVerifier : public OperatorVerifier<T, std::less<typename T::Type>> {
         !std::is_base_of<StringVerifier, T>::value, "T cannot be StringVerifier"
     );
     static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
-    static_assert(
-        !std::is_base_of<VectorVerifier, T>::value,
-        "T cannot be VectorVerifier"
-    );
 
     using OperatorVerifier<T, std::less<typename T::Type>>::OperatorVerifier;
 
@@ -550,10 +546,6 @@ struct LessEqualVerifier : public OperatorVerifier<T, std::less_equal<typename T
         "T cannot be StringVerifier"
     );
     static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
-    static_assert(
-        !std::is_base_of<VectorVerifier, T>::value,
-        "T cannot be VectorVerifier"
-    );
 
     using OperatorVerifier<T, std::less_equal<typename T::Type>>::OperatorVerifier;
 
@@ -575,10 +567,6 @@ struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Typ
         "T cannot be StringVerifier"
     );
     static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
-    static_assert(
-        !std::is_base_of<VectorVerifier, T>::value,
-        "T cannot be VectorVerifier"
-    );
 
     using OperatorVerifier<T, std::greater<typename T::Type>>::OperatorVerifier;
 
@@ -602,10 +590,6 @@ struct GreaterEqualVerifier : public OperatorVerifier<T,
         "T cannot be StringVerifier"
     );
     static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
-    static_assert(
-        !std::is_base_of<VectorVerifier, T>::value,
-        "T cannot be VectorVerifier"
-    );
 
     using OperatorVerifier<T, std::greater_equal<typename T::Type>>::OperatorVerifier;
 
@@ -754,10 +738,6 @@ struct InRangeVerifier : public T {
         !std::is_base_of<TableVerifier, T>::value,
         "T cannot be TableVerifier"
     );
-    static_assert(
-        !std::is_base_of<VectorVerifier, T>::value,
-        "T cannot be VectorVerifier"
-    );
 
     /**
      * Constructs a InRangeVerifier that checks whether the incoming value is of the
@@ -815,10 +795,6 @@ struct NotInRangeVerifier : public T {
     static_assert(
         !std::is_base_of<TableVerifier, T>::value,
         "T cannot be TableVerifier"
-    );
-    static_assert(
-        !std::is_base_of<VectorVerifier, T>::value,
-        "T cannot be VectorVerifier"
     );
 
     /**
@@ -1145,6 +1121,8 @@ using StringNotInListVerifier = NotInListVerifier<StringVerifier>;
 using IntInRangeVerifier = InRangeVerifier<IntVerifier>;
 /// A short-hand definition for a InRangeVerifier with a type check for \c double
 using DoubleInRangeVerifier = InRangeVerifier<DoubleVerifier>;
+/// A short-hand definition for a InRangeVerifier with a type check for \c vec2
+using Vec2InRangeVerifier = InRangeVerifier<DoubleVector2Verifier>;
 /// A short-hand definition for a NotInRangeVerifier with a type check for \c int
 using IntNotInRangeVerifier = NotInRangeVerifier<IntVerifier>;
 /// A short-hand definition for a NotInRangeVerifier with a type check for \c double

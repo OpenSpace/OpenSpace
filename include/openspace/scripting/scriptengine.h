@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,7 @@ public:
         ScriptCallback callback;
     };
 
-    static constexpr const char* OpenSpaceLibraryName = "openspace";
+    static constexpr std::string_view OpenSpaceLibraryName = "openspace";
 
     ScriptEngine();
 
@@ -92,7 +92,7 @@ public:
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    void queueScript(const std::string& script, RemoteScripting remoteScripting,
+    void queueScript(std::string script, RemoteScripting remoteScripting,
         ScriptCallback cb = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
@@ -115,10 +115,10 @@ private:
 
     std::queue<QueueItem> _incomingScripts;
 
-    // Slave scripts are mutex protected since decode and rendering may
-    // happen asynchronously.
-    std::mutex _slaveScriptsMutex;
-    std::queue<std::string> _slaveScriptQueue;
+    // Client scripts are mutex protected since decode and rendering may happen
+    // asynchronously
+    std::mutex _clientScriptsMutex;
+    std::queue<std::string> _clientScriptQueue;
     std::queue<QueueItem> _masterScriptQueue;
 
     std::vector<std::string> _scriptsToSync;

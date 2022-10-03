@@ -1,19 +1,10 @@
-local colorLayersPath = "./layers/colorlayers"
-
-local colorLayer = asset.require(colorLayersPath .. "/mimas_texture")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Mimas.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/colorlayers/mimas_texture", true)
 
 
 asset.meta = {
   Name = "Default Mimas Layers",
   Version = "1.0",
-  Description = [[ Default Mimas layers are: Mimas Texture]],
+  Description = "Default Mimas layers are: Mimas Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

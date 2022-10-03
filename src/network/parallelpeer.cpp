@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,59 +43,66 @@
 #include "parallelpeer_lua.inl"
 
 namespace {
-    constexpr const size_t MaxLatencyDiffs = 64;
-    constexpr const char* _loggerCat = "ParallelPeer";
+    constexpr size_t MaxLatencyDiffs = 64;
+    constexpr std::string_view _loggerCat = "ParallelPeer";
 
     constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
         "The general password that allows this OpenSpace instance access to the Wormhole "
-        "server."
+        "server"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HostPasswordInfo = {
         "HostPassword",
         "Host Password",
         "The password that is required to take control of the joint session and thus "
-        "send all commands to connected clients."
+        "send all commands to connected clients"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The port on which the Wormhole server is listening to connections from "
-        "OpenSpace."
+        "OpenSpace"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
-        "The address of the Wormhole server either as a DNS name or an IP address."
+        "The address of the Wormhole server either as a DNS name or an IP address"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "Name",
         "Connection Name",
         "The name of this OpenSpace instance that will be potentially broadcast to other "
-        "connected instances."
+        "connected instances"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
         "BufferTime",
         "Buffer Time",
-        "" // @TODO Missing documentation
+        "This is the number of seconds that received keyframes are buffered before they "
+        "get applied to the rendering. A higher value leads to smoother rendering, "
+        "particularly when the internet connection is unstable, but also leads to higher "
+        "delay"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
         "TimeKeyframeInterval",
         "Time keyframe interval",
-        "" // @TODO Missing documentation
+        "Determines how often the information about the simulation time is sent (in "
+        "seconds). Lower values mean more accurate representation of the time, but also "
+        "require higher internet bandwidth"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
         "CameraKeyframeInterval",
         "Camera Keyframe interval",
-        "" // @TODO Missing documentation
+        "Determines how often the information about the camera position and orientation "
+        "is sent (in seconds). Lower values mean more accurate representation of the "
+        "time, but also more internet traffic"
     };
 } // namespace
 
@@ -138,7 +145,7 @@ void ParallelPeer::connect() {
 
     setStatus(ParallelConnection::Status::Connecting);
 
-    std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
+    auto socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
         atoi(_port.value().c_str())
     );
@@ -163,31 +170,59 @@ void ParallelPeer::disconnect() {
 }
 
 void ParallelPeer::sendAuthentication() {
-    std::string name = _name;
-    // Length of this nodes name
-    const uint32_t nameLength = static_cast<uint32_t>(name.length());
+    std::string password = _password;
+    if (password.size() > std::numeric_limits<uint16_t>::max()) {
+        password.resize(std::numeric_limits<uint16_t>::max());
+    }
+    const uint16_t passwordSize = static_cast<uint16_t>(password.size());
 
-    // Total size of the buffer: (passcode + namelength + name)
-    const size_t size = sizeof(uint64_t) + sizeof(uint32_t) + nameLength;
+    std::string hostPassword = _hostPassword;
+    if (hostPassword.size() > std::numeric_limits<uint16_t>::max()) {
+        hostPassword.resize(std::numeric_limits<uint16_t>::max());
+    }
+    const uint16_t hostPasswordSize = static_cast<uint16_t>(hostPassword.size());
+
+    std::string name = _name;
+    if (name.size() > std::numeric_limits<uint8_t>::max()) {
+        name.resize(std::numeric_limits<uint8_t>::max());
+    }
+    const uint8_t nameLength = static_cast<uint8_t>(name.length());
+
+
+    // Total size of the buffer
+    const size_t size =
+        sizeof(uint16_t) + // password length
+        passwordSize +     // password
+        sizeof(uint16_t) + // host password length
+        hostPasswordSize + // host password
+        sizeof(uint8_t)  + // name length
+        nameLength;        // name
 
     // Create and reserve buffer
     std::vector<char> buffer;
     buffer.reserve(size);
 
-    const uint64_t passCode = std::hash<std::string>{}(_password.value());
-
-    // Write the hashed password to buffer
+    // Write the password to buffer
     buffer.insert(
         buffer.end(),
-        reinterpret_cast<const char*>(&passCode),
-        reinterpret_cast<const char*>(&passCode) + sizeof(uint64_t)
+        reinterpret_cast<const char*>(&passwordSize),
+        reinterpret_cast<const char*>(&passwordSize) + sizeof(uint16_t)
     );
+    buffer.insert(buffer.end(), password.begin(), password.end());
+
+    // Write the host password to buffer
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<const char*>(&hostPasswordSize),
+        reinterpret_cast<const char*>(&hostPasswordSize) + sizeof(uint16_t)
+    );
+    buffer.insert(buffer.end(), hostPassword.begin(), hostPassword.end());
 
     // Write the length of the nodes name to buffer
     buffer.insert(
         buffer.end(),
         reinterpret_cast<const char*>(&nameLength),
-        reinterpret_cast<const char*>(&nameLength) + sizeof(uint32_t)
+        reinterpret_cast<const char*>(&nameLength) + sizeof(uint8_t)
     );
 
     // Write this node's name to buffer
@@ -265,8 +300,8 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     size_t offset = 0;
 
     // The type of data message received
-    const uint32_t type = *(reinterpret_cast<const uint32_t*>(message.data() + offset));
-    offset += sizeof(uint32_t);
+    const uint8_t type = *(reinterpret_cast<const uint8_t*>(message.data() + offset));
+    offset += sizeof(uint8_t);
 
     const double timestamp = *(reinterpret_cast<const double*>(message.data() + offset));
     offset += sizeof(double);
@@ -352,30 +387,29 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
             );
             break;
         }
-        default: {
+        default:
             LERROR(fmt::format(
                 "Unidentified message with identifier {} received in parallel connection",
                 type
             ));
             break;
-        }
     }
 }
 
 void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message) {
-    if (message.size() < 2 * sizeof(uint32_t)) {
+    if (message.size() < 2 * sizeof(uint8_t)) {
         LERROR("Malformed connection status message");
         return;
     }
     size_t pointer = 0;
-    uint32_t statusIn = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
+    const uint8_t statusIn = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
     const ParallelConnection::Status status = static_cast<ParallelConnection::Status>(
         statusIn
     );
-    pointer += sizeof(uint32_t);
+    pointer += sizeof(uint8_t);
 
-    const size_t hostNameSize = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
-    pointer += sizeof(uint32_t);
+    const uint8_t hostNameSize = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
+    pointer += sizeof(uint8_t);
 
     if (hostNameSize > message.size() - pointer) {
         LERROR("Malformed connection status message");
@@ -409,8 +443,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     global::timeManager->clearKeyframes();
 }
 
-void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
-{
+void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message) {
     if (message.size() < sizeof(uint32_t)) {
         LERROR("Malformed host info message");
         return;
@@ -424,8 +457,10 @@ void ParallelPeer::handleCommunication() {
         try {
             ParallelConnection::Message m = _connection.receiveMessage();
             queueInMessage(m);
-        } catch (const ParallelConnection::ConnectionLostError&) {
-            LERROR("Parallel connection lost");
+        } catch (const ParallelConnection::ConnectionLostError& e) {
+            if (e.shouldLogError) {
+                LERROR("Parallel connection lost");
+            }
         }
     }
     setStatus(ParallelConnection::Status::Disconnected);
@@ -445,12 +480,14 @@ void ParallelPeer::setName(std::string name) {
 
 void ParallelPeer::requestHostship() {
     std::vector<char> buffer;
-    uint64_t passwordHash = std::hash<std::string>{}(_hostPassword);
+    std::string hostPw = _hostPassword;
+    uint16_t hostPwSize = static_cast<uint16_t>(hostPw.size());
     buffer.insert(
         buffer.end(),
-        reinterpret_cast<char*>(&passwordHash),
-        reinterpret_cast<char*>(&passwordHash) + sizeof(uint64_t)
+        reinterpret_cast<const char*>(&hostPwSize),
+        reinterpret_cast<const char*>(&hostPwSize) + sizeof(uint16_t)
     );
+    buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
 
     _connection.sendMessage(ParallelConnection::Message(
         ParallelConnection::MessageType::HostshipRequest,
@@ -504,7 +541,7 @@ void ParallelPeer::resetTimeOffset() {
 void ParallelPeer::preSynchronization() {
     ZoneScoped
 
-    std::unique_lock<std::mutex> unqlock(_receiveBufferMutex);
+    std::unique_lock<std::mutex> unlock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
         ParallelConnection::Message& message = _receiveBuffer.front();
         handleMessage(message);
@@ -733,30 +770,10 @@ scripting::LuaLibrary ParallelPeer::luaLibrary() {
     return {
         "parallel",
         {
-            {
-                "connect",
-                &luascriptfunctions::connect,
-                "",
-                "Connect to parallel"
-            },
-            {
-                "disconnect",
-                &luascriptfunctions::disconnect,
-                "",
-                "Disconnect from parallel"
-            },
-            {
-                "requestHostship",
-                &luascriptfunctions::requestHostship,
-                "",
-                "Request to be the host for this session"
-            },
-            {
-                "resignHostship",
-                &luascriptfunctions::resignHostship,
-                "",
-                "Resign hostship"
-            },
+            codegen::lua::Connect,
+            codegen::lua::Disconnect,
+            codegen::lua::RequestHostship,
+            codegen::lua::ResignHostship
         }
     };
 }

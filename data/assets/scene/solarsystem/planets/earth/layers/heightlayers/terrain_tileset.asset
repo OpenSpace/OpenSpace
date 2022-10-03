@@ -1,34 +1,35 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
-
-local fallBackLayer = asset.require("./fallbacks/blue_marble_height").layer
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Terrain_tileset",
   Name = "Terrain tileset",
-  FilePath = mapServiceConfigsPath .. "/ESRI/Terrain.wms",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("terrain_tileset.wms"),
   TilePixelSize = 64,
-  Fallback = fallBackLayer,
   Description = [[This globe layer presents elevation data at approximately 90m or 1km
     per pixel resolution for the world. The elevation data includes 90m Shuttle Radar
     Topography Mission (SRTM) elevation data from NASA and National
     Geospatial-Intelligence Agency (NGA) where it is available and 1km GTOPO30
-    data from the USGS elsewhere. Vertical units are measured in meters.]],
+    data from the USGS elsewhere. Vertical units are measured in meters]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "World Elevation (3D)",
-  Version = "1.0",
-  Description = [[Main web loaded height layer for Earth. This layer is hosted by ESRI.]],
+  Version = "1.1",
+  Description = "Main web loaded height layer for Earth. This layer is hosted by ESRI",
   Author = "ESRI",
   URL = "https://www.arcgis.com/home/item.html?id=1b48cd3b6276416784fe90a68c580a89",
-  License = "Esri Master License Agreement",
-  Identifiers = {"Terrain_tileset"}
+  License = "Esri Master License Agreement"
 }

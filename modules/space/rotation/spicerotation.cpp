@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,27 +36,27 @@ namespace {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
-        "coordinate transformation. This has to be a valid SPICE name."
+        "coordinate transformation. This has to be a valid SPICE name"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
-        "transformation. This has to be a valid SPICE name."
+        "transformation. This has to be a valid SPICE name"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeFrameInfo = {
         "TimeFrame",
         "Time Frame",
-        "The time frame in which the spice kernels are valid."
+        "The time frame in which the spice kernels are valid"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed Date",
         "A time to lock the rotation to. Setting this to an empty string will "
-        "unlock the time and return to rotation based on current simulation time."
+        "unlock the time and return to rotation based on current simulation time"
     };
 
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {

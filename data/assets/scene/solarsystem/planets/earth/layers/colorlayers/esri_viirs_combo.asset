@@ -1,11 +1,9 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
-
-local fallBackLayer = asset.require("./fallbacks/blue_marble").layer
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "ESRI_VIIRS_Combo",
   Name = "ESRI VIIRS Combo",
+  Enabled = asset.enabled,
   Type = "ByLevelTileLayer",
   LevelTileProviders = {
     {
@@ -14,14 +12,20 @@ local layer = {
         Identifier = "Temporal_VIIRS_SNPP",
         Name = "Temporal VIIRS SNPP",
         Type = "TemporalTileLayer",
-        FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-          "VIIRS_SNPP_CorrectedReflectance_TrueColor",
-          "2015-11-24",
-          "Today",
-          "1d",
-          "250m",
-          "jpg"
-        ),
+        Mode = "Prototyped",
+        Prototyped = {
+          Time = {
+            Start = "2015-11-24",
+            End = "Today"
+          },
+          TemporalResolution = "1d",
+          TimeFormat = "YYYY-MM-DD",
+          Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+            "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+            "250m",
+            "jpg"
+          )
+        },
         PadTiles = false
       }
     },
@@ -30,31 +34,34 @@ local layer = {
       TileProvider = {
         Identifier = "ESRI_World_Imagery",
         Name = "ESRI World Imagery",
-        FilePath = mapServiceConfigsPath .. "/ESRI/World_Imagery.wms",
+        FilePath = asset.localResource("esri_world_imagery.wms"),
         PadTiles = false
       }
     },
   },
   PadTiles = false,
-  Fallback = fallBackLayer,
   Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
     Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "ESRI VIIRS Combo",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
   Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]],
   Author = "OpenSpace Tem",
   URL = "http://www.openspaceproject.com",
-  License = "MIT License",
-  Identifiers = {"ESRI_VIIRS_Combo"}
+  License = "MIT License"
 }

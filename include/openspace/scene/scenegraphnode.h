@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,13 +75,13 @@ public:
     BooleanType(UpdateScene);
 
     static constexpr const char* RootNodeIdentifier = "Root";
-    static constexpr const char* KeyIdentifier = "Identifier";
-    static constexpr const char* KeyParentName = "Parent";
-    static constexpr const char* KeyDependencies = "Dependencies";
-    static constexpr const char* KeyTag = "Tag";
+    static constexpr std::string_view KeyIdentifier = "Identifier";
+    static constexpr std::string_view KeyParentName = "Parent";
+    static constexpr std::string_view KeyDependencies = "Dependencies";
+    static constexpr std::string_view KeyTag = "Tag";
 
     SceneGraphNode();
-    ~SceneGraphNode();
+    virtual ~SceneGraphNode() override;
 
     static ghoul::mm_unique_ptr<SceneGraphNode> createFromDictionary(
         const ghoul::Dictionary& dictionary);

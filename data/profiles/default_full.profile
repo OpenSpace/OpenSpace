@@ -2,7 +2,7 @@
   "actions": [
     {
       "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
+      "gui_path": "/Solar System/Earth",
       "identifier": "profile.toggle.satellite",
       "is_local": false,
       "name": "Toggle satellite trails",
@@ -10,7 +10,7 @@
     },
     {
       "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Earth",
+      "gui_path": "/Solar System/Earth",
       "identifier": "profile.focus.iss",
       "is_local": false,
       "name": "Focus ISS",
@@ -18,7 +18,7 @@
     },
     {
       "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Earth",
+      "gui_path": "/Solar System/Earth",
       "identifier": "profile.focus.earth",
       "is_local": false,
       "name": "Focus on Earth",
@@ -26,7 +26,7 @@
     },
     {
       "documentation": "Toggle on/off minor moon trails for all planets in the solar system",
-      "gui_path": "/Solar System",
+      "gui_path": "/Trails",
       "identifier": "profile.toggle.minormoons",
       "is_local": false,
       "name": "Toggle Minor Moon Trails",
@@ -35,6 +35,7 @@
   ],
   "assets": [
     "base",
+    "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/jupiter/major_moons",
@@ -44,7 +45,8 @@
     "scene/solarsystem/planets/saturn/major_moons",
     "scene/solarsystem/planets/saturn/minor_moons",
     "scene/solarsystem/planets/uranus/major_moons",
-    "scene/solarsystem/planets/uranus/minor_moons"
+    "scene/solarsystem/planets/uranus/minor_moons",
+    "scene/milkyway/objects/orionnebula/orionnebula"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -109,7 +111,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles.",
+    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",

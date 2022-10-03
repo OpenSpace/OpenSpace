@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,9 +29,9 @@
 #include <openspace/query/query.h>
 
 namespace {
-    constexpr const char* _loggerCat = "NavigationState";
+    constexpr std::string_view _loggerCat = "NavigationState";
 
-    const double Epsilon = 1E-7;
+    constexpr double Epsilon = 1E-7;
 
     struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node
@@ -98,38 +98,33 @@ CameraPose NavigationState::cameraPose() const {
 
     if (!anchorNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as anchor.", referenceFrame
+            "Could not find scene graph node '{}' used as anchor", anchor
         ));
         return CameraPose();
     }
-    if (!aim.empty() && !sceneGraphNode(aim)) {
-        LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as aim.", referenceFrame
-        ));
-        return CameraPose();
-    }
+
     if (!referenceFrameNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as reference frame.",
-            referenceFrame)
-        );
+            "Could not find scene graph node '{}' used as reference frame",
+            referenceFrame
+        ));
         return CameraPose();
     }
 
     CameraPose resultingPose;
 
-    const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
-    const glm::dmat3 referenceFrameTransform = referenceFrameNode->worldRotationMatrix();
+    const glm::dmat3 referenceFrameTransform = referenceFrameNode->modelTransform();
 
-    resultingPose.position = anchorWorldPosition + referenceFrameTransform * position;
+    resultingPose.position = anchorNode->worldPosition() +
+        referenceFrameTransform * glm::dvec3(position);
 
     glm::dvec3 upVector = up.has_value() ?
-        glm::normalize(referenceFrameTransform * up.value()) :
+        glm::normalize(referenceFrameTransform * *up) :
         glm::dvec3(0.0, 1.0, 0.0);
 
-    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
+    // Construct vectors of a "neutral" view, i.e. when the anchor is centered in view
     glm::dvec3 neutralView =
-        glm::normalize(anchorWorldPosition - resultingPose.position);
+        glm::normalize(anchorNode->worldPosition() - resultingPose.position);
 
     glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
         glm::dvec3(0.0),
@@ -137,8 +132,8 @@ CameraPose NavigationState::cameraPose() const {
         upVector
     )));
 
-    glm::dquat pitchRotation = glm::angleAxis(pitch, glm::dvec3(1.f, 0.f, 0.f));
-    glm::dquat yawRotation = glm::angleAxis(yaw, glm::dvec3(0.f, -1.f, 0.f));
+    glm::dquat pitchRotation = glm::angleAxis(pitch, glm::dvec3(1.0, 0.0, 0.0));
+    glm::dquat yawRotation = glm::angleAxis(yaw, glm::dvec3(0.0, -1.0, 0.0));
 
     resultingPose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
 
@@ -146,32 +141,24 @@ CameraPose NavigationState::cameraPose() const {
 }
 
 ghoul::Dictionary NavigationState::dictionary() const {
-    constexpr const char* KeyAnchor = "Anchor";
-    constexpr const char* KeyAim = "Aim";
-    constexpr const char* KeyPosition = "Position";
-    constexpr const char* KeyUp = "Up";
-    constexpr const char* KeyYaw = "Yaw";
-    constexpr const char* KeyPitch = "Pitch";
-    constexpr const char* KeyReferenceFrame = "ReferenceFrame";
-
     ghoul::Dictionary cameraDict;
-    cameraDict.setValue(KeyPosition, position);
-    cameraDict.setValue(KeyAnchor, anchor);
+    cameraDict.setValue("Position", position);
+    cameraDict.setValue("Anchor", anchor);
 
     if (anchor != referenceFrame) {
-        cameraDict.setValue(KeyReferenceFrame, referenceFrame);
+        cameraDict.setValue("ReferenceFrame", referenceFrame);
     }
     if (!aim.empty()) {
-        cameraDict.setValue(KeyAim, aim);
+        cameraDict.setValue("Aim", aim);
     }
     if (up.has_value()) {
-        cameraDict.setValue(KeyUp, *up);
+        cameraDict.setValue("Up", *up);
 
         if (std::abs(yaw) > Epsilon) {
-            cameraDict.setValue(KeyYaw, yaw);
+            cameraDict.setValue("Yaw", yaw);
         }
         if (std::abs(pitch) > Epsilon) {
-            cameraDict.setValue(KeyPitch, pitch);
+            cameraDict.setValue("Pitch", pitch);
         }
     }
 

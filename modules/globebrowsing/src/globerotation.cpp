@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,7 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0."
+        "globe. The default value is 0.0"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
@@ -56,14 +56,14 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0."
+        "globe. The default value is 0.0"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AngleInfo = {
         "Angle",
         "Angle",
         "A rotation angle that can be used to rotate the object around its own y-axis, "
-        "which will be pointing out of the globe's surface."
+        "which will be pointing out of the globe's surface"
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
@@ -71,7 +71,7 @@ namespace {
         "Use Heightmap",
         "If set to true, the heightmap will be used when computing the surface normal. "
         "This means that the object will be rotated to lay flat on the surface at the "
-        "given coordinate and follow the shape of the landscape."
+        "given coordinate and follow the shape of the landscape"
     };
 
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
@@ -110,6 +110,11 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _globe = p.globe;
+    _globe.onChange([this]() {
+        findGlobe();
+        setUpdateVariables();
+    });
+    addProperty(_globe);
 
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { setUpdateVariables(); });
@@ -130,7 +135,7 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
 
 void GlobeRotation::findGlobe() {
     SceneGraphNode* n = sceneGraphNode(_globe);
-    if (n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
+    if (n && n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
         _globeNode = dynamic_cast<RenderableGlobe*>(n->renderable());
     }
     else {
@@ -218,7 +223,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     }
     yAxis = glm::normalize(yAxis);
 
-    constexpr const glm::dvec3 n = glm::dvec3(0.0, 0.0, 1.0);
+    constexpr glm::dvec3 n = glm::dvec3(0.0, 0.0, 1.0);
     glm::dvec3 zAxis = glm::dvec3(
         zAxis.x = yAxis.y * n.z - yAxis.z * n.y,
         zAxis.y = yAxis.z * n.x - yAxis.x * n.z,

@@ -1,0 +1,90 @@
+local toggle_trail = {
+  Identifier = "event.jwst.toggle_trail",
+  Name = "Toggle JWST Trail (Auto)",
+  Command = [[
+    local node
+    if is_declared("args") then
+      node = args.Node
+    else
+      node = openspace.navigation.getNavigationState().Anchor
+    end
+
+    if node ~= "JWSTModel" then
+      return
+    end
+
+
+    local launchTrail = "JWSTTrailLaunch"
+    local cruiseTrail = "JWSTTrailCruise"
+    local coRevOrbitTrail = "JWSTTrailCoRevOrbit"
+
+    local visibility
+    if is_declared("args") then
+      if args.Transition == "Approaching" then
+        visibility = false
+      elseif args.Transition == "Exiting" then
+        visibility = true
+      else
+        return
+      end
+    else
+      visibility = not (
+        openspace.getPropertyValue("Scene." .. launchTrail .. ".Renderable.Enabled") or
+        openspace.getPropertyValue("Scene." .. cruiseTrail .. ".Renderable.Enabled") or
+        openspace.getPropertyValue("Scene." .. coRevOrbitTrail .. ".Renderable.Enabled")
+      )
+    end
+
+    openspace.setPropertyValueSingle(
+      "Scene." .. launchTrail .. ".Renderable.Enabled",
+      visibility
+    )
+    openspace.setPropertyValueSingle(
+      "Scene." .. cruiseTrail .. ".Renderable.Enabled",
+      visibility
+    )
+    openspace.setPropertyValueSingle(
+      "Scene." .. coRevOrbitTrail .. ".Renderable.Enabled",
+      visibility
+    )
+  ]],
+  Documentation = [[Toggles the visibility of the JWST trail with an
+    approaching/exiting event. This action takes optional arguments to 1) determine which
+    node is currently in focus and only hide JWST trail if it is in focus (as the
+    'Node') and 2) the transition direction (as 'Approaching' or 'Exiting')]],
+  GuiPath = "/JWST/Events",
+  IsLocal = true
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(toggle_trail)
+
+  openspace.event.registerEventAction(
+    "CameraFocusTransition",
+    toggle_trail.Identifier,
+    { Transition = "Exiting" }
+  )
+  openspace.event.registerEventAction(
+    "CameraFocusTransition",
+    toggle_trail.Identifier,
+    { Transition = "Approaching" }
+  )
+end)
+
+asset.onDeinitialize(function()
+  openspace.event.unregisterEventAction(
+    "CameraFocusTransition",
+    toggle_trail.Identifier,
+    { Transition = "Exiting" }
+  )
+  openspace.event.unregisterEventAction(
+    "CameraFocusTransition",
+    toggle_trail.Identifier,
+    { Transition = "Approaching" }
+  )
+
+  openspace.action.removeAction(toggle_trail)
+end)
+
+asset.export("jwst.toggle_trail", toggle_trail.Identifier)

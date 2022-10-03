@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Tethys = {
   Identifier = "Tethys",
@@ -27,7 +32,7 @@ local Tethys = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/tethys.labels",
+      FileName = labelsPath .. "tethys.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 8.3,
@@ -44,13 +49,22 @@ local Tethys = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Tethys })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Tethys)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Tethys)
+end)
+  
+asset.export(Tethys)
+
 
 
 asset.meta = {
   Name = "Tethys",
   Version = "1.0",
-  Description = [[ Tethys globe with labels.]],
+  Description = "Tethys globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

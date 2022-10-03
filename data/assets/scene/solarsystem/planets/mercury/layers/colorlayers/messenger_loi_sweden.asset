@@ -1,14 +1,31 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
   Identifier = "Messenger_LOI_Sweden",
   Name = "Messenger LOI [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Messenger_LOI.wms",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource("messenger_loi_sweden.wms")
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Messenger LOI [Sweden]",
+  Version = "1.0",
+  Description = [[Mercury LOI layer for Mercury globe. This map is hosted on the OpenSpace
+    server in Sweden]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Mercury/Messenger/Global/Mercury_MESSENGER_MDIS_Basemap_LOI_Mosaic_Global_166m",
+  License = "NASA/PDS"
+}
+

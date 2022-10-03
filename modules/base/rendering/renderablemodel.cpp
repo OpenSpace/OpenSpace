@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,14 +45,14 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableModel";
-    constexpr const char* ProgramName = "ModelProgram";
+    constexpr std::string_view _loggerCat = "RenderableModel";
+    constexpr std::string_view ProgramName = "ModelProgram";
 
-    constexpr const int DefaultBlending = 0;
-    constexpr const int AdditiveBlending = 1;
-    constexpr const int PointsAndLinesBlending = 2;
-    constexpr const int PolygonBlending = 3;
-    constexpr const int ColorAddingBlending = 4;
+    constexpr int DefaultBlending = 0;
+    constexpr int AdditiveBlending = 1;
+    constexpr int PointsAndLinesBlending = 2;
+    constexpr int PolygonBlending = 3;
+    constexpr int ColorAddingBlending = 4;
 
     std::map<std::string, int> BlendingMapping = {
         { "Default", DefaultBlending },
@@ -68,7 +68,7 @@ namespace {
         "Enable or disable the animation for the model if it has any"
     };
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
@@ -78,39 +78,39 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "A multiplier for ambient lighting."
+        "A multiplier for ambient lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse Intensity",
-        "A multiplier for diffuse lighting."
+        "A multiplier for diffuse lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular Intensity",
-        "A multiplier for specular lighting."
+        "A multiplier for specular lighting"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform Shading",
         "This value determines whether this model should be shaded by using the position "
-        "of the Sun."
+        "of the Sun"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFaceCullingInfo = {
         "DisableFaceCulling",
         "Disable Face Culling",
-        "Disable OpenGL automatic face culling optimization."
+        "Disable OpenGL automatic face culling optimization"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
-        "all other transformations are applied."
+        "all other transformations are applied"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
@@ -122,26 +122,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light Sources",
-        "A list of light sources that this model should accept light from."
+        "A list of light sources that this model should accept light from"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableDepthTestInfo = {
         "DisableDepthTest",
         "Disable Depth Test",
-        "Disable Depth Testing for the Model."
+        "Disable Depth Testing for the Model"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
         "Changes the blending function used to calculate the colors of the model with "
-        "respect to the opacity."
+        "respect to the opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
         "EnableOpacityBlending",
         "Enable Opacity Blending",
-        "Enable Opacity Blending."
+        "Enable Opacity Blending"
     };
 
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
@@ -150,7 +150,7 @@ namespace {
         // the Renderable.
         std::filesystem::path geometryFile;
 
-        enum class ScaleUnit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
             Nanometer,
             Micrometer,
             Millimeter,
@@ -189,7 +189,7 @@ namespace {
         // In format 'YYYY MM DD hh:mm:ss'.
         std::optional<std::string> animationStartTime [[codegen::datetime()]];
 
-        enum class AnimationTimeUnit {
+        enum class [[codegen::map(openspace::TimeUnit)]] AnimationTimeUnit {
             Nanosecond,
             Microsecond,
             Millisecond,
@@ -318,56 +318,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
             Parameters::ScaleUnit scaleUnit =
                 std::get<Parameters::ScaleUnit>(*p.modelScale);
-            DistanceUnit distanceUnit;
-
-            switch (scaleUnit) {
-                case Parameters::ScaleUnit::Nanometer:
-                    distanceUnit = DistanceUnit::Nanometer;
-                    break;
-                case Parameters::ScaleUnit::Micrometer:
-                    distanceUnit = DistanceUnit::Micrometer;
-                    break;
-                case Parameters::ScaleUnit::Millimeter:
-                    distanceUnit = DistanceUnit::Millimeter;
-                    break;
-                case Parameters::ScaleUnit::Centimeter:
-                    distanceUnit = DistanceUnit::Centimeter;
-                    break;
-                case Parameters::ScaleUnit::Decimeter:
-                    distanceUnit = DistanceUnit::Decimeter;
-                    break;
-                case Parameters::ScaleUnit::Meter:
-                    distanceUnit = DistanceUnit::Meter;
-                    break;
-                case Parameters::ScaleUnit::Kilometer:
-                    distanceUnit = DistanceUnit::Kilometer;
-                    break;
-
-                // Weird units
-                case Parameters::ScaleUnit::Thou:
-                    distanceUnit = DistanceUnit::Thou;
-                    break;
-                case Parameters::ScaleUnit::Inch:
-                    distanceUnit = DistanceUnit::Inch;
-                    break;
-                case Parameters::ScaleUnit::Foot:
-                    distanceUnit = DistanceUnit::Foot;
-                    break;
-                case Parameters::ScaleUnit::Yard:
-                    distanceUnit = DistanceUnit::Yard;
-                    break;
-                case Parameters::ScaleUnit::Chain:
-                    distanceUnit = DistanceUnit::Chain;
-                    break;
-                case Parameters::ScaleUnit::Furlong:
-                    distanceUnit = DistanceUnit::Furlong;
-                    break;
-                case Parameters::ScaleUnit::Mile:
-                    distanceUnit = DistanceUnit::Mile;
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
+            DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
             _modelScale = toMeter(distanceUnit);
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
@@ -409,30 +360,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         else if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
         }
-        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(*p.animationTimeScale)) {
+        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(
+                    *p.animationTimeScale)
+                )
+        {
             Parameters::AnimationTimeUnit animationTimeUnit =
                 std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
-            TimeUnit timeUnit;
-
-            switch (animationTimeUnit) {
-                case Parameters::AnimationTimeUnit::Nanosecond:
-                    timeUnit = TimeUnit::Nanosecond;
-                    break;
-                case Parameters::AnimationTimeUnit::Microsecond:
-                    timeUnit = TimeUnit::Microsecond;
-                    break;
-                case Parameters::AnimationTimeUnit::Millisecond:
-                    timeUnit = TimeUnit::Millisecond;
-                    break;
-                case Parameters::AnimationTimeUnit::Second:
-                    timeUnit = TimeUnit::Second;
-                    break;
-                case Parameters::AnimationTimeUnit::Minute:
-                    timeUnit = TimeUnit::Minute;
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
+            TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
 
             _geometry->setTimeScale(static_cast<float>(
                 convertTime(1.0, timeUnit, TimeUnit::Second))
@@ -575,7 +509,7 @@ void RenderableModel::initialize() {
 void RenderableModel::initializeGL() {
     ZoneScoped
 
-    std::string program = ProgramName;
+    std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
         program += "|vs=" + _vertexShaderPath;
     }
@@ -594,7 +528,7 @@ void RenderableModel::initializeGL() {
                 absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
                 std::filesystem::path(_fragmentShaderPath);
 
-            return global::renderEngine->buildRenderProgram(ProgramName, vs, fs);
+            return global::renderEngine->buildRenderProgram(program, vs, fs);
         }
     );
     // We don't really know what kind of shader the user provides us with, so we can't
@@ -613,7 +547,7 @@ void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
 
-    std::string program = ProgramName;
+    std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
         program += "|vs=" + _vertexShaderPath;
     }
@@ -645,17 +579,14 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     if (distanceToCamera < maxDistance) {
         _program->activate();
 
-        _program->setUniform(_uniformCache.opacity, _opacity);
+        _program->setUniform(_uniformCache.opacity, opacity());
 
         // Model transform and view transform needs to be in double precision
         const glm::dmat4 modelTransform =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
             glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-            glm::scale(
-                glm::dmat4(_modelTransform.value()),
-                glm::dvec3(_modelScale) // Model scale unit
-            );
+            glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
         const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
             modelTransform;
 
@@ -758,6 +689,8 @@ void RenderableModel::update(const UpdateData& data) {
     setBoundingSphere(_geometry->boundingRadius() * _modelScale *
         glm::compMax(data.modelTransform.scale)
     );
+    // Set Interaction sphere size to be 10% of the bounding sphere
+    setInteractionSphere(_boundingSphere * 0.1);
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;

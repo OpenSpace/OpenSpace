@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,31 +40,32 @@
 #include <filesystem>
 
 namespace {
-    constexpr const char* _loggerCat = "WebBrowser";
+    constexpr std::string_view _loggerCat = "WebBrowser";
 
     #ifdef _MSC_VER
-        constexpr const char* SubprocessPath = "OpenSpace Helper.exe";
-    #elif __APPLE__
-        constexpr const char* SubprocessPath =
-            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
+        constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
+    #elif defined(__APPLE__)
+        constexpr std::string_view SubprocessPath =
+            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace_Helper";
     #else
-        constexpr const char* SubprocessPath = "";
+        constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
     #endif
 
     constexpr openspace::properties::Property::PropertyInfo
-    UpdateBrowserBetweenRenderablesInfo = {
+        UpdateBrowserBetweenRenderablesInfo =
+    {
         "UpdateBrowserBetweenRenderables",
         "Update Browser Between Renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs "
-        "once per frame."
+        "once per frame"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser Update Interval",
         "The time in microseconds between running the message loop of the browser. "
-        "Only used if UpdateBrowserBetweenRenderables is true."
+        "Only used if UpdateBrowserBetweenRenderables is true"
     };
 } // namespace
 
@@ -140,14 +141,9 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         _enabled = dictionary.value<bool>("Enabled");
     }
 
-    const bool isMaster = global::windowDelegate->isMaster();
-    if (!_enabled || (!isMaster)) {
-        return;
-    }
-
     LDEBUG(fmt::format("CEF using web helper executable: {}", _webHelperLocation));
     _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
-    LDEBUG("Starting CEF... done!");
+    LDEBUG("Starting CEF... done");
 
     if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
         _updateBrowserBetweenRenderables =
@@ -163,7 +159,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _eventHandler->initialize();
 
     // register ScreenSpaceBrowser
-    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }

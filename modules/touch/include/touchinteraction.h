@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,7 +56,7 @@ public:
     double averageFrameTime() const;
 
 private:
-    static const int TotalSamples = 10;
+    static constexpr int TotalSamples = 10;
     int _nSamples = 0;
     double _samples[TotalSamples];
     int _index = 0;

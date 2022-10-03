@@ -1,0 +1,90 @@
+-- Allowed values for the third parameter of bindJoystickAxis:
+-- "None"
+-- "Orbit X"
+-- "Orbit Y"
+-- "Zoom" -- both in and out
+-- "Zoom In"
+-- "Zoom Out"
+-- "LocalRoll X"
+-- "LocalRoll Y"
+-- "GlobalRoll X"
+-- "GlobalRoll Y"
+-- "Pan X"
+-- "Pan Y"
+-- Fourth parameter determines whether the axis should be inverted
+-- Fifth parameter determines whether the axis behaves like a joystick or a Trigger.
+--       Allowed values are "JoystickLike" and "TriggerLike", the first one is the default
+-- Sixth parameters determins if the axis should be "Sticky" or not.
+--       The axis values can either go back to 0 when the joystick is released or it can
+--       stay at the value it was before the joystick was released.
+--       The latter is called a sticky axis, when the values don't go back to 0.
+-- Seventh parameter is the sensitivity for the axis
+
+
+-- Parameters for bindJoystickAxisProperty:
+-- First - Name of the joystick that should be bound
+-- Second - Which axis should be bound of this joystick
+-- Third - The property uri
+-- Fourth - (optional) The smallest value that you want to allow this property on the joystick
+-- Fifth - (optional) The largest value that you want to allow this property on the joystick
+-- Sixth - (optional) Determines whether the axis should be inverted
+-- Seventh - (optional) Should this property change be sent to other connected remote sessions
+
+local XBoxController = {
+  LeftThumbStick = { 0 , 1 },
+  RightThumbStick = { 2, 3 },
+  LeftTrigger = 4,
+  RightTrigger = 5,
+  A = 0,
+  B = 1,
+  X = 2,
+  Y = 3,
+  LB = 4,
+  RB = 5,
+  Select = 6,
+  Start = 7,
+  LeftStickButton = 8,
+  RightStickButton = 9,
+  DPad = {
+    Up = 10,
+    Right = 11,
+    Down = 12,
+    Left = 13
+  }
+}
+
+local freezeValue = function(name, axis, min, max)
+  return [[
+  local joystickType = openspace.navigation.joystickAxis("]] .. name .. [[", ]] .. axis .. [[);
+  local isPropertyBound = true;
+  if joystickType == "None" then
+    isPropertyBound = false;
+  else
+    isPropertyBound = true;
+  end
+
+  if isPropertyBound then
+    openspace.navigation.bindJoystickAxis("]] .. name .. [[", ]] .. axis .. [[, "None");
+    isPropertyBound = false;
+  else
+    openspace.navigation.bindJoystickAxisProperty("]] .. name .. [[", ]] .. axis .. [[, "Scene.Earth.Scale.Scale", ]] .. min ..", " .. max.. [[);
+    isPropertyBound = true;
+  end
+  ]]
+end
+
+asset.onInitialize(function()
+  local controller = XBoxController;
+  local name = "Xbox Controller";
+
+  -- Bind Right trigger to Earth Scale
+  openspace.navigation.bindJoystickAxisProperty(name, controller.RightTrigger, "Scene.Earth.Scale.Scale", 0.1, 100);
+
+  -- Bind 'A' button to freeze current value
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.A,
+    freezeValue(name, controller.RightTrigger, 0.1, 100),
+    "Freeze current scale for Earth. Or release it to the trigger again."
+  )
+end)
