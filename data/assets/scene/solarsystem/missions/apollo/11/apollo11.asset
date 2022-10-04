@@ -26,34 +26,6 @@ local lem_model = asset.syncedResource({
 local apolloSpiceId = -911
 local apolloLemSpiceId = -911500
 
-local landingPosition = { 0.673950, 23.473093 }
-
--- A "handle" that can be used for navigation and such
-local Handle = {
-  Identifier = "Apollo11-landing-Handle",
-  Parent = moon_transforms.Moon.Identifier,
-  Transform = {
-    Translation = {
-      Type = "GlobeTranslation",
-      Globe = moon_transforms.Moon.Identifier,
-      Latitude = landingPosition[1],
-      Longitude = landingPosition[2],
-      Altitude = -1925,
-      UseHeightmap = false
-    },
-    Rotation = {
-      Type = "GlobeRotation",
-      Globe = moon_transforms.Moon.Identifier,
-      Latitude = landingPosition[1],
-      Longitude = landingPosition[2]
-    }
-  },
-  GUI = {
-    Name = "Apollo 11 landing site Handle",
-    Path = "/Solar System/Missions/Apollo/11"
-  }
-}
-
 local Apollo11Position = {
   Identifier = "Apollo11Position",
   Parent = moon_transforms.Moon.Identifier,
@@ -272,8 +244,7 @@ local nodes = {
   Apollo11LemDescentModel,
   Apollo11LemLandedModel,
   Apollo11MoonTrail,
-  Apollo11LemTrail,
-  Handle
+  Apollo11LemTrail
 }
 
 asset.onInitialize(function()

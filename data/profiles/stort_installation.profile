@@ -41,6 +41,7 @@
     "installationspecific/others/mars_moons/deimos",
     "installationspecific/others/mars_moons/phobos",
     "installationspecific/others/olympus_mons_node",
+    "installationspecific/extra_scenegraphnodes",
     "installationspecific/stort_state_machine",
     "installationspecific/screenspace_renderables",
     "installationspecific/substates/missions/cassini/trail",
@@ -162,6 +163,16 @@
       "name": "Scene.ImageConstellation*.Renderable.Opacity",
       "type": "setPropertyValue",
       "value": "0.0"
+    },
+    {
+      "name": "Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_LiU.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
     },
     {
       "name": "Scene.Mars.Renderable.Layers.ColorLayers.Themis_IR_Day_Sweden.Enabled",

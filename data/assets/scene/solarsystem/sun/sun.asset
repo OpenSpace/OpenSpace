@@ -20,32 +20,6 @@ local Sun = {
   }
 }
 
--- A "handle" that can be used for navigation and such
-local Handle = {
-  Identifier = "Sun-Handle",
-  Parent = Sun.Identifier,
-  Transform = {
-    Translation = {
-      Type = "GlobeTranslation",
-      Globe = Sun.Identifier,
-      Latitude = 90.0,
-      Longitude = 0.0,
-      Altitude = 1000,
-      UseHeightmap = false
-    },
-    Rotation = {
-      Type = "GlobeRotation",
-      Globe = Sun.Identifier,
-      Latitude = 90.0,
-      Longitude = 0.0
-    }
-  },
-  GUI = {
-    Name = "Sun Handle",
-    Path = "/Solar System/Sun"
-  }
-}
-
 local SunLabel = {
   Identifier = "SunLabel",
   Parent = Sun.Identifier,
@@ -81,11 +55,9 @@ local LightSource = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Sun)
   openspace.addSceneGraphNode(SunLabel)
-  openspace.addSceneGraphNode(Handle)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Handle)
   openspace.removeSceneGraphNode(SunLabel)
   openspace.removeSceneGraphNode(Sun)
 end)
