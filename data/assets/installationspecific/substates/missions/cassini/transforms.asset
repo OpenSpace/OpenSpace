@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  *************************************************************************************]]--
 
-local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local saturnTransforms = asset.require('scene/solarsystem/planets/saturn/transforms')
 local kernels = asset.require('./kernels')
@@ -145,9 +144,30 @@ local Huygens = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  CassiniSSB,
-  CassiniSAT,
-  CassiniROT,
-  Huygens
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CassiniSSB)
+  openspace.addSceneGraphNode(CassiniSAT)
+  openspace.addSceneGraphNode(CassiniROT)
+  openspace.addSceneGraphNode(Huygens)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Huygens)
+  openspace.removeSceneGraphNode(CassiniROT)
+  openspace.removeSceneGraphNode(CassiniSAT)
+  openspace.removeSceneGraphNode(CassiniSSB)
+end)
+
+asset.export(CassiniSSB)
+asset.export(CassiniSAT)
+asset.export(CassiniROT)
+asset.export(Huygens)
+
+asset.meta = {
+  Name = "Cassini Mission Transforms",
+  Version = "1.0",
+  Description = "", -- TODO
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,10 +1,9 @@
-local assetHelper = asset.require('util/asset_helper')
 local mars = asset.require('scene/solarsystem/planets/mars/mars')
 
 local lat = 18.65
 local long = 226.2
 
-local olympusMonsPosition = {
+local OlympusMonsPosition = {
   Identifier = "OlympusMonsPosition",
   Parent = mars.Mars.Identifier,
   Transform = {
@@ -27,13 +26,22 @@ local olympusMonsPosition = {
   }
 }
 
-asset.meta = {
-    Name = "Olympus Mons Position",
-    Version = "1.0",
-    Description = "A node on the surface of Mars, in the position of Olympus Mons",
-    Author = "",
-    URL = "",
-    License = ""
-}
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OlympusMonsPosition)
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { olympusMonsPosition })
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OlympusMonsPosition)
+end)
+
+asset.export(OlympusMonsPosition)
+
+
+asset.meta = {
+  Name = "Olympus Mons Position",
+  Version = "1.0",
+  Description = "A node on the surface of Mars, in the position of Olympus Mons",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

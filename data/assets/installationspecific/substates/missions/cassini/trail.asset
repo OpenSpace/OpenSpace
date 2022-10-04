@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  *************************************************************************************]]--
 
-local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local saturnTransforms = asset.require('scene/solarsystem/planets/saturn/transforms')
 local kernels = asset.require('./kernels')
@@ -400,16 +399,54 @@ local huygensTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  earthVenus,
-  venusVenus,
-  venusEarth,
-  earthJupiter,
-  jupiterSaturn,
-  saturnEnd,
-  primaryMission,
-  equinoxMission,
-  solsticeMission,
-  grandFinale,
-  huygensTrail,
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(earthVenus)
+  openspace.addSceneGraphNode(venusVenus)
+  openspace.addSceneGraphNode(venusEarth)
+  openspace.addSceneGraphNode(earthJupiter)
+  openspace.addSceneGraphNode(jupiterSaturn)
+  openspace.addSceneGraphNode(saturnEnd)
+  openspace.addSceneGraphNode(primaryMission)
+  openspace.addSceneGraphNode(equinoxMission)
+  openspace.addSceneGraphNode(solsticeMission)
+  openspace.addSceneGraphNode(grandFinale)
+  openspace.addSceneGraphNode(huygensTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(huygensTrail)
+  openspace.removeSceneGraphNode(grandFinale)
+  openspace.removeSceneGraphNode(solsticeMission)
+  openspace.removeSceneGraphNode(equinoxMission)
+  openspace.removeSceneGraphNode(primaryMission)
+  openspace.removeSceneGraphNode(saturnEnd)
+  openspace.removeSceneGraphNode(jupiterSaturn)
+  openspace.removeSceneGraphNode(earthJupiter)
+  openspace.removeSceneGraphNode(venusEarth)
+  openspace.removeSceneGraphNode(venusVenus)
+  openspace.removeSceneGraphNode(earthVenus)
+end)
+
+asset.export(earthVenus)
+asset.export(venusVenus)
+asset.export(venusEarth)
+asset.export(earthJupiter)
+asset.export(jupiterSaturn)
+asset.export(saturnEnd)
+asset.export(primaryMission)
+asset.export(equinoxMission)
+asset.export(solsticeMission)
+asset.export(grandFinale)
+asset.export(huygensTrail)
+
+
+asset.meta = {
+  Name = "Cassini Mission Trails",
+  Version = "1.0",
+  Description = [[Includes trails for the different phases of the Cassini missions, 
+    and for the Huygens lander
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -22,8 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  *************************************************************************************]]--
 
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sun = asset.require('scene/solarsystem/sun/sun')
 local transforms = asset.require('./transforms')
 
 local model = asset.syncedResource({
@@ -60,8 +59,9 @@ local Cassini_SSB = {
     Type = "RenderableModel",
     Body = "CASSINI",
     GeometryFile = model .. "/Cassini.glb",
-    LightSources =
-      assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+    LightSources = {
+      sun.LightSource
+    }
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -85,8 +85,9 @@ local Cassini_ROT = {
     Type = "RenderableModel",
     Body = "CASSINI_ROT",
     GeometryFile = model .. "/Cassini.glb",
-    LightSources =
-      assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+    LightSources = {
+      sun.LightSource
+    }
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -121,8 +122,9 @@ local Cassini_SAT = {
     Type = "RenderableModel",
     Body = "CASSINI",
     GeometryFile = model .. "/Cassini.glb",
-    LightSources =
-      assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+    LightSources = {
+      sun.LightSource
+    }
   },
   TimeFrame = {
     Type = "TimeFrameUnion",
@@ -147,8 +149,28 @@ local Cassini_SAT = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { 
-  Cassini_SSB,
-  Cassini_ROT,
-  Cassini_SAT
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Cassini_SSB)
+  openspace.addSceneGraphNode(Cassini_ROT)
+  openspace.addSceneGraphNode(Cassini_SAT)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Cassini_SAT)
+  openspace.removeSceneGraphNode(Cassini_ROT)
+  openspace.removeSceneGraphNode(Cassini_SSB)
+end)
+
+asset.export(Cassini_SSB)
+asset.export(Cassini_ROT)
+asset.export(Cassini_SAT)
+
+
+asset.meta = {
+  Name = "Cassini Models",
+  Version = "1.0",
+  Description = "", -- TODO
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

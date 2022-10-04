@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local mars = asset.require('scene/solarsystem/planets/mars/mars')
 
 local globeIdentifier = mars.Mars.Identifier
@@ -83,4 +82,28 @@ local RoverPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Path, Handle, RoverPosition })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Path)
+  openspace.addSceneGraphNode(Handle)
+  openspace.addSceneGraphNode(RoverPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RoverPosition)
+  openspace.removeSceneGraphNode(Handle)
+  openspace.removeSceneGraphNode(Path)
+end)
+
+asset.export(Path)
+asset.export(Handle)
+asset.export(RoverPosition)
+
+
+asset.meta = {
+  Name = "Curiosity Rover Path",
+  Version = "1.0",
+  Description = "Renderables used to show the traversal path of the Curiosity rover",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

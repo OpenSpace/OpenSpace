@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local mars = asset.require('scene/solarsystem/planets/mars/mars')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
@@ -200,11 +199,40 @@ local PerseveranceModel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { 
-  Handle,
-  Path,
-  LandingPosition,
-  PerseveranceModel,
-  RoverPosition,
-  IngenuityPosition
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Handle)
+  openspace.addSceneGraphNode(Path)
+  openspace.addSceneGraphNode(LandingPosition)
+  openspace.addSceneGraphNode(PerseveranceModel)
+  openspace.addSceneGraphNode(RoverPosition)
+  openspace.addSceneGraphNode(IngenuityPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IngenuityPosition)
+  openspace.removeSceneGraphNode(RoverPosition)
+  openspace.removeSceneGraphNode(PerseveranceModel)
+  openspace.removeSceneGraphNode(LandingPosition)
+  openspace.removeSceneGraphNode(Path)
+  openspace.removeSceneGraphNode(Handle)
+end)
+
+asset.export(Handle)
+asset.export(Path)
+asset.export(LandingPosition)
+asset.export(PerseveranceModel)
+asset.export(RoverPosition)
+asset.export(IngenuityPosition)
+
+
+asset.meta = {
+  Name = "Perseverance Rover & Ingenuity",
+  Version = "1.0",
+  Description = [[
+    Renderables used to show the traversal path of the Perseverance rover and the 
+    position of the helicopter Ingenuity. Also includes the Perseverance rover model.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
