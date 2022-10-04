@@ -311,10 +311,9 @@ void FfmpegTileProvider::reset() {
     if (_videoFile.empty()) {
         return;
     }
-
-    // TODO: This should probalby be repolaced with a call to internal
-    // initialize when that is fixed
     _tileIsReady = false;
+    internalDeinitialize();
+    internalInitialize();
 }
 
 
@@ -411,15 +410,15 @@ void FfmpegTileProvider::internalInitialize() {
 FfmpegTileProvider::~FfmpegTileProvider() {
     // TODO: Check so internalDeinitialize is called after the last
     // update function and move code there
+
+}
+
+void FfmpegTileProvider::internalDeinitialize() {
     avformat_close_input(&_formatContext);
     av_free(_avFrame);
     av_free(_glFrame);
     av_free(_packet);
     avformat_free_context(_formatContext);
-}
-
-void FfmpegTileProvider::internalDeinitialize() {
-
 }
 
 } // namespace openspace::globebrowsing
