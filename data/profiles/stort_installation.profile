@@ -38,8 +38,6 @@
   ],
   "assets": [
     "base",
-    "installationspecific/others/mars_moons/deimos",
-    "installationspecific/others/mars_moons/phobos",
     "installationspecific/others/olympus_mons_node",
     "installationspecific/extra_scenegraphnodes",
     "installationspecific/stort_state_machine",
@@ -134,16 +132,6 @@
     "version": "1.0"
   },
   "properties": [
-    {
-      "name": "Scene.Phobos.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
-      "name": "Scene.Deimos.Renderable.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
     {
       "name": "Scene.Constellations.Renderable.Enabled",
       "type": "setPropertyValueSingle",
