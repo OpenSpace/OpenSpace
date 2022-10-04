@@ -22,26 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#define __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
 
-layout(location = 0) in vec3 in_position;
+#include <openspace/properties/propertyowner.h>
 
-out float vs_depthClipSpace;
-out vec4 vs_positionViewSpace;
+#include <modules/space/speckloader.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
+#include <ghoul/glm.h>
+#include <filesystem>
 
-uniform dmat4 modelViewTransform;
-uniform dmat4 MVPTransform;
+namespace ghoul::fontrendering { class Font; }
 
+namespace openspace {
+struct RenderData;
 
-void main() {
-  dvec4 objPosDouble = dvec4(in_position, 1.0);
-  dvec4 positionViewSpace = modelViewTransform * objPosDouble;
-  dvec4 positionClipSpace = MVPTransform * objPosDouble;
+namespace documentation { struct Documentation; }
 
-  positionClipSpace.z = 0.0;
+class LabelsComponent : public properties::PropertyOwner {
+public:
+    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+    ~LabelsComponent() override = default;
 
-  vs_depthClipSpace = float(positionClipSpace.w);
-  vs_positionViewSpace = vec4(positionViewSpace);
+    speck::Labelset& labelSet();
+    const speck::Labelset& labelSet() const;
 
-  gl_Position = vec4(positionClipSpace);
-}
+    void initialize();
+
+    void loadLabels();
+
+    bool isReady() const;
+
+    void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+        float fadeInVariable = 1.f);
+
+    static documentation::Documentation Documentation();
+
+private:
+    std::filesystem::path _labelFile;
+    DistanceUnit _unit = DistanceUnit::Parsec;
+    speck::Labelset _labelset;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
+
+    // Properties
+    properties::FloatProperty _opacity;
+    properties::Vec3Property _color;
+    properties::FloatProperty _size;
+    properties::FloatProperty _fontSize;
+    properties::IVec2Property _minMaxSize;
+    properties::BoolProperty _faceCamera;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__

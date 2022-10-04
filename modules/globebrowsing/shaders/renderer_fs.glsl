@@ -55,6 +55,7 @@ uniform vec3 lightDirectionCameraSpace;
 
 #if PERFORM_SHADING
 uniform float orenNayarRoughness;
+uniform float ambientIntensity;
 #endif // PERFORM_SHADING
 
 #if SHADOW_MAPPING_ENABLED
@@ -205,7 +206,8 @@ Fragment getFragment() {
     normal,
     lightDirectionCameraSpace,
     normalize(positionCameraSpace),
-    orenNayarRoughness
+    orenNayarRoughness,
+    ambientIntensity
   );
 #endif // PERFORM_SHADING
 

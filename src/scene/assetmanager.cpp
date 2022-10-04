@@ -489,10 +489,14 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
 
             Asset* thisAsset = ghoul::lua::userData<Asset>(L, 1);
-            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::localResourceLua");
+            ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::localResourceLua");
 
-            std::string name = ghoul::lua::value<std::string>(L);
-            std::filesystem::path path = thisAsset->path().parent_path() / name;
+            auto [name] = ghoul::lua::values<std::optional<std::string>>(L);
+            std::filesystem::path path =
+                name.has_value() ?
+                thisAsset->path().parent_path() / *name :
+                thisAsset->path().parent_path();
+
             ghoul::lua::push(L, path);
             return 1;
         },
@@ -514,7 +518,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
             std::unique_ptr<ResourceSynchronization> s =
                 ResourceSynchronization::createFromDictionary(d);
-            
+
             std::string uid = d.value<std::string>("Type") + "/" + s->generateUid();
             SyncItem* syncItem = nullptr;
             auto it = manager->_synchronizations.find(uid);

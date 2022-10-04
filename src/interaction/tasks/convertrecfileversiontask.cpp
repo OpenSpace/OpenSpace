@@ -52,11 +52,6 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
     _inFilename = dictionary.value<std::string>(KeyInFilePath);
     _inFilePath = absPath(_inFilename);
 
-    std::string::size_type idx = _inFilename.find_last_of('/');
-    if (idx != std::string::npos) {
-        _inFilename = _inFilename.substr(idx + 1);
-    }
-
     ghoul_assert(std::filesystem::is_regular_file(_inFilePath), "The file must exist");
     if (!std::filesystem::is_regular_file(_inFilePath)) {
         LERROR(fmt::format("Failed to load session recording file: {}", _inFilePath));
@@ -100,7 +95,7 @@ void ConvertRecFileVersionTask::convert() {
         ));
         return;
     }
-    sessRec->convertFile(_inFilename);
+    sessRec->convertFileRelativePath(_inFilename);
 }
 
 documentation::Documentation ConvertRecFileVersionTask::documentation() {

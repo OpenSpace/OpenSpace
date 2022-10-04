@@ -131,7 +131,7 @@ local JWSTLabel = {
     End = endTime
   },
   Renderable = {
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "JWST",
     FontSize = 50,
     Size = 6.5,

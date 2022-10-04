@@ -37,7 +37,6 @@ set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
 set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
@@ -164,7 +163,6 @@ if (UNIX)
 endif ()
 
 add_subdirectory(ext)
-
 add_subdirectory(src)
 
 add_subdirectory(support/coding/codegen)

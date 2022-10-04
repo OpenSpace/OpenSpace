@@ -10,14 +10,17 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "galclust.label",
+      Color = { 1.0, 0.44, 0.0 },
+      Size = 22,
+      MinMaxSize = { 8, 20 },
+      Unit = "Mpc"
+    },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "galclust.label",
     Unit = "Mpc",
-    TextColor = { 1.0, 0.44, 0.0 },
     DrawLabels = true,
-    TextSize = 22,
-    TextMinMaxSize = { 8, 20 },
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
@@ -39,11 +42,11 @@ local object = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 

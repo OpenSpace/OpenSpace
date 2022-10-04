@@ -25,13 +25,13 @@
 #ifndef __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__
 #define __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__
 
-#include <modules/base/rendering/renderablelabels.h>
+#include <modules/base/rendering/renderablelabel.h>
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderableDistanceLabel : public RenderableLabels {
+class RenderableDistanceLabel : public RenderableLabel {
 public:
      RenderableDistanceLabel(const ghoul::Dictionary& dictionary);
 

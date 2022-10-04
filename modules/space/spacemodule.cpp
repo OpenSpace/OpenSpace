@@ -24,6 +24,7 @@
 
 #include <modules/space/spacemodule.h>
 
+#include <modules/space/labelscomponent.h>
 #include <modules/space/rendering/renderableconstellationbounds.h>
 #include <modules/space/rendering/renderableconstellationlines.h>
 #include <modules/space/rendering/renderablefluxnodes.h>
@@ -128,6 +129,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
+        LabelsComponent::Documentation(),
         GPTranslation::Documentation()
     };
 }

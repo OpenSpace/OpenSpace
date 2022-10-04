@@ -376,9 +376,9 @@ vec4 calculateNight(vec4 currentColor, vec2 uv, vec3 levelWeights,
 
 vec4 calculateShadedColor(vec4 currentColor, vec3 ellipsoidNormalCameraSpace,
                           vec3 lightDirectionCameraSpace, vec3 viewDirectionCameraSpace,
-                          float roughness)
+                          float roughness, float ambientIntensity)
 {
-  vec3 shadedColor = currentColor.rgb * 0.05;
+  vec3 shadedColor = currentColor.rgb * ambientIntensity;
 
   vec3 n = normalize(ellipsoidNormalCameraSpace);
 
