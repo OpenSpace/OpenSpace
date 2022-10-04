@@ -57,6 +57,7 @@ namespace openspace::globebrowsing {
 
 namespace openspace::globebrowsing {
 
+// If you add a new type, also add it to shaders/texturetilemapping.glsl
 enum class Type {
     DefaultTileProvider = 0,
     SingleImageTileProvider,
