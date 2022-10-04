@@ -901,8 +901,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Render pass 2
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        // Screen-space quad should not be discarded due to depth test
-        glDisable(GL_DEPTH_TEST);
+        // Screen-space quad should not be discarded due to depth test,
+        // but we still want to be able to write to the depth buffer -> GL_ALWAYS
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_ALWAYS);
 
         _screenShader->activate();
 
