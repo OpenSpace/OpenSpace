@@ -248,9 +248,89 @@
       "value": "false"
     },
     {
+      "name": "Scene.Neptune.Renderable.Layers.ColorLayers.Texture.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
       "name": "Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma",
       "type": "setPropertyValueSingle",
       "value": "0.5"
+    },
+    {
+      "name": "{planet_solarSystem}.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.3"
+    },
+    {
+      "name": "Scene.Mercury.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.4"
+    },
+    {
+      "name": "Scene.Venus.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.5"
+    },
+    {
+      "name": "Scene.Earth.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.05"
+    },
+    {
+      "name": "Scene.Mars.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.5"
+    },
+    {
+      "name": "Scene.Jupiter.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.13"
+    },
+    {
+      "name": "Scene.Saturn.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.05"
+    },
+    {
+      "name": "Scene.Pluto.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.15"
+    },
+    {
+      "name": "{moon_solarSystem}.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.3"
+    },
+    {
+      "name": "Scene.Moon.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.3"
+    },
+    {
+      "name": "Scene.Phobos.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.1"
+    },
+    {
+      "name": "Scene.Deimos.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.1"
+    },
+    {
+      "name": "Scene.Io.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.2"
+    },
+    {
+      "name": "Scene.Titan.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.25"
+    },
+    {
+      "name": "Scene.Charon.Renderable.AmbientIntensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.25"
     }
   ],
   "time": {
