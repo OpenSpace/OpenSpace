@@ -128,8 +128,8 @@ local flyLinearlyToNode = function(node, distance)
     openspace.pathnavigation.createPath({
       TargetType = 'Node', 
       Target = ']] .. node ..[[', 
-      Height = ']] .. tostring(distance or nil) .. [[', 
-      PathType = 1 -- linear
+      Height = ]] .. tostring(distance or nil) .. [[, 
+      PathType = "Linear"
     })
   ]]
 end
@@ -137,13 +137,13 @@ end
 local setCurveType = function(type)
   local typeAsInt = 0
   if (type == "ZoomOutOverview") then
-    typeAsInt = 2
+    typeAsInt = 1
   elseif (type == "AvoidCollision") then
     typeAsInt = 0
   elseif (type == "AvoidCollisionWithLookAt") then
     typeAsInt = 3
   elseif (type == "Linear") then
-    typeAsInt = 1
+    typeAsInt = 2
   end
 
   return [[

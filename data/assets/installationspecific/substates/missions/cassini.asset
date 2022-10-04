@@ -29,9 +29,7 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-10days.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', true)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(orbitInsertionDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(orbitInsertionDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(864000)" .. -- 10 days per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
@@ -51,9 +49,7 @@ local cassiniScripts = [[
   -- Zoom in after orbital insertion
   openspace.scriptScheduler.loadScheduledScript(
     "2004-11-01T00:00:00.000", -- 5 months after
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(primaryDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)"
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(primaryDistance) .. [[)"
   )
 
   -- Focus on Saturn again
@@ -69,9 +65,7 @@ local cassiniScripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2008-08-09T00:00:00.000",
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-dagjamningsuppdraget.png' .. [[')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(equinoxDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(equinoxDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(864000)" .. -- 10 days per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
@@ -84,9 +78,7 @@ local cassiniScripts = [[
     "2010-11-24T00:00:00.000",
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-solstandsuppdraget.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-15days.png' .. [[')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(solsticeDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(solsticeDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(1314871)" .. -- 15 days per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
@@ -108,9 +100,7 @@ local cassiniScripts = [[
     "2017-04-16T00:00:00.000", -- 10 day pre delay
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-storafinalen.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-2days.png' .. [[')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(grandFinaleDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(grandFinaleDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(172800)" .. -- 2 Days  per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
@@ -195,9 +185,7 @@ local huygensScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(approachDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(approachDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
@@ -209,9 +197,7 @@ local huygensScripts = [[
     "2005-01-14 06:41:40.000", -- 30 min pre delay
     "openspace.time.interpolateDeltaTime(600)" .. -- 10 min per second
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-10min.png' .. [[')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(landingDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(landingDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..

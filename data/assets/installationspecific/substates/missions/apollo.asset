@@ -25,9 +25,7 @@ local apollo8Scripts = [[
   -- Zoom out a little
   openspace.scriptScheduler.loadScheduledScript(
     "1968-12-21T12:54:51",
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(launchOverviewDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)"
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(launchOverviewDistance) .. [[)"
   )
 
   -- Focus on Apollo 8 again
@@ -49,9 +47,7 @@ local apollo8Scripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "1968-12-21T13:06:51",
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-30min.png' .. [[')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(earthOverviewDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(earthOverviewDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(1800)" .. -- 30 min per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
@@ -64,9 +60,7 @@ local apollo8Scripts = [[
     "1968-12-21T17:20:51",
     "openspace.time.interpolateDeltaTime(10800)" .. -- 3 hours per second
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-3hours.png' .. [[')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(apollo8OverviewDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)"
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(apollo8OverviewDistance) .. [[)"
   )
 
   -- Half way to moon
@@ -81,9 +75,7 @@ local apollo8Scripts = [[
   -- At Moon
   openspace.scriptScheduler.loadScheduledScript(
     "1968-12-24T01:51:51",
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(moonOverviewDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(moonOverviewDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-1hour.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
@@ -95,9 +87,7 @@ local apollo8Scripts = [[
   -- Leaving Moon
   openspace.scriptScheduler.loadScheduledScript(
     "1968-12-25T09:51:51",
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(apollo8OverviewDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(apollo8OverviewDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(10800)" .. -- 3 hours per second
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-3hours.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
@@ -120,9 +110,7 @@ local apollo8Scripts = [[
   -- Landing
   openspace.scriptScheduler.loadScheduledScript(
     "1968-12-27T12:51:51",
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(earthOverviewDistance) .. [[)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.pathnavigation.zoomToDistance(]] .. tostring(earthOverviewDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(1800)" .. -- 30 min per second
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-30min.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..

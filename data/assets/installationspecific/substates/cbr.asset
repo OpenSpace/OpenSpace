@@ -27,7 +27,7 @@ local earthDistance = 20000000
 
 local flyToEarth = [[
   openspace.time.setPause(true);
-  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  ]] .. util.setCurveType("Linear") .. [[ 
   openspace.pathnavigation.flyToHeight(
     "Earth",
     ]] .. tostring(earthDistance) .. [[
