@@ -34,39 +34,6 @@ namespace {
 
 namespace openspace {
 
-// returns seconds between two datasets. If 0 or 1 file in list 0.0 is returned.
-double calculateCadence(std::vector<std::pair<std::string, std::string>>& list) {
-    // alternative 1: assums cadence between data files are the same,
-    // or that its a sample and doesn't matter to much
-        //if (list.size() < 2) {
-        //    //if 0 or 1 files there is no cadence
-        //    return 0.0;
-        //}
-        //else {
-        //    std::string firstTime = list[0].first;
-        //    std::string secondTime = list[1].first;
-
-        //    double time1 = Time::convertTime(firstTime);
-        //    double time2 = Time::convertTime(secondTime);
-        //    return time2 - time1;
-        //}
-
-    // alternative 2, avarage
-    double averageTime = 0.0;
-    if (list.size() < 2) {
-        //if 0 or 1 files there is no cadence
-        return averageTime;
-    }
-
-    double time1 = Time::convertTime(list.begin()->first);
-    double timeN = Time::convertTime(list.rbegin()->first);
-    averageTime = (timeN - time1) / list.size();
-    return averageTime;
-
-    // alternative 3, dynamic
-    // TODO: would be alternative 3 which if nessesary dynamic cadence,
-    // to keep track exactely the right time between every two data files
-}
 std::string formulateDataHttpRequest(double minTime, double maxTime,
                                                        std::pair<int, std::string> dataID,
                                                                 const std::string baseURL)
@@ -445,9 +412,12 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
     //
 
 }
+void DynamicDownloaderManager::clearDownloaded() {
+    _downloadedFiles.clear();
+}
 
 //reference or no reference? return path to where they are instead?
-std::vector<std::filesystem::path>&
+const std::vector<std::filesystem::path>&
 DynamicDownloaderManager::downloadedFiles()
 {
     return _downloadedFiles;

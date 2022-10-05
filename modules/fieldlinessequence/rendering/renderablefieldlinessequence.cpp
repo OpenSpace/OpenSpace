@@ -1073,6 +1073,14 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     }
 }
 
+void updateStaticLoading() {
+
+}
+
+void updateDynamicLoading() {
+
+}
+
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
@@ -1091,7 +1099,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         //     *_dynamicdownloaderManager, "DynamicDownloaderManager must excist"
         // );
         _dynamicdownloaderManager->update(currentTime, deltaTime);
-        std::vector<std::filesystem::path>& filesToRead =
+        const std::vector<std::filesystem::path>& filesToRead =
             _dynamicdownloaderManager->downloadedFiles();
         bool needsSorting = false;
         for (auto file : filesToRead) {
@@ -1100,12 +1108,16 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         }
         // if all files are moved into _sourceFiles then we can
         // empty the DynamicDownloaderManager _downloadedFiles;
-        filesToRead.clear();
+        _dynamicdownloaderManager->clearDownloaded();
 
         if (needsSorting) {
             // if this is to slow, some sort of insert instead of push_back above, is needed
             std::sort(_sourceFiles.begin(), _sourceFiles.end());
         }
+    }
+    //if using static loading at startup:
+    else {
+
     }
     //TODO: if dynamic downloading -> guarantee a startTime at [0]?
     const bool isInInterval = (currentTime >= _startTimes[0]) &&

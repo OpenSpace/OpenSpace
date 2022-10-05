@@ -148,8 +148,9 @@ public:
     //std::pair<std::string, std::string>* closestFileToNow(const double time);
     File& closestFileToNow(const double time);
     void update(const double time, const double deltaTime);
-    std::vector<std::filesystem::path>& downloadedFiles();
+    const std::vector<std::filesystem::path>& downloadedFiles();
     void checkForFinishedDownloads();
+    void clearDownloaded();
 
 private:
 
@@ -159,7 +160,6 @@ private:
     double calculateCadence();
     void prioritizeQueue(const double& time, const double& deltaTime);
 
-    bool _fistFrame = true;
     //int _MaxNumberOfDownloadedFiles = 20;
     //bool _deltaTimeChanged = false;
     bool _forward = true;
