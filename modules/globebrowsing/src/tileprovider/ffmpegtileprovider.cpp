@@ -88,8 +88,6 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
 
     _videoFile = p.file;
     _startTime = p.startTime;
-
-    
 }
 
 Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
@@ -101,7 +99,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
 
     const int wholeRowSize = FinalResolution.x * BytesPerPixel;
     const int tileRowSize = TileSize.x * BytesPerPixel;
-    
+
     // The range of rows of the whole image that this tile needs
     const glm::ivec2 rowRange = glm::ivec2(
         TileSize.y * tileIndex.y,
@@ -124,40 +122,37 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         destination += tileRowSize;
     }
     // Look for tile in cache. If not found, create it
-    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    cache::ProviderTileKey key = { tileIndex, _codecContext->frame_number };
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
-    Tile ourTile;
-    ghoul::opengl::Texture* writeTexture;
 
     if (tileCache->exist(key)) {
-        ourTile = tileCache->get(key);
-        writeTexture = ourTile.texture;
+        return tileCache->get(key);
     }
-    else {
-        // The data for initializing the texture
-        TileTextureInitData initData(
-            TileSize.x,
-            TileSize.y,
-            GL_UNSIGNED_BYTE,
-            ghoul::opengl::Texture::Format::RGB,
-            TileTextureInitData::PadTiles::No,
-            TileTextureInitData::ShouldAllocateDataOnCPU::No
-        );
 
-        // Create a texture with the initialization data
-        writeTexture = tileCache->texture(initData);
-        ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
-        tileCache->put(key, initData.hashKey, ourTile);
-    }
-    // Update the pixel data for this tile
+    // The data for initializing the texture
+    TileTextureInitData initData(
+        TileSize.x,
+        TileSize.y,
+        GL_UNSIGNED_BYTE,
+        ghoul::opengl::Texture::Format::RGB,
+        TileTextureInitData::PadTiles::No,
+        TileTextureInitData::ShouldAllocateDataOnCPU::No
+    );
+
+    // Create a texture with the initialization data
+    ghoul::opengl::Texture* writeTexture = tileCache->texture(initData);
+
+    // Update the pixel data for this texture
     writeTexture->setPixelData(
         _tilePixels,
         ghoul::opengl::Texture::TakeOwnership::No
     );
+    writeTexture->uploadTexture();
 
     // Bind the texture to the tile
-    writeTexture->uploadTexture();
+    Tile ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
+    tileCache->put(key, initData.hashKey, ourTile);
 
     return ourTile;
 }
@@ -195,7 +190,7 @@ void FfmpegTileProvider::update() {
         diff > _frameTime;
 
     if(!hasNewFrame) {
-        return; 
+        return;
     }
     _tileIsReady = false;
 
@@ -251,7 +246,7 @@ void FfmpegTileProvider::update() {
         _frameTime = std::chrono::milliseconds(msPerFrame);
     }
     _lastFrameTime = now;
-    
+
     // TODO: Need to check the format of the video and decide what formats we want to
     // support and how they relate to the GL formats
 
@@ -263,7 +258,7 @@ void FfmpegTileProvider::update() {
         _conversionContext = sws_getContext(
             _codecContext->width,
             _codecContext->height,
-            _codecContext->pix_fmt, 
+            _codecContext->pix_fmt,
             FinalResolution.x,
             FinalResolution.y,
             AV_PIX_FMT_RGB24,
