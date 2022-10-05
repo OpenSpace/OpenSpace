@@ -97,6 +97,16 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         return Tile{nullptr, std::nullopt, Tile::Status::Unavailable };
     }
 
+    // Look for tile in cache
+    cache::ProviderTileKey key = { tileIndex, _codecContext->frame_number };
+    cache::MemoryAwareTileCache* tileCache =
+        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
+
+    if (tileCache->exist(key)) {
+        return tileCache->get(key);
+    }
+
+    // If tile not found in cache then create it
     const int wholeRowSize = FinalResolution.x * BytesPerPixel;
     const int tileRowSize = TileSize.x * BytesPerPixel;
 
@@ -106,8 +116,19 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         TileSize.y * (tileIndex.y + 1)
     );
 
+    // Map PBO
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, BytesPerTile, nullptr, GL_STREAM_DRAW);
+    _tilePixels = reinterpret_cast<GLubyte*>(
+        glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
+    );
+    if (!_tilePixels) {
+        LERROR("Failed to map PBO");
+        return Tile{ nullptr, std::nullopt, Tile::Status::IOError };
+    }
+
     // Copy every row inside the part of the texture we want for the tile
-    GLubyte* destination = &_tilePixels[0];
+    GLubyte* destination = _tilePixels;
     GLubyte* source = &_glFrame->data[0][0];
     // Traverse backwards so texture is placed correctly
     for (int row = rowRange.y - 1; row > rowRange.x; --row) {
@@ -121,14 +142,8 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         // Advance the destination pointer
         destination += tileRowSize;
     }
-    // Look for tile in cache. If not found, create it
-    cache::ProviderTileKey key = { tileIndex, _codecContext->frame_number };
-    cache::MemoryAwareTileCache* tileCache =
-        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
-
-    if (tileCache->exist(key)) {
-        return tileCache->get(key);
-    }
+    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     // The data for initializing the texture
     TileTextureInitData initData(
@@ -143,12 +158,8 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     // Create a texture with the initialization data
     ghoul::opengl::Texture* writeTexture = tileCache->texture(initData);
 
-    // Update the pixel data for this texture
-    writeTexture->setPixelData(
-        _tilePixels,
-        ghoul::opengl::Texture::TakeOwnership::No
-    );
-    writeTexture->uploadTexture();
+    // Upload texture to GPU using the PBO (this will be async and faster)
+    writeTexture->reUploadTextureFromPBO(_pbo);
 
     // Bind the texture to the tile
     Tile ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
@@ -400,6 +411,9 @@ void FfmpegTileProvider::internalInitialize() {
     // Update times
     _lastFrameTime = std::chrono::system_clock::now();
     _isInitialized = true;
+
+    // Create PBO for async texture upload
+    glGenBuffers(1, &_pbo);
 }
 
 FfmpegTileProvider::~FfmpegTileProvider() {

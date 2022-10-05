@@ -81,7 +81,8 @@ private:
     AVStream* _videoStream = nullptr;
     AVPacket* _packet = nullptr;
 
-    GLubyte _tilePixels[BytesPerTile] = { 0 };
+    GLubyte* _tilePixels = nullptr;
+    GLuint _pbo = 0;
 
     void internalInitialize() override final;
     void internalDeinitialize() override final;
