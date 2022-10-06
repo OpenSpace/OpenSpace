@@ -498,7 +498,6 @@ void PathNavigator::findRelevantNodes() {
     _relevantNodes = resultingNodes;
 }
 
-
 SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
     constexpr float LengthEpsilon = 1e-5f;
     const std::vector<SceneGraphNode*>& relNodes =
