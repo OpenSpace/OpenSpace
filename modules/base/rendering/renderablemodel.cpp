@@ -606,16 +606,6 @@ void RenderableModel::initializeGL() {
         (void*)(2 * sizeof(GLfloat))
     );
 
-
-    createFramebuffers();
-
-    _geometry->initialize();
-    _geometry->calculateBoundingRadius();
-}
-
-void RenderableModel::createFramebuffers() {
-    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
-
     // Generate textures and the frame buffer
     glGenTextures(1, &_colorTexture);
     glGenTextures(1, &_positionTexture);
@@ -623,93 +613,11 @@ void RenderableModel::createFramebuffers() {
     glGenTextures(1, &_depthTexture);
     glGenFramebuffers(1, &_framebuffer);
 
-    // Create the textures
-    // Color
-    glBindTexture(GL_TEXTURE_2D, _colorTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        static_cast<GLsizei>(resolution.x),
-        static_cast<GLsizei>(resolution.y),
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _colorTexture, -1, "RenderableModel Color");
-    }
+    // Create Textures
+    _resolution = global::windowDelegate->currentDrawBufferResolution();
+    updateResolution();
 
-
-    // Position
-    glBindTexture(GL_TEXTURE_2D, _positionTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        static_cast<GLsizei>(resolution.x),
-        static_cast<GLsizei>(resolution.y),
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _positionTexture, -1, "RenderableModel Position");
-    }
-
-    // Normal
-    glBindTexture(GL_TEXTURE_2D, _normalTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        static_cast<GLsizei>(resolution.x),
-        static_cast<GLsizei>(resolution.y),
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _normalTexture, -1, "RenderableModel Normal");
-    }
-
-    // Depth
-    glBindTexture(GL_TEXTURE_2D, _depthTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_DEPTH_COMPONENT32F,
-        static_cast<GLsizei>(resolution.x),
-        static_cast<GLsizei>(resolution.y),
-        0,
-        GL_DEPTH_COMPONENT,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _depthTexture, -1, "RenderableModel Depth");
-    }
-
-    // Create buffers
+    // Bind textures to the framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     glFramebufferTexture(
         GL_FRAMEBUFFER,
@@ -742,10 +650,104 @@ void RenderableModel::createFramebuffers() {
 
     // Check status
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status  != GL_FRAMEBUFFER_COMPLETE) {
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Framebuffer is not complete!");
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Initialize geometry
+    _geometry->initialize();
+    _geometry->calculateBoundingRadius();
+}
+
+void RenderableModel::updateResolution() {
+    ZoneScoped
+
+    // Create the textures
+    // Color
+    glBindTexture(GL_TEXTURE_2D, _colorTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        static_cast<GLsizei>(_resolution.x),
+        static_cast<GLsizei>(_resolution.y),
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _colorTexture, -1, "RenderableModel Color");
+    }
+
+
+    // Position
+    glBindTexture(GL_TEXTURE_2D, _positionTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        static_cast<GLsizei>(_resolution.x),
+        static_cast<GLsizei>(_resolution.y),
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _positionTexture, -1, "RenderableModel Position");
+    }
+
+    // Normal
+    glBindTexture(GL_TEXTURE_2D, _normalTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        static_cast<GLsizei>(_resolution.x),
+        static_cast<GLsizei>(_resolution.y),
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _normalTexture, -1, "RenderableModel Normal");
+    }
+
+    // Depth
+    glBindTexture(GL_TEXTURE_2D, _depthTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        static_cast<GLsizei>(_resolution.x),
+        static_cast<GLsizei>(_resolution.y),
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _depthTexture, -1, "RenderableModel Depth");
+    }
 }
 
 void RenderableModel::deinitializeGL() {
@@ -973,6 +975,12 @@ void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    }
+
+    glm::ivec2 resolution = global::windowDelegate->currentDrawBufferResolution();
+    if (resolution != _resolution) {
+        _resolution = resolution;
+        updateResolution();
     }
 
     setBoundingSphere(_geometry->boundingRadius() * _modelScale *

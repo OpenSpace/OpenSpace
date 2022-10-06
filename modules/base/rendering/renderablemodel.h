@@ -118,7 +118,7 @@ private:
 
     properties::PropertyOwner _lightSourcePropertyOwner;
 
-    // Frame buffer stuff
+    // Framebuffer and its textures
     GLuint _framebuffer;
     GLuint _colorTexture;
     GLuint _depthTexture;
@@ -126,7 +126,8 @@ private:
     GLuint _normalTexture;
     GLuint _quadVao;
     GLuint _quadVbo;
-    void createFramebuffers();
+    glm::ivec2 _resolution = glm::ivec2(0);
+    void updateResolution();
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;
 
     UniformCache(opacity, opacityBlending, colorTexture, depthTexture, positionTexture,
