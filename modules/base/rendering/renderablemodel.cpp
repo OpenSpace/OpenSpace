@@ -506,7 +506,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableModel::isReady() const {
-    return _program && _screenShader;
+    return _program && _quadProgram;
 }
 
 void RenderableModel::initialize() {
@@ -559,7 +559,7 @@ void RenderableModel::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    _screenShader = BaseModule::ProgramObjectManager.request(
+    _quadProgram = BaseModule::ProgramObjectManager.request(
         "ModelOpacityProgram",
         [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             std::filesystem::path vs =
@@ -571,7 +571,7 @@ void RenderableModel::initializeGL() {
         }
     );
     ghoul::opengl::updateUniformLocations(
-        *_screenShader,
+        *_quadProgram,
         _uniformOpacityCache,
         UniformOpacityNames
     );
@@ -774,8 +774,16 @@ void RenderableModel::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
+
+    BaseModule::ProgramObjectManager.release(
+        "ModelOpacityProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+
     _program = nullptr;
-    _screenShader = nullptr;
+    _quadProgram = nullptr;
     ghoul::opengl::FramebufferObject::deactivate();
 }
 
@@ -794,8 +802,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     if (distanceToCamera < maxDistance) {
         _program->activate();
-
-
 
         // Model transform and view transform needs to be in double precision
         const glm::dmat4 modelTransform =
@@ -853,7 +859,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
         _program->setUniform(_uniformCache.performShading, _performShading);
 
-
         if (_disableFaceCulling) {
             glDisable(GL_CULL_FACE);
         }
@@ -881,7 +886,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             glDisable(GL_DEPTH_TEST);
         }
 
-        // Frame buffer stuff
+        // Prepare framebuffer
         GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
         glDrawBuffers(4, ColorAttachmentArray);
@@ -889,11 +894,17 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
         // Render Pass 1
+        // Render all parts of the model into the new framebuffer without opacity
         bool isTransparent = false;
-        if (_renderBin != Renderable::RenderBin::Opaque) {
+        const float o = opacity();
+        if (o >= 0.f && o < 1.f) {
             isTransparent = true;
-            _renderBin = Renderable::RenderBin::Opaque;
+            setRenderBin(Renderable::RenderBin::Overlay);
         }
+        else {
+            setRenderBin(Renderable::RenderBin::Opaque);
+        }
+
         _geometry->render(*_program);
         if (_disableFaceCulling) {
             glEnable(GL_CULL_FACE);
@@ -905,21 +916,19 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         }
 
         // Render pass 2
-        if (isTransparent) {
-            isTransparent = true;
-            _renderBin = Renderable::RenderBin::PostDeferredTransparent;
-        }
-
+        // Render the whole model into the G-buffer with the correct opacity
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+
+
         // Screen-space quad should not be discarded due to depth test,
         // but we still want to be able to write to the depth buffer -> GL_ALWAYS
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_ALWAYS);
 
-        _screenShader->activate();
+        _quadProgram->activate();
 
-        _screenShader->setUniform(_uniformOpacityCache.opacity, opacity());
-        _screenShader->setUniform(
+        _quadProgram->setUniform(_uniformOpacityCache.opacity, opacity());
+        _quadProgram->setUniform(
             _uniformOpacityCache.opacityBlending,
             _enableOpacityBlending
         );
@@ -928,12 +937,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         ghoul::opengl::TextureUnit colorTextureUnit;
         colorTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _colorTexture);
-        _screenShader->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
+        _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
 
         ghoul::opengl::TextureUnit positionTextureUnit;
         positionTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _positionTexture);
-        _screenShader->setUniform(
+        _quadProgram->setUniform(
            _uniformOpacityCache.positionTexture,
             positionTextureUnit
         );
@@ -941,19 +950,19 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         ghoul::opengl::TextureUnit normalTextureUnit;
         normalTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _normalTexture);
-        _screenShader->setUniform(_uniformOpacityCache.normalTexture, normalTextureUnit);
+        _quadProgram->setUniform(_uniformOpacityCache.normalTexture, normalTextureUnit);
 
         ghoul::opengl::TextureUnit depthTextureUnit;
         depthTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _depthTexture);
-        _screenShader->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
+        _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 
         // Draw
         glBindVertexArray(_quadVao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        _screenShader->deactivate();
+        _quadProgram->deactivate();
 
-        // End
+        // Reset
         global::renderEngine->openglStateCache().resetBlendState();
         global::renderEngine->openglStateCache().resetDepthState();
         glActiveTexture(GL_TEXTURE0);

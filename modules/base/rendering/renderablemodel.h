@@ -127,7 +127,7 @@ private:
     GLuint _quadVao;
     GLuint _quadVbo;
     void createFramebuffers();
-    ghoul::opengl::ProgramObject* _screenShader = nullptr;
+    ghoul::opengl::ProgramObject* _quadProgram = nullptr;
 
     UniformCache(opacity, opacityBlending, colorTexture, depthTexture, positionTexture,
         normalTexture) _uniformOpacityCache;
