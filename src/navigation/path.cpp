@@ -36,7 +36,6 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/collisionhelper.h>
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
@@ -440,50 +439,14 @@ Waypoint waypointFromCamera() {
     return Waypoint{ pos, rot, node };
 }
 
-SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
-    const std::vector<SceneGraphNode*>& relevantNodes =
-        global::navigationHandler->pathNavigator().relevantNodes();
-
-    for (SceneGraphNode* n : relevantNodes) {
-        bool isSame = (n->identifier() == node->identifier());
-        // If the nodes are in the very same position, they are probably representing
-        // the same object
-        isSame |=
-            glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
-
-        if (isSame) {
-            continue;
-        }
-
-        constexpr float proximityRadiusFactor = 3.f;
-
-        const float bs = static_cast<float>(n->boundingSphere());
-        const float proximityRadius = proximityRadiusFactor * bs;
-        const glm::dvec3 posInModelCoords =
-            glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
-
-        bool isClose = collision::isPointInsideSphere(
-            posInModelCoords,
-            glm::dvec3(0.0, 0.0, 0.0),
-            proximityRadius
-        );
-
-        if (isClose) {
-            return n;
-        }
-    }
-
-    return nullptr;
-}
-
 // Compute a target position close to the specified target node, using knowledge of
 // the start point and a desired distance from the node's center
 glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
                                     const Waypoint& startPoint)
 {
     const glm::dvec3 nodePos = targetNode->worldPosition();
-    const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
     const SceneGraphNode* sun = sceneGraphNode(SunIdentifier);
+    const SceneGraphNode* closeNode = PathNavigator::findNodeNearTarget(targetNode);
 
     // @TODO (2021-07-09, emmbr): Not nice to depend on a specific scene graph node,
     // as it might not exist. Ideally, each SGN could know about their preferred
