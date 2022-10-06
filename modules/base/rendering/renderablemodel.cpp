@@ -889,6 +889,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
         // Render Pass 1
+        bool isTransparent = false;
+        if (_renderBin != Renderable::RenderBin::Opaque) {
+            isTransparent = true;
+            _renderBin = Renderable::RenderBin::Opaque;
+        }
         _geometry->render(*_program);
         if (_disableFaceCulling) {
             glEnable(GL_CULL_FACE);
@@ -900,6 +905,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         }
 
         // Render pass 2
+        if (isTransparent) {
+            isTransparent = true;
+            _renderBin = Renderable::RenderBin::PostDeferredTransparent;
+        }
+
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
         // Screen-space quad should not be discarded due to depth test,
         // but we still want to be able to write to the depth buffer -> GL_ALWAYS
