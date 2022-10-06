@@ -72,6 +72,7 @@ public:
     void abortPath();
     void pausePath();
     void continuePath();
+    void skipToEnd();
 
     Path::Type defaultPathType() const;
     double minValidBoundingSphere() const;
@@ -80,10 +81,10 @@ public:
     const std::vector<SceneGraphNode*>& relevantNodes();
 
     /**
-     * Find a node close to the given node. Closeness is determined by a factor times 
-     * the bounding sphere of the object
-     * \return pointer to the SGN if one was found, nullptr otherwise
-     */
+    * Find a node close to the given node. Closeness is determined by a factor times
+    * the bounding sphere of the object
+    * \return pointer to the SGN if one was found, nullptr otherwise
+    */
     static SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
 
     /**
@@ -105,6 +106,8 @@ private:
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;
     bool _startSimulationTimeOnFinish = false;
+
+    bool _setCameraToEndNextFrame = false;
 
     properties::OptionProperty _defaultPathType;
     properties::BoolProperty _includeRoll;

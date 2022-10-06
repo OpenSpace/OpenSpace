@@ -215,6 +215,18 @@ void PathNavigator::updateCamera(double deltaTime) {
         return;
     }
 
+    if (_setCameraToEndNextFrame) {
+        LDEBUG("Skipped to end of camera path");
+        camera()->setPose(_currentPath->endPoint().pose());
+        global::navigationHandler->orbitalNavigator().setFocusNode(
+            _currentPath->endPoint().nodeIdentifier(),
+            false
+        );
+        handlePathEnd();
+        _setCameraToEndNextFrame = false;
+        return;
+    }
+
     // Prevent long delta times due to e.g. computations from other actions to cause
     // really big jumps in the motion along the path
     // OBS! Causes problems if the general FPS is lower than 10, but then the user should
@@ -242,19 +254,6 @@ void PathNavigator::updateCamera(double deltaTime) {
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached target");
         handlePathEnd();
-
-        if (_applyIdleBehaviorOnFinish) {
-            constexpr const char ApplyIdleBehaviorScript[] =
-                "openspace.setPropertyValueSingle("
-                    "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
-                    "true"
-                ");";
-
-            global::scriptEngine->queueScript(
-                ApplyIdleBehaviorScript,
-                openspace::scripting::ScriptEngine::RemoteScripting::Yes
-            );
-        }
         return;
     }
 }
@@ -369,6 +368,14 @@ void PathNavigator::continuePath() {
     _isPlaying = true;
 }
 
+void PathNavigator::skipToEnd() {
+    if (!openspace::global::navigationHandler->pathNavigator().isPlayingPath()) {
+        LWARNING("No camera path is currently active");
+    }
+
+    _setCameraToEndNextFrame = true;
+}
+
 Path::Type PathNavigator::defaultPathType() const {
     return static_cast<Path::Type>(_defaultPathType.value());
 }
@@ -431,15 +438,25 @@ const std::vector<SceneGraphNode*>& PathNavigator::relevantNodes() {
 
 void PathNavigator::handlePathEnd() {
     _isPlaying = false;
+    global::openSpaceEngine->resetMode();
 
     if (_startSimulationTimeOnFinish) {
         openspace::global::scriptEngine->queueScript(
             "openspace.time.setPause(false)",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
+        _startSimulationTimeOnFinish = false;
     }
-    _startSimulationTimeOnFinish = false;
-    global::openSpaceEngine->resetMode();
+
+    if (_applyIdleBehaviorOnFinish) {
+        global::scriptEngine->queueScript(
+            "openspace.setPropertyValueSingle("
+                "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
+                "true"
+            ");",
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
 }
 
 void PathNavigator::findRelevantNodes() {
@@ -483,7 +500,7 @@ void PathNavigator::findRelevantNodes() {
 
 SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
     constexpr float LengthEpsilon = 1e-5f;
-    const std::vector<SceneGraphNode*>& relNodes = 
+    const std::vector<SceneGraphNode*>& relNodes =
         global::navigationHandler->pathNavigator().relevantNodes();
 
     for (SceneGraphNode* n : relNodes) {
@@ -542,6 +559,7 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             codegen::lua::ContinuePath,
             codegen::lua::PausePath,
             codegen::lua::StopPath,
+            codegen::lua::SkipToEnd,
             codegen::lua::FlyTo,
             codegen::lua::FlyToHeight,
             codegen::lua::FlyToNavigationState,

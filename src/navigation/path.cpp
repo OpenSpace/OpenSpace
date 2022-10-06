@@ -36,7 +36,6 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/collisionhelper.h>
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
