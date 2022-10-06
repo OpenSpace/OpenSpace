@@ -35,6 +35,7 @@
 #endif // _MSC_VER
 
 #include <ccmc/Kameleon.h>
+#include <ccmc/FileReader.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

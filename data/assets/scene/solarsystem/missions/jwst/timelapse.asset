@@ -50,13 +50,15 @@ local function createForwardTimelapse()
     -- array complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 0, 0, 30, 42) .. [[",
-      "openspace.time.interpolateDeltaTime(7200)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
+      "openspace.time.interpolateDeltaTime(2400)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 40 minutes/second\")"
     )
 
     -- Make night layer more visible, at around 14:00
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(detachTime, 0, 1, 10, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(7200)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")" ..
       "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 0.7)" ..
       "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", false)"
     )
@@ -280,8 +282,10 @@ local function createBackwardTimelapse()
 
     -- Reset night layer, at around 14:00
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(detachTime, 0, 1, 10, 0) .. [[",
+      advance(detachTime, 0, 1 + 1, 10, 0) .. [[", -- 1h pre delay so time to interpolate
       "",
+      "openspace.time.interpolateDeltaTime(-2400)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -40 minutes/second\")" ..
       "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
       "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)"
     )
@@ -520,6 +524,8 @@ local function createActions()
       openspace.scriptScheduler.clear(0)
       openspace.time.setDeltaTime(1)
       openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
+      openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma", 1.0)
+      openspace.setPropertyValueSingle("Scene.EarthAtmosphere.Renderable.Enabled", true)
       openspace.time.setTime("]] .. detachTime .. [[")
       ]] .. createForwardTimelapse() .. [[
       openspace.time.setDeltaTime(1)

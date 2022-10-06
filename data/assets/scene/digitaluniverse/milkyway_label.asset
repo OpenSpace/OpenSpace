@@ -10,15 +10,18 @@ local homeLabel = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = homespeck .. "home.label",
+      Color = { 0.8, 0.8, 0.8 },
+      Size = 20.50,
+      MinMaxSize = { 16, 20 },
+      Unit = "Mpc"
+    },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
     ScaleFactor = 500.0,
     DrawLabels = true,
-    LabelFile = homespeck .. "home.label",
     Unit = "Mpc",
-    TextColor = { 0.8, 0.8, 0.8 },
-    TextSize = 20.50,
-    TextMinMaxSize = { 16, 20 },
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
@@ -32,18 +35,18 @@ local homeLabel = {
   GUI = {
     Name = "Home Label",
     Path = "/Universe/Galaxies",
-    Description = "Label for the Milky Way titled 'Home', sided for the galactic level",
+    Description = "Label for the Milky Way titled 'Home', sided for the galactic level"
   }
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(homeLabel)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(homeLabel)
 end)
-  
+
 asset.export(homeLabel)
 
 

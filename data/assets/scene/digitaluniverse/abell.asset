@@ -17,16 +17,20 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "abell.label",
+      Opacity = 1.0,
+      Color = { 0.0, 0.8, 0.0 },
+      Size = 22,
+      MinMaxSize = { 10, 12 },
+      Unit = "Mpc"
+    },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,
     --ColorMap = speck .. "abell.cmap",
     File = speck .. "abell.speck",
     Texture = textures .. "point3A.png",
-    LabelFile = speck .. "abell.label",
     Unit = "Mpc",
-    TextColor = { 0.0, 0.8, 0.0 },
-    TextSize = 22,
-    TextMinMaxSize = { 10, 12 },
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,

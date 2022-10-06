@@ -25,6 +25,7 @@
 #include <openspace/util/sphere.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <cstring>
 
 namespace {

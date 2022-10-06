@@ -499,7 +499,7 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file) {
     std::optional<Parameters> current = std::nullopt;
     std::string line;
     while (std::getline(f, line)) {
-        if (line.empty()) {
+        if (line.empty() || line == "\r") {
             continue;
         }
 

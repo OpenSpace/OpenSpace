@@ -1,7 +1,7 @@
 local data = asset.syncedResource({
-  Name = "Constellation Bounds Data",
+  Name = "Constellation Files",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_constellationbounds_data",
+  Identifier = "digitaluniverse_constellations_data",
   Version = 1
 })
 
@@ -16,8 +16,8 @@ local object = {
     Type = "RenderableConstellationBounds",
     Enabled = false,
     File = data .. "bound_20.dat",
-    ConstellationFile = data .. "constellations.dat"
-    -- ConstellationSelection = zodiacs
+    NamesFile = data .. "constellations.dat",
+    -- Selection = zodiacs
   },
   Transform = {
     Rotation = {
@@ -41,18 +41,18 @@ local object = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 
 
 asset.meta = {
   Name = "Constellation Bounds",
-  Version = "1.1",
+  Version = "1.2",
   Description = [[DU asset providing a Spherical mesh dividing the sky into regions that
     fit the constellations]],
   Author = "Brian Abbott (AMNH)",

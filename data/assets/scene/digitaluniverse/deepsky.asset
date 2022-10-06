@@ -17,6 +17,13 @@ local deepSkyPoints = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "dso.label",
+      Color = { 0.1, 0.4, 0.6 },
+      Size = 20.50,
+      MinMaxSize = { 16, 20 },
+      Unit = "pc"
+    },
     Color = { 1.0, 1.0, 0.0 },
     Opacity = 0.99,
     ScaleFactor = 500.0,
@@ -27,11 +34,7 @@ local deepSkyPoints = {
     --ColorOption = { "proximity" },
     --ColorOption = { "prox5Mpc" },
     --ColorRange = { { 1.0, 30.0 } },
-    LabelFile = speck .. "dso.label",
     Unit = "pc",
-    TextColor = { 0.1, 0.4, 0.6 },
-    TextSize = 20.50,
-    TextMinMaxSize = { 16, 20 },
     --FadeInDistances = { 0.05, 1.0 }, -- Fade in value in the same unit as "Unit"
     BillboardMinMaxSize = { 0.0, 8.22 }, -- in pixels
     --CorrectionSizeEndDistance = 22.0,
@@ -94,12 +97,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(deepSkyPoints)
   openspace.addSceneGraphNode(deepSkyImages)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(deepSkyImages)
   openspace.removeSceneGraphNode(deepSkyPoints)
 end)
-  
+
 asset.export(deepSkyPoints)
 asset.export(deepSkyImages)
 

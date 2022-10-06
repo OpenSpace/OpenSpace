@@ -17,17 +17,20 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "h2.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 16.24,
+      MinMaxSize = { 4, 20 },
+      Unit = "pc"
+    },
     Color = { 0.0, 0.5, 1.0 },
     Opacity = 0.70,
     File = speck .. "h2.speck",
     Texture = textures .. "point4.png",
     PolygonSides = 6,
-    LabelFile = speck .. "h2.label",
     Unit = "pc",
-    TextColor = { 0.5, 0.5, 0.5 },
     ScaleFactor = 420,
-    TextSize = 16.24,
-    TextMinMaxSize = { 4, 20 },
     BillboardMinMaxSize = { 0.0, 300.0 },
     EnablePixelSizeControl = false
   },
@@ -44,18 +47,18 @@ local object = {
       Because of this, they are great tracers of the spiral arms of the Galaxy, and
       were instrumental in our understanding of the Galaxy's overall structure
       (Description from URL) <br><br> Data Reference: The WISE catalog of Galactic
-      HII Regions (Anderson+, 2014)]],
+      HII Regions (Anderson+, 2014)]]
   }
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 

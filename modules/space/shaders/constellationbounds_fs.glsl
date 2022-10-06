@@ -28,13 +28,18 @@
 in vec4 vs_position;
 
 uniform vec3 color;
+uniform float opacity;
 
 
 Fragment getFragment() {
-  vec4 position = vs_position;
-    
   Fragment frag;
-  frag.color = vec4(color, 1.0);
+  if (opacity == 0.0) {
+    discard;
+  }
+
+  vec4 position = vs_position;
+
+  frag.color = vec4(color, opacity);
   frag.depth = pscDepth(position);
 
   return frag;

@@ -28,16 +28,9 @@
 #include <modules/touch/include/win32_touch.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/logging/logmanager.h>
-#include <sstream>
-#include <string>
 
 using namespace TUIO;
 

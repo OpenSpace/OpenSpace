@@ -24,7 +24,9 @@
 
 #include <modules/space/spacemodule.h>
 
+#include <modules/space/labelscomponent.h>
 #include <modules/space/rendering/renderableconstellationbounds.h>
+#include <modules/space/rendering/renderableconstellationlines.h>
 #include <modules/space/rendering/renderablefluxnodes.h>
 #include <modules/space/rendering/renderablehabitablezone.h>
 #include <modules/space/rendering/renderableorbitalkepler.h>
@@ -79,6 +81,9 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableConstellationBounds>(
         "RenderableConstellationBounds"
     );
+    fRenderable->registerClass<RenderableConstellationLines>(
+        "RenderableConstellationLines"
+    );
     fRenderable->registerClass<RenderableFluxNodes>("RenderableFluxNodes");
     fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
@@ -115,6 +120,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         HorizonsTranslation::Documentation(),
         KeplerTranslation::Documentation(),
         RenderableConstellationBounds::Documentation(),
+        RenderableConstellationLines::Documentation(),
         RenderableFluxNodes::Documentation(),
         RenderableHabitableZone::Documentation(),
         RenderableRings::Documentation(),
@@ -123,6 +129,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
+        LabelsComponent::Documentation(),
         GPTranslation::Documentation()
     };
 }

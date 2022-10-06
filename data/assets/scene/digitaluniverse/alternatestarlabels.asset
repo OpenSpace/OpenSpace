@@ -10,14 +10,17 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "stars-altlbl.label",
+      Color = { 0.4, 0.4, 0.4 },
+      Size = 14.7,
+      MinMaxSize = { 6, 20 },
+      Unit = "pc"
+    },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "stars-altlbl.label",
     Unit = "pc",
-    TextColor = { 0.4, 0.4, 0.4 },
-    DrawLabels = true,
-    TextSize = 14.7,
-    TextMinMaxSize = { 6, 20 }
+    DrawLabels = true
   },
   GUI = {
     Name = "Stars Labels - Alternate",
@@ -28,7 +31,7 @@ local object = {
     attempts over thousands of years to name all the visible stars have led to two
     main catalogs: Johann Bayer's Catalog from 1603 and John Flamsteed's Catalog
     published in 1725. (Description from URL) <br><br> Data Reference: Various
-    sources]],
+    sources]]
   }
 }
 
@@ -36,11 +39,11 @@ local object = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 

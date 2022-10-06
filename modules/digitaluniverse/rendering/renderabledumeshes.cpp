@@ -255,6 +255,13 @@ bool RenderableDUMeshes::isReady() const {
         (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
 }
 
+void RenderableDUMeshes::initialize() {
+    bool success = loadData();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
+    }
+}
+
 void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         "RenderableDUMeshes",
@@ -268,11 +275,6 @@ void RenderableDUMeshes::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-
-    bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
-    }
 
     createMeshes();
 
@@ -536,8 +538,7 @@ bool RenderableDUMeshes::readSpeckFile() {
 
             std::getline(file, line);
             std::stringstream dim(line);
-            dim >> mesh.numU; // numU
-            dim >> mesh.numV; // numV
+            dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
             for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
@@ -602,7 +603,6 @@ bool RenderableDUMeshes::readSpeckFile() {
             }
         }
     }
-
     setBoundingSphere(maxRadius);
 
     return true;
@@ -636,7 +636,7 @@ void RenderableDUMeshes::createMeshes() {
             // in_position
             glEnableVertexAttribArray(0);
             // (2022-03-23, emmbr) This code was actually never used. We only read three
-            // values per line and di not handle any texture cooridnates, even if there
+            // values per line and did not handle any texture cooridnates, even if there
             // would have been some in the file
             //// U and V may not be given by the user
             //if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
