@@ -48,8 +48,6 @@
 #include <filesystem>
 #include <optional>
 
-#include <iostream>
-
 namespace {
     constexpr std::string_view _loggerCat = "RenderableModel";
     constexpr std::string_view ProgramName = "ModelProgram";
@@ -68,13 +66,10 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr glm::vec4 PosBufferClearVal = { 0.f, 0.f, 0.f, 0.f };
-
-    const GLenum ColorAttachmentArray[4] = {
+    const GLenum ColorAttachmentArray[3] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
        GL_COLOR_ATTACHMENT2,
-       GL_COLOR_ATTACHMENT3
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
@@ -645,7 +640,7 @@ void RenderableModel::initializeGL() {
     );
 
     if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Opacity");
+        glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
     }
 
     // Check status
@@ -684,7 +679,6 @@ void RenderableModel::updateResolution() {
     if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _colorTexture, -1, "RenderableModel Color");
     }
-
 
     // Position
     glBindTexture(GL_TEXTURE_2D, _positionTexture);
@@ -891,16 +885,14 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Prepare framebuffer
         GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-        glDrawBuffers(4, ColorAttachmentArray);
+        glDrawBuffers(3, ColorAttachmentArray);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
+        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.f, 0.f, 0.f, 0.f)));
 
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
-        bool isTransparent = false;
         const float o = opacity();
         if (o >= 0.f && o < 1.f) {
-            isTransparent = true;
             setRenderBin(Renderable::RenderBin::Overlay);
         }
         else {
@@ -920,7 +912,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Render pass 2
         // Render the whole model into the G-buffer with the correct opacity
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-
 
         // Screen-space quad should not be discarded due to depth test,
         // but we still want to be able to write to the depth buffer -> GL_ALWAYS

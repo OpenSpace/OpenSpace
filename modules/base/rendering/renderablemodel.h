@@ -40,7 +40,6 @@
 #include <memory>
 
 namespace ghoul::opengl {
-    class FramebufferObject;
     class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl

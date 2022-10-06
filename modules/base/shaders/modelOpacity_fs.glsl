@@ -44,7 +44,6 @@ Fragment getFragment() {
   }
 
   if (opacityBlending) {
-    // frag.color.a = opacity * (frag.color.r + frag.color.g + frag.color.b)/3.0;
     frag.color.a = opacity * max(max(frag.color.r, frag.color.g), frag.color.b);
   }
   else {
