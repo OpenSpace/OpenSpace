@@ -50,7 +50,7 @@ public:
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
 
-    void setVerticalFovWithScroll(float scroll);
+    double setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
     void setRatio(float ratio);
     void setIdInBrowser() const;

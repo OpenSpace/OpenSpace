@@ -68,6 +68,12 @@ namespace {
         "The thickness of the line of the target. The larger number, the thicker line"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
+        "VerticalFov",
+        "Vertical Field Of View",
+        "The vertical field of view of the target."
+    };
+
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
         // [[codegen::verbatim(crossHairSizeInfo.description)]]
         std::optional<float> crossHairSize;
@@ -77,6 +83,9 @@ namespace {
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(VerticalFovInfo.description)]]
+        std::optional<double> verticalFov;
     };
 
 #include "renderableskytarget_codegen.cpp"
@@ -93,6 +102,7 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)
     , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
     , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
+    , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
     , _borderColor(220, 220, 220)
 {
     // Handle target dimension property
@@ -104,7 +114,12 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
     addProperty(_showRectangleThreshold);
 
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    _verticalFov= p.verticalFov.value_or(_verticalFov);
+    _verticalFov.setReadOnly(true);
+    addProperty(_verticalFov);
 }
 
 void RenderableSkyTarget::bindTexture() {}

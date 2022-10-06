@@ -62,10 +62,9 @@ private:
     properties::FloatProperty _crossHairSize;
     properties::FloatProperty _showRectangleThreshold;
     properties::FloatProperty _lineWidth;
-    
-    double _borderRadius = 0.0;
-    double _verticalFov = 10.0;
+    properties::DoubleProperty _verticalFov;
 
+    double _borderRadius = 0.0;
     glm::ivec3 _borderColor = glm::ivec3(230);
     float _ratio = 1.f;
 };
