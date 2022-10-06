@@ -72,6 +72,7 @@ public:
     void abortPath();
     void pausePath();
     void continuePath();
+    void skipToEnd();
 
     Path::Type defaultPathType() const;
     double minValidBoundingSphere() const;
@@ -98,6 +99,8 @@ private:
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;
     bool _startSimulationTimeOnFinish = false;
+
+    bool _setCameraToEndNextFrame = false;
 
     properties::OptionProperty _defaultPathType;
     properties::BoolProperty _includeRoll;
