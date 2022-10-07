@@ -673,7 +673,7 @@ namespace {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->setBorderRadius(radius);
+        pair->setBorderRadius(std::clamp(radius, 0.0, 1.0));
     }
 }
 
