@@ -326,7 +326,7 @@ void ScreenSpaceSkyBrowser::update() {
         _isInitialized = false;
     }
 
-    if (_radiusIsDirty) {
+    if (_radiusIsDirty && _isInitialized) {
         setBorderRadius(_borderRadius);
         _radiusIsDirty = false;
     }

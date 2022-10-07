@@ -672,7 +672,8 @@ namespace {
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
-    if (pair) {
+    // Make sure the webpage has loaded properly before executing javascript on it
+    if (pair && pair->browser()->isInitialized()) {
         pair->setBorderRadius(std::clamp(radius, 0.0, 1.0));
     }
 }
