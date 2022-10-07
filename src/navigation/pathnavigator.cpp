@@ -217,6 +217,7 @@ void PathNavigator::updateCamera(double deltaTime) {
 
     if (_setCameraToEndNextFrame) {
         LDEBUG("Skipped to end of camera path");
+        _currentPath->quitPath();
         camera()->setPose(_currentPath->endPoint().pose());
         global::navigationHandler->orbitalNavigator().setFocusNode(
             _currentPath->endPoint().nodeIdentifier(),
