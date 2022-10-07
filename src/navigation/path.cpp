@@ -177,6 +177,11 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     return newPose;
 }
 
+void Path::quitPath() {
+    _traveledDistance = pathLength();
+    _shouldQuit = true;
+}
+
 std::string Path::currentAnchor() const {
     bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
     return (pastHalfway) ? _end.nodeIdentifier() : _start.nodeIdentifier();
