@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "Themis_IR_Day_Sweden",
   Name = "Themis IR Day [Sweden]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("themis_ir_day_sweden.wms"),
   BlendMode = "Color",
   Description = [[This mosaic represents the Thermal Emission Imaging System (THEMIS)

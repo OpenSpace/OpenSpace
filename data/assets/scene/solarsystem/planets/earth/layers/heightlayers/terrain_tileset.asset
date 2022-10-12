@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "Terrain_tileset",
   Name = "Terrain tileset",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("terrain_tileset.wms"),
   TilePixelSize = 64,
   Description = [[This globe layer presents elevation data at approximately 90m or 1km

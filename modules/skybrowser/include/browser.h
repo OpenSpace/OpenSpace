@@ -28,8 +28,8 @@
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -64,7 +64,7 @@ public:
     explicit Browser(const ghoul::Dictionary& dictionary);
     virtual ~Browser();
 
-    bool initializeGL();
+    void initializeGL();
     void deinitializeGL();
     bool isReady() const;
 
@@ -72,13 +72,14 @@ public:
     void update();
 
     void updateBrowserSize();
+    void reload();
 
     glm::vec2 browserPixelDimensions() const;
     float browserRatio() const;
     void setCallbackDimensions(const std::function<void(const glm::dvec2&)>& function);
 
 protected:
-    properties::Vec2Property _browserPixeldimensions;
+    properties::Vec2Property _browserDimensions;
     properties::StringProperty _url;
     properties::TriggerProperty _reload;
 

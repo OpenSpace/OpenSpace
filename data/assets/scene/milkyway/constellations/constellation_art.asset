@@ -2,11 +2,47 @@ local constellationsCSV = asset.localResource("constellation_data.csv")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local images = asset.syncedResource({
-    Name = "Constellation Images",
-    Type = "HttpSynchronization",
-    Identifier = "constellation_images",
-    Version = 4
+  Name = "Constellation Images",
+  Type = "HttpSynchronization",
+  Identifier = "constellation_images",
+  Version = 4
 })
+
+local data = asset.syncedResource({
+  Name = "Constellation Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_constellations_data",
+  Version = 1
+})
+
+
+-- Function that returns the full name of a constellation given its abbreviation
+-- The function uses the constellations.dat file to find the name
+-- If the file does not exist or if a match could not be found, it returns nil
+local findFullName = function(abbreviation)
+  local namesFile = data .. "constellations.dat"
+
+  local file = io.open(namesFile, "r")
+  if file ~= nil then
+    io.close(file)
+    for line in io.lines(namesFile) do
+      local index, length = string.find(line, abbreviation)
+
+      if index ~= nil and index < 4 then
+        return string.sub(line, length + 1)
+      end
+
+      local fullLine = line
+      local lowerLine = string.lower(line)
+      index, length = string.find(lowerLine, string.lower(abbreviation))
+      if index ~= nil and index < 4 then
+        return string.sub(fullLine, length + 1)
+      end
+    end
+  end
+  return nil
+end
+
 
 --function that reads the file
 local createConstellations = function (baseIdentifier, guiPath, constellationfile)
@@ -29,6 +65,13 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
       local normx = x/magVec
       local normy = y/magVec
       local normz = z/magVec
+
+      -- Use the full name in the data constellations.dat if possible
+      -- Otherwise, use the given name in the constellation_data.csv file
+      local foundName = findFullName(abbreviation)
+      if foundName ~= nil then
+        name = foundName
+      end
 
       group = (group == "" and globe or group)
 
@@ -172,7 +215,7 @@ end
 
 asset.meta = {
   Name = "Constellation Images",
-  Version = "1.1",
+  Version = "1.2",
   Description = "Artistic images depicting the constellations",
   Author = "James Hedberg",
   URL = "http://jameshedberg.com",

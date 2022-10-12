@@ -17,6 +17,13 @@ local tullyPoints = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = true,
+    Labels = {
+      File = speck .. "tully.label",
+      Color = { 0.7, 0.7, 0.7 },
+      Size = 19.36,
+      MinMaxSize = { 8, 20 },
+      Unit = "Mpc"
+    },
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
     ScaleFactor = 504.0,
@@ -27,12 +34,8 @@ local tullyPoints = {
     --ColorOption = { "proximity" },
     ColorOption = { "prox5Mpc" },
     ColorRange = { { 1.0, 30.0 } },
-    LabelFile = speck .. "tully.label",
     DrawLabels = false,
     Unit = "Mpc",
-    TextColor = { 0.7, 0.7, 0.7 },
-    TextSize = 19.36,
-    TextMinMaxSize = { 8, 20 },
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
@@ -110,12 +113,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(tullyPoints)
   openspace.addSceneGraphNode(tullyImages)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(tullyImages)
   openspace.removeSceneGraphNode(tullyPoints)
 end)
-  
+
 asset.export(tullyPoints)
 asset.export(tullyImages)
 

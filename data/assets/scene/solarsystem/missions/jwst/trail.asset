@@ -28,12 +28,12 @@ local JWSTTrailLaunch = {
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
-			Type = 'SpiceTranslation',
-			Target = 170, -- JWST
-			Observer = 'EARTH',
-			Frame = 'IAU_EARTH',
-			Kernels = { kernels .. "webb.bsp" }
-		},
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 'EARTH',
+      Frame = 'IAU_EARTH',
+      Kernels = { kernels .. "webb.bsp" }
+    },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = launchTime,
     EndTime = detachTime,
@@ -61,12 +61,12 @@ local JWSTTrailCruise = {
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
-			Type = 'SpiceTranslation',
-			Target = 170, -- JWST
-			Observer = 'EARTH',
-			Frame = 'GALACTIC',
-			Kernels = { kernels .. "webb.bsp" }
-		},
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 'EARTH',
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "webb.bsp" }
+    },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = detachTime,
     EndTime = L2orbitInsertionTime,
@@ -83,9 +83,10 @@ local JWSTTrailCruise = {
 
 -- Trail of JWST relative to L2 after first month to reach L2
 -- Gives a better trail history of the orbit around L2 than if it was relative to Earth
+-- This does NOT co-rotate with L2 and gives a saddle look of the trail
 local JWSTTrailOrbit = {
   Identifier = "JWSTTrailOrbit",
-  Parent = transforms.L2.Identifier,
+  Parent = transforms.L2Position.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = L2orbitInsertionTime,
@@ -94,13 +95,13 @@ local JWSTTrailOrbit = {
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
-			Type = 'SpiceTranslation',
-			Target = 170, -- JWST
-			Observer = 392, -- L2
-			Frame = 'GALACTIC',
-			Kernels = { kernels .. "webb.bsp" }
-		},
-    Color = { 0.9, 0.9, 0.0 },
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 392, -- L2
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "webb.bsp" }
+    },
+    Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months
     Resolution = 183 -- About a sample rate of once per day
   },
@@ -109,6 +110,38 @@ local JWSTTrailOrbit = {
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
       James Webb Space Telescope Orbit Trail relative to L2.
+    ]],
+  }
+}
+
+-- Trail of JWST in orbit around L2 that co-revolves with L2 around the Sun
+-- This gives the trail a look of a wheel going along L2 around the Sun
+local JWSTTrailCoRevOrbit = {
+  Identifier = "JWSTTrailCoRevOrbit",
+  Parent = transforms.L2CoRevFrame.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = L2orbitInsertionTime,
+    End = endTime
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 392, -- L2
+      Frame = 'L2_COREV',
+      Kernels = { kernels .. "webb.bsp" }
+    },
+    Color = { 1.0, 0.663, 0.157 },
+    Period = 365.242198, -- About a year, 2 orbits. 1 orbit would be 182.621099 (6 months)
+    Resolution = 365 -- About a sample rate of once per day
+  },
+  GUI = {
+    Name = "JWST L2 Co-revolving Orbit Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Orbit Trail that Co-revolves with L2.
     ]],
   }
 }
@@ -124,12 +157,12 @@ local JWSTSunTrail = {
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
-			Type = 'SpiceTranslation',
-			Target = 170, -- JWST
-			Observer = 'SSB',
-			Frame = 'GALACTIC',
-			Kernels = { kernels .. "webb.bsp" }
-		},
+      Type = 'SpiceTranslation',
+      Target = 170, -- JWST
+      Observer = 'SSB',
+      Frame = 'GALACTIC',
+      Kernels = { kernels .. "webb.bsp" }
+    },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,
     Resolution = 365 -- About a sample rate of once per day
@@ -147,11 +180,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTTrailLaunch)
   openspace.addSceneGraphNode(JWSTTrailCruise)
   openspace.addSceneGraphNode(JWSTTrailOrbit)
+  openspace.addSceneGraphNode(JWSTTrailCoRevOrbit)
   openspace.addSceneGraphNode(JWSTSunTrail)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTSunTrail)
+  openspace.removeSceneGraphNode(JWSTTrailCoRevOrbit)
   openspace.removeSceneGraphNode(JWSTTrailOrbit)
   openspace.removeSceneGraphNode(JWSTTrailCruise)
   openspace.removeSceneGraphNode(JWSTTrailLaunch)
@@ -160,6 +195,7 @@ end)
 asset.export(JWSTTrailLaunch)
 asset.export(JWSTTrailCruise)
 asset.export(JWSTTrailOrbit)
+asset.export(JWSTTrailCoRevOrbit)
 asset.export(JWSTSunTrail)
 
 

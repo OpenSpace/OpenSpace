@@ -26,11 +26,8 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 
 #include <modules/skybrowser/include/browser.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/vector/dvec2property.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/ivec3property.h>
 #include <deque>
 
 namespace openspace {
@@ -38,8 +35,7 @@ namespace openspace {
 class WwtCommunicator : public Browser {
 public:
     explicit WwtCommunicator(const ghoul::Dictionary& dictionary);
-    WwtCommunicator(const WwtCommunicator&) = default;
-    ~WwtCommunicator() override;
+    ~WwtCommunicator() override = default;
 
     void update();
 
@@ -60,11 +56,13 @@ public:
     glm::dvec2 fieldsOfView() const;
     std::vector<int> selectedImages() const;
     std::vector<double> opacities() const;
+    double borderRadius() const;
 
     void setImageCollectionIsLoaded(bool isLoaded);
     void setVerticalFov(double vfov);
     void setEquatorialAim(glm::dvec2 equatorial);
     void setBorderColor(glm::ivec3 color);
+    void setBorderRadius(double radius);
     void setTargetRoll(double roll);
 
     void updateBorderColor() const;
@@ -73,8 +71,10 @@ public:
 protected:
     void setIdInBrowser(const std::string& id) const;
     std::deque<std::pair<int, double>>::iterator findSelectedImage(int i);
-
-    double _verticalFov = 10.0f;
+    
+    properties::DoubleProperty _verticalFov;    
+    
+    double _borderRadius = 0.0;
     glm::ivec3 _borderColor = glm::ivec3(70);
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     double _targetRoll = 0.0;
@@ -82,23 +82,10 @@ protected:
     std::deque<std::pair<int, double>> _selectedImages;
 
 private:
-    void setWebpageBorderColor(glm::ivec3 color) const;
     void sendMessageToWwt(const ghoul::Dictionary& msg) const;
-
-    // WorldWide Telescope messages
-    ghoul::Dictionary moveCameraMessage(const glm::dvec2& celestCoords, double fov,
-        double roll, bool shouldMoveInstantly = true) const;
-    ghoul::Dictionary loadCollectionMessage(const std::string& url) const;
-    ghoul::Dictionary setForegroundMessage(const std::string& name) const;
-    ghoul::Dictionary addImageMessage(const std::string& id,
-        const std::string& url) const;
-    ghoul::Dictionary removeImageMessage(const std::string& id) const;
-    ghoul::Dictionary setImageOpacityMessage(const std::string& id, double opacity) const;
-    ghoul::Dictionary setLayerOrderMessage(const std::string& id, int version);
 
     bool _borderColorIsDirty = false;
     bool _equatorialAimIsDirty = false;
-    int messageCounter = 0;
 
     // Time variables
     // For capping the message passing to WWT

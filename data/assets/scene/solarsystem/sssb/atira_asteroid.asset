@@ -1,16 +1,31 @@
-local sharedSssb = asset.require("./sssb_shared")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, "atira_asteroid",
-  "sssb_data_atira_asteroid")
-local object = sharedSssb.createSssbGroupObject("sssb_data_atira_asteroid.csv",
-  "Atira Asteroids", filepath, { 0.5, 0.8, 1.0 })
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 2
-object.Renderable.TrailFade = 25
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Atira Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_atira_asteroid",
+  Version = 1
+})
 
-object.GUI.Description = [[ Near-Earth-Asteroids whose orbits are contained entirely
-  within the orbit of the Earth. ]]
-
+local object = {
+  Identifier = "sssb_atira_asteroid",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_atira_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 2,
+    Color = { 0.5, 0.8, 1.0 },
+    TrailFade = 25
+  },
+  GUI = {
+    Name = "Atira Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Near-Earth-Asteroids whose orbits are contained entirely within the
+      orbit of the Earth.]]
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)

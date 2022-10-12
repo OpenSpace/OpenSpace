@@ -99,6 +99,25 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
 endif ()
 
+target_precompile_headers(libcef_dll_wrapper PRIVATE
+  [["include/cef_client.h"]]
+  [["include/capi/cef_browser_capi.h"]]
+  [["include/capi/cef_client_capi.h"]]
+  [["include/cef_client.h"]]
+  [["include/capi/cef_base_capi.h"]]
+  [["include/cef_render_handler.h"]]
+  <string>
+  <sstream>
+  <istream>
+  <ostream>
+)
+
+if (WIN32)
+  target_precompile_headers(libcef_dll_wrapper PRIVATE
+    <Windows.h>
+  )
+endif ()
+
 ##########################################################################################
 # Add CEF client files
 
@@ -183,8 +202,8 @@ if (OS_MACOSX)
     endif ()
   endforeach()
 
-  set_property(TARGET ${CEF_HELPER_TARGET_GPU} PROPERTY FOLDER "Helper")
-  set_property(TARGET ${CEF_HELPER_TARGET_RENDERER} PROPERTY FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "Helper")
 else()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
@@ -200,7 +219,7 @@ else()
   endif (OS_WINDOWS)
 endif ()
 
-set_property(TARGET ${CEF_HELPER_TARGET} PROPERTY FOLDER "Helper")
+set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
 
 ##########################################################################################
 # Create OpenSpace module.
@@ -241,9 +260,14 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 
+target_precompile_headers(${webbrowser_module} PRIVATE
+  <include/cef_browser.h>
+  <include/cef_client.h>
+  <include/wrapper/cef_helpers.h>
+)
+
 set_folder_location(libcef_dll_wrapper "Helper")
 set_folder_location(openspace_web_helper "Helper")
-
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()
@@ -268,13 +292,4 @@ if (UNIX AND NOT (${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
     DESTINATION ${CEF_ROOT}/${CMAKE_BUILD_TYPE}/
     FILES_MATCHING PATTERN *
   )
-  endif ()
-
-# Rename to "OpenSpace Helper" after build & link as spaces in targets are not allowed
-# add_custom_command(
-#   TARGET ${CEF_HELPER_TARGET} POST_BUILD
-#   COMMAND ${CMAKE_COMMAND} -E rename
-#     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/${CEF_HELPER_TARGET}"
-#     "$<TARGET_FILE_DIR:${CEF_HELPER_TARGET}>/OpenSpace Helper"
-#   COMMENT "Renaming ${CEF_HELPER_TARGET} to 'OpenSpace Helper'"
-# )
+endif ()

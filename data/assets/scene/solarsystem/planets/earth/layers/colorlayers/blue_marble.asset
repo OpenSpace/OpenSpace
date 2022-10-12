@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Identifier = "Blue_Marble",
   Name = "Blue Marble",
+  Enabled = asset.enabled,
   FilePath = texturesPath .. "earth_bluemarble.jpg",
   Description = "Earth image from Blue Marble Next Generation",
 }

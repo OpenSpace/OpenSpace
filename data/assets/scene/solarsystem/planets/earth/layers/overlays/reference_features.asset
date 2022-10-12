@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "Reference_Features",
   Name = "Reference Features",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("reference_features.wms")
 }
 

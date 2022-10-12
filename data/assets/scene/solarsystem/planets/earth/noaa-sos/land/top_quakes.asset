@@ -30,6 +30,7 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "sos_saras_big_quakes_20110316.png",
   Description = Description
 }

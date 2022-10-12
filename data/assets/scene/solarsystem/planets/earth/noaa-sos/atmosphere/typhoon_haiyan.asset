@@ -23,6 +23,7 @@ local imagesDestination = syncedDirectory .. "images"
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
@@ -37,6 +38,7 @@ local layer = {
 local track = {
   Identifier = Identifier .. "-track",
   Name = Name .. " (Track)",
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "track.png",
   Description = Description
 }

@@ -68,6 +68,7 @@ struct Labelset {
 
     struct Entry {
         glm::vec3 position = glm::vec3(0.f);
+        std::string identifier;
         std::string text;
     };
     std::vector<Entry> entries;

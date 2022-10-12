@@ -74,20 +74,6 @@ endfunction ()
 
 
 
-function (register_external_libraries libraries)
-  # This is an ugly hack as we can't inject a variable into a scope two parents above
-  # would love to: set(${module_external_librarys} "${libraries}" PARENT_PARENT_SCOPE)
-  # instead
-  set(libs "")
-  foreach (library ${libraries})
-    get_filename_component(lib ${library} ABSOLUTE)
-    list(APPEND libs ${lib})
-  endforeach()
-
-  set_property(GLOBAL PROPERTY CurrentModuleExternalLibraries ${libs})
-endfunction ()
-
-
 # Gets and returns the <name>module.h and <name>module.cpp files and provides them with a
 # source group
 function (get_module_files module_name module_files)
@@ -108,9 +94,6 @@ endfunction ()
 function (handle_module_dependencies target_name module_name)
   # We always want to link against Ghoul and the core library
   target_link_libraries(${library_name} PRIVATE Ghoul openspace-core)
-  # We currently can't reuse the precompiled header because that one has the Kameleon
-  # definition stuck into it
-  #target_precompile_headers(${library_name} REUSE_FROM openspace-core)
   target_precompile_headers(${library_name} PRIVATE
     [["ghoul/fmt.h"]]
     [["ghoul/glm.h"]]
@@ -119,12 +102,13 @@ function (handle_module_dependencies target_name module_name)
     [["ghoul/misc/exception.h"]]
     [["ghoul/misc/invariants.h"]]
     [["ghoul/misc/profiling.h"]]
-    <algorithm>
+    [["ghoul/opengl/ghoul_gl.h"]]
     <array>
-    <map>
+    <filesystem>
     <memory>
     <string>
-    <utility>
+    <string_view>
+    <variant>
     <vector>
   )
 

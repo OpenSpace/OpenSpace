@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLELABELS___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLELABELS___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLELABEL___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLELABEL___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -54,9 +54,9 @@ namespace documentation { struct Documentation; }
 
 struct LinePoint;
 
-class RenderableLabels : public Renderable {
+class RenderableLabel : public Renderable {
 public:
-    RenderableLabels(const ghoul::Dictionary& dictionary);
+    RenderableLabel(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -111,4 +111,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLELABELS___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLELABEL___H__

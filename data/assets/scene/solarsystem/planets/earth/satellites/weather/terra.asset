@@ -1,109 +1,106 @@
-local satelliteHelper = asset.require("util/tle_helper")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
-local url = "http://celestrak.com/NORAD/elements/gp.php?CATNR=25994"
-local identifier = "Terra"
-local filename = "Terra.txt"
-local nodes = {}
-local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
+local omm = asset.syncedResource({
+  Name = "Satellite OMM Data (Terra)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_terra",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25994&FORMAT=kvn",
+  Filename = "Terra.txt",
+  Override = true
+})
 
-
-asset.onInitialize(function ()
-  local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
-  local period = satelliteHelper.getPeriodFromElement(lineElement)
-  local path = tle .. "/" .. filename
-
-  local Terra = {
-    Identifier = "Terra",
-    Parent = transforms.EarthInertial.Identifier,
-    InteractionSphere = 30,
-    Transform = {
-      Translation = {
-        Type = "TLETranslation",
-        Body = identifier,
-        Observer = transforms.EarthInertial.Identifier,
-        File = path,
-        LineNumber = 1
-      },
-      Rotation = {
-        Type = "SpiceRotation",
-        SourceFrame = "GALACTIC",
-        DestinationFrame = "J2000",
-      }
+local Terra = {
+  Identifier = "Terra",
+  Parent = transforms.EarthInertial.Identifier,
+  InteractionSphere = 30,
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "Terra.txt",
+      Format = "OMM"
     },
-    Tag = { "earth_satellite", "Terra" },
-    GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/Terra"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "GALACTIC",
+      DestinationFrame = "J2000",
     }
+  },
+  Tag = { "earth_satellite", "Terra" },
+  GUI = {
+    Name = "Terra",
+    Path = "/Solar System/Planets/Earth/Satellites/Terra"
   }
+}
 
 
-  local TerraTrail = {
-    Identifier = identifier .. "_trail",
-    Parent = transforms.EarthInertial.Identifier,
-    Renderable = {
-      Type = "RenderableTrailOrbit",
-      Translation = {
-        Type = "TLETranslation",
-        Body = identifier,
-        Observer = transforms.EarthInertial.Identifier,
-        File = path,
-        LineNumber = 1,
-        RenderBinMode = "PostDeferredTransparent"
-      },
-      Color = { 0.9, 0.6715, 0.0 },
-      Fade = 1.5,
-      Period = period,
-      Resolution = 320
+local TerraTrail = {
+  Identifier = "Terra_trail",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "Terra.txt",
+      Format = "OMM",
+      RenderBinMode = "PostDeferredTransparent"
     },
-    Tag = { "earth_satellite", "Terra" },
-    GUI = {
-      Name = "Terra Trail",
-      Path = "/Solar System/Planets/Earth/Satellites/Terra"
-    }
+    Color = { 0.9, 0.6715, 0.0 },
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellite", "Terra" },
+  GUI = {
+    Name = "Terra Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/Terra"
   }
+}
 
-  -- @TODO (emmbr, 2021-05-27) this label is not visible. Too large fade distances?
-  -- Might also be affected by the rendering issues for labels
-  local TerraLabel = {
-    Identifier = "TerraLabel",
-    Parent = Terra.Identifier,
-    Renderable = {
-      Enabled = false,
-      Type = "RenderableLabels",
-      Text = "Terra",
-      FontSize = 70.0,
-      Size = 4.0,
-      MinMaxSize = { 1, 100 },
-      OrientationOption = "Camera View Direction",
-      BlendMode = "Additive",
-      EnableFading = true,
-      FadeUnit = "au",
-      FadeDistances = { 1.5, 15.0 },
-      FadeWidths = { 1.0, 25.0 }
-    },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-      Name = "Terra Label",
-      Path = "/Solar System/Planets/Earth"
-    }
+-- @TODO (emmbr, 2021-05-27) this label is not visible. Too large fade distances?
+-- Might also be affected by the rendering issues for labels
+local TerraLabel = {
+  Identifier = "TerraLabel",
+  Parent = Terra.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabel",
+    Text = "Terra",
+    FontSize = 70.0,
+    Size = 4.0,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 15.0 },
+    FadeWidths = { 1.0, 25.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Terra Label",
+    Path = "/Solar System/Planets/Earth"
   }
+}
 
-  table.insert(nodes, Terra)
-  table.insert(nodes, TerraTrail)
-  table.insert(nodes, TerraLabel)
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end  
+asset.onInitialize(function()
+  local t = openspace.space.readKeplerFile(omm .. "Terra.txt", "OMM")
+  TerraTrail.Renderable.Period = t[0].Period / (60 * 60 * 24)
 
+  openspace.addSceneGraphNode(Terra)
+  openspace.addSceneGraphNode(TerraTrail)
+  openspace.addSceneGraphNode(TerraLabel)
 end)
 
 asset.onDeinitialize(function ()
-  for _, node in ipairs(nodes) do
-    openspace.removeSceneGraphNode(node)
-  end  
+  openspace.removeSceneGraphNode(TerraLabel)
+  openspace.removeSceneGraphNode(TerraTrail)
+  openspace.removeSceneGraphNode(Terra)
 end)
+
+asset.export(Terra)
+asset.export(TerraTrail)
+asset.export(TerraLabel)
 
 
 asset.meta = {

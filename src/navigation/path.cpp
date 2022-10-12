@@ -36,7 +36,6 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/collisionhelper.h>
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
@@ -178,6 +177,11 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     return newPose;
 }
 
+void Path::quitPath() {
+    _traveledDistance = pathLength();
+    _shouldQuit = true;
+}
+
 std::string Path::currentAnchor() const {
     bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
     return (pastHalfway) ? _end.nodeIdentifier() : _start.nodeIdentifier();
@@ -316,6 +320,7 @@ glm::dquat Path::linearPathRotation(double t) const {
 }
 
 glm::dquat Path::lookAtTargetsRotation(double t) const {
+    t = glm::clamp(t, 0.0, 1.0);
     const double t1 = 0.2;
     const double t2 = 0.8;
 
@@ -331,13 +336,15 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
         const glm::dvec3 viewDir = ghoul::viewDirection(_start.rotation());
         const glm::dvec3 inFrontOfStart = startPos + inFrontDistance * viewDir;
 
-        const double tScaled = ghoul::cubicEaseInOut(t / t1);
+        const double tScaled = glm::clamp(t / t1, 0.0, 1.0);
+        const double tEased = ghoul::cubicEaseInOut(tScaled);
         lookAtPos =
-            ghoul::interpolateLinear(tScaled, inFrontOfStart, startNodePos);
+            ghoul::interpolateLinear(tEased, inFrontOfStart, startNodePos);
     }
     else if (t <= t2) {
-        const double tScaled = ghoul::cubicEaseInOut((t - t1) / (t2 - t1));
-        lookAtPos = ghoul::interpolateLinear(tScaled, startNodePos, endNodePos);
+        const double tScaled = glm::clamp((t - t1) / (t2 - t1), 0.0, 1.0);
+        const double tEased = ghoul::cubicEaseInOut(tScaled);
+        lookAtPos = ghoul::interpolateLinear(tEased, startNodePos, endNodePos);
     }
     else {
         // (t > t2)
@@ -346,8 +353,9 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
         const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
         const glm::dvec3 inFrontOfEnd = endPos + inFrontDistance * viewDir;
 
-        const double tScaled = ghoul::cubicEaseInOut((t - t2) / (1.0 - t2));
-        lookAtPos = ghoul::interpolateLinear(tScaled, endNodePos, inFrontOfEnd);
+        const double tScaled = glm::clamp((t - t2) / (1.0 - t2), 0.0, 1.0);
+        const double tEased = ghoul::cubicEaseInOut(tScaled);
+        lookAtPos = ghoul::interpolateLinear(tEased, endNodePos, inFrontOfEnd);
     }
 
     // Handle up vector separately
@@ -416,6 +424,7 @@ double Path::speedAlongPath(double traveledDistance) const {
         const double remainingDistance = pathLength() - traveledDistance;
         dampeningFactor = remainingDistance / closeUpDistance;
     }
+    dampeningFactor = glm::clamp(dampeningFactor, 0.0, 1.0);
     dampeningFactor = ghoul::sineEaseOut(dampeningFactor);
 
     // Prevent multiplying with 0 (and hence a speed of 0.0 => no movement)
@@ -435,50 +444,14 @@ Waypoint waypointFromCamera() {
     return Waypoint{ pos, rot, node };
 }
 
-SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
-    const std::vector<SceneGraphNode*>& relevantNodes =
-        global::navigationHandler->pathNavigator().relevantNodes();
-
-    for (SceneGraphNode* n : relevantNodes) {
-        bool isSame = (n->identifier() == node->identifier());
-        // If the nodes are in the very same position, they are probably representing
-        // the same object
-        isSame |=
-            glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
-
-        if (isSame) {
-            continue;
-        }
-
-        constexpr float proximityRadiusFactor = 3.f;
-
-        const float bs = static_cast<float>(n->boundingSphere());
-        const float proximityRadius = proximityRadiusFactor * bs;
-        const glm::dvec3 posInModelCoords =
-            glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
-
-        bool isClose = collision::isPointInsideSphere(
-            posInModelCoords,
-            glm::dvec3(0.0, 0.0, 0.0),
-            proximityRadius
-        );
-
-        if (isClose) {
-            return n;
-        }
-    }
-
-    return nullptr;
-}
-
 // Compute a target position close to the specified target node, using knowledge of
 // the start point and a desired distance from the node's center
 glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
                                     const Waypoint& startPoint)
 {
     const glm::dvec3 nodePos = targetNode->worldPosition();
-    const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
     const SceneGraphNode* sun = sceneGraphNode(SunIdentifier);
+    const SceneGraphNode* closeNode = PathNavigator::findNodeNearTarget(targetNode);
 
     // @TODO (2021-07-09, emmbr): Not nice to depend on a specific scene graph node,
     // as it might not exist. Ideally, each SGN could know about their preferred
@@ -706,7 +679,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     try {
         return Path(startPoint, waypointToAdd, type, duration);
     }
-    catch (const PathCurve::TooShortPathError& e) {
+    catch (const PathCurve::TooShortPathError&) {
         LINFO("Already at the requested target");
         // Rethrow e, so the pathnavigator can handle it as well
         throw;

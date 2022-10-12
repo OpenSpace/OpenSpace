@@ -1,41 +1,32 @@
 -- Color layer
-asset.require("./layers/colorlayers/mars_texture")
-local colorLayer = asset.require("./layers/colorlayers/moc_wa_color_utah")
-asset.require("./layers/colorlayers/moc_wa_color_sweden")
-asset.require("./layers/colorlayers/viking_mdim_utah") 
-asset.require("./layers/colorlayers/viking_mdim_sweden") 
-asset.require("./layers/colorlayers/mola_pseudo_color_utah") 
-asset.require("./layers/colorlayers/mola_pseudo_color_sweden") 
-asset.require("./layers/colorlayers/mola_hrsc_utah") 
-asset.require("./layers/colorlayers/mola_hrsc_sweden") 
-asset.require("./layers/colorlayers/themis_ir_day_utah") 
-asset.require("./layers/colorlayers/themis_ir_day_sweden") 
-asset.require("./layers/colorlayers/themis_ir_night_utah") 
-asset.require("./layers/colorlayers/themis_ir_night_sweden")
-asset.require("./layers/colorlayers/ctx_mosaic_utah") 
-asset.require("./layers/colorlayers/ctx_mosaic_sweden") 
-asset.require("./layers/colorlayers/ctx_blended_01")
-asset.require("./layers/colorlayers/hirise")
-asset.require("./layers/colorlayers/hirisels")
+asset.require("./layers/colorlayers/mars_texture", false)
+asset.require("./layers/colorlayers/moc_wa_color_utah", true)
+asset.require("./layers/colorlayers/moc_wa_color_sweden", false)
+asset.require("./layers/colorlayers/viking_mdim_utah", false)
+asset.require("./layers/colorlayers/viking_mdim_sweden", false)
+asset.require("./layers/colorlayers/mola_pseudo_color_utah", false)
+asset.require("./layers/colorlayers/mola_pseudo_color_sweden", false)
+asset.require("./layers/colorlayers/mola_hrsc_utah", false)
+asset.require("./layers/colorlayers/mola_hrsc_sweden", false)
+asset.require("./layers/colorlayers/themis_ir_day_utah", false)
+asset.require("./layers/colorlayers/themis_ir_day_sweden", false)
+asset.require("./layers/colorlayers/themis_ir_night_utah", false)
+asset.require("./layers/colorlayers/themis_ir_night_sweden", false)
+asset.require("./layers/colorlayers/ctx_mosaic_utah", false)
+asset.require("./layers/colorlayers/ctx_mosaic_sweden", false)
+asset.require("./layers/colorlayers/ctx_blended_01", false)
+asset.require("./layers/colorlayers/hirise", false)
+asset.require("./layers/colorlayers/hirisels", false)
 
 -- Height layers
-asset.require("./layers/heightlayers/mola_sweden")
-asset.require("./layers/heightlayers/mola_utah")
-local heightLayer = asset.require("./layers/heightlayers/MDEM200M")
-asset.require("./layers/heightlayers/hirisels")
+asset.require("./layers/heightlayers/mola_sweden", false)
+asset.require("./layers/heightlayers/mola_utah", false)
+asset.require("./layers/heightlayers/MDEM200M", true)
+asset.require("./layers/heightlayers/hirisels", false)
 
 -- Overlays
-asset.require("./layers/overlays/indices")
-asset.require("./layers/overlays/size_reference")
-
--- Set enabled layers (temporary solution)
--- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
-asset.onInitialize(function () 
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers." ..
-    colorLayer.layer.Identifier .. ".Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers." ..
-    heightLayer.layer.Identifier .. ".Enabled", true)
-end)
+asset.require("./layers/overlays/indices", false)
+asset.require("./layers/overlays/size_reference", false)
 
 
 asset.meta = {

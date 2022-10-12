@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../moon").Moon.Identifier
 local layer = {
   Identifier = "Lola_Shade_Utah",
   Name = "Lola Shade [Utah]",
+  Enabled = asset.enabled,
   Description = [[This is a shaded-relief of a original polar digital elevation model 
     (DEM) from the Lunar Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an instrument 
     on the National Aeronautics and Space Agency (NASA) Lunar Reconnaissance Orbiter (LRO) 

@@ -512,7 +512,7 @@ void ShadowComponent::saveDepthBuffer() {
                 << std::endl;
         ppmFile << "255" << std::endl;
 
-        std::cout << "\n\nSaving depth texture to file depthBufferShadowMapping.ppm\n\n";
+        LDEBUG("Saving depth texture to file depthBufferShadowMapping.ppm");
         int k = 0;
         for (int i = 0; i < _shadowDepthTextureWidth; i++) {
             for (int j = 0; j < _shadowDepthTextureHeight; j++, k++) {
@@ -523,8 +523,7 @@ void ShadowComponent::saveDepthBuffer() {
         }
 
         ppmFile.close();
-
-        std::cout << "Texture saved to file depthBufferShadowMapping.ppm\n\n";
+        LDEBUG("Texture saved to file depthBufferShadowMapping.ppm");
     }
 
     buffer.clear();
@@ -552,7 +551,7 @@ void ShadowComponent::saveDepthBuffer() {
                 << std::endl;
         ppmFile << "255" << std::endl;
 
-        std::cout << "\n\nSaving texture position to positionBufferShadowMapping.ppm\n\n";
+        LDEBUG("Saving texture position to positionBufferShadowMapping.ppm");
 
         float biggestValue = 0.f;
 
@@ -580,7 +579,7 @@ void ShadowComponent::saveDepthBuffer() {
 
         ppmFile.close();
 
-        LINFO("Texture saved to file positionBufferShadowMapping.ppm");
+        LDEBUG("Texture saved to file positionBufferShadowMapping.ppm");
     }
 }
 

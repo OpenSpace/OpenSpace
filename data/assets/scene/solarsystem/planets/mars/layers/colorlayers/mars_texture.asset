@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Identifier = "Mars_Texture",
   Name = "Mars Texture",
+  Enabled = asset.enabled,
   FilePath = texturesPath .. "mars.jpg",
   Description = "Default jpg texture for Mars"
 }

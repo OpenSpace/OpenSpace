@@ -222,6 +222,12 @@ namespace {
         "The roughness factor that is used for the Oren-Nayar lighting mode"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
+        "AmbientIntensity",
+        "Ambient Intensity",
+        "The intensity factor for the ambient light used for light shading"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo NActiveLayersInfo = {
         "NActiveLayers",
         "Number of active layers",
@@ -524,6 +530,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
+        FloatProperty(AmbientIntensityInfo, 0.05f, 0.f, 1.f),
         IntProperty(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
     })
     , _debugPropertyOwner({ "Debug" })
@@ -607,6 +614,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.targetLodScaleFactor);
     addProperty(_generalProperties.currentLodScaleFactor);
     addProperty(_generalProperties.orenNayarRoughness);
+    addProperty(_generalProperties.ambientIntensity);
     _generalProperties.nActiveLayers.setReadOnly(true);
     addProperty(_generalProperties.nActiveLayers);
 
@@ -964,6 +972,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         const float onr = _generalProperties.orenNayarRoughness;
         _localRenderer.program->setUniform("orenNayarRoughness", onr);
         _globalRenderer.program->setUniform("orenNayarRoughness", onr);
+
+        const float amb = _generalProperties.ambientIntensity;
+        _localRenderer.program->setUniform("ambientIntensity", amb);
+        _globalRenderer.program->setUniform("ambientIntensity", amb);
     }
 
     _localRenderer.program->setUniform("opacity", opacity());
@@ -2271,7 +2283,7 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
     ZoneScoped
 
     const int currLevel = chunk.tileIndex.level;
-    
+
     for (const layers::Group& gi : layers::Groups) {
         const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
         for (Layer* layer : lyrs) {

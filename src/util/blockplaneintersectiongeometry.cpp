@@ -25,6 +25,7 @@
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <algorithm>
 
 namespace {

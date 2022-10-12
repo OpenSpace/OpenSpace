@@ -12,7 +12,7 @@ local kernels = asset.syncedResource({
   Name = "Lagrange Kernels",
   Type = "HttpSynchronization",
   Identifier = "earth_lagrange_kernels",
-  Version = 1
+  Version = 2
 })
 
 local L2Position = {
@@ -29,6 +29,30 @@ local L2Position = {
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
   GUI = {
     Name = "L2 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Hidden = true
+  }
+}
+
+-- This ref. frame co-revolves with L2 and is needed for a more intuitive trail of JWST in
+-- relation to L2
+local L2CoRevFrame = {
+  Identifier = "L2CoRevFrame",
+  Parent = L2Position.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "L2_COREV",
+      DestinationFrame = 'GALACTIC',
+      Kernels = {
+        kernels .. "L2_de431.bsp",
+        kernels .. "L2_corev.tf"
+      }
+    }
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
+  GUI = {
+    Name = "L2 Co-revolving Reference Frame",
     Path = "/Solar System/Planets/Earth/Lagrange points",
     Hidden = true
   }
@@ -74,7 +98,7 @@ local L2SmallLabel = {
   Identifier = "L2SmallLabel",
   Parent = L2Position.Identifier,
   Renderable = {
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "L2",
     FontSize = 50.0,
     Size = 6.0,
@@ -95,7 +119,7 @@ local L2Label = {
   Identifier = "L2Label",
   Parent = L2Position.Identifier,
   Renderable = {
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "L2",
     FontSize = 50,
     Size = 7.5,
@@ -131,6 +155,7 @@ local L2SunLine = {
 
 local nodes = {
   L2Position,
+  L2CoRevFrame,
   L2Small,
   L2,
   L2SunLine,

@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../moon").Moon.Identifier
 local layer = {
   Identifier = "LolaDem_Sweden",
   Name = "Lola DEM [Sweden]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("loladem_sweden.wms"),
   TilePixelSize = 64,
   Settings = { Multiplier = 0.5 }

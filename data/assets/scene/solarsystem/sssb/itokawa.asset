@@ -75,7 +75,7 @@ local ItokawaModel = {
     Name = "Itokawa Model",
     Path = "/Solar System/SSSB/Itokawa",
     Description = [[Model of asteroid 25143 Itokawa. 3D model from
-      https://solarsystem.nasa.gov/resources/2377/asteroid-itokawa-3d-model/]]
+      https://solarsystem.nasa.gov/resources/2377/asteroid-itokawa-3d-model]]
   }
 }
 

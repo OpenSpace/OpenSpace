@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../venus").Venus.Identifier
 local layer = {
   Identifier = "Magellan_Mosaic_Utah",
   Name = "Magellan Mosaic [Utah]",
+  Enabled = asset.enabled,
   Description = [[Color layer for Venus. This mosaic was created from the Magellan
     F-BIDRs, (Full resolution Basic Image Data Records), the highest resolution
     radar images of the Venus surface (~75 m/pixel). Because Venus is shrouded by a

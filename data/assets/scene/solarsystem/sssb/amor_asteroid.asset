@@ -1,16 +1,31 @@
-local sharedSssb = asset.require("./sssb_shared")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, "amor_asteroid",
-"sssb_data_amor_asteroid")
-local object = sharedSssb.createSssbGroupObject("sssb_data_amor_asteroid.csv",
-  "Amor Asteroids", filepath, { 1.0, 1.0, 1.0 })
-object.Renderable.Enabled = false
-object.Renderable.SegmentQuality = 4
-object.Renderable.TrailFade = 11
+local sssb = asset.syncedResource({
+  Name = "Small SolarSystem Body Data (Amor Asteroid)",
+  Type = "HttpSynchronization",
+  Identifier = "sssb_data_amor_asteroid",
+  Version = 1
+})
 
-object.GUI.Description = [[Earth-approaching Near-Earth-Asteroids with orbits exterior to
-  Earth's but interior to Mars']]
-
+local object = {
+  Identifier = "sssb_amor_asteroid",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = sssb .. "sssb_data_amor_asteroid.csv",
+    Format = "SBDB",
+    Segments = 200,
+    SegmentQuality = 4,
+    Color = { 1.0, 1.0, 1.0 },
+    TrailFade = 11
+  },
+  GUI = {
+    Name = "Amor Asteroids",
+    Path = "/Solar System/Small Bodies",
+    Description = [[Earth-approaching Near-Earth-Asteroids with orbits exterior to
+      Earth's but interior to Mars'.]]
+  }
+}
   
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)

@@ -26,19 +26,21 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   horizonsfile.h
+  kepler.h
+  labelscomponent.h
   speckloader.h
+  rendering/renderableconstellationsbase.h
   rendering/renderableconstellationbounds.h
+  rendering/renderableconstellationlines.h
   rendering/renderablefluxnodes.h
   rendering/renderablehabitablezone.h
   rendering/renderablerings.h
   rendering/renderableorbitalkepler.h
-  rendering/renderablesatellites.h
-  rendering/renderablesmallbody.h
   rendering/renderablestars.h
   rendering/renderabletravelspeed.h
+  translation/gptranslation.h
   translation/keplertranslation.h
   translation/spicetranslation.h
-  translation/tletranslation.h
   translation/horizonstranslation.h
   rotation/spicerotation.h
 )
@@ -46,20 +48,22 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   horizonsfile.cpp
+  kepler.cpp
   spacemodule_lua.inl
+  labelscomponent.cpp
   speckloader.cpp
+  rendering/renderableconstellationsbase.cpp
   rendering/renderableconstellationbounds.cpp
+  rendering/renderableconstellationlines.cpp
   rendering/renderablefluxnodes.cpp
   rendering/renderablehabitablezone.cpp
   rendering/renderablerings.cpp
   rendering/renderableorbitalkepler.cpp
-  rendering/renderablesatellites.cpp
-  rendering/renderablesmallbody.cpp
   rendering/renderablestars.cpp
   rendering/renderabletravelspeed.cpp
+  translation/gptranslation.cpp
   translation/keplertranslation.cpp
   translation/spicetranslation.cpp
-  translation/tletranslation.cpp
   translation/horizonstranslation.cpp
   rotation/spicerotation.cpp
 )
@@ -68,6 +72,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   shaders/constellationbounds_fs.glsl
   shaders/constellationbounds_vs.glsl
+  shaders/constellationlines_fs.glsl
+  shaders/constellationlines_vs.glsl
   shaders/debrisViz_fs.glsl
   shaders/debrisViz_vs.glsl
   shaders/fluxnodes_fs.glsl
@@ -89,4 +95,13 @@ create_new_module(
   space_module
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+)
+target_precompile_headers(${space_module} PRIVATE
+  <openspace/documentation/documentation.h>
+  <openspace/documentation/verifier.h>
+  <openspace/properties/numericalproperty.h>
+  <openspace/rendering/renderable.h>
+  <ghoul/opengl/programobject.h>
+  <ghoul/opengl/shaderobject.h>
+  <ghoul/opengl/uniformcache.h>
 )
