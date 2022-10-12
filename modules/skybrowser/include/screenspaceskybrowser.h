@@ -37,6 +37,7 @@ namespace openspace {
 
 class ScreenSpaceSkyBrowser : public ScreenSpaceRenderable, public WwtCommunicator {
 public:
+    static constexpr int RadiusTimeOut = 25;
     explicit ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceSkyBrowser() override;
 
@@ -80,6 +81,7 @@ private:
     bool _ratioIsDirty = false;
     bool _radiusIsDirty = false;
     bool _isInitialized = false;
+    int _borderRadiusTimer = -1;
 
     float _ratio = 1.f;
 };
