@@ -119,6 +119,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_browserDimensions);
     addProperty(_reload);
     addProperty(_textureQuality);
+    addProperty(_verticalFov);
 
     _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 
@@ -201,6 +202,7 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     _browserDimensions = glm::ivec2(newSize);
     _texture->setDimensions(glm::ivec3(newSize, 1));
     _objectSize = glm::ivec3(_texture->dimensions());
+    _radiusIsDirty = true;
 }
 
 void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
@@ -324,16 +326,22 @@ void ScreenSpaceSkyBrowser::update() {
         _isInitialized = false;
     }
 
-    WwtCommunicator::update();
+    if (_radiusIsDirty && _isInitialized) {
+        setBorderRadius(_borderRadius);
+        _radiusIsDirty = false;
+    }
+
     ScreenSpaceRenderable::update();
+    WwtCommunicator::update();
 }
 
-void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
+double ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     // Make scroll more sensitive the smaller the FOV
     double x = _verticalFov;
     double zoomFactor = atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
     double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
     _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
+    return _verticalFov;
 }
 
 void ScreenSpaceSkyBrowser::bindTexture() {

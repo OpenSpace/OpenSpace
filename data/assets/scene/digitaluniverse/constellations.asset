@@ -1,24 +1,34 @@
 local speck = asset.syncedResource({
-  Name = "Constellation Speck Files",
+  Name = "Constellation Files",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_constellations_speck",
-  Version = 2
+  Identifier = "digitaluniverse_constellations_data",
+  Version = 1
 })
+
+local zodiacs = {
+  "Cancer", "Taurus", "Pisces", "Aries", "Libra", "Aquarius", "Capricornus", "Scorpius",
+  "Virgo", "Sagittarius", "Gemini", "Leo"
+}
 
 local constellationsExtragalactic = {
   Identifier = "ConstellationsExtragalactic",
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableConstellationLines",
     Enabled = false,
+    Labels = {
+      File = speck .. "constellationsEXGAL.label",
+      Opacity = 0.4,
+      Color = { 0.8, 0.8, 0.8 },
+      Size = 20.0,
+      MinMaxSize = { 20, 30 },
+      Unit = "Mpc",
+    },
     Opacity = 0.4,
     File = speck .. "constellationsEXGAL.speck",
-    LabelFile = speck .. "constellationsEXGAL.label",
-    TextColor = { 0.8, 0.8, 0.8 },
-    TextOpacity = 0.4,
-    TextSize = 20.0,
-    TextMinMaxSize = { 20, 30 },
-    MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
-    Unit = "Mpc"
+    NamesFile = speck .. "constellations.dat",
+    Colors = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
+    Unit = "Mpc",
+    -- Selection = zodiacs
   },
   GUI = {
     Name = "Constellations (Extragalactic)",
@@ -29,20 +39,25 @@ local constellationsExtragalactic = {
 local constellations = {
   Identifier = "Constellations",
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableConstellationLines",
     Enabled = false,
+    Labels = {
+      File = speck .. "constellations.label",
+      Opacity = 0.3,
+      Color = { 0.8, 0.8, 0.8 },
+      Size = 14.5,
+      MinMaxSize = { 8, 170 },
+      Unit = "pc",
+    },
     Opacity = 0.3,
     File = speck .. "constellations.speck",
-    LabelFile = speck .. "constellations.label",
-    TextColor = { 0.8, 0.8, 0.8 },
-    TextOpacity = 0.3,
-    TextSize = 14.5,
-    TextMinMaxSize = { 8, 170 },
-    MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
-    Unit = "pc"
+    NamesFile = speck .. "constellations.dat",
+    Colors = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
+    Unit = "pc",
+    -- Selection = zodiacs
   },
   GUI = {
-      Name = "Constellations",
+    Name = "Constellations",
     Path = "/Milky Way/Constellations",
     Description = [[Census 88 constellations and labels. DU Version 2.3. <br> These
       modern constellations are largely based on those of the Babylonians and
@@ -60,12 +75,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(constellationsExtragalactic)
   openspace.addSceneGraphNode(constellations)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(constellations)
   openspace.removeSceneGraphNode(constellationsExtragalactic)
 end)
-  
+
 asset.export(constellationsExtragalactic)
 asset.export(constellations)
 
@@ -73,7 +88,7 @@ asset.export(constellations)
 
 asset.meta = {
   Name = "Constellations",
-  Version = "1.1",
+  Version = "1.2",
   Description = "Digital Universe asset for constellation lines",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

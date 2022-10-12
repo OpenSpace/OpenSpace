@@ -74,20 +74,6 @@ endfunction ()
 
 
 
-function (register_external_libraries libraries)
-  # This is an ugly hack as we can't inject a variable into a scope two parents above
-  # would love to: set(${module_external_librarys} "${libraries}" PARENT_PARENT_SCOPE)
-  # instead
-  set(libs "")
-  foreach (library ${libraries})
-    get_filename_component(lib ${library} ABSOLUTE)
-    list(APPEND libs ${lib})
-  endforeach()
-
-  set_property(GLOBAL PROPERTY CurrentModuleExternalLibraries ${libs})
-endfunction ()
-
-
 # Gets and returns the <name>module.h and <name>module.cpp files and provides them with a
 # source group
 function (get_module_files module_name module_files)

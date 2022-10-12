@@ -46,6 +46,11 @@ namespace {
     openspace::global::navigationHandler->pathNavigator().abortPath();
 }
 
+// Immediately skips to the end of the current camera path, if one is being played.
+[[codegen::luawrap]] void skipToEnd() {
+    openspace::global::navigationHandler->pathNavigator().skipToEnd();
+}
+
 /**
  * Move the camera to the node with the specified identifier. The optional double
  * specifies the duration of the motion, in seconds. If the optional bool is set to true

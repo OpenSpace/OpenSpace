@@ -25,7 +25,7 @@ local SunLabel = {
   Parent = Sun.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Sun",
     FontSize = 70.0,
     Size = 14.17,
@@ -48,7 +48,7 @@ local SunLabel = {
 local LightSource = {
   Type = "SceneGraphLightSource",
   Identifier = "Sun",
-  Node = transforms.SolarSystemBarycenter.Identifier,
+  Node = Sun.Identifier,
   Intensity = 1.0
 }
 
@@ -56,12 +56,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Sun)
   openspace.addSceneGraphNode(SunLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SunLabel)
   openspace.removeSceneGraphNode(Sun)
 end)
-    
+
 asset.export(Sun)
 asset.export(SunLabel)
 asset.export("LightSource", LightSource)

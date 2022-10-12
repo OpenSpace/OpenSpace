@@ -44,7 +44,7 @@ set(HEADER_FILES
   rendering/grids/renderablesphericalgrid.h
   rendering/renderablecartesianaxes.h
   rendering/renderabledisc.h
-  rendering/renderablelabels.h
+  rendering/renderablelabel.h
   rendering/renderablemodel.h
   rendering/renderablenodedirectionhint.h
   rendering/renderablenodeline.h
@@ -99,7 +99,7 @@ set(SOURCE_FILES
   rendering/grids/renderablesphericalgrid.cpp
   rendering/renderablecartesianaxes.cpp
   rendering/renderabledisc.cpp
-  rendering/renderablelabels.cpp
+  rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
   rendering/renderablenodedirectionhint.cpp
   rendering/renderablenodeline.cpp

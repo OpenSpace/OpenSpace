@@ -17,17 +17,20 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "expl.label",
+      Color = { 0.3, 0.3, 0.8 },
+      Size = 14.8,
+      MinMaxSize = { 10, 100 },
+      Unit = "pc"
+    },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
     ScaleFactor = 10.0,
     Texture = textures .. "target-blue.png",
     File = speck .. "expl.speck",
-    LabelFile = speck .. "expl.label",
     Unit = "pc",
     ScaleFactor = 388.67923,
-    TextColor = { 0.3, 0.3, 0.8 },
-    TextSize = 14.8,
-    TextMinMaxSize = { 10, 100 },
     CorrectionSizeEndDistance = 15.23,
     CorrectionSizeFactor = 13.3,
     BillboardMinMaxSize = { 0.0, 75.0 },
@@ -49,11 +52,11 @@ local object = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 

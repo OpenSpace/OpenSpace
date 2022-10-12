@@ -141,6 +141,7 @@ private:
         properties::FloatProperty targetLodScaleFactor;
         properties::FloatProperty currentLodScaleFactor;
         properties::FloatProperty orenNayarRoughness;
+        properties::FloatProperty ambientIntensity;
         properties::IntProperty   nActiveLayers;
     } _generalProperties;
 

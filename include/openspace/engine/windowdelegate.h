@@ -107,6 +107,10 @@ struct WindowDelegate {
     void (*setScreenshotFolder)(std::string) = [](std::string) {};
 
     void (*showStatistics)(bool) = [](bool) {};
+
+    int (*numberOfNodes)() = []() { return 0; };
+
+    int (*currentNode)() = []() { return 0; };
 };
 
 } // namespace openspace

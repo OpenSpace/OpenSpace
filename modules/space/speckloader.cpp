@@ -37,7 +37,7 @@
 
 namespace {
     constexpr int8_t DataCacheFileVersion = 10;
-    constexpr int8_t LabelCacheFileVersion = 10;
+    constexpr int8_t LabelCacheFileVersion = 11;
     constexpr int8_t ColorCacheFileVersion = 10;
 
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {
@@ -321,7 +321,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
 
         if (!str.good()) {
             // Need to subtract one of the line number here as we increase the current
-            // line count in the beginning of the while loop we are currently in 
+            // line count in the beginning of the while loop we are currently in
             throw ghoul::RuntimeError(fmt::format(
                 "Error loading position information out of data line {} in file {}. "
                 "Value was not a number",
@@ -346,7 +346,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
                 if (valueStream.fail()) {
                     // Need to subtract one of the line number here as we increase the
                     // current line count in the beginning of the while loop we are
-                    // currently in 
+                    // currently in
                     throw ghoul::RuntimeError(fmt::format(
                         "Error loading data value {} out of data line {} in file {}. "
                         "Value was not a number",
@@ -674,10 +674,20 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
         std::getline(str, rest);
         strip(rest);
 
+        if (startsWith(rest, "id")) {
+            // optional arument with identifier
+            // Remove the 'id' text
+            rest = rest.substr(std::string_view("id ").size());
+            size_t index = rest.find("text");
+            entry.identifier = rest.substr(0, index - 1);
+
+            // update the rest, remove the identifier
+            rest = rest.substr(index);
+        }
         if (!startsWith(rest, "text")) {
             throw ghoul::RuntimeError(fmt::format(
-                "Error loading label file {}: File contains some value between "
-                "positions and text label, which is unsupported", path
+                "Error loading label file {}: File contains an unsupported value "
+                "between positions and text label", path
             ));
         }
 
@@ -731,6 +741,13 @@ std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
         file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
         file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
 
+        // Identifier
+        uint8_t idLen;
+        file.read(reinterpret_cast<char*>(&idLen), sizeof(uint8_t));
+        e.identifier.resize(idLen);
+        file.read(e.identifier.data(), idLen);
+
+        // Text
         uint16_t len;
         file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
         e.text.resize(len);
@@ -763,6 +780,13 @@ void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
         file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
         file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
 
+        // Identifier
+        checkSize<uint8_t>(e.identifier.size(), "Identifier too long");
+        uint8_t idLen = static_cast<uint8_t>(e.identifier.size());
+        file.write(reinterpret_cast<const char*>(&idLen), sizeof(uint8_t));
+        file.write(e.identifier.data(), idLen);
+
+        // Text
         checkSize<uint16_t>(e.text.size(), "Text too long");
         uint16_t len = static_cast<uint16_t>(e.text.size());
         file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));

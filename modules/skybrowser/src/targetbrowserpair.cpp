@@ -182,6 +182,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("selectedImages", selectedImages());
     res.setValue("scale", static_cast<double>(_browser->scale()));
     res.setValue("opacities", _browser->opacities());
+    res.setValue("borderRadius", _browser->borderRadius());
 
     std::vector<std::pair<std::string, glm::dvec3>> copies = displayCopies();
     std::vector<std::pair<std::string, bool>> showCopies = _browser->showDisplayCopies();
@@ -256,13 +257,19 @@ void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
     _browser->setBorderColor(color);
 }
 
+void TargetBrowserPair::setBorderRadius(double radius) {
+    _browser->setBorderRadius(radius);
+    _targetRenderable->setBorderRadius(radius);
+}
+
 void TargetBrowserPair::setBrowserRatio(float ratio) {
     _browser->setRatio(ratio);
     _targetRenderable->setRatio(ratio);
 }
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
-    _browser->setVerticalFovWithScroll(scroll);
+    double fov = _browser->setVerticalFovWithScroll(scroll);
+    _targetRenderable->setVerticalFov(fov);
 }
 
 void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
