@@ -65,9 +65,11 @@ public:
 
 private:
     std::filesystem::path _videoFile;
-    std::chrono::milliseconds _frameTime = std::chrono::milliseconds(0);
-    std::chrono::system_clock::time_point _lastFrameTime;
+    double _nSecPerFrame = -1.0;
+    double _lastFrameTime = std::numeric_limits<double>::min();
     std::string _startTime;
+    double _startJ200Time = std::numeric_limits<double>::min();
+    int _prevFrameIndex = -1;
     bool _tileIsReady = false;
     bool _isInitialized = false;
 
