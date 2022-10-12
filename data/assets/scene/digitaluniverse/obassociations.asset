@@ -17,6 +17,13 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "ob.label",
+      Color = { 0.4, 0.5, 1.0 },
+      Size = 16.24,
+      MinMaxSize = { 4, 25 },
+      Unit = "pc"
+    },
     Color = { 1.0, 1.0, 1.0 },
     ColorMap = speck .. "ob.cmap",
     ColorOption = { "arm" },
@@ -27,11 +34,7 @@ local object = {
     Unit = "pc",
     Texture = textures .. "point4.png",
     PolygonSides = 7,
-    LabelFile = speck .. "ob.label",
-    TextColor = { 0.4, 0.5, 1.0 },
     ScaleFactor = 390.0,
-    TextSize = 16.24,
-    TextMinMaxSize = { 4, 25 },
     BillboardMinMaxSize = { 0.0, 450.0 },
     EnablePixelSizeControl = true
   },
@@ -48,18 +51,18 @@ local object = {
       coded by their spiral arm membership. Blue associations trace the Sagittarius
       Arm. Purple associations are in the local Orion Spur. Orange associations are
       in the Perseus Arm (Description from URL) <br><br> Data Reference: New List of
-      OB Associations (Melnik+)]],
+      OB Associations (Melnik+)]]
   }
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 

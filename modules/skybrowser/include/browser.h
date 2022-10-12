@@ -72,6 +72,7 @@ public:
     void update();
 
     void updateBrowserSize();
+    void reload();
 
     glm::vec2 browserPixelDimensions() const;
     float browserRatio() const;

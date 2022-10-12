@@ -157,8 +157,8 @@ bool RenderableConstellationBounds::isReady() const {
     bool isReady = _program && _vao != 0 && _vbo != 0;
 
     // If we have labels, they also need to be loaded
-    if (_hasLabel) {
-        return isReady && !_labelset.entries.empty();
+    if (_hasLabels) {
+        isReady = isReady && RenderableConstellationsBase::isReady();
     }
     return isReady;
 }

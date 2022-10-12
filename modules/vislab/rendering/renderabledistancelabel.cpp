@@ -78,7 +78,7 @@ documentation::Documentation RenderableDistanceLabel::Documentation() {
 }
 
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
-    : RenderableLabels(dictionary)
+    : RenderableLabel(dictionary)
     , _nodelineId(NodeLineInfo)
     , _distanceUnit(DistanceUnitInfo, 1, 0, 11)
     , _customUnitDescriptor(CustomUnitDescriptorInfo)

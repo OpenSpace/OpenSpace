@@ -22,78 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLERADIALGRID___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLERADIALGRID___H__
+#ifndef __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#define __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
 
-#include <openspace/rendering/renderable.h>
+#include <openspace/properties/propertyowner.h>
 
-#include <modules/space/labelscomponent.h>
+#include <modules/space/speckloader.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
-#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/rendering/helper.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/util/distanceconversion.h>
+#include <ghoul/glm.h>
+#include <filesystem>
 
-namespace ghoul::opengl { class ProgramObject; }
-
-namespace openspace::documentation { struct Documentation; }
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
+struct RenderData;
 
-class RenderableRadialGrid : public Renderable {
+namespace documentation { struct Documentation; }
+
+class LabelsComponent : public properties::PropertyOwner {
 public:
-    RenderableRadialGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableRadialGrid() override = default;
+    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+    ~LabelsComponent() override = default;
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+    speck::Labelset& labelSet();
+    const speck::Labelset& labelSet() const;
 
-    bool isReady() const override;
+    void initialize();
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    void loadLabels();
+
+    bool isReady() const;
+
+    void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+        float fadeInVariable = 1.f);
 
     static documentation::Documentation Documentation();
 
-protected:
-    struct GeometryData {
-        GeometryData(GLenum renderMode);
-        GeometryData(GeometryData&& other) noexcept;
-        GeometryData& operator=(const GeometryData& other) = delete;
-        GeometryData& operator=(GeometryData&& other) noexcept;
-        ~GeometryData();
+private:
+    std::filesystem::path _labelFile;
+    DistanceUnit _unit = DistanceUnit::Parsec;
+    speck::Labelset _labelset;
 
-        void update();
-        void render();
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
-        std::vector<rendering::helper::VertexXYZ> varray;
-        GLuint vao = 0;
-        GLuint vbo = 0;
-        GLenum mode = GL_LINE_STRIP;
-    };
-
-    ghoul::opengl::ProgramObject* _gridProgram;
-
+    // Properties
+    properties::FloatProperty _opacity;
     properties::Vec3Property _color;
-    properties::IVec2Property _gridSegments;
-    properties::IntProperty _circleSegments;
-    properties::FloatProperty _lineWidth;
-    properties::Vec2Property _radii;
-
-    bool _gridIsDirty = true;
-
-    std::vector<GeometryData> _circles;
-    GeometryData _lines{GL_LINES};
-
-    // Labels
-    bool _hasLabels = false;
-    properties::BoolProperty _drawLabels;
-    std::unique_ptr<LabelsComponent> _labels;
+    properties::FloatProperty _size;
+    properties::FloatProperty _fontSize;
+    properties::IVec2Property _minMaxSize;
+    properties::BoolProperty _faceCamera;
 };
 
-}// namespace openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLERADIALGRID___H__
+#endif // __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__

@@ -17,19 +17,22 @@ local object = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "gc.label",
+      Color = { 0.5, 0.5, 0.0 },
+      Size = 16.7,
+      MinMaxSize = { 4, 20 },
+      Unit = "pc"
+    },
     Color = { 0.8, 0.8, 0.0 },
     Opacity = 0.4,
     File = speck .. "gc.speck",
     Texture = textures .. "point4.png",
     PolygonSides = 5,
-    LabelFile = speck .. "gc.label",
     Unit = "pc",
-    TextColor = { 0.5, 0.5, 0.0 },
     ScaleFactor = 431.0,
-    TextSize = 16.7,
-    TextMinMaxSize = { 4, 20 },
     BillboardMinMaxSize = { 0.0, 500.0 },
-    EnablePixelSizeControl = true,
+    EnablePixelSizeControl = true
   },
   GUI = {
     Name = "Globular Clusters",
@@ -53,11 +56,11 @@ local object = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(object)
 end)
-  
+
 asset.export(object)
 
 
