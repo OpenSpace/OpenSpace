@@ -131,7 +131,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     GLubyte* destination = _tilePixels;
     GLubyte* source = &_glFrame->data[0][0];
     // Traverse backwards so texture is placed correctly
-    for (int row = rowRange.y - 1; row > rowRange.x; --row) {
+    for (int row = rowRange.y - 1; row >= rowRange.x; --row) {
         // Find index of first item, row & col
         int rowIndex = row * wholeRowSize;
         int columnIndex = tileRowSize * tileIndex.x;
