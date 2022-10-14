@@ -82,14 +82,6 @@ namespace {
         "The minimum and maximum size (in pixels) of the labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
-        "FaceCamera",
-        "Face Camera",
-        "If enabled, the labels will be rotated to face the camera. "
-        "For non-linear display rendering (for example fisheye) this should be set to "
-        "false."
-    };
-
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
@@ -119,9 +111,6 @@ namespace {
             Gigalightyear [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
-
-        // [[codegen::verbatim(FaceCameraInfo.description)]]
-        std::optional<bool> faceCamera;
     };
 #include "labelscomponent_codegen.cpp"
 } // namespace
@@ -144,7 +133,6 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
         glm::ivec2(0),
         glm::ivec2(1000)
     )
-    , _faceCamera(FaceCameraInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -177,22 +165,6 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     _minMaxSize = p.minMaxSize.value_or(_minMaxSize);
     _minMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_minMaxSize);
-
-    if (p.faceCamera.has_value()) {
-        _faceCamera = *p.faceCamera;
-    }
-    else {
-        // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum,
-        // and doing it based on the fisheye rendering seems a bit brittle?
-
-        // @TODO (malej 2022-SEP-14)
-        // For non-linear display rendering (for example fisheye) _faceCamera should be
-        // false, for planar displays it should be true.
-        // This should be automatically detected in the future by SGCT but for now we
-        // listen to a property in the RenderEngine
-        _faceCamera = !global::renderEngine->isInNonLinearDisplayMode();
-    }
-    addProperty(_faceCamera);
 }
 
 speck::Labelset& LabelsComponent::labelSet() {
@@ -225,23 +197,34 @@ void LabelsComponent::render(const RenderData& data, const glm::dmat4& modelMatr
                              float fadeInVariable)
 {
     float scale = static_cast<float>(toMeter(_unit));
-    int renderOption = _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
+
+    // @TODO (malej 2022-SEP-14)
+    // For planar displays, use render mode RenderOptionFaceCamera.
+    // For non-linear display rendering (for example fisheye), use render mode
+    // RenderOptionPositionNormal.
+    // This should be automatically detected in the future by SGCT, but for now we
+    // listen to a property in the RenderEngine which can be set in the .cfg file.
+    int renderOption = global::renderEngine->isInNonLinearDisplayMode() ?
+        RenderOptionPositionNormal : RenderOptionFaceCamera;
 
     // Calculate the matrices
     const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
     const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
 
-    const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+    // Camera vectors
     const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+    const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
     glm::vec3 right = glm::cross(viewDirection, lookup);
     const glm::vec3 up = glm::cross(right, viewDirection);
 
+    // Move camera vectors into model space
     const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
     glm::vec3 orthoRight = glm::normalize(
         glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
     );
 
+    // ?
     if (orthoRight == glm::vec3(0.f)) {
         glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);

@@ -75,7 +75,6 @@ private:
     properties::FloatProperty _size;
     properties::FloatProperty _fontSize;
     properties::IVec2Property _minMaxSize;
-    properties::BoolProperty _faceCamera;
 };
 
 } // namespace openspace
