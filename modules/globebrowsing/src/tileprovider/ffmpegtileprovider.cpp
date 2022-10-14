@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
@@ -193,16 +194,18 @@ void FfmpegTileProvider::update() {
         return;
     }
     // Check if it is time for a new frame
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    std::chrono::system_clock::duration diff = now - _lastFrameTime;
-    const double j2000Time = Time::now().j2000Seconds();
+    const double now = global::timeManager->time().j2000Seconds();
+    double videoTime = now - _startJ200Time;
+    int currentFrameIndex = std::floor(videoTime / _nSecPerFrame);
 
-    const bool hasNewFrame = (j2000Time > Time::convertTime(_startTime)) &&
-        diff > _frameTime;
+    const bool hasNewFrame =
+        now > Time::convertTime(_startTime) && _prevFrameIndex != currentFrameIndex;
 
     if(!hasNewFrame) {
         return;
     }
+
+    //LINFO(fmt::format("Frame index {} matches video duration {}", currentFrameIndex, videoTime));
     _tileIsReady = false;
 
     // Read frame
@@ -250,13 +253,12 @@ void FfmpegTileProvider::update() {
     }
 
     // Update times
-    if (_frameTime.count() <= 0) {
+    if (_nSecPerFrame < 0) {
         // Calculate frame time
-        double sPerFrame = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
-        int msPerFrame = static_cast<int>(sPerFrame * 1000);
-        _frameTime = std::chrono::milliseconds(msPerFrame);
+        _nSecPerFrame = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
     }
     _lastFrameTime = now;
+    _prevFrameIndex = currentFrameIndex;
 
     // TODO: Need to check the format of the video and decide what formats we want to
     // support and how they relate to the GL formats
@@ -328,6 +330,7 @@ float FfmpegTileProvider::noDataValueAsFloat() {
 }
 
 void FfmpegTileProvider::internalInitialize() {
+    _startJ200Time = Time::convertTime(_startTime);
     std::string path = absPath(_videoFile).string();
 
     // Open video
@@ -408,12 +411,10 @@ void FfmpegTileProvider::internalInitialize() {
         1
     );
 
-    // Update times
-    _lastFrameTime = std::chrono::system_clock::now();
-    _isInitialized = true;
-
     // Create PBO for async texture upload
     glGenBuffers(1, &_pbo);
+
+    _isInitialized = true;
 }
 
 FfmpegTileProvider::~FfmpegTileProvider() {
