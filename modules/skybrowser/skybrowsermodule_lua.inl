@@ -39,6 +39,37 @@
 namespace {
     constexpr std::string_view _loggerCat = "SkyBrowserModule";
 
+
+/**
+* Reloads the sky browser display copy for the node index that is sent in.
+* .If no ID is sent in, it will reload all display copies on that node.
+*/
+[[codegen::luawrap]] void reloadDisplayCopyOnNode(int nodeIndex, std::string id = "all") {
+    using namespace openspace;
+
+    if (global::windowDelegate->currentNode() != nodeIndex)
+        return;
+
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    if (id != "all") {
+        TargetBrowserPair* pair = module->pair(id);
+        if (pair) {
+            pair->browser()->setIsInitialized(false);
+            pair->browser()->setImageCollectionIsLoaded(false);
+            pair->browser()->reload();
+        }
+    }
+    else {
+        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
+        for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
+            pair->browser()->setIsInitialized(false);
+            pair->browser()->setImageCollectionIsLoaded(false);
+            pair->browser()->reload();
+        }
+    }
+}
+
+
 /**
  * Takes an index to an image and selects that image in the currently
  * selected sky browser.
@@ -419,6 +450,10 @@ namespace {
 [[codegen::luawrap]] void createTargetBrowserPair() {
     using namespace openspace;
 
+    if (!global::windowDelegate->isMaster()) {
+        return;
+    }
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     int uniqueIdentifier = module->uniqueIdentifierCounter();
@@ -480,23 +515,23 @@ namespace {
 
     global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::RemoteScripting::No
+        scripting::ScriptEngine::RemoteScripting::Yes
     );
 
     global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + target + ");",
-        scripting::ScriptEngine::RemoteScripting::No
+        scripting::ScriptEngine::RemoteScripting::Yes
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
         + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::No
+        scripting::ScriptEngine::RemoteScripting::Yes
     );
 
     global::scriptEngine->queueScript(
         "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::No
+        scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
@@ -625,6 +660,21 @@ namespace {
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->setBorderColor(glm::ivec3(red, green, blue));
+    }
+}
+
+/**
+ * Takes an identifier to a sky browser and a radius value between 0 and 1, where 0 is
+ * rectangular and 1 is circular
+ */
+[[codegen::luawrap]] void setBorderRadius(std::string identifier, double radius) {
+    using namespace openspace;
+
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    TargetBrowserPair* pair = module->pair(identifier);
+    // Make sure the webpage has loaded properly before executing javascript on it
+    if (pair && pair->browser()->isInitialized()) {
+        pair->setBorderRadius(std::clamp(radius, 0.0, 1.0));
     }
 }
 

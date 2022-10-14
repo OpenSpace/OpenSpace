@@ -49,6 +49,7 @@ public:
     void setRatio(float ratio);
     void setColor(glm::ivec3 color);
     void setVerticalFov(double fov);
+    void setBorderRadius(double radius);
 
     // Display
     void highlight(const glm::ivec3& addition);
@@ -61,9 +62,9 @@ private:
     properties::FloatProperty _crossHairSize;
     properties::FloatProperty _showRectangleThreshold;
     properties::FloatProperty _lineWidth;
+    properties::DoubleProperty _verticalFov;
 
-    double _verticalFov = 10.0;
-
+    double _borderRadius = 0.0;
     glm::ivec3 _borderColor = glm::ivec3(230);
     float _ratio = 1.f;
 };

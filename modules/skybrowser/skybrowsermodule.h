@@ -101,6 +101,7 @@ private:
     properties::DoubleProperty _browserAnimationSpeed;
     properties::BoolProperty _hideTargetsBrowsersWithGui;
     properties::BoolProperty _inverseZoomDirection;
+    properties::BoolProperty _synchronizeAim;
     properties::DoubleProperty _spaceCraftAnimationTime;
     properties::StringProperty _wwtImageCollectionUrl;
 

@@ -42,7 +42,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
-        "The speck label file with tha data for the labels"
+        "The speck label file with the data for the labels"
     };
 
     constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
