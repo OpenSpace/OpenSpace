@@ -73,6 +73,9 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <vector>
 
+#include <modules/globebrowsing/src/screenspacevideorenderable.h>
+
+
 #include <gdal.h>
 
 #ifdef _MSC_VER
@@ -306,6 +309,14 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul::TemplateFactory<TileProvider>* fTileProvider =
         FactoryManager::ref().factory<TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
+
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+
+    // Register ScreenSpaceSkyBrowser
+    fScreenSpaceRenderable->registerClass<ScreenSpaceVideoRenderable>("ScreenSpaceVideoRenderable");
+
 
 
     fTileProvider->registerClass<DefaultTileProvider>("DefaultTileLayer");

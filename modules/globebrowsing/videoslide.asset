@@ -1,0 +1,27 @@
+local slide = {
+  Identifier = "TestVideoSlide2",
+  File = "C:/Users/ylvaselling/Downloads/equirectangular-projection-testmovie02.mp4",
+  Name = "Test Video Slide",
+  Enabled = asset.enabled,
+  Type = "ScreenSpaceVideoRenderable",
+  Description = [[Testing video]]
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(slide)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(slide)
+end)
+
+asset.export("slide", slide)
+
+asset.meta = {
+  Name = "Aqua Modis (Temporal)",
+  Version = "1.1",
+  Description = "GIBS hosted layer",
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
+  License = "NASA"
+}
