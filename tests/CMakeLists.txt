@@ -40,8 +40,9 @@ add_executable(
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
   test_spicemanager.cpp
-  test_timequantizer.cpp
+  test_timeconversion.cpp
   test_timeline.cpp
+  test_timequantizer.cpp
 
   property/test_property_optionproperty.cpp
   property/test_property_listproperties.cpp

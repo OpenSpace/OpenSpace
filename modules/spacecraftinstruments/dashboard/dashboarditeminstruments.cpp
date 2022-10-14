@@ -144,7 +144,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             ghoul::fontrendering::CrDirection::Down
         );
 
-        std::pair<double, std::string> remainingConv = simplifyTime(remaining);
+        std::pair<double, std::string_view> remainingConv = simplifyTime(remaining);
 
         // If the remaining time is below 5 minutes, we switch over to seconds display
         if (remaining < 5 * 60) {
