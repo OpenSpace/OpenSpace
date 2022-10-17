@@ -65,7 +65,8 @@
 namespace {
     constexpr const char _loggerCat[] = "ExoplanetsDataViewer";
 
-    constexpr const char RenderDataFileName[] = "${TEMPORARY}/pointrenderdata.dat";
+    constexpr const char RenderDataFile[] = "${TEMPORARY}/pointrenderdata.dat";
+    constexpr const char LabelsFile[] = "${TEMPORARY}/exosystems.label";
 
     constexpr const char WebpagePath[] = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
 
@@ -445,16 +446,22 @@ void DataViewer::initializeRenderables() {
 
     writeRenderDataToFile();
 
-    if (!std::filesystem::is_regular_file(absPath(RenderDataFileName))) {
+    std::filesystem::path dataFilePath = absPath(RenderDataFile);
+    std::filesystem::path labelsFilePath = absPath(LabelsFile);
+
+    if (!std::filesystem::is_regular_file(dataFilePath)) {
         LWARNING("Count not find data file for points rendering");
+        return;
+    }
+
+    if (!std::filesystem::is_regular_file(labelsFilePath)) {
+        LWARNING("Count not find file for labels rendering");
         return;
     }
 
     ghoul::Dictionary gui;
     gui.setValue("Name", "All Exoplanets"s);
     gui.setValue("Path", "/ExoplanetExplorer"s);
-
-    std::filesystem::path dataFilePath = absPath(RenderDataFileName);
 
     ghoul::Dictionary renderable;
 
@@ -472,6 +479,13 @@ void DataViewer::initializeRenderables() {
 
     renderable.setValue("DataFile", dataFilePath.string());
     renderable.setValue("HighlightColor", glm::dvec3(DefaultSelectedColor));
+
+    ghoul::Dictionary labels;
+    labels.setValue("File", labelsFilePath.string());
+    labels.setValue("Size", 15);
+    labels.setValue("MinMaxSize", glm::ivec2(4, 12));
+    labels.setValue("Unit", "pc"s);
+    renderable.setValue("Labels", labels);
 
     ghoul::Dictionary node;
     node.setValue("Identifier", std::string(ExoplanetsExpertToolModule::GlyphCloudIdentifier));
@@ -2542,18 +2556,26 @@ glm::vec4 DataViewer::colorFromColormap(const ExoplanetItem& item,
 }
 
 void DataViewer::writeRenderDataToFile() {
-    std::ofstream file(absPath(RenderDataFileName), std::ios::binary);
+    std::ofstream file(absPath(RenderDataFile), std::ios::binary);
     if (!file) {
-        LERROR(fmt::format("Cannot open file '{}' for writing", RenderDataFileName));
+        LERROR(fmt::format("Cannot open file '{}' for writing", RenderDataFile));
         return;
     }
 
+    std::ofstream labelfile(absPath(LabelsFile));
+    if (!labelfile) {
+        LERROR(fmt::format("Cannot open file '{}' for writing", LabelsFile));
+    }
+    labelfile << "textcolor 1" << std::endl;
+
     LDEBUG("Writing render data to file");
+
+    std::vector<size_t> indicesWithPositions;
+    indicesWithPositions.reserve(_filteredData.size());
 
     // For now, only write the filtered data. Later on we might want to render the
     // filtered out points somehow and then we should write out the full dataset
-    std::vector<size_t> indicesWithPositions;
-    indicesWithPositions.reserve(_filteredData.size());
+
     for (size_t index : _filteredData) {
         const ExoplanetItem& item = _data[index];
         if (item.position.has_value()) {
@@ -2561,6 +2583,9 @@ void DataViewer::writeRenderDataToFile() {
         }
     }
     indicesWithPositions.shrink_to_fit();
+
+    std::vector<std::string_view> hosts;
+    hosts.reserve(_filteredData.size());
 
     // TODO: use size_t instead of unsigned int
 
@@ -2599,7 +2624,19 @@ void DataViewer::writeRenderDataToFile() {
             int component = item.component - 'a';
             file.write(reinterpret_cast<const char*>(&component), sizeof(int));
         }
+
+        // Write label to file
+        bool isAdded = std::find(hosts.begin(), hosts.end(), item.hostName) != hosts.end();
+        if (!isAdded) {
+            labelfile << fmt::format(
+                "{} {} {} text {}",
+                position.x, position.y, position.z, item.hostName
+            );
+            labelfile << std::endl;
+            hosts.push_back(item.hostName);
+        }
     }
+
 }
 
 void DataViewer::updateSelectionInRenderable() {

@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/labelscomponent.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -48,6 +49,7 @@ class RenderableExoplanetGlyphCloud : public Renderable {
 public:
     RenderableExoplanetGlyphCloud(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -86,6 +88,11 @@ private:
 
     std::vector<GlyphData> _fullGlyphData;
     std::vector<int> _glyphIndices; // indices of the points in the dataviewer
+
+    // Labels
+    bool _hasLabels = false;
+    properties::BoolProperty _drawLabels;
+    std::unique_ptr<LabelsComponent> _labels;
 
     GLuint _primaryPointsVAO = 0;
     GLuint _primaryPointsVBO = 0;
