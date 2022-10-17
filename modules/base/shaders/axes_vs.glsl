@@ -33,6 +33,7 @@ out vec3 vs_positionModelSpace;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
+
 void main() {
   vec4 positionViewSpace = modelViewTransform * vec4(in_position, 1.0);
   vec4 positionClipSpace = projectionTransform * positionViewSpace;

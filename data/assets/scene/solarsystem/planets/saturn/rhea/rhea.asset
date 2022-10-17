@@ -47,7 +47,7 @@ local Rhea = {
   GUI = {
     Name = "Rhea",
     Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[Second largest moon of Saturn.]]
+    Description = "Second largest moon of Saturn"
   }
 }
 
@@ -66,7 +66,7 @@ asset.export(Rhea)
 asset.meta = {
   Name = "Rhea",
   Version = "1.0",
-  Description = [[ Rhea globe with labels.]],
+  Description = "Rhea globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

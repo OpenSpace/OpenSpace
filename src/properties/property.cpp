@@ -31,10 +31,10 @@
 #include <algorithm>
 
 namespace {
-    constexpr const char* MetaDataKeyGroup = "Group";
-    constexpr const char* MetaDataKeyReadOnly = "isReadOnly";
-    constexpr const char* MetaDataKeyViewOptions = "ViewOptions";
-    constexpr const char* MetaDataKeyVisibility = "Visibility";
+    constexpr std::string_view MetaDataKeyGroup = "Group";
+    constexpr std::string_view MetaDataKeyReadOnly = "isReadOnly";
+    constexpr std::string_view MetaDataKeyViewOptions = "ViewOptions";
+    constexpr std::string_view MetaDataKeyVisibility = "Visibility";
 } // namespace
 
 namespace openspace::properties {
@@ -172,7 +172,7 @@ const std::string& Property::description() const {
 }
 
 void Property::setGroupIdentifier(std::string groupId) {
-    _metaData.setValue(MetaDataKeyGroup, std::move(groupId));
+    _metaData.setValue(std::string(MetaDataKeyGroup), std::move(groupId));
 }
 
 std::string Property::groupIdentifier() const {
@@ -186,7 +186,7 @@ std::string Property::groupIdentifier() const {
 
 void Property::setVisibility(Visibility visibility) {
     _metaData.setValue(
-        MetaDataKeyVisibility,
+        std::string(MetaDataKeyVisibility),
         static_cast<std::underlying_type_t<Visibility>>(visibility)
     );
 }
@@ -198,13 +198,13 @@ Property::Visibility Property::visibility() const {
 }
 
 void Property::setReadOnly(bool state) {
-    _metaData.setValue(MetaDataKeyReadOnly, state);
+    _metaData.setValue(std::string(MetaDataKeyReadOnly), state);
 }
 
 void Property::setViewOption(std::string option, bool value) {
     ghoul::Dictionary d;
     d.setValue(option, value);
-    _metaData.setValue(MetaDataKeyViewOptions, d);
+    _metaData.setValue(std::string(MetaDataKeyViewOptions), d);
 }
 
 bool Property::viewOption(const std::string& option, bool defaultValue) const {

@@ -51,7 +51,7 @@ local Phobos = {
   GUI = {
     Name = "Phobos",
     Path = "/Solar System/Planets/Mars",
-    Description = [[One of two moons of Mars.]]
+    Description = "One of two moons of Mars"
   }
 }
 
@@ -74,7 +74,7 @@ local PhobosTrail = {
   GUI = {
     Name = "Phobos Trail",
     Path = "/Solar System/Planets/Mars",
-    Description = [[Trail for Phobos.]]
+    Description = "Trail for Phobos"
   }
 }
 
@@ -96,7 +96,7 @@ asset.export(PhobosTrail)
 asset.meta = {
   Name = "Phobos",
   Version = "1.0",
-  Description = [[ RenderableModel and Trail for Phobos.]],
+  Description = "RenderableModel and Trail for Phobos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

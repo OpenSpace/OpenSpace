@@ -15,7 +15,7 @@ local MercuryBarycenter = {
     Name = "Mercury Barycenter",
     Path = "/Solar System/Planets/Mercury",
     Hidden = true,
-    Description = [[ Mercury Barycenter position]],
+    Description = "Mercury Barycenter position",
   }
 }
 
@@ -34,7 +34,7 @@ asset.export(MercuryBarycenter)
 asset.meta = {
   Name = "Mercury Transforms",
   Version = "1.1",
-  Description = [[ Mercury Barycenter transform]],
+  Description = "Mercury Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -79,11 +79,11 @@ TouchInputHolder::TouchInputHolder(TouchInput input)
 {}
 
 bool TouchInputHolder::tryAddInput(TouchInput input) {
-    if(_inputs.empty()) {
+    if (_inputs.empty()) {
         _inputs.emplace_front(input);
         return true;
     }
-    constexpr const double ONE_MS = 0.001;
+    constexpr double ONE_MS = 0.001;
     const TouchInput& lastInput = latestInput();
     input.dx = input.x - lastInput.x;
     input.dy = input.y - lastInput.y;
@@ -103,7 +103,7 @@ bool TouchInputHolder::tryAddInput(TouchInput input) {
         successful = true;
     }
 
-    constexpr const int MaxInputs = 128;
+    constexpr int MaxInputs = 128;
     if (_inputs.size() > MaxInputs) {
         _inputs.pop_back();
     }

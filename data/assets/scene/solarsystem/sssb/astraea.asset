@@ -64,12 +64,11 @@ asset.export(AstraeaTrail)
 asset.meta = {
   Name = "5 Astraea",
   Version = "1.2",
-  Description = [[ This asset contains the trail
-    and position of 5 Astraea from 2014 JAN 01 00:00:00
-    to 2050 JAN 01 00:00:00. Data from JPL Horizons']],
+  Description = [[This asset contains the trail and position of 5 Astraea from
+    2014 JAN 01 00:00:00 to 2050 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "Zach Shaffer",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
-  License = [[ JPL-authored documents are sponsored by NASA under Contract
-    NAS7-030010. All documents available from this server may be protected
-    under the U.S. and Foreign Copyright Laws."]]
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
+    All documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws]]
 }

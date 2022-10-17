@@ -17,7 +17,7 @@ local UranusBarycenter = {
     Name = "Uranus Barycenter",
     Path = "/Solar System/Planets/Uranus",
     Hidden = true,
-    Description = [[ Uranus Barycenter position]],
+    Description = "Uranus Barycenter position",
   }
 }
 
@@ -36,7 +36,7 @@ asset.export(UranusBarycenter)
 asset.meta = {
   Name = "Uranus Transforms",
   Version = "1.1",
-  Description = [[ Uranus Barycenter transform]],
+  Description = "Uranus Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

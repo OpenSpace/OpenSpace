@@ -33,7 +33,7 @@
 #include <sstream>
 
 namespace {
-    constexpr const char _loggerCat[] = "VersionChecker";
+    constexpr std::string_view _loggerCat = "VersionChecker";
 } // namespace
 
 namespace openspace {
@@ -113,7 +113,7 @@ void VersionChecker::cancel() {
             }
             else {
                 LINFO(fmt::format(
-                    "OpenSpace version {}.{}.{} is up to date.",
+                    "OpenSpace version {}.{}.{} is up to date",
                     currentVersion.major,
                     currentVersion.minor,
                     currentVersion.patch
@@ -127,7 +127,7 @@ void VersionChecker::cancel() {
             std::vector<char> data = _request->downloadedData();
             std::string response(data.begin(), data.end());
             LWARNING(fmt::format(
-                "Failed to get latest OpenSpace version information from {}.",
+                "Failed to get latest OpenSpace version information from {}",
                 _request->url()
             ));
             _request = nullptr;

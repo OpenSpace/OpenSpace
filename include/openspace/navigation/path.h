@@ -76,6 +76,12 @@ public:
     CameraPose traversePath(double dt, float speedScale = 1.f);
 
     /**
+     * Function that can be used to permaturely quit a path ,for example when skipping
+     * to the end
+     */
+    void quitPath();
+
+    /**
      * Return the identifer of the node that is the current appropriate anchor node, of
      * the start and end waypoint's reference node. Dtermined based on how far along the
      * path we have traveled

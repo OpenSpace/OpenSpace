@@ -91,3 +91,6 @@ create_new_module(
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
+
+target_precompile_headers(${spacecraftinstruments_module} PRIVATE
+)

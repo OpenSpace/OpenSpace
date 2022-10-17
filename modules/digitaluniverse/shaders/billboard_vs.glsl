@@ -33,6 +33,7 @@ in float in_dvarScaling;
 flat out vec4 colorMap;
 flat out float dvarScaling;
 
+
 void main() {
   colorMap = in_colormap;
   dvarScaling = in_dvarScaling;

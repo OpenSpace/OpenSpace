@@ -148,8 +148,10 @@ public:
     std::vector<Syncable*> getSyncables();
 
     // Static constants
-    static const glm::dvec3 ViewDirectionCameraSpace;
-    static const glm::dvec3 UpDirectionCameraSpace;
+    // (2021-07-16, emmbr) Note that this hard coded vector for the view direction is also
+    // used in a qauternion -> view direction helper function in ghoul/glm.h
+    static constexpr glm::dvec3 ViewDirectionCameraSpace = glm::dvec3(0.0, 0.0, -1.0);
+    static constexpr glm::dvec3 UpDirectionCameraSpace = glm::dvec3(0.0, 1.0, 0.0);
 
 private:
 

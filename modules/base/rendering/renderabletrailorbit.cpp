@@ -93,7 +93,7 @@ namespace {
         "The objects period, i.e. the length of its orbit around the parent object given "
         "in (Earth) days. In the case of Earth, this would be a sidereal year "
         "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession."
+        "possible to show the effects of precession"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
@@ -102,14 +102,14 @@ namespace {
         "The number of samples along the orbit. This determines the resolution of the "
         "trail; the tradeoff being that a higher resolution is able to resolve more "
         "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used."
+        "smoother the trail, but also more memory will be used"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
        "RenderableType",
        "RenderableType",
        "This value specifies if the orbit should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step. Default is Transparent."
+       "Opaque, Transparent, or Overlay rendering step. Default is Transparent"
     };
 
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
@@ -361,7 +361,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     }
 
 
-    constexpr const double Epsilon = 1e-7;
+    constexpr double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
     if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
         return { false, false, 0 };

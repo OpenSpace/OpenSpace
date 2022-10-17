@@ -31,7 +31,7 @@ local OumuamuaTrail = {
     Name = "'Oumuamua Trail",
     Path = "/Solar System/Interstellar",
     Description = [[Trail of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01 00:00:00.
-     Data from JPL Horizons']],
+      Data from JPL Horizons]],
   }
 }
 
@@ -47,8 +47,8 @@ local OumuamuaPosition = {
   GUI = {
     Name = "'Oumuamua",
     Path = "/Solar System/Interstellar",
-    Description = [[ Position of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01
-     00:00:00. Data from JPL Horizons']],
+    Description = [[Position of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01
+      00:00:00. Data from JPL Horizons]],
   }
 }
 
@@ -70,7 +70,7 @@ asset.export(OumuamuaTrail)
 asset.meta = {
   Name = "'Oumuamua",
   Version = "1.2",
-  Description = [[ This asset contains the trail and position of 'Oumuamua from 2014
+  Description = [[This asset contains the trail and position of 'Oumuamua from 2014
     JAN 01 00:00:00 to 2050 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",

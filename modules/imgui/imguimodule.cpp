@@ -44,37 +44,37 @@
 // #define SHOW_IMGUI_HELPERS
 
 namespace {
-    constexpr const char* _loggerCat = "GUI";
-    constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
-    constexpr const float FontSize = 14.f;
+    constexpr std::string_view _loggerCat = "GUI";
+    constexpr std::string_view GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+    constexpr float FontSize = 14.f;
 
     ImFont* captionFont = nullptr;
 
-    constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
+    constexpr std::array<const char*, 2> UniformNames = { "tex", "ortho" };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not."
+        "This setting determines whether this object will be visible or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is Collapsed",
-        "This setting determines whether this window is collapsed or not."
+        "This setting determines whether this window is collapsed or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
-        "explaining what impact they have on the visuals."
+        "explaining what impact they have on the visuals"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip Delay (in s)",
-        "This value determines the delay in seconds after which the tooltip is shown."
+        "This value determines the delay in seconds after which the tooltip is shown"
     };
 } // namespace
 
@@ -153,30 +153,49 @@ ImGUIModule::ImGUIModule()
     });
 
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier mod, KeyAction action) -> bool {
+        [&](Key key, KeyModifier mod, KeyAction action,
+            IsGuiWindow isGuiWindow) -> bool
+        {
             ZoneScopedN("ImGUI")
 
-            return _isEnabled ? keyCallback(key, mod, action) : false;
+            if (!isGuiWindow || !_isEnabled) {
+                return false;
+            }
+            return keyCallback(key, mod, action);
         }
     );
 
     global::callback::character->emplace_back(
-        [&](unsigned int codepoint, KeyModifier modifier) -> bool {
+        [&](unsigned int codepoint, KeyModifier modifier,
+            IsGuiWindow isGuiWindow) -> bool
+        {
             ZoneScopedN("ImGUI")
 
-            return _isEnabled ? charCallback(codepoint, modifier) : false;
+            if (!isGuiWindow || !_isEnabled) {
+                return false;
+            }
+            return charCallback(codepoint, modifier);
         }
     );
 
     global::callback::mousePosition->emplace_back(
-        [&](double x, double y) {
+        [&](double x, double y, IsGuiWindow isGuiWindow) {
+            if (!isGuiWindow) {
+                return; // do nothing
+            }
             _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
         }
     );
 
     global::callback::mouseButton->emplace_back(
-        [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
+        [&](MouseButton button, MouseAction action, KeyModifier,
+            IsGuiWindow isGuiWindow) -> bool
+        {
             ZoneScopedN("ImGUI")
+
+            if (!isGuiWindow) {
+                return false;
+            }
 
             if (action == MouseAction::Press) {
                 _mouseButtons |= (1 << static_cast<int>(button));
@@ -190,10 +209,13 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseScrollWheel->emplace_back(
-        [&](double, double posY) -> bool {
+        [&](double, double posY, IsGuiWindow isGuiWindow) -> bool {
             ZoneScopedN("ImGUI")
 
-            return _isEnabled ? mouseWheelCallback(posY) : false;
+            if (!isGuiWindow || !_isEnabled) {
+                return false;
+            }
+            return mouseWheelCallback(posY);
         }
     );
 
@@ -225,7 +247,7 @@ void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
             const std::vector<SceneGraphNode*>& nodes = scene ?
                 scene->allSceneGraphNodes() :
                 std::vector<SceneGraphNode*>();
-            
+
             return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
         }
     );
@@ -412,7 +434,7 @@ void ImGUIModule::internalInitializeGL() {
         sizeof(ImDrawVert),
         nullptr
     );
-    
+
     glEnableVertexAttribArray(uvAttrib);
     glVertexAttribPointer(
         uvAttrib,
@@ -422,7 +444,7 @@ void ImGUIModule::internalInitializeGL() {
         sizeof(ImDrawVert),
         reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
     );
-    
+
     glEnableVertexAttribArray(colorAttrib);
     glVertexAttribPointer(
         colorAttrib,

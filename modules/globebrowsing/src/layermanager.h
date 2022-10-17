@@ -48,19 +48,18 @@ class TileTextureInitData;
  */
 class LayerManager : public properties::PropertyOwner {
 public:
-    constexpr static const int NumLayerGroups = layergroupid::NUM_LAYER_GROUPS;
+    constexpr static size_t NumLayerGroups = layers::Groups.size();
 
     LayerManager();
 
     void initialize(const ghoul::Dictionary& layerGroupsDict);
     void deinitialize();
 
-    Layer* addLayer(layergroupid::GroupID groupId,
-        const ghoul::Dictionary& layerDict);
-    void deleteLayer(layergroupid::GroupID groupId, const std::string& layerName);
+    Layer* addLayer(layers::Group::ID groupId, const ghoul::Dictionary& layerDict);
+    void deleteLayer(layers::Group::ID groupId, const std::string& layerName);
 
-    LayerGroup& layerGroup(layergroupid::GroupID);
-    const LayerGroup& layerGroup(layergroupid::GroupID) const;
+    LayerGroup& layerGroup(layers::Group::ID groupId);
+    const LayerGroup& layerGroup(layers::Group::ID groupId) const;
 
     bool hasAnyBlendingLayersEnabled() const;
 

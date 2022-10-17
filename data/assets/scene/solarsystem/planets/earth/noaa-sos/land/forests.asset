@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Forest Change (Extent, Gain, and Loss) - 2000 - 2014"
 local Identifier = "noaa-sos-land-forests"
-local Description = [[ This dataset shows annual tree cover extent,gain, and loss from 
+local Description = [[This dataset shows annual tree cover extent,gain, and loss from 
 the year 2001 to 2014, at 30 meter resolution, as colored layers that can be seen 
 together or one at a time as individual layers that can be toggled on and off. Green is 
 used to represent tree cover in 2000, red shows tree cover loss between 2001-2014, 
 blue shows tree cover gain between 2001-2014, and purple is gain and loss together due to 
-replanting after loss has occurred.   ]]
+replanting after loss has occurred]]
 local URL = "https://sos.noaa.gov/catalog/datasets/forest-change-extent-gain-and-loss-2000-2014/"
 
 
@@ -107,7 +107,7 @@ asset.export(label1)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

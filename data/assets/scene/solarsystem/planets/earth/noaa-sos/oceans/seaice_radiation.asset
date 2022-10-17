@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Ice: Fraction and Solar Radiation Absorption"
 local Identifier = "noaa-sos-oceans-seaice_radiation"
-local Description = [[ While sea ice is mostly white and reflects the sun's rays, ocean 
+local Description = [[While sea ice is mostly white and reflects the sun's rays, ocean 
 water is dark and absorbs the sun's energy at a higher rate. A decline in the region's 
 albedo - its reflectivity, in effect - has been a key concern among scientists since the 
 summer Arctic sea ice cover began shrinking in recent decades. As more of the sun's 
 energy is absorbed by the climate system, it enhances ongoing warming in the region, 
-which is more pronounced than anywhere else on the planet.   ]]
+which is more pronounced than anywhere else on the planet]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-fraction-and-solar-radiation-absorption/"
 
 
@@ -50,7 +50,7 @@ asset.export(layer_solar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

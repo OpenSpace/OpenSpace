@@ -36,7 +36,7 @@
 #include <functional>
 
 namespace {
-    constexpr const char _loggerCat[] = "EventInfo";
+    constexpr std::string_view _loggerCat = "EventInfo";
 } // namespace
 
 using namespace std::string_literals;

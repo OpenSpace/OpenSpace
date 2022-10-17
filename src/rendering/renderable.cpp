@@ -30,7 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/navigation/navigationhandler.h> 
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
@@ -40,19 +40,19 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    constexpr std::string_view KeyType = "Type";
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not."
+        "This setting determines whether this object will be visible or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this renderable. A value of 0 means "
-        "completely transparent."
+        "completely transparent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
@@ -70,7 +70,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable Type",
-        "This tells the type of the renderable.",
+        "This tells the type of the renderable",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -79,15 +79,15 @@ namespace {
         "RenderBinMode",
         "Render Bin Mode",
         "This value specifies if the renderable should be rendered in the Background,"
-        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step.",
+        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
         "DimInAtmosphere",
         "Dim In Atmosphere",
-        "Enables/Disables if the object should be dimmed if the camera is in an "
-        "atmosphere.",
+        "Enables/Disables if the object should be dimmed when the camera is in the "
+        "sunny part of an atmosphere",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -207,7 +207,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     if (p.renderBinMode.has_value()) {
         setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
     }
-    
+
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
     addProperty(_dimInAtmosphere);
 }
@@ -267,6 +267,10 @@ bool Renderable::matchesRenderBinMask(int binMask) {
     return binMask & static_cast<int>(renderBin());
 }
 
+void Renderable::setFade(float fade) {
+    _fade = fade;
+}
+
 bool Renderable::isVisible() const {
     return _enabled && _opacity > 0.f && _fade > 0.f;
 }
@@ -309,7 +313,7 @@ void Renderable::registerUpdateRenderBinFromOpacity() {
 }
 
 float Renderable::opacity() const {
-    // Rendering should depend on if camera is in the atmosphere and if camera is at the 
+    // Rendering should depend on if camera is in the atmosphere and if camera is at the
     // dark part of the globe
     return _dimInAtmosphere ?
         _opacity * _fade * global::navigationHandler->camera()->atmosphereDimmingFactor() :

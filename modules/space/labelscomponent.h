@@ -22,57 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
-#include "floatoperations.glsl"
+#ifndef __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#define __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
 
-out vec4 _out_color_;
+#include <openspace/properties/propertyowner.h>
 
-void main() {
-    Fragment frag = getFragment();
-    int sampleMask = gl_SampleMaskIn[0];
+#include <modules/space/speckloader.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
+#include <ghoul/glm.h>
+#include <filesystem>
 
-    if (frag.depth < 0) {
-//         discard;
-    }
+namespace ghoul::fontrendering { class Font; }
 
-    bool storeInAbuffer = false;
+namespace openspace {
+struct RenderData;
 
-    if (frag.forceFboRendering) {
-        storeInAbuffer = false;
-    } else {
-        storeInAbuffer = frag.color.a < 1.0 ||
-                          sampleMask != 255 ||
-                          frag.blend != BLEND_MODE_NORMAL;
-        // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
-    }
+namespace documentation { struct Documentation; }
 
-    if (storeInAbuffer) {
-        uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-        if (newHead >= #{rendererData.maxTotalFragments}) {
-            discard; // ABuffer is full!
-        }
-        uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
+class LabelsComponent : public properties::PropertyOwner {
+public:
+    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+    ~LabelsComponent() override = default;
 
-        ABufferFragment aBufferFrag;
-        _color_(aBufferFrag, frag.color);
-        _depth_(aBufferFrag, frag.depth);
-        _blend_(aBufferFrag, frag.blend);
+    speck::Labelset& labelSet();
+    const speck::Labelset& labelSet() const;
 
-        _type_(aBufferFrag, 0); // 0 = geometry type
-        _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-        _next_(aBufferFrag, prevHead);
+    void initialize();
 
-        storeFragment(newHead, aBufferFrag);
-        discard;
-    } else {
-        _out_color_ = frag.color;
-        gl_FragDepth = normalizeFloat(frag.depth);
-    }
+    void loadLabels();
 
-    //gl_FragDepth = 1;
+    bool isReady() const;
 
-}
+    void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+        float fadeInVariable = 1.f);
 
+    static documentation::Documentation Documentation();
+
+private:
+    std::filesystem::path _labelFile;
+    DistanceUnit _unit = DistanceUnit::Parsec;
+    speck::Labelset _labelset;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
+
+    // Properties
+    properties::FloatProperty _opacity;
+    properties::Vec3Property _color;
+    properties::FloatProperty _size;
+    properties::FloatProperty _fontSize;
+    properties::IVec2Property _minMaxSize;
+    properties::BoolProperty _faceCamera;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__

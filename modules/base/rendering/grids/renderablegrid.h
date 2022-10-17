@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/labelscomponent.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -43,6 +44,7 @@ class RenderableGrid : public Renderable {
 public:
     RenderableGrid(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -55,25 +57,36 @@ public:
 
 protected:
     struct Vertex {
-        float location[3];
+        double location[3];
     };
 
     ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
     properties::Vec3Property _color;
+    properties::Vec3Property _highlightColor;
     // @TODO (abock, 2021-01-28)  This was a UVec2Property before, but it wasn't supported
     // be the codegen.  As soon as it does, this should be changed back
     properties::IVec2Property _segments;
+    properties::IVec2Property _highlightRate;
     properties::FloatProperty _lineWidth;
+    properties::FloatProperty _highlightLineWidth;
     properties::Vec2Property _size;
 
     bool _gridIsDirty = true;
 
     GLuint _vaoID = 0;
     GLuint _vBufferID = 0;
+    GLuint _highlightVaoID = 0;
+    GLuint _highlightVBufferID = 0;
 
     GLenum _mode = GL_LINES;
     std::vector<Vertex> _varray;
+    std::vector<Vertex> _highlightArray;
+
+    // Labels
+    bool _hasLabels = false;
+    properties::BoolProperty _drawLabels;
+    std::unique_ptr<LabelsComponent> _labels;
 };
 
 }// namespace openspace

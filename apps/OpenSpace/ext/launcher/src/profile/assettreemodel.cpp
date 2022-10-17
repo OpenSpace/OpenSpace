@@ -29,8 +29,8 @@
 #include <QColor>
 
 namespace {
-    constexpr const char* Header1 = "Asset";
-    constexpr const char* Header2 = "Enabled";
+    constexpr std::string_view Header1 = "Asset";
+    constexpr std::string_view Header2 = "Enabled";
 
     struct ImportElement {
         std::string line;
@@ -140,8 +140,8 @@ AssetTreeModel::AssetTreeModel(QObject* parent)
 {
     _rootItem = std::make_unique<AssetTreeItem>(
         std::vector<QVariant> {
-            QString::fromStdString(Header1),
-            QString::fromStdString(Header2)
+            QString::fromStdString(std::string(Header1)),
+            QString::fromStdString(std::string(Header2))
         }
     );
 }

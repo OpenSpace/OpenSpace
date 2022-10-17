@@ -29,13 +29,13 @@
 #define BLEND_MODE_ADDITIVE 1u
 
 struct Fragment {
-    vec4 color;
-    vec4 gPosition;
-    vec4 gNormal;
-    float depth;
-    uint blend;
-    bool forceFboRendering;
-    bool disableLDR2HDR;
+  vec4 color;
+  vec4 gPosition;
+  vec4 gNormal;
+  float depth;
+  uint blend;
+  bool forceFboRendering;
+  bool disableLDR2HDR;
 };
 
 #endif

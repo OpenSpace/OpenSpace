@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/labelscomponent.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
@@ -46,6 +47,7 @@ public:
     RenderableRadialGrid(const ghoul::Dictionary& dictionary);
     ~RenderableRadialGrid() override = default;
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -85,6 +87,11 @@ protected:
 
     std::vector<GeometryData> _circles;
     GeometryData _lines{GL_LINES};
+
+    // Labels
+    bool _hasLabels = false;
+    properties::BoolProperty _drawLabels;
+    std::unique_ptr<LabelsComponent> _labels;
 };
 
 }// namespace openspace

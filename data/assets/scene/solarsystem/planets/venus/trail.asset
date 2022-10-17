@@ -41,8 +41,8 @@ asset.export(VenusTrail)
 asset.meta = {
   Name = "Venus Trail",
   Version = "1.1",
-  Description = [[ Trail of Venus as observed by the Sun. Data from NASA Spice (see
-    base spice asset)]],
+  Description = [[Trail of Venus as observed by the Sun. Data from NASA Spice (see base
+    spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

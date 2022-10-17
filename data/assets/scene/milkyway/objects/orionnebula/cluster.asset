@@ -34,7 +34,7 @@ local OrionClusterStars = {
   GUI = {
     Name = "Orion Nebula Star Cluster",
     Path = "/Milky Way/Orion",
-    Description = [[ In order to have an accurate depiction of the Orion nebula, we
+    Description = [[In order to have an accurate depiction of the Orion nebula, we
       need to include the star cluster that was birthed from it. We turned to a study of the
       cluster's stellar population by Lynne Hillenbrand, who was working at the University of 
       California, Berkeley at the time. The catalog from her paper contains more than 1500 
@@ -46,7 +46,7 @@ local OrionClusterStars = {
       placed each star along a line of sight through this imaginary sphere centered on the 
       cluster. In this sense, these data are observed data and the view from Earth is accurate. 
       But the distance of each star has been derived from this educated-guess approach for the 
-      cluster distribution. ]]
+      cluster distribution]]
   }
 }
 
@@ -65,8 +65,8 @@ asset.export(OrionClusterStars)
 asset.meta = {
   Name = "Orion Nebula Star Cluster",
   Version = "1.1",
-  Description = [[ Digital Universe asset for the Orion star cluster. To be used in
-    conjunction with nebula model. Use orionnebula.asset to include both.]],
+  Description = [[Digital Universe asset for the Orion star cluster. To be used in
+    conjunction with nebula model. Use orionnebula.asset to include both]],
   Author = "AMNH Digital Universe",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

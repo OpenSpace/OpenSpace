@@ -35,10 +35,10 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "InstrumentTimesParser";
+    constexpr std::string_view _loggerCat = "InstrumentTimesParser";
 
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyInstrumentFiles = "Files";
+    constexpr std::string_view KeyInstrument = "Instrument";
+    constexpr std::string_view KeyInstrumentFiles = "Files";
 
     struct [[codegen::Dictionary(InstrumentTimesParser)]] Parameters {
         std::string target;

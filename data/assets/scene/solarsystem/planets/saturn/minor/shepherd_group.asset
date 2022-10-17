@@ -169,9 +169,9 @@ end
 asset.meta = {
   Name = "Saturn Shepherd Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Saturn's Shepherd moons:
-    Prometheus, Pandora, Atlas, Janus, Epimetheus, Daphnis and Pan. Blank globes
-    and SPICE trails are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Saturn's Shepherd moons: Prometheus,
+    Pandora, Atlas, Janus, Epimetheus, Daphnis and Pan. Blank globes and SPICE trails are
+    generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

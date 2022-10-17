@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "CarbonTracker: Fixed Scale"
 local Identifier = "noaa-sos-atmosphere-carbontracker_2000_2100-fixed_scale"
-local Description = [[ "NOAA encourages science that adds benefit to society and the 
+local Description = [["NOAA encourages science that adds benefit to society and the 
 environment. CarbonTracker does both." said retired Navy Vice Admiral Conrad 
 Lautenbacher, Ph.D., former undersecretary of commerce for oceans and atmosphere and NOAA 
 administrator. CarbonTracker is a system to keep track of carbon dioxide uptake and 
@@ -13,7 +13,7 @@ CarbonTracker has helped improve the understanding of carbon uptake and release 
 land and oceans, and how those sources and sinks are responding to the changing climate, 
 increasing levels of atmospheric CO2 (the CO2 fertilization effect), and human management 
 of land and oceans. CarbonTracker relies on the long-term monitoring of atmospheric CO2 
-performed by the NOAA Global Monitoring Division and international partners.  ]]
+performed by the NOAA Global Monitoring Division and international partners]]
 local URL = "https://sos.noaa.gov/catalog/datasets/carbon-tracker-fixed-scale/"
 
 
@@ -105,7 +105,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

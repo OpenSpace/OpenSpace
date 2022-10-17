@@ -36,24 +36,26 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <optional>
 #include <variant>
 
 namespace {
-    constexpr const std::array<const char*, 6> UniformNames = {
+    constexpr std::array<const char*, 6> UniformNames = {
         "color", "opacity", "mvpMatrix", "tex", "backgroundColor", "gamma"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this sceen space plane will be visible or not."
+        "This setting determines whether this sceen space plane will be visible or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-    UseRadiusAzimuthElevationInfo = {
+        UseRadiusAzimuthElevationInfo =
+    {
         "UseRadiusAzimuthElevation",
         "Use Radius Azimuth and Elevation",
         "This value determines whether the location of this screen space plane will be "
@@ -61,21 +63,21 @@ namespace {
         "using cartesian coordinates. By switching this value, the correct property will "
         "be shown or hidden. The Cartesian coordinate system is useful if a regular "
         "rendering is applied, whereas the radius azimuth elevation are most useful in a "
-        "planetarium environment."
+        "planetarium environment"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-    UsePerspectiveProjectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UsePerspectiveProjectionInfo =
+    {
         "UsePerspectiveProjection",
         "Use Perspective Projection",
-        "Determines whetether the z/radius values affects the size of the plane or not."
+        "Determines whetether the z/radius values affects the size of the plane or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CartesianPositionInfo = {
         "CartesianPosition",
         "Cartesian Coordinates",
         "This value determines the position of this screen space plane in Cartesian "
-        "three-dimensional coordinates (meters)."
+        "three-dimensional coordinates (meters)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusAzimuthElevationInfo = {
@@ -83,7 +85,7 @@ namespace {
         "Radius Azimuth Elevation",
         "This value determines the position of this screen space plane in a "
         "coordinate system based on radius (meters), azimuth (radians) and elevation "
-        "(radians)."
+        "(radians)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
@@ -91,29 +93,28 @@ namespace {
         "Scale Value",
         "This value determines a scale factor for the plane. The default size of a plane "
         "is determined by the concrete instance and reflects, for example, the size of "
-        "the image being displayed."
+        "the image being displayed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
         "Rotation",
         "Local Rotation",
-        "An euler rotation (x, y, z) to apply to the plane."
+        "An euler rotation (x, y, z) to apply to the plane"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
         "If set, the plane's texture is multiplied with this color. "
-        "Useful for applying a color grayscale images."
+        "Useful for applying a color grayscale images"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background Color",
         "The fixed color that is combined with the screen space renderable to create the "
         "final color. The actual color of the screen space renderable is alpha-blended "
-        "with the background color to produce the final result."
+        "with the background color to produce the final result"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
@@ -121,7 +122,7 @@ namespace {
         "Opacity",
         "This value determines the opacity of the screen space plane. If this value "
         "is 1, the plane is completely opaque, if this value is 0, the plane is "
-        "completely transparent."
+        "completely transparent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
@@ -140,20 +141,20 @@ namespace {
         "Delete",
         "Delete",
         "If this property is triggered, this screen space plane is removed from the "
-        "scene."
+        "scene"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face Camera",
         "If enabled, the local rotation is applied after the plane is rotated to face "
-        "the camera."
+        "the camera"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
-        "Sets the gamma correction of the texture."
+        "Sets the gamma correction of the texture"
     };
 
     float wrap(float value, float min, float max) {

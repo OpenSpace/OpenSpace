@@ -68,7 +68,7 @@ int main(int, char**) {
             progressBar.print(static_cast<int>(progress * 100.f));
         });
     }
-    std::cout << "Done synchronizing." << std::endl;
+    std::cout << "Done synchronizing" << std::endl;
 
     return 0;
 };

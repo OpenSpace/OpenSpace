@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Cascadia - 1700"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-cascadia"
-local Description = [[ Just before midnight on January 27, 1700 a tsunami struck the 
+local Description = [[Just before midnight on January 27, 1700 a tsunami struck the 
 coasts of Japan without warning since no one in Japan felt the earthquake that must have 
 caused it. Nearly 300 years later scientists and historians in Japan and the United 
 States solved the mystery of what caused this "orphan tsunami" through careful analysis 
@@ -21,7 +21,7 @@ the Great Alaska Earthquake of 1964. Such an earthquake would have ruptured the 
 along the entire length of the 1000 km (~600 mi) long fault of the Cascadia Subduction 
 Zone and severe shaking could have lasted for 5 minutes or longer. Its tsunami would 
 cross the Pacific Ocean and reach Japan in about 9 hours, so the earthquake must have 
-occurred around 9:00 at night in Cascadia on January 26, 1700 (05:00 January 27 UTC).   ]]
+occurred around 9:00 at night in Cascadia on January 26, 1700 (05:00 January 27 UTC)]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-cascadia-1700/"
 
 
@@ -84,7 +84,7 @@ asset.export(layer_null)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

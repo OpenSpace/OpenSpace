@@ -551,6 +551,16 @@ public:
     std::string convertFile(std::string filename, int depth = 0);
 
     /**
+     * Converts file format of a session recording file to the current format version
+     * (will determine the file format conversion to convert from based on the file's
+     * header version number). Accepts a relative path (currently from task runner dir)
+     * rather than a path assumed to be relative to ${RECORDINGS}.
+     *
+     * \param filename name of the file to convert
+     */
+    void convertFileRelativePath(std::string filenameRelative);
+
+    /**
      * Goes to legacy session recording inherited class, and calls its convertFile()
      * method, and then returns the resulting conversion filename.
      *
@@ -617,7 +627,6 @@ protected:
     bool handleRecordingFile(std::string filenameIn);
     static bool isPath(std::string& filename);
     void removeTrailingPathSlashes(std::string& filename);
-    void extractFilenameFromPath(std::string& filename);
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
@@ -854,7 +863,7 @@ public:
             //Read string length from file
             in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
             if (strLen > saveBufferStringSize_max) {
-                throw ConversionError("Invalid script size for conversion read.");
+                throw ConversionError("Invalid script size for conversion read");
             }
             //Read back full string
             std::vector<char> temp(strLen + 1);

@@ -726,10 +726,10 @@ Profile::Profile(const std::string& content) {
         }
         if (profile.find("camera") != profile.end()) {
             nlohmann::json c = profile.at("camera");
-            if (c["type"] == CameraNavState::Type) {
+            if (c["type"].get<std::string>() == CameraNavState::Type) {
                 camera = c.get<CameraNavState>();
             }
-            else if (c["type"] == CameraGoToGeo::Type) {
+            else if (c["type"].get<std::string>() == CameraGoToGeo::Type) {
                 camera = c.get<CameraGoToGeo>();
             }
             else {

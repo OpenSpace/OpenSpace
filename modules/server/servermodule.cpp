@@ -41,7 +41,7 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyInterfaces = "Interfaces";
+    constexpr std::string_view KeyInterfaces = "Interfaces";
 } // namespace
 
 namespace openspace {

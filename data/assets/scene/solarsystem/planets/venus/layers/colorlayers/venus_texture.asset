@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "venus.jpg",
+  Enabled = asset.enabled,
   Settings = {
     Opacity = 0.48,
     Gamma = 0.48
@@ -31,7 +32,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Venus Texture",
   Version = "1.0",
-  Description = [[ This asset supplies a default texture for Venus.]],
+  Description = "This asset supplies a default texture for Venus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

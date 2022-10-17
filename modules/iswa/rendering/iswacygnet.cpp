@@ -40,7 +40,7 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    constexpr const char* _loggerCat = "IswaCygnet";
+    constexpr std::string_view _loggerCat = "IswaCygnet";
 
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",

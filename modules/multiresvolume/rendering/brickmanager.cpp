@@ -31,7 +31,7 @@
 #include <glm/gtx/std_based_type.hpp>
 
 namespace {
-    constexpr const char* _loggerCat = "BrickManager";
+    constexpr std::string_view _loggerCat = "BrickManager";
 } // namespace
 
 namespace openspace {
@@ -98,7 +98,7 @@ bool BrickManager::readHeader() {
 
 
     if (fileSize != calcFileSize) {
-        LERROR("Sizes don't match");
+        LERROR("Sizes do not match");
         LERROR(fmt::format("Calculated file size: {}", calcFileSize));
         LERROR(fmt::format("File size: {}", fileSize));
         return false;

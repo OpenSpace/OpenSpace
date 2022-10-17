@@ -34,6 +34,7 @@ out vec4 vs_positionViewSpace;
 uniform dmat4 modelViewTransform;
 uniform dmat4 projectionTransform;
 
+
 void main() {
   dvec4 positionViewSpace  = modelViewTransform * dvec4(in_position, 1.0);
   vec4 positionClipSpace   = vec4(projectionTransform * positionViewSpace);

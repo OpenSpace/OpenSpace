@@ -38,7 +38,7 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* _loggerCat = "TimeManager";
+    constexpr std::string_view _loggerCat = "TimeManager";
 
     // Properties for time interpolation
     // These are used when setting the time from lua time interpolation functions,
@@ -74,7 +74,7 @@ namespace {
         "when interpolating"
     };
 
-    constexpr const char* DeltaTimeStepsKeybindsGuiPath = "/Time/Delta Time Steps";
+    constexpr std::string_view DeltaTimeStepsKeybindsGuiPath = "/Time/Delta Time Steps";
 }
 
 namespace openspace {
@@ -460,7 +460,7 @@ void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
 }
 
 void TimeManager::addDeltaTimesKeybindings() {
-    constexpr const std::array<Key, 10> Keys = {
+    constexpr std::array<Key, 10> Keys = {
         Key::Num1,
         Key::Num2,
         Key::Num3,

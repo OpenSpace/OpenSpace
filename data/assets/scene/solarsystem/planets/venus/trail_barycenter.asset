@@ -39,8 +39,8 @@ asset.export(VenusBarycenterTrail)
 asset.meta = {
   Name = "Venus Trail",
   Version = "1.1",
-  Description = [[ Barycenter Trail of Venus as observed by the Sun. Data from NASA Spice (see
-    base spice asset)]],
+  Description = [[Barycenter Trail of Venus as observed by the Sun. Data from NASA Spice
+    (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

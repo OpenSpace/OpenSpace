@@ -28,7 +28,7 @@
 #include <openspace/util/task.h>
 #include <openspace/util/time.h>
 
-#include <modules/space/rendering/renderablesatellites.h>
+#include <modules/space/rendering/renderableorbitalkepler.h>
 #include <modules/space/translation/keplertranslation.h>
 
 
@@ -49,8 +49,6 @@ public:
     static documentation::Documentation documentation();
 
     std::string _gridType;
-
-protected:
 
 private:
     std::string _rawVolumeOutputPath;

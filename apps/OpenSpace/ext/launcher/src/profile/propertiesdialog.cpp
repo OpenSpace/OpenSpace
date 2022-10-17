@@ -352,7 +352,7 @@ void PropertiesDialog::editBoxDisabled(bool disabled) {
 
 void PropertiesDialog::parseSelections() {
     // Handle case with only one remaining but empty line
-    if ((_propertyData.size() == 1) && (_propertyData.at(0).name.compare("") == 0)) {
+    if ((_propertyData.size() == 1) && _propertyData.at(0).name.empty()) {
         _propertyData.clear();
     }
     *_properties = std::move(_propertyData);

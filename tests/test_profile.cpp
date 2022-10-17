@@ -140,12 +140,12 @@ using namespace openspace;
 
 namespace {
     /// Loads the contents of the file and creates a profile from it
-    Profile loadProfile(const std::string& filename) {
-        if (!std::filesystem::exists(absPath(filename))) {
+    Profile loadProfile(const std::filesystem::path& filename) {
+        if (!std::filesystem::exists(filename)) {
             throw std::runtime_error("Could not find file)");
         }
 
-        std::ifstream f(absPath(filename));
+        std::ifstream f(filename);
         std::string content(
             (std::istreambuf_iterator<char>(f)),
             std::istreambuf_iterator<char>()
@@ -160,8 +160,8 @@ namespace {
 // The absolute minimal profile that can be loaded
 //
 TEST_CASE("Minimal", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/minimal.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/minimal.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version.major = 1;
@@ -173,8 +173,8 @@ TEST_CASE("Minimal", "[profile]") {
 // Basic functionality
 //
 TEST_CASE("Basic Meta (full)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/meta_full.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/meta_full.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -192,8 +192,8 @@ TEST_CASE("Basic Meta (full)", "[profile]") {
 }
 
 TEST_CASE("Basic Meta (empty)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/meta_empty.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/meta_empty.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -205,8 +205,8 @@ TEST_CASE("Basic Meta (empty)", "[profile]") {
 }
 
 TEST_CASE("Basic Meta (no name)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_name.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/meta_no_name.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -223,8 +223,8 @@ TEST_CASE("Basic Meta (no name)", "[profile]") {
 }
 
 TEST_CASE("Basic Meta (no version)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_version.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/meta_no_version.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -241,8 +241,8 @@ TEST_CASE("Basic Meta (no version)", "[profile]") {
 }
 
 TEST_CASE("Basic Meta (no description)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_description.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/meta_no_description.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -259,8 +259,8 @@ TEST_CASE("Basic Meta (no description)", "[profile]") {
 }
 
 TEST_CASE("Basic Meta (no author)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_author.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/meta_no_author.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -277,8 +277,8 @@ TEST_CASE("Basic Meta (no author)", "[profile]") {
 }
 
 TEST_CASE("Basic Meta (no url)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_url.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/meta_no_url.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -295,8 +295,8 @@ TEST_CASE("Basic Meta (no url)", "[profile]") {
 }
 
 TEST_CASE("Basic Meta (no license)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_license.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/meta_no_license.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -313,8 +313,8 @@ TEST_CASE("Basic Meta (no license)", "[profile]") {
 }
 
 TEST_CASE("Basic Module", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/modules.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/modules.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -348,8 +348,8 @@ TEST_CASE("Basic Module", "[profile]") {
 }
 
 TEST_CASE("Basic Assets", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/assets.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/assets.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -362,8 +362,8 @@ TEST_CASE("Basic Assets", "[profile]") {
 }
 
 TEST_CASE("Basic Properties", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/properties.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/properties.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -415,8 +415,8 @@ TEST_CASE("Basic Properties", "[profile]") {
 }
 
 TEST_CASE("Basic Keybindings", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/keybindings.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/keybindings.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -471,8 +471,8 @@ TEST_CASE("Basic Keybindings", "[profile]") {
 }
 
 TEST_CASE("Basic Time Relative", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/time_relative.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/time_relative.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -486,8 +486,8 @@ TEST_CASE("Basic Time Relative", "[profile]") {
 }
 
 TEST_CASE("Basic Time Absolute", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/time_absolute.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/time_absolute.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -501,8 +501,8 @@ TEST_CASE("Basic Time Absolute", "[profile]") {
 }
 
 TEST_CASE("Basic Delta Times", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/deltatimes.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/deltatimes.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -517,8 +517,8 @@ TEST_CASE("Basic Delta Times", "[profile]") {
 }
 
 TEST_CASE("Basic Camera NavState (full)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/camera_navstate_full.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/camera_navstate_full.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -537,9 +537,9 @@ TEST_CASE("Basic Camera NavState (full)", "[profile]") {
 }
 
 TEST_CASE("Basic Camera NavState (no aim)", "[profile]") {
-    constexpr const char* File =
+    constexpr std::string_view File =
         "${TESTDIR}/profile/basic/camera_navstate_no_aim.profile";
-    Profile profile = loadProfile(File);
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -557,9 +557,9 @@ TEST_CASE("Basic Camera NavState (no aim)", "[profile]") {
 }
 
 TEST_CASE("Basic Camera NavState (no pitch)", "[profile]") {
-    constexpr const char* File =
+    constexpr std::string_view File =
         "${TESTDIR}/profile/basic/camera_navstate_no_pitch.profile";
-    Profile profile = loadProfile(File);
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -577,8 +577,9 @@ TEST_CASE("Basic Camera NavState (no pitch)", "[profile]") {
 }
 
 TEST_CASE("Basic Camera NavState (no up)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/camera_navstate_no_up.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File =
+        "${TESTDIR}/profile/basic/camera_navstate_no_up.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -596,9 +597,9 @@ TEST_CASE("Basic Camera NavState (no up)", "[profile]") {
 }
 
 TEST_CASE("Basic Camera NavState (no yaw)", "[profile]") {
-    constexpr const char* File =
+    constexpr std::string_view File =
         "${TESTDIR}/profile/basic/camera_navstate_no_yaw.profile";
-    Profile profile = loadProfile(File);
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -616,8 +617,8 @@ TEST_CASE("Basic Camera NavState (no yaw)", "[profile]") {
 }
 
 TEST_CASE("Basic Camera GoToGeo (full)", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/camera_gotogeo.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/camera_gotogeo.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -632,9 +633,9 @@ TEST_CASE("Basic Camera GoToGeo (full)", "[profile]") {
 }
 
 TEST_CASE("Basic Camera GoToGeo (with altitude)", "[profile]") {
-    constexpr const char* File =
+    constexpr std::string_view File =
         "${TESTDIR}/profile/basic/camera_gotogeo_altitude.profile";
-    Profile profile = loadProfile(File);
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -650,8 +651,8 @@ TEST_CASE("Basic Camera GoToGeo (with altitude)", "[profile]") {
 }
 
 TEST_CASE("Basic Mark Nodes", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/basic/mark_nodes.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/mark_nodes.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -664,9 +665,9 @@ TEST_CASE("Basic Mark Nodes", "[profile]") {
 }
 
 TEST_CASE("Basic Additional Scripts", "[profile]") {
-    constexpr const char* File =
+    constexpr std::string_view File =
         "${TESTDIR}/profile/basic/additional_scripts.profile";
-    Profile profile = loadProfile(File);
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -682,8 +683,8 @@ TEST_CASE("Basic Additional Scripts", "[profile]") {
 // Integration
 //
 TEST_CASE("Integration Full Test", "[profile]") {
-    constexpr const char* File = "${TESTDIR}/profile/integration/full_test.profile";
-    Profile profile = loadProfile(File);
+    constexpr std::string_view File = "${TESTDIR}/profile/integration/full_test.profile";
+    Profile profile = loadProfile(absPath(File));
 
     Profile ref;
     ref.version = Profile::CurrentVersion;
@@ -1031,46 +1032,46 @@ TEST_CASE("Save settings to profile", "[profile]") {
 // Version
 //
 TEST_CASE("(Error) Version: Missing value 'major'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/version/missing_major.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'version.major' field is missing")
     );
 }
 
 TEST_CASE("(Error) Version: Missing value 'minor'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/version/missing_minor.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'version.minor' field is missing")
     );
 }
 
 TEST_CASE("(Error) Version: Wrong type 'major'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/version/wrongtype_major.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'version.major' must be a number")
     );
 }
 
 TEST_CASE("(Error) Version: Wrong type 'minor'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/version/wrongtype_minor.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'version.minor' must be a number")
     );
 }
 
 TEST_CASE("(Error) Version: Wrong type 'major' and 'minor'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/version/wrongtype_major_minor.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'version.major' must be a number")
     );
 }
@@ -1081,37 +1082,37 @@ TEST_CASE("(Error) Version: Wrong type 'major' and 'minor'", "[profile]") {
 //
 
 TEST_CASE("(Error) Module: Missing value 'name'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/module/missing_name.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'module.name' field is missing")
     );
 }
 
 TEST_CASE("(Error) Module: Wrong type 'name'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/module/wrongtype_name.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'module.name' must be a string")
     );
 }
 
 TEST_CASE("(Error) Module: Wrong type 'loadedInstruction'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/module/wrongtype_loadedInstruction.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'module.loadedInstruction' must be a string")
     );
 }
 
 TEST_CASE("(Error) Module: Wrong type 'notLoadedInstruction'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/module/wrongtype_notLoadedInstruction.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'module.notLoadedInstruction' must be a string")
     );
 }
@@ -1121,55 +1122,55 @@ TEST_CASE("(Error) Module: Wrong type 'notLoadedInstruction'", "[profile]") {
 // Property
 //
 TEST_CASE("(Error) Property: Missing value 'name'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/property/missing_name.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'property.name' field is missing")
     );
 }
 
 TEST_CASE("(Error) Property: Missing value 'value'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/property/missing_value.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'property.value' field is missing")
     );
 }
 
 TEST_CASE("(Error) Property: Missing value 'name' and 'value'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/property/missing_name_value.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'property.name' field is missing")
     );
 }
 
 TEST_CASE("(Error) Property: Wrong value 'type'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/property/wrongvalue_type.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("Unknown property set type")
     );
 }
 
 TEST_CASE("(Error) Property: Wrong type 'name'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/property/wrongtype_name.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'property.name' must be a string")
     );
 }
 
 TEST_CASE("(Error) Property: Wrong type 'value'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/property/wrongtype_value.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'property.value' must be a string")
     );
 }
@@ -1179,109 +1180,109 @@ TEST_CASE("(Error) Property: Wrong type 'value'", "[profile]") {
 // Keybinding
 //
 TEST_CASE("(Error) Keybinding: Missing value 'key'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_key.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.key' field is missing")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Missing value 'documentation'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_documentation.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.documentation' field is missing")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Missing value 'name'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_name.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.name' field is missing")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Missing value 'gui_path'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_guipath.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.gui_path' field is missing")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Missing value 'is_local'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_islocal.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.is_local' field is missing")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Wrong value 'key'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongvalue_key.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("Could not find key for 'F50'")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Wrong value 'key, modifier'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongvalue_modifier.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("Unknown modifier key 'KEYKEY'")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Wrong type 'documentation'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_documentation.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.documentation' must be a string")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Wrong type 'gui_path'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_guipath.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.gui_path' must be a string")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Wrong type 'is_local'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_islocal.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.is_local' must be a boolean")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Wrong type 'name'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_name.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.name' must be a string")
     );
 }
 
 TEST_CASE("(Error) Keybinding: Wrong type 'script'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_script.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'keybinding.script' must be a string")
     );
 }
@@ -1291,28 +1292,28 @@ TEST_CASE("(Error) Keybinding: Wrong type 'script'", "[profile]") {
 // Time
 //
 TEST_CASE("(Error) Time: Wrong value 'type'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/time/wrongvalue_type.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("Unknown time type")
     );
 }
 
 TEST_CASE("(Error) Time (absolute): Missing value 'type'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/time/missing_type.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'time.type' field is missing")
     );
 }
 
 TEST_CASE("(Error) Time (relative): Missing value 'value'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/time/relative_missing_value.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'time.value' field is missing")
     );
 }
@@ -1321,10 +1322,10 @@ TEST_CASE("(Error) Time (relative): Missing value 'value'", "[profile]") {
 // Deltatime
 //
 TEST_CASE("(Error) Deltatimes: Wrong type", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/deltatimes/wrongtype_value.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("type must be number, but is string")
     );
 }
@@ -1333,271 +1334,271 @@ TEST_CASE("(Error) Deltatimes: Wrong type", "[profile]") {
 // Camera
 //
 TEST_CASE("(Error) Camera: Wrong value 'type'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/wrongvalue_type.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("Unknown camera type")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Missing value 'anchor'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_anchor.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.anchor' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Missing value 'frame'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_frame.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.frame' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Missing value 'position'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_position.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.position' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'anchor'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_anchor.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.anchor' must be a string")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'aim'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_aim.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.aim' must be a string")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'frame'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_frame.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.frame' must be a string")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'position'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.position' must be an object")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Missing value 'position.x'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_position_x.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.position.x' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'position.x'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position_x.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.position.x' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Missing value 'position.y'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_position_y.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.position.y' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'position.y'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position_y.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.position.y' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Missing value 'position.z'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_position_z.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.position.z' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'position.z'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position_z.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.position.z' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'up'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.up' must be an object")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Missing value 'up.x'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_up_x.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.up.x' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'up.x'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up_x.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.up.x' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Missing value 'up.y'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_up_y.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.up.y' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'up.y'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up_y.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.up.y' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Missing value 'up.z'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_up_z.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.up.z' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'up.z'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up_z.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.up.z' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'yaw'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_yaw.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.yaw' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'pitch'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_pitch.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("camera.pitch' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (GoToGeo): Missing value 'anchor'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_missing_anchor.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.anchor' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (GoToGeo): Missing value 'latitude'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_missing_latitude.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.latitude' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (GoToGeo): Missing value 'longitude'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_missing_longitude.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.longitude' field is missing")
     );
 }
 
 TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'anchor'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_anchor.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.anchor' must be a string")
     );
 }
 
 TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'latitude'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_latitude.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.latitude' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'longitude'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_longitude.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.longitude' must be a number")
     );
 }
 
 TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'altitude'", "[profile]") {
-    constexpr const char* TestFile =
+    constexpr std::string_view TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_altitude.profile";
     CHECK_THROWS_WITH(
-        loadProfile(TestFile),
+        loadProfile(absPath(TestFile)),
         Catch::Matchers::Contains("'camera.altitude' must be a number")
     );
 }

@@ -4,7 +4,7 @@ local earthTransforms = asset.require("scene/solarsystem/planets/earth/transform
 
 
 
-local BENNU_BODY = "2101955"
+local BENNU_BODY = 2101955
 
 local OsirisRexTrailEarth = {
   Identifier = "OsirisRexTrailEarth",

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablelabels.h>
+#include <modules/base/rendering/renderablelabel.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -32,7 +32,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -50,18 +49,18 @@
 #include <optional>
 
 namespace {
-    constexpr const char* MeterUnit = "m";
-    constexpr const char* KilometerUnit = "Km";
-    constexpr const char* MegameterUnit = "Mm";
-    constexpr const char* GigameterUnit = "Gm";
-    constexpr const char* AstronomicalUnitUnit = "au";
-    constexpr const char* TerameterUnit = "Tm";
-    constexpr const char* PetameterUnit = "Pm";
-    constexpr const char* ParsecUnit = "pc";
-    constexpr const char* KiloparsecUnit = "Kpc";
-    constexpr const char* MegaparsecUnit = "Mpc";
-    constexpr const char* GigaparsecUnit = "Gpc";
-    constexpr const char* GigalightyearUnit = "Gly";
+    constexpr std::string_view MeterUnit = "m";
+    constexpr std::string_view KilometerUnit = "Km";
+    constexpr std::string_view MegameterUnit = "Mm";
+    constexpr std::string_view GigameterUnit = "Gm";
+    constexpr std::string_view AstronomicalUnitUnit = "au";
+    constexpr std::string_view TerameterUnit = "Tm";
+    constexpr std::string_view PetameterUnit = "Pm";
+    constexpr std::string_view ParsecUnit = "pc";
+    constexpr std::string_view KiloparsecUnit = "Kpc";
+    constexpr std::string_view MegaparsecUnit = "Mpc";
+    constexpr std::string_view GigaparsecUnit = "Gpc";
+    constexpr std::string_view GigalightyearUnit = "Gly";
 
     enum BlendMode {
         Normal = 0,
@@ -93,55 +92,55 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to the renderable."
+        "This determines the blending mode that is applied to the renderable"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The label text color."
+        "The label text color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "The font size (in points) for the label."
+        "The font size (in points) for the label"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value affects the size scale of the label."
+        "This value affects the size scale of the label"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
-        "The text that will be displayed on screen."
+        "The text that will be displayed on screen"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min and Max Size",
-        "The minimum and maximum size (in pixels) of the label."
+        "The minimum and maximum size (in pixels) of the label"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to the label."
+        "Transformation matrix to be applied to the label"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
         "Orientation Option",
-        "Label orientation rendering mode."
+        "Label orientation rendering mode"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
         "Enable/Disable Fade-in Effect",
-        "Enable/Disable the Fade-in effect."
+        "Enable/Disable the Fade-in effect"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeWidthsInfo = {
@@ -151,23 +150,23 @@ namespace {
         "The first value is the distance before the closest distance and the second "
         "the one after the furthest distance. For example, with the unit Parsec (pc), "
         "a value of {1, 2} will make the label being fully faded out 1 Parsec before "
-        "the closest distance and 2 Parsec away from the furthest distance."
+        "the closest distance and 2 Parsec away from the furthest distance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
         "Fade Distances",
         "The distance range in which the labels should be fully opaque, specified in "
-        "the chosen unit. The distance from the position of the label to the camera."
+        "the chosen unit. The distance from the position of the label to the camera"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
         "Fade Distance Unit",
-        "Distance unit for fade-in/-out distance calculations. Defaults to \"au\"."
+        "Distance unit for fade-in/-out distance calculations. Defaults to \"au\""
     };
 
-    struct [[codegen::Dictionary(RenderableLabels)]] Parameters {
+    struct [[codegen::Dictionary(RenderableLabel)]] Parameters {
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
             Additive
@@ -229,16 +228,16 @@ namespace {
         // [[codegen::verbatim(FadeWidthsInfo.description)]]
         std::optional<glm::vec2> fadeWidths;
     };
-#include "renderablelabels_codegen.cpp"
+#include "renderablelabel_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableLabels::Documentation() {
+documentation::Documentation RenderableLabel::Documentation() {
     return codegen::doc<Parameters>("base_renderable_labels");
 }
 
-RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
+RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -329,18 +328,18 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _enableFadingEffect = p.enableFading.value_or(_enableFadingEffect);
     addProperty(_enableFadingEffect);
 
-    _fadeUnitOption.addOption(Meter, MeterUnit);
-    _fadeUnitOption.addOption(Kilometer, KilometerUnit);
-    _fadeUnitOption.addOption(Megameter, MegameterUnit);
-    _fadeUnitOption.addOption(Gigameter, GigameterUnit);
-    _fadeUnitOption.addOption(AstronomicalUnit, AstronomicalUnitUnit);
-    _fadeUnitOption.addOption(Terameter, TerameterUnit);
-    _fadeUnitOption.addOption(Petameter, PetameterUnit);
-    _fadeUnitOption.addOption(Parsec, ParsecUnit);
-    _fadeUnitOption.addOption(KiloParsec, KiloparsecUnit);
-    _fadeUnitOption.addOption(MegaParsec, MegaparsecUnit);
-    _fadeUnitOption.addOption(GigaParsec, GigaparsecUnit);
-    _fadeUnitOption.addOption(GigaLightyear, GigalightyearUnit);
+    _fadeUnitOption.addOption(Meter, std::string(MeterUnit));
+    _fadeUnitOption.addOption(Kilometer, std::string(KilometerUnit));
+    _fadeUnitOption.addOption(Megameter, std::string(MegameterUnit));
+    _fadeUnitOption.addOption(Gigameter, std::string(GigameterUnit));
+    _fadeUnitOption.addOption(AstronomicalUnit, std::string(AstronomicalUnitUnit));
+    _fadeUnitOption.addOption(Terameter, std::string(TerameterUnit));
+    _fadeUnitOption.addOption(Petameter, std::string(PetameterUnit));
+    _fadeUnitOption.addOption(Parsec, std::string(ParsecUnit));
+    _fadeUnitOption.addOption(KiloParsec, std::string(KiloparsecUnit));
+    _fadeUnitOption.addOption(MegaParsec, std::string(MegaparsecUnit));
+    _fadeUnitOption.addOption(GigaParsec, std::string(GigaparsecUnit));
+    _fadeUnitOption.addOption(GigaLightyear, std::string(GigalightyearUnit));
 
     if (p.fadeUnit.has_value()) {
         _fadeUnitOption = codegen::map<Unit>(*p.fadeUnit);
@@ -358,17 +357,17 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     addProperty(_fadeWidths);
 }
 
-bool RenderableLabels::isReady() const {
+bool RenderableLabel::isReady() const {
     return true;
 }
 
-void RenderableLabels::initialize() {
+void RenderableLabel::initialize() {
     ZoneScoped
 
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
 }
 
-void RenderableLabels::initializeGL() {
+void RenderableLabel::initializeGL() {
     if (_font == nullptr) {
         _font = global::fontManager->font(
             "Mono",
@@ -379,9 +378,9 @@ void RenderableLabels::initializeGL() {
     }
 }
 
-void RenderableLabels::deinitializeGL() {}
+void RenderableLabel::deinitializeGL() {}
 
-void RenderableLabels::render(const RenderData& data, RendererTasks&) {
+void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     glDepthMask(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -422,11 +421,11 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
 }
 
 
-void RenderableLabels::setLabelText(const std::string & newText) {
+void RenderableLabel::setLabelText(const std::string & newText) {
     _text = newText;
 }
 
-void RenderableLabels::renderLabels(const RenderData& data,
+void RenderableLabel::renderLabels(const RenderData& data,
                                     const glm::dmat4& modelViewProjectionMatrix,
                                     const glm::dvec3& orthoRight,
                                     const glm::dvec3& orthoUp, float fadeInVariable)
@@ -464,7 +463,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
     );
 }
 
-float RenderableLabels::computeFadeFactor(float distanceNodeToCamera) const {
+float RenderableLabel::computeFadeFactor(float distanceNodeToCamera) const {
     float distanceUnit = unit(_fadeUnitOption);
 
     float x = distanceNodeToCamera;
@@ -488,7 +487,7 @@ float RenderableLabels::computeFadeFactor(float distanceNodeToCamera) const {
     }
 }
 
-float RenderableLabels::unit(int unit) const {
+float RenderableLabel::unit(int unit) const {
     switch (static_cast<Unit>(unit)) {
         case Meter: return 1.f;
         case Kilometer: return 1e3f;
@@ -506,7 +505,7 @@ float RenderableLabels::unit(int unit) const {
     }
 }
 
-std::string RenderableLabels::toString(int unit) const {
+std::string_view RenderableLabel::toString(int unit) const {
     switch (static_cast<Unit>(unit)) {
         case Meter: return MeterUnit;
         case Kilometer: return KilometerUnit;

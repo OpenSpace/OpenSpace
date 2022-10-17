@@ -72,7 +72,7 @@ namespace {
         "Use Heightmap",
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
-        "globe's reference ellipsoid. The default value is 'false'."
+        "globe's reference ellipsoid. The default value is 'false'"
     };
 
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {

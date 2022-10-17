@@ -35,9 +35,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* EventKey = "event";
-    constexpr const char* SubscribeEvent = "start_subscription";
-    constexpr const char* UnsubscribeEvent = "stop_subscription";
+    constexpr std::string_view SubscribeEvent = "start_subscription";
+    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
 } // namespace
 
 using nlohmann::json;
@@ -67,7 +66,7 @@ bool SkyBrowserTopic::isDone() const {
 }
 
 void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at(EventKey).get<std::string>();
+    std::string event = json.at("event").get<std::string>();
     if (event == UnsubscribeEvent) {
         _isDone = true;
         return;
@@ -102,7 +101,7 @@ void SkyBrowserTopic::sendBrowserData() {
 
     // Pass data for all the browsers and the corresponding targets
     if (module->isCameraInSolarSystem()) {
-        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
         ghoul::Dictionary targets;
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();

@@ -1,30 +1,175 @@
+local orbit_right = {
+  Identifier = "ipac.orbit_right",
+  Name = "Orbit right",
+  Command = [[ openspace.navigation.addGlobalRotation(-5.0, 0.0) ]],
+  Documentation = "Orbits the camera to the right around the current focus",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacOrbitRight", orbit_right)
+
+local orbit_left = {
+  Identifier = "ipac.orbit_left",
+  Name = "Orbit left",
+  Command = [[ openspace.navigation.addGlobalRotation(5.0, 0.0) ]],
+  Documentation = "Orbits the camera to the left around the current focus",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacOrbitLeft", orbit_left)
+
+local orbit_up = {
+  Identifier = "ipac.orbit_up",
+  Name = "Orbit up",
+  Command = [[ openspace.navigation.addGlobalRotation(0.0, 5.0) ]],
+  Documentation = "Orbits the camera up around the current focus",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacOrbitUp", orbit_up)
+
+local orbit_down = {
+  Identifier = "ipac.orbit_down",
+  Name = "Orbit down",
+  Command = [[ openspace.navigation.addGlobalRotation(0.0, -5.0) ]],
+  Documentation = "Orbits the camera down around the current focus",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacOrbitDown", orbit_down)
+
+
+local pan_right = {
+  Identifier = "ipac.pan_right",
+  Name = "Pan right",
+  Command = [[ openspace.navigation.addLocalRotation(-5.0, 0.0) ]],
+  Documentation = "Pans the camera to the right",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacPanRight", pan_right)
+
+local pan_left = {
+  Identifier = "ipac.pan_left",
+  Name = "Pan left",
+  Command = [[ openspace.navigation.addLocalRotation(5.0, 0.0) ]],
+  Documentation = "Pans the camera to the left",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacPanLeft", pan_left)
+
+local pan_up = {
+  Identifier = "ipac.pan_up",
+  Name = "Pan up",
+  Command = [[ openspace.navigation.addLocalRotation(0.0, 5.0) ]],
+  Documentation = "Pans the camera up",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacPanUp", pan_up)
+
+local pan_down = {
+  Identifier = "ipac.pan_down",
+  Name = "Pan down",
+  Command = [[ openspace.navigation.addLocalRotation(0.0, -5.0) ]],
+  Documentation = "Pans the camera down",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacPanDown", pan_down)
+
+
+local zoom_in = {
+  Identifier = "ipac.zoom_in",
+  Name = "Zoom in",
+  Command = [[ openspace.navigation.addTruckMovement(0.0, 5.0) ]],
+  Documentation = "Zooms the camera in, towards the current focus",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacZoomIn", zoom_in)
+
+local zoom_out = {
+  Identifier = "ipac.zoom_out",
+  Name = "Zoom out",
+  Command = [[ openspace.navigation.addTruckMovement(0.0, -5.0) ]],
+  Documentation = "Zooms the camera out, away form the current focus",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacZoomOut", zoom_out)
+
+
+local focus_moon = {
+  Identifier = "ipac.focus_moon",
+  Name = "Focus on the Moon",
+  Command = [[
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Moon");
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
+  ]],
+  Documentation = "Focuses the camera on the Moon",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacFocusMoon", focus_moon)
+
+local focus_earth = {
+  Identifier = "ipac.focus_earth",
+  Name = "Focus on the Earth",
+  Command = [[
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+  ]],
+  Documentation = "Focuses the camera on Earth",
+  GuiPath = "/Ipac",
+  IsLocal = false
+}
+asset.export("IpacFocusEarth", focus_earth)
+
+
+local actions = {
+  orbit_right,
+  orbit_left,
+  orbit_up,
+  orbit_down,
+  pan_right,
+  pan_left,
+  pan_up,
+  pan_down,
+  zoom_in,
+  zoom_out,
+  focus_moon,
+  focus_earth
+}
+
 asset.onInitialize(function()
+  for _, a in ipairs(actions) do
+    openspace.action.registerAction(a)
+  end
+
   openspace.clearKeys()
-  openspace.bindKey("RIGHT", "openspace.navigation.addGlobalRotation(-5.0, 0.0)");
-  openspace.bindKey("LEFT", "openspace.navigation.addGlobalRotation(5.0, 0.0)");
-  openspace.bindKey("UP", "openspace.navigation.addGlobalRotation(0.0, 5.0)");
-  openspace.bindKey("DOWN", "openspace.navigation.addGlobalRotation(0.0, -5.0)");
+  openspace.bindKey("RIGHT", orbit_right.Identifier)
+  openspace.bindKey("LEFT", orbit_left.Identifier)
+  openspace.bindKey("UP", orbit_up.Identifier)
+  openspace.bindKey("DOWN", orbit_down.Identifier)
 
-  openspace.bindKey("CTRL+RIGHT", "openspace.navigation.addLocalRotation(-5.0, 0.0)");
-  openspace.bindKey("CTRL+LEFT", "openspace.navigation.addLocalRotation(5.0, 0.0)");
-  openspace.bindKey("CTRL+UP", "openspace.navigation.addLocalRotation(0.0, 5.0)");
-  openspace.bindKey("CTRL+DOWN", "openspace.navigation.addLocalRotation(0.0, -5.0)");
+  openspace.bindKey("CTRL+RIGHT", pan_right.Identifier)
+  openspace.bindKey("CTRL+LEFT", pan_left.Identifier)
+  openspace.bindKey("CTRL+UP", pan_up.Identifier)
+  openspace.bindKey("CTRL+DOWN", pan_down.Identifier)
 
-  openspace.bindKey("ALT+UP", "openspace.navigation.addTruckMovement(0.0, 5.0)");
-  openspace.bindKey("ALT+DOWN", "openspace.navigation.addTruckMovement(0.0, -5.0)");
+  openspace.bindKey("ALT+UP", zoom_in.Identifier)
+  openspace.bindKey("ALT+DOWN", zoom_out.Identifier)
 
-  openspace.bindKey(
-    "SPACE", 
-    [[
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Moon");
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
-  ]])
-  openspace.bindKey(
-    "Z",
-    [[
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
-  ]])
+  openspace.bindKey("SPACE", focus_moon.Identifier)
+  openspace.bindKey("Z", focus_earth.Identifier)
+end)
+
+asset.onDeinitialize(function ()
+  for i = #actions, 1, -1 do
+    openspace.action.removeAction(actions[i])
+  end
 end)

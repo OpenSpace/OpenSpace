@@ -23,7 +23,7 @@ local layer_prototype = {
   },
   Interpolation = true,
   Colormap = path .. "rainbow.png",
-  Description = [[ Temporal coverage: 01 Jan 1981 - 31 Dec 2020.]]
+  Description = "Temporal coverage: 01 Jan 1981 - 31 Dec 2020"
 }
 
 local layer_folder = {
@@ -37,7 +37,7 @@ local layer_folder = {
   },
   Interpolation = true,
   Colormap = path .. "rainbow.png",
-  Description = [[ Temporal coverage: 01 Jan 1981 - 31 Dec 2020.]]
+  Description = "Temporal coverage: 01 Jan 1981 - 31 Dec 2020"
 }
 
 asset.onInitialize(function() 
@@ -55,7 +55,7 @@ asset.export("layer", layer_prototype)
 asset.meta = {
   Name = "Climate Earth Layers",
   Version = "1.0",
-  Description = [[ ERA5 data ]],
+  Description = "ERA5 data",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

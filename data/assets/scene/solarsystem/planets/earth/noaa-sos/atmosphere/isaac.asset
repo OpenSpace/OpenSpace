@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Isaac - 2012"
 local Identifier = "noaa-sos-atmosphere-isaac"
-local Description = [[ Hurricane Isaac formed as a tropical depression east of the Lesser 
+local Description = [[Hurricane Isaac formed as a tropical depression east of the Lesser 
 Antilles on August 21 and that same day was upgraded to a tropical storm. As a tropical 
 storm Hurricane Isaac passed over Hispaniola and Cuba, killing many people. It them 
 entered the Gulf of Mexico. Shortly before making landfall near the mouth of the 
 Mississippi River, Tropical Storm Isaac strengthened and became Hurricane Isaac on August 
 28. Isaac actually made landfall twice, briefly returning offshore after its first 
 landfall before returning to land. Isaac was a very slow moving storm after landfall and 
-brought significant amounts of rain to the southeastern United States.   ]]
+brought significant amounts of rain to the southeastern United States]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-isaac-2012/"
 
 
@@ -79,7 +79,7 @@ asset.export(layer_sat)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

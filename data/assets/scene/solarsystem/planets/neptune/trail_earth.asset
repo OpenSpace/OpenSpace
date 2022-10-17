@@ -24,7 +24,7 @@ local NeptuneTrailEarth = {
     Name = "Neptune trail from Earth",
     Path = "/Solar System/Planets/Neptune",
     Hidden = false,
-    Description = [[ Trail of Neptune as observed by the Earth.]],
+    Description = "Trail of Neptune as observed by the Earth",
   }
 }
 
@@ -43,8 +43,8 @@ asset.export(NeptuneTrailEarth)
 asset.meta = {
   Name = "Neptune Trail from Earth",
   Version = "1.1",
-  Description = [[ Alternate trail of Neptune, as observed by the Earth rather then the
-    Sun.]],
+  Description = [[Alternate trail of Neptune, as observed by the Earth rather then the
+    Sun]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

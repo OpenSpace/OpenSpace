@@ -33,6 +33,7 @@ uniform vec3 color;
 uniform float opacity = 1.0;
 uniform float lineFade;
 
+
 Fragment getFragment() {
   // float offsetPeriods = offset / period;
   // This is now done in the fragment shader instead to make smooth movement between

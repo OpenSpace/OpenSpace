@@ -64,7 +64,7 @@ foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)
   if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
     target_link_libraries(OpenSpaceTest PRIVATE ${library_name})
-  endif()
+  endif ()
 endforeach ()
 
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)

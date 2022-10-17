@@ -22,10 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_SPACE___GPTRANSLATION___H__
+#define __OPENSPACE_MODULE_SPACE___GPTRANSLATION___H__
 
-in vec2 position;
+#include <modules/space/translation/keplertranslation.h>
 
-void main() {
-    gl_Position = vec4(position, 0.0, 1.0);
-}
+namespace openspace {
+
+/**
+ * A specialization of the KeplerTranslation that utilizes general pertubation file
+ * formats to extracts the Keplerian elements
+ */
+class GPTranslation : public KeplerTranslation {
+public:
+    /**
+     * Constructor for the GPTranslation class. The \p dictionary must contain a key for
+     * the file that contains the general pertubation information as well as the file
+     * format that is to be used.
+     *
+     * \param The ghoul::Dictionary that contains the information for this TLETranslation
+     */
+    explicit GPTranslation(const ghoul::Dictionary& dictionary);
+
+    /**
+     * Method returning the openspace::Documentation that describes the ghoul::Dictionary
+     * that can be passed to the constructor.
+     *
+     * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
+     * be passed to the constructor
+     */
+    static documentation::Documentation Documentation();
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___GPTRANSLATION___H__

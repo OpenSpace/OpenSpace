@@ -38,12 +38,12 @@
 #include "SpiceZpr.h"
 
 namespace {
-    constexpr const char* _loggerCat = "SpiceManager";
+    constexpr std::string_view _loggerCat = "SpiceManager";
 
     // The value comes from
     // http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getmsg_c.html
     // as the maximum message length
-    constexpr const unsigned SpiceErrorBufferSize = 1841;
+    constexpr unsigned SpiceErrorBufferSize = 1841;
 
     const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
         using SM = openspace::SpiceManager;
@@ -404,7 +404,7 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
 {
     std::vector<std::pair<int, std::string>> bodies;
 
-    constexpr const int Frnmln = 33;
+    constexpr int Frnmln = 33;
     static SpiceInt idsetBuffer[SPICE_CELL_CTRLSZ + 8192];
     static SpiceCell idset = {
         SPICE_INT,

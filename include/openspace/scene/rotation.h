@@ -29,7 +29,6 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <memory>
 
 namespace ghoul { class Dictionary; }
 

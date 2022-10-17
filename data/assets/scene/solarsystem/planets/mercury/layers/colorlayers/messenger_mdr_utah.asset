@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 local layer = {
   Identifier = "Messenger_MDR_Utah",
   Name = "Messenger MDR [Utah]",
+  Enabled = asset.enabled,
   FilePath = asset.localResource("messenger_mdr_utah.wms")
 }
 
@@ -21,8 +22,8 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Messenger MDR [Utah]",
   Version = "1.0",
-  Description = [[ Mercury MDR layer for Mercury globe. 
-  This map is hosted on the OpenSpace server in Utah.]],
+  Description = [[Mercury MDR layer for Mercury globe. This map is hosted on the OpenSpace
+    server in Utah]],
   Author = "USGS",
   URL = "",
   License = "NASA/PDS"

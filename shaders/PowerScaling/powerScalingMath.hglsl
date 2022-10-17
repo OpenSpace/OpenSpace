@@ -30,72 +30,67 @@ const float k = 10.0;
 const float FLT_MAX = 1e38; // Not max but large enough for the purpose
 
 float log10(float x) {  
-    return log(x) / log(10.0);   
+  return log(x) / log(10.0);   
 }
 
 vec4 psc_normalization(vec4 v) {
-    vec4 v2 = v;
-    float l = length(v.xyz);
-    v2.xyz = v.xyz / l;
-    v2.w = v.w - log10(1.0/l);
-    return v2;
+  vec4 v2 = v;
+  float l = length(v.xyz);
+  v2.xyz = v.xyz / l;
+  v2.w = v.w - log10(1.0/l);
+  return v2;
 }
 
 vec4 psc_addition(vec4 v1, vec4 v2) {
-    float ds = v2.w - v1.w;
-    if(ds >= 0) {
-        float p = pow(k,-ds);
-        return vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
-    } else {
-        float p = pow(k,ds);
-        return vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
-    }
+  float ds = v2.w - v1.w;
+  if (ds >= 0) {
+    float p = pow(k,-ds);
+    return vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
+  } else {
+    float p = pow(k,ds);
+    return vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
+  }
 }
 
 vec4 psc_subtraction(vec4 v1, vec4 v2) {
-    vec4 negV2 = vec4(-v2.xyz, v2.w);
-    return psc_addition(v1, negV2);
+  vec4 negV2 = vec4(-v2.xyz, v2.w);
+  return psc_addition(v1, negV2);
 }
 
 vec2 psc_addition(vec2 v1, vec2 v2) {
-    float ds = v2.y - v1.y;
-    if(ds >= 0) {
-        float p = pow(k,-ds);
-        return vec2(v1.x*p + v2.x, v2.y);
-    } else {
-        float p = pow(k,ds);
-        return vec2(v1.x + v2.x*p, v1.y);
-    }
+  float ds = v2.y - v1.y;
+  if (ds >= 0) {
+    float p = pow(k,-ds);
+    return vec2(v1.x*p + v2.x, v2.y);
+  } else {
+    float p = pow(k,ds);
+    return vec2(v1.x + v2.x*p, v1.y);
+  }
 }
 
 vec2 psc_subtraction(vec2 v1, vec2 v2) {
-    vec2 negV2 = vec2(-v2.x, v2.y);
-    return psc_addition(v1, negV2);
+  vec2 negV2 = vec2(-v2.x, v2.y);
+  return psc_addition(v1, negV2);
 }
 
-
 vec4 z_normalization(vec4 v_in) {
-    vec4 v_out = v_in;
-    v_out.z = 0;
-    //if ( v_out.z < -v_out.w )
-    //  v_out.z = -v_out.w;
-    //else if (v_out.z > v_out.w)
-    //  v_out.z = v_out.w;
-    return v_out;
+  vec4 v_out = v_in;
+  v_out.z = 0;
+  return v_out;
 }
 
 /**
  * Convert a psc vector to a float
  */
 vec3 pscToLinear(vec4 position) {
-    return pow(k, position.w) * position.xyz;
+  return pow(k, position.w) * position.xyz;
 }
 
 /**
  * Convert a psc scalar to a float
  */
 float pscToLinear(vec2 position) {
-    return pow(k, position.y) * position.x;
+  return pow(k, position.y) * position.x;
 }
 
 #endif

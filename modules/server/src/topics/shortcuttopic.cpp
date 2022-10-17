@@ -29,12 +29,6 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 
-namespace {
-    constexpr const char* EventKey = "event";
-    constexpr const char* StartSubscription = "start_subscription";
-    constexpr const char* StopSubscription = "stop_subscription";
-} // namespace
-
 using nlohmann::json;
 
 namespace openspace {
@@ -91,12 +85,12 @@ void ShortcutTopic::sendData() const {
 }
 
 void ShortcutTopic::handleJson(const nlohmann::json& input) {
-    const std::string& event = input.at(EventKey).get<std::string>();
-    if (event == StartSubscription) {
+    const std::string& event = input.at("event").get<std::string>();
+    if (event == "start_subscription") {
         // TODO: Subscribe to shortcuts and keybindings
         // shortcutManager.subscribe(); ...
     }
-    else if (event == StopSubscription) {
+    else if (event == "stop_subscription") {
         // TODO: Unsubscribe to shortcuts and keybindings
         // shortcutManager.unsubscribe(); ...
         return;

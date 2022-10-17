@@ -30,12 +30,12 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "AuthorizationTopic";
+    constexpr std::string_view _loggerCat = "AuthorizationTopic";
 
-    constexpr const char* KeyStatus = "status";
-    constexpr const char* Authorized = "authorized";
-    constexpr const char* IncorrectKey = "incorrectKey";
-    constexpr const char* BadRequest = "badRequest";
+    constexpr std::string_view KeyStatus = "status";
+    constexpr std::string_view Authorized = "authorized";
+    constexpr std::string_view IncorrectKey = "incorrectKey";
+    constexpr std::string_view BadRequest = "badRequest";
 } // namespace
 
 namespace openspace {
@@ -58,7 +58,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
             if (authorize(providedKey)) {
                 _connection->setAuthorized(true);
                 _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
-                LINFO("Client successfully authorized.");
+                LINFO("Client successfully authorized");
             }
             else {
                 _connection->sendJson(wrappedPayload({ KeyStatus, IncorrectKey }));

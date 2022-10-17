@@ -87,7 +87,7 @@ void FileSystemAccess::parseChildFile(std::string filename, bool& hasDirHeaderBe
     else {
         std::string extension = filename.substr(filename.length()
             - _fileExtension.length());
-        if (extension.compare(_fileExtension) != 0) {
+        if (extension != _fileExtension) {
             return;
         }
     }

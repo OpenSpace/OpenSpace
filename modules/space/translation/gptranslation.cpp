@@ -22,62 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _ABUFFERRESOURCES_GLSL_
-#define _ABUFFERRESOURCES_GLSL_
+#include <modules/space/translation/gptranslation.h>
 
-#include "abufferfragment.glsl"
-#define MAX_LAYERS #{rendererData.maxLayers}
+#include <modules/space/kepler.h>
+#include <openspace/documentation/verifier.h>
+#include <filesystem>
+#include <optional>
 
-ABufferFragment fragments[MAX_LAYERS];
-uint fragmentIndices[MAX_LAYERS];
+namespace {
+    struct [[codegen::Dictionary(GPTranslation)]] Parameters {
+        // Specifies the filename of the general pertubation file
+        std::filesystem::path file;
 
-layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
-layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
-layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
+        enum class [[codegen::map(openspace::kepler::Format)]] Format {
+            // A NORAD-style Two-Line element
+            TLE,
+            // Orbit Mean-Elements Message in the KVN notation
+            OMM,
+            // JPL's Small Bodies Database
+            SBDB
+        };
+        // The file format that is contained in the file
+        Format format;
 
-const uint NULL_POINTER = 0;
+        // Specifies the element within the file that should be used in case the file
+        // provides multiple general pertubation elements. Defaults to 1.
+        std::optional<int> element [[codegen::greater(0)]];
+    };
+#include "gptranslation_codegen.cpp"
+} // namespace
 
-void storeFragment(uint index, ABufferFragment aBufferFrag) {
-    imageStore(fragmentTexture, int(index), _raw_(aBufferFrag));                
+namespace openspace {
+
+documentation::Documentation GPTranslation::Documentation() {
+    return codegen::doc<Parameters>("space_transform_gp");
 }
 
-ABufferFragment loadFragment(uint index) {
-    uvec4 raw = imageLoad(fragmentTexture, int(index));
-    ABufferFragment aBufferFragment;
-    _raw_(aBufferFragment, raw);
-    return aBufferFragment;
-}
-
-/**
- * Load fragments into the #fragments array.
- */ 
-uint loadFragments() {
-    uint currentIndex = imageLoad(anchorPointerTexture, ivec2(gl_FragCoord.xy)).x;
-    int nFrags = 0;
-    while (currentIndex != NULL_POINTER && nFrags < MAX_LAYERS) { 
-        ABufferFragment frag = loadFragment(currentIndex);
-        fragments[nFrags] = frag;
-        fragmentIndices[nFrags] = currentIndex;
-        currentIndex = _next_(frag);
-        nFrags++;
+GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    if (!std::filesystem::is_regular_file(p.file)) {
+        throw ghoul::RuntimeError("The provided TLE file must exist");
     }
-    return nFrags;
-}
 
-/**
- * Store the current contents of the fragments array back into the abuffer.
- */
-void storeFragments(uint nFrags) {
-    if (nFrags == 0)
-        return;
-    uint maxFragIndex = nFrags - 1;
-    for (int i = 0; i < maxFragIndex; i++) {
-        _next_(fragments[i], fragmentIndices[i+1]);
-        storeFragment(fragmentIndices[i], fragments[i]);
+    int element = p.element.value_or(1);
+
+    std::vector<kepler::Parameters> parameters = kepler::readFile(
+        p.file,
+        codegen::map<kepler::Format>(p.format)
+    );
+    if (parameters.size() < element) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Requested element {} but only {} are available", element, parameters.size()
+        ));
     }
-    _next_(fragments[maxFragIndex], NULL_POINTER);
-    storeFragment(fragmentIndices[maxFragIndex], fragments[maxFragIndex]);
-            
+
+    kepler::Parameters param = parameters[element - 1];
+    setKeplerElements(
+        param.eccentricity,
+        param.semiMajorAxis,
+        param.inclination,
+        param.ascendingNode,
+        param.argumentOfPeriapsis,
+        param.meanAnomaly,
+        param.period,
+        param.epoch
+    );
 }
 
-#endif
+} // namespace openspace

@@ -42,9 +42,10 @@ uniform sampler3D deltaSMTexture;
 
 const int IRRADIANCE_INTEGRAL_SAMPLES = 32;
 
-// Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI/2]
+// Spherical Coordinates Steps. phi in [0,2PI] and theta in [0, PI/2]
 const float stepPhi = (2.0 * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / (2.0 * float(IRRADIANCE_INTEGRAL_SAMPLES));
+
 
 void main() {
   // See Bruneton and Collienne to understand the mapping.

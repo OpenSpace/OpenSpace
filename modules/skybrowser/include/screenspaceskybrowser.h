@@ -29,9 +29,9 @@
 #include <modules/skybrowser/include/wwtcommunicator.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 
@@ -50,7 +50,7 @@ public:
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
 
-    void setVerticalFovWithScroll(float scroll);
+    double setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
     void setRatio(float ratio);
     void setIdInBrowser() const;
@@ -78,6 +78,7 @@ private:
     bool _isSyncedWithWwt = false;
     bool _textureDimensionsIsDirty = false;
     bool _ratioIsDirty = false;
+    bool _radiusIsDirty = false;
     bool _isInitialized = false;
 
     float _ratio = 1.f;

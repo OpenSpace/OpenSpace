@@ -113,17 +113,6 @@ private:
     glm::dquat lookDownCameraRotation(const globebrowsing::RenderableGlobe& globe,
         glm::dvec3 cameraPositionModelSpace, globebrowsing::Geodetic2 geo2);
 
-    /**
-     \return a comma separated list of layer group names.
-     */
-    static std::string layerGroupNamesList();
-
-    /**
-     \return a comma separated list of layer type names.
-     */
-    static std::string layerTypeNamesList();
-
-
     properties::BoolProperty _wmsCacheEnabled;
     properties::BoolProperty _offlineMode;
     properties::StringProperty _wmsCacheLocation;

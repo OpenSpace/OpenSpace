@@ -28,6 +28,6 @@ layout(location = 0) in vec4 position;
 out vec2 texCoord;
 
 void main() {
-    texCoord = 0.5 + position.xy * 0.5;
-    gl_Position = position;
+  texCoord = 0.5 + position.xy * 0.5;
+  gl_Position = position;
 }

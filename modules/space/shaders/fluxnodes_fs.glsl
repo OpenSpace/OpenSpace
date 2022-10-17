@@ -36,61 +36,59 @@ uniform bool usingCameraPerspective;
 uniform bool usingGaussianPulse;
 uniform vec3 cameraPos;
 
+
 Fragment getFragment() {
-    vec4 fragColor = vs_color;
-    if (vs_color.a == 0) {
-        discard;
-    }
+  vec4 fragColor = vs_color;
+  if (vs_color.a == 0) {
+    discard;
+  }
 
-    vec2 pos = vec2(0.5) - vs_st;
+  vec2 pos = vec2(0.5) - vs_st;
 
-    float r = length(pos) * 2.0;
-    float a = atan(pos.y, pos.x);
-    float f = cos(a * 3.0);
+  float r = length(pos) * 2.0;
+  float a = atan(pos.y, pos.x);
+  float f = cos(a * 3.0);
 
-    vec3 color = vec3(0.0);
-    color = vec3(1.0 - smoothstep(f, f, r));
+  vec3 color = vec3(0.0);
+  color = vec3(1.0 - smoothstep(f, f, r));
 
-    Fragment frag;
-    frag.depth = vs_depth;
-    frag.color = fragColor;
-    vec2 coord = gl_PointCoord - vec2(0.5);
+  Fragment frag;
+  frag.depth = vs_depth;
+  frag.color = fragColor;
+  vec2 coord = gl_PointCoord - vec2(0.5);
 
-    if (drawCircles && length(coord) > 0.5) {
-        discard;
-    }
+  if (drawCircles && length(coord) > 0.5) {
+    discard;
+  }
 
-    if (drawHollow &&
-        length(coord) < 0.4 &&
-        (vs_closeToEarth > 0.5 || distance(cameraPos, vec3(0.0)) < 500000000000.0))
-    {
-        if (usingGaussianPulse &&
-            usingCameraPerspective &&
-            vs_closeToEarth > 0.5)
-        {
-            if (length(coord) < 0.3) {
-                float e = 2.718055;
-                float y = pow(e, - (pow(length(coord), 2.0)) /( 2.0 * pow(0.2, 2.0)));
-                if (y < 0.05) {
-                    discard;
-                }
-                frag.color.a = y;
-            }
-        }
-        else {
-            discard;
-        }
-    }
-
-    if (useGaussian) {
-        float e = 2.718055;
-        float y = pow(e, - (pow(length(coord), 2.0)) /( 2.0 * pow(0.2, 2.0)));
+  if (drawHollow &&
+      length(coord) < 0.4 &&
+      (vs_closeToEarth > 0.5 || distance(cameraPos, vec3(0.0)) < 500000000000.0))
+  {
+    if (usingGaussianPulse && usingCameraPerspective && vs_closeToEarth > 0.5) {
+      if (length(coord) < 0.3) {
+        const float e = 2.718055;
+        float y = pow(e, - (pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
         if (y < 0.05) {
-            discard;
+          discard;
         }
         frag.color.a = y;
+      }
     }
+    else {
+        discard;
+    }
+  }
 
-    frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
-    return frag;
+  if (useGaussian) {
+    float e = 2.718055;
+    float y = pow(e, - (pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
+    if (y < 0.05) {
+      discard;
+    }
+    frag.color.a = y;
+  }
+
+  frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
+  return frag;
 }

@@ -48,7 +48,7 @@ void ConcurrentJobManager<P>::clearEnqueuedJobs() {
 
 template<typename P>
 std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
-    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop!");
+    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop");
 
     std::lock_guard lock(_finishedJobsMutex);
     return _finishedJobs.pop();

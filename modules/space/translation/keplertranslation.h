@@ -71,7 +71,7 @@ public:
     glm::dvec3 position(const UpdateData& data) const override;
 
     /**
-     * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
+     * Method returning the openspace::Documentation that describes the ghoul::Dictionary
      * that can be passed to the constructor.
      *
      * \return The openspace::Documentation that describes the ghoul::Dicitonary that can

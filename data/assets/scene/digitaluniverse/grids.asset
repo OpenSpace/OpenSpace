@@ -20,6 +20,10 @@ local speck = asset.syncedResource({
   Version = 2
 })
 
+local lightDay = 2.59020684E13
+local lightMonth = 7.771E14
+local lightYear = 9.4605284E15
+
 local radio = {
   Identifier = "RadioSphere",
   Parent = earth_transforms.EarthBarycenter.Identifier,
@@ -106,14 +110,17 @@ local eclipticLabels = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "eclip.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 14.75,
+      MinMaxSize = { 1, 50 },
+      Unit = "pc"
+    },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "eclip.label",
     Unit = "pc",
     DrawLabels = true,
-    TextColor = { 0.5, 0.5, 0.5 },
-    TextSize = 14.75,
-    TextMinMaxSize = { 1, 50 },
     TransformationMatrix = {
       -0.05487554,  0.4941095, -0.8676661,    0.0,
       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
@@ -159,14 +166,17 @@ local equatorialLabels = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "radec.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 14.5,
+      MinMaxSize = { 2, 70 },
+      Unit = "pc"
+    },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "radec.label",
     Unit = "pc",
     DrawLabels = true,
-    TextColor = { 0.5, 0.5, 0.5 },
-    TextSize = 14.5,
-    TextMinMaxSize = { 2, 70 },
     TransformationMatrix = {
       -0.05487554,  0.4941095, -0.8676661, 0.0,
       -0.8734371 , -0.4448296, -0.1980764, 0.0,
@@ -208,14 +218,17 @@ local galacticLabels = {
   Renderable = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
+    Labels = {
+      File = speck .. "galac.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 15.8,
+      MinMaxSize = { 1, 100 },
+      Unit = "pc"
+    },
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "galac.label",
     Unit = "pc",
-    DrawLabels = true,
-    TextColor = { 0.5, 0.5, 0.5 },
-    TextSize = 15.8,
-    TextMinMaxSize = { 1, 100 }
+    DrawLabels = true
   },
   GUI = {
     Name = "Galactic Sphere Labels",
@@ -233,16 +246,20 @@ local plane1ld = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "1ld.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 10.3,
+      MinMaxSize = { 0, 30 },
+      Unit = "Km"
+    },
     Opacity = 0.4,
-    File = speck .. "1ld.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1ld.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 10.3,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Km"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightDay, 2*lightDay }
   },
   GUI = {
     Name = "1ld Grid",
@@ -260,16 +277,20 @@ local plane1lm = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "1lm.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 11.8,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
     Opacity = 0.4,
-    File = speck .. "1lm.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1lm.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 11.8,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightMonth, 2*lightMonth }
   },
   GUI = {
     Name = "1lm Grid",
@@ -287,16 +308,20 @@ local plane1ly = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "1ly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 13.0,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
     Opacity = 0.4,
-    File = speck .. "1ly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1ly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 13.0,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2*lightYear, 2*lightYear }
   },
   GUI = {
     Name = "1ly Grid",
@@ -314,16 +339,20 @@ local plane10ly = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "10ly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 14.17,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
     Opacity = 0.4,
-    File = speck .. "10ly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "10ly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 14.17,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 10*2*lightYear, 10*2*lightYear }
   },
   GUI = {
     Name = "10ly Grid",
@@ -341,16 +370,20 @@ local plane100ly = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "100ly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 15.0,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
     Opacity = 0.4,
-    File = speck .. "100ly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "100ly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 15.0,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 100*2*lightYear, 100*2*lightYear }
   },
   GUI = {
     Name = "100ly Grid",
@@ -368,16 +401,20 @@ local plane1kly = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "1kly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 16.0,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
     Opacity = 0.4,
-    File = speck .. "1kly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1kly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 16.0,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 1E3*2*lightYear, 1E3*2*lightYear }
   },
   GUI = {
     Name = "1kly Grid",
@@ -395,16 +432,20 @@ local plane10kly = {
     }
   },
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "10kly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 17.25,
+      MinMaxSize = { 0, 30 },
+      Unit = "pc"
+    },
     Opacity = 0.4,
-    File = speck .. "10kly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "10kly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 17.25,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "pc"
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 10E3*2*lightYear, 10E3*2*lightYear }
   },
   GUI = {
     Name = "10kly Grid",
@@ -415,16 +456,22 @@ local plane10kly = {
 local plane100kly = {
   Identifier = "100klyGrid",
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "100kly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 18.6,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
     Opacity = 0.4,
-    File = speck .. "100kly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "100kly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 18.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    HighlightRate = { 5, 5 },
+    Size = { 100E3*2*lightYear, 100E3*2*lightYear }
   },
   GUI = {
     Name = "100kly Grid",
@@ -435,16 +482,22 @@ local plane100kly = {
 local plane1Mly = {
   Identifier = "1MlyGrid",
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "1Mly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 19.6,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
     Opacity = 0.4,
-    File = speck .. "1Mly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "1Mly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 19.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    HighlightRate = { 5, 5 },
+    Size = { 1E6*2*lightYear, 1E6*2*lightYear }
   },
   GUI = {
     Name = "1Mly Grid",
@@ -455,16 +508,22 @@ local plane1Mly = {
 local plane10Mly = {
   Identifier = "10MlyGrid",
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "10Mly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 20.6,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
     Opacity = 0.4,
-    File = speck .. "10Mly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "10Mly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 20.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    HighlightRate = { 5, 5 },
+    Size = { 10E6*2*lightYear, 10E6*2*lightYear }
   },
   GUI = {
     Name = "10Mly Grid",
@@ -475,16 +534,22 @@ local plane10Mly = {
 local plane100Mly = {
   Identifier = "100MlyGrid",
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "100Mly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 21.6,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
     Opacity = 0.4,
-    File = speck .. "100Mly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "100Mly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 21.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    HighlightRate = { 5, 5 },
+    Size = { 100E6*2*lightYear, 100E6*2*lightYear }
   },
   GUI = {
     Name = "100Mly Grid",
@@ -495,16 +560,22 @@ local plane100Mly = {
 local plane20Gly = {
   Identifier = "20GlyGrid",
   Renderable = {
-    Type = "RenderableDUMeshes",
+    Type = "RenderableGrid",
     Enabled = false,
+    Labels = {
+      File = speck .. "20Gly.label",
+      Color = { 0.0, 0.2, 0.5 },
+      Size = 23.6,
+      MinMaxSize = { 0, 30 },
+      Unit = "Mpc"
+    },
     Opacity = 0.4,
-    File = speck .. "20Gly.speck",
-    MeshColor = {{ 0.1, 0.5, 0.6 }},
-    LabelFile = speck .. "20Gly.label",
-    TextColor = { 0.0, 0.2, 0.5 },
-    TextSize = 23.6,
-    TextMinMaxSize = { 0, 30 },
-    Unit = "Mpc"
+    Color = { 0.1, 0.5, 0.6 },
+    HighlightColor = { 0.3, 0.7, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 40, 40 },
+    HighlightRate = { 5, 5 },
+    Size = { 20E9*2*lightYear, 20E9*2*lightYear }
   },
   GUI = {
     Name = "20Gly Grid",
@@ -524,7 +595,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     local node = nodes[i]

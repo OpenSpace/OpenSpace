@@ -44,13 +44,12 @@ FontSize = {
 }
 )";
 
-    void writeConfig(const std::string& filename, const std::string& content) {
-        std::string config = MinimalConfig + content;
+    void writeConfig(const std::string& filename, std::string_view content) {
         std::ofstream f(filename);
-        f << MinimalConfig << '\n' << content;
+        f << MinimalConfig << '\n' << MinimalConfig << content;
     }
 
-    Configuration loadConfiguration(const std::string& tag, const std::string& content) {
+    Configuration loadConfiguration(const std::string& tag, std::string_view content) {
         std::string filename = fmt::format("test_configuration_{}.cfg", tag);
         std::filesystem::path path = std::filesystem::temp_directory_path();
         std::string file = (path / filename).string();
@@ -72,32 +71,32 @@ TEST_CASE("Configuration: minimal", "[configuration]") {
 }
 
 TEST_CASE("Configuration: windowConfiguration", "[configuration]") {
-    constexpr const char Extra[] = R"(SGCTConfig = "foobar")";
+    constexpr std::string_view Extra = R"(SGCTConfig = "foobar")";
     const Configuration c = loadConfiguration("windowConfiguration", Extra);
     CHECK(c.windowConfiguration == "foobar");
 }
 
 TEST_CASE("Configuration: asset", "[configuration]") {
-    constexpr const char Extra[] = R"(Asset = "foobar")";
+    constexpr std::string_view Extra = R"(Asset = "foobar")";
     const Configuration c = loadConfiguration("asset", Extra);
     CHECK(c.asset == "foobar");
 }
 
 TEST_CASE("Configuration: profile", "[configuration]") {
-    constexpr const char Extra[] = R"(Profile = "foobar")";
+    constexpr std::string_view Extra = R"(Profile = "foobar")";
     const Configuration c = loadConfiguration("profile", Extra);
     CHECK(c.profile == "foobar");
 }
 
 TEST_CASE("Configuration: globalCustomizationScripts", "[configuration]") {
-    constexpr const char Extra[] = R"(GlobalCustomizationScripts = { "foo", "bar" })";
+    constexpr std::string_view Extra = R"(GlobalCustomizationScripts = { "foo", "bar" })";
     const Configuration c = loadConfiguration("globalCustomization", Extra);
     CHECK(c.globalCustomizationScripts.size() == 2);
     CHECK(c.globalCustomizationScripts == std::vector<std::string>{ "foo", "bar" });
 }
 
 TEST_CASE("Configuration: paths", "[configuration]") {
-    constexpr const char Extra[] = R"(Paths = { foo = "1", bar = "2" })";
+    constexpr std::string_view Extra = R"(Paths = { foo = "1", bar = "2" })";
     const Configuration c = loadConfiguration("paths", Extra);
     CHECK(c.pathTokens.size() == 2);
     CHECK(
@@ -107,7 +106,7 @@ TEST_CASE("Configuration: paths", "[configuration]") {
 }
 
 TEST_CASE("Configuration: fonts", "[configuration]") {
-    constexpr const char Extra[] = R"(Fonts = { foo = "1", bar = "2" })";
+    constexpr std::string_view Extra = R"(Fonts = { foo = "1", bar = "2" })";
     const Configuration c = loadConfiguration("fonts", Extra);
     CHECK(c.fonts.size() == 2);
     CHECK(
@@ -120,7 +119,7 @@ TEST_CASE("Configuration: logging", "[configuration]") {
     Configuration defaultConf;
     {
         // Empty
-        constexpr const char Extra[] = R"(Logging = {})";
+        constexpr std::string_view Extra = R"(Logging = {})";
         const Configuration c = loadConfiguration("logging1", Extra);
 
         CHECK(c.logging.level == defaultConf.logging.level);
@@ -133,7 +132,7 @@ TEST_CASE("Configuration: logging", "[configuration]") {
     }
     {
         // level
-        constexpr const char Extra[] = R"(Logging = { LogLevel = "Fatal" })";
+        constexpr std::string_view Extra = R"(Logging = { LogLevel = "Fatal" })";
         const Configuration c = loadConfiguration("logging2", Extra);
 
         CHECK(c.logging.level == "Fatal");
@@ -146,7 +145,7 @@ TEST_CASE("Configuration: logging", "[configuration]") {
     }
     {
         // forceimmediate
-        constexpr const char Extra[] = R"(Logging = { ImmediateFlush = false })";
+        constexpr std::string_view Extra = R"(Logging = { ImmediateFlush = false })";
         const Configuration c = loadConfiguration("logging3", Extra);
 
         CHECK(c.logging.level == defaultConf.logging.level);
@@ -159,7 +158,7 @@ TEST_CASE("Configuration: logging", "[configuration]") {
     }
     {
         // logs
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 Logging = {
     Logs = {
         { Type = "html", File = "foobar", Append = false }
@@ -185,7 +184,7 @@ Logging = {
     }
     {
         // capabilities verbosity
-        constexpr const char Extra[] = R"(Logging = { CapabilitiesVerbosity = "Full" })";
+        constexpr std::string_view Extra = R"(Logging = { CapabilitiesVerbosity = "Full" })";
         const Configuration c = loadConfiguration("logging5", Extra);
 
         CHECK(c.logging.level == defaultConf.logging.level);
@@ -196,25 +195,25 @@ Logging = {
 }
 
 TEST_CASE("Configuration: scriptlog", "[configuration]") {
-    constexpr const char Extra[] = R"(ScriptLog = "foobar")";
+    constexpr std::string_view Extra = R"(ScriptLog = "foobar")";
     const Configuration c = loadConfiguration("scriptlog", Extra);
     CHECK(c.scriptLog == "foobar");
 }
 
 TEST_CASE("Configuration: documentationpath", "[configuration]") {
-    constexpr const char Extra[] = R"(Documentation = { Path = "foobar" })";
+    constexpr std::string_view Extra = R"(Documentation = { Path = "foobar" })";
     const Configuration c = loadConfiguration("documentationpath", Extra);
     CHECK(c.documentation.path == "foobar");
 }
 
 TEST_CASE("Configuration: versioncheckurl", "[configuration]") {
-    constexpr const char Extra[] = R"(VersionCheckUrl = "foobar")";
+    constexpr std::string_view Extra = R"(VersionCheckUrl = "foobar")";
     const Configuration c = loadConfiguration("versioncheckurl", Extra);
     CHECK(c.versionCheckUrl == "foobar");
 }
 
 TEST_CASE("Configuration: useMultithreadedInit", "[configuration]") {
-    constexpr const char Extra[] = R"(UseMultithreadedInitialization = true)";
+    constexpr std::string_view Extra = R"(UseMultithreadedInitialization = true)";
     const Configuration c = loadConfiguration("useMultithreadedInit", Extra);
     CHECK(c.useMultithreadedInitialization == true);
 }
@@ -224,7 +223,7 @@ TEST_CASE("Configuration: loadingscreen", "[configuration]") {
 
     {
         // empty
-        constexpr const char Extra[] = R"(LoadingScreen = {})";
+        constexpr std::string_view Extra = R"(LoadingScreen = {})";
         const Configuration c = loadConfiguration("loadingscreen1", Extra);
         CHECK(
             c.loadingScreen.isShowingMessages ==
@@ -241,7 +240,7 @@ TEST_CASE("Configuration: loadingscreen", "[configuration]") {
     }
     {
         // isShowingMessages
-        constexpr const char Extra[] = R"(LoadingScreen = { ShowMessage = true })";
+        constexpr std::string_view Extra = R"(LoadingScreen = { ShowMessage = true })";
         const Configuration c = loadConfiguration("loadingscreen2", Extra);
         CHECK(c.loadingScreen.isShowingMessages == true);
         CHECK(
@@ -255,7 +254,7 @@ TEST_CASE("Configuration: loadingscreen", "[configuration]") {
     }
     {
         // isShowingProgressbar
-        constexpr const char Extra[] = R"(LoadingScreen = { ShowProgressbar = true })";
+        constexpr std::string_view Extra = R"(LoadingScreen = { ShowProgressbar = true })";
         const Configuration c = loadConfiguration("loadingscreen3", Extra);
         CHECK(
             c.loadingScreen.isShowingMessages ==
@@ -269,7 +268,7 @@ TEST_CASE("Configuration: loadingscreen", "[configuration]") {
     }
     {
         // isShowingNodeNames
-        constexpr const char Extra[] = R"(LoadingScreen = { ShowNodeNames = true })";
+        constexpr std::string_view Extra = R"(LoadingScreen = { ShowNodeNames = true })";
         const Configuration c = loadConfiguration("loadingscreen4", Extra);
         CHECK(
             c.loadingScreen.isShowingMessages ==
@@ -284,73 +283,73 @@ TEST_CASE("Configuration: loadingscreen", "[configuration]") {
 }
 
 TEST_CASE("Configuration: isCheckingOpenGLState", "[configuration]") {
-    constexpr const char Extra[] = R"(CheckOpenGLState = true)";
+    constexpr std::string_view Extra = R"(CheckOpenGLState = true)";
     const Configuration c = loadConfiguration("isCheckingOpenGLState", Extra);
     CHECK(c.isCheckingOpenGLState == true);
 }
 
 TEST_CASE("Configuration: isLoggingOpenGLCalls", "[configuration]") {
-    constexpr const char Extra[] = R"(LogEachOpenGLCall = true)";
+    constexpr std::string_view Extra = R"(LogEachOpenGLCall = true)";
     const Configuration c = loadConfiguration("isLoggingOpenGLCalls", Extra);
     CHECK(c.isLoggingOpenGLCalls == true);
 }
 
 TEST_CASE("Configuration: shutdownCountdown", "[configuration]") {
-    constexpr const char Extra[] = R"(ShutdownCountdown = 0.5)";
+    constexpr std::string_view Extra = R"(ShutdownCountdown = 0.5)";
     const Configuration c = loadConfiguration("shutdownCountdown", Extra);
     CHECK(c.shutdownCountdown == 0.5f);
 }
 
 TEST_CASE("Configuration: shouldUseScreenshotDate", "[configuration]") {
-    constexpr const char Extra[] = R"(ScreenshotUseDate = true)";
+    constexpr std::string_view Extra = R"(ScreenshotUseDate = true)";
     const Configuration c = loadConfiguration("shouldUseScreenshotDate", Extra);
     CHECK(c.shouldUseScreenshotDate == true);
 }
 
 TEST_CASE("Configuration: onScreenTextScaling", "[configuration]") {
-    constexpr const char Extra[] = R"(OnScreenTextScaling = "framebuffer")";
+    constexpr std::string_view Extra = R"(OnScreenTextScaling = "framebuffer")";
     const Configuration c = loadConfiguration("onScreenTextScaling", Extra);
     CHECK(c.onScreenTextScaling == "framebuffer");
 }
 
 TEST_CASE("Configuration: usePerProfileCache", "[configuration]") {
-    constexpr const char Extra[] = R"(PerProfileCache = true)";
+    constexpr std::string_view Extra = R"(PerProfileCache = true)";
     const Configuration c = loadConfiguration("usePerProfileCache", Extra);
     CHECK(c.usePerProfileCache == true);
 }
 
 TEST_CASE("Configuration: isRenderingOnMasterDisabled", "[configuration]") {
-    constexpr const char Extra[] = R"(DisableRenderingOnMaster = true)";
+    constexpr std::string_view Extra = R"(DisableRenderingOnMaster = true)";
     const Configuration c = loadConfiguration("isRenderingOnMasterDisabled", Extra);
     CHECK(c.isRenderingOnMasterDisabled == true);
 }
 
 TEST_CASE("Configuration: globalRotation", "[configuration]") {
-    constexpr const char Extra[] = R"(GlobalRotation = { 1.0, 2.0, 3.0 })";
+    constexpr std::string_view Extra = R"(GlobalRotation = { 1.0, 2.0, 3.0 })";
     const Configuration c = loadConfiguration("globalRotation", Extra);
     CHECK(c.globalRotation == glm::vec3(1.0, 2.0, 3.0));
 }
 
 TEST_CASE("Configuration: screenSpaceRotation", "[configuration]") {
-    constexpr const char Extra[] = R"(ScreenSpaceRotation = { 1.0, 2.0, 3.0 })";
+    constexpr std::string_view Extra = R"(ScreenSpaceRotation = { 1.0, 2.0, 3.0 })";
     const Configuration c = loadConfiguration("screenSpaceRotation", Extra);
     CHECK(c.screenSpaceRotation == glm::vec3(1.0, 2.0, 3.0));
 }
 
 TEST_CASE("Configuration: masterRotation", "[configuration]") {
-    constexpr const char Extra[] = R"(MasterRotation = { 1.0, 2.0, 3.0 })";
+    constexpr std::string_view Extra = R"(MasterRotation = { 1.0, 2.0, 3.0 })";
     const Configuration c = loadConfiguration("masterRotation", Extra);
     CHECK(c.masterRotation == glm::vec3(1.0, 2.0, 3.0));
 }
 
 TEST_CASE("Configuration: isConsoleDisabled", "[configuration]") {
-    constexpr const char Extra[] = R"(DisableInGameConsole = true)";
+    constexpr std::string_view Extra = R"(DisableInGameConsole = true)";
     const Configuration c = loadConfiguration("isConsoleDisabled", Extra);
     CHECK(c.isConsoleDisabled == true);
 }
 
 TEST_CASE("Configuration: bypassLauncher", "[configuration]") {
-    constexpr const char Extra[] = R"(BypassLauncher = true)";
+    constexpr std::string_view Extra = R"(BypassLauncher = true)";
     const Configuration c = loadConfiguration("bypassLauncher", Extra);
     CHECK(c.bypassLauncher == true);
 }
@@ -358,13 +357,13 @@ TEST_CASE("Configuration: bypassLauncher", "[configuration]") {
 TEST_CASE("Configuration: moduleConfigurations", "[configuration]") {
     {
         // empty
-        constexpr const char Extra[] = R"(ModuleConfigurations = {})";
+        constexpr std::string_view Extra = R"(ModuleConfigurations = {})";
         const Configuration c = loadConfiguration("moduleConfigurations", Extra);
         CHECK(c.moduleConfigurations.empty());
     }
     {
         // values
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 ModuleConfigurations = {
     Foo = {
         Foo2 = 1.0,
@@ -398,7 +397,7 @@ TEST_CASE("Configuration: openGLDebugContext", "[configuration]") {
     Configuration defaultConf;
     {
         // empty-ish / activate
-        constexpr const char Extra[] = R"(OpenGLDebugContext = { Activate = true })";
+        constexpr std::string_view Extra = R"(OpenGLDebugContext = { Activate = true })";
         const Configuration c = loadConfiguration("openGLDebugContext1", Extra);
         CHECK(c.openGLDebugContext.isActive == true);
         CHECK(c.openGLDebugContext.printStacktrace == false);
@@ -431,7 +430,7 @@ TEST_CASE("Configuration: openGLDebugContext", "[configuration]") {
     }
     {
         // isSynchronous
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 OpenGLDebugContext = { Activate = true, Synchronous = true }
 )";
         const Configuration c = loadConfiguration("openGLDebugContext2", Extra);
@@ -462,7 +461,7 @@ OpenGLDebugContext = { Activate = true, Synchronous = true }
     }
     {
         // identifierFilters
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 OpenGLDebugContext = {
     Activate = true,
     PrintStacktrace = true,
@@ -526,7 +525,7 @@ OpenGLDebugContext = {
     }
     {
         // filterSeverity
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 OpenGLDebugContext = { Activate = true, FilterSeverity = { "High", "Medium" } }
 )";
         const Configuration c = loadConfiguration("openGLDebugContext4", Extra);
@@ -566,7 +565,7 @@ TEST_CASE("Configuration: httpProxy", "[configuration]") {
     Configuration defaultConf;
     {
         // empty-ish / address + port
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 HttpProxy = {
     Address = "foobar",
     Port = 1234
@@ -582,7 +581,7 @@ HttpProxy = {
     }
     {
         // activate
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 HttpProxy = {
     Activate = true,
     Address = "foobar",
@@ -599,7 +598,7 @@ HttpProxy = {
     }
     {
         // authentication
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 HttpProxy = {
     Address = "foobar",
     Port = 1234,
@@ -616,7 +615,7 @@ HttpProxy = {
     }
     {
         // user
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 HttpProxy = {
     Address = "foobar",
     Port = 1234,
@@ -633,7 +632,7 @@ HttpProxy = {
     }
     {
         // password
-        constexpr const char Extra[] = R"(
+        constexpr std::string_view Extra = R"(
 HttpProxy = {
     Address = "foobar",
     Port = 1234,

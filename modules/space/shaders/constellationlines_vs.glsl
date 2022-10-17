@@ -24,43 +24,24 @@
 
 #version __CONTEXT__
 
-#include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform bool _exit_;
-out vec4 _out_color_;
+in vec3 in_position;
+
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
+
+uniform dmat4 modelViewTransform;
+uniform dmat4 projectionTransform;
+
 
 void main() {
-    Fragment frag = getFragment();
+  dvec4 positionViewSpace = modelViewTransform * dvec4(in_position, 1.0);
+  vec4 positionClipSpace = vec4(projectionTransform * positionViewSpace);
+  vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
 
-    int sampleMask = gl_SampleMaskIn[0];
+  vs_screenSpaceDepth = positionScreenSpace.w;
+  vs_positionViewSpace = vec4(positionViewSpace);
 
-    if (frag.depth < 0) {
-    //        discard;
-        }
-
-    
-    uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-    uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
-
-    ABufferFragment aBufferFrag;
-    _position_(aBufferFrag, frag.color.rgb);
-    _depth_(aBufferFrag, frag.depth);
-    _blend_(aBufferFrag, frag.blend);
-
-    int fragmentType = #{fragmentType};
-
-    if (_exit_) {
-        fragmentType *= -1;
-    }
-
-    _type_(aBufferFrag, fragmentType);
-    _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-    
-    _next_(aBufferFrag, prevHead);
-
-    storeFragment(newHead, aBufferFrag);
-    discard;
+  gl_Position = positionScreenSpace;
 }

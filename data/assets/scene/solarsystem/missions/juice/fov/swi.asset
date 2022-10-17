@@ -63,7 +63,7 @@ local SwiFull = {
   GUI = {
     Name = "SWI Full FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
-    Description = "The field-of-view for the full SWI instrument onboard Juice."
+    Description = "The field-of-view for the full SWI instrument onboard Juice"
   }
 }
 

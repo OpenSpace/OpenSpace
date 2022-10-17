@@ -32,21 +32,22 @@ uniform sampler2D colorTexture;
 uniform float opacity;
 uniform bool mirrorTexture;
 
+
 Fragment getFragment() {
-    vec2 texCoord = vs_textureCoords;
+  vec2 texCoord = vs_textureCoords;
 
-    Fragment frag;
-    if (mirrorTexture) {
-        texCoord.x = 1.0 - texCoord.x;
-    }
+  Fragment frag;
+  if (mirrorTexture) {
+    texCoord.x = 1.0 - texCoord.x;
+  }
 
-    frag.color = texture(colorTexture, texCoord);
-    frag.color.a *= opacity;
-    frag.depth = vs_position.w;
+  frag.color = texture(colorTexture, texCoord);
+  frag.color.a *= opacity;
+  frag.depth = vs_position.w;
 
-    // G-Buffer
-    frag.gPosition = vs_position;
-    frag.gNormal = vec4(vs_normal, 1.0);
+  // G-Buffer
+  frag.gPosition = vs_position;
+  frag.gNormal = vec4(vs_normal, 1.0);
 
-    return frag;
+  return frag;
 }

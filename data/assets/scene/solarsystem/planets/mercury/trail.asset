@@ -21,7 +21,7 @@ local MercuryTrail = {
   GUI = {
     Name = "Mercury Trail",
     Path = "/Solar System/Planets/Mercury",
-    Description = [[ Trail of Mercury as observed by the Sun.]],
+    Description = "Trail of Mercury as observed by the Sun",
   }
 }
 
@@ -40,8 +40,7 @@ asset.export(MercuryTrail)
 asset.meta = {
   Name = "Mercury Trail",
   Version = "1.1",
-  Description = [[ Main trail for Mercury. Data from NASA Spice (see
-    base spice asset)]],
+  Description = "Main trail for Mercury. Data from NASA Spice (see base spice asset)",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

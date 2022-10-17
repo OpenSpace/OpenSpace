@@ -3,6 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "ESRI_VIIRS_Combo",
   Name = "ESRI VIIRS Combo",
+  Enabled = asset.enabled,
   Type = "ByLevelTileLayer",
   LevelTileProviders = {
     {

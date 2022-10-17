@@ -87,7 +87,7 @@ void performTasks(const std::string& path) {
         };
         task.perform(onProgress);
     }
-    std::cout << "Done performing tasks." << std::endl;
+    std::cout << "Done performing tasks" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -112,8 +112,8 @@ int main(int argc, char** argv) {
 
     // Register the base path as the directory where the configuration file lives
     std::filesystem::path base = configFile.parent_path();
-    constexpr const char* BasePathToken = "${BASE}";
-    FileSys.registerPathToken(BasePathToken, base);
+    constexpr std::string_view BasePathToken = "${BASE}";
+    FileSys.registerPathToken(BasePathToken.data(), base);
 
     // Using same configuration for size as in apps/OpenSpace/main.cpp
     glm::ivec2 size = glm::ivec2(1920, 1080);
