@@ -230,8 +230,7 @@ void ScreenSpaceVideoRenderable::update() {
     if (!hasNewFrame) {
         return;
     }
-    _textureIsReady = false;
-
+    
     // Read frame
     while (true) {
         int result = av_read_frame(_formatContext, _packet);
@@ -326,14 +325,10 @@ void ScreenSpaceVideoRenderable::update() {
     // Successfully collected a frame
     av_packet_unref(_packet);
 
-    _textureIsReady = true;
-
-
     _texture->setPixelData(
         reinterpret_cast<char*>(_glFrame->data[0]),
         ghoul::opengl::Texture::TakeOwnership::No
     );
-
     _texture->uploadTexture();
 
     ScreenSpaceRenderable::update();

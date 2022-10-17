@@ -72,7 +72,6 @@ private:
     AVPacket* _packet = nullptr;
 
     bool _isInitialized = false;
-    bool _textureIsReady = false;
 
     std::chrono::milliseconds _frameTime = std::chrono::milliseconds(0);
     std::chrono::system_clock::time_point _lastFrameTime;
