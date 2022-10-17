@@ -36,7 +36,13 @@ namespace {
         "video that is then loaded and used for all tiles"
     };
 
-    struct [[codegen::Dictionary(FfmpegTileProvider)]] Parameters {
+    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
+        "Reset",
+        "Reset",
+        "Reset the video."
+    };
+
+    struct [[codegen::Dictionary(ScreenSpaceVideoRenderable)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
     };
@@ -53,13 +59,23 @@ documentation::Documentation ScreenSpaceVideoRenderable::Documentation() {
 
 ScreenSpaceVideoRenderable::ScreenSpaceVideoRenderable(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
+    , _videoFile(FileInfo, "")
+    , _reset(ResetInfo)
+
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _videoFile = p.file;
+    _videoFile = absPath(p.file).string();
+
+    _reset.onChange([this]() {
+        this->reset();
+        });
+
+    addProperty(_videoFile);
+    addProperty(_reset);
 }
 
 ScreenSpaceVideoRenderable::~ScreenSpaceVideoRenderable() {
@@ -74,10 +90,15 @@ bool ScreenSpaceVideoRenderable::deinitialize() {
     return true;
 }
 
+void ScreenSpaceVideoRenderable::reset() {
+    deinitializeGL();
+    initializeGL();
+}
+
 bool ScreenSpaceVideoRenderable::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
-    std::string path = absPath(_videoFile).string();
+    std::string path = _videoFile;
 
     // Open video
     int openRes = avformat_open_input(
@@ -141,8 +162,8 @@ bool ScreenSpaceVideoRenderable::initializeGL() {
     // Fill the destination frame for the convertion
     int glFrameSize = av_image_get_buffer_size(
         AV_PIX_FMT_RGB24,
-        _codecContext->width,
-        _codecContext->height,
+        FinalResolution.x,
+        FinalResolution.y,
         1
     );
     uint8_t* internalBuffer =
@@ -152,27 +173,168 @@ bool ScreenSpaceVideoRenderable::initializeGL() {
         _glFrame->linesize,
         internalBuffer,
         AV_PIX_FMT_RGB24,
-        _codecContext->width,
-        _codecContext->height,
+        FinalResolution.x,
+        FinalResolution.y,
         1
     );
 
     // Update times
     _lastFrameTime = std::chrono::system_clock::now();
 
+    // Create the texture
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(FinalResolution.x, FinalResolution.y, 1),
+        GL_TEXTURE_2D,
+        ghoul::opengl::Texture::Format::RGB,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::Repeat,
+        ghoul::opengl::Texture::AllocateData::No,
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+
+    _isInitialized = true;
     return true;
 }
 
 bool ScreenSpaceVideoRenderable::deinitializeGL() {
+    avformat_close_input(&_formatContext);
+    av_free(_avFrame);
+    av_free(_glFrame);
+    av_free(_packet);
+    avformat_free_context(_formatContext);
+
     ScreenSpaceRenderable::deinitializeGL();
     return true;
 }
 
 void ScreenSpaceVideoRenderable::render() {
-
+    ScreenSpaceRenderable::render();
 }
 
 void ScreenSpaceVideoRenderable::update() {
+
+    ZoneScoped
+
+    if (!_isInitialized) {
+        return;
+    }
+    // Check if it is time for a new frame
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    std::chrono::system_clock::duration diff = now - _lastFrameTime;
+
+    const bool hasNewFrame = diff > _frameTime;
+
+    if (!hasNewFrame) {
+        return;
+    }
+    _textureIsReady = false;
+
+    // Read frame
+    while (true) {
+        int result = av_read_frame(_formatContext, _packet);
+        if (result < 0) {
+            av_packet_unref(_packet);
+            return;
+        }
+
+        // Does this packet belong to this video stream?
+        if (_packet->stream_index != _streamIndex) {
+            continue;
+        }
+
+        // Send packet to the decoder
+        result = avcodec_send_packet(_codecContext, _packet);
+        if (result < 0 || result == AVERROR(EAGAIN) || result == AVERROR_EOF) {
+            LERROR(fmt::format("Sending packet failed with {}", result));
+            av_packet_unref(_packet);
+            return;
+        }
+
+        // Get result from decoder
+        result = avcodec_receive_frame(
+            _codecContext,
+            _avFrame
+        );
+
+        // Is the frame finished? If not then we need to wait for more packets
+        // to finish the frame
+        if (result == AVERROR(EAGAIN)) {
+            continue;
+        }
+        if (result < 0) {
+            LERROR(fmt::format("Receiving packet failed with {}", result));
+            av_packet_unref(_packet);
+            return;
+        }
+        // Successfully collected a frame
+        LINFO(fmt::format(
+            "Successfully decoded frame {}", _codecContext->frame_number
+        ));
+        break;
+    }
+
+    // Update times
+    if (_frameTime.count() <= 0) {
+        // Calculate frame time
+        double sPerFrame = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
+        int msPerFrame = static_cast<int>(sPerFrame * 1000);
+        _frameTime = std::chrono::milliseconds(msPerFrame);
+    }
+    _lastFrameTime = now;
+
+    // TODO: Need to check the format of the video and decide what formats we want to
+    // support and how they relate to the GL formats
+
+    // Convert the color format to AV_PIX_FMT_RGB24
+    // Only create the conversion context once
+    // Scale all videos to 2048 * 1024 pixels
+    // TODO: support higher resolutions
+    if (!_conversionContext) {
+        _conversionContext = sws_getContext(
+            _codecContext->width,
+            _codecContext->height,
+            _codecContext->pix_fmt,
+            FinalResolution.x,
+            FinalResolution.y,
+            AV_PIX_FMT_RGB24,
+            SWS_BICUBIC,
+            nullptr,
+            nullptr,
+            nullptr
+        );
+    }
+
+    sws_scale(
+        _conversionContext,
+        _avFrame->data,
+        _avFrame->linesize,
+        0,
+        _codecContext->height,
+        _glFrame->data,
+        _glFrame->linesize
+    );
+
+    // TEST save a grayscale frame into a .pgm file
+    // This ends up in OpenSpace\build\apps\OpenSpace
+    // https://github.com/leandromoreira/ffmpeg-libav-tutorial/blob/master/0_hello_world.c
+    /*char frame_filename[1024];
+    snprintf(frame_filename, sizeof(frame_filename), "%s-%d.pgm", "frame", _codecContext->frame_number);
+    save_gray_frame(_avFrame->data[0], _avFrame->linesize[0], _avFrame->width, _avFrame->height, frame_filename);
+    */
+    // Successfully collected a frame
+    av_packet_unref(_packet);
+
+    _textureIsReady = true;
+
+
+    _texture->setPixelData(
+        reinterpret_cast<char*>(_glFrame->data[0]),
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+
+    _texture->uploadTexture();
 
     ScreenSpaceRenderable::update();
 }

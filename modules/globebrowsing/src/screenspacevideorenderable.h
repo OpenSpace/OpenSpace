@@ -41,6 +41,8 @@ namespace openspace {
 
 class ScreenSpaceVideoRenderable : public ScreenSpaceRenderable {
 public:
+    static constexpr glm::ivec2 FinalResolution = { 2048, 1024 };
+
     explicit ScreenSpaceVideoRenderable(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceVideoRenderable() override;
 
@@ -50,12 +52,14 @@ public:
     bool deinitializeGL() override;
     void render() override;
     void update() override;
+    void reset();
 
     static documentation::Documentation Documentation();
 
 private:
     void bindTexture() override;
-    std::filesystem::path _videoFile;
+    properties::TriggerProperty _reset;
+    properties::StringProperty _videoFile;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
@@ -68,6 +72,9 @@ private:
     int _streamIndex = -1;
     AVStream* _videoStream = nullptr;
     AVPacket* _packet = nullptr;
+
+    bool _isInitialized = false;
+    bool _textureIsReady = false;
 
     std::chrono::milliseconds _frameTime = std::chrono::milliseconds(0);
     std::chrono::system_clock::time_point _lastFrameTime;
