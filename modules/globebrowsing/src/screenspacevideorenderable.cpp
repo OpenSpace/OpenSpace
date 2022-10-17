@@ -162,8 +162,8 @@ bool ScreenSpaceVideoRenderable::initializeGL() {
     // Fill the destination frame for the convertion
     int glFrameSize = av_image_get_buffer_size(
         AV_PIX_FMT_RGB24,
-        FinalResolution.x,
-        FinalResolution.y,
+        _codecContext->width,
+        _codecContext->height,
         1
     );
     uint8_t* internalBuffer =
@@ -173,8 +173,8 @@ bool ScreenSpaceVideoRenderable::initializeGL() {
         _glFrame->linesize,
         internalBuffer,
         AV_PIX_FMT_RGB24,
-        FinalResolution.x,
-        FinalResolution.y,
+        _codecContext->width,
+        _codecContext->height,
         1
     );
 
@@ -183,7 +183,7 @@ bool ScreenSpaceVideoRenderable::initializeGL() {
 
     // Create the texture
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(FinalResolution.x, FinalResolution.y, 1),
+        glm::uvec3(_codecContext->width, _codecContext->height, 1),
         GL_TEXTURE_2D,
         ghoul::opengl::Texture::Format::RGB,
         GL_RGB,
@@ -195,6 +195,7 @@ bool ScreenSpaceVideoRenderable::initializeGL() {
     );
 
     _isInitialized = true;
+    _objectSize = { _codecContext->width, _codecContext->height };
     return true;
 }
 
@@ -289,15 +290,14 @@ void ScreenSpaceVideoRenderable::update() {
 
     // Convert the color format to AV_PIX_FMT_RGB24
     // Only create the conversion context once
-    // Scale all videos to 2048 * 1024 pixels
     // TODO: support higher resolutions
     if (!_conversionContext) {
         _conversionContext = sws_getContext(
             _codecContext->width,
             _codecContext->height,
             _codecContext->pix_fmt,
-            FinalResolution.x,
-            FinalResolution.y,
+            _codecContext->width,
+            _codecContext->height,
             AV_PIX_FMT_RGB24,
             SWS_BICUBIC,
             nullptr,

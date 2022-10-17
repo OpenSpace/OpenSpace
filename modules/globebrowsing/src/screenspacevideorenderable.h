@@ -41,8 +41,6 @@ namespace openspace {
 
 class ScreenSpaceVideoRenderable : public ScreenSpaceRenderable {
 public:
-    static constexpr glm::ivec2 FinalResolution = { 2048, 1024 };
-
     explicit ScreenSpaceVideoRenderable(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceVideoRenderable() override;
 
