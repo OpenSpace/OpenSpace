@@ -78,6 +78,27 @@ void save_gray_frame(unsigned char* buf, int wrap, int xsize, int ysize, const c
     fclose(f);
 }
 
+std::string getFffmpegErrorString(const int errorCode) {
+    const int size = 100;
+    const char initChar = '@';
+    std::string result;
+
+    std::vector<char> buf;
+    buf.resize(size, initChar);
+    char* newBuf = av_make_error_string(buf.data(), size, errorCode);
+
+    for (int i = 0; i < buf.size(); ++i) {
+        if (buf[i] != initChar) {
+            result.append(1, buf[i]);
+        }
+        else {
+            result.append(1, '\n');
+            break;
+        }
+    }
+    return result;
+}
+
 documentation::Documentation FfmpegTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_ffmpegtileprovider");
 }
@@ -99,7 +120,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     }
 
     // Look for tile in cache
-    cache::ProviderTileKey key = { tileIndex, _codecContext->frame_number };
+    cache::ProviderTileKey key = { tileIndex, _prevFrameIndex }; // TODO: Improve cachign with a better id
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
 
@@ -196,22 +217,49 @@ void FfmpegTileProvider::update() {
     // Check if it is time for a new frame
     const double now = global::timeManager->time().j2000Seconds();
     double videoTime = now - _startJ200Time;
-    int currentFrameIndex = std::floor(videoTime / _nSecPerFrame);
-
-    const bool hasNewFrame =
-        now > Time::convertTime(_startTime) && _prevFrameIndex != currentFrameIndex;
-
-    if(!hasNewFrame) {
+    if (now < Time::convertTime(_startTime)) {
         return;
     }
 
-    //LINFO(fmt::format("Frame index {} matches video duration {}", currentFrameIndex, videoTime));
+    // Check if video is over
+    if (videoTime > _videoDuration) {
+        LINFO(fmt::format(
+            "Time '{}' is outsice, duration '{}' of video", videoTime, _videoDuration
+        ));
+        return;
+    }
+
+    // Find the frame number that corresponds to the current in game time
+    int64_t currentFrameIndex = av_rescale_q(
+        static_cast<int64_t>(videoTime * AV_TIME_BASE),
+        _avTimeBaseQ,
+        _formatContext->streams[_streamIndex]->time_base
+    );
+
+    // Check if we found a new frame
+    if (_prevFrameIndex == currentFrameIndex) {
+        return;
+    }
     _tileIsReady = false;
+
+    // Only decode the the current frame
+    int result = av_seek_frame(_formatContext, _streamIndex, currentFrameIndex, 0);
+    if (result < 0) {
+        std::string message = getFffmpegErrorString(result);
+
+        LERROR(fmt::format(
+            "Seeking frame {} failed with error code {}, message: '{}'",
+            currentFrameIndex, result, message
+        ));
+        return;
+    }
+    //LINFO(fmt::format("Frame index {} matches video duration {}", currentFrameIndex, videoTime));
 
     // Read frame
     while(true) {
         int result = av_read_frame(_formatContext, _packet);
         if (result < 0) {
+            LERROR(fmt::format("Reading frame failed with code {}", result));
             av_packet_unref(_packet);
             return;
         }
@@ -223,8 +271,8 @@ void FfmpegTileProvider::update() {
 
         // Send packet to the decoder
         result = avcodec_send_packet(_codecContext, _packet);
-        if (result < 0 || result == AVERROR(EAGAIN) || result == AVERROR_EOF) {
-            LERROR(fmt::format("Sending packet failed with {}", result));
+        if (result < 0 || result == AVERROR(EAGAIN) || result == AVERROR(AVERROR_EOF)) {
+            LERROR(fmt::format("Sending packet failed with code {}", result));
             av_packet_unref(_packet);
             return;
         }
@@ -241,23 +289,17 @@ void FfmpegTileProvider::update() {
             continue;
         }
         if (result < 0) {
-            LERROR(fmt::format("Receiving packet failed with {}", result));
+            LERROR(fmt::format("Receiving packet failed with code {}", result));
             av_packet_unref(_packet);
             return;
         }
         // Successfully collected a frame
         LINFO(fmt::format(
-            "Successfully decoded frame {}", _codecContext->frame_number
+            "Successfully decoded frame {}", currentFrameIndex
         ));
         break;
     }
 
-    // Update times
-    if (_nSecPerFrame < 0) {
-        // Calculate frame time
-        _nSecPerFrame = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
-    }
-    _lastFrameTime = now;
     _prevFrameIndex = currentFrameIndex;
 
     // TODO: Need to check the format of the video and decide what formats we want to
@@ -310,7 +352,6 @@ int FfmpegTileProvider::minLevel() {
 
 int FfmpegTileProvider::maxLevel() {
     // Every tile needs to be 512 by 512, how far can we subdivide this video
-    // TODO: Maybe set this vlaue (512) as a constant somehere?
     // TODO: Check if it should be floor or ceil
     return std::floor(std::log2(FinalResolution.x) - std::log2(1024)) + 1;
 }
@@ -350,6 +391,7 @@ void FfmpegTileProvider::internalInitialize() {
     }
     // DEBUG dump info
     av_dump_format(_formatContext, 0, path.c_str(), false);
+    LINFO(fmt::format("Duration: ", _formatContext->duration));
 
     // Find the video stream
     for (unsigned int i = 0; i < _formatContext->nb_streams; ++i) {
@@ -387,6 +429,9 @@ void FfmpegTileProvider::internalInitialize() {
         throw ghoul::RuntimeError(fmt::format("Failed to open codec for {}", path));
     }
 
+    // Find the duration of the video
+    _videoDuration = _formatContext->duration * av_q2d(_avTimeBaseQ);
+
     // Allocate the video frames
     _packet = av_packet_alloc();
     _avFrame = av_frame_alloc();    // Raw frame
@@ -418,8 +463,6 @@ void FfmpegTileProvider::internalInitialize() {
 }
 
 FfmpegTileProvider::~FfmpegTileProvider() {
-    // TODO: Check so internalDeinitialize is called after the last
-    // update function and move code there
 
 }
 

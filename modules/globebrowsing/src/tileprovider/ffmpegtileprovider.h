@@ -65,11 +65,11 @@ public:
 
 private:
     std::filesystem::path _videoFile;
-    double _nSecPerFrame = -1.0;
-    double _lastFrameTime = std::numeric_limits<double>::min();
     std::string _startTime;
     double _startJ200Time = std::numeric_limits<double>::min();
-    int _prevFrameIndex = -1;
+    const AVRational _avTimeBaseQ{ 1, AV_TIME_BASE };
+    double _videoDuration = -1.0;
+    int64_t _prevFrameIndex = -1;
     bool _tileIsReady = false;
     bool _isInitialized = false;
 
