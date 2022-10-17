@@ -70,8 +70,9 @@ std::string formulateDataHttpRequest(double minTime, double maxTime,
 //    return a windows .back().first;
 //}
 
-DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string baseURL)
-    : _baseURL(baseURL)
+DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string infoURL, const std::string dataURL)
+    : _infoURL(infoURL)
+    , _dataURL(dataURL)
 {
     FieldlineOption fieldlineOption;
 
@@ -80,10 +81,10 @@ DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string
         "${CACHE}/dynamic_downloaded_fieldlines/" + name + "/" + std::to_string(dataID)
     );
     _dataID = { dataID, name };
-    std::string httpInfoRequest = _baseURL + std::to_string(_dataID.first);
+    std::string httpInfoRequest = _infoURL + std::to_string(_dataID.first);
     requestDataInfo(httpInfoRequest);
     std::string httpDataRequest = formulateDataHttpRequest(
-        _dataMinTime, _dataMaxTime, _dataID, _baseURL
+        _dataMinTime, _dataMaxTime, _dataID, _dataURL
     );
     requestAvailableFiles(httpDataRequest);
 
@@ -109,8 +110,8 @@ void DynamicDownloaderManager::requestDataInfo(std::string httpInforRequest) {
     *}
     ********************/
 
-    _dataMinTime = jsonResult["availability"]["startDate"];
-    _dataMaxTime = jsonResult["availability"]["stopDate"];
+    _dataMinTime = Time::convertTime(jsonResult["availability"]["startDate"]);
+    _dataMaxTime = Time::convertTime(jsonResult["availability"]["stopDate"]);
     _dataIdDescription = jsonResult["description"];
 
 }
@@ -158,25 +159,29 @@ void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest
         std::pair<std::string, std::string> data(element["timestamp"], element["url"]);
         listOfFiles.push_back(data);
 
+        std::string fileName = "/" + data.second.substr(data.second.find_last_of("//") + 1);
+        std::filesystem::path destination = _syncDir;
+        destination += fileName;
         std::unique_ptr<HttpFileDownload> downloader =
-            std::make_unique<HttpFileDownload>(data.second, _syncDir);
-        _availableFiles.push_back(std::move(downloader));
+            std::make_unique<HttpFileDownload>(data.second, destination);
 
+        HttpFileDownload* dl = downloader.get();
         File fileElement;
-        fileElement.download = downloader.get();
+        fileElement.download = std::move(downloader);
         fileElement.state = File::State::Available;
         fileElement.timestep = data.first;
         fileElement.URL = data.second;
         fileElement.cadence = 0;
         fileElement.availableIndex = index;
-        _availableData.push_back(fileElement);
+        _availableData.push_back(std::move(fileElement));
         ++index;
+
     }
     //maybe sort vector if some data set is order in a different parameter.
 
     // TODO: do something with time.max and time.min if they don't match the request.
-    _dataMaxTime = jsonResult["time.max"];
-    _dataMinTime = jsonResult["time.min"];
+    //_dataMaxTime = jsonResult["time.max"];
+    //_dataMinTime = jsonResult["time.min"];
 
     //bigWindow.listOfFiles = listOfFiles;
     //bigWindow.cadence = calculateCadence(listOfFiles);
@@ -202,106 +207,64 @@ double DynamicDownloaderManager::calculateCadence() {
     return averageTime;
 }
 
-void DynamicDownloaderManager::putOnQueue(std::unique_ptr<HttpFileDownload>& file,
-                                                                     const int prioNumber)
-{
-    _queuedFilesToDownload.push(std::move(file));
-}
-
-void DynamicDownloaderManager::putOnQueue(std::string urlToDownload) {
-    //// Alternative 1 dont save file
-    //HttpMemoryDownload downloading = HttpMemoryDownload(fileInfo.second);
-    //downloading.start();
-
-    // Alternative 2 save file
-    std::unique_ptr<HttpFileDownload> downloader =
-        std::make_unique<HttpFileDownload>(urlToDownload, _syncDir);
-    _queuedFilesToDownload.push(std::move(downloader));
-}
-
-void
-DynamicDownloaderManager::prioritizeQueue(const double& time, const double& deltaTime) {
-    using Unq = std::unique_ptr<HttpFileDownload>;
-    using Q = std::priority_queue<Unq>;
-    using Vec = std::vector<Unq>;
-    using VecIt = Vec::iterator;
+void DynamicDownloaderManager::prioritizeQueue(const double& time) {
+    //using Unq = std::unique_ptr<HttpFileDownload>;
+    //using Q = std::priority_queue<Unq>;
+    //using Vec = std::vector<Unq>;
+    //using VecIt = Vec::iterator;
     // Delta time changed direction and priory of queue is not correct anymore
     // Emptying queue
-    _queuedFilesToDownload = std::priority_queue<std::unique_ptr<HttpFileDownload>>();
+    _queuedFilesToDownload.clear();
 
-    File closestFileToNow = DynamicDownloaderManager::closestFileToNow(time);
+    const File& closestFileToNow = DynamicDownloaderManager::closestFileToNow(time);
     // priority 0 is highest. Higher number is lower priority.
-    int prioNumber = 0;
-    if (_forward) {
-        for (std::vector<File>::iterator it =
-                _availableData.begin() + closestFileToNow.availableIndex;
-            it == _availableData.end() ;
-            ++it)
-        {
-            //file in availableFiles at index i
-            // moved to q with prio prioNumber
-            putOnQueue(*it.download, prionumber);
-            // increase prioNumber
-            //
-        }
-        for (std::vector<File>::iterator it =
-                _availableData.begin() + closestFileToNow.availableIndex - 1;
-            it == _availableData.begin() ;
-            --it)
-        {
-            putOnQueue(*it.download, prionumber);
-        }
 
+    std::vector<File>::iterator now =
+        _availableData.begin() + closestFileToNow.availableIndex;
+
+    std::vector<File>::iterator end;
+    if (_forward) {
+        end = _availableData.end();
     }
     else {
-        for (std::vector<File>::iterator it =
-            _availableData.begin() + closestFileToNow.availableIndex;
-            it == _availableData.begin();
-            --it)
-        {
-            //file in availableFiles at index i
-            // moved to q with prio prioNumber
-            putOnQueue(*it.download, prionumber);
-            // increase prioNumber
-            //
-        }
-        for (std::vector<File>::iterator it =
-            _availableData.begin() + closestFileToNow.availableIndex - 1;
-            it == _availableData.end();
-            ++it)
-        {
-            putOnQueue(*it.download, prionumber);
-        }
+        end = _availableData.begin();
     }
 
-
-
+    // if forward iterate from now to end. else reverse from now to begin
+    for (std::vector<File>::iterator it = now; it != end; _forward ? ++it : --it) {
+        if (it->state == File::State::Available) {
+            _queuedFilesToDownload.push_back(&*it);
+            it->state = File::State::OnQueue;
+        }
+    }
 }
 
 void DynamicDownloaderManager::downloadFile(){
-    if (_filesCurrentlyDownloading.size() < 4) {
-        // there is no way to traverse
-        // priority_queue's content without erasing the queue.
-        HttpFileDownload* dl = _queuedFilesToDownload.top().get();
-        dl->start();
-        _filesCurrentlyDownloading.push_back(std::move(_queuedFilesToDownload.top()));
-        // after doing the push_back(move), do I still need to pop to remove from queue?
-        //_queuedFilesToDownload.pop();
+    if (_filesCurrentlyDownloading.size() < 4 && _queuedFilesToDownload.size() > 0) {
+        File* dl = _queuedFilesToDownload.front();
+        _queuedFilesToDownload.erase(_queuedFilesToDownload.begin());
+        dl->download->start();
+        _filesCurrentlyDownloading.push_back(dl);
+        dl->state = File::State::Downloading;
     }
 }
 
 void DynamicDownloaderManager::checkForFinishedDownloads() {
-    std::vector<std::unique_ptr<HttpFileDownload>>::iterator currentIt =
-        _filesCurrentlyDownloading.begin();
-    while (currentIt != _filesCurrentlyDownloading.end()) {
-        HttpFileDownload* dl = currentIt->get();
+    for (std::vector<File*>::iterator currentIt =
+            _filesCurrentlyDownloading.begin();
+        currentIt != _filesCurrentlyDownloading.end();
+        ++currentIt)
+    {
+        File* file = *currentIt;
+        HttpFileDownload* dl = file->download.get();
 
         if (dl->hasSucceeded()) {
             //_downloadedFiles.push_back(std::move(*currentIt));
             //std::vector<std::filesystem::path> downloadedFiles;
             _downloadedFiles.push_back(dl->destination());
-
-            currentIt->reset();
+            file->state = File::State::Downloaded;
+            _filesCurrentlyDownloading.erase(currentIt);
+            //currentIt->reset();
             //currentIt = _filesCurrentlyDownloading.erase(currentIt);
 
         }
@@ -309,15 +272,16 @@ void DynamicDownloaderManager::checkForFinishedDownloads() {
             ghoul_assert(!dl->hasFailed(), "downloading of file failed");
             LERROR("TODO, make better handling if file download fails");
         }
-        else {
-            ++currentIt;
+        //else would be that the file is not finnished downloading
+        if (_filesCurrentlyDownloading.empty()) {
+            return;
         }
     }
 }
 
 // negative part of this is it has to go through the whole list.
 // Maybe a std::map is better to fetch to most relavent file to download.
-File& DynamicDownloaderManager::closestFileToNow(const double time) {
+const File& DynamicDownloaderManager::closestFileToNow(const double time) {
     File* closest;
     double smallest = DBL_MAX;
     for (File& file : _availableData) {
@@ -347,18 +311,18 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
         return;
     }
 
-    if (_availableFiles.empty()) {
-        // TODO: add in if statement: if we are at edge of big window
-        // if dataset is changed or has not yet been initialized, update big window
-        // Also TODO: request a bigwindow in constructur to begin with.
-        //_httpInfoRequest = _baseURL + std::to_string(_dataID.first);
-        std::string httpInfoRequest = _baseURL + std::to_string(_dataID.first);
-        requestDataInfo(httpInfoRequest);
-        std::string httpDataRequest = formulateDataHttpRequest(
-            _dataMinTime, _dataMaxTime, _dataID, _baseURL
-        );
-        requestAvailableFiles(httpDataRequest);
-    }
+    //if (_availableData.empty()) {
+    //    // TODO: add in if statement: if we are at edge of big window
+    //    // if dataset is changed or has not yet been initialized, update big window
+    //    // Also TODO: request a bigwindow in constructur to begin with.
+    //    //_httpInfoRequest = _baseURL + std::to_string(_dataID.first);
+    //    std::string httpInfoRequest = _infoURL + std::to_string(_dataID.first);
+    //    requestDataInfo(httpInfoRequest);
+    //    std::string httpDataRequest = formulateDataHttpRequest(
+    //        _dataMinTime, _dataMaxTime, _dataID, _dataURL
+    //    );
+    //    requestAvailableFiles(httpDataRequest);
+    //}
 
     if (_downloadedFiles.size() > 20) {
         // cache files.
@@ -367,7 +331,9 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
         // Maybe instead we should check if we have to many cached files and remove them
     }
 
-    checkForFinishedDownloads();
+    if (_filesCurrentlyDownloading.size() > 0) {
+        checkForFinishedDownloads();
+    }
 
     // We should still check for finishedDownloads even if direction of time changed
     // therefore, this is done after checkForFinishedDownloads()
@@ -387,9 +353,8 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
      //    DynamicDownloaderManager::findMostRelevantFileToDownload(time);
      //putOnQueue(mostRelaventFileToDownload.second);
 
-    if (!_queueIsPrioritized) {
-
-        prioritizeQueue(time, deltaTime);
+    if (!_queueIsPrioritized && (_availableData.size() > 0) ) {
+        prioritizeQueue(time);
         _queueIsPrioritized = true;
     }
 

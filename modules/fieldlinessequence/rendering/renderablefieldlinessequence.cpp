@@ -389,8 +389,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         // should be either a property from asset
         const std::string baseURL =
             "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=";
+        const std::string dataURL =
+            "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=";
         _dynamicdownloaderManager =
-            std::make_unique<DynamicDownloaderManager>(_dataID, baseURL);
+            std::make_unique<DynamicDownloaderManager>(_dataID, baseURL, dataURL);
     }
     // source folder, but not dynamic
     else if (p.sourceFolder.has_value()) {
@@ -520,19 +522,21 @@ void RenderableFieldlinesSequence::initializeGL() {
     // Extract source file type specific information from dictionary
     // & get states from source
     switch (_inputFileType) {
-        case SourceFileType::Cdf:
-            bool success = getStatesFromCdfFiles();
-            if (!success) {
+        case SourceFileType::Cdf: {
+            bool CdfSuccess = getStatesFromCdfFiles();
+            if (!CdfSuccess) {
                 return;
             }
             break;
-        case SourceFileType::Json:
-            bool success = loadJsonStatesIntoRAM();
-            if (!success) {
+        }
+        case SourceFileType::Json: {
+            bool JsonSuccess = loadJsonStatesIntoRAM();
+            if (!JsonSuccess) {
                 return;
             }
             break;
-        case SourceFileType::Osfls:
+        }
+        case SourceFileType::Osfls: {
             // dynamic loading, but not dynamic downloading
             if (_loadingStatesDynamically && !_dynamicWebContent) {
                 bool success = prepareForOsflsStreaming();
@@ -547,6 +551,7 @@ void RenderableFieldlinesSequence::initializeGL() {
             break;
             // else: would be if dynamic downloading, and therefor also dynamic loading,
             // where true. Don't need to do anything here.
+        }
         // TODO: A default case would mean a faulty sourefiletyp is specified. Terminate
         // and throw with message.
         default:
@@ -1119,8 +1124,9 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     else {
 
     }
+
     //TODO: if dynamic downloading -> guarantee a startTime at [0]?
-    const bool isInInterval = (currentTime >= _startTimes[0]) &&
+    const bool isInInterval = (_startTimes.size() > 0) && (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {

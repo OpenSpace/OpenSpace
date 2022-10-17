@@ -120,7 +120,7 @@ struct FieldlineOption {
 //};
 
 struct File {
-    HttpFileDownload* download;
+    std::unique_ptr<HttpFileDownload> download;
     //pair.first is timestep, pair.second is url to be downloaded
     std::string timestep;
     std::string URL;
@@ -139,14 +139,14 @@ struct File {
 class DynamicDownloaderManager {
 public:
     //DynamicDownloaderManager() = default;
-    DynamicDownloaderManager(int dataID, const std::string baseURL);
+    DynamicDownloaderManager(int dataID, const std::string infoURL, const std::string dataURL);
     void requestDataInfo(std::string httpInfoRequest);
     void requestAvailableFiles(std::string httpDataRequest);
     //std::pair<std::string, std::string> findMostRelevantFileToDownload(const double time);
     //std::unique_ptr<HttpFileDownload>&
     //    findMostRelevantFileToPutOnQueue(const double time, const double deltaTime);
     //std::pair<std::string, std::string>* closestFileToNow(const double time);
-    File& closestFileToNow(const double time);
+    const File& closestFileToNow(const double time);
     void update(const double time, const double deltaTime);
     const std::vector<std::filesystem::path>& downloadedFiles();
     void checkForFinishedDownloads();
@@ -154,11 +154,9 @@ public:
 
 private:
 
-    void putOnQueue(std::unique_ptr<HttpFileDownload>& file, const int prioNumber);
-    void putOnQueue(std::string fileInfo);
     void downloadFile();
     double calculateCadence();
-    void prioritizeQueue(const double& time, const double& deltaTime);
+    void prioritizeQueue(const double& time);
 
     //int _MaxNumberOfDownloadedFiles = 20;
     //bool _deltaTimeChanged = false;
@@ -167,25 +165,29 @@ private:
 
     std::filesystem::path _syncDir;
     std::pair<int, std::string> _dataID;
-    std::string _dataIdDescription;
-    const std::string _baseURL;
+    const std::string _infoURL;
+    const std::string _dataURL;
     //BigWindow _bigWindow;
 
     double _dataMinTime;
     double _dataMaxTime;
+    std::string _dataIdDescription;
     //temporary having a global cadence. To be replaced with a cadence for each file.
     double _tempCadence = 0;
 
-    std::vector<std::unique_ptr<HttpFileDownload>> _availableFiles;
     std::vector<File> _availableData;
 
-    // Number 0 is highest priority in Queue. Higher number is lower prio
-    std::priority_queue<std::unique_ptr<HttpFileDownload>> _queuedFilesToDownload;
-    bool _queueIsPrioritized = false;
-    std::vector<std::unique_ptr<HttpFileDownload>> _filesCurrentlyDownloading;
-    //std::vector<std::unique_ptr<HttpFileDownload>> _downloadedFiles;
-    std::vector<std::filesystem::path> _downloadedFiles;
+    //std::vector<std::unique_ptr<HttpFileDownload>> _availableFiles;
+    //std::priority_queue<std::unique_ptr<HttpFileDownload>> _queuedFilesToDownload;
+    //std::vector<std::unique_ptr<HttpFileDownload>> _filesCurrentlyDownloading;
+    ////std::vector<std::unique_ptr<HttpFileDownload>> _downloadedFiles;
+    //std::vector<std::filesystem::path> _downloadedFiles;
 
+    // Number 0 is highest priority in Queue. Higher number is lower prio
+    std::vector<File*> _queuedFilesToDownload;
+    bool _queueIsPrioritized = false;
+    std::vector<File*> _filesCurrentlyDownloading;
+    std::vector<std::filesystem::path> _downloadedFiles;
 
 
 };
