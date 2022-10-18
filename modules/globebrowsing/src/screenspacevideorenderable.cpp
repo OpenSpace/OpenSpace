@@ -210,6 +210,13 @@ bool ScreenSpaceVideoRenderable::deinitializeGL() {
     return true;
 }
 
+glm::mat4 ScreenSpaceVideoRenderable::localRotationMatrix() {
+    // Ffmpeg reads the texture differently than OpenGL. Flip the texture to make it 
+    // appear correctly
+    glm::mat4 flipTexture = glm::mat4(glm::quat(glm::vec3(glm::pi<float>(), 0.f, 0.f)));
+    return ScreenSpaceRenderable::localRotationMatrix() * flipTexture;
+}
+
 void ScreenSpaceVideoRenderable::render() {
     ScreenSpaceRenderable::render();
 }

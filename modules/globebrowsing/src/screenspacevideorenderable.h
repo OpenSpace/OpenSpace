@@ -55,6 +55,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    glm::mat4 localRotationMatrix() override;
     void bindTexture() override;
     properties::TriggerProperty _reset;
     properties::StringProperty _videoFile;
