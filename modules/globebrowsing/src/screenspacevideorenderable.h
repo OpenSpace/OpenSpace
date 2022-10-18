@@ -57,10 +57,14 @@ public:
 private:
     glm::mat4 localRotationMatrix() override;
     void bindTexture() override;
+    void readFrame();
     properties::TriggerProperty _reset;
+    properties::TriggerProperty _play;
+    properties::TriggerProperty _pause;
     properties::StringProperty _videoFile;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    bool _isPlaying = false;
 
     AVFormatContext* _formatContext = nullptr;
     AVCodecContext* _codecContext = nullptr;

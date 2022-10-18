@@ -38,8 +38,20 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
         "Reset",
-        "Reset",
-        "Reset the video."
+        "Go to beginning",
+        "Go to beginning of video."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
+        "Play",
+        "Play",
+        "Play the video."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PauseInfo = {
+        "Pause",
+        "Pause",
+        "Pause the video."
     };
 
     struct [[codegen::Dictionary(ScreenSpaceVideoRenderable)]] Parameters {
@@ -61,6 +73,8 @@ ScreenSpaceVideoRenderable::ScreenSpaceVideoRenderable(const ghoul::Dictionary& 
     : ScreenSpaceRenderable(dictionary)
     , _videoFile(FileInfo, "")
     , _reset(ResetInfo)
+    , _play(PlayInfo)
+    , _pause(PauseInfo)
 
 {
     _identifier = makeUniqueIdentifier(_identifier);
@@ -72,10 +86,21 @@ ScreenSpaceVideoRenderable::ScreenSpaceVideoRenderable(const ghoul::Dictionary& 
 
     _reset.onChange([this]() {
         this->reset();
+        _isPlaying = false;
+        });
+
+    _play.onChange([this]() {
+        _isPlaying = true;
+        });
+
+    _pause.onChange([this]() {
+        _isPlaying = false;
         });
 
     addProperty(_videoFile);
     addProperty(_reset);
+    addProperty(_play);
+    addProperty(_pause);
 }
 
 ScreenSpaceVideoRenderable::~ScreenSpaceVideoRenderable() {
@@ -194,8 +219,23 @@ bool ScreenSpaceVideoRenderable::initializeGL() {
         ghoul::opengl::Texture::TakeOwnership::No
     );
 
+    _conversionContext = sws_getContext(
+        _codecContext->width,
+        _codecContext->height,
+        _codecContext->pix_fmt,
+        _codecContext->width,
+        _codecContext->height,
+        AV_PIX_FMT_RGB24,
+        SWS_BICUBIC,
+        nullptr,
+        nullptr,
+        nullptr
+    );
+
+    readFrame(); 
     _isInitialized = true;
     _objectSize = { _codecContext->width, _codecContext->height };
+
     return true;
 }
 
@@ -225,7 +265,7 @@ void ScreenSpaceVideoRenderable::update() {
 
     ZoneScoped
 
-    if (!_isInitialized) {
+    if (!_isInitialized || !_isPlaying) {
         return;
     }
     // Check if it is time for a new frame
@@ -237,8 +277,22 @@ void ScreenSpaceVideoRenderable::update() {
     if (!hasNewFrame) {
         return;
     }
-    
-    // Read frame
+
+    readFrame();
+
+    // Update times
+    if (_frameTime.count() <= 0) {
+        // Calculate frame time
+        double sPerFrame = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
+        int msPerFrame = static_cast<int>(sPerFrame * 1000);
+        _frameTime = std::chrono::milliseconds(msPerFrame);
+    }
+    _lastFrameTime = now;
+
+    ScreenSpaceRenderable::update();
+}
+
+void ScreenSpaceVideoRenderable::readFrame() {
     while (true) {
         int result = av_read_frame(_formatContext, _packet);
         if (result < 0) {
@@ -281,37 +335,7 @@ void ScreenSpaceVideoRenderable::update() {
         ));
         break;
     }
-
-    // Update times
-    if (_frameTime.count() <= 0) {
-        // Calculate frame time
-        double sPerFrame = av_q2d(_codecContext->time_base) * _codecContext->ticks_per_frame;
-        int msPerFrame = static_cast<int>(sPerFrame * 1000);
-        _frameTime = std::chrono::milliseconds(msPerFrame);
-    }
-    _lastFrameTime = now;
-
-    // TODO: Need to check the format of the video and decide what formats we want to
-    // support and how they relate to the GL formats
-
     // Convert the color format to AV_PIX_FMT_RGB24
-    // Only create the conversion context once
-    // TODO: support higher resolutions
-    if (!_conversionContext) {
-        _conversionContext = sws_getContext(
-            _codecContext->width,
-            _codecContext->height,
-            _codecContext->pix_fmt,
-            _codecContext->width,
-            _codecContext->height,
-            AV_PIX_FMT_RGB24,
-            SWS_BICUBIC,
-            nullptr,
-            nullptr,
-            nullptr
-        );
-    }
-
     sws_scale(
         _conversionContext,
         _avFrame->data,
@@ -322,13 +346,6 @@ void ScreenSpaceVideoRenderable::update() {
         _glFrame->linesize
     );
 
-    // TEST save a grayscale frame into a .pgm file
-    // This ends up in OpenSpace\build\apps\OpenSpace
-    // https://github.com/leandromoreira/ffmpeg-libav-tutorial/blob/master/0_hello_world.c
-    /*char frame_filename[1024];
-    snprintf(frame_filename, sizeof(frame_filename), "%s-%d.pgm", "frame", _codecContext->frame_number);
-    save_gray_frame(_avFrame->data[0], _avFrame->linesize[0], _avFrame->width, _avFrame->height, frame_filename);
-    */
     // Successfully collected a frame
     av_packet_unref(_packet);
 
@@ -337,8 +354,6 @@ void ScreenSpaceVideoRenderable::update() {
         ghoul::opengl::Texture::TakeOwnership::No
     );
     _texture->uploadTexture();
-
-    ScreenSpaceRenderable::update();
 }
 
 void ScreenSpaceVideoRenderable::bindTexture() {
