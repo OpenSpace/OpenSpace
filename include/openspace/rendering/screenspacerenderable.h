@@ -96,7 +96,7 @@ protected:
     virtual glm::mat4 scaleMatrix();
     glm::mat4 globalRotationMatrix();
     glm::mat4 translationMatrix();
-    glm::mat4 localRotationMatrix();
+    virtual glm::mat4 localRotationMatrix();
 
     glm::vec3 raeToCartesian(const glm::vec3& rae) const;
     glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
