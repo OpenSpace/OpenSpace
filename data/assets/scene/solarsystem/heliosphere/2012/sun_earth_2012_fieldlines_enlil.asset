@@ -1,4 +1,4 @@
-local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere.asset')
+local transforms = asset.require('scene/solarsystem/heliosphere/transforms_heliosphere.asset')
 asset.require('scene/solarsystem/heliosphere/2012/reset_loop_action.asset')
 
 local transferFunctions = asset.syncedResource({

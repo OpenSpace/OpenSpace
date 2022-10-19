@@ -1216,11 +1216,11 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
 // Assumes we already know that currentTime is within the sequence interval
 int RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTime) {
-    int index;
+    int index = 0;
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if (iter != _startTimes.begin()) {
-            _activeTriggerTimeIndex = static_cast<int>(
+            index = static_cast<int>(
                 std::distance(_startTimes.begin(), iter)
             ) - 1;
         }

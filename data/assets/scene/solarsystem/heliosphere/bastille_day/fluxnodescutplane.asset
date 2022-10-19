@@ -1,5 +1,5 @@
 local propertyHelper = asset.require("util/property_helper")
-local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 local rot = asset.require("./carringtonToHEEQRotation.asset")
 
 local TexturesPathEquatorial = asset.syncedResource({
