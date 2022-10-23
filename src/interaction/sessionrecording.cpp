@@ -953,10 +953,9 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
             != _propertyBaselinesSaved.end()
             );
         if (!isPropAlreadySaved) {
-            std::string val;
-            prop.getStringValue(val);
             std::string initialScriptCommand = fmt::format(
-                "openspace.setPropertyValueSingle(\"{}\", {})", propIdentifier, val
+                "openspace.setPropertyValueSingle(\"{}\", {})",
+                propIdentifier, prop.stringValue()
             );
             saveScriptKeyframeToPropertiesBaseline(initialScriptCommand);
             _propertyBaselinesSaved.push_back(propIdentifier);

@@ -225,7 +225,7 @@ public:
      * \param value The value to which the Property will be encoded
      * \return \p true if the encoding succeeded, \p false otherwise
      */
-    virtual bool getStringValue(std::string& value) const;
+    virtual std::string stringValue() const;
 
     /**
      * This method registers a \p callback function that will be called every time if

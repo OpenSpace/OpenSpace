@@ -112,8 +112,8 @@ int Property::typeLua() const {
     return LUA_TNIL;
 }
 
-bool Property::getStringValue(std::string&) const {
-    return false;
+std::string Property::stringValue() const {
+    return "";
 }
 
 const std::string& Property::guiName() const {
@@ -178,9 +178,7 @@ const ghoul::Dictionary& Property::metaData() const {
 }
 
 std::string Property::jsonValue() const {
-    std::string v;
-    getStringValue(v);
-    return v;
+    return stringValue();
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {

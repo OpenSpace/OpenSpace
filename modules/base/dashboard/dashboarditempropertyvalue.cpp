@@ -93,9 +93,7 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
     }
 
     if (_property) {
-        std::string value;
-        _property->getStringValue(value);
-
+        std::string value = _property->stringValue();
         RenderFont(
             *_font,
             penPosition,

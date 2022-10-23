@@ -127,7 +127,7 @@ public:
      * \param value The string object in which to store the resulting encoding
      * \return \c true if the encoding succeeded; \c false otherwise
      */
-    virtual bool getStringValue(std::string& value) const override;
+    virtual std::string stringValue() const override;
 
     /**
      * Returns the description for this TemplateProperty as a Lua script that returns a
