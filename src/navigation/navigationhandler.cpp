@@ -104,7 +104,7 @@ NavigationHandler::NavigationHandler()
     addProperty(_useKeyFrameInteraction);
 }
 
-NavigationHandler::~NavigationHandler() {} // NOLINT
+NavigationHandler::~NavigationHandler() {}
 
 void NavigationHandler::initialize() {
     ZoneScoped

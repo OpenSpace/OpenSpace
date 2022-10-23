@@ -83,7 +83,7 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     addProperty(_texturePath);
 }
 
-ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {} // NOLINT
+ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {}
 
 bool ScreenSpaceImageOnline::deinitializeGL() {
     _texture = nullptr;

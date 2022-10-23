@@ -181,7 +181,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     });
 }
 
-OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
+OpenSpaceEngine::~OpenSpaceEngine() {}
 
 void OpenSpaceEngine::registerPathTokens() {
     LTRACE("OpenSpaceEngine::initialize(begin)");

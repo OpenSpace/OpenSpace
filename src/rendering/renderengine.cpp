@@ -411,7 +411,7 @@ RenderEngine::RenderEngine()
     addProperty(_disabledFontColor);
 }
 
-RenderEngine::~RenderEngine() {} // NOLINT
+RenderEngine::~RenderEngine() {}
 
 void RenderEngine::initialize() {
     ZoneScoped

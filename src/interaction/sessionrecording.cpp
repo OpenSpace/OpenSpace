@@ -107,7 +107,7 @@ SessionRecording::SessionRecording(bool isGlobal)
     }
 }
 
-SessionRecording::~SessionRecording() { // NOLINT
+SessionRecording::~SessionRecording() {
 }
 
 void SessionRecording::deinitialize() {

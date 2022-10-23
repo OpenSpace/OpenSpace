@@ -151,9 +151,9 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(
 
 SpiceManager::SpiceManager() {
     // Set the SPICE library to not exit the program if an error occurs
-    erract_c("SET", 0, const_cast<char*>("REPORT")); // NOLINT
+    erract_c("SET", 0, const_cast<char*>("REPORT"));
     // But we do not want SPICE to print the errors, we will fetch them ourselves
-    errprt_c("SET", 0, const_cast<char*>("NONE")); // NOLINT
+    errprt_c("SET", 0, const_cast<char*>("NONE"));
 }
 
 SpiceManager::~SpiceManager() {
@@ -162,8 +162,8 @@ SpiceManager::~SpiceManager() {
     }
 
     // Set values back to default
-    erract_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
-    errprt_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
+    erract_c("SET", 0, const_cast<char*>("DEFAULT"));
+    errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
 }
 
 void SpiceManager::initialize() {
@@ -1043,7 +1043,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
+        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -1102,7 +1102,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
+        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
 #pragma clang diagnostic pop

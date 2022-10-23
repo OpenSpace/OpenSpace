@@ -83,7 +83,7 @@ std::string Property::fullyQualifiedIdentifier() const {
     while (currentOwner) {
         std::string ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
-            identifier = ownerId + "." + identifier; // NOLINT
+            identifier = ownerId + "." + identifier;
         }
         currentOwner = currentOwner->owner();
     }
@@ -98,7 +98,7 @@ bool Property::getLuaValue(lua_State*) const {
     return false;
 }
 
-void Property::set(std::any) {} // NOLINT
+void Property::set(std::any) {}
 
 bool Property::setLuaValue(lua_State*) {
     return false;
@@ -339,7 +339,7 @@ std::string Property::generateAdditionalJsonDescription() const {
     return "{}";
 }
 
-void Property::setInterpolationTarget(std::any) {} // NOLINT
+void Property::setInterpolationTarget(std::any) {}
 void Property::setLuaInterpolationTarget(lua_State*) {}
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 

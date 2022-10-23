@@ -552,7 +552,7 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_showDebugSphere);
 }
 
-SceneGraphNode::~SceneGraphNode() {} // NOLINT
+SceneGraphNode::~SceneGraphNode() {}
 
 void SceneGraphNode::initialize() {
     ZoneScoped
