@@ -274,8 +274,8 @@ void Property::resetToUnchanged() {
 }
 
 std::string Property::generateBaseJsonDescription() const {
-    std::string cName = className();
-    std::string cNameSan = escapedJson(cName);
+    std::string_view cName = className();
+    std::string cNameSan = escapedJson(std::string(cName));
     std::string identifier = fullyQualifiedIdentifier();
     std::string identifierSan = escapedJson(identifier);
     std::string gName = guiName();

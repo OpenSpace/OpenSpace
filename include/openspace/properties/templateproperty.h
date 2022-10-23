@@ -71,7 +71,7 @@ public:
      *
      * \return The class name for the TemplateProperty
      */
-    virtual std::string className() const override = 0;
+    virtual std::string_view className() const override = 0;
 
     /**
      * Returns the stored value packed into a ghoul::any object.

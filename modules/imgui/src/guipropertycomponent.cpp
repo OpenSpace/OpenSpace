@@ -497,7 +497,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
     const auto v = static_cast<std::underlying_type_t<V>>(visibilityFilter);
     const auto propV = static_cast<std::underlying_type_t<V>>(prop->visibility());
     if (v >= propV) {
-        auto it = FunctionMapping.find(prop->className());
+        auto it = FunctionMapping.find(std::string(prop->className()));
         if (it != FunctionMapping.end()) {
             if (owner) {
                 it->second(

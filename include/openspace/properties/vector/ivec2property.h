@@ -39,7 +39,7 @@ public:
         glm::ivec2 maxValue = glm::ivec2(std::numeric_limits<int>::max()),
         glm::ivec2 stepValue = glm::ivec2(1));
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<glm::ivec2>::operator=;

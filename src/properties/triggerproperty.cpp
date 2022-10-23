@@ -30,7 +30,7 @@ TriggerProperty::TriggerProperty(PropertyInfo info)
     : Property(std::move(info))
 {}
 
-std::string TriggerProperty::className() const {
+std::string_view TriggerProperty::className() const {
     return "TriggerProperty";
 }
 

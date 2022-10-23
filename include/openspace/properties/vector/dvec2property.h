@@ -39,7 +39,7 @@ public:
         glm::dvec2 maxValue = glm::dvec2(std::numeric_limits<double>::max()),
         glm::dvec2 stepValue = glm::dvec2(0.01));
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<glm::dvec2>::operator=;

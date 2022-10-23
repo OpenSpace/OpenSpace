@@ -30,6 +30,7 @@
 #include <any>
 #include <functional>
 #include <string>
+#include <string_view>
 
 struct lua_State;
 
@@ -146,7 +147,7 @@ public:
      *
      * \return The class name of the Property
      */
-    virtual std::string className() const = 0;
+    virtual std::string_view className() const = 0;
 
     /**
      * This method returns the encapsulated value of the Property to the caller. The type
@@ -383,11 +384,11 @@ public:
     void setReadOnly(bool state);
 
     /**
-    * Default view options that can be used in the Property::setViewOption method. The
-    * values are:
-    * - Property::ViewOptions::Color = \c Color (Intended for Vec3 and Vec4),
-    * - Property::ViewOptions::MinMaxRange = \c MinMaxRange (Intended for Vec2)
-    */
+     * Default view options that can be used in the Property::setViewOption method. The
+     * values are:
+     * - Property::ViewOptions::Color = \c Color (Intended for Vec3 and Vec4),
+     * - Property::ViewOptions::MinMaxRange = \c MinMaxRange (Intended for Vec2)
+     */
     struct ViewOptions {
         static const char* Color;
         static const char* MinMaxRange;

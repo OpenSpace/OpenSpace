@@ -33,7 +33,7 @@ DoubleProperty::DoubleProperty(Property::PropertyInfo info, double value,
     : NumericalProperty<double>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string DoubleProperty::className() const {
+std::string_view DoubleProperty::className() const {
     return "DoubleProperty";
 }
 

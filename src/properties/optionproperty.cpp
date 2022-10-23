@@ -46,7 +46,7 @@ OptionProperty::OptionProperty(PropertyInfo info, DisplayType displayType)
     , _displayType(displayType)
 {}
 
-std::string OptionProperty::className() const {
+std::string_view OptionProperty::className() const {
     return "OptionProperty";
 }
 

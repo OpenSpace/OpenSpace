@@ -48,7 +48,7 @@ class BoolProperty : public TemplateProperty<bool> {
 public:
     BoolProperty(Property::PropertyInfo info, bool value = false);
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<bool>::operator=;

@@ -82,7 +82,7 @@ public:
      *
      * \return The name of this class for reflection purposes
      */
-    std::string className() const override;
+    std::string_view className() const override;
     using IntProperty::operator=;
 
     /**
