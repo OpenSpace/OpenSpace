@@ -66,8 +66,6 @@ public:
      */
     void set(std::any value) override;
 
-    std::string toJson() const override;
-
     std::string jsonValue() const override;
 };
 

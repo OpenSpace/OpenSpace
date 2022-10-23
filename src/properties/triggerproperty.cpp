@@ -43,13 +43,6 @@ void TriggerProperty::set(std::any) {
     notifyChangeListeners();
 }
 
-std::string TriggerProperty::toJson() const {
-    std::string result = "{";
-    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseJsonDescription();
-    result += "}";
-    return result;
-}
-
 std::string TriggerProperty::jsonValue() const {
     return "true";
 }

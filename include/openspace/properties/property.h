@@ -114,7 +114,8 @@ public:
 
     /// This OnChangeHandle can be used to remove all onChange callbacks from this
     /// Property
-    static OnChangeHandle OnChangeHandleAll;
+    constexpr static OnChangeHandle OnChangeHandleAll =
+        std::numeric_limits<OnChangeHandle>::max();
 
     /**
      * The constructor for the property. The \p info (see #PropertyInfo) contains
@@ -427,14 +428,6 @@ public:
     const ghoul::Dictionary& metaData() const;
 
     /**
-     * Convert the Property into a string containing a JSON representation of the
-     * Property. Includes description of the object.
-     *
-     * \return The JSON string
-     */
-    virtual std::string toJson() const;
-
-    /**
      * Get a valid JSON formatted representation of the Property's value.
      *
      * \return the value in a json compatible format
@@ -496,14 +489,6 @@ public:
     void resetToUnchanged();
 
 protected:
-    static const char* IdentifierKey;
-    static const char* NameKey;
-    static const char* TypeKey;
-    static const char* DescriptionKey;
-    static const char* JsonValueKey;
-    static const char* MetaDataKey;
-    static const char* AdditionalDataKey;
-
     /**
      * This method must be called by all subclasses whenever the encapsulated value has
      * changed and potential listeners need to be informed.
@@ -546,9 +531,6 @@ private:
     uint64_t _id;
 #endif
 };
-
-/// This function sanitizes an incoming string for JSON control characters
-std::string sanitizeString(const std::string& str);
 
 } // namespace openspace::properties
 

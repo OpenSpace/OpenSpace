@@ -25,6 +25,7 @@
 #include <openspace/properties/property.h>
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
@@ -35,59 +36,20 @@ namespace {
     constexpr std::string_view MetaDataKeyReadOnly = "isReadOnly";
     constexpr std::string_view MetaDataKeyViewOptions = "ViewOptions";
     constexpr std::string_view MetaDataKeyVisibility = "Visibility";
+
+    constexpr std::string_view IdentifierKey = "Identifier";
+    constexpr std::string_view NameKey = "Name";
+    constexpr std::string_view TypeKey = "Type";
+    constexpr std::string_view DescriptionKey = "Description";
+    constexpr std::string_view JsonValueKey = "Value";
+    constexpr std::string_view MetaDataKey = "MetaData";
+    constexpr std::string_view AdditionalDataKey = "AdditionalData";
 } // namespace
 
 namespace openspace::properties {
 
-Property::OnChangeHandle Property::OnChangeHandleAll =
-                                               std::numeric_limits<OnChangeHandle>::max();
-
 const char* Property::ViewOptions::Color = "Color";
 const char* Property::ViewOptions::MinMaxRange = "MinMaxRange";
-
-const char* Property::IdentifierKey = "Identifier";
-const char* Property::NameKey = "Name";
-const char* Property::TypeKey = "Type";
-const char* Property::DescriptionKey = "Description";
-const char* Property::JsonValueKey = "Value";
-const char* Property::MetaDataKey = "MetaData";
-const char* Property::AdditionalDataKey = "AdditionalData";
-
-
-std::string sanitizeString(const std::string& s) {
-    std::string result;
-
-    for (const char& c : s) {
-        switch (c) {
-            case '"':
-                result += "\\\"";
-                break;
-            case '\\':
-                result += "\\\\";
-                break;
-            case '\b':
-                result += "\\b";
-                break;
-            case '\f':
-                result += "\\f";
-                break;
-            case '\n':
-                result += "\\n";
-                break;
-            case '\r':
-                result += "\\r";
-                break;
-            case '\t':
-                result += "\\t";
-                break;
-            default:
-                result += c;
-        }
-    }
-
-    return result;
-}
-
 
 #ifdef _DEBUG
 uint64_t Property::Identifier = 0;
@@ -224,14 +186,6 @@ const ghoul::Dictionary& Property::metaData() const {
     return _metaData;
 }
 
-std::string Property::toJson() const {
-    std::string result = "{";
-    result += "\"" + std::string(DescriptionKey) + "\": " +
-              generateBaseJsonDescription() + ", ";
-    result += "\"" + std::string(JsonValueKey) + "\": " + jsonValue() + '}';
-    return result;
-}
-
 std::string Property::jsonValue() const {
     return getStringValue();
 }
@@ -321,20 +275,26 @@ void Property::resetToUnchanged() {
 
 std::string Property::generateBaseJsonDescription() const {
     std::string cName = className();
-    std::string cNameSan = sanitizeString(cName);
+    std::string cNameSan = escapedJson(cName);
     std::string identifier = fullyQualifiedIdentifier();
-    std::string identifierSan = sanitizeString(identifier);
+    std::string identifierSan = escapedJson(identifier);
     std::string gName = guiName();
-    std::string gNameSan = sanitizeString(gName);
+    std::string gNameSan = escapedJson(gName);
     std::string metaData = generateMetaDataJsonDescription();
     std::string description = generateAdditionalJsonDescription();
 
-    return
-        "{ \"" + std::string(TypeKey) + "\": \"" + cNameSan + "\", " +
-        "\"" + std::string(IdentifierKey) + "\": \"" + identifierSan + "\", " +
-        "\"" + std::string(NameKey) + "\": \"" + gNameSan + "\", " +
-        "\"" + std::string(MetaDataKey) + "\": " + metaData + ", " +
-        "\"" + std::string(AdditionalDataKey) + "\": " + description + " }";
+    return fmt::format(
+        R"({{"{}":"{}","{}":"{}","{}":"{}","{}":{},"{}":{}}})",
+        TypeKey, cNameSan, IdentifierKey, identifierSan, NameKey, gNameSan, MetaDataKey,
+        metaData, AdditionalDataKey, description
+    );
+
+    //return
+    //    "{ \"" + std::string(TypeKey) + "\": \"" + cNameSan + "\", " +
+    //    "\"" + std::string(IdentifierKey) + "\": \"" + identifierSan + "\", " +
+    //    "\"" + std::string(NameKey) + "\": \"" + gNameSan + "\", " +
+    //    "\"" + std::string(MetaDataKey) + "\": " + metaData + ", " +
+    //    "\"" + std::string(AdditionalDataKey) + "\": " + description + " }";
 }
 
 std::string Property::generateMetaDataJsonDescription() const {
@@ -357,7 +317,7 @@ std::string Property::generateMetaDataJsonDescription() const {
     std::string isReadOnlyString = (isReadOnly ? "true" : "false");
 
     std::string groupId = groupIdentifier();
-    std::string sanitizedGroupId = sanitizeString(groupId);
+    std::string sanitizedGroupId = escapedJson(groupId);
 
     std::string viewOptions = "{}";
    if (_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
