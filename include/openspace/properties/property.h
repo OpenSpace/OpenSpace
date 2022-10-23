@@ -228,16 +228,6 @@ public:
     virtual bool getStringValue(std::string& value) const;
 
     /**
-     * This method encodes the encapsulated value of this Property as a
-     * <code>std::string</code>.
-     *
-     * \return the string value
-     *
-     * \throw ghoul::RuntimeError If value could not be fetched
-     */
-    std::string getStringValue() const;
-
-    /**
      * This method registers a \p callback function that will be called every time if
      * either Property:set or Property::setLuaValue was called with a value that is
      * different from the previously stored value. The callback can be removed by calling

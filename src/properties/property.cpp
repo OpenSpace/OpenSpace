@@ -116,15 +116,6 @@ bool Property::getStringValue(std::string&) const {
     return false;
 }
 
-std::string Property::getStringValue() const {
-    std::string value;
-    bool status = getStringValue(value);
-    if (!status) {
-        throw ghoul::RuntimeError("Could not get string value", identifier());
-    }
-    return value;
-}
-
 const std::string& Property::guiName() const {
     return _guiName;
 }
@@ -187,7 +178,9 @@ const ghoul::Dictionary& Property::metaData() const {
 }
 
 std::string Property::jsonValue() const {
-    return getStringValue();
+    std::string v;
+    getStringValue(v);
+    return v;
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {

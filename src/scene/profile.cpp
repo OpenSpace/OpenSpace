@@ -589,7 +589,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
         Property p;
         p.setType = Property::SetType::SetPropertyValueSingle;
         p.name = prop->fullyQualifiedIdentifier();
-        p.value = prop->getStringValue();
+        prop->getStringValue(p.value);
         properties.push_back(std::move(p));
     }
 
