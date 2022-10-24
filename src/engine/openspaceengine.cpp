@@ -368,12 +368,6 @@ void OpenSpaceEngine::initialize() {
 
     global::scriptEngine->initialize();
 
-    // To be concluded
-    _documentationJson.clear();
-    _documentationJson += "{\"documentation\":[";
-
-    writeStaticDocumentation();
-
     _shutdown.waitTime = global::configuration->shutdownCountdown;
 
     global::navigationHandler->initialize();
@@ -875,7 +869,7 @@ void OpenSpaceEngine::loadAssets() {
 
     runGlobalCustomizationScripts();
 
-    _writeDocumentationTask = std::async(&OpenSpaceEngine::writeSceneDocumentation, this);
+    _writeDocumentationTask = std::async(&OpenSpaceEngine::writeDocumentation, this);
 
     LTRACE("OpenSpaceEngine::loadAsset(end)");
 }
@@ -950,31 +944,6 @@ void OpenSpaceEngine::deinitializeGL() {
     LTRACE("OpenSpaceEngine::deinitializeGL(end)");
 }
 
-void OpenSpaceEngine::writeStaticDocumentation() {
-    std::string path = global::configuration->documentation.path;
-    if (!path.empty()) {
-
-        DocEng.addHandlebarTemplates(global::scriptEngine->templatesToRegister());
-        DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
-        DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
-
-        _documentationJson += "{\"name\":\"Scripting\",";
-        _documentationJson += "\"identifier\":\"" + global::scriptEngine->jsonName();
-        _documentationJson += "\",\"data\":" + global::scriptEngine->generateJson();
-        _documentationJson += "},";
-
-        _documentationJson += "{\"name\":\"Top Level\",";
-        _documentationJson += "\"identifier\":\"" + DocEng.jsonName();
-        _documentationJson += "\",\"data\":" + DocEng.generateJson();
-        _documentationJson += "},";
-
-        _documentationJson += "{\"name\":\"Factory\",";
-        _documentationJson += "\"identifier\":\"" + FactoryManager::ref().jsonName();
-        _documentationJson += "\",\"data\":" + FactoryManager::ref().generateJson();
-        _documentationJson += "},";
-    }
-}
-
 void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
     LTRACE(absPath("${USER}").string());
 
@@ -1044,61 +1013,83 @@ void OpenSpaceEngine::loadFonts() {
     }
 }
 
-void OpenSpaceEngine::writeSceneDocumentation() {
+void OpenSpaceEngine::writeDocumentation() {
     ZoneScoped
 
     // Write documentation to json files if config file supplies path for doc files
-
     std::string path = global::configuration->documentation.path;
-    if (!path.empty()) {
-        std::future<std::string> root = std::async(
-            &properties::PropertyOwner::generateJson,
-            global::rootPropertyOwner
-        );
-
-        std::future<std::string> scene = std::async(
-            &properties::PropertyOwner::generateJson,
-            _scene.get()
-        );
-
-
-
-        path = absPath(path).string() + '/';
-        _documentationJson += "{\"name\":\"Keybindings\",\"identifier\":\"";
-        _documentationJson += global::keybindingManager->jsonName() + "\",";
-        _documentationJson += "\"data\":";
-        _documentationJson += global::keybindingManager->generateJson();
-        _documentationJson += "},";
-        _documentationJson += "{\"name\":\"Scene License Information\",";
-        _documentationJson += "\"identifier\":\"sceneLicense";
-        _documentationJson += "\",\"data\":";
-        _documentationJson += SceneLicenseWriter().generateJson();
-        _documentationJson += "},";
-        _documentationJson += "{\"name\":\"Scene Properties\",";
-        _documentationJson += "\"identifier\":\"propertylist";// + _scene->jsonName();
-        _documentationJson += "\",\"data\":" + root.get();
-        _documentationJson += "},";
-        _documentationJson += "{\"name\":\"Scene Graph Information\",";
-        _documentationJson += "\"identifier\":\"propertylist";
-        _documentationJson += "\",\"data\":" + scene.get();
-        _documentationJson += "}";
-
-        //add templates for the jsons we just registered
-        DocEng.addHandlebarTemplates(global::keybindingManager->templatesToRegister());
-        //TODO this is in efficaiant, here i am just instaning the class to get
-        //at a member variable which is staticly defined. How do i just get that
-        SceneLicenseWriter writer;
-        DocEng.addHandlebarTemplates(writer.templatesToRegister());
-        DocEng.addHandlebarTemplates(global::rootPropertyOwner->templatesToRegister());
-
-        //the static documentation shoudl be finished already
-        //so now that we wrote the static and secene json files
-        //we should write the html file that uses them.
-        _documentationJson += "]}";
-
-        DocEng.writeDocumentationHtml(path, _documentationJson);
+    if (path.empty()) {
+        // if path was empty, that means that no documentation is requested
+        return;
     }
-    //no else, if path was empty, that means that no documentation is requested
+    path = absPath(path).string() + '/';
+
+    // Start the async requests as soon as possible so they are finished when we need them
+    std::future<std::string> root = std::async(
+        &properties::PropertyOwner::generateJson,
+        global::rootPropertyOwner
+    );
+
+    std::future<std::string> scene = std::async(
+        &properties::PropertyOwner::generateJson,
+        _scene.get()
+    );
+
+
+    DocEng.addHandlebarTemplates(global::scriptEngine->templatesToRegister());
+    DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
+    DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
+
+    std::string json = "{\"documentation\":[";
+
+    json += fmt::format(
+        R"({{"name":"{}","identifier":"{}","data":{}}},)",
+        "Scripting",
+        global::scriptEngine->jsonName(),
+        global::scriptEngine->generateJson()
+    );
+
+    json += fmt::format(
+        R"({{"name":"{}","identifier":"{}","data":{}}},)",
+        "Top Level", DocEng.jsonName(), DocEng.generateJson()
+    );
+
+    json += fmt::format(
+        R"({{"name":"{}","identifier":"{}","data":{}}},)",
+        "Factory", FactoryManager::ref().jsonName(), FactoryManager::ref().generateJson()
+    );
+
+    json += fmt::format(
+        R"({{"name":"{}","identifier":"{}","data":{}}},)",
+        "Keybindings",
+        global::keybindingManager->jsonName(),
+        global::keybindingManager->generateJson()
+    );
+
+    SceneLicenseWriter writer;
+    json += fmt::format(
+        R"({{"name":"{}","identifier":"{}","data":{}}},)",
+        "Scene License Information", writer.jsonName(), writer.generateJson()
+    );
+
+    json += fmt::format(
+        R"({{"name":"{}","identifier":"{}","data":{}}},)",
+        "Scene Properties", "propertylist", root.get()
+    );
+
+    json += fmt::format(
+        R"({{"name":"{}","identifier":"{}","data":{}}})",
+        "Scene Graph Information", "propertylist", scene.get()
+    );
+
+    json += "]}";
+
+    // Add templates for the JSONs we just registered
+    DocEng.addHandlebarTemplates(global::keybindingManager->templatesToRegister());
+    DocEng.addHandlebarTemplates(writer.templatesToRegister());
+    DocEng.addHandlebarTemplates(global::rootPropertyOwner->templatesToRegister());
+
+    DocEng.writeDocumentationHtml(path, json);
 }
 
 void OpenSpaceEngine::preSynchronization() {

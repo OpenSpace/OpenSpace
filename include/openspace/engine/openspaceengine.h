@@ -126,8 +126,7 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
-    void writeSceneDocumentation();
-    void writeStaticDocumentation();
+    void writeDocumentation();
     void createUserDirectoriesIfNecessary();
 
     /**
@@ -154,9 +153,6 @@ private:
     std::unique_ptr<VersionChecker> _versionChecker;
 
     glm::vec2 _mousePosition = glm::vec2(0.f);
-
-    //grabs json from each module to pass to the documentation engine.
-    std::string _documentationJson;
 
     std::future<void> _writeDocumentationTask;
 
