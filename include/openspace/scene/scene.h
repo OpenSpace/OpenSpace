@@ -69,7 +69,7 @@ public:
          * \param message The reason that caused this exception to be thrown
          * \param component The optional compoment that caused this exception to be thrown
          * \pre message may not be empty
-        */
+         */
         explicit InvalidSceneError(std::string msg, std::string comp = "");
     };
 
@@ -142,8 +142,8 @@ public:
     void unregisterNode(SceneGraphNode* node);
 
     /**
-    * Mark the node registry as dirty
-    */
+     * Mark the node registry as dirty
+     */
     void markNodeRegistryDirty();
 
     /**
