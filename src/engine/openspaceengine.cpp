@@ -999,9 +999,7 @@ void OpenSpaceEngine::loadFonts() {
         bool success = global::fontManager->registerFontPath(key, fontName);
 
         if (!success) {
-            LERROR(fmt::format(
-                "Error registering font {} with key '{}'", fontName, key
-            ));
+            LERROR(fmt::format("Error registering font {} with key '{}'", fontName, key));
         }
     }
 
@@ -1417,9 +1415,9 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
             // handler in order to reliably terminate a rotation or zoom, or to the other
-            // callbacks to for example release a drag and drop of a UI window. Accidentally
-            // moving the cursor over a UI window is easy to miss and leads to weird
-            // continuing movement
+            // callbacks to for example release a drag and drop of a UI window.
+            // Accidentally moving the cursor over a UI window is easy to miss and leads
+            // to weird continuing movement
             if (action == MouseAction::Release) {
                 continue;
             }
@@ -1442,9 +1440,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
     global::interactionMonitor->markInteraction();
 }
 
-void OpenSpaceEngine::mousePositionCallback(double x, double y,
-                                            IsGuiWindow isGuiWindow)
-{
+void OpenSpaceEngine::mousePositionCallback(double x, double y, IsGuiWindow isGuiWindow) {
     ZoneScoped
 
     using F = global::callback::MousePositionCallback;
@@ -1508,9 +1504,7 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
     }
 }
 
-void OpenSpaceEngine::handleDragDrop(const std::string& file) {
-    std::filesystem::path f(file);
-
+void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
     std::filesystem::path absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
     int status = luaL_loadfile(s, absolutePath.string().c_str());
@@ -1523,11 +1517,11 @@ void OpenSpaceEngine::handleDragDrop(const std::string& file) {
     ghoul::lua::push(s, file);
     lua_setglobal(s, "filename");
 
-    std::string basename = f.filename().string();
+    std::string basename = file.filename().string();
     ghoul::lua::push(s, basename);
     lua_setglobal(s, "basename");
 
-    std::string extension = f.extension().string();
+    std::string extension = file.extension().string();
     std::transform(
         extension.begin(), extension.end(),
         extension.begin(),
@@ -1558,8 +1552,7 @@ void OpenSpaceEngine::handleDragDrop(const std::string& file) {
 std::vector<std::byte> OpenSpaceEngine::encode() {
     ZoneScoped
 
-    std::vector<std::byte> buffer = global::syncEngine->encodeSyncables();
-    return buffer;
+    return global::syncEngine->encodeSyncables();
 }
 
 void OpenSpaceEngine::decode(std::vector<std::byte> data) {
@@ -1652,6 +1645,35 @@ void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
     _modeChangeCallbacks.erase(it);
 }
 
+scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
+    return {
+        "",
+        {
+            codegen::lua::ToggleShutdown,
+            codegen::lua::WriteDocumentation,
+            codegen::lua::SetScreenshotFolder,
+            codegen::lua::AddTag,
+            codegen::lua::RemoveTag,
+            codegen::lua::DownloadFile,
+            codegen::lua::CreateSingleColorImage,
+            codegen::lua::IsMaster,
+            codegen::lua::Version
+        },
+        {
+            absPath("${SCRIPTS}/core_scripts.lua")
+        }
+    };
+}
+
+LoadingScreen* OpenSpaceEngine::loadingScreen() {
+    return _loadingScreen.get();
+}
+
+AssetManager& OpenSpaceEngine::assetManager() {
+    ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
+    return *_assetManager;
+}
+
 void setCameraFromProfile(const Profile& p) {
     if (!p.camera.has_value()) {
         // If the camera is not specified, we want to set it to a sensible default value
@@ -1689,10 +1711,10 @@ void setCameraFromProfile(const Profile& p) {
                 global::navigationHandler->setNavigationStateNextFrame(nav);
             },
             [](const Profile::CameraGoToGeo& geo) {
-                //Instead of direct calls to navigation state code, lua commands with
-                //globebrowsing goToGeo are used because this prevents a module
-                //dependency in this core code. Eventually, goToGeo will be incorporated
-                //in the OpenSpace core and this code will change.
+                // Instead of direct calls to navigation state code, lua commands with
+                // globebrowsing goToGeo are used because this prevents a module
+                // dependency in this core code. Eventually, goToGeo will be incorporated
+                // in the OpenSpace core and this code will change.
                 std::string geoScript = fmt::format("openspace.globebrowsing.goToGeo"
                     "([[{}]], {}, {}", geo.anchor, geo.latitude, geo.longitude);
                 if (geo.altitude.has_value()) {
@@ -1741,16 +1763,14 @@ void setActionsFromProfile(const Profile& p) {
             LERROR("Identifier must to provided to register action");
         }
         if (global::actionManager->hasAction(a.identifier)) {
-            LERROR(
-                fmt::format("Action for identifier '{}' already existed & registered",
-                a.identifier)
-            );
+            LERROR(fmt::format(
+                "Action for identifier '{}' already existed & registered", a.identifier
+            ));
         }
         if (a.script.empty()) {
-            LERROR(
-                fmt::format("Identifier '{}' doesn't provide a Lua command to execute",
-                a.identifier)
-            );
+            LERROR(fmt::format(
+                "Identifier '{}' doesn't provide a Lua command to execute", a.identifier
+            ));
         }
         interaction::Action action;
         action.identifier = a.identifier;
@@ -1772,12 +1792,10 @@ void setKeybindingsFromProfile(const Profile& p) {
             LERROR(fmt::format("Action '{}' does not exist", k.action));
         }
         if (k.key.key == openspace::Key::Unknown) {
-            LERROR(
-                fmt::format(
-                    "Could not find key '{}'",
-                    std::to_string(static_cast<uint16_t>(k.key.key))
-                )
-            );
+            LERROR(fmt::format(
+                "Could not find key '{}'",
+                std::to_string(static_cast<uint16_t>(k.key.key))
+            ));
         }
         global::keybindingManager->bindKey(k.key.key, k.key.modifier, k.action);
     }
@@ -1799,35 +1817,6 @@ void setAdditionalScriptsFromProfile(const Profile& p) {
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
-}
-
-scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
-    return {
-        "",
-        {
-            codegen::lua::ToggleShutdown,
-            codegen::lua::WriteDocumentation,
-            codegen::lua::SetScreenshotFolder,
-            codegen::lua::AddTag,
-            codegen::lua::RemoveTag,
-            codegen::lua::DownloadFile,
-            codegen::lua::CreateSingleColorImage,
-            codegen::lua::IsMaster,
-            codegen::lua::Version
-        },
-        {
-            absPath("${SCRIPTS}/core_scripts.lua")
-        }
-    };
-}
-
-LoadingScreen* OpenSpaceEngine::loadingScreen() {
-    return _loadingScreen.get();
-}
-
-AssetManager& OpenSpaceEngine::assetManager() {
-    ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
-    return *_assetManager;
 }
 
 }  // namespace openspace
