@@ -45,30 +45,22 @@
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
-#include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/lightsource.h>
 #include <openspace/scene/sceneinitializer.h>
-#include <openspace/scene/translation.h>
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
@@ -154,16 +146,6 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
 {
     FactoryManager::initialize();
-    FactoryManager::ref().addFactory<Renderable>("Renderable");
-    FactoryManager::ref().addFactory<Translation>("Translation");
-    FactoryManager::ref().addFactory<Rotation>("Rotation");
-    FactoryManager::ref().addFactory<Scale>("Scale");
-    FactoryManager::ref().addFactory<TimeFrame>("TimeFrame");
-    FactoryManager::ref().addFactory<LightSource>("LightSource");
-    FactoryManager::ref().addFactory<Task>("Task");
-    FactoryManager::ref().addFactory<ResourceSynchronization>("ResourceSynchronization");
-    FactoryManager::ref().addFactory<DashboardItem>("DashboardItem");
-
     SpiceManager::initialize();
     TransformationManager::initialize();
 
@@ -225,13 +207,7 @@ void OpenSpaceEngine::initialize() {
 
     std::string cacheFolder = absPath("${CACHE}").string();
     if (global::configuration->usePerProfileCache) {
-        std::string profile = global::configuration->profile;
-        if (profile.empty()) {
-            throw ghoul::RuntimeError(
-                "Unexpected error: Configuration file profile was empty"
-            );
-        }
-        cacheFolder = cacheFolder + "-" + profile;
+        cacheFolder = cacheFolder + "-" + global::configuration->profile;
 
         LINFO(fmt::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(fmt::format("New cache: {}", cacheFolder));
@@ -244,7 +220,7 @@ void OpenSpaceEngine::initialize() {
 
     // Create directories that doesn't exist
     for (const std::string& token : FileSys.tokens()) {
-        if (!std::filesystem::is_directory(token)) {
+        if (!std::filesystem::is_directory(absPath(token))) {
             std::filesystem::create_directories(absPath(token));
         }
     }
@@ -329,63 +305,58 @@ void OpenSpaceEngine::initialize() {
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(*global::scriptEngine);
 
-    // Process profile file (must be provided in configuration file)
-    if (!global::configuration->profile.empty()) {
-        std::filesystem::path profile;
-        if (!std::filesystem::is_regular_file(global::configuration->profile)) {
-            std::filesystem::path userCandidate = absPath(fmt::format(
-                "${{USER_PROFILES}}/{}.profile", global::configuration->profile
-            ));
-            std::filesystem::path profileCandidate = absPath(fmt::format(
-                "${{PROFILES}}/{}.profile", global::configuration->profile
-            ));
+    // Process profile file
+    std::filesystem::path profile;
+    if (!std::filesystem::is_regular_file(global::configuration->profile)) {
+        std::filesystem::path userCandidate = absPath(fmt::format(
+            "${{USER_PROFILES}}/{}.profile", global::configuration->profile
+        ));
+        std::filesystem::path profileCandidate = absPath(fmt::format(
+            "${{PROFILES}}/{}.profile", global::configuration->profile
+        ));
 
-            // Give the user profile priority if there are both
-            if (std::filesystem::is_regular_file(userCandidate)) {
-                profile = userCandidate;
-            }
-            else if (std::filesystem::is_regular_file(profileCandidate)) {
-                profile = profileCandidate;
-            }
-            else {
-                throw ghoul::RuntimeError(fmt::format(
-                    "Could not load profile '{}': File does not exist",
-                    global::configuration->profile
-                ));
-            }
+        // Give the user profile priority if there are both
+        if (std::filesystem::is_regular_file(userCandidate)) {
+            profile = userCandidate;
+        }
+        else if (std::filesystem::is_regular_file(profileCandidate)) {
+            profile = profileCandidate;
         }
         else {
-            profile = global::configuration->profile;
-        }
-
-        // Load the profile
-        std::ifstream inFile;
-        try {
-            inFile.open(profile, std::ifstream::in);
-        }
-        catch (const std::ifstream::failure& e) {
             throw ghoul::RuntimeError(fmt::format(
-                "Exception opening profile file for read: {} ({})",
-                profile, e.what())
-            );
+                "Could not load profile '{}': File does not exist",
+                global::configuration->profile
+            ));
         }
-
-        std::string content(
-            (std::istreambuf_iterator<char>(inFile)),
-            std::istreambuf_iterator<char>()
-        );
-        *global::profile = Profile(content);
+    }
+    else {
+        profile = global::configuration->profile;
     }
 
+    // Load the profile
+    std::ifstream inFile;
+    try {
+        inFile.open(profile, std::ifstream::in);
+    }
+    catch (const std::ifstream::failure& e) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Exception opening profile file for read: {} ({})", profile, e.what()
+        ));
+    }
+
+    std::string content(
+        (std::istreambuf_iterator<char>(inFile)),
+        std::istreambuf_iterator<char>()
+    );
+    *global::profile = Profile(content);
+
     // Set up asset loader
-    global::openSpaceEngine->_assetManager = std::make_unique<AssetManager>(
+    _assetManager = std::make_unique<AssetManager>(
         global::scriptEngine->luaState(),
-        absPath("${ASSETS}").string()
+        absPath("${ASSETS}")
     );
 
-    global::scriptEngine->addLibrary(
-        global::openSpaceEngine->_assetManager->luaLibrary()
-    );
+    global::scriptEngine->addLibrary(_assetManager->luaLibrary());
 
     for (OpenSpaceModule* module : global::moduleEngine->modules()) {
         global::scriptEngine->addLibrary(module->luaLibrary());
@@ -416,27 +387,6 @@ void OpenSpaceEngine::initialize() {
     }
 
     LTRACE("OpenSpaceEngine::initialize(end)");
-}
-
-std::string OpenSpaceEngine::generateFilePath(std::string openspaceRelativePath) {
-    // @TODO (abock, 2021-05-16) This whole function can die, I think
-    std::string path = absPath(openspaceRelativePath).string();
-    // Needs to handle either windows (which seems to require double back-slashes)
-    // or unix path slashes.
-    const std::string search = "\\";
-    const std::string replace = "\\\\";
-    if (path.find(search) != std::string::npos) {
-        size_t start_pos = 0;
-        while ((start_pos = path.find(search, start_pos)) != std::string::npos) {
-            path.replace(start_pos, search.length(), replace);
-            start_pos += replace.length();
-        }
-        path.append(replace);
-    }
-    else {
-        path.append("/");
-    }
-    return path.append(global::configuration->profile);
 }
 
 void OpenSpaceEngine::initializeGL() {
@@ -545,7 +495,7 @@ void OpenSpaceEngine::initializeGL() {
         bool synchronous = global::configuration->openGLDebugContext.isSynchronous;
         setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
 
-        for (const configuration::Configuration::OpenGLDebugContext::IdentifierFilter&f :
+        for (const configuration::Configuration::OpenGLDebugContext::IdentifierFilter& f :
             global::configuration->openGLDebugContext.identifierFilters)
         {
             setDebugMessageControl(
@@ -569,13 +519,12 @@ void OpenSpaceEngine::initializeGL() {
         }
 
         auto callback = [](Source source, Type type, Severity severity,
-            unsigned int id, std::string message) -> void
+                           unsigned int id, std::string message) -> void
         {
             const std::string s = ghoul::to_string(source);
             const std::string t = ghoul::to_string(type);
 
-            const std::string category =
-                "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
+            const std::string category = fmt::format("OpenGL ({}) [{}] {{{}}}", s, t, id);
             switch (severity) {
                 case Severity::High:
                     LERRORC(category, message);
@@ -669,7 +618,8 @@ void OpenSpaceEngine::initializeGL() {
         if (lvl > LogLevel::Trace) {
             LWARNING(
                 "Logging OpenGL calls is enabled, but the selected log level does "
-                "not include TRACE, so no OpenGL logs will be printed");
+                "not include TRACE, so no OpenGL logs will be printed"
+            );
         }
         else {
             using namespace glbinding;
@@ -735,9 +685,9 @@ void OpenSpaceEngine::loadAssets() {
     if (_scene) {
         ZoneScopedN("Reset scene")
 
-        global::syncEngine->removeSyncables(global::timeManager->getSyncables());
+        global::syncEngine->removeSyncables(global::timeManager->syncables());
         if (_scene && _scene->camera()) {
-            global::syncEngine->removeSyncables(_scene->camera()->getSyncables());
+            global::syncEngine->removeSyncables(_scene->camera()->syncables());
         }
         global::renderEngine->setScene(nullptr);
         global::renderEngine->setCamera(nullptr);
@@ -761,12 +711,9 @@ void OpenSpaceEngine::loadAssets() {
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
     global::renderEngine->setScene(_scene.get());
-
     global::rootPropertyOwner->addPropertySubOwner(_scene.get());
-    _scene->setCamera(std::make_unique<Camera>());
-    Camera* camera = _scene->camera();
-    camera->setParent(_scene->root());
 
+    Camera* camera = _scene->camera();
     global::renderEngine->setCamera(camera);
     global::navigationHandler->setCamera(camera);
     const SceneGraphNode* parent = camera->parent();
@@ -917,9 +864,9 @@ void OpenSpaceEngine::loadAssets() {
 
     global::renderEngine->updateScene();
 
-    global::syncEngine->addSyncables(global::timeManager->getSyncables());
+    global::syncEngine->addSyncables(global::timeManager->syncables());
     if (_scene && _scene->camera()) {
-        global::syncEngine->addSyncables(_scene->camera()->getSyncables());
+        global::syncEngine->addSyncables(_scene->camera()->syncables());
     }
 
 #ifdef __APPLE__
@@ -950,7 +897,7 @@ void OpenSpaceEngine::deinitialize() {
     }
     if (global::renderEngine->scene() && global::renderEngine->scene()->camera()) {
         global::syncEngine->removeSyncables(
-            global::renderEngine->scene()->camera()->getSyncables()
+            global::renderEngine->scene()->camera()->syncables()
         );
     }
     global::sessionRecording->deinitialize();

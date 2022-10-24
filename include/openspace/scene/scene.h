@@ -101,11 +101,6 @@ public:
     ghoul::mm_unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
 
     /**
-     * Set the camera of the scene
-     */
-    void setCamera(std::unique_ptr<Camera> camera);
-
-    /**
      * Return the camera
      */
     Camera* camera() const;

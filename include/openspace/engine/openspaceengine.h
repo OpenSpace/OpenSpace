@@ -141,7 +141,6 @@ private:
     void loadFonts();
 
     void runGlobalCustomizationScripts();
-    std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     properties::BoolProperty _printEvents;

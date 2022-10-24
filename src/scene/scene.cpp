@@ -98,10 +98,13 @@ Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
+    , _camera(std::make_unique<Camera>())
     , _initializer(std::move(initializer))
 {
     _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
     _rootDummy.setScene(this);
+
+    _camera->setParent(&_rootDummy);
 }
 
 Scene::~Scene() {
@@ -115,10 +118,6 @@ void Scene::attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node) {
 
 ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
     return _rootDummy.detachChild(node);
-}
-
-void Scene::setCamera(std::unique_ptr<Camera> camera) {
-    _camera = std::move(camera);
 }
 
 Camera* Scene::camera() const {
