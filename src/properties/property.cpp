@@ -312,6 +312,7 @@ std::string Property::generateMetaDataJsonDescription() const {
     std::string result = fmt::format(
         R"({{"{}":"{}","{}":"{}","{}":{},"{}":{}}})",
         MetaDataKeyGroup, sanitizedGroupId,
+        MetaDataKeyVisibility, vis,
         MetaDataKeyReadOnly, isReadOnlyString,
         MetaDataKeyViewOptions, viewOptions
     );
