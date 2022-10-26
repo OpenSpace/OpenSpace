@@ -264,9 +264,8 @@ void Property::resetToUnchanged() {
     _isValueDirty = false;
 }
 
-std::string Property::generateBaseJsonDescription() const {
-    std::string_view cName = className();
-    std::string cNameSan = escapedJson(std::string(cName));
+std::string Property::generateJsonDescription() const {
+    std::string cName = escapedJson(std::string(className()));
     std::string identifier = fullyQualifiedIdentifier();
     std::string identifierSan = escapedJson(identifier);
     std::string gName = guiName();
@@ -276,16 +275,9 @@ std::string Property::generateBaseJsonDescription() const {
 
     return fmt::format(
         R"({{"{}":"{}","{}":"{}","{}":"{}","{}":{},"{}":{}}})",
-        TypeKey, cNameSan, IdentifierKey, identifierSan, NameKey, gNameSan, MetaDataKey,
+        TypeKey, cName, IdentifierKey, identifierSan, NameKey, gNameSan, MetaDataKey,
         metaData, AdditionalDataKey, description
     );
-
-    //return
-    //    "{ \"" + std::string(TypeKey) + "\": \"" + cNameSan + "\", " +
-    //    "\"" + std::string(IdentifierKey) + "\": \"" + identifierSan + "\", " +
-    //    "\"" + std::string(NameKey) + "\": \"" + gNameSan + "\", " +
-    //    "\"" + std::string(MetaDataKey) + "\": " + metaData + ", " +
-    //    "\"" + std::string(AdditionalDataKey) + "\": " + description + " }";
 }
 
 std::string Property::generateMetaDataJsonDescription() const {
@@ -311,18 +303,18 @@ std::string Property::generateMetaDataJsonDescription() const {
     std::string sanitizedGroupId = escapedJson(groupId);
 
     std::string viewOptions = "{}";
-   if (_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
-       viewOptions = ghoul::formatJson(
-           _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions)
-       );
-   }
+    if (_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
+        viewOptions = ghoul::formatJson(
+            _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions)
+        );
+    }
 
-    std::string result = "{ ";
-    result += fmt::format("\"{}\": \"{}\",", MetaDataKeyGroup, sanitizedGroupId);
-    result += fmt::format("\"{}\": \"{}\",", MetaDataKeyVisibility, vis);
-    result += fmt::format("\"{}\": {},", MetaDataKeyReadOnly, isReadOnlyString);
-    result += fmt::format("\"{}\": {}", MetaDataKeyViewOptions, viewOptions);
-    result += " }";
+    std::string result = fmt::format(
+        R"({{"{}":"{}","{}":"{}","{}":{},"{}":{}}})",
+        MetaDataKeyGroup, sanitizedGroupId,
+        MetaDataKeyReadOnly, isReadOnlyString,
+        MetaDataKeyViewOptions, viewOptions
+    );
     return result;
 }
 

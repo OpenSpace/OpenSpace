@@ -441,7 +441,7 @@ public:
      *
      * \return The base description common to all Property classes
      */
-    std::string generateBaseJsonDescription() const;
+    std::string generateJsonDescription() const;
 
     /**
      * Creates the information for the \c MetaData key-part of the JSON description for
