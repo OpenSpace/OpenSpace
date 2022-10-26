@@ -28,13 +28,7 @@
   "additional_scripts": [
     "openspace.setPropertyValue(\"{moonTrail_minor}.Renderable.Appearance.Color\", {0.3, 0.5, 0.5});",
     "openspace.setPropertyValue(\"Scene.Voyager*.Renderable.Appearance.Color\", {0.424000, 1.000000, 0.404000});",
-    "openspace.setPropertyValue(\"Scene.Pioneer*.Renderable.Appearance.Color\", {0.910000, 0.478000, 0.976000});",
-    "openspace.setPropertyValueSingle(\"Scene.PerseveranceModel.Renderable.LightSources.Camera.Intensity\", 0.7);",
-    "openspace.setPropertyValueSingle('Dashboard.IsEnabled', false);",
-    "openspace.setPropertyValueSingle(\"RenderEngine.ShowLog\", false);",
-    "openspace.setPropertyValueSingle(\"RenderEngine.ShowVersion\", false);",
-    "openspace.setPropertyValueSingle(\"RenderEngine.ShowCamera\", false)",
-    "openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', false);"
+    "openspace.setPropertyValue(\"Scene.Pioneer*.Renderable.Appearance.Color\", {0.910000, 0.478000, 0.976000});"
   ],
   "assets": [
     "base",
@@ -131,7 +125,69 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
+  "modules": [
+    {
+      "loadedInstruction": "",
+      "name": "Touch",
+      "notLoadedInstruction": "openspace.printFatal('Could not load profile due to missing module \"Touch\"');"
+    }
+  ],
   "properties": [
+    {
+      "name": "Scene.PerseveranceModel.Renderable.LightSources.Camera.Intensity",
+      "type": "setPropertyValueSingle",
+      "value": "0.7"
+    },
+    {
+      "name": "Dashboard.IsEnabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "RenderEngine.ShowLog",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "RenderEngine.ShowVersion",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "RenderEngine.ShowCamera",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "NavigationHandler.OrbitalNavigator.IdleBehavior.ShouldTriggerWhenIdle",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "NavigationHandler.OrbitalNavigator.IdleBehavior.IdleWaitTime",
+      "type": "setPropertyValueSingle",
+      "value": "10"
+    },
+    {
+      "name": "NavigationHandler.OrbitalNavigator.IdleBehavior.SpeedFactor",
+      "type": "setPropertyValueSingle",
+      "value": "0.5"
+    },
+    {
+      "name": "Modules.Touch.TouchMarker.Visibility",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier",
+      "type": "setPropertyValueSingle",
+      "value": "2.0"
+    },
+    {
+      "name": "Modules.Touch.TouchInteraction.DisableZoom",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
     {
       "name": "Scene.Constellations.Renderable.Enabled",
       "type": "setPropertyValueSingle",
