@@ -22,52 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYTARGET___H__
-#define __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYTARGET___H__
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMELAPSEDTIME___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMELAPSEDTIME___H__
 
-#include <modules/base/rendering/renderableplane.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-namespace openspace::documentation { struct Documentation; }
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
-class ScreenSpaceSkyBrowser;
+namespace documentation { struct Documentation; }
 
-class RenderableSkyTarget : public RenderablePlane {
+class DashboardItemElapsedTime : public DashboardTextItem {
 public:
-    explicit RenderableSkyTarget(const ghoul::Dictionary& dictionary);
+    DashboardItemElapsedTime(const ghoul::Dictionary& dictionary);
+    ~DashboardItemElapsedTime() override = default;
 
-    void initializeGL() override;
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void bindTexture() override;
+    void render(glm::vec2& penPosition) override;
 
-    glm::ivec3 borderColor() const;
-
-    void setRatio(float ratio);
-    void setColor(glm::ivec3 color);
-    void setVerticalFov(double fov);
-    void setBorderRadius(double radius);
-
-    // Display
-    void highlight(const glm::ivec3& addition);
-    void removeHighlight(const glm::ivec3& removal);
+    glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
 
 private:
-    // Properties
-    properties::FloatProperty _crossHairSize;
-    properties::FloatProperty _showRectangleThreshold;
-    properties::FloatProperty _lineWidth;
-    properties::DoubleProperty _verticalFov;
-
-    double _borderRadius = 0.0;
-    glm::ivec3 _borderColor = glm::ivec3(230);
-    float _ratio = 1.f;
+    properties::StringProperty _formatString;
+    properties::StringProperty _referenceTime;
+    double _referenceJ2000 = 0.0;
+    properties::BoolProperty _simplifyTime;
+    properties::OptionProperty _lowestTimeUnit;
 };
+
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYTARGET___H__
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMDATE___H__

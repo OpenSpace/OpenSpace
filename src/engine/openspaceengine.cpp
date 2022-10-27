@@ -1443,7 +1443,11 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
     }
 
     global::navigationHandler->keyboardCallback(key, mod, action);
-    global::keybindingManager->keyboardCallback(key, mod, action);
+
+    if (!global::navigationHandler->disabledKeybindings()) {
+        global::keybindingManager->keyboardCallback(key, mod, action);
+    }
+
     global::interactionMonitor->markInteraction();
 }
 

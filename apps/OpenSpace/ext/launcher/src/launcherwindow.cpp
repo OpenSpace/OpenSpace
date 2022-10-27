@@ -570,6 +570,19 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         // Otherwise, we want to load that profile
 
         std::string fullProfilePath = saveProfilePath + profile + ".profile";
+
+        // Verify that the file actually exists
+        if (!std::filesystem::exists(fullProfilePath)) {
+            QMessageBox::critical(
+                this,
+                "Exception",
+                QString::fromStdString(fmt::format(
+                    "Could not open profile file '{}'", fullProfilePath
+                ))
+            );
+
+            return;
+        }
         p = loadProfileFromFile(this, fullProfilePath);
         if (!p.has_value()) {
             return;

@@ -179,6 +179,10 @@ void Browser::updateBrowserSize() {
     _browserDimensions = _texture->dimensions();
 }
 
+void Browser::reload() {
+    _reload.set(true);
+}
+
 float Browser::browserRatio() const {
     return static_cast<float>(_texture->dimensions().x) /
            static_cast<float>(_texture->dimensions().y);
