@@ -74,20 +74,28 @@ void TargetBrowserPair::setImageOrder(int i, int order) {
 }
 
 void TargetBrowserPair::startFinetuningTarget() {
+
     _startTargetPosition = _targetNode->worldPosition();
 }
 
-// The fine tune of the target is a way to "drag and drop" the target with right click
+// The fine tune of the target is a way to "drag and drop" the target with click
 // drag on the sky browser window. This is to be able to drag the target around when it
 // has a very small field of view
 void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation)
 {
-    glm::dvec2 startRaDec = skybrowser::cartesianToSpherical(
-        skybrowser::galacticToEquatorial(glm::normalize(_startTargetPosition))
+    glm::dvec3 startTarget = skybrowser::galacticToEquatorial(
+        glm::normalize(_startTargetPosition)
     );
+    glm::dvec2 fovs = _browser->fieldsOfView();
+    glm::dvec3 upperRightCorner = startTarget - 0.5 * skybrowser::sphericalToCartesian(glm::dvec2(-fovs[0], fovs[1]));
+    glm::dvec3 lowerLeftCorner = startTarget - 0.5 * skybrowser::sphericalToCartesian(glm::dvec2(fovs[0], -fovs[1]));
+    glm::dvec3 upperLeftCorner = startTarget - 0.5 * skybrowser::sphericalToCartesian(fovs);
 
-    glm::dvec2 newRaDec = startRaDec + glm::dvec2(translation);
-    glm::dvec3 newCartesian = skybrowser::sphericalToCartesian(newRaDec);
+    glm::dvec3 vecToRight = (upperRightCorner - upperLeftCorner) * static_cast<double>(translation[0]);
+    glm::dvec3 vecToDown = (lowerLeftCorner - upperLeftCorner) * static_cast<double>(translation[1]);
+
+
+    glm::dvec3 newCartesian = startTarget - (vecToRight + vecToDown);
     aimTargetGalactic(
         _targetNode->identifier(), 
         skybrowser::equatorialToGalactic(newCartesian)
