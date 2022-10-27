@@ -130,7 +130,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _scale.onChange([this]() {
         updateTextureResolution();
         _borderRadiusTimer = 0;
-        });
+    });
 
     _useRadiusAzimuthElevation.onChange(
         [this]() {
@@ -334,7 +334,6 @@ void ScreenSpaceSkyBrowser::update() {
         _borderRadiusTimer = -1;
     }
     _borderRadiusTimer++;
-    
 
     ScreenSpaceRenderable::update();
     WwtCommunicator::update();

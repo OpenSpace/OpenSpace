@@ -37,7 +37,6 @@ namespace openspace {
 
 class ScreenSpaceSkyBrowser : public ScreenSpaceRenderable, public WwtCommunicator {
 public:
-    static constexpr int RadiusTimeOut = 25;
     explicit ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceSkyBrowser() override;
 
@@ -68,6 +67,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    static constexpr int RadiusTimeOut = 25;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
