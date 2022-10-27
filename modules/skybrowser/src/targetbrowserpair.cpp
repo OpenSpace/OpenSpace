@@ -86,13 +86,19 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation)
     glm::dvec3 startTarget = skybrowser::galacticToEquatorial(
         glm::normalize(_startTargetPosition)
     );
+    glm::dvec2 multiplierRight = { -1.0, 1.0 };
+    glm::dvec2 multiplierLeft = { 1.0, -1.0 };
+    glm::dvec2 drag = glm::dvec2(translation);
     glm::dvec2 fovs = _browser->fieldsOfView();
-    glm::dvec3 upperRightCorner = startTarget - 0.5 * skybrowser::sphericalToCartesian(glm::dvec2(-fovs[0], fovs[1]));
-    glm::dvec3 lowerLeftCorner = startTarget - 0.5 * skybrowser::sphericalToCartesian(glm::dvec2(fovs[0], -fovs[1]));
-    glm::dvec3 upperLeftCorner = startTarget - 0.5 * skybrowser::sphericalToCartesian(fovs);
+    glm::dvec3 cartUpperRight = skybrowser::sphericalToCartesian(fovs * multiplierRight);
+    glm::dvec3 cartLowerLeft = skybrowser::sphericalToCartesian(fovs * multiplierLeft);
+    glm::dvec3 cartUpperLeft = skybrowser::sphericalToCartesian(fovs);
+    glm::dvec3 upperRightCorner = startTarget - 0.5 * cartUpperRight;
+    glm::dvec3 lowerLeftCorner = startTarget - 0.5 * cartLowerLeft;
+    glm::dvec3 upperLeftCorner = startTarget - 0.5 * cartUpperLeft;
 
-    glm::dvec3 vecToRight = (upperRightCorner - upperLeftCorner) * static_cast<double>(translation[0]);
-    glm::dvec3 vecToDown = (lowerLeftCorner - upperLeftCorner) * static_cast<double>(translation[1]);
+    glm::dvec3 vecToRight = (upperRightCorner - upperLeftCorner) * drag.x;
+    glm::dvec3 vecToDown = (lowerLeftCorner - upperLeftCorner) * drag.y;
 
 
     glm::dvec3 newCartesian = startTarget - (vecToRight + vecToDown);
