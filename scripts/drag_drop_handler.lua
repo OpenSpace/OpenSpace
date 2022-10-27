@@ -29,6 +29,11 @@ is_image_file = function(extension)
          extension == ".pic" or extension == ".pnm"
 end
 
+is_video_file = function(extension)
+  return extension == ".mp4" or extension == ".mpeg4" or extension == ".mkv" or
+         extension == ".avi" 
+end
+
 local ReloadUIScript = [[ if openspace.hasProperty('Modules.CefWebGui.Reload') then openspace.setPropertyValue('Modules.CefWebGui.Reload', nil) end ]]
 
 if is_image_file(extension) then
@@ -38,6 +43,14 @@ if is_image_file(extension) then
     Identifier = "]] .. identifier .. [[",
     Type = "ScreenSpaceImageLocal",
     TexturePath = "]] .. filename .. [["
+  });]] .. ReloadUIScript
+elseif is_video_file(extension) then
+  identifier = basename_without_extension:gsub(" ", "_")
+  identifier = identifier:gsub("%p", "_") -- replace all punctuation characters with '_'
+  return [[openspace.addScreenSpaceRenderable({
+    Identifier = "]] .. identifier .. [[",
+    Type = "ScreenSpaceVideoRenderable",
+    File = "]] .. filename .. [["
   });]] .. ReloadUIScript
 elseif extension == ".asset" then
   return [[
