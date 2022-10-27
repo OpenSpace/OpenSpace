@@ -60,8 +60,7 @@ TEST_CASE("StringListProperty: Get String Value", "[stringlistproperty]") {
     const std::vector<std::string> list{ "a", "b", "c" };
     p.setValue(list);
 
-    std::string res;
-    p.getStringValue(res);
+    std::string res = p.stringValue();
 
     CHECK(res == "[\"a\",\"b\",\"c\"]");
 }
@@ -160,8 +159,7 @@ TEST_CASE("IntListProperty: Get String Value", "[intlistproperty]") {
     const std::vector<int> list{ 1, 2, 3 };
     p.setValue(list);
 
-    std::string res;
-    p.getStringValue(res);
+    std::string res = p.stringValue();
 
     CHECK(res == "[1,2,3]");
 }
@@ -271,8 +269,7 @@ TEST_CASE("DoubleListProperty: Get String Value", "[doublelistproperty]") {
     const std::vector<double> list{ 1.0, 2.0, 3.0 };
     p.setValue(list);
 
-    std::string res;
-    p.getStringValue(res);
+    std::string res = p.stringValue();
 
     CHECK(res == "[1.0,2.0,3.0]");
 }
