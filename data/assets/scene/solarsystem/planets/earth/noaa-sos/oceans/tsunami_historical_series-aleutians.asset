@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Aleutian Islands - 1946"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-aleutians"
-local Description = [[ On April 1, 1946 at 4:28 am (12:28 UTC), an 8.6 moment magnitude 
+local Description = [[On April 1, 1946 at 4:28 am (12:28 UTC), an 8.6 moment magnitude 
 earthquake struck off the coast of Unimak Island in Alaska's Aleutian Islands, 
 generating a tsunami that caused the greatest damage and number of deaths in Hawaii's 
 history, leading to the creation of the United States' first tsunami warning system. As 
@@ -18,7 +18,7 @@ Fernandez Islands got nearly 3 m or 9 ft. high waves. Pitcairn Island also had 5
 ft. high waves, New Zealand had over 2 m or 8 ft. high waves, and Samoa had over 1 m or 
 about 4 ft. high waves. In North America the highest waves were in California at over 2 m 
 or over 8 ft. and killed one person there and in South America it killed one more person 
-in Peru.   ]]
+in Peru]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-aleutian-islands-1946/"
 
 
@@ -82,7 +82,7 @@ asset.export(layer_null)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

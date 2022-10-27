@@ -41,7 +41,7 @@ void GuiFilePathComponent::render() {
 
     ImGui::Text(
         "%s",
-        "These are file paths registered in the current OpenSpace instance."
+        "These are file paths registered in the current OpenSpace instance"
     );
     ImGui::Separator();
 

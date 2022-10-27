@@ -33,26 +33,23 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* _loggerCat = "LayerGroup";
+    constexpr std::string_view _loggerCat = "LayerGroup";
 
     constexpr openspace::properties::Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
         "Blend between levels",
         "If this value is enabled, images between different levels are interpolated, "
         "rather than switching between levels abruptly. This makes transitions smoother "
-        "and more visually pleasing.",
+        "and more visually pleasing",
         openspace::properties::Property::Visibility::Hidden
     };
 } // namespace
 
 namespace openspace::globebrowsing {
 
-LayerGroup::LayerGroup(layergroupid::GroupID id)
-    : properties::PropertyOwner({
-        layergroupid::LAYER_GROUP_IDENTIFIERS[id],
-        layergroupid::LAYER_GROUP_NAMES[id]
-    })
-    , _groupId(id)
+LayerGroup::LayerGroup(layers::Group group)
+    : properties::PropertyOwner({ std::string(group.identifier), std::string(group.name)})
+    , _groupId(group.id)
     , _levelBlendingEnabled(BlendTileInfo, true)
 {
     addProperty(_levelBlendingEnabled);
@@ -246,6 +243,10 @@ void LayerGroup::onChange(std::function<void(Layer*)> callback) {
     for (const std::unique_ptr<Layer>& layer : _layers) {
         layer->onChange(_onChangeCallback);
     }
+}
+
+bool LayerGroup::isHeightLayer() const {
+    return _groupId == layers::Group::ID::HeightLayers;
 }
 
 } // namespace openspace::globebrowsing

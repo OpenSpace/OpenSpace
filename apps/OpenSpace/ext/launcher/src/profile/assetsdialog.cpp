@@ -158,7 +158,7 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
         _assetTree->setToolTip(
             "Expand arrow entries to browse assets in this OpenSpace installation. "
             "Enable checkbox to include an asset. Those assets highlighted in red are "
-            "present in the profile but do not exist in this OpenSpace installation."
+            "present in the profile but do not exist in this OpenSpace installation"
         );
         _assetTree->setAlternatingRowColors(true);
         _assetTree->setModel(&_assetTreeModel);

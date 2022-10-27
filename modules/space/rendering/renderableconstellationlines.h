@@ -22,37 +22,81 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONLINES___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONLINES___H__
 
-#include <modules/space/rendering/renderableorbitalkepler.h>
-#include <openspace/rendering/renderable.h>
+#include <modules/space/rendering/renderableconstellationsbase.h>
 
-#include <modules/base/rendering/renderabletrail.h>
-#include <modules/space/translation/keplertranslation.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/uintproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/uniformcache.h>
+#include <unordered_map>
+
+namespace ghoul::filesystem { class File; }
+namespace ghoul::fontrendering { class Font; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderableSatellites : public RenderableOrbitalKepler {
+class RenderableConstellationLines : public RenderableConstellationsBase {
 public:
-    RenderableSatellites(const ghoul::Dictionary& dictionary);
-    virtual void readDataFile(const std::string& filename) override;
+    explicit RenderableConstellationLines(const ghoul::Dictionary& dictionary);
+    ~RenderableConstellationLines() override = default;
+
+    void initialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+
     static documentation::Documentation Documentation();
-    void initializeFileReading();
 
 private:
-    void skipSingleEntryInFile(std::ifstream& file);
-    const unsigned int nLineEntriesPerSatellite = 3;
-};
+    struct ConstellationLine {
+        bool isEnabled = true;
+        std::string name;
+        int lineIndex;
+        int colorIndex;
+        int numV;
+        GLuint vaoArray;
+        GLuint vboArray;
+        std::vector<GLfloat> vertices;
+    };
 
+    void createConstellations();
+    void renderConstellations(const RenderData& data, const glm::dmat4& modelViewMatrix,
+        const glm::dmat4& projectionMatrix);
+
+    bool loadData();
+    bool readSpeckFile();
+
+    /**
+     * Callback method that gets triggered when <code>_constellationSelection</code>
+     * changes
+     */
+    void selectionPropertyHasChanged() override;
+
+    properties::BoolProperty _drawElements;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
+    UniformCache(modelViewTransform, projectionTransform, opacity,
+        color) _uniformCache;
+
+    properties::StringProperty _speckFile;
+
+    DistanceUnit _constellationUnit = DistanceUnit::Parsec;
+
+    std::vector<float> _fullData;
+
+    std::unordered_map<int, glm::vec3> _constellationColorMap;
+    std::unordered_map<int, ConstellationLine> _renderingConstellationsMap;
+};
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLECONSTELLATIONLINES___H__

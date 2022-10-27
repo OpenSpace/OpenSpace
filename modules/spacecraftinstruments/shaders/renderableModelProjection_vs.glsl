@@ -38,6 +38,7 @@ uniform mat4 ModelTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
+
 void main() {
   vec4 raw_pos = psc_to_meter(meshTransform * in_position, vec2(1.0, 0.0));
   vec4 position = ProjectorMatrix * ModelTransform * raw_pos;

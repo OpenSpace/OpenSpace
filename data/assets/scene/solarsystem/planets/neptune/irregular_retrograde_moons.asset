@@ -93,9 +93,9 @@ end
 asset.meta = {
   Name = "Neptune Irregular Retrograde Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Neptune' irregular retrograde
+  Description = [[Procedural Globe asset containing Neptune' irregular retrograde
     moons: Nereid, Sao and Laomedeia. Blank globes and SPICE trails are generated for
-    each moon.]],
+    each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

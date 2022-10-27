@@ -30,7 +30,7 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    constexpr const char* _loggerCat = "TextureCygnet";
+    constexpr std::string_view _loggerCat = "TextureCygnet";
 } // namespace
 
 namespace openspace {

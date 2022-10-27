@@ -36,7 +36,7 @@
 #include <filesystem>
 
 namespace {
-    constexpr const char* _loggerCat = "TaskRunner";
+    constexpr std::string_view _loggerCat = "TaskRunner";
 } // namespace
 
 namespace openspace {

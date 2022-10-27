@@ -32,7 +32,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat  = "InstrumentDecoder";
+    constexpr std::string_view _loggerCat  = "InstrumentDecoder";
 
     struct [[codegen::Dictionary(InstrumentDecoder)]] Parameters {
         std::string detectorType;

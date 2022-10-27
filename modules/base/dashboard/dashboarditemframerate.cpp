@@ -48,14 +48,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
-        "This value determines the units in which the frame time is displayed."
+        "This value determines the units in which the frame time is displayed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClearCacheInfo = {
         "ClearCache",
         "Clear Cache",
         "Clears the cache of this DashboardItemFramerate item. If the selected option "
-        "does not use any caching, this trigger does not do anything."
+        "does not use any caching, this trigger does not do anything"
     };
 
     [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {

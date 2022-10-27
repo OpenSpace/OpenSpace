@@ -21,7 +21,7 @@ local UranusBarycenterTrail = {
   GUI = {
     Name = "Uranus Barycenter Trail",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[ Trail of Uranus as observed by the Sun.]],
+    Description = "Trail of Uranus as observed by the Sun",
   }
 }
 
@@ -40,7 +40,8 @@ asset.export(UranusBarycenterTrail)
 asset.meta = {
   Name = "Uranus Trail",
   Version = "1.1",
-  Description = [[ Trail of Uranus' Barycenter. Data from NASA Spice (see base spice asset)]],
+  Description = [[Trail of Uranus' Barycenter. Data from NASA Spice (see base spice
+    asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

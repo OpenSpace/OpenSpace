@@ -22,8 +22,8 @@ local MarsBarycenterTrail = {
   GUI = {
     Name = "Mars Barycenter Trail",
     Path = "/Solar System/Planets/Mars",
-    Description = [[ Trail of Mars' Barycenter as observed by the Sun. Data from NASA Spice (see
-      base spice asset)]],
+    Description = [[Trail of Mars' Barycenter as observed by the Sun. Data from NASA Spice
+      (see base spice asset)]],
   }
 }
 
@@ -42,7 +42,7 @@ asset.export(MarsBarycenterTrail)
 asset.meta = {
   Name = "Mars Trail",
   Version = "1.1",
-  Description = [[ Barycenter Mars trail from SPICE.]],
+  Description = "Barycenter Mars trail from SPICE",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

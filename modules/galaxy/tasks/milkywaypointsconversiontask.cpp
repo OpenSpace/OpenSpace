@@ -78,7 +78,7 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
             progressCallback(static_cast<float>(i + 1) / nPoints);
         }
         else {
-            std::cout << "Failed to convert point data.";
+            std::cout << "Failed to convert point data";
             return;
         }
     }

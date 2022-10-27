@@ -43,6 +43,7 @@ uniform mat4 normalTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
+
 void main() {
   vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
   vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;

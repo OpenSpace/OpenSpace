@@ -35,36 +35,37 @@ uniform float opacity = 1.0;
 uniform bool mirrorBackside = true;
 uniform vec3 multiplyColor;
 
+
 Fragment getFragment() {
-    Fragment frag;
-    if (gl_FrontFacing) {
-        frag.color = texture(texture1, vs_st);
+  Fragment frag;
+  if (gl_FrontFacing) {
+    frag.color = texture(texture1, vs_st);
+  }
+  else {
+    if (mirrorBackside) {
+      frag.color = texture(texture1, vec2(1.0 - vs_st.s, vs_st.t));
     }
     else {
-        if (mirrorBackside) {
-            frag.color = texture(texture1, vec2(1.0 - vs_st.s, vs_st.t));
-        }
-        else {
-            frag.color = texture(texture1, vs_st);
-        }
+      frag.color = texture(texture1, vs_st);
     }
+  }
 
-    frag.color.rgb *= multiplyColor;
+  frag.color.rgb *= multiplyColor;
 
-    frag.color.a *= opacity;
-    if (frag.color.a == 0.0) {
-        discard;
-    }
+  frag.color.a *= opacity;
+  if (frag.color.a == 0.0) {
+    discard;
+  }
 
-    frag.depth = vs_screenSpaceDepth;
+  frag.depth = vs_screenSpaceDepth;
 
-    if (additiveBlending) {
-        frag.blend = BLEND_MODE_ADDITIVE;
-    }
+  if (additiveBlending) {
+    frag.blend = BLEND_MODE_ADDITIVE;
+  }
 
-    // G-Buffer
-    frag.gPosition = vs_gPosition;
-    frag.gNormal = vec4(vs_gNormal, 1.0);
+  // G-Buffer
+  frag.gPosition = vs_gPosition;
+  frag.gNormal = vec4(vs_gNormal, 1.0);
 
-    return frag;
+  return frag;
 }

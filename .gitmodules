@@ -9,7 +9,7 @@
 	url = https://github.com/OpenSpace/Spice.git
 [submodule "modules/touch/ext/libTUIO11"]
 	path = modules/touch/ext/libTUIO11
-	url = https://github.com/mkalten/TUIO11_CPP
+	url = https://github.com/OpenSpace/TUIO11_CPP.git
 [submodule "apps/OpenSpace-MinVR/ext/minvr"]
 	path = apps/OpenSpace-MinVR/ext/minvr
 	url = https://github.com/OpenSpace/minvr

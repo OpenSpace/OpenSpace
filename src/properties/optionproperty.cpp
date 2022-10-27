@@ -28,7 +28,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "OptionProperty";
+    constexpr std::string_view _loggerCat = "OptionProperty";
 } // namespace
 
 namespace openspace::properties {

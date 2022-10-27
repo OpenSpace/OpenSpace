@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Japan - 2011"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-japan"
-local Description = [[ At 14:46 in the afternoon of March 11, 2011 (05:46 UTC), a 9.0 
+local Description = [[At 14:46 in the afternoon of March 11, 2011 (05:46 UTC), a 9.0 
 moment magnitude earthquake struck near the coastline of Honshu, Japan. The Pacific 
 Tsunami Warning Center (PTWC) quickly determined that the very large magnitude of this 
 earthquake, its offshore location, its relatively shallow depth within the earth, and a 
@@ -28,7 +28,7 @@ Islands (French Polynesia), Mexico, Papua New Guinea, and Peru. In the United St
 tsunami rose to more than 5 m or 16 ft. in Hawaii, more than 2 m or 6.5 ft in California 
 and Oregon, and more than 1 m or 3 ft. in the U.S. island territories of Midway and 
 Saipan (Northern Mariana Islands). The tsunami also killed one person in Crescent City, 
-California.   ]]
+California]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-japan-2011/"
 
 
@@ -91,7 +91,7 @@ asset.export(layer_null)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

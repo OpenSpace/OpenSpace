@@ -48,7 +48,7 @@ asset.export(volume)
 asset.meta = {
   Name = "Satellites Debris - Volume Spherical",
   Version = "1.0",
-  Description = [[ Satellites asset for Debris - Volume Spherical. Example asset.]],
+  Description = "Satellites asset for Debris - Volume Spherical. Example asset",
   Author = "OpenSpace Team",
   URL = "",
   License = "MIT"

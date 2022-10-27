@@ -28,7 +28,7 @@ local RimeBase = {
   GUI = {
     Name = "Rime Base FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
-    Description = "The location of the base for the RIME instrument onboard Juice."
+    Description = "The location of the base for the RIME instrument onboard Juice"
   }
 }
 
@@ -58,7 +58,7 @@ local Rime = {
   GUI = {
     Name = "Rime FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
-    Description = "The location of the RIME instrument onboard Juice."
+    Description = "The location of the RIME instrument onboard Juice"
   }
 }
 

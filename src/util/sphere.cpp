@@ -25,10 +25,11 @@
 #include <openspace/util/sphere.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <cstring>
 
 namespace {
-    constexpr const char* _loggerCat = "PowerScaledSphere";
+    constexpr std::string_view _loggerCat = "PowerScaledSphere";
 } // namespace
 
 namespace openspace {

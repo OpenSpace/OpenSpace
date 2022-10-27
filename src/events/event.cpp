@@ -36,7 +36,7 @@
 #include <functional>
 
 namespace {
-    constexpr const char _loggerCat[] = "EventInfo";
+    constexpr std::string_view _loggerCat = "EventInfo";
 } // namespace
 
 using namespace std::string_literals;
@@ -538,8 +538,7 @@ void logAllEvents(const Event* e) {
                 log(i, *static_cast<const CustomEvent*>(e));
                 break;
             default:
-                LINFO(fmt::format("[{}]: Unknown {}", typeid(e).name()));
-                break;
+                throw ghoul::MissingCaseException();
         }
 
         i++;

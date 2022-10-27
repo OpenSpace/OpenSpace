@@ -41,7 +41,7 @@ asset.export(CallistoTrail)
 asset.meta = {
   Name = "Callisto Trail",
   Version = "1.1",
-  Description = [[ Trail of Callisto as observed by the Jupiter. Data from NASA Spice
+  Description = [[Trail of Callisto as observed by the Jupiter. Data from NASA Spice
     (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

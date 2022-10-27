@@ -40,6 +40,7 @@ uniform dmat4 modelViewProjectionMatrix;
 // where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
 uniform dmat4 shadowMatrix;
 
+
 void main() {
   vs_st = in_st;
 

@@ -27,7 +27,7 @@
 namespace openspace::globebrowsing {
 
 TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
-    : TextTileProvider(tileTextureInitData(layergroupid::GroupID::ColorLayers, false))
+    : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
 {}
 
 Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {

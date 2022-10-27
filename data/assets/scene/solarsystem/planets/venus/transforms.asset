@@ -34,7 +34,7 @@ asset.export(VenusBarycenter)
 asset.meta = {
   Name = "Venus Transforms",
   Version = "1.1",
-  Description = [[ Spice translation for Venus Barycenter ]],
+  Description = "Spice translation for Venus Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

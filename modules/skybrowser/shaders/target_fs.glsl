@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "fragment.glsl"
 
 in vec4 vs_gPosition;
 in vec3 vs_gNormal;
@@ -35,6 +36,7 @@ uniform float lineWidth;
 uniform float ratio;
 uniform vec4 lineColor;
 uniform float fov;
+uniform float borderRadius;
 
 uniform bool additiveBlending;
 uniform float opacity;
@@ -64,50 +66,76 @@ float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
   return crosshairHorizontal + crosshairVertical;
 }
 
-#include "fragment.glsl"
+// Creates a rounded rectangle where radius is [0, 1] from completely square
+// to completely round
+float roundedRectangle(vec2 coord, vec2 size, float radius) {
+    vec2 q = abs(coord) - size + vec2(radius);
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
+}
 
 Fragment getFragment() {
-    float rectangle = 0.0;
-    float maxWwtFov = 70;
+  float rectangle = 0.0;
+  float maxWwtFov = 70;
 
-    float crosshair = createCrosshair(lineWidth, ratio, vs_st);
-    float crossHairHeight = crossHairSize/maxWwtFov;
-    float crossHairWidth = crossHairHeight * ratio;
-    float crossHairBox = createFilledRectangle(crossHairWidth, crossHairHeight, vs_st);
-    crosshair *= crossHairBox;
+  float crosshair = createCrosshair(lineWidth, ratio, vs_st);
+  float crossHairHeight = crossHairSize/maxWwtFov;
+  float crossHairWidth = crossHairHeight * ratio;
+  float crossHairBox = createFilledRectangle(crossHairWidth, crossHairHeight, vs_st);
+  crosshair *= crossHairBox;
 
-    if (showRectangle) {
-      float lineWidthX = lineWidth * 2 * VerticalThickness;
-      float lineWidthY = lineWidth * 2;
-      float height = ((fov * 0.5)/maxWwtFov)-lineWidthX;
-      float width = (height * ratio) - lineWidthY;
-      float outerEdge = createFilledRectangle(width, height, vs_st);
-      float innerEdge = createFilledRectangle(width-lineWidthY, height-lineWidthX, vs_st);
-      rectangle = outerEdge - innerEdge;
-    }
+  if (showRectangle) {
+    float lineWidthY = lineWidth * 2;
+    float lineWidthX = lineWidth * 2 * VerticalThickness;
+    float height = ((fov * 0.5) / maxWwtFov) - lineWidth;
+    float width = (height * ratio) - lineWidthY;
+    vec2 size = vec2(width, height);
 
-    float result = clamp(crosshair + rectangle, 0.0, 1.0);
+    // The radius of the corners (in pixels) clockwise starting in the top left
+    float radius = clamp(borderRadius * 0.5 * min(height, width), 0.0, 0.5 * min(height, width));
 
-    Fragment frag;
-    frag.color = lineColor;
-    frag.color.a *= result;
+    // Calculate distance to edge
+    float distance = roundedRectangle(vs_st.xy - vec2(0.5), size * 0.5, radius);
 
-    frag.color.rgb *= multiplyColor;
+    // How soft the edges should be (in pixels)
+    // Higher values could be used to simulate a drop shadow
+    float edgeSoftness = 2.0;
+    // Smooth the result (free antialiasing)
+    float smoothedAlpha =  1.0 - smoothstep(0.0, edgeSoftness, distance);
 
-    frag.color.a *= opacity;
-    if (frag.color.a == 0.0) {
-        discard;
-    }
+    // Border
+    float borderThickness = lineWidth * 0.5;
+    float borderSoftness  = 0.0;
+    float borderAlpha     = 1.0-smoothstep(borderThickness - borderSoftness, borderThickness, abs(distance));
 
-    frag.depth = vs_screenSpaceDepth;
+    // Colors
+    float borderColor = 1.0;
+    float bgColor = 0.0;
 
-    if (additiveBlending) {
-        frag.blend = BLEND_MODE_ADDITIVE;
-    }
+    rectangle = mix(bgColor, mix(bgColor, borderColor, borderAlpha), smoothedAlpha);
+  }
 
-    // G-Buffer
-    frag.gPosition = vs_gPosition;
-    frag.gNormal = vec4(vs_gNormal, 1.0);
+  float result = clamp(crosshair + rectangle, 0.0, 1.0);
 
-    return frag;
+  Fragment frag;
+  frag.color = lineColor;
+  frag.color.a *= result;
+
+  frag.color.rgb *= multiplyColor;
+
+  frag.color.a *= opacity;
+  if (frag.color.a == 0.0) {
+    discard;
+  }
+
+  frag.depth = vs_screenSpaceDepth;
+
+  if (additiveBlending) {
+    frag.blend = BLEND_MODE_ADDITIVE;
+  }
+
+  // G-Buffer
+  frag.gPosition = vs_gPosition;
+  frag.gNormal = vec4(vs_gNormal, 1.0);
+
+  return frag;
 }

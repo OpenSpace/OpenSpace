@@ -41,7 +41,7 @@
 
 namespace {
     using json = nlohmann::json;
-    constexpr const char* _loggerCat = "KameleonPlane";
+    constexpr std::string_view _loggerCat = "KameleonPlane";
 
     constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",

@@ -20,9 +20,9 @@ local EnceladusTrail = {
   },
   Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
   GUI = {
-      Name = "Enceladus Trail",
-  Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[ Trail of Saturn's moon Enceladus as observed by Saturn.]],
+    Name = "Enceladus Trail",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = "Trail of Saturn's moon Enceladus as observed by Saturn",
   }
 }
 
@@ -41,7 +41,7 @@ asset.export(EnceladusTrail)
 asset.meta = {
   Name = "Enceladus Trail",
   Version = "1.1",
-  Description = [[ Trail for Enceladus. Data from NASA Spice (see base spice asset)]],
+  Description = "Trail for Enceladus. Data from NASA Spice (see base spice asset)",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

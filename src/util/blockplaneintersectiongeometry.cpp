@@ -25,10 +25,11 @@
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <algorithm>
 
 namespace {
-    constexpr const char* _loggerCat = "BlockPlaneIntersectionGeometry";
+    constexpr std::string_view _loggerCat = "BlockPlaneIntersectionGeometry";
 } // namespace
 
 namespace openspace {

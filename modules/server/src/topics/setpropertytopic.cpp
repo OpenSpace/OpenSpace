@@ -34,10 +34,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* PropertyKey = "property";
-    constexpr const char* ValueKey = "value";
-    constexpr const char* _loggerCat = "SetPropertyTopic";
-    constexpr const char* SpecialKeyTime = "__time";
+    constexpr std::string_view _loggerCat = "SetPropertyTopic";
+    constexpr std::string_view SpecialKeyTime = "__time";
 
     std::string escapedLuaString(const std::string& str) {
         std::string luaString;
@@ -113,15 +111,15 @@ namespace openspace {
 
 void SetPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
-        const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
+        const std::string& propertyKey = json.at("property").get<std::string>();
 
         if (propertyKey == SpecialKeyTime) {
             Time newTime;
-            newTime.setTime(json.at(ValueKey).get<std::string>());
+            newTime.setTime(json.at("value").get<std::string>());
             global::timeManager->setTimeNextFrame(newTime);
         }
         else {
-            nlohmann::json value = json.at(ValueKey);
+            nlohmann::json value = json.at("value");
             std::string literal = luaLiteralFromJson(value);
 
             global::scriptEngine->queueScript(

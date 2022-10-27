@@ -46,7 +46,7 @@ namespace {
         "Display String",
         "The String that is being displayed. It must either be empty (in which case only "
         "the value itself will be displayed), or it must contain extact one instance of "
-        "{}, which will be replaced with the value of the property during rendering."
+        "{}, which will be replaced with the value of the property during rendering"
     };
 
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
@@ -96,7 +96,11 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
         std::string value;
         _property->getStringValue(value);
 
-        RenderFont(*_font, penPosition, fmt::format(_displayString.value(), value));
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(fmt::runtime(_displayString.value()), value)
+        );
         penPosition.y -= _font->height();
     }
 }

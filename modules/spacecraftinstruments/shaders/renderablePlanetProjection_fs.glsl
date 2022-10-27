@@ -40,6 +40,7 @@ uniform vec3 boresight;
 
 const float M_PI = 3.14159265358979323846;
 
+
 vec4 uvToModel(vec2 uv, vec3 radius, float segments) {
   float fj = uv.x * segments;
   float fi = (1.0 - uv.y) * segments;
@@ -57,6 +58,7 @@ vec4 uvToModel(vec2 uv, vec3 radius, float segments) {
 bool inRange(float x, float a, float b) {
   return (x >= a && x <= b);
 } 
+
 
 void main() {
   vec2 uv = (vs_position + vec2(1.0)) / vec2(2.0);

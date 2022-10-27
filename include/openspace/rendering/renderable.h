@@ -96,6 +96,8 @@ public:
     void setRenderBin(RenderBin bin);
     bool matchesRenderBinMask(int binMask);
 
+    void setFade(float fade);
+
     bool isVisible() const;
 
     void onEnabledChange(std::function<void(bool)> callback);
@@ -107,6 +109,7 @@ protected:
     properties::FloatProperty _opacity;
     properties::FloatProperty _fade;
     properties::StringProperty _renderableType;
+    properties::BoolProperty _dimInAtmosphere;
 
     void setBoundingSphere(double boundingSphere);
     void setInteractionSphere(double interactionSphere);

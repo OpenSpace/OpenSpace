@@ -44,7 +44,7 @@ local TeslaPosition = {
     Name = "Tesla Roadster",
     Path = "/Solar System/SSSB",
     Description = [[Position and Trail of Tesla Roadster from 2018 FEB 7 03:00:00
-      to 2089 DEC 31 03:00:00. Data from JPL Horizons.]]
+      to 2089 DEC 31 03:00:00. Data from JPL Horizons]]
   }
 }
 
@@ -66,11 +66,11 @@ asset.export(TeslaRoadsterTrail)
 asset.meta = {
   Name = "Tesla Roadster",
   Version = "1.2",
-  Description = [[ Position and Trail of Tesla Roadster from 2018 FEB 7 03:00:00
-    to 2089 DEC 31 03:00:00. Data from JPL Horizons.]],
+  Description = [[Position and Trail of Tesla Roadster from 2018 FEB 7 03:00:00 to
+    2089 DEC 31 03:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
-  License = [[ JPL-authored documents are sponsored by NASA under Contract
-    NAS7-030010. All documents available from this server may be protected
-    under the U.S. and Foreign Copyright Laws.]]
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws]]
 }

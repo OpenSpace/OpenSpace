@@ -35,8 +35,8 @@
 #include <QTabWidget> 
 
 namespace {
-    constexpr const int CameraTypeNav = 0;
-    constexpr const int CameraTypeGeo = 1;
+    constexpr int CameraTypeNav = 0;
+    constexpr int CameraTypeGeo = 1;
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;

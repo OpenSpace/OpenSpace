@@ -51,15 +51,16 @@
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 #include <stack>
 
 #include "scene_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "Scene";
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeyParent = "Parent";
+    constexpr std::string_view _loggerCat = "Scene";
+    constexpr std::string_view KeyIdentifier = "Identifier";
+    constexpr std::string_view KeyParent = "Parent";
 
 #ifdef TRACY_ENABLE
     constexpr const char* renderBinToString(int renderBin) {
@@ -127,7 +128,7 @@ Camera* Scene::camera() const {
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.count(node->identifier())) {
         throw Scene::InvalidSceneError(
-            "Node with identifier " + node->identifier() + " already exits."
+            "Node with identifier " + node->identifier() + " already exits"
         );
     }
 
@@ -276,7 +277,7 @@ void Scene::initialize() {
             );
         }
         catch (const ghoul::RuntimeError& e) {
-            LERROR(node->name() << " not initialized.");
+            LERROR(node->name() << " not initialized");
             LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
             OsEng.loadingScreen().updateItem(
                 node->name(),
@@ -312,7 +313,7 @@ void Scene::initializeGL() {
             node->initializeGL();
         }
         catch (const ghoul::RuntimeError& e) {
-            LERROR(node->name() << " not initialized.");
+            LERROR(node->name() << " not initialized");
             LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
         }
     }
@@ -334,6 +335,7 @@ void Scene::update(const UpdateData& data) {
     if (_dirtyNodeRegistry) {
         updateNodeRegistry();
     }
+    _camera->setAtmosphereDimmingFactor(1.f);
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             node->update(data);
@@ -845,7 +847,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "group tag expansion is performed and the first argument is used as an "
                 "ECMAScript style regular expression that matches against the fully "
                 "qualified IDs of properties. If the fifth argument is 'single' no "
-                "substitutions are performed and exactly 0 or 1 properties are changed."
+                "substitutions are performed and exactly 0 or 1 properties are changed"
             },
             {
                 "setPropertyValueSingle",
@@ -861,30 +863,17 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "specified. If 'duration' is 0, this parameter value is ignored. "
                 "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
                 "This is the same as calling the setValue method and passing 'single' as "
-                "the fourth argument to setPropertyValue."
-            },
-            {
-                "hasProperty",
-                &luascriptfunctions::propertyHasProperty,
-                {},
-                "",
-                "Returns whether a property with the given URI exists"
+                "the fourth argument to setPropertyValue"
             },
             {
                 "getPropertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI."
+                "Returns the value the property, identified by the provided URI"
             },
-            {
-                "getProperty",
-                &luascriptfunctions::propertyGetProperty,
-                {},
-                "",
-                "Returns a list of property identifiers that match the passed regular "
-                "expression"
-            },
+            codegen::lua::HasProperty,
+            codegen::lua::GetProperty,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,

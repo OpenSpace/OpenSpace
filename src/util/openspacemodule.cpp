@@ -36,10 +36,9 @@
 
 #include <openspace/modulepath.h>
 
-
 namespace {
-    constexpr const char* _loggerCat = "OpenSpaceModule";
-    constexpr const char* ModuleBaseToken = "MODULE_";
+    constexpr std::string_view _loggerCat = "OpenSpaceModule";
+    constexpr std::string_view ModuleBaseToken = "MODULE_";
 } // namespace
 
 namespace openspace {
@@ -125,7 +124,7 @@ std::string OpenSpaceModule::modulePath() const {
         return path.string();
     }
     else { // Otherwise, it might be one of the external directories
-        for (const char* dir : ModulePaths) {
+        for (std::string_view dir : ModulePaths) {
             const std::string& p = std::string(dir) + '/' + moduleIdentifier;
             if (std::filesystem::is_directory(absPath(p))) {
                 return absPath(p).string();

@@ -41,7 +41,7 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     {
         QString pitchTip = "Pitch or elevation: negative numbers tilt the camera "
             "downwards; positive numbers tilt upwards.\nThe allowed range is [-90, 90]. "
-            "Internally, this corresponds to the x value in the quaternion.";
+            "Internally, this corresponds to the x value in the quaternion";
 
         QLabel* labelPitch = new QLabel("Pitch");
         labelPitch->setToolTip(pitchTip);
@@ -58,7 +58,7 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     {
         QString rollTip = "Roll or bank: negative numbers rotate the camera counter-"
             "clockwise; positive numbers clockwise.\nThe allowed range is [-180, 180]. "
-            "Internally, this corresponds to the z value in the quaternion.";
+            "Internally, this corresponds to the z value in the quaternion";
 
         QLabel* labelRoll = new QLabel("Roll");
         labelRoll->setToolTip(rollTip);
@@ -75,7 +75,7 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     {
         QString yawTip = "Yaw, heading, or azimuth: negative numbers pan the camera "
             "to the left; positive numbers pan to the\nright. The allowed range is "
-            "[-360, 360]. Internally, this corresponds to the y value in the quaternion.";
+            "[-360, 360]. Internally, this corresponds to the y value in the quaternion";
 
         QLabel* labelYaw = new QLabel;
         labelYaw ->setText("Yaw");

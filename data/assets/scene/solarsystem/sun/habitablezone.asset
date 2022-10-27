@@ -16,7 +16,7 @@ local HabitableZone = {
   GUI = {
     Name = "Sun Habitable Zone",
     Path = "/Solar System/Sun",
-    Description = "Habitable zone for the sun in our solar system."
+    Description = "Habitable zone for the sun in our solar system"
   }
 }
 
@@ -34,7 +34,7 @@ asset.export(HabitableZone)
 asset.meta = {
   Name = "Sun Habitable Zone",
   Version = "1.1",
-  Description = [[ The habitable zone around our sun, computed using formula and 
+  Description = [[The habitable zone around our sun, computed using formula and 
     coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

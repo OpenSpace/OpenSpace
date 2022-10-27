@@ -38,21 +38,21 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyLazyLoading = "LazyLoading";
-    constexpr const char* _loggerCat = "RenderablePlaneTimeVaryingImage";
+    constexpr std::string_view KeyLazyLoading = "LazyLoading";
+    constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
     constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
         "Source Folder",
         "This value specifies the image directory that is loaded from disk and "
-        "is used as a texture that is applied to this plane."
+        "is used as a texture that is applied to this plane"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderTypeInfo = {
        "RenderType",
        "Render Type",
        "This value specifies if the plane should be rendered in the Background, "
-       "Opaque, Transparent, or Overlay rendering step."
+       "Opaque, Transparent, or Overlay rendering step"
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {

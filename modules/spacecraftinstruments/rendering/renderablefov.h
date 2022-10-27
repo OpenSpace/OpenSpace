@@ -105,13 +105,13 @@ private:
         // Differentiating different vertex types
         using VertexColorType = int32_t;
         // This needs to be synced with the fov_vs.glsl shader
-        static const VertexColorType VertexColorTypeDefaultStart = 0;
-        static const VertexColorType VertexColorTypeDefaultEnd = 1;
-        static const VertexColorType VertexColorTypeInFieldOfView = 2;
-        static const VertexColorType VertexColorTypeActive = 3;
-        static const VertexColorType VertexColorTypeIntersectionStart = 4;
-        static const VertexColorType VertexColorTypeIntersectionEnd = 5;
-        static const VertexColorType VertexColorTypeSquare = 6;
+        static constexpr VertexColorType VertexColorTypeDefaultStart = 0;
+        static constexpr VertexColorType VertexColorTypeDefaultEnd = 1;
+        static constexpr VertexColorType VertexColorTypeInFieldOfView = 2;
+        static constexpr VertexColorType VertexColorTypeActive = 3;
+        static constexpr VertexColorType VertexColorTypeIntersectionStart = 4;
+        static constexpr VertexColorType VertexColorTypeIntersectionEnd = 5;
+        static constexpr VertexColorType VertexColorTypeSquare = 6;
 
         struct VBOData {
             GLfloat position[3];

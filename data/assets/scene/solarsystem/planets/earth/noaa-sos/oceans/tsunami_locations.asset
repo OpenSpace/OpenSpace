@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Locations - 2000 BCE - 2014"
 local Identifier = "noaa-sos-oceans-tsunami_locations"
-local Description = [[ Earthquakes, landslides, volcanoes, explosions, and atmospheric 
+local Description = [[Earthquakes, landslides, volcanoes, explosions, and atmospheric 
 processes - all of these disasters have caused tsunamis in the past. But by far, the most 
 common generator of tsunamis is earthquakes, as has recently been seen in Sumatra, Chile, 
 and Japan. The NOAA National Geophysical Data Center archives academic and historical 
@@ -17,7 +17,7 @@ of event origins are located around the Pacific "Ring of Fire" known for its pre
 of volcanic and tectonic activity. The points are overlaid on top of a map of ocean 
 bathymetry (Natural Earth 2 from the Natural Earth project), which indicates many of the 
 pronounced ocean features, such as volcanic islands, rift zones, and plate boundaries
- that are often associated with generating tsunamis.   ]]
+ that are often associated with generating tsunamis]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-locations-2000-bce-2014/"
 
 
@@ -91,7 +91,7 @@ asset.export(layer_events)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

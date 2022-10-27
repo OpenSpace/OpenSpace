@@ -365,7 +365,7 @@ void ProfileEdit::duplicateProfile() {
         return;
     }
 
-    constexpr const char Separator = '_';
+    constexpr char Separator = '_';
     int version = 0;
     if (size_t it = profile.rfind(Separator); it != std::string::npos) {
         // If the value exists, we have a profile that potentially already has a version

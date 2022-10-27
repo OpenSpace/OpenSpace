@@ -65,7 +65,7 @@
 #endif // WIN32
 
 namespace {
-    constexpr const char* _loggerCat = "TouchInteraction";
+    constexpr std::string_view _loggerCat = "TouchInteraction";
 
     constexpr openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
@@ -120,7 +120,7 @@ namespace {
         "PinchZoomFactor",
         "Scaling distance travelled on pinch",
         "This value is used to reduce the amount of pinching needed. A linear kind of "
-        "sensitivity that will alter the pinch-zoom speed."
+        "sensitivity that will alter the pinch-zoom speed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
@@ -222,7 +222,7 @@ namespace {
         "Zoom Out Limit",
         "The maximum distance you are allowed to navigate away from the anchor. "
         "This should always be larger than the zoom in value if you want to be able "
-        "to zoom. Defaults to maximum allowed double."
+        "to zoom. Defaults to maximum allowed double"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
@@ -898,7 +898,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
 }
 
 double TouchInteraction::computeConstTimeDecayCoefficient(double velocity) {
-    constexpr const double postDecayVelocityTarget = 1e-6;
+    constexpr double postDecayVelocityTarget = 1e-6;
     const double stepsToDecay = _constTimeDecay_secs / _frameTimeAvg.averageFrameTime();
 
     if (stepsToDecay > 0.0 && std::abs(velocity) > postDecayVelocityTarget) {
@@ -1097,7 +1097,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
             }
             else {
 #ifdef TOUCH_DEBUG_PROPERTIES
-                LINFO("Zero the zoom velocity close to surface.");
+                LINFO("Zero the zoom velocity close to surface");
 #endif
                 _vel.zoom = 0.0;
             }

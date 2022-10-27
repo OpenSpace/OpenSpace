@@ -22,44 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__
-#define __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMELAPSEDTIME___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMELAPSEDTIME___H__
 
-#include <modules/space/rendering/planetgeometry.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
-    class Renderable;
-    class Sphere;
-} // namespace openspace
 
-namespace openspace::documentation { struct Documentation; }
+namespace documentation { struct Documentation; }
 
-namespace openspace::planetgeometry {
-
-class SimpleSphereGeometry : public PlanetGeometry {
+class DashboardItemElapsedTime : public DashboardTextItem {
 public:
-    SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
-    ~SimpleSphereGeometry() override;
+    DashboardItemElapsedTime(const ghoul::Dictionary& dictionary);
+    ~DashboardItemElapsedTime() override = default;
 
-    void initialize() override;
-    void deinitialize() override;
-    void render() override;
+    void render(glm::vec2& penPosition) override;
 
-    float boundingSphere() const override;
+    glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
 
 private:
-    void createSphere();
-
-    properties::Vec3Property _radius;
-    properties::IntProperty _segments;
-    Sphere* _sphere;
+    properties::StringProperty _formatString;
+    properties::StringProperty _referenceTime;
+    double _referenceJ2000 = 0.0;
+    properties::BoolProperty _simplifyTime;
+    properties::OptionProperty _lowestTimeUnit;
 };
 
-} // namespace openspace::planetgeometry
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMDATE___H__

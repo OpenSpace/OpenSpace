@@ -29,13 +29,14 @@ in vec4 vs_positionViewSpace;
 
 uniform vec4 color;
 
+
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    frag.color = color;
+  frag.color = color;
 
-    frag.depth = vs_depth;
-    frag.gPosition = vs_positionViewSpace;
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    return frag;
+  frag.depth = vs_depth;
+  frag.gPosition = vs_positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  return frag;
 }

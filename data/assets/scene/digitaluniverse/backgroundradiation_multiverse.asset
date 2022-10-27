@@ -150,9 +150,9 @@ asset.export(multiverse_planck_4)
 asset.meta = {
   Name = "Multiverse Background Radiation",
   Version = "2.1",
-  Description = [[ Non-physical representation of the location of hypothetical 
-      cosmic microwave background radiation images how they would be observed from other
-      locations in the universe. <br> This is not a measured dataset!]],
+  Description = [[Non-physical representation of the location of hypothetical cosmic
+    microwave background radiation images how they would be observed from other locations
+    in the universe. <br> This is not a measured dataset]],
   Author = "Brian Abbott (AMNH), OpenSpace Team",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

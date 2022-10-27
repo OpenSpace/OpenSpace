@@ -37,7 +37,7 @@
 
 #ifdef INTERPOLATION_DEBUG_PRINT
 namespace {
-    constexpr const char* _loggerCat = "KeyframeNavigator";
+    constexpr std::string_view _loggerCat = "KeyframeNavigator";
 } // namespace
 #endif
 

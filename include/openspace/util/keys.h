@@ -261,7 +261,7 @@ struct KeyInfo {
     std::string_view identifier;
 };
 
-constexpr const std::array<KeyInfo, 120> KeyInfos = {
+constexpr std::array<KeyInfo, 120> KeyInfos = {
     KeyInfo { Key::Unknown,        "",              ""              },
     KeyInfo { Key::Space,          "Space",         "SPACE"         },
     KeyInfo { Key::Apostrophe,     "'",             "APOSTROPHE"    },

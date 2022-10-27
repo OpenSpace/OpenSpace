@@ -76,7 +76,7 @@ local xy_utot = {
     Name = "Ganymede XY Plane U_tot",
     Path = "/Solar System/Missions/Juice/Plane",
     Description = [[A cut plane in Ganymede's XY plane showing the X, Y, and Z components
-      of the magnetic field mapped to the RGB components.]]
+      of the magnetic field mapped to the RGB components]]
   }
 }
 
@@ -217,7 +217,7 @@ local xz_utot = {
     Name = "Ganymede XZ Plane U_tot",
     Path = "/Solar System/Missions/Juice/Plane",
     Description = [[A cut plane in Ganymede's XZ plane showing the X, Y, and Z components
-      of the magnetic field mapped to the RGB components.]]
+      of the magnetic field mapped to the RGB components]]
   }
 }
 

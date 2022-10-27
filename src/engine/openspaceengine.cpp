@@ -31,7 +31,6 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
@@ -83,6 +82,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
@@ -95,6 +95,10 @@
 #include <numeric>
 #include <sstream>
 
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
+
 #ifdef __APPLE__
 #include <openspace/interaction/touchbar.h>
 #endif // __APPLE__
@@ -106,7 +110,7 @@ namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    constexpr const char* _loggerCat = "OpenSpaceEngine";
+    constexpr std::string_view _loggerCat = "OpenSpaceEngine";
 
     constexpr std::string_view stringify(openspace::OpenSpaceEngine::Mode m) {
         using Mode = openspace::OpenSpaceEngine::Mode;
@@ -122,14 +126,14 @@ namespace {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
-        "printed to the log."
+        "printed to the log"
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "PropertyVisibility",
         "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
-        "are."
+        "are"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHiddenSceneInfo = {
@@ -218,11 +222,6 @@ void OpenSpaceEngine::initialize() {
     );
 
     _printEvents = global::configuration->isPrintingEvents;
-
-    const std::string versionCheckUrl = global::configuration->versionCheckUrl;
-    if (!versionCheckUrl.empty()) {
-        global::versionChecker->requestLatestVersion(versionCheckUrl);
-    }
 
     std::string cacheFolder = absPath("${CACHE}").string();
     if (global::configuration->usePerProfileCache) {
@@ -463,6 +462,10 @@ void OpenSpaceEngine::initializeGL() {
     );
     SysCap.logCapabilities(verbosity);
 
+    const std::string versionCheckUrl = global::configuration->versionCheckUrl;
+    if (!versionCheckUrl.empty()) {
+        global::versionChecker->requestLatestVersion(versionCheckUrl);
+    }
 
     // Check the required OpenGL versions of the registered modules
     ghoul::systemcapabilities::Version version =
@@ -486,7 +489,8 @@ void OpenSpaceEngine::initializeGL() {
                     LFATAL(fmt::format(
                         "Module {} required OpenGL extension {} which is not available "
                         "on this system. Some functionality related to this module will "
-                        "probably not work.", m->guiName(), ext
+                        "probably not work",
+                        m->guiName(), ext
                     ));
                 }
             }
@@ -1408,7 +1412,9 @@ void OpenSpaceEngine::resetPropertyChangeFlagsOfSubowners(properties::PropertyOw
     }
 }
 
-void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
+void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action,
+                                       IsGuiWindow isGuiWindow)
+{
     ZoneScoped
 
     if (_loadingScreen) {
@@ -1421,9 +1427,9 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
-    using F = std::function<bool (Key, KeyModifier, KeyAction)>;
+    using F = global::callback::KeyboardCallback;
     for (const F& func : *global::callback::keyboard) {
-        const bool isConsumed = func(key, mod, action);
+        const bool isConsumed = func(key, mod, action, isGuiWindow);
         if (isConsumed) {
             return;
         }
@@ -1437,16 +1443,22 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
     }
 
     global::navigationHandler->keyboardCallback(key, mod, action);
-    global::keybindingManager->keyboardCallback(key, mod, action);
+
+    if (!global::navigationHandler->disabledKeybindings()) {
+        global::keybindingManager->keyboardCallback(key, mod, action);
+    }
+
     global::interactionMonitor->markInteraction();
 }
 
-void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
+void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
+                                   IsGuiWindow isGuiWindow)
+{
     ZoneScoped
 
-    using F = std::function<bool (unsigned int, KeyModifier)>;
+    using F = global::callback::CharacterCallback;
     for (const F& func : *global::callback::character) {
-        bool isConsumed = func(codepoint, modifier);
+        bool isConsumed = func(codepoint, modifier, isGuiWindow);
         if (isConsumed) {
             return;
         }
@@ -1456,22 +1468,22 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     global::interactionMonitor->markInteraction();
 }
 
-void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
-                                          MouseAction action,
-                                          KeyModifier mods)
+void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action,
+                                          KeyModifier mods, IsGuiWindow isGuiWindow)
 {
     ZoneScoped
 
-    using F = std::function<bool (MouseButton, MouseAction, KeyModifier)>;
+    using F = global::callback::MouseButtonCallback;
     for (const F& func : *global::callback::mouseButton) {
-        bool isConsumed = func(button, action, mods);
+        bool isConsumed = func(button, action, mods, isGuiWindow);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
-            // handler in order to reliably terminate a rotation or zoom. Accidentally
+            // handler in order to reliably terminate a rotation or zoom, or to the other
+            // callbacks to for example release a drag and drop of a UI window. Accidentally
             // moving the cursor over a UI window is easy to miss and leads to weird
             // continuing movement
             if (action == MouseAction::Release) {
-                break;
+                continue;
             }
             else {
                 return;
@@ -1479,8 +1491,9 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
         }
     }
 
-    // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing
-    if (action == MouseAction::Press) {
+    // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing.
+    // Only handle the clicks if we are in a GUI window
+    if (action == MouseAction::Press && isGuiWindow) {
         bool isConsumed = global::renderEngine->mouseActivationCallback(_mousePosition);
         if (isConsumed) {
             return;
@@ -1491,12 +1504,14 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
     global::interactionMonitor->markInteraction();
 }
 
-void OpenSpaceEngine::mousePositionCallback(double x, double y) {
+void OpenSpaceEngine::mousePositionCallback(double x, double y,
+                                            IsGuiWindow isGuiWindow)
+{
     ZoneScoped
 
-    using F = std::function<void (double, double)>;
+    using F = global::callback::MousePositionCallback;
     for (const F& func : *global::callback::mousePosition) {
-        func(x, y);
+        func(x, y, isGuiWindow);
     }
 
     global::navigationHandler->mousePositionCallback(x, y);
@@ -1505,12 +1520,14 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
+void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
+                                               IsGuiWindow isGuiWindow)
+{
     ZoneScoped
 
-    using F = std::function<bool (double, double)>;
+    using F = global::callback::MouseScrollWheelCallback;
     for (const F& func : *global::callback::mouseScrollWheel) {
-        bool isConsumed = func(posX, posY);
+        bool isConsumed = func(posX, posY, isGuiWindow);
         if (isConsumed) {
             return;
         }

@@ -36,6 +36,7 @@ uniform ivec3 nBricksInAtlas_#{id};
 uniform ivec3 atlasSize_#{id};
 uniform float stepSizeCoefficient_#{id} = 1.0;
 
+
 void atlasMapDataFunction_#{id}(ivec3 brickCoords, inout uint atlasIntCoord,
                                 inout uint level)
 {

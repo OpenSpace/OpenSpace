@@ -131,7 +131,7 @@ function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
   if (USE_SANDBOX)
     # Logical target used to link the cef_sandbox library.
     message(STATUS "Using CEF in Sandboxed mode.")
-    ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+    add_logical_target("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
     target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
   endif ()
 
@@ -151,7 +151,7 @@ function(run_cef_linux_config CEF_TARGET CEF_ROOT)
   if (USE_SANDBOX)
     # Logical target used to link the cef_sandbox library.
     message(STATUS "Using CEF in Sandboxed mode.")
-    ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+    add_logical_target("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
     target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
   endif ()
 

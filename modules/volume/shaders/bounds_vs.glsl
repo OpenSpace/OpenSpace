@@ -21,18 +21,26 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#version __CONTEXT__
 
-#ifndef _RAYCASTERDATA_GLSL_
-#define _RAYCASTERDATA_GLSL_
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-struct RaycasterData {
-    vec3 position;
-    vec3 direction;
-    float scale;
-    float previousJitterDistance;
-    uint blend;
-};
+layout(location = 0) in vec3 vertPosition;
 
-RaycasterData raycasterData[N_RAYCASTERS];    
+out vec4 positionLocalSpace;
+out vec4 positionCameraSpace;
+
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
+
+
+void main() {
+  positionLocalSpace = vec4(vertPosition, 1.0);
+  positionCameraSpace = modelViewTransform * positionLocalSpace;
+
+  vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+  vec4 positionScreenSpace = z_normalization(positionClipSpace);
     
-#endif
+  gl_Position = positionScreenSpace;
+}

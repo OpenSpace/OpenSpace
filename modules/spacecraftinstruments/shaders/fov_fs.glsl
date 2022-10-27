@@ -27,6 +27,7 @@
 in vec4 vs_color;
 in float vs_depth;
 
+
 Fragment getFragment() {
   Fragment frag;
   frag.color = vs_color;

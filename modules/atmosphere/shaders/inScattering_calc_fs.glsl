@@ -44,6 +44,7 @@ uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
 
+
 void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R, 
                out vec3 S_M)
 {
@@ -115,6 +116,7 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
   S_R *= betaRayleigh * (rayDist / (2.0 * float(INSCATTER_INTEGRAL_SAMPLES)));
   S_M *= betaMieScattering * (rayDist / (2.0 * float(INSCATTER_INTEGRAL_SAMPLES)));
 }
+
 
 void main() {
   // From the layer interpolation (see C++ code for layer to r) and the textures

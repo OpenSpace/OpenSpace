@@ -17,7 +17,7 @@ asset.export("PlutoKernels", PlutoKernels)
 asset.meta = {
   Name = "Pluto Spice Kernels",
   Version = "1.0",
-  Description = [[ Generic SPICE kernels for Pluto.]],
+  Description = "Generic SPICE kernels for Pluto",
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
   License = "NASA"

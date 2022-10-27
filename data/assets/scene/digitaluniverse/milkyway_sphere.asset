@@ -24,7 +24,8 @@ local sphere = {
     RenderBinMode = "PreDeferredTransparent",
     MirrorTexture = true,
     FadeOutThreshold = 0.0015,
-    Background = true
+    Background = true,
+    DimInAtmosphere = true,
   },
   GUI = {
     Name = "Milky Way Sphere",
@@ -49,7 +50,7 @@ asset.export(sphere)
 asset.meta = {
   Name = "Milky Way Galaxy Sphere",
   Version = "2.1",
-  Description = [[All sky image of the Milky Way]],
+  Description = "All sky image of the Milky Way",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

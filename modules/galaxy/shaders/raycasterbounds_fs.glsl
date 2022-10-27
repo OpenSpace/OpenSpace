@@ -28,6 +28,7 @@
 in vec3 modelPosition;
 in vec4 viewPosition;
 
+
 Fragment getFragment() {
   Fragment frag;
   vec3 pos = modelPosition + 0.5;

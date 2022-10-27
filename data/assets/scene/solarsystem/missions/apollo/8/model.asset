@@ -9,7 +9,7 @@ local models = asset.syncedResource({
   Version = 4
 })
 
-local apolloSpiceId = "-908"
+local apolloSpiceId = -908
 
 local Apollo8 = {
   Identifier = "Apollo8",

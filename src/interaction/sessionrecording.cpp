@@ -55,13 +55,13 @@
 #include <iomanip>
 
 #ifdef WIN32
-#include <windows.h>
+#include <Windows.h>
 #endif // WIN32
 
 #include "sessionrecording_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "SessionRecording";
+    constexpr std::string_view _loggerCat = "SessionRecording";
 
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
@@ -77,7 +77,7 @@ namespace {
         "computed values are used instead"
     };
 
-    constexpr const bool UsingTimeKeyframes = false;
+    constexpr bool UsingTimeKeyframes = false;
 } // namespace
 
 namespace openspace::interaction {
@@ -143,15 +143,6 @@ void SessionRecording::removeTrailingPathSlashes(std::string& filename) {
     }
 }
 
-void SessionRecording::extractFilenameFromPath(std::string& filename) {
-    size_t unixDelimiter = filename.find_last_of("/");
-    if (unixDelimiter != std::string::npos)
-        filename = filename.substr(unixDelimiter + 1);
-    size_t windowsDelimiter = filename.find_last_of("\\");
-    if (windowsDelimiter != std::string::npos)
-        filename = filename.substr(windowsDelimiter + 1);
-}
-
 bool SessionRecording::handleRecordingFile(std::string filenameIn) {
     if (isPath(filenameIn)) {
         LERROR("Recording filename must not contain path (/) elements");
@@ -181,7 +172,7 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
 
     if (std::filesystem::is_regular_file(absFilename)) {
         LERROR(fmt::format(
-            "Unable to start recording; file {} already exists.", absFilename
+            "Unable to start recording; file {} already exists", absFilename
         ));
         return false;
     }
@@ -735,7 +726,7 @@ void SessionRecording::saveStringToFile(const std::string& s,
 bool SessionRecording::hasCameraChangedFromPrev(
                                              datamessagestructures::CameraKeyframe kfNew)
 {
-    constexpr const  double threshold = 1e-2;
+    constexpr double threshold = 1e-2;
     bool hasChanged = false;
 
     glm::dvec3 positionDiff = kfNew._position - _prevRecordedCameraKeyframe._position;
@@ -875,14 +866,14 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
 bool SessionRecording::doesStartWithSubstring(const std::string& s,
                                               const std::string& matchSubstr)
 {
-    return (s.substr(0, matchSubstr.length()).compare(matchSubstr) == 0);
+    return s.substr(0, matchSubstr.length()) == matchSubstr;
 }
 
 void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script) {
-    Timestamps times
-        = generateCurrentTimestamp3(global::windowDelegate->applicationTime());
-    size_t indexIntoScriptKeyframesFromMainTimeline
-        = _keyframesSavePropertiesBaseline_scripts.size();
+    Timestamps times =
+        generateCurrentTimestamp3(global::windowDelegate->applicationTime());
+    size_t indexIntoScriptKeyframesFromMainTimeline =
+        _keyframesSavePropertiesBaseline_scripts.size();
     _keyframesSavePropertiesBaseline_scripts.push_back(std::move(script));
     addKeyframeToTimeline(
         _keyframesSavePropertiesBaseline_timeline,
@@ -1019,8 +1010,8 @@ void SessionRecording::render() {
     }
 
 
-    constexpr const char* FontName = "Mono";
-    constexpr const float FontSizeFrameinfo = 32.f;
+    constexpr std::string_view FontName = "Mono";
+    constexpr float FontSizeFrameinfo = 32.f;
     std::shared_ptr<ghoul::fontrendering::Font> font =
         global::fontManager->font(FontName, FontSizeFrameinfo);
 
@@ -1624,7 +1615,7 @@ std::string SessionRecording::isolateTermFromQuotes(std::string s) {
     }
     //If no quotes found, remove other possible characters from end
     std::string unwantedChars = " );";
-    while (unwantedChars.find(s.back()) != std::string::npos) {
+    while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
         s.pop_back();
     }
     return s;
@@ -1791,8 +1782,8 @@ bool SessionRecording::addKeyframeToTimeline(std::vector<TimelineEntry>& timelin
     }
     catch(...) {
         LERROR(fmt::format(
-            "Timeline memory allocation error trying to add keyframe {}. "
-            "The playback file may be too large for system memory.",
+            "Timeline memory allocation error trying to add keyframe {}. The playback "
+            "file may be too large for system memory",
             lineNum - 1
         ));
         return false;
@@ -1995,7 +1986,7 @@ bool SessionRecording::processNextNonCameraKeyframeAheadInTime() {
             return processScriptKeyframe();
         default:
             LERROR(fmt::format(
-                "Bad keyframe type encountered during playback at index {}.",
+                "Bad keyframe type encountered during playback at index {}",
                 _idxTimeline_nonCamera
             ));
             return false;
@@ -2228,7 +2219,7 @@ void SessionRecording::readPlaybackHeader_stream(std::stringstream& conversionIn
     );
 
     if (readBackHeaderString != FileHeaderTitle) {
-        throw ConversionError("File to convert does not contain expected header.");
+        throw ConversionError("File to convert does not contain expected header");
     }
     version = readHeaderElement(conversionInStream, FileHeaderVersionLength);
     std::string readDataMode = readHeaderElement(conversionInStream, 1);
@@ -2256,7 +2247,7 @@ SessionRecording::DataMode SessionRecording::readModeFromHeader(std::string file
         FileHeaderTitle.length()
     );
     if (readBackHeaderString != FileHeaderTitle) {
-        LERROR("Specified playback file does not contain expected header.");
+        LERROR("Specified playback file does not contain expected header");
     }
     readHeaderElement(inputFile, FileHeaderVersionLength);
     std::string readDataMode = readHeaderElement(inputFile, 1);
@@ -2303,12 +2294,16 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     inputFstream.close();
 }
 
+void SessionRecording::convertFileRelativePath(std::string filenameRelative) {
+    convertFile(absPath(filenameRelative).string());
+}
+
 std::string SessionRecording::convertFile(std::string filename, int depth) {
     std::string conversionOutFilename = filename;
     std::ifstream conversionInFile;
     std::stringstream conversionInStream;
     if (depth >= _maximumRecursionDepth) {
-        LERROR("Runaway recursion in session recording conversion of file version.");
+        LERROR("Runaway recursion in session recording conversion of file version");
         exit(EXIT_FAILURE);
     }
     std::string newFilename = filename;
@@ -2327,13 +2322,10 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         // correct version of the file to be converted, then call getLegacy() to recurse
         // to the next level down in the legacy subclasses until we get the right
         // version, then proceed with conversion from there.
-        if (fileVersion.compare(fileFormatVersion()) != 0) {
+        if (fileVersion != fileFormatVersion()) {
             //conversionInStream.seekg(conversionInStream.beg);
             newFilename = getLegacyConversionResult(filename, depth + 1);
             removeTrailingPathSlashes(newFilename);
-            if (isPath(newFilename)) {
-                extractFilenameFromPath(newFilename);
-            }
             if (filename == newFilename) {
                 return filename;
             }
@@ -2348,7 +2340,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
             conversionOutFilename = determineConversionOutFilename(filename, mode);
             LINFO(fmt::format(
                 "Starting conversion on rec file {}, version {} in {} mode. "
-                "Writing result to {}.",
+                "Writing result to {}",
                 newFilename, fileVersion, (mode == DataMode::Ascii) ? "ascii" : "binary",
                 conversionOutFilename
             ));
@@ -2547,7 +2539,7 @@ std::string SessionRecording_legacy_0085::getLegacyConversionResult(std::string 
     LERROR(fmt::format(
         "Version 00.85 is the oldest supported legacy file format; no conversion "
         "can be made. It is possible that file {} has a corrupted header or an invalid "
-        "file format version number.",
+        "file format version number",
         filename
     ));
     return filename;
@@ -2572,7 +2564,7 @@ std::string SessionRecording::determineConversionOutFilename(const std::string f
         filenameSansExtension = filename.substr(0, filename.find_last_of("."));
     }
     filenameSansExtension += "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
-    return absPath("${RECORDINGS}/" + filenameSansExtension + fileExtension).string();
+    return filenameSansExtension + fileExtension;
 }
 
 bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,

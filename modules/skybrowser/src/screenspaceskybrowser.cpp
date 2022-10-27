@@ -38,35 +38,35 @@
 #include <random>
 
 namespace {
-    constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
+    constexpr std::string_view _loggerCat = "ScreenSpaceSkyBrowser";
 
-    constexpr const openspace::properties::Property::PropertyInfo TextureQualityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureQualityInfo = {
         "TextureQuality",
         "Quality of Texture",
         "A parameter to set the resolution of the texture. 1 is full resolution and "
         "slower frame rate. Lower value means lower resolution of texture and faster "
-        "frame rate."
+        "frame rate"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
         "DisplayCopy",
         "Display Copy Position",
         "Display a copy of this sky browser at an additional position. This copy will not "
         "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates "
-        "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates."
+        "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
         "ShowDisplayCopy",
         "Show Display Copy",
-        "Show the display copy."
+        "Show the display copy"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo IsHiddenInfo = {
+    constexpr openspace::properties::Property::PropertyInfo IsHiddenInfo = {
         "IsHidden",
         "Is Hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
-        "be."
+        "be"
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -116,9 +116,10 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
     addProperty(_isHidden);
     addProperty(_url);
-    addProperty(_browserPixeldimensions);
+    addProperty(_browserDimensions);
     addProperty(_reload);
     addProperty(_textureQuality);
+    addProperty(_verticalFov);
 
     _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 
@@ -198,9 +199,10 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     float newResX = newResY * _ratio;
     glm::vec2 newSize = glm::vec2(newResX , newResY) * _textureQuality.value();
 
-    _browserPixeldimensions = glm::ivec2(newSize);
+    _browserDimensions = glm::ivec2(newSize);
     _texture->setDimensions(glm::ivec3(newSize, 1));
     _objectSize = glm::ivec3(_texture->dimensions());
+    _radiusIsDirty = true;
 }
 
 void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
@@ -236,7 +238,9 @@ void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCo
 void ScreenSpaceSkyBrowser::removeDisplayCopy() {
     if (!_displayCopies.empty()) {
         removeProperty(_displayCopies.back().get());
+        removeProperty(_showDisplayCopies.back().get());
         _displayCopies.pop_back();
+        _showDisplayCopies.pop_back();
     }
 }
 
@@ -322,16 +326,22 @@ void ScreenSpaceSkyBrowser::update() {
         _isInitialized = false;
     }
 
-    WwtCommunicator::update();
+    if (_radiusIsDirty && _isInitialized) {
+        setBorderRadius(_borderRadius);
+        _radiusIsDirty = false;
+    }
+
     ScreenSpaceRenderable::update();
+    WwtCommunicator::update();
 }
 
-void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
+double ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     // Make scroll more sensitive the smaller the FOV
     double x = _verticalFov;
     double zoomFactor = atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
     double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
     _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
+    return _verticalFov;
 }
 
 void ScreenSpaceSkyBrowser::bindTexture() {

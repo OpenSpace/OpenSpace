@@ -90,6 +90,8 @@ public:
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
+    bool disabledKeybindings() const;
+
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
@@ -159,7 +161,7 @@ private:
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-    inline static const double InteractionHystersis = 0.0125;
+    static constexpr double InteractionHystersis = 0.0125;
     bool _inAnchorApproachSphere = false;
     bool _inAnchorReachSphere = false;
 
@@ -169,6 +171,7 @@ private:
 
     std::optional<NavigationState> _pendingNavigationState;
 
+    properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;

@@ -54,7 +54,7 @@ private:
     properties::IntProperty _tilePixelSize;
 
     std::unique_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    layergroupid::GroupID _layerGroupID = layergroupid::GroupID::Unknown;
+    layers::Group::ID _layerGroupID = layers::Group::ID::Unknown;
     bool _performPreProcessing = false;
     bool _padTiles = true;
 };

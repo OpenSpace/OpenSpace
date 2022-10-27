@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/base/rendering/renderabletrail.h>
+#include <modules/space/kepler.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
@@ -47,65 +48,21 @@ public:
     void deinitializeGL() override;
 
     bool isReady() const override;
+    void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    /**
-        * Reads the provided data file and calls the KeplerTranslation::setKeplerElments
-        * method with the correct values. If \p filename is a valid data file but contains
-        * disallowed values (see KeplerTranslation::setKeplerElements), a
-        * KeplerTranslation::RangeError is thrown.
-        *
-        * \param filename The path to the file that contains the data file.
-        *
-        * \throw ghoul::RuntimeError if the data file does not exist or there is a
-        *        problem with its format.
-        * \pre The \p filename must exist
-        */
-    virtual void readDataFile(const std::string& filename) = 0;
-
-protected:
     static documentation::Documentation Documentation();
 
-    double calculateSemiMajorAxis(double meanMotion) const;
-    double epochFromSubstring(const std::string& epochString) const;
-    double epochFromYMDdSubstring(const std::string& epochString);
+private:
     void updateBuffers();
 
-    std::function<void()> _reinitializeTrailBuffers;
-    std::function<void()> _updateStartRenderIdxSelect;
-    std::function<void()> _updateRenderSizeSelect;
-
-    struct KeplerParameters {
-        double inclination = 0.0;
-        double semiMajorAxis = 0.0;
-        double ascendingNode = 0.0;
-        double eccentricity = 0.0;
-        double argumentOfPeriapsis = 0.0;
-        double meanAnomaly = 0.0;
-        double meanMotion = 0.0;
-        double epoch = 0.0;
-        double period = 0.0;
-    };
-
     bool _updateDataBuffersAtNextRender = false;
-    std::streamoff _numObjects;
     bool _isFileReadinitialized = false;
-    inline static constexpr double convertAuToKm = 1.496e8;
-    inline static constexpr double convertDaysToSecs = 86400.0;
-    std::vector<KeplerParameters> _data;
+    std::streamoff _numObjects;
     std::vector<size_t> _segmentSize;
     properties::UIntProperty _segmentQuality;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;
-    properties::Property::OnChangeHandle _startRenderIdxCallbackHandle;
-    properties::Property::OnChangeHandle _sizeRenderCallbackHandle;
-
-private:
-    struct Vertex {
-        glm::vec3 position = glm::vec3(0.f);
-        glm::vec3 color = glm::vec3(0.f);
-        glm::vec2 texcoord = glm::vec2(0.f);
-    };
 
     /// The layout of the VBOs
     struct TrailVBOLayout {
@@ -117,20 +74,17 @@ private:
         double period = 0.0;
     };
 
-    KeplerTranslation _keplerTranslator;
-
-    /// The backend storage for the vertex buffer object containing all points for this
-    /// trail.
+    /// The backend storage for the vertex buffer object containing all points
     std::vector<TrailVBOLayout> _vertexBufferData;
 
     GLuint _vertexArray;
     GLuint _vertexBuffer;
 
-
     ghoul::opengl::ProgramObject* _programObject;
     properties::StringProperty _path;
+    properties::BoolProperty _contiguousMode;
+    kepler::Format _format;
     RenderableTrail::Appearance _appearance;
-    glm::vec3 _position = glm::vec3(0.f);
 
     UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
         numberOfSegments) _uniformCache;

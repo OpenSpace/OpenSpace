@@ -22,62 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _ABUFFERRESOURCES_GLSL_
-#define _ABUFFERRESOURCES_GLSL_
+#version __CONTEXT__
 
-#include "abufferfragment.glsl"
-#define MAX_LAYERS #{rendererData.maxLayers}
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-ABufferFragment fragments[MAX_LAYERS];
-uint fragmentIndices[MAX_LAYERS];
+in vec3 in_position;
 
-layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
-layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
-layout (binding = 0, offset = 0) uniform atomic_uint atomicCounterBuffer;
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
 
-const uint NULL_POINTER = 0;
+uniform dmat4 modelViewTransform;
+uniform dmat4 projectionTransform;
 
-void storeFragment(uint index, ABufferFragment aBufferFrag) {
-    imageStore(fragmentTexture, int(index), _raw_(aBufferFrag));                
+
+void main() {
+  dvec4 positionViewSpace = modelViewTransform * dvec4(in_position, 1.0);
+  vec4 positionClipSpace = vec4(projectionTransform * positionViewSpace);
+  vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
+
+  vs_screenSpaceDepth = positionScreenSpace.w;
+  vs_positionViewSpace = vec4(positionViewSpace);
+
+  gl_Position = positionScreenSpace;
 }
-
-ABufferFragment loadFragment(uint index) {
-    uvec4 raw = imageLoad(fragmentTexture, int(index));
-    ABufferFragment aBufferFragment;
-    _raw_(aBufferFragment, raw);
-    return aBufferFragment;
-}
-
-/**
- * Load fragments into the #fragments array.
- */ 
-uint loadFragments() {
-    uint currentIndex = imageLoad(anchorPointerTexture, ivec2(gl_FragCoord.xy)).x;
-    int nFrags = 0;
-    while (currentIndex != NULL_POINTER && nFrags < MAX_LAYERS) { 
-        ABufferFragment frag = loadFragment(currentIndex);
-        fragments[nFrags] = frag;
-        fragmentIndices[nFrags] = currentIndex;
-        currentIndex = _next_(frag);
-        nFrags++;
-    }
-    return nFrags;
-}
-
-/**
- * Store the current contents of the fragments array back into the abuffer.
- */
-void storeFragments(uint nFrags) {
-    if (nFrags == 0)
-        return;
-    uint maxFragIndex = nFrags - 1;
-    for (int i = 0; i < maxFragIndex; i++) {
-        _next_(fragments[i], fragmentIndices[i+1]);
-        storeFragment(fragmentIndices[i], fragments[i]);
-    }
-    _next_(fragments[maxFragIndex], NULL_POINTER);
-    storeFragment(fragmentIndices[maxFragIndex], fragments[maxFragIndex]);
-            
-}
-
-#endif

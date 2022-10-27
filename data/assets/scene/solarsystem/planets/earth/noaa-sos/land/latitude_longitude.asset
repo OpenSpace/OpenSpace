@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Latitude Longitude Layers"
 local Identifier = "noaa-sos-land-latitude_longitude"
-local Description = [[ Showing the relationship of latitude and longitude lines on Earth, 
+local Description = [[Showing the relationship of latitude and longitude lines on Earth, 
 this dataset is useful when talking about geographical features or areas, GPS and the 
-introduction of map reading and exploration.   ]]
+introduction of map reading and exploration]]
 local URL = "https://sos.noaa.gov/catalog/datasets/latitude-longitude-layers/"
 
 
@@ -67,7 +67,7 @@ asset.export(layer_longitude)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

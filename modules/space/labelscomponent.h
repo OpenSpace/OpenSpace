@@ -22,12 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
+#define __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__
 
-in vec4 position;
-out vec2 texCoord;
+#include <openspace/properties/propertyowner.h>
 
-void main() {
-    gl_Position = position;
-    texCoord = 0.5 + position.xy / 2.0;
-}
+#include <modules/space/speckloader.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
+#include <ghoul/glm.h>
+#include <filesystem>
+
+namespace ghoul::fontrendering { class Font; }
+
+namespace openspace {
+struct RenderData;
+
+namespace documentation { struct Documentation; }
+
+class LabelsComponent : public properties::PropertyOwner {
+public:
+    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+    ~LabelsComponent() override = default;
+
+    speck::Labelset& labelSet();
+    const speck::Labelset& labelSet() const;
+
+    void initialize();
+
+    void loadLabels();
+
+    bool isReady() const;
+
+    void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+        float fadeInVariable = 1.f);
+
+    static documentation::Documentation Documentation();
+
+private:
+    std::filesystem::path _labelFile;
+    DistanceUnit _unit = DistanceUnit::Parsec;
+    speck::Labelset _labelset;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
+
+    // Properties
+    properties::FloatProperty _opacity;
+    properties::Vec3Property _color;
+    properties::FloatProperty _size;
+    properties::FloatProperty _fontSize;
+    properties::IVec2Property _minMaxSize;
+    properties::BoolProperty _faceCamera;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___LABELSCOMPONENT___H__

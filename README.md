@@ -14,7 +14,7 @@
 ![Image](https://github.com/OpenSpace/openspace.github.io/raw/master/assets/images/collection.jpg)
 
 # Background
-OpenSpace started as a collaboration between Sweden's [Linköping University](https://scivis.github.io) (LiU) and the [American Museum of Natural History](https://www.amnh.org) (AMNH).  Development of the software began several years ago through a close collaboration with NASA Goddard's [Community Coordinated Modeling Center](https://ccmc.gsfc.nasa.gov) (CCMC) to model space weather forecasting and continued with visualizations of NASA's New Horizons mission to Pluto and ESA's Rosetta mission to 67P/Churyumov–Gerasimenko.  This promising set of preliminary work provided a foundation for continued funding from NASA, the Swedish eScience Research Centre, and the Knut and Alice Wallenberg foundation, which has extended the collaboration to include the University of Utah's [Scientific Computing and Imaging](https://www.sci.utah.edu) (SCI) Institute, [New York University](https://www.nyu.edu)'s Tandon School of Engineering, multiple informal science institutions across the world, and multiple, international vendors.
+OpenSpace started as a collaboration between Sweden's [Linköping University](https://scivis.github.io) (LiU) and the [American Museum of Natural History](https://www.amnh.org) (AMNH).  Development of the software began several years ago through a close collaboration with NASA Goddard's [Community Coordinated Modeling Center](https://ccmc.gsfc.nasa.gov) (CCMC) to model space weather forecasting and continued with visualizations of NASA's New Horizons mission to Pluto and ESA's Rosetta mission to 67P/Churyumov-Gerasimenko.  This promising set of preliminary work provided a foundation for continued funding from NASA, the Swedish eScience Research Centre, and the Knut and Alice Wallenberg foundation, which has extended the collaboration to include the University of Utah's [Scientific Computing and Imaging](https://www.sci.utah.edu) (SCI) Institute, [New York University](https://www.nyu.edu)'s Tandon School of Engineering, multiple informal science institutions across the world, and multiple, international vendors.
 
 ![Image](https://github.com/OpenSpace/openspace.github.io/raw/master/assets/images/presentation.jpg)
 
@@ -38,7 +38,7 @@ This repository contains the source code and example profiles for OpenSpace, but
 
 Requirements for compiling are:
  - CMake version 3.10 or above
- - C++ compiler supporting C++17 (MSVC 16.10, GCC9, Clang10)
+ - C++ compiler supporting C++20 (MSVC 19.31, GCC11, Clang14, AppleClang 13.1.6)
  - [Boost](http://www.boost.org/)
  - [Qt](http://www.qt.io/download)
 

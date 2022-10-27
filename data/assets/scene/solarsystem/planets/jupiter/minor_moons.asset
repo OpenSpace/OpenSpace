@@ -11,8 +11,8 @@ asset.require("./minor/themisto_group")
 asset.meta = {
   Name = "Jupiter Minor Moons",
   Version = "1.0",
-  Description = [[ Meta asset containing eight moon groups: Ananke, Carme, Carpo,
-     Himalia, Pasiphae, Themisto, Inner, and Other]],
+  Description = [[Meta asset containing eight moon groups: Ananke, Carme, Carpo, Himalia,
+    Pasiphae, Themisto, Inner, and Other]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

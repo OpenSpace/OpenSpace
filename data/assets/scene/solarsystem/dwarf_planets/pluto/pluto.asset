@@ -54,7 +54,7 @@ local PlutoLabel = {
   Parent = Pluto.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Pluto",
     FontSize = 70.0,
     Size = 9.05,
@@ -88,7 +88,7 @@ asset.export(PlutoLabel)
 asset.meta = {
   Name = "Pluto",
   Version = "1.0",
-  Description = [[ Pluto globe, and main planet label.]],
+  Description = "Pluto globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

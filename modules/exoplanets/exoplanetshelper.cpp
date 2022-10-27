@@ -38,8 +38,8 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetsModule";
-}
+    constexpr std::string_view _loggerCat = "ExoplanetsModule";
+} // namespace
 
 namespace openspace::exoplanets {
 

@@ -27,6 +27,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace ghoul { class Dictionary; }
@@ -36,7 +37,7 @@ namespace openspace {
 class Decoder {
 public:
     static std::unique_ptr<Decoder> createFromDictionary(
-        const ghoul::Dictionary& dictionary, const std::string& type);
+        const ghoul::Dictionary& dictionary, std::string_view type);
 
     virtual ~Decoder() = default;
 

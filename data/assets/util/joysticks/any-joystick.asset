@@ -15,7 +15,7 @@ local function addJoystickAsset(joystick)
   elseif joystick == "SpaceMouse Enterprise" then
     openspace.asset.add("./util/joysticks/space-mouse-enterprise")
   elseif joystick == "3Dconnexion Universal Receiver" then
-    openspace.printWarning("SpaceMouse in wireless mode cannot be automatically detected and added. Please add the matching asset file manually.")
+    openspace.printWarning("SpaceMouse in wireless mode cannot be automatically detected and added. Please add the matching asset file manually")
   else
     openspace.printWarning("Could not find a matching asset for joystick: " .. joystick)
   end

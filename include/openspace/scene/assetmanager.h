@@ -27,6 +27,7 @@
 
 #include <ghoul/lua/luastate.h>
 #include <filesystem>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -139,7 +140,9 @@ private:
 
     /// Returns the loaded Asset by either trying to load the asset at the provided path
     /// or returning a previously loaded copy
-    Asset* retrieveAsset(const std::filesystem::path& path);
+    Asset* retrieveAsset(const std::filesystem::path& path,
+        const std::filesystem::path& retriever,
+        std::optional<bool> explicitEnable = std::nullopt);
 
     /// Setup the asset table of the provided asset in the shared Lua state
     void setCurrentAsset(Asset* asset);

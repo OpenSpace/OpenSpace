@@ -42,7 +42,7 @@ namespace {
         "Use Tree Layout",
         "If this value is checked, this component will display the properties using a "
         "tree layout, rather than using a flat map. This value should only be set on "
-        "property windows that display SceneGraphNodes, or the application might crash."
+        "property windows that display SceneGraphNodes, or the application might crash"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrderingInfo = {
@@ -50,7 +50,7 @@ namespace {
         "Tree Ordering",
         "This list determines the order of the first tree layer if it is used. Elements "
         "present in this list will be shown first, with an alphabetical ordering for "
-        "elements not listed."
+        "elements not listed"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IgnoreHiddenInfo = {
@@ -58,7 +58,7 @@ namespace {
         "Ignore Hidden Hint",
         "If this value is 'true', all 'Hidden' hints passed into the SceneGraphNodes are "
         "ignored and thus all SceneGraphNodes are displayed. If this value is 'false', "
-        "the hidden hints are followed."
+        "the hidden hints are followed"
     };
 
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props)

@@ -22,57 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
-#include "floatoperations.glsl"
+#include <modules/space/translation/gptranslation.h>
 
-out vec4 _out_color_;
+#include <modules/space/kepler.h>
+#include <openspace/documentation/verifier.h>
+#include <filesystem>
+#include <optional>
 
-void main() {
-    Fragment frag = getFragment();
-    int sampleMask = gl_SampleMaskIn[0];
+namespace {
+    struct [[codegen::Dictionary(GPTranslation)]] Parameters {
+        // Specifies the filename of the general pertubation file
+        std::filesystem::path file;
 
-    if (frag.depth < 0) {
-//         discard;
-    }
+        enum class [[codegen::map(openspace::kepler::Format)]] Format {
+            // A NORAD-style Two-Line element
+            TLE,
+            // Orbit Mean-Elements Message in the KVN notation
+            OMM,
+            // JPL's Small Bodies Database
+            SBDB
+        };
+        // The file format that is contained in the file
+        Format format;
 
-    bool storeInAbuffer = false;
+        // Specifies the element within the file that should be used in case the file
+        // provides multiple general pertubation elements. Defaults to 1.
+        std::optional<int> element [[codegen::greater(0)]];
+    };
+#include "gptranslation_codegen.cpp"
+} // namespace
 
-    if (frag.forceFboRendering) {
-        storeInAbuffer = false;
-    } else {
-        storeInAbuffer = frag.color.a < 1.0 ||
-                          sampleMask != 255 ||
-                          frag.blend != BLEND_MODE_NORMAL;
-        // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
-    }
+namespace openspace {
 
-    if (storeInAbuffer) {
-        uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-        if (newHead >= #{rendererData.maxTotalFragments}) {
-            discard; // ABuffer is full!
-        }
-        uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
-
-        ABufferFragment aBufferFrag;
-        _color_(aBufferFrag, frag.color);
-        _depth_(aBufferFrag, frag.depth);
-        _blend_(aBufferFrag, frag.blend);
-
-        _type_(aBufferFrag, 0); // 0 = geometry type
-        _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-        _next_(aBufferFrag, prevHead);
-
-        storeFragment(newHead, aBufferFrag);
-        discard;
-    } else {
-        _out_color_ = frag.color;
-        gl_FragDepth = normalizeFloat(frag.depth);
-    }
-
-    //gl_FragDepth = 1;
-
+documentation::Documentation GPTranslation::Documentation() {
+    return codegen::doc<Parameters>("space_transform_gp");
 }
 
+GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    if (!std::filesystem::is_regular_file(p.file)) {
+        throw ghoul::RuntimeError("The provided TLE file must exist");
+    }
+
+    int element = p.element.value_or(1);
+
+    std::vector<kepler::Parameters> parameters = kepler::readFile(
+        p.file,
+        codegen::map<kepler::Format>(p.format)
+    );
+    if (parameters.size() < element) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Requested element {} but only {} are available", element, parameters.size()
+        ));
+    }
+
+    kepler::Parameters param = parameters[element - 1];
+    setKeplerElements(
+        param.eccentricity,
+        param.semiMajorAxis,
+        param.inclination,
+        param.ascendingNode,
+        param.argumentOfPeriapsis,
+        param.meanAnomaly,
+        param.period,
+        param.epoch
+    );
+}
+
+} // namespace openspace

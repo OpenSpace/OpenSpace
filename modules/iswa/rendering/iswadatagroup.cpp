@@ -35,7 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "IswaDataGroup";
+    constexpr std::string_view _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {

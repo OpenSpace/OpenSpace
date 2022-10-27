@@ -22,7 +22,7 @@ local VenusTrailEarth = {
   GUI = {
     Name = "Venus trail from Earth",
     Path = "/Solar System/Planets/Venus",
-    Description = "Alternate trail for Venus, showing Venus as observed from Earth.",
+    Description = "Alternate trail for Venus, showing Venus as observed from Earth",
     Hidden = false
   }
 }
@@ -42,8 +42,8 @@ asset.export(VenusTrailEarth)
 asset.meta = {
   Name = "Venus Trail from Earth",
   Version = "1.1",
-  Description = [[ Trail of Venus as observed by the Earth. Data from NASA
-    SPICE (see base spice asset)]],
+  Description = [[Trail of Venus as observed by the Earth. Data from NASA SPICE (see base
+    spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
