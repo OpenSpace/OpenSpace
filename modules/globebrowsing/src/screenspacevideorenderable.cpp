@@ -330,9 +330,6 @@ void ScreenSpaceVideoRenderable::readFrame() {
             return;
         }
         // Successfully collected a frame
-        LINFO(fmt::format(
-            "Successfully decoded frame {}", _codecContext->frame_number
-        ));
         break;
     }
     // Convert the color format to AV_PIX_FMT_RGB24
