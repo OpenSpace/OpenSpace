@@ -66,7 +66,9 @@ public:
 private:
     std::filesystem::path _videoFile;
     std::string _startTime;
+    std::string _endTime;
     double _startJ200Time = std::numeric_limits<double>::min();
+    double _endJ200Time = std::numeric_limits<double>::min();
     const AVRational _avTimeBaseQ{ 1, AV_TIME_BASE };
     double _videoDuration = -1.0;
     int64_t _prevFrameIndex = -1;

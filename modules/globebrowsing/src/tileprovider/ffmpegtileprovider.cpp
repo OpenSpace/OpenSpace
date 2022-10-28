@@ -50,12 +50,22 @@ namespace {
         "'YYYY MM DD hh:mm:ss'."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
+        "EndTime",
+        "End Time",
+        "The date and time that the video should end in the format "
+        "'YYYY MM DD hh:mm:ss'."
+    };
+
     struct [[codegen::Dictionary(FfmpegTileProvider)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
 
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::string startTime [[codegen::datetime()]];
+
+        // [[codegen::verbatim(EndTimeInfo.description)]]
+        std::string endTime [[codegen::datetime()]];
     };
 #include "ffmpegtileprovider_codegen.cpp"
 } // namespace
@@ -110,6 +120,7 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
 
     _videoFile = p.file;
     _startTime = p.startTime;
+    _endTime = p.endTime;
 }
 
 Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
@@ -216,18 +227,16 @@ void FfmpegTileProvider::update() {
     }
     // Check if it is time for a new frame
     const double now = global::timeManager->time().j2000Seconds();
-    double videoTime = now - _startJ200Time;
-    if (now < Time::convertTime(_startTime)) {
-        return;
-    }
 
-    // Check if video is over
-    if (videoTime > _videoDuration) {
+    // Check so we are currently in interval where video is playing
+    if (now > _endJ200Time || now < _startJ200Time) {
         LINFO(fmt::format(
-            "Time '{}' is outsice, duration '{}' of video", videoTime, _videoDuration
+            "Time '{}' is not during video", now
         ));
         return;
     }
+    double percentageOfMovie = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
+    double videoTime = percentageOfMovie * _videoDuration;
 
     // Find the frame number that corresponds to the current in game time
     int64_t currentFrameIndex = av_rescale_q(
@@ -372,6 +381,7 @@ float FfmpegTileProvider::noDataValueAsFloat() {
 
 void FfmpegTileProvider::internalInitialize() {
     _startJ200Time = Time::convertTime(_startTime);
+    _endJ200Time = Time::convertTime(_endTime);
     std::string path = absPath(_videoFile).string();
 
     // Open video
