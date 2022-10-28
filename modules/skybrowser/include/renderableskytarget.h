@@ -57,6 +57,8 @@ public:
 
     static documentation::Documentation Documentation();
 
+    glm::dvec3 rightVector();
+    glm::dvec3 upVector();
 private:
     // Properties
     properties::FloatProperty _crossHairSize;
@@ -67,6 +69,8 @@ private:
     double _borderRadius = 0.0;
     glm::ivec3 _borderColor = glm::ivec3(230);
     float _ratio = 1.f;
+    glm::dvec3 _rightVector;
+    glm::dvec3 _upVector;
 };
 } // namespace openspace
 

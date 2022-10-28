@@ -151,6 +151,16 @@ glm::ivec3 RenderableSkyTarget::borderColor() const {
     return _borderColor;
 }
 
+glm::dvec3 RenderableSkyTarget::rightVector() {
+    double scaling = (_verticalFov / 70)* static_cast<double>(_size.value());
+    return scaling * _rightVector;
+}
+
+glm::dvec3 RenderableSkyTarget::upVector() {
+    double scaling = (_verticalFov / 70) * static_cast<double>(_size.value());
+    return scaling * _upVector;
+}
+
 void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
     const bool showRectangle = _verticalFov > _showRectangleThreshold;
@@ -175,14 +185,14 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     );
 
     glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
-    glm::dvec3 newRight = glm::normalize(
+    _rightVector = glm::normalize(
         glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
     );
-    glm::dvec3 newUp = glm::cross(normal, newRight);
+    _upVector = glm::cross(normal, _rightVector);
 
     glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
-    cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
-    cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
+    cameraOrientedRotation[0] = glm::dvec4(_rightVector, 0.0);
+    cameraOrientedRotation[1] = glm::dvec4(_upVector, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
 
     const glm::dmat4 rotationTransform = _billboard ?

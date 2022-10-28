@@ -81,30 +81,15 @@ void TargetBrowserPair::startFinetuningTarget() {
 // The fine tune of the target is a way to "drag and drop" the target with click
 // drag on the sky browser window. This is to be able to drag the target around when it
 // has a very small field of view
-void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation)
-{
-    glm::dvec3 startTarget = skybrowser::galacticToEquatorial(
-        glm::normalize(_startTargetPosition)
-    );
-    glm::dvec2 multiplierRight = { -1.0, 1.0 };
-    glm::dvec2 multiplierLeft = { 1.0, -1.0 };
-    glm::dvec2 drag = glm::dvec2(translation);
-    glm::dvec2 fovs = _browser->fieldsOfView();
-    glm::dvec3 cartUpperRight = skybrowser::sphericalToCartesian(fovs * multiplierRight);
-    glm::dvec3 cartLowerLeft = skybrowser::sphericalToCartesian(fovs * multiplierLeft);
-    glm::dvec3 cartUpperLeft = skybrowser::sphericalToCartesian(fovs);
-    glm::dvec3 upperRightCorner = startTarget - 0.5 * cartUpperRight;
-    glm::dvec3 lowerLeftCorner = startTarget - 0.5 * cartLowerLeft;
-    glm::dvec3 upperLeftCorner = startTarget - 0.5 * cartUpperLeft;
+void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
+    glm::dvec2 percentage = glm::dvec2(translation);
+    glm::dvec3 right = _targetRenderable->rightVector() * percentage.x;
+    glm::dvec3 up = _targetRenderable->upVector() * percentage.y;
 
-    glm::dvec3 vecToRight = (upperRightCorner - upperLeftCorner) * drag.x;
-    glm::dvec3 vecToDown = (lowerLeftCorner - upperLeftCorner) * drag.y;
-
-
-    glm::dvec3 newCartesian = startTarget - (vecToRight + vecToDown);
+    glm::dvec3 newCartesian = _startTargetPosition - (right - up);
     aimTargetGalactic(
         _targetNode->identifier(), 
-        skybrowser::equatorialToGalactic(newCartesian)
+        newCartesian
     );
 }
 
