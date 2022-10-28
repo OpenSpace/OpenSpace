@@ -29,6 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
@@ -601,40 +602,32 @@ void RenderableModel::initializeGL() {
     );
 
     // Generate textures and the frame buffer
-    glGenTextures(1, &_colorTexture);
-    glGenTextures(1, &_positionTexture);
-    glGenTextures(1, &_normalTexture);
-    glGenTextures(1, &_depthTexture);
     glGenFramebuffers(1, &_framebuffer);
-
-    // Create Textures
-    _resolution = global::windowDelegate->currentDrawBufferResolution();
-    updateResolution();
 
     // Bind textures to the framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
-        _colorTexture,
+        *(global::renderEngine->renderer()->additionalColorTexture()),
         0
     );
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
-        _positionTexture,
+        *(global::renderEngine->renderer()->additionalPositionTexture()),
         0
     );
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT2,
-        _normalTexture,
+        *(global::renderEngine->renderer()->additionalNormalTexture()),
         0
     );
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
-        _depthTexture,
+        *(global::renderEngine->renderer()->additionalDepthTexture()),
         0
     );
 
@@ -654,104 +647,11 @@ void RenderableModel::initializeGL() {
     _geometry->calculateBoundingRadius();
 }
 
-void RenderableModel::updateResolution() {
-    ZoneScoped
-
-    // Create the textures
-    // Color
-    glBindTexture(GL_TEXTURE_2D, _colorTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        static_cast<GLsizei>(_resolution.x),
-        static_cast<GLsizei>(_resolution.y),
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _colorTexture, -1, "RenderableModel Color");
-    }
-
-    // Position
-    glBindTexture(GL_TEXTURE_2D, _positionTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        static_cast<GLsizei>(_resolution.x),
-        static_cast<GLsizei>(_resolution.y),
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _positionTexture, -1, "RenderableModel Position");
-    }
-
-    // Normal
-    glBindTexture(GL_TEXTURE_2D, _normalTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        static_cast<GLsizei>(_resolution.x),
-        static_cast<GLsizei>(_resolution.y),
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _normalTexture, -1, "RenderableModel Normal");
-    }
-
-    // Depth
-    glBindTexture(GL_TEXTURE_2D, _depthTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_DEPTH_COMPONENT32F,
-        static_cast<GLsizei>(_resolution.x),
-        static_cast<GLsizei>(_resolution.y),
-        0,
-        GL_DEPTH_COMPONENT,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _depthTexture, -1, "RenderableModel Depth");
-    }
-}
-
 void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
 
     glDeleteFramebuffers(1, &_framebuffer);
-    glDeleteTextures(1, &_colorTexture);
-    glDeleteTextures(1, &_depthTexture);
-    glDeleteTextures(1, &_positionTexture);
-    glDeleteTextures(1, &_normalTexture);
 
     glDeleteBuffers(1, &_quadVbo);
     glDeleteVertexArrays(1, &_quadVao);
@@ -928,12 +828,18 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Bind textures
         ghoul::opengl::TextureUnit colorTextureUnit;
         colorTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _colorTexture);
+        glBindTexture(
+            GL_TEXTURE_2D,
+            *(global::renderEngine->renderer()->additionalColorTexture())
+        );
         _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
 
         ghoul::opengl::TextureUnit positionTextureUnit;
         positionTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _positionTexture);
+        glBindTexture(
+            GL_TEXTURE_2D,
+            *(global::renderEngine->renderer()->additionalPositionTexture())
+        );
         _quadProgram->setUniform(
            _uniformOpacityCache.positionTexture,
             positionTextureUnit
@@ -941,12 +847,18 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         ghoul::opengl::TextureUnit normalTextureUnit;
         normalTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _normalTexture);
+        glBindTexture(
+            GL_TEXTURE_2D,
+            *(global::renderEngine->renderer()->additionalNormalTexture())
+        );
         _quadProgram->setUniform(_uniformOpacityCache.normalTexture, normalTextureUnit);
 
         ghoul::opengl::TextureUnit depthTextureUnit;
         depthTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _depthTexture);
+        glBindTexture(
+            GL_TEXTURE_2D,
+            *(global::renderEngine->renderer()->additionalDepthTexture())
+        );
         _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 
         // Draw
@@ -965,12 +877,6 @@ void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-    }
-
-    glm::ivec2 resolution = global::windowDelegate->currentDrawBufferResolution();
-    if (resolution != _resolution) {
-        _resolution = resolution;
-        updateResolution();
     }
 
     setBoundingSphere(_geometry->boundingRadius() * _modelScale *

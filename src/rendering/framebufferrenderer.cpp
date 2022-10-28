@@ -87,6 +87,22 @@ namespace {
 
 namespace openspace {
 
+GLuint* FramebufferRenderer::additionalColorTexture() {
+    return &_hdrBuffers.hdrFilteringTexture;
+}
+
+GLuint* FramebufferRenderer::additionalPositionTexture() {
+    return &_exitColorTexture;
+}
+
+GLuint* FramebufferRenderer::additionalNormalTexture() {
+    return &_fxaaBuffers.fxaaTexture;
+}
+
+GLuint* FramebufferRenderer::additionalDepthTexture() {
+    return &_exitDepthTexture;
+}
+
 void FramebufferRenderer::initialize() {
     ZoneScoped
     TracyGpuZone("Rendering initialize");

@@ -119,14 +119,8 @@ private:
 
     // Framebuffer and its textures
     GLuint _framebuffer;
-    GLuint _colorTexture;
-    GLuint _depthTexture;
-    GLuint _positionTexture;
-    GLuint _normalTexture;
     GLuint _quadVao;
     GLuint _quadVbo;
-    glm::ivec2 _resolution = glm::ivec2(0);
-    void updateResolution();
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;
 
     UniformCache(opacity, opacityBlending, colorTexture, depthTexture, positionTexture,

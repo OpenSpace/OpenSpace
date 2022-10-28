@@ -59,6 +59,13 @@ class FramebufferRenderer final : public RaycasterListener, public Deferredcaste
 public:
     virtual ~FramebufferRenderer() override = default;
 
+    // Get functions for Model Opacity rendering
+    // TODO: Add a REALLY good documentation here
+    GLuint* additionalColorTexture();
+    GLuint* additionalPositionTexture();
+    GLuint* additionalNormalTexture();
+    GLuint* additionalDepthTexture();
+
     void initialize();
     void deinitialize();
 
