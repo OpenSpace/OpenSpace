@@ -111,6 +111,9 @@ private:
     //  DynamicDownloaderManager downloads and updates renderable field lines with
     //  field lines downloaded from the web.
     std::unique_ptr<DynamicDownloaderManager> _dynamicdownloaderManager;
+    // number of files to queue up at a time
+    int _nOfFilesToQueue = 10;
+
     // Used for 'runtime-states'. True when finished loading a new state from disk on
     // another thread.
     std::atomic_bool _newStateIsReady = false;
@@ -120,7 +123,7 @@ private:
     // line segments
     bool _shouldUpdateMaskingBuffer = false;
     // note Elon: rework the case of only one state
-    // hasBeenUpdated only gets sets once, first iteration of update function, to 
+    // hasBeenUpdated only gets sets once, first iteration of update function, to
     // guarantee the vertext position buffer to be initialized.
     bool _hasBeenUpdated = false;
 

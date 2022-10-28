@@ -139,7 +139,9 @@ struct File {
 class DynamicDownloaderManager {
 public:
     //DynamicDownloaderManager() = default;
-    DynamicDownloaderManager(int dataID, const std::string infoURL, const std::string dataURL);
+    DynamicDownloaderManager(
+        int dataID, const std::string infoURL, const std::string dataURL, int nOfFilesToQ
+    );
     void requestDataInfo(std::string httpInfoRequest);
     void requestAvailableFiles(std::string httpDataRequest);
     //std::pair<std::string, std::string> findMostRelevantFileToDownload(const double time);
@@ -174,6 +176,7 @@ private:
     std::string _dataIdDescription;
     //temporary having a global cadence. To be replaced with a cadence for each file.
     double _tempCadence = 0;
+    const int _nOfFilesToQueue = 0;
 
     std::vector<File> _availableData;
 

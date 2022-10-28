@@ -203,6 +203,10 @@ namespace {
         // dataID that corresponds to what dataset to use if using dynamicWebContent
         std::optional<int> dataID;
 
+        // number Of Files To Queue is a max value of the amount of files to queue up
+        // so that not to big of a data set is downloaded nessesarily.
+        std::optional<int> numberOfFilesToQueue;
+
         // [[codegen::verbatim(ColorUniformInfo.description)]]
         std::optional<glm::vec4> color [[codegen::color()]];
 
@@ -383,16 +387,19 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // dynamic is specified, disregards what source folder is.
     else if (_dynamicWebContent == true) {
         LINFO("Initializing dynamicDownloaderManager and sync-directory ");
-
         _loadingStatesDynamically = true;
+
+        _nOfFilesToQueue = p.numberOfFilesToQueue.value_or(10);
+
         // right now, dynamic downloading only supported from iswa
         // should be either a property from asset
         const std::string baseURL =
             "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=";
         const std::string dataURL =
             "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=";
-        _dynamicdownloaderManager =
-            std::make_unique<DynamicDownloaderManager>(_dataID, baseURL, dataURL);
+        _dynamicdownloaderManager = std::make_unique<DynamicDownloaderManager>(
+            _dataID, baseURL, dataURL, _nOfFilesToQueue
+            );
     }
     // source folder, but not dynamic
     else if (p.sourceFolder.has_value()) {
@@ -550,7 +557,9 @@ void RenderableFieldlinesSequence::initializeGL() {
             }
             break;
             // else: would be if dynamic downloading, and therefor also dynamic loading,
-            // where true. Don't need to do anything here.
+            // where true.
+            // else if(_loadingStatesDynamically && _dynamicWebContent){}
+            // Don't need to do anything here.
         }
         // TODO: A default case would mean a faulty sourefiletyp is specified. Terminate
         // and throw with message.
@@ -803,6 +812,26 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
     _domainY = glm::vec2(-limit, limit);
     _domainZ = glm::vec2(-limit, limit);
     _domainR = glm::vec2(0.f, limit * 1.5f);
+}
+
+const double extractTriggerTimeFromFileName(std::string filePath) {
+    // number of  characters in filename (excluding '.osfls')
+    constexpr int FilenameSize = 23;
+    // size(".osfls")
+    constexpr int ExtSize = 6;
+    const size_t strLength = filePath.size();
+    // Extract the filename from the path (without extension)
+    std::string timeString = filePath.substr(
+        strLength - FilenameSize - ExtSize,
+        FilenameSize - 1
+    );
+    // Ensure the separators are correct
+    timeString.replace(4, 1, "-");
+    timeString.replace(7, 1, "-");
+    timeString.replace(13, 1, ":");
+    timeString.replace(16, 1, ":");
+    timeString.replace(19, 1, ".");
+    return Time::convertTime(timeString);
 }
 
 // Extract J2000 time from file names
@@ -1109,6 +1138,13 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         bool needsSorting = false;
         for (auto file : filesToRead) {
             _sourceFiles.push_back(file.string());
+            double filesTriggerTime = extractTriggerTimeFromFileName(
+                file.filename().string()
+            );
+            _startTimes.push_back(filesTriggerTime);
+
+
+
             needsSorting = true;
         }
         // if all files are moved into _sourceFiles then we can
@@ -1118,11 +1154,16 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         if (needsSorting) {
             // if this is to slow, some sort of insert instead of push_back above, is needed
             std::sort(_sourceFiles.begin(), _sourceFiles.end());
+            std::sort(_startTimes.begin(), _startTimes.end());
         }
     }
     //if using static loading at startup:
     else {
 
+    }
+
+    if (_states.empty() && !_sourceFiles.empty()) {
+        loadStateFromOsfls(filePath)
     }
 
     //TODO: if dynamic downloading -> guarantee a startTime at [0]?
@@ -1172,7 +1213,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         needUpdate = false;
     }
 
-    if (mustLoadNewStateFromDisk) {
+    if (mustLoadNewStateFromDisk || (_states.empty() && !_sourceFiles.empty())) {
         if (!_isLoadingStateFromDisk && !_newStateIsReady) {
             _isLoadingStateFromDisk = true;
             mustLoadNewStateFromDisk  = false;
@@ -1216,6 +1257,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
 // Assumes we already know that currentTime is within the sequence interval
 int RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTime) {
+    if (_states.empty()) return -1;
     int index = 0;
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
@@ -1231,9 +1273,7 @@ int RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTim
     else {
         index = static_cast<int>(_nStates) - 1;
     }
-    if (_nStates == 1) {
-        index = 0;
-    }
+
     return index;
 }
 

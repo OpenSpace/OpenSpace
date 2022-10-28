@@ -70,15 +70,18 @@ std::string formulateDataHttpRequest(double minTime, double maxTime,
 //    return a windows .back().first;
 //}
 
-DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string infoURL, const std::string dataURL)
+DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string infoURL,
+                                                                const std::string dataURL,
+                                                                          int nOfFilesToQ)
     : _infoURL(infoURL)
     , _dataURL(dataURL)
+    , _nOfFilesToQueue(nOfFilesToQ)
 {
     FieldlineOption fieldlineOption;
 
     std::string name = fieldlineOption.optionName(dataID);
     _syncDir = absPath(
-        "${CACHE}/dynamic_downloaded_fieldlines/" + name + "/" + std::to_string(dataID)
+        "${CACHE}/dynamic_downloaded_fieldlines/" + std::to_string(dataID)
     );
     _dataID = { dataID, name };
     std::string httpInfoRequest = _infoURL + std::to_string(_dataID.first);
@@ -90,8 +93,8 @@ DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string
 
 }
 
-void DynamicDownloaderManager::requestDataInfo(std::string httpInforRequest) {
-    HttpMemoryDownload respons(httpInforRequest);
+void DynamicDownloaderManager::requestDataInfo(std::string httpInfoRequest) {
+    HttpMemoryDownload respons(httpInfoRequest);
     respons.start();
     respons.wait();
 
@@ -105,7 +108,8 @@ void DynamicDownloaderManager::requestDataInfo(std::string httpInforRequest) {
     *        "startDate": "2017-07-01T00:42:02.0Z",
     *        "stopDate" : "2017-09-30T22:43:18.0Z"
     *    },
-    *        "description" : "WSA 4.4 field line trace from the SCS outer boundary to the source surface",
+    *        "description" : "WSA 4.4 field line trace from the SCS outer boundary to the
+    *                         source surface",
     *        "id" : 1177
     *}
     ********************/
@@ -159,13 +163,14 @@ void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest
         std::pair<std::string, std::string> data(element["timestamp"], element["url"]);
         listOfFiles.push_back(data);
 
-        std::string fileName = "/" + data.second.substr(data.second.find_last_of("//") + 1);
+        std::string fileName = "/" +
+                                   data.second.substr(data.second.find_last_of("//") + 1);
         std::filesystem::path destination = _syncDir;
         destination += fileName;
         std::unique_ptr<HttpFileDownload> downloader =
             std::make_unique<HttpFileDownload>(data.second, destination);
 
-        HttpFileDownload* dl = downloader.get();
+        //HttpFileDownload* dl = downloader.get();
         File fileElement;
         fileElement.download = std::move(downloader);
         fileElement.state = File::State::Available;
@@ -231,11 +236,15 @@ void DynamicDownloaderManager::prioritizeQueue(const double& time) {
     }
 
     // if forward iterate from now to end. else reverse from now to begin
+    int notToMany = 0;
     for (std::vector<File>::iterator it = now; it != end; _forward ? ++it : --it) {
         if (it->state == File::State::Available) {
             _queuedFilesToDownload.push_back(&*it);
             it->state = File::State::OnQueue;
         }
+        ++notToMany;
+        // exit out early if enough files are queued / already downloaded
+        if (notToMany == _nOfFilesToQueue) break;
     }
 }
 
@@ -250,8 +259,7 @@ void DynamicDownloaderManager::downloadFile(){
 }
 
 void DynamicDownloaderManager::checkForFinishedDownloads() {
-    for (std::vector<File*>::iterator currentIt =
-            _filesCurrentlyDownloading.begin();
+    for (std::vector<File*>::iterator currentIt = _filesCurrentlyDownloading.begin();
         currentIt != _filesCurrentlyDownloading.end();
         ++currentIt)
     {
@@ -338,20 +346,18 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
     // We should still check for finishedDownloads even if direction of time changed
     // therefore, this is done after checkForFinishedDownloads()
     if (_forward && deltaTime < 0 || !_forward && deltaTime > 0) {
-        _forward == true ? _forward = false : _forward = true;
+        _forward = !_forward;
         // if std::queue :clear(_queuedFilesToDownload);
         // if priority q:
         _queueIsPrioritized = false;
     }
-
-    // here we will make the decisions depending on if sliding window is on edge
-    // of big window, or current time is past big window
-    // or more things?
+    const File& now = closestFileToNow(time);
 
 
-     //std::pair<std::string, std::string> mostRelaventFileToDownload =
-     //    DynamicDownloaderManager::findMostRelevantFileToDownload(time);
-     //putOnQueue(mostRelaventFileToDownload.second);
+
+    //std::pair<std::string, std::string> mostRelaventFileToDownload =
+    //    DynamicDownloaderManager::findMostRelevantFileToDownload(time);
+    //putOnQueue(mostRelaventFileToDownload.second);
 
     if (!_queueIsPrioritized && (_availableData.size() > 0) ) {
         prioritizeQueue(time);
