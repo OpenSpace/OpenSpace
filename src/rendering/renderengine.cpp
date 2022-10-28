@@ -413,6 +413,10 @@ RenderEngine::RenderEngine()
 
 RenderEngine::~RenderEngine() {} // NOLINT
 
+FramebufferRenderer* RenderEngine::renderer() {
+    return &_renderer;
+}
+
 void RenderEngine::initialize() {
     ZoneScoped
 
