@@ -37,7 +37,7 @@ DoubleListProperty::DoubleListProperty(Property::PropertyInfo info,
     : ListProperty(std::move(info), std::move(values))
 {}
 
-std::string DoubleListProperty::className() const {
+std::string_view DoubleListProperty::className() const {
     return "DoubleListProperty";
 }
 

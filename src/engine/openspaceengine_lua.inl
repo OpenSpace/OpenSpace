@@ -38,8 +38,7 @@ namespace {
  * Writes out documentation files
  */
 [[codegen::luawrap]] void writeDocumentation() {
-    openspace::global::openSpaceEngine->writeStaticDocumentation();
-    openspace::global::openSpaceEngine->writeSceneDocumentation();
+    openspace::global::openSpaceEngine->writeDocumentation();
 }
 
 // Sets the folder used for storing screenshots or session recording frames

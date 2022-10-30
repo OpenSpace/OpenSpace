@@ -92,7 +92,6 @@ void ModuleEngine::initialize(
         }
 
         addPropertySubOwner(m);
-
     }
 }
 
@@ -153,12 +152,11 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + mod->identifier() + "' was registered before",
+            fmt::format("Module name '{}' was registered before", mod->identifier()),
             "ModuleEngine"
         );
     }
 
-    LDEBUG(fmt::format("Registering module '{}'", mod->identifier()));
     LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
     _modules.push_back(std::move(mod));
 }

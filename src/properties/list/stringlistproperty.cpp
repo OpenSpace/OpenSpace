@@ -37,7 +37,7 @@ StringListProperty::StringListProperty(Property::PropertyInfo info,
     : ListProperty(std::move(info), std::move(values))
 {}
 
-std::string StringListProperty::className() const {
+std::string_view StringListProperty::className() const {
     return "StringListProperty";
 }
 

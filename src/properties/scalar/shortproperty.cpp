@@ -33,7 +33,7 @@ ShortProperty::ShortProperty(Property::PropertyInfo info, short value, short min
     : NumericalProperty<short>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string ShortProperty::className() const {
+std::string_view ShortProperty::className() const {
     return "ShortProperty";
 }
 

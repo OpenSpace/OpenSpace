@@ -41,7 +41,7 @@ DVec4Property::DVec4Property(Property::PropertyInfo info, glm::dvec4 value,
     )
 {}
 
-std::string DVec4Property::className() const {
+std::string_view DVec4Property::className() const {
     return "DVec4Property";
 }
 

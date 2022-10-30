@@ -41,7 +41,7 @@ Mat4Property::Mat4Property(Property::PropertyInfo info, glm::mat4x4 value,
     )
 {}
 
-std::string Mat4Property::className() const {
+std::string_view Mat4Property::className() const {
     return "Mat4Property";
 }
 

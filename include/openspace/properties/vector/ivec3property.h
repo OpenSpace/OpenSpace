@@ -39,7 +39,7 @@ public:
         glm::ivec3 maxValue = glm::ivec3(std::numeric_limits<int>::max()),
         glm::ivec3 stepValue = glm::ivec3(1));
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<glm::ivec3>::operator=;

@@ -121,14 +121,12 @@ TEST_CASE("SelectionProperty: Get String Value", "[selectionproperty]") {
     const std::set<std::string> list{ "a", "b" };
     p.setValue(list);
 
-    std::string res;
-    p.getStringValue(res);
-
+    std::string res = p.stringValue();
     CHECK(res == "[\"a\",\"b\"]");
 
     p.setValue({});
-    p.getStringValue(res);
-    CHECK(res == "[]");
+    std::string res2 = p.stringValue();
+    CHECK(res2 == "[]");
 }
 
 TEST_CASE("SelectionProperty: Set Lua Value", "[selectionproperty]") {

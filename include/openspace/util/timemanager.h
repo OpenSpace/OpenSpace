@@ -59,7 +59,7 @@ public:
     const Time& integrateFromTime() const;
     const Timeline<TimeKeyframeData>& timeline() const;
 
-    std::vector<Syncable*> getSyncables();
+    std::vector<Syncable*> syncables();
     void preSynchronization(double dt);
 
     TimeKeyframeData interpolate(double applicationTime);

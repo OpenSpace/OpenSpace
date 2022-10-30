@@ -33,7 +33,7 @@ BoolProperty::BoolProperty(Property::PropertyInfo info, bool value)
     : TemplateProperty<bool>(std::move(info), value)
 {}
 
-std::string BoolProperty::className() const {
+std::string_view BoolProperty::className() const {
     return "BoolProperty";
 }
 

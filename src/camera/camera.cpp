@@ -288,7 +288,7 @@ const glm::mat4& Camera::viewProjectionMatrix() const {
     return sgctInternal.viewProjectionMatrix();
 }
 
-std::vector<Syncable*> Camera::getSyncables() {
+std::vector<Syncable*> Camera::syncables() {
     return { &_position, &_rotation, &_scaling };
 }
 
