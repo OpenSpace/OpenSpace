@@ -368,6 +368,8 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     addProperty(_ssaoEnabled);
     addProperty(_ssaoIntensity);
     addProperty(_ssaoRadius);
+
+    setRenderBin(RenderBin::PostDeferredTransparent);
 }
 
 RenderableMolecule::~RenderableMolecule() {

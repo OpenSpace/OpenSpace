@@ -49,7 +49,8 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/httprequest.h>
 
-//#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <ghoul/opengl/openglstatecache.h>
 //#include <openspace/util/boxgeometry.h>
 //#include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
@@ -456,6 +457,8 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_ssaoEnabled);
     addProperty(_ssaoIntensity);
     addProperty(_ssaoRadius);
+
+    setRenderBin(RenderBin::PostDeferredTransparent);
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {
@@ -735,6 +738,8 @@ static mat4_t mat4_from_glm(glm::mat4 const& src) {
 }
 
 void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
+    global::renderEngine->openglStateCache().loadCurrentGLState();
+
     using namespace glm;
     const dmat4 I(1.0);
     
@@ -911,6 +916,8 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
         billboardDraw(transform, colorTex, depthTex, vec4(1.0), circleWidth, depth);
     }
+
+    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::string& file) {
