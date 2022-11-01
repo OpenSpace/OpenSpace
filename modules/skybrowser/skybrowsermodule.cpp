@@ -111,6 +111,7 @@ namespace {
        "The url of the image collection which is loaded into AAS WorldWide Telescope"
     };
 
+
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;

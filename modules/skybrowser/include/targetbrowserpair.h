@@ -75,6 +75,7 @@ public:
     void setBrowserRatio(float ratio);
     void setVerticalFovWithScroll(float scroll);
     void setImageCollectionIsLoaded(bool isLoaded);
+    void applyRoll();
 
     double verticalFov() const;
     glm::ivec3 borderColor() const;

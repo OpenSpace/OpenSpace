@@ -86,10 +86,10 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
     glm::dvec3 right = _targetRenderable->rightVector() * percentage.x;
     glm::dvec3 up = _targetRenderable->upVector() * percentage.y;
 
-    glm::dvec3 newCartesian = _startTargetPosition - (right - up);
+    glm::dvec3 newPosition = _startTargetPosition - (right - up);
     aimTargetGalactic(
         _targetNode->identifier(), 
-        newCartesian
+        newPosition
     );
 }
 
@@ -271,6 +271,10 @@ void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
     _browser->setImageCollectionIsLoaded(isLoaded);
 }
 
+void TargetBrowserPair::applyRoll() {
+    _targetRenderable->applyRoll();
+}
+
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {
     // Animate the target before the field of view starts to animate
     if (_targetAnimation.isAnimating()) {
@@ -339,13 +343,8 @@ double TargetBrowserPair::targetRoll() const {
         _targetNode->worldPosition() -
         global::navigationHandler->camera()->positionVec3()
     );
-    glm::dvec3 right = glm::normalize(
-        glm::cross(
-            global::navigationHandler->camera()->lookUpVectorWorldSpace(),
-            normal
-        )
-    );
-    glm::dvec3 up = glm::normalize(glm::cross(normal, right));
+    glm::dvec3 right = _targetRenderable->rightVector();
+    glm::dvec3 up = glm::normalize(glm::cross(right, normal));
     return skybrowser::targetRoll(up, normal);
 }
 
