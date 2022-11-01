@@ -523,7 +523,10 @@ void RawTileDataReader::initialize() {
         ZoneScopedN("GDALOpen")
         _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
         if (!_dataset) {
-            throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
+            throw ghoul::RuntimeError(fmt::format(
+                "Failed to load dataset: {}. GDAL Error: {}",
+                _datasetFilePath, CPLGetLastErrorMsg()
+            ));
         }
     }
 
