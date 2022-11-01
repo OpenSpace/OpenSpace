@@ -573,14 +573,16 @@ void RenderableFieldlinesSequence::initializeGL() {
     }
 
     // At this point there should be at least one state loaded into memory
-    if (_states.empty()) {
+    if (!_dynamicWebContent && _states.empty()) {
         LERROR("Wasn't able to extract any valid states from provided source files");
         return;
     }
 
-    computeSequenceEndTime();
-    setModelDependentConstants();
-    setupProperties();
+    if (!_dynamicWebContent) {
+        computeSequenceEndTime();
+        setModelDependentConstants();
+        setupProperties();
+    }
 
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -1027,7 +1029,7 @@ bool RenderableFieldlinesSequence::isReady() const {
 }
 
 void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
-    if (_activeTriggerTimeIndex == -1) {
+    if (_activeTriggerTimeIndex == -1 || _states.empty()) {
         return;
     }
     _shaderProgram->activate();
@@ -1129,9 +1131,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     const double deltaTime = global::timeManager->deltaTime();
 
     if (_dynamicWebContent) {
-        // ghoul_assert(
-        //     *_dynamicdownloaderManager, "DynamicDownloaderManager must excist"
-        // );
+
         _dynamicdownloaderManager->update(currentTime, deltaTime);
         const std::vector<std::filesystem::path>& filesToRead =
             _dynamicdownloaderManager->downloadedFiles();
@@ -1156,18 +1156,22 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             std::sort(_sourceFiles.begin(), _sourceFiles.end());
             std::sort(_startTimes.begin(), _startTimes.end());
         }
+
+        if (!_startTimes.empty() && _firstDownload && !_states.empty()) {
+            computeSequenceEndTime();
+            setModelDependentConstants();
+            setupProperties();
+            _firstDownload = false;
+        }
     }
     //if using static loading at startup:
     else {
 
     }
 
-    if (_states.empty() && !_sourceFiles.empty()) {
-        loadStateFromOsfls(filePath)
-    }
-
     //TODO: if dynamic downloading -> guarantee a startTime at [0]?
-    const bool isInInterval = (_startTimes.size() > 0) && (currentTime >= _startTimes[0]) &&
+    const bool isInInterval = (_startTimes.size() > 0) &&
+                              (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
@@ -1182,24 +1186,24 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         {
             _activeTriggerTimeIndex = updateActiveTriggerTimeIndex(currentTime);
 
+            _activeStateIndex = _activeTriggerTimeIndex;
             if (_loadingStatesDynamically) {
                 mustLoadNewStateFromDisk = true;
             }
             else {
                 needUpdate = true;
-                _activeStateIndex = _activeTriggerTimeIndex;
             }
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     // if only one state
-    else if (_nStates == 1) {
+    else if (_startTimes.size() == 1) {
         _activeTriggerTimeIndex = 0;
         _activeStateIndex = 0;
         if (!_hasBeenUpdated) {
             updateVertexPositionBuffer();
         }
 
-        if (_states[_activeStateIndex].nExtraQuantities() > 0) {
+        if (!_states.empty() && _states[_activeStateIndex].nExtraQuantities() > 0) {
             _shouldUpdateColorBuffer = true;
             _shouldUpdateMaskingBuffer = true;
         }
@@ -1227,7 +1231,19 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     if (needUpdate || _newStateIsReady) {
         if (_loadingStatesDynamically) {
-            _states[0] = std::move(*_newState);
+            if (_states.empty()) {
+                _states.push_back(std::move(*_newState));
+            }
+            else {
+                auto iter = std::upper_bound(
+                    _states.begin(), _states.end(), _newState->triggerTime(),
+                    [](double newStateTime, const FieldlinesState& states) {
+                        return newStateTime < states.triggerTime();
+                    }
+                );
+                _states.insert(iter, std::move(*_newState));
+
+            }
         }
 
         updateVertexPositionBuffer();
@@ -1257,7 +1273,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
 // Assumes we already know that currentTime is within the sequence interval
 int RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTime) {
-    if (_states.empty()) return -1;
+    if (_startTimes.empty()) return -1;
     int index = 0;
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
@@ -1271,7 +1287,7 @@ int RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTim
         }
     }
     else {
-        index = static_cast<int>(_nStates) - 1;
+        index = static_cast<int>(_startTimes.size()) - 1;
     }
 
     return index;
@@ -1293,7 +1309,7 @@ void unbindGL() {
 }
 
 void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
-    if (_activeStateIndex == -1) { return; }
+    if (_activeStateIndex == -1 || _states.empty()) { return; }
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
@@ -1313,7 +1329,7 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
 }
 
 void RenderableFieldlinesSequence::updateVertexColorBuffer() {
-    if (_activeStateIndex == -1) { return; }
+    if (_activeStateIndex == -1 || _states.empty()) { return; }
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
@@ -1339,7 +1355,7 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
 }
 
 void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
-    if (_activeStateIndex == -1) { return; }
+    if (_activeStateIndex == -1 || _states.empty()) { return; }
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexMaskingBuffer);
 

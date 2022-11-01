@@ -28,7 +28,6 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
-#include <modules/fieldlinessequence/util/webfieldlinesmanager.h>
 #include <modules/fieldlinessequence/util/dynamicdownloadermanager.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -113,6 +112,8 @@ private:
     std::unique_ptr<DynamicDownloaderManager> _dynamicdownloaderManager;
     // number of files to queue up at a time
     int _nOfFilesToQueue = 10;
+    // to initialize things after first download
+    bool _firstDownload = true;
 
     // Used for 'runtime-states'. True when finished loading a new state from disk on
     // another thread.

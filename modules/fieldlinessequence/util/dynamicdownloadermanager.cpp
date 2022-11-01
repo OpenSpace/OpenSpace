@@ -259,10 +259,12 @@ void DynamicDownloaderManager::downloadFile(){
 }
 
 void DynamicDownloaderManager::checkForFinishedDownloads() {
-    for (std::vector<File*>::iterator currentIt = _filesCurrentlyDownloading.begin();
-        currentIt != _filesCurrentlyDownloading.end();
-        ++currentIt)
-    {
+    size_t numberOfIterations = _filesCurrentlyDownloading.size();
+    std::vector<File*>::iterator currentIt = _filesCurrentlyDownloading.begin();
+
+    // since size of filesCurrentlyDownloading can change per iteration, keep size-call
+    for (size_t i = 0; i != _filesCurrentlyDownloading.size(); ++i) {
+
         File* file = *currentIt;
         HttpFileDownload* dl = file->download.get();
 
@@ -271,17 +273,23 @@ void DynamicDownloaderManager::checkForFinishedDownloads() {
             //std::vector<std::filesystem::path> downloadedFiles;
             _downloadedFiles.push_back(dl->destination());
             file->state = File::State::Downloaded;
-            _filesCurrentlyDownloading.erase(currentIt);
-            //currentIt->reset();
-            //currentIt = _filesCurrentlyDownloading.erase(currentIt);
+            currentIt = _filesCurrentlyDownloading.erase(currentIt);
+            // if one is removed, i is reduced, else we'd skip one in the list
+            --i;
 
         }
         else if (dl->hasFailed()) {
             ghoul_assert(!dl->hasFailed(), "downloading of file failed");
             LERROR("TODO, make better handling if file download fails");
         }
-        //else would be that the file is not finnished downloading
-        if (_filesCurrentlyDownloading.empty()) {
+        // The file is not finnished downloading, move on to next
+        else {
+            ++currentIt;
+        }
+
+        // Since in the if statement one is removed and else statement it got incremented,
+        // check if at end
+        if (currentIt == _filesCurrentlyDownloading.end()) {
             return;
         }
     }
@@ -351,9 +359,6 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
         // if priority q:
         _queueIsPrioritized = false;
     }
-    const File& now = closestFileToNow(time);
-
-
 
     //std::pair<std::string, std::string> mostRelaventFileToDownload =
     //    DynamicDownloaderManager::findMostRelevantFileToDownload(time);
