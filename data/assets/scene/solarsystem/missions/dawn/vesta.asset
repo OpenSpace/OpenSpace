@@ -2,7 +2,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local kernels = asset.syncedResource({
-  Name = "Dawn Kernels",
+  Name = "Vesta Kernels",
   Type = "HttpSynchronization",
   Identifier = "vesta_kernels",
   Version = 1

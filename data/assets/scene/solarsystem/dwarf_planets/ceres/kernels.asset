@@ -1,5 +1,5 @@
 local Kernels = asset.syncedResource({
-  Name = "Dawn Kernels",
+  Name = "Ceres Kernels",
   Type = "HttpSynchronization",
   Identifier = "ceres_kernels",
   Version = 1
