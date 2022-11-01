@@ -53,7 +53,7 @@ local KernelFiles = {
   kernels .. "dawn_sc_110808_110814.bc",
   kernels .. "dawn_sc_120910_120916.bc",
 
-  -- all space craft CK files
+  -- space craft CK files
   -- kernels .. "dawn_sc_070927_070930.bc",
   -- kernels .. "dawn_sc_110801_110807.bc",
   -- kernels .. "dawn_sc_110808_110814.bc",

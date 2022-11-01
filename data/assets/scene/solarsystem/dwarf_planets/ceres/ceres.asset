@@ -59,8 +59,8 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Ceres)
   openspace.removeSceneGraphNode(CeresLabel)
+  openspace.removeSceneGraphNode(Ceres)
 end)
 
 asset.export(Ceres)
