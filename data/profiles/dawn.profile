@@ -1,7 +1,8 @@
 {
   "assets": [
     "base",
-    "scene/solarsystem/missions/dawn/ceres",
+    "scene/solarsystem/dwarf_planets/ceres/ceres",
+    "scene/solarsystem/dwarf_planets/ceres/trail",
     "scene/solarsystem/missions/dawn/dawn",
     "scene/solarsystem/missions/dawn/vesta"
   ],

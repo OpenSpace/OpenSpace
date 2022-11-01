@@ -6,7 +6,7 @@ local kernels = asset.syncedResource({
   Name = "Dawn Kernels",
   Type = "HttpSynchronization",
   Identifier = "dawn_kernels",
-  Version = 2
+  Version = 3
 })
 
 local textures = asset.syncedResource({
@@ -797,7 +797,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     local node = nodes[i]
