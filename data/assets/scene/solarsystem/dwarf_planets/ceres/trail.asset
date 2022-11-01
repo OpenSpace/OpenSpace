@@ -14,8 +14,6 @@ local CeresTrail = {
       Kernels = kernels
     },
     Color = { 0.7, 0.8, 0.7 },
-    StartTime = "2010 JAN 01 00:00:00.000",
-    EndTime = "2100 JAN 01 00:00:00.000",
     Period = 1680,
     Resolution = 1000
   },
