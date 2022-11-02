@@ -87,20 +87,25 @@ namespace {
 
 namespace openspace {
 
-GLuint* FramebufferRenderer::additionalColorTexture() {
-    return &_hdrBuffers.hdrFilteringTexture;
+// Gives access to the currently NOT used pingPongTexture
+GLuint FramebufferRenderer::additionalColorTexture1() {
+    int unusedPingPongIndex = _pingPongIndex == 0 ? 1 : 0;
+    return _pingPongBuffers.colorTexture[unusedPingPongIndex];
 }
 
-GLuint* FramebufferRenderer::additionalPositionTexture() {
-    return &_exitColorTexture;
+// Gives access to the exitColorTexture
+GLuint FramebufferRenderer::additionalColorTexture2() {
+    return _exitColorTexture;
 }
 
-GLuint* FramebufferRenderer::additionalNormalTexture() {
-    return &_fxaaBuffers.fxaaTexture;
+// Gives access to the fxaaTexture
+GLuint FramebufferRenderer::additionalColorTexture3() {
+    return _fxaaBuffers.fxaaTexture;
 }
 
-GLuint* FramebufferRenderer::additionalDepthTexture() {
-    return &_exitDepthTexture;
+// Gives access to the exitDepthTexture
+GLuint FramebufferRenderer::additionalDepthTexture() {
+    return _exitDepthTexture;
 }
 
 void FramebufferRenderer::initialize() {

@@ -609,25 +609,25 @@ void RenderableModel::initializeGL() {
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
-        *(global::renderEngine->renderer()->additionalColorTexture()),
+        global::renderEngine->renderer()->additionalColorTexture1(),
         0
     );
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
-        *(global::renderEngine->renderer()->additionalPositionTexture()),
+        global::renderEngine->renderer()->additionalColorTexture2(),
         0
     );
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT2,
-        *(global::renderEngine->renderer()->additionalNormalTexture()),
+        global::renderEngine->renderer()->additionalColorTexture3(),
         0
     );
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
-        *(global::renderEngine->renderer()->additionalDepthTexture()),
+        global::renderEngine->renderer()->additionalDepthTexture(),
         0
     );
 
@@ -830,7 +830,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         colorTextureUnit.activate();
         glBindTexture(
             GL_TEXTURE_2D,
-            *(global::renderEngine->renderer()->additionalColorTexture())
+            global::renderEngine->renderer()->additionalColorTexture1()
         );
         _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
 
@@ -838,7 +838,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         positionTextureUnit.activate();
         glBindTexture(
             GL_TEXTURE_2D,
-            *(global::renderEngine->renderer()->additionalPositionTexture())
+            global::renderEngine->renderer()->additionalColorTexture2()
         );
         _quadProgram->setUniform(
            _uniformOpacityCache.positionTexture,
@@ -849,7 +849,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         normalTextureUnit.activate();
         glBindTexture(
             GL_TEXTURE_2D,
-            *(global::renderEngine->renderer()->additionalNormalTexture())
+            global::renderEngine->renderer()->additionalColorTexture3()
         );
         _quadProgram->setUniform(_uniformOpacityCache.normalTexture, normalTextureUnit);
 
@@ -857,7 +857,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         depthTextureUnit.activate();
         glBindTexture(
             GL_TEXTURE_2D,
-            *(global::renderEngine->renderer()->additionalDepthTexture())
+            global::renderEngine->renderer()->additionalDepthTexture()
         );
         _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 

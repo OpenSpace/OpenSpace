@@ -59,12 +59,43 @@ class FramebufferRenderer final : public RaycasterListener, public Deferredcaste
 public:
     virtual ~FramebufferRenderer() override = default;
 
-    // Get functions for Model Opacity rendering
-    // TODO: Add a REALLY good documentation here
-    GLuint* additionalColorTexture();
-    GLuint* additionalPositionTexture();
-    GLuint* additionalNormalTexture();
-    GLuint* additionalDepthTexture();
+    // Functions to access and reuse some of the existing textures
+    /**
+     * Gives access to the currently NOT used pingPongTexture. This texture is available
+     * for all RenderBins. However, it cannot be used at the same time as the Deferred
+     * Caster Tasks. The size of the texture is the resolution of the viewport.
+     *
+     * \return GLuint identifier of the currently NOT used pingPongTexture
+     */
+    GLuint additionalColorTexture1();
+
+    /**
+     * Gives access to the exitColorTexture. This texture is available for all RenderBins.
+     * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
+     * texture is the resolution of the viewport.
+     *
+     * \return GLuint identifier of the exitColorTexture
+     */
+    GLuint additionalColorTexture2();
+
+    /**
+     * Gives access to the fxaaTexture. This texture is available for all RenderBins.
+     * However, it cannot be used at the same time as the FXAA Task. The size of the
+     * texture is the resolution of the viewport.
+     *
+     * \return GLuint identifier of the fxaaTexture
+     */
+    GLuint additionalColorTexture3();
+
+    /**
+     * Gives access to the exitDepthTexture. This texture is available for all RenderBins.
+     * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
+     * texture is the resolution of the viewport.
+     *
+     * \return GLuint identifier of the exitDepthTexture
+     */
+    GLuint additionalDepthTexture();
+
 
     void initialize();
     void deinitialize();
