@@ -13,7 +13,7 @@ local fieldlines = {
     DynamicWebContent = true,
     --LoadAtRuntime is redundant if using DynamicWebContent since it will have to be true
     --LoadAtRuntime = true,
-    DataID = 1771,
+    DataID = 1768,
   },
   GUI = {
     Path = "/Solar System/Heliosphere",

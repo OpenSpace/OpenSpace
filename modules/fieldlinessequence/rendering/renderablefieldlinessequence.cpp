@@ -399,7 +399,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=";
         _dynamicdownloaderManager = std::make_unique<DynamicDownloaderManager>(
             _dataID, baseURL, dataURL, _nOfFilesToQueue
-            );
+        );
     }
     // source folder, but not dynamic
     else if (p.sourceFolder.has_value()) {

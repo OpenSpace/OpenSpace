@@ -116,7 +116,7 @@ void DynamicDownloaderManager::requestDataInfo(std::string httpInfoRequest) {
 
     _dataMinTime = Time::convertTime(jsonResult["availability"]["startDate"]);
     _dataMaxTime = Time::convertTime(jsonResult["availability"]["stopDate"]);
-    _dataIdDescription = jsonResult["description"];
+    //_dataIdDescription = jsonResult["description"];
 
 }
 
@@ -156,12 +156,9 @@ void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest
     * meaning there are no more available files between month 7-10.
     * *****************/
 
-    // push_back into listOfFiles
-    std::vector<std::pair<std::string, std::string>> listOfFiles;
     int index = 0;
     for (auto& element : jsonResult["files"]) {
         std::pair<std::string, std::string> data(element["timestamp"], element["url"]);
-        listOfFiles.push_back(data);
 
         std::string fileName = "/" +
                                    data.second.substr(data.second.find_last_of("//") + 1);
@@ -188,8 +185,6 @@ void DynamicDownloaderManager::requestAvailableFiles(std::string httpDataRequest
     //_dataMaxTime = jsonResult["time.max"];
     //_dataMinTime = jsonResult["time.min"];
 
-    //bigWindow.listOfFiles = listOfFiles;
-    //bigWindow.cadence = calculateCadence(listOfFiles);
     // TODO Shyam: add accurate cadence to each file here
     _tempCadence = calculateCadence();
     for (auto& element : _availableData) {
@@ -221,11 +216,12 @@ void DynamicDownloaderManager::prioritizeQueue(const double& time) {
     // Emptying queue
     _queuedFilesToDownload.clear();
 
-    const File& closestFileToNow = DynamicDownloaderManager::closestFileToNow(time);
+    //const File& closestFileToNow = DynamicDownloaderManager::closestFileToNow(time);
+    std::vector<File>::iterator now = DynamicDownloaderManager::closestFileToNow(time);
     // priority 0 is highest. Higher number is lower priority.
 
-    std::vector<File>::iterator now =
-        _availableData.begin() + closestFileToNow.availableIndex;
+    //std::vector<File>::iterator now =
+    //    _availableData.begin() + closestFileToNow.availableIndex;
 
     std::vector<File>::iterator end;
     if (_forward) {
@@ -259,7 +255,6 @@ void DynamicDownloaderManager::downloadFile(){
 }
 
 void DynamicDownloaderManager::checkForFinishedDownloads() {
-    size_t numberOfIterations = _filesCurrentlyDownloading.size();
     std::vector<File*>::iterator currentIt = _filesCurrentlyDownloading.begin();
 
     // since size of filesCurrentlyDownloading can change per iteration, keep size-call
@@ -297,8 +292,9 @@ void DynamicDownloaderManager::checkForFinishedDownloads() {
 
 // negative part of this is it has to go through the whole list.
 // Maybe a std::map is better to fetch to most relavent file to download.
-const File& DynamicDownloaderManager::closestFileToNow(const double time) {
+std::vector<File>::iterator DynamicDownloaderManager::closestFileToNow(const double time) {
     File* closest;
+    std::vector<File>::iterator it = _availableData.begin();
     double smallest = DBL_MAX;
     for (File& file : _availableData) {
         const double fileTime = Time::convertTime(file.timestep);
@@ -309,7 +305,9 @@ const File& DynamicDownloaderManager::closestFileToNow(const double time) {
             closest = &file;
         }
     }
-    return *closest;
+    it += closest->availableIndex;
+    return it;
+    //return *closest;
 }
 
 void DynamicDownloaderManager::update(const double time, const double deltaTime) {
@@ -360,8 +358,6 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
         _queueIsPrioritized = false;
     }
 
-    //std::pair<std::string, std::string> mostRelaventFileToDownload =
-    //    DynamicDownloaderManager::findMostRelevantFileToDownload(time);
     //putOnQueue(mostRelaventFileToDownload.second);
 
     if (!_queueIsPrioritized && (_availableData.size() > 0) ) {
