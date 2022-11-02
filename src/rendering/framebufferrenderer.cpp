@@ -1208,18 +1208,18 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glEnablei(GL_BLEND, 0);
 
     {
+        TracyGpuZone("Overlay")
+        ghoul::GLDebugGroup group("Overlay");
+        data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
+        scene->render(data, tasks);
+    }
+
+    {
         TracyGpuZone("PostDeferredTransparent")
         ghoul::GLDebugGroup group("PostDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PostDeferredTransparent
         );
-        scene->render(data, tasks);
-    }
-
-    {
-        TracyGpuZone("Overlay")
-        ghoul::GLDebugGroup group("Overlay");
-        data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
         scene->render(data, tasks);
     }
 
