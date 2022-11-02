@@ -67,25 +67,19 @@ SceneGraphLightSource::SceneGraphLightSource()
     , _sceneGraphNodeReference(NodeInfo, "")
 {
     addProperty(_intensity);
-    addProperty(_sceneGraphNodeReference);
-}
-
-SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
-    : LightSource(dictionary)
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-    , _sceneGraphNodeReference(NodeInfo, "")
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    _intensity = p.intensity.value_or(_intensity);
-    addProperty(_intensity);
-
-    _sceneGraphNodeReference = p.node;
     _sceneGraphNodeReference.onChange([this]() {
         _sceneGraphNode =
             global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);
     });
     addProperty(_sceneGraphNodeReference);
+}
+
+SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
+    : SceneGraphLightSource()
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _intensity = p.intensity.value_or(_intensity);
+    _sceneGraphNodeReference = p.node;
 }
 
 bool SceneGraphLightSource::initialize() {

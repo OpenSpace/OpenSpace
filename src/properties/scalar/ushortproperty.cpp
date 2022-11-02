@@ -40,7 +40,7 @@ UShortProperty::UShortProperty(Property::PropertyInfo info, unsigned short value
     )
 {}
 
-std::string UShortProperty::className() const {
+std::string_view UShortProperty::className() const {
     return "UShortProperty";
 }
 

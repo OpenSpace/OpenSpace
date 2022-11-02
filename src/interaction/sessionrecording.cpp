@@ -107,7 +107,7 @@ SessionRecording::SessionRecording(bool isGlobal)
     }
 }
 
-SessionRecording::~SessionRecording() { // NOLINT
+SessionRecording::~SessionRecording() {
 }
 
 void SessionRecording::deinitialize() {
@@ -955,7 +955,7 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
         if (!isPropAlreadySaved) {
             std::string initialScriptCommand = fmt::format(
                 "openspace.setPropertyValueSingle(\"{}\", {})",
-                propIdentifier, prop.getStringValue()
+                propIdentifier, prop.stringValue()
             );
             saveScriptKeyframeToPropertiesBaseline(initialScriptCommand);
             _propertyBaselinesSaved.push_back(propIdentifier);

@@ -41,7 +41,7 @@ public:
             ghoul::createFillMat4x4<double>(std::numeric_limits<double>::max()),
         glm::dmat4x4 stepValue = ghoul::createFillMat4x4<double>(0.01));
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<glm::dmat4x4>::operator=;

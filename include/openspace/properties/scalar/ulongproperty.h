@@ -52,7 +52,7 @@ public:
         unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
         unsigned long stepValue = 1ul);
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<unsigned long>::operator=;

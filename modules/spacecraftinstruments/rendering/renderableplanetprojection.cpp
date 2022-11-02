@@ -299,7 +299,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_segments);
 }
 
-RenderablePlanetProjection::~RenderablePlanetProjection() {} // NOLINT
+RenderablePlanetProjection::~RenderablePlanetProjection() {}
 
 void RenderablePlanetProjection::initializeGL() {
     _programObject = SpacecraftInstrumentsModule::ProgramObjectManager.request(

@@ -22,35 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/vector/dvec3property.h>
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMELAPSEDTIME___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMELAPSEDTIME___H__
 
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
-namespace openspace::properties {
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
 
-DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
-                             glm::dvec3 minValue, glm::dvec3 maxValue,
-                             glm::dvec3 stepValue)
-    : NumericalProperty<glm::dvec3>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
-{}
+namespace openspace {
 
-std::string_view DVec3Property::className() const {
-    return "DVec3Property";
-}
+namespace documentation { struct Documentation; }
 
-int DVec3Property::typeLua() const {
-    return LUA_TTABLE;
-}
+class DashboardItemElapsedTime : public DashboardTextItem {
+public:
+    DashboardItemElapsedTime(const ghoul::Dictionary& dictionary);
+    ~DashboardItemElapsedTime() override = default;
 
-glm::dvec3 DVec3Property::fromLuaConversion(lua_State* state, bool& success) const {
-    return ghoul::lua::tryGetValue<glm::dvec3>(state, success);
-}
+    void render(glm::vec2& penPosition) override;
 
-} // namespace openspace::properties
+    glm::vec2 size() const override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    properties::StringProperty _formatString;
+    properties::StringProperty _referenceTime;
+    double _referenceJ2000 = 0.0;
+    properties::BoolProperty _simplifyTime;
+    properties::OptionProperty _lowestTimeUnit;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMDATE___H__

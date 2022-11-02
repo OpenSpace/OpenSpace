@@ -41,7 +41,7 @@ public:
             ghoul::createFillMat2x2<float>(std::numeric_limits<float>::max()),
         glm::mat2x2 stepValue = ghoul::createFillMat2x2<float>(0.01f));
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<glm::mat2x2>::operator=;

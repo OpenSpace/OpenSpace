@@ -1203,7 +1203,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_TRUE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx)) // NOLINT
+                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
                 );
 
                 break;
@@ -1255,7 +1255,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(OtherDataLayout, value)) // NOLINT
+                    reinterpret_cast<void*>(offsetof(OtherDataLayout, value))
                 );
             }
         }

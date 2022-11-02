@@ -98,7 +98,7 @@ void PlaneGeometry::updateGeometry() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s)) // NOLINT
+        reinterpret_cast<void*>(offsetof(VertexData, s))
     );
 }
 

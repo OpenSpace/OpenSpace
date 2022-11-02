@@ -92,7 +92,7 @@ public:
     void renderEndscreen();
     void postDraw();
 
-    float globalBlackOutFactor();
+    float globalBlackOutFactor() const;
     void setGlobalBlackOutFactor(float opacity);
 
     float hdrExposure() const;

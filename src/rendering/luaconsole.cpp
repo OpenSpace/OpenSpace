@@ -166,7 +166,7 @@ LuaConsole::LuaConsole()
     addProperty(_historyTextColor);
 }
 
-LuaConsole::~LuaConsole() {} // NOLINT
+LuaConsole::~LuaConsole() {}
 
 void LuaConsole::initialize() {
     ZoneScoped

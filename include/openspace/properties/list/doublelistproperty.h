@@ -34,7 +34,7 @@ public:
     DoubleListProperty(Property::PropertyInfo info,
         std::vector<double> values = std::vector<double>());
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<std::vector<double>>::operator std::vector<double>;

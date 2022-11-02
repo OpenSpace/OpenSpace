@@ -98,10 +98,13 @@ Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
+    , _camera(std::make_unique<Camera>())
     , _initializer(std::move(initializer))
 {
     _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
     _rootDummy.setScene(this);
+
+    _camera->setParent(&_rootDummy);
 }
 
 Scene::~Scene() {
@@ -117,10 +120,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
     return _rootDummy.detachChild(node);
 }
 
-void Scene::setCamera(std::unique_ptr<Camera> camera) {
-    _camera = std::move(camera);
-}
-
 Camera* Scene::camera() const {
     return _camera.get();
 }
@@ -128,7 +127,7 @@ Camera* Scene::camera() const {
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.count(node->identifier())) {
         throw Scene::InvalidSceneError(
-            "Node with identifier " + node->identifier() + " already exits"
+            "Node with identifier " + node->identifier() + " already exists"
         );
     }
 
@@ -250,75 +249,6 @@ void Scene::initializeNode(SceneGraphNode* node) {
 bool Scene::isInitializing() const {
     return _initializer->isInitializing();
 }
-
-/*
-void Scene::initialize() {
-    bool useMultipleThreads = true;
-    if (OsEng.configurationManager().hasKey(
-        ConfigurationManager::KeyUseMultithreadedInitialization
-    ))
-    {
-        useMultipleThreads = OsEng.configurationManager().value<bool>(
-            ConfigurationManager::KeyUseMultithreadedInitialization
-        );
-    }
-
-    auto initFunction = [](SceneGraphNode* node){
-        try {
-            OsEng.loadingScreen().updateItem(
-                node->name(),
-                LoadingScreen::ItemStatus::Initializing
-            );
-            node->initialize();
-            OsEng.loadingScreen().tickItem();
-            OsEng.loadingScreen().updateItem(
-                node->name(),
-                LoadingScreen::ItemStatus::Finished
-            );
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERROR(node->name() << " not initialized");
-            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
-            OsEng.loadingScreen().updateItem(
-                node->name(),
-                LoadingScreen::ItemStatus::Failed
-            );
-        }
-
-    };
-
-    if (useMultipleThreads) {
-        unsigned int nThreads = std::thread::hardware_concurrency();
-
-        ghoul::ThreadPool pool(nThreads == 0 ? 2 : nThreads - 1);
-
-        OsEng.loadingScreen().postMessage("Initializing scene");
-
-        for (SceneGraphNode* node : _topologicallySortedNodes) {
-            pool.queue(initFunction, node);
-        }
-
-        pool.stop();
-    }
-    else {
-        for (SceneGraphNode* node : _topologicallySortedNodes) {
-            initFunction(node);
-        }
-    }
-}
-
-void Scene::initializeGL() {
-    for (SceneGraphNode* node : _topologicallySortedNodes) {
-        try {
-            node->initializeGL();
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERROR(node->name() << " not initialized");
-            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
-        }
-    }
-}
-*/
 
 void Scene::update(const UpdateData& data) {
     ZoneScoped
@@ -609,9 +539,7 @@ void Scene::updateInterpolations() {
         std::remove_if(
             _propertyInterpolationInfos.begin(),
             _propertyInterpolationInfos.end(),
-            [](const PropertyInterpolationInfo& i) {
-                return i.isExpired;
-            }
+            [](const PropertyInterpolationInfo& i) { return i.isExpired; }
         ),
         _propertyInterpolationInfos.end()
     );
@@ -652,7 +580,7 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             groupName,
             ghoul::EasingFunction::Linear
         );
-        //Clear lua state stack
+        // Clear lua state stack
         lua_settop(L, 0);
     }
 }
@@ -688,7 +616,7 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
 
     switch (pType) {
         case PropertyValueType::Boolean:
-            result = (value == "true") ? true : false;
+            result = (value == "true");
             break;
         case PropertyValueType::Float:
             result = std::stof(value);
