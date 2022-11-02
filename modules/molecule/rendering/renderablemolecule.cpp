@@ -715,6 +715,9 @@ namespace openspace {
                 glDisable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             }
+
+            glDrawBuffer(GL_FRONT_AND_BACK);
+            glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
         }
 
         { // draw billboard pre-rendered with molecule inside
