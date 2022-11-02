@@ -34,4 +34,4 @@
 	url = https://github.com/OpenSpace/codegen
 [submodule "modules/molecule/ext/mold"]
 	path = modules/molecule/ext/mold
-	url = https://github.com/scanberg/mold
+	url = https://github.com/scanberg/mdlib

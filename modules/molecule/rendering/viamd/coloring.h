@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <cstdint>
-#include <core/md_bitfield.h>
-#include <core/md_vec_math.h>
-#include <md_molecule.h>
+#include <stdint.h>
 
-void color_atoms_uniform(uint32_t* colors, int64_t count, vec4_t color, const md_bitfield_t* mask);
+struct md_bitfield_t;
+struct md_molecule_t;
+
+void color_atoms_uniform(uint32_t* colors, int64_t count, uint32_t rgba, const md_bitfield_t* mask);
 void color_atoms_cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol);
 void color_atoms_idx(uint32_t* colors, int64_t count, const md_molecule_t&);
 void color_atoms_residue_id(uint32_t* colors, int64_t count, const md_molecule_t& mol);
@@ -35,4 +35,3 @@ void color_atoms_residue_index(uint32_t* colors, int64_t count, const md_molecul
 void color_atoms_chain_id(uint32_t* colors, int64_t count, const md_molecule_t& mol);
 void color_atoms_chain_index(uint32_t* colors, int64_t count, const md_molecule_t& mol);
 void color_atoms_secondary_structure(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-

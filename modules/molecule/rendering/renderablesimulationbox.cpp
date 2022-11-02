@@ -24,7 +24,7 @@
 
 #include "renderablesimulationbox.h"
 
-#include "../md_concat.h"
+//#include "../md_concat.h"
 #include "billboard.h"
 
 #include "glbinding/gl/bitfield.h"
@@ -39,6 +39,7 @@
 #include "viamd/loader.h"
 #include "viamd/gfx/conetracing_utils.h"
 #include "viamd/gfx/postprocessing_utils.h"
+#include "../moleculemanager.h"
 
 #include <glm/gtc/random.hpp>
 
@@ -53,8 +54,8 @@
 #include <ghoul/opengl/openglstatecache.h>
 //#include <openspace/util/boxgeometry.h>
 //#include <openspace/util/distanceconstants.h>
+
 #include <openspace/util/updatestructures.h>
-//#include <openspace/engine/downloadmanager.h>
 
 #include <md_pdb.h>
 #include <md_gro.h>
@@ -100,9 +101,9 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
     vec3 specular = vec3(0.3) * spec; // assuming bright white light color
 
-    out_color = vec4(ambient + diffuse + specular, color.a);
+    //out_color = vec4(ambient + diffuse + specular, color.a);
     out_normal = vec4(encode_normal(view_normal), 0, 0);
-    // out_color = color;
+    out_color = color;
 }
 )";
 
@@ -226,7 +227,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ViamdFilterInfo = {
         "ViamdFilter",
         "Viamd Filter",
-        "VIA-MD script filter for atom visibility"
+        "VIAMD script filter for atom visibility"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
@@ -245,6 +246,12 @@ namespace {
         "SSAORadius",
         "SSAO Radius",
         "SSAO Radius"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SSAOBiasInfo = {
+        "SSAOBias",
+        "SSAO Bias",
+        "SSAO Bias"
     };
 
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
@@ -314,6 +321,9 @@ namespace {
         
         // [[codegen::verbatim(SSAORadiusInfo.description)]]
         std::optional<float> ssaoRadius;
+
+        // [[codegen::verbatim(SSAOBiasInfo.description)]]
+        std::optional<float> ssaoBias;
     };
 
 #include "renderablesimulationbox_codegen.cpp"
@@ -349,7 +359,8 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _viamdFilter(ViamdFilterInfo),
     _ssaoEnabled(SSAOEnabledInfo),
     _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f),
-    _ssaoRadius(SSAORadiusInfo, 12.f, 0.f, 100.f)
+    _ssaoRadius(SSAORadiusInfo, 12.f, 0.1f, 100.f),
+    _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f)
 {
     _repType.addOptions({
         { static_cast<int>(RepresentationType::SpaceFill), "Space Fill" },
@@ -384,7 +395,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _ssaoEnabled = p.ssaoEnabled.value_or(true);
     _ssaoIntensity = p.ssaoIntensity.value_or(12.f);
     _ssaoRadius = p.ssaoRadius.value_or(12.f);
-
+    _ssaoBias = p.ssaoBias.value_or(0.1f);
 
     if (p.repType.has_value()) {
         _repType = static_cast<int>(codegen::map<RepresentationType>(*p.repType));
@@ -401,15 +412,12 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     for (int count : _moleculeCounts.value()) {
         molecule_data_t mol {
             {},      // states
-            nullptr, // moleculeApi
-            nullptr, // trajectoryApi
-            {},      // molecule
             {},      // concatMolecule
             nullptr, // trajectory
             {},      // drawRep
             {},      // drawMol
             {},      // visibilityMask
-            {},      // occupancy volume
+            //{},      // occupancy volume
         };
         
         for (int i = 0; i < count; i++) {
@@ -429,9 +437,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     
     auto onUpdateRepr = [this]() {
         for (molecule_data_t& mol: _molecules) {
-            if (mol.moleculeApi) {
-                updateRepresentation(mol);
-            }
+            updateRepresentation(mol);
         }
     };
     
@@ -441,9 +447,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 
     _viamdFilter.onChange([this] () {
         for (molecule_data_t& mol: _molecules) {
-            if (mol.moleculeApi) {
-                applyViamdFilter(mol, _viamdFilter);
-            }
+            applyViamdFilter(mol, _viamdFilter.value());
         }
     });
     
@@ -457,16 +461,14 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_ssaoEnabled);
     addProperty(_ssaoIntensity);
     addProperty(_ssaoRadius);
+    addProperty(_ssaoBias);
 
     setRenderBin(RenderBin::PostDeferredTransparent);
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {
     for (molecule_data_t& mol : _molecules) {
-        if (mol.moleculeApi)
-            freeMolecule(mol);
-        if (mol.trajectoryApi)
-            freeTrajectory(mol);
+        freeMolecule(mol);
     }
 }
 
@@ -528,15 +530,8 @@ void RenderableSimulationBox::initializeGL() {
 
     size_t i = 0;
     for (molecule_data_t& mol : _molecules) {
-        std::string molFile = _moleculeFiles.value().at(i);
-        std::string trajFile = _trajectoryFiles.value().at(i);
-
-        initMolecule(mol, molFile);
-        if (trajFile != "")
-            initTrajectory(mol, trajFile);
-
-        applyViamdFilter(mol, _viamdFilter);
-
+        initMolecule(mol, _moleculeFiles.value().at(i), _trajectoryFiles.value().at(i));
+        applyViamdFilter(mol, _viamdFilter.value());
         i++;
     }
     
@@ -636,6 +631,7 @@ void RenderableSimulationBox::updateAnimation(molecule_data_t& mol, double time)
     }
 }
 
+/*
 void RenderableSimulationBox::applyTransforms() {
     for (const molecule_data_t& mol : _molecules) {
         for (size_t i = 0; i < mol.states.size(); i++) {
@@ -655,6 +651,7 @@ void RenderableSimulationBox::applyTransforms() {
         }
     }
 }
+*/
 
 void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) {
     // update positions / rotations
@@ -709,17 +706,17 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     
     for (molecule_data_t& mol : _molecules) {
         // update animation
-        if (mol.trajectoryApi) {
+        if (mol.trajectory) {
             updateAnimation(mol, t * _animationSpeed);
+            md_gl_molecule_set_atom_position(&mol.drawMol, 0, uint32_t(mol.molecule.atom.count), mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z, 0);
         }
     
         // update simulation
         updateSimulation(mol, dt * _simulationSpeed);
     
         // update gl repr
-        applyTransforms();
-        md_gl_molecule_set_atom_position(&mol.drawMol, 0, uint32_t(mol.concatMolecule.atom.count),
-            mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z, 0);
+        //applyTransforms();
+
     }
 }
 
@@ -774,14 +771,30 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         dmat4(camCopy.sgctInternal.projectionMatrix()) *
         I;
 
+    // We want to preallocate this to avoid reallocations
+    size_t count = 0;
+    for (const auto& mol : _molecules) {
+        count += mol.states.size();
+    }
+
     std::vector<md_gl_draw_op_t> drawOps;
-    for (molecule_data_t& mol : _molecules) {
-        if (mol.concatMolecule.atom.count) {
-            // the modelMatrix was put in the viewMatrix to perform multiplication in
-            // double precision (dmat4).
-            mat4 modelMatrix(1.f);
+    drawOps.reserve(count);
+
+    std::vector<mat4> transforms;
+    transforms.reserve(count);
+
+    for (const molecule_data_t& mol : _molecules) {
+        for (size_t i = 0; i < mol.states.size(); i++) {
+            const molecule_state_t& state = mol.states[i];
+            dmat4 transform =
+                translate(dmat4(1.0), state.position) *
+                rotate(dmat4(1.0), state.angle, state.rotationAxis) *
+                dmat4(1.0);
+
+            transforms.push_back(mat4(transform));
+
             md_gl_draw_op_t drawOp = {};
-            drawOp.model_matrix = value_ptr(modelMatrix);
+            drawOp.model_matrix = value_ptr(transforms.back()); // This is only safe, because we store it in a vector and preallocate the memory
             drawOp.rep = &mol.drawRep;
             drawOps.push_back(drawOp);
         }
@@ -792,7 +805,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     args.view_transform = {
         value_ptr(viewMatrix),
         value_ptr(projMatrix),
-        nullptr, nullptr
     };
     args.atom_mask = AtomBitVisible;
     args.options = 0;
@@ -864,22 +876,20 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             desc.ambient_occlusion.enabled = _ssaoEnabled;
             desc.ambient_occlusion.intensity = _ssaoIntensity;
             desc.ambient_occlusion.radius = _ssaoRadius;
+            desc.ambient_occlusion.bias = _ssaoBias;
             desc.bloom.enabled = false;
             desc.depth_of_field.enabled = false;
             desc.temporal_reprojection.enabled = false;
-            desc.tonemapping.enabled = false;
+            desc.tonemapping.enabled = true;
             desc.input_textures.depth = depthTex;
             desc.input_textures.color = colorTex;
             desc.input_textures.normal = normalTex;
 
-            ViewParam param;
+            ViewParam param = {0};
             // camCopy.maxFov()
             param.clip_planes.near = 0.1f;
             param.clip_planes.far = 1000.f;
             // param.fov_y
-            param.jitter.current = vec2_t{{ 0, 0 }};
-            param.jitter.next = vec2_t{{ 0, 0 }};
-            param.jitter.previous = vec2_t{{ 0, 0 }};
             param.matrix.current.proj = mat4_from_glm(projMatrix);
             param.matrix.current.proj_jittered = mat4_from_glm(projMatrix);
             // param.matrix.current.norm = mat4_transpose(mat4_inverse(param.matrix.current.proj));
@@ -890,7 +900,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             
             postprocessing::postprocess(desc, param);
             glEnable(GL_DEPTH_TEST); // restore state after postprocess
-            glEnable(GL_BLEND);
+            glDisable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
 
@@ -920,78 +930,50 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().resetBlendState();
 }
 
-void RenderableSimulationBox::initMolecule(molecule_data_t& mol, const std::string& file) {
-    LDEBUG("Loading molecule file '" + file + "'");
+void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_view molFile, std::string_view trajFile) {
+    LDEBUG(fmt::format("Loading molecule file '{}'", molFile));
 
     // free previously loaded molecule
-    if (mol.moleculeApi) {
-        freeMolecule(mol);
-    }
-    
-    str_t molFileStr = str_from_cstr(file.data());
-    mol.moleculeApi = load::mol::get_api(molFileStr);
+    freeMolecule(mol);
 
-    if (!mol.moleculeApi) {
-        LERROR("failed to initialize molecule: unknown file type");
+    const md_molecule_t* molecule = mol_manager::get_molecule(molFile);
+    if (!molecule) {
         return;
     }
 
-    bool init = mol.moleculeApi->init_from_file(&mol.molecule, molFileStr, default_allocator);
-    
-    if (!init) {
-        LERROR("failed to initialize molecule: malformed file");
-        mol.moleculeApi = nullptr;
-        return;
+    // We don't really append per-se, we use this to perform a deep copy of the molecule from the manager so we can modify its state (coordinates).
+    md_molecule_append(&mol.molecule, molecule, default_allocator);
+
+    if (!trajFile.empty() && trajFile != "") {
+        LDEBUG(fmt::format("Loading trajectory file '{}'", trajFile));
+        mol.trajectory = mol_manager::get_trajectory(trajFile);
+
+        if (!mol.trajectory) {
+            LERROR("failed to initialize trajectory: failed to load file");
+            return;
+        }
     }
     
-    // duplicate the molecule data n times. This is done for performance reasons, because
-    // the molecule simulation can be treated as 1 big molecule with a single draw call.
-    mol.concatMolecule = concat_molecule_init(&mol.molecule, mol.states.size(), default_allocator);
     md_bitfield_init(&mol.visibilityMask, default_allocator);
     
     double sphere = glm::compMax(_simulationBox.value()) / 2.0;
     setBoundingSphere(sphere);
     // setInteractionSphere(sphere);
 
-    md_gl_molecule_init(&mol.drawMol, &mol.concatMolecule);
+    md_gl_molecule_init(&mol.drawMol, &mol.molecule);
     md_gl_representation_init(&mol.drawRep, &mol.drawMol);
     updateRepresentation(mol);
 
-    vec3_t min, max;
-    compute_aabb(&min, &max, mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z, mol.concatMolecule.atom.count);
+    //vec3 min = _simulationBox.minValue();
+    //vec3 max = _simulationBox.maxValue();
 
     // conetracing
-    cone_trace::init_occlusion_volume(&mol.occupancyVolume, min, max, 8.0f);
+    //cone_trace::init_occlusion_volume(&mol.occupancyVolume, min, max, 8.0f);
 
     // vec3 box = _simulationBox.value();
     // cone_trace::init_occlusion_volume(&mol.occupancyVolume, { {0, 0, 0} }, {{ box.x, box.y, box.z }}, 8.0f);
 
-    cone_trace::compute_occupancy_volume(
-        mol.occupancyVolume, mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z,
-        mol.concatMolecule.atom.radius, mol.concatMolecule.atom.count
-    );
-}
-
-void RenderableSimulationBox::initTrajectory(molecule_data_t& mol, const std::string& file) {
-    LDEBUG("Loading trajectory file '" + file + "'");
-    
-    // need to keep the string in scope to keep the str pointer valid
-    str_t trajFileStr = str_from_cstr(file.data());
-
-    mol.trajectoryApi = load::traj::get_api(trajFileStr);
-
-    if (!mol.trajectoryApi) {
-        LERROR("failed to initialize trajectory: unknown file type");
-        return;
-    }
-    
-    mol.trajectory = load::traj::open_file(trajFileStr, &mol.molecule, default_allocator);
-
-    if (!mol.trajectory) {
-        LERROR("failed to initialize trajectory: failed to load file");
-        mol.trajectoryApi = nullptr;
-        return;
-    }
+    //cone_trace::compute_occupancy_volume(mol.occupancyVolume, mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z, mol.molecule.atom.radius, mol.molecule.atom.count);
 }
 
 void RenderableSimulationBox::updateRepresentation(molecule_data_t& mol) {
@@ -1013,56 +995,58 @@ void RenderableSimulationBox::updateRepresentation(molecule_data_t& mol) {
             case RepresentationType::Licorice:
                 rep_args.licorice.radius = _repScale;
                 break;
+            default:
+                ghoul_assert(false, "unexpected representation type");
+                break;
         }
 
         md_gl_representation_set_type_and_args(&mol.drawRep, _repType, rep_args);
     }
     { // COLORING
-        uint32_t* colors = static_cast<uint32_t*>(md_alloc(default_temp_allocator, sizeof(uint32_t) * mol.concatMolecule.atom.count));
-        uint32_t count = static_cast<uint32_t>(mol.concatMolecule.atom.count);
+        uint32_t* colors = static_cast<uint32_t*>(md_alloc(default_temp_allocator, sizeof(uint32_t) * mol.molecule.atom.count));
+        uint32_t count = static_cast<uint32_t>(mol.molecule.atom.count);
 
         switch (static_cast<Coloring>(_coloring.value())) {
             case Coloring::Cpk:
-                color_atoms_cpk(colors, count, mol.concatMolecule);
+                color_atoms_cpk(colors, count, mol.molecule);
                 break;
             case Coloring::AtomIndex:
-                color_atoms_idx(colors, count, mol.concatMolecule);
+                color_atoms_idx(colors, count, mol.molecule);
                 break;
             case Coloring::ResId:
-                color_atoms_residue_id(colors, count, mol.concatMolecule);
+                color_atoms_residue_id(colors, count, mol.molecule);
                 break;
             case Coloring::ResIndex:
-                color_atoms_residue_index(colors, count, mol.concatMolecule);
+                color_atoms_residue_index(colors, count, mol.molecule);
                 break;
             case Coloring::ChainId:
-                color_atoms_chain_id(colors, count, mol.concatMolecule);
+                color_atoms_chain_id(colors, count, mol.molecule);
                 break;
             case Coloring::ChainIndex:
-                color_atoms_chain_index(colors, count, mol.concatMolecule);
+                color_atoms_chain_index(colors, count, mol.molecule);
                 break;
             case Coloring::SecondaryStructure:
-                color_atoms_secondary_structure(colors, count, mol.concatMolecule);
+                color_atoms_secondary_structure(colors, count, mol.molecule);
                 break;
             default:
                 ghoul_assert(false, "unexpected molecule coloring");
                 break;
         }
 
-        md_gl_representation_set_color(&mol.drawRep, 0, static_cast<uint32_t>(mol.concatMolecule.atom.count), colors, 0);
+        md_gl_representation_set_color(&mol.drawRep, 0, static_cast<uint32_t>(mol.molecule.atom.count), colors, 0);
     }
 }
 
-void RenderableSimulationBox::applyViamdFilter(molecule_data_t& mol, const std::string& filter) {
+void RenderableSimulationBox::applyViamdFilter(molecule_data_t& mol, std::string_view filter) {
     md_bitfield_clear(&mol.visibilityMask);
     
-    if (!mol.concatMolecule.atom.flags)
+    if (!mol.molecule.atom.flags)
         return;
     
-    if (!filter.empty()) {
-        str_t str = str_from_cstr(filter.data());
+    if (!filter.empty() && filter != "") {
+        str_t str = {filter.data(), filter.length()};
         md_filter_result_t res{};
-        md_script_ir_t* filterIR = md_script_ir_create(default_temp_allocator);
-        bool success = md_filter_evaluate(&res, str, &mol.concatMolecule, filterIR, default_temp_allocator);
+        bool success = md_filter_evaluate(&res, str, &mol.molecule, NULL, default_temp_allocator);
     
         if (success) {
             LDEBUG("Compiled viamd filter");
@@ -1074,38 +1058,35 @@ void RenderableSimulationBox::applyViamdFilter(molecule_data_t& mol, const std::
             LERROR("Failed to evaluate viamd filter");
         }
 
-        for (int64_t i = 0; i < mol.concatMolecule.atom.count; ++i) {
-            uint8_t& flags = mol.concatMolecule.atom.flags[i];
+        for (int64_t i = 0; i < mol.molecule.atom.count; ++i) {
+            md_flags_t& flags = mol.molecule.atom.flags[i];
             flags = md_bitfield_test_bit(&mol.visibilityMask, i) ? AtomBitVisible : 0; 
         }
 
         md_filter_free(&res, default_temp_allocator);
-        md_script_ir_free(filterIR);
     }
 
     else {
-        for (int64_t i = 0; i < mol.concatMolecule.atom.count; ++i) {
-            mol.concatMolecule.atom.flags[i] = AtomBitVisible;
+        for (int64_t i = 0; i < mol.molecule.atom.count; ++i) {
+            mol.molecule.atom.flags[i] = AtomBitVisible;
         }
     }
 
-    md_gl_molecule_set_atom_flags(&mol.drawMol, 0, static_cast<uint32_t>(mol.concatMolecule.atom.count), mol.concatMolecule.atom.flags, 0);
+    md_gl_molecule_set_atom_flags(&mol.drawMol, 0, static_cast<uint32_t>(mol.molecule.atom.count), mol.molecule.atom.flags, 0);
 }
 
-void RenderableSimulationBox::applyViamdScript(molecule_data_t& mol, const std::string& script) {
-    str_t str = str_from_cstr(script.data());
+void RenderableSimulationBox::applyViamdScript(molecule_data_t& mol, std::string_view script) {
+    str_t str = {script.data(), script.length()};
     int numFrames = md_trajectory_num_frames(mol.trajectory);
 
     md_script_ir_t* selectionIr = md_script_ir_create(default_temp_allocator);
     md_script_ir_t* mainIr = md_script_ir_create(default_temp_allocator);
     md_script_eval_t* fullEval = md_script_eval_create(numFrames, mainIr, default_temp_allocator);
-    // md_script_eval_t* filtEval = md_script_eval_create(numFrames, main_ir, default_temp_allocator);
 
     bool res = md_script_ir_compile_source(mainIr, str, &mol.molecule, selectionIr);
     
     if (res) {
         res = md_script_eval_compute(fullEval, mainIr, &mol.molecule, mol.trajectory, nullptr);
-        // md_script_eval_compute(filtEval, main_ir, &mol.molecule, &mol.trajectory, nullptr);
     } else {
         LERROR("Failed to compile IR from source");
     }
@@ -1116,25 +1097,18 @@ void RenderableSimulationBox::applyViamdScript(molecule_data_t& mol, const std::
 }
 
 void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {
-    cone_trace::free_volume(&mol.occupancyVolume);
+    //cone_trace::free_volume(&mol.occupancyVolume);
     md_gl_representation_free(&mol.drawRep);
     md_gl_molecule_free(&mol.drawMol);
-    mol.moleculeApi->free(&mol.molecule, default_allocator);
-    mol.moleculeApi = nullptr;
-    concat_molecule_free(&mol.concatMolecule, default_allocator);
+    md_molecule_free(&mol.molecule, default_allocator);
+
     md_bitfield_free(&mol.visibilityMask);
     mol.visibilityMask = {};
-    mol.concatMolecule = {};
     mol.molecule = {};
+    mol.trajectory = nullptr;
     mol.drawMol = {};
     mol.drawRep = {};
-    mol.occupancyVolume = {};
-}
-
-void RenderableSimulationBox::freeTrajectory(molecule_data_t& mol) {
-    mol.trajectoryApi->destroy(mol.trajectory);
-    mol.trajectoryApi = nullptr;
-    mol.trajectory = nullptr;
+    //mol.occupancyVolume = {};
 }
 
 } // namespace openspace

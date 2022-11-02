@@ -50,7 +50,9 @@
         if (&glPopDebugGroup) glPopDebugGroup(); \
     }
 
+#ifndef VIAMD_SHADER_DIR
 #define VIAMD_SHADER_DIR "shaders"
+#endif
 
 namespace postprocessing {
 

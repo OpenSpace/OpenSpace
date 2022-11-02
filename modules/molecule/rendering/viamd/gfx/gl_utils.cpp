@@ -35,8 +35,8 @@ bool gl::get_program_link_error(char* buffer, int max_length, GLuint program) {
 bool build_shader_src(md_string_builder_t* builder, str_t src, str_t base_include_dir) {
     str_t line;
     while (extract_line(&line, &src)) {
-        if (compare_str_cstr_n(line, "#include ", 9)) {
-            str_t file = trim_whitespace(substr(line, 9));
+        if (str_equal_cstr_n(line, "#include ", 9)) {
+            str_t file = str_trim_whitespace(substr(line, 9));
             if (!file || !(file.len > 2) || file[0] != '"' || file[file.len-1] != '"') {
                 md_printf(MD_LOG_TYPE_ERROR, "Failed to parse include file");
                 return false;
@@ -69,7 +69,7 @@ GLuint gl::compile_shader_from_source(str_t src, GLenum type, str_t defines, str
     
     if (defines) {
         str_t version_str = {};
-        if (compare_str_cstr_n(src, "#version ", 9)) {
+        if (str_equal_cstr_n(src, "#version ", 9)) {
             if (!extract_line(&version_str, &src)) {
                 md_print(MD_LOG_TYPE_ERROR, "Failed to extract version string!");
                 return 0;
@@ -117,7 +117,7 @@ GLuint gl::compile_shader_from_file(str_t filename, GLenum type, str_t defines) 
 
     if (defines) {
         str_t version_str = {};
-        if (compare_str_cstr_n(src, "#version ", 9)) {
+        if (str_equal_cstr_n(src, "#version ", 9)) {
             if (!extract_line(&version_str, &src)) {
                 md_print(MD_LOG_TYPE_ERROR, "Failed to extract version string!");
                 return 0;
