@@ -149,3 +149,12 @@ end)
 
 asset.export(Vesta)
 asset.export(VestaTrail)
+
+asset.meta = {
+  Name = "Vesta",
+  Version = "1.0",
+  Description = "Vesta model projection and trail",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -253,3 +253,12 @@ end)
 for i, node in ipairs(nodes) do
   asset.export(node)
 end
+
+asset.meta = {
+  Name = "Dawn",
+  Version = "1.0",
+  Description = "Dawn spacecraft and trail",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
