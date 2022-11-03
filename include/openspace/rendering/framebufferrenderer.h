@@ -96,7 +96,6 @@ public:
      */
     GLuint additionalDepthTexture();
 
-
     void initialize();
     void deinitialize();
 

@@ -28,7 +28,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
@@ -573,13 +572,13 @@ void RenderableModel::initializeGL() {
 
     // Screen quad VAO
     const GLfloat quadVertices[] = {
-        // x     y    s    t
-        -1.f, -1.f, 0.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-        -1.f,  1.f, 0.f, 1.f,
-        -1.f, -1.f, 0.f, 0.f,
-         1.f, -1.f, 1.f, 0.f,
-         1.f,  1.f, 1.f, 1.f
+        // x     y     s     t
+        -1.f, -1.f,  0.f,  0.f,
+         1.f,  1.f,  1.f,  1.f,
+        -1.f,  1.f,  0.f,  1.f,
+        -1.f, -1.f,  0.f,  0.f,
+         1.f, -1.f,  1.f,  0.f,
+         1.f,  1.f,  1.f,  1.f
     };
 
     glGenVertexArrays(1, &_quadVao);
@@ -791,7 +790,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
         const float o = opacity();
-        if (o >= 0.f && o < 1.f) {
+        if ((o >= 0.f && o < 1.f) || _disableDepthTest) {
             setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
         }
         else {
@@ -803,10 +802,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             glEnable(GL_CULL_FACE);
         }
         _program->deactivate();
-
-        if (_disableDepthTest) {
-            glEnable(GL_DEPTH_TEST);
-        }
 
         // Render pass 2
         // Render the whole model into the G-buffer with the correct opacity

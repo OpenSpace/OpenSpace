@@ -1223,6 +1223,15 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         scene->render(data, tasks);
     }
 
+    {
+        TracyGpuZone("Sticker")
+        ghoul::GLDebugGroup group("Sticker");
+        data.renderBinMask = static_cast<int>(
+            Renderable::RenderBin::Sticker
+        );
+        scene->render(data, tasks);
+    }
+
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
     // Disabling depth test for filtering and hdr

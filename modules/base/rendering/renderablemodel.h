@@ -117,12 +117,13 @@ private:
 
     properties::PropertyOwner _lightSourcePropertyOwner;
 
-    // Framebuffer and its textures
+    // Framebuffer and screen space quad
     GLuint _framebuffer;
     GLuint _quadVao;
     GLuint _quadVbo;
-    ghoul::opengl::ProgramObject* _quadProgram = nullptr;
 
+    // Opacity program
+    ghoul::opengl::ProgramObject* _quadProgram = nullptr;
     UniformCache(opacity, opacityBlending, colorTexture, depthTexture, positionTexture,
         normalTexture) _uniformOpacityCache;
 };

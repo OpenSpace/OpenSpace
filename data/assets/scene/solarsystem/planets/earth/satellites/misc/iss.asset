@@ -110,7 +110,7 @@ local IssLabel = {
     FadeDistances = { 0.15, 15.0 },
     FadeWidths = { 1.0, 25.0 }
   },
-  Tag = { "solarsystem_labels", "earth_satellite", "ISS" },
+  Tag = { "solarsystem_labels" },
   GUI = {
     Name = "ISS Label",
     Path = "/Solar System/Planets/Earth/Satellites"
