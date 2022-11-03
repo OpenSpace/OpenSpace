@@ -434,7 +434,7 @@ void LauncherWindow::populateProfilesList(std::string preset) {
             const std::optional<std::string>& d = (*p).meta.value().description;
             if (d.has_value()) {
                 // Tooltip has to be 'rich text' to linebreak properly
-                QString tooltip = QString::fromStdString(fmt::format("<html><p>{}</p></html>", *d));
+                QString tooltip = QString::fromStdString(fmt::format("<p>{}</p>", *d));
                 _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
             }
         }
@@ -470,7 +470,7 @@ void LauncherWindow::populateProfilesList(std::string preset) {
             const std::optional<std::string>& d = (*p).meta.value().description;
             if (d.has_value()) {
                 // Tooltip has to be 'rich text' to linebreak properly
-                QString tooltip = QString::fromStdString(fmt::format("<html><p>{}</p></html>", *d));
+                QString tooltip = QString::fromStdString(fmt::format("<p>{}</p>", *d));
                 _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
             }
         }
