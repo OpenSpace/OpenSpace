@@ -790,7 +790,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
         const float o = opacity();
-        if ((o >= 0.f && o < 1.f) || _disableDepthTest) {
+        if ((o >= 0.f && o < 1.f) || _disableDepthTest || _enableOpacityBlending) {
             setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
         }
         else {

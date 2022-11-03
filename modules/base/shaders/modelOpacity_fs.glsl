@@ -43,6 +43,8 @@ Fragment getFragment() {
     discard;
   }
 
+  frag.color.rgb = textureColor.rgb;
+
   if (opacityBlending) {
     frag.color.a = opacity * max(max(frag.color.r, frag.color.g), frag.color.b);
   }
@@ -50,7 +52,6 @@ Fragment getFragment() {
     frag.color.a = opacity;
   }
 
-  frag.color.rgb = textureColor.rgb;
   frag.depth = denormalizeFloat(texture(depthTexture, vs_st).x);
   frag.gPosition = texture(positionTexture, vs_st);
   frag.gNormal = vec4(texture(normalTexture, vs_st).rgb, 0.0);
