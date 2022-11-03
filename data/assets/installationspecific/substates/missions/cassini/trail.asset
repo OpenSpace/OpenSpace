@@ -228,7 +228,7 @@ local primaryMission = {
     Color = { 0.76, 0.26, 0.85 },
     StartTime = beginSaturnOrbit,
     EndTime = missionEquinoxStart,
-    SampleInterval = 400,
+    SampleInterval = 15000,
     Enabled = true,
     Opacity = 0.0
   },
@@ -261,7 +261,7 @@ local equinoxMission = {
     Color = { 0.76, 0.26, 0.85 },
     StartTime = missionEquinoxStart,
     EndTime = missionSolsticeStart,
-    SampleInterval = 400,
+    SampleInterval = 12500,
     Enabled = true,
     Opacity = 0.0
   },
@@ -294,7 +294,7 @@ local solsticeMission = {
     Color = { 0.76, 0.26, 0.85 },
     StartTime = missionSolsticeStart,
     EndTime = startGrandFinale,
-    SampleInterval = 400,
+    SampleInterval = 10000,
     Enabled = true,
     Opacity = 0.0
   },
@@ -327,7 +327,7 @@ local grandFinale = {
     Color = { 0.76, 0.26, 0.85 },
     StartTime = startGrandFinale,
     EndTime = endCassini,
-    SampleInterval = 400,
+    SampleInterval = 1000,
     Enabled = true,
     Opacity = 0.0
   },
@@ -360,7 +360,7 @@ local huygensTrail = {
     Color = { 0.1, 0.34, 0.85 },
     StartTime = huygensDetach,
     EndTime = endHuygens,
-    SampleInterval = 400,
+    SampleInterval = 15000,
     Enabled = true,
     Opacity = 0.0
   },
