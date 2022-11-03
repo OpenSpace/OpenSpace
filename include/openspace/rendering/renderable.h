@@ -57,8 +57,9 @@ public:
         Background = 1,
         Opaque = 2,
         PreDeferredTransparent = 4,
-        PostDeferredTransparent = 8,
-        Overlay = 16
+        Overlay = 8,
+        PostDeferredTransparent = 16,
+        Sticker = 32
     };
 
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
