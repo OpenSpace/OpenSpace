@@ -50,7 +50,7 @@ TransferFunction::TransferFunction(const std::string& filepath,
     setCallback(std::move(tfChangedCallback));
 }
 
-TransferFunction::~TransferFunction() {} // NOLINT
+TransferFunction::~TransferFunction() {}
 
 void TransferFunction::setPath(const std::string& filepath) {
     if (_file) {

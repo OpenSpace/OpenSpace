@@ -87,13 +87,10 @@ LightSource::LightSource()
 }
 
 LightSource::LightSource(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "LightSource" })
-    , _enabled(EnabledInfo, true)
+    : LightSource()
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
     _enabled = p.enabled.value_or(_enabled);
-    addProperty(_enabled);
 }
 
 bool LightSource::initialize() {

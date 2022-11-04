@@ -282,9 +282,7 @@ void renderDoubleListProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    std::string value;
-    p->getStringValue(value);
-
+    std::string value = p->stringValue();
     renderListProperty(name, p->fullyQualifiedIdentifier(), value);
 
     if (showTooltip) {
@@ -302,9 +300,7 @@ void renderIntListProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    std::string value;
-    p->getStringValue(value);
-
+    std::string value = p->stringValue();
     renderListProperty(name, p->fullyQualifiedIdentifier(), value);
 
     if (showTooltip) {
@@ -322,9 +318,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    std::string value;
-    p->getStringValue(value);
-
+    std::string value = p->stringValue();
     renderListProperty(name, p->fullyQualifiedIdentifier(), value);
 
     if (showTooltip) {

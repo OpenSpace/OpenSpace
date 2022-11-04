@@ -33,7 +33,7 @@ LongProperty::LongProperty(Property::PropertyInfo info, long value,
     : NumericalProperty<long>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string LongProperty::className() const {
+std::string_view LongProperty::className() const {
     return "LongProperty";
 }
 

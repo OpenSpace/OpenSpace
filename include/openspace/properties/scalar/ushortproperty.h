@@ -52,7 +52,7 @@ public:
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<unsigned short>::operator=;

@@ -154,6 +154,8 @@ private:
     properties::StringProperty _origin;
     properties::BoolProperty _unitTest;
     properties::BoolProperty _touchActive;
+    properties::BoolProperty _disableZoom;
+    properties::BoolProperty _disableRoll;
     properties::BoolProperty _reset;
     properties::IntProperty _maxTapTime;
     properties::IntProperty _deceleratesPerSecond;

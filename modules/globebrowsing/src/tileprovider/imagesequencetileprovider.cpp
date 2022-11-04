@@ -140,6 +140,7 @@ void ImageSequenceTileProvider::reset() {
             _imagePaths.push_back(p.path());
         }
     }
+    std::sort(_imagePaths.begin(), _imagePaths.end());
 
     _index = 0;
     _index.setMaxValue(static_cast<int>(_imagePaths.size() - 1));

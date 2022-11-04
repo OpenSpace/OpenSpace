@@ -140,6 +140,38 @@ namespace {
     global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
+// Picks the previous node from the interesting nodes out of the profile and selects that.
+// If the current anchor is not an interesting node, the first will be selected
+[[codegen::luawrap]] void targetPreviousInterestingAnchor() {
+    using namespace openspace;
+    if (global::profile->markNodes.empty()) {
+        LWARNINGC(
+            "targetPreviousInterestingAnchor",
+            "Profile does not define any interesting nodes"
+        );
+        return;
+    }
+    const std::vector<std::string>& markNodes = global::profile->markNodes;
+
+    std::string currAnchor =
+        global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
+
+    auto it = std::find(markNodes.begin(), markNodes.end(), currAnchor);
+    if (it == markNodes.end()) {
+        // We want to use the first node if the current node is not an interesting node
+        global::navigationHandler->orbitalNavigator().setFocusNode(markNodes.front());
+    }
+    else if (it == markNodes.begin()) {
+        // We want to use the last node if the current node is the first in the list
+        global::navigationHandler->orbitalNavigator().setFocusNode(markNodes.back());
+    }
+    else {
+        // Otherwise we can just select the previous one
+        global::navigationHandler->orbitalNavigator().setFocusNode(*(it - 1));
+    }
+    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+}
+
 /**
  * Finds the input joystick with the given 'name' and binds the axis identified by the
  * second argument to be used as the type identified by the third argument. If

@@ -35,7 +35,7 @@ public:
     NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
         T maximumValue, T steppingValue, float exponent = 1.f);
 
-    virtual std::string className() const override = 0;
+    virtual std::string_view className() const override = 0;
     virtual int typeLua() const override = 0;
 
     T minValue() const;

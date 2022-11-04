@@ -51,7 +51,7 @@ public:
         int minValue = std::numeric_limits<int>::lowest(),
         int maxValue = std::numeric_limits<int>::max(), int stepValue = 1);
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<int>::operator=;

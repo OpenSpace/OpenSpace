@@ -82,7 +82,7 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     }
 }
 
-RenderablePlaneProjection::~RenderablePlaneProjection() {} // NOLINT
+RenderablePlaneProjection::~RenderablePlaneProjection() {}
 
 bool RenderablePlaneProjection::isReady() const {
     return _shader && _texture;

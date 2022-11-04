@@ -37,7 +37,7 @@ class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 public:
     SelectionProperty(Property::PropertyInfo info);
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     /**

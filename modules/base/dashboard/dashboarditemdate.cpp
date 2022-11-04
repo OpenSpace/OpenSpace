@@ -39,7 +39,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format String",
-        "The format text describing how this dashboard item renders it's text. This text "
+        "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the date"
     };
 

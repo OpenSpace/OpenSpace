@@ -157,7 +157,7 @@ PathNavigator::PathNavigator()
     addProperty(_relevantNodeTags);
 }
 
-PathNavigator::~PathNavigator() {} // NOLINT
+PathNavigator::~PathNavigator() {}
 
 Camera* PathNavigator::camera() const {
     return global::navigationHandler->camera();

@@ -177,7 +177,7 @@ bool Sphere::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)) // NOLINT
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
     );
 
     glEnableVertexAttribArray(2);
@@ -187,7 +187,7 @@ bool Sphere::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)) // NOLINT
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
