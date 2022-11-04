@@ -1,13 +1,6 @@
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 
-local textures = asset.syncedResource({
-  Name = "Ceres Textures",
-  Type = "HttpSynchronization",
-  Identifier = "ceres_textures",
-  Version = 2
-})
-
 local Ceres = {
   Identifier = "Ceres",
   Parent = transforms.CeresPosition.Identifier,
@@ -15,15 +8,7 @@ local Ceres = {
     Type = "RenderableGlobe",
     Radii = { 487.3E3, 487.3E3, 454.7E3 },
     SegmentsPerPatch = 64,
-    Layers = {
-      ColorLayers = {
-        {
-          Identifier = "Texture",
-          FilePath = textures .. "ceres_lamo_4096x2048.png",
-          Enabled = true
-        }
-      }
-    }
+    Layers = {}
   },
   Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet" },
   GUI = {

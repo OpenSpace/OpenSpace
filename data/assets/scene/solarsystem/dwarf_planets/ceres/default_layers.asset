@@ -1,0 +1,12 @@
+asset.require("./layers/colorlayers/lamo_local", false)
+asset.require("./layers/colorlayers/lamo", true)
+
+
+asset.meta = {
+  Name = "Default Ceres Layers",
+  Version = "1.0",
+  Description = "Default Ceres layers are: LAMO",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
