@@ -13,10 +13,10 @@ local grandFinaleStart = "2017-04-26T00:00:00.000"
 local cassiniEnd = "2017-09-15T10:34:05.000"
 
 local orbitInsertionDistance = 9000000000
-local primaryDistance = 2500000000
-local equinoxDistance = 1500000000
-local solsticeDistance = 650000000
-local grandFinaleDistance = 400000000
+local primaryDistance = 2600000000
+local equinoxDistance = 2000000000
+local solsticeDistance = 2000000000
+local grandFinaleDistance = 550000000
 
 local cassiniNavigationState = [[{ Anchor = 'Saturn', Pitch = -0.000071, Position = { 3641029278.891357, 7812048554.762817, -1533586357.197266 }, ReferenceFrame = 'Root', Up = { -0.739154, 0.443940, 0.506525 }, Yaw = 0.003681 }]]
 
@@ -24,6 +24,7 @@ local cassiniScripts = [[
   -- Primary start
   openspace.scriptScheduler.loadScheduledScript(
     "2004-06-16T08:14:58.000", -- 1 sec pre delay
+    "openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-primarauppdraget.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-10days.png' .. [[')" ..
@@ -63,6 +64,8 @@ local cassiniScripts = [[
   -- Equinox start
   openspace.scriptScheduler.loadScheduledScript(
     "2008-08-09T00:00:00.000",
+    "openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-dagjamningsuppdraget.png' .. [[')" ..
     "openspace.pathnavigation.zoomToDistance(]] .. tostring(equinoxDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(864000)" .. -- 10 days per second
@@ -75,6 +78,8 @@ local cassiniScripts = [[
   -- Solstice start
   openspace.scriptScheduler.loadScheduledScript(
     "2010-11-24T00:00:00.000",
+    "openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-solstandsuppdraget.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-15days.png' .. [[')" ..
     "openspace.pathnavigation.zoomToDistance(]] .. tostring(solsticeDistance) .. [[)" ..
@@ -97,6 +102,8 @@ local cassiniScripts = [[
   -- Grand Finale start
   openspace.scriptScheduler.loadScheduledScript(
     "2017-04-16T00:00:00.000", -- 10 day pre delay
+    "openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-storafinalen.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-2days.png' .. [[')" ..
     "openspace.pathnavigation.zoomToDistance(]] .. tostring(grandFinaleDistance) .. [[)" ..
@@ -140,6 +147,7 @@ local cassiniScripts = [[
   -- End
   openspace.scriptScheduler.loadScheduledScript(
     "2017-09-15T11:05:10.000", -- 31 minutes and 5 seconds delay
+    "openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.Enabled', false)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)" ..
     "openspace.time.setTime('2004-06-16T08:14:57.000')" .. -- Loop
@@ -160,6 +168,7 @@ local huygensScripts = [[
   -- Detach
   openspace.scriptScheduler.loadScheduledScript(
     "2004-11-21 08:44:54.000", -- 1 sec pre delay
+    "openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', true)" ..
     "openspace.time.interpolateDeltaTime(172800)" .. -- 2 days per second
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-2days.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', true)"
@@ -213,6 +222,7 @@ local huygensScripts = [[
   -- End
   openspace.scriptScheduler.loadScheduledScript(
     "2005-01-14 09:11:15.000", -- 6 minutes and 20 secods delay
+    "openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', false)" ..
     "openspace.time.setTime('2004-11-21 08:44:50.000')" .. -- Loop
     "openspace.navigation.setNavigationState(]] .. tostring(huygensNavigationState) .. [[)"
   )
@@ -226,6 +236,7 @@ local trails = { "primaryMission", "equinoxMission", "solsticeMission", "grandFi
 local cassiniState = {
   Identifier = "Cassini",
   Enter = [[
+    openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', true)
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitConstantLatitudeOnArrival() .. [[
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 0.0, 3.0)
@@ -237,6 +248,10 @@ local cassiniState = {
   Exit = [[
     ]] .. util.stopOrbiting() .. [[
     openspace.scriptScheduler.clear()
+    openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.Enabled', false)
     openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)
     ]] .. util.fadeOutNodes(trails) .. [[
@@ -249,6 +264,11 @@ local cassiniState = {
 local huygensState = {
   Identifier = "Huygens",
   Enter = [[
+    openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', true)
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.Titan.Renderable.Opacity', 1.0, 3.0)
@@ -257,6 +277,7 @@ local huygensState = {
     ]] .. huygensScripts .. [[
   ]],
   Exit = [[
+    openspace.setPropertyValueSingle('Scene.huygensTrail.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)
     openspace.scriptScheduler.clear()
     ]] .. util.fadeOutNodes({ "huygensTrail" }) .. [[
