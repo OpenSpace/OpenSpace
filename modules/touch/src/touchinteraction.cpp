@@ -34,6 +34,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -373,6 +374,14 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
 #ifdef TOUCH_DEBUG_PROPERTIES
     _debugProperties.nFingers = list.size();
 #endif
+
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
     if (_tap) {
         // check for doubletap
         using namespace std::chrono;
@@ -445,6 +454,14 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     _vel.zoom = 0.0;
     _vel.roll = 0.0;
     _vel.pan = glm::dvec2(0.0);
+
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
 #ifdef TOUCH_DEBUG_PROPERTIES
     LINFO("DirectControl");
 #endif
@@ -969,6 +986,13 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
 // Main update call, calculates the new orientation and position for the camera depending
 // on _vel and dt. Called every frame
 void TouchInteraction::step(double dt, bool directTouch) {
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
     using namespace glm;
 
     const SceneGraphNode* anchor =
@@ -1183,6 +1207,13 @@ void TouchInteraction::decelerate(double dt) {
 
     //Ensure the number of times to apply the decay coefficient is valid
     times = std::min(times, 1);
+
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
 
     _vel.orbit *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.orbit, times);
     _vel.roll  *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.roll,  times);
