@@ -79,6 +79,18 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
+        "DisableZoom",
+        "Disable zoom navigation",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableRollInfo = {
+        "DisableRoll",
+        "Disable roll navigation",
+        "" // @TODO Missing documentation
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "TouchEvents",
         "True if we have a touch event",
@@ -253,6 +265,8 @@ TouchInteraction::TouchInteraction()
     , _origin(OriginInfo)
     , _unitTest(UnitTestInfo, false)
     , _touchActive(EventsInfo, false)
+    , _disableZoom(DisableZoomInfo, false)
+    , _disableRoll(DisableRollInfo, false)
     , _reset(SetDefaultInfo, false)
     , _maxTapTime(MaxTapTimeInfo, 300, 10, 1000)
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
@@ -305,6 +319,8 @@ TouchInteraction::TouchInteraction()
     // projDiffLength/diffLength.
 {
     addProperty(_touchActive);
+    addProperty(_disableZoom);
+    addProperty(_disableRoll);
     addProperty(_unitTest);
     addProperty(_reset);
     addProperty(_maxTapTime);
@@ -441,11 +457,15 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     int nDof = _solver.nDof();
 
     if (_lmSuccess && !_unitTest) {
-         // if good values were found set new camera state
+        // if good values were found set new camera state
         _vel.orbit = glm::dvec2(par.at(0), par.at(1));
         if (nDof > 2) {
-            _vel.zoom = par.at(2);
-            _vel.roll = par.at(3);
+            if (!_disableZoom) {
+                _vel.zoom = par.at(2);
+            }
+            if (!_disableRoll) {
+                _vel.roll = par.at(3);
+            }
             if (_panEnabled && nDof > 4) {
                 _vel.roll = 0.0;
                 _vel.pan = glm::dvec2(par.at(4), par.at(5));
@@ -793,6 +813,10 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case PINCH: {
+            if (_disableZoom) {
+                break;
+            }
+
              // add zooming velocity - dependant on distance difference between contact
              // points this/first frame
             using namespace glm;
@@ -820,6 +844,10 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case ROLL: {
+            if (_disableRoll) {
+                break;
+            }
+
             // add global roll rotation velocity
             double rollFactor = std::accumulate(
                 list.begin(),
@@ -857,6 +885,10 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case PAN: {
+            if (!_panEnabled) {
+                break;
+            }
+
             // add local rotation velocity
             _vel.pan += glm::dvec2(inputHolder.speedX() *
                         _sensitivity.pan.x, inputHolder.speedY() * _sensitivity.pan.y);
@@ -890,6 +922,10 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case ZOOM_OUT: {
+            if (_disableZoom) {
+                break;
+            }
+
             // zooms out from current if triple tap occurred
             _vel.zoom = computeTapZoomDistance(-1.0);
             _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
@@ -986,7 +1022,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         }
         {
             // Orbit (global rotation)
-            const dvec3 eulerAngles(_vel.orbit.y*dt, _vel.orbit.x*dt, 0);
+            const dvec3 eulerAngles(_vel.orbit.y * dt, _vel.orbit.x * dt, 0);
             const dquat rotationDiffCamSpace = dquat(eulerAngles);
 
             const dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace *
@@ -1187,6 +1223,8 @@ void TouchInteraction::resetAfterInput() {
 // Reset all property values to default
 void TouchInteraction::resetToDefault() {
     _unitTest.set(false);
+    _disableZoom.set(false);
+    _disableRoll.set(false);
     _reset.set(false);
     _maxTapTime.set(300);
     _deceleratesPerSecond.set(240);
