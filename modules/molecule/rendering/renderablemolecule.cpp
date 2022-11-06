@@ -763,8 +763,8 @@ namespace openspace {
 
         const md_molecule_t* molecule = mol_manager::get_molecule(molFile);
         if (molecule) {
-            // We deep copy the contents, so we can freely modify the fields (coordinates etc)
-            md_molecule_append(&mol.molecule, molecule, default_allocator);
+            // Perform a deep copy of the molecule from the manager so we can modify its state (coordinates).
+            md_molecule_copy(&mol.molecule, molecule, default_allocator);
         }
 
         if (!trajFile.empty() && trajFile != "") {
