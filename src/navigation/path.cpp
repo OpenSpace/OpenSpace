@@ -217,6 +217,7 @@ void Path::resetPlaybackVariables() {
 CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
     ghoul_assert(_type == Type::Linear, "Path type must be linear");
     const double relativeDistance = distance / pathLength();
+
     const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
     const double remainingDistance = glm::length(prevPosToEnd);
     CameraPose pose;
@@ -230,9 +231,27 @@ CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
         // Just move along line from the current position to the target
         const glm::dvec3 lineDir = glm::normalize(prevPosToEnd);
         pose.position = _prevPose.position - displacement * lineDir;
+
+        double newRemainingDistance = glm::length(pose.position - _end.position());
+        double diff = remainingDistance - newRemainingDistance;
+        // Avoid remaining distances close to zero, or even negative
+        if (relativeDistance > 0.5 && diff < LengthEpsilon) {
+            // The positions are too large, so we are not making progress because of
+            // insufficient precision
+            LWARNING("Quit camera path prematurely due to insufficient precision");
+            _shouldQuit = true;
+            return _prevPose;
+        }
     }
 
     pose.rotation = linearPathRotation(relativeDistance);
+
+    if (glm::any(glm::isnan(pose.rotation)) || glm::any(glm::isnan(pose.position))) {
+        // This should not happen, but guard for it anyways
+        _shouldQuit = true;
+        return _prevPose;
+    }
+
     return pose;
 }
 
