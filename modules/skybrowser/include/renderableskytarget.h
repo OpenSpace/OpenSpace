@@ -57,6 +57,9 @@ public:
 
     static documentation::Documentation Documentation();
 
+    void applyRoll();
+    glm::dvec3 rightVector() const;
+    glm::dvec3 upVector() const;
 private:
     // Properties
     properties::FloatProperty _crossHairSize;
@@ -65,8 +68,15 @@ private:
 
     double _verticalFov = 10.0;
 
+    properties::BoolProperty _applyRoll;
+
+    bool _isInitialized = false;
+    double _borderRadius = 0.0;
     glm::ivec3 _borderColor = glm::ivec3(230);
     float _ratio = 1.f;
+    glm::dvec3 _rightVector;
+    glm::dvec3 _upVector;
+    glm::dvec3 _worldPosition;
 };
 } // namespace openspace
 

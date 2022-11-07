@@ -55,7 +55,7 @@ public:
 
     // Mouse interaction
     void startFinetuningTarget();
-    void fineTuneTarget(const glm::vec2& startMouse, const glm::vec2& translation);
+    void fineTuneTarget(const glm::vec2& translation);
     void synchronizeAim();
 
     // Browser
@@ -80,6 +80,7 @@ public:
     void setBrowserRatio(float ratio);
     void setVerticalFovWithScroll(float scroll);
     void setImageCollectionIsLoaded(bool isLoaded);
+    void applyRoll();
 
     double verticalFov() const;
     glm::ivec3 borderColor() const;
@@ -110,8 +111,6 @@ public:
     friend bool operator!=(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs);
 
 private:
-    void aimTargetGalactic(glm::dvec3 direction);
-
     // Target and browser
     RenderableSkyTarget* _targetRenderable = nullptr;
     ScreenSpaceSkyBrowser* _browser = nullptr;

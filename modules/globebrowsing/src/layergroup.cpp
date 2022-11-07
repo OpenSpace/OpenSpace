@@ -248,4 +248,8 @@ void LayerGroup::onChange(std::function<void(Layer*)> callback) {
     }
 }
 
+bool LayerGroup::isHeightLayer() const {
+    return _groupId == layergroupid::HeightLayers;
+}
+
 } // namespace openspace::globebrowsing

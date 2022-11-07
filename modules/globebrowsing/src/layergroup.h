@@ -66,6 +66,8 @@ struct LayerGroup : public properties::PropertyOwner {
 
     void onChange(std::function<void(Layer*)> callback);
 
+    bool isHeightLayer() const;
+
 private:
     const layergroupid::GroupID _groupId;
     std::vector<std::unique_ptr<Layer>> _layers;
