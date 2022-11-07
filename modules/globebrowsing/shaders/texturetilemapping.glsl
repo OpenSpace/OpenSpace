@@ -97,14 +97,15 @@ float orenNayarDiffuse(vec3 lightDirection, vec3 viewDirection, vec3 surfaceNorm
 }
 
 float performLayerSettings(float value, LayerSettings settings) {
-  float v = pow(abs(value), settings.gamma) * settings.multiplier + settings.offset;
-  return sign(value) * v * settings.opacity;
+  float v = sign(value) * pow(abs(value), settings.gamma) *
+    settings.multiplier + settings.offset;
+  return v * settings.opacity;
 }
 
-vec4 performLayerSettings(vec4 currentValue, LayerSettings settings) {
-  vec3 newValue = sign(currentValue.rgb) * pow(abs(currentValue.rgb), vec3(settings.gamma)) *
-          settings.multiplier + settings.offset;
-  return vec4(newValue, currentValue.a * settings.opacity);
+vec4 performLayerSettings(vec4 value, LayerSettings settings) {
+  vec3 v = sign(value.rgb) * pow(abs(value.rgb), vec3(settings.gamma)) *
+    settings.multiplier + settings.offset;
+  return vec4(v, value.a * settings.opacity);
 }
 
 vec2 tileUVToTextureSamplePosition(ChunkTile chunkTile, vec2 tileUV, PixelPadding padding)
