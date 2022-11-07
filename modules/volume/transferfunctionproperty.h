@@ -35,7 +35,7 @@ public:
     TransferFunctionProperty(Property::PropertyInfo info,
         volume::TransferFunction value = volume::TransferFunction());
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<volume::TransferFunction>::operator=;

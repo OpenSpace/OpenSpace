@@ -85,6 +85,14 @@ LayerRenderSettings::LayerRenderSettings()
     });
 }
 
+void LayerRenderSettings::onChange(std::function<void()> callback) {
+    opacity.onChange(callback);
+    gamma.onChange(callback);
+    multiplier.onChange(callback);
+    multiplier.onChange(callback);
+    offset.onChange(callback);
+}
+
 float LayerRenderSettings::performLayerSettings(float v) const {
     return
         ((glm::sign(v) * glm::pow(glm::abs(v), gamma) * multiplier) + offset) * opacity;

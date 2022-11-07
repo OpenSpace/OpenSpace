@@ -81,6 +81,19 @@ namespace {
     } // geometry
 
     std::optional<Profile> loadProfileFromFile(QWidget* parent, std::string filename) {
+        // Verify that the file actually exists
+        if (!std::filesystem::exists(filename)) {
+            QMessageBox::critical(
+                parent,
+                "Exception",
+                QString::fromStdString(fmt::format(
+                    "Could not open profile file '{}'", filename
+                ))
+            );
+
+            return std::nullopt;
+        }
+
         std::ifstream inFile;
         try {
             inFile.open(filename, std::ifstream::in);
@@ -407,11 +420,24 @@ void LauncherWindow::populateProfilesList(std::string preset) {
         ++_userAssetCount;
     }
     std::sort(profiles.begin(), profiles.end());
-    for (const fs::directory_entry& p : profiles) {
+    for (const fs::directory_entry& profile : profiles) {
+        std::filesystem::path path = profile.path();
         _profileBox->addItem(
-            QString::fromStdString(p.path().stem().string()),
-            QString::fromStdString(p.path().string())
+            QString::fromStdString(path.stem().string()),
+            QString::fromStdString(path.string())
         );
+
+        // Add toooltip
+        std::optional<Profile> p = loadProfileFromFile(this, path.string());
+        int idx = _profileBox->count() - 1;
+        if (p.has_value() && (*p).meta.has_value()) {
+            const std::optional<std::string>& d = (*p).meta.value().description;
+            if (d.has_value()) {
+                // Tooltip has to be 'rich text' to linebreak properly
+                QString tooltip = QString::fromStdString(fmt::format("<p>{}</p>", *d));
+                _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
+            }
+        }
     }
 
     _profileBox->addItem(QString::fromStdString("--- OpenSpace Profiles ---"));
@@ -431,11 +457,23 @@ void LauncherWindow::populateProfilesList(std::string preset) {
 
     // Add sorted items to list
     for (const fs::directory_entry& profile : profiles) {
-        std::string abc = profile.path().string();
+        std::filesystem::path path = profile.path();
         _profileBox->addItem(
-            QString::fromStdString(profile.path().stem().string()),
-            QString::fromStdString(profile.path().string())
+            QString::fromStdString(path.stem().string()),
+            QString::fromStdString(path.string())
         );
+
+        // Add toooltip
+        std::optional<Profile> p = loadProfileFromFile(this, path.string());
+        int idx = _profileBox->count() - 1;
+        if (p.has_value() && (*p).meta.has_value()) {
+            const std::optional<std::string>& d = (*p).meta.value().description;
+            if (d.has_value()) {
+                // Tooltip has to be 'rich text' to linebreak properly
+                QString tooltip = QString::fromStdString(fmt::format("<p>{}</p>", *d));
+                _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
+            }
+        }
     }
 
     // Try to find the requested profile and set it as the current one
@@ -568,7 +606,6 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     }
     else {
         // Otherwise, we want to load that profile
-
         std::string fullProfilePath = saveProfilePath + profile + ".profile";
         p = loadProfileFromFile(this, fullProfilePath);
         if (!p.has_value()) {

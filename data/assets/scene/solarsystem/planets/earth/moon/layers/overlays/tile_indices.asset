@@ -1,0 +1,29 @@
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
+
+local layer = {
+  Identifier = "Tile_Indices",
+  Name = "Tile Indices",
+  Enabled = asset.enabled,
+  Type = "TileIndexTileLayer"
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+end)
+
+asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Moon Tile Indices",
+  Version = "1.0",
+  Description = "Tile index layer for Moon globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

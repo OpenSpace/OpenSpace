@@ -41,7 +41,7 @@ IVec3Property::IVec3Property(Property::PropertyInfo info, glm::ivec3 value,
     )
 {}
 
-std::string IVec3Property::className() const {
+std::string_view IVec3Property::className() const {
     return "IVec3Property";
 }
 

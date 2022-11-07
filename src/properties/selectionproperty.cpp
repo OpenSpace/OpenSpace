@@ -43,7 +43,7 @@ SelectionProperty::SelectionProperty(Property::PropertyInfo info)
     : TemplateProperty(std::move(info), std::set<std::string>())
 {}
 
-std::string SelectionProperty::className() const {
+std::string_view SelectionProperty::className() const {
     return "SelectionProperty";
 }
 

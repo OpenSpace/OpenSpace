@@ -41,7 +41,7 @@ DMat4Property::DMat4Property(Property::PropertyInfo info, glm::dmat4x4 value,
     )
 {}
 
-std::string DMat4Property::className() const {
+std::string_view DMat4Property::className() const {
     return "DMat4Property";
 }
 

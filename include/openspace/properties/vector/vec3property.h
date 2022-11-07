@@ -39,7 +39,7 @@ public:
         glm::vec3 maxValue = glm::vec3(std::numeric_limits<float>::max()),
         glm::vec3 stepValue = glm::vec3(0.01f));
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<glm::vec3>::operator=;

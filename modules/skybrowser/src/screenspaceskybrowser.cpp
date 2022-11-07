@@ -129,7 +129,8 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
     _scale.onChange([this]() {
         updateTextureResolution();
-        });
+        _borderRadiusTimer = 0;
+    });
 
     _useRadiusAzimuthElevation.onChange(
         [this]() {
@@ -325,11 +326,14 @@ void ScreenSpaceSkyBrowser::update() {
     if (_shouldReload) {
         _isInitialized = false;
     }
-
-    if (_radiusIsDirty && _isInitialized) {
+    // After the texture has been updated, wait a little bit before updating the border
+    // radius so the browser has time to update its size
+    if (_radiusIsDirty && _isInitialized && _borderRadiusTimer == RadiusTimeOut) {
         setBorderRadius(_borderRadius);
         _radiusIsDirty = false;
+        _borderRadiusTimer = -1;
     }
+    _borderRadiusTimer++;
 
     ScreenSpaceRenderable::update();
     WwtCommunicator::update();

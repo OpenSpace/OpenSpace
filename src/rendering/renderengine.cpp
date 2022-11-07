@@ -411,7 +411,7 @@ RenderEngine::RenderEngine()
     addProperty(_disabledFontColor);
 }
 
-RenderEngine::~RenderEngine() {} // NOLINT
+RenderEngine::~RenderEngine() {}
 
 void RenderEngine::initialize() {
     ZoneScoped
@@ -632,9 +632,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     glm::mat4 combinedGlobalRot = nodeRot * globalRot;
 
     if (_camera) {
-        _camera->sgctInternal.setViewMatrix(
-            viewMatrix * combinedGlobalRot * sceneMatrix
-        );
+        _camera->sgctInternal.setViewMatrix(viewMatrix * combinedGlobalRot * sceneMatrix);
         _camera->sgctInternal.setSceneMatrix(combinedGlobalRot * sceneMatrix);
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
         _camera->invalidateCache();
@@ -642,8 +640,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     const int fpsLimit = _framerateLimit;
     if (fpsLimit > 0) {
-        // Using a sleep here is not optimal, but we are not looking for FPS-perfect
-        // limiting
+        // Using a sleep here is not optimal, but we are not looking for perfect timing
         std::this_thread::sleep_until(_lastFrameTime);
         const double delta = (1.0 / fpsLimit) * 1000.0 * 1000.0;
         auto now = std::chrono::high_resolution_clock::now();
@@ -652,11 +649,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     const bool renderingEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
     if (renderingEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
-        _renderer.render(
-            _scene,
-            _camera,
-            _globalBlackOutFactor
-        );
+        _renderer.render(_scene, _camera, _globalBlackOutFactor);
     }
 
     // The CEF webbrowser fix has to be called at least once per frame and we are doing
@@ -896,7 +889,7 @@ ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
     return *_openglStateCache;
 }
 
-float RenderEngine::globalBlackOutFactor() {
+float RenderEngine::globalBlackOutFactor() const {
     return _globalBlackOutFactor;
 }
 
@@ -982,12 +975,7 @@ void RenderEngine::removeRenderProgram(ghoul::opengl::ProgramObject* program) {
         return;
     }
 
-    auto it = std::find(
-        _programs.begin(),
-        _programs.end(),
-        program
-    );
-
+    auto it = std::find(_programs.begin(), _programs.end(), program);
     if (it != _programs.end()) {
         _programs.erase(it);
     }
@@ -1056,19 +1044,18 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
 }
 
 void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s) {
-
     const std::string identifier = s->identifier();
 
-    if (std::find_if(
+    auto it = std::find_if(
         global::screenSpaceRenderables->begin(),
         global::screenSpaceRenderables->end(),
         [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& ssr) {
             return ssr->identifier() == identifier;
-        }) != global::screenSpaceRenderables->end()
-    ) {
+        }
+    );
+    if (it != global::screenSpaceRenderables->end()) {
         LERROR(fmt::format(
-            "Cannot add scene space renderable. "
-            "An element with identifier '{}' already exists",
+            "Cannot add scene space renderable. Identifier '{}' already exists",
             identifier
         ));
         return;
@@ -1142,7 +1129,7 @@ void RenderEngine::renderCameraInformation() {
         return;
     }
 
-    const glm::vec4 EnabledColor  = _enabledFontColor.value();
+    const glm::vec4 EnabledColor = _enabledFontColor.value();
     const glm::vec4 DisabledColor = _disabledFontColor.value();
 
     const glm::vec2 rotationBox = _fontCameraInfo->boundingBox("Rotation");
@@ -1216,10 +1203,7 @@ void RenderEngine::renderVersionInformation() {
 
     FR::defaultRenderer().render(
         *_fontVersionInfo,
-        glm::vec2(
-            fontResolution().x - versionBox.x - 10.f,
-            5.f
-        ),
+        glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
         _versionString,
         glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
     );

@@ -104,7 +104,7 @@ public:
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
-    void handleDragDrop(const std::string& file);
+    void handleDragDrop(std::filesystem::path file);
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
@@ -126,8 +126,7 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
-    void writeSceneDocumentation();
-    void writeStaticDocumentation();
+    void writeDocumentation();
     void createUserDirectoriesIfNecessary();
 
     /**
@@ -141,7 +140,6 @@ private:
     void loadFonts();
 
     void runGlobalCustomizationScripts();
-    std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     properties::BoolProperty _printEvents;
@@ -155,9 +153,6 @@ private:
     std::unique_ptr<VersionChecker> _versionChecker;
 
     glm::vec2 _mousePosition = glm::vec2(0.f);
-
-    //grabs json from each module to pass to the documentation engine.
-    std::string _documentationJson;
 
     std::future<void> _writeDocumentationTask;
 

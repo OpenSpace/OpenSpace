@@ -33,7 +33,7 @@ FloatProperty::FloatProperty(Property::PropertyInfo info, float value,
     : NumericalProperty<float>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string FloatProperty::className() const {
+std::string_view FloatProperty::className() const {
     return "FloatProperty";
 }
 

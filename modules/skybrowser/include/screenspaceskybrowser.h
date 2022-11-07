@@ -67,6 +67,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    static constexpr int RadiusTimeOut = 25;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
@@ -80,6 +81,7 @@ private:
     bool _ratioIsDirty = false;
     bool _radiusIsDirty = false;
     bool _isInitialized = false;
+    int _borderRadiusTimer = -1;
 
     float _ratio = 1.f;
 };

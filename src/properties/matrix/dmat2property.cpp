@@ -41,7 +41,7 @@ DMat2Property::DMat2Property(Property::PropertyInfo info, glm::dmat2x2 value,
     )
 {}
 
-std::string DMat2Property::className() const {
+std::string_view DMat2Property::className() const {
     return "DMat2Property";
 }
 

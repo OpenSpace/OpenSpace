@@ -112,7 +112,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     addProperty(_performShading);
 }
 
-RenderableModelProjection::~RenderableModelProjection() {} // NOLINT
+RenderableModelProjection::~RenderableModelProjection() {}
 
 bool RenderableModelProjection::isReady() const {
     return (_programObject != nullptr) && _projectionComponent.isReady();
