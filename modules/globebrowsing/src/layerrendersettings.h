@@ -41,6 +41,8 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     properties::FloatProperty offset;
     properties::TriggerProperty setDefault;
 
+    void onChange(std::function<void()> callback);
+
     /// This function matches the function with the same name in the
     /// shader code
     float performLayerSettings(float value) const;

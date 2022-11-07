@@ -37,7 +37,7 @@ Fragment getFragment() {
 
   vec4 mixedTexture = mix(texel0, texel1, blendFactor);
 
-  Fragment frag;  
+  Fragment frag;
   if (mixedTexture.r > 0.999) {
     frag.color = texture(colormapTexture, mixedTexture.r - 0.01);
   }
