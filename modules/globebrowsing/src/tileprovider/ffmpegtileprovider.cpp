@@ -149,34 +149,43 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         TileSize.y * (tileIndex.y + 1)
     );
 
-    // Map PBO
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, BytesPerTile, nullptr, GL_STREAM_DRAW);
-    _tilePixels = reinterpret_cast<GLubyte*>(
-        glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
-    );
-    if (!_tilePixels) {
-        LERROR("Failed to map PBO");
-        return Tile{ nullptr, std::nullopt, Tile::Status::IOError };
+    {
+        ZoneScopedN("Map PBO")
+        TracyGpuZone("Map PBO")
+
+        // Map PBO
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, BytesPerTile, nullptr, GL_STREAM_DRAW);
+        _tilePixels = reinterpret_cast<GLubyte*>(
+            glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
+        );
+        if (!_tilePixels) {
+            LERROR("Failed to map PBO");
+            return Tile{ nullptr, std::nullopt, Tile::Status::IOError };
+        }
     }
+    {
+        ZoneScopedN("Copy Frame")
+        TracyGpuZone("Copy Frame")
 
-    // Copy every row inside the part of the texture we want for the tile
-    GLubyte* destination = _tilePixels;
-    GLubyte* source = &_glFrame->data[0][0];
-    // Traverse backwards so texture is placed correctly
-    for (int row = rowRange.y - 1; row >= rowRange.x; --row) {
-        // Find index of first item, row & col
-        int rowIndex = row * wholeRowSize;
-        int columnIndex = tileRowSize * tileIndex.x;
+        // Copy every row inside the part of the texture we want for the tile
+        GLubyte* destination = _tilePixels;
+        GLubyte* source = &_glFrame->data[0][0];
+        // Traverse backwards so texture is placed correctly
+        for (int row = rowRange.y - 1; row >= rowRange.x; --row) {
+            // Find index of first item, row & col
+            int rowIndex = row * wholeRowSize;
+            int columnIndex = tileRowSize * tileIndex.x;
 
-        // Copy row
-        memcpy(destination, source + rowIndex + columnIndex, tileRowSize);
+            // Copy row
+            memcpy(destination, source + rowIndex + columnIndex, tileRowSize);
 
-        // Advance the destination pointer
-        destination += tileRowSize;
+            // Advance the destination pointer
+            destination += tileRowSize;
+        }
+        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
-    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     // The data for initializing the texture
     TileTextureInitData initData(
@@ -191,8 +200,13 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     // Create a texture with the initialization data
     ghoul::opengl::Texture* writeTexture = tileCache->texture(initData);
 
-    // Upload texture to GPU using the PBO (this will be async and faster)
-    writeTexture->reUploadTextureFromPBO(_pbo);
+    {
+        ZoneScopedN("Upload Texture")
+        TracyGpuZone("Upload Texture")
+
+        // Upload texture to GPU using the PBO (this will be async and faster)
+        writeTexture->reUploadTextureFromPBO(_pbo);
+    }
 
     // Bind the texture to the tile
     Tile ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
@@ -251,62 +265,70 @@ void FfmpegTileProvider::update() {
     }
     _tileIsReady = false;
 
-    // Only decode the the current frame
-    int result = av_seek_frame(_formatContext, _streamIndex, currentFrameIndex, 0);
-    if (result < 0) {
-        std::string message = getFffmpegErrorString(result);
+    {
+        ZoneScopedN("Seek Frame")
+        TracyGpuZone("Seek Frame")
 
-        LERROR(fmt::format(
-            "Seeking frame {} failed with error code {}, message: '{}'",
-            currentFrameIndex, result, message
-        ));
-        return;
+        // Only decode the the current frame
+        int result = av_seek_frame(_formatContext, _streamIndex, currentFrameIndex, 0);
+        if (result < 0) {
+            std::string message = getFffmpegErrorString(result);
+            LERROR(fmt::format(
+                "Seeking frame {} failed with error code {}, message: '{}'",
+                currentFrameIndex, result, message
+            ));
+            return;
+        }
+        //LINFO(fmt::format("Frame index {} matches video duration {}", currentFrameIndex, videoTime));
     }
-    //LINFO(fmt::format("Frame index {} matches video duration {}", currentFrameIndex, videoTime));
+    {
+        ZoneScopedN("Read Frame")
+        TracyGpuZone("Read Frame")
 
-    // Read frame
-    while(true) {
-        int result = av_read_frame(_formatContext, _packet);
-        if (result < 0) {
-            LERROR(fmt::format("Reading frame failed with code {}", result));
-            av_packet_unref(_packet);
-            return;
-        }
+        // Read frame
+        while (true) {
+            int result = av_read_frame(_formatContext, _packet);
+            if (result < 0) {
+                LERROR(fmt::format("Reading frame failed with code {}", result));
+                av_packet_unref(_packet);
+                return;
+            }
 
-        // Does this packet belong to this video stream?
-        if (_packet->stream_index != _streamIndex) {
-            continue;
-        }
+            // Does this packet belong to this video stream?
+            if (_packet->stream_index != _streamIndex) {
+                continue;
+            }
 
-        // Send packet to the decoder
-        result = avcodec_send_packet(_codecContext, _packet);
-        if (result < 0 || result == AVERROR(EAGAIN) || result == AVERROR(AVERROR_EOF)) {
-            LERROR(fmt::format("Sending packet failed with code {}", result));
-            av_packet_unref(_packet);
-            return;
-        }
+            // Send packet to the decoder
+            result = avcodec_send_packet(_codecContext, _packet);
+            if (result < 0 || result == AVERROR(EAGAIN) || result == AVERROR(AVERROR_EOF)) {
+                LERROR(fmt::format("Sending packet failed with code {}", result));
+                av_packet_unref(_packet);
+                return;
+            }
 
-        // Get result from decoder
-        result = avcodec_receive_frame(
-            _codecContext,
-            _avFrame
-        );
+            // Get result from decoder
+            result = avcodec_receive_frame(
+                _codecContext,
+                _avFrame
+            );
 
-        // Is the frame finished? If not then we need to wait for more packets
-        // to finish the frame
-        if (result == AVERROR(EAGAIN)) {
-            continue;
+            // Is the frame finished? If not then we need to wait for more packets
+            // to finish the frame
+            if (result == AVERROR(EAGAIN)) {
+                continue;
+            }
+            if (result < 0) {
+                LERROR(fmt::format("Receiving packet failed with code {}", result));
+                av_packet_unref(_packet);
+                return;
+            }
+            // Successfully collected a frame
+            LINFO(fmt::format(
+                "Successfully decoded frame {}", currentFrameIndex
+            ));
+            break;
         }
-        if (result < 0) {
-            LERROR(fmt::format("Receiving packet failed with code {}", result));
-            av_packet_unref(_packet);
-            return;
-        }
-        // Successfully collected a frame
-        LINFO(fmt::format(
-            "Successfully decoded frame {}", currentFrameIndex
-        ));
-        break;
     }
 
     _prevFrameIndex = currentFrameIndex;
@@ -314,34 +336,39 @@ void FfmpegTileProvider::update() {
     // TODO: Need to check the format of the video and decide what formats we want to
     // support and how they relate to the GL formats
 
-    // Convert the color format to AV_PIX_FMT_RGB24
-    // Only create the conversion context once
-    // Scale all videos to 2048 * 1024 pixels
-    // TODO: support higher resolutions
-    if (!_conversionContext) {
-        _conversionContext = sws_getContext(
-            _codecContext->width,
+    {
+        ZoneScopedN("Convert Frame")
+        TracyGpuZone("Convert Frame")
+
+        // Convert the color format to AV_PIX_FMT_RGB24
+        // Only create the conversion context once
+        // Scale all videos to 2048 * 1024 pixels
+        // TODO: support higher resolutions
+        if (!_conversionContext) {
+            _conversionContext = sws_getContext(
+                _codecContext->width,
+                _codecContext->height,
+                _codecContext->pix_fmt,
+                FinalResolution.x,
+                FinalResolution.y,
+                AV_PIX_FMT_RGB24,
+                SWS_BICUBIC,
+                nullptr,
+                nullptr,
+                nullptr
+            );
+        }
+
+        sws_scale(
+            _conversionContext,
+            _avFrame->data,
+            _avFrame->linesize,
+            0,
             _codecContext->height,
-            _codecContext->pix_fmt,
-            FinalResolution.x,
-            FinalResolution.y,
-            AV_PIX_FMT_RGB24,
-            SWS_BICUBIC,
-            nullptr,
-            nullptr,
-            nullptr
+            _glFrame->data,
+            _glFrame->linesize
         );
     }
-
-    sws_scale(
-        _conversionContext,
-        _avFrame->data,
-        _avFrame->linesize,
-        0,
-        _codecContext->height,
-        _glFrame->data,
-        _glFrame->linesize
-    );
 
     // TEST save a grayscale frame into a .pgm file
     // This ends up in OpenSpace\build\apps\OpenSpace
