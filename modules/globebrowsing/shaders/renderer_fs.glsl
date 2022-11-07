@@ -126,7 +126,7 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[NSEclipseShadows],
       }
       else if (length_d < r_p_pi) {// penumbra
 #if USE_ECLIPSE_HARD_SHADOWS
-        return vec4(0.5, 0.5, 0.5, 1.0); 
+        return vec4(0.5, 0.5, 0.5, 1.0);
 #else
         return vec4(vec3(length_d / r_p_pi), 1.0);
 #endif
