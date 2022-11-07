@@ -58,8 +58,8 @@ public:
     static documentation::Documentation Documentation();
 
     void applyRoll();
-    glm::dvec3 rightVector();
-    glm::dvec3 upVector();
+    glm::dvec3 rightVector() const;
+    glm::dvec3 upVector() const;
 private:
     // Properties
     properties::FloatProperty _crossHairSize;
