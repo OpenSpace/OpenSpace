@@ -192,6 +192,9 @@ bool Path::hasReachedEnd() const {
         return true;
     }
 
+    // @TODO (emmbr, 2022-11-07) Handle linear paths separately, as they might 
+    // abort prematurely due to the "isPositionFinished" condition
+
     bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
 
     constexpr double RotationEpsilon = 0.0001;
