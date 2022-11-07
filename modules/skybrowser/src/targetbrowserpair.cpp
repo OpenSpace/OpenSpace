@@ -164,6 +164,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
 
     ghoul::Dictionary res;
     res.setValue("id", browserId());
+    res.setValue("targetId", targetNodeId());
     res.setValue("name", browserGuiName());
     res.setValue("fov", static_cast<double>(verticalFov()));
     res.setValue("ra", spherical.x);
