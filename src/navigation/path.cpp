@@ -513,6 +513,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         return Waypoint();
     }
 
+    glm::dvec3 stepDir;
     glm::dvec3 targetPos;
     if (info.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
@@ -529,7 +530,6 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
-        glm::dvec3 stepDir;
         if (type == Path::Type::Linear) {
             // If linear path, compute position along line form start to end point
             glm::dvec3 endNodePos = targetNode->worldPosition();
@@ -551,7 +551,18 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     }
 
     // Compute rotation so the camera is looking at the targetted node
-    const glm::dvec3 lookAtPos = targetNode->worldPosition();
+    glm::dvec3 lookAtPos = targetNode->worldPosition();
+
+    // Check if we can distinguish between targetpos and lookAt pos. Otherwise, move it further away
+    const glm::dvec3 diff = targetPos - lookAtPos;
+    double distSquared = glm::dot(diff, diff);
+    if (std::isnan(distSquared) || distSquared < LengthEpsilon) {
+        double startToEndDist = glm::length(
+            startPoint.position() - targetNode->worldPosition()
+        );
+        lookAtPos = targetPos - stepDir * 0.1 * startToEndDist;
+    }
+
     const glm::dquat targetRot = ghoul::lookAtQuaternion(targetPos, lookAtPos, up);
 
     return Waypoint(targetPos, targetRot, info.identifier);
