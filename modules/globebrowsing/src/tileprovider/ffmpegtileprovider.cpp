@@ -287,7 +287,11 @@ void FfmpegTileProvider::update() {
 
         // Read frame
         while (true) {
-            int result = av_read_frame(_formatContext, _packet);
+            int result;
+            {
+                ZoneScopedN("av_read_frame")
+                result = av_read_frame(_formatContext, _packet);
+            }
             if (result < 0) {
                 LERROR(fmt::format("Reading frame failed with code {}", result));
                 av_packet_unref(_packet);
@@ -300,7 +304,10 @@ void FfmpegTileProvider::update() {
             }
 
             // Send packet to the decoder
-            result = avcodec_send_packet(_codecContext, _packet);
+            {
+                ZoneScopedN("avcodec_send_packet")
+                result = avcodec_send_packet(_codecContext, _packet);
+            }
             if (result < 0 || result == AVERROR(EAGAIN) || result == AVERROR(AVERROR_EOF)) {
                 LERROR(fmt::format("Sending packet failed with code {}", result));
                 av_packet_unref(_packet);
@@ -308,10 +315,13 @@ void FfmpegTileProvider::update() {
             }
 
             // Get result from decoder
-            result = avcodec_receive_frame(
-                _codecContext,
-                _avFrame
-            );
+            {
+                ZoneScopedN("avcodec_receive_frame")
+                result = avcodec_receive_frame(
+                    _codecContext,
+                    _avFrame
+                );
+            }
 
             // Is the frame finished? If not then we need to wait for more packets
             // to finish the frame
@@ -324,12 +334,20 @@ void FfmpegTileProvider::update() {
                 return;
             }
             // Successfully collected a frame
-            LINFO(fmt::format(
-                "Successfully decoded frame {}", currentFrameIndex
-            ));
             break;
         }
     }
+    LINFO(fmt::format(
+        "Successfully decoded frame {}", currentFrameIndex
+    ));
+
+    // WIP
+    /*int64_t pts = _packet->pts;
+    pts = pts == AV_NOPTS_VALUE ? 0 : pts;
+    LINFO(fmt::format("Pts: {}", pts));
+    double ptsSec = pts * av_q2d(_formatContext->streams[_streamIndex]->time_base);
+    LINFO(fmt::format("Pts Sec: {}", ptsSec));
+    LINFO(fmt::format("repeat_pict: {}", _avFrame->repeat_pict));*/
 
     _prevFrameIndex = currentFrameIndex;
 
@@ -461,6 +479,19 @@ void FfmpegTileProvider::internalInitialize() {
         );
     }
 
+    // Use multithreaded decoding if suitable
+    _codecContext->thread_count = 0;
+    if (_decoder->capabilities | AV_CODEC_CAP_FRAME_THREADS) {
+        _codecContext->thread_type = FF_THREAD_FRAME;
+    }
+    else if (_decoder->capabilities | AV_CODEC_CAP_SLICE_THREADS) {
+        _codecContext->thread_type = FF_THREAD_SLICE;
+    }
+    else {
+        // Multithreading not suitable
+        _codecContext->thread_count = 1;
+    }
+
     // Open the decoder
     if (avcodec_open2(_codecContext, _decoder, nullptr) < 0) {
         throw ghoul::RuntimeError(fmt::format("Failed to open codec for {}", path));
@@ -492,6 +523,8 @@ void FfmpegTileProvider::internalInitialize() {
         FinalResolution.y,
         1
     );
+    _buffer = av_buffer_alloc(glFrameSize);
+    _packet->buf = _buffer;
 
     // Create PBO for async texture upload
     glGenBuffers(1, &_pbo);
@@ -509,6 +542,7 @@ void FfmpegTileProvider::internalDeinitialize() {
     av_free(_glFrame);
     av_free(_packet);
     avformat_free_context(_formatContext);
+    avcodec_close(_codecContext);
 }
 
 } // namespace openspace::globebrowsing

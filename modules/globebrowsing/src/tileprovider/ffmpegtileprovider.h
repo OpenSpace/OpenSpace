@@ -31,10 +31,10 @@
 
 // FFMPEG
 extern "C" {
-#include <libavcodec/avcodec.h> // avcodec_alloc_context3
-#include <libavformat/avformat.h> // avformat_open_input, AVFormatContext
-#include <libavutil/imgutils.h> // av_image_get_buffer_size
-#include <libswscale/swscale.h> // SwsContext
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
+#include <libswscale/swscale.h>
 }
 
 namespace openspace { struct Documentation; }
@@ -84,6 +84,7 @@ private:
     int _streamIndex = -1;
     AVStream* _videoStream = nullptr;
     AVPacket* _packet = nullptr;
+    AVBufferRef* _buffer = nullptr;
 
     GLubyte* _tilePixels = nullptr;
     GLuint _pbo = 0;
