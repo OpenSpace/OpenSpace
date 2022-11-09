@@ -75,10 +75,13 @@ namespace {
             return "PreDeferredTransparent";
         }
         else if (renderBin == 8) {
-            return "PostDeferredTransparent";
+            return "Overlay";
         }
         else if (renderBin == 16) {
-            return "Overlay";
+            return "PostDeferredTransparent";
+        }
+        else if (renderBin == 32) {
+            return "Sticker";
         }
         else {
             throw ghoul::MissingCaseException();
