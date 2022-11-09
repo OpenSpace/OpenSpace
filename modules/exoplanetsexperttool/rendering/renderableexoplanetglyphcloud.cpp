@@ -26,12 +26,15 @@
 
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
@@ -40,9 +43,10 @@
 namespace {
     constexpr const char* _loggerCat = "ExoplanetGlyphCloud";
 
-    constexpr const std::array<const char*, 9> UniformNames = {
+    constexpr const std::array<const char*, 10> UniformNames = {
         "modelMatrix", "cameraViewProjectionMatrix", "onTop", "useFixedRingWidth",
-        "opacity", "size", "screenSize", "minBillboardSize", "maxBillboardSize"
+        "opacity", "size", "screenSize", "minBillboardSize", "maxBillboardSize",
+        "isRenderIndexStep"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
@@ -181,12 +185,33 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     _dataFile->setCallback([&]() { updateDataFromFile(); });
 
     updateDataFromFile();
+
+    // Picking callback
+    global::callback::mousePosition->emplace_back(
+        [&](double x, double y, bool isGuiWindow) {
+            if (!_enabled) {
+                return; // do nothing
+            }
+
+            // Convert mouse position to pixel position
+            float normalizedX = x / static_cast<float>(_lastViewPortSize.x);
+            float normalizedY = (static_cast<float>(_lastViewPortSize.y) - y) / static_cast<float>(_lastViewPortSize.y);
+
+            glm::uvec2 texturePos = glm::uvec2(
+                normalizedX * static_cast<float>(_glyphIdTexture->width()),
+                normalizedY * static_cast<float>(_glyphIdTexture->height())
+            );
+
+            _glyphIdTexture->downloadTexture();
+            glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat(texturePos);
+            LINFO(fmt::format("{}", pixelValue.r));
+        }
+    );
 }
 
 bool RenderableExoplanetGlyphCloud::isReady() const {
     return _program != nullptr;
 }
-
 
 void RenderableExoplanetGlyphCloud::initialize() {
     if (_hasLabels) {
@@ -204,6 +229,33 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+
+    // Generate texture and frame buffer for rendering glyph id
+    glGenFramebuffers(1, &_glyphIdFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFramebuffer);
+    _glyphIdTexture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(1080, 720, 1), // Just a valid default size. Will update when needed
+        GL_TEXTURE_2D
+     );
+    _glyphIdTexture->uploadTexture();
+    _glyphIdTexture->bind();
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        *_glyphIdTexture,
+        0
+    );
+
+    // Give the framebuffer a reasonable name (for RonderDoc debugging)
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_FRAMEBUFFER, _glyphIdFramebuffer, -1, "Glyph ID Framebuffer");
+    }
+
+    // Check status
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Framebuffer is not complete!");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void RenderableExoplanetGlyphCloud::deinitializeGL() {
@@ -251,6 +303,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     _program->setUniform(_uniformCache.opacity, opacity());
     _program->setUniform(_uniformCache.size, _size);
     _program->setUniform(_uniformCache.onTop, false);
+    _program->setUniform(_uniformCache.isRenderIndexStep, false);
 
     const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels
     const float maxBillboardSize = _billboardMinMaxSize.value().y; // in pixels
@@ -263,14 +316,55 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     glGetIntegerv(GL_VIEWPORT, viewport);
     _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
-    // Changes GL state:
+    // 1st rendering pass: render the glyohs normally, with correct color
     glEnablei(GL_BLEND, 0);
     glDepthMask(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
 
     glBindVertexArray(_primaryPointsVAO);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
+
+
+    // 2nd rendering pass: Render ids to a separate texture every frame as well
+    // To use for picking
+    _program->setUniform(_uniformCache.isRenderIndexStep, true);
+    GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFramebuffer);
+    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffers);
+
+    // Potentially upate texture size
+    if (viewport[2] != _glyphIdTexture->width() || viewport[3] != _glyphIdTexture->height()) {
+        _glyphIdTexture = std::make_unique<ghoul::opengl::Texture>(
+            glm::uvec3(viewport[2], viewport[3], 1),
+            GL_TEXTURE_2D
+        );
+        _glyphIdTexture->uploadTexture();
+        _glyphIdTexture->bind();
+
+        glFramebufferTexture(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            *_glyphIdTexture,
+            0
+        );
+    }
+
+    // Clear the previous values from the texture
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Draw again! And specify viewport size
+    glViewport(viewport[0], viewport[1], _glyphIdTexture->width(), _glyphIdTexture->height());
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
+
+    // Reset index rendering, viewport size and frame buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    _program->setUniform(_uniformCache.isRenderIndexStep, false);
+
+    // Save viewport size
+    _lastViewPortSize = glm::ivec2(viewport[2], viewport[3]);
 
     // Selected points
     const size_t nSelected = _selectedIndices.value().size();
@@ -279,7 +373,6 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
         _program->setUniform(_uniformCache.onTop, true);
         glBindVertexArray(_selectedPointsVAO);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(nSelected));
-        // OBS!! Does not work if we are alreday rendering points. Why??
     }
 
     glBindVertexArray(0);
@@ -345,52 +438,7 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
             _fullGlyphData.data(),
             GL_STATIC_DRAW
         );
-
-        GLint positionAttribute = _program->attributeLocation("in_position");
-        glEnableVertexAttribArray(positionAttribute);
-        glVertexAttribPointer(
-            positionAttribute,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(GlyphData),
-            nullptr
-        );
-
-        GLint componentAttribute = _program->attributeLocation("in_component");
-        glEnableVertexAttribArray(componentAttribute);
-        glVertexAttribPointer(
-            componentAttribute,
-            1,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(GlyphData),
-            reinterpret_cast<void*>(offsetof(GlyphData, component))
-        );
-
-        GLint nColorsAttribute = _program->attributeLocation("in_nColors");
-        glEnableVertexAttribArray(nColorsAttribute);
-        glVertexAttribIPointer(
-            nColorsAttribute,
-            1,
-            GL_INT,
-            sizeof(GlyphData),
-            reinterpret_cast<void*>(offsetof(GlyphData, nColors))
-        );
-
-        GLint colorAttribute = _program->attributeLocation("in_colors");
-        for (int i = 0; i < MaxNumberColors; i++) {
-            glEnableVertexAttribArray(colorAttribute + i);
-            glVertexAttribPointer(
-                colorAttribute + i,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                sizeof(GlyphData),
-                reinterpret_cast<void*>(offsetof(GlyphData, colors) + i * 4 * sizeof(float))
-            );
-        }
-
+        mapVertexAttributes();
         glBindVertexArray(0);
     }
 
@@ -446,57 +494,70 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
                 GL_STATIC_DRAW
             );
 
-            GLint positionAttribute = _program->attributeLocation("in_position");
-            glEnableVertexAttribArray(positionAttribute);
-            glVertexAttribPointer(
-                positionAttribute,
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                sizeof(GlyphData),
-                nullptr
-            );
-
-            GLint componentAttribute = _program->attributeLocation("in_component");
-            glEnableVertexAttribArray(componentAttribute);
-            glVertexAttribPointer(
-                componentAttribute,
-                1,
-                GL_FLOAT,
-                GL_FALSE,
-                sizeof(GlyphData),
-                reinterpret_cast<void*>(offsetof(GlyphData, component))
-            );
-
-            GLint nColorsAttribute = _program->attributeLocation("in_nColors");
-            glEnableVertexAttribArray(nColorsAttribute);
-            glVertexAttribIPointer(
-                nColorsAttribute,
-                1,
-                GL_INT,
-                sizeof(GlyphData),
-                reinterpret_cast<void*>(offsetof(GlyphData, nColors))
-            );
-
-            GLint colorAttribute = _program->attributeLocation("in_colors");
-            for (int i = 0; i < MaxNumberColors; i++) {
-                glEnableVertexAttribArray(colorAttribute + i);
-                glVertexAttribPointer(
-                    colorAttribute + i,
-                    4,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    sizeof(GlyphData),
-                    reinterpret_cast<void*>(offsetof(GlyphData, colors) + i * 4 * sizeof(float))
-                );
-            }
-
+            mapVertexAttributes();
             glBindVertexArray(0);
         }
     }
 
     _isDirty = false;
     _selectionChanged = false;
+}
+
+void RenderableExoplanetGlyphCloud::mapVertexAttributes() {
+    GLint positionAttribute = _program->attributeLocation("in_position");
+    glEnableVertexAttribArray(positionAttribute);
+    glVertexAttribPointer(
+        positionAttribute,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GlyphData),
+        nullptr
+    );
+
+    GLint componentAttribute = _program->attributeLocation("in_component");
+    glEnableVertexAttribArray(componentAttribute);
+    glVertexAttribPointer(
+        componentAttribute,
+        1,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GlyphData),
+        reinterpret_cast<void*>(offsetof(GlyphData, component))
+    );
+
+    GLint indexAttribute = _program->attributeLocation("in_glyphIndex");
+    glEnableVertexAttribArray(indexAttribute);
+    glVertexAttribIPointer(
+        indexAttribute,
+        1,
+        GL_INT,
+        sizeof(GlyphData),
+        reinterpret_cast<void*>(offsetof(GlyphData, index))
+    );
+
+    GLint nColorsAttribute = _program->attributeLocation("in_nColors");
+    glEnableVertexAttribArray(nColorsAttribute);
+    glVertexAttribIPointer(
+        nColorsAttribute,
+        1,
+        GL_INT,
+        sizeof(GlyphData),
+        reinterpret_cast<void*>(offsetof(GlyphData, nColors))
+    );
+
+    GLint colorAttribute = _program->attributeLocation("in_colors");
+    for (int i = 0; i < MaxNumberColors; i++) {
+        glEnableVertexAttribArray(colorAttribute + i);
+        glVertexAttribPointer(
+            colorAttribute + i,
+            4,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(GlyphData),
+            reinterpret_cast<void*>(offsetof(GlyphData, colors) + i * 4 * sizeof(float))
+        );
+    }
 }
 
 void RenderableExoplanetGlyphCloud::updateDataFromFile() {
@@ -551,6 +612,8 @@ void RenderableExoplanetGlyphCloud::updateDataFromFile() {
         int component;
         file.read(reinterpret_cast<char*>(&component), sizeof(int));
         d.component = static_cast<float>(component);
+
+        d.index = static_cast<int>(index);
 
         _fullGlyphData.push_back(std::move(d));
         _glyphIndices.push_back(static_cast<int>(index));

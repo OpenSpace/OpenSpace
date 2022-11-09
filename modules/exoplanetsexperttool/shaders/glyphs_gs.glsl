@@ -34,11 +34,13 @@ const int MaxColors = 8;
 flat in float vs_component[];
 flat in int vs_nColors[];
 flat in vec4 vs_colors[][MaxColors];
+flat in int vs_glyphIndex[];
 in dvec4 vs_dposWorld[];
 
 flat out float gs_component;
 out float gs_depthClipSpace;
 out vec4 gs_positionViewSpace;
+flat out int gs_glyphIndex;
 flat out int gs_nColors;
 flat out vec4 gs_colors[MaxColors];
 out vec2 texCoord;
@@ -67,6 +69,7 @@ void main() {
     gs_component = vs_component[0];
     gs_colors = vs_colors[0];
     gs_nColors = vs_nColors[0];
+    gs_glyphIndex = vs_glyphIndex[0];
 
     dvec4 dpos = vs_dposWorld[0]; //modelMatrix * dvec4(pos);
     vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
@@ -112,7 +115,7 @@ void main() {
         // Ish 90% width of previous ring
         sizeFactor = 1.0;
         for (int i = 1; i < comp; i++) {
-            // TODO: create a constant for the 
+            // TODO: create a constant for the
             sizeFactor += sqrt(pow(0.87, comp)); // This computation is not completely logical.
                                                 // But it makes the result look ok. based on
                                                 // trying to make each ring about 90% as wide

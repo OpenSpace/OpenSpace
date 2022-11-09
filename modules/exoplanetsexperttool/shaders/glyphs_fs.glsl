@@ -28,6 +28,7 @@ const int MaxColors = 8;
 
 in float gs_depthClipSpace;
 flat in int gs_nColors;
+flat in int gs_glyphIndex;
 flat in vec4 gs_colors[MaxColors];
 in float gs_component;
 in vec2 texCoord; // [-1, 1]
@@ -38,6 +39,8 @@ uniform float opacity;
 uniform bool onTop;
 uniform bool useFixedRingWidth;
 
+uniform bool isRenderIndexStep = false;
+
 const float M_PI = 3.141592657;
 
 Fragment getFragment() {
@@ -46,7 +49,7 @@ Fragment getFragment() {
     float x = texCoord.x;
     float y = texCoord.y;
 
-    // Selection
+    // Render selection icon
     if (onTop && radius > 1.0 && (abs(x - y) < 0.2 || abs(-1.0 * x - y) < 0.2)) {
         Fragment frag;
         frag.color = vec4(1.0);
@@ -105,6 +108,12 @@ Fragment getFragment() {
     }
 
     color.a *= opacity;
+
+    // TODO render glyph index if we are at that rendering step
+    if (isRenderIndexStep) {
+        color.rgb = vec3(float(gs_glyphIndex) / 6000.0); // TODO: rmeve division
+        color.a = 1.0;
+    }
 
     Fragment frag;
     frag.color = color;

@@ -34,6 +34,7 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace::documentation { struct Documentation; }
@@ -63,12 +64,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    void mapVertexAttributes();
+
     bool _isDirty = true;
     bool _selectionChanged = true;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, useFixedRingWidth,
-        opacity, size, screenSize, minBillboardSize, maxBillboardSize
+        opacity, size, screenSize, minBillboardSize, maxBillboardSize, isRenderIndexStep
     ) _uniformCache;
 
     properties::Vec3Property _highlightColor;
@@ -82,6 +85,7 @@ private:
     struct GlyphData {
         glm::vec3 position;
         float component;
+        int index;
         int nColors;
         glm::vec4 colors[MaxNumberColors];
     };
@@ -99,6 +103,12 @@ private:
 
     GLuint _selectedPointsVAO = 0;
     GLuint _selectedPointsVBO = 0;
+
+    // Point id from screenspace position
+    std::unique_ptr<ghoul::opengl::Texture> _glyphIdTexture;
+    GLuint _glyphIdFramebuffer = 0;
+
+    glm::ivec2 _lastViewPortSize;
 };
 
 }// namespace openspace::exoplanets

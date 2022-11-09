@@ -30,15 +30,17 @@ const int MaxColors = 8;
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in float in_component;
-layout(location = 2) in int in_nColors;
+layout(location = 2) in int in_glyphIndex;
+layout(location = 3) in int in_nColors;
 
 // Always pass 8 colors
-layout(location = 3) in vec4 in_colors[MaxColors];
+layout(location = 4) in vec4 in_colors[MaxColors];
 
 flat out float vs_component;
 flat out int vs_nColors;
 flat out vec4 vs_colors[MaxColors];
 out dvec4 vs_dposWorld;
+flat out int vs_glyphIndex;
 
 uniform dmat4 modelMatrix;
 
@@ -49,4 +51,5 @@ void main() {
     vs_nColors = in_nColors;
     vs_colors = in_colors;
     vs_dposWorld = modelMatrix * position;
+    vs_glyphIndex = in_glyphIndex;
 }
