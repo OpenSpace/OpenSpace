@@ -537,18 +537,25 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
 }
 
 void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
-    const glm::dvec3 anchorPos = anchor()->worldPosition();
+    // The actual position for the camera does not really matter. Use the origin,
+    // to avoid precision problems when we have large values for the position
+    const glm::dvec3 cameraPos = glm::dvec3(0.0);
     const glm::dvec3 cameraDir = glm::normalize(
         pose.rotation * Camera::ViewDirectionCameraSpace
     );
-    const double anchorToPosDistance = glm::distance(anchorPos, pose.position);
-    const double notTooCloseDistance = deltaTime * anchorToPosDistance;
-    glm::dvec3 lookAtPos = pose.position + notTooCloseDistance * cameraDir;
+
+    // The actual distance does not really matter either. Just have to far 
+    // enough away from the camera
+    constexpr double NotTooCloseDistance = 10000.0;
+
+    glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
+
     glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
-        pose.position,
+        cameraPos,
         lookAtPos,
         camera()->lookUpVectorWorldSpace()
     );
+
     pose.rotation = rollFreeRotation;
 }
 
