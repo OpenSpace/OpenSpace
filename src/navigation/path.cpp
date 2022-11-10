@@ -724,7 +724,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
         LINFO(
             "Switching to a linear path, to avoid problems with precision due to "
-            "immense path length"
+            "immense path length or precision problems"
         );
 
         return createPathFromDictionary(dictionary, Path::Type::Linear);
