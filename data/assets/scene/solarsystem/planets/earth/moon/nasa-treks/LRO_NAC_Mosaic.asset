@@ -14,11 +14,11 @@ local treks_20200415_lacusmortis_orthomos_filled_8bit_lzw = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_20200415_lacusmortis_orthomos_filled_8bit_lzw)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_20200415_lacusmortis_orthomos_filled_8bit_lzw)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_20200415_lacusmortis_orthomos_filled_8bit_lzw")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_20200415_lacusmortis_orthomos_filled_8bit_lzw")
 end)
 
 asset.export("20200415_lacusmortis_orthomos_filled_8bit_lzw", treks_20200415_lacusmortis_orthomos_filled_8bit_lzw)

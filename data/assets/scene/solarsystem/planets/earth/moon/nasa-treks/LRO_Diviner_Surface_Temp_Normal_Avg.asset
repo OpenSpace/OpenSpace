@@ -14,11 +14,11 @@ local treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd")
 end)
 
 asset.export("LRO_Diviner_STN_Avg_Clr_Global_32ppd", treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd)

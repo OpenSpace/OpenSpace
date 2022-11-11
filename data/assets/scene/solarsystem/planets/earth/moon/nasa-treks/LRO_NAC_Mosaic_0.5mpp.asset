@@ -14,11 +14,11 @@ local treks_LRO_NAC_Mosaic_50cmpp_VonKarman_v2 = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Mosaic_50cmpp_VonKarman_v2)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Mosaic_50cmpp_VonKarman_v2)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Mosaic_50cmpp_VonKarman_v2")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Mosaic_50cmpp_VonKarman_v2")
 end)
 
 asset.export("LRO_NAC_Mosaic_50cmpp_VonKarman_v2", treks_LRO_NAC_Mosaic_50cmpp_VonKarman_v2)

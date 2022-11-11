@@ -14,11 +14,11 @@ local treks_LRO_NAC_Mosaic_1mpp = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Mosaic_1mpp)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Mosaic_1mpp)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Mosaic_1mpp")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Mosaic_1mpp")
 end)
 
 asset.export("LRO_NAC_Mosaic_1mpp", treks_LRO_NAC_Mosaic_1mpp)

@@ -14,11 +14,11 @@ local treks_SchrodingerMareNortheq = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_SchrodingerMareNortheq)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_SchrodingerMareNortheq)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_SchrodingerMareNortheq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_SchrodingerMareNortheq")
 end)
 
 asset.export("SchrodingerMareNortheq", treks_SchrodingerMareNortheq)

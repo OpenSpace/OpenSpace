@@ -14,11 +14,11 @@ local treks_THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018 = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018")
 end)
 
 asset.export("THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018", treks_THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018)

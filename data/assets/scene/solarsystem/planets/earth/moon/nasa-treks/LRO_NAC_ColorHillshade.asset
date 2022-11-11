@@ -14,11 +14,11 @@ local treks_20191118demmoseqccolorhillshade = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_20191118demmoseqccolorhillshade)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_20191118demmoseqccolorhillshade)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_20191118demmoseqccolorhillshade")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_20191118demmoseqccolorhillshade")
 end)
 
 asset.export("20191118demmoseqccolorhillshade", treks_20191118demmoseqccolorhillshade)

@@ -14,11 +14,11 @@ local treks_LRO_LrocKaguya_Shade_60N60S_512ppd = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_LrocKaguya_Shade_60N60S_512ppd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_LrocKaguya_Shade_60N60S_512ppd)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_LrocKaguya_Shade_60N60S_512ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_LrocKaguya_Shade_60N60S_512ppd")
 end)
 
 asset.export("LRO_LrocKaguya_Shade_60N60S_512ppd", treks_LRO_LrocKaguya_Shade_60N60S_512ppd)

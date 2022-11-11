@@ -21,13 +21,13 @@ local treks_LRO_NAC_AvgMosaic_SPole855_1mp_EQ = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_AvgMosaic_NPole855_1mp_EQ)
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_AvgMosaic_SPole855_1mp_EQ)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_AvgMosaic_NPole855_1mp_EQ)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_AvgMosaic_SPole855_1mp_EQ)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_AvgMosaic_NPole855_1mp_EQ")
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_AvgMosaic_SPole855_1mp_EQ")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_AvgMosaic_NPole855_1mp_EQ")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_AvgMosaic_SPole855_1mp_EQ")
 end)
 
 asset.export("LRO_NAC_AvgMosaic_NPole855_1mp_EQ", treks_LRO_NAC_AvgMosaic_NPole855_1mp_EQ)

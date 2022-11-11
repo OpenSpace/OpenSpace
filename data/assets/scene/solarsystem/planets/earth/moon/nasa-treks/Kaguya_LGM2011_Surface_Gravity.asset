@@ -21,13 +21,13 @@ local treks_Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd)
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd")
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd")
 end)
 
 asset.export("Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd", treks_Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd)

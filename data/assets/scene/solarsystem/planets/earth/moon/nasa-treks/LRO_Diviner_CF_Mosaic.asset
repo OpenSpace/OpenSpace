@@ -14,11 +14,11 @@ local treks_LRO_Diviner_CF_Filled_Global_8ppd = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_Diviner_CF_Filled_Global_8ppd)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_Diviner_CF_Filled_Global_8ppd)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_Diviner_CF_Filled_Global_8ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_Diviner_CF_Filled_Global_8ppd")
 end)
 
 asset.export("LRO_Diviner_CF_Filled_Global_8ppd", treks_LRO_Diviner_CF_Filled_Global_8ppd)

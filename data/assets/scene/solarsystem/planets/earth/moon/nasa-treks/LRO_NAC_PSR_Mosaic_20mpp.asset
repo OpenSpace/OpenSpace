@@ -21,13 +21,13 @@ local treks_NAC_POLE_PSR_SOUTH_STRETCH_EQ = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_NAC_POLE_PSR_NORTH_STRETCH_EQ)
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_NAC_POLE_PSR_SOUTH_STRETCH_EQ)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_NAC_POLE_PSR_NORTH_STRETCH_EQ)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_NAC_POLE_PSR_SOUTH_STRETCH_EQ)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_NAC_POLE_PSR_NORTH_STRETCH_EQ")
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_NAC_POLE_PSR_SOUTH_STRETCH_EQ")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_NAC_POLE_PSR_NORTH_STRETCH_EQ")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_NAC_POLE_PSR_SOUTH_STRETCH_EQ")
 end)
 
 asset.export("NAC_POLE_PSR_NORTH_STRETCH_EQ", treks_NAC_POLE_PSR_NORTH_STRETCH_EQ)

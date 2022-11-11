@@ -21,13 +21,13 @@ local treks_MC11E11_HRDTMAR_DA5 = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_hrsc_dem_martian_east)
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_MC11E11_HRDTMAR_DA5)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_hrsc_dem_martian_east)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_MC11E11_HRDTMAR_DA5)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_hrsc_dem_martian_east")
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_MC11E11_HRDTMAR_DA5")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_hrsc_dem_martian_east")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_MC11E11_HRDTMAR_DA5")
 end)
 
 asset.export("hrsc_dem_martian_east", treks_hrsc_dem_martian_east)

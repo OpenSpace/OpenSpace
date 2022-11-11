@@ -14,11 +14,11 @@ local treks_mars_pahrump_patch_8k_256m = {
 }
 
 asset.onInitialize(function()
-	openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_mars_pahrump_patch_8k_256m)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_mars_pahrump_patch_8k_256m)
 end)
 
 asset.onDeinitialize(function()
-	openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_mars_pahrump_patch_8k_256m")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_mars_pahrump_patch_8k_256m")
 end)
 
 asset.export("mars_pahrump_patch_8k_256m", treks_mars_pahrump_patch_8k_256m)
