@@ -64,6 +64,15 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    enum class AnimationMode {
+        MapToSimulationTime = 0,
+        RealTimeLoopFromStart,
+        RealTimeLoopInfinitely,
+        RealTimeBounceFromStart,
+        RealTimeBounceInfinitely
+    };
+
+    AnimationMode _animationMode = AnimationMode::MapToSimulationTime;
     std::filesystem::path _videoFile;
     std::string _startTime;
     std::string _endTime;

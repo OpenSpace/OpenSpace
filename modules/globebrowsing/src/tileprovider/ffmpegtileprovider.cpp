@@ -66,6 +66,19 @@ namespace {
 
         // [[codegen::verbatim(EndTimeInfo.description)]]
         std::string endTime [[codegen::datetime()]];
+
+        enum class AnimationMode {
+            MapToSimulationTime = 0,
+            RealTimeLoopFromStart,
+            RealTimeLoopInfinitely,
+            RealTimeBounceFromStart,
+            RealTimeBounceInfinitely
+        };
+
+        // The mode of how the animation should be played back.
+        // Default is video is played back according to the set start and end times.
+        std::optional<AnimationMode> animationMode;
+
     };
 #include "ffmpegtileprovider_codegen.cpp"
 } // namespace
@@ -121,6 +134,28 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
     _videoFile = p.file;
     _startTime = p.startTime;
     _endTime = p.endTime;
+
+    if (p.animationMode.has_value()) {
+        switch (*p.animationMode) {
+        case Parameters::AnimationMode::RealTimeLoopFromStart:
+            _animationMode = AnimationMode::RealTimeLoopFromStart;
+            break;
+        case Parameters::AnimationMode::RealTimeLoopInfinitely:
+            _animationMode = AnimationMode::RealTimeLoopInfinitely;
+            break;
+        case Parameters::AnimationMode::RealTimeBounceFromStart:
+            _animationMode = AnimationMode::RealTimeBounceFromStart;
+            break;
+        case Parameters::AnimationMode::RealTimeBounceInfinitely:
+            _animationMode = AnimationMode::RealTimeBounceInfinitely;
+            break;
+        case Parameters::AnimationMode::MapToSimulationTime:
+            _animationMode = AnimationMode::MapToSimulationTime;
+            break;
+        default:
+            throw ghoul::MissingCaseException();
+        }
+    }
 }
 
 Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
@@ -239,20 +274,57 @@ void FfmpegTileProvider::update() {
     if (!_isInitialized) {
         return;
     }
-    // Check if it is time for a new frame
+
     const double now = global::timeManager->time().j2000Seconds();
+    double videoTime = 0.0;
+    double percentage = 0.0;
 
-    // Check so we are currently in interval where video is playing
-    if (now > _endJ200Time || now < _startJ200Time) {
-        LINFO(fmt::format(
-            "Time '{}' is not during video", now
-        ));
-        return;
+    switch (_animationMode) {
+    case AnimationMode::MapToSimulationTime:
+        // Check so we are currently in interval where video is playing
+        if (now > _endJ200Time || now < _startJ200Time) {
+            LINFO(fmt::format(
+                "Time '{}' is not during video", now
+            ));
+            return;
+        }
+        percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
+        videoTime = percentage * _videoDuration;
+        break;
+    case AnimationMode::RealTimeLoopFromStart:
+        videoTime = std::fmod(now - _startJ200Time, _videoDuration);
+        if (videoTime < 0.0) {
+            videoTime += _videoDuration;
+        }
+        break;
+    case AnimationMode::RealTimeLoopInfinitely:
+        videoTime =
+            _videoDuration - abs(
+                fmod(now - _startJ200Time, 2 * _videoDuration) - _videoDuration
+            );
+        break;
+    case AnimationMode::RealTimeBounceFromStart: {
+        double modulo = fmod(now - _startJ200Time, 2 * _videoDuration);
+        if (modulo < 0.0) {
+            modulo += 2 * _videoDuration;
+        }
+        videoTime = _videoDuration - abs(modulo - _videoDuration);
+        break;
     }
-    double percentageOfMovie = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
-    double videoTime = percentageOfMovie * _videoDuration;
+    case AnimationMode::RealTimeBounceInfinitely:
+        videoTime = now - _startJ200Time;
+        if (videoTime > _videoDuration) {
+            videoTime = _videoDuration;
+        }
+        break;
+    default:
+        throw ghoul::MissingCaseException();
+    }
+    if (videoTime > _videoDuration || videoTime < 0.0) {
+        LINFO(std::to_string(videoTime));
+    }
 
-    // Find the frame number that corresponds to the current in game time
+    // Find the frame number that corresponds to the current video time
     int64_t currentFrameIndex = av_rescale_q(
         static_cast<int64_t>(videoTime * AV_TIME_BASE),
         _avTimeBaseQ,
@@ -337,9 +409,9 @@ void FfmpegTileProvider::update() {
             break;
         }
     }
-    LINFO(fmt::format(
-        "Successfully decoded frame {}", currentFrameIndex
-    ));
+    //LINFO(fmt::format(
+    //    "Successfully decoded frame {}", currentFrameIndex
+    //));
 
     // WIP
     /*int64_t pts = _packet->pts;
