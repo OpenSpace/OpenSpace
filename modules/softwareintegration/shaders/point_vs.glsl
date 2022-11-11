@@ -22,64 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
+#version __CONTEXT__
 
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace openspace {
+layout(location = 0) in vec3 in_position;
+in vec3 in_velocity;
+in float in_colormapAttributeScalar;
+in float in_linearSizeAttributeScalar;
 
-class SyncBuffer {
-public:
-    SyncBuffer(size_t n);
+out vec3 vs_velocity;
 
-    ~SyncBuffer();
+out float vs_colormapAttributeScalar;
+flat out float vs_linearSizeAttributeScalar;
 
-    void encode(const std::string& s);
+uniform bool motionEnabled;
+uniform float time;
 
-    template <typename T>
-    void encode(const T& v);
+void main() {
+    vs_colormapAttributeScalar = in_colormapAttributeScalar;
+    vs_linearSizeAttributeScalar = in_linearSizeAttributeScalar;
 
-    template <typename T>
-    void encode(std::vector<T>& value);
+    vec4 objectPosition = vec4(in_position, 1.0);
 
-    std::string decode();
+    // Add velocity if applicable
+    // Velocity (UVW) is already in m/s
+    vs_velocity = in_velocity;
+    bool velocityIsNan = (isnan(in_velocity[0]) || isnan(in_velocity[1]) || isnan(in_velocity[2]));
+    if (motionEnabled && !velocityIsNan) {
+        objectPosition.xyz += time * in_velocity; 
+    }
 
-    template <typename T>
-    T decode();
-
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
-
-    template <typename T>
-    void decode(T& value);
-
-    template <typename T>
-    void decode(std::vector<T>& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
-};
-
-} // namespace openspace
-
-#include "syncbuffer.inl"
-
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__
+    gl_Position = objectPosition;
+}

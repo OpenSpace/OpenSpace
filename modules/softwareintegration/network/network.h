@@ -22,64 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__
 
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
+#include <modules/softwareintegration/network/softwareconnection.h>
+#include <modules/softwareintegration/simp/simp.h>
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <modules/softwareintegration/utils/interruptibleconcurrentqueue.h>
 
-namespace openspace {
+#include <functional>
+#include <unordered_map>
 
-class SyncBuffer {
+namespace openspace::softwareintegration::network {
+
+class SoftwareConnectionLostError : public ghoul::RuntimeError {
 public:
-    SyncBuffer(size_t n);
-
-    ~SyncBuffer();
-
-    void encode(const std::string& s);
-
-    template <typename T>
-    void encode(const T& v);
-
-    template <typename T>
-    void encode(std::vector<T>& value);
-
-    std::string decode();
-
-    template <typename T>
-    T decode();
-
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
-
-    template <typename T>
-    void decode(T& value);
-
-    template <typename T>
-    void decode(std::vector<T>& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
+    explicit SoftwareConnectionLostError(const std::string& msg);
 };
 
-} // namespace openspace
+struct IncomingMessage {
+	std::weak_ptr<SoftwareConnection> connection;
+	softwareintegration::simp::MessageType type{ softwareintegration::simp::MessageType::Unknown };
+	std::vector<std::byte> content{};
+	std::string rawMessageType{""};
+};
 
-#include "syncbuffer.inl"
+struct NetworkState {
+	std::unique_ptr<ghoul::io::TcpSocketServer> server;
 
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__
+	std::unique_ptr<std::thread> serverThread;
+	std::unique_ptr<std::thread> eventLoopThread;
+
+	std::unordered_map<size_t, std::shared_ptr<SoftwareConnection>> softwareConnections{};
+	std::mutex softwareConnectionsMutex{};
+
+	std::atomic_bool shouldStopThreads{ false };
+	std::atomic_bool hasStopped{ false };
+
+	InterruptibleConcurrentQueue<IncomingMessage> incomingMessages{};
+};
+
+std::shared_ptr<NetworkState> serve(const int port = 4700);
+
+void stopServer(std::shared_ptr<NetworkState> networkState);
+
+} // namespace openspace::softwareintegration::network
+
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___NETWORKENGINE___H__

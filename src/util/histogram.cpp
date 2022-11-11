@@ -69,7 +69,7 @@ bool Histogram::isValid() const {
 }
 
 bool Histogram::add(float value, float repeat) {
-    if (value < _minValue || value > _maxValue) {
+    if (isnan(value) || value < _minValue || value > _maxValue) {
         // Out of range
         return false;
     }

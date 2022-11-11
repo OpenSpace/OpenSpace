@@ -22,64 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
+#include <climits>
 
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
+namespace openspace::softwareintegration::simp {
 
-namespace openspace {
+namespace {
 
-class SyncBuffer {
-public:
-    SyncBuffer(size_t n);
 
-    ~SyncBuffer();
+bool hostIsBigEndian() {
+    const int i = 1;
+    // For big endian the most significant byte 
+    // is placed at the byte with the lowest address
+    // Example: 4 byte int with with value 1 is as bytes
+    // is 0001 for big endian and 1000 for little endian
+    return *(const char*)&i == 0;
+}
 
-    void encode(const std::string& s);
+template <typename T>
+T swapEndian(T value) {
+    union {
+        T u;
+        unsigned char u8[sizeof(T)];
+    } source, dest;
 
-    template <typename T>
-    void encode(const T& v);
+    source.u = value;
 
-    template <typename T>
-    void encode(std::vector<T>& value);
+    for (size_t k = 0; k < sizeof(T); k++) {
+        dest.u8[k] = source.u8[sizeof(T) - k - 1];
+    }
 
-    std::string decode();
+    return *reinterpret_cast<T*>(dest.u8);
+}
 
-    template <typename T>
-    T decode();
+} // namespace
 
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
+template <typename T>
+T networkToHostEndian(T value) {
+    static_assert (CHAR_BIT == 8, "CHAR_BIT != 8");
 
-    template <typename T>
-    void decode(T& value);
+    if (hostIsBigEndian()) return value;
 
-    template <typename T>
-    void decode(std::vector<T>& value);
+    return swapEndian(value);
+}
 
-    void reset();
+template <typename T>
+T hostToNetworkEndian(T value) {
+    static_assert (CHAR_BIT == 8, "CHAR_BIT != 8");
+    
+    if (!hostIsBigEndian()) return value;
 
-    //void write();
-    //void read();
+    return swapEndian(value);
+}
 
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
-};
-
-} // namespace openspace
-
-#include "syncbuffer.inl"
-
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__
+} // namespace openspace::softwareintegration::simp

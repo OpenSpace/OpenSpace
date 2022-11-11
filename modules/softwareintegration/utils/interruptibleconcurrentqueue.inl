@@ -22,64 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
-
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
-
 namespace openspace {
 
-class SyncBuffer {
-public:
-    SyncBuffer(size_t n);
+template <typename T>
+T InterruptibleConcurrentQueue<T>::pop() {
+    auto isInterruptedOrNotEmpty = [this]() {
+        if (_interrupted) return true;
+        return !_queue.empty();
+    };
 
-    ~SyncBuffer();
+    std::unique_lock lock(_mutex);
 
-    void encode(const std::string& s);
+    // Block execution until interrupted or queue not empty
+    if (!isInterruptedOrNotEmpty()) {
+        _notifyForPop.wait(lock, isInterruptedOrNotEmpty);
+    }
 
-    template <typename T>
-    void encode(const T& v);
+    if (_interrupted) throw ghoul::RuntimeError{""};
 
-    template <typename T>
-    void encode(std::vector<T>& value);
+    auto item = _queue.front();
+    _queue.pop();
 
-    std::string decode();
+    return item;
+}
 
-    template <typename T>
-    T decode();
+template <typename T>
+void InterruptibleConcurrentQueue<T>::interrupt() {
+    _interrupted = true;
+    _notifyForPop.notify_all();
+}
 
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
+template <typename T>
+void InterruptibleConcurrentQueue<T>::push(const T& item) {
+    if (_interrupted) return;
+    std::unique_lock<std::mutex> mlock(_mutex);
+    _queue.push(item);
+    mlock.unlock();
+    _notifyForPop.notify_one();
+}
 
-    template <typename T>
-    void decode(T& value);
-
-    template <typename T>
-    void decode(std::vector<T>& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
-};
+template <typename T>
+void InterruptibleConcurrentQueue<T>::push(T&& item) {
+    if (_interrupted) return;
+    std::unique_lock<std::mutex> mlock(_mutex);
+    _queue.push(std::move(item));
+    mlock.unlock();
+    _notifyForPop.notify_one();
+}
 
 } // namespace openspace
-
-#include "syncbuffer.inl"
-
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__

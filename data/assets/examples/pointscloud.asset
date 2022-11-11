@@ -1,0 +1,23 @@
+-- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SPOUT enabled
+
+local assetHelper = asset.require("util/asset_helper")
+
+local RenderablePointsCloud = {
+    Identifier = "RenderablePointsCloud",
+    Renderable = {
+        Type = "RenderablePointsCloud",
+        Color = {0.0, 0.0, 0.0},
+        Data = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}},
+        Luminosity = {0.0, 0.0, 0.0},
+        Opacity = 0.0,
+        Size = 0.0,
+        Velocity = {0.0, 0.0, 0.0}
+    },
+    GUI = {
+        Name = "Points Cloud",
+        Path = "/Examples"
+    }
+}
+
+local objects = { RenderablePointsCloud }
+assetHelper.registerSceneGraphNodesAndExport(asset, objects)

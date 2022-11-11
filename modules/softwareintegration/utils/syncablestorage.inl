@@ -22,64 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
-
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 
-class SyncBuffer {
-public:
-    SyncBuffer(size_t n);
+template<typename T>
+bool SyncableStorage::fetch(
+    const Identifier& identifier,
+    const storage::Key storageKey,
+    T& resultingData
+) {
+    LDEBUGC("SyncableStorage", fmt::format("Loading data from float data storage: {}-{}", identifier, storage::getStorageKeyString(storageKey)));
+    std::lock_guard guard(_mutex);
+    if (!count(identifier)) {
+        LERRORC("SyncableStorage", fmt::format(
+            "Could not find any data for SceneGraphNode '{}' in the centralized data storage",
+            identifier
+        ));
+        return false;
+    }
 
-    ~SyncBuffer();
+    switch (storageKey) {
+        case storage::Key::DataPoints:
+        case storage::Key::Colormap:
+        case storage::Key::ColormapAttrData:
+        case storage::Key::LinearSizeAttrData:
+        case storage::Key::VelocityData: {
+            if (!std::is_same<T, std::vector<float>>::value) {
+                LERRORC("SyncableStorage", fmt::format(
+                    "Can't put {} into a {}.",
+                    storage::getStorageKeyString(storageKey), typeid(T).name()
+                ));
+                return false;
+            }
 
-    void encode(const std::string& s);
+            return fetchDimFloatData(identifier, simpDataKeysFromStorageKey(storageKey), resultingData);
+        }
+        default: {
+            LERRORC("SyncableStorage", fmt::format(
+                "Could not find data in storage for the key {}",
+                storage::getStorageKeyString(storageKey)
+            ));
+            break;
+        }
+    }
 
-    template <typename T>
-    void encode(const T& v);
-
-    template <typename T>
-    void encode(std::vector<T>& value);
-
-    std::string decode();
-
-    template <typename T>
-    T decode();
-
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
-
-    template <typename T>
-    void decode(T& value);
-
-    template <typename T>
-    void decode(std::vector<T>& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
-};
+    return false;
+}
 
 } // namespace openspace
-
-#include "syncbuffer.inl"
-
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__

@@ -22,64 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___INTERRUPTABLECONCURRENTQUEUE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___INTERRUPTABLECONCURRENTQUEUE___H__
 
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
+#include <condition_variable>
+#include <mutex>
+#include <queue>
 
 namespace openspace {
 
-class SyncBuffer {
+template <typename T>
+class InterruptibleConcurrentQueue {
 public:
-    SyncBuffer(size_t n);
-
-    ~SyncBuffer();
-
-    void encode(const std::string& s);
-
-    template <typename T>
-    void encode(const T& v);
-
-    template <typename T>
-    void encode(std::vector<T>& value);
-
-    std::string decode();
-
-    template <typename T>
-    T decode();
-
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
-
-    template <typename T>
-    void decode(T& value);
-
-    template <typename T>
-    void decode(std::vector<T>& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
+    T pop();
+	void interrupt();
+    void push(const T& item);
+    void push(T&& item);
 
 private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
+    std::atomic_bool _interrupted{ false };
+    std::queue<T> _queue;
+    mutable std::mutex _mutex;
+    mutable std::condition_variable _notifyForPop;
 };
 
 } // namespace openspace
 
-#include "syncbuffer.inl"
+#include "interruptibleconcurrentqueue.inl"
 
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___INTERRUPTABLECONCURRENTQUEUE___H__

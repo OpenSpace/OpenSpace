@@ -22,64 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___MESSAGEHANDLER___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___MESSAGEHANDLER___H__
 
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
+#include <unordered_map>
 
-namespace openspace {
+#include <modules/softwareintegration/network/softwareconnection.h>
+#include <modules/softwareintegration/utils/syncablestorage.h>
 
-class SyncBuffer {
-public:
-    SyncBuffer(size_t n);
+#include <openspace/properties/propertyowner.h>
 
-    ~SyncBuffer();
+namespace openspace::softwareintegration::messagehandler {
 
-    void encode(const std::string& s);
-
-    template <typename T>
-    void encode(const T& v);
-
-    template <typename T>
-    void encode(std::vector<T>& value);
-
-    std::string decode();
-
-    template <typename T>
-    T decode();
-
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
-
-    template <typename T>
-    void decode(T& value);
-
-    template <typename T>
-    void decode(std::vector<T>& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
+struct Callback {
+    std::function<void()> function;
+    std::vector<softwareintegration::storage::Key> waitForData = {};
+    std::string description = "???"; // To help debugging. Maybe remove?
 };
+using CallbackList = std::vector<Callback>;
+using CallbackMap = std::unordered_map<std::string, CallbackList>;
 
-} // namespace openspace
+void postSyncCallbacks();
 
-#include "syncbuffer.inl"
+void handleMessage(IncomingMessage& incomingMessage);
 
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__
+template<typename T>
+bool handleEnumValue(
+    const std::vector<std::byte>& message,
+    size_t& offset,
+    const simp::DataKey& dataKey,
+    const std::string& identifier,
+    const std::string& propertyName
+);
+
+void addCallback(const std::string& identifier, const Callback& newCallback);
+
+} // namespace openspace::softwareintegration::messagehandler
+
+#include "messagehandler.inl"
+
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___MESSAGEHANDLER___H__

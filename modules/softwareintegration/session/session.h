@@ -22,64 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
-
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSESSION___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSESSION___H__
 
 namespace openspace {
 
-class SyncBuffer {
+class SoftwareIntegrationModule;
+
+namespace softwareintegration {
+
+class Session {
 public:
-    SyncBuffer(size_t n);
+    Session() = delete;
 
-    ~SyncBuffer();
+    static bool loadSessionData(SoftwareIntegrationModule* module,
+                                const std::string& filePathString,
+                                std::string& errorMessage);
 
-    void encode(const std::string& s);
+    static bool saveSession(const std::string& wantedFileName, std::string& errorMessage);
 
-    template <typename T>
-    void encode(const T& v);
-
-    template <typename T>
-    void encode(std::vector<T>& value);
-
-    std::string decode();
-
-    template <typename T>
-    T decode();
-
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
-
-    template <typename T>
-    void decode(T& value);
-
-    template <typename T>
-    void decode(std::vector<T>& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
 };
 
-} // namespace openspace
+}  // namespace softwareintegration
 
-#include "syncbuffer.inl"
+}  // namespace openspace
 
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__
+#endif  // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSESSION___H__

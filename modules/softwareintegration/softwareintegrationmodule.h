@@ -22,64 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
 
-#include <ghoul/glm.h>
-#include <memory>
-#include <string>
-#include <vector>
+#include <openspace/util/openspacemodule.h>
+#include <modules/softwareintegration/utils/syncablestorage.h>
+#include <openspace/documentation/documentation.h>
+#include <modules/softwareintegration/network/network.h>
 
 namespace openspace {
 
-class SyncBuffer {
+namespace softwareintegration {
+
+class Session;
+
+} // namespace softwareintegration
+
+class SoftwareIntegrationModule : public OpenSpaceModule {
+    friend class softwareintegration::Session;
+
 public:
-    SyncBuffer(size_t n);
+    constexpr static const char* Name = "SoftwareIntegration";
 
-    ~SyncBuffer();
+    SoftwareIntegrationModule();
+    ~SoftwareIntegrationModule();
 
-    void encode(const std::string& s);
-
+    void storeData(
+        const SyncableStorage::Identifier& identifier,
+        const simp::DataKey key,
+        const std::vector<std::byte>& data
+    );
     template <typename T>
-    void encode(const T& v);
+    bool fetchData(
+        const SyncableStorage::Identifier& identifier,
+        const storage::Key key,
+        T& resultingData
+    );
+    bool isDataDirty(
+        const SyncableStorage::Identifier& identifier,
+        const storage::Key key
+    );
+    void setDataLoaded(
+        const SyncableStorage::Identifier& identifier,
+        const storage::Key key
+    );
+    bool dataLoaded(
+        const SyncableStorage::Identifier& identifier,
+        const storage::Key key
+    );
 
-    template <typename T>
-    void encode(std::vector<T>& value);
+    std::vector<documentation::Documentation> documentations() const override;
 
-    std::string decode();
-
-    template <typename T>
-    T decode();
-
-    void decode(std::string& s);
-    void decode(glm::quat& value);
-    void decode(glm::dquat& value);
-    void decode(glm::vec3& value);
-    void decode(glm::dvec3& value);
-
-    template <typename T>
-    void decode(T& value);
-
-    template <typename T>
-    void decode(std::vector<T>& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<std::byte> data);
-    std::vector<std::byte> data();
+    scripting::LuaLibrary luaLibrary() const override;
 
 private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<std::byte> _dataStream;
+    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalDeinitialize() override;
+
+    std::vector<Syncable*> getSyncables();
+
+    // Centralized storage for datasets
+    SyncableStorage _syncableStorage;
+
+    std::shared_ptr<softwareintegration::network::NetworkState> _networkState;
 };
 
 } // namespace openspace
 
-#include "syncbuffer.inl"
+#include "softwareintegrationmodule.inl"
 
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
