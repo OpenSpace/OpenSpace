@@ -25,7 +25,6 @@
 // The following code was taken from VIAMD (https://github.com/scanberg/viamd), MIT.
 
 #include "coloring.h"
-//#include "color_utils.h"
 #include "md_util.h"
 #include <core/md_bitfield.h>
 
@@ -82,7 +81,7 @@ constexpr inline vec3_t hcl_to_rgb(vec3_t HCL) {
         float Q = expf((1.f - C / (2.f * L)) * (HCLgamma / HCLy0));
         float U = (2.f * L - C) / (2.f * Q - 1.f);
         float V = C / Q;
-        float T = tanf((H + MIN(fractf(2.f * H) / 4.f, fractf(-2.f * H) / 8.f)) * PI * 2.f);
+        float T = tanf((H + MIN(fractf(2.f * H) / 4.f, fractf(-2.f * H) / 8.f)) * static_cast<float>(PI) * 2.f);
         H *= 6.f;
         if (H <= 1.f) {
             RGB.x = 1.f;

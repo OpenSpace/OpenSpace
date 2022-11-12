@@ -2,7 +2,7 @@
 #include <md_trajectory.h>
 #include <md_util.h>
 #include <core/md_allocator.h>
-#include "rendering/viamd/loader.h"
+#include "viamd/loader.h"
 
 #include <string>
 #include <unordered_map>

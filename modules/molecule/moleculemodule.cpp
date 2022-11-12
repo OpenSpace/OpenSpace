@@ -24,8 +24,8 @@
 
 #include <modules/molecule/moleculemodule.h>
 
-#include <modules/molecule/rendering/renderablemolecule.h>
-#include <modules/molecule/rendering/renderablesimulationbox.h>
+#include <modules/molecule/renderablemolecule.h>
+#include <modules/molecule/renderablesimulationbox.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>

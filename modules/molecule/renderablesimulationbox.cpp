@@ -35,11 +35,10 @@
 #include <md_script.h>
 #include <md_filter.h>
 #include "openspace/engine/windowdelegate.h"
-#include "viamd/coloring.h"
-#include "viamd/loader.h"
-#include "viamd/gfx/conetracing_utils.h"
-#include "viamd/gfx/postprocessing_utils.h"
-#include "../moleculemanager.h"
+#include "mol/viamd/coloring.h"
+#include "mol/viamd/loader.h"
+#include "mol/viamd/postprocessing_utils.h"
+#include "mol/cache.h"
 
 #include <glm/gtc/random.hpp>
 
@@ -62,6 +61,8 @@
 #include <md_xyz.h>
 #include <md_frame_cache.h>
 #include <core/md_allocator.h>
+
+#include "mol/util.h"
 
 // COMBAK: because my ide complains
 #ifndef ZoneScoped
@@ -107,50 +108,8 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 }
 )";
 
-static void compute_aabb(vec3_t* aabb_min, vec3_t* aabb_max, const float* x, const float* y, const float* z, int64_t count) {
-    ASSERT(count >= 0);
-
-    if (count < 1) {
-        *aabb_min = *aabb_max = {{0, 0, 0}};
-        return;
-    }
-
-    *aabb_min = {{x[0], y[0], z[0]}};
-    *aabb_max = {{x[0], y[0], z[0]}};
-    for (int64_t i = 1; i < count; ++i) {
-        aabb_min->x = MIN(aabb_min->x, x[i]);
-        aabb_max->x = MAX(aabb_max->x, x[i]);
-        aabb_min->y = MIN(aabb_min->y, y[i]);
-        aabb_max->y = MAX(aabb_max->y, y[i]);
-        aabb_min->z = MIN(aabb_min->z, z[i]);
-        aabb_max->z = MAX(aabb_max->z, z[i]);
-    }
-}
-enum AtomBit {
-    AtomBitVisible = 0x4,
-};
-
 namespace {
     constexpr const char* _loggerCat = "RenderableSimulationBox";
-
-    enum class RepresentationType {
-        SpaceFill = MD_GL_REP_SPACE_FILL,
-        Ribbons = MD_GL_REP_RIBBONS,
-        Cartoon = MD_GL_REP_CARTOON,
-        Licorice = MD_GL_REP_LICORICE,
-    };
-
-    enum class Coloring {
-        // Uniform,
-        Cpk,
-        AtomIndex,
-        ResId,
-        ResIndex,
-        ChainId,
-        ChainIndex,
-        SecondaryStructure,
-        // Property
-    };
 
     constexpr openspace::properties::Property::PropertyInfo MoleculeFilesInfo = {
         "MoleculeFiles",
@@ -254,6 +213,12 @@ namespace {
         "SSAO Bias"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ExposureInfo = {
+        "Exposure",
+        "Exposure",
+        "Exposure, Controls the Exposure setting for the tonemap"
+    };
+
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         // [[codegen::verbatim(MoleculeFilesInfo.description)]]
         std::vector<std::string> moleculeFiles;
@@ -261,17 +226,17 @@ namespace {
         // [[codegen::verbatim(TrajectoryFilesInfo.description)]]
         std::vector<std::string> trajectoryFiles;
 
-        enum class [[codegen::map(RepresentationType)]] RepresentationType {
+        enum class [[codegen::map(mol::rep::Type)]] RepresentationType {
             SpaceFill,
+            Licorice,
             Ribbons,
             Cartoon,
-            Licorice,
         };
 
         // [[codegen::verbatim(RepTypeInfo.description)]]
         std::optional<RepresentationType> repType;
 
-        enum class [[codegen::map(Coloring)]] Coloring {
+        enum class [[codegen::map(mol::rep::Color)]] Coloring {
             // Uniform,
             Cpk,
             AtomIndex,
@@ -324,6 +289,9 @@ namespace {
 
         // [[codegen::verbatim(SSAOBiasInfo.description)]]
         std::optional<float> ssaoBias;
+
+        // [[codegen::verbatim(ExposureInfo.description)]]
+        std::optional<float> exposure;
     };
 
 #include "renderablesimulationbox_codegen.cpp"
@@ -360,23 +328,24 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _ssaoEnabled(SSAOEnabledInfo),
     _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f),
     _ssaoRadius(SSAORadiusInfo, 12.f, 0.1f, 100.f),
-    _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f)
+    _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
+    _exposure(ExposureInfo, 0.3f, 0.1f, 10.f)
 {
     _repType.addOptions({
-        { static_cast<int>(RepresentationType::SpaceFill), "Space Fill" },
-        { static_cast<int>(RepresentationType::Ribbons), "Ribbons" },
-        { static_cast<int>(RepresentationType::Cartoon), "Cartoon" },
-        { static_cast<int>(RepresentationType::Licorice), "Licorice" },
+        { static_cast<int>(mol::rep::Type::SpaceFill), "Space Fill" },
+        { static_cast<int>(mol::rep::Type::Ribbons), "Ribbons" },
+        { static_cast<int>(mol::rep::Type::Cartoon), "Cartoon" },
+        { static_cast<int>(mol::rep::Type::Licorice), "Licorice" },
     });
     
     _coloring.addOptions({
-        { static_cast<int>(Coloring::Cpk), "CPK" },
-        { static_cast<int>(Coloring::AtomIndex), "Atom Index" },
-        { static_cast<int>(Coloring::ResId), "Residue ID" },
-        { static_cast<int>(Coloring::ResIndex), "Residue Index" },
-        { static_cast<int>(Coloring::ChainId), "Chain ID" },
-        { static_cast<int>(Coloring::ChainIndex), "Chain Index" },
-        { static_cast<int>(Coloring::SecondaryStructure), "Secondary Structure" },
+        { static_cast<int>(mol::rep::Color::Cpk), "CPK" },
+        { static_cast<int>(mol::rep::Color::AtomIndex), "Atom Index" },
+        { static_cast<int>(mol::rep::Color::ResId), "Residue ID" },
+        { static_cast<int>(mol::rep::Color::ResIndex), "Residue Index" },
+        { static_cast<int>(mol::rep::Color::ChainId), "Chain ID" },
+        { static_cast<int>(mol::rep::Color::ChainIndex), "Chain Index" },
+        { static_cast<int>(mol::rep::Color::SecondaryStructure), "Secondary Structure" },
     });
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -396,17 +365,18 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _ssaoIntensity = p.ssaoIntensity.value_or(12.f);
     _ssaoRadius = p.ssaoRadius.value_or(12.f);
     _ssaoBias = p.ssaoBias.value_or(0.1f);
+    _exposure = p.exposure.value_or(0.3f);
 
     if (p.repType.has_value()) {
-        _repType = static_cast<int>(codegen::map<RepresentationType>(*p.repType));
+        _repType = static_cast<int>(codegen::map<mol::rep::Type>(*p.repType));
     } else {
-        _repType = static_cast<int>(RepresentationType::SpaceFill);
+        _repType = static_cast<int>(mol::rep::Type::SpaceFill);
     }
     
     if (p.coloring.has_value()) {
-        _coloring = static_cast<int>(codegen::map<Coloring>(*p.coloring));
+        _coloring = static_cast<int>(codegen::map<mol::rep::Color>(*p.coloring));
     } else {
-        _coloring = static_cast<int>(Coloring::Cpk);
+        _coloring = static_cast<int>(mol::rep::Color::Cpk);
     }
     
     for (int count : _moleculeCounts.value()) {
@@ -416,8 +386,6 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
             nullptr, // trajectory
             {},      // drawRep
             {},      // drawMol
-            {},      // visibilityMask
-            //{},      // occupancy volume
         };
         
         for (int i = 0; i < count; i++) {
@@ -435,21 +403,22 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         _molecules.push_back(mol);
     }
     
-    auto onUpdateRepr = [this]() {
+    auto onUpdateRep = [this]() {
         for (molecule_data_t& mol: _molecules) {
-            updateRepresentation(mol);
+            mol::util::update_rep_type(mol.drawRep, static_cast<mol::rep::Type>(_repType.value()), _repScale);
+        }
+    };
+
+    auto onUpdateCol = [this]() {
+        for (molecule_data_t& mol: _molecules) {
+            mol::util::update_rep_colors(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
         }
     };
     
-    _repType.onChange(onUpdateRepr);
-    _coloring.onChange(onUpdateRepr);
-    _repScale.onChange(onUpdateRepr);
-
-    _viamdFilter.onChange([this] () {
-        for (molecule_data_t& mol: _molecules) {
-            applyViamdFilter(mol, _viamdFilter.value());
-        }
-    });
+    _repType.onChange(onUpdateRep);
+    _repScale.onChange(onUpdateRep);
+    _coloring.onChange(onUpdateCol);
+    _viamdFilter.onChange(onUpdateCol);
     
     addProperty(_repType);
     addProperty(_coloring);
@@ -520,7 +489,6 @@ void RenderableSimulationBox::initializeGL() {
         md_gl_initialize();
         md_gl_shaders_init(&shaders, shader_output_snippet);
         
-        cone_trace::initialize();
         postprocessing::initialize(size.x, size.y);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -531,7 +499,7 @@ void RenderableSimulationBox::initializeGL() {
     size_t i = 0;
     for (molecule_data_t& mol : _molecules) {
         initMolecule(mol, _moleculeFiles.value().at(i), _trajectoryFiles.value().at(i));
-        applyViamdFilter(mol, _viamdFilter.value());
+        mol::util::update_rep_colors(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
         i++;
     }
     
@@ -549,7 +517,6 @@ void RenderableSimulationBox::deinitializeGL() {
         colorTex = 0;
         fbo = 0;
         billboardGlDeinit();
-        cone_trace::shutdown();
         postprocessing::shutdown();
     }
 
@@ -561,97 +528,6 @@ void RenderableSimulationBox::deinitializeGL() {
 bool RenderableSimulationBox::isReady() const {
     return true;
 }
-void RenderableSimulationBox::updateAnimation(molecule_data_t& mol, double time) {
-    int64_t nFrames = md_trajectory_num_frames(mol.trajectory);
-    if (nFrames >= 4) {
-        double t = fract(time);
-        int64_t frames[4];
-
-        // The animation is played forward and back (bouncing), the first and last
-        // frame are repeated.
-
-        if ((int64_t(time) / nFrames) % 2 == 0) { // animation forward
-            int64_t frame = int64_t(time) % nFrames;
-            if (frame < 0) frame += nFrames;
-            frames[0] = std::max<int64_t>(0, frame - 1);
-            frames[1] = frame;
-            frames[2] = std::min<int64_t>(nFrames - 1, frame + 1);
-            frames[3] = std::min<int64_t>(nFrames - 1, frame + 2);
-        }
-        else { // animation backward
-            t = 1.0 - t;
-            int64_t frame = nFrames - 1 - (int64_t(time) % nFrames);
-            if (frame >= nFrames) frame -= nFrames;
-            frames[0] = std::max<int64_t>(0, frame - 2);
-            frames[1] = std::max<int64_t>(0, frame - 1);
-            frames[2] = frame;
-            frames[3] = std::min<int64_t>(nFrames - 1, frame + 1);
-        }
-
-        // nearest
-        // mdtraj_frame_header_t header{};
-        // mdtraj_load_frame(traj, frame, &header, mol.atom.x, mol.atom.y, mol.atom.z);
-        // md_gl_molecule_set_atom_position(&_drawMol, 0,static_cast<uint32_t>(mol.atom.count), mol.atom.x, mol.atom.y, mol.atom.z, 0);
-        
-        // cubic
-        md_trajectory_frame_header_t header[4];
-        mat3_t boxes[4];
-        int64_t stride = ROUND_UP(mol.molecule.atom.count, md_simd_widthf);    // The interploation uses SIMD vectorization without bounds, so we make sure there is no overlap between the data segments
-        int64_t bytes = stride * sizeof(float) * 3 * 4;
-        float* mem = static_cast<float*>(malloc(bytes));
-        {
-            md_vec3_soa_t src[4] = {
-                {mem + stride * 0, mem + stride *  1, mem + stride *  2},
-                {mem + stride * 3, mem + stride *  4, mem + stride *  5},
-                {mem + stride * 6, mem + stride *  7, mem + stride *  8},
-                {mem + stride * 9, mem + stride * 10, mem + stride * 11},
-            };
-            md_vec3_soa_t dst = {
-                mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z,
-            };
-
-            md_trajectory_load_frame(mol.trajectory, frames[0], &header[0], src[0].x, src[0].y, src[0].z);
-            md_trajectory_load_frame(mol.trajectory, frames[1], &header[1], src[1].x, src[1].y, src[1].z);
-            md_trajectory_load_frame(mol.trajectory, frames[2], &header[2], src[2].x, src[2].y, src[2].z);
-            md_trajectory_load_frame(mol.trajectory, frames[3], &header[3], src[3].x, src[3].y, src[3].z);
-
-            memcpy(&boxes[0], header[0].box, sizeof(boxes[0]));
-            memcpy(&boxes[1], header[1].box, sizeof(boxes[1]));
-            memcpy(&boxes[2], header[2].box, sizeof(boxes[2]));
-            memcpy(&boxes[3], header[3].box, sizeof(boxes[3]));
-            mat3_t box = cubic_spline(boxes[0], boxes[1], boxes[2], boxes[3], t, 1.0);
-            vec3_t pbc_ext = box * vec3_t{{1.0, 1.0, 1.0}};
-            
-            md_util_cubic_interpolation(dst, src, mol.molecule.atom.count, pbc_ext, t, 1.0f);
-        }
-        free(mem);
-    }
-    else {
-        LERROR("Molecule trajectory contains less than 4 frames. Cannot interpolate.");
-    }
-}
-
-/*
-void RenderableSimulationBox::applyTransforms() {
-    for (const molecule_data_t& mol : _molecules) {
-        for (size_t i = 0; i < mol.states.size(); i++) {
-            const molecule_state_t& state = mol.states[i];
-            dmat4 transform =
-                translate(dmat4(1.0), state.position) *
-                rotate(dmat4(1.0), state.angle, state.rotationAxis) *
-                dmat4(1.0);
-        
-            for (int j = 0; j < mol.molecule.atom.count; j++) {
-                dvec4 pos(*(mol.molecule.atom.x + j), *(mol.molecule.atom.y + j), *(mol.molecule.atom.z + j), 1.0);
-                pos = transform * pos;
-                *(mol.concatMolecule.atom.x + (i * mol.molecule.atom.count) + j) = pos.x;
-                *(mol.concatMolecule.atom.y + (i * mol.molecule.atom.count) + j) = pos.y;
-                *(mol.concatMolecule.atom.z + (i * mol.molecule.atom.count) + j) = pos.z;
-            }
-        }
-    }
-}
-*/
 
 void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) {
     // update positions / rotations
@@ -707,16 +583,12 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     for (molecule_data_t& mol : _molecules) {
         // update animation
         if (mol.trajectory) {
-            updateAnimation(mol, t * _animationSpeed);
+            mol::util::interpolate_coords(mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z, mol.molecule.atom.count, t, mol::util::Interpolation::Cubic, mol.trajectory);
             md_gl_molecule_set_atom_position(&mol.drawMol, 0, uint32_t(mol.molecule.atom.count), mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z, 0);
         }
     
         // update simulation
         updateSimulation(mol, dt * _simulationSpeed);
-    
-        // update gl repr
-        //applyTransforms();
-
     }
 }
 
@@ -806,7 +678,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         value_ptr(viewMatrix),
         value_ptr(projMatrix),
     };
-    args.atom_mask = AtomBitVisible;
     args.options = 0;
         
     args.draw_operations = {
@@ -818,7 +689,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         GLint defaultFbo;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        // deferred rendering of mold
+        // shading rendering of mold
         const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
         glDrawBuffers(2, bufs);
 
@@ -844,61 +715,29 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         md_gl_draw(&args);
         
-        // conetracing
-        // glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        // for (molecule_data_t& mol : _molecules) {
-
-        //     cone_trace::free_volume(&mol.occupancyVolume);
-        //     vec3_t min, max;
-        //     compute_aabb(&min, &max, mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z, mol.concatMolecule.atom.count);
-        //     std::cout << min[0] << " " << min[1] << " " << min[2] << std::endl;
-        //     std::cout << max[0] << " " << max[1] << " " << max[2] << std::endl;
-        //     cone_trace::init_occlusion_volume(&mol.occupancyVolume, min, max, 8.0f);
-
-        //     cone_trace::compute_occupancy_volume(
-        //         mol.occupancyVolume, mol.concatMolecule.atom.x, mol.concatMolecule.atom.y, mol.concatMolecule.atom.z,
-        //         mol.concatMolecule.atom.radius, mol.concatMolecule.atom.count
-        //     );
-
-        //     cone_trace::render_directional_occlusion(
-        //         depthTex, normalTex, mol.occupancyVolume,
-        //         mat4_from_glm(viewMatrix), mat4_from_glm(projMatrix),
-        //         1.0, 1.0
-        //     );
-
-        // }
-        
         { // postprocessing
-            postprocessing::Descriptor desc;
-            desc.background.intensity = {{ 0, 0, 0 }};
-            desc.ambient_occlusion.enabled = _ssaoEnabled;
-            desc.ambient_occlusion.intensity = _ssaoIntensity;
-            desc.ambient_occlusion.radius = _ssaoRadius;
-            desc.ambient_occlusion.bias = _ssaoBias;
-            desc.bloom.enabled = false;
-            desc.depth_of_field.enabled = false;
-            desc.temporal_reprojection.enabled = false;
-            desc.tonemapping.enabled = true;
-            desc.input_textures.depth = depthTex;
-            desc.input_textures.color = colorTex;
-            desc.input_textures.normal = normalTex;
+            postprocessing::Settings settings;
+            settings.background.intensity = {{ 0, 0, 0 }};
+            settings.ambient_occlusion.enabled = _ssaoEnabled;
+            settings.ambient_occlusion.intensity = _ssaoIntensity;
+            settings.ambient_occlusion.radius = _ssaoRadius;
+            settings.ambient_occlusion.bias = _ssaoBias;
+            settings.bloom.enabled = false;
+            settings.depth_of_field.enabled = false;
+            settings.temporal_reprojection.enabled = false;
+            settings.tonemapping.enabled = true;
+            settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
+            settings.tonemapping.exposure = _exposure;
+            settings.input_textures.depth = depthTex;
+            settings.input_textures.color = colorTex;
+            settings.input_textures.normal = normalTex;
 
-            ViewParam param = {0};
-            // camCopy.maxFov()
-            param.clip_planes.near = 0.1f;
-            param.clip_planes.far = 1000.f;
-            // param.fov_y
-            param.matrix.current.proj = mat4_from_glm(projMatrix);
-            param.matrix.current.proj_jittered = mat4_from_glm(projMatrix);
-            // param.matrix.current.norm = mat4_transpose(mat4_inverse(param.matrix.current.proj));
-            // param.matrix.current.view = 
-            param.matrix.inverse.proj = mat4_inverse(param.matrix.current.proj);
-            param.matrix.inverse.proj_jittered = mat4_inverse(param.matrix.current.proj_jittered);
-            // param.resolution
-            
-            postprocessing::postprocess(desc, param);
+            postprocessing::postprocess(settings, mat4_from_glm(projMatrix));
+
             glEnable(GL_DEPTH_TEST); // restore state after postprocess
             glDisable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -919,12 +758,12 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             I;
         mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
         mat4 transform = projMatrix * mat4(billboardModel) * faceCamera;
-        float circleWidth = distance / compMax(_simulationBox.value() * data.modelTransform.scale) * 1E-2;
+        double circleWidth = distance / compMax(_simulationBox.value() * data.modelTransform.scale) * 1E-2;
 
         dvec4 depth_ = dmat4(data.camera.sgctInternal.projectionMatrix()) * billboardModel * dvec4(0.0, 0.0, 0.0, 1.0);
         double depth = normalizeDouble(depth_.w);
 
-        billboardDraw(transform, colorTex, depthTex, vec4(1.0), circleWidth, depth);
+        billboardDraw(transform, colorTex, depthTex, vec4(1.0), static_cast<float>(circleWidth), static_cast<float>(depth));
     }
 
     global::renderEngine->openglStateCache().resetBlendState();
@@ -941,8 +780,8 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_vie
         return;
     }
 
-    // Perform a deep copy of the molecule from the manager so we can modify its state (coordinates).
-    md_molecule_copy(&mol.molecule, molecule, default_allocator);
+    // We don't really append per-se, we use this to perform a deep copy of the molecule from the manager so we can modify its state (coordinates).
+    md_molecule_append(&mol.molecule, molecule, default_allocator);
 
     if (!trajFile.empty() && trajFile != "") {
         LDEBUG(fmt::format("Loading trajectory file '{}'", trajFile));
@@ -954,161 +793,25 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_vie
         }
     }
     
-    md_bitfield_init(&mol.visibilityMask, default_allocator);
-    
     double sphere = glm::compMax(_simulationBox.value()) / 2.0;
     setBoundingSphere(sphere);
-    // setInteractionSphere(sphere);
 
     md_gl_molecule_init(&mol.drawMol, &mol.molecule);
     md_gl_representation_init(&mol.drawRep, &mol.drawMol);
-    updateRepresentation(mol);
-
-    //vec3 min = _simulationBox.minValue();
-    //vec3 max = _simulationBox.maxValue();
-
-    // conetracing
-    //cone_trace::init_occlusion_volume(&mol.occupancyVolume, min, max, 8.0f);
-
-    // vec3 box = _simulationBox.value();
-    // cone_trace::init_occlusion_volume(&mol.occupancyVolume, { {0, 0, 0} }, {{ box.x, box.y, box.z }}, 8.0f);
-
-    //cone_trace::compute_occupancy_volume(mol.occupancyVolume, mol.molecule.atom.x, mol.molecule.atom.y, mol.molecule.atom.z, mol.molecule.atom.radius, mol.molecule.atom.count);
-}
-
-void RenderableSimulationBox::updateRepresentation(molecule_data_t& mol) {
-    { // REPRESENTATION TYPE
-        md_gl_representation_args_t rep_args{};
     
-        switch (static_cast<RepresentationType>(_repType.value())) {
-            case RepresentationType::SpaceFill:
-                rep_args.space_fill.radius_scale = _repScale;
-                break;
-            case RepresentationType::Cartoon:
-                rep_args.cartoon.width_scale = _repScale;
-                rep_args.cartoon.thickness_scale = _repScale;
-                break;
-            case RepresentationType::Ribbons:
-                rep_args.cartoon.width_scale = _repScale;
-                rep_args.cartoon.thickness_scale = _repScale;
-                break;
-            case RepresentationType::Licorice:
-                rep_args.licorice.radius = _repScale;
-                break;
-            default:
-                ghoul_assert(false, "unexpected representation type");
-                break;
-        }
-
-        md_gl_representation_set_type_and_args(&mol.drawRep, _repType, rep_args);
-    }
-    { // COLORING
-        uint32_t* colors = static_cast<uint32_t*>(md_alloc(default_temp_allocator, sizeof(uint32_t) * mol.molecule.atom.count));
-        uint32_t count = static_cast<uint32_t>(mol.molecule.atom.count);
-
-        switch (static_cast<Coloring>(_coloring.value())) {
-            case Coloring::Cpk:
-                color_atoms_cpk(colors, count, mol.molecule);
-                break;
-            case Coloring::AtomIndex:
-                color_atoms_idx(colors, count, mol.molecule);
-                break;
-            case Coloring::ResId:
-                color_atoms_residue_id(colors, count, mol.molecule);
-                break;
-            case Coloring::ResIndex:
-                color_atoms_residue_index(colors, count, mol.molecule);
-                break;
-            case Coloring::ChainId:
-                color_atoms_chain_id(colors, count, mol.molecule);
-                break;
-            case Coloring::ChainIndex:
-                color_atoms_chain_index(colors, count, mol.molecule);
-                break;
-            case Coloring::SecondaryStructure:
-                color_atoms_secondary_structure(colors, count, mol.molecule);
-                break;
-            default:
-                ghoul_assert(false, "unexpected molecule coloring");
-                break;
-        }
-
-        md_gl_representation_set_color(&mol.drawRep, 0, static_cast<uint32_t>(mol.molecule.atom.count), colors, 0);
-    }
-}
-
-void RenderableSimulationBox::applyViamdFilter(molecule_data_t& mol, std::string_view filter) {
-    md_bitfield_clear(&mol.visibilityMask);
-    
-    if (!mol.molecule.atom.flags)
-        return;
-    
-    if (!filter.empty() && filter != "") {
-        str_t str = {filter.data(), filter.length()};
-        md_filter_result_t res{};
-        bool success = md_filter_evaluate(&res, str, &mol.molecule, NULL, default_temp_allocator);
-    
-        if (success) {
-            LDEBUG("Compiled viamd filter");
-            for (int64_t i = 0; i < res.num_bitfields; ++i) {
-                md_bitfield_or_inplace(&mol.visibilityMask, &res.bitfields[i]);
-            }
-        }
-        else {
-            LERROR("Failed to evaluate viamd filter");
-        }
-
-        for (int64_t i = 0; i < mol.molecule.atom.count; ++i) {
-            md_flags_t& flags = mol.molecule.atom.flags[i];
-            flags = md_bitfield_test_bit(&mol.visibilityMask, i) ? AtomBitVisible : 0; 
-        }
-
-        md_filter_free(&res, default_temp_allocator);
-    }
-
-    else {
-        for (int64_t i = 0; i < mol.molecule.atom.count; ++i) {
-            mol.molecule.atom.flags[i] = AtomBitVisible;
-        }
-    }
-
-    md_gl_molecule_set_atom_flags(&mol.drawMol, 0, static_cast<uint32_t>(mol.molecule.atom.count), mol.molecule.atom.flags, 0);
-}
-
-void RenderableSimulationBox::applyViamdScript(molecule_data_t& mol, std::string_view script) {
-    str_t str = {script.data(), script.length()};
-    int numFrames = md_trajectory_num_frames(mol.trajectory);
-
-    md_script_ir_t* selectionIr = md_script_ir_create(default_temp_allocator);
-    md_script_ir_t* mainIr = md_script_ir_create(default_temp_allocator);
-    md_script_eval_t* fullEval = md_script_eval_create(numFrames, mainIr, default_temp_allocator);
-
-    bool res = md_script_ir_compile_source(mainIr, str, &mol.molecule, selectionIr);
-    
-    if (res) {
-        res = md_script_eval_compute(fullEval, mainIr, &mol.molecule, mol.trajectory, nullptr);
-    } else {
-        LERROR("Failed to compile IR from source");
-    }
-
-    md_script_ir_free(mainIr);
-    md_script_ir_free(selectionIr);
-    md_script_eval_free(fullEval);
+    mol::util::update_rep_type(mol.drawRep, static_cast<mol::rep::Type>(_repType.value()), _repScale);
+    mol::util::update_rep_colors(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
 }
 
 void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {
-    //cone_trace::free_volume(&mol.occupancyVolume);
     md_gl_representation_free(&mol.drawRep);
     md_gl_molecule_free(&mol.drawMol);
     md_molecule_free(&mol.molecule, default_allocator);
 
-    md_bitfield_free(&mol.visibilityMask);
-    mol.visibilityMask = {};
     mol.molecule = {};
     mol.trajectory = nullptr;
     mol.drawMol = {};
     mol.drawRep = {};
-    //mol.occupancyVolume = {};
 }
 
 } // namespace openspace

@@ -25,34 +25,28 @@
 
 // Shaders for HBAO are based on nVidias examples and are copyright protected as stated above
 
+#ifdef _MSC_VER
+// Disable double to float truncation warnings from table
+#pragma warning( disable : 4305 )
+#endif
+
 #include "postprocessing_utils.h"
 
-//#include <core/types.h>
-//#include <core/common.h>
-//#include <core/log.h>
-//#include <core/math_utils.h>
-//#include <core/string_utils.h>
-
+#include <core/md_allocator.h>
 #include <core/md_str.h>
 #include <core/md_log.h>
-#include "gl_utils.h"
-// #include <random_util.h>
+#include <core/md_string_builder.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <float.h>
 
-#define PUSH_GPU_SECTION(lbl)                                                                       \
-    {                                                                                               \
-        if (&glPushDebugGroup) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, lbl); \
-    }
-#define POP_GPU_SECTION()                       \
-    {                                           \
-        if (&glPopDebugGroup) glPopDebugGroup(); \
-    }
+#include "postprocessing_shaders.inl"
 
-#ifndef VIAMD_SHADER_DIR
-#define VIAMD_SHADER_DIR "shaders"
-#endif
+#include <ghoul/opengl/ghoul_gl.h>
+
+#define PUSH_GPU_SECTION(lbl) {if (&glPushDebugGroup) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, lbl);}
+#define POP_GPU_SECTION()     {if (&glPopDebugGroup) glPopDebugGroup();}
 
 namespace postprocessing {
 
@@ -61,211 +55,135 @@ namespace postprocessing {
 // @TODO: Use some kind of unified pipeline for all post processing operations
 
 static struct {
-    GLuint vao = 0;
-    GLuint v_shader_fs_quad = 0;
-    GLuint tex_width = 0;
-    GLuint tex_height = 0;
+    uint32_t vao = 0;
+    uint32_t v_shader_fs_quad = 0;
+    uint32_t tex_width = 0;
+    uint32_t tex_height = 0;
 
     struct {
-        GLuint fbo = 0;
-        GLuint tex_rgba8 = 0;
+        uint32_t fbo = 0;
+        uint32_t tex_rgba8 = 0;
     } tmp;
 
     struct {
-        GLuint fbo = 0;
-        GLuint tex_color[2] = {0, 0};
-        GLuint tex_temporal_buffer[2] = {0, 0};  // These are dedicated and cannot be use as intermediate buffers by other shaders
+        uint32_t fbo = 0;
+        uint32_t tex_color[2] = {0, 0};
+        uint32_t tex_temporal_buffer[2] = {0, 0};  // These are dedicated and cannot be use as intermediate buffers by other shaders
     } targets;
 
     struct {
-        GLuint fbo = 0;
-        GLuint tex_tilemax = 0;
-        GLuint tex_neighbormax = 0;
+        uint32_t fbo = 0;
+        uint32_t tex_tilemax = 0;
+        uint32_t tex_neighbormax = 0;
         int32_t tex_width = 0;
         int32_t tex_height = 0;
     } velocity;
 
     struct {
-        GLuint fbo = 0;
-        GLuint texture = 0;
-        GLuint program_persp = 0;
-        GLuint program_ortho = 0;
+        uint32_t fbo = 0;
+        uint32_t texture = 0;
+        uint32_t program_persp = 0;
+        uint32_t program_ortho = 0;
         struct {
-            GLint clip_info = -1;
-            GLint tex_depth = -1;
+            int clip_info = -1;
+            int tex_depth = -1;
         } uniform_loc;
     } linear_depth;
 
     struct {
-        GLuint tex_random = 0;
-        GLuint ubo_hbao_data = 0;
+        uint32_t tex_random = 0;
+        uint32_t ubo_hbao_data = 0;
 
         struct {
-            GLuint fbo = 0;
-            GLuint texture = 0;
-            GLuint program_persp = 0;
-            GLuint program_ortho = 0;
+            uint32_t fbo = 0;
+            uint32_t texture = 0;
+            uint32_t program_persp = 0;
+            uint32_t program_ortho = 0;
         } hbao;
 
         struct {
-            GLuint fbo = 0;
-            GLuint texture = 0;
-            GLuint program = 0;
+            uint32_t fbo = 0;
+            uint32_t texture = 0;
+            uint32_t program = 0;
         } blur;
     } ssao;
 
     struct {
-        GLuint program = 0;
+        uint32_t program = 0;
         struct {
-            GLint tex_half_res = -1;
-            GLint tex_color = -1;
-            GLint tex_depth = -1;
-            GLint pixel_size = -1;
-            GLint focus_point = -1;
-            GLint focus_scale = -1;
-            GLint time = -1;
+            int tex_half_res = -1;
+            int tex_color = -1;
+            int tex_depth = -1;
+            int pixel_size = -1;
+            int focus_point = -1;
+            int focus_scale = -1;
+            int time = -1;
         } uniform_loc;
 
         struct {
-            GLuint fbo = 0;
-            GLuint program = 0;
+            uint32_t fbo = 0;
+            uint32_t program = 0;
             struct {
-                GLuint color_coc = 0;
+                uint32_t color_coc = 0;
             } tex;
             struct {
-                GLint tex_depth = -1;
-                GLint tex_color = -1;
-                GLint focus_point = -1;
-                GLint focus_scale = -1;
+                int tex_depth = -1;
+                int tex_color = -1;
+                int focus_point = -1;
+                int focus_scale = -1;
             } uniform_loc;
         } half_res;
     } bokeh_dof;
 
     struct {
-        GLuint program = 0;
-    } bloom;
-
-    struct {
-        GLuint program = 0;
+        uint32_t program = 0;
         struct {
-            GLint mode = -1;
-            GLint tex_color = -1;
+            int mode = -1;
+            int tex_color = -1;
         } uniform_loc;
     } tonemapping;
 
     struct {
         struct {
-            GLuint program = 0;
+            uint32_t program = 0;
             struct {
-                GLint tex_linear_depth = -1;
-                GLint tex_main = -1;
-                GLint tex_prev = -1;
-                GLint tex_vel = -1;
-                GLint tex_vel_neighbormax = -1;
-                GLint texel_size = -1;
-                GLint time = -1;
-                GLint feedback_min = -1;
-                GLint feedback_max = -1;
-                GLint motion_scale = -1;
-                GLint jitter_uv = -1;
+                int tex_linear_depth = -1;
+                int tex_main = -1;
+                int tex_prev = -1;
+                int tex_vel = -1;
+                int tex_vel_neighbormax = -1;
+                int texel_size = -1;
+                int time = -1;
+                int feedback_min = -1;
+                int feedback_max = -1;
+                int motion_scale = -1;
+                int jitter_uv = -1;
             } uniform_loc;
         } with_motion_blur;
         struct {
-            GLuint program = 0;
+            uint32_t program = 0;
             struct {
-                GLint tex_linear_depth = -1;
-                GLint tex_main = -1;
-                GLint tex_prev = -1;
-                GLint tex_vel = -1;
-                GLint texel_size = -1;
-                GLint time = -1;
-                GLint feedback_min = -1;
-                GLint feedback_max = -1;
-                GLint motion_scale = -1;
-                GLint jitter_uv = -1;
+                int tex_linear_depth = -1;
+                int tex_main = -1;
+                int tex_prev = -1;
+                int tex_vel = -1;
+                int texel_size = -1;
+                int time = -1;
+                int feedback_min = -1;
+                int feedback_max = -1;
+                int motion_scale = -1;
+                int jitter_uv = -1;
             } uniform_loc;
         } no_motion_blur;
     } temporal;
 
     struct {
-        GLuint program_edge_detection;
-        GLuint program_blending_weight_calculation;
-        GLuint program_neighborhood_blending;
+        uint32_t program_edge_detection;
+        uint32_t program_blending_weight_calculation;
+        uint32_t program_neighborhood_blending;
     } smaa;
 
 } gl;
-
-static constexpr str_t v_shader_src_fs_quad = MAKE_STR(
-R"(
-#version 150 core
-
-out vec2 tc;
-
-uniform vec2 u_tc_scl = vec2(1,1);
-
-void main() {
-	uint idx = uint(gl_VertexID) % 3U;
-	gl_Position = vec4(
-		(float( idx     &1U)) * 4.0 - 1.0,
-		(float((idx>>1U)&1U)) * 4.0 - 1.0,
-		0, 1.0);
-	tc = (gl_Position.xy * 0.5 + 0.5) * u_tc_scl;
-}
-)");
-
-static constexpr str_t f_shader_src_linearize_depth = MAKE_STR(
-R"(
-#ifndef PERSPECTIVE
-#define PERSPECTIVE 1
-#endif
-
-// z_n * z_f,  z_n - z_f,  z_f, *not used*
-uniform vec4 u_clip_info;
-uniform sampler2D u_tex_depth;
-
-float denormalizeFloat(float inpt) {
-    if (inpt < 0.0) {
-        return inpt + 1.0;
-    } else {
-        return pow(10, 30) * inpt;
-    }
-}
-
-float ReconstructCSZ(float d, vec4 clip_info) {
-#if PERSPECTIVE
-    return (clip_info[0] / (d*clip_info[1] + clip_info[2]));
-#else
-    return (clip_info[1] + clip_info[2] - d*clip_info[1]);
-#endif
-}
-
-out vec4 out_frag;
-
-void main() {
-  float d = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy), 0).x;
-  out_frag = vec4(ReconstructCSZ(d, u_clip_info), 0, 0, 0);
-}
-)");
-
-/*
-static constexpr const char* f_shader_src_mip_map_min_depth = R"(
-uniform sampler2D u_tex_depth;
-
-out vec4 out_frag;
-
-void main() {
-	float d00 = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy) + ivec2(0,0), 0).x;
-	float d01 = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy) + ivec2(0,1), 0).x;
-	float d10 = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy) + ivec2(1,0), 0).x;
-	float d11 = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy) + ivec2(1,1), 0).x;
-
-	float dmin0 = min(d00, d01);
-	float dmin1 = min(d10, d11);
-
-	out_frag = vec4(min(dmin0, dmin1));
-}
-)";
-*/
 
 static inline float halton(int index, int base) {
     float f = 1;
@@ -279,9 +197,105 @@ static inline float halton(int index, int base) {
     return r;
 }
 
-static GLuint setup_program_from_source(str_t name, str_t f_shader_src, str_t defines = {}) {
-    GLuint f_shader = gl::compile_shader_from_source(f_shader_src, GL_FRAGMENT_SHADER, defines);
-    GLuint program = 0;
+// Projection parameter extraction
+static inline bool is_ortho_proj_matrix(const mat4_t& P) { return P.elem[2][3] == 0.0f; }
+
+static inline vec2_t extract_jitter_uv(const mat4_t& P) {
+    vec2_t jitter;
+    if (is_ortho_proj_matrix(P)) {
+        jitter[0] = -P.elem[3][0] * 0.5f;
+        jitter[1] = -P.elem[3][1] * 0.5f;
+    }
+    else {
+        jitter[0] = P.elem[2][0] * 0.5f;
+        jitter[1] = P.elem[2][1] * 0.5f;
+    }
+    return jitter;
+}
+
+static inline vec2_t extract_near_far(const mat4_t& P) {
+    vec2_t near_far;
+    near_far[0] = P.elem[3][2] / (P[2][2] - 1.0f);
+    near_far[1] = P.elem[3][2] / (P[2][2] + 1.0f);
+    return near_far;
+}
+
+static bool get_shader_compile_error(char* buffer, int max_length, GLuint shader) {
+    GLint success = 0;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (success == 0) {
+        int length;
+        glGetShaderInfoLog(shader, max_length, &length, buffer);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static bool get_program_link_error(char* buffer, int max_length, GLuint program) {
+    GLint success = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (success == 0) {
+        int length;
+        glGetProgramInfoLog(program, max_length, &length, buffer);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static uint32_t compile_shader_from_source(str_t src, GLenum type, str_t defines = {}) {
+    ASSERT(type == GL_VERTEX_SHADER || type == GL_GEOMETRY_SHADER || type == GL_FRAGMENT_SHADER || type == GL_COMPUTE_SHADER ||
+        type == GL_TESS_CONTROL_SHADER || type == GL_TESS_EVALUATION_SHADER);
+
+    uint32_t shader = glCreateShader(type);
+    md_string_builder_t builder = {};
+    md_string_builder_init(&builder, default_temp_allocator);
+
+    // Skip to first # which should contain version
+    while(src.len > 0 && src.ptr[0] != '#') {
+        src.ptr++;
+        src.len--;
+    }
+
+    str_t final_src = src;
+    if (defines) {
+        str_t version_str = {};
+
+        if (str_equal_cstr_n(src, "#version ", 9)) {
+            if (!extract_line(&version_str, &src)) {
+                md_print(MD_LOG_TYPE_ERROR, "Failed to extract version string!");
+                return 0;
+            }
+            md_string_builder_append_str(&builder, version_str);
+            md_string_builder_append_str(&builder, defines);
+            md_string_builder_append_char(&builder, '\n');
+        }
+        else {
+            md_string_builder_append_str(&builder, defines);
+            md_string_builder_append_char(&builder, '\n');
+        }
+        md_string_builder_append_str(&builder, src);
+        final_src = md_string_builder_to_string(&builder);
+    }
+
+    glShaderSource(shader, 1, &final_src.ptr, nullptr);
+    md_string_builder_free(&builder);
+
+    glCompileShader(shader);
+
+    char buffer[1024];
+    if (get_shader_compile_error(buffer, sizeof(buffer), shader)) {
+        md_printf(MD_LOG_TYPE_ERROR, "%s\n", buffer);
+        return 0;
+    }
+
+    return shader;
+}
+
+static uint32_t setup_program_from_source(str_t name, str_t f_shader_src, str_t defines = {}) {
+    uint32_t f_shader = compile_shader_from_source(f_shader_src, GL_FRAGMENT_SHADER, defines);
+    uint32_t program = 0;
 
     if (f_shader) {
         char buffer[1024];
@@ -290,7 +304,7 @@ static GLuint setup_program_from_source(str_t name, str_t f_shader_src, str_t de
         glAttachShader(program, gl.v_shader_fs_quad);
         glAttachShader(program, f_shader);
         glLinkProgram(program);
-        if (gl::get_program_link_error(buffer, sizeof(buffer), program)) {
+        if (get_program_link_error(buffer, sizeof(buffer), program)) {
             md_printf(MD_LOG_TYPE_ERROR, "Error while linking %.*s program:\n%s", (int)name.len, name.ptr, buffer);
             glDeleteProgram(program);
             return 0;
@@ -304,32 +318,6 @@ static GLuint setup_program_from_source(str_t name, str_t f_shader_src, str_t de
     return program;
 }
 
-static GLuint setup_program_from_file(str_t name, str_t filename, str_t defines = {}) {
-    GLuint f_shader = gl::compile_shader_from_file(filename, GL_FRAGMENT_SHADER, defines);
-    GLuint program = 0;
-
-    if (f_shader) {
-        char buffer[1024];
-        program = glCreateProgram();
-
-        glAttachShader(program, gl.v_shader_fs_quad);
-        glAttachShader(program, f_shader);
-        glLinkProgram(program);
-        if (gl::get_program_link_error(buffer, sizeof(buffer), program)) {
-            md_printf(MD_LOG_TYPE_ERROR, "Error while linking %s program:\n%s", name, buffer);
-            glDeleteProgram(program);
-            return 0;
-        }
-
-        glDetachShader(program, gl.v_shader_fs_quad);
-        glDetachShader(program, f_shader);
-        glDeleteShader(f_shader);
-    }
-
-    return program;
-}
-
-static bool is_orthographic_proj_matrix(const mat4_t& proj_mat) { return proj_mat.elem[2][3] == 0.0f; }
 
 namespace ssao {
 #ifndef AO_RANDOM_TEX_SIZE
@@ -351,7 +339,7 @@ struct HBAOData {
     vec4_t sample_pattern[32];
 };
 
-void setup_ubo_hbao_data(GLuint ubo, int width, int height, const mat4_t& proj_mat, float intensity, float radius, float bias, float time) {
+void setup_ubo_hbao_data(uint32_t ubo, int width, int height, const mat4_t& proj_mat, float intensity, float radius, float bias, float time) {
     ASSERT(ubo);
 
     // From intel ASSAO
@@ -370,7 +358,7 @@ void setup_ubo_hbao_data(GLuint ubo, int width, int height, const mat4_t& proj_m
     float proj_scl;
 
     const float* proj_data = &proj_mat.elem[0][0];
-    const bool ortho = is_orthographic_proj_matrix(proj_mat);
+    const bool ortho = is_ortho_proj_matrix(proj_mat);
     if (!ortho) {
         proj_info = {
             2.0f / (proj_data[4 * 0 + 0]),                          // (x) * (R - L)/N
@@ -378,8 +366,6 @@ void setup_ubo_hbao_data(GLuint ubo, int width, int height, const mat4_t& proj_m
             -(1.0f - proj_data[4 * 2 + 0]) / proj_data[4 * 0 + 0],  // L/N
             -(1.0f + proj_data[4 * 2 + 1]) / proj_data[4 * 1 + 1]   // B/N
         };
-
-        // proj_scl = float(height) / (math::tan(fovy * 0.5f) * 2.0f);
         proj_scl = float(height) * proj_data[4 * 1 + 1] * 0.5f;
     } else {
         proj_info = {
@@ -409,7 +395,7 @@ void setup_ubo_hbao_data(GLuint ubo, int width, int height, const mat4_t& proj_m
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void initialize_rnd_tex(GLuint rnd_tex) {
+void initialize_rnd_tex(uint32_t rnd_tex) {
     constexpr int buffer_size = AO_RANDOM_TEX_SIZE * AO_RANDOM_TEX_SIZE;
     signed short buffer[buffer_size * 4];
 
@@ -436,9 +422,9 @@ void initialize_rnd_tex(GLuint rnd_tex) {
 float compute_sharpness(float radius) { return 30.f / sqrtf(radius); }
 
 void initialize(int width, int height) {
-    gl.ssao.hbao.program_persp = setup_program_from_file(MAKE_STR("ssao persp"), MAKE_STR(VIAMD_SHADER_DIR "/ssao/ssao.frag"), MAKE_STR("#define AO_PERSPECTIVE 1"));
-    gl.ssao.hbao.program_ortho = setup_program_from_file(MAKE_STR("ssao ortho"), MAKE_STR(VIAMD_SHADER_DIR "/ssao/ssao.frag"), MAKE_STR("#define AO_PERSPECTIVE 0"));
-    gl.ssao.blur.program       = setup_program_from_file(MAKE_STR("ssao blur"),  MAKE_STR(VIAMD_SHADER_DIR "/ssao/blur.frag"));
+    gl.ssao.hbao.program_persp = setup_program_from_source(MAKE_STR("ssao persp"), f_shader_src_ssao, MAKE_STR("#define AO_PERSPECTIVE 1"));
+    gl.ssao.hbao.program_ortho = setup_program_from_source(MAKE_STR("ssao ortho"), f_shader_src_ssao, MAKE_STR("#define AO_PERSPECTIVE 0"));
+    gl.ssao.blur.program       = setup_program_from_source(MAKE_STR("ssao blur"),  f_shader_src_ssao_blur);
     
     if (!gl.ssao.hbao.fbo) glGenFramebuffers(1, &gl.ssao.hbao.fbo);
     if (!gl.ssao.blur.fbo) glGenFramebuffers(1, &gl.ssao.blur.fbo);
@@ -496,152 +482,112 @@ void shutdown() {
 
 }  // namespace ssao
 
-namespace highlight {
+namespace shading {
 
 static struct {
-    GLuint program = 0;
-    GLuint selection_texture = 0;
+    uint32_t program = 0;
     struct {
-        GLint texture_atom_idx = -1;
-        GLint buffer_selection = -1;
-        GLint highlight = -1;
-        GLint selection = -1;
-        GLint outline = -1;
+        int texture_depth = -1;
+        int texture_color = -1;
+        int texture_normal = -1;
+        int inv_proj_mat = -1;
+        int time = -1;
     } uniform_loc;
-} highlight;
+} shading;
 
 void initialize() {
-    highlight.program = setup_program_from_file(MAKE_STR("highlight"), MAKE_STR(VIAMD_SHADER_DIR "/highlight.frag"));
-    if (!highlight.selection_texture) glGenTextures(1, &highlight.selection_texture);
-    highlight.uniform_loc.texture_atom_idx = glGetUniformLocation(highlight.program, "u_texture_atom_idx");
-    highlight.uniform_loc.buffer_selection = glGetUniformLocation(highlight.program, "u_buffer_selection");
-    highlight.uniform_loc.highlight = glGetUniformLocation(highlight.program, "u_highlight");
-    highlight.uniform_loc.selection = glGetUniformLocation(highlight.program, "u_selection");
-    highlight.uniform_loc.outline = glGetUniformLocation(highlight.program, "u_outline");
+    shading.program = setup_program_from_source(MAKE_STR("deferred shading"), f_shader_src_deferred_shading);
+    shading.uniform_loc.texture_depth = glGetUniformLocation(shading.program, "u_texture_depth");
+    shading.uniform_loc.texture_color = glGetUniformLocation(shading.program, "u_texture_color");
+    shading.uniform_loc.texture_normal = glGetUniformLocation(shading.program, "u_texture_normal");
+    shading.uniform_loc.inv_proj_mat = glGetUniformLocation(shading.program, "u_inv_proj_mat");
+    shading.uniform_loc.time = glGetUniformLocation(shading.program, "u_time");
 }
 
 void shutdown() {
-    if (highlight.program) glDeleteProgram(highlight.program);
+    if (shading.program) glDeleteProgram(shading.program);
 }
-}  // namespace highlight
-
-namespace hsv {
-
-static struct {
-    GLuint program = 0;
-    struct {
-        GLint texture_color = -1;
-        GLint hsv_scale = -1;
-    } uniform_loc;
-} gl;
-
-void initialize() {
-    gl.program = setup_program_from_file(MAKE_STR("scale hsv"), MAKE_STR(VIAMD_SHADER_DIR "/scale_hsv.frag"));
-    gl.uniform_loc.texture_color = glGetUniformLocation(gl.program, "u_texture_atom_color");
-    gl.uniform_loc.hsv_scale = glGetUniformLocation(gl.program, "u_hsv_scale");
-}
-
-void shutdown() {
-    if (gl.program) glDeleteProgram(gl.program);
-}
-}  // namespace hsv
-
-namespace deferred {
-
-static struct {
-    GLuint program = 0;
-    struct {
-        GLint texture_depth = -1;
-        GLint texture_color = -1;
-        GLint texture_normal = -1;
-        GLint inv_proj_mat = -1;
-        GLint time = -1;
-    } uniform_loc;
-} deferred;
-
-void initialize() {
-    deferred.program = setup_program_from_file(MAKE_STR("deferred shading"), MAKE_STR(VIAMD_SHADER_DIR "/deferred_shading.frag"));
-    deferred.uniform_loc.texture_depth = glGetUniformLocation(deferred.program, "u_texture_depth");
-    deferred.uniform_loc.texture_color = glGetUniformLocation(deferred.program, "u_texture_color");
-    deferred.uniform_loc.texture_normal = glGetUniformLocation(deferred.program, "u_texture_normal");
-    deferred.uniform_loc.inv_proj_mat = glGetUniformLocation(deferred.program, "u_inv_proj_mat");
-    deferred.uniform_loc.time = glGetUniformLocation(deferred.program, "u_time");
-}
-
-void shutdown() {
-    if (deferred.program) glDeleteProgram(deferred.program);
-}
-}  // namespace deferred
+}  // namespace shading
 
 namespace tonemapping {
 
 static struct {
-    GLuint program = 0;
+    uint32_t program = 0;
     struct {
-        GLint texture = -1;
+        int texture = -1;
     } uniform_loc;
 } passthrough;
 
 static struct {
-    GLuint program = 0;
+    uint32_t program = 0;
     struct {
-        GLint texture = -1;
-        GLint exposure = -1;
-        GLint gamma = -1;
+        int texture = -1;
+        int exposure = -1;
+        int gamma = -1;
     } uniform_loc;
 } exposure_gamma;
 
 static struct {
-    GLuint program = 0;
+    uint32_t program = 0;
     struct {
-        GLint texture = -1;
-        GLint exposure = -1;
-        GLint gamma = -1;
+        int texture = -1;
+        int exposure = -1;
+        int gamma = -1;
     } uniform_loc;
 } filmic;
 
 static struct {
-    GLuint program_forward = 0;
-    GLuint program_inverse = 0;
+    uint32_t program = 0;
     struct {
-        GLint texture = -1;
+        int texture = -1;
+        int exposure = -1;
+        int gamma = -1;
+    } uniform_loc;
+} ACES;
+
+static struct {
+    uint32_t program_forward = 0;
+    uint32_t program_inverse = 0;
+    struct {
+        int texture = -1;
     } uniform_loc;
 } fast_reversible;
 
 void initialize() {
     {
         // PASSTHROUGH
-        passthrough.program = setup_program_from_file(MAKE_STR("Passthrough"), MAKE_STR(VIAMD_SHADER_DIR "/tonemap/passthrough.frag"));
+        passthrough.program = setup_program_from_source(MAKE_STR("Passthrough"), f_shader_src_tonemap_passthrough);
         passthrough.uniform_loc.texture = glGetUniformLocation(passthrough.program, "u_texture");
     }
     {
         // EXPOSURE GAMMA
-        exposure_gamma.program = setup_program_from_file(MAKE_STR("Exposure Gamma"), MAKE_STR(VIAMD_SHADER_DIR "/tonemap/exposure_gamma.frag"));
+        exposure_gamma.program = setup_program_from_source(MAKE_STR("Exposure Gamma"), f_shader_src_tonemap_exposure_gamma);
         exposure_gamma.uniform_loc.texture = glGetUniformLocation(exposure_gamma.program, "u_texture");
         exposure_gamma.uniform_loc.exposure = glGetUniformLocation(exposure_gamma.program, "u_exposure");
         exposure_gamma.uniform_loc.gamma = glGetUniformLocation(exposure_gamma.program, "u_gamma");
     }
     {
-        // UNCHARTED
-        filmic.program = setup_program_from_file(MAKE_STR("Filmic"), MAKE_STR(VIAMD_SHADER_DIR "/tonemap/uncharted.frag"));
+        // FILMIC (UNCHARTED)
+        filmic.program = setup_program_from_source(MAKE_STR("Filmic"), f_shader_src_tonemap_filmic);
         filmic.uniform_loc.texture = glGetUniformLocation(filmic.program, "u_texture");
         filmic.uniform_loc.exposure = glGetUniformLocation(filmic.program, "u_exposure");
         filmic.uniform_loc.gamma = glGetUniformLocation(filmic.program, "u_gamma");
     }
     {
-        // Fast Reversible (For AA) (Credits to Brian Karis: http://graphicrants.blogspot.com/2013/12/tone-mapping.html)
-        fast_reversible.program_forward = setup_program_from_file(MAKE_STR("Fast Reversible"), MAKE_STR(VIAMD_SHADER_DIR "/tonemap/fast_reversible.frag"), MAKE_STR("#define USE_INVERSE 0"));
-        fast_reversible.program_inverse = setup_program_from_file(MAKE_STR("Fast Reversible"), MAKE_STR(VIAMD_SHADER_DIR "/tonemap/fast_reversible.frag"), MAKE_STR("#define USE_INVERSE 1"));
-        fast_reversible.uniform_loc.texture = glGetUniformLocation(fast_reversible.program_forward, "u_texture");
+        // ACES
+        ACES.program = setup_program_from_source(MAKE_STR("ACES"), f_shader_src_tonemap_aces);
+        ACES.uniform_loc.texture = glGetUniformLocation(ACES.program, "u_texture");
+        ACES.uniform_loc.exposure = glGetUniformLocation(ACES.program, "u_exposure");
+        ACES.uniform_loc.gamma = glGetUniformLocation(ACES.program, "u_gamma");
     }
+
 }
 
 void shutdown() {
     if (passthrough.program) glDeleteProgram(passthrough.program);
     if (exposure_gamma.program) glDeleteProgram(exposure_gamma.program);
     if (filmic.program) glDeleteProgram(filmic.program);
-    if (fast_reversible.program_forward) glDeleteProgram(fast_reversible.program_forward);
-    if (fast_reversible.program_inverse) glDeleteProgram(fast_reversible.program_inverse);
+    if (ACES.program) glDeleteProgram(ACES.program);
 }
 
 }  // namespace tonemapping
@@ -649,7 +595,7 @@ void shutdown() {
 namespace dof {
 void initialize(int32_t width, int32_t height) {
     {
-        gl.bokeh_dof.half_res.program = setup_program_from_file(MAKE_STR("DOF prepass"), MAKE_STR(VIAMD_SHADER_DIR "/dof/dof_half_res_prepass.frag"));
+        gl.bokeh_dof.half_res.program = setup_program_from_source(MAKE_STR("DOF prepass"), f_shader_src_dof_halfres_prepass);
         if (gl.bokeh_dof.half_res.program) {
             gl.bokeh_dof.half_res.uniform_loc.tex_depth = glGetUniformLocation(gl.bokeh_dof.half_res.program, "u_tex_depth");
             gl.bokeh_dof.half_res.uniform_loc.tex_color = glGetUniformLocation(gl.bokeh_dof.half_res.program, "u_tex_color");
@@ -682,7 +628,7 @@ void initialize(int32_t width, int32_t height) {
 
     // DOF
     {
-        gl.bokeh_dof.program = setup_program_from_file(MAKE_STR("Bokeh DOF"), MAKE_STR(VIAMD_SHADER_DIR "/dof/dof.frag"));
+        gl.bokeh_dof.program = setup_program_from_source(MAKE_STR("Bokeh DOF"), f_shader_src_dof);
         if (gl.bokeh_dof.program) {
             gl.bokeh_dof.uniform_loc.tex_color = glGetUniformLocation(gl.bokeh_dof.program, "u_half_res");
             gl.bokeh_dof.uniform_loc.tex_color = glGetUniformLocation(gl.bokeh_dof.program, "u_tex_color");
@@ -699,10 +645,10 @@ void shutdown() {}
 }  // namespace dof
 
 namespace blit {
-static GLuint program_tex = 0;
-static GLuint program_col = 0;
-static GLint uniform_loc_texture = -1;
-static GLint uniform_loc_color = -1;
+static uint32_t program_tex = 0;
+static uint32_t program_col = 0;
+static int uniform_loc_texture = -1;
+static int uniform_loc_color = -1;
 
 constexpr str_t f_shader_src_tex = MAKE_STR(R"(
 #version 150 core
@@ -741,119 +687,37 @@ void shutdown() {
 }
 }  // namespace blit
 
-namespace blur {
-static GLuint program_gaussian = 0;
-static GLuint program_box = 0;
-static GLint uniform_loc_texture = -1;
-static GLint uniform_loc_inv_res_dir = -1;
-
-constexpr str_t f_shader_src_gaussian = MAKE_STR(R"(
-#version 150 core
-
-#define KERNEL_RADIUS 5
-
-uniform sampler2D u_texture;
-uniform vec2      u_inv_res_dir;
-
-in vec2 tc;
-out vec4 out_frag;
-
-float blur_weight(float r) {
-    const float sigma = KERNEL_RADIUS * 0.5;
-    const float falloff = 1.0 / (2.0*sigma*sigma);
-    float w = exp2(-r*r*falloff);
-    return w;
-}
-
-void main() {
-    vec2 uv = tc;
-    vec4  c_tot = texture(u_texture, uv);
-    float w_tot = 1.0;
-
-    for (float r = 1; r <= KERNEL_RADIUS; ++r) {
-        float w = blur_weight(r);
-        vec4  c = texture(u_texture, uv + u_inv_res_dir * r);
-        c_tot += c * w;
-        w_tot += w;
-    }
-    for (float r = 1; r <= KERNEL_RADIUS; ++r) {
-        float w = blur_weight(r);
-        vec4  c = texture(u_texture, uv - u_inv_res_dir * r);
-        c_tot += c * w;
-        w_tot += w;
-    }
-
-    out_frag = c_tot / w_tot;
-}
-)");
-
-constexpr str_t f_shader_src_box = MAKE_STR(R"(
-#version 150 core
-
-uniform sampler2D u_texture;
-out vec4 out_frag;
-
-void main() {
-    vec4 c = vec4(0);
-    c += texelFetch(u_texture, ivec2(gl_FragCoord.xy) + ivec2(-1, -1), 0);
-    c += texelFetch(u_texture, ivec2(gl_FragCoord.xy) + ivec2( 0, -1), 0);
-    c += texelFetch(u_texture, ivec2(gl_FragCoord.xy) + ivec2(+1, -1), 0);
-    c += texelFetch(u_texture, ivec2(gl_FragCoord.xy) + ivec2(-1,  0), 0);
-    c += texelFetch(u_texture, ivec2(gl_FragCoord.xy) + ivec2( 0,  0), 0);
-    c += texelFetch(u_texture, ivec2(gl_FragCoord.xy) + ivec2(+1,  0), 0);
-    c += texelFetch(u_texture, ivec2(gl_FragCoord.xy) + ivec2(-1, +1), 0);
-    c += texelFetch(u_texture, ivec2(gl_FragCoord.xy) + ivec2( 0, +1), 0);
-    c += texelFetch(u_texture, ivec2(gl_FragCoord.xy) + ivec2(+1, +1), 0);
-
-    out_frag = c / 9.0;
-}
-)");
-
-void initialize() {
-    program_gaussian = setup_program_from_source(MAKE_STR("gaussian blur"), f_shader_src_gaussian);
-    uniform_loc_texture = glGetUniformLocation(program_gaussian, "u_texture");
-    uniform_loc_inv_res_dir = glGetUniformLocation(program_gaussian, "u_inv_res_dir");
-
-    program_box = setup_program_from_source(MAKE_STR("box blur"), f_shader_src_box);
-}
-
-void shutdown() {
-    if (program_gaussian) glDeleteProgram(program_gaussian);
-    if (program_box) glDeleteProgram(program_box);
-}
-}  // namespace blit
-
 namespace velocity {
 #define VEL_TILE_SIZE 8
 
 struct {
-    GLuint program = 0;
+    uint32_t program = 0;
     struct {
-		GLint tex_depth = -1;
-        GLint curr_clip_to_prev_clip_mat = -1;
-        GLint jitter_uv = -1;
+		int tex_depth = -1;
+        int curr_clip_to_prev_clip_mat = -1;
+        int jitter_uv = -1;
     } uniform_loc;
 } blit_velocity;
 
 struct {
-    GLuint program = 0;
+    uint32_t program = 0;
     struct {
-        GLint tex_vel = -1;
-        GLint tex_vel_texel_size = -1;
+        int tex_vel = -1;
+        int tex_vel_texel_size = -1;
     } uniform_loc;
 } blit_tilemax;
 
 struct {
-    GLuint program = 0;
+    uint32_t program = 0;
     struct {
-        GLint tex_vel = -1;
-        GLint tex_vel_texel_size = -1;
+        int tex_vel = -1;
+        int tex_vel_texel_size = -1;
     } uniform_loc;
 } blit_neighbormax;
 
 void initialize(int32_t width, int32_t height) {
     {
-        blit_velocity.program = setup_program_from_file(MAKE_STR("screen-space velocity"), MAKE_STR(VIAMD_SHADER_DIR "/velocity/blit_velocity.frag"));
+        blit_velocity.program = setup_program_from_source(MAKE_STR("screen-space velocity"), f_shader_src_vel_blit);
 		blit_velocity.uniform_loc.tex_depth = glGetUniformLocation(blit_velocity.program, "u_tex_depth");
         blit_velocity.uniform_loc.curr_clip_to_prev_clip_mat = glGetUniformLocation(blit_velocity.program, "u_curr_clip_to_prev_clip_mat");
         blit_velocity.uniform_loc.jitter_uv = glGetUniformLocation(blit_velocity.program, "u_jitter_uv");
@@ -863,14 +727,14 @@ void initialize(int32_t width, int32_t height) {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
         str_t defines = MAKE_STR("#define TILE_SIZE " TOSTRING(VEL_TILE_SIZE));
-        blit_tilemax.program = setup_program_from_file(MAKE_STR("tilemax"), MAKE_STR(VIAMD_SHADER_DIR "/velocity/blit_tilemax.frag"), defines);
+        blit_tilemax.program = setup_program_from_source(MAKE_STR("tilemax"), f_shader_src_vel_tilemax, defines);
         blit_tilemax.uniform_loc.tex_vel = glGetUniformLocation(blit_tilemax.program, "u_tex_vel");
         blit_tilemax.uniform_loc.tex_vel_texel_size = glGetUniformLocation(blit_tilemax.program, "u_tex_vel_texel_size");
 #undef STRINGIFY
 #undef TOSTRING
     }
     {
-        blit_neighbormax.program = setup_program_from_file(MAKE_STR("neighbormax"), MAKE_STR(VIAMD_SHADER_DIR "/velocity/blit_neighbormax.frag"));
+        blit_neighbormax.program = setup_program_from_source(MAKE_STR("neighbormax"), f_shader_src_vel_neighbormax);
         blit_neighbormax.uniform_loc.tex_vel = glGetUniformLocation(blit_neighbormax.program, "u_tex_vel");
         blit_neighbormax.uniform_loc.tex_vel_texel_size = glGetUniformLocation(blit_neighbormax.program, "u_tex_vel_texel_size");
     }
@@ -926,8 +790,8 @@ void shutdown() {
 namespace temporal {
 void initialize() {
     {
-        gl.temporal.with_motion_blur.program = setup_program_from_file(MAKE_STR("temporal aa + motion-blur"), MAKE_STR(VIAMD_SHADER_DIR "/temporal.frag"));
-        gl.temporal.no_motion_blur.program   = setup_program_from_file(MAKE_STR("temporal aa"), MAKE_STR(VIAMD_SHADER_DIR "/temporal.frag"), MAKE_STR("#define USE_MOTION_BLUR 0\n"));
+        gl.temporal.with_motion_blur.program = setup_program_from_source(MAKE_STR("temporal aa + motion-blur"), f_shader_src_temporal);
+        gl.temporal.no_motion_blur.program   = setup_program_from_source(MAKE_STR("temporal aa"), f_shader_src_temporal, MAKE_STR("#define USE_MOTION_BLUR 0\n"));
 
         gl.temporal.with_motion_blur.uniform_loc.tex_linear_depth = glGetUniformLocation(gl.temporal.with_motion_blur.program, "u_tex_linear_depth");
         gl.temporal.with_motion_blur.uniform_loc.tex_main = glGetUniformLocation(gl.temporal.with_motion_blur.program, "u_tex_main");
@@ -958,28 +822,29 @@ void shutdown() {}
 };  // namespace temporal
 
 namespace sharpen {
-static GLuint program = 0;
+static uint32_t program = 0;
 void initialize() {
     constexpr str_t f_shader_src_sharpen = MAKE_STR(
- R"(#version 150 core
+ R"(
+#version 150 core
 
-    uniform sampler2D u_tex;
-    out vec4 out_frag;
+uniform sampler2D u_tex;
+out vec4 out_frag;
 
-    void main() {
-        vec3 cc = texelFetch(u_tex, ivec2(gl_FragCoord.xy), 0).rgb;
-        vec3 cl = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2(-1, 0), 0).rgb;
-        vec3 ct = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2( 0, 1), 0).rgb;
-        vec3 cr = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2( 1, 0), 0).rgb;
-        vec3 cb = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2( 0,-1), 0).rgb;
+void main() {
+    vec3 cc = texelFetch(u_tex, ivec2(gl_FragCoord.xy), 0).rgb;
+    vec3 cl = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2(-1, 0), 0).rgb;
+    vec3 ct = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2( 0, 1), 0).rgb;
+    vec3 cr = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2( 1, 0), 0).rgb;
+    vec3 cb = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2( 0,-1), 0).rgb;
 
-        const float weight[2] = float[2](1.4, -0.1);
-        out_frag = vec4(vec3(weight[0] * cc + weight[1] * (cl + ct + cr + cb)), 1.0);
-    })");
+    const float weight[2] = float[2](1.4, -0.1);
+    out_frag = vec4(vec3(weight[0] * cc + weight[1] * (cl + ct + cr + cb)), 1.0);
+})");
     program = setup_program_from_source(MAKE_STR("sharpen"), f_shader_src_sharpen);
 }
 
-void sharpen(GLuint in_texture) {
+void sharpen(uint32_t in_texture) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, in_texture);
 
@@ -1001,12 +866,11 @@ void shutdown() {
 void initialize(int width, int height) {
     if (!gl.vao) glGenVertexArrays(1, &gl.vao);
 
-    gl.v_shader_fs_quad = gl::compile_shader_from_source(v_shader_src_fs_quad, GL_VERTEX_SHADER);
+    gl.v_shader_fs_quad = compile_shader_from_source(v_shader_src_fs_quad, GL_VERTEX_SHADER);
 
     // LINEARIZE DEPTH
-
-    gl.linear_depth.program_persp = setup_program_from_source(MAKE_STR("linearize depth persp"), f_shader_src_linearize_depth, MAKE_STR("#version 150 core\n#define PERSPECTIVE 1"));
-    gl.linear_depth.program_ortho = setup_program_from_source(MAKE_STR("linearize depth ortho"), f_shader_src_linearize_depth, MAKE_STR("#version 150 core\n#define PERSPECTIVE 0"));
+    gl.linear_depth.program_persp = setup_program_from_source(MAKE_STR("linearize depth persp"), f_shader_src_linearize_depth, MAKE_STR("#define PERSPECTIVE 1"));
+    gl.linear_depth.program_ortho = setup_program_from_source(MAKE_STR("linearize depth ortho"), f_shader_src_linearize_depth, MAKE_STR("#define PERSPECTIVE 0"));
 
     if (!gl.linear_depth.texture) glGenTextures(1, &gl.linear_depth.texture);
     glBindTexture(GL_TEXTURE_2D, gl.linear_depth.texture);
@@ -1102,13 +966,10 @@ void initialize(int width, int height) {
     ssao::initialize(width, height);
     dof::initialize(width, height);
     velocity::initialize(width, height);
-    deferred::initialize();
-    highlight::initialize();
-    hsv::initialize();
+    shading::initialize();
     tonemapping::initialize();
     temporal::initialize();
     blit::initialize();
-    blur::initialize();
     sharpen::initialize();
 }
 
@@ -1116,23 +977,19 @@ void shutdown() {
     ssao::shutdown();
     dof::shutdown();
     velocity::shutdown();
-    deferred::shutdown();
-    highlight::shutdown();
-    hsv::shutdown();
+    shading::shutdown();
     tonemapping::shutdown();
     temporal::shutdown();
     blit::shutdown();
-    blur::shutdown();
     sharpen::shutdown();
 
     if (gl.vao) glDeleteVertexArrays(1, &gl.vao);
-    //if (gl.vbo) glDeleteBuffers(1, &gl.vbo);
     if (gl.v_shader_fs_quad) glDeleteShader(gl.v_shader_fs_quad);
     if (gl.tmp.fbo) glDeleteFramebuffers(1, &gl.tmp.fbo);
     if (gl.tmp.tex_rgba8) glDeleteTextures(1, &gl.tmp.tex_rgba8);
 }
 
-void compute_linear_depth(GLuint depth_tex, float near_plane, float far_plane, bool orthographic = false) {
+void compute_linear_depth(uint32_t depth_tex, float near_plane, float far_plane, bool orthographic = false) {
     const vec4_t clip_info {near_plane * far_plane, near_plane - far_plane, far_plane, 0};
 
     glActiveTexture(GL_TEXTURE0);
@@ -1151,15 +1008,15 @@ void compute_linear_depth(GLuint depth_tex, float near_plane, float far_plane, b
     glBindVertexArray(0);
 }
 
-void apply_ssao(GLuint linear_depth_tex, GLuint normal_tex, const mat4_t& proj_matrix, float intensity, float radius, float bias, float time) {
+void apply_ssao(uint32_t linear_depth_tex, uint32_t normal_tex, const mat4_t& proj_matrix, float intensity, float radius, float bias, float time) {
     ASSERT(glIsTexture(linear_depth_tex));
     ASSERT(glIsTexture(normal_tex));
 
-    const bool ortho = is_orthographic_proj_matrix(proj_matrix);
+    const bool ortho = is_ortho_proj_matrix(proj_matrix);
     const float sharpness = ssao::compute_sharpness(radius);
 
-    GLint last_fbo;
-    GLint last_viewport[4];
+    int last_fbo;
+    int last_viewport[4];
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
     glGetIntegerv(GL_VIEWPORT, last_viewport);
 
@@ -1180,7 +1037,7 @@ void apply_ssao(GLuint linear_depth_tex, GLuint normal_tex, const mat4_t& proj_m
     glViewport(0, 0, width, height);
 
     // RENDER HBAO
-    GLuint program = ortho ? gl.ssao.hbao.program_ortho : gl.ssao.hbao.program_persp;
+    uint32_t program = ortho ? gl.ssao.hbao.program_ortho : gl.ssao.hbao.program_persp;
 
     PUSH_GPU_SECTION("HBAO")
     glUseProgram(program);
@@ -1199,7 +1056,6 @@ void apply_ssao(GLuint linear_depth_tex, GLuint normal_tex, const mat4_t& proj_m
     glUniform1i(glGetUniformLocation(program, "u_tex_random"), 2);
 
     glUniform2f(glGetUniformLocation(program, "u_tc_scl"), (float)width/(float)gl.tex_width, (float)height/(float)gl.tex_height);
-    //glUniform2f(glGetUniformLocation(program, "u_tc_scl"), (float)gl.tex_width/(float)width, (float)gl.tex_height/(float)height);
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -1213,8 +1069,6 @@ void apply_ssao(GLuint linear_depth_tex, GLuint normal_tex, const mat4_t& proj_m
     glUniform2f(glGetUniformLocation(gl.ssao.blur.program, "u_inv_res_dir"), inv_res.x, 0);
 
     glUniform2f(glGetUniformLocation(gl.ssao.blur.program, "u_tc_scl"), (float)width/(float)gl.tex_width, (float)height/(float)gl.tex_height);
-
-    //glUniform2f(glGetUniformLocation(gl.ssao.blur.program, "u_tc_scl"), (float)gl.tex_width/(float)width, (float)gl.tex_height/(float)height);
 
     glActiveTexture(GL_TEXTURE1);
 
@@ -1236,7 +1090,6 @@ void apply_ssao(GLuint linear_depth_tex, GLuint normal_tex, const mat4_t& proj_m
     glBindTexture(GL_TEXTURE_2D, gl.ssao.blur.texture);
     glUniform2f(glGetUniformLocation(gl.ssao.blur.program, "u_inv_res_dir"), 0, inv_res.y);
 
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_ZERO, GL_SRC_COLOR);
     glColorMask(1, 1, 1, 0);
@@ -1251,7 +1104,7 @@ void apply_ssao(GLuint linear_depth_tex, GLuint normal_tex, const mat4_t& proj_m
     POP_GPU_SECTION()
 }
 
-void shade_deferred(GLuint depth_tex, GLuint color_tex, GLuint normal_tex, const mat4_t& inv_proj_matrix, float time) {
+void shade_deferred(uint32_t depth_tex, uint32_t color_tex, uint32_t normal_tex, const mat4_t& inv_proj_matrix, float time) {
     ASSERT(glIsTexture(depth_tex));
     ASSERT(glIsTexture(color_tex));
     ASSERT(glIsTexture(normal_tex));
@@ -1263,44 +1116,21 @@ void shade_deferred(GLuint depth_tex, GLuint color_tex, GLuint normal_tex, const
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, normal_tex);
 
-    glUseProgram(deferred::deferred.program);
-    glUniform1i(deferred::deferred.uniform_loc.texture_depth, 0);
-    glUniform1i(deferred::deferred.uniform_loc.texture_color, 1);
-    glUniform1i(deferred::deferred.uniform_loc.texture_normal, 2);
-    glUniformMatrix4fv(deferred::deferred.uniform_loc.inv_proj_mat, 1, GL_FALSE, &inv_proj_matrix.elem[0][0]);
-    glUniform1f(deferred::deferred.uniform_loc.time, time);
+    glUseProgram(shading::shading.program);
+    glUniform1i(shading::shading.uniform_loc.texture_depth, 0);
+    glUniform1i(shading::shading.uniform_loc.texture_color, 1);
+    glUniform1i(shading::shading.uniform_loc.texture_normal, 2);
+    glUniformMatrix4fv(shading::shading.uniform_loc.inv_proj_mat, 1, GL_FALSE, &inv_proj_matrix.elem[0][0]);
+    glUniform1f(shading::shading.uniform_loc.time, time);
     glBindVertexArray(gl.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
 
-void highlight_selection(GLuint atom_idx_tex, GLuint selection_buffer, const vec3_t& highlight, const vec3_t& selection, const vec3_t& outline) {
-    ASSERT(glIsTexture(atom_idx_tex));
-    ASSERT(glIsBuffer(selection_buffer));
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, atom_idx_tex);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_BUFFER, highlight::highlight.selection_texture);
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_R8UI, selection_buffer);
-
-    glUseProgram(highlight::highlight.program);
-    glUniform1i(highlight::highlight.uniform_loc.texture_atom_idx, 0);
-    glUniform1i(highlight::highlight.uniform_loc.buffer_selection, 1);
-    glUniform3fv(highlight::highlight.uniform_loc.highlight, 1, &highlight.x);
-    glUniform3fv(highlight::highlight.uniform_loc.selection, 1, &selection.x);
-    glUniform3fv(highlight::highlight.uniform_loc.outline, 1, &outline.x);
-    glBindVertexArray(gl.vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-    glUseProgram(0);
-}
-
-void half_res_color_coc(GLuint linear_depth_tex, GLuint color_tex, float focus_point, float focus_scale) {
+void half_res_color_coc(uint32_t linear_depth_tex, uint32_t color_tex, float focus_point, float focus_scale) {
     PUSH_GPU_SECTION("DOF Prepass");
-    GLint last_viewport[4];
+    int last_viewport[4];
     glGetIntegerv(GL_VIEWPORT, last_viewport);
     glViewport(0, 0, gl.tex_width / 2, gl.tex_height / 2);
 
@@ -1327,13 +1157,13 @@ void half_res_color_coc(GLuint linear_depth_tex, GLuint color_tex, float focus_p
     POP_GPU_SECTION();
 }
 
-void apply_dof(GLuint linear_depth_tex, GLuint color_tex, float focus_point, float focus_scale, float time) {
+void apply_dof(uint32_t linear_depth_tex, uint32_t color_tex, float focus_point, float focus_scale, float time) {
     ASSERT(glIsTexture(linear_depth_tex));
     ASSERT(glIsTexture(color_tex));
 
     const vec2_t pixel_size = vec2_t{1.f / gl.tex_width, 1.f / gl.tex_height};
 
-    GLint last_fbo;
+    int last_fbo;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
 
     half_res_color_coc(linear_depth_tex, color_tex, focus_point, focus_scale);
@@ -1363,30 +1193,36 @@ void apply_dof(GLuint linear_depth_tex, GLuint color_tex, float focus_point, flo
     glActiveTexture(GL_TEXTURE0);
 }
 
-void apply_tonemapping(GLuint color_tex, Tonemapping tonemapping, float exposure, float gamma) {
+void apply_tonemapping(uint32_t color_tex, Tonemapping tonemapping, float exposure, float gamma) {
     ASSERT(glIsTexture(color_tex));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, color_tex);
 
     switch (tonemapping) {
-        case Tonemapping_ExposureGamma:
-            glUseProgram(tonemapping::exposure_gamma.program);
-            glUniform1i(tonemapping::exposure_gamma.uniform_loc.texture, 0);
-            glUniform1f(tonemapping::exposure_gamma.uniform_loc.exposure, exposure);
-            glUniform1f(tonemapping::exposure_gamma.uniform_loc.gamma, gamma);
-            break;
-        case Tonemapping_Filmic:
-            glUseProgram(tonemapping::filmic.program);
-            glUniform1i(tonemapping::filmic.uniform_loc.texture, 0);
-            glUniform1f(tonemapping::filmic.uniform_loc.exposure, exposure);
-            glUniform1f(tonemapping::filmic.uniform_loc.gamma, gamma);
-            break;
-        case Tonemapping_Passthrough:
-        default:
-            glUseProgram(tonemapping::passthrough.program);
-            glUniform1i(tonemapping::passthrough.uniform_loc.texture, 0);
-            break;
+    case Tonemapping::ExposureGamma:
+        glUseProgram(tonemapping::exposure_gamma.program);
+        glUniform1i(tonemapping::exposure_gamma.uniform_loc.texture, 0);
+        glUniform1f(tonemapping::exposure_gamma.uniform_loc.exposure, exposure);
+        glUniform1f(tonemapping::exposure_gamma.uniform_loc.gamma, gamma);
+        break;
+    case Tonemapping::Filmic:
+        glUseProgram(tonemapping::filmic.program);
+        glUniform1i(tonemapping::filmic.uniform_loc.texture, 0);
+        glUniform1f(tonemapping::filmic.uniform_loc.exposure, exposure);
+        glUniform1f(tonemapping::filmic.uniform_loc.gamma, gamma);
+        break;
+    case Tonemapping::ACES:
+        glUseProgram(tonemapping::ACES.program);
+        glUniform1i(tonemapping::ACES.uniform_loc.texture, 0);
+        glUniform1f(tonemapping::ACES.uniform_loc.exposure, exposure);
+        glUniform1f(tonemapping::ACES.uniform_loc.gamma, gamma);
+        break;
+    case Tonemapping::Passthrough:
+    default:
+        glUseProgram(tonemapping::passthrough.program);
+        glUniform1i(tonemapping::passthrough.uniform_loc.texture, 0);
+        break;
     }
 
     glBindVertexArray(gl.vao);
@@ -1395,7 +1231,7 @@ void apply_tonemapping(GLuint color_tex, Tonemapping tonemapping, float exposure
     glUseProgram(0);
 }
 
-void apply_aa_tonemapping(GLuint color_tex) {
+void apply_aa_tonemapping(uint32_t color_tex) {
     ASSERT(glIsTexture(color_tex));
 
     glActiveTexture(GL_TEXTURE0);
@@ -1410,7 +1246,7 @@ void apply_aa_tonemapping(GLuint color_tex) {
     glUseProgram(0);
 }
 
-void apply_inverse_aa_tonemapping(GLuint color_tex) {
+void apply_inverse_aa_tonemapping(uint32_t color_tex) {
     ASSERT(glIsTexture(color_tex));
 
     glActiveTexture(GL_TEXTURE0);
@@ -1425,28 +1261,7 @@ void apply_inverse_aa_tonemapping(GLuint color_tex) {
     glUseProgram(0);
 }
 
-void blit_static_velocity(GLuint depth_tex, const ViewParam& view_param) {
-    mat4_t curr_clip_to_prev_clip_mat = view_param.matrix.previous.view_proj_jittered * view_param.matrix.inverse.view_proj_jittered;
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, depth_tex);
-
-    const vec2_t res = view_param.resolution;
-    const vec2_t jitter_uv_cur = view_param.jitter.current / res;
-    const vec2_t jitter_uv_prev = view_param.jitter.previous / res;
-    const vec4_t jitter_uv = {jitter_uv_cur.x, jitter_uv_cur.y, jitter_uv_prev.x, jitter_uv_prev.y};
-
-    glUseProgram(velocity::blit_velocity.program);
-	glUniform1i(velocity::blit_velocity.uniform_loc.tex_depth, 0);
-    glUniformMatrix4fv(velocity::blit_velocity.uniform_loc.curr_clip_to_prev_clip_mat, 1, GL_FALSE, &curr_clip_to_prev_clip_mat.elem[0][0]);
-    glUniform4fv(velocity::blit_velocity.uniform_loc.jitter_uv, 1, &jitter_uv.x);
-    glBindVertexArray(gl.vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-    glUseProgram(0);
-}
-
-void blit_tilemax(GLuint velocity_tex, int tex_width, int tex_height) {
+void blit_tilemax(uint32_t velocity_tex, int tex_width, int tex_height) {
     ASSERT(glIsTexture(velocity_tex));
     const vec2_t texel_size = {1.f / tex_width, 1.f / tex_height};
 
@@ -1462,7 +1277,7 @@ void blit_tilemax(GLuint velocity_tex, int tex_width, int tex_height) {
     glUseProgram(0);
 }
 
-void blit_neighbormax(GLuint velocity_tex, int tex_width, int tex_height) {
+void blit_neighbormax(uint32_t velocity_tex, int tex_width, int tex_height) {
     ASSERT(glIsTexture(velocity_tex));
     const vec2_t texel_size = {1.f / tex_width, 1.f / tex_height};
 
@@ -1478,7 +1293,7 @@ void blit_neighbormax(GLuint velocity_tex, int tex_width, int tex_height) {
     glUseProgram(0);
 }
 
-void apply_temporal_aa(GLuint linear_depth_tex, GLuint color_tex, GLuint velocity_tex, GLuint velocity_neighbormax_tex, const vec2_t& curr_jitter, const vec2_t& prev_jitter, float feedback_min,
+void apply_temporal_aa(uint32_t linear_depth_tex, uint32_t color_tex, uint32_t velocity_tex, uint32_t velocity_neighbormax_tex, const vec2_t& curr_jitter, const vec2_t& prev_jitter, float feedback_min,
                        float feedback_max, float motion_scale, float time) {
     ASSERT(glIsTexture(linear_depth_tex));
     ASSERT(glIsTexture(color_tex));
@@ -1513,7 +1328,7 @@ void apply_temporal_aa(GLuint linear_depth_tex, GLuint color_tex, GLuint velocit
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, velocity_neighbormax_tex);
 
-    GLint bound_buffer;
+    int bound_buffer;
     glGetIntegerv(GL_DRAW_BUFFER, &bound_buffer);
 
     GLenum draw_buffers[2];
@@ -1561,37 +1376,7 @@ void apply_temporal_aa(GLuint linear_depth_tex, GLuint color_tex, GLuint velocit
     glUseProgram(0);
 }
 
-void scale_hsv(GLuint color_tex, vec3_t hsv_scale) {
-    GLint last_fbo;
-    GLint last_viewport[4];
-    GLint last_draw_buffer;
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
-    glGetIntegerv(GL_VIEWPORT, last_viewport);
-    glGetIntegerv(GL_DRAW_BUFFER, &last_draw_buffer);
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.targets.fbo);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glViewport(0, 0, gl.tex_width, gl.tex_height);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, color_tex);
-
-    glUseProgram(hsv::gl.program);
-    glUniform1i(hsv::gl.uniform_loc.texture_color, 0);
-    glUniform3fv(hsv::gl.uniform_loc.hsv_scale, 1, &hsv_scale.x);
-    glBindVertexArray(gl.vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-    glUseProgram(0);
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
-    glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
-    glDrawBuffer((GLenum)last_draw_buffer);
-
-    blit_texture(gl.targets.tex_color[0]);
-}
-
-void blit_texture(GLuint tex) {
+void blit_texture(uint32_t tex) {
     ASSERT(glIsTexture(tex));
     glUseProgram(blit::program_tex);
     glActiveTexture(GL_TEXTURE0);
@@ -1612,106 +1397,12 @@ void blit_color(vec4_t color) {
     glUseProgram(0);
 }
 
-void blur_texture_gaussian(GLuint tex, int num_passes) {
-    ASSERT(glIsTexture(tex));
-    ASSERT(num_passes > 0);
-
-    GLint last_fbo;
-    GLint last_viewport[4];
-    GLint last_draw_buffer[8];
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
-    glGetIntegerv(GL_VIEWPORT, last_viewport);
-    for (int i = 0; i < 8; ++i) glGetIntegerv(GL_DRAW_BUFFER0 + i, &last_draw_buffer[i]);
-
-    GLint w, h;
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex);
-
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
-
-    glBindVertexArray(gl.vao);
-
-    glUseProgram(blur::program_gaussian);
-    glUniform1i(blur::uniform_loc_texture, 0);
-
-    glViewport(0, 0, w, h);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.tmp.fbo);
-
-    for (int i = 0; i < num_passes; ++i) {
-        glBindTexture(GL_TEXTURE_2D, tex);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.tmp.tex_rgba8, 0);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        glUniform2f(blur::uniform_loc_inv_res_dir, 1.0f / w, 0.0f);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        glBindTexture(GL_TEXTURE_2D, gl.tmp.tex_rgba8);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        glUniform2f(blur::uniform_loc_inv_res_dir, 0.0f, 1.0f / h);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-    }
-
-    glUseProgram(0);
-    glBindVertexArray(0);
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
-    glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
-    for (int i = 0; i < 8; ++i) glDrawBuffers(8, (GLenum*)last_draw_buffer);
-}
-
-void blur_texture_box(GLuint tex, int num_passes) {
-    ASSERT(glIsTexture(tex));
-    ASSERT(num_passes > 0);
-
-    GLint last_fbo;
-    GLint last_viewport[4];
-    GLint last_draw_buffer[8];
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
-    glGetIntegerv(GL_VIEWPORT, last_viewport);
-    for (int i = 0; i < 8; ++i) glGetIntegerv(GL_DRAW_BUFFER0 + i, &last_draw_buffer[i]);
-
-    GLint w, h;
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex);
-
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
-
-    glBindVertexArray(gl.vao);
-
-    glUseProgram(blur::program_box);
-
-    glViewport(0, 0, w, h);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.tmp.fbo);
-
-    for (int i = 0; i < num_passes; ++i) {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.tmp.tex_rgba8, 0);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        glBindTexture(GL_TEXTURE_2D, gl.tmp.tex_rgba8);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-    }
-
-    glUseProgram(0);
-    glBindVertexArray(0);
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
-    glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
-    for (int i = 0; i < 8; ++i) glDrawBuffers(8, (GLenum*)last_draw_buffer);
-}
-
-void postprocess(const Descriptor& desc, const ViewParam& view_param) {
-    ASSERT(glIsTexture(desc.input_textures.depth));
-    ASSERT(glIsTexture(desc.input_textures.color));
-    ASSERT(glIsTexture(desc.input_textures.normal));
-    if (desc.temporal_reprojection.enabled) {
-        ASSERT(glIsTexture(desc.input_textures.velocity));
+void postprocess(const Settings& settings, const mat4_t& P) {
+    ASSERT(glIsTexture(settings.input_textures.depth));
+    ASSERT(glIsTexture(settings.input_textures.color));
+    ASSERT(glIsTexture(settings.input_textures.normal));
+    if (settings.temporal_reprojection.enabled) {
+        ASSERT(glIsTexture(settings.input_textures.velocity));
     }
 
     // For seeding noise
@@ -1719,16 +1410,25 @@ void postprocess(const Descriptor& desc, const ViewParam& view_param) {
     time = time + 0.016f;
     if (time > 100.f) time -= 100.f;
 
-    const auto near_dist = view_param.clip_planes.near;
-    const auto far_dist = view_param.clip_planes.far;
-    const auto ortho = is_orthographic_proj_matrix(view_param.matrix.current.proj);
+    static vec2_t prev_jitter = {0,0};
+    mat4_t inv_P = mat4_inverse(P);
+    vec2_t near_far = extract_near_far(P);
+    vec2_t jitter = extract_jitter_uv(P);
+    bool ortho = is_ortho_proj_matrix(P);
 
-    GLint last_fbo;
-    GLint last_viewport[4];
-    GLint last_draw_buffer;
+    int last_fbo;
+    int last_viewport[4];
+    int last_draw_buffer;
+    int last_blend;
+    int last_colormask[4];
+    int last_depthmask;
+
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
     glGetIntegerv(GL_VIEWPORT, last_viewport);
     glGetIntegerv(GL_DRAW_BUFFER, &last_draw_buffer);
+    glGetIntegerv(GL_BLEND, &last_blend);
+    glGetIntegerv(GL_COLOR_WRITEMASK, last_colormask);
+    glGetIntegerv(GL_DEPTH_WRITEMASK, &last_depthmask);
 
     int width = last_viewport[2];
     int height = last_viewport[3];
@@ -1744,12 +1444,12 @@ void postprocess(const Descriptor& desc, const ViewParam& view_param) {
     PUSH_GPU_SECTION("Linearize Depth") {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.linear_depth.fbo);
         glViewport(0, 0, gl.tex_width, gl.tex_height);
-        glClearColor(far_dist,0,0,0);
+        glClearColor(near_far[1],0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
         glViewport(0, 0, width, height);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
-        compute_linear_depth(desc.input_textures.depth, near_dist, far_dist, ortho);
+        compute_linear_depth(settings.input_textures.depth, near_far[0], near_far[1], ortho);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
     }
@@ -1761,13 +1461,13 @@ void postprocess(const Descriptor& desc, const ViewParam& view_param) {
     }
     POP_GPU_SECTION()
 
-    if (desc.temporal_reprojection.enabled) {
+    if (settings.temporal_reprojection.enabled) {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.velocity.fbo);
         glViewport(0, 0, gl.velocity.tex_width, gl.velocity.tex_height);
 
         PUSH_GPU_SECTION("Velocity: Tilemax") {
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
-            blit_tilemax(desc.input_textures.velocity, gl.tex_width, gl.tex_height);
+            blit_tilemax(settings.input_textures.velocity, gl.tex_width, gl.tex_height);
         }
         POP_GPU_SECTION()
 
@@ -1779,7 +1479,7 @@ void postprocess(const Descriptor& desc, const ViewParam& view_param) {
     }
 
     GLenum dst_buffer = GL_COLOR_ATTACHMENT1;
-    GLuint src_texture = gl.targets.tex_color[0];
+    uint32_t src_texture = gl.targets.tex_color[0];
 
     auto swap_target = [&dst_buffer, &src_texture]() {
         dst_buffer = dst_buffer == GL_COLOR_ATTACHMENT0 ? GL_COLOR_ATTACHMENT1 : GL_COLOR_ATTACHMENT0;
@@ -1792,21 +1492,21 @@ void postprocess(const Descriptor& desc, const ViewParam& view_param) {
     glViewport(0, 0, width, height);
 
     PUSH_GPU_SECTION("Clear HDR")
-    glClearColor(desc.background.intensity.x, desc.background.intensity.y, desc.background.intensity.z, 1.f);
+    glClearColor(settings.background.intensity.x, settings.background.intensity.y, settings.background.intensity.z, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     POP_GPU_SECTION()
 
     PUSH_GPU_SECTION("Shade")
-    shade_deferred(desc.input_textures.depth, desc.input_textures.color, desc.input_textures.normal, view_param.matrix.inverse.proj_jittered, time);
+    shade_deferred(settings.input_textures.depth, settings.input_textures.color, settings.input_textures.normal, inv_P, time);
     POP_GPU_SECTION()
 
-    if (desc.ambient_occlusion.enabled) {
+    if (settings.ambient_occlusion.enabled) {
         PUSH_GPU_SECTION("SSAO")
-        apply_ssao(gl.linear_depth.texture, desc.input_textures.normal, view_param.matrix.current.proj_jittered, desc.ambient_occlusion.intensity, desc.ambient_occlusion.radius, desc.ambient_occlusion.bias, time);
+        apply_ssao(gl.linear_depth.texture, settings.input_textures.normal, P, settings.ambient_occlusion.intensity, settings.ambient_occlusion.radius, settings.ambient_occlusion.bias, time);
         POP_GPU_SECTION()
     }
 
-    if (desc.temporal_reprojection.enabled) {
+    if (settings.temporal_reprojection.enabled) {
 #if 0
         swap_target();
         glDrawBuffer(dst_buffer);
@@ -1815,15 +1515,14 @@ void postprocess(const Descriptor& desc, const ViewParam& view_param) {
 
         swap_target();
         glDrawBuffer(dst_buffer);
-        const float feedback_min = desc.temporal_reprojection.feedback_min;
-        const float feedback_max = desc.temporal_reprojection.feedback_max;
-        const float motion_scale = desc.temporal_reprojection.motion_blur.enabled ? desc.temporal_reprojection.motion_blur.motion_scale : 0.f;
+        const float feedback_min = settings.temporal_reprojection.feedback_min;
+        const float feedback_max = settings.temporal_reprojection.feedback_max;
+        const float motion_scale = settings.temporal_reprojection.motion_blur.enabled ? settings.temporal_reprojection.motion_blur.motion_scale : 0.f;
         if (motion_scale != 0.f)
             PUSH_GPU_SECTION("Temporal AA + Motion Blur")
         else
             PUSH_GPU_SECTION("Temporal AA")
-
-            apply_temporal_aa(gl.linear_depth.texture, src_texture, desc.input_textures.velocity, gl.velocity.tex_neighbormax, view_param.jitter.current, view_param.jitter.previous, feedback_min, feedback_max,
+            apply_temporal_aa(gl.linear_depth.texture, src_texture, settings.input_textures.velocity, gl.velocity.tex_neighbormax, jitter, prev_jitter, feedback_min, feedback_max,
                 motion_scale, time);
         POP_GPU_SECTION()
 
@@ -1842,40 +1541,42 @@ void postprocess(const Descriptor& desc, const ViewParam& view_param) {
 #endif
     }
 
-    if (desc.input_textures.emissive) {
+    if (settings.input_textures.emissive) {
         PUSH_GPU_SECTION("Add Emissive")
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
-        blit_texture(desc.input_textures.emissive);
+        blit_texture(settings.input_textures.emissive);
         glDisable(GL_BLEND);
         POP_GPU_SECTION()
     }
 
-    if (desc.depth_of_field.enabled) {
+    if (settings.depth_of_field.enabled) {
         swap_target();
         glDrawBuffer(dst_buffer);
         PUSH_GPU_SECTION("DOF")
-        apply_dof(gl.linear_depth.texture, src_texture, desc.depth_of_field.focus_depth, desc.depth_of_field.focus_scale, time);
+        apply_dof(gl.linear_depth.texture, src_texture, settings.depth_of_field.focus_depth, settings.depth_of_field.focus_scale, time);
         POP_GPU_SECTION()
     }
 
     PUSH_GPU_SECTION("Tonemapping") {
         swap_target();
         glDrawBuffer(dst_buffer);
-        const auto tonemapper = desc.tonemapping.enabled ? desc.tonemapping.mode : Tonemapping_Passthrough;
-        apply_tonemapping(src_texture, tonemapper, desc.tonemapping.exposure, desc.tonemapping.gamma);
+        const auto tonemapper = settings.tonemapping.enabled ? settings.tonemapping.mode : Tonemapping::Passthrough;
+        apply_tonemapping(src_texture, tonemapper, settings.tonemapping.exposure, settings.tonemapping.gamma);
     }
     POP_GPU_SECTION()
 
-    if (desc.input_textures.post_tonemap) {
+    if (settings.input_textures.post_tonemap) {
         PUSH_GPU_SECTION("Add Post Tonemap")
         glEnable(GL_BLEND);
         glColorMask(1, 1, 1, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        blit_texture(desc.input_textures.post_tonemap);
+        blit_texture(settings.input_textures.post_tonemap);
         glDisable(GL_BLEND);
         POP_GPU_SECTION()
     }
+
+    prev_jitter = jitter;
 
     // Activate backbuffer or whatever was bound before
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
@@ -1886,8 +1587,15 @@ void postprocess(const Descriptor& desc, const ViewParam& view_param) {
     glDepthMask(0);
     blit_texture(src_texture);
 
-    glDepthMask(1);
-    glColorMask(1, 1, 1, 1);
+    // Reset rest of state
+    glBlendFunc(GL_ONE, GL_ZERO);
+    if (last_blend)
+        glEnable(GL_BLEND);
+    else
+        glDisable(GL_BLEND);
+
+    glDepthMask(last_depthmask);
+    glColorMask(last_colormask[0], last_colormask[1], last_colormask[2], last_colormask[3]);
 }
 
 }  // namespace postprocessing

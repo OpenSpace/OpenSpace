@@ -34,21 +34,21 @@
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
 
-
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
-#include <core/md_bitfield.h>
-//#include "viamd/gfx/conetracing_utils.h"
+
+#include <openspace/properties/listproperty.h>
 
 namespace openspace {
 
 struct RenderData;
+class HttpMemoryDownload;
 
-class RenderableSimulationBox : public Renderable {
+class RenderableMolecule : public Renderable {
 public:
-    explicit RenderableSimulationBox(const ghoul::Dictionary& dictionary);
-    virtual ~RenderableSimulationBox();
+    explicit RenderableMolecule(const ghoul::Dictionary& dictionary);
+    virtual ~RenderableMolecule();
 
     void initialize() override;
     void initializeGL() override;
@@ -60,55 +60,42 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    struct molecule_state_t {
-        glm::dvec3 position;
-        double angle;
-        glm::dvec3 direction;     // moving direction where magnitude is linear velocity
-        glm::dvec3 rotationAxis;  // rotation axis where magnitude is angular velocity
-    };
 
     struct molecule_data_t {
-        std::vector<molecule_state_t> states;
+        glm::vec3 extent;
+        glm::vec3 center;
+        float radius;
+
         md_molecule_t molecule;
         const md_trajectory_i* trajectory;
+
         md_gl_representation_t drawRep;
         md_gl_molecule_t drawMol;
-        md_bitfield_t visibilityMask;
-        //cone_trace::GPUVolume occupancyVolume;
     };
     
-    void updateAnimation(molecule_data_t& mol, double t);
-    void updateSimulation(molecule_data_t& mol, double dt);
-    void updateRepresentation(molecule_data_t& mol);
-    void applyViamdFilter(molecule_data_t& mol, std::string_view filter);
-    void applyViamdScript(molecule_data_t& mol, std::string_view script);
+    void computeAABB(molecule_data_t& mol);
     
-    void initMolecule(molecule_data_t& mol, std::string_view molFile, std::string_view trajFile = {});
+    void initMolecule(molecule_data_t& mol, std::string_view mol_file, std::string_view traj_file = {});
     void freeMolecule(molecule_data_t& mol);
 
     bool _renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
 
     double _frame;
     
-    std::vector<molecule_data_t> _molecules;
+    molecule_data_t _molecule;
     
-    properties::StringListProperty _moleculeFiles;
-    properties::StringListProperty _trajectoryFiles;
+    properties::StringProperty _moleculeFile;
+    properties::StringProperty _trajectoryFile;
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
     properties::FloatProperty _animationSpeed;
-    properties::FloatProperty _simulationSpeed;
-    properties::IntListProperty _moleculeCounts;
-    properties::FloatProperty _linearVelocity;
-    properties::FloatProperty _angularVelocity;
-    properties::DVec3Property _simulationBox;
-    properties::FloatProperty _collisionRadius;
     properties::StringProperty _viamdFilter;
     properties::BoolProperty _ssaoEnabled;
     properties::FloatProperty _ssaoIntensity;
     properties::FloatProperty _ssaoRadius;
     properties::FloatProperty _ssaoBias;
+    properties::FloatProperty _exposure;
 };
 
 } // namespace openspace

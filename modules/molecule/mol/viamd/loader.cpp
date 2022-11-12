@@ -14,10 +14,7 @@
 #include <md_frame_cache.h>
 #include <md_util.h>
 
-// #include <string_util.h>
 #include <string.h>
-
-// #include "task_system.h"
 
 struct LoadedMolecule {
     uint64_t key;
