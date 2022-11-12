@@ -67,8 +67,6 @@ option(MD_USE_RELATIVE_RESOURCE_PATH OFF)
 include_external_library(${molecule_module} PRIVATE mdlib ${CMAKE_CURRENT_SOURCE_DIR}/ext/mold)
 disable_external_warnings(mdlib)
 
-target_compile_definitions(${molecule_module} PRIVATE VIAMD_SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/mol/viamd/gfx/shaders")
-  
 # disable annoying warnings from mold included header files
 # TODO: Cmake people help me!! How do you do that properly??
 # I hate Cmake
