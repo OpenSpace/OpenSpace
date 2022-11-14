@@ -1059,6 +1059,8 @@ void DataViewer::renderTableWindow(bool *open) {
     }
 
     renderTable("full_exoplanets_table", _filteredData, false, searchString);
+
+    ImGui::End();
 }
 
 void DataViewer::renderTable(const std::string& tableId,
