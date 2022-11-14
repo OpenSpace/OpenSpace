@@ -1,0 +1,302 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
+
+local treks_LRO_NAC_Apollo11_Mosaic_p = {
+  Identifier = "LRO_NAC_Apollo11_Mosaic_p",
+  Name = [[LRO Narrow Angle Camera, Apollo 11 Landing Site]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Apollo_11_Landing_Site.vrt"),
+  Description = [[This is the site where American astronauts Neil Armstrong and Edwin “Buzz” Aldrin made the first human landing on the Moon on July 20, 1969. Armstrong and Aldrin landed here aboard the lunar module Eagle, while Michael Collins remained in orbit around the Moon in the command module Columbia. Armstrong and Aldrin conducted one EVA on the lunar surface lasting 2 hours, 31 minutes 40 seconds, remaining within 60 meters of the lunar module. They collected 21.55 kg of lunar sample material for return to the Earth.
+ 
+In this LRO NAC view of the landing site, the descent stage of the Eagle is the largest man-made object visible. The dark tracks of the astronauts’ footprints extend out from it clustered primarily in 3 directions. To the northwest, the tracks extend to the location where the astronauts set up a TV camera. To the south, tracks extend to where a Lunar Ranging Retroreflector and the Passive Seismic Experiment Package were deployed. To the east, the tracks extend to the rim of Little West Crater.
+ 
+The landing site, located at 0.67416 N, 23.47314 E, is in the southwest part of Mare Tranquilitatis, an area characterized by extensive deposits of mare basalt.
+]]
+}
+
+local treks_LRO_NAC_Apollo12_Mosaic_p = {
+  Identifier = "LRO_NAC_Apollo12_Mosaic_p",
+  Name = [[LRO Narrow Angle Camera, Apollo 12 Landing Site]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Apollo_12_Landing_Site.vrt"),
+  Description = [[This is the site where American astronauts Charles “Pete” Conrad and Alan Bean made the second human landing on the Moon on November 19, 1969. Conrad and Bean landed here aboard the lunar module Intrepid, while Richard Gordon remained in orbit around the Moon in the command module Yankee Clipper. Apollo 12 demonstrated the key capability of a precision landing, with Intrepid touching down less than 200 meters from the site where the Surveyor 3 probe had landed on April 20, 1967. Conrad and Bean conducted 2 EVAs on the lunar surface. The first, lasting 3 hours, 56 minutes, extended to the northwest for deployment of the ALSEP instrument package, and the continued to the rim of a 350-meter diameter crater dubbed Middle Crescent. The second EVA, lasting 3 hours, 49 minutes, was a loop trip of 1.5 km around several craters to the south, including retrieval of a camera from Surveyor 3. They collected 34.35 kilograms of lunar sample material for return to the Earth.
+ 
+In this LRO NAC view of the landing site, the descent stage of the Intrepid is the largest man-made object visible. The dark tracks of the astronauts’ footprints extend out from it. To the northwest, the tracks extend about 130 meters to were components of the ALSEP can be seen. About 160 meters to the southeast of Intrepid, Surveyor 3 is visible with a dense cluster of footprints around it.
+ 
+The landing site, located at 3.0138 S N, 23.4219 W, is in the southern part of Oceanus Procellarum, an area characterized by extensive deposits of basalt significantly younger than that at the Apollo 11 site. The site also provided the first samples of KREEP, material rich in potassium, phosphorus, and rare earth elements. The potential for sampling ejecta from one of the rays extending from the crater Copernicus added to the attractiveness of the site.
+]]
+}
+
+local treks_LRO_NAC_Apollo14_Mosaic_p = {
+  Identifier = "LRO_NAC_Apollo14_Mosaic_p",
+  Name = [[LRO Narrow Angle Camera, Apollo 14 Landing Site]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Apollo_14_Landing_Site.vrt"),
+  Description = [[This is the site where American astronauts Alan Shepard and Edgar Mitchell made the third human landing on the Moon on February 5, 1971. Shepard and Mitchell landed here aboard the lunar module Antares, while Stuart Roosa remained in orbit around the Moon in the command module Kitty Hawk. Shephard and Mitchell conducted 2 EVAs on the lunar surface. The first, lasting 4 hours, 47 minutes, 50 seconds, extended to the west for deployment of the ALSEP instrument package, included collection of a contingency sample, and covered a total distance of about 550 meters. The second EVA, lasting 4 hours, 34 minutes, 41 seconds, was intended to visit Cone Crater, 370 meters in diameter and located approximately 1.2 kilometers to the northeast. To help transport the load of equipment and retrieved samples on this EVA, the astronauts were equipped with a hand-pulled cart, the Modular Equipment Transporter (MET). The rough, hummocky terrain made navigation difficult during the second EVA, and the astronauts were not able to identify the rim of Cone Crater, though later imagery showed that they reached a point about 20 meters south of the crater rim. Shepard and Mitchell collected 42.80 kilograms of lunar sample material for return to the Earth.
+ 
+In this LRO NAC view of the landing site, the descent stage of the Antares is the largest man-made object visible. The dark tracks of the astronauts’ footprints from the first EVA extend to the west, where components of the ALSEP are visible. Extending to the northeast of Antares’ landing site, the track of the astronauts’ footprints and the tracks of the MET’s wheels can be traced toward Cone Crater.
+ 
+The landing site, located at 3.64589 S, 17.47194 W, was selected largely with the goal of sampling material from the Imbrium Basin impact, whose ejecta covers much of this area, known as the Fra Mauro formation.]]
+}
+
+local treks_LRO_NAC_Apollo15_Mosaic_p = {
+  Identifier = "LRO_NAC_Apollo15_Mosaic_p",
+  Name = [[LRO Narrow Angle Camera, Apollo 15 Landing Site]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Apollo_15_Landing_Site.vrt"),
+  Description = [[This is the site where American astronauts David Scott and James Irwin made the fourth human landing on the Moon on July 30, 1971. Scott and Irwin landed here aboard the lunar module Falcon, while Alfred Worden remained in orbit around the Moon in the command module Endeavour. This was the first of the Apollo J missions. These featured a greater emphasis on conducting science on the Moon along with longer stays on the lunar surface. The J missions also included a lunar rover which allowed the astronauts to drive across the lunar surface, covering far greater areas, and carrying back more sample material. Scott first conducted a 33-minute stand-up EVA, surveying and imaging the local terrain through the upper hatch of the lunar module. Scott and Irwin then conducted 3 surface EVAs. The first, lasting 6 hours, 32 minutes, 42 seconds, involved deploying the Lunar Rover, and driving in it on a 10.3-km geological traverse. They drove southwest to the edge of Hadley Rille and then continued south along the edge of the rille. At the end of the first surface EVA, they deployed the Apollo Lunar Surface Experiments Package (ALSEP) approximately 110 meters north-northwest of the lunar module. The second surface EVA, lasting 7 hours, 12 minutes, 14 seconds, featured a 12.5-kilometer lunar rover traverse southeast across the mare and along the base of the Apennine Mountains. The third surface EVA, lasting 4 hours, 49 minutes, 50 seconds, had the astronauts making a 5.1-kilometer traverse west to Hadley Rille northwest along the edge of the rille, and east across the mare back to the lunar module. Scott and Irwin collected 77 kilograms of lunar sample material for return to the Earth.
+ 
+In this LRO NAC view of the landing site, the descent stage of the Falcon is the largest man-made object visible. The dark markings of the astronauts’ footprints and rover tire tracks are visible around the landing site, especially extending to the north-northwest, where components of the ALSEP are visible. 
+ 
+The landing site, located at 26.13239 N, 3.63330 E, was selected to provide access to the basalt of Mare Imbrium, the stratigraphy revealed in the deep channel of Hadley Rille carved by flowing lava, and mountain material from the front of the Apennine Range.
+]]
+}
+
+local treks_LRO_NAC_Apollo16_Mosaic_p = {
+  Identifier = "LRO_NAC_Apollo16_Mosaic_p",
+  Name = [[LRO Narrow Angle Camera, Apollo 16 Landing Site]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Apollo_16_Landing_Site.vrt"),
+  Description = [[This is the site where American astronauts John Young and Charles Duke made the fifth human landing on the Moon on April 21, 1972. Young and Duke landed here aboard the lunar module Orion, while Ken Mattingly remained in orbit around the Moon in the command module Casper. Young and Duke conducted 3 surface EVAs. The first, lasting 7 hours, 11 minutes, 2 seconds, included deploying the Apollo Lunar Surface Experiments Package (ALSEP) approximately 95 meters southwest of the lunar module, and conducting a geologic traverse using the lunar rover to a couple of small craters within about 1,400 meters to the west of the landing site. The second surface EVA, lasting 7 hours, 23 minutes, 9 seconds, featured an 11.1-kilometer lunar rover drive south to the Cinco Crater area of Stone Mountain, making stops at 6 stations along the way. across the mare and along the base of the Apennine Mountains. The third surface EVA, lasting 5 hours, 40 minutes, 3 seconds, had the astronauts making a 11.4-kilometer traverse north to North Ray Crater. Young and Duke collected 95.71 kilograms of lunar sample material for return to the Earth.
+ 
+In this LRO NAC view of the landing site, the descent stage of the Orion is the largest man-made object visible, within a dark halo on the western rim of a ~30-meter crater. The dark markings of the astronauts’ footprints and rover tire tracks are visible around the landing site, especially extending to the southwest, where components of the ALSEP are visible. 
+ 
+With the previous Apollo landings having focused on the low, flat, basaltic terrain of the lunar maria or seas, Apollo 16 was the first crewed mission to visit the lunar highlands. The landing site, located at 8.9734 S, 15.5011 E, was located on the boundary of two highland geologic units, the Descartes Formation and the Cayley Formation. Both units were thought to be volcanic in nature, but composed of lavas with higher silica content than the basaltic rocks of the maria; the Descartes Formation was widely thought to be rhyolite. However, the astronauts quickly discovered on their traverses that the rocks around them were overwhelmingly breccias. The great surprise of Apollo 16 was the discovery that the highland terrain was not silicic lava, but fluidized ejecta from a great basin-forming impact, an that the rocks were crustal material, largely anorthosite and gabbro.
+]]
+}
+
+local treks_NAC_DTM_APOLLO17_CLRSHADE = {
+  Identifier = "NAC_DTM_APOLLO17_CLRSHADE",
+  Name = [[LRO Narrow Angle Camera, ColorHillShade Apollo 17]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/ColorHillShade_Apollo_17.vrt"),
+  Description = [[Color-coded topography draped over the shaded relief from a 5m Digital Terrain Model (DTM) of the Apollo 17 landing site created with Narrow Angle Camera (NAC) stereo image pairs from the Lunar Reconnaissance Orbiter Camera (LROC) aboard the Lunar Reconnaissance Orbiter (LRO). The shaded relief image was generated with the sun azimuth of 315 degrees (northwest) and sun altitude of 45 degrees. ]]
+}
+
+local treks_NAC_DTM_APOLLO17_SHADE = {
+  Identifier = "NAC_DTM_APOLLO17_SHADE",
+  Name = [[LRO Narrow Angle Camera, HillShade Apollo 17]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/HillShade_Apollo_17.vrt"),
+  Description = [[This is a  shaded-relief derived from a 5m Digital Terrain Model (DTM) of the Apollo 17 landing site created with Narrow Angle Camera (NAC) stereo image pairs from the Lunar Reconnaissance Orbiter Camera (LROC) aboard the Lunar Reconnaissance Orbiter (LRO). The shaded relief image was generated with the sun azimuth of 315 degrees (northwest) and sun altitude of 45 degrees. Image is a TIFF image, 8 bits/sample, 1 samples/pixel in single image plane configuration.]]
+}
+
+local treks_A11_60x60kmeq = {
+  Identifier = "A11_60x60kmeq",
+  Name = [[LRO Narrow Angle Camera, Mosaic Apollo 11]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Apollo_11.vrt"),
+  Description = [[This is a Lunar Reconnaisance Orbiter (LRO) Narrow Angle Camera (NAC) mosaic centered at the Apollo 11 landing site with an extent of 60x60km. Each NAC image was processed in ISIS3 at a resolution of 50cm pixel, color balanced, and synthesized into a single output.]]
+}
+
+local treks_A12_60x60km0_3eq = {
+  Identifier = "A12_60x60km0_3eq",
+  Name = [[LRO Narrow Angle Camera, Mosaic Apollo 12]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Apollo_12.vrt"),
+  Description = [[This is a Lunar Reconnaissance Orbiter (LRO) Narrow Angle Camera (NAC) mosaic centered at the Apollo 12 landing site with an extent of 60x60km. Each NAC image was processed in ISIS3 at a resolution of 50cm pixel, color balanced, and synthesized into a single output. Apollo 12 was second crewed mission to land on the surface of the Moon. The mission launched on November 14th 1969, and landed five days later at the Ocean of Storms within walking distance of the Surveyor 3 spacecraft.]]
+}
+
+local treks_A14_60x60km0_3eq = {
+  Identifier = "A14_60x60km0_3eq",
+  Name = [[LRO Narrow Angle Camera, Mosaic Apollo 14]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Apollo_14.vrt"),
+  Description = [[This is a Lunar Reconnaissance Orbiter (LRO) Narrow Angle Camera (NAC) mosaic centered at the Apollo 14 landing site with an extent of 60x60km. Each NAC image was processed in ISIS3 at a resolution of 50cm pixel, color balanced, and synthesized into a single output. Apollo 14 landed on the Moon February 15th 1971.]]
+}
+
+local treks_A15_60x60km0_2eq = {
+  Identifier = "A15_60x60km0_2eq",
+  Name = [[LRO Narrow Angle Camera, Mosaic Apollo 15]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Apollo_15.vrt"),
+  Description = [[This is a Lunar Reconnaisance Orbiter (LRO) Narrow Angle Camera (NAC) mosaic centered at the Apollo 15 landing site with an extent of 60x60km. Each NAC image was processed in ISIS3 at a resolution of 50cm pixel, color balanced, and synthesized into a single output.]]
+}
+
+local treks_A16_60x60kmeq = {
+  Identifier = "A16_60x60kmeq",
+  Name = [[LRO Narrow Angle Camera, Mosaic Apollo 16]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Apollo_16.vrt"),
+  Description = [[This is a Lunar Reconnaisance Orbiter (LRO) Narrow Angle Camera (NAC) mosaic centered at the Apollo 16 landing site with an extent of 60x60km. Each NAC image was processed in ISIS3 at a resolution of 50cm pixel, color balanced, and synthesized into a single output.]]
+}
+
+local treks_A17_60x60kmeq = {
+  Identifier = "A17_60x60kmeq",
+  Name = [[LRO Narrow Angle Camera, Mosaic Apollo 17]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Apollo_17.vrt"),
+  Description = [[This is a Lunar Reconnaisance Orbiter (LRO) Narrow Angle Camera (NAC) mosaic centered at the Apollo 17 landing site with an extent of 60x60km. Each NAC image was processed in ISIS3 at a resolution of 50cm pixel, color balanced, and synthesized into a single output.]]
+}
+
+local treks_M129086118ndgcs = {
+  Identifier = "M129086118ndgcs",
+  Name = [[LRO Narrow Angle Camera, Mosaic Apollo 17 Landing Site]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Apollo_17_Landing_Site.vrt"),
+  Description = [[This is the site where American astronauts Eugene Cernan and Harrison Schmitt made the sixth and final human landing on the Moon of the Apollo program on December 11, 1972. Cernan and Schmitt landed here aboard the lunar module Challenger, while Ronald Evans remained in orbit around the Moon in the command module America. With a PhD in geology, Schmitt was the first and only professional scientist to have visited the Moon. Cernan and Schmitt conducted 3 surface EVAs. The first, lasting 7 hours, 11 minutes, 53 seconds, included deploying the Apollo Lunar Surface Experiments Package (ALSEP) approximately 185 meters west-northwest of the lunar module, and conducting a 3.5-kilometer geologic traverse using the lunar rover to the rim of Steno, a small impact crater south of the landing site. The second surface EVA, lasting 7 hours, 36 minutes, 56 seconds, featured a 20.4-kilometer geologic traverse south and west. Stops included a location at the base of South Massif where a landslide had brought ancient highland rocks from high on the mountain into reach, and at Shorty Crater, which was found to be impact rather than volcanic in origin, but which excavated an older volcanic deposit which yielded the famous “orange soil”, beads of volcanic glass erupted in a lunar fire fountain. The third surface EVA, lasting 7 hours, 15 minutes, 8 seconds, had the astronauts making a 20.4-kilometer geologic traverse north and east to North Massif. Stops on this traverse included taking samples of early lunar crust material from large boulders near the base of the massif that had rolled down from high up on the mountain. Cernan and Schmitt collected 110.52 kilograms of lunar sample material for return to the Earth.  
+
+In this LRO NAC view of the landing site, the descent stage of the Challenger is the largest man-made object visible. The dark markings of the astronauts’ footprints and rover tire tracks are visible around the landing site, especially extending to the west-northwest, where components of the ALSEP are visible.
+
+The landing site, located at 20.1911 N, 30.7723 E, is in a narrow valley in the Taurus Mountains near the crater Littrow. The Taurus Mountains form part of the Serenitatis impact basin, and sampling some of the ancient highland terrain into which the basin was excavated could help determine the date of the basin’s formation. Mare basalt subsequently flooded the floor of the valley, and after that parts of the area were blanketed by pyroclastic ash deposits erupting from dark-haloed volcanic craters. The site could therefore provide access to a diverse range of sample material.]]
+}
+
+local treks_ingenii_skylight = {
+  Identifier = "ingenii_skylight",
+  Name = [[LRO Narrow Angle Camera, Mosaic Ingenii]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Ingenii.vrt"),
+  Description = [[Mare Ingenii is notable for being one of the few examples of a mare on the far side of the Moon, and the site for notable lunar swirls, enigmatic bright albedo features. This was enough to qualify the area as a Constellation Region of Interest. However, the area became even more interesting with the discovery of a lunar pit in imagery obtained using the Kaguya Terrain Camera. It measures about 130 m in diameter, and researchers speculate that the pit could be a skylight resulting from the collapse of the roof of a lava tube. Whether this is actually the case, and if so, the accessibility and extent of the lava tube have yet to be determined. However, such lava tubes are of great interest as potential locations for lunar bases, offering protection from extreme swings in temperature, galactic and solar radiation, and meteoroid impacts. This data layer was obtained using the Narrow Angle Camera aboard the Lunar Reconnaissance Orbiter and is a is a mosaic of 2 NAC strips centered on the Mare Ingenii pit.]]
+}
+
+local treks_marius_skylight = {
+  Identifier = "marius_skylight",
+  Name = [[LRO Narrow Angle Camera, Mosaic Marius]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Marius.vrt"),
+  Description = [[The Marius Hills represents one of the most prominent collection of volcanic domes on the Moon. The area was a candidate landing site for the Apollo program and was also designated as a Constellation Region of Interest. It remains a site under consideration for possible future missions. In addition to volcanic domes, the area features basaltic flows, sinuous rilles, and one prominent lunar pit. The Marius Hills pit measures 58 x 49 m in diameter and 40 m deep. It was first noticed in an image taken with the Kaguya Terrain Camera on May 20, 2008, by a team led by Junichi Haruyama . The fact that the Marius Hills pit is located on the floor of a sinuous rille has encouraged speculation the pit could be a skylight resulting from the collapse of the roof of a lava tube. Whether this is actually the case, and if so, the accessibility and extent of the lava tube have yet to be determined. However, such lava tubes are of great interest as potential locations for lunar bases, offering protection from extreme swings in temperature, galactic and solar radiation, and meteoroid impacts. This data layer was obtained using the Narrow Angle Camera aboard the Lunar Reconnaissance Orbiter and is a is a mosaic of 2 NAC strips centered on the Marius Hills pit.]]
+}
+
+local treks_LRO_NAC_Schrodinger = {
+  Identifier = "LRO_NAC_Schrodinger",
+  Name = [[LRO Narrow Angle Camera, Mosaic Schrodinger]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Schrodinger.vrt"),
+  Description = [[This is a visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. The images were orthorectified using a digital elevation model (DEM) created from LROC NAC stereo images, when available, or LRO's Lunar Orbiter Laser Altimeter (LOLA) global DEM. The mosaic is generated at the same resolution at which the individual LROC NAC images were gathered, which is approximately 0.5 meters/pixel. The mosaic was registered horizontally to the LOLA global DEM.]]
+}
+
+local treks_schrodingerextraswathseq = {
+  Identifier = "schrodingerextraswathseq",
+  Name = [[LRO Narrow Angle Camera, Mosaic Schrodinger Extra]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Schrodinger_Extra.vrt"),
+  Description = [[TBD]]
+}
+
+local treks_LRO_NAC_SchrodingerLandingSite2 = {
+  Identifier = "LRO_NAC_SchrodingerLandingSite2",
+  Name = [[LRO Narrow Angle Camera, Mosaic Schrodinger Landing Site]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Schrodinger_Landing_Site.vrt"),
+  Description = [[This is a visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. The images were orthorectified using a digital elevation model (DEM) created from LROC NAC stereo images, when available, or LRO's Lunar Orbiter Laser Altimeter (LOLA) global DEM. The mosaic is generated at the same resolution at which the individual LROC NAC images were gathered, which is approximately 0.5 meters/pixel. The mosaic was registered horizontally to the LOLA global DEM.]]
+}
+
+local treks_schrodingerneequirect = {
+  Identifier = "schrodingerneequirect",
+  Name = [[LRO Narrow Angle Camera, Mosaic Schrodinger NorthEast]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Schrodinger_NorthEast.vrt"),
+  Description = [[This is a visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. Each NAC image was registered horizontally to the LRO's Lunar Orbiter Laser Altimeter (LOLA) global DEM, and then mosaicked together and color balanced. The mosaic is generated at the same resolution at which the individual LROC NAC images were gathered, which is approximately 1 meters/pixel.]]
+}
+
+local treks_schrodingerscequirect = {
+  Identifier = "schrodingerscequirect",
+  Name = [[LRO Narrow Angle Camera, Mosaic Schrodinger SouthCenter]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Schrodinger_SouthCenter.vrt"),
+  Description = [[This is a visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. Each NAC image was registered horizontally to the LRO's Lunar Orbiter Laser Altimeter (LOLA) global DEM, and then mosaicked together and color balanced. The mosaic is generated at the same resolution at which the individual LROC NAC images were gathered, which is approximately 1 meters/pixel.]]
+}
+
+local treks_schrodingerseequirect = {
+  Identifier = "schrodingerseequirect",
+  Name = [[LRO Narrow Angle Camera, Mosaic Schrodinger SouthEast]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Schrodinger_SouthEast.vrt"),
+  Description = [[This is a visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. Each NAC image was registered horizontally to the LRO's Lunar Orbiter Laser Altimeter (LOLA) global DEM, and then mosaicked together and color balanced. The mosaic is generated at the same resolution at which the individual LROC NAC images were gathered, which is approximately 1 meters/pixel.]]
+}
+
+local treks_small_tranq_skylight_1 = {
+  Identifier = "small_tranq_skylight_1",
+  Name = [[LRO Narrow Angle Camera, Mosaic Small Tranquilltatis 1]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Small_Tranquilltatis_1.vrt"),
+  Description = [[The discovery of three lunar pits using imagery from imagery obtained using the Kaguya Terrain Camera led researchers to wonder how common such features might be. A very successful campaign was mounted to search Lunar Reconnaissance Orbiter Narrow Angle Camera (NAC) images to see if the higher resolution of NAC might reveal more lunar pits smaller than were detectable with the Kaguya Terrain Camera (R. V. Wagner and M. S. Robinson, 2015, UPDATE: THE SEARCH FOR LUNAR PITS, 2nd International Planetary Caves Conference). Researchers speculate that these lunar pits could be skylights resulting from roof collapse in lava tubes. Whether this is actually the case, and if so, the accessibility and extent of the lava tubes have yet to be determined. However, such lava tubes are of great interest as potential locations for lunar bases, offering protection from extreme swings in temperature, galactic and solar radiation, and meteoroid impacts. This data layer was obtained using the Narrow Angle Camera aboard the Lunar Reconnaissance Orbiter and is a is a mosaic of 2 NAC strips centered on a small pit in Mare Tranquillitatis.]]
+}
+
+local treks_small_tranq_skylight_2 = {
+  Identifier = "small_tranq_skylight_2",
+  Name = [[LRO Narrow Angle Camera, Mosaic Small Tranquilltatis 2]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Mosaic_Small_Tranquilltatis_2.vrt"),
+  Description = [[The discovery of three lunar pits using imagery from imagery obtained using the Kaguya Terrain Camera led researchers to wonder how common such features might be. A very successful campaign was mounted to search Lunar Reconnaissance Orbiter Narrow Angle Camera (NAC) images to see if the higher resolution of NAC might reveal more lunar pits smaller than were detectable with the Kaguya Terrain Camera (R. V. Wagner and M. S. Robinson, 2015, UPDATE: THE SEARCH FOR LUNAR PITS, 2nd International Planetary Caves Conference). Researchers speculate that these lunar pits could be skylights resulting from roof collapse in lava tubes. Whether this is actually the case, and if so, the accessibility and extent of the lava tubes have yet to be determined. However, such lava tubes are of great interest as potential locations for lunar bases, offering protection from extreme swings in temperature, galactic and solar radiation, and meteoroid impacts. This data layer was obtained using the Narrow Angle Camera aboard the Lunar Reconnaissance Orbiter and is a is a mosaic of 2 NAC strips centered on a small pit in Mare Tranquillitatis.]]
+}
+
+local treks_NAC_DTM_APOLLO17_SLOPE = {
+  Identifier = "NAC_DTM_APOLLO17_SLOPE",
+  Name = [[LRO Narrow Angle Camera, Slope Apollo 17]],
+  FilePath = asset.localResource("LRO_Narrow_Angle_Camera/Slope_Apollo_17.vrt"),
+  Description = [[This is a color slope map derived from a 5m Digital Terrain Model (DTM) of the Apollo 17 landing site created with Narrow Angle Camera (NAC) stereo image pairs from the Lunar Reconnaissance Orbiter Camera (LROC) aboard the Lunar Reconnaissance Orbiter (LRO). Image is 3-channel RGB TIFF, 8 bits/sample, 3 samples/pixel in single image plane configuration]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Apollo11_Mosaic_p)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Apollo12_Mosaic_p)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Apollo14_Mosaic_p)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Apollo15_Mosaic_p)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Apollo16_Mosaic_p)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_NAC_DTM_APOLLO17_CLRSHADE)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_NAC_DTM_APOLLO17_SHADE)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_A11_60x60kmeq)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_A12_60x60km0_3eq)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_A14_60x60km0_3eq)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_A15_60x60km0_2eq)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_A16_60x60kmeq)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_A17_60x60kmeq)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_M129086118ndgcs)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_ingenii_skylight)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_marius_skylight)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Schrodinger)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_schrodingerextraswathseq)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_SchrodingerLandingSite2)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_schrodingerneequirect)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_schrodingerscequirect)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_schrodingerseequirect)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_small_tranq_skylight_1)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_small_tranq_skylight_2)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_NAC_DTM_APOLLO17_SLOPE)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Apollo11_Mosaic_p")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Apollo12_Mosaic_p")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Apollo14_Mosaic_p")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Apollo15_Mosaic_p")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Apollo16_Mosaic_p")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_NAC_DTM_APOLLO17_CLRSHADE")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_NAC_DTM_APOLLO17_SHADE")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_A11_60x60kmeq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_A12_60x60km0_3eq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_A14_60x60km0_3eq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_A15_60x60km0_2eq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_A16_60x60kmeq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_A17_60x60kmeq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_M129086118ndgcs")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_ingenii_skylight")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_marius_skylight")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_Schrodinger")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_schrodingerextraswathseq")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_SchrodingerLandingSite2")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_schrodingerneequirect")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_schrodingerscequirect")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_schrodingerseequirect")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_small_tranq_skylight_1")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_small_tranq_skylight_2")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_NAC_DTM_APOLLO17_SLOPE")
+end)
+
+asset.export("LRO_NAC_Apollo11_Mosaic_p", treks_LRO_NAC_Apollo11_Mosaic_p)
+asset.export("LRO_NAC_Apollo12_Mosaic_p", treks_LRO_NAC_Apollo12_Mosaic_p)
+asset.export("LRO_NAC_Apollo14_Mosaic_p", treks_LRO_NAC_Apollo14_Mosaic_p)
+asset.export("LRO_NAC_Apollo15_Mosaic_p", treks_LRO_NAC_Apollo15_Mosaic_p)
+asset.export("LRO_NAC_Apollo16_Mosaic_p", treks_LRO_NAC_Apollo16_Mosaic_p)
+asset.export("NAC_DTM_APOLLO17_CLRSHADE", treks_NAC_DTM_APOLLO17_CLRSHADE)
+asset.export("NAC_DTM_APOLLO17_SHADE", treks_NAC_DTM_APOLLO17_SHADE)
+asset.export("A11_60x60kmeq", treks_A11_60x60kmeq)
+asset.export("A12_60x60km0_3eq", treks_A12_60x60km0_3eq)
+asset.export("A14_60x60km0_3eq", treks_A14_60x60km0_3eq)
+asset.export("A15_60x60km0_2eq", treks_A15_60x60km0_2eq)
+asset.export("A16_60x60kmeq", treks_A16_60x60kmeq)
+asset.export("A17_60x60kmeq", treks_A17_60x60kmeq)
+asset.export("M129086118ndgcs", treks_M129086118ndgcs)
+asset.export("ingenii_skylight", treks_ingenii_skylight)
+asset.export("marius_skylight", treks_marius_skylight)
+asset.export("LRO_NAC_Schrodinger", treks_LRO_NAC_Schrodinger)
+asset.export("schrodingerextraswathseq", treks_schrodingerextraswathseq)
+asset.export("LRO_NAC_SchrodingerLandingSite2", treks_LRO_NAC_SchrodingerLandingSite2)
+asset.export("schrodingerneequirect", treks_schrodingerneequirect)
+asset.export("schrodingerscequirect", treks_schrodingerscequirect)
+asset.export("schrodingerseequirect", treks_schrodingerseequirect)
+asset.export("small_tranq_skylight_1", treks_small_tranq_skylight_1)
+asset.export("small_tranq_skylight_2", treks_small_tranq_skylight_2)
+asset.export("NAC_DTM_APOLLO17_SLOPE", treks_NAC_DTM_APOLLO17_SLOPE)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Moon LRO_Narrow_Angle_Camera],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/moon",
+  License = "NASA/Treks",
+  Description = [[LRO_Narrow_Angle_Camera layers from NASA/Treks for Moon]]
+}

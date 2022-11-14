@@ -1,0 +1,29 @@
+<VRTDataset rasterXSize="1048576" rasterYSize="524288">
+  <SRS>GEOGCS["GCS_Moon_2000",DATUM["D_Moon_2000",SPHEROID["Moon_2000_IAU_IAG",1737400.0,0.0]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]]</SRS>
+  <GeoTransform> -1.8000000000000000e+02,  3.4332275390625000e-04,  0.0000000000000000e+00,  9.0000000000000000e+01,  0.0000000000000000e+00, -3.4332275390625000e-04</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+    <NoDataValue>0</NoDataValue>
+    <ColorInterp>Gray</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">10mpx.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="1048576" RasterYSize="524288" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="1048576" ySize="524288" />
+      <DstRect xOff="0" yOff="0" xSize="1048576" ySize="524288" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2">
+    <ColorInterp>Alpha</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">10mpx.wms</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="1048576" RasterYSize="524288" DataType="Byte" BlockXSize="256" BlockYSize="256" />
+      <SrcRect xOff="0" yOff="0" xSize="1048576" ySize="524288" />
+      <DstRect xOff="0" yOff="0" xSize="1048576" ySize="524288" />
+      <ScaleOffset>255</ScaleOffset>
+      <ScaleRatio>0</ScaleRatio>
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>
