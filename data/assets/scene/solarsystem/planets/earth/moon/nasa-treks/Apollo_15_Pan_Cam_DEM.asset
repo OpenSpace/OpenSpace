@@ -1,0 +1,54 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
+
+local treks_Apollo15_PanCam_ClrShade_25N311E_5mp = {
+  Identifier = "Apollo15_PanCam_ClrShade_25N311E_5mp",
+  Name = [[Apollo 15 Pan Cam DEM, Aristarchus Plateau 1, ColorHillshade]],
+  FilePath = asset.localResource("Apollo_15_Pan_Cam_DEM/Aristarchus_Plateau_1.vrt"),
+  Description = [[]]
+}
+
+local treks_Apollo15_PanCam_ClrShade_28N307E_3mp = {
+  Identifier = "Apollo15_PanCam_ClrShade_28N307E_3mp",
+  Name = [[Apollo 15 Pan Cam DEM, Aristarchus Plateau 2, ColorHillshade]],
+  FilePath = asset.localResource("Apollo_15_Pan_Cam_DEM/Aristarchus_Plateau_2.vrt"),
+  Description = [[]]
+}
+
+local treks_Apollo15_PanCam_ClrShade_19S129E_5mp = {
+  Identifier = "Apollo15_PanCam_ClrShade_19S129E_5mp",
+  Name = [[Apollo 15 Pan Cam DEM, Tsiolkovskiy Crater, ColorHillshade]],
+  FilePath = asset.localResource("Apollo_15_Pan_Cam_DEM/Tsiolkovskiy_Crater.vrt"),
+  Description = [[]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_ClrShade_25N311E_5mp)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_ClrShade_28N307E_3mp)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_ClrShade_19S129E_5mp)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_PanCam_ClrShade_25N311E_5mp")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_PanCam_ClrShade_28N307E_3mp")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Apollo15_PanCam_ClrShade_19S129E_5mp")
+end)
+
+asset.export("Apollo15_PanCam_ClrShade_25N311E_5mp", treks_Apollo15_PanCam_ClrShade_25N311E_5mp)
+asset.export("Apollo15_PanCam_ClrShade_28N307E_3mp", treks_Apollo15_PanCam_ClrShade_28N307E_3mp)
+asset.export("Apollo15_PanCam_ClrShade_19S129E_5mp", treks_Apollo15_PanCam_ClrShade_19S129E_5mp)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Moon Apollo_15_Pan_Cam_DEM],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/moon",
+  License = "NASA/Treks",
+  Description = [[Apollo_15_Pan_Cam_DEM layers from NASA/Treks for Moon]]
+}
