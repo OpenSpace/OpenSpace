@@ -544,7 +544,7 @@ void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
         pose.rotation * Camera::ViewDirectionCameraSpace
     );
 
-    // The actual distance does not really matter either. Just have to far 
+    // The actual distance does not really matter either. Just has to be far
     // enough away from the camera
     constexpr double NotTooCloseDistance = 10000.0;
 
