@@ -192,6 +192,9 @@ bool Path::hasReachedEnd() const {
         return true;
     }
 
+    // @TODO (emmbr, 2022-11-07) Handle linear paths separately, as they might 
+    // abort prematurely due to the "isPositionFinished" condition
+
     bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
 
     constexpr double RotationEpsilon = 0.0001;
@@ -214,6 +217,7 @@ void Path::resetPlaybackVariables() {
 CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
     ghoul_assert(_type == Type::Linear, "Path type must be linear");
     const double relativeDistance = distance / pathLength();
+
     const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
     const double remainingDistance = glm::length(prevPosToEnd);
     CameraPose pose;
@@ -227,9 +231,27 @@ CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
         // Just move along line from the current position to the target
         const glm::dvec3 lineDir = glm::normalize(prevPosToEnd);
         pose.position = _prevPose.position - displacement * lineDir;
+
+        double newRemainingDistance = glm::length(pose.position - _end.position());
+        double diff = remainingDistance - newRemainingDistance;
+        // Avoid remaining distances close to zero, or even negative
+        if (relativeDistance > 0.5 && diff < LengthEpsilon) {
+            // The positions are too large, so we are not making progress because of
+            // insufficient precision
+            LWARNING("Quit camera path prematurely due to insufficient precision");
+            _shouldQuit = true;
+            return _prevPose;
+        }
     }
 
     pose.rotation = linearPathRotation(relativeDistance);
+
+    if (glm::any(glm::isnan(pose.rotation)) || glm::any(glm::isnan(pose.position))) {
+        // This should not happen, but guard for it anyways
+        _shouldQuit = true;
+        return _prevPose;
+    }
+
     return pose;
 }
 
@@ -513,6 +535,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         return Waypoint();
     }
 
+    glm::dvec3 stepDir;
     glm::dvec3 targetPos;
     if (info.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
@@ -529,7 +552,6 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
-        glm::dvec3 stepDir;
         if (type == Path::Type::Linear) {
             // If linear path, compute position along line form start to end point
             glm::dvec3 endNodePos = targetNode->worldPosition();
@@ -551,7 +573,18 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     }
 
     // Compute rotation so the camera is looking at the targetted node
-    const glm::dvec3 lookAtPos = targetNode->worldPosition();
+    glm::dvec3 lookAtPos = targetNode->worldPosition();
+
+    // Check if we can distinguish between targetpos and lookAt pos. Otherwise, move it further away
+    const glm::dvec3 diff = targetPos - lookAtPos;
+    double distSquared = glm::dot(diff, diff);
+    if (std::isnan(distSquared) || distSquared < LengthEpsilon) {
+        double startToEndDist = glm::length(
+            startPoint.position() - targetNode->worldPosition()
+        );
+        lookAtPos = targetPos - stepDir * 0.1 * startToEndDist;
+    }
+
     const glm::dquat targetRot = ghoul::lookAtQuaternion(targetPos, lookAtPos, up);
 
     return Waypoint(targetPos, targetRot, info.identifier);
@@ -691,7 +724,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
         LINFO(
             "Switching to a linear path, to avoid problems with precision due to "
-            "immense path length"
+            "immense path length or precision problems"
         );
 
         return createPathFromDictionary(dictionary, Path::Type::Linear);
