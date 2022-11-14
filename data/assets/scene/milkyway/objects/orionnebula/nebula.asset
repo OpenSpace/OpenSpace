@@ -58,7 +58,6 @@ local OrionNebulaModel = {
     Type = "RenderableModel",
     GeometryFile = sync .. "orion_nebula.obj",
     Opacity = 1.0,
-    BoundingSphereRadius = 35999998699110400/2,
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
