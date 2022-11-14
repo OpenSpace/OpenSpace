@@ -44,7 +44,6 @@ set(SOURCE_FILES
   renderablemolecule.cpp
   renderablesimulationbox.cpp
   billboard.cpp
-  properties/representationproperty.cpp
   mol/util.cpp
   mol/cache.cpp
   mol/viamd/coloring.cpp
