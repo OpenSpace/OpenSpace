@@ -497,6 +497,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _enableOpacityBlending = p.enableOpacityBlending.value_or(_enableOpacityBlending);
 
     addProperty(_enableOpacityBlending);
+
+    _originalRenderBin = renderBin();
 }
 
 bool RenderableModel::isReady() const {
@@ -794,7 +796,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
         }
         else {
-            setRenderBin(Renderable::RenderBin::Opaque);
+            setRenderBin(_originalRenderBin);
         }
 
         _geometry->render(*_program);

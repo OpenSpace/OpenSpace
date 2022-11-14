@@ -49,7 +49,7 @@ Fragment getFragment() {
     frag.color.a = opacity * max(max(frag.color.r, frag.color.g), frag.color.b);
   }
   else {
-    frag.color.a = opacity;
+    frag.color.a = opacity * textureColor.a;
   }
 
   frag.depth = denormalizeFloat(texture(depthTexture, vs_st).x);

@@ -126,6 +126,9 @@ private:
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;
     UniformCache(opacity, opacityBlending, colorTexture, depthTexture, positionTexture,
         normalTexture) _uniformOpacityCache;
+
+    // Store the original RenderBin
+    Renderable::RenderBin _originalRenderBin;
 };
 
 }  // namespace openspace

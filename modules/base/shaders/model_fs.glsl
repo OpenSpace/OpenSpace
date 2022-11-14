@@ -42,8 +42,8 @@ uniform bool has_color_specular;
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_specular;
-uniform vec3 color_diffuse;
-uniform vec3 color_specular;
+uniform vec4 color_diffuse;
+uniform vec4 color_specular;
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
 uniform float lightIntensities[8];
@@ -70,9 +70,9 @@ Fragment getFragment() {
     return frag;
   }
 
-  vec3 diffuseAlbedo;
+  vec4 diffuseAlbedo;
   if (has_texture_diffuse) {
-    diffuseAlbedo = texture(texture_diffuse, vs_st).rgb;
+    diffuseAlbedo = texture(texture_diffuse, vs_st);
   }
   else {
     diffuseAlbedo = color_diffuse;
@@ -87,7 +87,7 @@ Fragment getFragment() {
     }
     else {
       if (has_color_specular) {
-        specularAlbedo = color_specular;
+        specularAlbedo = color_specular.rgb ;
       }
       else {
         specularAlbedo = vec3(1.0);
@@ -110,7 +110,7 @@ Fragment getFragment() {
 
     vec3 c = normalize(vs_positionCameraSpace.xyz);
 
-    vec3 color = ambientIntensity * lightColorAmbient * diffuseAlbedo;
+    vec3 color = ambientIntensity * lightColorAmbient * diffuseAlbedo.rgb;
 
     for (int i = 0; i < nLightSources; ++i) {
       vec3 l = lightDirectionsViewSpace[i];
@@ -121,7 +121,7 @@ Fragment getFragment() {
       const float specularPower = 100.0;
 
       vec3 diffuseColor =
-            diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
+            diffuseIntensity * lightColor * diffuseAlbedo.rgb * max(diffuseCosineFactor, 0);
 
       vec3 specularColor =
             specularIntensity * lightColor * specularAlbedo *
@@ -132,10 +132,10 @@ Fragment getFragment() {
     frag.color.rgb = color;
   }
   else {
-    frag.color.rgb = diffuseAlbedo;
+    frag.color.rgb = diffuseAlbedo.rgb;
   }
 
-  frag.color.a = 1.0;
+  frag.color.a = diffuseAlbedo.a;
   frag.depth = vs_screenSpaceDepth;
   frag.gPosition = vs_positionCameraSpace;
   frag.gNormal = vec4(vs_normalViewSpace, 0.0);
