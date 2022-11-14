@@ -1,0 +1,28 @@
+local globeIdentifier = asset.require("../../ceres").Ceres.Identifier
+
+local layer = {
+  Identifier = "LAMO_",
+  Name = "LAMO [Sweden]",
+  Enabled = asset.enabled,
+  FilePath = asset.localResource('LAMO.wms'),
+}
+
+asset.onInitialize(function ()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+  Name = "LAMO [Sweden]",
+  Version = "1.0",
+  Description = [[]],
+  Author = "",
+  URL = "",
+  License = ""
+}

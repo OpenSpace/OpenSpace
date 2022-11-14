@@ -1,0 +1,84 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
+
+local treks_TES_Dust = {
+  Identifier = "TES_Dust",
+  Name = [[MGS TES, Global Dust]],
+  FilePath = asset.localResource("MGS_TES/Global_Dust.vrt"),
+  Description = [[The Thermal Emission Spectrometer (TES) is one of the instruments aboard the Mars Global Surveyor spacecraft. TES is designed to measure the thermal infrared energy (heat) emitted from Mars. This technique, called thermal emission spectroscopy, can tell us much about the geology and atmosphere of Mars. Dust is widespread and abundant across the surface of Mars. However, in the wind-blown environment of Mars, dust accumulates tickly in some areas and is blown clear of other areas. Thick accumulations of dust mask the underlying surface, making measurements of surface composition from orbit difficult or even impossible. Preferred landing site candidates will ideally be relatively dust free. An index of the relative abundance of spectrally obscuring dust across the Martian surface was developed using data from TES. While closely correlated with albedo, the TES dust cover index (DCI) is a more direct metric for the presence or absence of dust on a particular surface and is independent of albedo. This becomes important for the types of light-toned layered deposits and surfaces that likely will be among the candidates for future landing sites. Map resolution/scale: 16ppd/3.5km. Ruff and Christensen, 2002, JGR, VOL. 107, NO. E12, 5127]]
+}
+
+local treks_tes_ruffdust = {
+  Identifier = "tes_ruffdust",
+  Name = [[MGS TES, Global Dust Index]],
+  FilePath = asset.localResource("MGS_TES/Global_Dust_Index.vrt"),
+  Description = [[The Thermal Emission Spectrometer (TES) is one of the instruments aboard the Mars Global Surveyor spacecraft. TES is designed to measure the thermal infrared energy (heat) emitted from Mars. This technique, called thermal emission spectroscopy, can tell us much about the geology and atmosphere of Mars. Dust is widespread and abundant across the surface of Mars. However, in the wind-blown environment of Mars, dust accumulates tickly in some areas and is blown clear of other areas. Thick accumulations of dust mask the underlying surface, making measurements of surface composition from orbit difficult or even impossible. Preferred landing site candidates will ideally be relatively dust free. An index of the relative abundance of spectrally obscuring dust across the Martian surface was developed using data from TES. While closely correlated with albedo, the TES dust cover index (DCI) is a more direct metric for the presence or absence of dust on a particular surface and is independent of albedo. This becomes important for the types of light-toned layered deposits and surfaces that likely will be among the candidates for future landing sites. Map resolution/scale: 16ppd/3.5km. Ruff and Christensen, 2002, JGR, VOL. 107, NO. E12, 5127]]
+}
+
+local treks_TES_Clinopyroxene = {
+  Identifier = "TES_Clinopyroxene",
+  Name = [[MGS TES, Global High-Ca Pyroxene Abundance]],
+  FilePath = asset.localResource("MGS_TES/Global_High-Ca_Pyroxene_Abundance.vrt"),
+  Description = [[The Thermal Emission Spectrometer (TES) is one of the instruments aboard the Mars Global Surveyor spacecraft. TES is designed to measure the thermal infrared energy (heat) emitted from Mars. This technique, called thermal emission spectroscopy, can tell us much about the geology and atmosphere of Mars. A deconvolution method was used to remove atmospheric components and determine surface mineralogy from TES data at 1 pixel per degree (ppd). Minerals were grouped into categories on the basis of compositional and spectral similarity, and global concentration maps were produced. High-Ca pyroxenes are identified in concentrations of 0.10 - 0.20 in equatorial low albedo regions. The highest concentrations are present in Syrtis Major. High-latitude, low-albedo regions are characterized by concentrations of 0 - 0.10. Light regions have 0 - 0.05 high-Ca pyroxene concentrations. Only equatorial low-albedo regions have pyroxene concentrations above the detection limit. Map resolution/scale: 4 ppd/16km. Joshua L. Bandfield, 2002, JGR, VOL. 107, NO. E6, 5042]]
+}
+
+local treks_TES_Plagioclase = {
+  Identifier = "TES_Plagioclase",
+  Name = [[MGS TES, Global Plagioclase Abundance]],
+  FilePath = asset.localResource("MGS_TES/Global_Plagioclase_Abundance.vrt"),
+  Description = [[The Thermal Emission Spectrometer (TES) is one of the instruments aboard the Mars Global Surveyor spacecraft. TES is designed to measure the thermal infrared energy (heat) emitted from Mars. This technique, called thermal emission spectroscopy, can tell us much about the geology and atmosphere of Mars. A deconvolution method was used to remove atmospheric components and determine surface mineralogy from TES data at 1 pixel per degree (ppd). Minerals were grouped into categories on the basis of compositional and spectral similarity, and global concentration maps were produced. Plagioclase is present in high concentrations in low-albedo regions. High-latitude, low albedo regions have concentrations of 0.05 - 0.15. Equatorial low-albedo regions display concentrations of 0.10 - 0.20 with the highest concentrations in the Syrtis Major region. High-albedo surfaces have plagioclase concentrations of 0 - 0.05, well below the detectable limit. Where there are significant concentrations, average plagioclase compositions are intermediate to calcic. Map resolution/scale: 4 ppd/16km. Joshua L. Bandfield, 2002, JGR, VOL. 107, NO. E6, 5042]]
+}
+
+local treks_TES_Glass_Clay = {
+  Identifier = "TES_Glass_Clay",
+  Name = [[MGS TES, Global Sheet Silicates/High-Si Glass]],
+  FilePath = asset.localResource("MGS_TES/Global_Sheet_SilicatesHigh-Si_Glass.vrt"),
+  Description = [[The Thermal Emission Spectrometer (TES) is one of the instruments aboard the Mars Global Surveyor spacecraft. TES is designed to measure the thermal infrared energy (heat) emitted from Mars. This technique, called thermal emission spectroscopy, can tell us much about the geology and atmosphere of Mars. A deconvolution method was used to remove atmospheric components and determine surface mineralogy from TES data at 1 pixel per degree (ppd). Minerals were grouped into categories on the basis of compositional and spectral similarity, and global concentration maps were produced. The sheet silicate and high-Si glass map is slightly noisier than the other mineralogy maps. This is likely due to the spectral similarity between the sheet silicate and high-Si glass end-member group and the atmospheric dust spectral shapes. The highest concentrations are located in northern hemisphere low-albedo regions with concentrations of 0.05 - 0.20. High concentrations are also present in several isolated regions south of Solis Planum, southeast of Hellas Basin, and along the edge of the southern polar cap. High albedo regions contain 0 - 0.10 sheet silicate and high-Si glass concentrations. Equatorial and southern hemisphere low-albedo regions typically have concentrations of 0.05 - 0.15 with the exception of some isolated areas. Map resolution/scale: 4 ppd/16km. Joshua L. Bandfield, 2002, JGR, VOL. 107, NO. E6, 5042]]
+}
+
+local treks_TES_Thermal_Inertia = {
+  Identifier = "TES_Thermal_Inertia",
+  Name = [[MGS TES, Global Thermal Inertia]],
+  FilePath = asset.localResource("MGS_TES/Global_Thermal_Inertia.vrt"),
+  Description = [[The Thermal Emission Spectrometer (TES) is one of the instruments aboard the Mars Global Surveyor spacecraft. TES is designed to measure the thermal infrared energy (heat) emitted from Mars. This technique, called thermal emission spectroscopy, can tell us much about the geology and atmosphere of Mars. One of the objectives of the MGS TES instrument is the derivation of thermal inertia of the surface at 3-km spatial resolution. Thermal inertia represents the ability of a material to conduct and store heat, and in the context of planetary science, it is a measure of the subsurface's ability to store heat during the day and reradiate it during the night. While compositional differences (ie, mineralogy) will have some effect, for a terrestrial planetary surface such as that of Mars, thermal inertia will depend predominantly on the physical properties of the near surface materials such as particle size, degree of induration (ie, cementation of grains), rock abundance, and exposure of bedrock (rocks will have a much higher thermal inertia than sand or dust - that is, it takes longer to heat rocks up during the day and to cool them off at night). For example, on a visit to the desert you may notice that sandy areas are much hotter at midday than adjacent rocks, and the sand cools off quickly after sunset whereas the rocks remain warm well into the evening. Map resolution/scale: 20 ppd/3km. Putzig et al, 2005, Icarus 173, 325-341]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_TES_Dust)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_tes_ruffdust)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_TES_Clinopyroxene)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_TES_Plagioclase)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_TES_Glass_Clay)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_TES_Thermal_Inertia)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_TES_Dust")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_tes_ruffdust")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_TES_Clinopyroxene")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_TES_Plagioclase")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_TES_Glass_Clay")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_TES_Thermal_Inertia")
+end)
+
+asset.export("TES_Dust", treks_TES_Dust)
+asset.export("tes_ruffdust", treks_tes_ruffdust)
+asset.export("TES_Clinopyroxene", treks_TES_Clinopyroxene)
+asset.export("TES_Plagioclase", treks_TES_Plagioclase)
+asset.export("TES_Glass_Clay", treks_TES_Glass_Clay)
+asset.export("TES_Thermal_Inertia", treks_TES_Thermal_Inertia)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Mars MGS_TES],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/mars",
+  License = "NASA/Treks",
+  Description = [[MGS_TES layers from NASA/Treks for Mars]]
+}

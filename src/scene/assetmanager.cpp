@@ -190,7 +190,14 @@ void AssetManager::update() {
         ZoneScopedN("Adding queued assets")
 
         std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
-        Asset* a = retrieveAsset(path, "");
+        Asset* a = nullptr;
+        try {
+            a = retrieveAsset(path, "");
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+            continue;
+        }
 
         const auto it = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
         if (it != _rootAssets.cend()) {

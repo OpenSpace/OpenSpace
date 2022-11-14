@@ -24,11 +24,11 @@ local PlutoBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoBarycenter)
 end)
-  
+
 asset.export(PlutoBarycenter)
 
 

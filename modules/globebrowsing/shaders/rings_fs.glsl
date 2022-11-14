@@ -80,7 +80,7 @@ Fragment getFragment() {
     normalizedShadowCoords.z = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
     normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
     normalizedShadowCoords.w = 1.0;
-    
+
     float sum = 0;
     #for i in 0..#{nShadowSamples}
       sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
