@@ -30,6 +30,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
+#include <openspace/util/keys.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
@@ -192,10 +193,29 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
 
     updateDataFromFile();
 
-    // Picking callback
-    global::callback::mousePosition->emplace_back(
-        [&](double x, double y, bool isGuiWindow) {
+    // Picking callbacks
+    global::callback::keyboard->emplace_back(
+        [&](Key key, KeyModifier modifier, KeyAction action, bool) -> bool {
             if (!_enabled) {
+                return false;
+            }
+
+            const bool hasCtrl = hasKeyModifier(modifier, KeyModifier::Control);
+            if (hasCtrl && action == KeyAction::Press) {
+                _isInSelectionMode = true;
+            }
+            else if (action == KeyAction::Release) {
+                _isInSelectionMode = false;
+                _currentlyHoveredIndex = -1;
+            }
+
+            // Do not capture
+            return false;
+        }
+    );
+    global::callback::mousePosition->emplace_back(
+        [&](double x, double y, bool) {
+            if (!_enabled || !_isInSelectionMode) {
                 return; // do nothing
             }
 

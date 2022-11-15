@@ -97,6 +97,8 @@ private:
     int _maxIndex = -1;
     properties::IntProperty _currentlyHoveredIndex;
 
+    bool _isInSelectionMode = false;
+
     // Labels
     bool _hasLabels = false;
     properties::BoolProperty _drawLabels;
