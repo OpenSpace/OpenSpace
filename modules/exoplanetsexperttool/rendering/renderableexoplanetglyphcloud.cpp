@@ -213,9 +213,10 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
                 _glyphIdTexture->downloadTexture();
 
                 // TODO: make sure pos is within texture
-                glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat(texturePos);
-
-                _currentlyHoveredIndex = std::round(pixelValue.r * static_cast<float>(_maxIndex)) - 1;
+                if (texturePos.x < _glyphIdTexture->width() && texturePos.y < _glyphIdTexture->height()) {
+                    glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat(texturePos);
+                    _currentlyHoveredIndex = std::round(pixelValue.r * static_cast<float>(_maxIndex)) - 1;
+                }
             }
         }
     );
@@ -248,22 +249,7 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
     // Generate texture and frame buffer for rendering glyph id
     glGenFramebuffers(1, &_glyphIdFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFramebuffer);
-    _glyphIdTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(1080, 720, 1), // Just a valid default size. Will update when needed
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA32F,
-        GL_FLOAT
-     );
-    _glyphIdTexture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-    _glyphIdTexture->uploadTexture();
-    _glyphIdTexture->bind();
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        *_glyphIdTexture,
-        0
-    );
+    createGlyphIdTexture(glm::uvec3(1080, 720, 1));
 
     // Give the framebuffer a reasonable name (for RonderDoc debugging)
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -357,22 +343,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
 
     // Potentially upate texture size
     if (viewport[2] != _glyphIdTexture->width() || viewport[3] != _glyphIdTexture->height()) {
-        _glyphIdTexture = std::make_unique<ghoul::opengl::Texture>(
-            glm::uvec3(viewport[2], viewport[3], 1),
-            GL_TEXTURE_2D,
-            ghoul::opengl::Texture::Format::RGBA,
-            GL_RGBA32F,
-            GL_FLOAT
-        );
-        _glyphIdTexture->uploadTexture();
-        _glyphIdTexture->bind();
-
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            *_glyphIdTexture,
-            0
-        );
+        createGlyphIdTexture(glm::uvec3(viewport[2], viewport[3], 1));
     }
 
     // Clear the previous values from the texture
@@ -529,6 +500,28 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
 
     _isDirty = false;
     _selectionChanged = false;
+}
+
+void RenderableExoplanetGlyphCloud::createGlyphIdTexture(const glm::uvec3 dimensions) {
+    // TODO (emmbr, 2022-11-15): at some point try using a integer value for the texture instead.
+    // But for now, just make it work!
+    _glyphIdTexture = std::make_unique<ghoul::opengl::Texture>(
+        dimensions,
+        GL_TEXTURE_2D,
+        ghoul::opengl::Texture::Format::Red,
+        GL_R32F,
+        GL_FLOAT
+     );
+    _glyphIdTexture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+    _glyphIdTexture->uploadTexture();
+    _glyphIdTexture->bind();
+
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        *_glyphIdTexture,
+        0
+    );
 }
 
 void RenderableExoplanetGlyphCloud::mapVertexAttributes() {

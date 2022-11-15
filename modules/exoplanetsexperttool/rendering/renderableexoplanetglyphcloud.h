@@ -64,6 +64,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    void createGlyphIdTexture(const glm::uvec3 dimensions);
     void mapVertexAttributes();
 
     bool _isDirty = true;
