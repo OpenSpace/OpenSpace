@@ -344,46 +344,49 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
     // 1st rendering pass: render the glyohs normally, with correct color
-    glEnablei(GL_BLEND, 0);
-    glDepthMask(true);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    {
+        glEnablei(GL_BLEND, 0);
+        glDepthMask(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glBindVertexArray(_primaryPointsVAO);
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
-
+        glBindVertexArray(_primaryPointsVAO);
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
+    }
 
     // 2nd rendering pass: Render ids to a separate texture every frame as well
     // To use for picking
-    _program->setUniform(_uniformCache.isRenderIndexStep, true);
-    GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+    {
+        _program->setUniform(_uniformCache.isRenderIndexStep, true);
+        GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFramebuffer);
-    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, drawBuffers);
+        glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFramebuffer);
+        GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, drawBuffers);
 
-    // Potentially upate texture size
-    if (viewport[2] != _glyphIdTexture->width() || viewport[3] != _glyphIdTexture->height()) {
-        createGlyphIdTexture(glm::uvec3(viewport[2], viewport[3], 1));
+        // Potentially upate texture size
+        if (viewport[2] != _glyphIdTexture->width() || viewport[3] != _glyphIdTexture->height()) {
+            createGlyphIdTexture(glm::uvec3(viewport[2], viewport[3], 1));
+        }
+
+        // Clear the previous values from the texture
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // No blending please
+        glDisablei(GL_BLEND, 0);
+
+        // Draw again! And specify viewport size
+        glViewport(viewport[0], viewport[1], _glyphIdTexture->width(), _glyphIdTexture->height());
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
+
+        // Reset index rendering, viewport size and frame buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        _program->setUniform(_uniformCache.isRenderIndexStep, false);
+        glEnablei(GL_BLEND, 0);
+
+        // Save viewport size
+        _lastViewPortSize = glm::ivec2(viewport[2], viewport[3]);
     }
-
-    // Clear the previous values from the texture
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // No blending please
-    glDisablei(GL_BLEND, 0);
-
-    // Draw again! And specify viewport size
-    glViewport(viewport[0], viewport[1], _glyphIdTexture->width(), _glyphIdTexture->height());
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
-
-    // Reset index rendering, viewport size and frame buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-    _program->setUniform(_uniformCache.isRenderIndexStep, false);
-    glEnablei(GL_BLEND, 0);
-
-    // Save viewport size
-    _lastViewPortSize = glm::ivec2(viewport[2], viewport[3]);
 
     // Selected points
     const size_t nSelected = _selectedIndices.value().size();
