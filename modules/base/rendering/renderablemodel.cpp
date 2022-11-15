@@ -84,8 +84,8 @@ namespace {
         "specularIntensity"
     };
 
-    constexpr std::array<const char*, 6> UniformOpacityNames = {
-        "opacity", "opacityBlending", "colorTexture", "depthTexture", "positionTexture",
+    constexpr std::array<const char*, 5> UniformOpacityNames = {
+        "opacity", "colorTexture", "depthTexture", "positionTexture",
         "normalTexture"
     };
 
@@ -150,12 +150,6 @@ namespace {
         "Blending Options",
         "Changes the blending function used to calculate the colors of the model with "
         "respect to the opacity"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
-        "EnableOpacityBlending",
-        "Enable Opacity Blending",
-        "Enable Opacity Blending"
     };
 
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
@@ -261,9 +255,6 @@ namespace {
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
         std::optional<std::string> blendingOption;
 
-        // [[codegen::verbatim(EnableOpacityBlendingInfo.description)]]
-        std::optional<bool> enableOpacityBlending;
-
         // The path to the vertex shader program that is used instead of the default
         // shader.
         std::optional<std::filesystem::path> vertexShader;
@@ -297,7 +288,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _disableDepthTest(DisableDepthTestInfo, false)
-    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
     , _blendingFuncOption(
         BlendingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -493,10 +483,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         const std::string blendingOpt = *p.blendingOption;
         _blendingFuncOption.set(BlendingMapping[blendingOpt]);
     }
-
-    _enableOpacityBlending = p.enableOpacityBlending.value_or(_enableOpacityBlending);
-
-    addProperty(_enableOpacityBlending);
 
     _originalRenderBin = renderBin();
 }
@@ -792,7 +778,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
         const float o = opacity();
-        if ((o >= 0.f && o < 1.f) || _disableDepthTest || _enableOpacityBlending) {
+        if ((o >= 0.f && o < 1.f) || _disableDepthTest) {
             setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
         }
         else {
@@ -817,10 +803,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _quadProgram->activate();
 
         _quadProgram->setUniform(_uniformOpacityCache.opacity, opacity());
-        _quadProgram->setUniform(
-            _uniformOpacityCache.opacityBlending,
-            _enableOpacityBlending
-        );
 
         // Bind textures
         ghoul::opengl::TextureUnit colorTextureUnit;

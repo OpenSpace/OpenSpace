@@ -28,7 +28,6 @@
 in vec2 vs_st;
 
 uniform float opacity = 1.0;
-uniform bool opacityBlending = false;
 
 uniform sampler2D colorTexture;
 uniform sampler2D depthTexture;
@@ -44,13 +43,7 @@ Fragment getFragment() {
   }
 
   frag.color.rgb = textureColor.rgb;
-
-  if (opacityBlending) {
-    frag.color.a = opacity * max(max(frag.color.r, frag.color.g), frag.color.b);
-  }
-  else {
-    frag.color.a = opacity * textureColor.a;
-  }
+  frag.color.a = opacity * textureColor.a;
 
   frag.depth = denormalizeFloat(texture(depthTexture, vs_st).x);
   frag.gPosition = texture(positionTexture, vs_st);

@@ -98,7 +98,6 @@ private:
     properties::Vec3Property _rotationVec;
 
     properties::BoolProperty _disableDepthTest;
-    properties::BoolProperty _enableOpacityBlending;
     properties::OptionProperty _blendingFuncOption;
 
     std::string _vertexShaderPath;
@@ -124,7 +123,7 @@ private:
 
     // Opacity program
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;
-    UniformCache(opacity, opacityBlending, colorTexture, depthTexture, positionTexture,
+    UniformCache(opacity, colorTexture, depthTexture, positionTexture,
         normalTexture) _uniformOpacityCache;
 
     // Store the original RenderBin
