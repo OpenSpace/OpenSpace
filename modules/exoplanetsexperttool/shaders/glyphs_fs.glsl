@@ -115,14 +115,20 @@ Fragment getFragment() {
         frag.disableLDR2HDR = true;
     }
 
-    float borderWidth = 0.13;
+    bool isCurrentHoveredGlyph = gs_glyphIndex == currentIndex && !isRenderIndexStep;
+    float borderWidth = isCurrentHoveredGlyph ? 0.20: 0.13;
     if (coord > 1.0 - borderWidth || coord < 1.0 - 1.0 + borderWidth) {
-        if (gs_glyphIndex == currentIndex && !isRenderIndexStep) {
-            color.rgb = vec3(1.0, 1.0, 1.0); // white border
+        if (isCurrentHoveredGlyph) {
+            color.rgb *= 2.5; //vec3(1.0, 1.0, 1.0); // white border
         }
         else {
             color.rgb = vec3(0.0, 0.0, 0.0); //black border
         }
+    }
+
+    if (isCurrentHoveredGlyph) {
+        // Brighten glyph
+        color.rgb *= 1.5;
     }
 
     frag.color = color;
