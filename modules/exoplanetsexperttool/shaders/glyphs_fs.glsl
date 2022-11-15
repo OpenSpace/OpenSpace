@@ -39,6 +39,7 @@ uniform float opacity;
 uniform bool onTop;
 uniform bool useFixedRingWidth;
 
+uniform int maxIndex;
 uniform bool isRenderIndexStep = false;
 
 const float M_PI = 3.141592657;
@@ -78,7 +79,6 @@ Fragment getFragment() {
 
         // Ish 90% width of previous ring
         width = pow(0.87, gs_component) / gs_sizeFactor;
-
     }
 
     float minRadius = 1.0 - width;
@@ -101,21 +101,24 @@ Fragment getFragment() {
     int colorIndex = int(floor(angle / angleSlice));
 
     vec4 color = gs_colors[colorIndex];
+    color.a *= opacity;
+
+
+    Fragment frag;
+
+    // Render glyph index if we are at that rendering step
+    if (isRenderIndexStep) {
+        color.rgb = vec3(float(gs_glyphIndex) * 1.0 / float(maxIndex));
+        color.a = 1.0;
+        // Set to render the value as is, without any color adjustments
+        frag.disableLDR2HDR = true;
+    }
 
     float borderWidth = 0.13;
     if (coord > 1.0 - borderWidth || coord < 1.0 - 1.0 + borderWidth) {
         color *= vec4(0.0, 0.0, 0.0, 1.0); // black border
     }
 
-    color.a *= opacity;
-
-    // TODO render glyph index if we are at that rendering step
-    if (isRenderIndexStep) {
-        color.rgb = vec3(float(gs_glyphIndex) / 6000.0); // TODO: rmeve division
-        color.a = 1.0;
-    }
-
-    Fragment frag;
     frag.color = color;
     frag.depth = gs_depthClipSpace;
 //    frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0); // From DU billboards shader code

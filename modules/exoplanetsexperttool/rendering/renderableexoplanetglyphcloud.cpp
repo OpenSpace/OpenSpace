@@ -43,10 +43,10 @@
 namespace {
     constexpr const char* _loggerCat = "ExoplanetGlyphCloud";
 
-    constexpr const std::array<const char*, 10> UniformNames = {
+    constexpr const std::array<const char*, 11> UniformNames = {
         "modelMatrix", "cameraViewProjectionMatrix", "onTop", "useFixedRingWidth",
         "opacity", "size", "screenSize", "minBillboardSize", "maxBillboardSize",
-        "isRenderIndexStep"
+        "maxIndex", "isRenderIndexStep"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
@@ -197,14 +197,20 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
             float normalizedX = x / static_cast<float>(_lastViewPortSize.x);
             float normalizedY = (static_cast<float>(_lastViewPortSize.y) - y) / static_cast<float>(_lastViewPortSize.y);
 
-            glm::uvec2 texturePos = glm::uvec2(
-                normalizedX * static_cast<float>(_glyphIdTexture->width()),
-                normalizedY * static_cast<float>(_glyphIdTexture->height())
-            );
+            if (_glyphIdTexture) {
+                glm::uvec2 texturePos = glm::uvec2(
+                    normalizedX * static_cast<float>(_glyphIdTexture->width()),
+                    normalizedY * static_cast<float>(_glyphIdTexture->height())
+                );
 
-            _glyphIdTexture->downloadTexture();
-            glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat(texturePos);
-            LINFO(fmt::format("{}", pixelValue.r));
+                _glyphIdTexture->downloadTexture();
+
+                // TODO: make sure pos is within texture
+                glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat(texturePos);
+
+                float index = pixelValue.r * static_cast<float>(_maxIndex) - 1;
+                LINFO(fmt::format("Index: {}", index));
+            }
         }
     );
 }
@@ -235,8 +241,12 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
     glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFramebuffer);
     _glyphIdTexture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(1080, 720, 1), // Just a valid default size. Will update when needed
-        GL_TEXTURE_2D
+        GL_TEXTURE_2D,
+        ghoul::opengl::Texture::Format::RGBA,
+        GL_RGBA32F,
+        GL_FLOAT
      );
+    _glyphIdTexture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
     _glyphIdTexture->uploadTexture();
     _glyphIdTexture->bind();
     glFramebufferTexture(
@@ -304,6 +314,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     _program->setUniform(_uniformCache.size, _size);
     _program->setUniform(_uniformCache.onTop, false);
     _program->setUniform(_uniformCache.isRenderIndexStep, false);
+    _program->setUniform(_uniformCache.maxIndex, _maxIndex);
 
     const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels
     const float maxBillboardSize = _billboardMinMaxSize.value().y; // in pixels
@@ -338,7 +349,10 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     if (viewport[2] != _glyphIdTexture->width() || viewport[3] != _glyphIdTexture->height()) {
         _glyphIdTexture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(viewport[2], viewport[3], 1),
-            GL_TEXTURE_2D
+            GL_TEXTURE_2D,
+            ghoul::opengl::Texture::Format::RGBA,
+            GL_RGBA32F,
+            GL_FLOAT
         );
         _glyphIdTexture->uploadTexture();
         _glyphIdTexture->bind();
@@ -354,6 +368,9 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     // Clear the previous values from the texture
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // No blending please
+    glDisablei(GL_BLEND, 0);
+
     // Draw again! And specify viewport size
     glViewport(viewport[0], viewport[1], _glyphIdTexture->width(), _glyphIdTexture->height());
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
@@ -362,6 +379,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     _program->setUniform(_uniformCache.isRenderIndexStep, false);
+    glEnablei(GL_BLEND, 0);
 
     // Save viewport size
     _lastViewPortSize = glm::ivec2(viewport[2], viewport[3]);
@@ -579,6 +597,8 @@ void RenderableExoplanetGlyphCloud::updateDataFromFile() {
     _fullGlyphData.reserve(nPoints);
     _glyphIndices.reserve(nPoints);
 
+    int maxIndex = -1;
+
     // OBS: this reading must match the writing in the dataviewer
     for (unsigned int i = 0; i < nPoints; i++) {
         GlyphData d;
@@ -613,11 +633,18 @@ void RenderableExoplanetGlyphCloud::updateDataFromFile() {
         file.read(reinterpret_cast<char*>(&component), sizeof(int));
         d.component = static_cast<float>(component);
 
-        d.index = static_cast<int>(index);
+        d.index = static_cast<int>(index) + 1;
+
+        if (d.index > maxIndex) {
+            maxIndex = d.index;
+        }
 
         _fullGlyphData.push_back(std::move(d));
         _glyphIndices.push_back(static_cast<int>(index));
     }
+
+    // TODO: use actual max
+    _maxIndex = 10000;
 
     _isDirty = true;
 }
