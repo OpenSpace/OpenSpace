@@ -29,13 +29,12 @@ set(HEADER_FILES
   moleculemodule.h
   renderablemolecule.h
   renderablesimulationbox.h
-  properties/representationproperty.h
   mol/def.h
   mol/util.h
   mol/cache.h
   mol/viamd/coloring.h
   mol/viamd/loader.h
-  mol/viamd/postprocessing_utils.h
+  mol/viamd/postprocessing.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -48,7 +47,7 @@ set(SOURCE_FILES
   mol/cache.cpp
   mol/viamd/coloring.cpp
   mol/viamd/loader.cpp
-  mol/viamd/postprocessing_utils.cpp
+  mol/viamd/postprocessing.cpp
   mol/viamd/postprocessing_shaders.inl
 )
 
@@ -65,11 +64,3 @@ option(MD_USE_RELATIVE_RESOURCE_PATH OFF)
 
 include_external_library(${molecule_module} PRIVATE mdlib ${CMAKE_CURRENT_SOURCE_DIR}/ext/mold)
 disable_external_warnings(mdlib)
-
-# disable annoying warnings from mold included header files
-# TODO: Cmake people help me!! How do you do that properly??
-# I hate Cmake
-if (MSVC)
-else ()
-  target_compile_options(${molecule_module} PRIVATE -w)
-endif ()

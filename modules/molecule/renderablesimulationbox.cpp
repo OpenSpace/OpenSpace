@@ -37,7 +37,7 @@
 #include "openspace/engine/windowdelegate.h"
 #include "mol/viamd/coloring.h"
 #include "mol/viamd/loader.h"
-#include "mol/viamd/postprocessing_utils.h"
+#include "mol/viamd/postprocessing.h"
 #include "mol/cache.h"
 
 #include <glm/gtc/random.hpp>
@@ -81,28 +81,7 @@ vec2 encode_normal (vec3 n) {
    return n.xy / p + 0.5;
 }
 
-// this is a basic blinn-phong taken from learnopengl.com.
-
 void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color, uint atom_index) {
-    vec3 viewPos = vec3(0.0, 0.0, 0.0); // in view space the camera is at origin.
-    vec3 lightPos = viewPos; // place the light on the camera.
-
-    // ambient
-    vec3 ambient = 0.05 * color.rgb;
-
-    // diffuse
-    vec3 lightDir = normalize(lightPos - view_coord);
-    vec3 normal = normalize(view_normal);
-    float diff = max(dot(lightDir, normal), 0.0);
-    vec3 diffuse = diff * color.rgb;
-
-    // specular
-    vec3 viewDir = normalize(viewPos - view_coord);
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
-    vec3 specular = vec3(0.3) * spec; // assuming bright white light color
-
-    //out_color = vec4(ambient + diffuse + specular, color.a);
     out_normal = vec4(encode_normal(view_normal), 0, 0);
     out_color = color;
 }
@@ -220,21 +199,12 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
-        // [[codegen::verbatim(MoleculeFilesInfo.description)]]
-        std::vector<std::string> moleculeFiles;
-
-        // [[codegen::verbatim(TrajectoryFilesInfo.description)]]
-        std::vector<std::string> trajectoryFiles;
-
         enum class [[codegen::map(mol::rep::Type)]] RepresentationType {
             SpaceFill,
             Licorice,
             Ribbons,
             Cartoon,
         };
-
-        // [[codegen::verbatim(RepTypeInfo.description)]]
-        std::optional<RepresentationType> repType;
 
         enum class [[codegen::map(mol::rep::Color)]] Coloring {
             // Uniform,
@@ -247,6 +217,15 @@ namespace {
             SecondaryStructure,
             // Property
         };
+
+        // [[codegen::verbatim(MoleculeFilesInfo.description)]]
+        std::vector<std::string> moleculeFiles;
+
+        // [[codegen::verbatim(TrajectoryFilesInfo.description)]]
+        std::vector<std::string> trajectoryFiles;
+
+        // [[codegen::verbatim(RepTypeInfo.description)]]
+        std::optional<RepresentationType> repType;
 
         // [[codegen::verbatim(ColoringInfo.description)]]
         std::optional<Coloring> coloring;
@@ -411,7 +390,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 
     auto onUpdateCol = [this]() {
         for (molecule_data_t& mol: _molecules) {
-            mol::util::update_rep_colors(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
+            mol::util::update_rep_color(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
         }
     };
     
@@ -499,7 +478,7 @@ void RenderableSimulationBox::initializeGL() {
     size_t i = 0;
     for (molecule_data_t& mol : _molecules) {
         initMolecule(mol, _moleculeFiles.value().at(i), _trajectoryFiles.value().at(i));
-        mol::util::update_rep_colors(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
+        mol::util::update_rep_color(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
         i++;
     }
     
@@ -800,7 +779,7 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_vie
     md_gl_representation_init(&mol.drawRep, &mol.drawMol);
     
     mol::util::update_rep_type(mol.drawRep, static_cast<mol::rep::Type>(_repType.value()), _repScale);
-    mol::util::update_rep_colors(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
+    mol::util::update_rep_color(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
 }
 
 void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {

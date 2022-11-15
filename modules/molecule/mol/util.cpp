@@ -16,10 +16,6 @@ void update_rep_type(md_gl_representation_t& rep, mol::rep::Type type, float sca
     md_gl_representation_type_t rep_type = 0;
 
     switch (type) {
-    case mol::rep::Type::SpaceFill:
-        rep_args.space_fill.radius_scale = scale;
-        rep_type = MD_GL_REP_SPACE_FILL;
-        break;
     case mol::rep::Type::Licorice:
         rep_args.licorice.radius = scale * 0.5f;
         rep_type = MD_GL_REP_LICORICE;
@@ -34,15 +30,17 @@ void update_rep_type(md_gl_representation_t& rep, mol::rep::Type type, float sca
         rep_args.cartoon.thickness_scale = scale * 5;
         rep_type = MD_GL_REP_CARTOON;
         break;
+    case mol::rep::Type::SpaceFill:
     default:
-        rep_args.space_fill.radius_scale = 1.0f;
+        rep_args.space_fill.radius_scale = scale;
         rep_type = MD_GL_REP_SPACE_FILL;
+        break;
     }
 
     md_gl_representation_set_type_and_args(&rep, rep_type, rep_args);
 }
 
-void update_rep_colors(md_gl_representation_t& rep, const md_molecule_t& mol, mol::rep::Color color, std::string_view filter) {
+void update_rep_color(md_gl_representation_t& rep, const md_molecule_t& mol, mol::rep::Color color, std::string_view filter) {
     uint32_t count = static_cast<uint32_t>(mol.atom.count);
 
     uint32_t* colors = (uint32_t*)md_alloc(default_allocator, sizeof(uint32_t) * count);
@@ -82,7 +80,7 @@ void update_rep_colors(md_gl_representation_t& rep, const md_molecule_t& mol, mo
         break;
     }
 
-    if (!filter.empty() && filter != "") {
+    if (!filter.empty() && filter != "" && filter != "all") {
         str_t str = {filter.data(), (int64_t)filter.length()};
         char err_buf[1024];
 

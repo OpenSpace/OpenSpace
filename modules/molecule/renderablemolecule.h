@@ -24,21 +24,16 @@
 
 #pragma once
 
-#include "openspace/properties/listproperty.h"
-#include "openspace/properties/optionproperty.h"
-#include "openspace/properties/selectionproperty.h"
 #include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/properties/list/intlistproperty.h>
-#include <openspace/properties/list/doublelistproperty.h>
-#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
-
-#include <openspace/properties/listproperty.h>
+#include "mol/def.h"
 
 namespace openspace {
 
@@ -60,37 +55,29 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-
-    struct molecule_data_t {
-        glm::vec3 extent;
-        glm::vec3 center;
-        float radius;
-
-        md_molecule_t molecule;
-        const md_trajectory_i* trajectory;
-
-        md_gl_representation_t drawRep;
-        md_gl_molecule_t drawMol;
-    };
     
-    void computeAABB(molecule_data_t& mol);
-    
-    void initMolecule(molecule_data_t& mol, std::string_view mol_file, std::string_view traj_file = {});
-    void freeMolecule(molecule_data_t& mol);
+    void addRepresentation(mol::rep::Type type = mol::rep::Type::SpaceFill, mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all", float scale = 1.0f);
+    void initMolecule(std::string_view mol_file, std::string_view traj_file = {});
+    void freeMolecule();
+    void updateRepresentationsGL();
 
     bool _renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
 
     double _frame;
-    
-    molecule_data_t _molecule;
+
+    md_molecule_t _molecule;
+    const md_trajectory_i* _trajectory;
+    md_gl_molecule_t _gl_molecule;
+
+    glm::dvec3  _center;
+    double      _radius;
+
+    std::vector<md_gl_representation_t> _gl_representations;
+    properties::PropertyOwner  _representations;
     
     properties::StringProperty _moleculeFile;
     properties::StringProperty _trajectoryFile;
-    properties::OptionProperty _repType;
-    properties::OptionProperty _coloring;
-    properties::FloatProperty _repScale;
     properties::FloatProperty _animationSpeed;
-    properties::StringProperty _viamdFilter;
     properties::BoolProperty _ssaoEnabled;
     properties::FloatProperty _ssaoIntensity;
     properties::FloatProperty _ssaoRadius;

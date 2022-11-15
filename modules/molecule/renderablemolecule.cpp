@@ -30,7 +30,7 @@
 #include "glbinding/gl/enum.h"
 #include "glbinding/gl/functions.h"
 #include "openspace/engine/windowdelegate.h"
-#include "mol/viamd/postprocessing_utils.h"
+#include "mol/viamd/postprocessing.h"
 #include "mol/cache.h"
 #include "mol/util.h"
 
@@ -75,7 +75,7 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 
 namespace {
     constexpr const char* _loggerCat = "RenderableMolecule";
-
+    
     constexpr openspace::properties::Property::PropertyInfo MoleculeFileInfo = {
         "MoleculeFile",
         "Molecule File",
@@ -88,34 +88,34 @@ namespace {
         "Trajectory file path"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RepTypeInfo = {
-        "RepType",
+    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
+        "Type",
         "Representation Type",
         "How to draw the molecule"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColoringInfo = {
-        "Coloring",
-        "Coloring",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Representation Color",
         "Select a color mapping for the atoms"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RepScaleInfo = {
-        "RepScale",
+    constexpr openspace::properties::Property::PropertyInfo FilterInfo = {
+        "Filter",
+        "Representation Filter",
+        "Filter for atom visibility"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+        "Scale",
         "Representation Scale",
-        "Thickness of the atoms in Space Fill or Licorice representation"
+        "Scale for the Geometric representation of atoms"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Animation Speed",
         "Playback speed of the animation (in frames per second)"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ViamdFilterInfo = {
-        "ViamdFilter",
-        "Viamd Filter",
-        "VIAMD script filter for atom visibility"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
@@ -148,46 +148,45 @@ namespace {
         "Exposure, Controls the Exposure setting for the tonemap"
     };
 
+    constexpr const char* RepresentationsDescription = "Representations";
+
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
+        struct Representation {
+            enum class [[codegen::map(mol::rep::Type)]] Type {
+                SpaceFill,
+                Licorice,
+                Ribbons,
+                Cartoon,
+            };
+
+            enum class [[codegen::map(mol::rep::Color)]] Color {
+                // Uniform,
+                Cpk,
+                AtomIndex,
+                ResId,
+                ResIndex,
+                ChainId,
+                ChainIndex,
+                SecondaryStructure,
+                // Property
+            };
+
+            std::optional<Type> type;
+            std::optional<Color> color;
+            std::optional<std::string> filter;
+            std::optional<float> scale;
+        };
+
+        std::optional<std::vector<Representation>> representations;
+
         // [[codegen::verbatim(MoleculeFileInfo.description)]]
         std::string moleculeFile;
 
         // [[codegen::verbatim(TrajectoryFileInfo.description)]]
         std::string trajectoryFile;
 
-        enum class [[codegen::map(mol::rep::Type)]] RepType {
-            SpaceFill,
-            Licorice,
-            Ribbons,
-            Cartoon,
-        };
-
-        // [[codegen::verbatim(RepTypeInfo.description)]]
-        std::optional<RepType> repType;
-
-        enum class [[codegen::map(mol::rep::Color)]] Coloring {
-            // Uniform,
-            Cpk,
-            AtomIndex,
-            ResId,
-            ResIndex,
-            ChainId,
-            ChainIndex,
-            SecondaryStructure,
-            // Property
-        };
-
-        // [[codegen::verbatim(ColoringInfo.description)]]
-        std::optional<Coloring> coloring;
-
-        // [[codegen::verbatim(RepScaleInfo.description)]]
-        std::optional<float> repScale;
-
         // [[codegen::verbatim(AnimationSpeedInfo.description)]]
         std::optional<float> animationSpeed;
-
-        // [[codegen::verbatim(ViamdFilterInfo.description)]]
-        std::optional<std::string> viamdFilter;
 
         // [[codegen::verbatim(SSAOEnabledInfo.description)]]
         std::optional<bool> ssaoEnabled;
@@ -217,33 +216,18 @@ static md_gl_shaders_t shaders;
 
 namespace openspace {
 
-    documentation::Documentation RenderableMolecule::Documentation() {
-        return codegen::doc<Parameters>("molecule_renderablemolecule");
-    }
-
-    RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary),
-        _moleculeFile(MoleculeFileInfo),
-        _trajectoryFile(TrajectoryFileInfo),
-        _repType(RepTypeInfo),
-        _coloring(ColoringInfo),
-        _repScale(RepScaleInfo, 1.f, 0.1f, 10.f),
-        _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f),
-        _viamdFilter(ViamdFilterInfo),
-        _ssaoEnabled(SSAOEnabledInfo),
-        _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f),
-        _ssaoRadius(SSAORadiusInfo, 12.f, 0.f, 100.f),
-        _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
-        _exposure(ExposureInfo, 0.3f, 0.1f, 10.f)
-    {
-        _repType.addOptions({
-            { static_cast<int>(mol::rep::Type::SpaceFill), "Space Fill" },
+    void RenderableMolecule::addRepresentation(mol::rep::Type type, mol::rep::Color color, std::string filter, float scale) {
+        properties::OptionProperty* pType = new properties::OptionProperty(TypeInfo);
+        pType->addOptions({
+            { static_cast<int>(mol::rep::Type::SpaceFill), "SpaceFill" },
             { static_cast<int>(mol::rep::Type::Licorice),  "Licorice" },
             { static_cast<int>(mol::rep::Type::Ribbons),   "Ribbons" },
             { static_cast<int>(mol::rep::Type::Cartoon),   "Cartoon" },
             });
+        pType->setValue(static_cast<int>(type));    
 
-        _coloring.addOptions({
+        properties::OptionProperty* pColor = new properties::OptionProperty(ColorInfo);
+        pColor->addOptions({
             { static_cast<int>(mol::rep::Color::Cpk), "CPK" },
             { static_cast<int>(mol::rep::Color::AtomIndex), "Atom Index" },
             { static_cast<int>(mol::rep::Color::ResId), "Residue ID" },
@@ -252,62 +236,118 @@ namespace openspace {
             { static_cast<int>(mol::rep::Color::ChainIndex), "Chain Index" },
             { static_cast<int>(mol::rep::Color::SecondaryStructure), "Secondary Structure" },
             });
+        pColor->setValue(static_cast<int>(color));
 
+        properties::StringProperty* pFilter = new properties::StringProperty(FilterInfo);
+        pFilter->setValue(filter);
+
+        properties::FloatProperty* pScale = new properties::FloatProperty(ScaleInfo, 1.0f, 0.0f, 10.0f);
+        pScale->setValue(scale);
+
+        size_t i = _representations.propertySubOwners().size();
+        PropertyOwner* prop = new PropertyOwner({std::to_string(i + 1)});
+        prop->addProperty(pType);
+        prop->addProperty(pColor);
+        prop->addProperty(pFilter);
+        prop->addProperty(pScale);
+        _representations.addPropertySubOwner(prop);
+
+        auto updateRep = [this, i, pType, pScale]() mutable {
+            if (i >= _gl_representations.size()) {
+                return;
+            }
+            mol::util::update_rep_type(_gl_representations[i], static_cast<mol::rep::Type>(pType->value()), pScale->value());
+        };
+
+        auto updateCol = [this, i, pColor, pFilter]() mutable {
+            if (i >= _gl_representations.size()) {
+                return;
+            }
+            mol::util::update_rep_color(_gl_representations[i], _molecule, static_cast<mol::rep::Color>(pColor->value()), pFilter->value());
+        };
+
+        pType->onChange(updateRep);
+        pScale->onChange(updateRep);
+        pColor->onChange(updateCol);
+        pFilter->onChange(updateCol);
+    }
+
+    void RenderableMolecule::updateRepresentationsGL() {
+        for (size_t i = 0; i < _gl_representations.size(); ++i) {
+            md_gl_representation_free(&_gl_representations[i]);
+        }
+        _gl_representations.resize(_representations.propertySubOwners().size());
+        for (size_t i = 0; i < _gl_representations.size(); ++i) {
+            _gl_representations[i] = {0};
+            md_gl_representation_init(&_gl_representations[i], &_gl_molecule);
+            
+            auto rep = _representations.propertySubOwners()[i];
+            auto pType   = rep->property("Type");
+            auto pColor  = rep->property("Color");
+            auto pFilter = rep->property("Filter");
+            auto pScale  = rep->property("Scale");
+
+            if (pType && pColor && pFilter && pScale) {
+                auto type   = static_cast<mol::rep::Type> (std::any_cast<int>(pType->get()));
+                auto color  = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
+                auto filter = std::any_cast<std::string>(pFilter->get());
+                auto scale  = std::any_cast<float>(pScale->get());
+
+                mol::util::update_rep_type (_gl_representations[i], type, scale);
+                mol::util::update_rep_color(_gl_representations[i], _molecule, color, filter);
+            }
+        }
+    }
+
+    documentation::Documentation RenderableMolecule::Documentation() {
+        return codegen::doc<Parameters>("molecule_renderablemolecule");
+    }
+
+    RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
+        : Renderable(dictionary),
+        _representations({"Representations"}),
+        _moleculeFile(MoleculeFileInfo),
+        _trajectoryFile(TrajectoryFileInfo),
+        _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f),
+        _ssaoEnabled(SSAOEnabledInfo),
+        _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f),
+        _ssaoRadius(SSAORadiusInfo, 6.f, 0.f, 100.f),
+        _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
+        _exposure(ExposureInfo, 0.3f, 0.1f, 10.f)
+    {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
         _moleculeFile = p.moleculeFile;
         _trajectoryFile = p.trajectoryFile;
-        _repScale = p.repScale.value_or(1.f);
         _animationSpeed = p.animationSpeed.value_or(1.f);
-        _viamdFilter = p.viamdFilter.value_or("");
         _ssaoEnabled = p.ssaoEnabled.value_or(true);
         _ssaoIntensity = p.ssaoIntensity.value_or(12.f);
         _ssaoRadius = p.ssaoRadius.value_or(12.f);
         _ssaoBias = p.ssaoBias.value_or(0.1f);
         _exposure = p.exposure.value_or(0.3f);
 
-        if (p.repType.has_value()) {
-            _repType = static_cast<int>(codegen::map<mol::rep::Type>(*p.repType));
+        if (p.representations.has_value()) {
+            const auto& reps = p.representations.value();
+            _gl_representations.reserve(reps.size());
+
+            for (size_t i = 0; i < reps.size(); ++i) {
+                const auto& rep = reps[i];
+
+                // @NOTE: (Robin) value_or does not seem to cut it when we map it
+                mol::rep::Type type = rep.type.has_value() ? codegen::map<mol::rep::Type>(rep.type.value()) : mol::rep::Type::SpaceFill;
+                mol::rep::Color color = rep.color.has_value() ? codegen::map<mol::rep::Color>(rep.color.value()) : mol::rep::Color::Cpk;
+                std::string filter = rep.filter.value_or("");
+                float scale = rep.scale.value_or(1.0f);
+
+                addRepresentation(type, color, filter, scale);
+            }
+        } else {
+            // Add a default representation if none were supplied
+            addRepresentation(mol::rep::Type::SpaceFill, mol::rep::Color::Cpk, "", 1.0f);
         }
-        else {
-            _repType = static_cast<int>(mol::rep::Type::SpaceFill);
-        }
-
-        if (p.coloring.has_value()) {
-            _coloring = static_cast<int>(codegen::map<mol::rep::Color>(*p.coloring));
-        }
-        else {
-            _coloring = static_cast<int>(mol::rep::Color::Cpk);
-        }
-
-        _molecule = molecule_data_t{
-            {},      // extent
-            {},      // center
-            0.f,     // radius
-            {},      // molecule
-            nullptr, // trajectory
-            {},      // drawRep
-            {},      // drawMol
-        };
-
-        auto onUpdateRepr = [this]() {
-            mol::util::update_rep_type(_molecule.drawRep, static_cast<mol::rep::Type>(_repType.value()), _repScale);
-        };
-
-        auto onUpdateCol = [this]() {
-            mol::util::update_rep_colors(_molecule.drawRep, _molecule.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
-        };
-
-        _repType.onChange(onUpdateRepr);
-        _repScale.onChange(onUpdateRepr);
-        _coloring.onChange(onUpdateCol);
-        _viamdFilter.onChange(onUpdateCol);
     
-        addProperty(_repType);
-        addProperty(_coloring);
-        addProperty(_repScale);
+        addPropertySubOwner(_representations);
         addProperty(_animationSpeed);
-        addProperty(_viamdFilter);
         addProperty(_ssaoEnabled);
         addProperty(_ssaoIntensity);
         addProperty(_ssaoRadius);
@@ -316,7 +356,7 @@ namespace openspace {
     }
 
     RenderableMolecule::~RenderableMolecule() {
-        freeMolecule(_molecule);
+        freeMolecule();
     }
 
     void RenderableMolecule::initialize() {
@@ -374,7 +414,7 @@ namespace openspace {
                 billboardGlInit();
             }
 
-        initMolecule(_molecule, _moleculeFile.value(), _trajectoryFile.value());
+        initMolecule(_moleculeFile.value(), _trajectoryFile.value());
 
         glUseCount++;
     }
@@ -411,12 +451,12 @@ namespace openspace {
         double t = data.time.j2000Seconds();
 
         // update animation
-        if (_molecule.trajectory) {
-            mol::util::interpolate_coords(_molecule.molecule.atom.x, _molecule.molecule.atom.y, _molecule.molecule.atom.z, _molecule.molecule.atom.count, t, mol::util::Interpolation::Cubic, _molecule.trajectory);
+        if (_trajectory) {
+            mol::util::interpolate_coords(_molecule.atom.x, _molecule.atom.y, _molecule.atom.z, _molecule.atom.count, t, mol::util::Interpolation::Cubic, _trajectory);
         }
 
         // update gl repr
-        md_gl_molecule_set_atom_position(&_molecule.drawMol, 0, (uint32_t)_molecule.molecule.atom.count, _molecule.molecule.atom.x, _molecule.molecule.atom.y, _molecule.molecule.atom.z, 0);
+        md_gl_molecule_set_atom_position(&_gl_molecule, 0, (uint32_t)_molecule.atom.count, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, 0);
     }
 
     static double normalizeDouble(double input) {
@@ -461,22 +501,19 @@ namespace openspace {
             translate(I, data.modelTransform.translation) *
             scale(I, data.modelTransform.scale) *
             dmat4(data.modelTransform.rotation) *
-            translate(I, dvec3(-_molecule.center)) *
+            translate(I, dvec3(-_center)) *
             I;
 
         mat4 projMatrix =
             dmat4(camCopy.sgctInternal.projectionMatrix()) *
             I;
 
-        std::vector<md_gl_draw_op_t> drawOps;
-        if (_molecule.molecule.atom.count) {
-            // the modelMatrix was put in the viewMatrix to perform multiplication in
-            // double precision (dmat4).
-            mat4 modelMatrix(1.f);
-            md_gl_draw_op_t drawOp = {};
-            drawOp.model_matrix = value_ptr(modelMatrix);
-            drawOp.rep = &_molecule.drawRep;
-            drawOps.push_back(drawOp);
+        mat4_t model_mat = mat4_ident();
+        std::vector<md_gl_draw_op_t> drawOps(_gl_representations.size());
+        if (_molecule.atom.count) {
+            for (size_t i = 0; i < _gl_representations.size(); ++i) {
+                drawOps[i] = {&_gl_representations[i], &model_mat[0][0]};
+            }
         }
 
         md_gl_draw_args_t args = {};
@@ -558,7 +595,8 @@ namespace openspace {
         }
 
         { // draw billboard pre-rendered with molecule inside
-            dvec3 sca = data.modelTransform.scale + dvec3(_molecule.radius * 2.f + _repScale * 2.f);
+            const double pad = 2.0f; // This should represent the additional space when applying scaling within representations
+            dvec3 sca = data.modelTransform.scale + dvec3(_radius * 2.f + pad);
             sca *= 2.0; // COMBAK: why? molecule is sometimes slightly out of view otherwise
             dmat4 billboardModel =
                 camCopy.combinedViewMatrix() *
@@ -577,63 +615,52 @@ namespace openspace {
         global::renderEngine->openglStateCache().resetBlendState();
     }
 
-    void RenderableMolecule::computeAABB(molecule_data_t& mol) {
-        glm::vec3 min_aabb{ FLT_MAX };
-        glm::vec3 max_aabb{ -FLT_MAX };
-
-        for (int64_t i = 0; i < mol.molecule.atom.count; ++i) {
-            glm::vec3 p{ mol.molecule.atom.x[i], mol.molecule.atom.y[i], mol.molecule.atom.z[i] };
-            min_aabb = glm::min(min_aabb, p);
-            max_aabb = glm::max(max_aabb, p);
-        }
-
-        mol.extent = max_aabb - min_aabb;
-        mol.center = (min_aabb + max_aabb) * 0.5f;
-        mol.radius = length(mol.extent) * 0.5f;
-    }
-
-    void RenderableMolecule::initMolecule(molecule_data_t& mol, std::string_view molFile, std::string_view trajFile) {
+    void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view trajFile) {
         LDEBUG(fmt::format("Loading molecule file '{}'", molFile));
 
         // free previously loaded molecule
-        freeMolecule(mol);
+        freeMolecule();
 
         const md_molecule_t* molecule = mol_manager::get_molecule(molFile);
         if (molecule) {
             // We deep copy the contents, so we can freely modify the fields (coordinates etc)
-            md_molecule_append(&mol.molecule, molecule, default_allocator);
+            md_molecule_copy(&_molecule, molecule, default_allocator);
+
+            md_gl_molecule_init(&_gl_molecule, &_molecule);
+            updateRepresentationsGL();
+
+            vec3_t aabb_min, aabb_max;
+            md_util_compute_aabb_xyzr(&aabb_min, &aabb_max, _molecule.atom.x, _molecule.atom.y, _molecule.atom.z, _molecule.atom.radius, _molecule.atom.count);
+            vec3_t c = (aabb_min + aabb_max) * 0.5f;
+            _center = {c.x, c.y, c.z};
+            _radius = vec3_distance(aabb_min, aabb_max) * 0.5f;
+            setBoundingSphere(_radius * 2.f);
         }
 
         if (!trajFile.empty() && trajFile != "") {
             LDEBUG(fmt::format("Loading trajectory file '{}'", trajFile));
-            mol.trajectory = mol_manager::get_trajectory(trajFile);
+            _trajectory = mol_manager::get_trajectory(trajFile);
 
-            if (!mol.trajectory) {
+            if (!_trajectory) {
                 LERROR("failed to initialize trajectory: failed to load file");
                 return;
             }
         }
-
-        computeAABB(mol);
-        setBoundingSphere(mol.radius * 2.f);
-        // setInteractionSphere(sphere);
-
-        md_gl_molecule_init(&mol.drawMol, &mol.molecule);
-        md_gl_representation_init(&mol.drawRep, &mol.drawMol);
-        
-        mol::util::update_rep_type(mol.drawRep, static_cast<mol::rep::Type>(_repType.value()), _repScale);
-        mol::util::update_rep_colors(mol.drawRep, mol.molecule, static_cast<mol::rep::Color>(_coloring.value()), _viamdFilter);
     }
 
-    void RenderableMolecule::freeMolecule(molecule_data_t& mol) {
-        md_gl_representation_free(&mol.drawRep);
-        md_gl_molecule_free(&mol.drawMol);
-        md_molecule_free(&mol.molecule, default_allocator);
+    void RenderableMolecule::freeMolecule() {
+        for (auto& rep : _gl_representations) {
+            md_gl_representation_free(&rep);
+        }
+        _gl_representations.clear();
 
-        mol.molecule = {};
-        mol.trajectory = nullptr;
-        mol.drawMol = {};
-        mol.drawRep = {};
+        md_gl_molecule_free(&_gl_molecule);
+        md_molecule_free(&_molecule, default_allocator);
+
+        _molecule = {};
+        _trajectory = nullptr;
+        _gl_molecule = {};
+        _gl_representations.clear();
     }
 
 } // namespace openspace

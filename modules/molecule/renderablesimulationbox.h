@@ -72,10 +72,6 @@ private:
         md_gl_representation_t drawRep;
         md_gl_molecule_t drawMol;
     };
-
-    struct representation_t {
-        std::string filter;
-    };
     
     void updateSimulation(molecule_data_t& mol, double dt);
     
