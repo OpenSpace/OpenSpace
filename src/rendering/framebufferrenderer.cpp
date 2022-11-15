@@ -155,10 +155,6 @@ void FramebufferRenderer::initialize() {
     glGenTextures(1, &_exitDepthTexture);
     glGenFramebuffers(1, &_exitFramebuffer);
 
-    // HDR / Filtering Buffers
-    glGenFramebuffers(1, &_hdrBuffers.hdrFilteringFramebuffer);
-    glGenTextures(1, &_hdrBuffers.hdrFilteringTexture);
-
     // FXAA Buffers
     glGenFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
     glGenTextures(1, &_fxaaBuffers.fxaaTexture);
@@ -274,30 +270,6 @@ void FramebufferRenderer::initialize() {
     }
 
     //===================================//
-    //=====  HDR/Filtering Buffers  =====//
-    //===================================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _hdrBuffers.hdrFilteringFramebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        _hdrBuffers.hdrFilteringTexture,
-        0
-    );
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_FRAMEBUFFER,
-            _hdrBuffers.hdrFilteringFramebuffer,
-            -1,
-            "HDR filtering"
-        );
-    }
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("HDR/Filtering framebuffer is not complete");
-    }
-
-    //===================================//
     //==========  FXAA Buffers  =========//
     //===================================//
     glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
@@ -405,7 +377,6 @@ void FramebufferRenderer::deinitialize() {
 
     glDeleteFramebuffers(1, &_gBuffers.framebuffer);
     glDeleteFramebuffers(1, &_exitFramebuffer);
-    glDeleteFramebuffers(1, &_hdrBuffers.hdrFilteringFramebuffer);
     glDeleteFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
     glDeleteFramebuffers(1, &_pingPongBuffers.framebuffer);
     glDeleteFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
@@ -413,7 +384,6 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_gBuffers.colorTexture);
     glDeleteTextures(1, &_gBuffers.depthTexture);
 
-    glDeleteTextures(1, &_hdrBuffers.hdrFilteringTexture);
     glDeleteTextures(1, &_fxaaBuffers.fxaaTexture);
     glDeleteTextures(1, &_gBuffers.positionTexture);
     glDeleteTextures(1, &_gBuffers.normalTexture);
@@ -820,27 +790,6 @@ void FramebufferRenderer::updateResolution() {
             -1,
             "G-Buffer Color Ping-Pong"
         );
-    }
-
-    // HDR / Filtering
-    glBindTexture(GL_TEXTURE_2D, _hdrBuffers.hdrFilteringTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _hdrBuffers.hdrFilteringTexture, -1, "HDR filtering");
     }
 
     // FXAA

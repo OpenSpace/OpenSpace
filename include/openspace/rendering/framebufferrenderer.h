@@ -192,11 +192,6 @@ private:
     } _pingPongBuffers;
 
     struct {
-        GLuint hdrFilteringFramebuffer;
-        GLuint hdrFilteringTexture;
-    } _hdrBuffers;
-
-    struct {
         GLuint fxaaFramebuffer;
         GLuint fxaaTexture;
     } _fxaaBuffers;
