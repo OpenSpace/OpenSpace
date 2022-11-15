@@ -43,10 +43,10 @@
 namespace {
     constexpr const char* _loggerCat = "ExoplanetGlyphCloud";
 
-    constexpr const std::array<const char*, 11> UniformNames = {
+    constexpr const std::array<const char*, 12> UniformNames = {
         "modelMatrix", "cameraViewProjectionMatrix", "onTop", "useFixedRingWidth",
         "opacity", "size", "screenSize", "minBillboardSize", "maxBillboardSize",
-        "maxIndex", "isRenderIndexStep"
+        "maxIndex", "currentIndex", "isRenderIndexStep"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
@@ -86,11 +86,16 @@ namespace {
         "Determines whether labels should be drawn or hidden"
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the astronomical objects"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CurrentIndexInfo = {
+        "CurrentlyHoveredIndex",
+        "Currently Hovered Index",
+        "The index of the currently hovered planet. Is -1 if no planet is being hovered."
     };
 
     struct [[codegen::Dictionary(RenderablePointData)]] Parameters {
@@ -142,9 +147,10 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
         glm::vec2(0.f, 400.f),
         glm::vec2(0.f),
         glm::vec2(1000.f)
-    ),
-    _useFixedRingWidth(UseFixedWidthInfo, true)
+    )
+    , _useFixedRingWidth(UseFixedWidthInfo, true)
     , _drawLabels(DrawLabelInfo, false)
+    , _currentlyHoveredIndex(CurrentIndexInfo, -1)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -194,8 +200,9 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
             }
 
             // Convert mouse position to pixel position
-            float normalizedX = x / static_cast<float>(_lastViewPortSize.x);
-            float normalizedY = (static_cast<float>(_lastViewPortSize.y) - y) / static_cast<float>(_lastViewPortSize.y);
+            glm::vec2 lastViewportSize = glm::vec2(_lastViewPortSize);
+            float normalizedX = x / lastViewportSize.x;
+            float normalizedY = (lastViewportSize.y - y) / lastViewportSize.y;
 
             if (_glyphIdTexture) {
                 glm::uvec2 texturePos = glm::uvec2(
@@ -208,11 +215,13 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
                 // TODO: make sure pos is within texture
                 glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat(texturePos);
 
-                float index = pixelValue.r * static_cast<float>(_maxIndex) - 1;
-                LINFO(fmt::format("Index: {}", index));
+                _currentlyHoveredIndex = std::round(pixelValue.r * static_cast<float>(_maxIndex)) - 1;
             }
         }
     );
+
+    _currentlyHoveredIndex.setReadOnly(true);
+    addProperty(_currentlyHoveredIndex);
 }
 
 bool RenderableExoplanetGlyphCloud::isReady() const {
@@ -315,6 +324,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     _program->setUniform(_uniformCache.onTop, false);
     _program->setUniform(_uniformCache.isRenderIndexStep, false);
     _program->setUniform(_uniformCache.maxIndex, _maxIndex);
+    _program->setUniform(_uniformCache.currentIndex, _currentlyHoveredIndex + 1); // Plus one to map offset in shader
 
     const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels
     const float maxBillboardSize = _billboardMinMaxSize.value().y; // in pixels
@@ -643,8 +653,7 @@ void RenderableExoplanetGlyphCloud::updateDataFromFile() {
         _glyphIndices.push_back(static_cast<int>(index));
     }
 
-    // TODO: use actual max
-    _maxIndex = 10000;
+    _maxIndex = maxIndex;
 
     _isDirty = true;
 }

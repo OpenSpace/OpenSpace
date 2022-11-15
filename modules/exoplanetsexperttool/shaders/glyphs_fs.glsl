@@ -40,6 +40,7 @@ uniform bool onTop;
 uniform bool useFixedRingWidth;
 
 uniform int maxIndex;
+uniform int currentIndex;
 uniform bool isRenderIndexStep = false;
 
 const float M_PI = 3.141592657;
@@ -108,7 +109,7 @@ Fragment getFragment() {
 
     // Render glyph index if we are at that rendering step
     if (isRenderIndexStep) {
-        color.rgb = vec3(float(gs_glyphIndex) * 1.0 / float(maxIndex));
+        color.rgb = vec3(float(gs_glyphIndex) / float(maxIndex));
         color.a = 1.0;
         // Set to render the value as is, without any color adjustments
         frag.disableLDR2HDR = true;
@@ -116,7 +117,12 @@ Fragment getFragment() {
 
     float borderWidth = 0.13;
     if (coord > 1.0 - borderWidth || coord < 1.0 - 1.0 + borderWidth) {
-        color *= vec4(0.0, 0.0, 0.0, 1.0); // black border
+        if (gs_glyphIndex == currentIndex && !isRenderIndexStep) {
+            color.rgb = vec3(1.0, 1.0, 1.0); // white border
+        }
+        else {
+            color.rgb = vec3(0.0, 0.0, 0.0); //black border
+        }
     }
 
     frag.color = color;

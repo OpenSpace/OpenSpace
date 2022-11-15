@@ -72,7 +72,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, useFixedRingWidth,
         opacity, size, screenSize, minBillboardSize, maxBillboardSize, maxIndex,
-        isRenderIndexStep
+        currentIndex, isRenderIndexStep
     ) _uniformCache;
 
     properties::Vec3Property _highlightColor;
@@ -94,6 +94,7 @@ private:
     std::vector<GlyphData> _fullGlyphData;
     std::vector<int> _glyphIndices; // indices of the points in the dataviewer
     int _maxIndex = -1;
+    properties::IntProperty _currentlyHoveredIndex;
 
     // Labels
     bool _hasLabels = false;
