@@ -50,7 +50,7 @@ asset.onInitialize(function()
   local controller = XBoxController;
   local name = "Wireless Xbox Controller";
 
-  local deadzoneJoysticks = 0.15
+  local deadzoneJoysticks = 0.2
   local deadzoneTriggers = 0.05
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[1], deadzoneJoysticks)
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[2], deadzoneJoysticks)
