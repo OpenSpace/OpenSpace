@@ -741,10 +741,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
         _program->setUniform(_uniformCache.performShading, _performShading);
 
-        if (_disableFaceCulling) {
-            glDisable(GL_CULL_FACE);
-        }
-
         glEnablei(GL_BLEND, 0);
         switch (_blendingFuncOption) {
             case DefaultBlending:
@@ -785,7 +781,28 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             setRenderBin(_originalRenderBin);
         }
 
-        _geometry->render(*_program);
+        bool shouldRenderTwice = !_disableFaceCulling;
+        int nPasses = shouldRenderTwice ? 2 : 1;
+        for (int i = 0; i < nPasses; ++i) {
+            if (shouldRenderTwice) {
+                glEnable(GL_CULL_FACE);
+
+                if (i == 0) {
+                    // First draw back faces (remove front faces)
+                    glCullFace(GL_FRONT);
+                }
+                else {
+                    // Then front faces (remove back faces)
+                    glCullFace(GL_BACK);
+                }
+            }
+            else {
+                glDisable(GL_CULL_FACE);
+            }
+
+            _geometry->render(*_program);
+        }
+
         if (_disableFaceCulling) {
             glEnable(GL_CULL_FACE);
         }
