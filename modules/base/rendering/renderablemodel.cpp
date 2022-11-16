@@ -781,7 +781,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             setRenderBin(_originalRenderBin);
         }
 
-        bool shouldRenderTwice = !_disableFaceCulling;
+        bool shouldRenderTwice = !_disableFaceCulling && _geometry->isTransparent();
         int nPasses = shouldRenderTwice ? 2 : 1;
         for (int i = 0; i < nPasses; ++i) {
             if (shouldRenderTwice) {
