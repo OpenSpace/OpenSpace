@@ -67,7 +67,7 @@ set(CEF_VERSION "91.1.23+g04c8d56+chromium-91.0.4472.164")
 #endif ()
 
 # CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
-if (WIN32 OR UNIX)
+if (WIN32 OR OS_LINUX)
   option(USE_SANDBOX OFF)
 endif ()
 
@@ -281,7 +281,7 @@ list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()
 add_external_library_dependencies("${deps}")
 
-if (UNIX)
+if (OS_LINUX)
   # Linux needs to have copies of CEF files in Resources/ in its build-type dir to avoid
   # the 'Couldn't mmap icu data file' runtime error
   file(COPY ${CEF_ROOT}/Resources/
