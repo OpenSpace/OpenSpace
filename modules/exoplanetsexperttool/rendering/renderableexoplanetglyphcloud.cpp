@@ -545,6 +545,25 @@ void RenderableExoplanetGlyphCloud::createGlyphIdTexture(const glm::uvec3 dimens
         *_glyphIdTexture,
         0
     );
+
+    // And a depth buffer of the same dimension
+    _depthTexture = std::make_unique<ghoul::opengl::Texture>(
+        dimensions,
+        GL_TEXTURE_2D,
+        ghoul::opengl::Texture::Format::DepthComponent,
+        GL_DEPTH_COMPONENT32F,
+        GL_FLOAT
+    );
+    _depthTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    _depthTexture->uploadTexture();
+    _depthTexture->bind();
+
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        *_depthTexture,
+        0
+    );
 }
 
 void RenderableExoplanetGlyphCloud::mapVertexAttributes() {

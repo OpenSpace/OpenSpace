@@ -112,6 +112,7 @@ private:
 
     // Point id from screenspace position
     std::unique_ptr<ghoul::opengl::Texture> _glyphIdTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
     GLuint _glyphIdFramebuffer = 0;
 
     glm::ivec2 _lastViewPortSize;
