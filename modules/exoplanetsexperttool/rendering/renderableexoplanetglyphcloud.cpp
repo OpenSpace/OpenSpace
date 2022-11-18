@@ -44,7 +44,7 @@
 namespace {
     constexpr const char* _loggerCat = "ExoplanetGlyphCloud";
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr std::array<const char*, 12> UniformNames = {
         "modelMatrix", "cameraViewProjectionMatrix", "onTop", "useFixedRingWidth",
         "opacity", "size", "screenSize", "minBillboardSize", "maxBillboardSize",
         "maxIndex", "currentIndex", "isRenderIndexStep"

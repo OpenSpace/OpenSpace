@@ -26,6 +26,7 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
+#include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
 #include <modules/exoplanetsexperttool/rendering/renderablepointdata.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
@@ -63,14 +64,14 @@
 //#define SHOW_IMGUI_HELPERS
 
 namespace {
-    constexpr const char _loggerCat[] = "ExoplanetsDataViewer";
+    constexpr char _loggerCat[] = "ExoplanetsDataViewer";
 
-    constexpr const char RenderDataFile[] = "${TEMPORARY}/pointrenderdata.dat";
-    constexpr const char LabelsFile[] = "${TEMPORARY}/exosystems.label";
+    constexpr char RenderDataFile[] = "${TEMPORARY}/pointrenderdata.dat";
+    constexpr char LabelsFile[] = "${TEMPORARY}/exosystems.label";
 
-    constexpr const char WebpagePath[] = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
+    constexpr char WebpagePath[] = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
 
-    constexpr const char AboutTheTool[] =
+    constexpr char AboutTheTool[] =
         "This is a research tool under development and we are currently \n"
         "looking for feedback from users. This feedback will be included \n"
         "in our scientific publication covering the tool. \n"
@@ -78,7 +79,7 @@ namespace {
         "Thank you for taking the time to trying it out, and please do not \n"
         "hesitate to reach out with any questions, input or feedback";
 
-    constexpr const char GetInTouchLink[] =
+    constexpr char GetInTouchLink[] =
         "https://weber.itn.liu.se/~emmbr26/ExoplanetExplorer/get_in_touch";
 
     bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
@@ -399,7 +400,6 @@ void DataViewer::initializeGL() {
 }
 
 void DataViewer::renderStartupInfo() {
-
     constexpr const int nPerColumn = 20;
 
     // Always center this window when appearing
@@ -544,6 +544,10 @@ void DataViewer::render() {
         renderStartupInfo();
         return;
     }
+
+    // Tooltip for hovered planets
+    int hoveredPlanet = getHoveredPlanetIndex();
+    renderPlanetTooltip(hoveredPlanet);
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Windows")) {
@@ -1873,6 +1877,44 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
     // Reset some state changed variables
     _externalSelectionChanged = false;
+}
+
+
+int DataViewer::getHoveredPlanetIndex() const {
+    std::string sgnId = std::string(ExoplanetsExpertToolModule::GlyphCloudIdentifier);
+    SceneGraphNode* n = sceneGraphNode(sgnId);
+    if (!n) {
+        return -1;
+    }
+
+   RenderableExoplanetGlyphCloud* cloud =
+       dynamic_cast<RenderableExoplanetGlyphCloud*>(n->renderable());
+   if (!cloud) {
+       return -1;
+   }
+
+   properties::Property* p = cloud->property("CurrentlyHoveredIndex");
+   properties::IntProperty* index = dynamic_cast<properties::IntProperty*>(p);
+   return index ? *index : -1;
+}
+
+void DataViewer::renderPlanetTooltip(int index) const {
+    if (index < 0) {
+        return; // no planet hovered
+    }
+
+    // Show tooltip iwndow on mouse position
+    ImVec2 pos = ImGui::GetIO().MousePos;
+    ImGui::SetNextWindowPos(pos, ImGuiCond_Appearing, ImVec2(-0.01f, 1.f));
+    ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+    ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoFocusOnAppearing;
+
+    if (ImGui::Begin("##planetToolTip", NULL, flags)) {
+        ImGui::Text(_data[index].planetName.c_str());
+    }
+
+    // TODO: Also handle mouseclick
 }
 
 void DataViewer::updateFilteredRowsProperty() {

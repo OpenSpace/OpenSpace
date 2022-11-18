@@ -120,6 +120,9 @@ private:
     void renderColormapWindow(bool* open);
     void renderFilterSettingsWindow(bool* open);
 
+    int getHoveredPlanetIndex() const;
+    void renderPlanetTooltip(int index) const;
+
     // Updates the property in the module so that it matches the filtered
     // rows in the UI
     void updateFilteredRowsProperty();
