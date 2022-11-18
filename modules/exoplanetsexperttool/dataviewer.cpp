@@ -400,14 +400,10 @@ void DataViewer::initializeGL() {
 }
 
 void DataViewer::renderStartupInfo() {
-    constexpr const int nPerColumn = 20;
-
     // Always center this window when appearing
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-    int nSelected = 0;
-    bool canSelectMore = true;
     ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
 
     ImGui::OpenPopup("We need your help!");
@@ -844,13 +840,10 @@ void DataViewer::renderColormapWindow(bool* open) {
 
     ImGui::Spacing();
 
-    constexpr const int InputWidth = 120;
-    constexpr const int ColorScaleHeight = 140;
-
     ImGui::BeginGroup();
 
     // Note the reverse ordering
-    for (int index = _variableSelection.size() - 1; index >= 0; --index) {
+    for (int index = static_cast<int>(_variableSelection.size()) - 1; index >= 0; --index) {
         ColorMappedVariable& variable = _variableSelection[index];
 
         ImGui::PushID(fmt::format("##variable{}", index).c_str());
@@ -880,8 +873,8 @@ void DataViewer::renderColormapWindow(bool* open) {
     // Circle plot to show which parameters map to which part of a glyph
     ImGui::SameLine();
     {
-        int nVariables = _variableSelection.size();
-        std::vector<float> data(nVariables, 1.0 / static_cast<float>(nVariables));
+        int nVariables = static_cast<int>(_variableSelection.size());
+        std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
 
         // First build array with real strings. Note that this has to stay alive for
         // the netire lifetime of the char * array
@@ -903,6 +896,7 @@ void DataViewer::renderColormapWindow(bool* open) {
         // Reverse vector to get the order its actually rendered
         std::reverse(labels.begin(), labels.end());
 
+        constexpr const int ColorScaleHeight = 140;
         ImVec2 plotSize = ImVec2(1.5 * ColorScaleHeight, ColorScaleHeight);
         ImPlot::SetNextPlotLimits(0, 1.5, 0, 1, ImGuiCond_Always);
         if (ImPlot::BeginPlot("##Pie", NULL, NULL, plotSize, ImPlotFlags_Equal | ImPlotFlags_NoMousePos, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations)) {
@@ -929,7 +923,7 @@ void DataViewer::renderScatterPlotWindow(bool* open) {
 
     for (size_t i : _filteredData) {
         const ExoplanetItem& item = _data[i];
-        if (item.ra.hasValue() && item.ra.hasValue()) {
+        if (item.ra.hasValue() && item.dec.hasValue()) {
             ra.push_back(item.ra.value);
             dec.push_back(item.dec.value);
         }
@@ -941,7 +935,7 @@ void DataViewer::renderScatterPlotWindow(bool* open) {
 
     for (size_t i : _selection) {
         const ExoplanetItem& item = _data[i];
-        if (item.ra.hasValue() && item.ra.hasValue()) {
+        if (item.ra.hasValue() && item.dec.hasValue()) {
             ra_selected.push_back(item.ra.value);
             dec_selected.push_back(item.dec.value);
         }
@@ -1051,7 +1045,7 @@ void DataViewer::renderTableWindow(bool *open) {
 
     // Search table
     static char searchString[128] = "";
-    bool searchEntered = ImGui::InputTextWithHint(
+   ImGui::InputTextWithHint(
         "##Query",
         "Search for a planet here...",
         searchString,
@@ -1085,7 +1079,7 @@ void DataViewer::renderTable(const std::string& tableId,
     // Some size variables
     const float RowHeight = ImGui::GetTextLineHeightWithSpacing(); // Inner height
     const float TableHeight =
-        (planetRows.size() + 1) * 1.2 * RowHeight + ImGui::GetStyle().ScrollbarSize;
+        (planetRows.size() + 1) * 1.2f * RowHeight + ImGui::GetStyle().ScrollbarSize;
     const ImVec2 TableSize = ImVec2(0.f, useFixedHeight ? TableHeight : 0.f);
 
     if (ImGui::BeginTable(tableId.c_str(), nColumns + 1, flags, TableSize)) {
@@ -1172,7 +1166,7 @@ void DataViewer::renderTable(const std::string& tableId,
 
         // Rows
         ImGuiListClipper clipper;
-        clipper.Begin(displayedRows.size());
+        clipper.Begin(static_cast<int>(displayedRows.size()));
         while (clipper.Step()) {
             for (size_t row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                 const size_t index = displayedRows[row];
@@ -1236,18 +1230,18 @@ void DataViewer::renderTable(const std::string& tableId,
                         if (ImGui::BeginPopupContextItem("item context menu")) {
                             ImGui::Text(item.planetName.c_str());
 
-                            auto found = std::find(
+                            auto foundIndex = std::find(
                                 _pinnedPlanets.begin(),
                                 _pinnedPlanets.end(),
                                 index
                             );
-                            bool isPinned = found != _pinnedPlanets.end();
+                            bool isPinned = foundIndex != _pinnedPlanets.end();
 
                             ImGui::SameLine();
                             ImGui::SetNextItemWidth(-10);
                             if (ImGui::Button(isPinned ? "Unpin" : "Pin")) {
                                 if (isPinned) {
-                                    _pinnedPlanets.erase(found);
+                                    _pinnedPlanets.erase(foundIndex);
                                 }
                                 else {
                                     _pinnedPlanets.push_back(index);
@@ -1807,7 +1801,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
         std::sort(_filteredData.begin(), _filteredData.end(), compare);
         _filteredData.erase(_filteredData.begin() + nRows, _filteredData.end());
-        nRowsAfterLimit = _filteredData.size();
+        nRowsAfterLimit = static_cast<int>(_filteredData.size());
     }
 
     if (limitNumberOfRows) {
