@@ -5,7 +5,7 @@
       "gui_path": "/Missions/Voyager",
       "identifier": "profile.focus.voyager1",
       "is_local": false,
-      "name": "Focus on Voyager",
+      "name": "Focus on Voyager 1",
       "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_1');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '')"
     },
     {
@@ -13,7 +13,7 @@
       "gui_path": "/Missions/Voyager",
       "identifier": "profile.focus.voyager2",
       "is_local": false,
-      "name": "Focus on Voyager2",
+      "name": "Focus on Voyager 2",
       "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_2');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
     },
     {
