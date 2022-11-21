@@ -18,7 +18,7 @@
     },
     {
       "documentation": "Sets the time for Voyager's approach to Jupiter",
-      "gui_path": "/",
+      "gui_path": "/Missions/Voyager",
       "identifier": "profile.setup.jupiter_approach",
       "is_local": false,
       "name": "Set Jupiter Approach",
