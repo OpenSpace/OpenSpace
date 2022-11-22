@@ -84,12 +84,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Mars)
   openspace.addSceneGraphNode(MarsLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MarsLabel)
   openspace.removeSceneGraphNode(Mars)
 end)
-    
+
 asset.export(Mars)
 asset.export(MarsLabel)
 

@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Season: Water Vapor and SST - 2005"
 local Identifier = "noaa-sos-atmosphere-2005_hurricane-wvsst"
-local Description = [["This hurricane season shattered records that have stood for 
-decades - most named storms, most hurricanes and most category five storms. Arguably, it 
-was the most devastating hurricane season the country has experienced in modern times," 
-said retired Navy Vice Adm. Conrad C. Lautenbacher, Jr., Ph.D., undersecretary of 
+local Description = [["This hurricane season shattered records that have stood for
+decades - most named storms, most hurricanes and most category five storms. Arguably, it
+was the most devastating hurricane season the country has experienced in modern times,"
+said retired Navy Vice Adm. Conrad C. Lautenbacher, Jr., Ph.D., undersecretary of
 commerce for oceans and atmosphere and NOAA administrator]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-season-water-vapor-and-sst-2005/"
 
@@ -35,7 +35,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)

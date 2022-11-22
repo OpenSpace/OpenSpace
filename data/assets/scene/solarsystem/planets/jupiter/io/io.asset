@@ -54,11 +54,11 @@ local Io = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Io)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Io)
 end)
-  
+
 asset.export(Io)
 
 

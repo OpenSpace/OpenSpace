@@ -3,8 +3,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Gray Earth"
 local Identifier = "noaa-sos-land-gray_earth"
-local Description = [[This dataset provides a view of the topography and bathymetry of 
-Earth by shading the continents and sea floor. Gray Earth also shows major continental 
+local Description = [[This dataset provides a view of the topography and bathymetry of
+Earth by shading the continents and sea floor. Gray Earth also shows major continental
 river systems and drainages.
 
 Longest Rivers in the world on each continent:
@@ -13,12 +13,12 @@ Longest Rivers in the world on each continent:
     Asia - Yangtze - 3,915 miles(6,300 km)
     North America - Missouri - 2,540 miles (4,088 km)
     Australia - Murray - 1,558 miles (2,508 km)
-    Europe - Volga - 2,266 miles (3,645) 
+    Europe - Volga - 2,266 miles (3,645)
 
-According to the dataset source, Natural Earth Data, the relief shading and hypsography 
-(study of Earth's topography; measurement and mapping of land elevations) are derived 
-from the modified SRTM - Shuttle Radar Topography Mission - Plus elevation data at 1km 
-resolution. Daniel Huffman, University of Wisconsin, Madison created the regionally 
+According to the dataset source, Natural Earth Data, the relief shading and hypsography
+(study of Earth's topography; measurement and mapping of land elevations) are derived
+from the modified SRTM - Shuttle Radar Topography Mission - Plus elevation data at 1km
+resolution. Daniel Huffman, University of Wisconsin, Madison created the regionally
 equalized hypsography that forms the foundation of the Gray Earth imagery]]
 local URL = "https://sos.noaa.gov/catalog/datasets/gray-earth/"
 
@@ -38,7 +38,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

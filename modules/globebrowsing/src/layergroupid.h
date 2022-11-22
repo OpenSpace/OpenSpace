@@ -137,54 +137,62 @@ namespace ghoul {
 template <>
 constexpr openspace::globebrowsing::layers::Layer::ID from_string(std::string_view string)
 {
-    using namespace openspace::globebrowsing::layers;
-
     auto it = std::find_if(
-        Layers.begin(),
-        Layers.end(),
-        [&string](const Layer& li) { return li.identifier == string; }
+        openspace::globebrowsing::layers::Layers.begin(),
+        openspace::globebrowsing::layers::Layers.end(),
+        [&string](const openspace::globebrowsing::layers::Layer& li) {
+            return li.identifier == string;
+        }
     );
-    return it != Layers.end() ? it->id : Layer::ID::Unknown;
+    return it != openspace::globebrowsing::layers::Layers.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Layer::ID::Unknown;
 }
 
 template <>
 constexpr openspace::globebrowsing::layers::Group::ID from_string(std::string_view string)
 {
-    using namespace openspace::globebrowsing::layers;
-
     auto it = std::find_if(
-        Groups.begin(),
-        Groups.end(),
-        [&string](const Group& gi) { return gi.identifier == string; }
+        openspace::globebrowsing::layers::Groups.begin(),
+        openspace::globebrowsing::layers::Groups.end(),
+        [&string](const openspace::globebrowsing::layers::Group& gi) {
+            return gi.identifier == string;
+        }
     );
-    return it != Groups.end() ? it->id: Group::ID::Unknown;
+    return it != openspace::globebrowsing::layers::Groups.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Group::ID::Unknown;
 }
 
 template <>
 constexpr openspace::globebrowsing::layers::Adjustment::ID from_string(
                                                                   std::string_view string)
 {
-    using namespace openspace::globebrowsing::layers;
-
     auto it = std::find_if(
-        Adjustments.begin(),
-        Adjustments.end(),
-        [&string](const Adjustment& ai) { return ai.identifier == string; }
+        openspace::globebrowsing::layers::Adjustments.begin(),
+        openspace::globebrowsing::layers::Adjustments.end(),
+        [&string](const openspace::globebrowsing::layers::Adjustment& ai) {
+            return ai.identifier == string;
+        }
     );
-    return it != Adjustments.end() ? it->id : Adjustment::ID::None;
+    return it != openspace::globebrowsing::layers::Adjustments.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Adjustment::ID::None;
 }
 
 template <>
 constexpr openspace::globebrowsing::layers::Blend::ID from_string(std::string_view string)
 {
-    using namespace openspace::globebrowsing::layers;
-
     auto it = std::find_if(
-        Blends.begin(),
-        Blends.end(),
-        [&string](const Blend& bi) { return bi.identifier == string; }
+        openspace::globebrowsing::layers::Blends.begin(),
+        openspace::globebrowsing::layers::Blends.end(),
+        [&string](const openspace::globebrowsing::layers::Blend& bi) {
+            return bi.identifier == string;
+        }
     );
-    return it != Blends.end() ? it->id : Blend::ID::Normal;
+    return it != openspace::globebrowsing::layers::Blends.end() ?
+        it->id :
+        openspace::globebrowsing::layers::Blend::ID::Normal;
 }
 
 } // ghoul

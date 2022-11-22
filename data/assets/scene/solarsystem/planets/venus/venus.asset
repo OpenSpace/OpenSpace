@@ -81,12 +81,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Venus)
   openspace.addSceneGraphNode(VenusLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VenusLabel)
   openspace.removeSceneGraphNode(Venus)
 end)
-    
+
 asset.export(Venus)
 asset.export(VenusLabel)
 

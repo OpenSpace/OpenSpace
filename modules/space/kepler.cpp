@@ -312,7 +312,6 @@ namespace {
         const size_t pos = epoch.find('T');
         if (pos == 10) {
             // We have the first form
-            
             int month;
             int days;
             auto res = scn::scan(
@@ -687,7 +686,7 @@ std::optional<std::vector<Parameters>> loadCache(std::filesystem::path file) {
     res.reserve(size);
     for (uint32_t i = 0; i < size; i++) {
         Parameters param;
-        
+
         uint32_t nameLength = 0;
         stream.read(reinterpret_cast<char*>(&nameLength), sizeof(uint32_t));
         param.name.resize(nameLength);

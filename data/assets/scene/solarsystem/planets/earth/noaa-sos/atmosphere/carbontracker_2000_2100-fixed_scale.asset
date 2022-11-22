@@ -3,16 +3,16 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "CarbonTracker: Fixed Scale"
 local Identifier = "noaa-sos-atmosphere-carbontracker_2000_2100-fixed_scale"
-local Description = [["NOAA encourages science that adds benefit to society and the 
-environment. CarbonTracker does both." said retired Navy Vice Admiral Conrad 
-Lautenbacher, Ph.D., former undersecretary of commerce for oceans and atmosphere and NOAA 
-administrator. CarbonTracker is a system to keep track of carbon dioxide uptake and 
-release at the Earth's surface over time. It was developed by the Carbon Cycle Greenhouse 
-Gases group at NOAA's Earth System Research Laboratory. As a scientific tool, 
-CarbonTracker has helped improve the understanding of carbon uptake and release from the 
-land and oceans, and how those sources and sinks are responding to the changing climate, 
-increasing levels of atmospheric CO2 (the CO2 fertilization effect), and human management 
-of land and oceans. CarbonTracker relies on the long-term monitoring of atmospheric CO2 
+local Description = [["NOAA encourages science that adds benefit to society and the
+environment. CarbonTracker does both." said retired Navy Vice Admiral Conrad
+Lautenbacher, Ph.D., former undersecretary of commerce for oceans and atmosphere and NOAA
+administrator. CarbonTracker is a system to keep track of carbon dioxide uptake and
+release at the Earth's surface over time. It was developed by the Carbon Cycle Greenhouse
+Gases group at NOAA's Earth System Research Laboratory. As a scientific tool,
+CarbonTracker has helped improve the understanding of carbon uptake and release from the
+land and oceans, and how those sources and sinks are responding to the changing climate,
+increasing levels of atmospheric CO2 (the CO2 fertilization effect), and human management
+of land and oceans. CarbonTracker relies on the long-term monitoring of atmospheric CO2
 performed by the NOAA Global Monitoring Division and international partners]]
 local URL = "https://sos.noaa.gov/catalog/datasets/carbon-tracker-fixed-scale/"
 
@@ -39,7 +39,7 @@ local layer_field = {
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "co2wx_%Y%m%d.png"
-  },  
+  },
   Description = Description
 }
 
@@ -53,7 +53,7 @@ local layer_obs = {
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "co2wx_%Y%m%d.obs.png"
-  },  
+  },
   Description = Description
 }
 
@@ -68,7 +68,7 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(fieldDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "field-1.zip", fieldDestination, true)
@@ -85,10 +85,10 @@ asset.onInitialize(function()
     openspace.printInfo("Extracting " .. Name .. " Colorbar")
     openspace.unzipFile(syncedDirectory .. "colorbar.zip", colorbarDestination, true)
   end
-      
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_field)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_obs)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

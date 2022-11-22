@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Biosphere: Marine Chlorophyll Concentration and Land Vegetation (with CO2 labels)"
 local Identifier = "noaa-sos-oceans-seawifs-no_holes"
-local Description = [[The term biosphere refers to the regions of the surface, 
-atmosphere, and hydrosphere of the earth occupied by living organisms.This dataset shows 
-quantity of marine and land-based plant-life as it changes throughout the seasons of the 
+local Description = [[The term biosphere refers to the regions of the surface,
+atmosphere, and hydrosphere of the earth occupied by living organisms.This dataset shows
+quantity of marine and land-based plant-life as it changes throughout the seasons of the
 year]]
 local URL = "https://sos.noaa.gov/catalog/datasets/biosphere-marine-chlorophyll-concentration-and-land-vegetation-with-co2-labels/"
 
@@ -45,7 +45,7 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

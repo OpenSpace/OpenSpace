@@ -24,7 +24,7 @@ local Dione = {
       SourceFrame = "IAU_ENCELADUS",
       DestinationFrame = "GALACTIC"
     }
-  },    
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 561400,
@@ -52,11 +52,11 @@ local Dione = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Dione)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Dione)
 end)
-  
+
 asset.export(Dione)
 
 

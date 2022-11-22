@@ -56,4 +56,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMDATE___H__
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMELAPSEDTIME___H__

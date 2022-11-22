@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Roads (black)"
 local Identifier = "noaa-sos-overlays-roads-black"
-local Description = [[Overlays are datasets with transparent backgrounds that contain 
-foreground data used to augment other SOS datasets.This particular dataset overlays black 
-roads onto any dataset that you are viewing. The data was found at Natural Earth 
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset overlays black
+roads onto any dataset that you are viewing. The data was found at Natural Earth
 Data]]
 local URL = "https://sos.noaa.gov/catalog/datasets/roads-black/"
 
@@ -25,7 +25,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 

@@ -118,15 +118,16 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
 std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
     std::vector<EventEngine::ActionInfo> result;
     result.reserve(_eventActions.size());
-    for (const std::pair<const events::Event::Type, std::vector<ActionInfo>>& p : _eventActions)
-    {
+    using Type = events::Event::Type;
+    for (const std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         result.insert(result.end(), p.second.begin(), p.second.end());
     }
     return result;
 }
 
 void EventEngine::enableEvent(uint32_t identifier) {
-    for (std::pair<const events::Event::Type, std::vector<ActionInfo>>& p : _eventActions) {
+    using Type = events::Event::Type;
+    for (std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         for (ActionInfo& ai : p.second) {
             if (ai.id == identifier) {
                 ai.isEnabled = true;
@@ -137,7 +138,8 @@ void EventEngine::enableEvent(uint32_t identifier) {
 }
 
 void EventEngine::disableEvent(uint32_t identifier) {
-    for (std::pair<const events::Event::Type, std::vector<ActionInfo>>& p : _eventActions) {
+    using Type = events::Event::Type;
+    for (std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         for (ActionInfo& ai : p.second) {
             if (ai.id == identifier) {
                 ai.isEnabled = false;

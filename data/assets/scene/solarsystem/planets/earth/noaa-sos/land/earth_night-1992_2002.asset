@@ -3,8 +3,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Nighttime Lights Comparison - 1992 and 2002"
 local Identifier = "noaa-sos-land-earth_night-1992_2002"
-local Description = [[The data was recorded by the Defense Meteorological Satellite 
-  Program (DMSP) in the National Geophysical Data Center (NGDC), now part of NOAA National 
+local Description = [[The data was recorded by the Defense Meteorological Satellite
+  Program (DMSP) in the National Geophysical Data Center (NGDC), now part of NOAA National
   Centers for Environmental Information (NCEI). The data was collected using polar
   orbiting satellites that provide full cover of the globe twice a day. The satellites
   have an Operation Linescan system which allows them to detect low levels of visible-near
@@ -33,7 +33,7 @@ local layer_2002 = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_1992)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2002)
 end)

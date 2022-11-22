@@ -27,11 +27,11 @@ local MoonTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MoonTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MoonTrail)
 end)
-  
+
 asset.export(MoonTrail)
 
 

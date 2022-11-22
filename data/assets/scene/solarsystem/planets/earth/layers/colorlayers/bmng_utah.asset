@@ -6,7 +6,7 @@ local layer = {
   Enabled = asset.enabled,
   FilePath = asset.localResource("bmng_utah.wms"),
   Description = [[Web loaded full resolution map of Blue Marble Next Generation. This map
-    is hosted on the OpenSpace servers in Utah]],    
+    is hosted on the OpenSpace servers in Utah]],
 }
 
 asset.onInitialize(function()

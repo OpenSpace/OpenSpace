@@ -377,7 +377,8 @@ namespace {
             target.setValue("dec", spherical.y);
             target.setValue("roll", pair->targetRoll());
             target.setValue("color", pair->borderColor());
-            std::vector<std::pair<std::string, glm::dvec3>> copies = pair->displayCopies();
+            std::vector<std::pair<std::string, glm::dvec3>> copies =
+                pair->displayCopies();
             ghoul::Dictionary copiesData;
             for (size_t i = 0; i < copies.size(); i++) {
                 copiesData.setValue(copies[i].first, copies[i].second);
@@ -751,7 +752,6 @@ namespace {
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->fineTuneTarget(translation);
-       
     }
 }
 
@@ -773,7 +773,7 @@ namespace {
             images.rbegin(), images.rend(),
             [&](int index) {
                 const ImageData& image = module->wwtDataHandler().image(index);
-                // Index of image is used as layer ID as it is unique in the image data set
+                // Index of image is used as layer ID as it's unique in the image data set
                 pair->browser()->addImageLayerToWwt(image.imageUrl, index);
             }
         );

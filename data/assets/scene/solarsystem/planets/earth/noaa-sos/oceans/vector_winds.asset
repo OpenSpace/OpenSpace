@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Ocean Surface Winds"
 local Identifier = "noaa-sos-oceans-vector_winds"
-local Description = [[The SeaWinds scatterometer, carried aboard NASA's QuikSCAT 
-satellite, is a microwave radar designed to measure the backscatter related to 
-near-surface wind speed and direction over the oceans. A rougher ocean surface returns a 
-stronger signal because the waves reflect more of the radar energy back toward the 
-scatterometer antenna (backscatter), and a smoother ocean surface returns a weaker signal 
-because less of the energy is reflected. Given the known relationship between the 
-roughness of the surface and the strength of the wind, it is possible to compute the wind 
-speed and direction - the wind vector - from multiple observations of the signal returned 
+local Description = [[The SeaWinds scatterometer, carried aboard NASA's QuikSCAT
+satellite, is a microwave radar designed to measure the backscatter related to
+near-surface wind speed and direction over the oceans. A rougher ocean surface returns a
+stronger signal because the waves reflect more of the radar energy back toward the
+scatterometer antenna (backscatter), and a smoother ocean surface returns a weaker signal
+because less of the energy is reflected. Given the known relationship between the
+roughness of the surface and the strength of the wind, it is possible to compute the wind
+speed and direction - the wind vector - from multiple observations of the signal returned
 from a given area on the ocean surface]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-surface-winds/"
 
@@ -51,7 +51,7 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

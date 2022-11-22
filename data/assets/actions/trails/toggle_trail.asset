@@ -56,7 +56,7 @@ local hide_trail = {
     else
       node = openspace.navigation.getNavigationState().Anchor
     end
-    
+
     if openspace.hasSceneGraphNode(node .. "Trail") then
       openspace.setPropertyValueSingle("Scene." .. node .. "Trail.Renderable.Fade", 0.0, 1.0)
     elseif openspace.hasSceneGraphNode(node .. "_trail") then
@@ -81,7 +81,7 @@ local show_trail = {
     else
       node = openspace.navigation.getNavigationState().Anchor
     end
-    
+
     if openspace.hasSceneGraphNode(node .. "Trail") then
       openspace.setPropertyValueSingle("Scene." .. node .. "Trail.Renderable.Fade", 1.0, 1.0)
     elseif openspace.hasSceneGraphNode(node .. "_trail") then

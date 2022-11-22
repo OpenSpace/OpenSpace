@@ -173,7 +173,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
     if (ImGui::TreeNode(name.c_str())) {
         bool selectionChanged = false;
         std::set<std::string> newSelected;
-       
+
         std::set<std::string> selected = p->value();
         const std::vector<std::string>& options = p->options();
 
@@ -257,7 +257,7 @@ void renderListProperty(const std::string& name, const std::string& fullIdentifi
 #else
     strcpy(buffer, value.c_str());
 #endif
-    
+
     bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
     if (hasNewValue) {
         std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');

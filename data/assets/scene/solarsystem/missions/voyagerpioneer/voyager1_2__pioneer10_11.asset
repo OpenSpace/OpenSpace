@@ -140,14 +140,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(pioneer10)
   openspace.addSceneGraphNode(pioneer11)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(pioneer11)
   openspace.removeSceneGraphNode(pioneer10)
   openspace.removeSceneGraphNode(voyager2)
   openspace.removeSceneGraphNode(voyager1)
 end)
-    
+
 asset.export(voyager1)
 asset.export(voyager2)
 asset.export(pioneer10)

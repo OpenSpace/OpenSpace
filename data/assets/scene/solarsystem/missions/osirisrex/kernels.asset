@@ -4,7 +4,7 @@ local kernels = asset.syncedResource({
   Identifier = "osirisrex_kernels",
   Version = 4
 })
-  
+
 local OsirisRexKernels = {
   kernels .. "orx_v14.tf",
   kernels .. "orx_ocams_v07.ti",

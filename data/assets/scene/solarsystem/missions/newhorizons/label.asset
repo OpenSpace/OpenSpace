@@ -27,9 +27,9 @@ local Labels = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Labels)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Labels)
 end)
-  
+
 asset.export(Labels)

@@ -40,10 +40,10 @@ local HydraTrail = {
     Period = 38.20177,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
@@ -56,12 +56,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Hydra)
   openspace.addSceneGraphNode(HydraTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HydraTrail)
   openspace.removeSceneGraphNode(Hydra)
 end)
-  
+
 asset.export(Hydra)
 asset.export(HydraTrail)
 

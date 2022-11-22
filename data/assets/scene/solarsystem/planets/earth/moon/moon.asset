@@ -37,7 +37,7 @@ local Moon = {
       Casters = {
         { Name = earthAsset.Earth.Identifier, Radius = 6.371E6 },
       }
-    },        
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "moon.labels",
@@ -59,11 +59,11 @@ local Moon = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Moon)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Moon)
 end)
-  
+
 asset.export(Moon)
 
 

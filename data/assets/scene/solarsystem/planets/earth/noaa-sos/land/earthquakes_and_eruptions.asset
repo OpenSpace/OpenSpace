@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Earthquakes and Eruptions - 1960 - 2010"
 local Identifier = "noaa-sos-land-earthquakes_and_eruptions"
-local Description = [[Most of Earth's earthquakes and volcanic eruptions occur at the 
-boundaries of the tectonic plates. This dataset shows all earthquakes of magnitude 5.0 or 
-greater from 1960 through 2010. The earthquakes are illustrated with a large white dot at 
-the time of the event. The size of the dot is proportional to the magnitude of the 
-earthquake. A musical tone is generated for the larger events. The larger the earthquake, 
-the lower the tone. The white dots eventually turn gray and slowly shrink to single-pixel 
+local Description = [[Most of Earth's earthquakes and volcanic eruptions occur at the
+boundaries of the tectonic plates. This dataset shows all earthquakes of magnitude 5.0 or
+greater from 1960 through 2010. The earthquakes are illustrated with a large white dot at
+the time of the event. The size of the dot is proportional to the magnitude of the
+earthquake. A musical tone is generated for the larger events. The larger the earthquake,
+the lower the tone. The white dots eventually turn gray and slowly shrink to single-pixel
 dots]]
 local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-and-eruptions-1960-2010/"
 
@@ -48,7 +48,7 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

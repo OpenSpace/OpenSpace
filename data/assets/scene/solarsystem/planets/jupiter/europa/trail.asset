@@ -27,11 +27,11 @@ local EuropaTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EuropaTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuropaTrail)
 end)
-  
+
 asset.export(EuropaTrail)
 
 

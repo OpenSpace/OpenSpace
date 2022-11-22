@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Plate Boundaries (colorized)"
 local Identifier = "noaa-sos-overlays-plate_boundary-color"
-local Description = [[Overlays are datasets with transparent backgrounds that contain 
-foreground data used to augment other SOS datasets.This particular dataset overlays 
-tectonic plate boundaries, with types of boundaries differentiated in color, onto any 
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset overlays
+tectonic plate boundaries, with types of boundaries differentiated in color, onto any
 dataset that you are viewing]]
 local URL = "https://sos.noaa.gov/catalog/datasets/plate-boundaries-colorized/"
 
@@ -25,7 +25,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 
