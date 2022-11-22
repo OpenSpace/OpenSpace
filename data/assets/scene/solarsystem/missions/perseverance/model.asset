@@ -1,6 +1,7 @@
 local trail = asset.require("./trail")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sun = asset.require("scene/solarsystem/sun/sun")
+local spice = asset.require("./spice")
 
 local models = asset.syncedResource({
   Name = "Perseverance Model",
@@ -9,10 +10,86 @@ local models = asset.syncedResource({
   Version = 2
 })
 
+local TranslationKeyframes = {
+  ["1850 JAN 01 00:00:00"] = {
+    Type = "SpiceTranslation",
+    Target = spice.ID,
+    Observer = "MARS",
+    Kernels = spice.Kernels,
+    Frame = "IAU_MARS",
+    FixedDate = "2020 JUL 17 13:56:43"
+  },
+  ["2020 JUL 17 13:56:42"] = {
+    Type = "SpiceTranslation",
+    Target = spice.ID,
+    Observer = "MARS",
+    Kernels = spice.Kernels,
+    Frame = "IAU_MARS",
+    FixedDate = "2020 JUL 17 13:56:43"
+  },
+  ["2020 JUL 17 13:56:43"] = {
+    Type = "SpiceTranslation",
+    Target = spice.ID,
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = spice.Kernels
+  },
+  ["2020 JUL 17 13:56:44"] = {
+    Type = "SpiceTranslation",
+    Target = spice.ID,
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = spice.Kernels
+  },
+  ["2021 FEB 18 20:43:48"] = {
+    Type = "SpiceTranslation",
+    Target = spice.ID,
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = spice.Kernels,
+  },
+  ["2021 FEB 18 20:43:49"] = {
+    Type = "SpiceTranslation",
+    Target = spice.ID,
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = spice.Kernels,
+    FixedDate = "2021 FEB 18 20:43:48"
+  },
+}
+
+local PerseveranceNode = {
+  Identifier = "PerseveranceNode",
+  Parent = marsTransforms.MarsBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MARS",
+      Observer = "MARS BARYCENTER"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_MARS",
+      DestinationFrame = "GALACTIC"
+    }
+  },
+  GUI = {
+    Name = "Perseverance Node",
+    Path = "/Solar System/Missions/Perseverance",
+    Hidden = true
+  }
+}
+
 -- Perseverance Model --
 local Perseverance = {
   Identifier = "Perseverance",
-  Parent = trail.PerseveranceNode.Identifier,
+  Parent = PerseveranceNode.Identifier,
+  Transform = {
+    Translation = {
+      Type = "TimelineTranslation",
+      Keyframes = TranslationKeyframes
+    }
+  },
   GUI = {
     Name = "Perseverance",
     Path = "/Solar System/Missions/Perseverance"
@@ -46,29 +123,30 @@ local Body = {
         Intensity = 0.5
       }
     },
-    PerformShading = false,
-    RotationVector = {65.940000,201.389999,263.980011}
+    RotationVector = {19.19,0.0,348.08}
   },
   GUI = {
     Name = "Perseverance Model Body",
     Path = "/Solar System/Missions/Perseverance/Model",
-    Hidden = true
+    -- Hidden = true
   }
 }
 
 
 asset.onInitialize(function()
+  openspace.addSceneGraphNode(PerseveranceNode)
   openspace.addSceneGraphNode(Perseverance)
   openspace.addSceneGraphNode(PerseveranceModel)
   openspace.addSceneGraphNode(Body)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Body)
   openspace.removeSceneGraphNode(PerseveranceModel)
   openspace.removeSceneGraphNode(Perseverance)
+  openspace.removeSceneGraphNode(PerseveranceNode)
 end)
-    
+
 asset.export(Perseverance)
 asset.export(PerseveranceModel)
 asset.export(Body)

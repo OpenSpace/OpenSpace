@@ -743,18 +743,15 @@ namespace {
  * and third is the end position of the drag.
  */
 [[codegen::luawrap]] void finetuneTargetPosition(std::string identifier,
-                                                 glm::vec2 startPosition,
-                                                 glm::vec2 endPosition)
+                                                 glm::dvec2 translation)
 {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        glm::vec2 startScreenSpace = skybrowser::pixelToScreenSpace2d(startPosition);
-        glm::vec2 endScreenSpace = skybrowser::pixelToScreenSpace2d(endPosition);
-        glm::vec2 translation = endScreenSpace - startScreenSpace;
-        pair->fineTuneTarget(startScreenSpace, translation);
+        pair->fineTuneTarget(translation);
+       
     }
 }
 

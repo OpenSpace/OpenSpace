@@ -31,11 +31,11 @@ local PlutoBarycenterTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoBarycenterTrail)
 end)
-  
+
 asset.export(PlutoBarycenterTrail)
 
 

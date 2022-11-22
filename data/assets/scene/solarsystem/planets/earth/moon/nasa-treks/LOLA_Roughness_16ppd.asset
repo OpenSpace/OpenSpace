@@ -1,0 +1,34 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
+
+local treks_LRO_LOLA_ClrRoughness_Global_16ppd = {
+  Identifier = "LRO_LOLA_ClrRoughness_Global_16ppd",
+  Name = [[LOLA Roughness 16ppd, Colorized]],
+  FilePath = asset.localResource("LOLA_Roughness_16ppd/Colorized.vrt"),
+  Description = [[]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_LOLA_ClrRoughness_Global_16ppd)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_LOLA_ClrRoughness_Global_16ppd")
+end)
+
+asset.export("LRO_LOLA_ClrRoughness_Global_16ppd", treks_LRO_LOLA_ClrRoughness_Global_16ppd)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Moon LOLA_Roughness_16ppd],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/moon",
+  License = "NASA/Treks",
+  Description = [[LOLA_Roughness_16ppd layers from NASA/Treks for Moon]]
+}

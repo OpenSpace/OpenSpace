@@ -53,6 +53,7 @@ local OrionNebulaModel = {
       Scale = 0.67500000
     }
   },
+  InteractionSphere = 0.8,
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = sync .. "orion_nebula.obj",

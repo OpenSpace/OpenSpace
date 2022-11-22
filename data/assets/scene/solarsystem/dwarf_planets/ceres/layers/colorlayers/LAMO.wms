@@ -1,0 +1,20 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://wms.itn.liu.se/Ceres/LAMO/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <SizeX>131072</SizeX>
+    <SizeY>65536</SizeY>
+    <TileLevel>9</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>EPSG:4326</Projection>
+  <BlockSizeX>256</BlockSizeX>
+  <BlockSizeY>256</BlockSizeY>
+  <BandsCount>1</BandsCount>
+  <MaxConnections>10</MaxConnections>
+</GDAL_WMS>

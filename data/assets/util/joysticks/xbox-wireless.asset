@@ -34,7 +34,7 @@ local XBoxController = {
   Y = 3,
   LB = 4,
   RB = 5,
-  Select = 6,
+  Back = 6,
   Start = 7,
   LeftStickButton = 8,
   RightStickButton = 9,
@@ -50,7 +50,7 @@ asset.onInitialize(function()
   local controller = XBoxController;
   local name = "Wireless Xbox Controller";
 
-  local deadzoneJoysticks = 0.15
+  local deadzoneJoysticks = 0.2
   local deadzoneTriggers = 0.05
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[1], deadzoneJoysticks)
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[2], deadzoneJoysticks)
@@ -60,76 +60,138 @@ asset.onInitialize(function()
   openspace.navigation.setAxisDeadZone(name, controller.RightTrigger, deadzoneTriggers)
 
   openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[1], "Orbit X");
-  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[2], "Orbit Y", true);
+  openspace.navigation.bindJoystickAxis(name, controller.LeftThumbStick[2], "Orbit Y");
   openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[1], "Pan X", true);
   openspace.navigation.bindJoystickAxis(name, controller.RightThumbStick[2], "Pan Y", true);
   openspace.navigation.bindJoystickAxis(name, controller.LeftTrigger, "Zoom Out", false, "TriggerLike");
   openspace.navigation.bindJoystickAxis(name, controller.RightTrigger, "Zoom In", false, "TriggerLike");
 
+  -- Roll
   openspace.navigation.bindJoystickButton(
     name,
-    controller.LB,
-    joystickHelper.bindLocalRoll(name, controller.RightThumbStick[1]),
-    "Switch to local roll mode"
+    controller.DPad.Up,
+    joystickHelper.bindLocalRoll(name, controller.RightThumbStick[1]) ..
+    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'None');",
+    "Switch to roll mode"
   )
   openspace.navigation.bindJoystickButton(
     name,
-    controller.LB,
-    joystickHelper.unbindRoll(name, controller.RightThumbStick[1]),
-    "Switch back to normal mode",
-    "Release"
-  )
-  openspace.navigation.bindJoystickButton(
-    name,
-    controller.RB,
-    joystickHelper.bindGlobalRoll(name, controller.RightThumbStick[1]),
-    "Switch to global roll mode"
-  )
-  openspace.navigation.bindJoystickButton(
-    name,
-    controller.RB,
-    joystickHelper.unbindRoll(name, controller.RightThumbStick[1]),
+    controller.DPad.Up,
+    joystickHelper.unbindRoll(name, controller.RightThumbStick[1]) ..
+    "openspace.navigation.bindJoystickAxis('" .. name .. "', " .. controller.RightThumbStick[2] .. ", 'Pan Y', true);",
     "Switch back to normal mode",
     "Release"
   )
 
+  -- Switch focus in the interesting nodes menu
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.LB,
+    [[
+      openspace.navigation.targetPreviousInterestingAnchor();
+      openspace.navigation.retargetAnchor();
+    ]],
+    "Switch target to the previous interesting node"
+  )
+
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.RB,
+    [[
+      openspace.navigation.targetNextInterestingAnchor();
+      openspace.navigation.retargetAnchor();
+    ]],
+    "Switch target to the next interesting node"
+  )
+
+  -- Toggle Frictions
   openspace.navigation.bindJoystickButton(
     name,
     controller.A,
-    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
-    "Toggle zoom friction"
-  )
-  openspace.navigation.bindJoystickButton(
-    name,
-    controller.B,
     propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
     "Toggle rotational friction"
   )
   openspace.navigation.bindJoystickButton(
     name,
-    controller.DPad.Left,
-    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
-    "Toggle roll friction"
-  )
-
-  openspace.navigation.bindJoystickButton(
-    name,
-    controller.X,
-    [[
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
-    ]],
-    "Switch target to Earth"
+    controller.B,
+    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
+    "Toggle zoom friction"
   )
   openspace.navigation.bindJoystickButton(
     name,
     controller.Y,
+    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
+    "Toggle roll friction"
+  )
+
+  -- Refocus
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.RightStickButton,
+    "openspace.navigation.retargetAnchor();",
+    "Retarget on current focus"
+  )
+
+  -- Time
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.DPad.Left,
+    "openspace.time.interpolatePreviousDeltaTimeStep();",
+    "Go backwards in time, faster the more times this button is pressed"
+  )
+
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.DPad.Down,
+    "openspace.time.interpolateDeltaTime(1);",
+    "Reset realtime"
+  )
+
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.DPad.Right,
+    "openspace.time.interpolateNextDeltaTimeStep();",
+    "Go forwards in time, faster the more times this button is pressed"
+  )
+
+  -- Reset Time to yesterday
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Back,
     [[
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Mars");
-      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
+      openspace.time.setDeltaTime(1);
+      local yesterday = openspace.time.advancedTime(openspace.time.currentWallTime(), "-1d");
+      openspace.time.setTime(yesterday);
     ]],
-    "Switch target to Mars"
+    "Reset to yesterday realtime"
+  )
+
+  -- Pause
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Start,
+    "openspace.time.togglePause();",
+    "Pause time simulation"
+  )
+
+  -- Open buttons that can be customized
+  -- X
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.X,
+    [[
+      -- <-- Copy paste your custum script here
+    ]],
+    ""  -- <-- Description of your custom script here (optional)
+  )
+
+  -- Left Joystick Button
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.LeftStickButton,
+    [[
+      -- <-- Copy paste your custum script here
+    ]],
+    ""  -- <-- Description of your custom script here (optional)
   )
 end)
