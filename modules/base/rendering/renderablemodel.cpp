@@ -764,6 +764,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             glDisable(GL_DEPTH_TEST);
         }
 
+        if (_disableFaceCulling) {
+            glDisable(GL_CULL_FACE);
+        }
+
         // Prepare framebuffer
         GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
@@ -795,9 +799,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
                     // Then front faces (remove back faces)
                     glCullFace(GL_BACK);
                 }
-            }
-            else {
-                glDisable(GL_CULL_FACE);
             }
 
             _geometry->render(*_program);
