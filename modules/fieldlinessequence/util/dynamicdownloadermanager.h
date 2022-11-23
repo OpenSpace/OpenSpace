@@ -121,8 +121,8 @@ struct FieldlineOption {
 
 struct File {
     std::unique_ptr<HttpFileDownload> download;
-    //pair.first is timestep, pair.second is url to be downloaded
     std::string timestep;
+    double time;
     std::string URL;
     double cadence;
     int availableIndex;
@@ -155,9 +155,10 @@ private:
     void downloadFile();
     double calculateCadence();
     void prioritizeQueue(const double& time);
-
+    void putOnQueue();
     bool _forward = true;
     bool _firstFrame = true;
+    bool _secondFrame = true;
 
     std::filesystem::path _syncDir;
     std::pair<int, std::string> _dataID;
@@ -171,6 +172,9 @@ private:
     double _tempCadence = 0;
     const int _nOfFilesToQueue = 0;
 
+    //to iterate window
+    std::vector<File>::iterator _thisFile;
+
     std::vector<File> _availableData;
 
     //std::vector<std::unique_ptr<HttpFileDownload>> _availableFiles;
@@ -183,7 +187,6 @@ private:
     bool _queueIsPrioritized = false;
     std::vector<File*> _filesCurrentlyDownloading;
     std::vector<std::filesystem::path> _downloadedFiles;
-
 
 };
 
