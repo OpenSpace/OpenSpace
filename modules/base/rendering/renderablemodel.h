@@ -93,11 +93,11 @@ private:
     properties::FloatProperty _specularIntensity;
 
     properties::BoolProperty _performShading;
-    properties::BoolProperty _disableFaceCulling;
+    properties::BoolProperty _enableFaceCulling;
     properties::DMat4Property _modelTransform;
     properties::Vec3Property _rotationVec;
 
-    properties::BoolProperty _disableDepthTest;
+    properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
 
     std::string _vertexShaderPath;

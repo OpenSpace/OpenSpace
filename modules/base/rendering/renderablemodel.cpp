@@ -114,10 +114,10 @@ namespace {
         "of the Sun"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFaceCullingInfo = {
-        "DisableFaceCulling",
-        "Disable Face Culling",
-        "Disable OpenGL automatic face culling optimization"
+    constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
+        "EnableFaceCulling",
+        "Enable Face Culling",
+        "Enable OpenGL automatic face culling optimization"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
@@ -139,10 +139,10 @@ namespace {
         "A list of light sources that this model should accept light from"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableDepthTestInfo = {
-        "DisableDepthTest",
-        "Disable Depth Test",
-        "Disable Depth Testing for the Model"
+    constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
+        "EnableDepthTest",
+        "Enable Depth Test",
+        "Enable Depth Testing for the Model"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
@@ -236,8 +236,8 @@ namespace {
         // [[codegen::verbatim(ShadingInfo.description)]]
         std::optional<bool> performShading;
 
-        // [[codegen::verbatim(DisableFaceCullingInfo.description)]]
-        std::optional<bool> disableFaceCulling;
+        // [[codegen::verbatim(EnableFaceCullingInfo.description)]]
+        std::optional<bool> enableFaceCulling;
 
         // [[codegen::verbatim(ModelTransformInfo.description)]]
         std::optional<glm::dmat3x3> modelTransform;
@@ -249,8 +249,8 @@ namespace {
         std::optional<std::vector<ghoul::Dictionary>> lightSources
             [[codegen::reference("core_light_source")]];
 
-        // [[codegen::verbatim(DisableDepthTestInfo.description)]]
-        std::optional<bool> disableDepthTest;
+        // [[codegen::verbatim(EnableDepthTestInfo.description)]]
+        std::optional<bool> enableDepthTest;
 
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
         std::optional<std::string> blendingOption;
@@ -279,7 +279,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
     , _performShading(ShadingInfo, true)
-    , _disableFaceCulling(DisableFaceCullingInfo, false)
+    , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _modelTransform(
         ModelTransformInfo,
         glm::dmat3(1.0),
@@ -287,7 +287,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat3(1.0)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
-    , _disableDepthTest(DisableDepthTestInfo, false)
+    , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(
         BlendingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -415,8 +415,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _diffuseIntensity = p.diffuseIntensity.value_or(_diffuseIntensity);
     _specularIntensity = p.specularIntensity.value_or(_specularIntensity);
     _performShading = p.performShading.value_or(_performShading);
-    _disableDepthTest = p.disableDepthTest.value_or(_disableDepthTest);
-    _disableFaceCulling = p.disableFaceCulling.value_or(_disableFaceCulling);
+    _enableDepthTest = p.enableDepthTest.value_or(_enableDepthTest);
+    _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
 
     if (p.vertexShader.has_value()) {
         _vertexShaderPath = p.vertexShader->string();
@@ -445,8 +445,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
     addProperty(_performShading);
-    addProperty(_disableFaceCulling);
-    addProperty(_disableDepthTest);
+    addProperty(_enableFaceCulling);
+    addProperty(_enableDepthTest);
     addProperty(_modelTransform);
     addProperty(_rotationVec);
 
@@ -760,11 +760,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
                 break;
         };
 
-        if (_disableDepthTest) {
+        if (!_enableDepthTest) {
             glDisable(GL_DEPTH_TEST);
         }
 
-        if (_disableFaceCulling) {
+        if (!_enableFaceCulling) {
             glDisable(GL_CULL_FACE);
         }
 
@@ -778,14 +778,14 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
         const float o = opacity();
-        if ((o >= 0.f && o < 1.f) || _disableDepthTest) {
+        if ((o >= 0.f && o < 1.f) || !_enableDepthTest) {
             setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
         }
         else {
             setRenderBin(_originalRenderBin);
         }
 
-        bool shouldRenderTwice = !_disableFaceCulling && _geometry->isTransparent();
+        bool shouldRenderTwice = _enableFaceCulling && _geometry->isTransparent();
         int nPasses = shouldRenderTwice ? 2 : 1;
         for (int i = 0; i < nPasses; ++i) {
             if (shouldRenderTwice) {
@@ -804,7 +804,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             _geometry->render(*_program);
         }
 
-        if (_disableFaceCulling) {
+        if (!_enableFaceCulling) {
             glEnable(GL_CULL_FACE);
         }
         _program->deactivate();

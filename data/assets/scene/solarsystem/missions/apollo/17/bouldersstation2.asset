@@ -49,7 +49,7 @@ local Station2Boulder1Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Station 2 Boulder 1 Model",
@@ -98,7 +98,7 @@ local Station2Boulder2Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Station 2 Boulder 2 Model",
@@ -147,7 +147,7 @@ local Station2Boulder3Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Station 2 Boulder 3 Model",
@@ -166,7 +166,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     local node = nodes[i]

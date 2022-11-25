@@ -68,7 +68,7 @@ local Apollo8Model = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Hidden = true,
@@ -98,13 +98,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo8Model)
   openspace.addSceneGraphNode(Apollo8Pivot)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo8Pivot)
   openspace.removeSceneGraphNode(Apollo8Model)
   openspace.removeSceneGraphNode(Apollo8)
 end)
-    
+
 asset.export(Apollo8)
 asset.export(Apollo8Model)
 asset.export(Apollo8Pivot)

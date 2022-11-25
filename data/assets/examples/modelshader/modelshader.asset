@@ -25,7 +25,7 @@ local model = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true,
+    EnableFaceCulling = true,
     VertexShader = asset.localResource("model_vs.glsl"),
     FragmentShader = asset.localResource("model_fs.glsl"),
   },
@@ -39,9 +39,9 @@ local model = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(model)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(model)
 end)
-  
+
 asset.export(model)

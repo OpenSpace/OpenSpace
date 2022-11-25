@@ -60,7 +60,7 @@ local Station6Frag1Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Station 6 Fragment 1 Model",
@@ -110,7 +110,7 @@ local Station6Frag2Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true,
+    EnableFaceCulling = true,
   },
   GUI = {
     Name = "Station 6 Fragment 2 Model",
@@ -148,7 +148,7 @@ local Station6Frag3Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Station 6 Fragment 3 Model",
@@ -166,7 +166,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     local node = nodes[i]

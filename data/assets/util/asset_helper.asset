@@ -170,7 +170,7 @@ local createModelPart = function (parent, sunLightSourceNode, models, geometry, 
       GeometryFile =  models .. "/" .. geometry .. ".obj",
       LightSources = lightSources,
       PerformShading = performShading,
-      DisableFaceCulling = true 
+      EnableFaceCulling = true
     },
     GUI = {
       Hidden = true

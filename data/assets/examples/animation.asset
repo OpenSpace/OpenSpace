@@ -30,7 +30,7 @@ local animationLoop = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Animated Model example (LoopFromStart)",
@@ -59,7 +59,7 @@ local animationLoopInf = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Animated Model example (LoopInfinitely)",
@@ -88,7 +88,7 @@ local animationOnce = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Animated Model example (Once)",
@@ -117,7 +117,7 @@ local animationBounceInf = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Animated Model example (BounceInfinitely)",
@@ -146,7 +146,7 @@ local animationBounce = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Animated Model example (BounceFromStart)",

@@ -37,7 +37,7 @@ local obj = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   InteractionSphere = 1000.0,
   OnApproach = { "os.example.generic" },

@@ -45,7 +45,7 @@ local Phobos = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
@@ -82,12 +82,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Phobos)
   openspace.addSceneGraphNode(PhobosTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PhobosTrail)
   openspace.removeSceneGraphNode(Phobos)
 end)
-    
+
 asset.export(Phobos)
 asset.export(PhobosTrail)
 

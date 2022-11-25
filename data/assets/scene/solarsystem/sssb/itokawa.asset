@@ -68,7 +68,7 @@ local ItokawaModel = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true,
+    EnableFaceCulling = true,
     SpecularIntensity = 0.0
   },
   GUI = {

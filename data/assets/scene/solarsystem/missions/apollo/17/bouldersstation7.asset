@@ -49,7 +49,7 @@ local Station7BoulderModel = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "Station 7 Boulder Model",
@@ -61,11 +61,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Station7BoulderHolder)
   openspace.addSceneGraphNode(Station7BoulderModel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Station7BoulderModel)
   openspace.removeSceneGraphNode(Station7BoulderHolder)
 end)
-    
+
 asset.export(Station7BoulderHolder)
 asset.export(Station7BoulderModel)

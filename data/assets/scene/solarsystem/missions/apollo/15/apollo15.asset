@@ -44,7 +44,7 @@ local Apollo15 = {
       sun.LightSource
     },
     PerformShading = true,
-    DisableFaceCulling = true
+    EnableFaceCulling = true
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -84,11 +84,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo15)
   openspace.addSceneGraphNode(Apollo15Trail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo15Trail)
   openspace.removeSceneGraphNode(Apollo15)
 end)
-    
+
 asset.export(Apollo15)
 asset.export(Apollo15Trail)
