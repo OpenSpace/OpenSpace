@@ -22,7 +22,8 @@ local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_saturn",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_saturn_minor"
 }
 
 local shepherdGroup = {
