@@ -29,11 +29,11 @@ local DioneTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(DioneTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DioneTrail)
 end)
-  
+
 asset.export(DioneTrail)
 
 

@@ -5,7 +5,7 @@ local layer = {
   Name = "Messenger SHADE [Sweden]",
   Enabled = asset.enabled,
   FilePath = asset.localResource("messenger_shade_sweden.wms"),
-  Settings = { 
+  Settings = {
     Gamma = 1.33,
     Multiplier = 1.15
   },

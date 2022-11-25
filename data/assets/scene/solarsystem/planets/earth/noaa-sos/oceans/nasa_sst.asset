@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Surface Temperature Model"
 local Identifier = "noaa-sos-oceans-nasa_sst"
-local Description = [["Sea surface temperature plays a vital role in the behavior of 
-the Earth's climate and weather. It is both a causal factor and a resulting effect of 
-complex interactions of natural forces on Earth. NASA not only measures sea surface 
-temperature from space using powerful scientific instruments, but it also studies 
-temperature processes in advanced computer models." -Gretchen Cook-Anderson, Goddard 
+local Description = [["Sea surface temperature plays a vital role in the behavior of
+the Earth's climate and weather. It is both a causal factor and a resulting effect of
+complex interactions of natural forces on Earth. NASA not only measures sea surface
+temperature from space using powerful scientific instruments, but it also studies
+temperature processes in advanced computer models." -Gretchen Cook-Anderson, Goddard
 Space Flight Center]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-temperature-model/"
 

@@ -51,7 +51,7 @@ void main() {
   gl_Position = positionScreenSpace;
   vs_st = in_st;
   vs_screenSpaceDepth = positionScreenSpace.w;
-    
+
   vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
 	// TBN matrix for normal mapping

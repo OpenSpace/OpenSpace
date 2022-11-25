@@ -55,12 +55,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(C2019Q4BorisovPosition)
   openspace.addSceneGraphNode(C2019Q4BorisovTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(C2019Q4BorisovTrail)
   openspace.removeSceneGraphNode(C2019Q4BorisovPosition)
 end)
-    
+
 asset.export(C2019Q4BorisovPosition)
 asset.export(C2019Q4BorisovTrail)
 

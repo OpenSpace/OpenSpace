@@ -54,11 +54,11 @@ local Mimas = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mimas)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Mimas)
 end)
-  
+
 asset.export(Mimas)
 
 

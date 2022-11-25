@@ -100,12 +100,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(stars)
   openspace.addSceneGraphNode(sunstar)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(sunstar)
   openspace.removeSceneGraphNode(stars)
 end)
-  
+
 asset.export(stars)
 asset.export(sunstar)
 

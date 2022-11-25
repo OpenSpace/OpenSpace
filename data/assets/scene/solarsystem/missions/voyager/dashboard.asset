@@ -22,7 +22,7 @@ asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(distance_voyager1)
   openspace.dashboard.addDashboardItem(distance_voyager2)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.dashboard.removeDashboardItem(distance_voyager2)
   openspace.dashboard.removeDashboardItem(distance_voyager1)

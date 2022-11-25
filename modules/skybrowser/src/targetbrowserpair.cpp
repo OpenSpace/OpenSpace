@@ -87,10 +87,7 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
     glm::dvec3 up = _targetRenderable->upVector() * percentage.y;
 
     glm::dvec3 newPosition = _startTargetPosition - (right - up);
-    aimTargetGalactic(
-        _targetNode->identifier(), 
-        newPosition
-    );
+    aimTargetGalactic(_targetNode->identifier(), newPosition);
 }
 
 void TargetBrowserPair::synchronizeAim() {

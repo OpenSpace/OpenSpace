@@ -28,11 +28,11 @@ local HyperionTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HyperionTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HyperionTrail)
 end)
-  
+
 asset.export(HyperionTrail)
 
 

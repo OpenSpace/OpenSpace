@@ -23,7 +23,7 @@ local layer = {
     as an accurate basemap on which data from future missions can be plotted.
     (Description from URL). <br><br> References: Williams, D. R. (2018). Viking
     Mission to Mars. https://nssdc.gsfc.nasa.gov/planetary/viking.html Additional
-    references available here: http://astrogeology.usgs.gov/maps/mdim-2-1]],
+    references available here: http://astrogeology.usgs.gov/maps/mdim-2-1]]
 }
 
 asset.onInitialize(function()

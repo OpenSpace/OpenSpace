@@ -20,7 +20,7 @@ local layer = {
     construction of this layer were produced by the team at the University of Arizona.
     This tiled web service, as hosted by Esri, is made available using lossy Jpeg
     compression using an 8 bit data range, using a linear stretch from the original
-    10 bit range. (Description from URL)]],
+    10 bit range. (Description from URL)]]
 }
 
 asset.onInitialize(function()

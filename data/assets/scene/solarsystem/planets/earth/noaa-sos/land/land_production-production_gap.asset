@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Agriculture: Cropland Production Gap"
 local Identifier = "noaa-sos-land-land_production-production_gap"
-local Description = [[A major component of the 2 Billion More Coming to Dinner film, 
-  these datasets show current and potential yields for the three top global crops, corn, 
-  wheat and rice, measured in tons per hectare. Potential yield for a given area is 
-  determined by using the productivity of another region with analogous environmental 
-  conditions and optimized water and nutrient input as a benchmark. In both maps, darker 
+local Description = [[A major component of the 2 Billion More Coming to Dinner film,
+  these datasets show current and potential yields for the three top global crops, corn,
+  wheat and rice, measured in tons per hectare. Potential yield for a given area is
+  determined by using the productivity of another region with analogous environmental
+  conditions and optimized water and nutrient input as a benchmark. In both maps, darker
   areas show smaller yields, while bright pink areas indicate higher yields]]
 local URL = "https://sos.noaa.gov/catalog/datasets/agriculture-cropland-yield-potential/"
 
@@ -45,10 +45,10 @@ local legend = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_countries)
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

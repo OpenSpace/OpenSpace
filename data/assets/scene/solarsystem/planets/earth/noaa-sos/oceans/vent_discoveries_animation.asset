@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Deep-Sea Vent Discoveries"
 local Identifier = "noaa-sos-oceans-vent_discoveries_animation"
-local Description = [[This dataset is an animation showing the discoveries of deep-sea 
-hydrothermal vents from 1977-2016 (cumulative, annually). In 1977 scientists made a 
-stunning discovery that changed our understanding of life on Earth. On the deep seafloor 
-they had discovered hot springs, or hydrothermal vents, with animals that had never been 
-seen before. These discoveries continue today. Over 240 vent fields have been discovered 
+local Description = [[This dataset is an animation showing the discoveries of deep-sea
+hydrothermal vents from 1977-2016 (cumulative, annually). In 1977 scientists made a
+stunning discovery that changed our understanding of life on Earth. On the deep seafloor
+they had discovered hot springs, or hydrothermal vents, with animals that had never been
+seen before. These discoveries continue today. Over 240 vent fields have been discovered
 with human-occupied, remotely-operated, and autonomous vehicles]]
 local URL = "https://sos.noaa.gov/catalog/datasets/deep-sea-vent-discoveries/"
 

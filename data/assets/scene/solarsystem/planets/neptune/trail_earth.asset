@@ -31,11 +31,11 @@ local NeptuneTrailEarth = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NeptuneTrailEarth)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneTrailEarth)
 end)
-  
+
 asset.export(NeptuneTrailEarth)
 
 

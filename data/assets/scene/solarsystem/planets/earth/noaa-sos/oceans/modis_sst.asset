@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Surface Temperature Observations - 2002 - 2006"
 local Identifier = "noaa-sos-oceans-modis_sst"
-local Description = [[Sea surface temperature, much like the atmosphere's temperature, 
-is constantly changing. The interaction between the ocean and the atmosphere is one that 
-scientists are constantly researching, especially in light of climate change. Water warms 
-up and cools down at a slower rate than air, so diurnal variations (heating during the 
-day and cooling during the night) seen in the atmosphere are hard to observe in the 
-ocean. The seasons, however, can be seen as the warmest water near the equator expands 
-toward the United States during the summer months and withdraws again during the winter 
+local Description = [[Sea surface temperature, much like the atmosphere's temperature,
+is constantly changing. The interaction between the ocean and the atmosphere is one that
+scientists are constantly researching, especially in light of climate change. Water warms
+up and cools down at a slower rate than air, so diurnal variations (heating during the
+day and cooling during the night) seen in the atmosphere are hard to observe in the
+ocean. The seasons, however, can be seen as the warmest water near the equator expands
+toward the United States during the summer months and withdraws again during the winter
 months]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-temperature-observations-2002-2006/"
 

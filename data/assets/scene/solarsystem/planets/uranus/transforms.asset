@@ -24,11 +24,11 @@ local UranusBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(UranusBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(UranusBarycenter)
 end)
-  
+
 asset.export(UranusBarycenter)
 
 

@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Surface Currents"
 local Identifier = "noaa-sos-oceans-nasa_speed"
-local Description = [[The water in the ocean is constantly moving. Ocean currents are 
-typically driven by surface wind and can have a huge impact on climate. Northwest Europe 
-is moderately temperate considering its latitude because the Gulf Stream off of the 
-eastern coast of the United States transports warm water north to those areas. In fact, 
-the Atlantic Ocean along the U.S. coast is much warmer than the Pacific Ocean along the 
-U.S. coast because of the warm water transported in the Gulf Stream. In this 
-visualization, a model created by NASA, the color variations denote speed. The lighter 
+local Description = [[The water in the ocean is constantly moving. Ocean currents are
+typically driven by surface wind and can have a huge impact on climate. Northwest Europe
+is moderately temperate considering its latitude because the Gulf Stream off of the
+eastern coast of the United States transports warm water north to those areas. In fact,
+the Atlantic Ocean along the U.S. coast is much warmer than the Pacific Ocean along the
+U.S. coast because of the warm water transported in the Gulf Stream. In this
+visualization, a model created by NASA, the color variations denote speed. The lighter
 green areas are moving faster than the blue areas]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-currents/"
 

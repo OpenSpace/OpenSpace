@@ -37,21 +37,18 @@ local object = {
   GUI = {
     Name = "Open Star Clusters",
     Path = "/Milky Way",
-    Description = [[Census: 2,040 clusters. DU Version 5.7. <br> 
-      An open star cluster is a loose assemblage of stars numbering from
-      hundreds to thousands that are bound by their mutual gravitation.
-      Astronomers know from their stellar spectra that stars in open clusters 
-      are typically young. (With a star's spectrum, we can determine
-      the spectral type and the luminosity class, revealing the star's age.)
-      Because these are young stars, we expect to see them in the
-      star-forming regions of our Galaxy, namely in the spiral arms. For
-      this reason, open clusters exist, for the most part, in the plane of the
-      Galaxy, where we view the arms edge-on as that band of light in
-      the night sky. Because of this, open clusters were originally known
-      as Galactic clusters, but this term fell out of favor once astronomers
-      began to understand that the Galaxy includes objects beyond the
-      Milky Way's disk. <br><br> Data Reference: Optically
-      visible open clusters and Candidates (Dias+ 2002-2015)]]
+    Description = [[Census: 2,040 clusters. DU Version 5.7. <br> An open star cluster is a
+      loose assemblage of stars numbering from hundreds to thousands that are bound by
+      their mutual gravitation. Astronomers know from their stellar spectra that stars in
+      open clusters are typically young. (With a star's spectrum, we can determine the
+      spectral type and the luminosity class, revealing the star's age.) Because these are
+      young stars, we expect to see them in the star-forming regions of our Galaxy, namely
+      in the spiral arms. For this reason, open clusters exist, for the most part, in the
+      plane of the Galaxy, where we view the arms edge-on as that band of light in the
+      night sky. Because of this, open clusters were originally known as Galactic
+      clusters, but this term fell out of favor once astronomers began to understand that
+      the Galaxy includes objects beyond the Milky Way's disk. <br><br> Data Reference:
+      Optically visible open clusters and Candidates (Dias+ 2002-2015)]]
   }
 }
 

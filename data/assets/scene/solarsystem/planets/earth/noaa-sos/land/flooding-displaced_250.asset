@@ -3,15 +3,15 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Flood Events: Displaced 250 or More People - 2000 - 2009"
 local Identifier = "noaa-sos-land-flooding-displaced_250"
-local Description = [[Flooding is the nation's most common, costly and deadly natural 
-hazard. Heavy rain is the most frequent cause of floods, but there are many other natural 
-triggers, including hurricanes, tidal surges, ice jams and snow melt. Floods and flash 
-floods have happened in all 50 states in the USA. Flooding in river basins is a natural 
-part of the river's processes, serving to improve water quality and provide essential 
-habitat to species, among other benefits. Flooding is a matter of scientific interest, as 
-well as cultural significance, and is critical to land-use planning and policy. It is 
-also a vital concern to the safety and welfare of communities in flood prone areas 
-including those who live along waterways and coasts. People from all walks of life are 
+local Description = [[Flooding is the nation's most common, costly and deadly natural
+hazard. Heavy rain is the most frequent cause of floods, but there are many other natural
+triggers, including hurricanes, tidal surges, ice jams and snow melt. Floods and flash
+floods have happened in all 50 states in the USA. Flooding in river basins is a natural
+part of the river's processes, serving to improve water quality and provide essential
+habitat to species, among other benefits. Flooding is a matter of scientific interest, as
+well as cultural significance, and is critical to land-use planning and policy. It is
+also a vital concern to the safety and welfare of communities in flood prone areas
+including those who live along waterways and coasts. People from all walks of life are
 vulnerable to the effects of flooding]]
 local URL = "https://sos.noaa.gov/catalog/datasets/flood-events-displaced-250-or-more-people-2000-2009/"
 
@@ -39,7 +39,7 @@ local layer_night = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_night)
 end)

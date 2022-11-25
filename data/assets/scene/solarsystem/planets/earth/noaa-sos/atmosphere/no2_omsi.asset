@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Nitrogen Dioxide"
 local Identifier = "noaa-sos-atmosphere-no2_omsi"
-local Description = [[Nitrogen dioxide (NO2) is a key component of urban air pollution. 
+local Description = [[Nitrogen dioxide (NO2) is a key component of urban air pollution.
   The nitrogen oxides ("NOx" of which NO2 is one component) are emitted from any
   combustion process. Coal- and gas-fired power plants and vehicles constitute the major
   anthropogenic (human-produced) sources. Forest fires and lightning are natural sources
@@ -34,7 +34,7 @@ local layer = {
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "NO2monthlymean_%Y%m.png"
-  },    
+  },
   Description = Description
 }
 
@@ -48,14 +48,14 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "2880.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

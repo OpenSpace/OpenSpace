@@ -96,7 +96,8 @@ documentation::Documentation RenderableConstellationsBase::Documentation() {
     return codegen::doc<Parameters>("space_renderable_constellationsbase");
 }
 
-RenderableConstellationsBase::RenderableConstellationsBase(const ghoul::Dictionary& dictionary)
+RenderableConstellationsBase::RenderableConstellationsBase(
+                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _drawLabels(DrawLabelInfo, false)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)

@@ -27,11 +27,11 @@ local EarthTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthTrail)
 end)
-  
+
 asset.export(EarthTrail)
 
 

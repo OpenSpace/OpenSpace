@@ -52,11 +52,11 @@ local Tethys = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Tethys)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Tethys)
 end)
-  
+
 asset.export(Tethys)
 
 

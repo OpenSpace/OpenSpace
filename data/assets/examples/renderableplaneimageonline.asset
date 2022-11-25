@@ -24,9 +24,9 @@ local RenderablePlaneImageOnline = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(RenderablePlaneImageOnline)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(RenderablePlaneImageOnline)
 end)
-  
+
 asset.export(RenderablePlaneImageOnline)

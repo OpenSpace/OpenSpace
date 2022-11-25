@@ -29,11 +29,11 @@ local CallistoTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CallistoTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CallistoTrail)
 end)
-  
+
 asset.export(CallistoTrail)
 
 

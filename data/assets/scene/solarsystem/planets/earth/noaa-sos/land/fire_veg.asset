@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Fire Observations and Vegetation - 2002 - 2011"
 local Identifier = "noaa-sos-land-fire_veg"
-local Description = [[This dataset leads viewers on a narrated global tour of fire 
-  detections beginning in July 2002 and ending July 2011. The dataset also includes 
-  vegetation and snow cover data to show how fires respond to seasonal changes. The tour 
-  begins in Australia in 2002 by showing a network of massive grassland fires spreading 
-  across interior Australia as well as the greener Eucalyptus forests in the northern and 
-  eastern part of the continent. The tour then shifts to Asia where large numbers of 
-  agricultural fires are visible first in China in June 2004, then across a huge swath of 
+local Description = [[This dataset leads viewers on a narrated global tour of fire
+  detections beginning in July 2002 and ending July 2011. The dataset also includes
+  vegetation and snow cover data to show how fires respond to seasonal changes. The tour
+  begins in Australia in 2002 by showing a network of massive grassland fires spreading
+  across interior Australia as well as the greener Eucalyptus forests in the northern and
+  eastern part of the continent. The tour then shifts to Asia where large numbers of
+  agricultural fires are visible first in China in June 2004, then across a huge swath of
   Europe and western Russia in August, and then across India and Southeast Asia through
   the early part of 2005]]
 local URL = "https://sos.noaa.gov/catalog/datasets/fire-observations-and-vegetation-2002-2011/"
@@ -60,8 +60,8 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar_fire);  
-  openspace.addScreenSpaceRenderable(colorbar_veg);  
+  openspace.addScreenSpaceRenderable(colorbar_fire)
+  openspace.addScreenSpaceRenderable(colorbar_veg)
 end)
 
 asset.onDeinitialize(function()

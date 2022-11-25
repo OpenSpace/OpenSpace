@@ -23,11 +23,11 @@ local HabitableZone = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HabitableZone)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HabitableZone)
 end)
-  
+
 asset.export(HabitableZone)
 
 

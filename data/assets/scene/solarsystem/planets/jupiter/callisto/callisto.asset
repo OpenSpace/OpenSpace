@@ -55,11 +55,11 @@ local Callisto = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Callisto)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Callisto)
 end)
-  
+
 asset.export(Callisto)
 
 

@@ -23,11 +23,11 @@ local JupiterBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JupiterBarycenter)
 end)
-  
+
 asset.export(JupiterBarycenter)
 
 

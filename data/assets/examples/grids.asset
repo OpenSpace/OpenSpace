@@ -97,14 +97,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(sphericalGrid)
   openspace.addSceneGraphNode(boxGrid)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(boxGrid)
   openspace.removeSceneGraphNode(sphericalGrid)
   openspace.removeSceneGraphNode(planarGrid)
   openspace.removeSceneGraphNode(radialGrid)
 end)
-  
+
 asset.export(radialGrid)
 asset.export(sphericalGrid)
 asset.export(planarGrid)

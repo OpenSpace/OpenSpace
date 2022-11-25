@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Ocean-Atmosphere CO2 Exchange"
 local Identifier = "noaa-sos-oceans-ocean_acid-co2_flux"
-local Description = [[When carbon dioxide CO2 is released into the atmosphere from the 
-burning of fossil fuels, approximately 50% remains in the atmosphere, while 25% is 
-absorbed by land plants and trees, and the other 25% is absorbed into certain areas of 
-the ocean. In other areas of the ocean, where the concentration of CO2 is higher in the 
+local Description = [[When carbon dioxide CO2 is released into the atmosphere from the
+burning of fossil fuels, approximately 50% remains in the atmosphere, while 25% is
+absorbed by land plants and trees, and the other 25% is absorbed into certain areas of
+the ocean. In other areas of the ocean, where the concentration of CO2 is higher in the
 water than in atmosphere above, CO2 is released to the atmosphere]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-atmosphere-co2-exchange/"
 
@@ -46,14 +46,14 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "images.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

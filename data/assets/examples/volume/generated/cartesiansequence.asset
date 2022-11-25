@@ -36,7 +36,7 @@ local volume = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(volume)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(volume)
 end)

@@ -54,11 +54,11 @@ local Titan = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Titan)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Titan)
 end)
-  
+
 asset.export(Titan)
 
 
