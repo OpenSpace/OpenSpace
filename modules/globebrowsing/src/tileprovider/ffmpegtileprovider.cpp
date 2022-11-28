@@ -137,23 +137,23 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
 
     if (p.animationMode.has_value()) {
         switch (*p.animationMode) {
-        case Parameters::AnimationMode::RealTimeLoopFromStart:
-            _animationMode = AnimationMode::RealTimeLoopFromStart;
-            break;
-        case Parameters::AnimationMode::RealTimeLoopInfinitely:
-            _animationMode = AnimationMode::RealTimeLoopInfinitely;
-            break;
-        case Parameters::AnimationMode::RealTimeBounceFromStart:
-            _animationMode = AnimationMode::RealTimeBounceFromStart;
-            break;
-        case Parameters::AnimationMode::RealTimeBounceInfinitely:
-            _animationMode = AnimationMode::RealTimeBounceInfinitely;
-            break;
-        case Parameters::AnimationMode::MapToSimulationTime:
-            _animationMode = AnimationMode::MapToSimulationTime;
-            break;
-        default:
-            throw ghoul::MissingCaseException();
+            case Parameters::AnimationMode::RealTimeLoopFromStart:
+                _animationMode = AnimationMode::RealTimeLoopFromStart;
+                break;
+            case Parameters::AnimationMode::RealTimeLoopInfinitely:
+                _animationMode = AnimationMode::RealTimeLoopInfinitely;
+                break;
+            case Parameters::AnimationMode::RealTimeBounceFromStart:
+                _animationMode = AnimationMode::RealTimeBounceFromStart;
+                break;
+            case Parameters::AnimationMode::RealTimeBounceInfinitely:
+                _animationMode = AnimationMode::RealTimeBounceInfinitely;
+                break;
+            case Parameters::AnimationMode::MapToSimulationTime:
+                _animationMode = AnimationMode::MapToSimulationTime;
+                break;
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
 }
@@ -280,56 +280,55 @@ void FfmpegTileProvider::update() {
     double percentage = 0.0;
 
     switch (_animationMode) {
-    case AnimationMode::MapToSimulationTime:
-        // Check so we are currently in interval where video is playing
-        if (now > _endJ200Time || now < _startJ200Time) {
-            LINFO(fmt::format(
-                "Time '{}' is not during video", now
-            ));
-            return;
+        case AnimationMode::MapToSimulationTime:
+            // Check so we are currently in interval where video is playing
+            if (now > _endJ200Time || now < _startJ200Time) {
+                LINFO(fmt::format(
+                    "Time '{}' is not during video", now
+                ));
+                return;
+            }
+            percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
+            videoTime = percentage * _videoDuration;
+            break;
+        case AnimationMode::RealTimeLoopFromStart:
+            videoTime = std::fmod(now - _startJ200Time, _videoDuration);
+            if (videoTime < 0.0) {
+                videoTime += _videoDuration;
+            }
+            break;
+        case AnimationMode::RealTimeLoopInfinitely:
+            videoTime =
+                _videoDuration - abs(
+                    fmod(now - _startJ200Time, 2 * _videoDuration) - _videoDuration
+                );
+            break;
+        case AnimationMode::RealTimeBounceFromStart: {
+            double modulo = fmod(now - _startJ200Time, 2 * _videoDuration);
+            if (modulo < 0.0) {
+                modulo += 2 * _videoDuration;
+            }
+            videoTime = _videoDuration - abs(modulo - _videoDuration);
+            break;
         }
-        percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
-        videoTime = percentage * _videoDuration;
-        break;
-    case AnimationMode::RealTimeLoopFromStart:
-        videoTime = std::fmod(now - _startJ200Time, _videoDuration);
-        if (videoTime < 0.0) {
-            videoTime += _videoDuration;
-        }
-        break;
-    case AnimationMode::RealTimeLoopInfinitely:
-        videoTime =
-            _videoDuration - abs(
-                fmod(now - _startJ200Time, 2 * _videoDuration) - _videoDuration
-            );
-        break;
-    case AnimationMode::RealTimeBounceFromStart: {
-        double modulo = fmod(now - _startJ200Time, 2 * _videoDuration);
-        if (modulo < 0.0) {
-            modulo += 2 * _videoDuration;
-        }
-        videoTime = _videoDuration - abs(modulo - _videoDuration);
-        break;
-    }
-    case AnimationMode::RealTimeBounceInfinitely:
-        videoTime = now - _startJ200Time;
-        if (videoTime > _videoDuration) {
-            videoTime = _videoDuration;
-        }
-        break;
-    default:
-        throw ghoul::MissingCaseException();
+        case AnimationMode::RealTimeBounceInfinitely:
+            videoTime = now - _startJ200Time;
+            if (videoTime > _videoDuration) {
+                videoTime = _videoDuration;
+            }
+            break;
+        default:
+            throw ghoul::MissingCaseException();
     }
     if (videoTime > _videoDuration || videoTime < 0.0) {
         LINFO(std::to_string(videoTime));
     }
 
     // Find the frame number that corresponds to the current video time
-    int64_t currentFrameIndex = av_rescale_q(
-        static_cast<int64_t>(videoTime * AV_TIME_BASE),
-        _avTimeBaseQ,
-        _formatContext->streams[_streamIndex]->time_base
+    int64_t internalFrameIndex = static_cast<int64_t>(
+        videoTime / av_q2d(_formatContext->streams[_streamIndex]->time_base)
     );
+    int64_t currentFrameIndex = internalFrameIndex / 1000;
 
     // Check if we found a new frame
     if (_prevFrameIndex == currentFrameIndex) {
@@ -341,17 +340,22 @@ void FfmpegTileProvider::update() {
         ZoneScopedN("Seek Frame")
         TracyGpuZone("Seek Frame")
 
-        // Only decode the the current frame
-        int result = av_seek_frame(_formatContext, _streamIndex, currentFrameIndex, 0);
-        if (result < 0) {
-            std::string message = getFffmpegErrorString(result);
-            LERROR(fmt::format(
-                "Seeking frame {} failed with error code {}, message: '{}'",
-                currentFrameIndex, result, message
-            ));
-            return;
+        if ((currentFrameIndex - 1) != _prevFrameIndex) {
+            // Jump more than one frame in the video
+            int result = av_seek_frame(_formatContext, _streamIndex, internalFrameIndex, 0);
+            if (result < 0) {
+                std::string message = getFffmpegErrorString(result);
+                LERROR(fmt::format(
+                    "Seeking frame {} failed with error code {}, message: '{}'",
+                    currentFrameIndex, result, message
+                ));
+                return;
+            }
+            //LINFO(fmt::format(
+            //    "Seek frame {} matches video duration {} and frame index {}",
+            //    internalFrameIndex, videoTime, currentFrameIndex
+            //));
         }
-        //LINFO(fmt::format("Frame index {} matches video duration {}", currentFrameIndex, videoTime));
     }
     {
         ZoneScopedN("Read Frame")
@@ -421,7 +425,22 @@ void FfmpegTileProvider::update() {
     LINFO(fmt::format("Pts Sec: {}", ptsSec));
     LINFO(fmt::format("repeat_pict: {}", _avFrame->repeat_pict));*/
 
-    _prevFrameIndex = currentFrameIndex;
+    // Debug checks
+    int64_t pts = _packet->pts;
+    int64_t dts = _packet->dts;
+    pts = pts == AV_NOPTS_VALUE ? 0 : pts;
+    dts = dts == AV_NOPTS_VALUE ? 0 : dts;
+    if (pts != dts) {
+        LWARNING(fmt::format(
+            "Format error, frames might be out of order, diff {}", abs(pts - dts)
+        ));
+    }
+    if (_avFrame->repeat_pict > 0) {
+        LWARNING(fmt::format(
+            "Frame {} requested to be repeated {} times", currentFrameIndex,
+            _avFrame->repeat_pict
+        ));
+    }
 
     // TODO: Need to check the format of the video and decide what formats we want to
     // support and how they relate to the GL formats
@@ -468,6 +487,7 @@ void FfmpegTileProvider::update() {
     save_gray_frame(_avFrame->data[0], _avFrame->linesize[0], _avFrame->width, _avFrame->height, frame_filename);
     */
 
+    _prevFrameIndex = currentFrameIndex;
     av_packet_unref(_packet);
     _tileIsReady = true;
 }
