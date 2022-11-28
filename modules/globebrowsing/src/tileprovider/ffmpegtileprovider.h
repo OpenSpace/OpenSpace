@@ -67,9 +67,7 @@ private:
     enum class AnimationMode {
         MapToSimulationTime = 0,
         RealTimeLoopFromStart,
-        RealTimeLoopInfinitely,
-        RealTimeBounceFromStart,
-        RealTimeBounceInfinitely
+        RealTimeLoopInfinitely
     };
 
     AnimationMode _animationMode = AnimationMode::MapToSimulationTime;

@@ -70,9 +70,7 @@ namespace {
         enum class AnimationMode {
             MapToSimulationTime = 0,
             RealTimeLoopFromStart,
-            RealTimeLoopInfinitely,
-            RealTimeBounceFromStart,
-            RealTimeBounceInfinitely
+            RealTimeLoopInfinitely
         };
 
         // The mode of how the animation should be played back.
@@ -142,12 +140,6 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
                 break;
             case Parameters::AnimationMode::RealTimeLoopInfinitely:
                 _animationMode = AnimationMode::RealTimeLoopInfinitely;
-                break;
-            case Parameters::AnimationMode::RealTimeBounceFromStart:
-                _animationMode = AnimationMode::RealTimeBounceFromStart;
-                break;
-            case Parameters::AnimationMode::RealTimeBounceInfinitely:
-                _animationMode = AnimationMode::RealTimeBounceInfinitely;
                 break;
             case Parameters::AnimationMode::MapToSimulationTime:
                 _animationMode = AnimationMode::MapToSimulationTime;
@@ -302,20 +294,6 @@ void FfmpegTileProvider::update() {
                 _videoDuration - abs(
                     fmod(now - _startJ200Time, 2 * _videoDuration) - _videoDuration
                 );
-            break;
-        case AnimationMode::RealTimeBounceFromStart: {
-            double modulo = fmod(now - _startJ200Time, 2 * _videoDuration);
-            if (modulo < 0.0) {
-                modulo += 2 * _videoDuration;
-            }
-            videoTime = _videoDuration - abs(modulo - _videoDuration);
-            break;
-        }
-        case AnimationMode::RealTimeBounceInfinitely:
-            videoTime = now - _startJ200Time;
-            if (videoTime > _videoDuration) {
-                videoTime = _videoDuration;
-            }
             break;
         default:
             throw ghoul::MissingCaseException();
