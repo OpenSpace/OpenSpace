@@ -3,17 +3,17 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Polar Orbiting: NOAA Satellite Tracks"
 local Identifier = "noaa-sos-atmosphere-noaa_sat-tracks"
-local Description = [[NOAA has four POES, Polar Operational Environmental Satellites, 
-currently in orbit. The satellites are named chronologically, based on launch date. NOAA 
-15 was launched in 1998, NOAA 16 was launched in 2000, NOAA 17 was launched in 2002 and 
-NOAA 18 was launched in 2005. In May and August of 2007 two older satellites, NOAA 14 and 
-NOAA 12 respectively, were decommissioned. These satellites orbit the Earth in such a way 
-that they pass over the poles. Each orbit takes approximately 102.1 minutes, allowing the 
-satellites to circle the Earth about 14.1 times each day. The polar orbit enables the 
-satellites to collect daily global data for land, ocean, and atmospheric applications. 
-This data is used a large variety of environmental monitoring applications such as 
-weather analysis and forecasting, climate research and prediction, global sea surface 
-temperature measurements, ocean dynamics research, global vegetation analysis and many 
+local Description = [[NOAA has four POES, Polar Operational Environmental Satellites,
+currently in orbit. The satellites are named chronologically, based on launch date. NOAA
+15 was launched in 1998, NOAA 16 was launched in 2000, NOAA 17 was launched in 2002 and
+NOAA 18 was launched in 2005. In May and August of 2007 two older satellites, NOAA 14 and
+NOAA 12 respectively, were decommissioned. These satellites orbit the Earth in such a way
+that they pass over the poles. Each orbit takes approximately 102.1 minutes, allowing the
+satellites to circle the Earth about 14.1 times each day. The polar orbit enables the
+satellites to collect daily global data for land, ocean, and atmospheric applications.
+This data is used a large variety of environmental monitoring applications such as
+weather analysis and forecasting, climate research and prediction, global sea surface
+temperature measurements, ocean dynamics research, global vegetation analysis and many
 other applications]]
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-noaa-satellite-tracks/"
 
@@ -33,7 +33,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

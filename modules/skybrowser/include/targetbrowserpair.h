@@ -52,7 +52,7 @@ public:
 
     // Mouse interaction
     void startFinetuningTarget();
-    void fineTuneTarget(const glm::vec2& startMouse, const glm::vec2& translation);
+    void fineTuneTarget(const glm::vec2& translation);
     void synchronizeAim();
 
     // Browser
@@ -71,9 +71,11 @@ public:
     void setVerticalFov(double vfov);
     void setEquatorialAim(const glm::dvec2& aim);
     void setBorderColor(const glm::ivec3& color);
+    void setBorderRadius(double radius);
     void setBrowserRatio(float ratio);
     void setVerticalFovWithScroll(float scroll);
     void setImageCollectionIsLoaded(bool isLoaded);
+    void applyRoll();
 
     double verticalFov() const;
     glm::ivec3 borderColor() const;

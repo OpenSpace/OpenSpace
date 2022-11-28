@@ -34,7 +34,7 @@ public:
     IntListProperty(Property::PropertyInfo info,
         std::vector<int> values = std::vector<int>());
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<std::vector<int>>::operator std::vector<int>;

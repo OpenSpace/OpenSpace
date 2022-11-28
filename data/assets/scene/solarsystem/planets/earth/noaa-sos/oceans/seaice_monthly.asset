@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Ice Extent (Arctic only) - 1850 - Present"
 local Identifier = "noaa-sos-oceans-seaice_monthly"
-local Description = [[Arctic sea ice extent is declining at a rapid rate; the extent in 
-September, 2019 was about 30% lower than the average September extent over 1980-2010. Sea 
-ice in both hemispheres can be easily monitored now, with data from a series of 
-satellites that have been operating since the late 1970s. Every year, NOAA publishes the 
-Arctic Report Card. In it, scientists summarize how sea ice, along with snow cover, 
-tundra greenness, marine algae, caribou, and other indicators of change are responding to 
-warming that is taking place about two times faster in the Arctic than elsewhere on the 
+local Description = [[Arctic sea ice extent is declining at a rapid rate; the extent in
+September, 2019 was about 30% lower than the average September extent over 1980-2010. Sea
+ice in both hemispheres can be easily monitored now, with data from a series of
+satellites that have been operating since the late 1970s. Every year, NOAA publishes the
+Arctic Report Card. In it, scientists summarize how sea ice, along with snow cover,
+tundra greenness, marine algae, caribou, and other indicators of change are responding to
+warming that is taking place about two times faster in the Arctic than elsewhere on the
 planet]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-extent-arctic-only-1850-present/"
 

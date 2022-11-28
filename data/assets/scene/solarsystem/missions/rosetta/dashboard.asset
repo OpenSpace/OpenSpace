@@ -26,7 +26,7 @@ asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(distance)
   openspace.dashboard.addDashboardItem(instruments)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.dashboard.removeDashboardItem(instruments)
   openspace.dashboard.removeDashboardItem(distance)

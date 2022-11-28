@@ -3,18 +3,18 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Fisheries Species Richness"
 local Identifier = "noaa-sos-oceans-species_richness"
-local Description = [[Species richness is a count of the number of different species in 
-an ecological community, landscape or region. Species richness is one of several 
-measurements used by scientists to help determine how biologically rich and diverse a 
-given area is. This map shows the predicted global distribution of 1066 commercially 
-harvested marine fish and invertebrates. Areas on the map with brighter colors 
-(orange/yellow) highlight areas with greater number of different species (higher species 
-richness), while cooler colors (purple) areas with lower number of species (lower species 
-richness). The map shows the highest number of different species is concentrated along 
-the coasts. These coastal areas are also where we find our largest marine ecosystems, 
-such as coral reefs, mangroves and marshes, which provide food and shelter for 
-economically, culturally, and ecologically important marine species. This stresses the 
-importance of protecting critical habitat along our coasts for marine life and 
+local Description = [[Species richness is a count of the number of different species in
+an ecological community, landscape or region. Species richness is one of several
+measurements used by scientists to help determine how biologically rich and diverse a
+given area is. This map shows the predicted global distribution of 1066 commercially
+harvested marine fish and invertebrates. Areas on the map with brighter colors
+(orange/yellow) highlight areas with greater number of different species (higher species
+richness), while cooler colors (purple) areas with lower number of species (lower species
+richness). The map shows the highest number of different species is concentrated along
+the coasts. These coastal areas are also where we find our largest marine ecosystems,
+such as coral reefs, mangroves and marshes, which provide food and shelter for
+economically, culturally, and ecologically important marine species. This stresses the
+importance of protecting critical habitat along our coasts for marine life and
 fisheries]]
 local URL = "https://sos.noaa.gov/catalog/datasets/fisheries-species-richness/"
 
@@ -45,9 +45,9 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

@@ -54,11 +54,11 @@ local Iapetus = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Iapetus)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Iapetus)
 end)
-  
+
 asset.export(Iapetus)
 
 

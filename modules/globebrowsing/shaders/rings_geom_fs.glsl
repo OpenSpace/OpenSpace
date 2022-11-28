@@ -54,7 +54,7 @@ Fragment getFragment() {
   }
 
   float diffuse = length(texture(ringTexture, texCoord).rgb);
-      
+
   // The normal for the one plane depends on whether we are dealing
   // with a front facing or back facing fragment
   //vec3 normal;
@@ -70,6 +70,6 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(vec3(vs_screenSpaceDepth), 1.0);
   frag.depth = (diffuse < 0.5) ? 1E30 : vs_screenSpaceDepth;
-  
+
   return frag;
 }

@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Japan Tsunami: Wave Heights - March 11, 2011"
 local Identifier = "noaa-sos-oceans-japan_tsunami"
-local Description = [[On March 11, 2011 at 2:45 local time, a 9.0 magnitude earthquake 
-occurred 81 miles (130 km) off the east coast of Sendai, Japan, triggering a massive 
-tsunami. It is estimated that the initial tsunami wave took 10 to 30 minutes to make its 
-first landfall. Forecasted wave heights were up to 33 ft (10 m) and there were many 
-reports of tsunami waves three stories high in parts of Japan. Across the Pacific Ocean, 
-many countries issued evacuations along the coasts because of the predicted tsunami 
+local Description = [[On March 11, 2011 at 2:45 local time, a 9.0 magnitude earthquake
+occurred 81 miles (130 km) off the east coast of Sendai, Japan, triggering a massive
+tsunami. It is estimated that the initial tsunami wave took 10 to 30 minutes to make its
+first landfall. Forecasted wave heights were up to 33 ft (10 m) and there were many
+reports of tsunami waves three stories high in parts of Japan. Across the Pacific Ocean,
+many countries issued evacuations along the coasts because of the predicted tsunami
 waves]]
 local URL = "https://sos.noaa.gov/catalog/datasets/japan-tsunami-wave-heights-march-11-2011/"
 
@@ -28,7 +28,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

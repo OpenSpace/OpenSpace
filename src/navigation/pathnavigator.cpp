@@ -38,6 +38,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/collisionhelper.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/file.h>
@@ -156,7 +157,7 @@ PathNavigator::PathNavigator()
     addProperty(_relevantNodeTags);
 }
 
-PathNavigator::~PathNavigator() {} // NOLINT
+PathNavigator::~PathNavigator() {}
 
 Camera* PathNavigator::camera() const {
     return global::navigationHandler->camera();
@@ -214,6 +215,19 @@ void PathNavigator::updateCamera(double deltaTime) {
         return;
     }
 
+    if (_setCameraToEndNextFrame) {
+        LDEBUG("Skipped to end of camera path");
+        _currentPath->quitPath();
+        camera()->setPose(_currentPath->endPoint().pose());
+        global::navigationHandler->orbitalNavigator().setFocusNode(
+            _currentPath->endPoint().nodeIdentifier(),
+            false
+        );
+        handlePathEnd();
+        _setCameraToEndNextFrame = false;
+        return;
+    }
+
     // Prevent long delta times due to e.g. computations from other actions to cause
     // really big jumps in the motion along the path
     // OBS! Causes problems if the general FPS is lower than 10, but then the user should
@@ -241,19 +255,6 @@ void PathNavigator::updateCamera(double deltaTime) {
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached target");
         handlePathEnd();
-
-        if (_applyIdleBehaviorOnFinish) {
-            constexpr const char ApplyIdleBehaviorScript[] =
-                "openspace.setPropertyValueSingle("
-                    "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
-                    "true"
-                ");";
-
-            global::scriptEngine->queueScript(
-                ApplyIdleBehaviorScript,
-                openspace::scripting::ScriptEngine::RemoteScripting::Yes
-            );
-        }
         return;
     }
 }
@@ -368,6 +369,14 @@ void PathNavigator::continuePath() {
     _isPlaying = true;
 }
 
+void PathNavigator::skipToEnd() {
+    if (!openspace::global::navigationHandler->pathNavigator().isPlayingPath()) {
+        LWARNING("No camera path is currently active");
+    }
+
+    _setCameraToEndNextFrame = true;
+}
+
 Path::Type PathNavigator::defaultPathType() const {
     return static_cast<Path::Type>(_defaultPathType.value());
 }
@@ -430,15 +439,25 @@ const std::vector<SceneGraphNode*>& PathNavigator::relevantNodes() {
 
 void PathNavigator::handlePathEnd() {
     _isPlaying = false;
+    global::openSpaceEngine->resetMode();
 
     if (_startSimulationTimeOnFinish) {
         openspace::global::scriptEngine->queueScript(
             "openspace.time.setPause(false)",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
+        _startSimulationTimeOnFinish = false;
     }
-    _startSimulationTimeOnFinish = false;
-    global::openSpaceEngine->resetMode();
+
+    if (_applyIdleBehaviorOnFinish) {
+        global::scriptEngine->queueScript(
+            "openspace.setPropertyValueSingle("
+                "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
+                "true"
+            ");",
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
 }
 
 void PathNavigator::findRelevantNodes() {
@@ -480,19 +499,63 @@ void PathNavigator::findRelevantNodes() {
     _relevantNodes = resultingNodes;
 }
 
+SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
+    constexpr float LengthEpsilon = 1e-5f;
+    const std::vector<SceneGraphNode*>& relNodes =
+        global::navigationHandler->pathNavigator().relevantNodes();
+
+    for (SceneGraphNode* n : relNodes) {
+        bool isSame = (n->identifier() == node->identifier());
+        // If the nodes are in the very same position, they are probably representing
+        // the same object
+        isSame |=
+            glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
+
+        if (isSame) {
+            continue;
+        }
+
+        constexpr float proximityRadiusFactor = 3.f;
+
+        const float bs = static_cast<float>(n->boundingSphere());
+        const float proximityRadius = proximityRadiusFactor * bs;
+        const glm::dvec3 posInModelCoords =
+            glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
+
+        bool isClose = collision::isPointInsideSphere(
+            posInModelCoords,
+            glm::dvec3(0.0, 0.0, 0.0),
+            proximityRadius
+        );
+
+        if (isClose) {
+            return n;
+        }
+    }
+
+    return nullptr;
+}
+
 void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
-    const glm::dvec3 anchorPos = anchor()->worldPosition();
+    // The actual position for the camera does not really matter. Use the origin,
+    // to avoid precision problems when we have large values for the position
+    const glm::dvec3 cameraPos = glm::dvec3(0.0);
     const glm::dvec3 cameraDir = glm::normalize(
         pose.rotation * Camera::ViewDirectionCameraSpace
     );
-    const double anchorToPosDistance = glm::distance(anchorPos, pose.position);
-    const double notTooCloseDistance = deltaTime * anchorToPosDistance;
-    glm::dvec3 lookAtPos = pose.position + notTooCloseDistance * cameraDir;
+
+    // The actual distance does not really matter either. Just has to be far
+    // enough away from the camera
+    constexpr double NotTooCloseDistance = 10000.0;
+
+    glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
+
     glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
-        pose.position,
+        cameraPos,
         lookAtPos,
         camera()->lookUpVectorWorldSpace()
     );
+
     pose.rotation = rollFreeRotation;
 }
 
@@ -504,6 +567,7 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             codegen::lua::ContinuePath,
             codegen::lua::PausePath,
             codegen::lua::StopPath,
+            codegen::lua::SkipToEnd,
             codegen::lua::FlyTo,
             codegen::lua::FlyToHeight,
             codegen::lua::FlyToNavigationState,

@@ -387,7 +387,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_delete);
 }
 
-ScreenSpaceRenderable::~ScreenSpaceRenderable() {} // NOLINT
+ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
 
 bool ScreenSpaceRenderable::initialize() {
     return true;

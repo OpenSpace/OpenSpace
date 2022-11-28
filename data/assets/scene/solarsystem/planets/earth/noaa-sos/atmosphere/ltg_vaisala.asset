@@ -3,17 +3,17 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Lightning Detection - Jun 2011 - Aug 2012"
 local Identifier = "noaa-sos-atmosphere-ltg_vaisala"
-local Description = [[The Global Lightning Dataset GLD360 network detects between 1 and 
-3 million lightning events around the world every day of the year. Lightning activity is 
-not uniformly distributed across the globe. About ten times as many flashes occur over 
-land than over the oceans, and the majority of global lightning is concentrated in the 
-tropics. Over the course of a year, highest flash rate regions follow the inclination of 
-the sun. The northern hemisphere sees more activity during June through August; the 
-southern hemisphere has higher flash rates in January through March. These seasonal 
-patterns can be clearly seen in these images, which show the total number of events 
-detected in each month per square kilometer. The color scale ranges from less than .01 
-lightning pulses per square kilometer in the corresponding month to over 20 pulses per 
-square kilometer. Each color range corresponds to a factor of two of increase in the 
+local Description = [[The Global Lightning Dataset GLD360 network detects between 1 and
+3 million lightning events around the world every day of the year. Lightning activity is
+not uniformly distributed across the globe. About ten times as many flashes occur over
+land than over the oceans, and the majority of global lightning is concentrated in the
+tropics. Over the course of a year, highest flash rate regions follow the inclination of
+the sun. The northern hemisphere sees more activity during June through August; the
+southern hemisphere has higher flash rates in January through March. These seasonal
+patterns can be clearly seen in these images, which show the total number of events
+detected in each month per square kilometer. The color scale ranges from less than .01
+lightning pulses per square kilometer in the corresponding month to over 20 pulses per
+square kilometer. Each color range corresponds to a factor of two of increase in the
 number of events. This dataset runs from June 2011 through August 2012]]
 local URL = "c"
 
@@ -38,7 +38,7 @@ local layer = {
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "%Y_%m-1.png"
-  },     
+  },
   Description = Description
 }
 
@@ -53,14 +53,14 @@ local colorbar = {
   CartesianPosition = { 0.75, 0.0, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "2160.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

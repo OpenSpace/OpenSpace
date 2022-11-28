@@ -53,11 +53,11 @@ local Hyperion = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Hyperion)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Hyperion)
 end)
-  
+
 asset.export(Hyperion)
 
 

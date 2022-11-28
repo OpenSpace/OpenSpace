@@ -42,9 +42,9 @@ local ImagePlane = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ImagePlane)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ImagePlane)
 end)
-  
+
 asset.export(ImagePlane)

@@ -133,7 +133,6 @@ void ScriptlogDialog::updateScriptList() {
             _scriptlogList->addItem(QString::fromStdString(script));
         }
     }
-    _scriptlogList->setCurrentRow(index != -1 ? index : 0);
 }
 
 void ScriptlogDialog::saveChosenScripts() {

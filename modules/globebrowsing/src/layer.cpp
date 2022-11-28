@@ -296,6 +296,14 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
         }
     });
 
+    _renderSettings.onChange([&]() {
+        // Only if we are a height layer will anyone care about these settings changing as
+        // that will change the overall bounding box of the layer and thus require culling
+        if (_parent.isHeightLayer() && _onChangeCallback) {
+            _onChangeCallback(this);
+        }
+    });
+
     _typeOption.onChange([&]() {
         switch (type()) {
             // Intentional fall through. Same for all tile layers

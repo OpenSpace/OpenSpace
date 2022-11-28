@@ -28,7 +28,7 @@ local RosettaKernels = {
   kernels .. "LORB_DV_236_01___T19_00318.BSP",
   kernels .. "LORB_DV_223_01___T19_00302.BSP",
   kernels .. "LORB_DV_145_01___T19_00216.BSP",
-  
+
   kernels .. "RORB_DV_243_01___T19_00325.BSP",
   kernels .. "RORB_DV_223_01___T19_00302.BSP",
   kernels .. "RORB_DV_145_01___T19_00216.BSP",
@@ -38,7 +38,7 @@ local RosettaKernels = {
   kernels .. "ROS_STRUCT_V5.BSP",
 
   kernels .. "ROS_NAVCAM_V01.TI",
-  
+
   kernels .. "ROS_CHURYUMOV_V01.TF",
   kernels .. "ROS_V26.TF",
 
@@ -81,7 +81,7 @@ local Rosetta = {
       Target = "ROSETTA",
       Observer = "SSB",
       Kernels = RosettaKernels
-    },  
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "ROS_SPACECRAFT",

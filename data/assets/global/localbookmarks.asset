@@ -8,13 +8,13 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(n)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for _, n in ipairs(nodes) do
     openspace.removeSceneGraphNode(n)
   end
 end)
-  
+
 for _, n in ipairs(nodes) do
   asset.export(n)
 end

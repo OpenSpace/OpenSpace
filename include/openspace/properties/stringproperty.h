@@ -33,11 +33,11 @@ class StringProperty : public TemplateProperty<std::string> {
 public:
     StringProperty(Property::PropertyInfo info, std::string value = "");
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<std::string>::operator=;
-    
+
     operator std::string_view();
     operator std::string_view() const;
 

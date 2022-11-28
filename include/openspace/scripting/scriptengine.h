@@ -85,8 +85,6 @@ public:
     bool runScript(const std::string& script, ScriptCallback callback = ScriptCallback());
     bool runScriptFile(const std::filesystem::path& filename);
 
-    bool writeLog(const std::string& script);
-
     virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;
     virtual void decode(SyncBuffer* syncBuffer) override;
@@ -102,13 +100,14 @@ public:
 private:
     BooleanType(Replace);
 
+    void writeLog(const std::string& script);
+
     bool registerLuaLibrary(lua_State* state, LuaLibrary& library);
     void addLibraryFunctions(lua_State* state, LuaLibrary& library, Replace replace);
 
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
 
     void addBaseLibrary();
-    void remapPrintFunction();
 
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;

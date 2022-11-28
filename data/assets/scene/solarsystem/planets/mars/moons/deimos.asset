@@ -80,12 +80,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Deimos)
   openspace.addSceneGraphNode(DeimosTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DeimosTrail)
   openspace.removeSceneGraphNode(Deimos)
 end)
-    
+
 asset.export(Deimos)
 asset.export(DeimosTrail)
 

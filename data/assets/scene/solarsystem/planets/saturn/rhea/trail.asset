@@ -29,11 +29,11 @@ local RheaTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(RheaTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(RheaTrail)
 end)
-  
+
 asset.export(RheaTrail)
 
 

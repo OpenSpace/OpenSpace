@@ -40,7 +40,7 @@ ULongProperty::ULongProperty(Property::PropertyInfo info, unsigned long value,
     )
 {}
 
-std::string ULongProperty::className() const {
+std::string_view ULongProperty::className() const {
     return "ULongProperty";
 }
 

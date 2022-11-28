@@ -159,16 +159,16 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     {
         CURL* curl = curl_easy_init();
         if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
-            curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace"); // NOLINT
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp); // NOLINT
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeData); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace");
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeData);
             if (timeout_secs) {
-                curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout_secs); // NOLINT
+                curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout_secs);
             }
             if (failOnError) {
-                curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L); // NOLINT
+                curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
             }
 
             ProgressInformation p = {
@@ -179,10 +179,10 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             #if LIBCURL_VERSION_NUM >= 0x072000
             // xferinfo was introduced in 7.32.0, if a lower curl version is used the
             // progress will not be shown for downloads on the splash screen
-            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo); // NOLINT
-            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
+            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
             #endif
-            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
             CURLcode res = curl_easy_perform(curl);
             curl_easy_cleanup(curl);
@@ -242,22 +242,22 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             throw ghoul::RuntimeError("Error initializing cURL");
         }
 
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace"); // NOLINT
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace");
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void*>(&file));
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback); // NOLINT
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L); // NOLINT
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false); // NOLINT
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
 
         // Will fail when response status is 400 or above
-        curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L); // NOLINT
+        curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 
         CURLcode res = curl_easy_perform(curl);
         if (res == CURLE_OK) {
             // ask for the content-type
             char* ct;
-            res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct); // NOLINT
+            res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
             if (res == CURLE_OK) {
                 std::string extension = std::string(ct);
                 std::stringstream ss(extension);
@@ -299,14 +299,14 @@ void DownloadManager::getFileExtension(const std::string& url,
     auto requestFunction = [url, finishedCb = std::move(finishedCallback)]() {
         CURL* curl = curl_easy_init();
         if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             //USING CURLOPT NOBODY
-            curl_easy_setopt(curl, CURLOPT_NOBODY, 1); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
             CURLcode res = curl_easy_perform(curl);
             if (CURLE_OK == res) {
                 char* ct;
                 // ask for the content-type
-                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct); // NOLINT
+                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
                 if ((res == CURLE_OK) && ct && finishedCb) {
                     finishedCb(std::string(ct));
                 }

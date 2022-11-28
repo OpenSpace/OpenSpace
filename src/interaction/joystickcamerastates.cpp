@@ -25,9 +25,11 @@
 #include <openspace/interaction/joystickcamerastates.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
+#include <algorithm>
 #include <cmath>
 #include <utility>
 
@@ -45,6 +47,13 @@ void JoystickCameraStates::updateStateFromInput(
                                            const JoystickInputStates& joystickInputStates,
                                                 double deltaTime)
 {
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
     std::pair<bool, glm::dvec2> globalRotation = { false, glm::dvec2(0.0) };
     std::pair<bool, double> zoom = { false, 0.0 };
     std::pair<bool, glm::dvec2> localRoll = { false, glm::dvec2(0.0) };
@@ -63,7 +72,10 @@ void JoystickCameraStates::updateStateFromInput(
         }
 
         int nAxes = joystickInputStates.numAxes(joystickInputState.name);
-        for (int i = 0; i < nAxes; ++i) {
+        for (int i = 0;
+             i < std::min(static_cast<size_t>(nAxes), joystick->axisMapping.size());
+             ++i)
+        {
             AxisInformation t = joystick->axisMapping[i];
             if (t.type == AxisType::None) {
                 continue;

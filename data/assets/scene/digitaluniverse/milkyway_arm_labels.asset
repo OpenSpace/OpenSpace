@@ -43,11 +43,11 @@ local plane = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(plane)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(plane)
 end)
-  
+
 asset.export(plane)
 
 

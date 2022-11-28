@@ -47,7 +47,7 @@ class GalaxyRaycaster : public VolumeRaycaster {
 public:
     GalaxyRaycaster(ghoul::opengl::Texture& texture);
     ~GalaxyRaycaster() override = default;
-    
+
     void initialize();
 
     void renderEntryPoints(const RenderData& data,

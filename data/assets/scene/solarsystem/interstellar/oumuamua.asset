@@ -56,12 +56,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(OumuamuaPosition)
   openspace.addSceneGraphNode(OumuamuaTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(OumuamuaTrail)
   openspace.removeSceneGraphNode(OumuamuaPosition)
 end)
-    
+
 asset.export(OumuamuaPosition)
 asset.export(OumuamuaTrail)
 

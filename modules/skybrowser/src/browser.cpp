@@ -89,7 +89,7 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
 
     _url = p.url.value_or(_url);
     _url.onChange([this]() { _isUrlDirty = true; });
-    
+
     _browserDimensions.onChange([this]() { _isDimensionsDirty = true; });
     _reload.onChange([this]() { _shouldReload = true; });
 
@@ -177,6 +177,10 @@ glm::vec2 Browser::browserPixelDimensions() const {
 // Updates the browser size to match the size of the texture
 void Browser::updateBrowserSize() {
     _browserDimensions = _texture->dimensions();
+}
+
+void Browser::reload() {
+    _reload.set(true);
 }
 
 float Browser::browserRatio() const {

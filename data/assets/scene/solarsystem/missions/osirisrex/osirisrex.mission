@@ -13,9 +13,9 @@ References:
 [3]     Source :    SPICE kernel data coverage
         Date :      2016-08-23
         Comment :   The spice data is split up into across different files. These files
-                    seems to represent different phases. A script was used to extract the 
+                    seems to represent different phases. A script was used to extract the
                     SPICE coverage from all .bc files and use the names of the files as
-                    mission names and associate the name with the time coverage. 
+                    mission names and associate the name with the time coverage.
                     Script used: support/mission/ckbrief2mission.js
 
 [4]     Source :    Visual interpretation of SPICE kernel data coverage
@@ -27,12 +27,12 @@ References:
 return {
   Name = "OSIRIS-REx",
   Phases = {
-    -- All 1-level phases based on [1] 
+    -- All 1-level phases based on [1]
     {
       Name = "Planning and Fabrication",
       TimeRange = { Start = "2012 JAN 01 00:00:00", End = "2016 SEP 08 23:05:00" }
     },
-    { 
+    {
       Name = "Outbound Cruise",
       TimeRange = { Start = "2016 SEP 03 00:00:00", End = "2018 SEP 01 01:00:00" },
       Phases = {
@@ -41,19 +41,19 @@ return {
           Name = "Pre Launch",
           TimeRange = { Start = "2016 SEP 03 01:00:00", End = "2016 SEP 08 23:05:05" }
         },
-        { 
+        {
           Name = "Launch", TimeRange = { Start = "2016 SEP 08 23:05:05", End = "2016 SEP 08 23:09:00" }
         },
-        { 
+        {
           Name = "Earth Orbit", TimeRange = { Start = "2016 SEP 08 23:09:00", End = "2016 SEP 08 23:45:00" }
         },
-        { 
+        {
           Name = "Solar Orbit", TimeRange = { Start = "2016 SEP 08 23:45:00", End = "2018 SEP 01 00:00:00" }
         },
-        { 
+        {
           Name = "Upcoming Gravity Assist", TimeRange = { Start = "2017 JAN 22 15:00:00", End = "2017 SEP 22 15:00:00" }
         },
-        { 
+        {
           Name = "Gravity Assist", TimeRange = { Start = "2017 SEP 22 15:00:00", End = "2017 SEP 22 21:00:00" }
         }
       }
@@ -64,10 +64,10 @@ return {
         -- Nested Levels from [3]
         {
           Name = "03_Approach", Phases = {
-            { 
+            {
               Name = "DustSearch_v1",
               Phases = {
-                { 
+                {
                   Name = "Phase03_AP_DustSearch_1.bc",
                   TimeRange = { Start = "2018-SEP-11 21:31:01.183", End = "2018-SEP-12 02:18:41.183" }
                 }

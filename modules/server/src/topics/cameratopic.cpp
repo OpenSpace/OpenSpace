@@ -45,7 +45,7 @@ using nlohmann::json;
 namespace openspace {
 
 CameraTopic::CameraTopic()
-    : _lastUpdateTime(std::chrono::system_clock::now()) 
+    : _lastUpdateTime(std::chrono::system_clock::now())
 {}
 
 CameraTopic::~CameraTopic() {

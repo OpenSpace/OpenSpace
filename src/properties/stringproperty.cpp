@@ -34,7 +34,7 @@ StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
     : TemplateProperty<std::string>(info, value)
 {}
 
-std::string StringProperty::className() const {
+std::string_view StringProperty::className() const {
     return "StringProperty";
 }
 

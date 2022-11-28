@@ -29,11 +29,11 @@ local TethysTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TethysTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TethysTrail)
 end)
-  
+
 asset.export(TethysTrail)
 
 

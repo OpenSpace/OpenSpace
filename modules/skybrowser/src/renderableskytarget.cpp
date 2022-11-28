@@ -68,6 +68,19 @@ namespace {
         "The thickness of the line of the target. The larger number, the thicker line"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
+        "VerticalFov",
+        "Vertical Field Of View",
+        "The vertical field of view of the target."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ApplyRollInfo = {
+       "ApplyRoll",
+       "Apply Roll",
+       "Always rotate the target to have it's up direction aligned with the up direction "
+       "of the camera"
+    };
+
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
         // [[codegen::verbatim(crossHairSizeInfo.description)]]
         std::optional<float> crossHairSize;
@@ -77,6 +90,12 @@ namespace {
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(VerticalFovInfo.description)]]
+        std::optional<double> verticalFov;
+
+        // [[codegen::verbatim(ApplyRollInfo.description)]]
+        std::optional<bool> applyRoll;
     };
 
 #include "renderableskytarget_codegen.cpp"
@@ -93,7 +112,9 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)
     , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
     , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
+    , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
     , _borderColor(220, 220, 220)
+    , _applyRoll(ApplyRollInfo, true)
 {
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -104,7 +125,14 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
     addProperty(_showRectangleThreshold);
 
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    _verticalFov= p.verticalFov.value_or(_verticalFov);
+    _verticalFov.setReadOnly(true);
+    addProperty(_verticalFov);
+
+    addProperty(_applyRoll);
 }
 
 void RenderableSkyTarget::bindTexture() {}
@@ -136,6 +164,26 @@ glm::ivec3 RenderableSkyTarget::borderColor() const {
     return _borderColor;
 }
 
+glm::dvec3 RenderableSkyTarget::rightVector() const {
+    double scaling = (_verticalFov / 70)* static_cast<double>(_size.value());
+    return scaling * _rightVector;
+}
+
+glm::dvec3 RenderableSkyTarget::upVector() const {
+    double scaling = (_verticalFov / 70) * static_cast<double>(_size.value());
+    return scaling * _upVector;
+}
+
+void RenderableSkyTarget::applyRoll() {
+    Camera* camera = global::navigationHandler->camera();
+    glm::dvec3 normal = glm::normalize(camera->positionVec3() - _worldPosition);
+
+    _rightVector = glm::normalize(
+        glm::cross(camera->lookUpVectorWorldSpace(), normal)
+    );
+    _upVector = glm::cross(normal, _rightVector);
+}
+
 void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
     const bool showRectangle = _verticalFov > _showRectangleThreshold;
@@ -144,29 +192,39 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
 
     _shader->activate();
     _shader->setUniform("opacity", opacity());
-
     _shader->setUniform("crossHairSize", _crossHairSize);
     _shader->setUniform("showRectangle", showRectangle);
     _shader->setUniform("lineWidth", _lineWidth * 0.0001f);
     _shader->setUniform("ratio", _ratio);
     _shader->setUniform("lineColor", color);
     _shader->setUniform("fov", static_cast<float>(_verticalFov));
+    _shader->setUniform("borderRadius", static_cast<float>(_borderRadius));
 
-    glm::dvec3 objectPositionWorld = glm::dvec3(
+    _worldPosition = glm::dvec3(
         glm::translate(
             glm::dmat4(1.0),
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
-    glm::dvec3 newRight = glm::normalize(
-        glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
-    );
-    glm::dvec3 newUp = glm::cross(normal, newRight);
+    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - _worldPosition);
+    // There are two modes - 1) target rolls to have its up vector parallel to the
+    // cameras up vector or 2) it is decoupled from the camera, in which case it needs to
+    // be initialized once
+    if (!_isInitialized || _applyRoll) {
+        applyRoll();
+        _isInitialized = true;
+    }
+    else {
+        // Use last frames vector for right and don't apply any roll
+        _upVector = glm::cross(normal, _rightVector);
+        _rightVector = glm::normalize(
+            glm::cross(_upVector, normal)
+        );
+    }
 
     glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
-    cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
-    cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
+    cameraOrientedRotation[0] = glm::dvec4(_rightVector, 0.0);
+    cameraOrientedRotation[1] = glm::dvec4(_upVector, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
 
     const glm::dmat4 rotationTransform = _billboard ?
@@ -229,6 +287,10 @@ void RenderableSkyTarget::removeHighlight(const glm::ivec3& removal) {
 
 void RenderableSkyTarget::setVerticalFov(double fov) {
     _verticalFov = fov;
+}
+
+void RenderableSkyTarget::setBorderRadius(double radius) {
+    _borderRadius = radius;
 }
 
 } // namespace openspace

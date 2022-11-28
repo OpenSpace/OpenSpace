@@ -552,7 +552,7 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_showDebugSphere);
 }
 
-SceneGraphNode::~SceneGraphNode() {} // NOLINT
+SceneGraphNode::~SceneGraphNode() {}
 
 void SceneGraphNode::initialize() {
     ZoneScoped
@@ -694,10 +694,7 @@ void SceneGraphNode::update(const UpdateData& data) {
         newUpdateData.modelTransform.translation
     );
     glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
-    glm::dmat4 scaling = glm::scale(
-        glm::dmat4(1.0),
-        newUpdateData.modelTransform.scale
-    );
+    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
 
     _modelTransformCached = translation * rotation * scaling;
 
@@ -883,11 +880,7 @@ void SceneGraphNode::removeDependency(SceneGraphNode& dependency) {
         dependency._dependentNodes.end()
     );
     _dependencies.erase(
-        std::remove(
-            _dependencies.begin(),
-            _dependencies.end(),
-            &dependency
-        ),
+        std::remove(_dependencies.begin(), _dependencies.end(), &dependency),
         _dependencies.end()
     );
 

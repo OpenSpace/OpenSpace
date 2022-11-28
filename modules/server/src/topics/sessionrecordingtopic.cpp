@@ -31,7 +31,7 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "SessionRecordingTopic";
-    
+
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
     constexpr std::string_view RefreshEvent = "refresh";

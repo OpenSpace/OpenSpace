@@ -27,11 +27,11 @@ local UranusTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(UranusTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(UranusTrail)
 end)
-  
+
 asset.export(UranusTrail)
 
 

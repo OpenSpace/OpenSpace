@@ -36,7 +36,6 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/collisionhelper.h>
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
@@ -178,6 +177,11 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     return newPose;
 }
 
+void Path::quitPath() {
+    _traveledDistance = pathLength();
+    _shouldQuit = true;
+}
+
 std::string Path::currentAnchor() const {
     bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
     return (pastHalfway) ? _end.nodeIdentifier() : _start.nodeIdentifier();
@@ -187,6 +191,9 @@ bool Path::hasReachedEnd() const {
     if (_shouldQuit) {
         return true;
     }
+
+    // @TODO (emmbr, 2022-11-07) Handle linear paths separately, as they might 
+    // abort prematurely due to the "isPositionFinished" condition
 
     bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
 
@@ -210,6 +217,7 @@ void Path::resetPlaybackVariables() {
 CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
     ghoul_assert(_type == Type::Linear, "Path type must be linear");
     const double relativeDistance = distance / pathLength();
+
     const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
     const double remainingDistance = glm::length(prevPosToEnd);
     CameraPose pose;
@@ -223,9 +231,27 @@ CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
         // Just move along line from the current position to the target
         const glm::dvec3 lineDir = glm::normalize(prevPosToEnd);
         pose.position = _prevPose.position - displacement * lineDir;
+
+        double newRemainingDistance = glm::length(pose.position - _end.position());
+        double diff = remainingDistance - newRemainingDistance;
+        // Avoid remaining distances close to zero, or even negative
+        if (relativeDistance > 0.5 && diff < LengthEpsilon) {
+            // The positions are too large, so we are not making progress because of
+            // insufficient precision
+            LWARNING("Quit camera path prematurely due to insufficient precision");
+            _shouldQuit = true;
+            return _prevPose;
+        }
     }
 
     pose.rotation = linearPathRotation(relativeDistance);
+
+    if (glm::any(glm::isnan(pose.rotation)) || glm::any(glm::isnan(pose.position))) {
+        // This should not happen, but guard for it anyways
+        _shouldQuit = true;
+        return _prevPose;
+    }
+
     return pose;
 }
 
@@ -440,50 +466,14 @@ Waypoint waypointFromCamera() {
     return Waypoint{ pos, rot, node };
 }
 
-SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
-    const std::vector<SceneGraphNode*>& relevantNodes =
-        global::navigationHandler->pathNavigator().relevantNodes();
-
-    for (SceneGraphNode* n : relevantNodes) {
-        bool isSame = (n->identifier() == node->identifier());
-        // If the nodes are in the very same position, they are probably representing
-        // the same object
-        isSame |=
-            glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
-
-        if (isSame) {
-            continue;
-        }
-
-        constexpr float proximityRadiusFactor = 3.f;
-
-        const float bs = static_cast<float>(n->boundingSphere());
-        const float proximityRadius = proximityRadiusFactor * bs;
-        const glm::dvec3 posInModelCoords =
-            glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
-
-        bool isClose = collision::isPointInsideSphere(
-            posInModelCoords,
-            glm::dvec3(0.0, 0.0, 0.0),
-            proximityRadius
-        );
-
-        if (isClose) {
-            return n;
-        }
-    }
-
-    return nullptr;
-}
-
 // Compute a target position close to the specified target node, using knowledge of
 // the start point and a desired distance from the node's center
 glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
                                     const Waypoint& startPoint)
 {
     const glm::dvec3 nodePos = targetNode->worldPosition();
-    const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
     const SceneGraphNode* sun = sceneGraphNode(SunIdentifier);
+    const SceneGraphNode* closeNode = PathNavigator::findNodeNearTarget(targetNode);
 
     // @TODO (2021-07-09, emmbr): Not nice to depend on a specific scene graph node,
     // as it might not exist. Ideally, each SGN could know about their preferred
@@ -545,6 +535,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         return Waypoint();
     }
 
+    glm::dvec3 stepDir;
     glm::dvec3 targetPos;
     if (info.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
@@ -561,7 +552,6 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
-        glm::dvec3 stepDir;
         if (type == Path::Type::Linear) {
             // If linear path, compute position along line form start to end point
             glm::dvec3 endNodePos = targetNode->worldPosition();
@@ -583,7 +573,18 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     }
 
     // Compute rotation so the camera is looking at the targetted node
-    const glm::dvec3 lookAtPos = targetNode->worldPosition();
+    glm::dvec3 lookAtPos = targetNode->worldPosition();
+
+    // Check if we can distinguish between targetpos and lookAt pos. Otherwise, move it further away
+    const glm::dvec3 diff = targetPos - lookAtPos;
+    double distSquared = glm::dot(diff, diff);
+    if (std::isnan(distSquared) || distSquared < LengthEpsilon) {
+        double startToEndDist = glm::length(
+            startPoint.position() - targetNode->worldPosition()
+        );
+        lookAtPos = targetPos - stepDir * 0.1 * startToEndDist;
+    }
+
     const glm::dquat targetRot = ghoul::lookAtQuaternion(targetPos, lookAtPos, up);
 
     return Waypoint(targetPos, targetRot, info.identifier);
@@ -723,7 +724,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
         LINFO(
             "Switching to a linear path, to avoid problems with precision due to "
-            "immense path length"
+            "immense path length or precision problems"
         );
 
         return createPathFromDictionary(dictionary, Path::Type::Linear);

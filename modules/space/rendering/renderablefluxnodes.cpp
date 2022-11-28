@@ -189,7 +189,7 @@ namespace {
         "Max Node Distance Size",
         "The maximum size of the nodes at a certin distance"
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo
                                                           CameraPerspectiveEnabledInfo = {
         "CameraPerspectiveEnabled",

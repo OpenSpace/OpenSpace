@@ -70,7 +70,7 @@ struct Layer {
   LayerSettings settings;
   LayerAdjustment adjustment;
   PixelPadding padding;
-  
+
   // Other layer type properties stuff
   vec3 color;
 };

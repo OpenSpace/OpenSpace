@@ -27,7 +27,7 @@ local volume = {
   },
   Transform = {
     Scale = {
-      Type = "StaticScale",   
+      Type = "StaticScale",
       Scale = maxApogee    --do not multiply this. That will not show real representation.
     }
   }
@@ -36,11 +36,11 @@ local volume = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(volume)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(volume)
 end)
-  
+
 asset.export(volume)
 
 

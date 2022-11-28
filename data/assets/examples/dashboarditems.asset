@@ -52,7 +52,13 @@ local property_value = {
   DisplayString = "Earth is enabled: {}"
 }
 
-asset.onInitialize(function() 
+local elapsed_time = {
+  Type = "DashboardItemElapsedTime",
+  Identifier = "ElapsedTime",
+  ReferenceTime = "2022-10-12 12:00:00"
+}
+
+asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(angle)
   openspace.dashboard.addDashboardItem(date)
   openspace.dashboard.addDashboardItem(simulation_increment)
@@ -61,9 +67,11 @@ asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(parallel_connection)
   openspace.dashboard.addDashboardItem(mission)
   openspace.dashboard.addDashboardItem(property_value)
+  openspace.dashboard.addDashboardItem(elapsed_time)
 end)
 
 asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(elapsed_time)
   openspace.dashboard.removeDashboardItem(property_value)
   openspace.dashboard.removeDashboardItem(mission)
   openspace.dashboard.removeDashboardItem(parallel_connection)
@@ -74,6 +82,7 @@ asset.onDeinitialize(function()
   openspace.dashboard.removeDashboardItem(angle)
 end)
 
+asset.export(elapsed_time)
 asset.export(property_value)
 asset.export(mission)
 asset.export(parallel_connection)

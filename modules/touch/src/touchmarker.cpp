@@ -83,7 +83,7 @@ TouchMarker::TouchMarker()
     addProperty(_color);
 }
 
-TouchMarker::~TouchMarker() {} // NOLINT
+TouchMarker::~TouchMarker() {}
 
 void TouchMarker::initialize() {
     glGenVertexArrays(1, &_quad); // generate array

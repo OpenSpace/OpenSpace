@@ -50,7 +50,7 @@ public:
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
 
-    void setVerticalFovWithScroll(float scroll);
+    double setVerticalFovWithScroll(float scroll);
     void setOpacity(float opacity);
     void setRatio(float ratio);
     void setIdInBrowser() const;
@@ -67,6 +67,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    static constexpr int RadiusTimeOut = 25;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
@@ -78,7 +79,9 @@ private:
     bool _isSyncedWithWwt = false;
     bool _textureDimensionsIsDirty = false;
     bool _ratioIsDirty = false;
+    bool _radiusIsDirty = false;
     bool _isInitialized = false;
+    int _borderRadiusTimer = -1;
 
     float _ratio = 1.f;
 };

@@ -31,9 +31,9 @@ local NewHorizons = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NewHorizons)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NewHorizons)
 end)
-  
+
 asset.export(NewHorizons)

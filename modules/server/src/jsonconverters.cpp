@@ -34,7 +34,7 @@ using json = nlohmann::json;
 namespace openspace::properties {
 
 void to_json(json& j, const Property& p) {
-    std::string description = p.generateBaseJsonDescription();
+    std::string description = p.generateJsonDescription();
     json desc = json::parse(description);
 
     std::string value = p.jsonValue();

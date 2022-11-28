@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Atmospheric Chemistry: GEOS-5 Model"
 local Identifier = "noaa-sos-atmosphere-nccs_models-chem"
-local Description = [[Models create a dynamic portrait of the Earth through numerical 
-experiments that simulate our current knowledge of the dynamical and physical processes 
-governing weather and climate variability. The simulation visualized here captures how 
-winds lift up aerosols from the Earth's surface and transport them around the globe 
-during the period September 1, 2006 to March 17, 2007. Such simulations allow scientists 
-to identify the sources and pathways of these tiny particulates that influence weather 
+local Description = [[Models create a dynamic portrait of the Earth through numerical
+experiments that simulate our current knowledge of the dynamical and physical processes
+governing weather and climate variability. The simulation visualized here captures how
+winds lift up aerosols from the Earth's surface and transport them around the globe
+during the period September 1, 2006 to March 17, 2007. Such simulations allow scientists
+to identify the sources and pathways of these tiny particulates that influence weather
 and climate]]
 local URL = "https://sos.noaa.gov/catalog/datasets/atmospheric-chemistry-geos-5-model/"
 
@@ -33,7 +33,7 @@ local layer = {
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "chem_%Y-%m-%d_%H-%M.png"
-  },      
+  },
   Description = Description
 }
 
@@ -47,7 +47,7 @@ local legend = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "4000-1.zip", imagesDestination, true)
@@ -79,7 +79,7 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

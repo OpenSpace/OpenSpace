@@ -49,6 +49,7 @@ public:
     void setRatio(float ratio);
     void setColor(glm::ivec3 color);
     void setVerticalFov(double fov);
+    void setBorderRadius(double radius);
 
     // Display
     void highlight(const glm::ivec3& addition);
@@ -56,16 +57,24 @@ public:
 
     static documentation::Documentation Documentation();
 
+    void applyRoll();
+    glm::dvec3 rightVector() const;
+    glm::dvec3 upVector() const;
 private:
     // Properties
     properties::FloatProperty _crossHairSize;
     properties::FloatProperty _showRectangleThreshold;
     properties::FloatProperty _lineWidth;
+    properties::DoubleProperty _verticalFov;
+    properties::BoolProperty _applyRoll;
 
-    double _verticalFov = 10.0;
-
+    bool _isInitialized = false;
+    double _borderRadius = 0.0;
     glm::ivec3 _borderColor = glm::ivec3(230);
     float _ratio = 1.f;
+    glm::dvec3 _rightVector;
+    glm::dvec3 _upVector;
+    glm::dvec3 _worldPosition;
 };
 } // namespace openspace
 

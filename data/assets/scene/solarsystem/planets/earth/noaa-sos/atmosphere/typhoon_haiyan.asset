@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Typhoon Haiyan - Oct - Nov 2013"
 local Identifier = "noaa-sos-atmosphere-typhoon_haiyan"
-local Description = [[Typhoon Haiyan, also known in the Phillippines as Typhoon Yolanda, 
-may be the strongest recorded tropical cyclone to make landfall with sustained speeds up 
-to 195 mph. If confirmed, it would beat the previous record holder, Hurricane Camille 
-(1969). This dataset is taken from the Real-Time Linear IR satellite dataset from October 
+local Description = [[Typhoon Haiyan, also known in the Phillippines as Typhoon Yolanda,
+may be the strongest recorded tropical cyclone to make landfall with sustained speeds up
+to 195 mph. If confirmed, it would beat the previous record holder, Hurricane Camille
+(1969). This dataset is taken from the Real-Time Linear IR satellite dataset from October
 30th to November 12th, 2013]]
 local URL = "https://sos.noaa.gov/catalog/datasets/typhoon-haiyan-oct-nov-2013/"
 

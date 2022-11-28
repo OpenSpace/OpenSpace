@@ -8,7 +8,7 @@ local layer = {
   Description = [[This map layer is colorzied based elevation data from MOLA and HRSC.
     Compared to MOLA Psuedo Color, this layer has no terrain shading, which is
     suitable for use when combing with other layers. Data Reference:
-    https://astrogeology.usgs.gov/search/map/Mars/Topography/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2]],
+    https://astrogeology.usgs.gov/search/map/Mars/Topography/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2]]
 }
 
 asset.onInitialize(function()

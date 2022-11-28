@@ -15,7 +15,7 @@ local layer = {
     we've also imaged avalanches in progress, and discovered dark flows that may or
     may not be briny seeps. Hundreds of science papers have been published with our
     data. (Description from URL). This map contains a subet set of the HiRISE
-    DEM where available as of 2018]],
+    DEM where available as of 2018]]
 }
 
 asset.onInitialize(function()

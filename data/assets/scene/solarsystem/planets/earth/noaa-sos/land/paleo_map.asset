@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "PALEOMAP PaleoAtlas 0 - 750 Million Years Ago"
 local Identifier = "noaa-sos-land-paleomap"
-local Description = [[The PALEOMAP PaleoAtlas for GPlates consists of 91 paleogeographic 
-  maps spanning the Phanerozoic and late Neoproterozoic. The PaleoAtlas can be directly 
-  loaded into GPlates as a Time Dependent Raster file. The paleogeographic maps in the 
-  PaleoAtlas illustrate the ancient configuration of the ocean basins and continents, as 
-  well as important topographic and bathymetric features such as mountains, lowlands, 
-  shallow sea, continental shelves, and deep oceans. This tutorial also describes how the 
-  maps in the PaleoAtlas were made, documents the sources of information used to make the 
+local Description = [[The PALEOMAP PaleoAtlas for GPlates consists of 91 paleogeographic
+  maps spanning the Phanerozoic and late Neoproterozoic. The PaleoAtlas can be directly
+  loaded into GPlates as a Time Dependent Raster file. The paleogeographic maps in the
+  PaleoAtlas illustrate the ancient configuration of the ocean basins and continents, as
+  well as important topographic and bathymetric features such as mountains, lowlands,
+  shallow sea, continental shelves, and deep oceans. This tutorial also describes how the
+  maps in the PaleoAtlas were made, documents the sources of information used to make the
   paleogeographic maps, and provides instructions how to plot user-defined paleodata on
   the paleogeographic maps using the program PaleoDataPlotter.
 
@@ -153,7 +153,7 @@ asset.onInitialize(function()
     openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", v)
   end
 
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

@@ -18,7 +18,7 @@ local parentSpice = "SATURN BARYCENTER"
 local guiPath = "/Solar System/Planets/Saturn/Moons/Shepherd Moons"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_shepherd", "moon_minor" }
 local trailColor = { 0.5, 0.3, 0.3 }
-local trailTags = { 
+local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_saturn",

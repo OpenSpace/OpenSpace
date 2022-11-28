@@ -30,6 +30,7 @@
 #include <any>
 #include <functional>
 #include <string>
+#include <string_view>
 
 struct lua_State;
 
@@ -114,15 +115,16 @@ public:
 
     /// This OnChangeHandle can be used to remove all onChange callbacks from this
     /// Property
-    static OnChangeHandle OnChangeHandleAll;
+    constexpr static OnChangeHandle OnChangeHandleAll =
+        std::numeric_limits<OnChangeHandle>::max();
 
     /**
      * The constructor for the property. The \p info (see #PropertyInfo) contains
      * necessary information for this Property. #PropertyInfo::identifier needs to be
      * unique for each PropertyOwner. The #PropertyInfo::guiName will be stored in the
      * metaData to be accessed by the GUI elements using the #PropertyInfo::guiName key.
-     * The default visibility settings is Visibility::Always, whereas the default read-only
-     * state is \c false.
+     * The default visibility settings is Visibility::Always, whereas the default
+     * read-only state is \c false.
      *
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property.
@@ -145,7 +147,7 @@ public:
      *
      * \return The class name of the Property
      */
-    virtual std::string className() const = 0;
+    virtual std::string_view className() const = 0;
 
     /**
      * This method returns the encapsulated value of the Property to the caller. The type
@@ -223,17 +225,7 @@ public:
      * \param value The value to which the Property will be encoded
      * \return \p true if the encoding succeeded, \p false otherwise
      */
-    virtual bool getStringValue(std::string& value) const;
-
-    /**
-     * This method encodes the encapsulated value of this Property as a
-     * <code>std::string</code>.
-     *
-     * \return the string value
-     *
-     * \throw ghoul::RuntimeError If value could not be fetched
-     */
-    std::string getStringValue() const;
+    virtual std::string stringValue() const;
 
     /**
      * This method registers a \p callback function that will be called every time if
@@ -382,11 +374,11 @@ public:
     void setReadOnly(bool state);
 
     /**
-    * Default view options that can be used in the Property::setViewOption method. The
-    * values are:
-    * - Property::ViewOptions::Color = \c Color (Intended for Vec3 and Vec4),
-    * - Property::ViewOptions::MinMaxRange = \c MinMaxRange (Intended for Vec2)
-    */
+     * Default view options that can be used in the Property::setViewOption method. The
+     * values are:
+     * - Property::ViewOptions::Color = \c Color (Intended for Vec3 and Vec4),
+     * - Property::ViewOptions::MinMaxRange = \c MinMaxRange (Intended for Vec2)
+     */
     struct ViewOptions {
         static const char* Color;
         static const char* MinMaxRange;
@@ -427,14 +419,6 @@ public:
     const ghoul::Dictionary& metaData() const;
 
     /**
-     * Convert the Property into a string containing a JSON representation of the
-     * Property. Includes description of the object.
-     *
-     * \return The JSON string
-     */
-    virtual std::string toJson() const;
-
-    /**
      * Get a valid JSON formatted representation of the Property's value.
      *
      * \return the value in a json compatible format
@@ -457,7 +441,7 @@ public:
      *
      * \return The base description common to all Property classes
      */
-    std::string generateBaseJsonDescription() const;
+    std::string generateJsonDescription() const;
 
     /**
      * Creates the information for the \c MetaData key-part of the JSON description for
@@ -496,14 +480,6 @@ public:
     void resetToUnchanged();
 
 protected:
-    static const char* IdentifierKey;
-    static const char* NameKey;
-    static const char* TypeKey;
-    static const char* DescriptionKey;
-    static const char* JsonValueKey;
-    static const char* MetaDataKey;
-    static const char* AdditionalDataKey;
-
     /**
      * This method must be called by all subclasses whenever the encapsulated value has
      * changed and potential listeners need to be informed.
@@ -546,9 +522,6 @@ private:
     uint64_t _id;
 #endif
 };
-
-/// This function sanitizes an incoming string for JSON control characters
-std::string sanitizeString(const std::string& str);
 
 } // namespace openspace::properties
 

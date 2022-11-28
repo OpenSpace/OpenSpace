@@ -576,7 +576,7 @@ const Timeline<TimeKeyframeData>& TimeManager::timeline() const {
     return _timeline;
 }
 
-std::vector<Syncable*> TimeManager::getSyncables() {
+std::vector<Syncable*> TimeManager::syncables() {
     return { &_currentTime, &_integrateFromTime };
 }
 
