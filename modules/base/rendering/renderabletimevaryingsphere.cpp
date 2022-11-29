@@ -109,7 +109,7 @@ namespace {
         "Enables/Disables the Fade-In/Out effects."
     };
 
-    struct [[codegen::Dictionary(RenerableTimeVaryingSphere)]] Parameters {
+    struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
 
