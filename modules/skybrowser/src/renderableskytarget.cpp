@@ -175,13 +175,7 @@ glm::dvec3 RenderableSkyTarget::upVector() const {
 }
 
 void RenderableSkyTarget::applyRoll() {
-    Camera* camera = global::navigationHandler->camera();
-    glm::dvec3 normal = glm::normalize(camera->positionVec3() - _worldPosition);
-
-    _rightVector = glm::normalize(
-        glm::cross(camera->lookUpVectorWorldSpace(), normal)
-    );
-    _upVector = glm::cross(normal, _rightVector);
+    _applyRoll = true;
 }
 
 void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
@@ -200,18 +194,21 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("fov", static_cast<float>(_verticalFov));
     _shader->setUniform("borderRadius", static_cast<float>(_borderRadius));
 
-    _worldPosition = glm::dvec3(
+    glm::dvec3 objectPositionWorld = glm::dvec3(
         glm::translate(
             glm::dmat4(1.0),
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - _worldPosition);
+    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
     // There are two modes - 1) target rolls to have its up vector parallel to the
     // cameras up vector or 2) it is decoupled from the camera, in which case it needs to
     // be initialized once
     if (!_isInitialized || _applyRoll) {
-        applyRoll();
+        _rightVector = glm::normalize(
+            glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
+        );
+        _upVector = glm::cross(normal, _rightVector);
         _isInitialized = true;
     }
     else {
@@ -222,53 +219,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
         );
     }
 
-    glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
-    cameraOrientedRotation[0] = glm::dvec4(_rightVector, 0.0);
-    cameraOrientedRotation[1] = glm::dvec4(_upVector, 0.0);
-    cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
-
-    const glm::dmat4 rotationTransform = _billboard ?
-        cameraOrientedRotation :
-        glm::dmat4(data.modelTransform.rotation);
-
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        rotationTransform *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-        glm::dmat4(1.0);
-    const glm::dmat4 modelViewTransform =
-        data.camera.combinedViewMatrix() * modelTransform;
-
-    _shader->setUniform(
-        "modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
-    );
-
-    _shader->setUniform(
-        "modelViewTransform",
-        glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform))
-    );
-
-    _shader->setUniform("multiplyColor", _multiplyColor);
-
-    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
-    if (additiveBlending) {
-        glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    }
-
-    glBindVertexArray(_quad);
-    glEnable(GL_LINE_SMOOTH);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDisable(GL_LINE_SMOOTH);
-    glBindVertexArray(0);
-
-    if (additiveBlending) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    }
-
-    _shader->deactivate();
+    internalRender(data, _rightVector, _upVector, normal);
 }
 
 void RenderableSkyTarget::setRatio(float ratio) {

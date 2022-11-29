@@ -28,7 +28,6 @@ in vec4 vs_gPosition;
 in vec3 vs_gNormal;
 in float vs_screenSpaceDepth;
 in vec2 vs_st;
-in vec4 vs_position;
 
 uniform float crossHairSize;
 uniform bool showRectangle;

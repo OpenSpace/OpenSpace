@@ -28,8 +28,8 @@
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
-out vec4 vs_gPosition;
 
+out vec4 vs_gPosition;
 out vec3 vs_gNormal;
 out float vs_screenSpaceDepth;
 out vec2 vs_st;

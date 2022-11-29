@@ -211,29 +211,11 @@ void RenderablePlane::deinitializeGL() {
     _shader = nullptr;
 }
 
-void RenderablePlane::render(const RenderData& data, RendererTasks&) {
-    ZoneScoped
-
-    _shader->activate();
-    _shader->setUniform("opacity", opacity());
-
-    _shader->setUniform("mirrorBackside", _mirrorBackside);
-
-    glm::dvec3 objectPositionWorld = glm::dvec3(
-        glm::translate(
-            glm::dmat4(1.0),
-            data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
-    );
-
-    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
-    glm::dvec3 newRight = glm::normalize(
-        glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
-    );
-    glm::dvec3 newUp = glm::cross(normal, newRight);
-
+void RenderablePlane::internalRender(const RenderData& data, const glm::dvec3& right,
+                                     const glm::dvec3& up, const glm::dvec3& normal) {
     glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
-    cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
-    cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
+    cameraOrientedRotation[0] = glm::dvec4(right, 0.0);
+    cameraOrientedRotation[1] = glm::dvec4(up, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
 
     const glm::dmat4 rotationTransform = _billboard ?
@@ -253,13 +235,6 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("modelViewTransform",
         glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform)));
-
-    ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    bindTexture();
-    defer { unbindTexture(); };
-
-    _shader->setUniform("texture1", unit);
 
     _shader->setUniform("multiplyColor", _multiplyColor);
 
@@ -282,9 +257,39 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
+void RenderablePlane::render(const RenderData& data, RendererTasks&) {
+    ZoneScoped
+
+    _shader->activate();
+    _shader->setUniform("opacity", opacity());
+    _shader->setUniform("mirrorBackside", _mirrorBackside);
+
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    bindTexture();
+    defer{ unbindTexture(); };
+
+    _shader->setUniform("texture1", unit);
+
+    glm::dvec3 objectPositionWorld = glm::dvec3(
+        glm::translate(
+            glm::dmat4(1.0),
+            data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+
+    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
+    glm::dvec3 newRight = glm::normalize(
+        glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
+    );
+    glm::dvec3 newUp = glm::cross(normal, newRight);
+    internalRender(data, newRight, newUp, normal);
+}
+
 void RenderablePlane::bindTexture() {}
 
 void RenderablePlane::unbindTexture() {}
+
+
 
 void RenderablePlane::update(const UpdateData&) {
     ZoneScoped

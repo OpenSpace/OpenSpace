@@ -74,7 +74,6 @@ private:
     float _ratio = 1.f;
     glm::dvec3 _rightVector;
     glm::dvec3 _upVector;
-    glm::dvec3 _worldPosition;
 };
 } // namespace openspace
 

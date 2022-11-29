@@ -67,6 +67,8 @@ public:
 protected:
     virtual void bindTexture();
     virtual void unbindTexture();
+    void internalRender(const RenderData& data, const glm::dvec3& right, 
+        const glm::dvec3& up, const glm::dvec3& normal);
     void createPlane();
 
     properties::OptionProperty _blendMode;
