@@ -113,10 +113,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
         std::unique_ptr<ServerInterface> serverInterface =
             ServerInterface::createFromDictionary(interfaceDictionary);
 
-
-        //if (global::windowDelegate->isMaster()) {
-            serverInterface->initialize();
-        //}
+        serverInterface->initialize();
 
         _interfaceOwner.addPropertySubOwner(serverInterface.get());
 
@@ -132,10 +129,6 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
 }
 
 void ServerModule::preSync() {
-    //if (!global::windowDelegate->isMaster()) {
-    //    return;
-    //}
-
     // Set up new connections.
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (!serverInterface->isEnabled()) {
@@ -204,9 +197,7 @@ void ServerModule::disconnectAll() {
     ZoneScoped
 
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
-        //if (global::windowDelegate->isMaster()) {
-            serverInterface->deinitialize();
-        //}
+        serverInterface->deinitialize();
     }
 
     for (ConnectionData& connectionData : _connections) {

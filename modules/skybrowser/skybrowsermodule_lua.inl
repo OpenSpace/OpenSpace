@@ -41,6 +41,7 @@ namespace {
 
 
     bool browserBelongsToCurrentNode(std::string identifier) {
+        // Convert the last char to an int
         int nodeId = static_cast<int>(identifier[identifier.length() - 1] - '0');
         return nodeId == openspace::global::windowDelegate->currentNode();
     }
