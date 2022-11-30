@@ -40,6 +40,11 @@ namespace {
     constexpr std::string_view _loggerCat = "SkyBrowserModule";
 
 
+    bool browserBelongsToCurrentNode(std::string identifier) {
+        int nodeId = static_cast<int>(identifier[identifier.length() - 1] - '0');
+        return nodeId == openspace::global::windowDelegate->currentNode();
+    }
+
 /**
 * Reloads the sky browser display copy for the node index that is sent in.
 * .If no ID is sent in, it will reload all display copies on that node.
@@ -169,6 +174,9 @@ namespace {
 [[codegen::luawrap]] void loadImagesToWWT(std::string identifier) {
     using namespace openspace;
 
+    if (!browserBelongsToCurrentNode(identifier))
+        return;
+    identifier.pop_back();
     // Load images from url
     LINFO("Connection established to WorldWide Telescope application in " + identifier);
     LINFO("Loading image collections to " + identifier);
@@ -207,12 +215,11 @@ namespace {
             );
         }
     }
-
     // To ensure each node in a cluster calls its own instance of the wwt application
     // Do not send this script to the other nodes
     global::scriptEngine->queueScript(
         "openspace.skybrowser.sendOutIdsToBrowsers()",
-        scripting::ScriptEngine::RemoteScripting::No
+        scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
@@ -241,6 +248,9 @@ namespace {
     using namespace openspace;
 
     // Initialize browser with ID and its corresponding target
+    if (!browserBelongsToCurrentNode(identifier))
+        return;
+    identifier.pop_back();
     LINFO("Initializing sky browser " + identifier);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
@@ -465,6 +475,9 @@ namespace {
     glm::vec3 positionBrowser = glm::vec3(0.f, 0.f, -2.1f);
     glm::vec3 positionTarget = glm::vec3(0.9f, 0.4f, -2.1f);
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
+    if (glm::any(glm::isnan(galacticTarget))) {
+        galacticTarget = { skybrowser::CelestialSphereRadius, 0.0, 0.0 };
+    }
     std::string guiPath = "/Sky Browser";
     std::string url = "http://wwt.openspaceproject.com/1/openspace/";
     double fov = 70.0;
@@ -762,6 +775,10 @@ namespace {
 [[codegen::luawrap]] void loadingImageCollectionComplete(std::string identifier) {
     using namespace openspace;
 
+    if (!browserBelongsToCurrentNode(identifier)) {
+        return;
+    }
+    identifier.pop_back();
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {

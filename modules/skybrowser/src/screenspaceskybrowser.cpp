@@ -183,7 +183,7 @@ bool ScreenSpaceSkyBrowser::isInitialized() const {
 }
 
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
-    WwtCommunicator::setIdInBrowser(identifier());
+    WwtCommunicator::setIdInBrowser(identifier() + std::to_string(global::windowDelegate->currentNode()));
 }
 
 void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {
