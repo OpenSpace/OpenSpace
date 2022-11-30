@@ -3,6 +3,9 @@
 -- The bsae OpenSpace content
 asset.require("base")
 
+-- Action for GUI scale
+asset.require("installationspecific/guiscaleaction")
+
 -- The state machine to control the installation
 asset.require("installationspecific/stort_state_machine")
 

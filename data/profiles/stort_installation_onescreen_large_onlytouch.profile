@@ -37,7 +37,16 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [],
+  "keybindings": [
+    {
+      "action": "gui.scaleup",
+      "key": "CTRL+UP"
+    },
+    {
+      "action": "gui.scaledown",
+      "key": "CTRL+DOWN"
+    }
+  ],
   "mark_nodes": [
     "Earth",
     "Mars",

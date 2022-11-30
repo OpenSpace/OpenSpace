@@ -1,7 +1,7 @@
 {
   "actions": [],
   "additional_scripts": [
-    "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiScale\", 1.5) -- Suitable for 55 inch touch screen"
+    "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiScale\", 1.5) -- Suitable for 55 inch touch screen",
     "local guiPath = \"${BASE}/../stort-2021/homeOneScreen/index.html\"; openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiUrl\", openspace.absPath(guiPath))"
   ],
   "assets": [
@@ -36,7 +36,16 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [],
+  "keybindings": [
+    {
+      "action": "gui.scaleup",
+      "key": "CTRL+UP"
+    },
+    {
+      "action": "gui.scaledown",
+      "key": "CTRL+DOWN"
+    }
+  ],
   "mark_nodes": [
     "Earth",
     "Mars",
