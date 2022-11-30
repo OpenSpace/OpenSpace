@@ -1,7 +1,8 @@
 {
   "actions": [],
   "additional_scripts": [
-    "openspace.setPropertyValueSingle(\"Modules.CefWebGui.Visible\", false);"
+    "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiScale\", 1) -- Suitable for smaller screens",
+    "local guiPath = \"${BASE}/../stort-2021/homeOneScreen/index.html\"; openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiUrl\", openspace.absPath(guiPath))"
   ],
   "assets": [
     "installationspecific/stort_installation_base"
@@ -59,7 +60,13 @@
       "notLoadedInstruction": "openspace.printFatal('Could not load profile due to missing module \"Touch\"');"
     }
   ],
-  "properties": [],
+  "properties": [
+    {
+      "name": "Modules.CefWebGui.Visible",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    }
+  ],
   "time": {
     "type": "absolute",
     "value": "2021-08-26T03:20:55.505"
