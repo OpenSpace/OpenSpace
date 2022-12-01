@@ -33,6 +33,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/collisionhelper.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <vector>
@@ -152,8 +153,11 @@ void AvoidCollisionCurve::removeCollisions(int step) {
             glm::dvec3 p1 = glm::inverse(modelTransform) * glm::dvec4(lineStart, 1.0);
             glm::dvec3 p2 = glm::inverse(modelTransform) * glm::dvec4(lineEnd, 1.0);
 
-            // Sphere to check for collision
-            double radius = node->boundingSphere();
+            // Sphere to check for collision. Make sure it does not have radius zero.
+            const double minValidBoundingSphere =
+                global::navigationHandler->pathNavigator().minValidBoundingSphere();
+
+            double radius = std::max(node->boundingSphere(), minValidBoundingSphere);
             glm::dvec3 center = glm::dvec3(0.0, 0.0, 0.0);
 
             // Add a buffer to avoid passing too close to the node.
@@ -207,6 +211,13 @@ void AvoidCollisionCurve::removeCollisions(int step) {
 
             glm::dvec3 extraKnot = collisionPoint -
                 avoidCollisionDistance * glm::normalize(orthogonal);
+
+            // Don't add invalid positions (indicating precision issues)
+            if (glm::any(glm::isnan(extraKnot))) {
+                throw InsufficientPrecisionError(
+                    "Insufficient precision for avoid collision computation"
+                );
+            }
 
             _points.insert(_points.begin() + i + 2, extraKnot);
 

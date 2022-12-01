@@ -3,22 +3,22 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Coral Reef Risk Outlook"
 local Identifier = "noaa-sos-oceans-reefs_risk"
-local Description = [[From tourism to disease prevention, it's clear that reefs offer 
-much more than recreation. According to the newly released Reefs at Risk Revisited 
+local Description = [[From tourism to disease prevention, it's clear that reefs offer
+much more than recreation. According to the newly released Reefs at Risk Revisited
 report, coral reefs:
 
 Support more than 275 million people worldwide.
 Protect coastlines in more than 100 countries - helping defend against storms and erosion.
 Accounts for 15% of gross domestic product in more than 20 countries.
-Hold the potential to fight disease - including treatments for cancer, HIV, malaria, and 
+Hold the potential to fight disease - including treatments for cancer, HIV, malaria, and
 other diseases.
 
-Yet coral reefs today face serious threats. The new report finds that approximately 75% 
-of world's coral reefs are currently threatened by local and global pressures. Local 
-pressures pose the most immediate threat - especially from overfishing and destructive 
-fishing, which is particularly widespread in Southeast Asia. Global threats from climate 
-change and alterations in ocean chemistry (i.e. ocean acidification) are compounding the 
-pressures on reefs. Climate change is causing ocean temperatures to rise, which, in turn, 
+Yet coral reefs today face serious threats. The new report finds that approximately 75%
+of world's coral reefs are currently threatened by local and global pressures. Local
+pressures pose the most immediate threat - especially from overfishing and destructive
+fishing, which is particularly widespread in Southeast Asia. Global threats from climate
+change and alterations in ocean chemistry (i.e. ocean acidification) are compounding the
+pressures on reefs. Climate change is causing ocean temperatures to rise, which, in turn,
 is leading to wide-spread coral bleaching]]
 local URL = "https://sos.noaa.gov/catalog/datasets/coral-reef-risk-outlook/"
 
@@ -61,11 +61,11 @@ local legend = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2012)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2030)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2050)
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

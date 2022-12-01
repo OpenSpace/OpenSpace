@@ -104,7 +104,7 @@ NavigationHandler::NavigationHandler()
     addProperty(_useKeyFrameInteraction);
 }
 
-NavigationHandler::~NavigationHandler() {} // NOLINT
+NavigationHandler::~NavigationHandler() {}
 
 void NavigationHandler::initialize() {
     ZoneScoped
@@ -630,7 +630,8 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::AddGlobalRoll,
             codegen::lua::TriggerIdleBehavior,
             codegen::lua::ListAllJoysticks,
-            codegen::lua::TargetNextInterestingAnchor
+            codegen::lua::TargetNextInterestingAnchor,
+            codegen::lua::TargetPreviousInterestingAnchor
         }
     };
 }

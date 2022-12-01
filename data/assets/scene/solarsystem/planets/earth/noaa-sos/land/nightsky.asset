@@ -3,8 +3,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Light Pollution - Artificial Sky Brightness"
 local Identifier = "noaa-sos-land-nightsky"
-local Description = [[Light pollution in urban centers creates a sky glow that can blot 
-out the stars. The brighter the area in this map the harder it is to see stars and 
+local Description = [[Light pollution in urban centers creates a sky glow that can blot
+out the stars. The brighter the area in this map the harder it is to see stars and
 constellations in the night sky]]
 local URL = "https://sos.noaa.gov/catalog/datasets/light-pollution-artificial-sky-brightness/"
 
@@ -34,9 +34,9 @@ local legend = {
   CartesianPosition = { 0.75, 0.0, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

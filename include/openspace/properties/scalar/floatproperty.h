@@ -51,7 +51,7 @@ public:
         float minValue = std::numeric_limits<float>::lowest(),
         float maxValue = std::numeric_limits<float>::max(), float stepValue = 0.01f);
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<float>::operator=;

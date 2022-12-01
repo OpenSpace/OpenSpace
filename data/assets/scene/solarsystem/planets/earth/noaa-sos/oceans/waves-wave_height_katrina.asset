@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Wave Heights - Hurricane Katrina 2005"
 local Identifier = "noaa-sos-oceans-waves-wave_height_katrina"
-local Description = [[This movie shows calculations of the NOAA wave forecasting model, 
-called WAVEWATCH III, over the Atlantic Ocean and focuses on the time period that 
-Hurricane Katrina occurred. Hurricane Katrina formed near the Bahamas on August 23rd, 
-2005. It made landfall in Florida on Monday August 27th and then regained energy tracking 
-though the Gulf of Mexico. Finally it hit the southeast Louisiana coast on Monday August 
+local Description = [[This movie shows calculations of the NOAA wave forecasting model,
+called WAVEWATCH III, over the Atlantic Ocean and focuses on the time period that
+Hurricane Katrina occurred. Hurricane Katrina formed near the Bahamas on August 23rd,
+2005. It made landfall in Florida on Monday August 27th and then regained energy tracking
+though the Gulf of Mexico. Finally it hit the southeast Louisiana coast on Monday August
 29th, 2005]]
 local URL = "https://sos.noaa.gov/catalog/datasets/wave-heights-hurricane-katrina-2005/"
 
@@ -47,7 +47,7 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

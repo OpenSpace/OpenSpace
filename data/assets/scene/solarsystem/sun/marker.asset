@@ -31,11 +31,11 @@ local SunMarker = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SunMarker)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SunMarker)
 end)
-  
+
 asset.export(SunMarker)
 
 

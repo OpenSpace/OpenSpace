@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Blue Marble: with Topography - Seasonal"
 local Identifier = "noaa-sos-land-blue_marble-next_gen-topo"
-local Description = [[The Blue Marble is an incredibly detailed, true-color depiction of 
-  the Earth. The Blue Marble Next Generation is an update on the original that has greater 
-  detail. "The original Blue Marble was a composite of four months of MODIS observations 
+local Description = [[The Blue Marble is an incredibly detailed, true-color depiction of
+  the Earth. The Blue Marble Next Generation is an update on the original that has greater
+  detail. "The original Blue Marble was a composite of four months of MODIS observations
   with a spatial resolution (level of detail) of 1 square kilometer per pixel.
   Blue Marble: Next Generation offers a years worth of monthly composites at a spatial
   resolution of 500 meters]]

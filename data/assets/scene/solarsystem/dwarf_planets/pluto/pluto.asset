@@ -43,7 +43,7 @@ local Pluto = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto"
   }
@@ -74,12 +74,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Pluto)
   openspace.addSceneGraphNode(PlutoLabel)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PlutoLabel)
   openspace.removeSceneGraphNode(Pluto)
 end)
-  
+
 asset.export(Pluto)
 asset.export(PlutoLabel)
 

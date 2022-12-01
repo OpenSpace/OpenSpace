@@ -145,7 +145,7 @@ public:
     // [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
     const glm::mat4& viewProjectionMatrix() const;
 
-    std::vector<Syncable*> getSyncables();
+    std::vector<Syncable*> syncables();
 
     // Static constants
     // (2021-07-16, emmbr) Note that this hard coded vector for the view direction is also

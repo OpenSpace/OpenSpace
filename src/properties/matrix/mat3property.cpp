@@ -41,7 +41,7 @@ Mat3Property::Mat3Property(Property::PropertyInfo info, glm::mat3x3 value,
     )
 {}
 
-std::string Mat3Property::className() const {
+std::string_view Mat3Property::className() const {
     return "Mat3Property";
 }
 

@@ -40,7 +40,7 @@ UIntProperty::UIntProperty(Property::PropertyInfo info, unsigned int value,
     )
 {}
 
-std::string UIntProperty::className() const {
+std::string_view UIntProperty::className() const {
     return "UIntProperty";
 }
 

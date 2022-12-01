@@ -53,11 +53,11 @@ local Charon = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Charon)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Charon)
 end)
-  
+
 asset.export(Charon)
 
 

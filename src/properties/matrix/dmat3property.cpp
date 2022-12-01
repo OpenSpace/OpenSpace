@@ -41,7 +41,7 @@ DMat3Property::DMat3Property(Property::PropertyInfo info, glm::dmat3x3 value,
     )
 {}
 
-std::string DMat3Property::className() const {
+std::string_view DMat3Property::className() const {
     return "DMat3Property";
 }
 

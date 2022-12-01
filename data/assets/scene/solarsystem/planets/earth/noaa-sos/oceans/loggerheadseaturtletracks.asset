@@ -3,15 +3,15 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Loggerhead Sea Turtle Tracks"
 local Identifier = "noaa-sos-oceans-loggerheadseaturtletracks"
-local Description = [[Using satellite transmitting tags on wildlife allows scientists to 
-monitor the behaviors of the wildlife in their natural habitats. This dataset contains 
-the tracks of juvenile loggerhead sea turtles that were tagged and monitored. Some of the 
-turtles were caught on commercial fishing vessels north of Hawaii and the other turtles 
-were raised in the hatchery at the Port of Nagoya Aquarium in Japan. After being tagged 
-the turtles were released at various at-sea locations. The data used in this dataset is 
-from 1997 through 2006. The animation represents a daily climatology showing the turtle 
-daily movement, independent of the year. The background is a daily climatology of 
-satellite remotely-sensed sea surface temperature. The size of the turtle graphic is 
+local Description = [[Using satellite transmitting tags on wildlife allows scientists to
+monitor the behaviors of the wildlife in their natural habitats. This dataset contains
+the tracks of juvenile loggerhead sea turtles that were tagged and monitored. Some of the
+turtles were caught on commercial fishing vessels north of Hawaii and the other turtles
+were raised in the hatchery at the Port of Nagoya Aquarium in Japan. After being tagged
+the turtles were released at various at-sea locations. The data used in this dataset is
+from 1997 through 2006. The animation represents a daily climatology showing the turtle
+daily movement, independent of the year. The background is a daily climatology of
+satellite remotely-sensed sea surface temperature. The size of the turtle graphic is
 proportional to the turtle length]]
 local URL = "https://sos.noaa.gov/catalog/datasets/loggerhead-sea-turtle-tracks/"
 

@@ -637,7 +637,7 @@ void deinitialize() {
         ssr->deinitialize();
     }
 
-    syncEngine->removeSyncables(timeManager->getSyncables());
+    syncEngine->removeSyncables(timeManager->syncables());
 
     moduleEngine->deinitialize();
     luaConsole->deinitialize();

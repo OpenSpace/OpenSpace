@@ -45,7 +45,6 @@ local CharonProjection = {
       Target     = "CHARON",
       Aberration = "NONE",
       AspectRatio = 2,
-
       Instrument = {
         Name       = "NH_LORRI",
         Method     = "ELLIPSOID",
@@ -55,7 +54,6 @@ local CharonProjection = {
         Near       = 0.2,
         Far        = 10000
       },
-      
       PotentialTargets = {
         "PLUTO",
         "CHARON"
@@ -115,13 +113,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(CharonText)
   openspace.addSceneGraphNode(CharonShadow)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CharonShadow)
   openspace.removeSceneGraphNode(CharonText)
   openspace.removeSceneGraphNode(CharonProjection)
 end)
-    
+
 asset.export(CharonProjection)
 asset.export(CharonText)
 asset.export(CharonShadow)

@@ -29,11 +29,11 @@ local NeptuneBarycenterTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NeptuneBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneBarycenterTrail)
 end)
-  
+
 asset.export(NeptuneBarycenterTrail)
 
 

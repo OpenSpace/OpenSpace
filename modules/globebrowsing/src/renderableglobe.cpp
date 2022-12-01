@@ -1858,9 +1858,6 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const int chunkLevel = node.tileIndex.level;
 
 
-    //TileIndex::TileIndex(const Geodetic2& point, int level_)
-    //    : level(level_)
-    //{
     const int numIndicesAtLevel = 1 << chunkLevel;
     const double u = 0.5 + geodeticPosition.lon / glm::two_pi<double>();
     const double v = 0.25 - geodeticPosition.lat / glm::two_pi<double>();

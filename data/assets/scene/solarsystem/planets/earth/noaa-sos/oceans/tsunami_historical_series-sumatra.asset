@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tsunami Historical Series: Sumatra - 2004"
 local Identifier = "noaa-sos-oceans-tsunami_historical_series-sumatra"
-local Description = [[The magnitude 9.1 Great Sumatra-Andaman Earthquake of December 26, 
-2004, spawned the deadliest tsunami in history, killing more than 230,000 people in 14 
-countries around the Indian Ocean. More than half of those killed had lived in Acheh 
-Province, Sumatra, where the tsunami rose as high as 30 m (100 ft.) and traveled more than 
+local Description = [[The magnitude 9.1 Great Sumatra-Andaman Earthquake of December 26,
+2004, spawned the deadliest tsunami in history, killing more than 230,000 people in 14
+countries around the Indian Ocean. More than half of those killed had lived in Acheh
+Province, Sumatra, where the tsunami rose as high as 30 m (100 ft.) and traveled more than
 4 km (2.5 mi.) inland in this low-lying region]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tsunami-historical-series-sumatra-2004//"
 
@@ -47,7 +47,7 @@ local layer_null = {
 }
 
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)

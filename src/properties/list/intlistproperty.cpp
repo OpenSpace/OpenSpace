@@ -36,7 +36,7 @@ IntListProperty::IntListProperty(Property::PropertyInfo info, std::vector<int> v
     : ListProperty(std::move(info), std::move(values))
 {}
 
-std::string IntListProperty::className() const {
+std::string_view IntListProperty::className() const {
     return "IntListProperty";
 }
 

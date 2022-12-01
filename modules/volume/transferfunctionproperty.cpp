@@ -32,7 +32,7 @@ TransferFunctionProperty::TransferFunctionProperty(Property::PropertyInfo info,
     : TemplateProperty<volume::TransferFunction>(std::move(info), value)
 {}
 
-std::string TransferFunctionProperty::className() const {
+std::string_view TransferFunctionProperty::className() const {
     return "TransferFunctionProperty";
 }
 

@@ -52,7 +52,7 @@ public:
         long maxValue = std::numeric_limits<long>::max(),
         long stepValue = long(1));
 
-    std::string className() const override;
+    std::string_view className() const override;
     int typeLua() const override;
 
     using TemplateProperty<long>::operator=;

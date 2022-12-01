@@ -49,11 +49,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoBarycenterAccurate)
   openspace.addSceneGraphNode(NewHorizonsPosition)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NewHorizonsPosition)
   openspace.removeSceneGraphNode(PlutoBarycenterAccurate)
 end)
-    
+
 asset.export(PlutoBarycenterAccurate)
 asset.export(NewHorizonsPosition)

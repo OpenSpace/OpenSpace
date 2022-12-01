@@ -54,12 +54,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(C2019Y4AtlasPosition)
   openspace.addSceneGraphNode(C2019Y4AtlasTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(C2019Y4AtlasTrail)
   openspace.removeSceneGraphNode(C2019Y4AtlasPosition)
 end)
-    
+
 asset.export(C2019Y4AtlasPosition)
 asset.export(C2019Y4AtlasTrail)
 

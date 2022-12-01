@@ -1,11 +1,11 @@
 -- Create a state machine with a few different states. The state machine can be controlled through
 -- the scripting commands from the state machine module.
 
-local targetNode = function(nodeIdentifier) 
+local targetNode = function(nodeIdentifier)
   return [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
     openspace.setPropertyValueSingle(
-      "NavigationHandler.OrbitalNavigator.Anchor", 
+      "NavigationHandler.OrbitalNavigator.Anchor",
       "]] .. nodeIdentifier ..  [["
     )
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")

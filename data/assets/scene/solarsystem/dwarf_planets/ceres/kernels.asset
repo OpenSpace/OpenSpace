@@ -1,0 +1,23 @@
+local Kernels = asset.syncedResource({
+  Name = "Ceres Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "ceres_kernels",
+  Version = 1
+})
+
+local CeresKernels = {
+  Kernels .. "ceres_v01.tpc",
+  Kernels .. "sb_ceres_140724.bsp",
+  Kernels .. "sb_ceres_110211.bsp"
+}
+
+asset.export("CeresKernels", CeresKernels)
+
+asset.meta = {
+  Name = "Ceres Spice Kernels",
+  Version = "1.0",
+  Description = "SPICE kernels for Ceres",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "NASA"
+}

@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "NOAA Science on a Sphere. Agriculture: Cropland Intensity"
 local Identifier = "noaa-sos-land-agriculture-cropland"
-local Description = [[These visualizations, created by the University of Minnesota's 
-Institute on the Environment, show the global land use intensity for pastureland and 
-cropland. Cropland is land devoted to growing plants for humans use for food, material, 
-or fuel. Pastureland is land used for raising and grazing animals. Altogether, cropland 
-covers about 16 million square kilometers, an area of land approximately the size of 
-South America. Global pastureland occupies more than 30 million square kilometers, about 
+local Description = [[These visualizations, created by the University of Minnesota's
+Institute on the Environment, show the global land use intensity for pastureland and
+cropland. Cropland is land devoted to growing plants for humans use for food, material,
+or fuel. Pastureland is land used for raising and grazing animals. Altogether, cropland
+covers about 16 million square kilometers, an area of land approximately the size of
+South America. Global pastureland occupies more than 30 million square kilometers, about
 the area of Africa]]
 local URL = "https://sos.noaa.gov/catalog/datasets/agriculture-cropland-intensity/"
 
@@ -46,10 +46,10 @@ local legend = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_countries)
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

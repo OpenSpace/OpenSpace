@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Season - 2005"
 local Identifier = "noaa-sos-atmosphere-2005_hurricane-grayir"
-local Description = [["This hurricane season shattered records that have stood for 
-decades - most named storms, most hurricanes and most category five storms. Arguably, it 
-was the most devastating hurricane season the country has experienced in modern times," 
-said retired Navy Vice Adm. Conrad C. Lautenbacher, Jr., Ph.D., undersecretary of 
+local Description = [["This hurricane season shattered records that have stood for
+decades - most named storms, most hurricanes and most category five storms. Arguably, it
+was the most devastating hurricane season the country has experienced in modern times,"
+said retired Navy Vice Adm. Conrad C. Lautenbacher, Jr., Ph.D., undersecretary of
 commerce for oceans and atmosphere and NOAA administrator]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-season-2005/"
 

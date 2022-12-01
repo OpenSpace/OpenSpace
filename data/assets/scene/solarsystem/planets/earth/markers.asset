@@ -29,11 +29,11 @@ local EarthMarker = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthMarker)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthMarker)
 end)
-  
+
 asset.export(EarthMarker)
 
 

@@ -30,11 +30,11 @@ local MarsBarycenterTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsBarycenterTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MarsBarycenterTrail)
 end)
-  
+
 asset.export(MarsBarycenterTrail)
 
 

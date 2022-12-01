@@ -7,7 +7,7 @@ local layer = {
   Type = "SpoutImageTileLayer"
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

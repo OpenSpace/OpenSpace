@@ -83,7 +83,7 @@ local SwiFullGCO500 = {
       -- These translations are eyeballed based on the existing model
       Position = { 0.465, -0.1, 0.95 }
     }
-  },  
+  },
   Renderable = {
     Type = "RenderableFov",
     Body = "JUICE",

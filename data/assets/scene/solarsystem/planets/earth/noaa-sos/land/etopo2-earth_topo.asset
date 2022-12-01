@@ -3,15 +3,15 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "ETOPO2: Topography and Bathymetry (natural colors)"
 local Identifier = "noaa-sos-land-etopo2-earth_topo"
-local Description = [[Many datasets have been created by utilizing the ETOPO2 dataset, 
-which was generated from digital data bases of seafloor and land elevations on a 2-minute 
-latitude/longitude grid (1 minute of latitude = 1 nautical mile, or 1.15 statute mile). 
-The ETOPO2 is a combination of satellite altimetry observations, shipboard echo-sounding 
-measurements, data from the Digital Bathymetric Data Base Variable Resolution and data 
-from the GLOBE project which has a global digital elevation model. The topography and 
-bathymetry side of the Hot Topo dataset was created with this digital data base, as well 
-as the datasets EarthLiteColor, EarthOne, and Earth Land/Bathymetry. EarthOne and Earth 
-Land/Bathymetry are shaded in relatively true color, while Hot Topo and EarthLiteColor 
+local Description = [[Many datasets have been created by utilizing the ETOPO2 dataset,
+which was generated from digital data bases of seafloor and land elevations on a 2-minute
+latitude/longitude grid (1 minute of latitude = 1 nautical mile, or 1.15 statute mile).
+The ETOPO2 is a combination of satellite altimetry observations, shipboard echo-sounding
+measurements, data from the Digital Bathymetric Data Base Variable Resolution and data
+from the GLOBE project which has a global digital elevation model. The topography and
+bathymetry side of the Hot Topo dataset was created with this digital data base, as well
+as the datasets EarthLiteColor, EarthOne, and Earth Land/Bathymetry. EarthOne and Earth
+Land/Bathymetry are shaded in relatively true color, while Hot Topo and EarthLiteColor
 use green, yellow, orange, red and white to denote increasing elevation of the land]]
 local URL = "https://sos.noaa.gov/catalog/datasets/etopo2-topography-and-bathymetry-natural-colors/"
 
@@ -31,7 +31,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

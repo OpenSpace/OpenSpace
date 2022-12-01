@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Rivers: Daily Discharge - 2010"
 local Identifier = "noaa-sos-land-river_discharge_2010"
-local Description = [[This dataset illustrates hydrological conditions worldwide for the 
-year 2010. The data originates from a computational model, the Water Balance Model (WBM). 
-WBM takes daily rainfall and temperature data, maps of vegetation, land-use, irrigation 
-and soil properties, and then calculates the hydrological balance for each of its grid 
+local Description = [[This dataset illustrates hydrological conditions worldwide for the
+year 2010. The data originates from a computational model, the Water Balance Model (WBM).
+WBM takes daily rainfall and temperature data, maps of vegetation, land-use, irrigation
+and soil properties, and then calculates the hydrological balance for each of its grid
 cells]]
 local URL = "https://sos.noaa.gov/catalog/datasets/rivers-daily-discharge-2010/"
 
@@ -47,7 +47,7 @@ asset.onInitialize(function ()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

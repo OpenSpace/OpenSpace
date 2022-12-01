@@ -34,6 +34,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -76,6 +77,18 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UnitTestInfo = {
         "UnitTest",
         "Take a unit test saving the LM data into file",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
+        "DisableZoom",
+        "Disable zoom navigation",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableRollInfo = {
+        "DisableRoll",
+        "Disable roll navigation",
         "" // @TODO Missing documentation
     };
 
@@ -253,6 +266,8 @@ TouchInteraction::TouchInteraction()
     , _origin(OriginInfo)
     , _unitTest(UnitTestInfo, false)
     , _touchActive(EventsInfo, false)
+    , _disableZoom(DisableZoomInfo, false)
+    , _disableRoll(DisableRollInfo, false)
     , _reset(SetDefaultInfo, false)
     , _maxTapTime(MaxTapTimeInfo, 300, 10, 1000)
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
@@ -305,6 +320,8 @@ TouchInteraction::TouchInteraction()
     // projDiffLength/diffLength.
 {
     addProperty(_touchActive);
+    addProperty(_disableZoom);
+    addProperty(_disableRoll);
     addProperty(_unitTest);
     addProperty(_reset);
     addProperty(_maxTapTime);
@@ -357,6 +374,14 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
 #ifdef TOUCH_DEBUG_PROPERTIES
     _debugProperties.nFingers = list.size();
 #endif
+
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
     if (_tap) {
         // check for doubletap
         using namespace std::chrono;
@@ -429,6 +454,14 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     _vel.zoom = 0.0;
     _vel.roll = 0.0;
     _vel.pan = glm::dvec2(0.0);
+
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
 #ifdef TOUCH_DEBUG_PROPERTIES
     LINFO("DirectControl");
 #endif
@@ -441,11 +474,15 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     int nDof = _solver.nDof();
 
     if (_lmSuccess && !_unitTest) {
-         // if good values were found set new camera state
+        // if good values were found set new camera state
         _vel.orbit = glm::dvec2(par.at(0), par.at(1));
         if (nDof > 2) {
-            _vel.zoom = par.at(2);
-            _vel.roll = par.at(3);
+            if (!_disableZoom) {
+                _vel.zoom = par.at(2);
+            }
+            if (!_disableRoll) {
+                _vel.roll = par.at(3);
+            }
             if (_panEnabled && nDof > 4) {
                 _vel.roll = 0.0;
                 _vel.pan = glm::dvec2(par.at(4), par.at(5));
@@ -793,6 +830,10 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case PINCH: {
+            if (_disableZoom) {
+                break;
+            }
+
              // add zooming velocity - dependant on distance difference between contact
              // points this/first frame
             using namespace glm;
@@ -820,6 +861,10 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case ROLL: {
+            if (_disableRoll) {
+                break;
+            }
+
             // add global roll rotation velocity
             double rollFactor = std::accumulate(
                 list.begin(),
@@ -857,6 +902,10 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case PAN: {
+            if (!_panEnabled) {
+                break;
+            }
+
             // add local rotation velocity
             _vel.pan += glm::dvec2(inputHolder.speedX() *
                         _sensitivity.pan.x, inputHolder.speedY() * _sensitivity.pan.y);
@@ -890,6 +939,10 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case ZOOM_OUT: {
+            if (_disableZoom) {
+                break;
+            }
+
             // zooms out from current if triple tap occurred
             _vel.zoom = computeTapZoomDistance(-1.0);
             _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
@@ -933,6 +986,13 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
 // Main update call, calculates the new orientation and position for the camera depending
 // on _vel and dt. Called every frame
 void TouchInteraction::step(double dt, bool directTouch) {
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
     using namespace glm;
 
     const SceneGraphNode* anchor =
@@ -986,7 +1046,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         }
         {
             // Orbit (global rotation)
-            const dvec3 eulerAngles(_vel.orbit.y*dt, _vel.orbit.x*dt, 0);
+            const dvec3 eulerAngles(_vel.orbit.y * dt, _vel.orbit.x * dt, 0);
             const dquat rotationDiffCamSpace = dquat(eulerAngles);
 
             const dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace *
@@ -1148,6 +1208,13 @@ void TouchInteraction::decelerate(double dt) {
     //Ensure the number of times to apply the decay coefficient is valid
     times = std::min(times, 1);
 
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
     _vel.orbit *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.orbit, times);
     _vel.roll  *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.roll,  times);
     _vel.pan   *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.pan,   times);
@@ -1187,6 +1254,8 @@ void TouchInteraction::resetAfterInput() {
 // Reset all property values to default
 void TouchInteraction::resetToDefault() {
     _unitTest.set(false);
+    _disableZoom.set(false);
+    _disableRoll.set(false);
     _reset.set(false);
     _maxTapTime.set(300);
     _deceleratesPerSecond.set(240);

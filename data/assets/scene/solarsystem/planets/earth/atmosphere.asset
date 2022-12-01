@@ -29,7 +29,7 @@ local Atmosphere = {
     --[[
       Ozone = {
       Coefficients = {
-        -- Extinction coefficients 
+        -- Extinction coefficients
         Extinction = {3.426, 8.298, 0.356}
       },
       H_O = 8.0,
@@ -91,11 +91,11 @@ local Atmosphere = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Atmosphere)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Atmosphere)
 end)
-  
+
 asset.export(Atmosphere)
 
 

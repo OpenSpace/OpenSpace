@@ -3,16 +3,16 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Paleoclimate Proxies"
 local Identifier = "noaa-sos-land-paleo_overlays"
-local Description = [[Every year, particles eroding from the continents are transported 
-to the oceans by the wind as dust and by rivers as sands and gravels. Once they get to 
-the ocean, they mix with billions of tons of dead plankton shells, sink, and settle on 
-the seafloor. There, they accumulate vertically in layers on top of previous years' 
-material. Similarly, this year's snow accumulates on top of the previous years' snow at 
-the polar regions in places like Greenland and Antarctica. Over time, this process forms 
-new layers of ice. Trees, much the same way, add yearly layers of new cells in concentric 
-circles just below their bark - called tree rings. And, in many caves around the world, 
-the strength of the seasonal cycle of a wet monsoon followed by a dry season is recorded 
-in the chemistry of stalagmites rising up from the cave floor, formed by drips of 
+local Description = [[Every year, particles eroding from the continents are transported
+to the oceans by the wind as dust and by rivers as sands and gravels. Once they get to
+the ocean, they mix with billions of tons of dead plankton shells, sink, and settle on
+the seafloor. There, they accumulate vertically in layers on top of previous years'
+material. Similarly, this year's snow accumulates on top of the previous years' snow at
+the polar regions in places like Greenland and Antarctica. Over time, this process forms
+new layers of ice. Trees, much the same way, add yearly layers of new cells in concentric
+circles just below their bark - called tree rings. And, in many caves around the world,
+the strength of the seasonal cycle of a wet monsoon followed by a dry season is recorded
+in the chemistry of stalagmites rising up from the cave floor, formed by drips of
 mineral-rich water from the roof of the cave]]
 local URL = "https://sos.noaa.gov/catalog/datasets/paleoclimate-proxies/"
 
@@ -84,7 +84,7 @@ asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_ocean)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_speleothem)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_tree_rings)
-  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend)
 end)
 
 asset.onDeinitialize(function()

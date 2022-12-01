@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Surface Temperature"
 local Identifier = "noaa-sos-land-surface_temperature"
-local Description = [[These maps combine high-resolution daytime surface temperatures 
-derived from satellite observations for both land and sea and display them with a common 
-color scale. Displaying these high-resolution data with a common color scale makes 
-evident the large difference between surface heating on land versus the sea. It also 
-shows the relatively small seasonal variation in sea surface temperature over the globe 
-relative to land temperatures. The larger seasonal variation in average temperature of 
-the northern hemisphere relative to the southern hemisphere, a result of the larger land 
+local Description = [[These maps combine high-resolution daytime surface temperatures
+derived from satellite observations for both land and sea and display them with a common
+color scale. Displaying these high-resolution data with a common color scale makes
+evident the large difference between surface heating on land versus the sea. It also
+shows the relatively small seasonal variation in sea surface temperature over the globe
+relative to land temperatures. The larger seasonal variation in average temperature of
+the northern hemisphere relative to the southern hemisphere, a result of the larger land
 area in the northern hemisphere, is also evident]]
 local URL = "https://sos.noaa.gov/catalog/datasets/surface-temperature/"
 
@@ -61,8 +61,8 @@ asset.onInitialize(function ()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
-  openspace.addScreenSpaceRenderable(colorbar2);  
+  openspace.addScreenSpaceRenderable(colorbar)
+  openspace.addScreenSpaceRenderable(colorbar2)
 end)
 
 asset.onDeinitialize(function()

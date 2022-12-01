@@ -3,16 +3,16 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Season - 2012"
 local Identifier = "noaa-sos-atmosphere-2012_hurricane"
-local Description = [["It was an extremely devastating and destructive storm, hopefully 
-one that people will only see once in their lifetime," National Weather Service 
-meteorologist, Joe Pollina, said of Hurricane Sandy. The 2012 Atlantic Hurricane season 
-was tied with 1887, 1995, 2010 and 2011 as the third most active year in recorded 
-history, producing nineteen tropical cyclones and named storms, ten hurricanes and two 
-major hurricanes. Annual Atlantic hurricane predictions by NOAA and Colorado State 
-University fell short of the actual numbers despite raising their numbers after a record 
-active start to the season, which began on June 1st and ended on November 30th. The 
-Eastern Pacific season was moderately active. This dataset names all the Atlantic and 
-Pacific named tropical storms and hurricanes in 2012 from the Linear IR Satellite data 
+local Description = [["It was an extremely devastating and destructive storm, hopefully
+one that people will only see once in their lifetime," National Weather Service
+meteorologist, Joe Pollina, said of Hurricane Sandy. The 2012 Atlantic Hurricane season
+was tied with 1887, 1995, 2010 and 2011 as the third most active year in recorded
+history, producing nineteen tropical cyclones and named storms, ten hurricanes and two
+major hurricanes. Annual Atlantic hurricane predictions by NOAA and Colorado State
+University fell short of the actual numbers despite raising their numbers after a record
+active start to the season, which began on June 1st and ended on November 30th. The
+Eastern Pacific season was moderately active. This dataset names all the Atlantic and
+Pacific named tropical storms and hurricanes in 2012 from the Linear IR Satellite data
 recorded by geostationary satellites]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-season-2012/"
 
@@ -46,7 +46,7 @@ local layer_sat = {
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "linear_rgb_cyl_%Y%m%d_%H%M.jpg"
-  },  
+  },
   Description = Description
 }
 

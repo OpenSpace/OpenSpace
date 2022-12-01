@@ -24,7 +24,7 @@ local Enceladus = {
       SourceFrame = "IAU_ENCELADUS",
       DestinationFrame = "GALACTIC"
     }
-  },    
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 252000,
@@ -54,11 +54,11 @@ local Enceladus = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Enceladus)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Enceladus)
 end)
-  
+
 asset.export(Enceladus)
 
 

@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Solar Insolation - Monthly (NASA)"
 local Identifier = "noaa-sos-atmosphere-globe-insolation"
-local Description = [[These maps show where and how much sunlight fell on Earth's 
-surface during each month in 2018. Scientists call this measure solar insolation. Knowing 
-how much of the Sun's energy reaches the surface helps scientists understand weather and 
-climate patterns as well as patterns of plant growth around our world. Solar insolation 
-maps are also useful to engineers who design solar panels and batteries designed to 
-convert energy from the Sun into electricity to power appliances in our homes and work 
+local Description = [[These maps show where and how much sunlight fell on Earth's
+surface during each month in 2018. Scientists call this measure solar insolation. Knowing
+how much of the Sun's energy reaches the surface helps scientists understand weather and
+climate patterns as well as patterns of plant growth around our world. Solar insolation
+maps are also useful to engineers who design solar panels and batteries designed to
+convert energy from the Sun into electricity to power appliances in our homes and work
 places]]
 local URL = "https://sos.noaa.gov/catalog/datasets/solar-insolation-monthly-nasa/"
 
@@ -33,7 +33,7 @@ local layer = {
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "CERES_INSOL_M_%Y-%m.PNG"
-  },   
+  },
   Description = Description
 }
 
@@ -48,14 +48,14 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "1440.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

@@ -77,12 +77,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Earth)
   openspace.addSceneGraphNode(EarthLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthLabel)
   openspace.removeSceneGraphNode(Earth)
 end)
-    
+
 asset.export(Earth)
 asset.export(EarthLabel)
 

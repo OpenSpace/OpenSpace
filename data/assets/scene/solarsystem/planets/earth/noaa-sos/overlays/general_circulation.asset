@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Atmospheric General Circulation"
 local Identifier = "noaa-sos-overlays-general_circulation"
-local Description = [[Overlays are datasets with transparent backgrounds that contain 
-foreground data used to augment other SOS datasets.This particular dataset overlays 
-arrows and names of the approximate prevailing wind onto any dataset that you are 
-viewing. General circulation overlay would be particularly useful when pointing out the 
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset overlays
+arrows and names of the approximate prevailing wind onto any dataset that you are
+viewing. General circulation overlay would be particularly useful when pointing out the
 rain shadow effect as well as cloud movement or when describing the coriolis effect]]
 local URL = "https://sos.noaa.gov/catalog/datasets/atmospheric-general-circulation/"
 
@@ -26,7 +26,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 

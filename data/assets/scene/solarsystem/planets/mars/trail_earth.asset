@@ -31,11 +31,11 @@ local MarsTrailEarth = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsTrailEarth)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MarsTrailEarth)
 end)
-  
+
 asset.export(MarsTrailEarth)
 
 

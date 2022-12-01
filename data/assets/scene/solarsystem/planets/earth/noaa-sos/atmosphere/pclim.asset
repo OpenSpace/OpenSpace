@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Temperature Anomaly: Yearly - 500 - 2006 (Paleoclimate Evidence)"
 local Identifier = "noaa-sos-atmosphere-pclim"
-local Description = [[This animation shows annual average temperature anomalies 
-(departure from normal) over the globe for the past 1,500 years compared to the average 
-temperature (normal) from 1961-1990. This data collected from over 1,000 paleoclimate 
-proxies. Areas shaded red are warmer than normal while areas shaded blue are cooler than 
+local Description = [[This animation shows annual average temperature anomalies
+(departure from normal) over the globe for the past 1,500 years compared to the average
+temperature (normal) from 1961-1990. This data collected from over 1,000 paleoclimate
+proxies. Areas shaded red are warmer than normal while areas shaded blue are cooler than
 normal]]
 local URL = "https://sos.noaa.gov/catalog/datasets/temperature-anomaly-yearly-500-2006-paleoclimate-evidence/"
 
@@ -39,14 +39,14 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "raw.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

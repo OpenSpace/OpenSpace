@@ -41,7 +41,7 @@ UVec4Property::UVec4Property(Property::PropertyInfo info, glm::uvec4 value,
     )
 {}
 
-std::string UVec4Property::className() const {
+std::string_view UVec4Property::className() const {
     return "UVec4Property";
 }
 

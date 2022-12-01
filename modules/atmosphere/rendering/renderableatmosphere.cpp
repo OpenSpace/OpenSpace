@@ -277,7 +277,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabled(EclipseHardShadowsInfo, false)
     , _atmosphereDimmingHeight(AtmosphereDimmingHeightInfo, 0.7f, 0.f, 1.f)
-    , _atmosphereDimmingSunsetAngle(SunsetAngleInfo, 
+    , _atmosphereDimmingSunsetAngle(
+        SunsetAngleInfo,
         glm::vec2(95.f, 100.f), glm::vec2(0.f), glm::vec2(180.f)
     )
  {
@@ -384,7 +385,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
     setBoundingSphere(_planetRadius * 1000.0);
 
-    _atmosphereDimmingHeight = p.atmosphereDimmingHeight.value_or(_atmosphereDimmingHeight);
+    _atmosphereDimmingHeight =
+        p.atmosphereDimmingHeight.value_or(_atmosphereDimmingHeight);
     addProperty(_atmosphereDimmingHeight);
 
     _atmosphereDimmingSunsetAngle = p.sunsetAngle.value_or(
@@ -478,7 +480,7 @@ void RenderableAtmosphere::update(const UpdateData& data) {
         // Fade with regards to altitude
         if (cameraIsInFadingRegion) {
             // Fading - linear interpolation
-            atmosphereDimming = (cameraDistance - atmosphereInnerEdge) / 
+            atmosphereDimming = (cameraDistance - atmosphereInnerEdge) /
                 atmosphereFadingHeight;
         }
         else {
@@ -487,7 +489,7 @@ void RenderableAtmosphere::update(const UpdateData& data) {
         }
         if (cameraIsInSunset) {
             // Fading - linear interpolation
-            atmosphereDimming = (cameraSunAngle - sunsetStart) / 
+            atmosphereDimming = (cameraSunAngle - sunsetStart) /
                 (sunsetEnd - sunsetStart);
         }
         global::navigationHandler->camera()->setAtmosphereDimmingFactor(
