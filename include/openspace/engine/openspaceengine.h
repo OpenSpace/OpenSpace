@@ -145,6 +145,7 @@ private:
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
     properties::BoolProperty _showHiddenSceneGraphNodes;
+    properties::BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
