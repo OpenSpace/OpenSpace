@@ -277,7 +277,6 @@ void DynamicDownloaderManager::checkForFinishedDownloads() {
             currentIt = _filesCurrentlyDownloading.erase(currentIt);
             // if one is removed, i is reduced, else we'd skip one in the list
             --i;
-
         }
         else if (dl->hasFailed()) {
             ghoul_assert(!dl->hasFailed(), "downloading of file failed");
@@ -374,21 +373,24 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
     if (_forward)
     {
         // if files are there and time is between next file (+1) and +2 file
-        // (meaning the this file is active from now till next file, 
+        // (meaning the this file is active from now till next file,
         // kind of like forward finite difference in math)
         // change this to be next
-        if (_thisFile + 1 != _availableData.end() && 
+        if (_thisFile + 1 != _availableData.end() &&
             _thisFile + 2 != _availableData.end() &&
             //_thisFile->time + _thisFile->cadence > time &&
             (_thisFile + 1)->time < time &&
-            (_thisFile + 2)->time > time) 
+            (_thisFile + 2)->time > time)
         {
             ++_thisFile;
         }
-        // if its beyond the +2 file, arguably that can mean delta time is to fast 
-        // and files might be missed. But we also know we went past boyond the next so 
+        // if its beyond the +2 file, arguably that can mean delta time is to fast
+        // and files might be missed. But we also know we went past boyond the next so
         // we no longer know where we are so we reinitialize
-        else if ((_thisFile + 2)->time < time) {
+        else if (_thisFile + 1 != _availableData.end() &&
+                 _thisFile + 2 != _availableData.end() &&
+                (_thisFile + 2)->time < time)
+        {
             _thisFile = closestFileToNow(time);
         }
     }
@@ -396,7 +398,7 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
         // if file is there and time is between prev and this file
         // then change this to be prev. Same goes here as if time is moving forward
         // we will use forward usage. File is active from now till next
-        if (_thisFile - 1 != _availableData.begin() && 
+        if (_thisFile - 1 != _availableData.begin() &&
             (_thisFile)->time < time &&
             (_thisFile - 1)->time > time)
         //_thisFile->time + _thisFile->cadence < time &&
@@ -405,7 +407,9 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
         }
         // if we are beyond the prev file, again delta time might be to fast, but we
         // no longer know where we are so we reinitialize
-        else if ((_thisFile-1)->time > time) {
+        else if (_thisFile - 1 != _availableData.begin() &&
+                (_thisFile - 1)->time > time)
+        {
             _thisFile = closestFileToNow(time);
         }
     }
@@ -429,24 +433,24 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
     downloadFile();
 
 // The todo list: //
-// 
+//
 // 1. When initializing add the already cached files to the _availableData list as downloaded
-// 
+//
 // 2. OnChange functions for if a different dataID is selected - reinitialize things
-// 
+//
 // 3. add functionality for if the data is not a sequence,
 // but just a few random files where order does not matter
-// 
+//
 // 4. Rename folder for where files are being downloaded to
-// 
+//
 // 5. Move class into a different module
-// 
+//
 // 6. recall data info every now and then to get new files
-// 
+//
 // 7. ultimet test: test with different data
-// 
+//
 // 8. optamize the closestFileToTime function
-// 
+//
 // 9. tracy
 //
 

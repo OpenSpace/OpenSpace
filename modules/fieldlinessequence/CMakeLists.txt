@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   rendering/renderablefieldlinessequence.h
+  rendering/renderablefieldlinessequencenew.h
   util/fieldlinesstate.h
   util/commons.h
   util/webfieldlinesmanager.h
@@ -38,6 +39,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   rendering/renderablefieldlinessequence.cpp
+  rendering/renderablefieldlinessequencenew.cpp
   util/fieldlinesstate.cpp
   util/webfieldlinesmanager.cpp
   util/webfieldlineswindow.cpp

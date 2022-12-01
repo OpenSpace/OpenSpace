@@ -44,14 +44,21 @@ namespace openspace {
 
 class RenderableFieldlinesSequenceNew : public Renderable {
 public:
+    RenderableFieldlinesSequenceNew(const ghoul::Dictionary& dictionary);
+    void initialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
+    bool isReady() const override;
 
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
 
-
-
+    static documentation::Documentation Documentation();
 
 
 private:
+    void definePropertyCallbackFunctions();
 
     //0: static loading and static downloading
     //1: dynamic loading but static downloading
@@ -68,6 +75,11 @@ private:
         Osfls = 2
     };
 
+    // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
+    enum class ColorMethod {
+        Uniform = 0,
+        ByQuantity = 1
+    };
 
     struct File {
         enum class FileStatus {
@@ -83,6 +95,36 @@ private:
 
     std::vector<File> _files;
     size_t activeTriggerTimeIndex = -1;
+
+    // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
+    std::unique_ptr<TransferFunction> _transferFunction;
+
+
+
+    ///////////////////////////////////////////////
+    //                PROPERTIES                 //
+    ///////////////////////////////////////////////
+
+    // Group to hold the color properties
+    properties::PropertyOwner _colorGroup;
+    // Uniform/transfer function/topology?
+    properties::OptionProperty _colorMethod;
+    // Index of the extra quantity to color lines by.
+    //TODO: Change to options instead of index
+    properties::OptionProperty _colorQuantity;
+    // Color table/transfer function min and max range
+    properties::Vec2Property _colorQuantityMinMax;
+    // Uniform Field Line Color
+    properties::Vec4Property _colorUniform;
+
+
+
+    ///////////////other.//////////////////////////
+
+    // Paths to color tables. One for each 'extraQuantity'
+    std::vector<std::string> _colorTablePaths;
+
+
 
 };
 
