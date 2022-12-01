@@ -18,7 +18,7 @@ local layer = {
     Neumann, et al., 2003). However, the total elevation uncertainty is at least ±3 m
     due to the global error in the areoid (±1.8 meters; Lemoine, et al., 2001) and
     regional uncertainties in its shape (Neumann, 2002). Pixel resolution of this map
-    is 463 meters per pixel (m). (Description from URL). Data Reference: (See URL)]],
+    is 463 meters per pixel (m). (Description from URL). Data Reference: (See URL)]]
 }
 
 asset.onInitialize(function()

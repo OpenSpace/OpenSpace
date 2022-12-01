@@ -56,12 +56,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Neptune)
   openspace.addSceneGraphNode(NeptuneLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneLabel)
   openspace.removeSceneGraphNode(Neptune)
 end)
-    
+
 asset.export(Neptune)
 asset.export(NeptuneLabel)
 

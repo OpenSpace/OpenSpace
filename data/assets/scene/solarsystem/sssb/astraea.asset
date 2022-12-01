@@ -50,12 +50,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(AstraeaPosition)
   openspace.addSceneGraphNode(AstraeaTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(AstraeaTrail)
   openspace.removeSceneGraphNode(AstraeaPosition)
 end)
-    
+
 asset.export(AstraeaPosition)
 asset.export(AstraeaTrail)
 

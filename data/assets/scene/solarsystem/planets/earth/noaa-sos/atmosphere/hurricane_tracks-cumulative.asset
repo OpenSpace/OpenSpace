@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Tracks: Cumulative - 1950 - 2020"
 local Identifier = "noaa-sos-atmosphere-hurricane_tracks-cumulative"
-local Description = [[Tracking historical hurricanes is an important way for hurricane 
-researchers to learn about the paths of future hurricanes. Because of this, records of 
-hurricane paths are archived and studied. Not all hurricanes follow the same path, but 
-there are certainly noticeable trends for hurricane paths. Many computer models that have 
+local Description = [[Tracking historical hurricanes is an important way for hurricane
+researchers to learn about the paths of future hurricanes. Because of this, records of
+hurricane paths are archived and studied. Not all hurricanes follow the same path, but
+there are certainly noticeable trends for hurricane paths. Many computer models that have
 been created to predict hurricane paths include the historical data in their models]]
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-tracks-cumulative-1950-2005/"
 
@@ -26,7 +26,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

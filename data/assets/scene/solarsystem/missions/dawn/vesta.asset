@@ -70,7 +70,7 @@ local Vesta = {
             Spice = { "DAWN_FC2" }
           }
         },
-        Target = { 
+        Target = {
           Read  = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",

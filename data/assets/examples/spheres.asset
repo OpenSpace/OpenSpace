@@ -39,7 +39,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(n)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for _, n in ipairs(spheres) do
     openspace.removeSceneGraphNode(n)

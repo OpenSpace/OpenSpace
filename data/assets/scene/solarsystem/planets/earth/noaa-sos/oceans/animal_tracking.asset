@@ -3,8 +3,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Seal and Seabird Tracks: Pacific Ocean"
 local Identifier = "noaa-sos-oceans-animal_tracking"
-local Description = [["TOPP, Tagging of the Pacific Predators, began in 2000 as one of 
-  17 projects of the Census of Marine Life, an ambitios 10-year, 80-nation endeavor to 
+local Description = [["TOPP, Tagging of the Pacific Predators, began in 2000 as one of
+  17 projects of the Census of Marine Life, an ambitios 10-year, 80-nation endeavor to
   assess and explain the diversity and abundance of life in the oceans, and where that
   life has lived, is living, and will live." - From TOPP website . Out of this came the
   Tagging of the Pacific Pelagics Project. Pelagaics are open ocean species such as sea
@@ -55,7 +55,7 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

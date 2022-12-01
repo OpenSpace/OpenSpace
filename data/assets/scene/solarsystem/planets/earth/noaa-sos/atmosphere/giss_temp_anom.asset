@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Temperature Anomaly: (NASA) - 1884 - 2012"
 local Identifier = "noaa-sos-atmosphere-giss_temp_anom"
-local Description = [[These maps, developed by NASA's Goddard Institute for Space 
-Studies (GISS), depict how much various regions of the world have warmed or cooled when 
-compared with a base period of 1951-1980. They show temperature anomalies, or changes, 
+local Description = [[These maps, developed by NASA's Goddard Institute for Space
+Studies (GISS), depict how much various regions of the world have warmed or cooled when
+compared with a base period of 1951-1980. They show temperature anomalies, or changes,
 not absolute temperature]]
 local URL = "https://sos.noaa.gov/catalog/datasets/temperature-anomaly-nasa-1884-2012/"
 
@@ -38,14 +38,14 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "2012.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

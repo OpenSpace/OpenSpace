@@ -170,7 +170,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     ZoneScoped
-    
+
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
 
     glm::dvec3 position = module->geoPosition();

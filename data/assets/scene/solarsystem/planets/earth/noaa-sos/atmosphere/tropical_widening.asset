@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tropical Widening"
 local Identifier = "noaa-sos-atmosphere-tropical_widening"
-local Description = [[This dataset was developed as part of the EarthNow project, and 
+local Description = [[This dataset was developed as part of the EarthNow project, and
 shows the changes in the tropical zone boundaries over the last three decades]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tropical-widening/"
 
@@ -34,9 +34,9 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.3, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

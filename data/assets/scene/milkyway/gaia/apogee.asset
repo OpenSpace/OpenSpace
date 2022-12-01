@@ -58,11 +58,11 @@ local gaia_abundance_apogee = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(gaia_abundance_apogee)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(gaia_abundance_apogee)
 end)
-  
+
 asset.export(gaia_abundance_apogee)
 
 

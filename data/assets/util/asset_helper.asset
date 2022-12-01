@@ -16,7 +16,7 @@ local registerSpiceKernels = function (spiceAsset, kernels)
   spiceAsset.onDeinitialize(function ()
     for i = #kernels, 1, -1 do
       local kernel = kernels[i]
-      openspace.spice.unloadKernel(kernel) 
+      openspace.spice.unloadKernel(kernel)
     end
   end)
 end

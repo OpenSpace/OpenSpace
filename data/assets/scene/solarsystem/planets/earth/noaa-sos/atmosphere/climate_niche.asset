@@ -3,19 +3,19 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Human Climate Niche - 2020 and 2070"
 local Identifier = "noaa-sos-atmosphere-climate_niche"
-local Description = [[The human climate niche are areas on Earth where humans have 
-historically lived due to favorable climate conditions related to temperature and 
-precipitation. For the past 6000 years, humans have mostly lived in the same climate 
-conditions as they do now. In addition to humans, this climate niche is also where the 
-production of crops and livestock typically takes place. The optimal mean annual 
-temperature of this identified niche is around 52 °F to 59 °F (~11 °C to 15 °C). But as 
-the climate changes, the areas that fit within the human climate niche will change as 
-well. This dataset identifies the current human climate niche, with land shaded to show 
-which areas are more or less suitable for people, and then projects the future human 
-climate niche in 2070 based on the climate projection scenario of RCP 8.5. Also included 
-as an additional layer that can be turned on and off is a map that shows the areas where 
-the mean annual temperature is greater than 84 °F (29 °C). Currently, only 0.8% of the 
-global land surface has a mean annual temperature greater than 84 °F, but in 2070 that is 
+local Description = [[The human climate niche are areas on Earth where humans have
+historically lived due to favorable climate conditions related to temperature and
+precipitation. For the past 6000 years, humans have mostly lived in the same climate
+conditions as they do now. In addition to humans, this climate niche is also where the
+production of crops and livestock typically takes place. The optimal mean annual
+temperature of this identified niche is around 52 °F to 59 °F (~11 °C to 15 °C). But as
+the climate changes, the areas that fit within the human climate niche will change as
+well. This dataset identifies the current human climate niche, with land shaded to show
+which areas are more or less suitable for people, and then projects the future human
+climate niche in 2070 based on the climate projection scenario of RCP 8.5. Also included
+as an additional layer that can be turned on and off is a map that shows the areas where
+the mean annual temperature is greater than 84 °F (29 °C). Currently, only 0.8% of the
+global land surface has a mean annual temperature greater than 84 °F, but in 2070 that is
 projected to cover 19% of the global land and impact an estimated 3.5 billion people]]
 local URL = "https://sos.noaa.gov/catalog/datasets/human-climate-niche-2020-and-2070/"
 
@@ -65,12 +65,12 @@ local colorbar = {
 }
 
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_precip_2020)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_precip_2070)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_mat_2020)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_mat_2070)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

@@ -3,8 +3,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Hurricane Sandy: Linear IR - Oct. 2012"
 local Identifier = "noaa-sos-atmosphere-sandy"
-local Description = [[Hurricane Sandy was a memorable and disastrous storm that hit the 
-  Caribbean islands and the Mid-Atlantic States in October of 2012.It was the second 
+local Description = [[Hurricane Sandy was a memorable and disastrous storm that hit the
+  Caribbean islands and the Mid-Atlantic States in October of 2012.It was the second
   costliest storm in U.S. history, after Hurricane Katrina]]
 local URL = "https://sos.noaa.gov/catalog/datasets/precipitable-water-galveston-hurricane-1900/"
 

@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Seismic Waves: Northridge Earthquake - 1994"
 local Identifier = "noaa-sos-land-seismic_waves-1994northride"
-local Description = [[At 4:30 a.m. on January 17, 1994, the shaking of an earthquake 
-awakened 10 million people in the Los Angeles region of Southern California. The 
-earthquake's epicenter was in Northridge, CA, and it was a magnitude 6.7 shock that 
-proved to be the most costly earthquake in United States history. The shaking heavily 
-damaged communities throughout the San Fernando Valley and Simi Valley, and the 
-surrounding mountains north and west of Los Angeles, causing estimated losses of $20 
-billion. Fifty-seven people died, more than 9,000 were injured, and more than 20,000 were 
+local Description = [[At 4:30 a.m. on January 17, 1994, the shaking of an earthquake
+awakened 10 million people in the Los Angeles region of Southern California. The
+earthquake's epicenter was in Northridge, CA, and it was a magnitude 6.7 shock that
+proved to be the most costly earthquake in United States history. The shaking heavily
+damaged communities throughout the San Fernando Valley and Simi Valley, and the
+surrounding mountains north and west of Los Angeles, causing estimated losses of $20
+billion. Fifty-seven people died, more than 9,000 were injured, and more than 20,000 were
 displaced from their homes by the effects of the quake]]
 local URL = "https://sos.noaa.gov/catalog/datasets/seismic-waves-northridge-earthquake-1994/"
 
@@ -71,7 +71,7 @@ asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_stations)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_images)
-  openspace.addScreenSpaceRenderable(pips);  
+  openspace.addScreenSpaceRenderable(pips)
 end)
 
 asset.onDeinitialize(function()

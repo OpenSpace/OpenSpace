@@ -22,11 +22,11 @@ local SaturnBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SaturnBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SaturnBarycenter)
 end)
-  
+
 asset.export(SaturnBarycenter)
 
 

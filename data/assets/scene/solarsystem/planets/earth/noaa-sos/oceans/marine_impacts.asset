@@ -3,15 +3,15 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Human Influences on Marine Ecosystems"
 local Identifier = "noaa-sos-oceans-marine_impacts"
-local Description = [[The ocean has an impact on the lives of everyone on Earth, even 
-those who don't live on the coasts. It has been estimated that one in every six jobs in 
-the United States is marine-related and that 50% of all species on Earth are supported by 
-the ocean. Because of this, it is important to protect and preserve the oceans. Humans 
-however have been shown to have a negative impact on the oceans. A report issued in 
-February 2008 found that 40% of the world's oceans are heavily impacted by human 
-activities, such as overfishing and pollution. In all 17 different human activities were 
-examined in the report, including fertilizer run-off, commercial shipping, and indirect 
-activities such as changes in sea surface temperature, UV radiation, and ocean 
+local Description = [[The ocean has an impact on the lives of everyone on Earth, even
+those who don't live on the coasts. It has been estimated that one in every six jobs in
+the United States is marine-related and that 50% of all species on Earth are supported by
+the ocean. Because of this, it is important to protect and preserve the oceans. Humans
+however have been shown to have a negative impact on the oceans. A report issued in
+February 2008 found that 40% of the world's oceans are heavily impacted by human
+activities, such as overfishing and pollution. In all 17 different human activities were
+examined in the report, including fertilizer run-off, commercial shipping, and indirect
+activities such as changes in sea surface temperature, UV radiation, and ocean
 acidification]]
 local URL = "https://sos.noaa.gov/catalog/datasets/human-influences-on-marine-ecosystems/"
 
@@ -52,10 +52,10 @@ local colorbar_human_impact = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
-  openspace.addScreenSpaceRenderable(colorbar_human_impact);  
+  openspace.addScreenSpaceRenderable(colorbar)
+  openspace.addScreenSpaceRenderable(colorbar_human_impact)
 end)
 
 asset.onDeinitialize(function()

@@ -22,11 +22,11 @@ local NeptuneBarycenter = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NeptuneBarycenter)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NeptuneBarycenter)
 end)
-  
+
 asset.export(NeptuneBarycenter)
 
 

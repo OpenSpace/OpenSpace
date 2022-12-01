@@ -38,9 +38,9 @@ local Bennu = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Bennu)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Bennu)
 end)
-  
+
 asset.export(Bennu)

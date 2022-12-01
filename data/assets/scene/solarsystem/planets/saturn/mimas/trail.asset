@@ -29,11 +29,11 @@ local MimasTrail = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MimasTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MimasTrail)
 end)
-  
+
 asset.export(MimasTrail)
 
 

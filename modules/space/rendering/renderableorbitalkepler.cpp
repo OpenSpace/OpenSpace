@@ -67,7 +67,7 @@ namespace {
         "method includes lines. If the rendering mode is set to Points, this value is "
         "ignored"
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
@@ -92,7 +92,7 @@ namespace {
         "Contiguous Size of Render Block",
         "Number of objects to render sequentially from StartRenderIdx"
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous Mode",
@@ -309,7 +309,7 @@ void RenderableOrbitalKepler::updateBuffers() {
             "Start index {} out of range [0, {}]", _startRenderIdx, _numObjects
         ));
     }
-    
+
     long long endElement = _startRenderIdx + _sizeRender - 1;
     endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
     if (endElement < 0 || endElement >= _numObjects) {

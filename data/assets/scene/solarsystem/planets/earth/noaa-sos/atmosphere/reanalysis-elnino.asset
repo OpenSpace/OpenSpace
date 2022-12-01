@@ -3,24 +3,24 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Precipitable Water - El Nino - 1917 - 1919"
 local Identifier = "noaa-sos-atmosphere-reanalysis-elnino"
-local Description = [[Until 2010, the longest globally-complete estimate of the 
-four-dimensional atmospheric circulation was from a dataset produced jointly by NOAA's 
-National Centers for Environmental Prediction and the National Center for Atmospheric 
-Research: the NCEP-NCAR Reanalysis. This dataset of computer-generated weather map 
-reconstructions or "reanalyses" starts from 1948, leaving many important climate events 
-such as 1930's Dust Bowl drought uncovered. To expand the coverage of global gridded 
-reanalyses, the 20th Century Reanalysis Project is an effort led by NOAA's Earth System 
-Research Laboratory Physical Sciences Division and the University of Colorado CIRES 
-Climate Diagnostics Center to produce a reanalysis dataset spanning the entire twentieth 
-century, assimilating only surface observations of synoptic pressure, monthly sea surface 
-temperature and sea ice distribution. The pressure observations have been assembled 
-through international cooperation under the auspices of the Atmospheric Circulation 
-Reconstructions over the Earth initiative, ACRE, and working groups of the Global Climate 
-Observing System and World Climate Research Program. The Project uses a 
-recently-developed Ensemble Filter data assimilation method which directly yields each 
-six-hourly reanalysis field or weather map as the most likely state of the global 
-atmosphere, and also estimates uncertainty in that map. This dataset will provide the 
-first estimates of global tropospheric variability spanning 1871 to present at six-hourly 
+local Description = [[Until 2010, the longest globally-complete estimate of the
+four-dimensional atmospheric circulation was from a dataset produced jointly by NOAA's
+National Centers for Environmental Prediction and the National Center for Atmospheric
+Research: the NCEP-NCAR Reanalysis. This dataset of computer-generated weather map
+reconstructions or "reanalyses" starts from 1948, leaving many important climate events
+such as 1930's Dust Bowl drought uncovered. To expand the coverage of global gridded
+reanalyses, the 20th Century Reanalysis Project is an effort led by NOAA's Earth System
+Research Laboratory Physical Sciences Division and the University of Colorado CIRES
+Climate Diagnostics Center to produce a reanalysis dataset spanning the entire twentieth
+century, assimilating only surface observations of synoptic pressure, monthly sea surface
+temperature and sea ice distribution. The pressure observations have been assembled
+through international cooperation under the auspices of the Atmospheric Circulation
+Reconstructions over the Earth initiative, ACRE, and working groups of the Global Climate
+Observing System and World Climate Research Program. The Project uses a
+recently-developed Ensemble Filter data assimilation method which directly yields each
+six-hourly reanalysis field or weather map as the most likely state of the global
+atmosphere, and also estimates uncertainty in that map. This dataset will provide the
+first estimates of global tropospheric variability spanning 1871 to present at six-hourly
 temporal resolution and 2 degree longitude by 2 degree latitude resolution]]
 local URL = "https://sos.noaa.gov/catalog/datasets/precipitable-water-el-nino-1917-1919/"
 
@@ -54,14 +54,14 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

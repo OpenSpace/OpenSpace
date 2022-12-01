@@ -3,14 +3,14 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "El Nino and La Nina Seasonal Impacts"
 local Identifier = "noaa-sos-oceans-elnino"
-local Description = [[El Nino is the warming of the Pacific Ocean off of the western 
-coast of South America near Ecuador and Peru. It is called El Nino, or little boy in 
-Spanish, referring to the Christ child because the phenomena was originally noticed near 
-Christmas time. The opposite of El Nino is La Nina, or little girl in Spanish, which is a 
-cooling of the Pacific Ocean. Because the Earth system is interconnected, changes in the 
-ocean cause changes in the atmosphere. El Nino and La Nina events not only impact ocean 
-temperatures in the tropical Pacific, but also global weather. The occurrence of El Nino 
-and La Nina is not predictable, but on average occurs once every four year and usually 
+local Description = [[El Nino is the warming of the Pacific Ocean off of the western
+coast of South America near Ecuador and Peru. It is called El Nino, or little boy in
+Spanish, referring to the Christ child because the phenomena was originally noticed near
+Christmas time. The opposite of El Nino is La Nina, or little girl in Spanish, which is a
+cooling of the Pacific Ocean. Because the Earth system is interconnected, changes in the
+ocean cause changes in the atmosphere. El Nino and La Nina events not only impact ocean
+temperatures in the tropical Pacific, but also global weather. The occurrence of El Nino
+and La Nina is not predictable, but on average occurs once every four year and usually
 lasts for about 18 months]]
 local URL = "https://sos.noaa.gov/catalog/datasets/el-nino-and-la-nina-seasonal-impacts/"
 
@@ -50,7 +50,7 @@ local layer_lanina_winter = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_elnino_summer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_elnino_winter)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_lanina_summer)

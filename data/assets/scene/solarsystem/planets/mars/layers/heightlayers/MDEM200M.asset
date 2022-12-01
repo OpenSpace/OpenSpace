@@ -5,13 +5,13 @@ local layer = {
   Name = "HRSC MOLA Blended DEM Global 200m v2",
   Enabled = asset.enabled,
   FilePath = asset.localResource("mdem200m.wms"),
-  Description = [[Blend of data derived from the Mars Orbiter Laser Altimeter 
+  Description = [[Blend of data derived from the Mars Orbiter Laser Altimeter
     (MOLA, an instrument aboard NASA's Mars Global Surveyor spacecraft), and data derived
     from the High-Resolution Stereo Camera (HRSC, an instrument aboard the European Space
-    Agency's Mars Express spacecraft). The average accuracy is ~100 meters in horizontal 
+    Agency's Mars Express spacecraft). The average accuracy is ~100 meters in horizontal
     position and the elevation uncertainty is at least ±3 m. This tiled elevation layer,
     hosted by ESRI, is made available using lossless LERC compression.
-    (Description from URL)]],
+    (Description from URL)]]
 }
 
 asset.onInitialize(function()

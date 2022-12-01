@@ -54,11 +54,11 @@ local Ganymede = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Ganymede)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Ganymede)
 end)
-  
+
 asset.export(Ganymede)
 
 

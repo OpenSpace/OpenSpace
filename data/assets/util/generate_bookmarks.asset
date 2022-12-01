@@ -20,7 +20,7 @@ local getBookmarks = function (guiPath, bookmarkfile)
           Scale = {
             Type = "StaticScale",
             Scale = tonumber(scale);
-          }, 
+          },
           Rotation = {
             Type = "StaticRotation",
             Rotation = {
@@ -65,7 +65,7 @@ local getBookmarks = function (guiPath, bookmarkfile)
         }
         if (altitude == nil) then
           sgn.Transform.Translation.UseHeightMap = true;
-        else 
+        else
           sgn.Transform.Translation.UseHeightMap = false;
           sgn.Transform.Translation.Altitude = tonumber(altitude);
         end

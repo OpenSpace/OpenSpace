@@ -3,18 +3,18 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Ocean Acidification: Saturation State"
 local Identifier = "noaa-sos-oceans-ocean_acid-saturation"
-local Description = [[Ocean acidification is an often overlooked consequence of 
-humankind's release of carbon dioxide emissions into the atmosphere from fossil fuel 
-burning. Excess carbon dioxide enters the ocean and reacts with water to form carbonic 
-acid, which decreases ocean pH (i.e., makes seawater less basic), and lowers carbonate 
-ion concentrations. Organisms such as corals, clams, oysters, and some plankton use 
-carbonate ions to create their shells and skeletons. Decreases in carbonate ion 
-concentration will make it difficult for these creatures to form hard structures, 
-particularly for juveniles. Ocean acidification may cause some organisms to die, 
-reproduce less successfully, or leave an area. Other organisms such as seagrass and some 
-plankton species may do better in oceans affected by ocean acidification because they use 
-carbon dioxide to photosynthesize, but do not require carbonate ions to survive. Ocean 
-ecosystem diversity and ecosystem services may therefore change dramatically from ocean 
+local Description = [[Ocean acidification is an often overlooked consequence of
+humankind's release of carbon dioxide emissions into the atmosphere from fossil fuel
+burning. Excess carbon dioxide enters the ocean and reacts with water to form carbonic
+acid, which decreases ocean pH (i.e., makes seawater less basic), and lowers carbonate
+ion concentrations. Organisms such as corals, clams, oysters, and some plankton use
+carbonate ions to create their shells and skeletons. Decreases in carbonate ion
+concentration will make it difficult for these creatures to form hard structures,
+particularly for juveniles. Ocean acidification may cause some organisms to die,
+reproduce less successfully, or leave an area. Other organisms such as seagrass and some
+plankton species may do better in oceans affected by ocean acidification because they use
+carbon dioxide to photosynthesize, but do not require carbonate ions to survive. Ocean
+ecosystem diversity and ecosystem services may therefore change dramatically from ocean
 acidification]]
 local URL = "https://sos.noaa.gov/catalog/datasets/ocean-acidification-saturation-state/"
 
@@ -69,7 +69,7 @@ asset.onInitialize(function()
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", reefs)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

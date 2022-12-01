@@ -132,7 +132,7 @@ glm::dvec3 galacticToLocalCamera(const glm::dvec3& coords) {
 
 double targetRoll(const glm::dvec3& up, const glm::dvec3& forward) {
     constexpr glm::dvec3 NorthPole = glm::dvec3(0.0, 0.0, 1.0);
-    
+
     glm::dvec3 upJ2000 = galacticToEquatorial(up);
     glm::dvec3 forwardJ2000 = galacticToEquatorial(forward);
 

@@ -39,10 +39,10 @@ local KerberosTrail = {
     Period = 32.16756,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
@@ -55,12 +55,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Kerberos)
   openspace.addSceneGraphNode(KerberosTrail)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(KerberosTrail)
   openspace.removeSceneGraphNode(Kerberos)
 end)
-  
+
 asset.export(Kerberos)
 asset.export(KerberosTrail)
 

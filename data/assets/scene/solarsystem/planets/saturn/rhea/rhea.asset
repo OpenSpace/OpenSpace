@@ -54,11 +54,11 @@ local Rhea = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Rhea)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Rhea)
 end)
-  
+
 asset.export(Rhea)
 
 

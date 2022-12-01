@@ -144,13 +144,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Comet67P)
   openspace.addSceneGraphNode(Trail67P)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Trail67P)
   openspace.removeSceneGraphNode(Comet67P)
   openspace.removeSceneGraphNode(Barycenter)
 end)
-    
+
 asset.export("Barycenter", Barycenter) -- @TODO: This double export should disappear
 asset.export(Barycenter)
 asset.export("Comet67P", Comet67P)  -- @TODO: This double export should disappear

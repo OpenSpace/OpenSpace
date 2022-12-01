@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Land to Sea Ratio"
 local Identifier = "noaa-sos-land-land_ratio"
-local Description = [[In this dataset, we witness the world map transform into a graph 
+local Description = [[In this dataset, we witness the world map transform into a graph
 that shows the ratio of land and sea at different latitudes]]
 local URL = "https://sos.noaa.gov/catalog/datasets/land-to-sea-ratio/"
 

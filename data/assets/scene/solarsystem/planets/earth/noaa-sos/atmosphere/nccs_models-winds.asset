@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Winds: GEOS-5 Model"
 local Identifier = "noaa-sos-atmosphere-nccs_models-winds"
-local Description = [[Models create a dynamic portrait of the Earth through numerical 
-experiments that simulate our current knowledge of the dynamical and physical processes 
-governing weather and climate variability. The simulation visualized here captures the 
-speed of winds at the tropopause, about 6-9 miles above the Earth's surface during the 
-period September 1, 2006 to March 17, 2007. Such simulations allow scientists to view the 
-intensity and turbulence of the polar and sub-tropic jet streams, which carry weather 
+local Description = [[Models create a dynamic portrait of the Earth through numerical
+experiments that simulate our current knowledge of the dynamical and physical processes
+governing weather and climate variability. The simulation visualized here captures the
+speed of winds at the tropopause, about 6-9 miles above the Earth's surface during the
+period September 1, 2006 to March 17, 2007. Such simulations allow scientists to view the
+intensity and turbulence of the polar and sub-tropic jet streams, which carry weather
 around the globe. Red, orange and yellow are used for the fastest moving air]]
 local URL = "https://sos.noaa.gov/catalog/datasets/winds-geos-5-model/"
 
@@ -33,11 +33,11 @@ local layer = {
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "winds_%Y-%m-%d_%H-%M.png"
-  },        
+  },
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "4000-1.zip", imagesDestination, true)

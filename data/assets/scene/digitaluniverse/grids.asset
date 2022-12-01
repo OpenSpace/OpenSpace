@@ -33,7 +33,7 @@ local radio = {
       -- First TV signals strong enough to leave the ionosphere
       ReferenceDate = "1936 AUG 01 12:00:00",
       Speed = 299792458 -- c
-    }, 
+    },
     Rotation = {
       Type = "StaticRotation",
       Rotation = equatorialRotationMatrix
@@ -59,7 +59,7 @@ local oort = {
     Scale = {
       Type = "StaticScale",
       Scale = 7.47989845E15
-    }, 
+    },
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
@@ -85,7 +85,7 @@ local ecliptic = {
     Scale = {
       Type = "StaticScale",
       Scale = 9.46377307652E17
-    }, 
+    },
     Rotation = {
       Type = "StaticRotation",
       Rotation = eclipticRotationMatrix
@@ -141,7 +141,7 @@ local equatorial = {
     Scale = {
       Type = "StaticScale",
       Scale = 4.28601E17;
-    }, 
+    },
     Rotation = {
       Type = "StaticRotation",
       Rotation = equatorialRotationMatrix

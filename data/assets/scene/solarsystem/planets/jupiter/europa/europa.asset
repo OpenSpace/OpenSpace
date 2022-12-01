@@ -54,11 +54,11 @@ local Europa = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Europa)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Europa)
 end)
-  
+
 asset.export(Europa)
 
 
