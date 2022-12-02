@@ -59,6 +59,7 @@ public:
 
 private:
     void definePropertyCallbackFunctions();
+    void setupProperties();
 
     //0: static loading and static downloading
     //1: dynamic loading but static downloading
@@ -95,7 +96,14 @@ private:
 
     std::vector<File> _files;
     size_t activeTriggerTimeIndex = -1;
+    bool isInInterval = false;
 
+    // True when new state is loaded or user change which quantity used for masking out
+    // line segments
+    bool _shouldUpdateMaskingBuffer = false;
+
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
     // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
     std::unique_ptr<TransferFunction> _transferFunction;
 
@@ -116,15 +124,43 @@ private:
     properties::Vec2Property _colorQuantityMinMax;
     // Uniform Field Line Color
     properties::Vec4Property _colorUniform;
+    // Whether or not to use additive blending
+    properties::BoolProperty _colorABlendEnabled;
 
+    // Toggle flow [ON/OFF]
+    properties::BoolProperty _flowEnabled;
+    // Group to hold the flow/particle properties
+    properties::PropertyOwner _flowGroup;
+    // Simulated particles' color
+    properties::Vec4Property _flowColor;
+    // Size of simulated flow particles
+    properties::IntProperty _flowParticleSize;
+    // Size of simulated flow particles
+    properties::IntProperty _flowParticleSpacing;
+    // Toggle flow direction [FORWARDS/BACKWARDS]
+    properties::BoolProperty _flowReversed;
+    // Speed of simulated flow
+    properties::IntProperty _flowSpeed;
 
+    // Whether or not to use masking
+    properties::BoolProperty _maskingEnabled;
+    // Group to hold the masking properties
+    properties::PropertyOwner _maskingGroup;
+    // Lower and upper range limit for allowed values
+    properties::Vec2Property _maskingMinMax;
+    // Index of the extra quantity to use for masking
+    properties::OptionProperty _maskingQuantity;
 
     ///////////////other.//////////////////////////
 
     // Paths to color tables. One for each 'extraQuantity'
     std::vector<std::string> _colorTablePaths;
+    // Values represents min & max values represented in the color table
+    std::vector<glm::vec2> _colorTableRanges;
 
 
+    // Values represents min & max limits for valid masking range
+    std::vector<glm::vec2> _maskingRanges;
 
 };
 
