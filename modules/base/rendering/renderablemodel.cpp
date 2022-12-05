@@ -473,7 +473,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _blendingFuncOption.addOption(DefaultBlending, "Default");
     _blendingFuncOption.addOption(AdditiveBlending, "Additive");
-    _blendingFuncOption.addOption(PointsAndLinesBlending, "Points and Lines");
     _blendingFuncOption.addOption(PolygonBlending, "Polygon");
     _blendingFuncOption.addOption(ColorAddingBlending, "Color Adding");
 
@@ -741,6 +740,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
         _program->setUniform(_uniformCache.performShading, _performShading);
 
+        // Configure blending
         glEnablei(GL_BLEND, 0);
         switch (_blendingFuncOption) {
             case DefaultBlending:
@@ -748,9 +748,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
                 break;
             case AdditiveBlending:
                 glBlendFunc(GL_ONE, GL_ONE);
-                break;
-            case PointsAndLinesBlending:
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 break;
             case PolygonBlending:
                 glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
