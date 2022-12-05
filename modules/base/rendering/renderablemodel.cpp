@@ -778,31 +778,14 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
         const float o = opacity();
-        if ((o >= 0.f && o < 1.f) || !_enableDepthTest) {
+        if ((o >= 0.f && o < 1.f) || !_enableDepthTest || _geometry->isTransparent()) {
             setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
         }
         else {
             setRenderBin(_originalRenderBin);
         }
 
-        bool shouldRenderTwice = _enableFaceCulling && _geometry->isTransparent();
-        int nPasses = shouldRenderTwice ? 2 : 1;
-        for (int i = 0; i < nPasses; ++i) {
-            if (shouldRenderTwice) {
-                glEnable(GL_CULL_FACE);
-
-                if (i == 0) {
-                    // First draw back faces (remove front faces)
-                    glCullFace(GL_FRONT);
-                }
-                else {
-                    // Then front faces (remove back faces)
-                    glCullFace(GL_BACK);
-                }
-            }
-
-            _geometry->render(*_program);
-        }
+        _geometry->render(*_program);
 
         if (!_enableFaceCulling) {
             glEnable(GL_CULL_FACE);
