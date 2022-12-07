@@ -25,6 +25,7 @@
 #include "fragment.glsl"
 
 in vec2 vs_st;
+in vec2 viewportPixelCoord;
 in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
 in float vs_screenSpaceDepth;
@@ -47,13 +48,23 @@ uniform vec4 color_specular;
 uniform int nLightSources;
 uniform vec3 lightDirectionsViewSpace[8];
 uniform float lightIntensities[8];
+uniform sampler2D gBufferDepthTexture;
 
 
 Fragment getFragment() {
+  Fragment frag;
+
+  // Manual depth test
+  float gBufferDepth =
+    denormalizeFloat(texture(gBufferDepthTexture, viewportPixelCoord).x);
+  if (vs_screenSpaceDepth > gBufferDepth) {
+    frag.color = vec4(0.f);
+    frag.depth = gBufferDepth;
+    return frag;
+  }
+
   // Render invisible mesh with flashy procedural material
   if (use_forced_color) {
-    Fragment frag;
-
     vec3 adjustedPos = floor(vs_positionCameraSpace.xyz * 3.0);
     float chessboard  = adjustedPos.x + adjustedPos.y + adjustedPos.z;
     chessboard = fract(chessboard * 0.5);
@@ -77,8 +88,6 @@ Fragment getFragment() {
   else {
     diffuseAlbedo = color_diffuse;
   }
-
-  Fragment frag;
 
   if (performShading) {
     vec3 specularAlbedo;

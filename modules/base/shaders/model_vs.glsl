@@ -32,6 +32,7 @@ layout(location = 2) in vec3 in_normal;
 layout(location = 3) in vec3 in_tangent;
 
 out vec2 vs_st;
+out vec2 viewportPixelCoord;
 out vec3 vs_normalViewSpace;
 out float vs_screenSpaceDepth;
 out vec4 vs_positionCameraSpace;
@@ -53,7 +54,8 @@ void main() {
   vs_st = in_st;
   vs_screenSpaceDepth = positionScreenSpace.w;
 
-  vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+  vs_normalViewSpace =
+    normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
 	// TBN matrix for normal mapping
 	vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
@@ -66,4 +68,9 @@ void main() {
 	vec3 B = normalize(cross(N, T));
 
 	TBN = mat3(T, B, N);
+
+	// Figure out the fragments position in the viewport
+	vec3 ndc = gl_Position.xyz / gl_Position.w; //perspective divide/normalize
+	vec2 viewportCoord = ndc.xy * 0.5 + 0.5; //ndc is -1 to 1 in GL. scale for 0 to 1
+	viewportPixelCoord = viewportCoord;
 }
