@@ -72,7 +72,7 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
-        KameleonVolumeToFieldlinesTask::Documentation();
+        KameleonVolumeToFieldlinesTask::documentation(),
         RenderableFieldlinesSequence::Documentation()
     };
 }

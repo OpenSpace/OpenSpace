@@ -47,8 +47,8 @@ namespace openspace {
         std::vector<std::string> _extraMagnitudeVars;
         std::filesystem::path _inputPath;
         //std::string _timeKernelPath;
-        std::string _seedpointsPath;
-        std::string _outputFolder;
+        std::filesystem::path _seedpointsPath;
+        std::filesystem::path _outputFolder;
     };
 
 } // namespace openspace
