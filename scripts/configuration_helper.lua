@@ -1,8 +1,8 @@
 -- Helper functions that are useful to customize the openspace.cfg loading
 
--- ####################################################################################### 
+-- #######################################################################################
 -- ##                          Public functions                                         ##
--- ####################################################################################### 
+-- #######################################################################################
 
 -- SGCT related functions
 sgct = {}
@@ -79,9 +79,9 @@ sgctconfiginitializeString = ""
 
 
 --[[
-########################################################################################## 
+##########################################################################################
                             Internal helper functions
-########################################################################################## 
+##########################################################################################
 ]]--
 
 function generateSingleViewportFOV(down, up, left, right, tracked)
@@ -347,7 +347,7 @@ function generateSingleWindowConfig(arg, viewport)
     check("table", arg["scene"], "orientation", "number")
     check("number", arg["scene"], "scale")
   end
-  
+
   if arg["shared"] ~= nil then
     local t = arg["tags"]
     t[#t + 1] = "Spout"
@@ -420,9 +420,9 @@ function sgct.config.single(arg)
 
   arg["tracked"] = arg["tracked"] or true
 
-  local viewport = generateSingleViewportFOV(arg["fov"]["down"], arg["fov"]["up"], 
+  local viewport = generateSingleViewportFOV(arg["fov"]["down"], arg["fov"]["up"],
     arg["fov"]["left"], arg["fov"]["right"], arg["tracked"])
- 
+
   return sgct.makeConfig(generateSingleWindowConfig(arg, viewport))
 end
 
@@ -445,7 +445,7 @@ function sgct.config.fisheye(arg)
     -- OpenSpace code prior to loading this file
 
     local scale_factor = 2.0/3.0;
-    arg["size"] = { ScreenResolution.x * scale_factor, ScreenResolution.y * scale_factor }    
+    arg["size"] = { ScreenResolution.x * scale_factor, ScreenResolution.y * scale_factor }
   end
 
   check("number", arg, "fov")
