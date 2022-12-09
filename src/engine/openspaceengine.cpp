@@ -1082,6 +1082,10 @@ void OpenSpaceEngine::writeDocumentation() {
 
     json += "]}";
 
+    std::ofstream out("documentationData.js");
+    out << "export const data = " << json;
+    out.close();
+
     // Add templates for the JSONs we just registered
     DocEng.addHandlebarTemplates(global::keybindingManager->templatesToRegister());
     DocEng.addHandlebarTemplates(writer.templatesToRegister());
