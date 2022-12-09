@@ -44,10 +44,10 @@ namespace {
 
     struct [[codegen::Dictionary(KameleonVolumeToFieldlinesTask)]] Parameters {
         // The folder to the cdf files to extract data from
-        std::filesystem::path input;
+        std::filesystem::path input [[codegen::directory()]];
         // A text file with seedpoints with the format x1 y1 z1 x2 y2 z2 ...
         // Seedpoints are expressed in the native coordinate system of the model.
-        std::filesystem::path seedpoints;
+        std::filesystem::path seedpoints [[codegen::directory()]];
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
@@ -55,7 +55,7 @@ namespace {
         // The name of the kameleon variable to use for tracing, like b, or u
         std::string tracingVar;
         // The folder to write the files to
-        std::filesystem::path outputFolder;
+        std::filesystem::path outputFolder [[codegen::directory()]];
 
         enum class ConversionType {
             Json,
