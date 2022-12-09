@@ -328,7 +328,37 @@ QWidget* LauncherWindow::createCentralWidget() {
     newWindowButton->setGeometry(geometry::NewWindowButton);
     newWindowButton->setCursor(Qt::PointingHandCursor);
 
+    _editWindowButton = new QPushButton("Edit", centralWidget);
+    connect(
+        _editWindowButton,
+        &QPushButton::released,
+        [this]() {
+            previewSelectedConfigFileForVersion();
+        }
+    );
+    _editWindowButton->setVisible(false);
+    _editWindowButton->setObjectName("small");
+    _editWindowButton->setGeometry(geometry::EditWindowButton);
+    _editWindowButton->setCursor(Qt::PointingHandCursor);
+
     return centralWidget;
+}
+
+void LauncherWindow::previewSelectedConfigFileForVersion() {
+    std::filesystem::path pathSelected = absPath(selectedWindowConfig());
+    std::string fileSelected = pathSelected.u8string();
+    if (_windowConfigBox->currentIndex() > 0
+        && std::filesystem::is_regular_file(fileSelected))
+    {
+        sgct::config::Cluster preview = sgct::readConfig(fileSelected, true);
+        if (preview.configGeneratorVersion.has_value()) {
+            if (preview.configGeneratorVersion.value()
+                >= SgctEdit::_configGenMinimumSupportedVersion)
+            {
+                openWindowEditor();
+            }
+        }
+    }
 }
 
 void LauncherWindow::setBackgroundImage(const std::string& syncPath) {

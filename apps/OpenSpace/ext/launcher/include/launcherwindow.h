@@ -88,6 +88,7 @@ private:
 
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
+    void previewSelectedConfigFileForVersion();
 
     const std::string _assetPath;
     const std::string _userAssetPath;
@@ -104,5 +105,6 @@ private:
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;
     QLabel* _backgroundImage = nullptr;
+    QPushButton* _editWindowButton = nullptr;
 };
 #endif // __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__
