@@ -35,7 +35,10 @@ namespace openspace {
 class FieldlinesState;
 
 namespace fls {
-
+std::unordered_map<std::string, std::vector<glm::vec3>>
+    extractSeedPointsFromFiles(std::filesystem::path);
+std::vector<std::string>
+    extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
     const std::unordered_map<std::string, std::vector<glm::vec3>>& seedMap,
     double manualTimeOffset, const std::string& tracingVar,

@@ -32,7 +32,6 @@
 #include <string>
 
 namespace openspace {
-
     class KameleonVolumeToFieldlinesTask : public Task {
     public:
         KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
@@ -42,12 +41,17 @@ namespace openspace {
         static documentation::Documentation documentation();
 
     private:
+        enum class conversionType {
+            Json,
+            Osfls
+        };
         std::string _tracingVar;
-        std::vector<std::string> _extraScalarVars;
-        std::vector<std::string> _extraMagnitudeVars;
+        std::vector<std::string> _extraVars;
         std::filesystem::path _inputPath;
-        //std::string _timeKernelPath;
+        std::vector<std::string> _sourceFiles;
+        double _manualTimeOffset = 0.0;
         std::filesystem::path _seedpointsPath;
+        conversionType _outputType;
         std::filesystem::path _outputFolder;
     };
 

@@ -29,6 +29,7 @@ set(HEADER_FILES
   util/fieldlinesstate.h
   util/commons.h
   util/kameleonfieldlinehelper.h
+  tasks/kameleonvolumetofieldlinestask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -37,6 +38,7 @@ set(SOURCE_FILES
   util/fieldlinesstate.cpp
   util/commons.cpp
   util/kameleonfieldlinehelper.cpp
+  tasks/kameleonvolumetofieldlinestask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

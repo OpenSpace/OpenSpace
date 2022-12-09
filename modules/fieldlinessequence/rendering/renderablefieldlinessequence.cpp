@@ -261,10 +261,6 @@ namespace {
 
 namespace openspace {
 fls::Model stringToModel(std::string str);
-std::unordered_map<std::string, std::vector<glm::vec3>>
-    extractSeedPointsFromFiles(std::filesystem::path);
-std::vector<std::string>
-    extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 
 documentation::Documentation RenderableFieldlinesSequence::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequence");
@@ -577,7 +573,7 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
     _states.push_back(newState);
     _nStates = _startTimes.size();
     if (_nStates == 1) {
-        // loading dynamicaly is not nessesary if only having one set in the sequence 
+        // loading dynamicaly is not nessesary if only having one set in the sequence
         _loadingStatesDynamically = false;
     }
     _activeStateIndex = 0;
@@ -793,10 +789,10 @@ void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
 }
 
 bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
-    std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
+    std::vector<std::string> extraMagVars = fls::extractMagnitudeVarsFromStrings(_extraVars);
 
     std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
-        extractSeedPointsFromFiles(_seedPointDirectory);
+        fls::extractSeedPointsFromFiles(_seedPointDirectory);
     if (seedsPerFiles.empty()) {
         LERROR("No seed files found");
         return false;
@@ -822,101 +818,6 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
         }
     }
     return true;
-}
-
-std::unordered_map<std::string, std::vector<glm::vec3>>
-    extractSeedPointsFromFiles(std::filesystem::path filePath)
-{
-    std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
-
-    if (!std::filesystem::is_directory(filePath)) {
-        LERROR(fmt::format(
-            "The specified seed point directory: '{}' does not exist", filePath
-        ));
-        return outMap;
-    }
-
-    namespace fs = std::filesystem;
-    for (const fs::directory_entry& spFile : fs::directory_iterator(filePath)) {
-        std::string seedFilePath = spFile.path().string();
-        if (!spFile.is_regular_file() ||
-            seedFilePath.substr(seedFilePath.find_last_of('.') + 1) != "txt")
-        {
-            continue;
-        }
-
-        std::ifstream seedFile(seedFilePath);
-        if (!seedFile.good()) {
-            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
-            outMap.clear();
-            return {};
-        }
-
-        LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
-        std::string line;
-        std::vector<glm::vec3> outVec;
-        while (std::getline(seedFile, line)) {
-            std::stringstream ss(line);
-            glm::vec3 point;
-            ss >> point.x;
-            ss >> point.y;
-            ss >> point.z;
-            outVec.push_back(std::move(point));
-        }
-
-        if (outVec.empty()) {
-            LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
-            outMap.clear();
-            return {};
-        }
-
-        size_t lastIndex = seedFilePath.find_last_of('.');
-        std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
-        size_t dateAndTimeSeperator = name.find_last_of('_');
-        std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
-        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
-        std::string dateAndTime = date + time;
-
-        // add outVec as value and time stamp as int as key
-        outMap[dateAndTime] = outVec;
-    }
-    return outMap;
-}
-
-std::vector<std::string>
-    extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
-{
-    std::vector<std::string> extraMagVars;
-    for (int i = 0; i < static_cast<int>(extrVars.size()); i++) {
-        const std::string& str = extrVars[i];
-        // Check if string is in the format specified for magnitude variables
-        if (str.substr(0, 2) == "|(" && str.substr(str.size() - 2, 2) == ")|") {
-            std::istringstream ss(str.substr(2, str.size() - 4));
-            std::string magVar;
-            size_t counter = 0;
-            while (std::getline(ss, magVar, ',')) {
-                magVar.erase(
-                    std::remove_if(
-                        magVar.begin(),
-                        magVar.end(),
-                        ::isspace
-                    ),
-                    magVar.end()
-                );
-                extraMagVars.push_back(magVar);
-                counter++;
-                if (counter == 3) {
-                    break;
-                }
-            }
-            if (counter != 3 && counter > 0) {
-                extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
-            }
-            extrVars.erase(extrVars.begin() + i);
-            i--;
-        }
-    }
-    return extraMagVars;
 }
 
 void RenderableFieldlinesSequence::deinitializeGL() {
@@ -1046,7 +947,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
-    
+
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
