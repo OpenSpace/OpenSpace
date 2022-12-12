@@ -29,6 +29,10 @@
 
 #include <ghoul/glm.h>
 
+// libmpv
+#include <client.h>
+#include <render_gl.h>
+
 // FFMPEG
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -95,6 +99,14 @@ private:
 
     GLubyte* _tilePixels = nullptr;
     GLuint _pbo = 0;
+
+    // libmpv
+    mpv_handle* mpvHandle;
+    mpv_render_context* mpvRenderContext;
+    unsigned int mpvFBO = 0;
+    unsigned int mpvTex = 0;
+
+    int mpvVideoReconfigs = 0;
 
     void internalInitialize() override final;
     void internalDeinitialize() override final;

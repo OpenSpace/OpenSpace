@@ -599,6 +599,16 @@ void FfmpegTileProvider::internalInitialize() {
     // Create PBO for async texture upload
     glGenBuffers(1, &_pbo);
 
+
+    // libmpv
+    mpvHandle = mpv_create();
+    if (!mpvHandle)
+        LINFO("mpv context init failed");
+    // Some minor options can only be set before mpv_initialize().
+    if (mpv_initialize(mpvHandle) < 0)
+        LINFO("mpv init failed");
+
+
     _isInitialized = true;
 }
 

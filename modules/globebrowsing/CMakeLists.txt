@@ -150,6 +150,15 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
 
 # Ffmpeg
 if(WIN32)
+  add_library(libmpv SHARED IMPORTED)
+  set_target_properties(libmpv PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/lib/mpv-2.dll"
+    IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/lib/mpv.lib"
+    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/libmpv/include"
+  )
+
+  target_link_libraries(openspace-module-globebrowsing PUBLIC libmpv)
+
   add_library(avcodec SHARED IMPORTED)
   set_target_properties(avcodec PROPERTIES
     IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg/lib/avcodec-59.dll"
