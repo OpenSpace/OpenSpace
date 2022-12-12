@@ -99,6 +99,13 @@ void save_gray_frame(unsigned char* buf, int wrap, int xsize, int ysize, const c
     fclose(f);
 }
 
+void check_error(int status)
+{
+    if (status < 0) {
+        printf("mpv API error: %s\n", mpv_error_string(status));
+    }
+}
+
 std::string getFffmpegErrorString(const int errorCode) {
     const int size = 100;
     const char initChar = '@';
@@ -604,11 +611,29 @@ void FfmpegTileProvider::internalInitialize() {
     mpvHandle = mpv_create();
     if (!mpvHandle)
         LINFO("mpv context init failed");
-    // Some minor options can only be set before mpv_initialize().
-    if (mpv_initialize(mpvHandle) < 0)
-        LINFO("mpv init failed");
+    // Enable default key bindings, so the user can actually interact with
+    // the player (and e.g. close the window).
+    check_error(mpv_set_option_string(mpvHandle, "input-default-bindings", "yes"));
+    mpv_set_option_string(mpvHandle, "input-vo-keyboard", "yes");
+    int val = 1;
+    check_error(mpv_set_option(mpvHandle, "osc", MPV_FORMAT_FLAG, &val));
 
+    // Done setting up options.
+    check_error(mpv_initialize(mpvHandle));
 
+    // Play this file.
+    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), NULL};
+    check_error(mpv_command(mpvHandle, cmd));
+
+    // Let it play, and wait until the user quits.
+    while (1) {
+        mpv_event* event = mpv_wait_event(mpvHandle, 10000);
+        printf("event: %s\n", mpv_event_name(event->event_id));
+        if (event->event_id == MPV_EVENT_SHUTDOWN)
+            break;
+    }
+
+    mpv_terminate_destroy(mpvHandle);
     _isInitialized = true;
 }
 
