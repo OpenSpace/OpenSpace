@@ -29,6 +29,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -105,6 +106,14 @@ void check_error(int status)
         printf("mpv API error: %s\n", mpv_error_string(status));
     }
 }
+
+void* get_proc_address_mpv(void*, const char* name)
+{
+    return reinterpret_cast<void*>(global::windowDelegate->openGLProcedureAddress(name));
+}
+
+void on_mpv_render_update(void*) {}
+
 
 std::string getFffmpegErrorString(const int errorCode) {
     const int size = 100;
@@ -226,7 +235,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         TileSize.x,
         TileSize.y,
         GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::Format::RGB,
+        ghoul::opengl::Texture::Format::RGBA,
         TileTextureInitData::PadTiles::No,
         TileTextureInitData::ShouldAllocateDataOnCPU::No
     );
@@ -235,11 +244,18 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     ghoul::opengl::Texture* writeTexture = tileCache->texture(initData);
 
     {
+        // Try to read fbo to texture
+        GLubyte* data = new GLubyte[4 * TileSize.x * TileSize.y];
         ZoneScopedN("Upload Texture")
         TracyGpuZone("Upload Texture")
+        glBindFramebuffer(GL_FRAMEBUFFER, mpvFBO);
+        glReadPixels(0, 0, TileSize.x, TileSize.y, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0); //back to window framebuffer
+        writeTexture->setPixelData(data);
+        writeTexture->uploadTexture();
 
         // Upload texture to GPU using the PBO (this will be async and faster)
-        writeTexture->reUploadTextureFromPBO(_pbo);
+        //writeTexture->reUploadTextureFromPBO(_pbo);
     }
 
     // Bind the texture to the tile
@@ -270,9 +286,24 @@ TileDepthTransform FfmpegTileProvider::depthTransform() {
 void FfmpegTileProvider::update() {
     ZoneScoped
 
+    // Always check that our framebuffer is ok
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        LINFO("Buffer is not happy :(");
+        
     if (!_isInitialized) {
         return;
     }
+    mpv_opengl_fbo mpfbo{ static_cast<int>(mpvFBO), FinalResolution.x, FinalResolution.y, 0 };
+    int flip_y{ 1 };
+
+    mpv_render_param params[] = {
+        {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
+        {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
+        {MPV_RENDER_PARAM_INVALID, nullptr}
+    };
+    // See render_gl.h on what OpenGL environment mpv expects, and
+    // other API details.
+    mpv_render_context_render(mpvRenderContext, params);
 
     const double now = global::timeManager->time().j2000Seconds();
     double videoTime = 0.0;
@@ -606,35 +637,81 @@ void FfmpegTileProvider::internalInitialize() {
     // Create PBO for async texture upload
     glGenBuffers(1, &_pbo);
 
-
     // libmpv
     mpvHandle = mpv_create();
     if (!mpvHandle)
         LINFO("mpv context init failed");
-    // Enable default key bindings, so the user can actually interact with
-    // the player (and e.g. close the window).
-    check_error(mpv_set_option_string(mpvHandle, "input-default-bindings", "yes"));
-    mpv_set_option_string(mpvHandle, "input-vo-keyboard", "yes");
-    int val = 1;
-    check_error(mpv_set_option(mpvHandle, "osc", MPV_FORMAT_FLAG, &val));
 
-    // Done setting up options.
-    check_error(mpv_initialize(mpvHandle));
+    // Some minor options can only be set before mpv_initialize().
+    if (mpv_initialize(mpvHandle) < 0)
+        LINFO("mpv init failed");
 
+    mpv_opengl_init_params gl_init_params{ get_proc_address_mpv, nullptr};
+    mpv_render_param params[]{
+        {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
+        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
+        {MPV_RENDER_PARAM_INVALID, nullptr}
+    };
+
+    // This makes mpv use the currently set GL context. It will use the callback
+    // (passed via params) to resolve GL builtin functions, as well as extensions.
+    if (mpv_render_context_create(&mpvRenderContext, mpvHandle, params) < 0)
+        LINFO("failed to initialize mpv GL context");
+
+    // When there is a need to call mpv_render_context_update(), which can
+    // request a new frame to be rendered.
+    // (Separate from the normal event handling mechanism for the sake of
+    //  users which run OpenGL on a different thread.)
+    mpv_render_context_set_update_callback(mpvRenderContext, on_mpv_render_update, NULL);
+
+    //Observe video parameters
+    mpv_observe_property(mpvHandle, 0, "video-params", MPV_FORMAT_NODE);
+    mpv_observe_property(mpvHandle, 0, "pause", MPV_FORMAT_FLAG);
+    mpv_observe_property(mpvHandle, 0, "time-pos", MPV_FORMAT_DOUBLE);
+
+    //Creating new FBO to render mpv into
+    createMpvFBO(FinalResolution.x, FinalResolution.y);
     // Play this file.
-    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), NULL};
+    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), NULL };
     check_error(mpv_command(mpvHandle, cmd));
 
-    // Let it play, and wait until the user quits.
-    while (1) {
-        mpv_event* event = mpv_wait_event(mpvHandle, 10000);
-        printf("event: %s\n", mpv_event_name(event->event_id));
-        if (event->event_id == MPV_EVENT_SHUTDOWN)
-            break;
-    }
-
-    mpv_terminate_destroy(mpvHandle);
     _isInitialized = true;
+}
+
+void FfmpegTileProvider::createMpvFBO(int width, int height) {
+    _videoWidth = width;
+    _videoHeight = height;
+
+    glGenFramebuffers(1, &mpvFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, mpvFBO);
+    generateTexture(mpvTex, width, height);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        GL_TEXTURE_2D,
+        mpvTex,
+        0
+    );
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FfmpegTileProvider::generateTexture(unsigned int& id, int width, int height) {
+    glGenTextures(1, &id);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glBindTexture(GL_TEXTURE_2D, id);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+    // Disable mipmaps
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 FfmpegTileProvider::~FfmpegTileProvider() {
@@ -648,6 +725,16 @@ void FfmpegTileProvider::internalDeinitialize() {
     av_free(_packet);
     avformat_free_context(_formatContext);
     avcodec_close(_codecContext);
+
+    // lib mpv
+    // Destroy the GL renderer and all of the GL objects it allocated. If video
+    // is still running, the video track will be deselected.
+    mpv_render_context_free(mpvRenderContext);
+
+    mpv_destroy(mpvHandle);
+
+    glDeleteFramebuffers(1, &mpvFBO);
+    glDeleteTextures(1, &mpvTex);
 }
 
 } // namespace openspace::globebrowsing

@@ -68,6 +68,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    void createMpvFBO(int width, int height);
+    void generateTexture(unsigned int& id, int width, int height);
+
     enum class AnimationMode {
         MapToSimulationTime = 0,
         RealTimeLoopFromStart,
@@ -105,6 +108,8 @@ private:
     mpv_render_context* mpvRenderContext;
     unsigned int mpvFBO = 0;
     unsigned int mpvTex = 0;
+    int _videoWidth = 0;
+    int _videoHeight = 0;
 
     int mpvVideoReconfigs = 0;
 
