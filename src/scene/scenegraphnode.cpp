@@ -323,8 +323,9 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
     }
 
-    result->_overrideBoundingSphere = p.boundingSphere;
-    result->_overrideInteractionSphere = p.interactionSphere;
+    result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
+    result->_interactionSphere = p.interactionSphere.value_or(result->_interactionSphere);
+
     result->_approachFactor = p.approachFactor.value_or(result->_approachFactor);
     result->_reachFactor = p.reachFactor.value_or(result->_reachFactor);
 
