@@ -100,6 +100,8 @@ private:
         QPushButton* removeButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;
     } _keybindingWidgets;
+
+    QDialogButtonBox* _mainButtons = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__
