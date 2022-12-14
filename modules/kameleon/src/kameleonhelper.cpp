@@ -135,7 +135,11 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     double seqStartDbl;
     if (seqStartStr.length() == 24) {
         seqStartDbl = Time::convertTime(
-            seqStartStr.substr(0, seqStartStr.length() - 2)
+            seqStartStr
+        );
+        ghoul_assert(
+            seqStartDbl != stod(seqStartStr.substr(0,4)),
+            "Somehow the time double got = to the year of your input time string"
         );
     }
     else {
