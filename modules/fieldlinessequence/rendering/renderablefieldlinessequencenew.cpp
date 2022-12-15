@@ -67,6 +67,32 @@ namespace {
         "Activate/deactivate additive blending"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
+        "DomainEnabled",
+        "Domain Limits",
+        "Enable/Disable domain limits"
+    };
+    constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
+        "LimitsX",
+        "X-limits",
+        "Valid range along the X-axis. [Min, Max]"
+    };
+    constexpr openspace::properties::Property::PropertyInfo DomainYInfo = {
+        "LimitsY",
+        "Y-limits",
+        "Valid range along the Y-axis. [Min, Max]"
+    };
+    constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
+        "LimitsZ",
+        "Z-limits",
+        "Valid range along the Z-axis. [Min, Max]"
+    };
+    constexpr openspace::properties::Property::PropertyInfo DomainRInfo = {
+        "LimitsR",
+        "Radial limits",
+        "Valid radial range. [Min, Max]"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow Direction",
@@ -118,40 +144,36 @@ namespace {
         "Quantity used for masking"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "This value specifies the line width of the fieldlines"
+    };
 
     struct [[codegen::Dictionary(RenderableFieldlinesSequenceNew)]] Parameters {
         // [[codegen::verbatim(ColorMethodInfo.description)]]
         std::optional<std::string> colorMethod;
-
         // [[codegen::verbatim(ColorQuantityInfo.description)]]
         std::optional<int> colorQuantity;
-
         // [[codegen::verbatim(ColorUniformInfo.description)]]
         std::optional<glm::vec4> color [[codegen::color()]];
-
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters
         std::optional<std::vector<std::string>> colorTablePaths;
-
         // List of ranges for which their corresponding parameters values will be
         // colorized by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> colorTableRanges;
-
 
         // [[codegen::verbatim(FlowEnabledInfo.description)]]
         std::optional<bool> flowEnabled;
         // [[codegen::verbatim(FlowColorInfo.description)]]
         std::optional<glm::vec4> flowColor [[codegen::color()]];
-
         // [[codegen::verbatim(FlowReversedInfo.description)]]
         std::optional<bool> reversedFlow;
-
         // [[codegen::verbatim(FlowParticleSizeInfo.description)]]
         std::optional<int> particleSize;
-
         // [[codegen::verbatim(FlowParticleSpacingInfo.description)]]
         std::optional<int> particleSpacing;
-
         // [[codegen::verbatim(FlowSpeedInfo.description)]]
         std::optional<int> flowSpeed;
 
@@ -163,6 +185,36 @@ namespace {
         // masked by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> maskingRanges;
 
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // Set to true if you are streaming data during runtime
+        // remnent from old renderable needed to not break potential assets from people
+        std::optional<bool> loadAtRuntime;
+        // new way to choose type of loading:
+        //0: static loading and static downloading
+        //1: dynamic loading but static downloading
+        //2: dynamic loading and dynamic downloading
+        enum class LoadingType {
+            StaticLoading = 0,
+            DynamicLoading = 1,
+            DynamicDownloading = 2
+        };
+        std::optional<LoadingType> loadingType;
+        // dataID that corresponds to what dataset to use if using dynamicWebContent
+        std::optional<int> dataID;
+        // number Of Files To Queue is a max value of the amount of files to queue up
+        // so that not to big of a data set is downloaded nessesarily.
+        std::optional<int> numberOfFilesToQueue;
+        std::optional<std::string> baseURL;
+        std::optional<std::string> dataURL;
+
+        enum class SourceFileType {
+            Cdf,
+            Json,
+            Osfls
+        };
+        SourceFileType inputFileType;
     };
 #include "renderablefieldlinessequencenew_codegen.cpp"
 } // namespace
@@ -193,6 +245,13 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     )
     , _colorABlendEnabled(ColorUseABlendingInfo, true)
 
+    , _domainEnabled(DomainEnabledInfo, true)
+    , _domainGroup({ "Domain" })
+    , _domainX(DomainXInfo)
+    , _domainY(DomainYInfo)
+    , _domainZ(DomainZInfo)
+    , _domainR(DomainRInfo)
+
     , _flowEnabled(FlowEnabledInfo, false)
     , _flowGroup({ "Flow" })
     , _flowColor(
@@ -218,8 +277,55 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
         MaskingQuantityInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.loadingType.has_value()) {
+        switch (p.loadingType.value()) {
+        case Parameters::LoadingType::StaticLoading:
+            _loadingType = LoadingType::StaticLoading;
+
+            break;
+        case Parameters::LoadingType::DynamicLoading:
+            _loadingType = LoadingType::DynamicLoading;
+
+            break;
+        case Parameters::LoadingType::DynamicDownloading:
+            _loadingType = LoadingType::DynamicDownloading;
+            setupDynamicDownloading(p);
+
+            break;
+        default:
+            break;
+        }
+    }
+    else {
+        _loadingType = LoadingType::StaticLoading;
+    }
+    _loadAtRuntime = p.loadAtRuntime.value_or(_loadAtRuntime);
+    if (_loadAtRuntime) {
+        _loadingType = LoadingType::DynamicLoading;
+    }
+
+    switch (p.inputFileType) {
+        case Parameters::SourceFileType::Cdf:
+            _inputFileType = SourceFileType::Cdf;
+
+        break;
+        case Parameters::SourceFileType::Json:
+            _inputFileType = SourceFileType::Json;
+
+        break;
+        case Parameters::SourceFileType::Osfls:
+            _inputFileType = SourceFileType::Osfls;
+
+        break;
+    default:
+        break;
+    }
+
+
 
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
     _flowColor = p.flowColor.value_or(_flowColor);
@@ -229,6 +335,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _flowSpeed = p.flowSpeed.value_or(_flowSpeed);
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantity = p.maskingQuantity.value_or(_maskingQuantity);
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
 
     // Color group
     if (p.colorTablePaths.has_value()) {
@@ -272,6 +379,23 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
 
 }
 
+void RenderableFieldlinesSequenceNew::setupDynamicDownloading(const Parameters& p) {
+    _dataID = p.dataID.value_or(_dataID);
+    if (!_dataID) {
+        throw ghoul::RuntimeError(
+            "If running with dynamic dopwnloading, dataID needs to be specified"
+        );
+    }
+    _nOfFilesToQueue = p.numberOfFilesToQueue.value_or(10);
+    _baseURL = p.baseURL.value();
+    if (_baseURL.empty()) { throw ghoul::RuntimeError("baseURL has to be provided"); }
+    _dataURL = p.dataURL.value();
+    if (_dataURL.empty()) { throw ghoul::RuntimeError("dataURL has to be provided"); }
+    _dynamicdownloaderManager = std::make_unique<DynamicDownloaderManager>(
+        _dataID, _baseURL, _dataURL, _nOfFilesToQueue
+    );
+}
+
 void RenderableFieldlinesSequenceNew::initialize() {
     //_transferFunction = std::make_unique<TransferFunction>(
     //    absPath(_colorTablePaths[0]).string()
@@ -291,12 +415,18 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
 
     // Add Property Groups
     addPropertySubOwner(_colorGroup);
+    addPropertySubOwner(_domainGroup);
     addPropertySubOwner(_flowGroup);
     addPropertySubOwner(_maskingGroup); // hasExtra
 
     _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
     _colorGroup.addProperty(_colorUniform);
     _colorGroup.addProperty(_colorQuantity);// hasExtra
+
+    _domainGroup.addProperty(_domainX);
+    _domainGroup.addProperty(_domainY);
+    _domainGroup.addProperty(_domainZ);
+    _domainGroup.addProperty(_domainR);
 
     _flowGroup.addProperty(_flowReversed);
     _flowColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -312,7 +442,7 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
         _maskingMinMax = _maskingRanges[_colorQuantity];// hasExtra
     //}
 
-
+    addProperty(_lineWidth);
 
 
 
@@ -336,7 +466,45 @@ void RenderableFieldlinesSequenceNew::definePropertyCallbackFunctions() {
     });
 }
 
+void RenderableFieldlinesSequenceNew::setModelDependentConstants() {
+    const fls::Model simulationModel = _states[0].model();
+    float limit = 100.f; // Just used as a default value.
+    switch (simulationModel) {
+    case fls::Model::Batsrus:
+        _scalingFactor = fls::ReToMeter;
+        limit = 300.f; // Should include a long magnetotail
+        break;
+    case fls::Model::Enlil:
+        _flowReversed = true;
+        _scalingFactor = fls::AuToMeter;
+        limit = 50.f; // Should include Plutos furthest distance from the Sun
+        break;
+    case fls::Model::Pfss:
+        _scalingFactor = fls::RsToMeter;
+        limit = 100.f; // Just a default value far away from the solar surface
+        break;
+    default:
+        break;
+    }
+    _domainX.setMinValue(glm::vec2(-limit));
+    _domainX.setMaxValue(glm::vec2(limit));
 
+    _domainY.setMinValue(glm::vec2(-limit));
+    _domainY.setMaxValue(glm::vec2(limit));
+
+    _domainZ.setMinValue(glm::vec2(-limit));
+    _domainZ.setMaxValue(glm::vec2(limit));
+
+    // Radial should range from 0 out to a corner of the cartesian box:
+    // sqrt(3) = 1.732..., 1.75 is a nice and round number
+    _domainR.setMinValue(glm::vec2(0.f));
+    _domainR.setMaxValue(glm::vec2(limit * 1.75f));
+
+    _domainX = glm::vec2(-limit, limit);
+    _domainY = glm::vec2(-limit, limit);
+    _domainZ = glm::vec2(-limit, limit);
+    _domainR = glm::vec2(0.f, limit * 1.5f);
+}
 
 
 
@@ -355,6 +523,17 @@ bool RenderableFieldlinesSequenceNew::isReady() const {
 
 void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 
+
+
+
+
+    if (shouldUpdateColorBuffer()) {
+        updateVertexColorBuffer();
+    }
+
+    if (shouldUpdateMaskingBuffer()) {
+        updateVertexMaskingBuffer();
+    }
 }
 
 void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTasks&) {
@@ -381,8 +560,40 @@ void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTas
         global::windowDelegate->applicationTime() * (_flowReversed ? -1 : 1)
     );
 
+#ifndef __APPLE__
+    glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
+#endif
+}
+
+bool RenderableFieldlinesSequenceNew::shouldUpdateColorBuffer() {
+    if () {  //if states != empty
+
+
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+bool RenderableFieldlinesSequenceNew::shouldUpdateMaskingBuffer() {
+    if () { //if states != empty
+
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+void RenderableFieldlinesSequenceNew::updateVertexColorBuffer() {
 
 }
 
+void RenderableFieldlinesSequenceNew::updateVertexMaskingBuffer() {
+
+}
 
 } // namespace openspace

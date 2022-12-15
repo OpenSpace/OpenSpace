@@ -43,6 +43,12 @@ struct FieldlineOption {
     // Question: What can I use instead of map to guarantee the value is also unique
     // These might only be useful as a dissplay name anyway
     const std::map<int, std::string> optionMap{
+        // WSA 5.4
+        {2284,"GONG_Z/trace_pfss_intoout"}, //GONG_Z/trace_pfss_intoout
+        {2285,"GONG_Z/trace_pfss_intoout"}, //GONG_Z/trace_pfss_outtoin
+        {2286,"GONG_Z/trace_pfss_intoout"}, //GONG_Z/trace_scs_outtoin
+        {2287,"GONG_Z/trace_pfss_intoout"}, //GONG_Z/trace_sun_earth
+
         // WSA 5.x GONG
         {1768, "WSA 5.X real"}, // - time output of the field line trace from the solar surface to the source surface using GONGZ as input
         {1769, "WSA 5.X real"}, // - time output of the field line trace from the source surface to the solar surface using GONGZ as input

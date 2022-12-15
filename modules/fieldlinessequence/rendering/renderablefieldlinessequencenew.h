@@ -60,7 +60,18 @@ public:
 private:
     void definePropertyCallbackFunctions();
     void setupProperties();
+    void setModelDependentConstants();
+    void setupDynamicDownloading(const Parameters& p);
+    // True when new state is loaded or user change which quantity used for masking out
+    // line segments
+    bool shouldUpdateColorBuffer();
+    bool shouldUpdateMaskingBuffer();
+    void updateVertexColorBuffer();
+    void updateVertexMaskingBuffer();
 
+
+    // remnent from old renderable needed to not break potential old assets from people
+    bool _loadAtRuntime = false;
     //0: static loading and static downloading
     //1: dynamic loading but static downloading
     //2: dynamic loading and dynamic downloading
@@ -69,12 +80,23 @@ private:
         DynamicLoading = 1,
         DynamicDownloading = 2
     };
+    LoadingType _loadingType;
+    // dataID that corresponds to what dataset to use if using DynamicDownloading
+    int _dataID;
+    // number of files to queue up at a time
+    int _nOfFilesToQueue = 10;
+    std::string _baseURL = "";
+    std::string _dataURL = "";
+    //  DynamicDownloaderManager downloads and updates renderable field lines with
+    //  field lines downloaded from the web.
+    std::unique_ptr<DynamicDownloaderManager> _dynamicdownloaderManager;
 
     enum class SourceFileType {
         Cdf = 0,
         Json = 1,
         Osfls = 2
     };
+    SourceFileType _inputFileType;
 
     // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
     enum class ColorMethod {
@@ -94,19 +116,18 @@ private:
 
     };
 
+    // In setup it is used to scale JSON coordinates. During runtime it is used to scale
+    // domain limits.
+    float _scalingFactor = 1.f;
+
+
     std::vector<File> _files;
     size_t activeTriggerTimeIndex = -1;
     bool isInInterval = false;
 
-    // True when new state is loaded or user change which quantity used for masking out
-    // line segments
-    bool _shouldUpdateMaskingBuffer = false;
-
-
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
     // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
     std::unique_ptr<TransferFunction> _transferFunction;
-
 
 
     ///////////////////////////////////////////////
@@ -150,6 +171,22 @@ private:
     properties::Vec2Property _maskingMinMax;
     // Index of the extra quantity to use for masking
     properties::OptionProperty _maskingQuantity;
+
+    // Whether or not to use Domain
+    properties::BoolProperty _domainEnabled;
+    // Group to hold the Domain properties
+    properties::PropertyOwner _domainGroup;
+    // Domain Limits along x-axis
+    properties::Vec2Property _domainX;
+    // Domain Limits along y-axis
+    properties::Vec2Property _domainY;
+    // Domain Limits along z-axis
+    properties::Vec2Property _domainZ;
+    // Domain Limits radially
+    properties::Vec2Property _domainR;
+
+    // Line width for the line rendering part
+    properties::FloatProperty _lineWidth;
 
     ///////////////other.//////////////////////////
 
