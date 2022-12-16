@@ -291,15 +291,14 @@ glm::dvec2 WwtCommunicator::equatorialAim() const {
 }
 
 void WwtCommunicator::setImageOrder(int i, int order) {
-    using it = std::deque<std::pair<int, double>>::iterator;
     // Find in selected images list
-    it current = findSelectedImage(i);
+    auto current = findSelectedImage(i);
     int currentIndex = std::distance(_selectedImages.begin(), current);
     int difference = order - currentIndex;
 
     std::deque<std::pair<int, double>> newDeque;
 
-    for (int i = 0; i < _selectedImages.size(); i++) {
+    for (int i = 0; i < static_cast<int>(_selectedImages.size()); i++) {
         if (i == currentIndex) {
             continue;
         }
