@@ -8,7 +8,7 @@ return {
         Seedpoints = "C:/Users/eolsson/Documents/openspace/data/2012/seeds",
         TracingVar = "b",
         OutputFolder = "C:/Users/eolsson/Documents/openspace/data/2012/test1Output",
-        OutputType = "Json",
+        OutputType = "Osfls",
         ExtraVars = {rho, p}
     }
 }

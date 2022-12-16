@@ -30,6 +30,7 @@
 #include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -57,7 +58,7 @@ namespace {
         // The folder to write the files to
         std::filesystem::path outputFolder [[codegen::directory()]];
 
-        enum class ConversionType {
+        enum class [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::conversionType)]] ConversionType {
             Json,
             Osfls
         };
@@ -78,14 +79,20 @@ documentation::Documentation KameleonVolumeToFieldlinesTask::documentation() {
 KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
                                                       const ghoul::Dictionary& dictionary)
 {
+    SpiceManager::ref().loadKernel(absPath("${ASSETS}/spice/naif0012.tls").string());
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inputPath = p.input;
     _seedpointsPath = p.seedpoints;
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _outputFolder = p.outputFolder;
+    if (&_outputFolder.string().back() != "/") {
+        _outputFolder += "/";
+    }
 
-    switch (p.outputType) {
+    _outputType = codegen::map<openspace::KameleonVolumeToFieldlinesTask::conversionType>(p.outputType);
+
+  /*  switch (p.outputType) {
     case Parameters::ConversionType::Json:
         break;
         _outputType = conversionType::Json;
@@ -94,9 +101,9 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
         break;
     default:
         LERROR("outputType must be either json or osfls");
-    }
+    }*/
 
-    _tracingVar= p.tracingVar;
+    _tracingVar = p.tracingVar;
 
     //_tracingVar = p.tracingVar.value_or(_tractingVar);
     if (p.extraVars.has_value()) {
@@ -119,6 +126,11 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
             _sourceFiles.push_back(eStr);
         }
     }
+
+}
+
+KameleonVolumeToFieldlinesTask::~KameleonVolumeToFieldlinesTask() {
+    SpiceManager::ref().unloadKernel(absPath("${ASSETS}/spice/naif0012.tls").string());
 
 }
 
@@ -165,7 +177,7 @@ void KameleonVolumeToFieldlinesTask::perform(
                 timeStr.replace(13, 1, "-");
                 timeStr.replace(16, 1, "-");
                 timeStr.replace(19, 1, "-");
-                std::string fileName = timeStr + "json";
+                std::string fileName = timeStr;
                 newState.saveStateToJson(_outputFolder.string() + fileName);
             }
         }
