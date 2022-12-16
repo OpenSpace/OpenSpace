@@ -80,7 +80,7 @@ DynamicDownloaderManager::DynamicDownloaderManager(int dataID, const std::string
 
     std::string name = fieldlineOption.optionName(dataID);
     _syncDir = absPath(
-        "${CACHE}/dynamic_downloaded_fieldlines/" + std::to_string(dataID)
+        "${CACHE}/dynamic_downloaded/" + std::to_string(dataID)
     );
     _dataID = { dataID, name };
     std::string httpInfoRequest = _infoURL + std::to_string(_dataID.first);

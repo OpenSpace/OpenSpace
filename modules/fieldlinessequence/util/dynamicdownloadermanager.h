@@ -55,12 +55,12 @@ struct FieldlineOption {
         {1770, "WSA 5.X real"}, // - time output of the field line trace from the SCS outer boundary to the source surface using GONGZ as input
         {1771, "WSA 5.X real"}, // - time output of the field line trace from the Earth using GONGZ as input
 
-        // WSA 4.4
-        {1176, "trace_sun_earth"},
-        {1177, "trace_scs_outtoin"},
-        {1178, "trace_pfss_intoout"},
-        {1179, "trace_pfss_outtoin"},
-        //{1180, "WSA_OUT"},              // .fits
+        {1229, "trace_sun_earth"},      // 4.5 gong?
+        {1230, "trace_scs_outtoin"},    // 4.5 gong?
+        {1231, "trace_pfss_intoout"},   // 4.5 gong?
+        {1232, "trace_pfss_outtoin"},   // 4.5 gong?
+        //{1233, "WSA_OUT"},            // 4.5 gong? .fits file
+        //{1234, "WSA_VEL_GONG"},       // 4.5 gong? .fits file
 
         // WSA 4.5
         {1192, "trace_sub_psp"},        // adapt
@@ -69,12 +69,12 @@ struct FieldlineOption {
         //{1195, "trace_pfss_outtoin"},   //same value as 1179        // adapt
         {1196, "ADAPT_WSA_OUT"},        // adapt
 
-        {1229, "trace_sun_earth"},      // 4.5 gong?
-        {1230, "trace_scs_outtoin"},    // 4.5 gong?
-        {1231, "trace_pfss_intoout"},   // 4.5 gong?
-        {1232, "trace_pfss_outtoin"},   // 4.5 gong?
-        //{1233, "WSA_OUT"},            // 4.5 gong? .fits file
-        //{1234, "WSA_VEL_GONG"},       // 4.5 gong? .fits file
+        // WSA 4.4
+        {1176, "trace_sun_earth"},
+        {1177, "trace_scs_outtoin"},
+        {1178, "trace_pfss_intoout"},
+        {1179, "trace_pfss_outtoin"},
+        //{1180, "WSA_OUT"},              // .fits
     };
     // Assumes the string is unique as well
     int id(std::string name) {

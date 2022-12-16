@@ -215,6 +215,12 @@ namespace {
             Osfls
         };
         SourceFileType inputFileType;
+
+        // Path to folder containing the input files
+        std::optional<std::filesystem::path> sourceFolder [[codegen::directory()]];
+        // Path to a .txt file containing seed points. Mandatory if CDF as input.
+        // Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
+        std::optional<std::filesystem::path> seedPointDirectory [[codegen::directory()]];
     };
 #include "renderablefieldlinessequencenew_codegen.cpp"
 } // namespace
@@ -285,7 +291,25 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
         switch (p.loadingType.value()) {
         case Parameters::LoadingType::StaticLoading:
             _loadingType = LoadingType::StaticLoading;
-
+            if (p.sourceFolder.has_value()) {
+                std::filesystem::path path = p.sourceFolder.value();
+                namespace fsm = std::filesystem;
+                for (const fsm::directory_entry& e : fsm::directory_iterator(path)) {
+                    if (!e.is_regular_file()) {
+                        continue;
+                    }
+                    File file;
+                    file.path = e.path();
+                    file.status = File::FileStatus::Downloaded;
+                    file.timestamp = -1.0;
+                    _files.push_back(file);
+                }
+            }
+            else {
+                throw ghoul::RuntimeError(
+                    "Static loading requires source folder to read from"
+                );
+            }
             break;
         case Parameters::LoadingType::DynamicLoading:
             _loadingType = LoadingType::DynamicLoading;
@@ -312,19 +336,26 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
         case Parameters::SourceFileType::Cdf:
             _inputFileType = SourceFileType::Cdf;
 
-        break;
+            break;
         case Parameters::SourceFileType::Json:
             _inputFileType = SourceFileType::Json;
 
-        break;
+            break;
         case Parameters::SourceFileType::Osfls:
             _inputFileType = SourceFileType::Osfls;
 
-        break;
-    default:
-        break;
+            break;
+        default:
+            break;
     }
 
+    if (_loadingType != LoadingType::StaticLoading &&
+        _inputFileType != SourceFileType::Osfls)
+    {
+        throw ghoul::RuntimeError(
+            "Dynamic loading is only supported for file type: osfls"
+        );
+    }
 
 
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
