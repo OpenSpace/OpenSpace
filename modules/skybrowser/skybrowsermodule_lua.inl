@@ -83,14 +83,17 @@ namespace {
     if (module->isCameraInSolarSystem()) {
         TargetBrowserPair* selected = module->pair(module->selectedBrowserId());
         if (selected) {
-            const ImageData& image = module->wwtDataHandler().image(imageUrl);
-            if (image.name == "") {
+            std::optional<const ImageData> found = module->wwtDataHandler().image(
+                imageUrl
+            );
+            if (!found.has_value()) {
                 LINFO(fmt::format(
                     "No image with identifier {} was found in the collection.", imageUrl
                 ));
                 return;
             }
             // Load image into browser
+            const ImageData& image = found.value();
             std::string str = image.name;
             // Check if character is ASCII - if it isn't, remove
             str.erase(
@@ -303,8 +306,6 @@ namespace {
     // Create Lua table to send to the GUI
     ghoul::Dictionary list;
     for (auto const& [id, img] : module->wwtDataHandler().images()) {
-        const ImageData& img = module->wwtDataHandler().image(id);
-        
         // Push ("Key", value)
         ghoul::Dictionary image;
         image.setValue("name", img.name);
@@ -775,7 +776,7 @@ namespace {
         std::for_each(
             images.rbegin(), images.rend(),
             [&](std::string imageUrl) {
-                const ImageData& image = module->wwtDataHandler().image(imageUrl);
+                const ImageData& image = module->wwtDataHandler().image(imageUrl).value();
                 // Index of image is used as layer ID as it's unique in the image data set
                 pair->browser()->addImageLayerToWwt(image.imageUrl);
             }

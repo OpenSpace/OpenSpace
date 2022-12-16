@@ -35,9 +35,9 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 struct ImageData {
-    std::string name = "";
+    std::string name;
     std::string thumbnailUrl;
-    std::string imageUrl = "";
+    std::string imageUrl;
     std::string credits;
     std::string creditsUrl;
     std::string collection;
@@ -52,7 +52,7 @@ class WwtDataHandler {
 public:
     void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages() const;
-    const ImageData& image(const std::string& imageUrl) const;
+    std::optional<const ImageData> image(const std::string& imageUrl) const;
     const std::map<std::string, ImageData>& images() const;
 
 private:

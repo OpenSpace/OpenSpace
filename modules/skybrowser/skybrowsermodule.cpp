@@ -319,8 +319,11 @@ void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
 }
 
 void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScript) {
-    const ImageData& image = _dataHandler.image(imageUrl);
-
+    std::optional<const ImageData> found = _dataHandler.image(imageUrl);
+    if (!found.has_value()) {
+        return;
+    }
+    const ImageData image = found.value();
     // Only move and show circle if the image has coordinates
     if (!(_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem)) {
         return;

@@ -163,7 +163,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     
     for (const std::string& imageUrl : selectedImages()) {
         selectedImagesIndices.push_back(
-            module->wwtDataHandler().image(imageUrl).identifier
+            module->wwtDataHandler().image(imageUrl).value().identifier
         );
     }
 

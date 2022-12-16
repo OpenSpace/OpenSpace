@@ -338,10 +338,10 @@ int WwtDataHandler::nLoadedImages() const {
     return static_cast<int>(_images.size());
 }
 
-const ImageData& WwtDataHandler::image(const std::string& imageUrl) const {
+std::optional<const ImageData> WwtDataHandler::image(const std::string& imageUrl) const {
      auto it = _images.find(imageUrl);
      if (it == _images.end()) {
-         return ImageData();
+        return std::nullopt;
      }
      return it->second;
 }
