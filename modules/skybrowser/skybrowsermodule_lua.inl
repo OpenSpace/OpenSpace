@@ -35,16 +35,35 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <scn/scn.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "SkyBrowserModule";
+constexpr std::string_view _loggerCat = "SkyBrowserModule";
 
-
-    bool browserBelongsToCurrentNode(std::string identifier) {
+bool browserBelongsToCurrentNode(std::string identifier) {
+    std::string delimiter = "_";
+    size_t found = identifier.find(delimiter);
+    std::string errorMessage = "The Sky Browser encountered a problem when it tried to "
+        "initialize the browser";
+    if (found == identifier.size()) {
+        throw ghoul::RuntimeError(errorMessage);
+    }
+    else {
+        std::string res = identifier.substr(found + 1, identifier.size());
+        if (res == "") {
+            throw ghoul::RuntimeError(errorMessage);
+        }
         // Convert the last char to an int
-        int nodeId = static_cast<int>(identifier[identifier.length() - 1] - '0');
+        int nodeId = std::stoi(res);
         return nodeId == openspace::global::windowDelegate->currentNode();
     }
+}
+
+std::string getPrunedIdentifer(std::string identifier) {
+    std::string delimiter = "_";
+    std::string res = identifier.substr(0, identifier.find(delimiter));
+    return res;
+}
 
 /**
 * Reloads the sky browser display copy for the node index that is sent in.
@@ -175,16 +194,17 @@ namespace {
 [[codegen::luawrap]] void loadImagesToWWT(std::string identifier) {
     using namespace openspace;
 
-    if (!browserBelongsToCurrentNode(identifier))
+    if (!browserBelongsToCurrentNode(identifier)) {
         return;
-    identifier.pop_back();
+    }
+    std::string prunedId = getPrunedIdentifer(identifier);
     // Load images from url
-    LINFO("Connection established to WorldWide Telescope application in " + identifier);
-    LINFO("Loading image collections to " + identifier);
+    LINFO("Connection established to WorldWide Telescope application in " + prunedId);
+    LINFO("Loading image collections to " + prunedId);
 
     // Load the collections here because we know that the browser can execute javascript
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
+    TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
         pair->hideChromeInterface();
         pair->browser()->loadImageCollection(module->wwtImageCollectionUrl());
@@ -249,12 +269,14 @@ namespace {
     using namespace openspace;
 
     // Initialize browser with ID and its corresponding target
-    if (!browserBelongsToCurrentNode(identifier))
+    if (!browserBelongsToCurrentNode(identifier)) {
         return;
-    identifier.pop_back();
-    LINFO("Initializing sky browser " + identifier);
+    }
+
+    std::string prunedId = getPrunedIdentifer(identifier);
+    LINFO("Initializing sky browser " + prunedId);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
+    TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
         pair->initialize();
     }
@@ -779,11 +801,12 @@ namespace {
     if (!browserBelongsToCurrentNode(identifier)) {
         return;
     }
-    identifier.pop_back();
+    std::string prunedId = getPrunedIdentifer(identifier);
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
+    TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
-        LINFO("Image collection is loaded in Screen Space Sky Browser " + identifier);
+        LINFO("Image collection is loaded in Screen Space Sky Browser " + prunedId);
         pair->setImageCollectionIsLoaded(true);
         // Add all selected images to WorldWide Telescope
         const std::vector<int>& images = pair->selectedImages();
