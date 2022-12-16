@@ -182,9 +182,9 @@ namespace {
         return true;
     }
 
-    std::optional<openspace::ImageData> loadImageFromNode(
-                                                         const tinyxml2::XMLElement* node,
-                                                                   std::string collection)
+    std::optional<openspace::ImageData> 
+    loadImageFromNode(const tinyxml2::XMLElement* node, const std::string& collection,
+                      const std::string& identifier)
     {
         using namespace openspace;
 
@@ -254,7 +254,8 @@ namespace {
             hasCelestialCoords,
             fov,
             equatorialSpherical,
-            equatorialCartesian
+            equatorialCartesian,
+            identifier
         };
     }
 } //namespace
@@ -330,13 +331,6 @@ void WwtDataHandler::loadImages(const std::string& root,
         }
     }
 
-    // Sort images in alphabetical order
-    std::sort(
-        _images.begin(),
-        _images.end(),
-        [](ImageData& a, ImageData& b) { return a.name < b.name; }
-    );
-
     LINFO(fmt::format("Loaded {} WorldWide Telescope images", _images.size()));
 }
 
@@ -344,9 +338,16 @@ int WwtDataHandler::nLoadedImages() const {
     return static_cast<int>(_images.size());
 }
 
-const ImageData& WwtDataHandler::image(int i) const {
-    ghoul_assert(i < static_cast<int>(_images.size()), "Index outside of vector size");
-    return _images[i];
+const ImageData& WwtDataHandler::image(const std::string& imageUrl) const {
+     auto it = _images.find(imageUrl);
+     if (it == _images.end()) {
+         return ImageData();
+     }
+     return it->second;
+}
+
+const std::map<std::string, ImageData>& WwtDataHandler::images() const {
+    return _images;
 }
 
 void WwtDataHandler::saveImagesFromXml(const tinyxml2::XMLElement* root,
@@ -361,9 +362,12 @@ void WwtDataHandler::saveImagesFromXml(const tinyxml2::XMLElement* root,
         const std::string name = node->Name();
         // If node is an image or place, load it
         if (name == ImageSet || name == Place) {
-            std::optional<ImageData> image = loadImageFromNode(node, collection);
+            std::string identifier = std::to_string(_images.size());
+            std::optional<ImageData> image = loadImageFromNode(
+                node, collection, identifier
+            );
             if (image.has_value()) {
-                _images.push_back(std::move(*image));
+                _images.insert({ image.value().imageUrl, std::move(*image) });
             }
 
         }

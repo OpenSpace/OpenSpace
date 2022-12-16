@@ -87,17 +87,17 @@ public:
     std::string targetNodeId() const;
 
     ScreenSpaceSkyBrowser* browser() const;
-    std::vector<int> selectedImages() const;
+    std::vector<std::string> selectedImages() const;
 
     ghoul::Dictionary dataAsDictionary() const;
 
     // WorldWide Telescope image handling
-    void setImageOrder(int i, int order);
-    void selectImage(const ImageData& image, int i);
-    void addImageLayerToWwt(const std::string& url, int i);
-    void removeSelectedImage(int i);
+    void setImageOrder(const std::string& imageUrl, int order);
+    void selectImage(const ImageData& image);
+    void addImageLayerToWwt(const std::string& imageUrl);
+    void removeSelectedImage(const std::string& imageUrl);
     void loadImageCollection(const std::string& collection);
-    void setImageOpacity(int i, float opacity);
+    void setImageOpacity(const std::string& imageUrl, float opacity);
     void hideChromeInterface();
 
 private:

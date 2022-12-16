@@ -69,8 +69,8 @@ TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
 }
 
-void TargetBrowserPair::setImageOrder(int i, int order) {
-    _browser->setImageOrder(i, order);
+void TargetBrowserPair::setImageOrder(const std::string& imageUrl, int order) {
+    _browser->setImageOrder(imageUrl, order);
 }
 
 void TargetBrowserPair::startFinetuningTarget() {
@@ -151,13 +151,21 @@ double TargetBrowserPair::verticalFov() const {
     return _browser->verticalFov();
 }
 
-std::vector<int> TargetBrowserPair::selectedImages() const {
+std::vector<std::string> TargetBrowserPair::selectedImages() const {
     return _browser->selectedImages();
 }
 
 ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     glm::dvec2 spherical = targetDirectionEquatorial();
     glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    std::vector<std::string> selectedImagesIndices;
+    
+    for (const std::string& imageUrl : selectedImages()) {
+        selectedImagesIndices.push_back(
+            module->wwtDataHandler().image(imageUrl).identifier
+        );
+    }
 
     ghoul::Dictionary res;
     res.setValue("id", browserId());
@@ -172,7 +180,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("ratio", static_cast<double>(_browser->browserRatio()));
     res.setValue("isFacingCamera", isFacingCamera());
     res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
-    res.setValue("selectedImages", selectedImages());
+    res.setValue("selectedImages", selectedImagesIndices);
     res.setValue("scale", static_cast<double>(_browser->scale()));
     res.setValue("opacities", _browser->opacities());
     res.setValue("borderRadius", _browser->borderRadius());
@@ -193,9 +201,9 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     return res;
 }
 
-void TargetBrowserPair::selectImage(const ImageData& image, int i) {
+void TargetBrowserPair::selectImage(const ImageData& image) {
     // Load image into browser
-    _browser->selectImage(image.imageUrl, i);
+    _browser->selectImage(image.imageUrl);
 
     // If the image has coordinates, move the target
     if (image.hasCelestialCoords) {
@@ -205,20 +213,20 @@ void TargetBrowserPair::selectImage(const ImageData& image, int i) {
     }
 }
 
-void TargetBrowserPair::addImageLayerToWwt(const std::string& url, int i) {
-    _browser->addImageLayerToWwt(url, i);
+void TargetBrowserPair::addImageLayerToWwt(const std::string& imageUrl) {
+    _browser->addImageLayerToWwt(imageUrl);
 }
 
-void TargetBrowserPair::removeSelectedImage(int i) {
-    _browser->removeSelectedImage(i);
+void TargetBrowserPair::removeSelectedImage(const std::string& imageUrl) {
+    _browser->removeSelectedImage(imageUrl);
 }
 
 void TargetBrowserPair::loadImageCollection(const std::string& collection) {
     _browser->loadImageCollection(collection);
 }
 
-void TargetBrowserPair::setImageOpacity(int i, float opacity) {
-    _browser->setImageOpacity(i, opacity);
+void TargetBrowserPair::setImageOpacity(const std::string& imageUrl, float opacity) {
+    _browser->setImageOpacity(imageUrl, opacity);
 }
 
 void TargetBrowserPair::hideChromeInterface() {
