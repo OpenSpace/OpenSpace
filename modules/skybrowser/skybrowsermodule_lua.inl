@@ -466,6 +466,9 @@ namespace {
     glm::vec3 positionBrowser = glm::vec3(0.f, 0.f, -2.1f);
     glm::vec3 positionTarget = glm::vec3(0.9f, 0.4f, -2.1f);
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
+    if (glm::any(glm::isnan(galacticTarget))) {
+        galacticTarget = glm::dvec3 (0.0, 0.0, skybrowser::CelestialSphereRadius);
+    }
     std::string guiPath = "/Sky Browser";
     std::string url = "http://wwt.openspaceproject.com/1/openspace/";
     double fov = 70.0;
