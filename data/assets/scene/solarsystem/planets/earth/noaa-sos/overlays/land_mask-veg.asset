@@ -3,9 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Land Mask (vegetation)"
 local Identifier = "noaa-sos-overlays-land_mask-veg"
-local Description = [[Overlays are datasets with transparent backgrounds that contain 
-foreground data used to augment other SOS datasets.This particular dataset overlays a 
-land mask of general vegetation over all the land onto any dataset that you are 
+local Description = [[Overlays are datasets with transparent backgrounds that contain
+foreground data used to augment other SOS datasets.This particular dataset overlays a
+land mask of general vegetation over all the land onto any dataset that you are
 viewing]]
 local URL = "https://sos.noaa.gov/catalog/datasets/land-mask-vegetation/"
 
@@ -25,7 +25,7 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 

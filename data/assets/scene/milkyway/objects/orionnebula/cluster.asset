@@ -53,11 +53,11 @@ local OrionClusterStars = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OrionClusterStars)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(OrionClusterStars)
 end)
-  
+
 asset.export(OrionClusterStars)
 
 

@@ -15,7 +15,7 @@ local NewHorizonsKernels = {
   Kernels .. "nh_scispi_2015_pred.bc",
   Kernels .. "nh_scispi_2015_recon.bc",
   Kernels .. "nh_lorri_wcs.bc",
-  
+
   Kernels .. "PLU_LORRI_ALL_161216.bc",
 
   Kernels .. "nh_targets_v001.tpc",

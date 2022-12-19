@@ -3,10 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Dams and Reservoirs: Mississippi River - 1800 - 2010"
 local Identifier = "noaa-sos-land-dams-mississippi"
-local Description = [[This dataset illustrates the construction of dams in the 
-Mississippi River Basin from 1800 to the present. We display all dams listed in the 
-Global Reservoir and Dam Database (GRanD). All dams that have a reservoir with a storage 
-capacity of more than 0.1 cubic kilometers are included, and many smaller dams were added 
+local Description = [[This dataset illustrates the construction of dams in the
+Mississippi River Basin from 1800 to the present. We display all dams listed in the
+Global Reservoir and Dam Database (GRanD). All dams that have a reservoir with a storage
+capacity of more than 0.1 cubic kilometers are included, and many smaller dams were added
 where data were available]]
 local URL = "https://sos.noaa.gov/catalog/datasets/dams-and-reservoirs-mississippi-river-1800-2010/"
 

@@ -38,10 +38,10 @@ local StyxTrail = {
     Period = 20.16155,
     Resolution = 1000
   },
-  Tag = { 
-    "moonTrail_solarSystem", 
-    "moonTrail_dwarf", 
-    "moonTrail_pluto", 
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
     "moonTrail_minor"
   },
   GUI = {
@@ -54,12 +54,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Styx)
   openspace.addSceneGraphNode(StyxTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(StyxTrail)
   openspace.removeSceneGraphNode(Styx)
 end)
-    
+
 asset.export(Styx)
 asset.export(StyxTrail)
 

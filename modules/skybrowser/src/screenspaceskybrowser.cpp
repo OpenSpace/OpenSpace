@@ -51,9 +51,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
         "DisplayCopy",
         "Display Copy Position",
-        "Display a copy of this sky browser at an additional position. This copy will not "
-        "be interactive. The position is in RAE (Radius, Azimuth, Elevation) coordinates "
-        "or Cartesian, depending on if the browser uses RAE or Cartesian coordinates"
+        "Display a copy of this sky browser at an additional position. This copy will "
+        "not be interactive. The position is in RAE (Radius, Azimuth, Elevation) "
+        "coordinates or Cartesian, depending on if the browser uses RAE or Cartesian "
+        "coordinates"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {

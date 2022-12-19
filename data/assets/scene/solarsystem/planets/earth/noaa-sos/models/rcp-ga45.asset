@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Climate Model: Temperature Change (RCP 4.5) - 2006 - 2100"
 local Identifier = "noaa-sos-models-rcp-ga45"
-local Description = [[Climate models are used for a variety of purposes from the study 
+local Description = [[Climate models are used for a variety of purposes from the study
 of dynamics of the weather and climate system to projections of future climate]]
 local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-temperature-change-rcp-45-2006-2100/"
 
@@ -50,7 +50,7 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

@@ -1,18 +1,18 @@
 local resetLoopAction = {
-    Documentation = "Reset button. Sets time to start of dataset. No loop",
-    GuiPath = "2012July",
-    Identifier = "2012july.reset_loop",
-    IsLocal = false,
-    Name = "Reset button",
-    Command = "openspace.time.setTime('2012-JUL-01 07:00:00.00');\nopenspace.time.setDeltaTime(1400);\nopenspace.scriptScheduler.clear();"
+  Documentation = "Reset button. Sets time to start of dataset. No loop",
+  GuiPath = "2012July",
+  Identifier = "2012july.reset_loop",
+  IsLocal = false,
+  Name = "Reset button",
+  Command = "openspace.time.setTime('2012-JUL-01 07:00:00.00');\nopenspace.time.setDeltaTime(1400);\nopenspace.scriptScheduler.clear();"
 }
 
 asset.export(resetLoopAction)
 
 asset.onInitialize(function ()
-    openspace.action.registerAction(resetLoopAction)
+  openspace.action.registerAction(resetLoopAction)
 end)
 
 asset.onDeinitialize(function ()
-    openspace.action.removeAction(resetLoopAction)
+  openspace.action.removeAction(resetLoopAction)
 end)

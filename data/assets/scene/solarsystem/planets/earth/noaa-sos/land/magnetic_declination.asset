@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Earth's Magnetic Declination"
 local Identifier = "noaa-sos-land-magnetic_declination"
-local Description = [[Earth is like a giant magnet with a North and South Pole. However, 
-the magnetic North and South Pole are not aligned with the Geographic North and South 
-Pole. The Geographic North Pole is defined by the latitude 90° N and is the axis of the 
-Earth's rotation. The Magnetic North Pole is where the Earth's magnetic field points 
-vertically downward. The Earth creates its own magnetic field from the electric currents 
+local Description = [[Earth is like a giant magnet with a North and South Pole. However,
+the magnetic North and South Pole are not aligned with the Geographic North and South
+Pole. The Geographic North Pole is defined by the latitude 90° N and is the axis of the
+Earth's rotation. The Magnetic North Pole is where the Earth's magnetic field points
+vertically downward. The Earth creates its own magnetic field from the electric currents
 created in the liquid iron-nickel core]]
 local URL = "https://sos.noaa.gov/catalog/datasets/earths-magnetic-declination/"
 

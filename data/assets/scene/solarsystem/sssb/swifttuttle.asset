@@ -50,12 +50,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(SwiftTuttlePosition)
   openspace.addSceneGraphNode(SwiftTuttleTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SwiftTuttleTrail)
   openspace.removeSceneGraphNode(SwiftTuttlePosition)
 end)
-    
+
 asset.export(SwiftTuttlePosition)
 asset.export(SwiftTuttleTrail)
 

@@ -295,7 +295,7 @@ void WwtDataHandler::loadImages(const std::string& root,
     if (std::filesystem::exists(localHashFile)) {
         std::ifstream(localHashFile) >> localHash;
     }
-    
+
     // Check if the hash has changed. This will be ignored if either the local of remote
     // hash does not exist
     if (!localHash.empty() && !remoteHash.empty() && localHash != remoteHash) {
@@ -307,7 +307,7 @@ void WwtDataHandler::loadImages(const std::string& root,
         std::filesystem::remove_all(directory);
         std::filesystem::create_directory(directory);
     }
-    
+
     // If there is no directory (either because it is the first start, or the previous
     // contents were deleted because of a change in hash) we have to download the files
     if (std::filesystem::is_empty(directory)) {

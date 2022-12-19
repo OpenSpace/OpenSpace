@@ -89,7 +89,7 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
 
     _url = p.url.value_or(_url);
     _url.onChange([this]() { _isUrlDirty = true; });
-    
+
     _browserDimensions.onChange([this]() { _isDimensionsDirty = true; });
     _reload.onChange([this]() { _shouldReload = true; });
 

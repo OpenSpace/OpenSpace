@@ -3,13 +3,13 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Sea Turtle Track: Pacific Ocean"
 local Identifier = "noaa-sos-oceans-pac_turtle"
-local Description = [[It is common for scientists to tag animals and release them into 
-their natural environment in order to study their behaviors and migration. Adelita, a 
-loggerhead (Caretta caretta) sea turtle, was originally captured off of Baja, Mexico as 
-an 8-pound juvenile. After being raised in captivity, Adelita was released on August 10, 
-1996 from Santa Rosaliita, a small town in Mexico on the Baja Peninsula. Adelita weighed 
-223 pounds when she was released. Before she was released, Wallace J. Nichols, then a 
-Ph.D. student at the University of Arizona, outfitted Adelita with a satellite tag. The 
+local Description = [[It is common for scientists to tag animals and release them into
+their natural environment in order to study their behaviors and migration. Adelita, a
+loggerhead (Caretta caretta) sea turtle, was originally captured off of Baja, Mexico as
+an 8-pound juvenile. After being raised in captivity, Adelita was released on August 10,
+1996 from Santa Rosaliita, a small town in Mexico on the Baja Peninsula. Adelita weighed
+223 pounds when she was released. Before she was released, Wallace J. Nichols, then a
+Ph.D. student at the University of Arizona, outfitted Adelita with a satellite tag. The
 tag transmitted a signal that allowed Adelita's track to be monitored post-release]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-turtle-track-pacific-ocean/"
 

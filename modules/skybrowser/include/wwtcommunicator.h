@@ -71,9 +71,9 @@ public:
 protected:
     void setIdInBrowser(const std::string& id) const;
     std::deque<std::pair<int, double>>::iterator findSelectedImage(int i);
-    
-    properties::DoubleProperty _verticalFov;    
-    
+
+    properties::DoubleProperty _verticalFov;
+
     double _borderRadius = 0.0;
     glm::ivec3 _borderColor = glm::ivec3(70);
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);

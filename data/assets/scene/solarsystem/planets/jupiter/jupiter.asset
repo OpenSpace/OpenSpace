@@ -64,12 +64,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Jupiter)
   openspace.addSceneGraphNode(JupiterLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JupiterLabel)
   openspace.removeSceneGraphNode(Jupiter)
 end)
-    
+
 asset.export(Jupiter)
 asset.export(JupiterLabel)
 

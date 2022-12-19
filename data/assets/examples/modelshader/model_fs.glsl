@@ -68,8 +68,8 @@ Fragment getFragment() {
     frag.color.rgb = normalize(vs_normalViewSpace);
   }
   frag.color.a = 1.0;
-  frag.gPosition      = vs_positionCameraSpace;
-  frag.gNormal        = vec4(vs_normalViewSpace, 0.0);
+  frag.gPosition = vs_positionCameraSpace;
+  frag.gNormal = vec4(vs_normalViewSpace, 0.0);
   frag.disableLDR2HDR = true;
   return frag;
 }

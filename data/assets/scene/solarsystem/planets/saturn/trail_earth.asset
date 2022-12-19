@@ -31,11 +31,11 @@ local SaturnTrailEarth = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SaturnTrailEarth)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SaturnTrailEarth)
 end)
-  
+
 asset.export(SaturnTrailEarth)
 
 

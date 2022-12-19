@@ -236,7 +236,7 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])

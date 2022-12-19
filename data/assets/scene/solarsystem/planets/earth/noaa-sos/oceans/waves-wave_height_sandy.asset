@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Wave Heights - Hurricane Sandy 2012"
 local Identifier = "noaa-sos-oceans-waves-wave_height_sandy"
-local Description = [[Meteorological offices worldwide forecast ocean wave heights for 
-the shipping and fisheries industry. In the United States, NOAA's National Weather 
-Service provides the wave forecasts. Just like in weather forecasting, scientists run 
-numerical models to make these predictions. This movie shows wave height calculations of 
-a wave model called 'WAVEWATCH III'. The movie shows 3 hourly model output over October 
+local Description = [[Meteorological offices worldwide forecast ocean wave heights for
+the shipping and fisheries industry. In the United States, NOAA's National Weather
+Service provides the wave forecasts. Just like in weather forecasting, scientists run
+numerical models to make these predictions. This movie shows wave height calculations of
+a wave model called 'WAVEWATCH III'. The movie shows 3 hourly model output over October
 1st - October 31st, 2012]]
 local URL = "https://sos.noaa.gov/catalog/datasets/wave-heights-hurricane-sandy-2012/"
 
@@ -47,7 +47,7 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

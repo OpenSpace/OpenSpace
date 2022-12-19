@@ -40,7 +40,7 @@ namespace {
         "If this value is 'false', this dashboard will be invisible, regardless of the "
         "state of the individual components"
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo StartPositionOffsetInfo = {
         "StartPositionOffset",
         "Start Position Offset",

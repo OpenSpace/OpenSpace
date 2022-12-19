@@ -133,6 +133,13 @@ namespace {
         "Show Hidden Scene Graph Nodes",
         "If checked, hidden scene graph nodes are visible in the UI"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
+        "DisableMouseInputs",
+        "Disable All Mouse Inputs",
+        "Disables all mouse inputs. Useful when using touch interaction, to prevent "
+        "double inputs on touch (from both touch input and inserted mouse inputs)"
+    };
 } // namespace
 
 namespace openspace {
@@ -144,6 +151,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
     , _showHiddenSceneGraphNodes(ShowHiddenSceneInfo, false)
+    , _disableAllMouseInputs(DisableMouseInputInfo, false)
 {
     FactoryManager::initialize();
     SpiceManager::initialize();
@@ -152,6 +160,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     addProperty(_printEvents);
     addProperty(_visibility);
     addProperty(_showHiddenSceneGraphNodes);
+    addProperty(_disableAllMouseInputs);
 
     using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
@@ -1409,6 +1418,10 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 {
     ZoneScoped
 
+    if (_disableAllMouseInputs) {
+        return;
+    }
+
     using F = global::callback::MouseButtonCallback;
     for (const F& func : *global::callback::mouseButton) {
         bool isConsumed = func(button, action, mods, isGuiWindow);
@@ -1443,6 +1456,10 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 void OpenSpaceEngine::mousePositionCallback(double x, double y, IsGuiWindow isGuiWindow) {
     ZoneScoped
 
+    if (_disableAllMouseInputs) {
+        return;
+    }
+
     using F = global::callback::MousePositionCallback;
     for (const F& func : *global::callback::mousePosition) {
         func(x, y, isGuiWindow);
@@ -1458,6 +1475,10 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
                                                IsGuiWindow isGuiWindow)
 {
     ZoneScoped
+
+    if (_disableAllMouseInputs) {
+        return;
+    }
 
     using F = global::callback::MouseScrollWheelCallback;
     for (const F& func : *global::callback::mouseScrollWheel) {

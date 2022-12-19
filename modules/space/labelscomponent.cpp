@@ -182,12 +182,12 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
         _faceCamera = *p.faceCamera;
     }
     else {
-        // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum, and
-        // doing it based on the fisheye rendering seems a bit brittle?
+        // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum,
+        // and doing it based on the fisheye rendering seems a bit brittle?
 
         // (malej 2022-SEP-14)
-        // For non-linear display rendering (for example fisheye) _faceCamera should be false,
-        // otherwise true.
+        // For non-linear display rendering (for example fisheye) _faceCamera should be
+        // false, otherwise true
         _faceCamera = !global::windowDelegate->isFisheyeRendering();
     }
     addProperty(_faceCamera);
@@ -219,7 +219,8 @@ bool LabelsComponent::isReady() const {
     return !(_labelset.entries.empty());
 }
 
-void LabelsComponent::render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+void LabelsComponent::render(const RenderData& data,
+                             const glm::dmat4& modelViewProjectionMatrix,
                              const glm::vec3& orthoRight, const glm::vec3& orthoUp,
                              float fadeInVariable)
 {

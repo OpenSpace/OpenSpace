@@ -48,11 +48,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(circle)
   openspace.addSceneGraphNode(ellipse)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ellipse)
   openspace.removeSceneGraphNode(circle)
 end)
-  
+
 asset.export(circle)
 asset.export(ellipse)

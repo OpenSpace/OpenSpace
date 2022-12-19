@@ -75,13 +75,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(OsirisRexTrailSolarSystem)
   openspace.addSceneGraphNode(OsirisRexTrailBennu)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(OsirisRexTrailBennu)
   openspace.removeSceneGraphNode(OsirisRexTrailSolarSystem)
   openspace.removeSceneGraphNode(OsirisRexTrailEarth)
 end)
-    
+
 asset.export(OsirisRexTrailEarth)
 asset.export(OsirisRexTrailSolarSystem)
 asset.export(OsirisRexTrailBennu)

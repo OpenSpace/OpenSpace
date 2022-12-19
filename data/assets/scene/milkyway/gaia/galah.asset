@@ -58,11 +58,11 @@ local gaia_abundance_galah = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(gaia_abundance_galah)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(gaia_abundance_galah)
 end)
-  
+
 asset.export(gaia_abundance_galah)
 
 

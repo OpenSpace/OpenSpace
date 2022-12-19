@@ -16,7 +16,7 @@ local layer = {
     datasets: 1. Techniques and data processing for Thermal Emission Imaging System
     (THEMIS) multi-spectral data, J. Geophys. Res., 116, E10008,
     doi:10.1029/2010JE003755. http://dx.doi.org/10.1029/2010JE003755 (Description from
-    URL)]],
+    URL)]]
 }
 
 asset.onInitialize(function()

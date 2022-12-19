@@ -378,8 +378,6 @@ void GuiPropertyComponent::render() {
             return;
         }
 
-        
-
         auto header = [&]() -> bool {
             if (owners.size() > 1) {
                 // Create a header in case we have multiple owners

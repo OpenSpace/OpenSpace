@@ -31,9 +31,9 @@ local TrailAtPluto = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TrailAtPluto)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TrailAtPluto)
 end)
-  
+
 asset.export(TrailAtPluto)

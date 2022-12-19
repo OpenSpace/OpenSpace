@@ -3,19 +3,19 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Plate Movement - 200 Million Years Ago to Today"
 local Identifier = "noaa-sos-land-plate_movement"
-local Description = [[Our planet's surface has been shaped and re-shaped by plate 
-tectonics through cycles of supercontinent amalgamation and breakup. We can study the 
-motion of the tectonic plates, and the continents that they carry, by measuring the 
-magnetic signatures recorded in rocks that form the seafloor. As plates move apart at mid 
-oceanic ridges (also known as seafloor spreading centers), lava from the Earth's mantle 
-fills the void that is being created and solidifies as basalt, which can capture the 
-magnetic polarity of the planet at the time. As the magnetic polarity reverses 
-irregularly over time, we can use this barcode pattern to determine the age of the 
-oceanic crust across all the world's oceans. Teams of geologists, geophysicists and 
-marine scientists use ocean-going scientific vessels to criss-cross the oceans in order 
-to reveal the entire "barcode" of seafloor spreading histories. This data enables the 
-creation of "plate tectonic reconstructions" where the seafloor spreading history can be 
-unwound to restore the past position of continents as they are pushed and pulled by the 
+local Description = [[Our planet's surface has been shaped and re-shaped by plate
+tectonics through cycles of supercontinent amalgamation and breakup. We can study the
+motion of the tectonic plates, and the continents that they carry, by measuring the
+magnetic signatures recorded in rocks that form the seafloor. As plates move apart at mid
+oceanic ridges (also known as seafloor spreading centers), lava from the Earth's mantle
+fills the void that is being created and solidifies as basalt, which can capture the
+magnetic polarity of the planet at the time. As the magnetic polarity reverses
+irregularly over time, we can use this barcode pattern to determine the age of the
+oceanic crust across all the world's oceans. Teams of geologists, geophysicists and
+marine scientists use ocean-going scientific vessels to criss-cross the oceans in order
+to reveal the entire "barcode" of seafloor spreading histories. This data enables the
+creation of "plate tectonic reconstructions" where the seafloor spreading history can be
+unwound to restore the past position of continents as they are pushed and pulled by the
 motion of the oceanic plates]]
 local URL = "https://sos.noaa.gov/catalog/datasets/plate-movement-200-million-years-ago-to-today/"
 
@@ -57,7 +57,7 @@ asset.onInitialize(function ()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(age_scale);  
+  openspace.addScreenSpaceRenderable(age_scale)
 end)
 
 asset.onDeinitialize(function()

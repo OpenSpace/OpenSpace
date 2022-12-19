@@ -81,7 +81,7 @@ local deepSkyImages = {
     Name = "Deep Sky Objects Images",
     Path = "/Universe/Galaxies",
     Description = [[Census: 63 images and labels. DU Version 1.3. <br> These data are
-      2-D images of Messier objects placed in 3-D space. Not only do we place these 
+      2-D images of Messier objects placed in 3-D space. Not only do we place these
       images at the proper location and give them the correct orientation, we also
       size them accurately so that you can fly to the globular cluster M13, for
       example, and see just how small the cluster of hundreds of thousands of stars

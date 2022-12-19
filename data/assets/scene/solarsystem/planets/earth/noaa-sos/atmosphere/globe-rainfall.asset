@@ -3,12 +3,12 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Solar Rainfall - Monthly (NASA)"
 local Identifier = "noaa-sos-atmosphere-globe-rainfall"
-local Description = [[Globally, rain is the main source of fresh water for plants and 
-animals rainfall is essential for life across Earth's landscapes. In addition to moving 
-tremendous amounts of water through Earth's atmosphere, rain clouds also move tremendous 
-amounts of energy. When water evaporates from the surface and rises as vapor into the 
-atmosphere, it carries heat from the sun-warmed surface with it. Later, when the water 
-vapor condenses to form cloud droplets and rain, the heat is released into the 
+local Description = [[Globally, rain is the main source of fresh water for plants and
+animals rainfall is essential for life across Earth's landscapes. In addition to moving
+tremendous amounts of water through Earth's atmosphere, rain clouds also move tremendous
+amounts of energy. When water evaporates from the surface and rises as vapor into the
+atmosphere, it carries heat from the sun-warmed surface with it. Later, when the water
+vapor condenses to form cloud droplets and rain, the heat is released into the
 atmosphere. This heating is a major part of Earth's energy budget and climate]]
 local URL = "https://sos.noaa.gov/catalog/datasets/rainfall-monthly-nasa/"
 
@@ -33,7 +33,7 @@ local layer = {
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "TRMM_3B43M_%Y-%m.PNG"
-  },   
+  },
   Description = Description
 }
 
@@ -48,14 +48,14 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
     openspace.unzipFile(syncedDirectory .. "1440.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

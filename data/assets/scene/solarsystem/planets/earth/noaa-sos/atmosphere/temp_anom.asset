@@ -3,16 +3,16 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Temperature Anomaly: Yearly (NOAA) - 1880 - Present"
 local Identifier = "noaa-sos-atmosphere-temp_anom"
-local Description = [[This animation shows Earth's surface temperature from 1880 through 
-2019 compared to the 20th century average. Maps are based on data from NOAA's National 
-Climatic Data Center. In 2016, the combined land and ocean surface temperature was 1.69°F 
-(0.94°C) above the 20th century average, making the year the warmest since records began 
-in 1880. This is the third consecutive year a new global annual temperature record has 
-been set. The first eight months of 2016 set monthly temperatures records and the last 
-four months were ranked among the top five for each month's temperature records. To date, 
-all 16 years of the 21st century rank among the seventeen warmest on record (1998 is 
-currently the eighth warmest.) The five warmest years have all occurred since 2010. 2017 
-was the third warmest, slightly cooler than the previous two. 2018 was the fourth 
+local Description = [[This animation shows Earth's surface temperature from 1880 through
+2019 compared to the 20th century average. Maps are based on data from NOAA's National
+Climatic Data Center. In 2016, the combined land and ocean surface temperature was 1.69°F
+(0.94°C) above the 20th century average, making the year the warmest since records began
+in 1880. This is the third consecutive year a new global annual temperature record has
+been set. The first eight months of 2016 set monthly temperatures records and the last
+four months were ranked among the top five for each month's temperature records. To date,
+all 16 years of the 21st century rank among the seventeen warmest on record (1998 is
+currently the eighth warmest.) The five warmest years have all occurred since 2010. 2017
+was the third warmest, slightly cooler than the previous two. 2018 was the fourth
 warmest]]
 local URL = "https://sos.noaa.gov/catalog/datasets/temperature-anomaly-yearly-noaa-1880-present/"
 
@@ -59,7 +59,7 @@ asset.onInitialize(function()
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

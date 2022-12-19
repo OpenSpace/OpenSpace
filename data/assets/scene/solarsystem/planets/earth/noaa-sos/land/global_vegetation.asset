@@ -3,11 +3,11 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Vegetation: Seasonal Changes - Apr 2012 - Apr 2013"
 local Identifier = "noaa-sos-land-global_vegetation"
-local Description = [[Although 75% of the planet is a relatively unchanging ocean of 
-blue, the remaining 25% of Earth's surface is a dynamic green. Data from the NASA/NOAA 
-Suomi NPP satellite is able to show these subtle differences in greenness using the 
-Visible-Infrared Imager/Radiometer Suite (VIIRS) instrument on board the satellite. This 
-dataset highlights our ever-changing planet, using a highly detailed vegetation index 
+local Description = [[Although 75% of the planet is a relatively unchanging ocean of
+blue, the remaining 25% of Earth's surface is a dynamic green. Data from the NASA/NOAA
+Suomi NPP satellite is able to show these subtle differences in greenness using the
+Visible-Infrared Imager/Radiometer Suite (VIIRS) instrument on board the satellite. This
+dataset highlights our ever-changing planet, using a highly detailed vegetation index
 data from the satellite, developed by scientists at NOAA]]
 local URL = "https://sos.noaa.gov/catalog/datasets/vegetation-seasonal-changes-apr-2012-apr-2013/"
 
@@ -78,7 +78,7 @@ asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", background1layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", background2layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()

@@ -17,7 +17,7 @@ local layer = {
       "AMSRU2_Sea_Ice_Concentration_12km",
       "2km",
       "png"
-    )  
+    )
   },
   Description = [[Temporal coverage: 02 July 2012 - Present. The Advanced Microwave
     Scanning Radiometer-E/Advanced Microwave Scanning Radiometer-2 (AMSR-E/AMSR2) unified
