@@ -85,7 +85,8 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-void save_gray_frame(unsigned char* buf, int wrap, int xsize, int ysize, const char* filename)
+void save_gray_frame(unsigned char* buf, int wrap, int xsize, int ysize,
+                     const char* filename)
 {
     FILE* f;
     int i;
@@ -100,20 +101,17 @@ void save_gray_frame(unsigned char* buf, int wrap, int xsize, int ysize, const c
     fclose(f);
 }
 
-void check_error(int status)
-{
+void check_error(int status) {
     if (status < 0) {
-        printf("mpv API error: %s\n", mpv_error_string(status));
+        LERROR("mpv API error: %s\n", mpv_error_string(status));
     }
 }
 
-void* get_proc_address_mpv(void*, const char* name)
-{
+void* get_proc_address_mpv(void*, const char* name) {
     return reinterpret_cast<void*>(global::windowDelegate->openGLProcedureAddress(name));
 }
 
 void on_mpv_render_update(void*) {}
-
 
 std::string getFffmpegErrorString(const int errorCode) {
     const int size = 100;
@@ -183,7 +181,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     }
 
     // If tile not found in cache then create it
-    const int wholeRowSize = FinalResolution.x * BytesPerPixel;
+    const int wholeRowSize = _resolution.x * BytesPerPixel;
     const int tileRowSize = TileSize.x * BytesPerPixel;
 
     // The range of rows of the whole image that this tile needs
@@ -243,23 +241,8 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     // Create a texture with the initialization data
     ghoul::opengl::Texture* writeTexture = tileCache->texture(initData);
 
-    {
-        // Try to read fbo to texture
-        GLubyte* data = new GLubyte[4 * TileSize.x * TileSize.y];
-        ZoneScopedN("Upload Texture")
-        TracyGpuZone("Upload Texture")
-        glBindFramebuffer(GL_FRAMEBUFFER, mpvFBO);
-        glReadPixels(0, 0, TileSize.x, TileSize.y, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0); //back to window framebuffer
-        writeTexture->setPixelData(data);
-        writeTexture->uploadTexture();
-
-        // Upload texture to GPU using the PBO (this will be async and faster)
-        //writeTexture->reUploadTextureFromPBO(_pbo);
-    }
-
     // Bind the texture to the tile
-    Tile ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
+    Tile ourTile = Tile{ _mpvTexture, std::nullopt, Tile::Status::OK };
     tileCache->put(key, initData.hashKey, ourTile);
 
     return ourTile;
@@ -287,13 +270,18 @@ void FfmpegTileProvider::update() {
     ZoneScoped
 
     // Always check that our framebuffer is ok
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        LINFO("Buffer is not happy :(");
-        
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LINFO("Framebuffer is not complete");
+    }
+
     if (!_isInitialized) {
         return;
     }
-    mpv_opengl_fbo mpfbo{ static_cast<int>(mpvFBO), FinalResolution.x, FinalResolution.y, 0 };
+
+    //Check mpv events
+    handleMpvEvents();
+
+    mpv_opengl_fbo mpfbo{ static_cast<int>(_mpvFBO), _resolution.x, _resolution.y, 0 };
     int flip_y{ 1 };
 
     mpv_render_param params[] = {
@@ -301,9 +289,11 @@ void FfmpegTileProvider::update() {
         {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
         {MPV_RENDER_PARAM_INVALID, nullptr}
     };
-    // See render_gl.h on what OpenGL environment mpv expects, and
-    // other API details.
-    mpv_render_context_render(mpvRenderContext, params);
+
+    // See render_gl.h on what OpenGL environment mpv expects, and other API details
+    // This function fills the fbo and texture with data, after it we can get the data on the GPU, not the CPU
+    mpv_render_context_render(_mpvRenderContext, params);
+
 
     const double now = global::timeManager->time().j2000Seconds();
     double videoTime = 0.0;
@@ -474,8 +464,8 @@ void FfmpegTileProvider::update() {
                 _codecContext->width,
                 _codecContext->height,
                 _codecContext->pix_fmt,
-                FinalResolution.x,
-                FinalResolution.y,
+                _resolution.x,
+                _resolution.y,
                 AV_PIX_FMT_RGB24,
                 SWS_BICUBIC,
                 nullptr,
@@ -508,6 +498,49 @@ void FfmpegTileProvider::update() {
     _tileIsReady = true;
 }
 
+void FfmpegTileProvider::handleMpvEvents() {
+    while (_mpvHandle) {
+        mpv_event* event = mpv_wait_event(_mpvHandle, 0);
+        if (event->event_id == MPV_EVENT_NONE) {
+            break;
+        }
+
+        switch (event->event_id) {
+            case MPV_EVENT_VIDEO_RECONFIG: {
+                // Retrieve the new video size.
+                int64_t w, h;
+                if (mpv_get_property(_mpvHandle, "dwidth", MPV_FORMAT_INT64, &w) >= 0 &&
+                    mpv_get_property(_mpvHandle, "dheight", MPV_FORMAT_INT64, &h) >= 0 &&
+                    w > 0 && h > 0)
+                {
+                    resizeMpvFBO(static_cast<int>(w), static_cast<int>(h));
+                    _mpvVideoReconfigs++;
+                }
+                break;
+            }
+            case MPV_EVENT_PROPERTY_CHANGE: {
+                // TODO: change getting of this property without qt
+                /*mpv_event_property* prop = (mpv_event_property*)event->data;
+                if (strcmp(prop->name, "video-params") == 0) {
+                    if (prop->format == MPV_FORMAT_NODE) {
+                        const QVariant videoParams = mpv::qt::get_property(_mpvHandle, "video-params");
+                        auto vm = videoParams.toMap();
+                        int w = vm["w"].toInt();
+                        int h = vm["h"].toInt();
+                        resizeMpvFBO((int)w, (int)h);
+                    }
+                }*/
+                break;
+                // TODO: handle pause event
+            }
+            default: {
+                // Ignore uninteresting or unknown events.
+                break;
+            }
+        }
+    }
+}
+
 int FfmpegTileProvider::minLevel() {
     return 1;
 }
@@ -515,7 +548,7 @@ int FfmpegTileProvider::minLevel() {
 int FfmpegTileProvider::maxLevel() {
     // Every tile needs to be 512 by 512, how far can we subdivide this video
     // TODO: Check if it should be floor or ceil
-    return std::floor(std::log2(FinalResolution.x) - std::log2(1024)) + 1;
+    return std::floor(std::log2(_resolution.x) - std::log2(1024)) + 1;
 }
 
 void FfmpegTileProvider::reset() {
@@ -616,8 +649,8 @@ void FfmpegTileProvider::internalInitialize() {
     // Fill the destination frame for the convertion
     int glFrameSize = av_image_get_buffer_size(
         AV_PIX_FMT_RGB24,
-        FinalResolution.x,
-        FinalResolution.y,
+        _resolution.x,
+        _resolution.y,
         1
     );
     uint8_t* internalBuffer =
@@ -627,8 +660,8 @@ void FfmpegTileProvider::internalInitialize() {
         _glFrame->linesize,
         internalBuffer,
         AV_PIX_FMT_RGB24,
-        FinalResolution.x,
-        FinalResolution.y,
+        _resolution.x,
+        _resolution.y,
         1
     );
     _buffer = av_buffer_alloc(glFrameSize);
@@ -638,14 +671,17 @@ void FfmpegTileProvider::internalInitialize() {
     glGenBuffers(1, &_pbo);
 
     // libmpv
-    mpvHandle = mpv_create();
-    if (!mpvHandle)
-        LINFO("mpv context init failed");
+    _mpvHandle = mpv_create();
+    if (!_mpvHandle) {
+        LERROR("Could not create mpv context");
+    }
 
-    // Some minor options can only be set before mpv_initialize().
-    if (mpv_initialize(mpvHandle) < 0)
-        LINFO("mpv init failed");
+    // Some minor options can only be set before mpv_initialize()
+    if (mpv_initialize(_mpvHandle) < 0) {
+        LERROR("mpv context failed to initialize");
+    }
 
+    // Set mpv to render using openGL
     mpv_opengl_init_params gl_init_params{ get_proc_address_mpv, nullptr};
     mpv_render_param params[]{
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
@@ -654,64 +690,85 @@ void FfmpegTileProvider::internalInitialize() {
     };
 
     // This makes mpv use the currently set GL context. It will use the callback
-    // (passed via params) to resolve GL builtin functions, as well as extensions.
-    if (mpv_render_context_create(&mpvRenderContext, mpvHandle, params) < 0)
-        LINFO("failed to initialize mpv GL context");
+    // (passed via params) to resolve GL built in functions, as well as extensions
+    if (mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params) < 0) {
+        LERROR("Failed to initialize mpv OpenGL context");
+    }
 
     // When there is a need to call mpv_render_context_update(), which can
     // request a new frame to be rendered.
     // (Separate from the normal event handling mechanism for the sake of
     //  users which run OpenGL on a different thread.)
-    mpv_render_context_set_update_callback(mpvRenderContext, on_mpv_render_update, NULL);
+    mpv_render_context_set_update_callback(_mpvRenderContext, on_mpv_render_update, NULL);
 
     //Observe video parameters
-    mpv_observe_property(mpvHandle, 0, "video-params", MPV_FORMAT_NODE);
-    mpv_observe_property(mpvHandle, 0, "pause", MPV_FORMAT_FLAG);
-    mpv_observe_property(mpvHandle, 0, "time-pos", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(_mpvHandle, 0, "video-params", MPV_FORMAT_NODE);
+    mpv_observe_property(_mpvHandle, 0, "pause", MPV_FORMAT_FLAG);
+    mpv_observe_property(_mpvHandle, 0, "time-pos", MPV_FORMAT_DOUBLE);
 
     //Creating new FBO to render mpv into
-    createMpvFBO(FinalResolution.x, FinalResolution.y);
-    // Play this file.
+    createMpvFBO(_resolution.x, _resolution.y);
+
+    // Play this file
     const char* cmd[] = { "loadfile", _videoFile.string().c_str(), NULL };
-    check_error(mpv_command(mpvHandle, cmd));
+    check_error(mpv_command(_mpvHandle, cmd));
 
     _isInitialized = true;
 }
 
 void FfmpegTileProvider::createMpvFBO(int width, int height) {
-    _videoWidth = width;
-    _videoHeight = height;
+    // Update resolution of video
+    _resolution = glm::ivec2(width, height);
 
-    glGenFramebuffers(1, &mpvFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, mpvFBO);
-    generateTexture(mpvTex, width, height);
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT1,
-        GL_TEXTURE_2D,
-        mpvTex,
-        0
+    glGenFramebuffers(1, &_mpvFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _mpvFBO);
+
+    cache::MemoryAwareTileCache* tileCache =
+        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
+
+    // Create or get a texture with this initialization data
+    TileTextureInitData initData(
+        width,
+        height,
+        GL_UNSIGNED_BYTE,                       // TODO: What format should we use?
+        ghoul::opengl::Texture::Format::RGBA,
+        TileTextureInitData::PadTiles::No,
+        TileTextureInitData::ShouldAllocateDataOnCPU::No
     );
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
+    _mpvTexture = tileCache->texture(initData);
 
-void FfmpegTileProvider::generateTexture(unsigned int& id, int width, int height) {
-    glGenTextures(1, &id);
+    // Configure
+    _mpvTexture->bind();
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glBindTexture(GL_TEXTURE_2D, id);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
     // Disable mipmaps
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // Bind texture to framebuffer
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        *_mpvTexture,
+        0
+    );
+
+    // Unbind FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FfmpegTileProvider::resizeMpvFBO(int width, int height) {
+    if (width == _resolution.x && height == _resolution.y) {
+        return;
+    }
+
+    LINFO(fmt::format("New MPV FBO width:{} and height:{}", width, height));
+
+    glDeleteFramebuffers(1, &_mpvFBO);
+    delete _mpvTexture;
+    createMpvFBO(width, height);
 }
 
 FfmpegTileProvider::~FfmpegTileProvider() {
@@ -729,12 +786,13 @@ void FfmpegTileProvider::internalDeinitialize() {
     // lib mpv
     // Destroy the GL renderer and all of the GL objects it allocated. If video
     // is still running, the video track will be deselected.
-    mpv_render_context_free(mpvRenderContext);
+    mpv_render_context_free(_mpvRenderContext);
 
-    mpv_destroy(mpvHandle);
+    mpv_destroy(_mpvHandle);
 
-    glDeleteFramebuffers(1, &mpvFBO);
-    glDeleteTextures(1, &mpvTex);
+    glDeleteFramebuffers(1, &_mpvFBO);
+
+    delete _mpvTexture;
 }
 
 } // namespace openspace::globebrowsing

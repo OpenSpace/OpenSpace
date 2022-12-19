@@ -48,7 +48,7 @@ namespace openspace::globebrowsing {
 class FfmpegTileProvider : public TileProvider {
 public:
     static constexpr glm::ivec2 TileSize = { 512, 512 };
-    static constexpr glm::ivec2 FinalResolution = { 2048, 1024 };
+    //static constexpr glm::ivec2 FinalResolution = { 2048, 1024 };
     static constexpr int NoTilePixels = 262144;
     static constexpr int BytesPerPixel = 3;
     static constexpr int BytesPerTile = 786432;
@@ -69,7 +69,8 @@ public:
 
 private:
     void createMpvFBO(int width, int height);
-    void generateTexture(unsigned int& id, int width, int height);
+    void resizeMpvFBO(int width, int height);
+    void handleMpvEvents();
 
     enum class AnimationMode {
         MapToSimulationTime = 0,
@@ -88,6 +89,7 @@ private:
     int64_t _prevFrameIndex = -1;
     bool _tileIsReady = false;
     bool _isInitialized = false;
+    glm::ivec2 _resolution = { 2048, 1024 };
 
     AVFormatContext* _formatContext = nullptr;
     AVCodecContext* _codecContext = nullptr;
@@ -103,18 +105,16 @@ private:
     GLubyte* _tilePixels = nullptr;
     GLuint _pbo = 0;
 
-    // libmpv
-    mpv_handle* mpvHandle;
-    mpv_render_context* mpvRenderContext;
-    unsigned int mpvFBO = 0;
-    unsigned int mpvTex = 0;
-    int _videoWidth = 0;
-    int _videoHeight = 0;
-
-    int mpvVideoReconfigs = 0;
-
     void internalInitialize() override final;
     void internalDeinitialize() override final;
+
+    // libmpv
+    mpv_handle* _mpvHandle;
+    mpv_render_context* _mpvRenderContext;
+    unsigned int _mpvFBO = 0;
+    ghoul::opengl::Texture* _mpvTexture = nullptr;
+
+    int _mpvVideoReconfigs = 0;
 };
 
 } // namespace openspace::globebrowsing
