@@ -912,7 +912,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
         ZoneScoped
 
-        Engine::instance().windows().front()->setHorizFieldOfView(hFovDeg);
+        for (std::unique_ptr<sgct::Window> const& w : Engine::instance().windows()) {
+            w->setHorizFieldOfView(hFovDeg);
+        }
     };
     #ifdef WIN32
     sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
