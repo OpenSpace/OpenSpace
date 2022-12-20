@@ -101,37 +101,20 @@ void save_gray_frame(unsigned char* buf, int wrap, int xsize, int ysize,
     fclose(f);
 }
 
-void check_error(int status) {
+bool checkMpvError(int status) {
     if (status < 0) {
-        LERROR("mpv API error: %s\n", mpv_error_string(status));
+        LERROR(fmt::format("Libmpv API error: {}", mpv_error_string(status)));
+        return false;
     }
+    return true;
 }
 
-void* get_proc_address_mpv(void*, const char* name) {
+void* getOpenGLProcAddress(void*, const char* name) {
     return reinterpret_cast<void*>(global::windowDelegate->openGLProcedureAddress(name));
 }
 
-void on_mpv_render_update(void*) {}
-
-std::string getFffmpegErrorString(const int errorCode) {
-    const int size = 100;
-    const char initChar = '@';
-    std::string result;
-
-    std::vector<char> buf;
-    buf.resize(size, initChar);
-    char* newBuf = av_make_error_string(buf.data(), size, errorCode);
-
-    for (int i = 0; i < buf.size(); ++i) {
-        if (buf[i] != initChar) {
-            result.append(1, buf[i]);
-        }
-        else {
-            result.append(1, '\n');
-            break;
-        }
-    }
-    return result;
+void mpvRenderUpdate(void*) {
+    LINFO("libmpv: new video frame");
 }
 
 documentation::Documentation FfmpegTileProvider::Documentation() {
@@ -167,12 +150,8 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
 Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
 
-    if (!_glFrame || !_codecContext ) {
-        return Tile{nullptr, std::nullopt, Tile::Status::Unavailable };
-    }
-
     // Look for tile in cache
-    cache::ProviderTileKey key = { tileIndex, _prevFrameIndex }; // TODO: Improve cachign with a better id
+    cache::ProviderTileKey key = { tileIndex, _prevVideoTime }; // TODO: Improve cachign with a better id
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
 
@@ -180,6 +159,8 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         return tileCache->get(key);
     }
 
+    // TODO: Move this to GPU
+    /*
     // If tile not found in cache then create it
     const int wholeRowSize = _resolution.x * BytesPerPixel;
     const int tileRowSize = TileSize.x * BytesPerPixel;
@@ -190,22 +171,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         TileSize.y * (tileIndex.y + 1)
     );
 
-    {
-        ZoneScopedN("Map PBO")
-        TracyGpuZone("Map PBO")
-
-        // Map PBO
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
-        glBufferData(GL_PIXEL_UNPACK_BUFFER, BytesPerTile, nullptr, GL_STREAM_DRAW);
-        _tilePixels = reinterpret_cast<GLubyte*>(
-            glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
-        );
-        if (!_tilePixels) {
-            LERROR("Failed to map PBO");
-            return Tile{ nullptr, std::nullopt, Tile::Status::IOError };
-        }
-    }
-    {
+     {
         ZoneScopedN("Copy Frame")
         TracyGpuZone("Copy Frame")
 
@@ -226,7 +192,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         }
         glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    }
+    }*/
 
     // The data for initializing the texture
     TileTextureInitData initData(
@@ -242,7 +208,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     ghoul::opengl::Texture* writeTexture = tileCache->texture(initData);
 
     // Bind the texture to the tile
-    Tile ourTile = Tile{ _mpvTexture, std::nullopt, Tile::Status::OK };
+    Tile ourTile = Tile{ _frameTexture, std::nullopt, Tile::Status::OK };
     tileCache->put(key, initData.hashKey, ourTile);
 
     return ourTile;
@@ -281,22 +247,18 @@ void FfmpegTileProvider::update() {
     //Check mpv events
     handleMpvEvents();
 
-    mpv_opengl_fbo mpfbo{ static_cast<int>(_mpvFBO), _resolution.x, _resolution.y, 0 };
-    int flip_y{ 1 };
+    // Double check the video duration
+    if (_videoDuration < 0.0) {
+        int result = mpv_get_property(_mpvHandle, "duration", MPV_FORMAT_DOUBLE, &_videoDuration);
+        if (!checkMpvError(result)) {
+            LWARNING("Could not find video duration");
+            return;
+        }
+    }
 
-    mpv_render_param params[] = {
-        {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
-        {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
-        {MPV_RENDER_PARAM_INVALID, nullptr}
-    };
-
-    // See render_gl.h on what OpenGL environment mpv expects, and other API details
-    // This function fills the fbo and texture with data, after it we can get the data on the GPU, not the CPU
-    mpv_render_context_render(_mpvRenderContext, params);
-
-
+    // TODO: bind OpenSpace tiem to video time
     const double now = global::timeManager->time().j2000Seconds();
-    double videoTime = 0.0;
+    double OSvideoTime = 0.0;
     double percentage = 0.0;
 
     switch (_animationMode) {
@@ -309,16 +271,16 @@ void FfmpegTileProvider::update() {
                 return;
             }
             percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
-            videoTime = percentage * _videoDuration;
+            OSvideoTime = percentage * _videoDuration;
             break;
         case AnimationMode::RealTimeLoopFromStart:
-            videoTime = std::fmod(now - _startJ200Time, _videoDuration);
-            if (videoTime < 0.0) {
-                videoTime += _videoDuration;
+            OSvideoTime = std::fmod(now - _startJ200Time, _videoDuration);
+            if (OSvideoTime < 0.0) {
+                OSvideoTime += _videoDuration;
             }
             break;
         case AnimationMode::RealTimeLoopInfinitely:
-            videoTime =
+            OSvideoTime =
                 _videoDuration - abs(
                     fmod(now - _startJ200Time, 2 * _videoDuration) - _videoDuration
                 );
@@ -326,164 +288,84 @@ void FfmpegTileProvider::update() {
         default:
             throw ghoul::MissingCaseException();
     }
-    if (videoTime > _videoDuration || videoTime < 0.0) {
-        LINFO(std::to_string(videoTime));
-    }
-
-    // Find the frame number that corresponds to the current video time
-    int64_t internalFrameIndex = static_cast<int64_t>(
-        videoTime / av_q2d(_formatContext->streams[_streamIndex]->time_base)
-    );
-    int64_t currentFrameIndex = internalFrameIndex / 1000;
-
-    // Check if we found a new frame
-    if (_prevFrameIndex == currentFrameIndex) {
+    if (OSvideoTime > _videoDuration || OSvideoTime < 0.0) {
+        LWARNING("Video time is outside range of video");
         return;
     }
+
+    // Check if we have reached the end of the file
+    int hasReachedEnd;
+    int result = mpv_get_property(_mpvHandle, "eof-reached", MPV_FORMAT_FLAG, &hasReachedEnd);
+    if (!checkMpvError(result)) {
+        LWARNING("Could not check if end of video reached");
+    }
+
+    if (hasReachedEnd > 0) {
+        LINFO("Reached end of video");
+        return;
+    }
+
+    double currentVideoTime;
+    result = mpv_get_property(_mpvHandle, "playback-time", MPV_FORMAT_DOUBLE, &currentVideoTime);
+    if (!checkMpvError(result)) {
+        LWARNING("Could not find current time in video");
+    }
+
+    if (currentVideoTime > _videoDuration || currentVideoTime < 0.0) {
+        LWARNING("Current time is outside range of video");
+        return;
+    }
+
+    LINFO(fmt::format(
+        "OS video time: {}, mpv current time: {}",
+        OSvideoTime, currentVideoTime
+    ));
+
+    // Are we going backwards?
+    if (global::timeManager->deltaTime() < 0) {
+        LINFO("Backwards!");
+    }
+
+    // Check if we need to seek in the video
+    if (OSvideoTime - currentVideoTime > _frameTime) {
+        LINFO(fmt::format(
+            "Seek needed OS curr: {}, video curr: {}",
+            OSvideoTime, currentVideoTime
+        ));
+        result = mpv_set_property(_mpvHandle, "playback-time", MPV_FORMAT_DOUBLE, &OSvideoTime);
+        if (!checkMpvError(result)) {
+            LWARNING("Could not seek in video");
+        }
+
+        result = mpv_get_property(_mpvHandle, "playback-time", MPV_FORMAT_DOUBLE, &currentVideoTime);
+        if (!checkMpvError(result)) {
+            LWARNING("Could not find current time in video");
+        }
+        LINFO(fmt::format("Seeked to time {}", currentVideoTime));
+    }
+
+    // Check if it is time for a new frame
+    if (currentVideoTime - _prevVideoTime < _frameTime) {
+        // Dont need a new frame just now
+        LINFO("Waiting..");
+        return;
+    }
+
     _tileIsReady = false;
 
-    {
-        ZoneScopedN("Seek Frame")
-        TracyGpuZone("Seek Frame")
+    // Render video frame to texture
+    mpv_opengl_fbo mpvfbo{ static_cast<int>(_fbo), _resolution.x, _resolution.y, 0 };
+    int flip_y{ 1 };
 
-        if ((currentFrameIndex - 1) != _prevFrameIndex) {
-            // Jump more than one frame in the video
-            int result = av_seek_frame(_formatContext, _streamIndex, internalFrameIndex, 0);
-            if (result < 0) {
-                std::string message = getFffmpegErrorString(result);
-                LERROR(fmt::format(
-                    "Seeking frame {} failed with error code {}, message: '{}'",
-                    currentFrameIndex, result, message
-                ));
-                return;
-            }
-            //LINFO(fmt::format(
-            //    "Seek frame {} matches video duration {} and frame index {}",
-            //    internalFrameIndex, videoTime, currentFrameIndex
-            //));
-        }
-    }
-    {
-        ZoneScopedN("Read Frame")
-        TracyGpuZone("Read Frame")
+    mpv_render_param params[] = {
+        {MPV_RENDER_PARAM_OPENGL_FBO, &mpvfbo},
+        {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
+        {MPV_RENDER_PARAM_INVALID, nullptr}
+    };
 
-        // Read frame
-        while (true) {
-            int result;
-            {
-                ZoneScopedN("av_read_frame")
-                result = av_read_frame(_formatContext, _packet);
-            }
-            if (result < 0) {
-                LERROR(fmt::format("Reading frame failed with code {}", result));
-                av_packet_unref(_packet);
-                return;
-            }
-
-            // Does this packet belong to this video stream?
-            if (_packet->stream_index != _streamIndex) {
-                continue;
-            }
-
-            // Send packet to the decoder
-            {
-                ZoneScopedN("avcodec_send_packet")
-                result = avcodec_send_packet(_codecContext, _packet);
-            }
-            if (result < 0 || result == AVERROR(EAGAIN) || result == AVERROR(AVERROR_EOF)) {
-                LERROR(fmt::format("Sending packet failed with code {}", result));
-                av_packet_unref(_packet);
-                return;
-            }
-
-            // Get result from decoder
-            {
-                ZoneScopedN("avcodec_receive_frame")
-                result = avcodec_receive_frame(
-                    _codecContext,
-                    _avFrame
-                );
-            }
-
-            // Is the frame finished? If not then we need to wait for more packets
-            // to finish the frame
-            if (result == AVERROR(EAGAIN)) {
-                continue;
-            }
-            if (result < 0) {
-                LERROR(fmt::format("Receiving packet failed with code {}", result));
-                av_packet_unref(_packet);
-                return;
-            }
-            // Successfully collected a frame
-            break;
-        }
-    }
-    //LINFO(fmt::format(
-    //    "Successfully decoded frame {}", currentFrameIndex
-    //));
-
-    // WIP
-    /*int64_t pts = _packet->pts;
-    pts = pts == AV_NOPTS_VALUE ? 0 : pts;
-    LINFO(fmt::format("Pts: {}", pts));
-    double ptsSec = pts * av_q2d(_formatContext->streams[_streamIndex]->time_base);
-    LINFO(fmt::format("Pts Sec: {}", ptsSec));
-    LINFO(fmt::format("repeat_pict: {}", _avFrame->repeat_pict));*/
-
-    // Debug checks
-    int64_t pts = _packet->pts;
-    int64_t dts = _packet->dts;
-    pts = pts == AV_NOPTS_VALUE ? 0 : pts;
-    dts = dts == AV_NOPTS_VALUE ? 0 : dts;
-    if (pts != dts) {
-        LWARNING(fmt::format(
-            "Format error, frames might be out of order, diff {}", abs(pts - dts)
-        ));
-    }
-    if (_avFrame->repeat_pict > 0) {
-        LWARNING(fmt::format(
-            "Frame {} requested to be repeated {} times", currentFrameIndex,
-            _avFrame->repeat_pict
-        ));
-    }
-
-    // TODO: Need to check the format of the video and decide what formats we want to
-    // support and how they relate to the GL formats
-
-    {
-        ZoneScopedN("Convert Frame")
-        TracyGpuZone("Convert Frame")
-
-        // Convert the color format to AV_PIX_FMT_RGB24
-        // Only create the conversion context once
-        // Scale all videos to 2048 * 1024 pixels
-        // TODO: support higher resolutions
-        if (!_conversionContext) {
-            _conversionContext = sws_getContext(
-                _codecContext->width,
-                _codecContext->height,
-                _codecContext->pix_fmt,
-                _resolution.x,
-                _resolution.y,
-                AV_PIX_FMT_RGB24,
-                SWS_BICUBIC,
-                nullptr,
-                nullptr,
-                nullptr
-            );
-        }
-
-        sws_scale(
-            _conversionContext,
-            _avFrame->data,
-            _avFrame->linesize,
-            0,
-            _codecContext->height,
-            _glFrame->data,
-            _glFrame->linesize
-        );
-    }
+    // See render_gl.h on what OpenGL environment mpv expects, and other API details
+    // This function fills the fbo and texture with data, after it we can get the data on the GPU, not the CPU
+    mpv_render_context_render(_mpvRenderContext, params);
 
     // TEST save a grayscale frame into a .pgm file
     // This ends up in OpenSpace\build\apps\OpenSpace
@@ -493,45 +375,103 @@ void FfmpegTileProvider::update() {
     save_gray_frame(_avFrame->data[0], _avFrame->linesize[0], _avFrame->width, _avFrame->height, frame_filename);
     */
 
-    _prevFrameIndex = currentFrameIndex;
-    av_packet_unref(_packet);
     _tileIsReady = true;
+    _prevVideoTime = currentVideoTime;
 }
 
 void FfmpegTileProvider::handleMpvEvents() {
     while (_mpvHandle) {
         mpv_event* event = mpv_wait_event(_mpvHandle, 0);
         if (event->event_id == MPV_EVENT_NONE) {
-            break;
+            return;
         }
 
         switch (event->event_id) {
             case MPV_EVENT_VIDEO_RECONFIG: {
                 // Retrieve the new video size.
                 int64_t w, h;
-                if (mpv_get_property(_mpvHandle, "dwidth", MPV_FORMAT_INT64, &w) >= 0 &&
-                    mpv_get_property(_mpvHandle, "dheight", MPV_FORMAT_INT64, &h) >= 0 &&
-                    w > 0 && h > 0)
-                {
-                    resizeMpvFBO(static_cast<int>(w), static_cast<int>(h));
-                    _mpvVideoReconfigs++;
+
+                // Get width
+                int result1 = mpv_get_property(_mpvHandle, "dwidth", MPV_FORMAT_INT64, &w);
+                if (!checkMpvError(result1)) {
+                    LWARNING("Could not find new width of video");
+                }
+
+                // Get Height
+                int result2 = mpv_get_property(_mpvHandle, "dheight", MPV_FORMAT_INT64, &h);
+                if (!checkMpvError(result2)) {
+                    LWARNING("Could not find new height of video");
+                }
+
+                // Resize FBO
+                if (result1 >= 0 && result2 >= 0 && w > 0 && h > 0) {
+                    resizeFBO(static_cast<int>(w), static_cast<int>(h));
                 }
                 break;
             }
             case MPV_EVENT_PROPERTY_CHANGE: {
                 // TODO: change getting of this property without qt
-                /*mpv_event_property* prop = (mpv_event_property*)event->data;
-                if (strcmp(prop->name, "video-params") == 0) {
-                    if (prop->format == MPV_FORMAT_NODE) {
-                        const QVariant videoParams = mpv::qt::get_property(_mpvHandle, "video-params");
-                        auto vm = videoParams.toMap();
-                        int w = vm["w"].toInt();
-                        int h = vm["h"].toInt();
-                        resizeMpvFBO((int)w, (int)h);
+                mpv_event_property* prop = (mpv_event_property*)event->data;
+                if (strcmp(prop->name, "video-params") == 0 &&
+                    prop->format == MPV_FORMAT_NODE)
+                {
+                    mpv_node videoParams;
+                    int result = mpv_get_property(_mpvHandle, "video-params", MPV_FORMAT_NODE, &videoParams);
+                    if (!checkMpvError(result)) {
+                        LWARNING("Could not find video parameters");
+                        return;
                     }
-                }*/
-                break;
+
+                    if (videoParams.format == MPV_FORMAT_NODE_ARRAY ||
+                        videoParams.format == MPV_FORMAT_NODE_MAP)
+                    {
+                        mpv_node_list* list = videoParams.u.list;
+
+                        mpv_node width, height;
+                        bool foundWidth = false;
+                        bool foundHeight = false;
+                        for (int i = 0; i < list->num; ++i) {
+                            if (foundWidth && foundHeight) {
+                                break;
+                            }
+
+                            if (list->keys[i] == "w") {
+                                width = list->values[i];
+                                foundWidth = true;
+                            }
+                            else if (list->keys[i] == "h") {
+                                height = list->values[i];
+                                foundHeight = true;
+                            }
+                        }
+
+                        if (!foundWidth || !foundHeight) {
+                            LERROR("Could not find width or height params");
+                            return;
+                        }
+
+                        int w = -1;
+                        int h = -1;
+                        if (width.format == MPV_FORMAT_INT64) {
+                            w = width.u.int64;
+                        }
+                        if (height.format == MPV_FORMAT_INT64) {
+                            h = height.u.int64;
+                        }
+
+                        if (w == -1 || h == -1) {
+                            LERROR("Invalid width or height params");
+                            return;
+                        }
+                        resizeFBO(w, h);
+                    }
+                    else {
+                        LERROR("Invalid video-params");
+                        return;
+                    }
+                }
                 // TODO: handle pause event
+                break;
             }
             default: {
                 // Ignore uninteresting or unknown events.
@@ -570,158 +510,81 @@ void FfmpegTileProvider::internalInitialize() {
     _endJ200Time = Time::convertTime(_endTime);
     std::string path = absPath(_videoFile).string();
 
-    // Open video
-    int openRes = avformat_open_input(
-        &_formatContext,
-        path.c_str(),
-        nullptr,
-        nullptr
-    );
-    if (openRes < 0) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open input for file {}", path));
-    }
 
-    // Find stream info
-    if (avformat_find_stream_info(_formatContext, nullptr) < 0) {
-        throw ghoul::RuntimeError(fmt::format("Failed to get stream info for {}", path));
-    }
-    // DEBUG dump info
-    av_dump_format(_formatContext, 0, path.c_str(), false);
-    LINFO(fmt::format("Duration: ", _formatContext->duration));
-
-    // Find the video stream
-    for (unsigned int i = 0; i < _formatContext->nb_streams; ++i) {
-        AVMediaType codec = _formatContext->streams[i]->codecpar->codec_type;
-        if (codec == AVMEDIA_TYPE_VIDEO) {
-            _streamIndex = i;
-            _videoStream = _formatContext->streams[_streamIndex];
-            break;
-        }
-    }
-    if (_streamIndex == -1 || _videoStream == nullptr) {
-        throw ghoul::RuntimeError(fmt::format("Failed to find video stream for {}", path));
-    }
-
-    // Find decoder
-    _decoder = avcodec_find_decoder(_videoStream->codecpar->codec_id);
-    if (!_decoder) {
-        throw ghoul::RuntimeError(fmt::format("Failed to find decoder for {}", path));
-    }
-
-    // Find codec
-    _codecContext = avcodec_alloc_context3(nullptr);
-    int contextSuccess = avcodec_parameters_to_context(
-        _codecContext,
-        _videoStream->codecpar
-    );
-    if (contextSuccess < 0) {
-        throw ghoul::RuntimeError(
-            fmt::format("Failed to create codec context for {}", path)
-        );
-    }
-
-    // Use multithreaded decoding if suitable
-    _codecContext->thread_count = 0;
-    if (_decoder->capabilities | AV_CODEC_CAP_FRAME_THREADS) {
-        _codecContext->thread_type = FF_THREAD_FRAME;
-    }
-    else if (_decoder->capabilities | AV_CODEC_CAP_SLICE_THREADS) {
-        _codecContext->thread_type = FF_THREAD_SLICE;
-    }
-    else {
-        // Multithreading not suitable
-        _codecContext->thread_count = 1;
-    }
-
-    // Open the decoder
-    if (avcodec_open2(_codecContext, _decoder, nullptr) < 0) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open codec for {}", path));
-    }
-
-    // Find the duration of the video
-    _videoDuration = _formatContext->duration * av_q2d(_avTimeBaseQ);
-
-    // Allocate the video frames
-    _packet = av_packet_alloc();
-    _avFrame = av_frame_alloc();    // Raw frame
-    _glFrame = av_frame_alloc();    // Color-converted frame
-
-    // Fill the destination frame for the convertion
-    int glFrameSize = av_image_get_buffer_size(
-        AV_PIX_FMT_RGB24,
-        _resolution.x,
-        _resolution.y,
-        1
-    );
-    uint8_t* internalBuffer =
-        reinterpret_cast<uint8_t*>(av_malloc(glFrameSize * sizeof(uint8_t)));
-    av_image_fill_arrays(
-        _glFrame->data,
-        _glFrame->linesize,
-        internalBuffer,
-        AV_PIX_FMT_RGB24,
-        _resolution.x,
-        _resolution.y,
-        1
-    );
-    _buffer = av_buffer_alloc(glFrameSize);
-    _packet->buf = _buffer;
-
-    // Create PBO for async texture upload
-    glGenBuffers(1, &_pbo);
-
-    // libmpv
+    // libmpv handle
     _mpvHandle = mpv_create();
     if (!_mpvHandle) {
-        LERROR("Could not create mpv context");
+        LERROR("Could not create mpv handle");
+        return;
     }
 
-    // Some minor options can only be set before mpv_initialize()
-    if (mpv_initialize(_mpvHandle) < 0) {
-        LERROR("mpv context failed to initialize");
+    int result = mpv_initialize(_mpvHandle);
+    if (!checkMpvError(result)) {
+        LERROR("Could not initialize mpv");
+        return;
     }
 
-    // Set mpv to render using openGL
-    mpv_opengl_init_params gl_init_params{ get_proc_address_mpv, nullptr};
+    // Set mpv parameters to render using openGL
+    mpv_opengl_init_params glInitParams{ getOpenGLProcAddress, nullptr};
     mpv_render_param params[]{
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
-        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
+        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &glInitParams},
         {MPV_RENDER_PARAM_INVALID, nullptr}
     };
 
-    // This makes mpv use the currently set GL context. It will use the callback
-    // (passed via params) to resolve GL built in functions, as well as extensions
-    if (mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params) < 0) {
-        LERROR("Failed to initialize mpv OpenGL context");
+    // This makes libmpv use the currently set OpenGL context. It will use the callback
+    // (passed via params) to resolve built in OpenGL functions, as well as extensions
+    result = mpv_render_context_create(&_mpvRenderContext, _mpvHandle, params);
+    if (!checkMpvError(result)) {
+        LERROR("Could not create mpv render context");
+        return;
     }
 
     // When there is a need to call mpv_render_context_update(), which can
     // request a new frame to be rendered.
     // (Separate from the normal event handling mechanism for the sake of
     //  users which run OpenGL on a different thread.)
-    mpv_render_context_set_update_callback(_mpvRenderContext, on_mpv_render_update, NULL);
+    mpv_render_context_set_update_callback(_mpvRenderContext, mpvRenderUpdate, NULL);
 
+    // TODO: Load mpv configuration?
+    // TODO: Set default settings?
+
+    // Load file
+    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), NULL };
+    result = mpv_command(_mpvHandle, cmd);
+    if (!checkMpvError(result)) {
+        LERROR("Could not open video file");
+        return;
+    }
+
+    // TODO: Make sure to handle all of them in handleMpvEvents() function
     //Observe video parameters
     mpv_observe_property(_mpvHandle, 0, "video-params", MPV_FORMAT_NODE);
     mpv_observe_property(_mpvHandle, 0, "pause", MPV_FORMAT_FLAG);
     mpv_observe_property(_mpvHandle, 0, "time-pos", MPV_FORMAT_DOUBLE);
 
-    //Creating new FBO to render mpv into
-    createMpvFBO(_resolution.x, _resolution.y);
+    //Create FBO to render video into
+    createFBO(_resolution.x, _resolution.y);
 
-    // Play this file
-    const char* cmd[] = { "loadfile", _videoFile.string().c_str(), NULL };
-    check_error(mpv_command(_mpvHandle, cmd));
+    // Find duration of video
+    result = mpv_get_property(_mpvHandle, "duration", MPV_FORMAT_DOUBLE, &_videoDuration);
+    if (!checkMpvError(result)) {
+        LWARNING("Could not find video duration");
+    }
+
+    // TODO: Find the estimated frame time of the video
 
     _isInitialized = true;
 }
 
-void FfmpegTileProvider::createMpvFBO(int width, int height) {
+void FfmpegTileProvider::createFBO(int width, int height) {
+    LINFO(fmt::format("Creating new FBO with width: {} and height: {}", width, height));
+
     // Update resolution of video
     _resolution = glm::ivec2(width, height);
 
-    glGenFramebuffers(1, &_mpvFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, _mpvFBO);
+    glGenFramebuffers(1, &_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
@@ -735,10 +598,10 @@ void FfmpegTileProvider::createMpvFBO(int width, int height) {
         TileTextureInitData::PadTiles::No,
         TileTextureInitData::ShouldAllocateDataOnCPU::No
     );
-    _mpvTexture = tileCache->texture(initData);
+    _frameTexture = tileCache->texture(initData);
 
     // Configure
-    _mpvTexture->bind();
+    _frameTexture->bind();
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -751,7 +614,7 @@ void FfmpegTileProvider::createMpvFBO(int width, int height) {
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        *_mpvTexture,
+        *_frameTexture,
         0
     );
 
@@ -759,16 +622,19 @@ void FfmpegTileProvider::createMpvFBO(int width, int height) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FfmpegTileProvider::resizeMpvFBO(int width, int height) {
+void FfmpegTileProvider::resizeFBO(int width, int height) {
     if (width == _resolution.x && height == _resolution.y) {
         return;
     }
 
-    LINFO(fmt::format("New MPV FBO width:{} and height:{}", width, height));
+    // Update resolution of video
+    _resolution = glm::ivec2(width, height);
 
-    glDeleteFramebuffers(1, &_mpvFBO);
-    delete _mpvTexture;
-    createMpvFBO(width, height);
+    // Delete old FBO and texture
+    glDeleteFramebuffers(1, &_fbo);
+    delete _frameTexture;
+
+    createFBO(width, height);
 }
 
 FfmpegTileProvider::~FfmpegTileProvider() {
@@ -776,13 +642,6 @@ FfmpegTileProvider::~FfmpegTileProvider() {
 }
 
 void FfmpegTileProvider::internalDeinitialize() {
-    avformat_close_input(&_formatContext);
-    av_free(_avFrame);
-    av_free(_glFrame);
-    av_free(_packet);
-    avformat_free_context(_formatContext);
-    avcodec_close(_codecContext);
-
     // lib mpv
     // Destroy the GL renderer and all of the GL objects it allocated. If video
     // is still running, the video track will be deselected.
@@ -790,9 +649,9 @@ void FfmpegTileProvider::internalDeinitialize() {
 
     mpv_destroy(_mpvHandle);
 
-    glDeleteFramebuffers(1, &_mpvFBO);
+    glDeleteFramebuffers(1, &_fbo);
 
-    delete _mpvTexture;
+    delete _frameTexture;
 }
 
 } // namespace openspace::globebrowsing

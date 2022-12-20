@@ -33,14 +33,6 @@
 #include <client.h>
 #include <render_gl.h>
 
-// FFMPEG
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libswscale/swscale.h>
-}
-
 namespace openspace { struct Documentation; }
 
 namespace openspace::globebrowsing {
@@ -49,9 +41,7 @@ class FfmpegTileProvider : public TileProvider {
 public:
     static constexpr glm::ivec2 TileSize = { 512, 512 };
     //static constexpr glm::ivec2 FinalResolution = { 2048, 1024 };
-    static constexpr int NoTilePixels = 262144;
-    static constexpr int BytesPerPixel = 3;
-    static constexpr int BytesPerTile = 786432;
+    static constexpr int NumTilePixels = 262144;
 
     FfmpegTileProvider(const ghoul::Dictionary& dictionary);
     ~FfmpegTileProvider();
@@ -68,9 +58,12 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void createMpvFBO(int width, int height);
-    void resizeMpvFBO(int width, int height);
+    void createFBO(int width, int height);
+    void resizeFBO(int width, int height);
     void handleMpvEvents();
+
+    void internalInitialize() override final;
+    void internalDeinitialize() override final;
 
     enum class AnimationMode {
         MapToSimulationTime = 0,
@@ -82,39 +75,20 @@ private:
     std::filesystem::path _videoFile;
     std::string _startTime;
     std::string _endTime;
-    double _startJ200Time = std::numeric_limits<double>::min();
-    double _endJ200Time = std::numeric_limits<double>::min();
-    const AVRational _avTimeBaseQ{ 1, AV_TIME_BASE };
+    double _startJ200Time = 0.0;
+    double _endJ200Time = 0.0;
     double _videoDuration = -1.0;
-    int64_t _prevFrameIndex = -1;
+    double _prevVideoTime = 0.0;
+    double _frameTime = 1.0 / 24.0;
     bool _tileIsReady = false;
     bool _isInitialized = false;
     glm::ivec2 _resolution = { 2048, 1024 };
 
-    AVFormatContext* _formatContext = nullptr;
-    AVCodecContext* _codecContext = nullptr;
-    struct SwsContext* _conversionContext = nullptr;
-    const AVCodec* _decoder = nullptr;
-    AVFrame* _avFrame = nullptr;
-    AVFrame* _glFrame = nullptr;
-    int _streamIndex = -1;
-    AVStream* _videoStream = nullptr;
-    AVPacket* _packet = nullptr;
-    AVBufferRef* _buffer = nullptr;
-
-    GLubyte* _tilePixels = nullptr;
-    GLuint _pbo = 0;
-
-    void internalInitialize() override final;
-    void internalDeinitialize() override final;
-
     // libmpv
     mpv_handle* _mpvHandle;
     mpv_render_context* _mpvRenderContext;
-    unsigned int _mpvFBO = 0;
-    ghoul::opengl::Texture* _mpvTexture = nullptr;
-
-    int _mpvVideoReconfigs = 0;
+    GLuint _fbo = 0;
+    ghoul::opengl::Texture* _frameTexture = nullptr;
 };
 
 } // namespace openspace::globebrowsing
