@@ -27,9 +27,12 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderengine.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <thread>
 
 
 namespace {
@@ -151,8 +154,12 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableFieldlinesSequenceNew)]] Parameters {
+        enum class [[codegen::map(openspace::RenderableFieldlinesSequenceNew::ColorMethod)]] ColorMethod {
+            Uniform = 0,
+            ByQuantity = 1
+        };
         // [[codegen::verbatim(ColorMethodInfo.description)]]
-        std::optional<std::string> colorMethod;
+        std::optional<ColorMethod> colorMethod;
         // [[codegen::verbatim(ColorQuantityInfo.description)]]
         std::optional<int> colorQuantity;
         // [[codegen::verbatim(ColorUniformInfo.description)]]
@@ -188,14 +195,11 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
-        // Set to true if you are streaming data during runtime
-        // remnent from old renderable needed to not break potential assets from people
-        std::optional<bool> loadAtRuntime;
-        // new way to choose type of loading:
+        // choose type of loading:
         //0: static loading and static downloading
         //1: dynamic loading but static downloading
         //2: dynamic loading and dynamic downloading
-        enum class LoadingType {
+        enum class [[codegen::map(openspace::RenderableFieldlinesSequenceNew::LoadingType)]] LoadingType {
             StaticLoading = 0,
             DynamicLoading = 1,
             DynamicDownloading = 2
@@ -209,7 +213,7 @@ namespace {
         std::optional<std::string> baseURL;
         std::optional<std::string> dataURL;
 
-        enum class SourceFileType {
+        enum class [[codegen::map(openspace::RenderableFieldlinesSequenceNew::SourceFileType)]] SourceFileType {
             Cdf,
             Json,
             Osfls
@@ -287,75 +291,53 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _inputFileType = codegen::map<openspace::RenderableFieldlinesSequenceNew::SourceFileType>(p.inputFileType);
     if (p.loadingType.has_value()) {
-        switch (p.loadingType.value()) {
-        case Parameters::LoadingType::StaticLoading:
-            _loadingType = LoadingType::StaticLoading;
-            if (p.sourceFolder.has_value()) {
-                std::filesystem::path path = p.sourceFolder.value();
-                namespace fsm = std::filesystem;
-                for (const fsm::directory_entry& e : fsm::directory_iterator(path)) {
-                    if (!e.is_regular_file()) {
-                        continue;
-                    }
-                    File file;
-                    file.path = e.path();
-                    file.status = File::FileStatus::Downloaded;
-                    file.timestamp = -1.0;
-                    _files.push_back(file);
-                }
-            }
-            else {
-                throw ghoul::RuntimeError(
-                    "Static loading requires source folder to read from"
-                );
-            }
-            break;
-        case Parameters::LoadingType::DynamicLoading:
-            _loadingType = LoadingType::DynamicLoading;
-
-            break;
-        case Parameters::LoadingType::DynamicDownloading:
-            _loadingType = LoadingType::DynamicDownloading;
-            setupDynamicDownloading(p);
-
-            break;
-        default:
-            break;
-        }
+        _loadingType = codegen::map<openspace::RenderableFieldlinesSequenceNew::LoadingType>(p.loadingType);
     }
     else {
         _loadingType = LoadingType::StaticLoading;
     }
-    _loadAtRuntime = p.loadAtRuntime.value_or(_loadAtRuntime);
-    if (_loadAtRuntime) {
-        _loadingType = LoadingType::DynamicLoading;
-    }
 
-    switch (p.inputFileType) {
-        case Parameters::SourceFileType::Cdf:
-            _inputFileType = SourceFileType::Cdf;
-
-            break;
-        case Parameters::SourceFileType::Json:
-            _inputFileType = SourceFileType::Json;
-
-            break;
-        case Parameters::SourceFileType::Osfls:
-            _inputFileType = SourceFileType::Osfls;
-
-            break;
-        default:
-            break;
-    }
-
-    if (_loadingType != LoadingType::StaticLoading &&
-        _inputFileType != SourceFileType::Osfls)
+    if ((_loadingType == LoadingType::DynamicDownloading ||
+         _loadingType == LoadingType::DynamicLoading) &&
+        _inputFileType == SourceFileType::Cdf)
     {
         throw ghoul::RuntimeError(
-            "Dynamic loading is only supported for file type: osfls"
+            "Dynamic loading (or downloading) is only supported for osfls and json files"
         );
     }
+    if ((_loadingType == LoadingType::StaticLoading ||
+         _loadingType == LoadingType::DynamicLoading) &&
+        !p.sourceFolder.has_value())
+    {
+        throw ghoul::RuntimeError(
+            "specify dynamic downloading parameters or a syncfolder"
+        );
+    }
+
+    if (_loadingType == LoadingType::DynamicDownloading) {
+        setupDynamicDownloading(p);
+    }
+    else {
+        ghoul_assert(
+            !p.sourceFolder.has_value(),
+            "sourceFolder not specified though it should not be able to get here"
+        );
+        std::filesystem::path path = p.sourceFolder.value();
+        namespace fsm = std::filesystem;
+        for (const fsm::directory_entry& e : fsm::directory_iterator(path)) {
+            if (!e.is_regular_file()) {
+                continue;
+            }
+            File file;
+            file.path = e.path();
+            file.status = File::FileStatus::Downloaded;
+            file.timestamp = -1.0;
+            _files.push_back(file);
+        }
+    }
+
 
 
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
@@ -376,12 +358,9 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
     _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
     if (p.colorMethod.has_value()) {
-        if (p.colorMethod.value() == "Uniform") {
-            _colorMethod = static_cast<int>(ColorMethod::Uniform);
-        }
-        else {
-            _colorMethod = static_cast<int>(ColorMethod::ByQuantity);
-        }
+        _colorMethod = static_cast<int>(
+            codegen::map<openspace::RenderableFieldlinesSequenceNew::ColorMethod>(p.colorMethod)
+        );
     }
     else {
         _colorMethod = static_cast<int>(ColorMethod::Uniform);
@@ -398,7 +377,6 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
         _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
     }
 
-
     if (p.maskingRanges.has_value()) {
         _maskingRanges = *p.maskingRanges;
     }
@@ -414,10 +392,10 @@ void RenderableFieldlinesSequenceNew::setupDynamicDownloading(const Parameters& 
     _dataID = p.dataID.value_or(_dataID);
     if (!_dataID) {
         throw ghoul::RuntimeError(
-            "If running with dynamic dopwnloading, dataID needs to be specified"
+            "If running with dynamic downloading, dataID needs to be specified"
         );
     }
-    _nOfFilesToQueue = p.numberOfFilesToQueue.value_or(10);
+    _nOfFilesToQueue = p.numberOfFilesToQueue.value_or(_nOfFilesToQueue);
     _baseURL = p.baseURL.value();
     if (_baseURL.empty()) { throw ghoul::RuntimeError("baseURL has to be provided"); }
     _dataURL = p.dataURL.value();
@@ -428,15 +406,33 @@ void RenderableFieldlinesSequenceNew::setupDynamicDownloading(const Parameters& 
 }
 
 void RenderableFieldlinesSequenceNew::initialize() {
-    //_transferFunction = std::make_unique<TransferFunction>(
-    //    absPath(_colorTablePaths[0]).string()
-    //);
+    _transferFunction = std::make_unique<TransferFunction>(
+        absPath(_colorTablePaths[0]).string()
+    );
 }
 
 void RenderableFieldlinesSequenceNew::initializeGL() {
-
+    _shaderProgram = global::renderEngine->buildRenderProgram(
+        "FieldlinesSequenceNew",
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
+    );
 
     setupProperties();
+
+
+
+
+
+
+
+    glGenVertexArrays(1, &_vertexArrayObject);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    glGenBuffers(1, &_vertexColorBuffer);
+    glGenBuffers(1, &_vertexMaskingBuffer);
+
+    // Needed for additive blending
+    setRenderBin(Renderable::RenderBin::Overlay);
 }
 
 void RenderableFieldlinesSequenceNew::setupProperties() {
@@ -545,6 +541,64 @@ void RenderableFieldlinesSequenceNew::setModelDependentConstants() {
 
 
 void RenderableFieldlinesSequenceNew::deinitializeGL() {
+    glDeleteVertexArrays(1, &_vertexArrayObject);
+    _vertexArrayObject = 0;
+
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    glDeleteBuffers(1, &_vertexColorBuffer);
+    _vertexColorBuffer = 0;
+
+    glDeleteBuffers(1, &_vertexMaskingBuffer);
+    _vertexMaskingBuffer = 0;
+
+    if (_shaderProgram) {
+        global::renderEngine->removeRenderProgram(_shaderProgram.get());
+        _shaderProgram = nullptr;
+    }
+
+    // Stall main thread until thread that's loading states is done
+    bool printedWarning = false;
+    while (_isLoadingStateFromDisk) {
+        if (!printedWarning) {
+            LWARNING("Trying to destroy class when an active thread is still using it");
+            printedWarning = true;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+
+}
+
+void RenderableFieldlinesSequenceNew::loadFile(File& file) {
+    _isLoadingStateFromDisk = true;
+    bool success = false;
+    if (_inputFileType == SourceFileType::Osfls) {
+
+        std::thread readFileThread([this, &file, &success]() {
+            success = file.state.loadStateFromOsfls(file.path.string());
+        });
+
+    }
+
+    // So far uncleare why model is needed and if scalingFactor can be changed afterwards.
+    // If these 2 things can be desided afterwards, without affecting Ganamyde fieldlines
+    // that are using json input, then changes to fieldlinesstate function
+    // loadStateFromJson can be changed. That will result in the option to dynamicaly
+    // load and download json files as well.
+    //
+    // I don't think it matters if model is invalid and scalingFactor is 1.f when loading
+    // json files anyway.
+
+    //else if (_inputFileType == SourceFileType::Json) {
+    //    std::thread readFileThread([this, &file, &success]() {
+    //        success = file.state.loadStateFromJson(
+    //            file.path.string(),
+    //            fls::Model::Invalid,
+    //            _scalingFactor
+    //        );
+    //    });
+    //}
 
 }
 
@@ -554,15 +608,17 @@ bool RenderableFieldlinesSequenceNew::isReady() const {
 
 void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 
+    if (_files[_activeTriggerTimeIndex].status == File::FileStatus::Downloaded) {
+        loadFile(_files[_activeTriggerTimeIndex]);
+    }
 
 
 
-
-    if (shouldUpdateColorBuffer()) {
+    if (_shouldUpdateColorBuffer) {
         updateVertexColorBuffer();
     }
 
-    if (shouldUpdateMaskingBuffer()) {
+    if (_shouldUpdateMaskingBuffer) {
         updateVertexMaskingBuffer();
     }
 }
@@ -598,33 +654,78 @@ void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTas
 #endif
 }
 
-bool RenderableFieldlinesSequenceNew::shouldUpdateColorBuffer() {
-    if () {  //if states != empty
-
-
-        return true;
-    }
-    else {
-        return false;
-    }
+// Unbind buffers and arrays
+void unbindGL() {
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
-bool RenderableFieldlinesSequenceNew::shouldUpdateMaskingBuffer() {
-    if () { //if states != empty
+void RenderableFieldlinesSequenceNew::updateVertexPositionBuffer() {
+    glBindVertexArray(_vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-        return true;
-    }
-    else {
-        return false;
-    }
+    const std::vector<glm::vec3>& vertPos = _states[_activeStateIndex].vertexPositions();
+
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        vertPos.size() * sizeof(glm::vec3),
+        vertPos.data(),
+        GL_STATIC_DRAW
+    );
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    unbindGL();
 }
 
 void RenderableFieldlinesSequenceNew::updateVertexColorBuffer() {
+    glBindVertexArray(_vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
+    bool isSuccessful;
+    const std::vector<float>& quantities = _states[_activeStateIndex].extraQuantity(
+        _colorQuantity,
+        isSuccessful
+    );
+
+    if (isSuccessful) {
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            quantities.size() * sizeof(float),
+            quantities.data(),
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+        unbindGL();
+    }
 }
 
 void RenderableFieldlinesSequenceNew::updateVertexMaskingBuffer() {
+    glBindVertexArray(_vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexMaskingBuffer);
 
+    bool success;
+    const std::vector<float>& maskings = _states[_activeStateIndex].extraQuantity(
+        _maskingQuantity,
+        success
+    );
+
+    if (success) {
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            maskings.size() * sizeof(float),
+            maskings.data(),
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+    unbindGL();
 }
 
 } // namespace openspace

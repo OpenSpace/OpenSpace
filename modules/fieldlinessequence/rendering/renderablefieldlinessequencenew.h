@@ -36,7 +36,6 @@
 
 #include <openspace/rendering/transferfunction.h>
 
-#include <filesystem>
 #include <vector>
 
 
@@ -44,6 +43,25 @@ namespace openspace {
 
 class RenderableFieldlinesSequenceNew : public Renderable {
 public:
+    //0: static loading and static downloading
+    //1: dynamic loading but static downloading
+    //2: dynamic loading and dynamic downloading
+    enum class LoadingType {
+        StaticLoading = 0,
+        DynamicLoading = 1,
+        DynamicDownloading = 2
+    };
+    enum class SourceFileType {
+        Cdf = 0,
+        Json = 1,
+        Osfls = 2
+    };
+    // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
+    enum class ColorMethod {
+        Uniform = 0,
+        ByQuantity = 1
+    };
+
     RenderableFieldlinesSequenceNew(const ghoul::Dictionary& dictionary);
     void initialize() override;
     void initializeGL() override;
@@ -64,22 +82,12 @@ private:
     void setupDynamicDownloading(const Parameters& p);
     // True when new state is loaded or user change which quantity used for masking out
     // line segments
-    bool shouldUpdateColorBuffer();
-    bool shouldUpdateMaskingBuffer();
+    //bool shouldUpdateColorBuffer();
+    //bool shouldUpdateMaskingBuffer();
+    void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexMaskingBuffer();
 
-
-    // remnent from old renderable needed to not break potential old assets from people
-    bool _loadAtRuntime = false;
-    //0: static loading and static downloading
-    //1: dynamic loading but static downloading
-    //2: dynamic loading and dynamic downloading
-    enum class LoadingType {
-        StaticLoading = 0,
-        DynamicLoading = 1,
-        DynamicDownloading = 2
-    };
     LoadingType _loadingType;
     // dataID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
@@ -91,19 +99,7 @@ private:
     //  field lines downloaded from the web.
     std::unique_ptr<DynamicDownloaderManager> _dynamicdownloaderManager;
 
-    enum class SourceFileType {
-        Cdf = 0,
-        Json = 1,
-        Osfls = 2
-    };
     SourceFileType _inputFileType;
-
-    // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
-    enum class ColorMethod {
-        Uniform = 0,
-        ByQuantity = 1
-    };
-
     struct File {
         enum class FileStatus {
             Available = 0,
@@ -112,24 +108,37 @@ private:
         };
         FileStatus status;
         std::filesystem::path path;
+        // assume timestamp is -1 until status is = Loaded
         double timestamp;
-
+        FieldlinesState state;
     };
+    std::vector<File> _files;
+    void loadFile(RenderableFieldlinesSequenceNew::File& file);
 
     // In setup it is used to scale JSON coordinates. During runtime it is used to scale
     // domain limits.
     float _scalingFactor = 1.f;
+    bool _shouldUpdateMaskingBuffer;
+    bool _shouldUpdateColorBuffer;
+    bool _shouldUpdatePositionBuffer;
+    int _activeTriggerTimeIndex = -1;
 
-
-    std::vector<File> _files;
-    size_t activeTriggerTimeIndex = -1;
-    bool isInInterval = false;
+    bool _isLoadingStateFromDisk = false;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
     // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
     std::unique_ptr<TransferFunction> _transferFunction;
 
-
+    // OpenGL Vertex Array Object
+    GLuint _vertexArrayObject = 0;
+    // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
+    // the lines
+    GLuint _vertexColorBuffer = 0;
+    // OpenGL Vertex Buffer Object containing the extraQuantity values used for masking
+    // out segments of the lines
+    GLuint _vertexMaskingBuffer = 0;
+    // OpenGL Vertex Buffer Object containing the vertex positions
+    GLuint _vertexPositionBuffer = 0;
     ///////////////////////////////////////////////
     //                PROPERTIES                 //
     ///////////////////////////////////////////////
@@ -194,8 +203,6 @@ private:
     std::vector<std::string> _colorTablePaths;
     // Values represents min & max values represented in the color table
     std::vector<glm::vec2> _colorTableRanges;
-
-
     // Values represents min & max limits for valid masking range
     std::vector<glm::vec2> _maskingRanges;
 
