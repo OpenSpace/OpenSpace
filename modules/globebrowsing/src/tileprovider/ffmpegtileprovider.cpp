@@ -327,7 +327,7 @@ void FfmpegTileProvider::update() {
     }
 
     // Check if we need to seek in the video
-    if (OSvideoTime - currentVideoTime > _frameTime) {
+    if (OSvideoTime - currentVideoTime > 2.0 * _frameTime) {
         LINFO(fmt::format(
             "Seek needed OS curr: {}, video curr: {}",
             OSvideoTime, currentVideoTime
@@ -345,10 +345,34 @@ void FfmpegTileProvider::update() {
     }
 
     // Check if it is time for a new frame
-    if (currentVideoTime - _prevVideoTime < _frameTime) {
-        // Dont need a new frame just now
+    if (OSvideoTime - currentVideoTime < _frameTime) {
+        if (_isWaiting) {
+            return;
+        }
+
+        // Don't need a new frame just now
         LINFO("Waiting..");
+
+        int setPauseTrue = 1;
+        result = mpv_set_property(_mpvHandle, "pause", MPV_FORMAT_FLAG, &setPauseTrue);
+        if (!checkMpvError(result)) {
+            LWARNING("Could not pause video");
+        }
+
+        _isWaiting = true;
         return;
+    }
+
+    // If we get this far then we want a new frame
+    if (_isWaiting) {
+        LINFO("Un-waiting :)");
+
+        int setPauseFalse = 0;
+        result = mpv_set_property(_mpvHandle, "pause", MPV_FORMAT_FLAG, &setPauseFalse);
+        if (!checkMpvError(result)) {
+            LWARNING("Could not un-pause video");
+        }
+        _isWaiting = false;
     }
 
     _tileIsReady = false;

@@ -82,6 +82,7 @@ private:
     double _frameTime = 1.0 / 24.0;
     bool _tileIsReady = false;
     bool _isInitialized = false;
+    bool _isWaiting = false;
     glm::ivec2 _resolution = { 2048, 1024 };
 
     // libmpv
