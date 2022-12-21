@@ -90,6 +90,7 @@ private:
     mpv_render_context* _mpvRenderContext;
     GLuint _fbo = 0;
     ghoul::opengl::Texture* _frameTexture = nullptr;
+    TileTextureInitData::HashKey _frameTextureHashKey;
 };
 
 } // namespace openspace::globebrowsing

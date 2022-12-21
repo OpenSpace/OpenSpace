@@ -151,7 +151,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
 
     // Look for tile in cache
-    cache::ProviderTileKey key = { tileIndex, _prevVideoTime }; // TODO: Improve cachign with a better id
+    cache::ProviderTileKey key = { tileIndex, _prevVideoTime }; // TODO: Improve caching with a better id
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
 
@@ -159,7 +159,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         return tileCache->get(key);
     }
 
-    // TODO: Move this to GPU
+    // TODO: Move this to GPU (shader)
     /*
     // If tile not found in cache then create it
     const int wholeRowSize = _resolution.x * BytesPerPixel;
@@ -194,22 +194,9 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }*/
 
-    // The data for initializing the texture
-    TileTextureInitData initData(
-        TileSize.x,
-        TileSize.y,
-        GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::Format::RGBA,
-        TileTextureInitData::PadTiles::No,
-        TileTextureInitData::ShouldAllocateDataOnCPU::No
-    );
-
-    // Create a texture with the initialization data
-    ghoul::opengl::Texture* writeTexture = tileCache->texture(initData);
-
     // Bind the texture to the tile
     Tile ourTile = Tile{ _frameTexture, std::nullopt, Tile::Status::OK };
-    tileCache->put(key, initData.hashKey, ourTile);
+    tileCache->put(key, _frameTextureHashKey, ourTile);
 
     return ourTile;
 }
@@ -256,7 +243,6 @@ void FfmpegTileProvider::update() {
         }
     }
 
-    // TODO: bind OpenSpace tiem to video time
     const double now = global::timeManager->time().j2000Seconds();
     double OSvideoTime = 0.0;
     double percentage = 0.0;
@@ -321,9 +307,10 @@ void FfmpegTileProvider::update() {
         OSvideoTime, currentVideoTime
     ));
 
+    // TODO: deal with backwards
     // Are we going backwards?
     if (global::timeManager->deltaTime() < 0) {
-        LINFO("Backwards!");
+        LINFO("Backwards");
     }
 
     // Check if we need to seek in the video
@@ -336,12 +323,6 @@ void FfmpegTileProvider::update() {
         if (!checkMpvError(result)) {
             LWARNING("Could not seek in video");
         }
-
-        result = mpv_get_property(_mpvHandle, "playback-time", MPV_FORMAT_DOUBLE, &currentVideoTime);
-        if (!checkMpvError(result)) {
-            LWARNING("Could not find current time in video");
-        }
-        LINFO(fmt::format("Seeked to time {}", currentVideoTime));
     }
 
     // Check if it is time for a new frame
@@ -365,7 +346,7 @@ void FfmpegTileProvider::update() {
 
     // If we get this far then we want a new frame
     if (_isWaiting) {
-        LINFO("Un-waiting :)");
+        LINFO("Continue");
 
         int setPauseFalse = 0;
         result = mpv_set_property(_mpvHandle, "pause", MPV_FORMAT_FLAG, &setPauseFalse);
@@ -434,7 +415,6 @@ void FfmpegTileProvider::handleMpvEvents() {
                 break;
             }
             case MPV_EVENT_PROPERTY_CHANGE: {
-                // TODO: change getting of this property without qt
                 mpv_event_property* prop = (mpv_event_property*)event->data;
                 if (strcmp(prop->name, "video-params") == 0 &&
                     prop->format == MPV_FORMAT_NODE)
@@ -494,7 +474,6 @@ void FfmpegTileProvider::handleMpvEvents() {
                         return;
                     }
                 }
-                // TODO: handle pause event
                 break;
             }
             default: {
@@ -581,11 +560,8 @@ void FfmpegTileProvider::internalInitialize() {
         return;
     }
 
-    // TODO: Make sure to handle all of them in handleMpvEvents() function
     //Observe video parameters
     mpv_observe_property(_mpvHandle, 0, "video-params", MPV_FORMAT_NODE);
-    mpv_observe_property(_mpvHandle, 0, "pause", MPV_FORMAT_FLAG);
-    mpv_observe_property(_mpvHandle, 0, "time-pos", MPV_FORMAT_DOUBLE);
 
     //Create FBO to render video into
     createFBO(_resolution.x, _resolution.y);
@@ -623,6 +599,7 @@ void FfmpegTileProvider::createFBO(int width, int height) {
         TileTextureInitData::ShouldAllocateDataOnCPU::No
     );
     _frameTexture = tileCache->texture(initData);
+    _frameTextureHashKey = initData.hashKey;
 
     // Configure
     _frameTexture->bind();
@@ -674,8 +651,6 @@ void FfmpegTileProvider::internalDeinitialize() {
     mpv_destroy(_mpvHandle);
 
     glDeleteFramebuffers(1, &_fbo);
-
-    delete _frameTexture;
 }
 
 } // namespace openspace::globebrowsing
