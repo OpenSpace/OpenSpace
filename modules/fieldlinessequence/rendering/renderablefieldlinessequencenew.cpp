@@ -197,6 +197,11 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
+        // If data sets parameter start_time differ from start of run,
+        // elapsed_time_in_seconds might be in relation to start of run.
+        // ManuelTimeOffset will be added to trigger time.
+        std::optional<double> manualTimeOffset;
+
         enum class [[codegen::map(openspace::fls::Model)]] Model {
             Batsrus = 0,
             Enlil,
@@ -244,11 +249,20 @@ namespace {
         // Path to a .txt file containing seed points. Mandatory if CDF as input.
         // Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
         std::optional<std::filesystem::path> seedPointDirectory [[codegen::directory()]];
+        // Extra variables such as rho, p or t
+        std::optional<std::vector<std::string>> extraVariables;
+        // Which variable in CDF file to trace. b is default for fieldline
+        std::optional<std::string> tracingVariable;
     };
 #include "renderablefieldlinessequencenew_codegen.cpp"
 } // namespace
 
 namespace openspace {
+
+std::vector<std::string>
+    extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
+std::unordered_map<std::string, std::vector<glm::vec3>>
+    extractSeedPointsFromFiles(std::filesystem::path);
 
 documentation::Documentation RenderableFieldlinesSequenceNew::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequencenew");
@@ -335,8 +349,14 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
         );
     }
 
-    _model = codegen::map<openspace::fls::Model>(p.simulationModel);
+    if (p.simulationModel.has_value()) {
+        _model = codegen::map<openspace::fls::Model>(p.simulationModel);
+    }
+    else {
+        _model = fls::Model::Invalid;
+    }
     if (_model != fls::Model::Invalid) {
+        //maybe this should be called even if model is invalid
         setModelDependentConstants();
     }
     // setting scaling factor after model to support unknown model (model = invalid, but
@@ -365,8 +385,26 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
         }
     }
 
+    if (_loadingType == LoadingType::StaticLoading) {
+        switch (_inputFileType) {
+        case SourceFileType::Cdf:
+            _seedPointDirectory = p.seedPointDirectory.value_or(_seedPointDirectory);
+            _tracingVariable = p.tracingVariable.value_or(_tracingVariable);
+            loadCdfFiles();
+            break;
+        case SourceFileType::Json:
+            loadJsonFiles();
+            break;
+        case SourceFileType::Osfls:
+            loadOsflsFiles();
+            break;
+        default:
+            break;
+        }
+    }
 
 
+    _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
     _flowColor = p.flowColor.value_or(_flowColor);
     _flowReversed = p.reversedFlow.value_or(_flowReversed);
@@ -376,6 +414,8 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantity = p.maskingQuantity.value_or(_maskingQuantity);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
+    _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
+
 
     // Color group
     if (p.colorTablePaths.has_value()) {
@@ -430,6 +470,93 @@ void RenderableFieldlinesSequenceNew::setupDynamicDownloading(const Parameters& 
     _dynamicdownloaderManager = std::make_unique<DynamicDownloaderManager>(
         _dataID, _baseURL, _dataURL, _nOfFilesToQueue
     );
+}
+
+void RenderableFieldlinesSequenceNew::loadOsflsFiles() {
+    for (File& f : _files) {
+        const bool loadSuccess = f.state.loadStateFromOsfls(f.path.string());
+        if (loadSuccess) {
+            f.status = File::FileStatus::Loaded;
+        }
+        else {
+            LERROR(fmt::format("Failed to load state from: {}", f.path));
+        }
+    }
+}
+
+void RenderableFieldlinesSequenceNew::loadJsonFiles() {
+    for (File& f : _files) {
+        const bool loadSuccess =
+            f.state.loadStateFromJson(f.path.string(), _model, _scalingFactor);
+        if (loadSuccess) {
+            f.status = File::FileStatus::Loaded;
+        }
+        else {
+            LERROR(fmt::format("Failed to load state from: {}", f.path));
+        }
+    }
+}
+
+void RenderableFieldlinesSequenceNew::loadCdfFiles() {
+    std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
+
+    std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
+        extractSeedPointsFromFiles(_seedPointDirectory);
+    if (seedsPerFiles.empty()) {
+        LERROR("No seed files found");
+    }
+
+    for (File& cdfFile : _files) {
+        bool loadSuccess = fls::convertCdfToFieldlinesState(
+            cdfFile.state,
+            cdfFile.path.string(),
+            seedsPerFiles,
+            _manualTimeOffset,
+            _tracingVariable,
+            _extraVars,
+            extraMagVars
+        );
+
+        if (loadSuccess) {
+            cdfFile.status = File::FileStatus::Loaded;
+        }
+    }
+}
+
+std::vector<std::string>
+extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
+{
+    std::vector<std::string> extraMagVars;
+    for (int i = 0; i < static_cast<int>(extrVars.size()); i++) {
+        const std::string& str = extrVars[i];
+        // Check if string is in the format specified for magnitude variables
+        if (str.substr(0, 2) == "|(" && str.substr(str.size() - 2, 2) == ")|") {
+            std::istringstream ss(str.substr(2, str.size() - 4));
+            std::string magVar;
+            size_t counter = 0;
+            while (std::getline(ss, magVar, ',')) {
+                magVar.erase(
+                    std::remove_if(
+                        magVar.begin(),
+                        magVar.end(),
+                        ::isspace
+                    ),
+                    magVar.end()
+                );
+                extraMagVars.push_back(magVar);
+                counter++;
+                if (counter == 3) {
+                    break;
+                }
+            }
+            if (counter != 3 && counter > 0) {
+                extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
+            }
+            extrVars.erase(extrVars.begin() + i);
+            i--;
+        }
+    }
+    return extraMagVars;
 }
 
 void RenderableFieldlinesSequenceNew::initialize() {

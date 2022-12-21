@@ -29,6 +29,8 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/dynamicdownloadermanager.h>
+#include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
+
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
@@ -102,10 +104,23 @@ private:
     void updateVertexColorBuffer();
     void updateVertexMaskingBuffer();
 
+    void loadOsflsFiles();
+    void loadJsonFiles();
+    void loadCdfFiles();
+
     std::vector<File> _files;
     void loadFile(RenderableFieldlinesSequenceNew::File& file);
 
     LoadingType _loadingType;
+    // path to directory with seed point files
+    std::filesystem::path _seedPointDirectory;
+    // which tracing vaiable to trace. 'b' for fieldline is default
+    std::string _tracingVariable = "b";
+    // Extra variables such as rho, p or t
+    std::vector<std::string> _extraVars;
+    // Manual time offset
+    double _manualTimeOffset = 0.0;
+
     // dataID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
     // number of files to queue up at a time
@@ -124,7 +139,7 @@ private:
     bool _shouldUpdateColorBuffer;
     bool _shouldUpdatePositionBuffer;
     int _activeTriggerTimeIndex = -1;
-    bool atLeastOneFileLoaded = false;
+    bool _atLeastOneFileLoaded = false;
 
     bool _isLoadingStateFromDisk = false;
 
