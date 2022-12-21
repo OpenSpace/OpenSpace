@@ -60,7 +60,7 @@ public:
         ScriptCallback callback;
     };
 
-    static constexpr const char* OpenSpaceLibraryName = "openspace";
+    static constexpr std::string_view OpenSpaceLibraryName = "openspace";
 
     ScriptEngine();
 
@@ -85,14 +85,12 @@ public:
     bool runScript(const std::string& script, ScriptCallback callback = ScriptCallback());
     bool runScriptFile(const std::filesystem::path& filename);
 
-    bool writeLog(const std::string& script);
-
     virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    void queueScript(const std::string& script, RemoteScripting remoteScripting,
+    void queueScript(std::string script, RemoteScripting remoteScripting,
         ScriptCallback cb = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
@@ -102,13 +100,14 @@ public:
 private:
     BooleanType(Replace);
 
+    void writeLog(const std::string& script);
+
     bool registerLuaLibrary(lua_State* state, LuaLibrary& library);
     void addLibraryFunctions(lua_State* state, LuaLibrary& library, Replace replace);
 
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
 
     void addBaseLibrary();
-    void remapPrintFunction();
 
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;

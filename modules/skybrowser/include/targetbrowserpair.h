@@ -26,8 +26,6 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___TARGETBROWSERPAIR___H__
 
 #include <modules/skybrowser/include/utility.h>
-#include <openspace/documentation/documentation.h>
-#include <deque>
 
 namespace ghoul { class Dictionary; }
 
@@ -42,7 +40,6 @@ class ScreenSpaceRenderable;
 class TargetBrowserPair {
 public:
     TargetBrowserPair(SceneGraphNode* target, ScreenSpaceSkyBrowser* browser);
-    TargetBrowserPair& operator=(TargetBrowserPair other);
 
     // Target & Browser
     void initialize();
@@ -55,14 +52,12 @@ public:
 
     // Mouse interaction
     void startFinetuningTarget();
-    void fineTuneTarget(const glm::vec2& startMouse, const glm::vec2& translation);
+    void fineTuneTarget(const glm::vec2& translation);
     void synchronizeAim();
 
     // Browser
     void sendIdToBrowser() const;
-    void updateBrowserSize();
     std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
-    bool isImageCollectionLoaded();
 
     // Target
     void centerTargetOnScreen();
@@ -73,13 +68,14 @@ public:
     bool isEnabled() const;
 
     void setEnabled(bool enable);
-    void setOpacity(float opacity);
     void setVerticalFov(double vfov);
     void setEquatorialAim(const glm::dvec2& aim);
     void setBorderColor(const glm::ivec3& color);
+    void setBorderRadius(double radius);
     void setBrowserRatio(float ratio);
     void setVerticalFovWithScroll(float scroll);
     void setImageCollectionIsLoaded(bool isLoaded);
+    void applyRoll();
 
     double verticalFov() const;
     glm::ivec3 borderColor() const;
@@ -89,9 +85,7 @@ public:
     std::string browserId() const;
     std::string targetRenderableId() const;
     std::string targetNodeId() const;
-    float browserRatio() const;
 
-    SceneGraphNode* targetNode() const;
     ScreenSpaceSkyBrowser* browser() const;
     std::vector<int> selectedImages() const;
 
@@ -106,12 +100,7 @@ public:
     void setImageOpacity(int i, float opacity);
     void hideChromeInterface();
 
-    friend bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs);
-    friend bool operator!=(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs);
-
 private:
-    void aimTargetGalactic(glm::dvec3 direction);
-
     // Target and browser
     RenderableSkyTarget* _targetRenderable = nullptr;
     ScreenSpaceSkyBrowser* _browser = nullptr;

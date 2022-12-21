@@ -34,7 +34,7 @@ namespace documentation { struct Documentation; }
 class DashboardItemParallelConnection : public DashboardTextItem {
 public:
     DashboardItemParallelConnection(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemParallelConnection() = default;
+    ~DashboardItemParallelConnection() override = default;
 
     void render(glm::vec2& penPosition) override;
 

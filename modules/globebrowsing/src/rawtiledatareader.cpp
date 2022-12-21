@@ -361,7 +361,7 @@ glm::ivec2 geodeticToPixel(const Geodetic2& geo,
     const double X = glm::degrees(geo.lon);
 
     const double divisor = t[2] * t[4] - t[1] * t[5];
-    ghoul_assert(divisor != 0.0, "Division by zero!");
+    ghoul_assert(divisor != 0.0, "Division by zero");
 
     const double P = (t[0] * t[5] - t[2] * t[3] + t[2] * Y - t[5] * X) / divisor;
     const double L = (-t[0] * t[4] + t[1] * t[3] - t[1] * Y + t[4] * X) / divisor;
@@ -523,7 +523,10 @@ void RawTileDataReader::initialize() {
         ZoneScopedN("GDALOpen")
         _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
         if (!_dataset) {
-            throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
+            throw ghoul::RuntimeError(fmt::format(
+                "Failed to load dataset: {}. GDAL Error: {}",
+                _datasetFilePath, CPLGetLastErrorMsg()
+            ));
         }
     }
 
@@ -589,7 +592,7 @@ RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand,
                                                  const IODescription& io,
                                                  char* dataDestination) const
 {
-    ghoul_assert(isInside(io.read.region, io.read.fullRegion), "write region of bounds!");
+    ghoul_assert(isInside(io.read.region, io.read.fullRegion), "write region of bounds");
     ghoul_assert(
         io.write.region.start.x >= 0 && io.write.region.start.y >= 0,
         "Invalid write region"
@@ -807,7 +810,7 @@ IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const
     );
     ghoul_assert(
         io.write.region.numPixels.x == _initData.dimensions.x,
-        "Write region must match tile it writes to."
+        "Write region must match tile it writes to"
     );
 
     return io;

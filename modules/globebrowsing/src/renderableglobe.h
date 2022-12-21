@@ -95,7 +95,7 @@ enum class ShadowCompType {
 class RenderableGlobe : public Renderable {
 public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
-    ~RenderableGlobe() = default;
+    ~RenderableGlobe() override = default;
 
     void initializeGL() override;
     void deinitialize() override;
@@ -118,8 +118,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    constexpr static const int MinSplitDepth = 2;
-    constexpr static const int MaxSplitDepth = 22;
+    static constexpr int MinSplitDepth = 2;
+    static constexpr int MaxSplitDepth = 22;
 
     struct {
         properties::BoolProperty showChunkEdges;
@@ -141,6 +141,7 @@ private:
         properties::FloatProperty targetLodScaleFactor;
         properties::FloatProperty currentLodScaleFactor;
         properties::FloatProperty orenNayarRoughness;
+        properties::FloatProperty ambientIntensity;
         properties::IntProperty   nActiveLayers;
     } _generalProperties;
 

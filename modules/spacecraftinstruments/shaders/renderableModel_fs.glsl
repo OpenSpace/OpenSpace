@@ -45,6 +45,7 @@ const float diffuseIntensity = 1.0;
 const float specularIntensity = 0.0;
 const float specularPower = 100.0;
 
+
 Fragment getFragment() {
   vec4 textureColor;
   if (has_texture_diffuse) {

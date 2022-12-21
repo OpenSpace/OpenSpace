@@ -71,7 +71,7 @@ public:
      *
      * \return The class name for the TemplateProperty
      */
-    virtual std::string className() const override = 0;
+    virtual std::string_view className() const override = 0;
 
     /**
      * Returns the stored value packed into a ghoul::any object.
@@ -127,7 +127,7 @@ public:
      * \param value The string object in which to store the resulting encoding
      * \return \c true if the encoding succeeded; \c false otherwise
      */
-    virtual bool getStringValue(std::string& value) const override;
+    virtual std::string stringValue() const override;
 
     /**
      * Returns the description for this TemplateProperty as a Lua script that returns a

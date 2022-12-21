@@ -73,7 +73,7 @@ asset.export(densityVolume)
 asset.meta = {
   Name = "Predictive Science Inc. Volume Rendering Bastille Day",
   Version = "1.0",
-  Description = [[Volumetric rendering for the bastille day CME event]],
+  Description = "Volumetric rendering for the bastille day CME event",
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "CC-BY"

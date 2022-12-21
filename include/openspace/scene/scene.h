@@ -69,7 +69,7 @@ public:
          * \param message The reason that caused this exception to be thrown
          * \param component The optional compoment that caused this exception to be thrown
          * \pre message may not be empty
-        */
+         */
         explicit InvalidSceneError(std::string msg, std::string comp = "");
     };
 
@@ -82,7 +82,7 @@ public:
 
     // constructors & destructor
     Scene(std::unique_ptr<SceneInitializer> initializer);
-    ~Scene();
+    virtual ~Scene() override;
 
     /**
      * Clear the scene graph,
@@ -99,11 +99,6 @@ public:
      * Detach node from the root
      */
     ghoul::mm_unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
-
-    /**
-     * Set the camera of the scene
-     */
-    void setCamera(std::unique_ptr<Camera> camera);
 
     /**
      * Return the camera
@@ -147,8 +142,8 @@ public:
     void unregisterNode(SceneGraphNode* node);
 
     /**
-    * Mark the node registry as dirty
-    */
+     * Mark the node registry as dirty
+     */
     void markNodeRegistryDirty();
 
     /**
@@ -252,6 +247,17 @@ public:
      * \param p The Profile to be read.
      */
     void setPropertiesFromProfile(const Profile& p);
+
+    /**
+     * Searches for any properties that match the regex propertyString, and returns
+     * the results in a vector.
+     *
+     * \param propertyString the regex string that is intended to match one or more
+     *        properties in the currently-available properties
+     * \return Vector of Property objs containing property names that matched the regex
+     */
+    std::vector<properties::Property*> propertiesMatchingRegex(
+        std::string propertyString);
 
 private:
     /**

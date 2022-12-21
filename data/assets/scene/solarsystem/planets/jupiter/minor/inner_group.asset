@@ -93,13 +93,13 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
-  
+
 for i, node in ipairs(nodes) do
   asset.export(node)
 end
@@ -108,9 +108,9 @@ end
 asset.meta = {
   Name = "Jupiter Inner Group Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Jupiter's Inner Group
-    moons: Metis, Adrastea, Amalthea, and Thebe. Blank globes and SPICE trails
-    are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Jupiter's Inner Group moons: Metis,
+    Adrastea, Amalthea, and Thebe. Blank globes and SPICE trails are generated for each
+    moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

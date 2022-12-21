@@ -25,6 +25,10 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/property.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/profile.h>
@@ -63,7 +67,7 @@ struct CommandlineArguments {
     std::string configurationOverride;
 };
 
-class OpenSpaceEngine {
+class OpenSpaceEngine : public properties::PropertyOwner {
 public:
     // A mode that specifies which part of the system is currently in control.
     // The mode can be used to limit certain features, like setting time, navigation
@@ -75,7 +79,7 @@ public:
     };
 
     OpenSpaceEngine();
-    ~OpenSpaceEngine();
+    ~OpenSpaceEngine() override;
 
     void registerPathTokens();
     void initialize();
@@ -89,18 +93,23 @@ public:
     void drawOverlays();
     void postDraw();
     void resetPropertyChangeFlags();
-    void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
-    void charCallback(unsigned int codepoint, KeyModifier modifier);
-    void mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
-    void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double posX, double posY);
+    void keyboardCallback(Key key, KeyModifier mod, KeyAction action,
+        IsGuiWindow isGuiWindow);
+    void charCallback(unsigned int codepoint, KeyModifier modifier,
+        IsGuiWindow isGuiWindow);
+    void mouseButtonCallback(MouseButton button, MouseAction action,
+        KeyModifier mods, IsGuiWindow isGuiWindow);
+    void mousePositionCallback(double x, double y, IsGuiWindow isGuiWindow);
+    void mouseScrollWheelCallback(double posX, double posY, IsGuiWindow isGuiWindow);
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
-    void handleDragDrop(const std::string& file);
+    void handleDragDrop(std::filesystem::path file);
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
+    properties::Property::Visibility visibility() const;
+    bool showHiddenSceneGraphNodes() const;
     void toggleShutdownMode();
 
     Mode currentMode() const;
@@ -117,8 +126,7 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
-    void writeSceneDocumentation();
-    void writeStaticDocumentation();
+    void writeDocumentation();
     void createUserDirectoriesIfNecessary();
 
     /**
@@ -132,10 +140,12 @@ private:
     void loadFonts();
 
     void runGlobalCustomizationScripts();
-    std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     properties::BoolProperty _printEvents;
+    properties::OptionProperty _visibility;
+    properties::BoolProperty _showHiddenSceneGraphNodes;
+    properties::BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -144,9 +154,6 @@ private:
     std::unique_ptr<VersionChecker> _versionChecker;
 
     glm::vec2 _mousePosition = glm::vec2(0.f);
-
-    //grabs json from each module to pass to the documentation engine.
-    std::string _documentationJson;
 
     std::future<void> _writeDocumentationTask;
 

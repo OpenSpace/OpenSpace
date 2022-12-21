@@ -35,11 +35,11 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* HandlebarsFilename =
+    constexpr std::string_view HandlebarsFilename =
         "${WEB}/documentation/handlebars-v4.0.5.js";
-    constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    constexpr const char* CssFilename = "${WEB}/documentation/style.css";
-    constexpr const char* JsFilename = "${WEB}/documentation/script.js";
+    constexpr std::string_view BootstrapFilename = "${WEB}/common/bootstrap.min.css";
+    constexpr std::string_view CssFilename = "${WEB}/documentation/style.css";
+    constexpr std::string_view JsFilename = "${WEB}/documentation/script.js";
 } // namespace
 
 namespace openspace::documentation {

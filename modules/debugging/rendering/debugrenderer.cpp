@@ -32,7 +32,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* _loggerCat = "DebugRenderer";
+    constexpr std::string_view _loggerCat = "DebugRenderer";
 } // namespace
 
 namespace openspace {

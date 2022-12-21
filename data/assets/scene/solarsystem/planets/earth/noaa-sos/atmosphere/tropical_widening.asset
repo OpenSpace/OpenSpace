@@ -3,8 +3,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Tropical Widening"
 local Identifier = "noaa-sos-atmosphere-tropical_widening"
-local Description = [[ This dataset was developed as part of the EarthNow project, and 
-shows the changes in the tropical zone boundaries over the last three decades.   ]]
+local Description = [[This dataset was developed as part of the EarthNow project, and
+shows the changes in the tropical zone boundaries over the last three decades]]
 local URL = "https://sos.noaa.gov/catalog/datasets/tropical-widening/"
 
 
@@ -18,6 +18,7 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "2048.png",
   Description = Description
 }
@@ -25,6 +26,7 @@ local layer = {
 local colorbar = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "colorbar.jpg",
   FaceCamera = false,
@@ -32,9 +34,9 @@ local colorbar = {
   CartesianPosition = { 0.0, -0.3, -2.0 }
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()
@@ -49,7 +51,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

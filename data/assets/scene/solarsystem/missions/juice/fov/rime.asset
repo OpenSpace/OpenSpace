@@ -1,0 +1,93 @@
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+
+-- Circle shapes are not support
+local RimeBase = {
+  Identifier = "JuiceRimeBase",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_RIME_BASE",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_RIME_BASE",
+      Method = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Rime Base FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The location of the base for the RIME instrument onboard Juice"
+  }
+}
+
+-- Circle shapes are not supported
+local Rime = {
+  Identifier = "JuiceRime",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_RIME",
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "JUICE_RIME",
+      Method = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Rime FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The location of the RIME instrument onboard Juice"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Rime)
+  openspace.addSceneGraphNode(RimeBase)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RimeBase)
+  openspace.removeSceneGraphNode(Rime)
+end)
+
+asset.export(Rime)
+asset.export(RimeBase)
+
+
+asset.meta = {
+  Name = "RIME",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Radar for Icy Moons Exploration (RIME) onboard Juice,
+    which is a ground-penetrating radar meant to measure the subsurface structure of the
+    ice surrounding the icy Galilean moons of up to 9 km. See
+    https://www.spacetech-i.com/products/mechanisms/juice-rime-antenna for more
+    information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -47,18 +47,18 @@ local Iapetus = {
   GUI = {
     Name = "Iapetus",
     Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[Third largest moon of Saturn.]]
+    Description = "Third largest moon of Saturn"
   }
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Iapetus)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Iapetus)
 end)
-  
+
 asset.export(Iapetus)
 
 
@@ -66,9 +66,8 @@ asset.export(Iapetus)
 asset.meta = {
     Name = "Iapetus",
     Version = "1.0",
-    Description = [[ Iapetus globe with labels.]],
+    Description = "Iapetus globe with labels",
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Iapetus"}
+    License = "MIT license"
 }

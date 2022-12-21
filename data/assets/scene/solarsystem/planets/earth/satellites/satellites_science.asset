@@ -7,8 +7,8 @@ asset.require("./science/education")
 asset.meta = {
   Name = "Satellites Science",
   Version = "1.0",
-  Description = [[ Meta asset for science satellites of Earth. Containing groups:
-    spaceearth, geodetic, engineering, and education.]],
+  Description = [[Meta asset for science satellites of Earth. Containing groups:
+    spaceearth, geodetic, engineering, and education]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,0 +1,133 @@
+*******************************************************************************
+ Revised: Apr 21, 2022    Mars Reconnaisance Orbiter (MRO)  / (Sun)         -74
+                            http://marsprogram.jpl.nasa.gov/mro/
+
+ NOTE (2014-Jun-10):
+  C/2013 A1 (Siding Spring) will have its closest approach to Mars on Oct 19, 
+  2014 at a distance of about 135,000 km. 
+  
+  Location of predicted MRO minimum risk from comet particles 
+  (occultation mid-point):
+
+   Latitude: 7.6083 deg
+   Time:     19-OCT-2014 20:08:07.182392952 ET (CSS CA + 98 min)
+
+ MISSION LAUNCH DATE:                                        MARS ARRIVAL DATE:
+  Aug 12, 2005 11:43 UTC (it's up and away)                  March 10, 2006
+
+  Notes:  Aug 10, 2005: Original launch was scrubbed (gyros)
+          Aug 11, 2005: Second attemped was launch scrubbed (fueling sensors)
+
+ LAUNCH VEHICLE:
+  Atlas V two-stage. Separation from Centaur: 2005-Aug-12 12:40:51.68 UTC
+
+ BACKGROUND:
+  MRO aerobraked for 6 months from the post-insertion 35 hour orbit, saving 
+  450 kg of fuel. Primary science phase starts in November of 2006 and 
+  nominally operates for 2 Earth years from a 112 minute, near circular polar 
+  orbit. 
+
+ SPACECRAFT PHYSICAL PROPERTIES:
+  Height=  6.5 m                          Solar panels =   20 m^2
+  Width = 13.6 m (tip-to-tip)             launch weight= 2180 kg
+
+ SPACECRAFT TRAJECTORY: 
+  Trajectory starts after Centaur launch stage separation (cruise phase).
+  Trajectory after 2022-Apr-21 is PREDICTION.
+
+  Trajectory files (from MRO Nav., JPL)      Start (TDB)         End (TDB) 
+  --------------------------------------  -----------------  -----------------
+  mro_cruise                              2005-Aug-12 12:42  2006-Mar-10 22:06
+  mro_ab                                  2006-Mar-10 22:06  2006-Sep-12 06:40
+  misc reconstruction (mro_psp1-62)       2006-Sep-12 06:40  2022-Apr-01 01:01
+  mro_psp_rec                             2022-Apr-01 01:01  2022-Apr-17 16:34
+  mro_psp                                 2022-Apr-17 16:34  2022-Sep-02 02:55
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / API_USER Mon May 23 05:19:05 2022 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: Mars Reconnaissance Orbiter (spacecraft) (-74) {source: MRO_MERGED}
+Center body name: Mars Barycenter (4)             {source: DE441}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2022-May-22 00:00:00.0000 TDB
+Stop  time      : A.D. 2022-May-23 00:00:00.0000 TDB
+Step-size       : 720 minutes
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : (undefined)                                                  
+Output units    : KM-S
+Output type     : GEOMETRIC cartesian states
+Output format   : 1 (position only)
+Reference frame : Ecliptic of J2000.0
+*******************************************************************************
+JDTDB
+   X     Y     Z
+*******************************************************************************
+$$SOE
+2459721.500000000 = A.D. 2022-May-22 00:00:00.0000 TDB 
+   2.615353755143860E+03  5.410112782583881E+02 -2.491150185148976E+03
+2459722.000000000 = A.D. 2022-May-22 12:00:00.0000 TDB 
+  -3.495159540344693E+03 -5.551069096048225E+02  9.252465537814477E+02
+2459722.500000000 = A.D. 2022-May-23 00:00:00.0000 TDB 
+   3.491185350937938E+03  4.083500559468409E+02  1.096540860137564E+03
+$$EOE
+*******************************************************************************
+ 
+TIME
+
+  Barycentric Dynamical Time ("TDB" or T_eph) output was requested. This
+continuous relativistic coordinate time is equivalent to the relativistic
+proper time of a clock at rest in a reference frame comoving with the
+solar system barycenter but outside the system's gravity well. It is the
+independent variable in the solar system relativistic equations of motion.
+
+  TDB runs at a uniform rate of one SI second per second and is independent
+of irregularities in Earth's rotation.
+
+  Calendar dates prior to 1582-Oct-15 are in the Julian calendar system.
+Later calendar dates are in the Gregorian system.
+
+REFERENCE FRAME AND COORDINATES
+
+  Ecliptic at the standard reference epoch
+
+    Reference epoch: J2000.0
+    X-Y plane: adopted Earth orbital plane at the reference epoch
+               Note: IAU76 obliquity of 84381.448 arcseconds wrt ICRF X-Y plane
+    X-axis   : ICRF
+    Z-axis   : perpendicular to the X-Y plane in the directional (+ or -) sense
+               of Earth's north pole at the reference epoch.
+
+  Symbol meaning:
+
+    JDTDB    Julian Day Number, Barycentric Dynamical Time
+      X      X-component of position vector (km)
+      Y      Y-component of position vector (km)
+      Z      Z-component of position vector (km)
+
+ABERRATIONS AND CORRECTIONS
+
+ Geometric state vectors have NO corrections or aberrations applied.
+
+Computations by ...
+
+    Solar System Dynamics Group, Horizons On-Line Ephemeris System
+    4800 Oak Grove Drive, Jet Propulsion Laboratory
+    Pasadena, CA  91109   USA
+
+    General site: https://ssd.jpl.nasa.gov/
+    Mailing list: https://ssd.jpl.nasa.gov/email_list.html
+    System news : https://ssd.jpl.nasa.gov/horizons/news.html
+    User Guide  : https://ssd.jpl.nasa.gov/horizons/manual.html
+    Connect     : browser        https://ssd.jpl.nasa.gov/horizons/app.html#/x
+                  API            https://ssd-api.jpl.nasa.gov/doc/horizons.html
+                  command-line   telnet ssd.jpl.nasa.gov 6775
+                  e-mail/batch   https://ssd.jpl.nasa.gov/ftp/ssd/hrzn_batch.txt
+                  scripts        https://ssd.jpl.nasa.gov/ftp/ssd/SCRIPTS
+    Author      : Jon.D.Giorgini@jpl.nasa.gov
+*******************************************************************************
+

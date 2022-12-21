@@ -33,7 +33,7 @@ IntProperty::IntProperty(Property::PropertyInfo info, int value,
     : NumericalProperty<int>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-std::string IntProperty::className() const {
+std::string_view IntProperty::className() const {
     return "IntProperty";
 }
 

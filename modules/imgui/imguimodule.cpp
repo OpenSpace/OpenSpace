@@ -44,101 +44,37 @@
 // #define SHOW_IMGUI_HELPERS
 
 namespace {
-    constexpr const char* _loggerCat = "GUI";
-    constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
-    constexpr const float FontSize = 14.f;
+    constexpr std::string_view _loggerCat = "GUI";
+    constexpr std::string_view GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+    constexpr float FontSize = 14.f;
 
     ImFont* captionFont = nullptr;
 
-    constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
-
-    void addScreenSpaceRenderableLocal(std::string identifier, std::string texturePath) {
-        if (!std::filesystem::is_regular_file(absPath(texturePath))) {
-            LWARNING(fmt::format("Could not find image '{}'", texturePath));
-            return;
-        }
-
-        std::string script;
-        if (identifier.empty()) {
-            script = fmt::format(
-                "openspace.addScreenSpaceRenderable({{\
-                    Type = 'ScreenSpaceImageLocal',\
-                    TexturePath = openspace.absPath('{}')\
-                }});",
-                texturePath
-            );
-        }
-        else {
-            script = fmt::format(
-                "openspace.addScreenSpaceRenderable({{\
-                    Type = 'ScreenSpaceImageLocal',\
-                    TexturePath = openspace.absPath('{0}'),\
-                    Identifier = '{1}',\
-                    Name = '{1}'\
-                }});",
-                texturePath, identifier
-            );
-        }
-
-        openspace::global::scriptEngine->queueScript(
-            script,
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-
-    void addScreenSpaceRenderableOnline(std::string identifier, std::string texturePath) {
-        std::string script;
-        if (identifier.empty()) {
-            script = fmt::format(
-                "openspace.addScreenSpaceRenderable({{\
-                    Type = 'ScreenSpaceImageOnline',\
-                    URL = '{}'\
-                }});",
-                texturePath
-            );
-        }
-        else {
-            script = fmt::format(
-                "openspace.addScreenSpaceRenderable({{\
-                    Type = 'ScreenSpaceImageOnline',\
-                    URL = '{0}',\
-                    Identifier = '{1}',\
-                    Name = '{1}'\
-                }});",
-                texturePath,
-                identifier
-            );
-        }
-
-        openspace::global::scriptEngine->queueScript(
-            script,
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
+    constexpr std::array<const char*, 2> UniformNames = { "tex", "ortho" };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not."
+        "This setting determines whether this object will be visible or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is Collapsed",
-        "This setting determines whether this window is collapsed or not."
+        "This setting determines whether this window is collapsed or not"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
-        "explaining what impact they have on the visuals."
+        "explaining what impact they have on the visuals"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip Delay (in s)",
-        "This value determines the delay in seconds after which the tooltip is shown."
+        "This value determines the delay in seconds after which the tooltip is shown"
     };
 } // namespace
 
@@ -217,30 +153,49 @@ ImGUIModule::ImGUIModule()
     });
 
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier mod, KeyAction action) -> bool {
+        [&](Key key, KeyModifier mod, KeyAction action,
+            IsGuiWindow isGuiWindow) -> bool
+        {
             ZoneScopedN("ImGUI")
 
-            return _isEnabled ? keyCallback(key, mod, action) : false;
+            if (!isGuiWindow || !_isEnabled) {
+                return false;
+            }
+            return keyCallback(key, mod, action);
         }
     );
 
     global::callback::character->emplace_back(
-        [&](unsigned int codepoint, KeyModifier modifier) -> bool {
+        [&](unsigned int codepoint, KeyModifier modifier,
+            IsGuiWindow isGuiWindow) -> bool
+        {
             ZoneScopedN("ImGUI")
 
-            return _isEnabled ? charCallback(codepoint, modifier) : false;
+            if (!isGuiWindow || !_isEnabled) {
+                return false;
+            }
+            return charCallback(codepoint, modifier);
         }
     );
 
     global::callback::mousePosition->emplace_back(
-        [&](double x, double y) {
+        [&](double x, double y, IsGuiWindow isGuiWindow) {
+            if (!isGuiWindow) {
+                return; // do nothing
+            }
             _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
         }
     );
 
     global::callback::mouseButton->emplace_back(
-        [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
+        [&](MouseButton button, MouseAction action, KeyModifier,
+            IsGuiWindow isGuiWindow) -> bool
+        {
             ZoneScopedN("ImGUI")
+
+            if (!isGuiWindow) {
+                return false;
+            }
 
             if (action == MouseAction::Press) {
                 _mouseButtons |= (1 << static_cast<int>(button));
@@ -254,10 +209,13 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseScrollWheel->emplace_back(
-        [&](double, double posY) -> bool {
+        [&](double, double posY, IsGuiWindow isGuiWindow) -> bool {
             ZoneScopedN("ImGUI")
 
-            return _isEnabled ? mouseWheelCallback(posY) : false;
+            if (!isGuiWindow || !_isEnabled) {
+                return false;
+            }
+            return mouseWheelCallback(posY);
         }
     );
 
@@ -289,7 +247,7 @@ void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
             const std::vector<SceneGraphNode*>& nodes = scene ?
                 scene->allSceneGraphNodes() :
                 std::vector<SceneGraphNode*>();
-            
+
             return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
         }
     );
@@ -476,7 +434,7 @@ void ImGUIModule::internalInitializeGL() {
         sizeof(ImDrawVert),
         nullptr
     );
-    
+
     glEnableVertexAttribArray(uvAttrib);
     glVertexAttribPointer(
         uvAttrib,
@@ -486,7 +444,7 @@ void ImGUIModule::internalInitializeGL() {
         sizeof(ImDrawVert),
         reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
     );
-    
+
     glEnableVertexAttribArray(colorAttrib);
     glVertexAttribPointer(
         colorAttrib,
@@ -553,18 +511,6 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
        ImGui::Checkbox(comp->guiName().c_str(), &enabled);
        comp->setEnabled(enabled);
    }
-
-   // Render and Update property visibility
-   // Fragile! Keep this in sync with properties::Property::Visibility
-   using V = properties::Property::Visibility;
-   int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
-
-   // Array is sorted by importance
-   std::array<const char*, 4> items = { "User", "Developer", "Hidden", "All" };
-   ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
-
-   _currentVisibility = static_cast<V>(t);
-   _property.setVisibility(_currentVisibility);
 
 #ifdef SHOW_IMGUI_HELPERS
    ImGui::Checkbox("ImGUI Internals", &_showInternals);

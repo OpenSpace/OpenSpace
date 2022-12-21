@@ -53,7 +53,7 @@ local EarthLabel = {
   Parent = Earth.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Earth",
     FontSize = 70.0,
     Size = 8.77,
@@ -77,12 +77,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Earth)
   openspace.addSceneGraphNode(EarthLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthLabel)
   openspace.removeSceneGraphNode(Earth)
 end)
-    
+
 asset.export(Earth)
 asset.export(EarthLabel)
 
@@ -91,7 +91,7 @@ asset.export(EarthLabel)
 asset.meta = {
   Name = "Earth",
   Version = "1.0",
-  Description = [[ Earth is a special planet with special needs ]],
+  Description = "Earth is a special planet with special needs",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

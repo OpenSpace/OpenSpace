@@ -34,7 +34,7 @@ SyncBuffer::SyncBuffer(size_t n)
     _dataStream.resize(_n);
 }
 
-SyncBuffer::~SyncBuffer() {} // NOLINT
+SyncBuffer::~SyncBuffer() {}
 
 void SyncBuffer::encode(const std::string& s) {
     ZoneScoped

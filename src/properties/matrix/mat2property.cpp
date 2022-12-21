@@ -41,7 +41,7 @@ Mat2Property::Mat2Property(Property::PropertyInfo info, glm::mat2x2 value,
     )
 {}
 
-std::string Mat2Property::className() const {
+std::string_view Mat2Property::className() const {
     return "Mat2Property";
 }
 

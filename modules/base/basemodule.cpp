@@ -27,6 +27,7 @@
 #include <modules/base/dashboard/dashboarditemangle.h>
 #include <modules/base/dashboard/dashboarditemdate.h>
 #include <modules/base/dashboard/dashboarditemdistance.h>
+#include <modules/base/dashboard/dashboarditemelapsedtime.h>
 #include <modules/base/dashboard/dashboarditemframerate.h>
 #include <modules/base/dashboard/dashboarditemmission.h>
 #include <modules/base/dashboard/dashboarditemparallelconnection.h>
@@ -43,7 +44,7 @@
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderabledisc.h>
-#include <modules/base/rendering/renderablelabels.h>
+#include <modules/base/rendering/renderablelabel.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablenodeline.h>
 #include <modules/base/rendering/renderablesphere.h>
@@ -106,6 +107,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
     fDashboard->registerClass<DashboardItemDate>("DashboardItemDate");
     fDashboard->registerClass<DashboardItemDistance>("DashboardItemDistance");
+    fDashboard->registerClass<DashboardItemElapsedTime>("DashboardItemElapsedTime");
     fDashboard->registerClass<DashboardItemFramerate>("DashboardItemFramerate");
     fDashboard->registerClass<DashboardItemMission>("DashboardItemMission");
     fDashboard->registerClass<DashboardItemParallelConnection>(
@@ -129,7 +131,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
     fRenderable->registerClass<RenderableDisc>("RenderableDisc");
     fRenderable->registerClass<RenderableGrid>("RenderableGrid");
-    fRenderable->registerClass<RenderableLabels>("RenderableLabels");
+    fRenderable->registerClass<RenderableLabel>("RenderableLabel");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
@@ -212,7 +214,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableCartesianAxes::Documentation(),
         RenderableDisc::Documentation(),
         RenderableGrid::Documentation(),
-        RenderableLabels::Documentation(),
+        RenderableLabel::Documentation(),
         RenderableModel::Documentation(),
         RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),

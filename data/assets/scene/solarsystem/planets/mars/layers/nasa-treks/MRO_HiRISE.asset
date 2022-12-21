@@ -1,0 +1,298 @@
+-- This file was automatically generated using a script found at
+-- https://github.com/OpenSpace/scripts/treks-to-openspace. See the README.md file
+-- in that repository for more information on how to run the script to update these
+-- files. In particular in the case of errors, prefer to change that script rather
+-- than the individual files
+
+local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
+
+local treks_DTEEC_001918_1735_001984_1735_U01_longlat = {
+  Identifier = "DTEEC_001918_1735_001984_1735_U01_longlat",
+  Name = [[MRO HiRISE, 001918_1735_001984_1735 DEM]],
+  FilePath = asset.localResource("MRO_HiRISE/001918_1735_001984_1735_DEM.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_DTEED_042014_1760_042647_1760_A01 = {
+  Identifier = "DTEED_042014_1760_042647_1760_A01",
+  Name = [[MRO HiRISE, 042014_1760_042647_1760 DEM]],
+  FilePath = asset.localResource("MRO_HiRISE/042014_1760_042647_1760_DEM.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_DTEED_042753_1930_042252_1930_A01 = {
+  Identifier = "DTEED_042753_1930_042252_1930_A01",
+  Name = [[MRO HiRISE, 042753_1930_042252_1930 DEM]],
+  FilePath = asset.localResource("MRO_HiRISE/042753_1930_042252_1930_DEM.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_h1183_0000_da4 = {
+  Identifier = "h1183_0000_da4",
+  Name = [[MRO HiRISE, 1183_0000 DEM]],
+  FilePath = asset.localResource("MRO_HiRISE/1183_0000_DEM.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_HiRISE_ColumbiaHills = {
+  Identifier = "HiRISE_ColumbiaHills",
+  Name = [[MRO HiRISE, Columbia Hills Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Columbia_Hills_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_curiosity_hirise_mosaic = {
+  Identifier = "curiosity_hirise_mosaic",
+  Name = [[MRO HiRISE, Curiosity Roving Site Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Curiosity_Roving_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_Gale_DEM_SMG_1m = {
+  Identifier = "Gale_DEM_SMG_1m",
+  Name = [[MRO HiRISE, Gale Crater DEM]],
+  FilePath = asset.localResource("MRO_HiRISE/Gale_Crater_DEM.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_ESP_042252_1930_RED_B_01_ORTHO = {
+  Identifier = "ESP_042252_1930_RED_B_01_ORTHO",
+  Name = [[MRO HiRISE, Marth Crater West Rim Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Marth_Crater_West_Rim_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_ESP_040776_2115_RED_A_01_ORTHO = {
+  Identifier = "ESP_040776_2115_RED_A_01_ORTHO",
+  Name = [[MRO HiRISE, Martian Ares 3 Landing Site Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Martian_Ares_3_Landing_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_ESP_042647_1760_RED_B_01_ORTHO = {
+  Identifier = "ESP_042647_1760_RED_B_01_ORTHO",
+  Name = [[MRO HiRISE, Martian Ares 4 Landing Site Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Martian_Ares_4_Landing_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_CLH_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018 = {
+  Identifier = "CLH_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018",
+  Name = [[MRO HiRISE, Mosaic Columbia Hills]],
+  FilePath = asset.localResource("MRO_HiRISE/Mosaic_Columbia_Hills.vrt"),
+  Description = [[Preliminary visible orthoimage mosaic for Columbia Hills candidate landing site for the Mars 2020 rover.
+HRSC orthoimages and DEMs were downloaded from the Planetary Data System archives. HiRISE and CTX orthoimages and DEMs were created by the USGS Astrogeology and HiRISE teams,
+and compiled and georeferenced at JPL/Caltech by the Advanced Laboratory for Landing Site Terrain Analysis and Reconnaissance (ALLSTAR) group including Nathan Williams, 
+Heather Lethcoe-Wilson, Lauren Berger, Marshall Trautman, and Matt Golombek for the M2020 Council of Terrains. These files are for discussion and planning purposes 
+only.
+Processing Notes:
+Georeferencing: 
+HRSC orthos are well-coregistered to the community-standard MOLA global topography products, and CTX orthos are well-coregistered to the HRSC orthos.
+Tie points were recorded at small craters visible in both HiRISE and CTX images, and a first-order transformation was used to rectify the HiRISE.
+
+Projection and Coordinate System:
+Former mosaic basemaps for M2020 used a Mars equirectangular projection with a standard parallel of 0 (also called Plate Carree),
+but this caused a ~5% latitude vs longitude distortion at the remaining 3 candidate landing sites such that true circles would appear elliptical.
+In this new version of basemaps, we use a Mars equirectangular projection with customized standard parallels for each site to reduce distortion to <1%.
+Specifically, Columbia Hills uses a standard parallel of -14.5 degrees, while Jezero and NE Syrtis both have a standard parallel of +18 degrees. Projection (.prj) files are included with this delivery.
+When analyzing images, please ensure that the correct projection system is being used. For example, there is a known issue with Matlab where reading images in as a geotiff may automatically assign an 
+incorrect projection without the specified standard parallel, which then produces distorted linear (in meters) x/y values.]]
+}
+
+local treks_ESP_058005_1845_RED_spline_rect = {
+  Identifier = "ESP_058005_1845_RED_spline_rect",
+  Name = [[MRO HiRISE, Mosaic Insight Landing Site]],
+  FilePath = asset.localResource("MRO_HiRISE/Mosaic_Insight_Landing_Site.vrt"),
+  Description = [[This image (ESP_058005_1845) was acquired with the Mars HiRISE Camera aboard NASA’s Mars Reconnaissance Orbiter. It shows the Mars InSight lander (4.5024°, 135.62345°), heat shield (4.50834°, 135.63481°), and backshell with parachute (4.49415°, 135.62778°). The image was acquired on December 11, 2018 at 14:02 local Mars time. The image is centered at 4.495° lat and 135.623° lon. The spacecraft altitude was 271.5 km. Original image scale range is 27.9 cm/pixel (with 1 x 1 binning) so objects about 84 cm across are resolved. The emission angle was 13.7°, phase angle was 51.0°, and solar incidence angle was 39°, with the Sun about 51° above the horizon. Solar longitude was 304.3°, Northern Winter.]]
+}
+
+local treks_NES_JEZ_MID_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018 = {
+  Identifier = "NES_JEZ_MID_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018",
+  Name = [[MRO HiRISE, Mosaic Jezero NE Syrtis Midway]],
+  FilePath = asset.localResource("MRO_HiRISE/Mosaic_Jezero_NE_Syrtis_Midway.vrt"),
+  Description = [[Preliminary visible orthoimage mosaic for Jezero Crater, NE Syrtis, and Midway candidate landing sites for the Mars 2020 rover.
+HRSC orthoimages and DEMs were downloaded from the Planetary Data System archives. HiRISE and CTX orthoimages and DEMs were created by the USGS Astrogeology and HiRISE teams,
+and compiled and georeferenced at JPL/Caltech by the Advanced Laboratory for Landing Site Terrain Analysis and Reconnaissance (ALLSTAR) group including Nathan Williams, 
+Heather Lethcoe-Wilson, Lauren Berger, Marshall Trautman, and Matt Golombek for the M2020 Council of Terrains. These files are for discussion and planning purposes 
+only.
+Processing Notes:
+Georeferencing: 
+HRSC orthos are well-coregistered to the community-standard MOLA global topography products, and CTX orthos are well-coregistered to the HRSC orthos.
+Tie points were recorded at small craters visible in both HiRISE and CTX images, and a first-order transformation was used to rectify the HiRISE.
+
+Projection and Coordinate System:
+Former mosaic basemaps for M2020 used a Mars equirectangular projection with a standard parallel of 0 (also called Plate Carree),
+but this caused a ~5% latitude vs longitude distortion at the remaining 3 candidate landing sites such that true circles would appear elliptical.
+In this new version of basemaps, we use a Mars equirectangular projection with customized standard parallels for each site to reduce distortion to <1%.
+Specifically, Columbia Hills uses a standard parallel of -14.5 degrees, while Jezero and NE Syrtis both have a standard parallel of +18 degrees. Projection (.prj) files are included with this delivery.
+When analyzing images, please ensure that the correct projection system is being used. For example, there is a known issue with Matlab where reading images in as a geotiff may automatically assign an 
+incorrect projection without the specified standard parallel, which then produces distorted linear (in meters) x/y values.]]
+}
+
+local treks_HiRISE_Opportunity = {
+  Identifier = "HiRISE_Opportunity",
+  Name = [[MRO HiRISE, Mosaic Opportunity]],
+  FilePath = asset.localResource("MRO_HiRISE/Mosaic_Opportunity.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars. The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_opportunity_hirise_mosaic = {
+  Identifier = "opportunity_hirise_mosaic",
+  Name = [[MRO HiRISE, Opportunity Roving Site Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Opportunity_Roving_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_phoenix_hirise_mosaic = {
+  Identifier = "phoenix_hirise_mosaic",
+  Name = [[MRO HiRISE, Phoenix Landing Site Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Phoenix_Landing_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_sojourner_hirise_mosaic = {
+  Identifier = "sojourner_hirise_mosaic",
+  Name = [[MRO HiRISE, Sojourner Roving Site Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Sojourner_Roving_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_PSP_001918_1735_RED_A_01_ORTHO_longlat = {
+  Identifier = "PSP_001918_1735_RED_A_01_ORTHO_longlat",
+  Name = [[MRO HiRISE, Southwest Candor Chasma Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Southwest_Candor_Chasma_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars. The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_spirit_hirise_mosaic = {
+  Identifier = "spirit_hirise_mosaic",
+  Name = [[MRO HiRISE, Spirit Roving Site Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Spirit_Roving_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_PSP_001521_2025_RED = {
+  Identifier = "PSP_001521_2025_RED",
+  Name = [[MRO HiRISE, Viking 1 Landing Site Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Viking_1_Landing_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+local treks_PSP_001501_2280_RED = {
+  Identifier = "PSP_001501_2280_RED",
+  Name = [[MRO HiRISE, Viking 2 Landing Site Mosaic]],
+  FilePath = asset.localResource("MRO_HiRISE/Viking_2_Landing_Site_Mosaic.vrt"),
+  Description = [[This data was acquired using the High Resolution Imaging Science Experiment camera aboard NASA's Mars Reconnaissance Orbiter spacecraft (MRO). MRO was launched on August 12, 2005 and arrived at Mars on March 10, 2006. It maintains a nearly circular orbit, completing an orbital revolution about every 112 minutes at an altitude of approximately 250 to 316 km or 155 to 196 miles. MRO carries a sophisticated suite of instruments used to analyze and map the landforms, stratigraphy, minerals, and ice of Mars.
+
+The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_DTEEC_001918_1735_001984_1735_U01_longlat)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_DTEED_042014_1760_042647_1760_A01)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_DTEED_042753_1930_042252_1930_A01)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_h1183_0000_da4)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_HiRISE_ColumbiaHills)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_curiosity_hirise_mosaic)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Gale_DEM_SMG_1m)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_ESP_042252_1930_RED_B_01_ORTHO)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_ESP_040776_2115_RED_A_01_ORTHO)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_ESP_042647_1760_RED_B_01_ORTHO)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_CLH_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_ESP_058005_1845_RED_spline_rect)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_NES_JEZ_MID_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_HiRISE_Opportunity)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_opportunity_hirise_mosaic)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_phoenix_hirise_mosaic)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_sojourner_hirise_mosaic)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_PSP_001918_1735_RED_A_01_ORTHO_longlat)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_spirit_hirise_mosaic)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_PSP_001521_2025_RED)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_PSP_001501_2280_RED)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_DTEEC_001918_1735_001984_1735_U01_longlat")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_DTEED_042014_1760_042647_1760_A01")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_DTEED_042753_1930_042252_1930_A01")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_h1183_0000_da4")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_HiRISE_ColumbiaHills")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_curiosity_hirise_mosaic")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_Gale_DEM_SMG_1m")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_ESP_042252_1930_RED_B_01_ORTHO")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_ESP_040776_2115_RED_A_01_ORTHO")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_ESP_042647_1760_RED_B_01_ORTHO")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_CLH_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_ESP_058005_1845_RED_spline_rect")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_NES_JEZ_MID_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_HiRISE_Opportunity")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_opportunity_hirise_mosaic")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_phoenix_hirise_mosaic")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_sojourner_hirise_mosaic")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_PSP_001918_1735_RED_A_01_ORTHO_longlat")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_spirit_hirise_mosaic")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_PSP_001521_2025_RED")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_PSP_001501_2280_RED")
+end)
+
+asset.export("DTEEC_001918_1735_001984_1735_U01_longlat", treks_DTEEC_001918_1735_001984_1735_U01_longlat)
+asset.export("DTEED_042014_1760_042647_1760_A01", treks_DTEED_042014_1760_042647_1760_A01)
+asset.export("DTEED_042753_1930_042252_1930_A01", treks_DTEED_042753_1930_042252_1930_A01)
+asset.export("h1183_0000_da4", treks_h1183_0000_da4)
+asset.export("HiRISE_ColumbiaHills", treks_HiRISE_ColumbiaHills)
+asset.export("curiosity_hirise_mosaic", treks_curiosity_hirise_mosaic)
+asset.export("Gale_DEM_SMG_1m", treks_Gale_DEM_SMG_1m)
+asset.export("ESP_042252_1930_RED_B_01_ORTHO", treks_ESP_042252_1930_RED_B_01_ORTHO)
+asset.export("ESP_040776_2115_RED_A_01_ORTHO", treks_ESP_040776_2115_RED_A_01_ORTHO)
+asset.export("ESP_042647_1760_RED_B_01_ORTHO", treks_ESP_042647_1760_RED_B_01_ORTHO)
+asset.export("CLH_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018", treks_CLH_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018)
+asset.export("ESP_058005_1845_RED_spline_rect", treks_ESP_058005_1845_RED_spline_rect)
+asset.export("NES_JEZ_MID_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018", treks_NES_JEZ_MID_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07102018)
+asset.export("HiRISE_Opportunity", treks_HiRISE_Opportunity)
+asset.export("opportunity_hirise_mosaic", treks_opportunity_hirise_mosaic)
+asset.export("phoenix_hirise_mosaic", treks_phoenix_hirise_mosaic)
+asset.export("sojourner_hirise_mosaic", treks_sojourner_hirise_mosaic)
+asset.export("PSP_001918_1735_RED_A_01_ORTHO_longlat", treks_PSP_001918_1735_RED_A_01_ORTHO_longlat)
+asset.export("spirit_hirise_mosaic", treks_spirit_hirise_mosaic)
+asset.export("PSP_001521_2025_RED", treks_PSP_001521_2025_RED)
+asset.export("PSP_001501_2280_RED", treks_PSP_001501_2280_RED)
+
+
+asset.meta = {
+  Name = [[NASA Treks Layers for Mars MRO_HiRISE],
+  Version = "1.0",
+  Author = "NASA/Treks",
+  URL = "https://trek.nasa.gov/mars",
+  License = "NASA/Treks",
+  Description = [[MRO_HiRISE layers from NASA/Treks for Mars]]
+}

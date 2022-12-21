@@ -35,7 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "IswaDataGroup";
+    constexpr std::string_view _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
@@ -134,7 +134,7 @@ void IswaDataGroup::registerProperties() {
         // else if autofilter is turned off, register backgroundValues
         }
         else {
-            _backgroundValues.setVisibility(properties::Property::Visibility::All);
+            _backgroundValues.setVisibility(properties::Property::Visibility::Always);
             //_backgroundValues.setVisible(true);
         }
         ghoul::Dictionary d;

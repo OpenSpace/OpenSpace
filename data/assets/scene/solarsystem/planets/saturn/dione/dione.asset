@@ -24,7 +24,7 @@ local Dione = {
       SourceFrame = "IAU_ENCELADUS",
       DestinationFrame = "GALACTIC"
     }
-  },    
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 561400,
@@ -52,11 +52,11 @@ local Dione = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Dione)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Dione)
 end)
-  
+
 asset.export(Dione)
 
 
@@ -64,7 +64,7 @@ asset.export(Dione)
 asset.meta = {
   Name = "Dione",
   Version = "1.0",
-  Description = [[ Dione globe with labels]],
+  Description = "Dione globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

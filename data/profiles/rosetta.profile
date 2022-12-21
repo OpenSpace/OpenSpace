@@ -17,7 +17,7 @@
       "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
     },
     {
-      "documentation": "Jumps to the time when the Philae lander is released.",
+      "documentation": "Jumps to the time when the Philae lander is released",
       "gui_path": "/Missions/Rosetta",
       "identifier": "profile.setup.lander_release",
       "is_local": false,
@@ -25,7 +25,7 @@
       "script": "openspace.time.setTime('2014-11-12T08:20:00.00');"
     },
     {
-      "documentation": "Removes all image projections from 67P.",
+      "documentation": "Removes all image projections from 67P",
       "gui_path": "/Missions/Rosetta",
       "identifier": "profile.67p.clear_projections",
       "is_local": false,
@@ -33,7 +33,7 @@
       "script": "openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.ClearAllProjections', true);"
     },
     {
-      "documentation": "Toggles the visibility of all trails further from the Sun than 67P.",
+      "documentation": "Toggles the visibility of all trails further from the Sun than 67P",
       "gui_path": "/Missions/Rosetta",
       "identifier": "profile.toggle.outerplanet_trails",
       "is_local": false,
@@ -41,7 +41,7 @@
       "script": "local list = openspace.getProperty('{planetTrail_giants}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
-      "documentation": "Toggles the visibility of the free floating image plane.",
+      "documentation": "Toggles the visibility of the free floating image plane",
       "gui_path": "/Missions/Rosetta",
       "identifier": "profile.toggle.image_plane",
       "is_local": false,
@@ -49,7 +49,7 @@
       "script": "openspace.setPropertyValueSingle('Scene.ImagePlaneRosetta.Renderable.Enabled', not openspace.getPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled'));"
     },
     {
-      "documentation": "Toggles the visibility of Philae's trail.",
+      "documentation": "Toggles the visibility of Philae's trail",
       "gui_path": "/Missions/Rosetta",
       "identifier": "profile.toggle.philae_trail",
       "is_local": false,
@@ -57,7 +57,7 @@
       "script": "openspace.setPropertyValueSingle('Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PhilaeTrail.Renderable.Enabled'));"
     },
     {
-      "documentation": "Enables or disables the image projection on 67P.",
+      "documentation": "Enables or disables the image projection on 67P",
       "gui_path": "/Missions/Rosetta",
       "identifier": "profile.toggle.67p_projection",
       "is_local": false,
@@ -150,7 +150,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "The Rosetta scene shows the entire mission of ESA’s Rosetta spacecraft around comet 67P, also known as Churyumov-Gerasimenko. The spacecraft’s images are projected onto the comet and the separation of the Philae lander is visible as well.",
+    "description": "The Rosetta scene shows the entire mission of ESA's Rosetta spacecraft around comet 67P, also known as Churyumov-Gerasimenko. The spacecraft's images are projected onto the comet and the separation of the Philae lander is visible as well",
     "license": "MIT License",
     "name": "Rosetta",
     "url": "https://www.openspaceproject.com",

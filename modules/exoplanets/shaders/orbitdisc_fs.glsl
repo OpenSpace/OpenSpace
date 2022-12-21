@@ -32,8 +32,10 @@ uniform vec2 offset; // relative to semi major axis
 uniform float opacity;
 uniform float eccentricity;
 uniform float semiMajorAxis;
+uniform vec3 multiplyColor = vec3(1.0);
 
 const float Epsilon = 0.0000001;
+
 
 // Compute semi minor axis from major axis, a, and eccentricity, e
 float semiMinorAxis(float a, float e) {
@@ -49,6 +51,7 @@ float ellipseTest(vec2 point, float a, float b, float cx) {
   float y = point.y;
   return (pow(x - cx, 2.0) / (a*a)) + ((y*y) / (b*b));
 }
+
 
 Fragment getFragment() {
   // Moving the origin to the center
@@ -120,6 +123,7 @@ Fragment getFragment() {
 
   vec4 diffuse = texture(discTexture, textureCoord);
   diffuse.a *= opacity;
+  diffuse.rgb *= multiplyColor;
 
   Fragment frag;
   frag.color = diffuse;

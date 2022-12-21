@@ -38,26 +38,21 @@
 #include <numeric>
 
 namespace {
-    constexpr const char* _loggerCat = "PropertyOwner";
+    constexpr std::string_view _loggerCat = "PropertyOwner";
 
     void createJson(openspace::properties::PropertyOwner* owner, std::vector<char>& buf) {
         ZoneScoped
 
         using namespace openspace;
 
-        constexpr const char* replStr = R"("{}": "{}")";
+        constexpr std::string_view replStr = R"("{}": "{}")";
 
-        //std::stringstream json;
-        //json << "{";
         buf.push_back('{');
-        //json << fmt::format(replStr, "name", owner->identifier()) << ",";
         fmt::format_to(std::back_inserter(buf), replStr, "name", owner->identifier());
         buf.push_back(',');
 
         constexpr std::string_view propertiesText = "\"properties\": [";
-        //constexpr const std::array<char, 16> propertiesText = { "\"properties\": [" };
         buf.insert(buf.end(), propertiesText.begin(), propertiesText.end());
-        //json << "\"properties\": [";
         const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
             //json << "{";
@@ -69,37 +64,28 @@ namespace {
             fmt::format_to(std::back_inserter(buf), replStr, "type", p->className());
             buf.push_back(',');
 
-            //json << fmt::format(
-            //    replStr, "fullyQualifiedId", p->fullyQualifiedIdentifier()
-            //) << ",";
             fmt::format_to(
                 std::back_inserter(buf),
                 replStr, "fullyQualifiedId", p->fullyQualifiedIdentifier()
             );
             buf.push_back(',');
 
-            //json << fmt::format(replStr, "guiName", p->guiName()) << ",";
             fmt::format_to(std::back_inserter(buf), replStr, "guiName", p->guiName());
             buf.push_back(',');
 
-            //json << fmt::format(replStr, "description", escapedJson(p->description()));
             fmt::format_to(
                 std::back_inserter(buf),
                 replStr, "description", escapedJson(p->description())
             );
-            //json << "}";
             buf.push_back('}');
             if (p != properties.back()) {
-                //json << ",";
                 buf.push_back(',');
             }
         }
-        //json << "],";
         buf.push_back(']');
         buf.push_back(',');
 
         constexpr std::string_view propertyOwnersText = "\"propertyOwners\": [";
-        //json << "\"propertyOwners\": [";
         buf.insert(
             buf.end(),
             propertyOwnersText.begin(),
@@ -108,18 +94,12 @@ namespace {
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {
             createJson(o, buf);
-            //json << createJson(o);
             if (o != propertyOwners.back()) {
-                //json << ",";
                 buf.push_back(',');
             }
         }
-        //json << "]";
         buf.push_back(']');
-        //json << "}";
         buf.push_back('}');
-
-        //return json.str();
     }
 } // namespace
 

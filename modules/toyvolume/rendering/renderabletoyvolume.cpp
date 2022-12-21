@@ -32,7 +32,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableToyVolume";
+    constexpr std::string_view _loggerCat = "RenderableToyVolume";
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
@@ -73,8 +74,7 @@ namespace {
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value set the downscaling factor"
-        " when rendering the current volume."
+        "This value set the downscaling factor when rendering the current volume"
     };
 } // namespace
 
@@ -84,7 +84,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
-    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f )
+    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
     , _rotation(
         RotationInfo,
@@ -132,8 +132,9 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         _rayCastSteps = static_cast<int>(dictionary.value<double>("Steps"));
     }
     else {
-        LINFO("Number of raycasting steps not specified for ToyVolume."
-            " Using default value.");
+        LINFO(
+            "Number of raycasting steps not specified for ToyVolume. Using default value"
+        );
     }
 }
 

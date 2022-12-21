@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; }
 class DashboardItemSpacing : public DashboardItem {
 public:
     DashboardItemSpacing(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemSpacing() = default;
+    ~DashboardItemSpacing() override = default;
 
     void render(glm::vec2& penPosition) override;
 

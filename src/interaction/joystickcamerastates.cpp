@@ -25,14 +25,16 @@
 #include <openspace/interaction/joystickcamerastates.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
+#include <algorithm>
 #include <cmath>
 #include <utility>
 
 namespace {
-    constexpr const char* _loggerCat = "JoystickCameraStates";
+    constexpr std::string_view _loggerCat = "JoystickCameraStates";
 } // namespace
 
 namespace openspace::interaction {
@@ -45,6 +47,13 @@ void JoystickCameraStates::updateStateFromInput(
                                            const JoystickInputStates& joystickInputStates,
                                                 double deltaTime)
 {
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        return;
+    }
+
     std::pair<bool, glm::dvec2> globalRotation = { false, glm::dvec2(0.0) };
     std::pair<bool, double> zoom = { false, 0.0 };
     std::pair<bool, glm::dvec2> localRoll = { false, glm::dvec2(0.0) };
@@ -63,7 +72,10 @@ void JoystickCameraStates::updateStateFromInput(
         }
 
         int nAxes = joystickInputStates.numAxes(joystickInputState.name);
-        for (int i = 0; i < nAxes; ++i) {
+        for (int i = 0;
+             i < std::min(static_cast<size_t>(nAxes), joystick->axisMapping.size());
+             ++i)
+        {
             AxisInformation t = joystick->axisMapping[i];
             if (t.type == AxisType::None) {
                 continue;
@@ -238,7 +250,7 @@ void JoystickCameraStates::setAxisMapping(std::string joystickName,
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= joystickCameraState->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystickCameraState->axisMapping.size())) {
         joystickCameraState->axisMapping.resize(axis + 1);
         joystickCameraState->prevAxisValues.resize(axis + 1);
     }
@@ -266,7 +278,7 @@ void JoystickCameraStates::setAxisMappingProperty(std::string joystickName,
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= joystickCameraState->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystickCameraState->axisMapping.size())) {
         joystickCameraState->axisMapping.resize(axis + 1);
         joystickCameraState->prevAxisValues.resize(axis + 1);
     }
@@ -292,7 +304,7 @@ JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(
         return dummy;
     }
 
-    if (axis >= joystick->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystick->axisMapping.size())) {
         JoystickCameraStates::AxisInformation dummy;
         return dummy;
     }
@@ -309,7 +321,7 @@ void JoystickCameraStates::setDeadzone(const std::string& joystickName, int axis
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= joystickCameraState->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystickCameraState->axisMapping.size())) {
         joystickCameraState->axisMapping.resize(axis + 1);
         joystickCameraState->prevAxisValues.resize(axis + 1);
     }
@@ -323,7 +335,7 @@ float JoystickCameraStates::deadzone(const std::string& joystickName, int axis) 
         return 0.f;
     }
 
-    if (axis >= joystick->axisMapping.size()) {
+    if (axis >= static_cast<int>(joystick->axisMapping.size())) {
         return 0.f;
     }
 
@@ -356,7 +368,7 @@ void JoystickCameraStates::clearButtonCommand(const std::string& joystickName,
     }
 
     for (auto it = joystick->buttonMapping.begin();
-         it != joystick->buttonMapping.end(); )
+         it != joystick->buttonMapping.end();)
     {
         // If the current iterator is the button that we are looking for, delete it
         // (std::multimap::erase will return the iterator to the next element for us)

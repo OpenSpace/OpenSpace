@@ -29,6 +29,7 @@ in float vs_depth;
 
 uniform float opacity;
 
+
 Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(vs_color, opacity);

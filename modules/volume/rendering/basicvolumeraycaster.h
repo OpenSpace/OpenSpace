@@ -53,7 +53,7 @@ public:
         std::shared_ptr<ghoul::opengl::Texture> texture,
         std::shared_ptr<openspace::TransferFunction> transferFunction,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
-    virtual ~BasicVolumeRaycaster();
+    ~BasicVolumeRaycaster() override;
 
     void initialize();
     void deinitialize();
@@ -76,7 +76,7 @@ public:
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunction(std::shared_ptr<openspace::TransferFunction> 
+    void setTransferFunction(std::shared_ptr<openspace::TransferFunction>
         transferFunction);
 
     void setStepSize(float stepSize);

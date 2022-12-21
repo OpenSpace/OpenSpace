@@ -35,16 +35,15 @@
 #include <ghoul/misc/profiling.h>
 #include <filesystem>
 #include <optional>
+#include <variant>
 
 namespace {
-    constexpr const char* DefaultReferenceFrame = "GALACTIC";
-
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "Target",
         "Target",
         "This is the SPICE NAIF name for the body whose translation is to be computed by "
         "the SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') "
-        "or a NAIF integer id code (such as '399')."
+        "or a NAIF integer id code (such as '399')"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
@@ -52,31 +51,29 @@ namespace {
         "Observer",
         "This is the SPICE NAIF name for the parent of the body whose translation is to "
         "be computed by the SpiceTranslation. It can either be a fully qualified name "
-        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')."
+        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "Frame",
         "Reference Frame",
         "This is the SPICE NAIF name for the reference frame in which the position "
-        "should be retrieved. The default value is GALACTIC."
+        "should be retrieved. The default value is GALACTIC"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed Date",
         "A time to lock the position to. Setting this to an empty string will "
-        "unlock the time and return to position based on current simulation time."
+        "unlock the time and return to position based on current simulation time"
     };
 
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
-        std::string target
-            [[codegen::annotation("A valid SPICE NAIF name or identifier")]];
+        std::variant<std::string, int> target;
 
         // [[codegen::verbatim(ObserverInfo.description)]]
-        std::string observer
-            [[codegen::annotation("A valid SPICE NAIF name or identifier")]];
+        std::variant<std::string, int> observer;
 
         std::optional<std::string> frame
             [[codegen::annotation("A valid SPICE NAIF name for a reference frame")]];
@@ -100,9 +97,9 @@ documentation::Documentation SpiceTranslation::Documentation() {
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     : _target(TargetInfo)
     , _observer(ObserverInfo)
-    , _frame(FrameInfo, DefaultReferenceFrame)
+    , _frame(FrameInfo, "GALACTIC")
     , _fixedDate(FixedDateInfo)
-    , _cachedFrame(DefaultReferenceFrame)
+    , _cachedFrame("GALACTIC")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -164,8 +161,20 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
-    _target = p.target;
-    _observer = p.observer;
+    if (std::holds_alternative<std::string>(p.target)) {
+        _target = std::get<std::string>(p.target);
+    }
+    else {
+        _target = std::to_string(std::get<int>(p.target));
+    }
+
+    if (std::holds_alternative<std::string>(p.observer)) {
+        _observer = std::get<std::string>(p.observer);
+    }
+    else {
+        _observer = std::to_string(std::get<int>(p.observer));
+    }
+
     _frame = p.frame.value_or(_frame);
 }
 

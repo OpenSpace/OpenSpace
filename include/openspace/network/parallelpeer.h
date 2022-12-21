@@ -47,7 +47,7 @@ namespace scripting { struct LuaLibrary; }
 class ParallelPeer : public properties::PropertyOwner {
 public:
     ParallelPeer();
-    ~ParallelPeer();
+    ~ParallelPeer() override;
 
     void connect();
     void setPort(std::string port);

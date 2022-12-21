@@ -32,6 +32,7 @@ out float vs_depth;
 
 uniform mat4 mvpMatrix;
 
+
 void main() {
   vs_st = in_st;
   vec4 p = mvpMatrix * vec4(in_position, 1.0);

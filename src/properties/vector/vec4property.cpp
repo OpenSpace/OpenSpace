@@ -40,7 +40,7 @@ Vec4Property::Vec4Property(Property::PropertyInfo info, glm::vec4 value,
     )
 {}
 
-std::string Vec4Property::className() const {
+std::string_view Vec4Property::className() const {
     return "Vec4Property";
 }
 

@@ -29,6 +29,7 @@ out vec4 renderTableColor;
 uniform ivec2 OTHER_TEXTURES;
 uniform sampler2D deltaETexture;
 
+
 void main() {   
   vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES);
 

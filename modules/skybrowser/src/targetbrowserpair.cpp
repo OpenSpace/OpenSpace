@@ -40,12 +40,28 @@
 #include <functional>
 #include <chrono>
 
+namespace {
+    void aimTargetGalactic(std::string id, glm::dvec3 direction) {
+        glm::dvec3 positionCelestial = glm::normalize(direction) *
+            openspace::skybrowser::CelestialSphereRadius;
+
+        std::string script = fmt::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
+            id, ghoul::to_string(positionCelestial)
+        );
+        openspace::global::scriptEngine->queueScript(
+            script,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+} // namespace
+
 namespace openspace {
 
 TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
                                      ScreenSpaceSkyBrowser* browser)
-    : _targetNode(targetNode)
-    , _browser(browser)
+    : _browser(browser)
+    , _targetNode(targetNode)
 {
     ghoul_assert(browser, "Sky browser is null pointer");
     ghoul_assert(targetNode, "Sky target is null pointer");
@@ -53,54 +69,25 @@ TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
 }
 
-TargetBrowserPair& TargetBrowserPair::operator=(TargetBrowserPair other) {
-    std::swap(_targetNode, other._targetNode);
-    std::swap(_browser, other._browser);
-    return *this;
-}
-
 void TargetBrowserPair::setImageOrder(int i, int order) {
     _browser->setImageOrder(i, order);
 }
 
-void TargetBrowserPair::aimTargetGalactic(glm::dvec3 direction) {
-    std::string id = _targetNode->identifier();
-    glm::dvec3 positionCelestial = glm::normalize(direction) *
-        skybrowser::CelestialSphereRadius;
-
-    std::string script = fmt::format(
-        "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
-        id, ghoul::to_string(positionCelestial)
-    );
-    openspace::global::scriptEngine->queueScript(
-        script,
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-}
-
 void TargetBrowserPair::startFinetuningTarget() {
+
     _startTargetPosition = _targetNode->worldPosition();
 }
 
-// The fine tune of the target is a way to "drag and drop" the target with right click
+// The fine tune of the target is a way to "drag and drop" the target with click
 // drag on the sky browser window. This is to be able to drag the target around when it
 // has a very small field of view
-void TargetBrowserPair::fineTuneTarget(const glm::vec2& startMouse,
-                                       const glm::vec2& translation)
-{
-    glm::vec2 fineTune = _browser->fineTuneVector(translation);
-    glm::vec2 endMouse = startMouse + fineTune;
+void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
+    glm::dvec2 percentage = glm::dvec2(translation);
+    glm::dvec3 right = _targetRenderable->rightVector() * percentage.x;
+    glm::dvec3 up = _targetRenderable->upVector() * percentage.y;
 
-    // Translation world
-    glm::dvec3 startWorld = skybrowser::localCameraToGalactic(
-        glm::vec3(startMouse, skybrowser::ScreenSpaceZ)
-    );
-    glm::dvec3 endWorld = skybrowser::localCameraToGalactic(
-        glm::vec3(endMouse, skybrowser::ScreenSpaceZ)
-    );
-
-    glm::dvec3 translationWorld = endWorld - startWorld;
-    aimTargetGalactic(_startTargetPosition + translationWorld);
+    glm::dvec3 newPosition = _startTargetPosition - (right - up);
+    aimTargetGalactic(_targetNode->identifier(), newPosition);
 }
 
 void TargetBrowserPair::synchronizeAim() {
@@ -114,11 +101,6 @@ void TargetBrowserPair::synchronizeAim() {
 void TargetBrowserPair::setEnabled(bool enable) {
     _browser->setEnabled(enable);
     _targetRenderable->property("Enabled")->set(enable);
-}
-
-void TargetBrowserPair::setOpacity(float opacity) {
-    _browser->property("Opacity")->set(opacity);
-    _targetRenderable->property("Opacity")->set(opacity);
 }
 
 bool TargetBrowserPair::isEnabled() const {
@@ -165,10 +147,6 @@ std::string TargetBrowserPair::targetNodeId() const {
     return _targetNode->identifier();
 }
 
-float TargetBrowserPair::browserRatio() const {
-    return _browser->browserRatio();
-}
-
 double TargetBrowserPair::verticalFov() const {
     return _browser->verticalFov();
 }
@@ -183,6 +161,7 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
 
     ghoul::Dictionary res;
     res.setValue("id", browserId());
+    res.setValue("targetId", targetNodeId());
     res.setValue("name", browserGuiName());
     res.setValue("fov", static_cast<double>(verticalFov()));
     res.setValue("ra", spherical.x);
@@ -190,12 +169,13 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("roll", targetRoll());
     res.setValue("color", borderColor());
     res.setValue("cartesianDirection", cartesian);
-    res.setValue("ratio", static_cast<double>(browserRatio()));
+    res.setValue("ratio", static_cast<double>(_browser->browserRatio()));
     res.setValue("isFacingCamera", isFacingCamera());
     res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
     res.setValue("selectedImages", selectedImages());
     res.setValue("scale", static_cast<double>(_browser->scale()));
     res.setValue("opacities", _browser->opacities());
+    res.setValue("borderRadius", _browser->borderRadius());
 
     std::vector<std::pair<std::string, glm::dvec3>> copies = displayCopies();
     std::vector<std::pair<std::string, bool>> showCopies = _browser->showDisplayCopies();
@@ -248,17 +228,8 @@ void TargetBrowserPair::hideChromeInterface() {
 void TargetBrowserPair::sendIdToBrowser() const {
     _browser->setIdInBrowser();
 }
-
-void TargetBrowserPair::updateBrowserSize() {
-    _browser->updateBrowserSize();
-}
-
 std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::displayCopies() const {
     return _browser->displayCopies();
-}
-
-bool TargetBrowserPair::isImageCollectionLoaded() {
-    return _browser->isImageCollectionLoaded();
 }
 
 void TargetBrowserPair::setVerticalFov(double vfov) {
@@ -268,6 +239,7 @@ void TargetBrowserPair::setVerticalFov(double vfov) {
 
 void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
     aimTargetGalactic(
+        _targetNode->identifier(),
         skybrowser::equatorialToGalactic(skybrowser::sphericalToCartesian(aim))
     );
     _browser->setEquatorialAim(aim);
@@ -278,32 +250,42 @@ void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
     _browser->setBorderColor(color);
 }
 
+void TargetBrowserPair::setBorderRadius(double radius) {
+    _browser->setBorderRadius(radius);
+    _targetRenderable->setBorderRadius(radius);
+}
+
 void TargetBrowserPair::setBrowserRatio(float ratio) {
     _browser->setRatio(ratio);
     _targetRenderable->setRatio(ratio);
 }
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
-    _browser->setVerticalFovWithScroll(scroll);
+    double fov = _browser->setVerticalFovWithScroll(scroll);
+    _targetRenderable->setVerticalFov(fov);
 }
 
 void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
     _browser->setImageCollectionIsLoaded(isLoaded);
 }
 
+void TargetBrowserPair::applyRoll() {
+    _targetRenderable->applyRoll();
+}
+
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {
     // Animate the target before the field of view starts to animate
     if (_targetAnimation.isAnimating()) {
-        aimTargetGalactic(_targetAnimation.getNewValue());
+        aimTargetGalactic(_targetNode->identifier(), _targetAnimation.newValue());
     }
     else if (!_targetAnimation.isAnimating() && _targetIsAnimating) {
         // Set the finished position
-        aimTargetGalactic(_targetAnimation.getNewValue());
+        aimTargetGalactic(_targetNode->identifier(), _targetAnimation.newValue());
         _fovAnimation.start();
         _targetIsAnimating = false;
     }
     if (_fovAnimation.isAnimating()) {
-        _browser->setVerticalFov(_fovAnimation.getNewValue());
+        _browser->setVerticalFov(_fovAnimation.newValue());
         _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
@@ -359,13 +341,8 @@ double TargetBrowserPair::targetRoll() const {
         _targetNode->worldPosition() -
         global::navigationHandler->camera()->positionVec3()
     );
-    glm::dvec3 right = glm::normalize(
-        glm::cross(
-            global::navigationHandler->camera()->lookUpVectorWorldSpace(),
-            normal
-        )
-    );
-    glm::dvec3 up = glm::normalize(glm::cross(normal, right));
+    glm::dvec3 right = _targetRenderable->rightVector();
+    glm::dvec3 up = glm::normalize(glm::cross(right, normal));
     return skybrowser::targetRoll(up, normal);
 }
 
@@ -377,20 +354,8 @@ bool TargetBrowserPair::isUsingRadiusAzimuthElevation() const {
     return _browser->isUsingRaeCoords();
 }
 
-SceneGraphNode* TargetBrowserPair::targetNode() const {
-    return _targetNode;
-}
-
 ScreenSpaceSkyBrowser* TargetBrowserPair::browser() const {
     return _browser;
-}
-
-bool operator==(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {
-    return lhs._targetNode == rhs._targetNode && lhs._browser == rhs._browser;
-}
-
-bool operator!=(const TargetBrowserPair& lhs, const TargetBrowserPair& rhs) {
-    return !(lhs == rhs);
 }
 
 } // namespace openspace

@@ -38,12 +38,12 @@
 #include "SpiceZpr.h"
 
 namespace {
-    constexpr const char* _loggerCat = "SpiceManager";
+    constexpr std::string_view _loggerCat = "SpiceManager";
 
     // The value comes from
     // http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getmsg_c.html
     // as the maximum message length
-    constexpr const unsigned SpiceErrorBufferSize = 1841;
+    constexpr unsigned SpiceErrorBufferSize = 1841;
 
     const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
         using SM = openspace::SpiceManager;
@@ -151,9 +151,9 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(
 
 SpiceManager::SpiceManager() {
     // Set the SPICE library to not exit the program if an error occurs
-    erract_c("SET", 0, const_cast<char*>("REPORT")); // NOLINT
+    erract_c("SET", 0, const_cast<char*>("REPORT"));
     // But we do not want SPICE to print the errors, we will fetch them ourselves
-    errprt_c("SET", 0, const_cast<char*>("NONE")); // NOLINT
+    errprt_c("SET", 0, const_cast<char*>("NONE"));
 }
 
 SpiceManager::~SpiceManager() {
@@ -162,8 +162,8 @@ SpiceManager::~SpiceManager() {
     }
 
     // Set values back to default
-    erract_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
-    errprt_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
+    erract_c("SET", 0, const_cast<char*>("DEFAULT"));
+    errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
 }
 
 void SpiceManager::initialize() {
@@ -404,7 +404,7 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
 {
     std::vector<std::pair<int, std::string>> bodies;
 
-    constexpr const int Frnmln = 33;
+    constexpr int Frnmln = 33;
     static SpiceInt idsetBuffer[SPICE_CELL_CTRLSZ + 8192];
     static SpiceCell idset = {
         SPICE_INT,
@@ -1043,7 +1043,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
+        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -1102,7 +1102,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
+        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i);
 
 #if defined __clang__
 #pragma clang diagnostic pop

@@ -111,13 +111,13 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
-  
+
 for i, node in ipairs(nodes) do
   asset.export(node)
 end
@@ -126,9 +126,9 @@ end
 asset.meta = {
   Name = "Jupiter Himalia Group Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Jupiter's Himalia Group
-    moons: Leda, Himalia, Lysithea, Elara and Dia. Blank globes and SPICE trails
-    are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Jupiter's Himalia Group moons: Leda,
+    Himalia, Lysithea, Elara and Dia. Blank globes and SPICE trails are generated for each
+    moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

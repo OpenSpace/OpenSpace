@@ -115,7 +115,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     int value = *p;
     const std::vector<OptionProperty::Option>& options = p->options();
     switch (p->displayType()) {
-        case OptionProperty::DisplayType::Radio: {
+        case OptionProperty::DisplayType::Radio:
             ImGui::Text("%s", name.c_str());
             ImGui::Separator();
             for (const OptionProperty::Option& o : options) {
@@ -126,7 +126,6 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
             }
             ImGui::Separator();
             break;
-        }
         case OptionProperty::DisplayType::Dropdown: {
             // The order of the options does not have to correspond with the value of the
             // option
@@ -174,7 +173,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
     if (ImGui::TreeNode(name.c_str())) {
         bool selectionChanged = false;
         std::set<std::string> newSelected;
-       
+
         std::set<std::string> selected = p->value();
         const std::vector<std::string>& options = p->options();
 
@@ -218,7 +217,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 
     const std::string value = p->value();
 
-    static const int bufferSize = 256;
+    static constexpr int bufferSize = 256;
     static char buffer[bufferSize];
 #ifdef _MSC_VER
     strcpy_s(buffer, value.length() + 1, value.c_str());
@@ -258,7 +257,7 @@ void renderListProperty(const std::string& name, const std::string& fullIdentifi
 #else
     strcpy(buffer, value.c_str());
 #endif
-    
+
     bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
     if (hasNewValue) {
         std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');
@@ -283,9 +282,7 @@ void renderDoubleListProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    std::string value;
-    p->getStringValue(value);
-
+    std::string value = p->stringValue();
     renderListProperty(name, p->fullyQualifiedIdentifier(), value);
 
     if (showTooltip) {
@@ -303,9 +300,7 @@ void renderIntListProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    std::string value;
-    p->getStringValue(value);
-
+    std::string value = p->stringValue();
     renderListProperty(name, p->fullyQualifiedIdentifier(), value);
 
     if (showTooltip) {
@@ -323,9 +318,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    std::string value;
-    p->getStringValue(value);
-
+    std::string value = p->stringValue();
     renderListProperty(name, p->fullyQualifiedIdentifier(), value);
 
     if (showTooltip) {

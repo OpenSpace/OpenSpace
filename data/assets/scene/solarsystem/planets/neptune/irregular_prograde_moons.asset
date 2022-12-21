@@ -11,7 +11,7 @@ local parentIdentifier = transforms.NeptuneBarycenter.Identifier
 local parentSpice = "NEPTUNE BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_irregular_prograde", "moon_minor" }
 local trailColor = { 0.2, 0.5, 0.75 }
-local trailTags = { 
+local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_neptune",
@@ -79,13 +79,13 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
-  
+
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
@@ -94,9 +94,9 @@ end
 asset.meta = {
   Name = "Neptune Irregular Prograde Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Neptune' irregular prograde
+  Description = [[Procedural Globe asset containing Neptune' irregular prograde
     moons: Halimede, Psamathe and Neso. Blank globes and SPICE trails are generated for
-    each moon.]],
+    each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

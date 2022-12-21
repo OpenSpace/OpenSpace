@@ -9,7 +9,7 @@ local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_inner", "moon_minor" }
 
 local trailColor = { 0.60, 0.65, 0.84 }
-local trailTags = { 
+local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_uranus",
@@ -248,13 +248,13 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
-  
+
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
@@ -263,10 +263,10 @@ end
 asset.meta = {
   Name = "Uranus Irregular Retrograde Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Uranus' irregular retrograde
-    moons: Cordelia, Ophelia, Bianca, Cressida, Desdemona, Juliet, Portia, Rosalind,
-    Cupid, Belinda, Perdita, Puck and Mab. Blank globes and SPICE trails are
-    generated for each moon.]],
+  Description = [[Procedural Globe asset containing Uranus' irregular retrograde moons:
+    Cordelia, Ophelia, Bianca, Cressida, Desdemona, Juliet, Portia, Rosalind, Cupid,
+    Belinda, Perdita, Puck and Mab. Blank globes and SPICE trails are generated for each
+    moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

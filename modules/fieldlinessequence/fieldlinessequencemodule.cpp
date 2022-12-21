@@ -33,7 +33,7 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* DefaultTransferfunctionSource =
+    constexpr std::string_view DefaultTransferfunctionSource =
 R"(
 width 5
 lower 0.0

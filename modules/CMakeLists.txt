@@ -361,7 +361,7 @@ foreach (path ${module_paths})
   # The module path should include the 'modules' directory, which is removed for the
   # include path to make all of the includes look the same
   list(APPEND MODULE_PATHS "    \"${path}/modules\",\n")
-  target_include_directories(openspace-module-collection PUBLIC ${path})
+  target_include_directories(openspace-module-collection INTERFACE ${path})
 endforeach ()
 
 if (NOT "${MODULE_HEADERS}" STREQUAL "")

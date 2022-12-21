@@ -34,7 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Waypoint";
+    constexpr std::string_view _loggerCat = "Waypoint";
 } // namespace
 
 namespace openspace::interaction {

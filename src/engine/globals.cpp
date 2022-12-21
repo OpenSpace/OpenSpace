@@ -70,7 +70,7 @@ namespace {
     // allocation works on Linux, but it fails on Windows in some SGCT function and on Mac
     // in some random global randoms
 #ifdef WIN32
-    constexpr const int TotalSize =
+    constexpr int TotalSize =
         sizeof(MemoryManager) +
         sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
@@ -399,6 +399,7 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::dashboard);
 
     rootPropertyOwner->addPropertySubOwner(global::userPropertyOwner);
+    rootPropertyOwner->addPropertySubOwner(global::openSpaceEngine);
 
     syncEngine->addSyncable(global::scriptEngine);
 }
@@ -636,7 +637,7 @@ void deinitialize() {
         ssr->deinitialize();
     }
 
-    syncEngine->removeSyncables(timeManager->getSyncables());
+    syncEngine->removeSyncables(timeManager->syncables());
 
     moduleEngine->deinitialize();
     luaConsole->deinitialize();

@@ -38,7 +38,7 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetsDataPreparationTask";
+    constexpr std::string_view _loggerCat = "ExoplanetsDataPreparationTask";
 
     struct [[codegen::Dictionary(ExoplanetsDataPreparationTask)]] Parameters {
         // The csv file to extract data from
@@ -82,7 +82,7 @@ std::string ExoplanetsDataPreparationTask::description() {
     return fmt::format(
         "Extract data about exoplanets from file {} and write as bin to {}. The data "
         "file should be a csv version of the Planetary Systems Composite Data from the "
-        "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/).",
+        "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/)",
         _inputDataPath, _outputBinPath
     );
 }

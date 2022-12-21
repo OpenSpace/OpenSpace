@@ -33,16 +33,16 @@ uniform vec4 viewport;
 uniform vec2 resolution;
 
 void main() {
-    // Modify the texCoord based on the Viewport and Resolution. This modification is
-    // necessary in case of side-by-side stereo as we only want to access the part of the
-    // feeding texture that we are currently responsible for.  Otherwise we would map the
-    // entire feeding texture into our half of the result texture, leading to a doubling
-    // of the "missing" half.  If you don't believe me, load a configuration file with the
-    // side_by_side stereo mode enabled, disable FXAA, and remove this modification
-    // The same calculation is done in the HDR resolving shader
-    vec2 st = texCoord;
-    st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
-    st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
+  // Modify the texCoord based on the Viewport and Resolution. This modification is
+  // necessary in case of side-by-side stereo as we only want to access the part of the
+  // feeding texture that we are currently responsible for.  Otherwise we would map the
+  // entire feeding texture into our half of the result texture, leading to a doubling of
+  // the "missing" half.  If you don't believe me, load a configuration file with the
+  // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
+  // The same calculation is done in the HDR resolving shader
+  vec2 st = texCoord;
+  st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
+  st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
   finalColor = texture(downscaledRenderedVolume, st);
   gl_FragDepth = texture(downscaledRenderedVolumeDepth, st).r;

@@ -106,8 +106,8 @@ namespace {
             for (int r = 0; r < nRows; r++) {
                 QModelIndex idx = model.index(r, 0, parent);
                 std::string assetName = model.name(idx).toStdString();
-
-                if (path == assetName) {
+                // Need to check if it actually is an asset to prevent issue #2154
+                if (model.isAsset(idx) && path == assetName) {
                     foundFileMatch = true;
                     model.setChecked(idx, true);
                     break;
@@ -158,7 +158,7 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
         _assetTree->setToolTip(
             "Expand arrow entries to browse assets in this OpenSpace installation. "
             "Enable checkbox to include an asset. Those assets highlighted in red are "
-            "present in the profile but do not exist in this OpenSpace installation."
+            "present in the profile but do not exist in this OpenSpace installation"
         );
         _assetTree->setAlternatingRowColors(true);
         _assetTree->setModel(&_assetTreeModel);

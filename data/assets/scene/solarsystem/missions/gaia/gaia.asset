@@ -26,7 +26,7 @@ local Gaia = {
       Scale = 10.0
     }
   },
-  -- X Orthogonal 
+  -- X Orthogonal
   Renderable = {
     Type = "RenderableModel",
     Body = "GAIA",
@@ -49,9 +49,9 @@ local Gaia = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Gaia)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Gaia)
 end)
-  
+
 asset.export(Gaia)

@@ -29,6 +29,7 @@ in vec4 vs_color;
 
 uniform float alpha;
 
+
 Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(vs_color.rgb, vs_color.a * alpha);

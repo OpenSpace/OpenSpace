@@ -5,7 +5,7 @@
       "gui_path": "/Missions/Voyager",
       "identifier": "profile.focus.voyager1",
       "is_local": false,
-      "name": "Focus on Voyager",
+      "name": "Focus on Voyager 1",
       "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_1');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '')"
     },
     {
@@ -13,12 +13,12 @@
       "gui_path": "/Missions/Voyager",
       "identifier": "profile.focus.voyager2",
       "is_local": false,
-      "name": "Focus on Voyager2",
+      "name": "Focus on Voyager 2",
       "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_2');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
     },
     {
       "documentation": "Sets the time for Voyager's approach to Jupiter",
-      "gui_path": "/",
+      "gui_path": "/Missions/Voyager",
       "identifier": "profile.setup.jupiter_approach",
       "is_local": false,
       "name": "Set Jupiter Approach",
@@ -134,7 +134,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "This scene contains the NASA Voyager 1 and Voyager 2 missions as they were launched from Earth in the 1970s and observed the gas giants in the Solar System. The spacecraft models are included and are pointed accurately throughout the mission. Position and orientation information are available until the second half of the 21st century.",
+    "description": "This scene contains the NASA Voyager 1 and Voyager 2 missions as they were launched from Earth in the 1970s and observed the gas giants in the Solar System. The spacecraft models are included and are pointed accurately throughout the mission. Position and orientation information are available until the second half of the 21st century",
     "license": "MIT License",
     "name": "Voyager",
     "url": "https://www.openspaceproject.com",

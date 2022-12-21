@@ -27,7 +27,7 @@ local Uranus = {
   GUI = {
     Name = "Uranus",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[Globe for Uranus.]]
+    Description = "Globe for Uranus"
   }
 }
 
@@ -36,7 +36,7 @@ local UranusLabel = {
   Parent = Uranus.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Uranus",
     FontSize = 70.0,
     Size = 8.86,
@@ -48,7 +48,7 @@ local UranusLabel = {
   GUI = {
     Name = "Uranus Label",
     Path = "/Solar System/Planets/Uranus",
-    Description = [[ Main planet label for Uranus.]],
+    Description = "Main planet label for Uranus",
   }
 }
 
@@ -56,12 +56,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Uranus)
   openspace.addSceneGraphNode(UranusLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(UranusLabel)
   openspace.removeSceneGraphNode(Uranus)
 end)
-    
+
 asset.export(Uranus)
 asset.export(UranusLabel)
 
@@ -70,7 +70,7 @@ asset.export(UranusLabel)
 asset.meta = {
   Name = "Uranus",
   Version = "1.1",
-  Description = [[ Uranus globe, and main planet label.]],
+  Description = "Uranus globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

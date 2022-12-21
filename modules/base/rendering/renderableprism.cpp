@@ -36,44 +36,53 @@
 #include <optional>
 
 namespace {
-    constexpr const std::array<const char*, 2> UniformNames = {
+    constexpr std::array<const char*, 2> UniformNames = {
         "modelViewProjectionTransform", "vs_color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
-        "The number of segments the shape of the prism should have."
+        "The number of segments the shape of the prism should have"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LinesInfo = {
         "NumLines",
         "Number of Lines",
-        "The number of lines connecting the two shapes of the prism."
+        "The number of lines connecting the two shapes of the prism. "
+        "They will be evenly distributed around the bounding circle that makes "
+        "up the shape of the prism"
     };
 
-    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
-        "The radius of the prism's shape in meters."
+        "The radius of the prism's shape in meters"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
+        "BaseRadius",
+        "Base Radius",
+        "The radius of the base of the prism's shape, in meters. By default it is "
+        "given the same radius as the outer shape"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width."
+        "This value specifies the line width"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line."
+        "This value determines the RGB color for the line"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
-        "The length of the prism in meters."
+        "The length of the prism in meters"
     };
 
     // Generate vertices around the unit circle on the XY-plane
@@ -100,6 +109,9 @@ namespace {
         // [[codegen::verbatim(RadiusInfo.description)]]
         std::optional<float> radius;
 
+        // [[codegen::verbatim(BaseRadiusInfo.description)]]
+        std::optional<float> baseRadius;
+
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
@@ -122,10 +134,11 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _nShapeSegments(SegmentsInfo, 6, 3, 32)
     , _nLines(LinesInfo, 6, 0, 32)
-    , _radius(RadiusInfo, 10.f, 0.f, 3.0e12f)
+    , _radius(RadiusInfo, 10.f, 0.f, 3e20f)
+    , _baseRadius(BaseRadiusInfo, 10.f, 0.f, 3e20f)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _length(LengthInfo, 20.f, 1.f, 3.0e12f)
+    , _length(LengthInfo, 20.f, 1.f, 3e20f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -137,10 +150,16 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     _nLines = p.lines.value_or(_nShapeSegments);
     addProperty(_nLines);
 
-    _radius.setExponent(10.f);
+    _radius.setExponent(12.f);
     _radius.onChange([&]() { _prismIsDirty = true; });
     _radius = p.radius.value_or(_radius);
     addProperty(_radius);
+
+    _baseRadius.setExponent(12.f);
+    _baseRadius.onChange([&]() { _prismIsDirty = true; });
+    // Use the "regular" radius as default if no value was provided
+    _baseRadius = p.baseRadius.value_or(_radius);
+    addProperty(_baseRadius);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
@@ -208,21 +227,30 @@ void RenderablePrism::updateVertexData() {
     std::vector<float> unitVertices = unitCircleVertices(_nShapeSegments);
     std::vector<float> unitVerticesLines = unitCircleVertices(_nLines);
 
-    // Put base and top shape vertices into array
-    for (int i = 0; i < 2; ++i) {
-        float h = i * _length; // z value, 0 to _length
+    // Put base vertices into array
+    for (int j = 0, k = 0;
+        j < _nShapeSegments && k < static_cast<int>(unitVertices.size());
+        ++j, k += 2)
+    {
+        float ux = unitVertices[k];
+        float uy = unitVertices[k + 1];
 
-        for (int j = 0, k = 0;
-             j < _nShapeSegments && k < static_cast<int>(unitVertices.size());
-             ++j, k += 2)
-        {
-            float ux = unitVertices[k];
-            float uy = unitVertices[k + 1];
+        _vertexArray.push_back(ux * _baseRadius); // x
+        _vertexArray.push_back(uy * _baseRadius); // y
+        _vertexArray.push_back(0.f);              // z
+    }
 
-            _vertexArray.push_back(ux * _radius); // x
-            _vertexArray.push_back(uy * _radius); // y
-            _vertexArray.push_back(h);            // z
-        }
+    // Put top shape vertices into array
+    for (int j = 0, k = 0;
+        j < _nShapeSegments && k < static_cast<int>(unitVertices.size());
+        ++j, k += 2)
+    {
+        float ux = unitVertices[k];
+        float uy = unitVertices[k + 1];
+
+        _vertexArray.push_back(ux * _radius); // x
+        _vertexArray.push_back(uy * _radius); // y
+        _vertexArray.push_back(_length);      // z
     }
 
     // Put the vertices for the connecting lines into array
@@ -247,9 +275,9 @@ void RenderablePrism::updateVertexData() {
             float uy = unitVerticesLines[k + 1];
 
             // Base
-            _vertexArray.push_back(ux * _radius); // x
-            _vertexArray.push_back(uy * _radius); // y
-            _vertexArray.push_back(0.f);          // z
+            _vertexArray.push_back(ux * _baseRadius); // x
+            _vertexArray.push_back(uy * _baseRadius); // y
+            _vertexArray.push_back(0.f);              // z
 
             // Top
             _vertexArray.push_back(ux * _radius); // x

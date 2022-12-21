@@ -56,7 +56,7 @@ public:
     double averageFrameTime() const;
 
 private:
-    static const int TotalSamples = 10;
+    static constexpr int TotalSamples = 10;
     int _nSamples = 0;
     double _samples[TotalSamples];
     int _index = 0;
@@ -154,6 +154,8 @@ private:
     properties::StringProperty _origin;
     properties::BoolProperty _unitTest;
     properties::BoolProperty _touchActive;
+    properties::BoolProperty _disableZoom;
+    properties::BoolProperty _disableRoll;
     properties::BoolProperty _reset;
     properties::IntProperty _maxTapTime;
     properties::IntProperty _deceleratesPerSecond;

@@ -35,8 +35,6 @@
 #include <variant>
 
 namespace {
-    constexpr const char* TempSuffix = ".tmp";
-
     struct [[codegen::Dictionary(UrlSynchronization)]] Parameters {
         // The URL or urls from where the files are downloaded. If multiple URLs are
         // provided, all files will be downloaded to the same directory and the filename
@@ -147,14 +145,14 @@ void UrlSynchronization::start() {
         std::vector<std::unique_ptr<HttpFileDownload>> downloads;
 
         for (const std::string& url : _urls) {
-            if (_filename.empty()) {
+            if (_filename.empty() || _urls.size() > 1) {
                 std::string name = std::filesystem::path(url).filename().string();
 
                 // We can not create filenames with question marks
                 name.erase(std::remove(name.begin(), name.end(), '?'), name.end());
                 _filename = name;
             }
-            std::filesystem::path destination = directory() / (_filename + TempSuffix);
+            std::filesystem::path destination = directory() / (_filename + ".tmp");
 
             auto download = std::make_unique<HttpFileDownload>(
                 url,

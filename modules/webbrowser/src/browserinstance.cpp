@@ -38,7 +38,7 @@
 #include <filesystem>
 
 namespace {
-    constexpr const char* _loggerCat = "CEF BrowserInstance";
+    constexpr std::string_view _loggerCat = "CEF BrowserInstance";
 } // namespace
 
 namespace openspace {
@@ -51,7 +51,9 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     _client = new BrowserClient(_renderHandler.get(), _keyboardHandler.get());
 
     CefWindowInfo windowInfo;
-    windowInfo.SetAsWindowless(nullptr);
+    // On Windows and MacOS this function takes a pointer as a parameter, but Linux
+    // requires this to be a long unsigned int, so we can't use nullptr here
+    windowInfo.SetAsWindowless(0);
 
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;
@@ -157,7 +159,7 @@ void BrowserInstance::sendTouchEvent(const CefTouchEvent& event) const{
 #endif // WIN32
 
 bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent& event) {
-    constexpr const bool DidNotLeaveWindow = false;
+    constexpr bool DidNotLeaveWindow = false;
 
     _browser->GetHost()->SendMouseMoveEvent(event, DidNotLeaveWindow);
     return false;

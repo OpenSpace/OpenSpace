@@ -36,7 +36,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value explicitly specifies the size of the screen space plane."
+        "This value explicitly specifies the size of the screen space plane"
     };
 } // namespace
 
@@ -83,7 +83,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
     _size.set(glm::vec4(0.f, 0.f, resolution.x, resolution.y));
 }
 
-ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {} // NOLINT
+ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
 
 bool ScreenSpaceFramebuffer::initializeGL() {
     ScreenSpaceRenderable::initializeGL();

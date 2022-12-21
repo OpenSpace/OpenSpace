@@ -68,8 +68,8 @@ public:
     const HashKey hashKey;
 };
 
-TileTextureInitData tileTextureInitData(layergroupid::GroupID id,
-    bool shouldPadTiles, size_t preferredTileSize = 0);
+TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTiles,
+    size_t preferredTileSize = 0);
 
 } // namespace openspace::globebrowsing
 

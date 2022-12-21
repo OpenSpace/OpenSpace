@@ -30,6 +30,7 @@ add_executable(
   test_distanceconversion.cpp
   test_configuration.cpp
   test_documentation.cpp
+  test_horizons.cpp
   test_iswamanager.cpp
   test_jsonformatting.cpp
   test_latlonpatch.cpp
@@ -39,8 +40,9 @@ add_executable(
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
   test_spicemanager.cpp
-  test_timequantizer.cpp
+  test_timeconversion.cpp
   test_timeline.cpp
+  test_timequantizer.cpp
 
   property/test_property_optionproperty.cpp
   property/test_property_listproperties.cpp
@@ -63,7 +65,7 @@ foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)
   if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
     target_link_libraries(OpenSpaceTest PRIVATE ${library_name})
-  endif()
+  endif ()
 endforeach ()
 
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)

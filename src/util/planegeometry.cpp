@@ -25,6 +25,7 @@
 #include <openspace/util/planegeometry.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 
 namespace openspace {
@@ -97,7 +98,7 @@ void PlaneGeometry::updateGeometry() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s)) // NOLINT
+        reinterpret_cast<void*>(offsetof(VertexData, s))
     );
 }
 

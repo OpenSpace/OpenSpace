@@ -30,7 +30,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char _loggerCat[] = "TextureComponent";
+    constexpr std::string_view _loggerCat = "TextureComponent";
 } // namespace
 
 namespace openspace {

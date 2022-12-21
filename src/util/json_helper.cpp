@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/json_helper.h>
+
 namespace openspace {
 
 std::string escapedJson(const std::string& text) {
@@ -29,20 +31,26 @@ std::string escapedJson(const std::string& text) {
     jsonString.reserve(text.size());
     for (const char& c : text) {
         switch (c) {
+            case '\b':
+                jsonString += "\\b";
+                break;
             case '\t':
                 jsonString += "\\t"; // Replace tab with \t.
+                break;
+            case '\n':
+                jsonString += "\\\\n"; // Replace newline with \n.
+                break;
+            case '\f':
+                jsonString += "\\f";
+                break;
+            case '\r':
+                jsonString += "\\r"; // Replace carriage return with \r.
                 break;
             case '"':
                 jsonString += "\\\""; // Replace " with \".
                 break;
             case '\\':
                 jsonString += "\\\\"; // Replace \ with \\.
-                break;
-            case '\n':
-                jsonString += "\\\\n"; // Replace newline with \n.
-                break;
-            case '\r':
-                jsonString += "\\r"; // Replace carriage return with \r.
                 break;
             default:
                 jsonString += c;

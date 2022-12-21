@@ -47,18 +47,18 @@ local Mimas = {
   GUI = {
     Name = "Mimas",
     Path = "/Solar System/Planets/Saturn/Moons",
-    Description = [[That's no moon...]]
+    Description = "That's no moon..."
   }
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mimas)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Mimas)
 end)
-  
+
 asset.export(Mimas)
 
 
@@ -66,7 +66,7 @@ asset.export(Mimas)
 asset.meta = {
   Name = "Mimas",
   Version = "1.1",
-  Description = [[ Mimas globe with labels.]],
+  Description = "Mimas globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

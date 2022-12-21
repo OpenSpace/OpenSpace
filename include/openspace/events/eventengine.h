@@ -100,7 +100,7 @@ public:
 
     /**
      * Removing registration for a specific event identified by the \p identifier.
-     * 
+     *
      * \param identifier The unique identifier of the event that should be removed.
      */
     void unregisterEventAction(uint32_t identifier);

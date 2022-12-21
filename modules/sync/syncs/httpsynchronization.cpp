@@ -31,11 +31,9 @@
 #include <unordered_map>
 
 namespace {
-    constexpr const char* _loggerCat = "HttpSynchronization";
+    constexpr std::string_view _loggerCat = "HttpSynchronization";
 
-    constexpr const char* TempSuffix = ".tmp";
-
-    constexpr const int ApplicationVersion = 1;
+    constexpr int ApplicationVersion = 1;
 
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
         // The unique identifier for this resource that is used to request a set of files
@@ -164,7 +162,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         }
 
         std::string filename = std::filesystem::path(line).filename().string();
-        std::filesystem::path destination = directory() / (filename + TempSuffix);
+        std::filesystem::path destination = directory() / (filename + ".tmp");
 
         if (sizeData.find(line) != sizeData.end()) {
             LWARNING(fmt::format("{}: Duplicate entry for {}", _identifier, line));

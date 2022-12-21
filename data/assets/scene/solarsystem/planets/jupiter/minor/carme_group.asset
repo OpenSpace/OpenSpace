@@ -282,13 +282,13 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
-  
+
 for i, node in ipairs(nodes) do
   asset.export(node)
 end
@@ -297,10 +297,10 @@ end
 asset.meta = {
   Name = "Jupiter Carme Group Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Jupiter's Carme Group
-    moons: Herse, Aitne, Kale, Taygete, Chaldene, Erinome, Kallichore, Kalyke,
-    Pasithee, S2010J1, Eukelade, Arche, Isonoe, Carme, and S2003J5. Blank globes
-    and SPICE trails are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Jupiter's Carme Group moons: Herse,
+    Aitne, Kale, Taygete, Chaldene, Erinome, Kallichore, Kalyke, Pasithee, S2010J1,
+    Eukelade, Arche, Isonoe, Carme, and S2003J5. Blank globes and SPICE trails are
+    generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

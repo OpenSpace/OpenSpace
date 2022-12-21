@@ -11,6 +11,12 @@ local astronomicalUnit = 149597870700
 local volume = {
   Identifier = "GeneratedVolume",
   Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = astronomicalUnit
+    }
+  },
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
     SourceDirectory = asset.localResource("spherical"),
@@ -24,19 +30,13 @@ local volume = {
   },
   GUI = {
     Path = "/Examples"
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = astronomicalUnit
-    }
   }
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(volume)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(volume)
 end)

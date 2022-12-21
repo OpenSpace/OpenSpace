@@ -29,8 +29,6 @@
 #include <ghoul/ghoul.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
@@ -64,19 +62,6 @@ namespace {
     const std::string _loggerCat = "TaskRunner Main";
 }
 
-void initTextureReaders() {
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_unique<ghoul::io::TextureReaderDevIL>()
-        );
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_unique<ghoul::io::TextureReaderFreeImage>()
-        );
-    #endif // GHOUL_USE_FREEIMAGE
-}
-
 void performTasks(const std::string& path) {
     using namespace openspace;
 
@@ -102,7 +87,7 @@ void performTasks(const std::string& path) {
         };
         task.perform(onProgress);
     }
-    std::cout << "Done performing tasks." << std::endl;
+    std::cout << "Done performing tasks" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -127,8 +112,8 @@ int main(int argc, char** argv) {
 
     // Register the base path as the directory where the configuration file lives
     std::filesystem::path base = configFile.parent_path();
-    constexpr const char* BasePathToken = "${BASE}";
-    FileSys.registerPathToken(BasePathToken, base);
+    constexpr std::string_view BasePathToken = "${BASE}";
+    FileSys.registerPathToken(BasePathToken.data(), base);
 
     // Using same configuration for size as in apps/OpenSpace/main.cpp
     glm::ivec2 size = glm::ivec2(1920, 1080);

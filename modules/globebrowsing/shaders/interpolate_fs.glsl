@@ -24,12 +24,13 @@
 
 #include "fragment.glsl"
 
+in vec2 texCoord;
+
 uniform sampler2D prevTexture;
 uniform sampler2D nextTexture;
 uniform sampler1D colormapTexture;
 uniform float blendFactor;
 
-in vec2 texCoord;
 
 Fragment getFragment() {
   vec4 texel0 = texture(prevTexture, texCoord);
@@ -37,7 +38,7 @@ Fragment getFragment() {
 
   vec4 mixedTexture = mix(texel0, texel1, blendFactor);
 
-  Fragment frag;  
+  Fragment frag;
   if (mixedTexture.r > 0.999) {
     frag.color = texture(colormapTexture, mixedTexture.r - 0.01);
   }

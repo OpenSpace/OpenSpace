@@ -1,0 +1,142 @@
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+
+-- Circle shapes are not support
+local SwiCh2 = {
+  Identifier = "JuiceSwiCH2",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_SWI_CH2",
+    RGB = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name = "JUICE_SWI_CH2",
+      Method = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "SWI CH2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local SwiFull = {
+  Identifier = "JuiceSwiFull",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      -- These translations are eyeballed based on the existing model
+      Position = { 0.465, -0.1, 0.95 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_SWI_FULL",
+    RGB = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name = "JUICE_SWI_FULL",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "SWI Full FOV",
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Description = "The field-of-view for the full SWI instrument onboard Juice"
+  }
+}
+
+-- This frame throws an error as the JUICE_SWI_FULL_GCO500 is not a recognized frame in
+-- the kernel set version 5
+local SwiFullGCO500 = {
+  Identifier = "JuiceSwiFullGCO500",
+  Parent = transforms.Juice.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2031 JUL 02 00:00:00.000",
+    End = "2035 OCT 05 00:00:00.000"
+  },
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      -- These translations are eyeballed based on the existing model
+      Position = { 0.465, -0.1, 0.95 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableFov",
+    Body = "JUICE",
+    Frame = "JUICE_SWI_FULL_GCO500",
+    RGB = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name = "JUICE_SWI_FULL_GCO500",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "SWI Full GCO500 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+
+asset.onInitialize(function()
+  -- We are only adding the main version of this instrument as a scene graph node. Other
+  -- versions are defined in the available SPICE kernels, but not a lot of information is
+  -- accessible about them. We don't want to remove them entirely as they might prove
+  -- useful to some users though
+
+  -- openspace.addSceneGraphNode(SwiCh2)
+  -- openspace.addSceneGraphNode(SwiFullGCO500)
+  openspace.addSceneGraphNode(SwiFull)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SwiFull)
+  -- openspace.removeSceneGraphNode(SwiFullGCO500)
+  -- openspace.removeSceneGraphNode(SwiCh2)
+end)
+
+-- asset.export(SwiCh2)
+asset.export(SwiFull)
+-- asset.export(SwiFullGCO500)
+
+
+asset.meta = {
+  Name = "SWI",
+  Version = "1.0",
+  Description = [[
+    Shows the field-view for the Submillimetre Wave Instrument (SWI), which is measuring
+    the chemistry, meteorology, and structure of Jupiters middle atmosphere as well as the
+    habitability of the Galilean moons. See
+    https://www.mps.mpg.de/planetary-science/juice-swi for more information.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

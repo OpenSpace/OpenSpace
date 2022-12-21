@@ -64,9 +64,9 @@ uniform vec3 p01;
 uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
 uniform float chunkMinHeight;
-
 uniform float distanceScaleFactor;
 uniform int chunkLevel;
+
 
 vec3 bilinearInterpolation(vec2 uv) {
   vec3 p0 = mix(p00, p10, uv.x);
@@ -86,10 +86,11 @@ vec3 getLevelWeights(float distToVertexOnEllipsoid) {
   );
 }
 
+
 void main() {
   // Position in cameraspace
   vec3 p = bilinearInterpolation(in_uv);
-  
+
   // Calculate desired level based on distance to the vertex on the ellipsoid
   // Before any heightmapping is done
   float distToVertexOnEllipsoid = length(p + patchNormalCameraSpace * chunkMinHeight);
@@ -99,7 +100,7 @@ void main() {
 
   // Get the height value and apply skirts
   float height = getTileHeightScaled(in_uv, levelWeights) - getTileVertexSkirtLength() * 100.0;
-  
+
   // Translate the point along normal
   p += patchNormalCameraSpace * height;
 

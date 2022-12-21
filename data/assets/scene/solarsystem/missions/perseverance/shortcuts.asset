@@ -61,14 +61,14 @@ local Shortcuts = {
     Local = false
   },
   {
-    Command = [[openspace.time.setPause(true);openspace.time.setTime("]] .. PerseveranceLaunchTime .. [[");]],
+    Command = 'openspace.time.setPause(true);openspace.time.setTime("' .. PerseveranceLaunchTime .. '");',
     Documentation = "Change the time for Perseverance launch",
     Name = "Perseverance launch time",
     GuiPath = "/Missions/Perseverance",
     Local = false
   },
   {
-    Command = [[openspace.time.setPause(true);openspace.time.setTime("]] .. PerseveranceLandingTime .. [[");]],
+    Command = 'openspace.time.setPause(true);openspace.time.setTime("' .. PerseveranceLandingTime .. '");',
     Documentation = "Change the time for when Perseverance has landed",
     Name = "Perseverance landed time",
     GuiPath = "/Missions/Perseverance",

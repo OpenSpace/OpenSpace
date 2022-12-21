@@ -143,7 +143,7 @@ void TimeDialog::enableFormatForAbsolute(bool enableAbs) {
 }
 
 void TimeDialog::approved() {
-    constexpr const int Relative = static_cast<int>(Profile::Time::Type::Relative);
+    constexpr int Relative = static_cast<int>(Profile::Time::Type::Relative);
     if (_typeCombo->currentIndex() == Relative) {
         if (_relativeEdit->text().isEmpty()) {
             *_time = std::nullopt;

@@ -35,9 +35,9 @@
 #include <optional>
 
 namespace {
-    constexpr const char* BootstrapPath = "${WEB}/common/bootstrap.min.css";
-    constexpr const char* CssPath = "${WEB}/log/style.css";
-    constexpr const char* JsPath = "${WEB}/log/script.js";
+    constexpr std::string_view BootstrapPath = "${WEB}/common/bootstrap.min.css";
+    constexpr std::string_view CssPath = "${WEB}/log/style.css";
+    constexpr std::string_view JsPath = "${WEB}/log/script.js";
 
     struct [[codegen::Dictionary(LogFactory)]] Parameters {
         enum class Type {

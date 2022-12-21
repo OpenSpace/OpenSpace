@@ -28,57 +28,91 @@
 
 #include <cstring>
 
+namespace {
+    std::pair<double, openspace::TimeUnit> extractUnit(double seconds) {
+        using namespace openspace;
+
+        const double secondsVal = glm::abs(seconds);
+
+        if (secondsVal == 0.0) {
+            return { 0.0, TimeUnit::Second };
+        }
+        else if (secondsVal <= 1e-6) {
+            const double val = seconds / 1e-9;
+            return { val, TimeUnit::Nanosecond };
+        }
+        else if (secondsVal <= 1e-3) {
+            const double val = seconds / 1e-6;
+            return { val, TimeUnit::Microsecond };
+        }
+        else if (secondsVal <= 1.0) {
+            const double val = seconds / 1e-3;
+            return { val, TimeUnit::Millisecond };
+        }
+        else if (secondsVal <= SecondsPerMinute) {
+            return { seconds, TimeUnit::Second };
+        }
+        else if (secondsVal <= SecondsPerHour) {
+            const double val = seconds / SecondsPerMinute;
+            return { val, TimeUnit::Minute };
+        }
+        else if (secondsVal <= SecondsPerDay) {
+            const double val = seconds / SecondsPerHour;
+            return { val, TimeUnit::Hour };
+        }
+        else if (secondsVal <= SecondsPerMonth) {
+            const double val = seconds / SecondsPerDay;
+            return { val, TimeUnit::Day };
+        }
+        else if (secondsVal <= SecondsPerYear) {
+            const double val = seconds / SecondsPerMonth;
+            return { val, TimeUnit::Month };
+        }
+        else {
+            const double val = seconds / SecondsPerYear;
+            return { val, TimeUnit::Year };
+        }
+    }
+} // namespace
+
 namespace openspace {
 
-std::pair<double, std::string> simplifyTime(double seconds, bool forceSingularForm) {
-    const double secondsVal = glm::abs(seconds);
+std::pair<double, std::string_view> simplifyTime(double seconds, bool forceSingularForm) {
+    std::pair<double, TimeUnit> p = extractUnit(seconds);
 
-    if (secondsVal == 0.0) {
-        return { 0.0, forceSingularForm ? "second" : "seconds" };
-    }
-    else if (secondsVal > 1e-3 && secondsVal < SecondsPerMinute) {
-        return { seconds, (seconds == 1.0 || forceSingularForm) ? "second" : "seconds" };
-    }
+    bool pluralForm = (p.first != 1.0 && !forceSingularForm);
+    return { p.first, nameForTimeUnit(p.second, pluralForm) };
+}
 
-    if (secondsVal <= 1e-9) {
-        const double val = seconds / 1e-9;
-        return { val, (val == 1.0 || forceSingularForm) ? "nanosecond" : "nanoseconds" };
-    }
-    else if (secondsVal <= 1e-6) {
-        const double val = seconds / 1e-6;
-        return {
-            val,
-            (val == 1.0 || forceSingularForm) ? "microsecond" : "microseconds"
-        };
-    }
-    else if (secondsVal <= 1e-3) {
-        const double val = seconds / 1e-3;
-        return {
-            val,
-            (val == 1.0 || forceSingularForm) ? "millisecond" : "milliseconds"
-        };
-    }
+std::vector<std::pair<double, std::string_view>> splitTime(double seconds,
+                                                           bool forceSingularForm)
+{
+    std::vector<std::pair<double, std::string_view>> res;
 
-    if (secondsVal >= SecondsPerYear) {
-        const double val = seconds / SecondsPerYear;
-        return { val, (val == 1.0 || forceSingularForm) ? "year" : "years" };
-    }
-    else if (secondsVal >= SecondsPerMonth) {
-        const double val = seconds / SecondsPerMonth;
-        return { val, (val == 1.0 || forceSingularForm) ? "month" : "months" };
-    }
-    else if (secondsVal >= SecondsPerDay) {
-        const double val = seconds / SecondsPerDay;
-        return { val, (val == 1.0 || forceSingularForm) ? "day" : "days" };
-    }
-    else if (secondsVal >= SecondsPerHour) {
-        const double val = seconds / SecondsPerHour;
-        return { val, (val == 1.0 || forceSingularForm) ? "hour" : "hours" };
-    }
-    else {
-        const double val = seconds / SecondsPerMinute;
-        return { val, (val == 1.0 || forceSingularForm) ? "minute" : "minutes" };
-    }
+    double secondsVal = std::abs(seconds);
+
+    do {
+        std::pair<double, TimeUnit> p = extractUnit(secondsVal);
+
+        if (p.second == TimeUnit::Nanosecond) {
+            // We have reached the lowest supported time unit
+
+            bool pluralForm = (p.first != 1.0 && !forceSingularForm);
+            res.push_back({ p.first, nameForTimeUnit(p.second, pluralForm) });
+            break;
+        }
+
+        double pt = std::floor(p.first);
+
+        // Add the unit the list
+        bool pluralForm = (p.first != 1.0 && !forceSingularForm);
+        res.push_back({ pt, nameForTimeUnit(p.second, pluralForm) });
+
+        // Adjust the remaining time
+        secondsVal -= convertTime(pt, p.second, TimeUnit::Second);
+    } while (secondsVal != 0.0);
+
+    return res;
 }
 
 } // namespace openspace

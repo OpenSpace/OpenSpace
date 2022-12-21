@@ -38,9 +38,9 @@ enum class Model : int {
 
 Model stringToModel(const std::string& s);
 
-constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
-constexpr const float ReToMeter = 6371000.f;       // Earth radius
-constexpr const float RsToMeter = 695700000.f;     // Sun radius
+constexpr float AuToMeter = 149597870700.f;  // Astronomical Units
+constexpr float ReToMeter = 6371000.f;       // Earth radius
+constexpr float RsToMeter = 695700000.f;     // Sun radius
 
 } // namespace openspace::fls
 

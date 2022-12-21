@@ -29,7 +29,6 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <memory>
 
 namespace ghoul { class Dictionary; }
 
@@ -45,7 +44,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     Rotation();
-    virtual ~Rotation() = default;
+    virtual ~Rotation() override = default;
 
     virtual bool initialize();
 

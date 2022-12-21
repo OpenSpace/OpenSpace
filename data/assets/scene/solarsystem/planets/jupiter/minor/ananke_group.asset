@@ -214,13 +214,13 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
-  
+
 for i, node in ipairs(nodes) do
   asset.export( node)
 end
@@ -230,10 +230,9 @@ end
 asset.meta = {
   Name = "Jupiter Ananke Group Moons",
   Version = "1.0",
-  Description = [[ Procedural Globe asset containing Jupiter's Ananke Group
-    moons: S2010J2, Thelxinoe, Euanthe, Iocaste, S2003J16, Praxidike, Harpalyke,
-    Mneme, Hermippe, Thyone, and Ananke. Blank globes
-    and SPICE trails are generated for each moon.]],
+  Description = [[Procedural Globe asset containing Jupiter's Ananke Group moons: S2010J2,
+    Thelxinoe, Euanthe, Iocaste, S2003J16, Praxidike, Harpalyke, Mneme, Hermippe, Thyone,
+    and Ananke. Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

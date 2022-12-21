@@ -75,13 +75,13 @@ public:
     BooleanType(UpdateScene);
 
     static constexpr const char* RootNodeIdentifier = "Root";
-    static constexpr const char* KeyIdentifier = "Identifier";
-    static constexpr const char* KeyParentName = "Parent";
-    static constexpr const char* KeyDependencies = "Dependencies";
-    static constexpr const char* KeyTag = "Tag";
+    static constexpr std::string_view KeyIdentifier = "Identifier";
+    static constexpr std::string_view KeyParentName = "Parent";
+    static constexpr std::string_view KeyDependencies = "Dependencies";
+    static constexpr std::string_view KeyTag = "Tag";
 
     SceneGraphNode();
-    ~SceneGraphNode();
+    virtual ~SceneGraphNode() override;
 
     static ghoul::mm_unique_ptr<SceneGraphNode> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -178,7 +178,7 @@ private:
     properties::StringProperty _guiDisplayName;
     properties::StringProperty _guiDescription;
 
-    // Transformation defined by ephemeris, rotation and scale
+    // Transformation defined by translation, rotation and scale
     struct {
         ghoul::mm_unique_ptr<Translation> translation;
         ghoul::mm_unique_ptr<Rotation> rotation;

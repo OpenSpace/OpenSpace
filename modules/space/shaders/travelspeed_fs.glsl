@@ -29,6 +29,7 @@
  in vec4 finalColor;
  in vec4 vs_positionViewSpace;
 
+
  Fragment getFragment() {
     Fragment frag;
 

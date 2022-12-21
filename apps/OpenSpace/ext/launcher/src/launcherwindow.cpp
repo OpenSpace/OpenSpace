@@ -46,45 +46,54 @@
 using namespace openspace;
 
 namespace {
-    constexpr const int ScreenWidth = 480;
-    constexpr const int ScreenHeight = 640;
+    constexpr int ScreenWidth = 480;
+    constexpr int ScreenHeight = 640;
 
-    constexpr const int LeftRuler = 40;
-    constexpr const int TopRuler = 80;
-    constexpr const int ItemWidth = 240;
-    constexpr const int ItemHeight = ItemWidth / 4;
-    constexpr const int SmallItemWidth = 100;
-    constexpr const int SmallItemHeight = SmallItemWidth / 4;
+    constexpr int LeftRuler = 40;
+    constexpr int TopRuler = 80;
+    constexpr int ItemWidth = 240;
+    constexpr int ItemHeight = ItemWidth / 4;
+    constexpr int SmallItemWidth = 100;
+    constexpr int SmallItemHeight = SmallItemWidth / 4;
 
     namespace geometry {
-        constexpr const QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
-        constexpr const QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
-        constexpr const QRect ChooseLabel(LeftRuler, TopRuler + 80, 151, 24);
-        constexpr const QRect ProfileBox(
-            LeftRuler, TopRuler + 110, ItemWidth, ItemHeight
-        );
-        constexpr const QRect NewProfileButton(
+        constexpr QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
+        constexpr QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
+        constexpr QRect ChooseLabel(LeftRuler, TopRuler + 80, 151, 24);
+        constexpr QRect ProfileBox(LeftRuler, TopRuler + 110, ItemWidth, ItemHeight);
+        constexpr QRect NewProfileButton(
             LeftRuler + 140, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr const QRect EditProfileButton(
+        constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr const QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
-        constexpr const QRect WindowConfigBox(
-            LeftRuler, TopRuler + 260, ItemWidth, ItemHeight
-        );
-        constexpr const QRect NewWindowButton(
+        constexpr QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
+        constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
+        constexpr QRect NewWindowButton(
             LeftRuler + 140, TopRuler + 330, SmallItemWidth, SmallItemHeight
         );
-        constexpr const QRect EditWindowButton(
+        constexpr QRect EditWindowButton(
             LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight
         );
-        constexpr const QRect StartButton(
+        constexpr QRect StartButton(
             LeftRuler, TopRuler + 400, ItemWidth, ItemHeight
         );
     } // geometry
 
     std::optional<Profile> loadProfileFromFile(QWidget* parent, std::string filename) {
+        // Verify that the file actually exists
+        if (!std::filesystem::exists(filename)) {
+            QMessageBox::critical(
+                parent,
+                "Exception",
+                QString::fromStdString(fmt::format(
+                    "Could not open profile file '{}'", filename
+                ))
+            );
+
+            return std::nullopt;
+        }
+
         std::ifstream inFile;
         try {
             inFile.open(filename, std::ifstream::in);
@@ -411,11 +420,24 @@ void LauncherWindow::populateProfilesList(std::string preset) {
         ++_userAssetCount;
     }
     std::sort(profiles.begin(), profiles.end());
-    for (const fs::directory_entry& p : profiles) {
+    for (const fs::directory_entry& profile : profiles) {
+        std::filesystem::path path = profile.path();
         _profileBox->addItem(
-            QString::fromStdString(p.path().stem().string()),
-            QString::fromStdString(p.path().string())
+            QString::fromStdString(path.stem().string()),
+            QString::fromStdString(path.string())
         );
+
+        // Add toooltip
+        std::optional<Profile> p = loadProfileFromFile(this, path.string());
+        int idx = _profileBox->count() - 1;
+        if (p.has_value() && (*p).meta.has_value()) {
+            const std::optional<std::string>& d = (*p).meta.value().description;
+            if (d.has_value()) {
+                // Tooltip has to be 'rich text' to linebreak properly
+                QString tooltip = QString::fromStdString(fmt::format("<p>{}</p>", *d));
+                _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
+            }
+        }
     }
 
     _profileBox->addItem(QString::fromStdString("--- OpenSpace Profiles ---"));
@@ -435,11 +457,23 @@ void LauncherWindow::populateProfilesList(std::string preset) {
 
     // Add sorted items to list
     for (const fs::directory_entry& profile : profiles) {
-        std::string abc = profile.path().string();
+        std::filesystem::path path = profile.path();
         _profileBox->addItem(
-            QString::fromStdString(profile.path().stem().string()),
-            QString::fromStdString(profile.path().string())
+            QString::fromStdString(path.stem().string()),
+            QString::fromStdString(path.string())
         );
+
+        // Add toooltip
+        std::optional<Profile> p = loadProfileFromFile(this, path.string());
+        int idx = _profileBox->count() - 1;
+        if (p.has_value() && (*p).meta.has_value()) {
+            const std::optional<std::string>& d = (*p).meta.value().description;
+            if (d.has_value()) {
+                // Tooltip has to be 'rich text' to linebreak properly
+                QString tooltip = QString::fromStdString(fmt::format("<p>{}</p>", *d));
+                _profileBox->setItemData(idx, tooltip, Qt::ToolTipRole);
+            }
+        }
     }
 
     // Try to find the requested profile and set it as the current one
@@ -572,7 +606,6 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     }
     else {
         // Otherwise, we want to load that profile
-
         std::string fullProfilePath = saveProfilePath + profile + ".profile";
         p = loadProfileFromFile(this, fullProfilePath);
         if (!p.has_value()) {

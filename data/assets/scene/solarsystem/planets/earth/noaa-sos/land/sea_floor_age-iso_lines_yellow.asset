@@ -3,17 +3,17 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Age of the Seafloor Contour Lines"
 local Identifier = "noaa-sos-land-sea_floor_age-iso_lines_yellow"
-local Description = [[ The surface of the Earth is composed of a mosaic tectonic plates 
-moving with respect to each other. The Earth is made of seven major plates and several 
-smaller plates. As the plates move, new sea floor can be created. The plates form three 
-different kinds of boundaries: convergent, divergent, and transform. Convergent 
-boundaries are also called collision boundaries because they are areas where two plates 
-collide. At transform boundaries, the plates slide and grind past one another. The 
-divergent boundaries are the areas where plates are moving apart from one another. Where 
-plates move apart, new crustal material is formed from molten magma from below the 
-Earth's surface. Because of this, the youngest sea floor can be found along divergent 
-boundaries, such as the Mid-Atlantic Ocean Ridge. The spreading, however, is generally 
-not uniform causing linear features perpendicular to the divergent boundaries.    ]]
+local Description = [[The surface of the Earth is composed of a mosaic tectonic plates
+moving with respect to each other. The Earth is made of seven major plates and several
+smaller plates. As the plates move, new sea floor can be created. The plates form three
+different kinds of boundaries: convergent, divergent, and transform. Convergent
+boundaries are also called collision boundaries because they are areas where two plates
+collide. At transform boundaries, the plates slide and grind past one another. The
+divergent boundaries are the areas where plates are moving apart from one another. Where
+plates move apart, new crustal material is formed from molten magma from below the
+Earth's surface. Because of this, the youngest sea floor can be found along divergent
+boundaries, such as the Mid-Atlantic Ocean Ridge. The spreading, however, is generally
+not uniform causing linear features perpendicular to the divergent boundaries]]
 local URL = "https://sos.noaa.gov/catalog/datasets/age-of-the-seafloor-contour-lines/"
 
 
@@ -27,6 +27,7 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
@@ -34,6 +35,7 @@ local layer = {
 local colorbar = {
   Identifier = Identifier,
   Name = Name,
+  Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "colorbar.png",
   FaceCamera = false,
@@ -44,7 +46,7 @@ local colorbar = {
 
 asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar);  
+  openspace.addScreenSpaceRenderable(colorbar)
 end)
 
 asset.onDeinitialize(function()
@@ -59,7 +61,7 @@ asset.export(colorbar)
 asset.meta = {
   Name = Name,
   Version = "1.0",
-  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,
   License = "https://sos.noaa.gov/copyright/"

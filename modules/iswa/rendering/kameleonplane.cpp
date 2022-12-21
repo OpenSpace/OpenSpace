@@ -41,7 +41,7 @@
 
 namespace {
     using json = nlohmann::json;
-    constexpr const char* _loggerCat = "KameleonPlane";
+    constexpr std::string_view _loggerCat = "KameleonPlane";
 
     constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
@@ -151,7 +151,7 @@ void KameleonPlane::initializeGL() {
             // else if autofilter is turned off, register backgroundValues
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::All);
+                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
                 //_backgroundValues.setVisible(true);
             }
         });

@@ -55,14 +55,14 @@ local Shortcuts = {
     Local = false
   },
   {
-    Command = [[openspace.navigation.setNavigationState(]] .. insightNavigationState .. [[);]],
+    Command = "openspace.navigation.setNavigationState(" .. insightNavigationState .. ");",
     Documentation = "Change the camera state for the start of Insight EDL",
     Name = "Insight EDL NavigationState",
     GuiPath = "/Missions/Insight",
     Local = false
   },
   {
-    Command = [[openspace.time.setPause(true);openspace.time.setTime("]] .. InsightEntryTime .. [[");]],
+    Command = 'openspace.time.setPause(true);openspace.time.setTime("' .. InsightEntryTime .. '");',
     Documentation = "Change the time for the start of Insight EDL",
     Name = "Insight EDL Time",
     GuiPath = "/Missions/Insight",

@@ -29,11 +29,6 @@
 
 namespace openspace {
 
-// (2021-07-16, emmbr) Note that this hard coded vector for the view direction is also
-// used in a qauternion -> view direction helper function in ghoul/glm.h
-const glm::dvec3 Camera::ViewDirectionCameraSpace = glm::dvec3(0.0, 0.0, -1.0);
-const glm::dvec3 Camera::UpDirectionCameraSpace = glm::dvec3(0.0, 1.0, 0.0);
-
 Camera::Camera(const Camera& o)
     : sgctInternal(o.sgctInternal)
     , _position(o._position)
@@ -154,6 +149,14 @@ float Camera::sinMaxFov() const {
         _cachedSinMaxFov.isDirty = true;
     }
     return _cachedSinMaxFov.datum;
+}
+
+void Camera::setAtmosphereDimmingFactor(float atmosphereDimmingFactor) {
+    _atmosphereDimmingFactor = atmosphereDimmingFactor;
+}
+
+float Camera::atmosphereDimmingFactor() const {
+    return _atmosphereDimmingFactor;
 }
 
 SceneGraphNode* Camera::parent() const {
@@ -285,7 +288,7 @@ const glm::mat4& Camera::viewProjectionMatrix() const {
     return sgctInternal.viewProjectionMatrix();
 }
 
-std::vector<Syncable*> Camera::getSyncables() {
+std::vector<Syncable*> Camera::syncables() {
     return { &_position, &_rotation, &_scaling };
 }
 

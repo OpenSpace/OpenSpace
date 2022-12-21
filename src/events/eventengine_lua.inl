@@ -53,7 +53,7 @@ namespace {
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> registeredEvents() {
     using namespace openspace;
-    
+
     std::vector<EventEngine::ActionInfo> actions =
         global::eventEngine->registeredActions();
 

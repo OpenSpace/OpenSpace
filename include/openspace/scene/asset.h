@@ -81,10 +81,13 @@ public:
      * \param manager The AssetManager that is responsible for loading this Asset and all
      *        of its dependencies
      * \param assetPath The file path that will be used to load this Asset
+     * \param explicitEnabled If the contents of this asset should start their life as
+     *        being enabled or not
      *
      * \pre The \p assetPath must not be empty and must be an existing file
      */
-    Asset(AssetManager& manager, std::filesystem::path assetPath);
+    Asset(AssetManager& manager, std::filesystem::path assetPath,
+        std::optional<bool> explicitEnabled);
 
     /**
      * Returns the path to the file that was used to initialize this Asset.
@@ -227,6 +230,24 @@ public:
     bool isFailed() const;
 
     /**
+     * Returns the state of whether this asset was loaded with an explicit enable/disable
+     * or not. If it was specified, the optional will have a value and the value is
+     * whether the original `require` call asked for a true/false. If no such parameter
+     * was used, the optional will not contain a value.
+     *
+     * \return Whether the asset was loaded with an explicit enable or not
+     */
+    std::optional<bool> explicitEnabled() const;
+
+    /**
+     * Returns the asset that has first loaded this asset or nullptr if that has not been
+     * determined yet.
+     *
+     * \return The asset that has first loaded this asset
+     */
+    Asset* firstParent() const;
+
+    /**
      * Sets the provided \p metaInformation as the meta information struct for this asset.
      * If previous information existed, it will be silently overwritten.
      *
@@ -303,6 +324,10 @@ private:
 
     /// Synchronizations that were requested by this asset
     std::vector<ResourceSynchronization*> _synchronizations;
+
+    /// The parameter that was passed into the original `require` call whether the
+    /// contents of this asset should be enabled or disabled
+    std::optional<bool> _explicitEnabled = std::nullopt;
 };
 
 } // namespace openspace

@@ -41,7 +41,7 @@ local Saturn = {
       TextureColor = texturesPath .. "color_original_single.png",
       TextureTransparency = texturesPath .. "trans_original_single.png",
       ColorFilter = 0.8,
-      
+
       NightFactor = 1.0,
       Size = 140445000,
       Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
@@ -49,13 +49,13 @@ local Saturn = {
     Shadows = {
       Enabled = true,
       DistanceFraction = 40.0
-    } 
+    }
   },
   Tag = { "planet_solarSystem", "planet_giants" },
   GUI = {
     Name = "Saturn",
     Path = "/Solar System/Planets/Saturn",
-    Description = [[Saturn globe.]]
+    Description = "Saturn globe"
   }
 }
 
@@ -64,7 +64,7 @@ local SaturnLabel = {
   Parent = Saturn.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Saturn",
     FontSize = 70.0,
     Size = 8.85,
@@ -76,7 +76,7 @@ local SaturnLabel = {
   GUI = {
     Name = "Saturn Label",
     Path = "/Solar System/Planets/Saturn",
-    Description = [[ Main planet label for Saturn.]],
+    Description = "Main planet label for Saturn",
   }
 }
 
@@ -84,12 +84,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Saturn)
   openspace.addSceneGraphNode(SaturnLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SaturnLabel)
   openspace.removeSceneGraphNode(Saturn)
 end)
-    
+
 asset.export(Saturn)
 asset.export(SaturnLabel)
 
@@ -98,7 +98,7 @@ asset.export(SaturnLabel)
 asset.meta = {
   Name = "Saturn",
   Version = "1.1",
-  Description = [[ Saturn globe, and main planet label.]],
+  Description = "Saturn globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

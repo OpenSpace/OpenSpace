@@ -61,7 +61,7 @@ public:
     KeplerTranslation(const ghoul::Dictionary& dictionary);
 
     /// Default destructor
-    virtual ~KeplerTranslation() = default;
+    ~KeplerTranslation() override = default;
 
     /**
     * Method returning the translation vector at a given time.
@@ -71,7 +71,7 @@ public:
     glm::dvec3 position(const UpdateData& data) const override;
 
     /**
-     * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
+     * Method returning the openspace::Documentation that describes the ghoul::Dictionary
      * that can be passed to the constructor.
      *
      * \return The openspace::Documentation that describes the ghoul::Dicitonary that can

@@ -49,47 +49,46 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableDUMeshes";
-    constexpr const char* ProgramObjectName = "RenderableDUMeshes";
+    constexpr std::string_view _loggerCat = "RenderableDUMeshes";
 
-    constexpr const std::array<const char*, 4> UniformNames = {
+    constexpr std::array<const char*, 4> UniformNames = {
         "modelViewTransform", "projectionTransform", "alphaValue", "color"
     };
 
-    constexpr const int RenderOptionViewDirection = 0;
-    constexpr const int RenderOptionPositionNormal = 1;
+    constexpr int RenderOptionViewDirection = 0;
+    constexpr int RenderOptionPositionNormal = 1;
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
-        "The text color for the astronomical object."
+        "The text color for the astronomical object"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
         "Text Opacity",
         "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent."
+        "and 0 fully transparent"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
-        "The text size for the astronomical object labels."
+        "The text size for the astronomical object labels"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
         "Label File",
         "The path to the label file that contains information about the astronomical "
-        "objects being rendered."
+        "objects being rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
         "Text Min/Max Size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered."
+        "astronomical objects being rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -101,25 +100,25 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects."
+        "Enables/Disables the drawing of the astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw Labels",
-        "Determines whether labels should be drawn or hidden."
+        "Determines whether labels should be drawn or hidden"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
-        "The defined colors for the meshes to be rendered."
+        "The defined colors for the meshes to be rendered"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts."
+        "Debug option for rendering of billboards and texts"
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
@@ -256,9 +255,16 @@ bool RenderableDUMeshes::isReady() const {
         (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
 }
 
+void RenderableDUMeshes::initialize() {
+    bool success = loadData();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
+    }
+}
+
 void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
+        "RenderableDUMeshes",
         []() {
             return global::renderEngine->buildRenderProgram(
                 "RenderableDUMeshes",
@@ -270,16 +276,11 @@ void RenderableDUMeshes::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
-    }
-
     createMeshes();
 
     if (_hasLabel) {
         if (!_font) {
-            constexpr const int FontSize = 50;
+            constexpr int FontSize = 50;
             _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(FontSize),
@@ -299,7 +300,7 @@ void RenderableDUMeshes::deinitializeGL() {
     }
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
+        "RenderableDUMeshes",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -537,8 +538,7 @@ bool RenderableDUMeshes::readSpeckFile() {
 
             std::getline(file, line);
             std::stringstream dim(line);
-            dim >> mesh.numU; // numU
-            dim >> mesh.numV; // numV
+            dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
             for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
@@ -603,7 +603,6 @@ bool RenderableDUMeshes::readSpeckFile() {
             }
         }
     }
-
     setBoundingSphere(maxRadius);
 
     return true;
@@ -637,7 +636,7 @@ void RenderableDUMeshes::createMeshes() {
             // in_position
             glEnableVertexAttribArray(0);
             // (2022-03-23, emmbr) This code was actually never used. We only read three
-            // values per line and di not handle any texture cooridnates, even if there
+            // values per line and did not handle any texture cooridnates, even if there
             // would have been some in the file
             //// U and V may not be given by the user
             //if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {

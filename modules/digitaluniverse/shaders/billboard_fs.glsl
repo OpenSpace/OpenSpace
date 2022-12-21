@@ -36,6 +36,7 @@ uniform bool hasColorMap;
 uniform bool useColorMap;
 uniform float fadeInValue;
 
+
 Fragment getFragment() {
   if (gs_colorMap.a == 0.0 || ta == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
     discard;

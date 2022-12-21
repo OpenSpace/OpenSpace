@@ -10,6 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Name = "Calcium Abundance",
   Identifier = "casimap_02122015",
+  Enabled = asset.enabled,
   FilePath = texturesPath .. "casimap_02122015.png",
   BlendMode = "Multiply",
 }
@@ -30,7 +31,7 @@ asset.export("layer", layer)
 asset.meta = {
   Name = "Mercury Calcium Abundance",
   Version = "1.0",
-  Description = [[ Calcium Abundance layer for Mercury globe]],
+  Description = "Calcium Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

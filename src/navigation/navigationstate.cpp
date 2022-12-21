@@ -29,9 +29,9 @@
 #include <openspace/query/query.h>
 
 namespace {
-    constexpr const char* _loggerCat = "NavigationState";
+    constexpr std::string_view _loggerCat = "NavigationState";
 
-    const double Epsilon = 1E-7;
+    constexpr double Epsilon = 1E-7;
 
     struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node
@@ -98,16 +98,16 @@ CameraPose NavigationState::cameraPose() const {
 
     if (!anchorNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as anchor.", anchor
+            "Could not find scene graph node '{}' used as anchor", anchor
         ));
         return CameraPose();
     }
 
     if (!referenceFrameNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as reference frame.",
-            referenceFrame)
-        );
+            "Could not find scene graph node '{}' used as reference frame",
+            referenceFrame
+        ));
         return CameraPose();
     }
 

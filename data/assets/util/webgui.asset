@@ -3,7 +3,7 @@ asset.require("./static_server")
 local guiCustomization = asset.require("customization/gui")
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "fae0fddfcdbdd9bd78e7b1b3d2954823e2af26f5"
+local frontendHash = "748c523b158be5a63d6907b054909c1ac53818d0"
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
@@ -90,7 +90,7 @@ asset.export("setCefRoute", setCefRoute)
 asset.meta = {
   Name = "WebGUI",
   Version = "0.1",
-  Description = [[ insert CEF rant ]],
+  Description = "insert CEF rant",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

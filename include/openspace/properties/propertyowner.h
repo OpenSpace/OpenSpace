@@ -52,7 +52,7 @@ class Property;
 class PropertyOwner : public DocumentationGenerator {
 public:
     /// The separator that is used while accessing the properties and/or sub-owners
-    static const char URISeparator = '.';
+    static constexpr char URISeparator = '.';
 
     struct PropertyOwnerInfo {
         std::string identifier;
@@ -77,7 +77,7 @@ public:
      * The destructor will remove all Propertys and PropertyOwners it owns along with
      * itself.
      */
-    virtual ~PropertyOwner();
+    virtual ~PropertyOwner() override;
 
     /**
      * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an

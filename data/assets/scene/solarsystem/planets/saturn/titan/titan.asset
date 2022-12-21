@@ -47,18 +47,18 @@ local Titan = {
   GUI = {
     Name = "Titan",
     Path = "/Solar System/Planets/Saturn/Moons/Titan",
-    Description = [[Largest moon of Saturn.]]
+    Description = "Largest moon of Saturn"
   }
 }
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Titan)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Titan)
 end)
-  
+
 asset.export(Titan)
 
 
@@ -66,7 +66,7 @@ asset.export(Titan)
 asset.meta = {
   Name = "Titan",
   Version = "1.2",
-  Description = [[ Titan globe with labels.]],
+  Description = "Titan globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

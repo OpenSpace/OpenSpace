@@ -45,7 +45,7 @@ local JupiterLabel = {
   Parent = Jupiter.Identifier,
   Renderable = {
     Enabled = false,
-    Type = "RenderableLabels",
+    Type = "RenderableLabel",
     Text = "Jupiter",
     FontSize = 70.0,
     Size = 8.77,
@@ -64,12 +64,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Jupiter)
   openspace.addSceneGraphNode(JupiterLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JupiterLabel)
   openspace.removeSceneGraphNode(Jupiter)
 end)
-    
+
 asset.export(Jupiter)
 asset.export(JupiterLabel)
 
@@ -78,7 +78,7 @@ asset.export(JupiterLabel)
 asset.meta = {
   Name = "Jupiter",
   Version = "1.1",
-  Description = [[ Jupiter globe, and main planet label.]],
+  Description = "Jupiter globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

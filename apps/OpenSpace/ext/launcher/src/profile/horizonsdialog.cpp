@@ -986,7 +986,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             appendLog(msg, HorizonsDialog::LogLevel::Error);
 
             msg = fmt::format(
-                "Try to use '@{}' as observer to search for possible matches.",
+                "Try to use '@{}' as observer to search for possible matches",
                 _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
@@ -998,7 +998,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
         case HorizonsResultCode::ErrorObserverTargetSame: {
             std::string msg = fmt::format(
                 "The observer '{}' and target '{}' are the same. Please use another "
-                "observer for the current target.", _observerName, _targetName
+                "observer for the current target", _observerName, _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
             styleLabel(_targetLabel, IsDirty::Yes);
@@ -1011,7 +1011,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             std::string msg = fmt::format(
                 "There is not enough data to compute the state of target '{}' in "
                 "relation to the observer '{}' for the time range '{}' to '{}'. Try to "
-                "use another observer for the current target or another time range.",
+                "use another observer for the current target or another time range",
                 _targetName, _observerName, _startTime, _endTime
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
@@ -1028,7 +1028,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
 
             msg = fmt::format(
                 "Did not find what you were looking for? Use '@{}' as observer to search "
-                "for alternatives.", _observerName
+                "for alternatives", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
             styleLabel(_centerLabel, IsDirty::Yes);
@@ -1104,8 +1104,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             appendLog(msg, HorizonsDialog::LogLevel::Error);
 
             msg = fmt::format(
-                "Try to use '{}*' as target to search for possible matches.",
-                _targetName
+                "Try to use '{}*' as target to search for possible matches", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
             styleLabel(_targetLabel, IsDirty::Yes);

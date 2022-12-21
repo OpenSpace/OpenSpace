@@ -35,13 +35,14 @@ out vec4 vs_position;
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
-void main() {
-    vec4 tmp = in_position;
-    vec4 position = pscTransform(tmp, ModelTransform);
 
-    vs_position = tmp;
-    vs_st = in_st;
-    
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+void main() {
+  vec4 tmp = in_position;
+  vec4 position = pscTransform(tmp, ModelTransform);
+
+  vs_position = tmp;
+  vs_st = in_st;
+  
+  position = ViewProjection * position;
+  gl_Position =  z_normalization(position);
 }

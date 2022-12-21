@@ -29,9 +29,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
-
 #include <functional>
-#include <memory>
 
 namespace ghoul { class Dictionary; }
 
@@ -47,7 +45,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     Translation();
-    virtual ~Translation() = default;
+    virtual ~Translation() override = default;
     virtual bool initialize();
 
     virtual void update(const UpdateData& data);

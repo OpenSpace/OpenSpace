@@ -29,13 +29,13 @@ asset.onInitialize(function()
     openspace.addSceneGraphNode(node)
   end
 end)
-  
+
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
     openspace.removeSceneGraphNode(nodes[i])
   end
 end)
-  
+
 for _, node in ipairs(nodes) do
   asset.export(node)
 end
@@ -45,8 +45,8 @@ end
 asset.meta = {
   Name = "Triton",
   Version = "1.1",
-  Description = [[ Procedural Globe asset containing Neptune's moon: Triton.
-    A blank globe and SPICE trail are generated for the moon.]],
+  Description = [[Procedural Globe asset containing Neptune's moon: Triton. A blank globe
+    and SPICE trail are generated for the moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

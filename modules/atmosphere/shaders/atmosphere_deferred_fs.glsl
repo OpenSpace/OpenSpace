@@ -60,10 +60,10 @@
 #include "atmosphere_common.glsl"
 
 in vec2 texCoord;
+
 out vec4 renderTarget;
 
 uniform int cullAtmosphere;
-
 uniform float Rg;
 uniform float Rt;
 uniform float groundRadianceEmission;
@@ -100,6 +100,7 @@ uniform dvec3 sunDirectionObj;
  *******************************************************************************/
 // JCC: Remove and use dictionary to decide the number of shadows
 const uint numberOfShadows = 1;
+
 
 struct ShadowRenderingStruct {
   double xu;
@@ -511,6 +512,7 @@ vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
   float scale = clamp(t, 0.0, 1.0);
   return scale * transmittance(transmittanceTexture, r, mu, Rg, Rt) * sunRadiance * (1.0 - irradianceFactor);
 }
+
 
 void main() {
   // Modify the texCoord based on the Viewport and Resolution. This modification is
