@@ -167,7 +167,8 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::CurrentTimeSpice,
             codegen::lua::CurrentWallTime,
             codegen::lua::CurrentApplicationTime,
-            codegen::lua::AdvancedTime
+            codegen::lua::AdvancedTime,
+            codegen::lua::ConvertTime,
         }
     };
 }
