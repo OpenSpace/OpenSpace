@@ -76,29 +76,6 @@ public:
 
 
 private:
-    void definePropertyCallbackFunctions();
-    void setupProperties();
-    void setModelDependentConstants();
-    void setupDynamicDownloading(const Parameters& p);
-    // True when new state is loaded or user change which quantity used for masking out
-    // line segments
-    //bool shouldUpdateColorBuffer();
-    //bool shouldUpdateMaskingBuffer();
-    void updateVertexPositionBuffer();
-    void updateVertexColorBuffer();
-    void updateVertexMaskingBuffer();
-
-    LoadingType _loadingType;
-    // dataID that corresponds to what dataset to use if using DynamicDownloading
-    int _dataID;
-    // number of files to queue up at a time
-    int _nOfFilesToQueue = 10;
-    std::string _baseURL = "";
-    std::string _dataURL = "";
-    //  DynamicDownloaderManager downloads and updates renderable field lines with
-    //  field lines downloaded from the web.
-    std::unique_ptr<DynamicDownloaderManager> _dynamicdownloaderManager;
-
     SourceFileType _inputFileType;
     struct File {
         enum class FileStatus {
@@ -112,16 +89,42 @@ private:
         double timestamp;
         FieldlinesState state;
     };
+
+    void definePropertyCallbackFunctions();
+    void setupProperties();
+    void setModelDependentConstants();
+    void setupDynamicDownloading(const Parameters& p);
+    // True when new state is loaded or user change which quantity used for masking out
+    // line segments
+    //bool shouldUpdateColorBuffer();
+    //bool shouldUpdateMaskingBuffer();
+    void updateVertexPositionBuffer();
+    void updateVertexColorBuffer();
+    void updateVertexMaskingBuffer();
+
     std::vector<File> _files;
     void loadFile(RenderableFieldlinesSequenceNew::File& file);
+
+    LoadingType _loadingType;
+    // dataID that corresponds to what dataset to use if using DynamicDownloading
+    int _dataID;
+    // number of files to queue up at a time
+    int _nOfFilesToQueue = 10;
+    std::string _baseURL = "";
+    std::string _dataURL = "";
+    //  DynamicDownloaderManager downloads and updates renderable field lines with
+    //  field lines downloaded from the web.
+    std::unique_ptr<DynamicDownloaderManager> _dynamicdownloaderManager;
 
     // In setup it is used to scale JSON coordinates. During runtime it is used to scale
     // domain limits.
     float _scalingFactor = 1.f;
+    fls::Model _model = fls::Model::Invalid;
     bool _shouldUpdateMaskingBuffer;
     bool _shouldUpdateColorBuffer;
     bool _shouldUpdatePositionBuffer;
     int _activeTriggerTimeIndex = -1;
+    bool atLeastOneFileLoaded = false;
 
     bool _isLoadingStateFromDisk = false;
 

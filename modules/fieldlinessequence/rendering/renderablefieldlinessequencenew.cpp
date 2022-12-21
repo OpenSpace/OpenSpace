@@ -27,9 +27,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <thread>
@@ -195,6 +197,23 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
+        enum class [[codegen::map(openspace::fls::Model)]] Model {
+            Batsrus = 0,
+            Enlil,
+            Pfss,
+            Invalid
+        };
+        // Currently supports: batsrus, enlil & pfss. Not specified -> model == invalid
+        // which just means that the scaleFactor (scaleToMeters) will be 1.f assuming
+        // meter as input
+        std::optional<Model> simulationModel;
+
+        // Convert the models distance unit, ex. AU to meters for Enlil.
+        // 1.f is default, assuming meters as input.
+        // Does not need to be specified if simulationModel is specified.
+        // Using a different model? Set this to scale your vertex positions to meters.
+        std::optional<float> scaleToMeters;
+
         // choose type of loading:
         //0: static loading and static downloading
         //1: dynamic loading but static downloading
@@ -315,6 +334,14 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
             "specify dynamic downloading parameters or a syncfolder"
         );
     }
+
+    _model = codegen::map<openspace::fls::Model>(p.simulationModel);
+    if (_model != fls::Model::Invalid) {
+        setModelDependentConstants();
+    }
+    // setting scaling factor after model to support unknown model (model = invalid, but
+    // scaling factor specified.
+    _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 
     if (_loadingType == LoadingType::DynamicDownloading) {
         setupDynamicDownloading(p);
@@ -494,9 +521,8 @@ void RenderableFieldlinesSequenceNew::definePropertyCallbackFunctions() {
 }
 
 void RenderableFieldlinesSequenceNew::setModelDependentConstants() {
-    const fls::Model simulationModel = _states[0].model();
     float limit = 100.f; // Just used as a default value.
-    switch (simulationModel) {
+    switch (_model) {
     case fls::Model::Batsrus:
         _scalingFactor = fls::ReToMeter;
         limit = 300.f; // Should include a long magnetotail
@@ -574,11 +600,9 @@ void RenderableFieldlinesSequenceNew::loadFile(File& file) {
     _isLoadingStateFromDisk = true;
     bool success = false;
     if (_inputFileType == SourceFileType::Osfls) {
-
         std::thread readFileThread([this, &file, &success]() {
             success = file.state.loadStateFromOsfls(file.path.string());
         });
-
     }
 
     // So far uncleare why model is needed and if scalingFactor can be changed afterwards.
@@ -624,6 +648,27 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 }
 
 void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTasks&) {
+    if (_states.empty()) {
+        return;
+    }
+    _shaderProgram->activate();
+
+    // Calculate Model View MatrixProjection
+    const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
+    const glm::dmat4 modelMat =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        rotMat *
+        glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
+    const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
+
+    _shaderProgram->setUniform("modelViewProjection",
+        data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+
+    _shaderProgram->setUniform("colorMethod", _colorMethod);
+    _shaderProgram->setUniform("lineColor", _colorUniform);
+    _shaderProgram->setUniform("usingDomain", _domainEnabled);
+    _shaderProgram->setUniform("usingMasking", _maskingEnabled);
+
     if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
         ghoul::opengl::TextureUnit textureUnit;
         textureUnit.activate();
@@ -636,6 +681,11 @@ void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTas
         _shaderProgram->setUniform("maskingRange", _maskingRanges[_maskingQuantity]);
     }
 
+    _shaderProgram->setUniform("domainLimR", _domainR.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimX", _domainX.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimY", _domainY.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimZ", _domainZ.value() * _scalingFactor);
+
     // Flow / Particles
     _shaderProgram->setUniform("flowColor", _flowColor);
     _shaderProgram->setUniform("usingParticles", _flowEnabled);
@@ -647,11 +697,35 @@ void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTas
         global::windowDelegate->applicationTime() * (_flowReversed ? -1 : 1)
     );
 
+    bool additiveBlending = false;
+    if (_colorABlendEnabled) {
+        additiveBlending = true;
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+
+    glBindVertexArray(_vertexArrayObject);
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
 #else
     glLineWidth(1.f);
 #endif
+
+    glMultiDrawArrays(
+        GL_LINE_STRIP,
+        _states[_activeStateIndex].lineStart().data(),
+        _states[_activeStateIndex].lineCount().data(),
+        static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
+    );
+
+    glBindVertexArray(0);
+    _shaderProgram->deactivate();
+
+    if (additiveBlending) {
+        // Restores OpenGL Rendering State
+        global::renderEngine->openglStateCache().resetBlendState();
+        global::renderEngine->openglStateCache().resetDepthState();
+    }
 }
 
 // Unbind buffers and arrays
