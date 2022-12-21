@@ -1,5 +1,6 @@
 local transforms = asset.require("./earth")
-
+asset.require("scene/solarsystem/sun/sun")
+asset.require("./moon/moon")
 
 
 -- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
