@@ -49,7 +49,7 @@ namespace openspace {
 CosmicSonification::CosmicSonification()
     : PropertyOwner(CosmicSonificationInfo)
 {
-
+    _isRunning = true;
 }
 
 CosmicSonification::~CosmicSonification() {
