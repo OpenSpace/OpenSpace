@@ -454,6 +454,42 @@ SonificationModule::SonificationModule()
     addPropertySubOwner(_compareProperty);
 }
 
+SonificationModule& SonificationModule::ref() {
+    static SonificationModule sonificationModule;
+    return sonificationModule;
+}
+
+// Send osc message
+void SonificationModule::sendOscMessage(const std::string& label,
+                                       std::vector<SonificationModule::OscDataEntry> data)
+{
+    _stream.Clear();
+    _stream << osc::BeginMessage(label.c_str());
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        switch (data[i].type) {
+            case SonificationModule::OscDataType::Blob:
+                _stream << data[i].blobValue;
+                break;
+            case SonificationModule::OscDataType::Bool:
+                _stream << data[i].boolValue;
+                break;
+            case SonificationModule::OscDataType::Double:
+                _stream << data[i].doubleValue;
+                break;
+            case SonificationModule::OscDataType::Int:
+                _stream << data[i].intValue;
+                break;
+            case SonificationModule::OscDataType::String:
+                _stream << data[i].stringValue.c_str();
+                break;
+        }
+    }
+
+    _stream << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
+}
+
 //Turn on/off everything
 void SonificationModule::onEverythingChanged(bool value) {
 
@@ -1915,6 +1951,8 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary&)
         //start a thread to extract data to the sonification
         _thread = std::thread([this]() { threadMain(std::ref(_isRunning)); });
     }
+
+    _cosmicSonification.start();
 }
 
 void SonificationModule::internalDeinitialize() {

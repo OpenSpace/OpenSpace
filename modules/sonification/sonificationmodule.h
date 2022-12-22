@@ -31,6 +31,7 @@
 
 #include "modules/sonification/ext/osc/ip/UdpSocket.h"
 #include "modules/sonification/ext/osc/osc/OscOutboundPacketStream.h"
+#include "modules/sonification/include/cosmicsonification.h"
 #include "openspace/properties/scalar/boolproperty.h"
 #include "openspace/properties/optionproperty.h"
 #include "openspace/scene/scene.h"
@@ -46,6 +47,24 @@ namespace openspace {
 
 class SonificationModule : public OpenSpaceModule {
 public:
+    enum class OscDataType {
+        Blob = 0,
+        Bool,
+        Double,
+        Int,
+        String,
+    };
+
+    struct OscDataEntry {
+        int intValue;
+        double doubleValue;
+        std::string stringValue;
+        osc::Blob blobValue;
+        bool boolValue;
+
+        OscDataType type;
+    };
+
     enum class GUIMode {
         Solar = 0,
         Planetary,
@@ -54,6 +73,16 @@ public:
 
     SonificationModule();
     ~SonificationModule();
+
+    /**
+     * Returns the static variant of the SonificationModule.
+     *
+     * \return The static variant of the SonificationModule
+     */
+    static SonificationModule& ref();
+
+    // Send osc message
+    void sendOscMessage(const std::string& label, std::vector<OscDataEntry> data);
 
     //Extract the data from the given identifier
     void extractData(const std::string& identifier, int i, const Scene * const scene,
@@ -367,6 +396,9 @@ private:
     CompareProperty _compareProperty = CompareProperty();
     properties::BoolProperty _everythingEnabled =
         properties::BoolProperty(_EverythingInfo, false);
+
+    // Cosmic view
+    CosmicSonification _cosmicSonification;
 };
 
 } // namespace openspace

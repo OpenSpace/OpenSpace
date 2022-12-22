@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,21 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___SONIFICATION___H__
-#define __OPENSPACE_MODULE_SONIFICATION___SONIFICATION___H__
+#ifndef __OPENSPACE_MODULE_SONIFICATION___COSMICSONIFICATION___H__
+#define __OPENSPACE_MODULE_SONIFICATION___COSMICSONIFICATION___H__
+
+#include <openspace/properties/propertyowner.h>
+
+#include "openspace/scene/scene.h"
+#include "ghoul/glm.h"
+#include <atomic>
+#include <thread>
 
 namespace openspace {
 
-class SonificationHelper{
+class CosmicSonification : public properties::PropertyOwner {
 
 public:
-    SonificationHelper();
-    virtual ~SonificationHelper();
+    CosmicSonification();
+    virtual ~CosmicSonification();
+
+    void start();
 
 private:
-    
+    std::thread _thread;
+    std::atomic<bool> _isRunning;
+
+    void threadMain(std::atomic<bool>& isRunning);
+    void subscripbeFocusDistance(const Scene* scene,
+        const glm::dvec3 cameraPosition, const SceneGraphNode* focusNode);
+    double _prevDistance;
 };
 
 } // openspace namespace
 
-#endif // __OPENSPACE_MODULE_SONIFICATION___SONIFICATION___H__
+#endif // __OPENSPACE_MODULE_SONIFICATION___COSMICSONIFICATION___H__
