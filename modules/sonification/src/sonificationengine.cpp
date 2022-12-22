@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,21 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___SONIFICATION___H__
-#define __OPENSPACE_MODULE_SONIFICATION___SONIFICATION___H__
+#include <modules/sonification/include/sonificationengine.h>
+
+namespace {
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
+        SonificationEngineInfo =
+    {
+       "SonificationEngine",
+       "Sonification Engine",
+       "Settings for the sonification engine"
+    };
+} // namespace
 
 namespace openspace {
 
-class SonificationHelper{
+SonificationEngine::SonificationEngine()
+    : properties::PropertyOwner(SonificationEngineInfo)
+{
 
-public:
-    SonificationHelper();
-    virtual ~SonificationHelper();
+}
 
-private:
-    
-};
+SonificationEngine::~SonificationEngine() {
+
+}
+
+void SonificationEngine::initialize() {
+
+}
+
+void SonificationEngine::deinitialize() {
+
+}
+
+void SonificationEngine::update() {
+
+}
 
 } // openspace namespace
-
-#endif // __OPENSPACE_MODULE_SONIFICATION___SONIFICATION___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                              *
+ * Copyright (c) 2014-2022                                                              *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -1910,6 +1910,10 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
 
 void SonificationModule::internalInitialize(const ghoul::Dictionary&)
 {
+    _sonificationEngine = new SonificationEngine();
+    _sonificationEngine->initialize();
+    addPropertySubOwner(_sonificationEngine);
+
     //Mkae sure that only the master computer runs the sonification module
     if (global::windowDelegate->isMaster()) {
         //start a thread to extract data to the sonification
@@ -1968,8 +1972,12 @@ void SonificationModule::internalDeinitialize() {
     _isRunning = false;
     if (_thread.joinable())
         _thread.join();
+
+    _sonificationEngine->deinitialize();
 }
 
-SonificationModule::~SonificationModule() { }
+SonificationModule::~SonificationModule() {
+    delete _sonificationEngine;
+}
 
 } // namespace openspace

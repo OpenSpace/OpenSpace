@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,12 +29,15 @@
 #define NUM_SEC_PER_DAY 86400.0
 #define NUM_PLANETARY_SETTINGS 6
 
+#include "openspace/util/openspacemodule.h"
+
+#include <modules/sonification/include/sonificationengine.h>
+
 #include "modules/sonification/ext/osc/ip/UdpSocket.h"
 #include "modules/sonification/ext/osc/osc/OscOutboundPacketStream.h"
 #include "openspace/properties/scalar/boolproperty.h"
 #include "openspace/properties/optionproperty.h"
 #include "openspace/scene/scene.h"
-#include "openspace/util/openspacemodule.h"
 #include "ghoul/glm.h"
 #include <atomic>
 #include <string>
@@ -367,6 +370,8 @@ private:
     CompareProperty _compareProperty = CompareProperty();
     properties::BoolProperty _everythingEnabled =
         properties::BoolProperty(_EverythingInfo, false);
+
+    SonificationEngine* _sonificationEngine;
 };
 
 } // namespace openspace
