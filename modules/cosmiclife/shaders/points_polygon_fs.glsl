@@ -22,40 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
-#define __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+#version __CONTEXT__
 
-#include <openspace/util/task.h>
+out vec4 finalColor;
 
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <string>
+uniform vec3 polygonColor;
 
-namespace openspace::volume {
-
-class GenerateRawVolumeTask : public Task {
-public:
-    GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation Documentation();
-
-private:
-    std::filesystem::path _rawVolumeOutputPath;
-    std::filesystem::path  _dictionaryOutputPath;
-    std::string _time;
-
-    glm::uvec3 _dimensions = glm::uvec3(0);
-    glm::vec3 _lowerDomainBound = glm::vec3(0.f);
-    glm::vec3 _upperDomainBound = glm::vec3(0.f);
-
-    std::string _valueFunctionLua;
-    std::string _file;
-
-    bool _hasFile = false;
-    bool _hasFunction = false;
-};
-
-} // namespace openspace::volume
-
-#endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+void main() {
+  finalColor = vec4(polygonColor, 1.0 );
+}

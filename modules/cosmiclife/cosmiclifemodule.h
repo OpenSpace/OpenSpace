@@ -22,40 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
-#define __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+#ifndef __OPENSPACE_MODULE_COSMICLIFE___COSMICLIFEMODULE___H__
+#define __OPENSPACE_MODULE_COSMICLIFE___COSMICLIFEMODULE___H__
 
-#include <openspace/util/task.h>
+#include <openspace/util/openspacemodule.h>
 
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <string>
+#include <ghoul/opengl/programobjectmanager.h>
+#include <ghoul/opengl/texturemanager.h>
 
-namespace openspace::volume {
+namespace openspace {
 
-class GenerateRawVolumeTask : public Task {
+class CosmicLifeModule : public OpenSpaceModule {
 public:
-    GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation Documentation();
+    constexpr static const char* Name = "CosmicLife";
 
-private:
-    std::filesystem::path _rawVolumeOutputPath;
-    std::filesystem::path  _dictionaryOutputPath;
-    std::string _time;
+    CosmicLifeModule();
+    virtual ~CosmicLifeModule() = default;
+    std::vector<documentation::Documentation> documentations() const override;
 
-    glm::uvec3 _dimensions = glm::uvec3(0);
-    glm::vec3 _lowerDomainBound = glm::vec3(0.f);
-    glm::vec3 _upperDomainBound = glm::vec3(0.f);
+    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+    static ghoul::opengl::TextureManager TextureManager;
 
-    std::string _valueFunctionLua;
-    std::string _file;
-
-    bool _hasFile = false;
-    bool _hasFunction = false;
+protected:
+    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalDeinitializeGL() override;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___DIGITALUNIVERSEMODULE___H__

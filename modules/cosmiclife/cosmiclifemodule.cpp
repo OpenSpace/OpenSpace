@@ -22,40 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
-#define __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+#include <modules/cosmiclife/cosmiclifemodule.h>
 
-#include <openspace/util/task.h>
+/*#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
+#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
+#include <modules/digitaluniverse/rendering/renderableplanescloud.h>*/
+#include <modules/cosmiclife/rendering/renderablecosmicpoints.h> 
+#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <string>
+namespace openspace {
 
-namespace openspace::volume {
+ghoul::opengl::ProgramObjectManager CosmicLifeModule::ProgramObjectManager;
+ghoul::opengl::TextureManager CosmicLifeModule::TextureManager;
 
-class GenerateRawVolumeTask : public Task {
-public:
-    GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation Documentation();
+CosmicLifeModule::CosmicLifeModule()
+    : OpenSpaceModule(CosmicLifeModule::Name)
+{}
 
-private:
-    std::filesystem::path _rawVolumeOutputPath;
-    std::filesystem::path  _dictionaryOutputPath;
-    std::string _time;
+void CosmicLifeModule::internalInitialize(const ghoul::Dictionary&) {
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "Renderable factory was not created");
 
-    glm::uvec3 _dimensions = glm::uvec3(0);
-    glm::vec3 _lowerDomainBound = glm::vec3(0.f);
-    glm::vec3 _upperDomainBound = glm::vec3(0.f);
+    fRenderable->registerClass<RenderableCosmicPoints>("RenderableCosmicPoints");
+    // fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
+    // fRenderable->registerClass<RenderablePlanesCloud>("RenderablePlanesCloud");
+    // fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
+}
 
-    std::string _valueFunctionLua;
-    std::string _file;
+void CosmicLifeModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+    TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
+}
 
-    bool _hasFile = false;
-    bool _hasFunction = false;
-};
+std::vector<documentation::Documentation> CosmicLifeModule::documentations() const {
+    return {
+        RenderableCosmicPoints::Documentation(),
+        // RenderableBillboardsCloud::Documentation(),
+        // RenderablePlanesCloud::Documentation(),
+        // RenderableDUMeshes::Documentation()
+    };
+}
 
-} // namespace openspace::volume
-
-#endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+} // namespace openspace

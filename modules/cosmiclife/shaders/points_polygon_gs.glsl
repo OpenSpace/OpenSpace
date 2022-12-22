@@ -22,40 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
-#define __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+#version __CONTEXT__
 
-#include <openspace/util/task.h>
+layout(points) in;
+layout(triangle_strip, max_vertices = 63) out;
 
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <string>
+uniform int sides;
 
-namespace openspace::volume {
+const float PI = 3.1415926;
 
-class GenerateRawVolumeTask : public Task {
-public:
-    GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation Documentation();
+void main() {
+  vec4 v0 = gl_in[0].gl_Position;
+    
+  for (int i = sides; i > 0; --i) {
+    // Angle between each side in radians
+    float ang = 2.0 * PI / float(sides) * i;
 
-private:
-    std::filesystem::path _rawVolumeOutputPath;
-    std::filesystem::path  _dictionaryOutputPath;
-    std::string _time;
+    gl_Position = v0;
+    EmitVertex();
 
-    glm::uvec3 _dimensions = glm::uvec3(0);
-    glm::vec3 _lowerDomainBound = glm::vec3(0.f);
-    glm::vec3 _upperDomainBound = glm::vec3(0.f);
+    vec4 vi = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
+    gl_Position = vi;
+    EmitVertex();
 
-    std::string _valueFunctionLua;
-    std::string _file;
+    ang = 2.0 * PI / float(sides) * (i - 1);
+    vec4 vii = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
+    gl_Position = vii;
+    EmitVertex();
 
-    bool _hasFile = false;
-    bool _hasFunction = false;
-};
-
-} // namespace openspace::volume
-
-#endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+    EndPrimitive();
+  }
+}

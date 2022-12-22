@@ -662,7 +662,6 @@ EventRenderableDisabled::EventRenderableDisabled(const SceneGraphNode* node_)
     , node(temporaryString(node_->identifier()))
 {}
 
-
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)
     : Event(Type)
     , subtype(subtype_)

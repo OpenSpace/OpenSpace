@@ -1,0 +1,183 @@
+-- Your personal path --
+local path = "C:/MasterThesis_cosmicView"
+
+-- Speck files --
+local status_file = asset.localResource(path .. "/data/endangered/speck/all_primates_endangered.speck")
+local trend_up_file = asset.localResource(path .. "/data/endangered/speck/primates_positions_trend_up.speck")
+local trend_same_file = asset.localResource(path .. "/data/endangered/speck/primates_positions_trend_same.speck")
+local trend_down_file = asset.localResource(path .. "/data/endangered/speck/primates_positions_trend_down.speck")
+
+-- Label files --
+local status_label = asset.localResource(path .. "/data/endangered/label/all_primates_endangered_commonname_label.speck")
+local trend_up_label = asset.localResource(path .. "/data/endangered/label/primates_commonname_trend_up_label.speck")
+local trend_same_label = asset.localResource(path .. "/data/endangered/label/primates_commonname_trend_same_label.speck")
+local trend_down_label =asset.localResource(path .. "/data/endangered/label/primates_commonname_trend_down_label.speck")
+
+-- Color maps --
+local color_map_status = asset.localResource(path .. "/data/endangered/cmap/redbluegreen.cmap")
+
+-- Texture files --
+local endangered_texture = asset.localResource(path .. "/data/texture/point3A.png")
+local trend_up_texture = asset.localResource(path .. "/data/endangered/texture/up.png")
+local trend_same_texture = asset.localResource(path .. "/data/endangered/texture/same.png")
+local trend_down_texture = asset.localResource(path .. "/data/endangered/texture/down.png")
+
+-- Image files --
+local status_image_file = asset.localResource(path .. "/data/endangered/images/critically_endangered.png")
+
+-- Scale factors --
+local status_scale = 20
+local up_down_scale = 16
+local same_scale = 15
+
+
+local endangered_status = {
+    Identifier = "endangered_status",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.4,1.0,1.0 },
+      Opacity = 1.0,
+      ScaleFactor = status_scale,
+      File = status_file,
+      ColorMap = color_map_status,
+      ColorOption = { "Status" },
+      ColorRange = { { 2.0, 4.0}},
+      DrawLabels = false,
+      LabelFile = status_label,
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 16 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 10 },
+      Unit = "Km",
+      FadeInDistances = { 0.0, 0.1 },
+      Texture = endangered_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Status",
+      Path = "/Cosmic/Endangered species"
+    }
+  }
+
+  local status_image = {
+    Identifier = "endangered",
+    Name = "status image",
+    Type = "ScreenSpaceImageLocal",
+    TexturePath = status_image_file,
+    FaceCamera = false,
+    Scale = 0.3,
+    CartesianPosition = { 1.23, -0.59, -2.0 },
+    Enabled = false
+  }
+
+
+  local endangered_trend_up = {
+    Identifier = "endangered_trend_up",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.0, 1.0, 0.0 },
+      Opacity = 1.0,
+      ScaleFactor = up_down_scale,
+      File = trend_up_file,
+      DrawLabels = false,
+      LabelFile = trend_up_label ,
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 16 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 10 },
+      Unit = "Km",
+      FadeInDistances = { 0.0, 0.1 },
+      Texture = trend_up_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Up",
+      Path = "/Cosmic/Endangered species/Trend"
+    }
+  }
+
+  local endangered_trend_zero = {
+    Identifier = "endangered_trend_zero",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.212 ,0.733, 0.929 },
+      Opacity = 1.0,
+      ScaleFactor = same_scale,
+      File = trend_same_file,
+      DrawLabels = false,
+      LabelFile = trend_same_label ,
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 16 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 10 },
+      Unit = "Km",
+      FadeInDistances = { 0.0, 0.1 },
+      Texture = trend_same_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Same",
+      Path = "/Cosmic/Endangered species/Trend"
+    }
+  }
+
+  local endangered_trend_down = {
+    Identifier = "endangered_trend_down",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 1.0, 0.0, 0.0 },
+      Opacity = 1.0,
+      ScaleFactor = up_down_scale,
+      File = trend_down_file,
+      DrawLabels = false,
+      LabelFile = trend_down_label,
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 16 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 10 },
+      Unit = "Km",
+      FadeInDistances = { 0.0, 0.1 },
+      Texture = trend_down_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    GUI = {
+      Name = "Down",
+      Path = "/Cosmic/Endangered species/Trend"
+    }
+  }
+
+
+  asset.onInitialize(function()
+    openspace.addSceneGraphNode(endangered_status)
+    openspace.addSceneGraphNode(status_image)
+    openspace.addSceneGraphNode(endangered_trend_up)
+    openspace.addSceneGraphNode(endangered_trend_zero)
+    openspace.addSceneGraphNode(endangered_trend_down)
+    end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(endangered_status)
+    openspace.removeSceneGraphNode(status_image)
+    openspace.removeSceneGraphNode(endangered_trend_up)
+    openspace.removeSceneGraphNode(endangered_trend_zero)
+    openspace.removeSceneGraphNode(endangered_trend_down)
+end)
+
+asset.export(endangered_status)
+asset.export(status_image)
+asset.export(endangered_trend_up)
+asset.export(endangered_trend_zero)
+asset.export(endangered_trend_down)
+

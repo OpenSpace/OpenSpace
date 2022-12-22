@@ -193,6 +193,15 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
         }
     });
 
+    _enabled.onChange([this]() {
+        if (isEnabled()) {
+            global::eventEngine->publishEvent<events::EventRenderableEnabled>(_parent);
+        }
+        else {
+            global::eventEngine->publishEvent<events::EventRenderableDisabled>(_parent);
+        }
+    });
+
     _opacity = p.opacity.value_or(_opacity);
     // We don't add the property here as subclasses should decide on their own whether
     // they to expose the opacity or not

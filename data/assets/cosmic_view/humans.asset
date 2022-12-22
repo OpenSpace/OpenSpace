@@ -1,0 +1,554 @@
+-- Your personal path --
+local path = "C:/MasterThesis_cosmicView"
+
+-- Speck files --
+local all_humans = asset.localResource(path .. "/data/humans/speck/all_human_continents.speck")
+local south_africa_file = asset.localResource(path .. "/data/humans/speck/regions/south_africa.speck")
+local west_africa_file = asset.localResource(path .. "/data/humans/speck/regions/west_africa.speck")
+local central_africa_file = asset.localResource(path .. "/data/humans/speck/regions/central_africa.speck")
+local north_africa_file = asset.localResource(path .. "/data/humans/speck/regions/north_africa.speck")
+local europe_file = asset.localResource(path .. "/data/humans/speck/regions/europe.speck")
+local west_asia_file = asset.localResource(path .. "/data/humans/speck/regions/west_asia.speck")
+local central_asia_file = asset.localResource(path .. "/data/humans/speck/regions/central_asia.speck")
+local south_asia_file = asset.localResource(path .. "/data/humans/speck/regions/south_asia.speck")
+local south_east_asia_file = asset.localResource(path .. "/data/humans/speck/regions/south_east_asia.speck")
+local east_asia_file =  asset.localResource(path .. "/data/humans/speck/regions/east_asia.speck")
+local north_east_asia_file = asset.localResource(path .. "/data/humans/speck/regions/north_east_asia.speck")
+local oceania_file = asset.localResource(path .. "/data/humans/speck/regions/oceania.speck")
+local north_america_file = asset.localResource(path .. "/data/humans/speck/regions/north_america.speck")
+local central_america_file = asset.localResource(path .. "/data/humans/speck/regions/central_america.speck")
+local south_america_file = asset.localResource(path .. "/data/humans/speck/regions/south_america.speck")
+
+local test_file = asset.localResource(path .. "/data/humans/speck/test_oceanien.speck")
+
+-- Label files --
+local all_humans_label = asset.localResource(path .. "/data/humans/label/human_tribe_label.speck")
+
+-- Color maps -- 
+local color_continents = asset.localResource(path .. "/data/humans/cmap/human_continents.cmap")
+
+-- Texture files -- 
+local human_texture = asset.localResource(path .. "/data/texture/point3A.png")
+
+
+
+-- Scale factor --
+local scale_factor_all = 0
+local scale_continents = 4
+local scale = 6
+
+
+local test = {
+  Identifier = "test",
+  Renderable = {
+    Type = "RenderableCosmicPoints",
+    Color = { 1, 0.067, 0.161 },
+    Opacity = 1.0,
+    ScaleFactor = scale_continents,
+    File = test_file,
+    ColorMap = color_continents,
+    ColorOption = { "region" },
+    ColorRange = { { 1.0, 2.0} },
+    Unit = "Km",
+    Texture = human_texture,
+    BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+    EnablePixelSizeControl = true,
+    Enabled = false
+  },
+  GUI = {
+    Name = "test",
+    Path = "/Cosmic/Humans/Continents/Oceania"
+  }
+}
+
+
+local all = {
+    Identifier = "allhumans",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.945, 0.929, 0.513 },
+      Opacity = 1.0,
+      ScaleFactor = scale_factor_all,
+      File = all_humans,
+      ColorMap = color_continents,
+      ColorOption = { "region" },
+      ColorRange = { { 1.0, 15.0} },
+      DrawLabels = false,
+      LabelFile = all_humans_label,
+      TextColor = { 1.0, 1.0, 1.0 },
+      TextSize = 1.0,
+      TextMinMaxSize = { 0, 14 },
+      FadeLabelDistances = { 0.0, 0.5 },
+      FadeLabelWidths = { 0.001, 0.5 },
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    Transform = {
+      Scale = {
+        Type = 'StaticScale',
+        Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "All Humans",
+      Path = "/Cosmic/Humans"
+    }
+  }
+
+
+
+
+  local south_africa = {
+    Identifier = "south_africa",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 1, 0.067, 0.161 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = south_africa_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    Transform = {
+      Scale = {
+        Type = 'StaticScale',
+        Scale  = scale
+      }
+},
+    GUI = {
+      Name = "South Africa",
+      Path = "/Cosmic/Humans/Continents/Africa"
+    }
+  }
+
+  local west_africa = {
+    Identifier = "west_africa",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 1, 0.263, 0.263 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = west_africa_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    Transform = {
+      Scale = {
+        Type = 'StaticScale',
+        Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "West Africa",
+      Path = "/Cosmic/Humans/Continents/Africa"
+    }
+  }
+
+  local central_africa = {
+    Identifier = "central_africa",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 1, 0.506, 0.459 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = central_africa_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "Central Africa",
+      Path = "/Cosmic/Humans/Continents/Africa"
+    }
+  }
+
+  local north_africa = {
+    Identifier = "north_africa",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 1.0, 0.427, 0.267 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = north_africa_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+    }
+    },
+    GUI = {
+      Name = "North Africa",
+      Path = "/Cosmic/Humans/Continents/Africa"
+    }
+  }
+
+  local europe = {
+    Identifier = "europe",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.776, 0.251, 1.0 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = europe_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "Europe",
+      Path = "/Cosmic/Humans/Continents/Europe"
+    }
+  }
+
+  local west_asia = {
+    Identifier = "west_asia",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.212, 0.655, 0.361 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = west_asia_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+    },
+    Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "West Asia",
+      Path = "/Cosmic/Humans/Continents/Asia"
+    }
+  }
+
+  local central_asia = {
+    Identifier = "central_asia",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.686, 1.0, 0.063 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = central_asia_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+    }
+    },
+    GUI = {
+      Name = "Central Asia",
+      Path = "/Cosmic/Humans/Continents/Asia"
+    }
+  }
+
+  local south_asia = {
+    Identifier = "south_asia",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.659, 1, 0.361},
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = south_asia_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "South Asia",
+      Path = "/Cosmic/Humans/Continents/Asia"
+    }
+  }
+
+  
+  local south_east_asia = {
+    Identifier = "south_east_asia",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.208, 0.659, 0.275 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = south_east_asia_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "South East Asia",
+      Path = "/Cosmic/Humans/Continents/Asia"
+    }
+  }
+
+  local east_asia = {
+    Identifier = "east_asia",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.082, 1.0, 0.573 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = east_asia_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "East Asia",
+      Path = "/Cosmic/Humans/Continents/Asia"
+    }
+  }
+
+  local north_east_asia = {
+    Identifier = "north_east_asia",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.745, 1.0, 0.659 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = north_east_asia_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "North East Asia",
+      Path = "/Cosmic/Humans/Continents/Asia"
+    }
+  }
+
+  local oceania = {
+    Identifier = "oceania",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 1.0, 1.0, 0.0 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = oceania_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "Oceania",
+      Path = "/Cosmic/Humans/Continents/Oceania"
+    }
+  }
+
+  local north_america = {
+    Identifier = "north_america",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.075, 0.69, 1.0 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = north_america_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "North America",
+      Path = "/Cosmic/Humans/Continents/America"
+    }
+  }
+
+  local central_america = {
+    Identifier = "central_america",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.459, 0.957, 1.0 },
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = central_america_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "Central America",
+      Path = "/Cosmic/Humans/Continents/America"
+    }
+  }
+
+  local south_america = {
+    Identifier = "south_america",
+    Renderable = {
+      Type = "RenderableCosmicPoints",
+      Color = { 0.067, 1.0, 0.906},
+      Opacity = 1.0,
+      ScaleFactor = scale_continents,
+      File = south_america_file,
+      Unit = "Km",
+      Texture = human_texture,
+      BillboardMinMaxSize = { 0.0, 250.0 }, -- in pixels
+      EnablePixelSizeControl = true,
+      Enabled = false
+      },
+      Transform = {
+        Scale = {
+          Type = 'StaticScale',
+          Scale  = scale
+      }
+    },
+    GUI = {
+      Name = "South America",
+      Path = "/Cosmic/Humans/Continents/America"
+    }
+  }
+
+
+  
+  
+  asset.onInitialize(function()
+   -- openspace.addSceneGraphNode(test)
+    openspace.addSceneGraphNode(all)
+    openspace.addSceneGraphNode(south_africa)
+    openspace.addSceneGraphNode(west_africa)
+    openspace.addSceneGraphNode(central_africa)
+    openspace.addSceneGraphNode(north_africa)
+    openspace.addSceneGraphNode(europe)
+    openspace.addSceneGraphNode(west_asia)
+    openspace.addSceneGraphNode(central_asia)
+    openspace.addSceneGraphNode(south_asia)
+    openspace.addSceneGraphNode(south_east_asia)
+    openspace.addSceneGraphNode(east_asia)
+    openspace.addSceneGraphNode(north_east_asia)
+    openspace.addSceneGraphNode(oceania)
+    openspace.addSceneGraphNode(north_america)
+    openspace.addSceneGraphNode(central_america)
+    openspace.addSceneGraphNode(south_america)
+    end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(all)
+  --  openspace.removeSceneGraphNode(test)
+    openspace.removeSceneGraphNode(south_africa)
+    openspace.removeSceneGraphNode(west_africa)
+    openspace.removeSceneGraphNode(central_africa)
+    openspace.removeSceneGraphNode(north_africa)
+    openspace.removeSceneGraphNode(europe)
+    openspace.removeSceneGraphNode(west_asia)
+    openspace.removeSceneGraphNode(central_asia)
+    openspace.removeSceneGraphNode(south_asia)
+    openspace.removeSceneGraphNode(south_east_asia)
+    openspace.removeSceneGraphNode(east_asia)
+    openspace.removeSceneGraphNode(north_east_asia)
+    openspace.removeSceneGraphNode(oceania)
+    openspace.removeSceneGraphNode(north_america)
+    openspace.removeSceneGraphNode(central_america)
+    openspace.removeSceneGraphNode(south_america)
+end)
+
+asset.export(all)
+-- asset.export(test)
+asset.export(south_africa)
+asset.export(west_africa)
+asset.export(central_africa)
+asset.export(north_africa)
+asset.export(europe)
+asset.export(west_asia)
+asset.export(central_asia)
+asset.export(south_asia)
+asset.export(south_east_asia)
+asset.export(east_asia)
+asset.export(north_east_asia)
+asset.export(oceania)
+asset.export(north_america)
+asset.export(central_america)
+asset.export(south_america)

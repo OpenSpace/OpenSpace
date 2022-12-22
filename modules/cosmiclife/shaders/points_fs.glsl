@@ -22,40 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
-#define __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+#include "fragment.glsl"
 
-#include <openspace/util/task.h>
+flat in vec4 gs_colorMap;
+flat in float vs_screenSpaceDepth;
+in vec2 texCoord;
+in float ta;
 
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <string>
+uniform float alphaValue;
+uniform vec3 color;
+uniform sampler2D spriteTexture;
+uniform bool hasColorMap;
+uniform float fadeInValue;
 
-namespace openspace::volume {
+Fragment getFragment() {
+  if (gs_colorMap.a == 0.0 || ta == 0.0 || fadeInValue == 0.0 || alphaValue == 0.0) {
+    discard;
+  }
 
-class GenerateRawVolumeTask : public Task {
-public:
-    GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation Documentation();
+  vec4 textureColor = texture(spriteTexture, texCoord);
+  if (textureColor.a < 0.1) {
+    discard;
+  }
 
-private:
-    std::filesystem::path _rawVolumeOutputPath;
-    std::filesystem::path  _dictionaryOutputPath;
-    std::string _time;
+  vec4 fullColor = textureColor;
+    
+  if (hasColorMap) {
+    fullColor *= gs_colorMap;
+  }
+  else {
+    fullColor.rgb *= color;
+  }
 
-    glm::uvec3 _dimensions = glm::uvec3(0);
-    glm::vec3 _lowerDomainBound = glm::vec3(0.f);
-    glm::vec3 _upperDomainBound = glm::vec3(0.f);
+  float textureOpacity = dot(fullColor.rgb, vec3(1.0));
+  if (textureOpacity == 0.0) {
+    discard;
+  }
 
-    std::string _valueFunctionLua;
-    std::string _file;
+  fullColor.a *= alphaValue * fadeInValue * ta;
 
-    bool _hasFile = false;
-    bool _hasFunction = false;
-};
+  Fragment frag;
+  frag.color = fullColor;
+  frag.depth = vs_screenSpaceDepth;
+  // Setting the position of the billboards to not interact with the ATM
+  frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
-} // namespace openspace::volume
-
-#endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+  return frag;
+}
