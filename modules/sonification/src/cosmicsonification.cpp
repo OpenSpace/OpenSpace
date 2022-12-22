@@ -33,7 +33,7 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "CosmicSonification";
-    constexpr double DistancePrecision = 1000.0;
+    constexpr double DistancePrecision = 0.1;
     constexpr double MeterToKilometer = 1000.0;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo CosmicSonificationInfo = {
@@ -99,9 +99,6 @@ void CosmicSonification::subscripbeFocusDistance(const Scene* scene,
     // Calculate distance to current focus
     glm::dvec3 cameraToNode = focusNode->worldPosition() - cameraPosition;
     double distance = glm::length(cameraToNode);
-
-    // Convert to km
-    distance /= MeterToKilometer;
 
     // Don't send if the data is the same
     if (abs(distance - _prevDistance) < DistancePrecision) {
