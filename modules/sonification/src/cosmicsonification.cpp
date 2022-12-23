@@ -108,9 +108,12 @@ void CosmicSonification::subscripbeFocusDistance(const Scene* scene,
 
     // Create the data structore for the message
     std::string label = "/cosmicFocus";
-    std::vector<SonificationModule::OscDataEntry> data(1);
+    std::vector<SonificationModule::OscDataEntry> data(2);
     data[0].type = SonificationModule::OscDataType::Double;
     data[0].doubleValue = distance;
+
+    data[1].type = SonificationModule::OscDataType::String;
+    data[1].stringValue = focusNode->identifier();
 
     // Send the message via Osc
     SonificationModule::ref().sendOscMessage(label, data);

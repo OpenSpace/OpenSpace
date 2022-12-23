@@ -84,6 +84,20 @@ local Strepsirrhini_volume = {
     }
 }
 
+local Strepsirrhini_volume_center = {
+    Identifier = "Strepsirrhini_volume_center",
+    Parent = lineage.lineage_17.Identifier,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { -491.40947743204754, -362.2762891999452, 344.5404096404138 }
+        }
+    },
+    GUI = {
+        Path = "/Volumes/Density"
+    }
+}
+
 local Platyrrhini_volume = {
     Identifier = "Platyrrhini_volume",
     Parent = lineage.lineage_17.Identifier,
@@ -110,6 +124,20 @@ local Platyrrhini_volume = {
     }
 }
 
+local Platyrrhini_volume_center = {
+    Identifier = "Platyrrhini_volume_center",
+    Parent = lineage.lineage_17.Identifier,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { -249.4982591567144, 240.0134143899799, 435.22515699956585 }
+        }
+    },
+    GUI = {
+        Path = "/Volumes/Density"
+    }
+}
+
 local Catarrhini_volume = {
     Identifier = "Catarrhini_volume",
     Parent = lineage.lineage_17.Identifier,
@@ -133,6 +161,20 @@ local Catarrhini_volume = {
             Type = "StaticScale",
             Scale = 1000
         }
+    }
+}
+
+local Catarrhini_volume_center = {
+    Identifier = "Catarrhini_volume_center",
+    Parent = lineage.lineage_17.Identifier,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 186.17289602440673, -194.22355806701506, 440.5954140267485 }
+        }
+    },
+    GUI = {
+        Path = "/Volumes/Density"
     }
 }
 
@@ -193,8 +235,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Primates_volume)
   openspace.addSceneGraphNode(Haplorrhini_volume)
   openspace.addSceneGraphNode(Strepsirrhini_volume)
+  openspace.addSceneGraphNode(Strepsirrhini_volume_center)
   openspace.addSceneGraphNode(Platyrrhini_volume)
+  openspace.addSceneGraphNode(Platyrrhini_volume_center)
   openspace.addSceneGraphNode(Catarrhini_volume)
+  openspace.addSceneGraphNode(Catarrhini_volume_center)
   openspace.addSceneGraphNode(Cercopithecoidea_volume)
   openspace.addSceneGraphNode(Hominoidea_volume)
 end)
@@ -203,8 +248,11 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Primates_volume)
   openspace.removeSceneGraphNode(Haplorrhini_volume)
   openspace.removeSceneGraphNode(Strepsirrhini_volume)
+  openspace.removeSceneGraphNode(Strepsirrhini_volume_center)
   openspace.removeSceneGraphNode(Platyrrhini_volume)
+  openspace.removeSceneGraphNode(Platyrrhini_volume_center)
   openspace.removeSceneGraphNode(Catarrhini_volume)
+  openspace.removeSceneGraphNode(Catarrhini_volume_center)
   openspace.removeSceneGraphNode(Cercopithecoidea_volume)
   openspace.removeSceneGraphNode(Hominoidea_volume)
 end)
@@ -212,7 +260,10 @@ end)
 asset.export(Primates_volume)
 asset.export(Haplorrhini_volume)
 asset.export(Strepsirrhini_volume)
+asset.export(Strepsirrhini_volume_center)
 asset.export(Platyrrhini_volume)
+asset.export(Platyrrhini_volume_center)
 asset.export(Catarrhini_volume)
+asset.export(Catarrhini_volume_center)
 asset.export(Cercopithecoidea_volume)
 asset.export(Hominoidea_volume)
