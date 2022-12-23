@@ -37,13 +37,15 @@ public:
     enum class OscDataType {
         Blob = 0,
         Double,
-        Int
+        Int,
+        String
     };
 
     struct OscDataEntry {
         osc::Blob blobValue;
         int intValue;
         double doubleValue;
+        std::string stringValue;
 
         OscDataType type;
     };

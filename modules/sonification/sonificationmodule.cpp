@@ -452,6 +452,10 @@ SonificationModule::SonificationModule()
     addPropertySubOwner(_compareProperty);
 }
 
+SonificationEngine* SonificationModule::engine() {
+    return  _sonificationEngine;
+}
+
 //Turn on/off everything
 void SonificationModule::onEverythingChanged(bool value) {
 

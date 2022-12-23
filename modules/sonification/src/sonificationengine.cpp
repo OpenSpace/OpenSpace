@@ -81,6 +81,9 @@ void SonificationEngine::send(const std::string& label,
             case SonificationEngine::OscDataType::Int:
                 _stream << data[i].intValue;
                 break;
+            case SonificationEngine::OscDataType::String:
+                _stream << data[i].stringValue.c_str();
+                break;
             default:
                 throw ghoul::MissingCaseException();
         }

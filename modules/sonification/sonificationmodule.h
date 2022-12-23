@@ -47,6 +47,8 @@ namespace openspace {
 
 class SonificationModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "SonificationModule";
+
     enum class GUIMode {
         Solar = 0,
         Planetary,
@@ -55,6 +57,8 @@ public:
 
     SonificationModule();
     ~SonificationModule();
+
+    SonificationEngine* engine();
 
     //Extract the data from the given identifier
     void extractData(const std::string& identifier, int i, const Scene * const scene,
