@@ -935,6 +935,42 @@ void SonificationModule::onCompareRingsChanged(bool value) {
 
 
 //Planetary View
+void SonificationModule::sendPlanetarySettings(const int planetIndex) {
+    std::string label = "/" + _planets[planetIndex].identifier;
+    std::vector<SonificationEngine::OscDataEntry> data;
+
+    // Distance
+    SonificationEngine::OscDataEntry distanceData;
+    distanceData.type = SonificationEngine::OscDataType::Double;
+    distanceData.doubleValue = _planets[planetIndex].distance;
+    data.push_back(distanceData);
+
+    // Angle
+    SonificationEngine::OscDataEntry angleData;
+    angleData.type = SonificationEngine::OscDataType::Double;
+    angleData.doubleValue = _planets[planetIndex].angle;
+    data.push_back(angleData);
+
+    // Settings
+    SonificationEngine::OscDataEntry SettingsData;
+    osc::Blob settingsBlob =
+        osc::Blob(_planets[planetIndex].settings, NUM_PLANETARY_SETTINGS);
+    SettingsData.type = SonificationEngine::OscDataType::Blob;
+    SettingsData.blobValue = settingsBlob;
+    data.push_back(SettingsData);
+
+    // Moons
+    for (size_t m = 0; m < _planets[planetIndex].moons.size(); ++m) {
+        SonificationEngine::OscDataEntry moonData;
+        moonData.type = SonificationEngine::OscDataType::Double;
+        moonData.doubleValue = _planets[planetIndex].moons[m].second;
+        data.push_back(moonData);
+    }
+
+    data.shrink_to_fit();
+    _sonificationEngine->send(label, data);
+}
+
 void SonificationModule::onAllEnabledChanged(bool value) {
     if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.allEnabled = false;
@@ -1739,49 +1775,17 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                                            glm::normalize(cameraUpVector));
             }
 
-            //Check if this data is new, otherwise dont send the data
+            // Check if this data is new, otherwise dont send the data
             if (abs(_planets[i].distance - distance) > _distancePrecision ||
                 abs(_planets[i].angle - angle) > _anglePrecision ||
                 updateMoons || _planets[i].update)
             {
-                //Update the saved data for the planet
+                // Update the saved data for the planet
                 _planets[i].setDistance(distance);
                 _planets[i].setAngle(angle);
 
-                //Send the data to SuperCollider
-                std::string label = "/" + identifier;
-                std::vector<SonificationEngine::OscDataEntry> data;
-
-                // Distance
-                SonificationEngine::OscDataEntry distanceData;
-                distanceData.type = SonificationEngine::OscDataType::Double;
-                distanceData.doubleValue = distance;
-                data.push_back(distanceData);
-
-                // Angle
-                SonificationEngine::OscDataEntry angleData;
-                angleData.type = SonificationEngine::OscDataType::Double;
-                angleData.doubleValue = angle;
-                data.push_back(angleData);
-
-                // Settings
-                SonificationEngine::OscDataEntry SettingsData;
-                osc::Blob settingsBlob =
-                    osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
-                SettingsData.type = SonificationEngine::OscDataType::Blob;
-                SettingsData.blobValue = settingsBlob;
-                data.push_back(SettingsData);
-
-                // Moons
-                for (size_t m = 0; m < _planets[i].moons.size(); ++m) {
-                    SonificationEngine::OscDataEntry moonData;
-                    moonData.type = SonificationEngine::OscDataType::Double;
-                    moonData.doubleValue = _planets[i].moons[m].second;
-                    data.push_back(moonData);
-                }
-
-                data.shrink_to_fit();
-                _sonificationEngine->send(label, data);
+                // Send the data to SuperCollider
+                sendPlanetarySettings(i);
                 _planets[i].update = false;
             }
         }
@@ -1897,39 +1901,7 @@ void SonificationModule::internalDeinitialize() {
             _compareSettings[s] = false;
         }
 
-        std::string label = "/" + _planets[i].identifier;
-        std::vector<SonificationEngine::OscDataEntry> data;
-
-        // Distance
-        SonificationEngine::OscDataEntry distanceData;
-        distanceData.type = SonificationEngine::OscDataType::Double;
-        distanceData.doubleValue = _planets[i].distance;
-        data.push_back(distanceData);
-
-        // Angle
-        SonificationEngine::OscDataEntry angleData;
-        angleData.type = SonificationEngine::OscDataType::Double;
-        angleData.doubleValue = _planets[i].angle;
-        data.push_back(angleData);
-
-        // Settings
-        SonificationEngine::OscDataEntry SettingsData;
-        osc::Blob settingsBlob =
-            osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
-        SettingsData.type = SonificationEngine::OscDataType::Blob;
-        SettingsData.blobValue = settingsBlob;
-        data.push_back(SettingsData);
-
-        // Moons
-        for (size_t m = 0; m < _planets[i].moons.size(); ++m) {
-            SonificationEngine::OscDataEntry moonData;
-            moonData.type = SonificationEngine::OscDataType::Double;
-            moonData.doubleValue = _planets[i].moons[m].second;
-            data.push_back(moonData);
-        }
-
-        data.shrink_to_fit();
-        _sonificationEngine->send(label, data);
+        sendPlanetarySettings(i);
     }
 
     for (int s = 0; s < NUM_PLANETS; ++s) {

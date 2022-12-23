@@ -104,6 +104,7 @@ private:
     void onCompareRingsChanged(bool value);
 
     //Planetary
+    void sendPlanetarySettings(const int planetIndex);
     void onAllEnabledChanged(bool value);
 
     //Mercury
