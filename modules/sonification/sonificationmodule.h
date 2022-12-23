@@ -31,8 +31,8 @@
 
 #include "openspace/util/openspacemodule.h"
 
+#include <modules/sonification/include/sonificationbase.h>
 #include <modules/sonification/include/sonificationengine.h>
-
 #include "openspace/properties/scalar/boolproperty.h"
 #include "openspace/properties/optionproperty.h"
 #include "openspace/scene/scene.h"
@@ -374,6 +374,8 @@ private:
         properties::BoolProperty(_EverythingInfo, false);
 
     SonificationEngine* _sonificationEngine;
+
+    std::vector<SonificationBase*> _sonifications;
 };
 
 } // namespace openspace

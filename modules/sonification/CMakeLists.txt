@@ -25,11 +25,13 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationbase.h
 	${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationengine.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationbase.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationengine.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
