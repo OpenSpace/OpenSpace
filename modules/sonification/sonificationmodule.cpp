@@ -233,11 +233,9 @@ namespace {
 namespace openspace {
 
 SonificationModule::SonificationModule()
-    : OpenSpaceModule("Sonification"), _socket(IpEndpointName(SC_IP_ADDRESS, SC_PORT))
+    : OpenSpaceModule("Sonification")
 {
     //Create buffer and stream to send to SuperCollider
-    _buffer = new char[BUFFER_SIZE];
-    _stream = osc::OutboundPacketStream(_buffer, BUFFER_SIZE);
     _isRunning = true;
     _GUIState = SonificationModule::GUIMode::Planetary;
     _timeSpeed = 0.0;
@@ -478,6 +476,17 @@ void SonificationModule::onEverythingChanged(bool value) {
 }
 
 //Solar View
+void SonificationModule::sendSolarSettings() {
+    std::string label = "/Sun";
+    std::vector<SonificationEngine::OscDataEntry> data(1);
+
+    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
+    data[0].type = SonificationEngine::OscDataType::Blob;
+    data[0].blobValue = settingsBlob;
+
+    _sonificationEngine->send(label, data);
+}
+
 void SonificationModule::onSolarAllEnabledChanged(bool value) {
     if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.allEnabled = false;
@@ -532,12 +541,7 @@ void SonificationModule::onSolarMercuryEnabledChanged(bool value) {
     }
 
     _solarSettings[0] = value;
-
-    std::string label = "/Sun";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendSolarSettings();
 }
 
 void SonificationModule::onSolarVenusEnabledChanged(bool value) {
@@ -558,12 +562,7 @@ void SonificationModule::onSolarVenusEnabledChanged(bool value) {
     }
 
     _solarSettings[1] = value;
-
-    std::string label = "/Sun";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendSolarSettings();
 }
 
 void SonificationModule::onSolarEarthEnabledChanged(bool value) {
@@ -584,12 +583,7 @@ void SonificationModule::onSolarEarthEnabledChanged(bool value) {
     }
 
     _solarSettings[2] = value;
-
-    std::string label = "/Sun";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendSolarSettings();
 }
 
 void SonificationModule::onSolarMarsEnabledChanged(bool value) {
@@ -610,12 +604,7 @@ void SonificationModule::onSolarMarsEnabledChanged(bool value) {
     }
 
     _solarSettings[3] = value;
-
-    std::string label = "/Sun";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendSolarSettings();
 }
 
 void SonificationModule::onSolarJupiterEnabledChanged(bool value) {
@@ -636,12 +625,7 @@ void SonificationModule::onSolarJupiterEnabledChanged(bool value) {
     }
 
     _solarSettings[4] = value;
-
-    std::string label = "/Sun";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendSolarSettings();
 }
 
 void SonificationModule::onSolarSaturnEnabledChanged(bool value) {
@@ -662,12 +646,7 @@ void SonificationModule::onSolarSaturnEnabledChanged(bool value) {
     }
 
     _solarSettings[5] = value;
-
-    std::string label = "/Sun";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendSolarSettings();
 }
 
 void SonificationModule::onSolarUranusEnabledChanged(bool value) {
@@ -688,12 +667,7 @@ void SonificationModule::onSolarUranusEnabledChanged(bool value) {
     }
 
     _solarSettings[6] = value;
-
-    std::string label = "/Sun";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendSolarSettings();
 }
 
 void SonificationModule::onSolarNeptuneEnabledChanged(bool value) {
@@ -714,16 +688,28 @@ void SonificationModule::onSolarNeptuneEnabledChanged(bool value) {
     }
 
     _solarSettings[7] = value;
-
-    std::string label = "/Sun";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendSolarSettings();
 }
 
 
 //Compare
+void SonificationModule::sendCompareSettings() {
+    std::string label = "/Compare";
+    std::vector<SonificationEngine::OscDataEntry> data(3);
+
+    data[0].type = SonificationEngine::OscDataType::Int;
+    data[0].intValue = _compareProperty.firstPlanet.value();
+
+    data[1].type = SonificationEngine::OscDataType::Int;
+    data[1].intValue = _compareProperty.secondPlanet.value();
+
+    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    data[2].type = SonificationEngine::OscDataType::Blob;
+    data[2].blobValue = settingsBlob;
+
+    _sonificationEngine->send(label, data);
+}
+
 void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Option value)
 {
     if (_GUIState == SonificationModule::GUIMode::Planetary && value.value != 0) {
@@ -765,12 +751,7 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
     else
         _oldCompareFirst = "";
 
-    std::string label = "/Compare";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << value.value
-        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendCompareSettings();
 }
 
 void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Option value)
@@ -813,12 +794,7 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
     else
         _oldCompareSecond = "";
 
-    std::string label = "/Compare";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
-        << value.value << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendCompareSettings();
 }
 
 void SonificationModule::onCompareAllChanged(bool value) {
@@ -864,12 +840,7 @@ void SonificationModule::onCompareSizeDayChanged(bool value) {
     //Set the array of settings
     _compareSettings[0] = value;
 
-    std::string label = "/Compare";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
-        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendCompareSettings();
 }
 
 void SonificationModule::onCompareGravityChanged(bool value) {
@@ -887,12 +858,7 @@ void SonificationModule::onCompareGravityChanged(bool value) {
     //Set the array of settings
     _compareSettings[1] = value;
 
-    std::string label = "/Compare";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
-        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendCompareSettings();
 }
 
 void SonificationModule::onCompareTemperatureChanged(bool value) {
@@ -910,12 +876,7 @@ void SonificationModule::onCompareTemperatureChanged(bool value) {
     //Set the array of settings
     _compareSettings[2] = value;
 
-    std::string label = "/Compare";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
-        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendCompareSettings();
 }
 
 void SonificationModule::onCompareAtmosphereChanged(bool value) {
@@ -933,12 +894,7 @@ void SonificationModule::onCompareAtmosphereChanged(bool value) {
     //Set the array of settings
     _compareSettings[3] = value;
 
-    std::string label = "/Compare";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
-        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendCompareSettings();
 }
 
 void SonificationModule::onCompareMoonsChanged(bool value) {
@@ -956,12 +912,7 @@ void SonificationModule::onCompareMoonsChanged(bool value) {
     //Set the array of settings
     _compareSettings[4] = value;
 
-    std::string label = "/Compare";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
-        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendCompareSettings();
 }
 
 void SonificationModule::onCompareRingsChanged(bool value) {
@@ -979,16 +930,11 @@ void SonificationModule::onCompareRingsChanged(bool value) {
     //Set the array of settings
     _compareSettings[5] = value;
 
-    std::string label = "/Compare";
-    _stream.Clear();
-    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
-        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendCompareSettings();
 }
 
 
-//Planetart View
+//Planetary View
 void SonificationModule::onAllEnabledChanged(bool value) {
     if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.allEnabled = false;
@@ -1713,9 +1659,12 @@ void SonificationModule::checkTimeSpeed(double& ts) {
         ts = timeSpeed;
 
         std::string label = "/Time";
-        _stream.Clear();
-        _stream << osc::BeginMessage(label.c_str()) << ts << osc::EndMessage;
-        _socket.Send(_stream.Data(), _stream.Size());
+        std::vector<SonificationEngine::OscDataEntry> data(1);
+
+        data[0].type = SonificationEngine::OscDataType::Double;
+        data[0].doubleValue = ts;
+
+        _sonificationEngine->send(label, data);
     }
 }
 
@@ -1800,22 +1749,39 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 _planets[i].setAngle(angle);
 
                 //Send the data to SuperCollider
-                //NOTE: Socket cannot be saved in class, it does not work then,
-                //dont know why. Only works if the socket is recreated
                 std::string label = "/" + identifier;
-                _stream.Clear();
+                std::vector<SonificationEngine::OscDataEntry> data;
+
+                // Distance
+                SonificationEngine::OscDataEntry distanceData;
+                distanceData.type = SonificationEngine::OscDataType::Double;
+                distanceData.doubleValue = distance;
+                data.push_back(distanceData);
+
+                // Angle
+                SonificationEngine::OscDataEntry angleData;
+                angleData.type = SonificationEngine::OscDataType::Double;
+                angleData.doubleValue = angle;
+                data.push_back(angleData);
+
+                // Settings
+                SonificationEngine::OscDataEntry SettingsData;
                 osc::Blob settingsBlob =
                     osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
-                _stream << osc::BeginMessage(label.c_str()) << distance << angle
-                    << settingsBlob;
+                SettingsData.type = SonificationEngine::OscDataType::Blob;
+                SettingsData.blobValue = settingsBlob;
+                data.push_back(SettingsData);
 
-                //Add the information of the moons if any
-                for (int m = 0; m < _planets[i].moons.size(); ++m) {
-                    _stream << _planets[i].moons[m].second;
+                // Moons
+                for (size_t m = 0; m < _planets[i].moons.size(); ++m) {
+                    SonificationEngine::OscDataEntry moonData;
+                    moonData.type = SonificationEngine::OscDataType::Double;
+                    moonData.doubleValue = _planets[i].moons[m].second;
+                    data.push_back(moonData);
                 }
 
-                _stream << osc::EndMessage;
-                _socket.Send(_stream.Data(), _stream.Size());
+                data.shrink_to_fit();
+                _sonificationEngine->send(label, data);
                 _planets[i].update = false;
             }
         }
@@ -1931,44 +1897,53 @@ void SonificationModule::internalDeinitialize() {
             _compareSettings[s] = false;
         }
 
-        _stream.Clear();
-        label = "/" + _planets[i].identifier;
-        osc::Blob settingsBlob = osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
-        _stream << osc::BeginMessage(label.c_str()) <<
-            _planets[i].distance << _planets[i].angle << settingsBlob;
+        std::string label = "/" + _planets[i].identifier;
+        std::vector<SonificationEngine::OscDataEntry> data;
 
-        //Add the information of the moons if any
-        for (int m = 0; m < _planets[i].moons.size(); ++m) {
-            _stream << _planets[i].moons[m].second;
+        // Distance
+        SonificationEngine::OscDataEntry distanceData;
+        distanceData.type = SonificationEngine::OscDataType::Double;
+        distanceData.doubleValue = _planets[i].distance;
+        data.push_back(distanceData);
+
+        // Angle
+        SonificationEngine::OscDataEntry angleData;
+        angleData.type = SonificationEngine::OscDataType::Double;
+        angleData.doubleValue = _planets[i].angle;
+        data.push_back(angleData);
+
+        // Settings
+        SonificationEngine::OscDataEntry SettingsData;
+        osc::Blob settingsBlob =
+            osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
+        SettingsData.type = SonificationEngine::OscDataType::Blob;
+        SettingsData.blobValue = settingsBlob;
+        data.push_back(SettingsData);
+
+        // Moons
+        for (size_t m = 0; m < _planets[i].moons.size(); ++m) {
+            SonificationEngine::OscDataEntry moonData;
+            moonData.type = SonificationEngine::OscDataType::Double;
+            moonData.doubleValue = _planets[i].moons[m].second;
+            data.push_back(moonData);
         }
 
-        _stream << osc::EndMessage;
-        _socket.Send(_stream.Data(), _stream.Size());
+        data.shrink_to_fit();
+        _sonificationEngine->send(label, data);
     }
 
     for (int s = 0; s < NUM_PLANETS; ++s) {
         _solarSettings[s] = false;
     }
 
-    label = "/Sun";
-    _stream.Clear();
-    osc::Blob solarSettingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-    _stream << osc::BeginMessage(label.c_str()) << solarSettingsBlob << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendSolarSettings();
 
     _compareProperty.firstPlanet.setValue(0);
     _compareProperty.secondPlanet.setValue(0);
 
-    label = "/Compare";
-    _stream.Clear();
-    osc::Blob compareSettingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
-        << _compareProperty.secondPlanet.value() << compareSettingsBlob
-        << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
+    sendCompareSettings();
 
     //Clear data
-    delete[] _buffer;
     _isRunning = false;
     if (_thread.joinable())
         _thread.join();

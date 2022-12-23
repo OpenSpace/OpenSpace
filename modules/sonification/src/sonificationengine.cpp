@@ -25,6 +25,13 @@
 #include <modules/sonification/include/sonificationengine.h>
 
 namespace {
+    constexpr std::string_view _loggerCat = "SonificationEngine";
+
+    //Output to SuperCollider
+    constexpr std::string_view SuperColliderIp = "127.0.0.1";
+    constexpr int SuperColliderPort = 57120;
+    constexpr int BufferSize = 1024;
+
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         SonificationEngineInfo =
     {
@@ -38,12 +45,15 @@ namespace openspace {
 
 SonificationEngine::SonificationEngine()
     : properties::PropertyOwner(SonificationEngineInfo)
+    , _socket(IpEndpointName(SuperColliderIp.data(), SuperColliderPort))
 {
-
+    // Create buffer and stream that will be used to send messages to SuperCollider
+    _buffer = new char[BufferSize];
+    _stream = osc::OutboundPacketStream(_buffer, BufferSize);
 }
 
 SonificationEngine::~SonificationEngine() {
-
+    delete[] _buffer;
 }
 
 void SonificationEngine::initialize() {
@@ -54,8 +64,24 @@ void SonificationEngine::deinitialize() {
 
 }
 
-void SonificationEngine::update() {
+void SonificationEngine::send(const std::string& label,
+                              const std::vector<OscDataEntry>& data)
+{
+    _stream.Clear();
+    _stream << osc::BeginMessage(label.c_str());
 
+    for (size_t i = 0; i < data.size(); ++i) {
+        switch (data[i].type) {
+            case SonificationEngine::OscDataType::Blob:
+                _stream << data[i].blobValue;
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
+
+    _stream  << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 } // openspace namespace

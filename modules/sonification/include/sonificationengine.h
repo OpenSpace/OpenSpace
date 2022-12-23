@@ -27,20 +27,39 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include "modules/sonification/ext/osc/ip/UdpSocket.h"
+#include "modules/sonification/ext/osc/osc/OscOutboundPacketStream.h"
+
 namespace openspace {
 
 class SonificationEngine : public properties::PropertyOwner {
 public:
+    enum class OscDataType {
+        Blob = 0,
+        Double,
+        Int
+    };
+
+    struct OscDataEntry {
+        osc::Blob blobValue;
+        int intValue;
+        double doubleValue;
+
+        OscDataType type;
+    };
+
     SonificationEngine();
     virtual ~SonificationEngine() override;
 
     void initialize();
     void deinitialize();
 
-    void update();
+    void send(const std::string& label, const std::vector<OscDataEntry>& data);
 
 private:
-
+    UdpTransmitSocket _socket;
+    osc::OutboundPacketStream _stream;
+    char* _buffer;
 };
 
 } // openspace namespace

@@ -33,8 +33,6 @@
 
 #include <modules/sonification/include/sonificationengine.h>
 
-#include "modules/sonification/ext/osc/ip/UdpSocket.h"
-#include "modules/sonification/ext/osc/osc/OscOutboundPacketStream.h"
 #include "openspace/properties/scalar/boolproperty.h"
 #include "openspace/properties/optionproperty.h"
 #include "openspace/scene/scene.h"
@@ -82,6 +80,7 @@ private:
     void onEverythingChanged(bool value);
 
     //Solar
+    void sendSolarSettings();
     void onSolarAllEnabledChanged(bool value);
     void onSolarMercuryEnabledChanged(bool value);
     void onSolarVenusEnabledChanged(bool value);
@@ -93,6 +92,7 @@ private:
     void onSolarNeptuneEnabledChanged(bool value);
 
     //Compare
+    void sendCompareSettings();
     void onFirstCompareChanged(properties::OptionProperty::Option value);
     void onSecondCompareChanged(properties::OptionProperty::Option value);
     void onCompareAllChanged(bool value);
@@ -204,9 +204,6 @@ private:
         bool update;
     };
 
-    char* _buffer;
-    UdpTransmitSocket _socket;
-    osc::OutboundPacketStream _stream;
     std::thread _thread;
     std::atomic<bool> _isRunning;
     double _anglePrecision;
