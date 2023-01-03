@@ -122,6 +122,7 @@ private:
 
     int getHoveredPlanetIndex() const;
     void renderPlanetTooltip(int index) const;
+    void handleDoubleClickHoveredPlanet(int index);
 
     // Updates the property in the module so that it matches the filtered
     // rows in the UI
@@ -203,6 +204,11 @@ private:
     bool _externalSelectionChanged = false;
 
     bool _filterChanged = false;
+    bool _selectionChanged = false;
+
+    // Keep track on whether ctrl is held, to prevent undesried interaction 
+    // when interacting with glyphs
+    bool _holdingCtrl = false;
 
     // Some settings
     glm::vec4 _nanPointColor = { 0.3f, 0.3f, 0.3f, 1.f };

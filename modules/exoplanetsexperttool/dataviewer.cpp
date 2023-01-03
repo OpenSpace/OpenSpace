@@ -30,6 +30,7 @@
 #include <modules/exoplanetsexperttool/rendering/renderablepointdata.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
@@ -339,6 +340,21 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
 
     // TODO: make sure that settings are preserved between sessions?
     _variableSelection.push_back(ColorMappedVariable());
+
+    // Interaction callbacks. OBS! A biut ugly to hadnle thsi separately from ImGui io....
+    global::callback::keyboard->emplace_back(
+        [&](Key key, KeyModifier modifier, KeyAction action, bool) -> bool {
+            const bool hasCtrl = hasKeyModifier(modifier, KeyModifier::Control);
+            if (hasCtrl && action == KeyAction::Press) {
+                _holdingCtrl = true;
+            }
+            else if (action == KeyAction::Release) {
+                _holdingCtrl = false;
+            }
+            // Do not capture
+            return false;
+        }
+    );
 }
 
 void DataViewer::initializeGL() {
@@ -544,6 +560,7 @@ void DataViewer::render() {
     // Tooltip for hovered planets
     int hoveredPlanet = getHoveredPlanetIndex();
     renderPlanetTooltip(hoveredPlanet);
+    handleDoubleClickHoveredPlanet(hoveredPlanet);
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Windows")) {
@@ -1074,8 +1091,6 @@ void DataViewer::renderTable(const std::string& tableId,
 
     const int nColumns = static_cast<int>(_columns.size());
 
-    bool selectionChanged = false;
-
     // Some size variables
     const float RowHeight = ImGui::GetTextLineHeightWithSpacing(); // Inner height
     const float TableHeight =
@@ -1171,7 +1186,6 @@ void DataViewer::renderTable(const std::string& tableId,
             for (size_t row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                 const size_t index = displayedRows[row];
                 const ExoplanetItem& item = _data[index];
-
 
                 ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns
                     | ImGuiSelectableFlags_AllowItemOverlap;
@@ -1319,7 +1333,7 @@ void DataViewer::renderTable(const std::string& tableId,
                                 _selection.push_back(index);
                             }
 
-                            selectionChanged = true;
+                            _selectionChanged = true;
                         }
                         continue;
                     }
@@ -1330,8 +1344,9 @@ void DataViewer::renderTable(const std::string& tableId,
         }
         ImGui::EndTable();
 
-        if (selectionChanged) {
+        if (_selectionChanged) {
             updateSelectionInRenderable();
+            _selectionChanged = false;
         }
     }
 }
@@ -1904,11 +1919,62 @@ void DataViewer::renderPlanetTooltip(int index) const {
     ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration |
         ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoFocusOnAppearing;
 
+    const ExoplanetItem& item = _data[index];
+
     if (ImGui::Begin("##planetToolTip", NULL, flags)) {
-        ImGui::Text(_data[index].planetName.c_str());
+        ImGui::Text(item.planetName.c_str());
+    }
+}
+
+void DataViewer::handleDoubleClickHoveredPlanet(int index) {
+    // Do nothing if user is not holding CTRL. Note that this is a little ugly, since the
+    // index is only set if CTRL is hold and this is handled in the renderable...
+    // Also note that we don't want to handle these clicks if ImGui is caring about the mouse input!
+    ImGuiIO& io = ImGui::GetIO();
+    if (!_holdingCtrl || io.WantCaptureMouse) {
+        return;
     }
 
-    // TODO: Also handle mouseclick
+    if (index < 0) {
+        // No planet hovered. Clear selection if double click
+        if (ImGui::IsMouseDoubleClicked(0) && _selection.size() > 0) {
+            _selection.clear();
+            _selectionChanged = true;
+        }
+
+        return;
+    }
+
+    const ExoplanetItem& item = _data[index];
+
+    if (ImGui::IsMouseDoubleClicked(0)) {
+        // Open system window
+        bool isAlreadyOpen = std::find(
+            _shownPlanetSystemWindows.begin(),
+            _shownPlanetSystemWindows.end(),
+            item.hostName
+        ) != _shownPlanetSystemWindows.end();
+
+        if (!isAlreadyOpen) {
+            _shownPlanetSystemWindows.push_back(item.hostName);
+        }
+        else {
+            // Bring window to front
+            ImGui::SetWindowFocus(systemWindowName(item.hostName).c_str());
+        }
+
+        // Select planet, if not already selected
+        auto found = std::find(_selection.begin(), _selection.end(), index);
+        const bool itemIsSelected = found != _selection.end();
+
+        if (!itemIsSelected) {
+            _selection.push_back(index);
+        }
+        else {
+            _selection.erase(found);
+        }
+        _selectionChanged = true;
+    }
 }
 
 void DataViewer::updateFilteredRowsProperty() {
