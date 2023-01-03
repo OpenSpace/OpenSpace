@@ -1,7 +1,7 @@
 # Based on implementation by Sebastian Zieba: https://github.com/sebastian-zieba/TSM
-# 2021-11-03    Main (updated) repo: https://github.com/lkreidberg/TSM 
+# 2021-11-03    Main (updated) repo: https://github.com/lkreidberg/TSM
 #
-# Downloads confirmed planet table from NExSci, aggregates data for ESM and TSM metrics, and saves 
+# Downloads confirmed planet table from NExSci, aggregates data for ESM and TSM metrics, and saves
 # the resulting data in a csv file
 
 from tkinter import FALSE
@@ -11,6 +11,7 @@ import os
 from datetime import datetime
 from astropy import constants as const
 import math
+import json
 
 # T - temperature (Kelvin)
 # lam - wavelength (meter)
@@ -19,20 +20,20 @@ def Plancks_function(T, lam):
     h = const.h.value
     c = const.c.value
     kB = const.k_B.value
-    
+
     # constant in the numerator of the equation
     # num = 2.0 * h * c * c / (lam ** 5)
 
-    # Since we have a ratio, we don't actually care about the nominator. 
+    # Since we have a ratio, we don't actually care about the nominator.
     # We are rather interested in how the value related to the planet (here the temp)
     # affects the final value. So, ignore the constant, to get more understandable values
-    num = 1.0 
+    num = 1.0
 
     res = num / (np.exp(h * c / (lam * kB * T)) - 1)
     return res
 
-# The full Planck ratio used in the ESM computation. The division means that we can 
-# simplify the equation a bit, since some constants will take each other out. Also 
+# The full Planck ratio used in the ESM computation. The division means that we can
+# simplify the equation a bit, since some constants will take each other out. Also
 # note that the division is flipped
 # Ts - stellar temmp
 # Tp - planet dayside temp
@@ -99,7 +100,7 @@ with open(DATA_FOLDER + 'last_update_time.txt', 'w+') as ff:
     ff.write(str(datetime.now()))
 
 print("Downloading positions from pscomppars table")
-# Also want to get the position parameters from the comppars dataset, to use 
+# Also want to get the position parameters from the comppars dataset, to use
 # if the ps dataset don't have position values
 positionColumns = 'pl_name,sy_dist,sy_disterr1,sy_disterr2,ra,dec'
 full_comppars= NEW_API + 'select+' + positionColumns + '+from+pscomppars&format=csv'
@@ -117,7 +118,7 @@ df = pd.concat([df0,df1])
 # This is messy since there are three different datetime formats here.
 # Must make sure to sort before filtering.
 
-## OBS! Actually, it seems that by now the pubdate have the same formatting, so just use as is. 
+## OBS! Actually, it seems that by now the pubdate have the same formatting, so just use as is.
 # This also avoids problems when the month in the format Y-M is zero, which it is for sme planets for osme reaosn
 df = df.sort_values(by='pl_pubdate', ascending=False)
 
@@ -129,7 +130,7 @@ df = df.sort_values(by='pl_pubdate', ascending=False)
 
 # df = df.sort_values(by='dt_obj', ascending=False)
 
-## Build up a filter to remove results from the Stassun et al. 2017 paper, 
+## Build up a filter to remove results from the Stassun et al. 2017 paper,
 #  which are often more recent but less precise than previous publications
 df.loc[df['pl_refname'].str.contains("STASSUN"), 'pl_refname'].unique()
 data_filter = (
@@ -255,7 +256,7 @@ df = df.merge(galah, on='gaia_id', how='left')
 
 ##################################################################
 # IAC Exoplanet Atmospheres
-# Dataset from: http://research.iac.es/proyecto/exoatmospheres/ 
+# Dataset from: http://research.iac.es/proyecto/exoatmospheres/
 ##################################################################
 IAC_COLUMNS = ['name', 'molecules']
 csv_url = 'http://research.iac.es/proyecto/muscat/exoatm/export'
@@ -276,12 +277,11 @@ df_iac_data = df_iac_data.apply(strip_quotes)
 df_iac_data = df_iac_data[df_iac_data.molecules != '[]']
 df_iac_data.drop_duplicates()
 
-# Drop a faulty row (something must be wrong with the formatting... 
+# Drop a faulty row (something must be wrong with the formatting...
 # it gets part of the publication data in the molecules list) # 2022-06-28
 df_iac_data = df_iac_data[df_iac_data['molecules'].str.contains("author") == False]
 
 # Convert molcecules column to actual json
-import json
 def molecules_to_json(item):
     return json.loads(item)
 
@@ -291,8 +291,8 @@ df_iac_data['molecules'] = df_iac_data['molecules'].map(molecules_to_json)
 
 def add_value(dict_obj, key, value):
     ''' Adds a key-value pair to the dictionary.
-        If the key already exists in the dictionary, 
-        it will associate multiple values with that 
+        If the key already exists in the dictionary,
+        it will associate multiple values with that
         key instead of overwritting its value'''
     if key not in dict_obj:
         dict_obj[key] = value
@@ -320,7 +320,7 @@ for index, row in df_iac_data.iterrows():
 # Check result
 # print(dict_iac)
 
-# Save as a json file, just in case 
+# Save as a json file, just in case
 with open("../data/test_iac_csv.json", "w") as outfile:
     json.dump(dict_iac, outfile)
 
@@ -337,7 +337,7 @@ for name, molecules in dict_iac.items():
     upperLimits = []
     noDetections = []
     for molecule, value in molecules.items():
-        if (value == KEY_DETECTION): 
+        if (value == KEY_DETECTION):
             detections.append(molecule)
         elif (value == KEY_UPPER_LIMIT):
             upperLimits.append(molecule)
@@ -363,8 +363,8 @@ df.drop(columns=['name'], inplace=True) # drop extra name column
 
 jwst_csv_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQfgw6NlQb3h86hlzo1zFZeLizKZ7ZzunZERWMP0l8LT-F1on-O5FobVlveeTEuEKq6iwSxG0rof326/pub?output=csv'
 df_jwst_data = pd.read_csv(
-    jwst_csv_url, 
-    sep=',', 
+    jwst_csv_url,
+    sep=',',
     skiprows=7, # 7 rows of metadata before columns names start
     usecols=['Planet', 'Observation', 'Instrument', 'Mode', 'Data to be obtained'],
     index_col=False
@@ -372,7 +372,7 @@ df_jwst_data = pd.read_csv(
 
 # Combine observation technical details into one column and drop old columns
 df_jwst_data['jwst_obs_ins_mode'] = '(' + df_jwst_data['Observation'] + ' / ' + df_jwst_data['Instrument'] + ' / ' + df_jwst_data['Mode'] + ')'
-df_jwst_data.drop(columns=['Observation', 'Instrument', 'Mode'], inplace=True) 
+df_jwst_data.drop(columns=['Observation', 'Instrument', 'Mode'], inplace=True)
 df_jwst_data = df_jwst_data.fillna('')
 df_jwst_data.rename(columns = {'Data to be obtained':'jwst_dates'}, inplace = True)
 
@@ -401,15 +401,15 @@ df.drop(columns=['Planet'], inplace=True) # drop extra name column
 ##################################################################
 
 #************************************************************************************
-# Coeffcients to be used in the analytical expression to calculate habitable zone flux 
+# Coeffcients to be used in the analytical expression to calculate habitable zone flux
 # boundaries
 
 # Coefficients from: https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
 # Order:  Recent Venus (otimistic inner), Runaway Greenhouse (conservative inner),
-#         Maximum Greenhouse (conservative outer), Early Mars (optimistic outer), 
-#         Runaway Greenhouse for 5 ME, Runaway Greenhouse for 0.1 ME 
+#         Maximum Greenhouse (conservative outer), Early Mars (optimistic outer),
+#         Runaway Greenhouse for 5 ME, Runaway Greenhouse for 0.1 ME
 seff = [0,0,0,0,0,0]
-seffsun  = [1.776,1.107, 0.356, 0.320, 1.188, 0.99] 
+seffsun  = [1.776,1.107, 0.356, 0.320, 1.188, 0.99]
 a = [2.136e-4, 1.332e-4, 6.171e-5, 5.547e-5, 1.433e-4, 1.209e-4]
 b = [2.533e-8, 1.580e-8, 1.698e-9, 1.526e-9, 1.707e-8, 1.404e-8]
 c = [-1.332e-11, -8.308e-12, -3.198e-12, -2.874e-12, -8.968e-12, -7.418e-12]
@@ -426,10 +426,10 @@ df['hz_outer_opt'] = np.nan  # optimistic outer
 validStarRows = (df['st_teff'] > 2000) & (df['st_teff'] < 8000)
 
 # TODO: don't do these operations on the final dataframe
-df['tstar'] = df['st_teff'] - 5780.0 
+df['tstar'] = df['st_teff'] - 5780.0
 
 # convert luminosity from log10 solar luminosity to just solar
-df['st_lum_solar'] = 10.0 ** df['st_lum'] 
+df['st_lum_solar'] = 10.0 ** df['st_lum']
 
 df.loc[validStarRows, 'hz_inner_opt'] =  (df['st_lum_solar'] / (seffsun[0] + a[0]*df['tstar'] + b[0]*df['tstar']**2 + c[0]*df['tstar']**3 + d[0]*df['tstar']**4)) ** 0.5
 df.loc[validStarRows, 'hz_inner_cons'] = (df['st_lum_solar'] / (seffsun[1] + a[1]*df['tstar'] + b[1]*df['tstar']**2 + c[1]*df['tstar']**3 + d[1]*df['tstar']**4)) ** 0.5
@@ -441,7 +441,7 @@ df.loc[validStarRows, 'hz_outer_opt'] =  (df['st_lum_solar'] / (seffsun[3] + a[3
 ## Compute radius to use for HZ check, based on average flux (see Bomont et al. paper)
 df['hz_orbsmax'] = df['pl_orbsmax'] * ((1.0 - df['pl_orbeccen'] ** 2) ** 0.25)
 
-# Inner optimistic range => score is computed by linearly interpolating to find value [0,1] 
+# Inner optimistic range => score is computed by linearly interpolating to find value [0,1]
 rows = (df['hz_orbsmax'] > df['hz_inner_opt']) & (df['hz_orbsmax'] < df['hz_inner_cons'])
 df.loc[rows, 'hz_score'] = (df['hz_orbsmax'] - df['hz_inner_opt']) / (df['hz_inner_cons'] - df['hz_inner_opt'])
 
@@ -449,22 +449,22 @@ df.loc[rows, 'hz_score'] = (df['hz_orbsmax'] - df['hz_inner_opt']) / (df['hz_inn
 rows = (df['pl_orbsmax'] > df['hz_inner_cons']) & (df['hz_orbsmax'] < df['hz_outer_opt'])
 df.loc[rows, 'hz_score'] = 1.0
 
-# Inner optimistic range => score is computed by linearly interpolating to find value [0,1] 
+# Inner optimistic range => score is computed by linearly interpolating to find value [0,1]
 rows = (df['hz_orbsmax'] > df['hz_outer_opt']) & (df['hz_orbsmax'] < df['hz_outer_opt'])
 df.loc[rows, 'hz_score'] = 1.0 - (df['hz_orbsmax'] - df['hz_outer_opt']) / (df['hz_outer_opt'] - df['hz_outer_opt'])
 
 
-# Account for high eccentricity and high luminosity, according to results from Bomont et al. 
-# https://www.aanda.org/articles/aa/pdf/2016/07/aa28073-16.pdf 
+# Account for high eccentricity and high luminosity, according to results from Bomont et al.
+# https://www.aanda.org/articles/aa/pdf/2016/07/aa28073-16.pdf
 
 # Just using the eccentricity scores based on the circular orbit that represents the average flux
-# leads to "weird" results for highly eccentric orbits. Can we account for star luminosity and 
+# leads to "weird" results for highly eccentric orbits. Can we account for star luminosity and
 # eccentricity based on the results from Bomont et al somehow?
 
 # If under acceptable line => keep value. If over completely unecceptable ratio, multiply by zero
 df['hz_score_scale'] = np.nan
-df.loc[(df['st_lum_solar']  < -2.5 * df['pl_orbeccen'] + 2.25), 'hz_score_scale'] = 1.0; 
-df.loc[(df['st_lum_solar']  > -2.5 * df['pl_orbeccen'] + 2.5), 'hz_score_scale'] = 0.0; 
+df.loc[(df['st_lum_solar']  < -2.5 * df['pl_orbeccen'] + 2.25), 'hz_score_scale'] = 1.0;
+df.loc[(df['st_lum_solar']  > -2.5 * df['pl_orbeccen'] + 2.5), 'hz_score_scale'] = 0.0;
 
 # For everything in between, linearly interpolate between the lines to decide the scaling factor.
 # => reduce value with highet eccentricity and luminosity
@@ -481,11 +481,11 @@ df['hz_score'] *= df['hz_score_scale']
 # Drop some columns only used for computation
 df.drop(columns=['hz_score_scale', 'hz_orbsmax'], inplace=True)
 
-# Note about line computation: 
-# Bottom line (all under = 1.0) tilt is computed from (L, ecc) = (10^-4, 0.9) and (L, ecc) = (1.0 0.5). 
+# Note about line computation:
+# Bottom line (all under = 1.0) tilt is computed from (L, ecc) = (10^-4, 0.9) and (L, ecc) = (1.0 0.5).
 # Then it was moved to be a little more pessimistic, so that (L, ecc) = (10^-4, 0.7)
 # Upper line was computed with the same tilt, but computed to go through the point (L, ecc) = (1, 0.6)
- 
+
 ## -------------------------------------------------------------##
 ## ADD ANY OTHER COMPUTATIONS YOU WANT HERE ##
 
