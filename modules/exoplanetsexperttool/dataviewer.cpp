@@ -343,7 +343,7 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
 
     // Interaction callbacks. OBS! A biut ugly to hadnle thsi separately from ImGui io....
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier modifier, KeyAction action, bool) -> bool {
+        [&](Key, KeyModifier modifier, KeyAction action, bool) -> bool {
             const bool hasCtrl = hasKeyModifier(modifier, KeyModifier::Control);
             if (hasCtrl && action == KeyAction::Press) {
                 _holdingCtrl = true;
@@ -589,12 +589,37 @@ void DataViewer::render() {
             if (ImGui::Button("Refocus on Earth")) {
                 refocusView();
             }
+            ImGui::SameLine();
+            renderHelpMarker(
+                "Reset the camera to focus on Earth. Useful for example when you have "
+                "focused on another planet system, or just moved the camera around."
+            );
             if (ImGui::Button("Zoom to overview")) {
                 flyToOverview();
             }
+            ImGui::SameLine();
+            renderHelpMarker(
+                "Fly to an overview of the exoplanets. This means viewing the planets "
+                "from the ouside in, from a position far out in our galaxy"
+            );
             if (ImGui::Button("Zoom to inside view")) {
                 flyToInsideView();
             }
+            ImGui::SameLine();
+            renderHelpMarker(
+                "Fly to a view close to our solar system. The planets will be placed "
+                "on their position on the night sky"
+            );
+
+            ImGui::Text("Tips for manual navigation");
+            ImGui::SameLine();
+            renderHelpMarker(
+                "Hold CTRL while rotating to change where the camera is focusing. "
+                "Reset using the \"Refocus on Earth\" button. \n"
+                "\n"
+                "You can also rotate the view using the middle mouse button. Give it a try!"
+            );
+
             ImGui::EndMenu();
         }
 
@@ -2837,7 +2862,7 @@ void DataViewer::flyToInsideView() const {
         "openspace.pathnavigation.createPath({"
             "TargetType = 'Node', "
             "Target = 'Earth', "
-            "Height = 1e+17, " // distance is what matters
+            "Height = 5e+13, " // distance is what matters
             "Duration = 4, "
             "PathType = 'Linear'"
         "});",
