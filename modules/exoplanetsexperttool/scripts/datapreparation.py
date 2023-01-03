@@ -85,7 +85,6 @@ columns='pl_name,hostname,default_flag,sy_snum,sy_pnum,discoverymethod,disc_year
         'sy_vmag,sy_vmagerr1,sy_vmagerr2,sy_jmag,sy_jmagerr1,sy_jmagerr2,sy_hmag,sy_hmagerr1,sy_hmagerr2,' \
         'sy_kmag,sy_kmagerr1,sy_kmagerr2,pl_pubdate,releasedate' \
 
-
 print("Downloading default_flag=1")
 where1 = 'where+default_flag=1+and+upper%28soltype%29+like+%27%25CONF%25%27'
 full1 = NEW_API + 'select+' + columns + '+from+ps+' + where1 + '&format=csv'
@@ -513,3 +512,18 @@ with open(dataFileName + ".js", 'w') as f:
 
 print("Done!")
 
+
+# Finally, print some statistics
+print("Writing statistics file...")
+nPlanets = df.shape[0]
+nColumns = df.shape[1]
+
+err_cols = [col for col in df if col.endswith('err1') or col.endswith('err2')]
+
+with open(DATA_FOLDER + 'statistics.txt', 'w+') as ff:
+    ff.write("number of planets: " + str(nPlanets) + "\n")
+    ff.write("number of columns: " + str(nColumns) + "\n")
+    ff.write("number of value columns: " + str(nColumns - len(err_cols)) + "\n")
+    ff.write("number of error columns: " + str(len(err_cols)) + " (2 per column with uncertainty info)\n")
+
+print("Wrote data on " + str(nPlanets) + " planets and " + str(nColumns) + " columns")

@@ -2031,10 +2031,13 @@ void DataViewer::renderColumnSettingsModal() {
     ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
 
     if (ImGui::BeginPopupModal("Set columns", NULL, flags)) {
-        ImGui::Text(
-            "Select up to 64 columns to show in the tool. OBS! For now, only numerical "
-            "values in the \"other columns\" will be read correctly."
-        );
+        ImGui::Text(fmt::format(
+            "Select up to 64 columns to show in the tool, out of {} ({} default columns, {} other columns)",
+            _defaultColumns.size() + _otherColumns.size(),
+            _defaultColumns.size(),
+            _otherColumns.size()
+        ).c_str());
+
         ImGui::Separator();
 
         // Default columns
