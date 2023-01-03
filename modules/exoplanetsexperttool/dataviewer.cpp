@@ -2537,7 +2537,7 @@ std::variant<const char*, float> DataViewer::valueFromColumn(int columnIndex,
             return item.waterDetection;
         case ColumnID::Other: {
             std::string key = _columns[columnIndex].name;
-            std::variant<std::string, float> value = item.otherColumns.at(key);
+            const std::variant<std::string, float>& value = item.otherColumns.at(key);
 
             if (std::holds_alternative<std::string>(value)) {
                 return std::get<std::string>(value).c_str();
