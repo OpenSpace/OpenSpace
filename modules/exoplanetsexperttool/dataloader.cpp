@@ -320,6 +320,7 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
         }
 
         // Check if water has been detected
+        // TODO: move to python
         // 1 = yes, 0 = maybe, -1 = no
         constexpr const char WaterKey[] = "H2O";
         if (p.moleculesDetection.find(WaterKey) != std::string::npos) {
@@ -361,7 +362,7 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
 
         // Virification related to "other columns"
         if (nOtherColumns == -1) {
-            nOtherColumns = p.otherColumns.size();
+            nOtherColumns = static_cast<int>(p.otherColumns.size());
         }
         else {
             if (p.otherColumns.size() != nOtherColumns) {
