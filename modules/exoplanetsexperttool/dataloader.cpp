@@ -285,7 +285,6 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
 
                 // For now, ignore any empty, limit and error columns
                 if (hasEnding(key, "err1") ||
-                    hasEnding(key, "err1") ||
                     hasEnding(key, "err2") ||
                     hasEnding(key, "lim"))
                 {
