@@ -520,12 +520,13 @@ nColumns = df.shape[1]
 
 err_cols = [col for col in df if col.endswith('err1') or col.endswith('err2')]
 lim_cols = [col for col in df if col.endswith('lim')]
+n_value_cols = nColumns - len(err_cols) - len(lim_cols)
 
 with open(DATA_FOLDER + 'statistics.txt', 'w+') as ff:
     ff.write("number of planets: " + str(nPlanets) + "\n")
     ff.write("number of columns: " + str(nColumns) + "\n")
-    ff.write("number of value columns: " + str(nColumns - len(err_cols) - len(lim_cols)) + "\n")
+    ff.write("number of value columns (parameters): " + str(n_value_cols) + "\n")
     ff.write("number of error columns: " + str(len(err_cols)) + " (2 per column with uncertainty info)\n")
     ff.write("number of error limit columns: " + str(len(lim_cols)) + "\n")
 
-print("Wrote data on " + str(nPlanets) + " planets and " + str(nColumns) + " columns")
+print("Wrote data on " + str(nPlanets) + " planets and " + str(nColumns) + " columns (" + str(n_value_cols) + " different parameters)")
