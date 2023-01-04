@@ -22,75 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/sonification/include/sonificationengine.h>
+#ifndef __OPENSPACE_MODULE_SONIFICATION___OSCENGINE___H__
+#define __OPENSPACE_MODULE_SONIFICATION___OSCENGINE___H__
 
-namespace {
-    constexpr std::string_view _loggerCat = "SonificationEngine";
-
-    //Output to SuperCollider
-    constexpr std::string_view SuperColliderIp = "127.0.0.1";
-    constexpr int SuperColliderPort = 57120;
-    constexpr int BufferSize = 1024;
-
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        SonificationEngineInfo =
-    {
-       "SonificationEngine",
-       "Sonification Engine",
-       "Settings for the sonification engine"
-    };
-} // namespace
+#include <modules/sonification/ext/osc/ip/UdpSocket.h>
+#include <modules/sonification/ext/osc/osc/OscOutboundPacketStream.h>
 
 namespace openspace {
 
-SonificationEngine::SonificationEngine()
-    : properties::PropertyOwner(SonificationEngineInfo)
-    , _socket(IpEndpointName(SuperColliderIp.data(), SuperColliderPort))
-{
-    // Create buffer and stream that will be used to send messages to SuperCollider
-    _buffer = new char[BufferSize];
-    _stream = osc::OutboundPacketStream(_buffer, BufferSize);
-}
+class OscEngine {
+public:
+    enum class OscDataType {
+        Blob = 0,
+        Double,
+        Int,
+        String
+    };
 
-SonificationEngine::~SonificationEngine() {
-    delete[] _buffer;
-}
+    struct OscDataEntry {
+        osc::Blob blobValue;
+        int intValue;
+        double doubleValue;
+        std::string stringValue;
 
-void SonificationEngine::initialize() {
+        OscDataType type;
+    };
 
-}
+    OscEngine(const std::string& ip, int port);
+    ~OscEngine();
 
-void SonificationEngine::deinitialize() {
+    void send(const std::string& label, const std::vector<OscDataEntry>& data);
 
-}
-
-void SonificationEngine::send(const std::string& label,
-                              const std::vector<OscDataEntry>& data)
-{
-    _stream.Clear();
-    _stream << osc::BeginMessage(label.c_str());
-
-    for (size_t i = 0; i < data.size(); ++i) {
-        switch (data[i].type) {
-            case SonificationEngine::OscDataType::Blob:
-                _stream << data[i].blobValue;
-                break;
-            case SonificationEngine::OscDataType::Double:
-                _stream << data[i].doubleValue;
-                break;
-            case SonificationEngine::OscDataType::Int:
-                _stream << data[i].intValue;
-                break;
-            case SonificationEngine::OscDataType::String:
-                _stream << data[i].stringValue.c_str();
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    }
-
-    _stream  << osc::EndMessage;
-    _socket.Send(_stream.Data(), _stream.Size());
-}
+private:
+    UdpTransmitSocket _socket;
+    osc::OutboundPacketStream _stream;
+    char* _buffer;
+};
 
 } // openspace namespace
+
+#endif // __OPENSPACE_MODULE_SONIFICATION___OSCENGINE___H__

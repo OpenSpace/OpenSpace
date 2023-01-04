@@ -27,14 +27,16 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <modules/sonification/sonificationmodule.h>
+
 namespace openspace {
 
 class SonificationBase : public properties::PropertyOwner {
 public:
-    SonificationBase();
+    SonificationBase(properties::PropertyOwner::PropertyOwnerInfo info);
     virtual ~SonificationBase();
 
-private:
+    virtual void update() = 0;
 };
 
 } // namespace openspace

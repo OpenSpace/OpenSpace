@@ -24,26 +24,13 @@
 
 #include <modules/sonification/include/sonificationbase.h>
 
-namespace {
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        SonificationBaseInfo =
-    {
-       "SonificationBase",
-       "Sonification Base",
-       "Base class for a sonification"
-    };
-} // namespace
-
 namespace openspace {
 
-SonificationBase::SonificationBase()
-    : properties::PropertyOwner(SonificationBaseInfo)
-{
+SonificationBase::SonificationBase(properties::PropertyOwner::PropertyOwnerInfo info)
+    : properties::PropertyOwner(info)
+{}
 
-}
-
-SonificationBase::~SonificationBase() {
-}
+SonificationBase::~SonificationBase() {}
 
 } // namespace openspace
 

@@ -22,48 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___SONIFICATIONENGINE___H__
-#define __OPENSPACE_MODULE_SONIFICATION___SONIFICATIONENGINE___H__
+#include <modules/sonification/include/oscengine.h>
 
-#include <openspace/properties/propertyowner.h>
+namespace {
+    constexpr int BufferSize = 1024;
 
-#include "modules/sonification/ext/osc/ip/UdpSocket.h"
-#include "modules/sonification/ext/osc/osc/OscOutboundPacketStream.h"
+} // namespace
 
 namespace openspace {
 
-class SonificationEngine : public properties::PropertyOwner {
-public:
-    enum class OscDataType {
-        Blob = 0,
-        Double,
-        Int,
-        String
-    };
+OscEngine::OscEngine(const std::string& ip, int port)
+    : _socket(IpEndpointName(ip.c_str(), port))
+{
+    // Create buffer and stream that will be used to send messages to SuperCollider
+    _buffer = new char[BufferSize];
+    _stream = osc::OutboundPacketStream(_buffer, BufferSize);
+}
 
-    struct OscDataEntry {
-        osc::Blob blobValue;
-        int intValue;
-        double doubleValue;
-        std::string stringValue;
+OscEngine::~OscEngine() {
+    delete[] _buffer;
+}
 
-        OscDataType type;
-    };
+void OscEngine::send(const std::string& label, const std::vector<OscDataEntry>& data)
+{
+    _stream.Clear();
+    _stream << osc::BeginMessage(label.c_str());
 
-    SonificationEngine();
-    virtual ~SonificationEngine() override;
+    for (size_t i = 0; i < data.size(); ++i) {
+        switch (data[i].type) {
+            case OscEngine::OscDataType::Blob:
+                _stream << data[i].blobValue;
+                break;
+            case OscEngine::OscDataType::Double:
+                _stream << data[i].doubleValue;
+                break;
+            case OscEngine::OscDataType::Int:
+                _stream << data[i].intValue;
+                break;
+            case OscEngine::OscDataType::String:
+                _stream << data[i].stringValue.c_str();
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
 
-    void initialize();
-    void deinitialize();
-
-    void send(const std::string& label, const std::vector<OscDataEntry>& data);
-
-private:
-    UdpTransmitSocket _socket;
-    osc::OutboundPacketStream _stream;
-    char* _buffer;
-};
+    _stream  << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
+}
 
 } // openspace namespace
-
-#endif // __OPENSPACE_MODULE_SONIFICATION___SONIFICATIONENGINE___H__
