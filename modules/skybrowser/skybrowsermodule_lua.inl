@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -470,6 +470,9 @@ namespace {
     glm::vec3 positionBrowser = glm::vec3(0.f, 0.f, -2.1f);
     glm::vec3 positionTarget = glm::vec3(0.9f, 0.4f, -2.1f);
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
+    if (glm::any(glm::isnan(galacticTarget))) {
+        galacticTarget = glm::dvec3 (0.0, 0.0, skybrowser::CelestialSphereRadius);
+    }
     std::string guiPath = "/Sky Browser";
     std::string url = "http://wwt.openspaceproject.com/1/openspace/";
     double fov = 70.0;

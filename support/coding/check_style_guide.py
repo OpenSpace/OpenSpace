@@ -3,7 +3,7 @@
 """
 OpenSpace
 
-Copyright (c) 2014-2022
+Copyright (c) 2014-2023
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -27,7 +27,7 @@ This script traverses the file tree of OpenSpace and will check all files' inclu
 guards for correctness. At the moment this includes:
  * Correctness (file has a #ifndef. #define, and #endif lines)
  * Equality (using the same name for the #ifdef and #define)
- * Styling 
+ * Styling
    * no empty line between #ifndef and #define lines
    * Empty lines before and after #ifndef #define block
    * Files end with an empty line
@@ -59,7 +59,7 @@ import os
 import re
 import sys
 
-current_year = '2022'
+current_year = '2023'
 is_strict_mode = False
 is_silent_mode = False
 
