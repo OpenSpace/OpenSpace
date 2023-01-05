@@ -480,7 +480,7 @@ namespace {
         "Name = '" + nameBrowser + "',"
         "Url = '" + url + "',"
         "FaceCamera = false,"
-        "Gamma = 2.2,"
+        "Gamma = 1.5,"
         "CartesianPosition = " + ghoul::to_string(positionBrowser) +
      "}";
 
