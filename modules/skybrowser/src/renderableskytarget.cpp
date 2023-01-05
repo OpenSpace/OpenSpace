@@ -133,6 +133,7 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     addProperty(_verticalFov);
 
     addProperty(_applyRoll);
+    _shouldUpdateIfDisabled = true;
 }
 
 void RenderableSkyTarget::bindTexture() {}
@@ -184,6 +185,17 @@ void RenderableSkyTarget::applyRoll() {
     _upVector = glm::cross(normal, _rightVector);
 }
 
+void RenderableSkyTarget::update(const UpdateData& data) {
+    RenderablePlane::update(data);
+    // Ensure the roll is always applied the first time the update 
+    // function runs
+    if (!_isInitialized || _applyRoll) {
+        applyRoll();
+        _isInitialized = true;
+    }
+}
+
+
 void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
     const bool showRectangle = _verticalFov > _showRectangleThreshold;
@@ -207,12 +219,11 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     );
 
     glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - _worldPosition);
-    // There are two modes - 1) target rolls to have its up vector parallel to the
-    // cameras up vector or 2) it is decoupled from the camera, in which case it needs to
-    // be initialized once
-    if (!_isInitialized || _applyRoll) {
+    // There are two modes - 1) Apply Roll: target rolls to have its up vector 
+    // parallel to the cameras up vector or ) Don't apply roll: it is decoupled 
+    // from the camera, which works better in a dome environment
+    if (_applyRoll) {
         applyRoll();
-        _isInitialized = true;
     }
     else {
         // Use last frames vector for right and don't apply any roll
