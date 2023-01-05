@@ -35,6 +35,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "SkyBrowserModule";
@@ -448,7 +449,7 @@ namespace {
 /**
  * Creates a sky browser and a target.
  */
-[[codegen::luawrap]] void createTargetBrowserPair() {
+[[codegen::luawrap]] void createTargetBrowserPair(std::optional<ghoul::Dictionary> p) {
     using namespace openspace;
 
     if (!global::windowDelegate->isMaster()) {
@@ -474,56 +475,69 @@ namespace {
     double fov = 70.0;
     double size = skybrowser::sizeFromFov(fov, galacticTarget);
 
-    const std::string browser = "{"
-        "Identifier = '" + idBrowser + "',"
-        "Type = 'ScreenSpaceSkyBrowser',"
-        "Name = '" + nameBrowser + "',"
-        "Url = '" + url + "',"
-        "FaceCamera = false,"
-        "Gamma = 1.5,"
-        "CartesianPosition = " + ghoul::to_string(positionBrowser) +
-     "}";
+    // Browser
+    ghoul::Dictionary browser;
+    browser.setValue("Identifier", idBrowser);
+    browser.setValue("Type", std::string("ScreenSpaceSkyBrowser"));
+    browser.setValue("Name", nameBrowser);
+    browser.setValue("Url", url);
+    browser.setValue("FaceCamera", false);
+    browser.setValue("Gamma", 1.5);
+    browser.setValue("CartesianPosition", glm::dvec3(positionBrowser)); 
 
-    const std::string target = "{"
-        "Identifier = '" + idTarget + "',"
-        "Type = 'SkyTarget',"
-        "Name = '" + nameTarget + "',"
-        "Transform = {"
-            "Translation = {"
-                "Type = 'StaticTranslation',"
-                "Position = {" +
-                    std::to_string(galacticTarget.x) + ", " +
-                    std::to_string(galacticTarget.y) + ", " +
-                    std::to_string(galacticTarget.z) + ", " +
-                "},"
-            "},"
-            "Rotation = {"
-                "Type = 'StaticRotation',"
-                "Rotation = {0.0, 0.0, 0.0}"
-            "}"
-        "},"
-        "Renderable = {"
-            "Identifier = 'RenderableSkyTarget',"
-            "Type = 'RenderableSkyTarget',"
-            "Size = " + std::to_string(size) + ","
-            "VerticalFieldOfView = " + std::to_string(fov) + ","
-            "Origin = 'Center',"
-            "Billboard = true,"
-            "Opacity = 0.99"
-        "},"
-        "GUI = {"
-          "Name = '" + nameTarget + "', "
-          "Path = '/SkyBrowser', "
-        "}"
-    "}";
+    // Target
+    ghoul::Dictionary target;
+    target.setValue("Identifier", idTarget);
+    target.setValue("Type", std::string("SkyTarget"));
+    target.setValue("Name", nameTarget);
+
+    // Target transform
+    ghoul::Dictionary targetTransform;
+    ghoul::Dictionary targetTranslation;
+    targetTranslation.setValue("Type", std::string("StaticTranslation"));
+    targetTranslation.setValue("Position", galacticTarget);
+    ghoul::Dictionary targetRotation;
+    targetRotation.setValue("Type", std::string("StaticRotation"));
+    targetRotation.setValue("Rotation", glm::dvec3(0.0));
+    targetTransform.setValue("Translation", targetTranslation);
+    targetTransform.setValue("Rotation", targetRotation);
+    target.setValue("Transform", targetTransform);
+
+    // Target Renderable
+    ghoul::Dictionary targetRenderable;
+    targetRenderable.setValue("Identifier", std::string("RenderableSkyTarget"));
+    targetRenderable.setValue("Type", std::string("RenderableSkyTarget"));
+    targetRenderable.setValue("Size", size);
+    targetRenderable.setValue("VerticalFieldOfView", fov);
+    targetRenderable.setValue("Origin", std::string("Center"));
+    targetRenderable.setValue("Billboard", true);
+    targetRenderable.setValue("Opacity", 1.0);
+    target.setValue("Renderable", targetRenderable);
+
+    // Target GUI
+    ghoul::Dictionary targetGui;
+    targetGui.setValue("Name", nameTarget);
+    targetGui.setValue("Path", std::string("/SkyBrowser"));
+    target.setValue("GUI", targetGui);
+
+    if (p.has_value()) {
+        if (p.value().hasKey("Browser")) {
+            ghoul::Dictionary browserParams = p.value().value<ghoul::Dictionary>("Browser");
+            browser.insert(browserParams);
+        }
+        if (p.value().hasKey("Target")) {
+            ghoul::Dictionary targetParams = p.value().value<ghoul::Dictionary>("Target");
+            target.insert(targetParams);
+        }
+    }
 
     global::scriptEngine->queueScript(
-        "openspace.addScreenSpaceRenderable(" + browser + ");",
+        "openspace.addScreenSpaceRenderable(" + ghoul::formatLua(browser) + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
     global::scriptEngine->queueScript(
-        "openspace.addSceneGraphNode(" + target + ");",
+        "openspace.addSceneGraphNode(" + ghoul::formatLua(target) + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
