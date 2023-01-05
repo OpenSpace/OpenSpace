@@ -47,6 +47,7 @@ public:
     void update() override;
 
     float opacity() const;
+    bool shouldUpdateWhileAnimating() const;
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
 
@@ -70,6 +71,7 @@ private:
     static constexpr int RadiusTimeOut = 25;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
+    properties::BoolProperty _shouldUpdateWhileAnimating;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 

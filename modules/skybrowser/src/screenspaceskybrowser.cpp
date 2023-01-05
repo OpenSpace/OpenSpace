@@ -70,12 +70,21 @@ namespace {
         "be"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShouldUpdateInfo = {
+        "ShouldUpdateWhileAnimating",
+        "Should Update While Animating",
+        "If checked, the browser update its aim when the target is animating"
+    };
+
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
 
         // [[codegen::verbatim(IsHiddenInfo.description)]]
         std::optional<bool> isHidden;
+
+        // [[codegen::verbatim(ShouldUpdateInfo.description)]]
+        std::optional<bool> shouldUpdate;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -107,6 +116,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     , WwtCommunicator(dictionary)
     , _textureQuality(TextureQualityInfo, 0.5f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
+    , _shouldUpdateWhileAnimating(ShouldUpdateInfo, false)
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
@@ -114,6 +124,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _textureQuality = p.textureQuality.value_or(_textureQuality);
     _isHidden = p.isHidden.value_or(_isHidden);
+    _shouldUpdateWhileAnimating = p.shouldUpdate.value_or(_shouldUpdateWhileAnimating);
 
     addProperty(_isHidden);
     addProperty(_url);
@@ -121,6 +132,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_reload);
     addProperty(_textureQuality);
     addProperty(_verticalFov);
+    addProperty(_shouldUpdateWhileAnimating);
 
     _textureQuality.onChange([this]() { _textureDimensionsIsDirty = true; });
 
@@ -235,6 +247,10 @@ void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCo
         addProperty(_displayCopies.back().get());
         addProperty(_showDisplayCopies.back().get());
     }
+}
+
+bool ScreenSpaceSkyBrowser::shouldUpdateWhileAnimating() const {
+    return _shouldUpdateWhileAnimating;
 }
 
 void ScreenSpaceSkyBrowser::removeDisplayCopy() {
