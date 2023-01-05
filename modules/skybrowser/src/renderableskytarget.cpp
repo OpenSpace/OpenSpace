@@ -110,7 +110,7 @@ documentation::Documentation RenderableSkyTarget::Documentation() {
 RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)
-    , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
+    , _showRectangleThreshold(RectangleThresholdInfo, 0.f, 0.f, 70.f)
     , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
     , _borderColor(220, 220, 220)
