@@ -386,23 +386,8 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     }
 
     if (_loadingType == LoadingType::StaticLoading) {
-        switch (_inputFileType) {
-        case SourceFileType::Cdf:
-            _seedPointDirectory = p.seedPointDirectory.value_or(_seedPointDirectory);
-            _tracingVariable = p.tracingVariable.value_or(_tracingVariable);
-            loadCdfFiles();
-            break;
-        case SourceFileType::Json:
-            loadJsonFiles();
-            break;
-        case SourceFileType::Osfls:
-            loadOsflsFiles();
-            break;
-        default:
-            break;
-        }
+        loadFiles(p);
     }
-
 
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
@@ -472,53 +457,51 @@ void RenderableFieldlinesSequenceNew::setupDynamicDownloading(const Parameters& 
     );
 }
 
-void RenderableFieldlinesSequenceNew::loadOsflsFiles() {
-    for (File& f : _files) {
-        const bool loadSuccess = f.state.loadStateFromOsfls(f.path.string());
+void RenderableFieldlinesSequenceNew::loadFiles(const Parameters& p) {
+    std::vector<std::string> extraMagVars;
+    std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles;
+
+    if (_inputFileType == SourceFileType::Cdf) {
+        _seedPointDirectory = p.seedPointDirectory.value_or(_seedPointDirectory);
+        _tracingVariable = p.tracingVariable.value_or(_tracingVariable);
+        extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
+        seedsPerFiles = extractSeedPointsFromFiles(_seedPointDirectory);
+        if (seedsPerFiles.empty()) {
+            LERROR("No seed files found");
+        }
+    }
+
+    for (File& file : _files) {
+        bool loadSuccess = false;
+        switch (_inputFileType) {
+            case SourceFileType::Cdf:
+                loadSuccess = fls::convertCdfToFieldlinesState(
+                    file.state,
+                    file.path.string(),
+                    seedsPerFiles,
+                    _manualTimeOffset,
+                    _tracingVariable,
+                    _extraVars,
+                    extraMagVars
+                );
+                break;
+            case SourceFileType::Json:
+                loadSuccess =
+                    file.state.loadStateFromJson(
+                        file.path.string(), _model, _scalingFactor
+                    );
+                break;
+            case SourceFileType::Osfls:
+                loadSuccess = file.state.loadStateFromOsfls(file.path.string());
+                break;
+            default:
+                break;
+        }
         if (loadSuccess) {
-            f.status = File::FileStatus::Loaded;
+            file.status = File::FileStatus::Loaded;
         }
         else {
-            LERROR(fmt::format("Failed to load state from: {}", f.path));
-        }
-    }
-}
-
-void RenderableFieldlinesSequenceNew::loadJsonFiles() {
-    for (File& f : _files) {
-        const bool loadSuccess =
-            f.state.loadStateFromJson(f.path.string(), _model, _scalingFactor);
-        if (loadSuccess) {
-            f.status = File::FileStatus::Loaded;
-        }
-        else {
-            LERROR(fmt::format("Failed to load state from: {}", f.path));
-        }
-    }
-}
-
-void RenderableFieldlinesSequenceNew::loadCdfFiles() {
-    std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
-
-    std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
-        extractSeedPointsFromFiles(_seedPointDirectory);
-    if (seedsPerFiles.empty()) {
-        LERROR("No seed files found");
-    }
-
-    for (File& cdfFile : _files) {
-        bool loadSuccess = fls::convertCdfToFieldlinesState(
-            cdfFile.state,
-            cdfFile.path.string(),
-            seedsPerFiles,
-            _manualTimeOffset,
-            _tracingVariable,
-            _extraVars,
-            extraMagVars
-        );
-
-        if (loadSuccess) {
-            cdfFile.status = File::FileStatus::Loaded;
+            LERROR(fmt::format("Failed to load state from: {}", file.path));
         }
     }
 }
@@ -530,31 +513,36 @@ extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
     for (int i = 0; i < static_cast<int>(extrVars.size()); i++) {
         const std::string& str = extrVars[i];
         // Check if string is in the format specified for magnitude variables
-        if (str.substr(0, 2) == "|(" && str.substr(str.size() - 2, 2) == ")|") {
-            std::istringstream ss(str.substr(2, str.size() - 4));
-            std::string magVar;
-            size_t counter = 0;
-            while (std::getline(ss, magVar, ',')) {
-                magVar.erase(
-                    std::remove_if(
-                        magVar.begin(),
-                        magVar.end(),
-                        ::isspace
-                    ),
-                    magVar.end()
-                );
-                extraMagVars.push_back(magVar);
-                counter++;
-                if (counter == 3) {
-                    break;
-                }
-            }
-            if (counter != 3 && counter > 0) {
-                extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
-            }
-            extrVars.erase(extrVars.begin() + i);
-            i--;
+        // As of now, unknown why parameters |( )| where used, or if it was used
+        if (str.substr(0, 2) == "|(" ) {
+            throw ghoul::RuntimeError(
+                "The formating of specifying extra variables no longer requires |( )|"
+            );
         }
+
+        std::istringstream ss(str);
+        std::string magVar;
+        size_t counter = 0;
+        while (std::getline(ss, magVar, ',')) {
+            magVar.erase(
+                std::remove_if(
+                    magVar.begin(),
+                    magVar.end(),
+                    ::isspace
+                ),
+                magVar.end()
+            );
+            extraMagVars.push_back(magVar);
+            counter++;
+            if (counter == 3) {
+                break;
+            }
+        }
+        if (counter != 3 && counter > 0) {
+            extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
+        }
+        extrVars.erase(extrVars.begin() + i);
+        i--;
     }
     return extraMagVars;
 }

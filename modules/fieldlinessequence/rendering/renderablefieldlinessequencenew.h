@@ -76,7 +76,6 @@ public:
 
     static documentation::Documentation Documentation();
 
-
 private:
     SourceFileType _inputFileType;
     struct File {
@@ -104,9 +103,7 @@ private:
     void updateVertexColorBuffer();
     void updateVertexMaskingBuffer();
 
-    void loadOsflsFiles();
-    void loadJsonFiles();
-    void loadCdfFiles();
+    void loadFiles(const Parameters& p);
 
     std::vector<File> _files;
     void loadFile(RenderableFieldlinesSequenceNew::File& file);
@@ -157,6 +154,8 @@ private:
     GLuint _vertexMaskingBuffer = 0;
     // OpenGL Vertex Buffer Object containing the vertex positions
     GLuint _vertexPositionBuffer = 0;
+
+
     ///////////////////////////////////////////////
     //                PROPERTIES                 //
     ///////////////////////////////////////////////
