@@ -4,11 +4,9 @@ local defaultTime = asset.require('./../../default_time.asset').time
 
 local enterStateSettings = [[]]
 
+  -- Reset things that might have been set during the state (either here or from webpage)
 local leaveStateSettings = [[
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 1.0);
-  -- Disable these, as they might be performance expensive
-  openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", false);
-  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", false);
   openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.IncludeRoll", false);
 ]]
 
@@ -46,8 +44,6 @@ local goToMarsOverview = [[
 -- Curiosity
 -----
 
--- openspace.globebrowsing.flyToGeo("Mars", -4.664599, 137.421634, 12057);
-
 local galeCrater_TiltedNavState = [[{
   Anchor = 'Mars-Curiosity-Handle',
   ReferenceFrame = 'Root',
@@ -78,9 +74,6 @@ local curiosityState = {
 -- Perseverance
 -----
 
--- Go to Perseverance path overview:
--- openspace.globebrowsing.flyToGeo("Mars", 18.433832, 77.450000, -800);
-
 -- Perseverance tilted state
 local perseverance_TiltedNavState_Path = [[{
   Up = { 0.444587, 0.644127, -0.622450 },
@@ -90,18 +83,6 @@ local perseverance_TiltedNavState_Path = [[{
   Position = { 530.380697, -754.288422, -401.730408 },
   Pitch = -0.000264
 }]]
-
-local perseverance_TiltedNavState_Rover = [[{
-  Up = {0.406661, 0.895815, -0.179284 },
-  Yaw = -0.012316,
-  Position = { -8.458007, 4.433480, 2.967551 },
-  Pitch = 0.118225,
-  Anchor = 'PerseveranceModel',
-  ReferenceFrame = 'PerseveranceModel'
-}]]
-
--- TODO: Just keep one state per rover and add a scripscheudler that flies to see it from above and
--- that looks at the rover
 
 local perseveranceState = {
   Identifier = "Perseverance",
