@@ -14,7 +14,7 @@ local leaveStateSettings = [[
 
 -- For the states close to the surface, the ambient intensity of Mars needs to be turned off
 local reduceAmbientIntensity = [[
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.AmbientIntensity", 0.5, 1.0);
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.AmbientIntensity", 0.05, 1.0);
 ]]
 
 local resetAmbientIntensity = [[
