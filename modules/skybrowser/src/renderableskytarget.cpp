@@ -58,7 +58,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RectangleThresholdInfo = {
         "RectangleThreshold",
         "Rectangle Threshold",
-        "When the field of view is larger than the rectangle threshold, a rectangle will"
+        "When the field of view is larger than the rectangle threshold, a rectangle will "
         "be rendered in the target"
     };
 

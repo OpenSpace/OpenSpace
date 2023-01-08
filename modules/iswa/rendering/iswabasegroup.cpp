@@ -48,7 +48,6 @@ namespace {
         "Delete",
         "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace {

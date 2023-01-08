@@ -113,8 +113,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowHabitableZoneInfo = {
         "ShowHabitableZone",
         "Show Habitable Zone",
-        "If true, the habitable zone disc is enabled per default when an "
-        "exoplanet system is created"
+        "If true, the habitable zone disc is enabled per default when an exoplanet "
+        "system is created"
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseOptimisticZoneInfo = {

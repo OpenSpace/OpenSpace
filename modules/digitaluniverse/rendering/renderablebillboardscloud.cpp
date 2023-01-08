@@ -135,15 +135,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
-        "This value determines which paramenter (datavar) is used for scaling "
-        "of the astronomical objects"
+        "This value determines which paramenter (datavar) is used for scaling of the "
+        "astronomical objects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Option wether the billboards should face the camera or not. Used for "
-        "non-linear display envierments such as fisheye."
+        "Option wether the billboards should face the camera or not. Used for non-linear "
+        "display envierments such as fisheye."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {

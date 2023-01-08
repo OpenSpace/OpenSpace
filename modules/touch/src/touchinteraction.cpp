@@ -243,7 +243,7 @@ namespace {
         "Zoom In Limit",
         "The minimum distance from the anchor that you are allowed to navigate to. "
         "Its purpose is to limit zooming in on a node. If this value is not set it "
-        "defaults to the surface of the current anchor. "
+        "defaults to the surface of the current anchor."
     };
 
     // Compute coefficient of decay based on current frametime; if frametime has been

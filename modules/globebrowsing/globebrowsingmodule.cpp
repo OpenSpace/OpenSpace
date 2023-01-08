@@ -128,7 +128,6 @@ namespace {
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU"
     };
 
-
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {

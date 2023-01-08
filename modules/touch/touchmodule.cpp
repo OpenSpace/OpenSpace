@@ -39,7 +39,7 @@ namespace {
         "TouchActive",
         "True if we want to use touch input as 3d navigation",
         "Use this if we want to turn on or off Touch input navigation. "
-        "Disabling this will reset all current touch inputs to the navigation. "
+        "Disabling this will reset all current touch inputs to the navigation."
     };
 }
 namespace openspace {

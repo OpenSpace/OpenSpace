@@ -190,15 +190,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
-        "The percentage of the correct distance to the surface being shadowed. "
-        "Possible values: [0.0, 1.0]"
+        "The percentage of the correct distance to the surface being shadowed. Possible "
+        "values: [0.0, 1.0]"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of Shadow Samples",
-        "The number of samples used during shadow mapping calculation "
-        "(Percentage Closer Filtering)"
+        "The number of samples used during shadow mapping calculation (Percentage Closer "
+        "Filtering)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {

@@ -58,7 +58,7 @@ namespace {
         "Save Transfer Function",
         "Save your transfer function"
     };
-}
+} // namespace
 
 namespace openspace::volume {
 

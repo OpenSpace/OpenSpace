@@ -62,7 +62,6 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "MarkerColor", "Marker color", "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace {
