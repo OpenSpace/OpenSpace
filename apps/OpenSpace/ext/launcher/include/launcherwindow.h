@@ -79,16 +79,24 @@ public:
       */
     std::string selectedWindowConfig() const;
 
+    /**
+      * Returns true if the window configuration filename selected in the combo box
+      * is a file in the user configurations section
+      *
+      * \return true if window configuration is a user configuration file
+      */
+    bool isUserConfigSelected() const;
+
 private:
     QWidget* createCentralWidget();
     void setBackgroundImage(const std::string& syncPath);
 
     void openProfileEditor(const std::string& profile, bool isUserProfile);
-    void openWindowEditor();
+    void openWindowEditor(const std::string& winCfg, bool isUserWinCfg);
 
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
-    void previewSelectedConfigFileForVersion();
+    void previewSelectedConfigFile();
 
     const std::string _assetPath;
     const std::string _userAssetPath;

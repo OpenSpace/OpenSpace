@@ -333,10 +333,10 @@ QWidget* LauncherWindow::createCentralWidget() {
         _editWindowButton,
         &QPushButton::released,
         [this]() {
-            previewSelectedConfigFileForVersion();
+            previewSelectedConfigFile();
         }
     );
-    _editWindowButton->setVisible(false);
+    _editWindowButton->setVisible(true);
     _editWindowButton->setObjectName("small");
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
@@ -344,19 +344,17 @@ QWidget* LauncherWindow::createCentralWidget() {
     return centralWidget;
 }
 
-void LauncherWindow::previewSelectedConfigFileForVersion() {
+void LauncherWindow::previewSelectedConfigFile() {
     std::filesystem::path pathSelected = absPath(selectedWindowConfig());
-    std::string fileSelected = pathSelected.u8string();
+    bool isUserConfig = isUserConfigSelected();
+    std::string fileSelected = pathSelected.generic_string();
     if (_windowConfigBox->currentIndex() > 0
-        && std::filesystem::is_regular_file(fileSelected))
+        && std::filesystem::is_regular_file(pathSelected))
     {
-        sgct::config::Cluster preview = sgct::readConfig(fileSelected, true);
-        if (preview.configGeneratorVersion.has_value()) {
-            if (preview.configGeneratorVersion.value()
-                >= SgctEdit::_configGenMinimumSupportedVersion)
-            {
-                openWindowEditor();
-            }
+        sgct::config::GeneratorVersion previewVersion =
+            sgct::readConfigGenerator(fileSelected);
+        if (previewVersion.versionCheck(minimumVersion)) {
+            openWindowEditor();
         }
     }
 }
@@ -669,7 +667,43 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 
 void LauncherWindow::openWindowEditor() {
     SgctEdit editor(this, _userConfigPath);
+
     int ret = editor.exec();
+    if (ret == QDialog::DialogCode::Accepted) {
+        sgct::config::Cluster cluster = editor.cluster();
+
+        std::filesystem::path savePath = editor.saveFilename();
+        saveWindowConfig(this, savePath, cluster);
+        // Truncate path to convert this back to path relative to _userConfigPath
+        std::string p = savePath.string().substr(_userConfigPath.size());
+        populateWindowConfigsList(p);
+    }
+}
+
+void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinCfg) {
+    std::string saveWindowCfgPath = isUserWinCfg? _userConfigPath : _configPath;
+    SgctEdit editor(this, saveWindowCfgPath);
+    sgct::config::Cluster preview;
+
+    if (!winCfg.empty()) {
+        preview = sgct::readConfig(winCfg, true);
+        if (preview.configGeneratorVersion.has_value()) {
+            if (preview.configGeneratorVersion.value()
+                >= SgctEdit::_configGenMinimumSupportedVersion)
+            {
+                openWindowEditor();
+            }
+        }
+    }
+
+    int ret = editor.exec(
+        preview,
+        winCfg,
+        _configPath,
+        _userConfigPath,
+        saveWindowCfgPath,
+        this
+    );
     if (ret == QDialog::DialogCode::Accepted) {
         sgct::config::Cluster cluster = editor.cluster();
 
@@ -701,4 +735,9 @@ std::string LauncherWindow::selectedWindowConfig() const {
     else {
         return "${USER_CONFIG}/" + _windowConfigBox->currentText().toStdString();
     }
+}
+
+bool LauncherWinow::isUserConfigSelected() const {
+    int selectedIndex = _windowConfigBox->currentIndex();
+    return (selectedIndex < _userConfigCount);
 }

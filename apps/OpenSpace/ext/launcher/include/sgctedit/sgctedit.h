@@ -38,6 +38,8 @@ class SettingsWidget;
 class QBoxLayout;
 class QWidget;
 
+const sgct::config::GeneratorVersion minimumVersion { "SgctWindowConfig", 1, 1 };
+
 class SgctEdit final : public QDialog {
 Q_OBJECT
 public:
@@ -50,6 +52,23 @@ public:
      *                       directory where all window configs are stored
      */
     SgctEdit(QWidget* parent, std::string userConfigPath);
+
+    /**
+     * Constructor for ProfileEdit class
+     *
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
+     * \param profileName The name of the profile to create
+     * \param assetBasePath The path to the folder where the assets live
+     * \param userAssetBasePath The path to the folder where the user assets live
+     * \param profileName The path to the folder in which all profiles live
+     * \param profilesReadOnly vector list of profile names that are read-only and must
+     *                         not be overwritten
+     * \param parent Pointer to parent Qt widget
+     */
+    SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
+        std::string configBasePath, std::string userConfigBasePath,
+        std::string profileBasePath, QWidget* parent);
 
     /**
      * Returns the saved filename
