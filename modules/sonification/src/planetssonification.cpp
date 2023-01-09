@@ -25,8 +25,6 @@
 #include <modules/sonification/include/planetssonification.h>
 
 #include <openspace/camera/camera.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
@@ -512,7 +510,7 @@ void PlanetsSonification::sendSolarSettings() {
     data[0].type = OscEngine::OscDataType::Blob;
     data[0].blobValue = settingsBlob;
 
-    global::moduleEngine->module<SonificationModule>()->engine()->send(label, data);
+    _sonificationModule->engine()->send(label, data);
 }
 
 void PlanetsSonification::onSolarAllEnabledChanged(bool value) {
@@ -735,7 +733,7 @@ void PlanetsSonification::sendCompareSettings() {
     data[2].type = OscEngine::OscDataType::Blob;
     data[2].blobValue = settingsBlob;
 
-    global::moduleEngine->module<SonificationModule>()->engine()->send(label, data);
+    _sonificationModule->engine()->send(label, data);
 }
 
 void PlanetsSonification::onFirstCompareChanged(properties::OptionProperty::Option value)
@@ -996,7 +994,7 @@ void PlanetsSonification::sendPlanetarySettings(const int planetIndex) {
     }
 
     data.shrink_to_fit();
-    global::moduleEngine->module<SonificationModule>()->engine()->send(label, data);
+    _sonificationModule->engine()->send(label, data);
 }
 
 void PlanetsSonification::onAllEnabledChanged(bool value) {
@@ -1728,7 +1726,7 @@ void PlanetsSonification::checkTimeSpeed(double& ts) {
         data[0].type = OscEngine::OscDataType::Double;
         data[0].doubleValue = ts;
 
-        global::moduleEngine->module<SonificationModule>()->engine()->send(label, data);
+        _sonificationModule->engine()->send(label, data);
     }
 }
 
@@ -1737,7 +1735,7 @@ void PlanetsSonification::checkTimeSpeed(double& ts) {
 //otherwise no match will be found
 void PlanetsSonification::extractData(const std::string& identifier, int i)
 {
-    if (!_scene) {
+    if (!_scene || !_camera) {
         return;
     }
 
@@ -1779,6 +1777,7 @@ void PlanetsSonification::extractData(const std::string& identifier, int i)
         //If this planet is in focus then calculate the angle from
         //the planet to its moons and send them too
         for (int m = 0; m < _planets[i].moons.size(); ++m) {
+            // TODO: This throws an exception sometimes for Io
             SceneGraphNode* moon =
                 _scene->sceneGraphNode(_planets[i].moons[m].first);
             if (moon) {

@@ -22,8 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/sonification/sonificationmodule.h"
+#include <modules/sonification/sonificationmodule.h>
 
+#include <modules/sonification/include/planetssonification.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 
@@ -45,14 +46,25 @@ SonificationModule::SonificationModule()
         _isRunning = true;
         _updateThread = std::thread([this]() { update(std::ref(_isRunning)); });
     }
+
+    // Fill sonification list
+    _sonifications.push_back(new PlanetsSonification);
+    addPropertySubOwner(_sonifications.back());
 }
 
 SonificationModule::~SonificationModule() {
+    // Join the thread
     _isRunning = false;
     if (_updateThread.joinable()) {
         _updateThread.join();
     }
 
+    // Clear the sonifications list
+    for (SonificationBase* sonification : _sonifications) {
+        delete sonification;
+    }
+
+    // Terminate the osc connection
     delete _oscEngine;
 }
 

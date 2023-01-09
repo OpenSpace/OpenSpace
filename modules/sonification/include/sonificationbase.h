@@ -28,8 +28,12 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/sonification/sonificationmodule.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 
 namespace openspace {
+
+class SonificationModule;
 
 class SonificationBase : public properties::PropertyOwner {
 public:
@@ -37,6 +41,9 @@ public:
     virtual ~SonificationBase();
 
     virtual void update() = 0;
+
+    SonificationModule* _sonificationModule =
+        global::moduleEngine->module<SonificationModule>();
 };
 
 } // namespace openspace
