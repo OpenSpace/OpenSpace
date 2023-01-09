@@ -1641,42 +1641,77 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     );
 
     static bool overrideInternalSelection = false;
+    bool useHighestValue = true;  // This default value does not matter
+    ColumnID rowLimitCol = ColumnID::TSM; // This default value does not matter
     bool rowLimitFilterChanged = false;
-    ColumnID rowLimitCol = ColumnID::TSM;
     if (showRowLimitSection) {
-        // Number of rows with max TSM/ESM filter
-        {
-            ImGui::Text("Limit number of rows");
-            ImGui::SameLine();
-            renderHelpMarker(
-                "Enable to only show the top X resulting rows with max ESM/TSM value"
-            );
+        rowLimitFilterChanged |= ImGui::Checkbox("##RowLimit", &limitNumberOfRows);
+        ImGui::SameLine();
+        ImGui::Text("Limit number of rows");
+        ImGui::SameLine();
+        renderHelpMarker(
+            "Enable to only show the top X resulting rows with highest or lowest value "
+            "for the given column"
+        );
 
-            rowLimitFilterChanged |= ImGui::Checkbox("##RowLimit", &limitNumberOfRows);
-            ImGui::SameLine();
-            ImGui::Text("Show first");
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(100);
-            rowLimitFilterChanged |= ImGui::InputInt("##nRows", &nRows);
-            ImGui::SameLine();
-            ImGui::Text(" rows with highest ");
-            ImGui::SameLine();
 
-            const char* metricChoices[] = { "TSM", "ESM" };
-            static int currentMetricChoiceIndex = 0;
-            ImGui::SetNextItemWidth(70);
-            rowLimitFilterChanged |= ImGui::Combo(
-                "##ESMorTSMcombo",
-                &currentMetricChoiceIndex,
-                metricChoices,
-                IM_ARRAYSIZE(metricChoices)
-            );
-            _filterChanged |= rowLimitFilterChanged;
+        ImGui::Text("Show");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(85);
+        rowLimitFilterChanged |= ImGui::InputInt("##nRows", &nRows);
+        ImGui::SameLine();
+        ImGui::Text("rows with");
+        ImGui::SameLine();
 
-            const char* metricChoice = metricChoices[currentMetricChoiceIndex];
-            rowLimitCol = (metricChoice == "TSM") ? ColumnID::TSM : ColumnID::ESM;
+        const char* highOrLowChoices[] = { "highest", "lowest" };
+        static int highOrLowIndex = 0; // highest
+        ImGui::SetNextItemWidth(80);
+        bool highLowChanged = ImGui::Combo(
+            "##HighOrLowCombo",
+            &highOrLowIndex,
+            highOrLowChoices,
+            IM_ARRAYSIZE(highOrLowChoices)
+        );
+        if (highLowChanged) {
+            rowLimitFilterChanged = true;
+        };
+
+        useHighestValue = std::string(highOrLowChoices[highOrLowIndex]) == "highest";
+
+        ImGui::SameLine();
+
+        static int currentMetricChoiceIndex = -1;
+        if (currentMetricChoiceIndex < 0) {
+            // Find default column - first numeric
+            for (int i = 0; i < _columns.size(); ++i) {
+                if (isNumericColumn(i)) {
+                    currentMetricChoiceIndex = i;
+                    rowLimitFilterChanged = true;
+                    break;
+                }
+            }
         }
+
+        ImGui::SetNextItemWidth(100);
+        if (ImGui::BeginCombo("##RowLimitColumn", _columns[currentMetricChoiceIndex].name.c_str())) {
+            for (int i = 0; i < _columns.size(); ++i) {
+                // Ignore non-numeric columns
+                if (!isNumericColumn(i)) {
+                    continue;
+                }
+
+                const char* name = _columns[i].name.c_str();
+                if (ImGui::Selectable(name, currentMetricChoiceIndex == i)) {
+                    currentMetricChoiceIndex = i;
+                    rowLimitFilterChanged = true;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        rowLimitCol = _columns[currentMetricChoiceIndex].id;
     }
+    _filterChanged |= rowLimitFilterChanged;
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -1832,10 +1867,10 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     // Limit the number of rows by first sorting based on the chosen metric
     static int nRowsAfterLimit = 0;
     if (limitNumberOfRows && _filteredData.size() > nRows) {
-        auto compare = [&rowLimitCol, this](const size_t& lhs, const size_t& rhs) {
+        auto compare = [&rowLimitCol, &useHighestValue, this](const size_t& lhs, const size_t& rhs) {
             // We are interested in the largest, so flip the order
-            const ExoplanetItem& l = _data[rhs];
-            const ExoplanetItem& r = _data[lhs];
+            const ExoplanetItem& l = _data[useHighestValue ? rhs : lhs];
+            const ExoplanetItem& r = _data[useHighestValue ? lhs : rhs];
             return compareColumnValues(columnIndexFromId(rowLimitCol), l, r);
         };
 
