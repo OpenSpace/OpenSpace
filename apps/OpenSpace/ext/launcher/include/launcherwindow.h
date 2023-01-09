@@ -96,7 +96,6 @@ private:
 
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
-    void previewSelectedConfigFile();
 
     const std::string _assetPath;
     const std::string _userAssetPath;
@@ -104,6 +103,7 @@ private:
     const std::string _userConfigPath;
     const std::string _profilePath;
     const std::string _userProfilePath;
+    const std::vector<std::string>& _readOnlyWindowConfigs;
     const std::vector<std::string>& _readOnlyProfiles;
     bool _shouldLaunch = false;
     int _userAssetCount = 0;

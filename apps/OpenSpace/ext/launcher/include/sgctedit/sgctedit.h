@@ -45,7 +45,7 @@ Q_OBJECT
 public:
     /**
      * Constructor for SgctEdit class, the underlying class for the full window
-     * configuration editor
+     * configuration editor. Used when creating a new config.
      *
      * \param parent The Qt QWidget parent object
      * \param userConfigPath A string containing the file path of the user config
@@ -54,21 +54,22 @@ public:
     SgctEdit(QWidget* parent, std::string userConfigPath);
 
     /**
-     * Constructor for ProfileEdit class
+     * Constructor for SgctEdit class, the underlying class for the full window
+     * configuration editor. Used when editing an existing config.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
-     * \param profileName The name of the profile to create
-     * \param assetBasePath The path to the folder where the assets live
-     * \param userAssetBasePath The path to the folder where the user assets live
-     * \param profileName The path to the folder in which all profiles live
-     * \param profilesReadOnly vector list of profile names that are read-only and must
-     *                         not be overwritten
+     * \param cluster The #sgct::config::Cluster object containing all data of the
+     *                imported window cluster configuration.
+     * \param configName The name of the window configuration filename
+     * \param configBasePath The path to the folder where default config files reside
+     * \param userConfigBasePath The path to the folder where the user config files reside
+     * \param configsReadOnly vector list of window config names that are read-only and
+     *                         must not be overwritten
      * \param parent Pointer to parent Qt widget
      */
     SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
         std::string configBasePath, std::string userConfigBasePath,
-        std::string profileBasePath, QWidget* parent);
+        const std::vector<std::string>& configsReadOnly,
+        QWidget* parent);
 
     /**
      * Returns the saved filename

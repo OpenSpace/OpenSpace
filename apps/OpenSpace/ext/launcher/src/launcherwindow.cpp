@@ -195,6 +195,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     , _userProfilePath(
         absPath(globalConfig.pathTokens.at("USER_PROFILES")).string() + '/'
     )
+    , _readOnlyWindowConfigs(globalConfig.readOnlyWindowConfigs)
     , _readOnlyProfiles(globalConfig.readOnlyProfiles)
     , _sgctConfigName(sgctConfigName)
 {
@@ -321,7 +322,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     connect(
         newWindowButton, &QPushButton::released,
         [this]() {
-            openWindowEditor();
+            openWindowEditor("", true);
         }
     );
     newWindowButton->setObjectName("small");
@@ -333,7 +334,14 @@ QWidget* LauncherWindow::createCentralWidget() {
         _editWindowButton,
         &QPushButton::released,
         [this]() {
-            previewSelectedConfigFile();
+            std::filesystem::path pathSelected = absPath(selectedWindowConfig());
+            bool isUserConfig = isUserConfigSelected();
+            std::string fileSelected = pathSelected.generic_string();
+            if (_windowConfigBox->currentIndex() > 0
+                && std::filesystem::is_regular_file(pathSelected))
+            {
+                openWindowEditor(fileSelected, isUserConfig);
+            }
         }
     );
     _editWindowButton->setVisible(true);
@@ -342,21 +350,6 @@ QWidget* LauncherWindow::createCentralWidget() {
     _editWindowButton->setCursor(Qt::PointingHandCursor);
 
     return centralWidget;
-}
-
-void LauncherWindow::previewSelectedConfigFile() {
-    std::filesystem::path pathSelected = absPath(selectedWindowConfig());
-    bool isUserConfig = isUserConfigSelected();
-    std::string fileSelected = pathSelected.generic_string();
-    if (_windowConfigBox->currentIndex() > 0
-        && std::filesystem::is_regular_file(pathSelected))
-    {
-        sgct::config::GeneratorVersion previewVersion =
-            sgct::readConfigGenerator(fileSelected);
-        if (previewVersion.versionCheck(minimumVersion)) {
-            openWindowEditor();
-        }
-    }
 }
 
 void LauncherWindow::setBackgroundImage(const std::string& syncPath) {
@@ -682,28 +675,33 @@ void LauncherWindow::openWindowEditor() {
 
 void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinCfg) {
     std::string saveWindowCfgPath = isUserWinCfg? _userConfigPath : _configPath;
-    SgctEdit editor(this, saveWindowCfgPath);
+    int ret = 0;
     sgct::config::Cluster preview;
 
+    if (winCfg.empty()) {
+        SgctEdit editor(this, saveWindowCfgPath);
+        ret = editor.exec();
+    }
     if (!winCfg.empty()) {
         preview = sgct::readConfig(winCfg, true);
         if (preview.configGeneratorVersion.has_value()) {
             if (preview.configGeneratorVersion.value()
                 >= SgctEdit::_configGenMinimumSupportedVersion)
             {
-                openWindowEditor();
+                SgctEdit editor(
+                    preview,
+                    winCfg,
+                    _configPath,
+                    _userConfigPath,
+                    saveWindowCfgPath,
+                    _readOnlyWindowConfigs,
+                    this
+                );
+                ret = editor.exec();
             }
         }
     }
 
-    int ret = editor.exec(
-        preview,
-        winCfg,
-        _configPath,
-        _userConfigPath,
-        saveWindowCfgPath,
-        this
-    );
     if (ret == QDialog::DialogCode::Accepted) {
         sgct::config::Cluster cluster = editor.cluster();
 
