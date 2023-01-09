@@ -1,4 +1,6 @@
 asset.require("spice/base") -- openspace.time.advancedTime depends on SPICE
+asset.require("scene/solarsystem/planets/earth/layers/nightlayers/earth_at_night_2012")
+asset.require("scene/solarsystem/planets/earth/atmosphere")
 
 -- Function to advance a time stamp in the given number of days, hours, minutes and
 -- seconds. returns the new time stamp

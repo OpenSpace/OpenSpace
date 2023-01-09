@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,17 +62,17 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
-        "EnableAnimation",
-        "Enable Animation",
-        "Enable or disable the animation for the model if it has any"
-    };
-
     constexpr std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
         "performShading", "ambientIntensity", "diffuseIntensity",
         "specularIntensity", "opacityBlending"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
+        "EnableAnimation",
+        "Enable Animation",
+        "Enable or disable the animation for the model if it has any"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,8 +66,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
         "Render Playback Information",
-        "If enabled, information about a currently played back session "
-        "recording is rendering to screen"
+        "If enabled, information about a currently played back session recording is "
+        "rendering to screen"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IgnoreRecordedScaleInfo = {

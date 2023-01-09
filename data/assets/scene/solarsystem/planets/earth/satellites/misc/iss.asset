@@ -21,7 +21,6 @@ local iss = {
   Identifier = "ISS",
   Parent = transforms.EarthInertial.Identifier,
   BoundingSphere = 54.5, -- half the width
-  InteractionSphere = 30,
   Transform = {
     Translation = {
       Type = "GPTranslation",

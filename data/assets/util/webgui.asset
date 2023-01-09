@@ -3,7 +3,7 @@ asset.require("./static_server")
 local guiCustomization = asset.require("customization/gui")
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "c87b94d6b44f44f049cf33c3b85cdcf38a8c3c9b"
+local frontendHash = "748c523b158be5a63d6907b054909c1ac53818d0"
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
