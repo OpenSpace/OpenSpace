@@ -24,6 +24,7 @@
 
 #include <openspace/util/factorymanager.h>
 
+#include <openspace/json.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/lightsource.h>
@@ -89,33 +90,22 @@ FactoryManager& FactoryManager::ref() {
 }
 
 std::string FactoryManager::generateJson() const {
-    std::stringstream json;
+    nlohmann::json json;
 
-    json << "[";
     for (const FactoryInfo& factoryInfo : _factories) {
-        json << "{";
-        json << "\"name\": \"" << factoryInfo.name << "\",";
-        json << "\"classes\": [";
+        nlohmann::json factory;
+        factory["name"] = factoryInfo.name;
 
         ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
         const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
-            json << "\"" << c << "\"";
-            if (&c != &registeredClasses.back()) {
-                json << ",";
-            }
+            json["classes"].push_back(c);
         }
-
-        json << "]}";
-        if (&factoryInfo != &_factories.back()) {
-            json << ",";
-        }
+        json.push_back(factory);
     }
 
-    json << "]";
-
     // I did not check the output of this for correctness ---abock
-    return json.str();
+    return json.dump();
 }
 
 }  // namespace openspace
