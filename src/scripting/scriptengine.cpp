@@ -28,7 +28,6 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/json.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/json_helper.h>
 #include <openspace/util/syncbuffer.h>
@@ -87,6 +86,7 @@ namespace {
         using namespace openspace::scripting;
         nlohmann::json function;
         function["name"] = f.name;
+        function["arguments"] = nlohmann::json::array();
 
         for (const LuaLibrary::Function::Argument& arg : f.arguments) {
             nlohmann::json argument;
@@ -454,6 +454,10 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
 }
 
 std::string ScriptEngine::generateJson() const {
+    return "";
+}
+
+nlohmann::json ScriptEngine::generateJsonJson() const {
     ZoneScoped
 
     nlohmann::json json;
@@ -462,8 +466,9 @@ std::string ScriptEngine::generateJson() const {
         using namespace openspace;
         using namespace openspace::scripting;
 
-        json["library"] = l.name;
         nlohmann::json library;
+        library["library"] = l.name;
+        library["subLibraries"] = nlohmann::json::array();
 
         for (const LuaLibrary::Function& f : l.functions) {
             library["functions"].push_back(toJson(f));
@@ -474,8 +479,7 @@ std::string ScriptEngine::generateJson() const {
         }
         json.push_back(library);
     }
-
-    return json.dump();
+    return json;
 }
 
 void ScriptEngine::writeLog(const std::string& script) {

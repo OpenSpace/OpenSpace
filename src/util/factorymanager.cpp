@@ -101,11 +101,30 @@ std::string FactoryManager::generateJson() const {
         for (const std::string& c : registeredClasses) {
             json["classes"].push_back(c);
         }
-        json.push_back(factory);
+        json["data"].push_back(factory);
     }
 
     // I did not check the output of this for correctness ---abock
     return json.dump();
+}
+
+nlohmann::json FactoryManager::generateJsonJson() const {
+    nlohmann::json json;
+
+    for (const FactoryInfo& factoryInfo : _factories) {
+        nlohmann::json factory;
+        factory["name"] = factoryInfo.name;
+
+        ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
+        const std::vector<std::string>& registeredClasses = f->registeredClasses();
+        for (const std::string& c : registeredClasses) {
+            factory["classes"].push_back(c);
+        }
+        json.push_back(factory);
+    }
+
+    // I did not check the output of this for correctness ---abock
+    return json;
 }
 
 }  // namespace openspace

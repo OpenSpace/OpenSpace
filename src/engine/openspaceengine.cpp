@@ -41,6 +41,7 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
@@ -1023,13 +1024,13 @@ void OpenSpaceEngine::writeDocumentation() {
     path = absPath(path).string() + '/';
 
     // Start the async requests as soon as possible so they are finished when we need them
-    std::future<std::string> root = std::async(
-        &properties::PropertyOwner::generateJson,
+    std::future<nlohmann::json> root = std::async(
+        &properties::PropertyOwner::generateJsonJson,
         global::rootPropertyOwner
     );
 
-    std::future<std::string> scene = std::async(
-        &properties::PropertyOwner::generateJson,
+    std::future<nlohmann::json> scene = std::async(
+        &properties::PropertyOwner::generateJsonJson,
         _scene.get()
     );
 
@@ -1038,60 +1039,56 @@ void OpenSpaceEngine::writeDocumentation() {
     DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
     DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
 
-    std::string json = "{\"documentation\":[";
+    nlohmann::json scripting;
+    scripting["name"] = "Scripting";
+    scripting["identifier"] = global::scriptEngine->jsonName();
+    scripting["data"] = global::scriptEngine->generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scripting",
-        global::scriptEngine->jsonName(),
-        global::scriptEngine->generateJson()
-    );
+    nlohmann::json topLevel;
+    topLevel["name"] = "Top Level";
+    topLevel["identifier"] = DocEng.jsonName();
+    topLevel["data"] = DocEng.generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Top Level", DocEng.jsonName(), DocEng.generateJson()
-    );
+    nlohmann::json factory;
+    factory["name"] = "Factory";
+    factory["identifier"] = FactoryManager::ref().jsonName();
+    factory["data"] = FactoryManager::ref().generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Factory", FactoryManager::ref().jsonName(), FactoryManager::ref().generateJson()
-    );
-
-    json += fmt::format(
+    /* t(
         R"({{"name":"{}","identifier":"{}","data":{}}},)",
         "Keybindings",
         global::keybindingManager->jsonName(),
         global::keybindingManager->generateJson()
     );
+    */
 
     SceneLicenseWriter writer;
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scene License Information", writer.jsonName(), writer.generateJson()
-    );
+    nlohmann::json license;
+    license["name"] = "Scene License Information";
+    license["identifier"] = writer.jsonName();
+    license["data"] = writer.generateJsonJson();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}},)",
-        "Scene Properties", "propertylist", root.get()
-    );
+    nlohmann::json sceneProperties;
+    sceneProperties["name"] = "Scene Properties";
+    sceneProperties["identifier"] = "propertylist1";
+    sceneProperties["data"] = root.get();
 
-    json += fmt::format(
-        R"({{"name":"{}","identifier":"{}","data":{}}})",
-        "Scene Graph Information", "propertylist", scene.get()
-    );
+    nlohmann::json sceneGraph;
+    sceneGraph["name"] = "Scene Graph Information";
+    sceneGraph["identifier"] = "propertylist";
+    sceneGraph["data"] = scene.get();
 
-    json += "]}";
+    nlohmann::json documentation;
+    documentation["documentation"].push_back(scripting);
+    documentation["documentation"].push_back(topLevel);
+    documentation["documentation"].push_back(factory);
+    documentation["documentation"].push_back(license);
+    documentation["documentation"].push_back(sceneProperties);
+    documentation["documentation"].push_back(sceneGraph);
 
     std::ofstream out("documentationData.js");
-    out << "export const data = " << json;
+    out << "export const data = " << documentation.dump();
     out.close();
-
-    // Add templates for the JSONs we just registered
-    DocEng.addHandlebarTemplates(global::keybindingManager->templatesToRegister());
-    DocEng.addHandlebarTemplates(writer.templatesToRegister());
-    DocEng.addHandlebarTemplates(global::rootPropertyOwner->templatesToRegister());
-
-    DocEng.writeDocumentationHtml(path, json);
 }
 
 void OpenSpaceEngine::preSynchronization() {

@@ -93,7 +93,7 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
 
     json["name"] = d.name;
     json["id"] = d.id;
-    json["entries"];
+    json["entries"] = nlohmann::json::array();
 
     for (const DocumentationEntry& p : d.entries) {
         nlohmann::json entry;
@@ -143,11 +143,22 @@ std::string DocumentationEngine::generateJson() const {
     nlohmann::json json;
 
     for (const Documentation& d : _documentations) {
-        json.push_back(generateJsonDocumentation(d));
+        json["data"].push_back(generateJsonDocumentation(d));
     }
 
     return json.dump();
 }
+
+nlohmann::json DocumentationEngine::generateJsonJson() const {
+    nlohmann::json json;
+
+    for (const Documentation& d : _documentations) {
+        json.push_back(generateJsonDocumentation(d));
+    }
+
+    return json;
+}
+
 
 void DocumentationEngine::addDocumentation(Documentation documentation) {
     if (documentation.id.empty()) {

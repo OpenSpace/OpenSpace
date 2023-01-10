@@ -27,6 +27,7 @@
 
 #include <openspace/documentation/documentationgenerator.h>
 
+#include <openspace/json.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -293,6 +294,8 @@ public:
 
     // Generate JSON for documentation
     std::string generateJson() const override;
+
+    nlohmann::json generateJsonJson() const;
 
 protected:
     /// The unique identifier of this PropertyOwner

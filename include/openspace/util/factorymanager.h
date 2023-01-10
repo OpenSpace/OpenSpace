@@ -27,6 +27,7 @@
 
 #include <openspace/documentation/documentationgenerator.h>
 
+#include <openspace/json.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/templatefactory.h>
 #include <memory>
@@ -110,6 +111,7 @@ public:
     ghoul::TemplateFactory<T>* factory() const;
 
     std::string generateJson() const override;
+    nlohmann::json generateJsonJson() const;
 
 private:
     /// Singleton member for the Factory Manager

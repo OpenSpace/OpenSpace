@@ -27,6 +27,7 @@
 
 #include <openspace/documentation/documentationgenerator.h>
 
+#include <openspace/json.h>
 #include <vector>
 
 namespace openspace {
@@ -35,6 +36,7 @@ class SceneLicenseWriter : public DocumentationGenerator {
 public:
     SceneLicenseWriter();
     std::string generateJson() const override;
+    nlohmann::json generateJsonJson() const;
 };
 
 } // namespace openspace

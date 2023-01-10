@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/json.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/json_helper.h>
@@ -40,66 +41,34 @@
 namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
 
-    void createJson(openspace::properties::PropertyOwner* owner, std::vector<char>& buf) {
+    nlohmann::json createJson(openspace::properties::PropertyOwner* owner) {
         ZoneScoped
 
         using namespace openspace;
+        nlohmann::json json;
 
-        constexpr std::string_view replStr = R"("{}": "{}")";
+        json["name"] = owner->identifier();
+        json["properties"] = nlohmann::json::array();
+        json["propertyOwners"] = nlohmann::json::array();
 
-        buf.push_back('{');
-        fmt::format_to(std::back_inserter(buf), replStr, "name", owner->identifier());
-        buf.push_back(',');
-
-        constexpr std::string_view propertiesText = "\"properties\": [";
-        buf.insert(buf.end(), propertiesText.begin(), propertiesText.end());
         const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
-            //json << "{";
-            buf.push_back('{');
-            //json << fmt::format(replStr, "id", p->identifier()) << ",";
-            fmt::format_to(std::back_inserter(buf), replStr, "id", p->identifier());
-            buf.push_back(',');
-            //json << fmt::format(replStr, "type", p->className()) << ",";
-            fmt::format_to(std::back_inserter(buf), replStr, "type", p->className());
-            buf.push_back(',');
-
-            fmt::format_to(
-                std::back_inserter(buf),
-                replStr, "fullyQualifiedId", p->fullyQualifiedIdentifier()
-            );
-            buf.push_back(',');
-
-            fmt::format_to(std::back_inserter(buf), replStr, "guiName", p->guiName());
-            buf.push_back(',');
-
-            fmt::format_to(
-                std::back_inserter(buf),
-                replStr, "description", escapedJson(p->description())
-            );
-            buf.push_back('}');
-            if (p != properties.back()) {
-                buf.push_back(',');
-            }
+            nlohmann::json propertyJson;
+            propertyJson["id"] = p->identifier();
+            propertyJson["type"] = p->className();
+            propertyJson["fullyQualifiedId"] = p->fullyQualifiedIdentifier();
+            propertyJson["guiName"] = p->guiName();
+            propertyJson["description"] = p->description();
+            
+            json["properties"].push_back(propertyJson);
         }
-        buf.push_back(']');
-        buf.push_back(',');
 
-        constexpr std::string_view propertyOwnersText = "\"propertyOwners\": [";
-        buf.insert(
-            buf.end(),
-            propertyOwnersText.begin(),
-            propertyOwnersText.end()
-        );
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {
-            createJson(o, buf);
-            if (o != propertyOwners.back()) {
-                buf.push_back(',');
-            }
+            nlohmann::json propertyOwner;
+            json["propertyOwners"].push_back(createJson(o));
         }
-        buf.push_back(']');
-        buf.push_back('}');
+        return json;
     }
 } // namespace
 
@@ -424,17 +393,25 @@ void PropertyOwner::removeTag(const std::string& tag) {
 std::string PropertyOwner::generateJson() const {
     ZoneScoped
 
-    std::vector<char> res;
-    res.reserve(5 * 51024 * 1024); // 5 MB
-    res.push_back('[');
+    nlohmann::json json;
     std::vector<PropertyOwner*> subOwners = propertySubOwners();
     for (PropertyOwner* owner : subOwners) {
-        createJson(owner, res);
-        res.push_back(',');
+        json["data"].push_back(createJson(owner));
     }
-    res.back() = ']';
 
-    return std::string(res.begin(), res.end());
+    return json.dump();
+}
+
+nlohmann::json PropertyOwner::generateJsonJson() const {
+    ZoneScoped
+
+    nlohmann::json json;
+    std::vector<PropertyOwner*> subOwners = propertySubOwners();
+    for (PropertyOwner* owner : subOwners) {
+        json.push_back(createJson(owner));
+    }
+
+    return json;
 }
 
 } // namespace openspace::properties

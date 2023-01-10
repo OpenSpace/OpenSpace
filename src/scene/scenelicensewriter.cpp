@@ -46,6 +46,59 @@ SceneLicenseWriter::SceneLicenseWriter()
     )
 {}
 
+nlohmann::json SceneLicenseWriter::generateJsonJson() const {
+    nlohmann::json json = nlohmann::json::array();
+
+    std::vector<const Asset*> assets =
+        global::openSpaceEngine->assetManager().allAssets();
+
+    int metaTotal = 0;
+    int metaCount = 0;
+    for (const Asset* asset : assets) {
+        std::optional<Asset::MetaInformation> meta = asset->metaInformation();
+        if (!meta.has_value()) {
+            continue;
+        }
+        metaTotal++;
+    }
+
+    if (global::profile->meta.has_value()) {
+        metaTotal++;
+        nlohmann::json metaJson;
+        metaJson["name"] = global::profile->meta->name.value_or("");
+        metaJson["version"] = global::profile->meta->version.value_or("");
+        metaJson["description"] = global::profile->meta->description.value_or("");
+        metaJson["author"] = global::profile->meta->author.value_or("");
+        metaJson["url"] = global::profile->meta->url.value_or("");
+        metaJson["license"] = global::profile->meta->license.value_or("");
+        json.push_back(metaJson);
+    }
+
+    for (const Asset* asset : assets) {
+        std::optional<Asset::MetaInformation> meta = asset->metaInformation();
+
+        if (!meta.has_value()) {
+            continue;
+        }
+
+        constexpr std::string_view replStr = R"("{}": "{}", )";
+        constexpr std::string_view replStr2 = R"("{}": "{}")";
+        nlohmann::json assetJson;
+
+        assetJson["name"] = meta->name;
+        assetJson["version"] = meta->version;
+        assetJson["description"] = meta->description;
+        assetJson["author"] = meta->author;
+        assetJson["url"] = meta->url;
+        assetJson["license"] = meta->license;
+        assetJson["identifiers"] = meta->identifiers;
+        assetJson["path"] = asset->path().string();
+        json.push_back(assetJson);
+    }
+
+    return json;
+}
+
 std::string SceneLicenseWriter::generateJson() const {
     ZoneScoped
 

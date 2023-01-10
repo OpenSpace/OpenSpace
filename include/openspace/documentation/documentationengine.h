@@ -28,6 +28,7 @@
 #include <openspace/documentation/documentationgenerator.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/json.h>
 #include <ghoul/misc/exception.h>
 
 namespace openspace::documentation {
@@ -108,6 +109,8 @@ public:
     void writeDocumentationHtml(const std::string& path, std::string data);
 
     std::string generateJson() const override;
+
+    nlohmann::json generateJsonJson() const;
 
 private:
 
