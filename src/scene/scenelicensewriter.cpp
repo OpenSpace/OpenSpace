@@ -47,7 +47,7 @@ SceneLicenseWriter::SceneLicenseWriter()
 {}
 
 nlohmann::json SceneLicenseWriter::generateJsonJson() const {
-    nlohmann::json json = nlohmann::json::array();
+    nlohmann::json json;
 
     std::vector<const Asset*> assets =
         global::openSpaceEngine->assetManager().allAssets();
@@ -71,8 +71,10 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
         metaJson["author"] = global::profile->meta->author.value_or("");
         metaJson["url"] = global::profile->meta->url.value_or("");
         metaJson["license"] = global::profile->meta->license.value_or("");
-        json.push_back(metaJson);
+        json["OpenSpace"] = metaJson;
     }
+
+    std::map<std::string, nlohmann::json> licenses;
 
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
@@ -93,9 +95,11 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
         assetJson["license"] = meta->license;
         assetJson["identifiers"] = meta->identifiers;
         assetJson["path"] = asset->path().string();
-        json.push_back(assetJson);
-    }
 
+        licenses[meta->license].push_back(assetJson);
+    }
+    json["assetLicenses"] = licenses;
+ 
     return json;
 }
 

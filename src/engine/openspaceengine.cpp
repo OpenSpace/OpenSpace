@@ -1064,7 +1064,7 @@ void OpenSpaceEngine::writeDocumentation() {
 
     SceneLicenseWriter writer;
     nlohmann::json license;
-    license["name"] = "Scene License Information";
+    license["name"] = "License Information";
     license["identifier"] = writer.jsonName();
     license["data"] = writer.generateJsonJson();
 
