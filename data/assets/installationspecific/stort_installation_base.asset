@@ -138,6 +138,5 @@ asset.onInitialize(function ()
   -- Touch settings
   openspace.setPropertyValueSingle("Modules.Touch.TouchMarker.Visibility", false)
   openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier", 2.0)
-  openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.DisableZoom", true)
 
 end)
