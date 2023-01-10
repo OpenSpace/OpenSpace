@@ -28,6 +28,7 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/json.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/json_helper.h>
 #include <openspace/util/syncbuffer.h>
@@ -39,7 +40,6 @@
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
-
 #include "scriptengine_lua.inl"
 
 namespace {
@@ -82,81 +82,24 @@ namespace {
         return result;
     }
 
-    void toJson(const openspace::scripting::LuaLibrary& library, std::stringstream& json)
-    {
-        constexpr std::string_view replStr = R"("{}": "{}", )";
-        constexpr std::string_view replStr2 = R"("{}": "{}")";
-
+    nlohmann::json toJson(const openspace::scripting::LuaLibrary::Function& f) {
         using namespace openspace;
         using namespace openspace::scripting;
+        nlohmann::json function;
+        function["name"] = f.name;
 
-        json << "{";
-        json << fmt::format(replStr, "library", library.name);
-        json << "\"functions\": [";
+        for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+            nlohmann::json argument;
+            argument["name"] = arg.name;
+            argument["type"] = arg.type;
+            argument["defaultValue"] = arg.defaultValue.value_or("");
 
-        for (const LuaLibrary::Function& f : library.functions) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << "\"arguments\": [";
-            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-                json << "{";
-                json << fmt::format(replStr, "name", escapedJson(arg.name));
-                json << fmt::format(replStr, "type", escapedJson(arg.type));
-                json << fmt::format(
-                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
-                );
-                json << "}";
-
-                if (&arg != &f.arguments.back()) {
-                    json << ",";
-                }
-            }
-            json << "],";
-            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
-            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
-            json << "}";
-            if (&f != &library.functions.back() || !library.documentations.empty()) {
-                json << ",";
-            }
+            function["arguments"].push_back(argument);
         }
+        function["returnType"] = f.returnType;
+        function["help"] = f.helpText;
 
-
-        for (const LuaLibrary::Function& f : library.documentations) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << "\"arguments\": [";
-            for (const LuaLibrary::Function::Argument& arg : f.arguments) {
-                json << "{";
-                json << fmt::format(replStr, "name", escapedJson(arg.name));
-                json << fmt::format(replStr, "type", escapedJson(arg.type));
-                json << fmt::format(
-                    replStr2, "defaultValue", escapedJson(arg.defaultValue.value_or(""))
-                );
-                json << "}";
-
-                if (&arg != &f.arguments.back()) {
-                    json << ",";
-                }
-            }
-            json << "],";
-            json << fmt::format(replStr, "returnType", escapedJson(f.returnType));
-            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
-            json << "}";
-            if (&f != &library.documentations.back()) {
-                json << ",";
-            }
-        }
-
-        json << "],";
-
-        json << "\"subLibraries\": [";
-        for (const LuaLibrary& sl : library.subLibraries) {
-            toJson(sl, json);
-            if (&sl != &library.subLibraries.back()) {
-                json << ",";
-            }
-        }
-        json << "]}";
+        return function;
     }
 
 #include "scriptengine_codegen.cpp"
@@ -513,22 +456,26 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
 std::string ScriptEngine::generateJson() const {
     ZoneScoped
 
-    // Create JSON
-    std::stringstream json;
-    json << "[";
+    nlohmann::json json;
 
-    bool first = true;
     for (const LuaLibrary& l : _registeredLibraries) {
-        if (!first) {
-            json << ",";
+        using namespace openspace;
+        using namespace openspace::scripting;
+
+        json["library"] = l.name;
+        nlohmann::json library;
+
+        for (const LuaLibrary::Function& f : l.functions) {
+            library["functions"].push_back(toJson(f));
         }
-        first = false;
 
-        toJson(l, json);
+        for (const LuaLibrary::Function& f : l.documentations) {
+            library["functions"].push_back(toJson(f));
+        }
+        json.push_back(library);
     }
-    json << "]";
 
-    return json.str();
+    return json.dump();
 }
 
 void ScriptEngine::writeLog(const std::string& script) {
