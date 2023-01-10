@@ -27,6 +27,7 @@
 #include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/json.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -87,19 +88,20 @@ DocumentationEngine& DocumentationEngine::ref() {
     return *_instance;
 }
 
-std::string generateJsonDocumentation(const Documentation& d) {
-    std::stringstream result;
-    result << "{";
+nlohmann::json generateJsonDocumentation(const Documentation& d) {
+    nlohmann::json json;
 
-    result << R"("name": ")" << d.name << "\",";
-    result << R"("id": ")" << d.id << "\",";
-    result << R"("entries": [)";
+    json["name"] = d.name;
+    json["id"] = d.id;
+    json["entries"];
+
     for (const DocumentationEntry& p : d.entries) {
-        result << '{';
-        result << R"("key": ")" << p.key << "\",";
-        result << R"("optional": )" << (p.optional ? "true" : "false") << ',';
-        result << R"("type": ")" << p.verifier->type() << "\",";
-        result << R"("documentation": ")" << escapedJson(p.documentation) << "\",";
+        nlohmann::json entry;
+        entry["key"] = p.key;
+        entry["optional"] = p.optional ? true : false;
+        entry["type"] = p.verifier->type();
+        entry["documentation"] = p.documentation;
+
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
 
@@ -112,51 +114,39 @@ std::string generateJsonDocumentation(const Documentation& d) {
             );
 
             if (it == documentations.end()) {
-                result << R"("reference": { "found": false })";
+                entry["reference"]["found"] = false;
             }
             else {
-                result << R"("reference": {)"
-                    << R"("found": true,)"
-                    << R"("name": ")" << it->name << "\","
-                    << R"("identifier": ")" << rv->identifier << '\"'
-                    << '}';
+                nlohmann::json reference;
+                reference["found"] = true;
+                reference["name"] = it->name;
+                reference["identifier"] = rv->identifier;
+
+                entry["reference"] = reference;
             }
         }
         else if (tv) {
-            std::string json = generateJsonDocumentation({ "", "", tv->documentations });
+            nlohmann::json json = generateJsonDocumentation(tv->documentations);
             // We have a TableVerifier, so we need to recurse
-            result << R"("restrictions": )" << json;
+            entry["restrictions"] = json;
         }
         else {
-            result << R"("description": ")" << p.verifier->documentation() << '\"';
+            entry["description"] = p.verifier->documentation();
         }
-        result << '}';
-        if (&p != &d.entries.back()) {
-            result << ", ";
-        }
-
+        json["entries"].push_back(entry);
     }
 
-    result << ']';
-    result << '}';
-
-    return result.str();
+    return json;
 }
 
 std::string DocumentationEngine::generateJson() const {
-    std::stringstream json;
-    json << "[";
+    nlohmann::json json;
 
     for (const Documentation& d : _documentations) {
-        json << generateJsonDocumentation(d);
-        if (&d != &_documentations.back()) {
-            json << ", ";
-        }
+        json.push_back(generateJsonDocumentation(d));
     }
 
-    json << "]";
-
-    return json.str();
+    return json.dump();
 }
 
 void DocumentationEngine::addDocumentation(Documentation documentation) {
