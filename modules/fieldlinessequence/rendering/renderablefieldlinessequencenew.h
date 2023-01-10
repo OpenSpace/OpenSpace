@@ -89,6 +89,10 @@ private:
         // assume timestamp is -1 until status is = Loaded
         double timestamp;
         FieldlinesState state;
+
+        bool operator<(const File& other) const {
+            return timestamp < other.timestamp;
+        }
     };
 
     void definePropertyCallbackFunctions();
@@ -99,14 +103,16 @@ private:
     // line segments
     //bool shouldUpdateColorBuffer();
     //bool shouldUpdateMaskingBuffer();
+    int updateActiveTriggerTimeIndex(const double currentTime);
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexMaskingBuffer();
 
-    void loadFiles(const Parameters& p);
+    void staticallyLoadFiles(const Parameters& p);
 
     std::vector<File> _files;
-    void loadFile(RenderableFieldlinesSequenceNew::File& file);
+    std::vector<File&> _loadedFiles;
+    void loadFile(File& file);
 
     LoadingType _loadingType;
     // path to directory with seed point files

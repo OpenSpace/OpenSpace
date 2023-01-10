@@ -28,6 +28,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -386,7 +387,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     }
 
     if (_loadingType == LoadingType::StaticLoading) {
-        loadFiles(p);
+        staticallyLoadFiles(p);
     }
 
     _extraVars = p.extraVariables.value_or(_extraVars);
@@ -400,7 +401,6 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _maskingQuantity = p.maskingQuantity.value_or(_maskingQuantity);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
-
 
     // Color group
     if (p.colorTablePaths.has_value()) {
@@ -457,7 +457,7 @@ void RenderableFieldlinesSequenceNew::setupDynamicDownloading(const Parameters& 
     );
 }
 
-void RenderableFieldlinesSequenceNew::loadFiles(const Parameters& p) {
+void RenderableFieldlinesSequenceNew::staticallyLoadFiles(const Parameters& p) {
     std::vector<std::string> extraMagVars;
     std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles;
 
@@ -499,6 +499,8 @@ void RenderableFieldlinesSequenceNew::loadFiles(const Parameters& p) {
         }
         if (loadSuccess) {
             file.status = File::FileStatus::Loaded;
+            _loadedFiles.push_back(file);
+            std::sort(_loadedFiles.begin(), _loadedFiles.end());
         }
         else {
             LERROR(fmt::format("Failed to load state from: {}", file.path));
@@ -547,6 +549,65 @@ extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
     return extraMagVars;
 }
 
+std::unordered_map<std::string, std::vector<glm::vec3>>
+extractSeedPointsFromFiles(std::filesystem::path filePath)
+{
+    std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
+
+    if (!std::filesystem::is_directory(filePath)) {
+        LERROR(fmt::format(
+            "The specified seed point directory: '{}' does not exist", filePath
+        ));
+        return outMap;
+    }
+
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& spFile : fs::directory_iterator(filePath)) {
+        std::string seedFilePath = spFile.path().string();
+        if (!spFile.is_regular_file() ||
+            seedFilePath.substr(seedFilePath.find_last_of('.') + 1) != "txt")
+        {
+            continue;
+        }
+
+        std::ifstream seedFile(seedFilePath);
+        if (!seedFile.good()) {
+            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
+            outMap.clear();
+            return {};
+        }
+
+        LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
+        std::string line;
+        std::vector<glm::vec3> outVec;
+        while (std::getline(seedFile, line)) {
+            std::stringstream ss(line);
+            glm::vec3 point;
+            ss >> point.x;
+            ss >> point.y;
+            ss >> point.z;
+            outVec.push_back(std::move(point));
+        }
+
+        if (outVec.empty()) {
+            LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
+            outMap.clear();
+            return {};
+        }
+
+        size_t lastIndex = seedFilePath.find_last_of('.');
+        std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
+        size_t dateAndTimeSeperator = name.find_last_of('_');
+        std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
+        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
+        std::string dateAndTime = date + time;
+
+        // add outVec as value and time stamp as int as key
+        outMap[dateAndTime] = outVec;
+    }
+    return outMap;
+}
+
 void RenderableFieldlinesSequenceNew::initialize() {
     _transferFunction = std::make_unique<TransferFunction>(
         absPath(_colorTablePaths[0]).string()
@@ -561,12 +622,6 @@ void RenderableFieldlinesSequenceNew::initializeGL() {
     );
 
     setupProperties();
-
-
-
-
-
-
 
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -612,11 +667,6 @@ void RenderableFieldlinesSequenceNew::setupProperties() {
     //}
 
     addProperty(_lineWidth);
-
-
-
-
-
 }
 
 void RenderableFieldlinesSequenceNew::definePropertyCallbackFunctions() {
@@ -674,13 +724,6 @@ void RenderableFieldlinesSequenceNew::setModelDependentConstants() {
     _domainR = glm::vec2(0.f, limit * 1.5f);
 }
 
-
-
-
-
-
-
-
 void RenderableFieldlinesSequenceNew::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArrayObject);
     _vertexArrayObject = 0;
@@ -717,6 +760,10 @@ void RenderableFieldlinesSequenceNew::loadFile(File& file) {
     if (_inputFileType == SourceFileType::Osfls) {
         std::thread readFileThread([this, &file, &success]() {
             success = file.state.loadStateFromOsfls(file.path.string());
+            if (success) {
+                file.status = File::FileStatus::Loaded;
+                _loadedFiles.push_back(file);
+            }
         });
     }
 
@@ -746,12 +793,27 @@ bool RenderableFieldlinesSequenceNew::isReady() const {
 }
 
 void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
+    const double currentTime = data.time.j2000Seconds();
+    const double deltaTime = global::timeManager->deltaTime();
+
 
     if (_files[_activeTriggerTimeIndex].status == File::FileStatus::Downloaded) {
         loadFile(_files[_activeTriggerTimeIndex]);
     }
 
-
+    switch (_loadingType) {
+        case LoadingType::StaticLoading:
+            updateStaticLoading();
+            break;
+        case LoadingType::DynamicLoading:
+            updateDynamicLoading();
+            break;
+        case LoadingType::DynamicDownloading:
+            updateDynamicDownloading();
+            break;
+        default:
+            break;
+    }
 
     if (_shouldUpdateColorBuffer) {
         updateVertexColorBuffer();
