@@ -134,9 +134,8 @@ asset.onInitialize(function ()
   openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleBehavior.IdleWaitTime", 10) -- seconds
   openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleBehavior.SpeedFactor", 0.5)
   openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.IdleBehavior.ShouldTriggerWhenIdle", true)
-  
+
   -- Touch settings
   openspace.setPropertyValueSingle("Modules.Touch.TouchMarker.Visibility", false)
-  openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier", 2.0)
 
 end)
