@@ -187,6 +187,15 @@ private:
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
 
+    struct LimitZoomOut : public properties::PropertyOwner {
+        LimitZoomOut();
+
+        properties::BoolProperty isEnabled;
+        properties::FloatProperty maximumAllowedDistance;
+    };
+
+    LimitZoomOut _limitZoomOut;
+
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;

@@ -155,6 +155,20 @@ namespace {
         "meters above the surface"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EnabledMaximumDistanceInfo = {
+        "Enabled",
+        "Enable Maximum Allowed Distance",
+        "Enables or disables that the camera cannot go further away from an object than "
+        "the set maximum allowed distance"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MaximumDistanceInfo = {
+        "MaximumAllowedDistance",
+        "Maximum Allowed Distance",
+        "Limits how far away the camera can get from an object. The distance is given in "
+        "meters above the surface"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo StereoInterpolationTimeInfo =
     {
         "StereoInterpolationTime",
@@ -327,6 +341,15 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     addProperty(dampenInterpolationTime);
 }
 
+OrbitalNavigator::LimitZoomOut::LimitZoomOut()
+    : properties::PropertyOwner({ "LimitZoomOut" })
+    , isEnabled(EnabledMaximumDistanceInfo, false)
+    , maximumAllowedDistance(MaximumDistanceInfo, 0.f, 0.f)
+{
+    addProperty(isEnabled);
+    addProperty(maximumAllowedDistance);
+}
+
 OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner({ "OrbitalNavigator" })
     , _anchor(AnchorInfo)
@@ -466,6 +489,7 @@ OrbitalNavigator::OrbitalNavigator()
 
     addPropertySubOwner(_friction);
     addPropertySubOwner(_idleBehavior);
+    addPropertySubOwner(_limitZoomOut);
 
     _idleBehaviorDampenInterpolator.setTransferFunction(
         ghoul::quadraticEaseInOut<double>
