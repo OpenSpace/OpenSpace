@@ -11,9 +11,11 @@ local cbrState = {
         ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.startOrbiting() .. [[
         ]] .. util.orbitOnArrival() .. [[
+        openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
     ]],
     Exit = [[
         ]] .. util.stopOrbiting() .. [[
+        openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
     ]]
 }
 

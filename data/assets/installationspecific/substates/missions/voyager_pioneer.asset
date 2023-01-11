@@ -105,6 +105,7 @@ local transitions = {
       ]] .. util.enableRoll() .. [[
       ]] .. util.flyToNavState(voyagerPioneerNavigationState) .. [[
       ]] .. util.fadeInNodes(trails) .. [[
+      openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier", 2000.0);
     ]]
   },
   {

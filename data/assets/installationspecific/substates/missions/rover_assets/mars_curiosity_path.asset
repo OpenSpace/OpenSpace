@@ -29,6 +29,7 @@ local Path = {
 local Handle = {
   Identifier = "Mars-Curiosity-Handle",
   Parent = globeIdentifier,
+  InteractionSphere = 10,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",

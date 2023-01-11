@@ -12,6 +12,7 @@ local exoplanetsState = {
         ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.startOrbiting() .. [[
         ]] .. util.interpolateProperty(opacityUri, 1.0, 2) .. [[
+        openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier', 1500);
     ]],
     Exit = [[
         ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[

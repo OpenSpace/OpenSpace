@@ -242,6 +242,7 @@ local cassiniState = {
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier", 10.0);
     ]] .. util.fadeInNodes(trails) .. [[
     ]] .. cassiniScripts .. [[
   ]],
@@ -272,6 +273,7 @@ local huygensState = {
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.Titan.Renderable.Opacity', 1.0, 3.0)
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
     ]] .. util.fadeInNodes({ "TitanTrail", "Titan" }) .. [[
     ]] .. util.fadeInNodes({ "huygensTrail" }) .. [[
     ]] .. huygensScripts .. [[
@@ -283,6 +285,7 @@ local huygensState = {
     ]] .. util.fadeOutNodes({ "huygensTrail" }) .. [[
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 1.0, 3.0)
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 1.0, 3.0)
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
   ]]
 }
 

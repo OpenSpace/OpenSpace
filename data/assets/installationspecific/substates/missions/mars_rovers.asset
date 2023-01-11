@@ -28,6 +28,7 @@ local marsRoversState = {
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
+    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier", 1.2);
   ]],
   Exit = [[
     ]] .. util.stopOrbiting() .. [[
@@ -59,6 +60,7 @@ local curiosityState = {
     ]] .. reduceAmbientIntensity .. [[
     openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", true);
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 10.0);
+    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier", 4000);
     ]] .. util.setOrbitSpeedFactor(0.8) .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
@@ -93,12 +95,14 @@ local perseveranceState = {
     openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Opacity", 1.0, 2.0);
     openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.ForceUpdateData", nil);
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 5.0);
+    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.DisableZoom", true);
     ]] .. util.setOrbitSpeedFactor(0.6) .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
   Exit = [[
     ]] .. resetAmbientIntensity .. [[
     openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", false);
+    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.DisableZoom", false);
     ]] .. util.stopOrbiting() .. [[
     ]] .. util.disableRoll() .. [[
   ]]
