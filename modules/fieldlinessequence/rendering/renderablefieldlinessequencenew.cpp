@@ -365,7 +365,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 
     if (_loadingType == LoadingType::DynamicDownloading) {
-        setupDynamicDownloading(p);
+        setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.baseURL, p.dataURL);
     }
     else {
         ghoul_assert(
@@ -384,10 +384,11 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
             file.timestamp = -1.0;
             _files.push_back(file);
         }
+        computeSequenceEndTime();
     }
 
-    if (_loadingType == LoadingType::StaticLoading) {
-        staticallyLoadFiles(p);
+    if (_loadingType == LoadingType::StaticLoading){
+        staticallyLoadFiles(p.seedPointDirectory, p.tracingVariable);
     }
 
     _extraVars = p.extraVariables.value_or(_extraVars);
@@ -440,30 +441,38 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
 
 }
 
-void RenderableFieldlinesSequenceNew::setupDynamicDownloading(const Parameters& p) {
-    _dataID = p.dataID.value_or(_dataID);
+void RenderableFieldlinesSequenceNew::setupDynamicDownloading(
+                                           const std::optional<int>& dataID,
+                                           const std::optional<int>& numberOfFilesToQueue,
+                                           const std::optional<std::string>& baseURL,
+                                           const std::optional<std::string>& dataURL)
+{
+    _dataID = dataID.value_or(_dataID);
     if (!_dataID) {
         throw ghoul::RuntimeError(
             "If running with dynamic downloading, dataID needs to be specified"
         );
     }
-    _nOfFilesToQueue = p.numberOfFilesToQueue.value_or(_nOfFilesToQueue);
-    _baseURL = p.baseURL.value();
+    _nOfFilesToQueue = numberOfFilesToQueue.value_or(_nOfFilesToQueue);
+    _baseURL = baseURL.value();
     if (_baseURL.empty()) { throw ghoul::RuntimeError("baseURL has to be provided"); }
-    _dataURL = p.dataURL.value();
+    _dataURL = dataURL.value();
     if (_dataURL.empty()) { throw ghoul::RuntimeError("dataURL has to be provided"); }
     _dynamicdownloaderManager = std::make_unique<DynamicDownloaderManager>(
         _dataID, _baseURL, _dataURL, _nOfFilesToQueue
     );
 }
 
-void RenderableFieldlinesSequenceNew::staticallyLoadFiles(const Parameters& p) {
+void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
+                           const std::optional<std::filesystem::path>& seedPointDirectory,
+                           const std::optional<std::string>& tracingVariable)
+{
     std::vector<std::string> extraMagVars;
     std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles;
 
     if (_inputFileType == SourceFileType::Cdf) {
-        _seedPointDirectory = p.seedPointDirectory.value_or(_seedPointDirectory);
-        _tracingVariable = p.tracingVariable.value_or(_tracingVariable);
+        _seedPointDirectory = seedPointDirectory.value_or(_seedPointDirectory);
+        _tracingVariable = tracingVariable.value_or(_tracingVariable);
         extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
         seedsPerFiles = extractSeedPointsFromFiles(_seedPointDirectory);
         if (seedsPerFiles.empty()) {
@@ -751,7 +760,15 @@ void RenderableFieldlinesSequenceNew::deinitializeGL() {
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
+}
 
+void RenderableFieldlinesSequenceNew::computeSequenceEndTime() {
+    if (_loadedFiles.size() > 1) {
+        const double lastTriggerTime = _loadedFiles.back().timestamp;
+        const double sequenceDuration = lastTriggerTime - _loadedFiles[0].timestamp;
+        const double averageStateDuration = sequenceDuration / (_loadedFiles.size() - 1);
+        _sequenceEndTime = lastTriggerTime + averageStateDuration;
+    }
 }
 
 void RenderableFieldlinesSequenceNew::loadFile(File& file) {
@@ -788,14 +805,48 @@ void RenderableFieldlinesSequenceNew::loadFile(File& file) {
 
 }
 
+int RenderableFieldlinesSequenceNew::updateActiveTriggerTimeIndex(const double nowTime) {
+    if (_loadedFiles.empty()) return -1;
+    int index = 0;
+    auto iter = std::upper_bound(
+        _loadedFiles.begin()->timestamp, _loadedFiles.end()->timestamp, nowTime
+    );
+    if (iter != _loadedFiles.end()) {
+        index = static_cast<int>(std::distance(_loadedFiles.begin()->timestamp, iter)) -1;
+    }
+    else {
+        index = static_cast<int>(_loadedFiles.size()) - 1;
+    }
+}
+
 bool RenderableFieldlinesSequenceNew::isReady() const {
     return true; // _shaderProgram != nullptr;
 }
 
+void RenderableFieldlinesSequenceNew::updateStaticLoading(const double currentTime,
+                                                                   const double deltaTime)
+{
+
+}
+void RenderableFieldlinesSequenceNew::updateDynamicLoading(const double currentTime,
+                                                                   const double deltaTime)
+{
+
+}
+void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double currentTime,
+                                                                   const double deltaTime)
+{
+    computeSequenceEndTime();
+}
+
 void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
+    if (_shaderProgram->isDirty()) {
+        _shaderProgram->rebuildFromFile();
+    }
     const double currentTime = data.time.j2000Seconds();
     const double deltaTime = global::timeManager->deltaTime();
 
+    _activeTriggerTimeIndex = updateActiveTriggerTimeIndex(currentTime);
 
     if (_files[_activeTriggerTimeIndex].status == File::FileStatus::Downloaded) {
         loadFile(_files[_activeTriggerTimeIndex]);
@@ -803,13 +854,13 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 
     switch (_loadingType) {
         case LoadingType::StaticLoading:
-            updateStaticLoading();
+            updateStaticLoading(currentTime, deltaTime);
             break;
         case LoadingType::DynamicLoading:
-            updateDynamicLoading();
+            updateDynamicLoading(currentTime, deltaTime);
             break;
         case LoadingType::DynamicDownloading:
-            updateDynamicDownloading();
+            updateDynamicDownloading(currentTime, deltaTime);
             break;
         default:
             break;

@@ -73,6 +73,10 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
+    void updateStaticLoading(const double currentTime, const double deltaTime);
+    void updateDynamicLoading(const double currentTime, const double deltaTime);
+    void updateDynamicDownloading(const double currentTime, const double deltaTime);
+    void computeSequenceEndTime();
 
     static documentation::Documentation Documentation();
 
@@ -98,7 +102,10 @@ private:
     void definePropertyCallbackFunctions();
     void setupProperties();
     void setModelDependentConstants();
-    void setupDynamicDownloading(const Parameters& p);
+    void setupDynamicDownloading(const std::optional<int>& dataID,
+                                 const std::optional<int>& numberOfFiles,
+                                 const std::optional<std::string>& baseURL,
+                                 const std::optional<std::string>& dataURL);
     // True when new state is loaded or user change which quantity used for masking out
     // line segments
     //bool shouldUpdateColorBuffer();
@@ -108,12 +115,14 @@ private:
     void updateVertexColorBuffer();
     void updateVertexMaskingBuffer();
 
-    void staticallyLoadFiles(const Parameters& p);
+    void staticallyLoadFiles(const std::optional<std::filesystem::path>& seed,
+                             const std::optional<std::string>& traceVariable);
 
     std::vector<File> _files;
     std::vector<File&> _loadedFiles;
     void loadFile(File& file);
 
+    // Static Loading on default / if not specified
     LoadingType _loadingType;
     // path to directory with seed point files
     std::filesystem::path _seedPointDirectory;
@@ -123,6 +132,9 @@ private:
     std::vector<std::string> _extraVars;
     // Manual time offset
     double _manualTimeOffset = 0.0;
+    // Estimated end of sequence.
+    // If there's just one state it should never disappear
+    double _sequenceEndTime;
 
     // dataID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
