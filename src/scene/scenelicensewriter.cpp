@@ -98,7 +98,7 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
         assetJson["path"] = asset->path().string();
 
         licenses[meta->license].push_back(assetJson);
-        licenses["name"] = "Asset Licenses";
+        licenses["name"] = "Assets";
     }
     json.push_back(licenses);
  
