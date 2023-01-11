@@ -26,6 +26,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
@@ -37,8 +38,9 @@
 #include <ghoul/misc/easing.h>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
-
 #include <cmath>
+
+#include "orbitalnavigator_lua.inl"
 
 namespace {
     constexpr std::string_view _loggerCat = "OrbitalNavigator";
@@ -889,6 +891,10 @@ void OrbitalNavigator::updatePreviousStateVariables() {
     updatePreviousAimState();
 }
 
+void OrbitalNavigator::setMinimumAllowedDistance(double distance) {
+    _minimumAllowedDistance = distance;
+}
+
 void OrbitalNavigator::startRetargetAnchor() {
     if (!_anchorNode) {
         return;
@@ -1717,6 +1723,15 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime,
     // Also apply the rotation to the global rotation, so the camera up vector is
     // rotated around the axis as well
     globalRotation = spinRotation * globalRotation;
+}
+
+scripting::LuaLibrary OrbitalNavigator::luaLibrary() {
+    return {
+        "orbitalnavigation",
+        {
+            codegen::lua::SetRelativeMinDistance
+        }
+    };
 }
 
 } // namespace openspace::interaction
