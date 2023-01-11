@@ -1040,7 +1040,7 @@ void OpenSpaceEngine::writeDocumentation() {
     DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
 
     nlohmann::json scripting;
-    scripting["name"] = "Scripting";
+    scripting["name"] = "Scripting API";
     scripting["identifier"] = global::scriptEngine->jsonName();
     scripting["data"] = global::scriptEngine->generateJsonJson();
 
@@ -1059,7 +1059,7 @@ void OpenSpaceEngine::writeDocumentation() {
 
     SceneLicenseWriter writer;
     nlohmann::json license;
-    license["name"] = "License Information";
+    license["name"] = "Licenses";
     license["identifier"] = writer.jsonName();
     license["data"] = writer.generateJsonJson();
 
