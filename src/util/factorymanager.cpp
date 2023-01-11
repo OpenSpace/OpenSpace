@@ -172,9 +172,11 @@ nlohmann::json FactoryManager::generateJsonJson() const {
 
     for (const FactoryInfo& factoryInfo : _factories) {
         nlohmann::json factory;
+        factory["name"] = factoryInfo.name;
+        factory["identifier"] = "category" + factoryInfo.name;
 
         ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
-
+        // Add documentation about base class
         auto factoryDoc = std::find_if(
             docs.begin(),
             docs.end(),
@@ -183,14 +185,17 @@ nlohmann::json FactoryManager::generateJsonJson() const {
             });
         if (factoryDoc != docs.end()) {
             nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
-            factory = documentation;
+            factory["data"].push_back(documentation);
             // Remove documentation from list check at the end if all docs got put in
             docs.erase(factoryDoc);          }
         else {
-            factory["name"] = factoryInfo.name;
-            factory["identifier"] = factoryInfo.name;
+            nlohmann::json documentation;
+            documentation["name"] = factoryInfo.name;
+            documentation["identifier"] = factoryInfo.name;
+            factory["data"].push_back(documentation);
         }
 
+        // Add documentation about derived classes
         const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
             auto found = std::find_if(
