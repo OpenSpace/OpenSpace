@@ -65,13 +65,14 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
     if (global::profile->meta.has_value()) {
         metaTotal++;
         nlohmann::json metaJson;
-        metaJson["name"] = global::profile->meta->name.value_or("");
-        metaJson["version"] = global::profile->meta->version.value_or("");
-        metaJson["description"] = global::profile->meta->description.value_or("");
-        metaJson["author"] = global::profile->meta->author.value_or("");
-        metaJson["url"] = global::profile->meta->url.value_or("");
-        metaJson["license"] = global::profile->meta->license.value_or("");
-        json["OpenSpace"] = metaJson;
+        metaJson["Name"] = "OpenSpace";
+        metaJson["Profile Name"] = global::profile->meta->name.value_or("");
+        metaJson["Version"] = global::profile->meta->version.value_or("");
+        metaJson["Description"] = global::profile->meta->description.value_or("");
+        metaJson["Author"] = global::profile->meta->author.value_or("");
+        metaJson["Url"] = global::profile->meta->url.value_or("");
+        metaJson["License"] = global::profile->meta->license.value_or("");
+        json.push_back(metaJson);
     }
 
     std::map<std::string, nlohmann::json> licenses;
@@ -97,8 +98,9 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
         assetJson["path"] = asset->path().string();
 
         licenses[meta->license].push_back(assetJson);
+        licenses["name"] = "assetLicenses";
     }
-    json["assetLicenses"] = licenses;
+    json.push_back(licenses);
  
     return json;
 }
