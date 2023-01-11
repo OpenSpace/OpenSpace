@@ -1044,13 +1044,8 @@ void OpenSpaceEngine::writeDocumentation() {
     scripting["identifier"] = global::scriptEngine->jsonName();
     scripting["data"] = global::scriptEngine->generateJsonJson();
 
-    nlohmann::json topLevel;
-    topLevel["name"] = "Top Level";
-    topLevel["identifier"] = DocEng.jsonName();
-    topLevel["data"] = DocEng.generateJsonJson();
-
     nlohmann::json factory;
-    factory["name"] = "Factory";
+    factory["name"] = "Classes";
     factory["identifier"] = FactoryManager::ref().jsonName();
     factory["data"] = FactoryManager::ref().generateJsonJson();
 
@@ -1069,18 +1064,17 @@ void OpenSpaceEngine::writeDocumentation() {
     license["data"] = writer.generateJsonJson();
 
     nlohmann::json sceneProperties;
-    sceneProperties["name"] = "Scene Properties";
-    sceneProperties["identifier"] = "propertylist1";
+    sceneProperties["name"] = "Settings";
+    sceneProperties["identifier"] = "settings";
     sceneProperties["data"] = root.get();
 
     nlohmann::json sceneGraph;
-    sceneGraph["name"] = "Scene Graph Information";
-    sceneGraph["identifier"] = "propertylist";
+    sceneGraph["name"] = "Scene";
+    sceneGraph["identifier"] = "scene";
     sceneGraph["data"] = scene.get();
 
     nlohmann::json documentation;
     documentation["documentation"].push_back(scripting);
-    documentation["documentation"].push_back(topLevel);
     documentation["documentation"].push_back(factory);
     documentation["documentation"].push_back(license);
     documentation["documentation"].push_back(sceneProperties);

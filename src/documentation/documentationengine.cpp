@@ -93,7 +93,7 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
 
     json["name"] = d.name;
     json["id"] = d.id;
-    json["entries"] = nlohmann::json::array();
+    json["properties"] = nlohmann::json::array();
 
     for (const DocumentationEntry& p : d.entries) {
         nlohmann::json entry;
@@ -133,7 +133,7 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
         else {
             entry["description"] = p.verifier->documentation();
         }
-        json["entries"].push_back(entry);
+        json["properties"].push_back(entry);
     }
 
     return json;
