@@ -51,7 +51,7 @@ public:
      * \param userConfigPath A string containing the file path of the user config
      *                       directory where all window configs are stored
      */
-    SgctEdit(QWidget* parent, std::string userConfigPath);
+    SgctEdit(QWidget* parent, const std::string& userConfigPath);
 
     /**
      * Constructor for SgctEdit class, the underlying class for the full window
@@ -61,14 +61,12 @@ public:
      *                imported window cluster configuration.
      * \param configName The name of the window configuration filename
      * \param configBasePath The path to the folder where default config files reside
-     * \param userConfigBasePath The path to the folder where the user config files reside
      * \param configsReadOnly vector list of window config names that are read-only and
      *                         must not be overwritten
      * \param parent Pointer to parent Qt widget
      */
     SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
-        std::string configBasePath, std::string userConfigBasePath,
-        const std::vector<std::string>& configsReadOnly,
+        std::string configBasePath, const std::vector<std::string>& configsReadOnly,
         QWidget* parent);
 
     /**
@@ -102,6 +100,8 @@ private:
         QColor(0x44, 0xAF, 0x69),
         QColor(0xF8, 0x33, 0x3C)
     };
+    std::string _configurationFilename;
+    const std::vector<std::string> _readOnlyConfigs;
 
     QBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;

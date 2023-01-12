@@ -658,41 +658,30 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     }
 }
 
-void LauncherWindow::openWindowEditor() {
-    SgctEdit editor(this, _userConfigPath);
-
-    int ret = editor.exec();
-    if (ret == QDialog::DialogCode::Accepted) {
-        sgct::config::Cluster cluster = editor.cluster();
-
-        std::filesystem::path savePath = editor.saveFilename();
-        saveWindowConfig(this, savePath, cluster);
-        // Truncate path to convert this back to path relative to _userConfigPath
-        std::string p = savePath.string().substr(_userConfigPath.size());
-        populateWindowConfigsList(p);
-    }
-}
-
 void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinCfg) {
     std::string saveWindowCfgPath = isUserWinCfg? _userConfigPath : _configPath;
-    int ret = 0;
+    int ret = QDialog::DialogCode::Rejected;
     sgct::config::Cluster preview;
 
     if (winCfg.empty()) {
         SgctEdit editor(this, saveWindowCfgPath);
         ret = editor.exec();
     }
-    if (!winCfg.empty()) {
-        preview = sgct::readConfig(winCfg, true);
-        if (preview.configGeneratorVersion.has_value()) {
-            if (preview.configGeneratorVersion.value()
-                >= SgctEdit::_configGenMinimumSupportedVersion)
-            {
+    else {
+        sgct::config::GeneratorVersion previewGenVersion =
+            sgct::readJsonGeneratorVersion(winCfg);
+        if (previewGenVersion.versionCheck(minimumVersion)) {
+            preview = sgct::readConfig(winCfg);
+            std::string configToValidate = stringifyJsonFile(winCfg);
+            bool passesSchemaValidation = sgct::validateConfigAgainstSchema(
+                configToValidate,
+                _configPath(absPath(globalConfig.pathTokens.at("CONFIG")).string()
+                            + '/schema/sgcteditor.schema.json')
+            );
+            if (passesSchemaValidation) {
                 SgctEdit editor(
                     preview,
                     winCfg,
-                    _configPath,
-                    _userConfigPath,
                     saveWindowCfgPath,
                     _readOnlyWindowConfigs,
                     this
@@ -701,14 +690,12 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
             }
         }
     }
-
     if (ret == QDialog::DialogCode::Accepted) {
         sgct::config::Cluster cluster = editor.cluster();
-
         std::filesystem::path savePath = editor.saveFilename();
         saveWindowConfig(this, savePath, cluster);
         // Truncate path to convert this back to path relative to _userConfigPath
-        std::string p = savePath.string().substr(_userConfigPath.size());
+        std::string p = savePath.string().substr(saveWindowCfgPath.size());
         populateWindowConfigsList(p);
     }
 }
@@ -735,7 +722,7 @@ std::string LauncherWindow::selectedWindowConfig() const {
     }
 }
 
-bool LauncherWinow::isUserConfigSelected() const {
+bool LauncherWindow::isUserConfigSelected() const {
     int selectedIndex = _windowConfigBox->currentIndex();
     return (selectedIndex < _userConfigCount);
 }

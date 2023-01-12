@@ -67,13 +67,13 @@ namespace {
     }
 } // namespace
 
-SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
+SgctEdit::SgctEdit(QWidget* parent, const std::string& userConfigPath)
     : QDialog(parent)
-    , _userConfigPath(std::move(userConfigPath))
+    , _userConfigPath(userConfigPath)
 {
     QList<QScreen*> screens = qApp->screens();
     setWindowTitle("Window Configuration Editor");
-    
+
     int nScreensManaged = std::min(static_cast<int>(screens.length()), 4);
     std::vector<QRect> monitorSizes;
     for (int s = 0; s < nScreensManaged; ++s) {
@@ -88,8 +88,19 @@ SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
             static_cast<int>(actualHeight * screens[s]->devicePixelRatio())
         );
     }
-
     createWidgets(monitorSizes);
+}
+
+SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
+                   std::string configBasePath,
+                   const std::vector<std::string>& configsReadOnly, QWidget* parent)
+    : QDialog(parent)
+    , _cluster(cluster)
+    , _userConfigPath(configBasePath)
+    , _configurationFilename(configName)
+    , _readOnlyConfigs(configsReadOnly)
+{
+
 }
 
 void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes) {
