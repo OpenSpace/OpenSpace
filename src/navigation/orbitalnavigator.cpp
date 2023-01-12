@@ -47,7 +47,6 @@ namespace {
 
     constexpr double AngleEpsilon = 1E-7;
     constexpr double DistanceRatioAimThreshold = 1E-4;
-    constexpr float GigaParsecs140InMeters = 4.3199492e+27;
 
     constexpr openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -347,9 +346,9 @@ OrbitalNavigator::LimitZoomOut::LimitZoomOut()
     , isEnabled(EnabledMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
-        GigaParsecs140InMeters,
+        4E+27,
         0.f,
-        GigaParsecs140InMeters
+        4E+27
     )
 {
     addProperty(isEnabled);
