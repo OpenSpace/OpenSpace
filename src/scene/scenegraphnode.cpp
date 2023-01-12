@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,8 +81,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "VisibilityDistance",
-        "The distace in world coordinates between node and camera "
-        "at which the screenspace object will become visible",
+        "The distace in world coordinates between node and camera at which the "
+        "screenspace object will become visible",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -101,10 +101,9 @@ namespace {
         "InteractionSphere",
         "Interaction Sphere",
         "The minimum radius that the camera is allowed to get close to this scene graph "
-        "node. This value is "
-        "only used as an override to the bounding sphere calculated by the Renderable, "
-        "if present. If this value is -1, the Renderable's computed interaction sphere "
-        "is used",
+        "node. This value is only used as an override to the bounding sphere calculated "
+        "by the Renderable, if present. If this value is -1, the Renderable's computed "
+        "interaction sphere is used",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -125,32 +124,31 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
         "Gui Path",
-        "This is the path for the scene graph node in the gui "
-        "example: /Solar System/Planets/Earth",
+        "This is the path for the scene graph node in the gui example: "
+        "/Solar System/Planets/Earth",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
         "GuiName",
         "Gui Name",
-        "This is the name for the scene graph node in the gui "
-        "example: Earth",
+        "This is the name for the scene graph node in the gui. Example: Earth",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
         "Gui Description",
-        "This is the description for the scene graph node to be shown in the gui "
-        "example: Earth is a special place",
+        "This is the description for the scene graph node to be shown in the gui. "
+        "Example: Earth is a special place",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiHiddenInfo = {
         "GuiHidden",
         "Gui Hidden",
-        "This represents if the scene graph node should be shown in the gui "
-        "example: false",
+        "This represents if the scene graph node should be shown in the gui. "
+        "Example: false",
         openspace::properties::Property::Visibility::Hidden
     };
 

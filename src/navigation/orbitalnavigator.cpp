@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,16 +50,15 @@ namespace {
         "Anchor",
         "Anchor",
         "The name of the scene graph node that is the origin of the camera interaction. "
-        "The camera follows, orbits and dollies towards this node. "
-        "Any scene graph node can be the anchor node"
+        "The camera follows, orbits and dollies towards this node. Any scene graph node "
+        "can be the anchor node"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AimInfo = {
         "Aim",
         "Aim",
-        "The name of the scene graph node that is the aim of the camera. "
-        "The camera direction is relative to the vector from the camera position "
-        "to this node"
+        "The name of the scene graph node that is the aim of the camera. The camera "
+        "direction is relative to the vector from the camera position to this node"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RetargetAnchorInfo = {
@@ -158,8 +157,8 @@ namespace {
     {
         "StereoInterpolationTime",
         "Stereo Interpolation Time",
-        "The time to interpolate to a new stereoscopic depth "
-        "when the anchor node is changed, in seconds"
+        "The time to interpolate to a new stereoscopic depth when the anchor node is "
+        "changed, in seconds"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -167,8 +166,8 @@ namespace {
     {
         "RetargetAnchorInterpolationTime",
         "Retarget Interpolation Time",
-        "The time to interpolate the camera rotation "
-        "when the anchor or aim node is changed, in seconds"
+        "The time to interpolate the camera rotation when the anchor or aim node is "
+        "changed, in seconds"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FollowRotationInterpTimeInfo =
@@ -201,8 +200,8 @@ namespace {
     {
         "StaticViewScaleExponent",
         "Static View Scale Exponent",
-        "Statically scale the world by 10^StaticViewScaleExponent. "
-        "Only used if UseAdaptiveStereoscopicDepthInfo is set to false"
+        "Statically scale the world by 10^StaticViewScaleExponent. Only used if "
+        "UseAdaptiveStereoscopicDepthInfo is set to false"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -210,9 +209,9 @@ namespace {
     {
         "StereoscopicDepthOfFocusSurface",
         "Stereoscopic Depth of the Surface in Focus",
-        "Set the stereoscopically perceived distance (in meters) to the closest "
-        "point out of the surface of the anchor and the center of the aim node. "
-        "Only used if UseAdaptiveStereoscopicDepthInfo is set to true"
+        "Set the stereoscopically perceived distance (in meters) to the closest point "
+        "out of the surface of the anchor and the center of the aim node. Only used if "
+        "UseAdaptiveStereoscopicDepthInfo is set to true"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
@@ -234,8 +233,8 @@ namespace {
     {
         "ShouldTriggerWhenIdle",
         "Should Trigger When Idle",
-        "If true, the chosen idle behavior will trigger automatically after "
-        "a certain time (see 'IdleWaitTime' property)"
+        "If true, the chosen idle behavior will trigger automatically after a certain "
+        "time (see 'IdleWaitTime' property)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleWaitTimeInfo = {

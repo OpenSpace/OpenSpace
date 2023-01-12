@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -243,7 +243,7 @@ namespace {
         "Zoom In Limit",
         "The minimum distance from the anchor that you are allowed to navigate to. "
         "Its purpose is to limit zooming in on a node. If this value is not set it "
-        "defaults to the surface of the current anchor. "
+        "defaults to the surface of the current anchor."
     };
 
     // Compute coefficient of decay based on current frametime; if frametime has been
@@ -286,7 +286,7 @@ TouchInteraction::TouchInteraction()
         0.01f,
         0.25f
     )
-    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
+    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 0.01f, 10000.0f)
     , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, std::numeric_limits<double>::max())
     , _zoomOutLimit(
         ZoomOutLimitInfo,

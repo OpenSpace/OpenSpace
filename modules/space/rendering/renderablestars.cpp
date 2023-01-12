@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -242,9 +242,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
         "MagnitudeExponent",
         "Magnitude Exponent",
-        "Adjust star magnitude by 10^MagnitudeExponent. "
-        "Stars closer than this distance are given full opacity. "
-        "Farther away, stars dim proportionally to the logarithm of their distance"
+        "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than this distance "
+        "are given full opacity. Farther away, stars dim proportionally to the "
+        "logarithm of their distance"
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderMethodOptionInfo = {

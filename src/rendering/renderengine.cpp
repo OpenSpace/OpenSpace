@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -111,7 +111,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
         "ShowCamera",
         "Shows information about the current camera state, such as friction",
-        "This value determines whether the information about the current camrea state is "
+        "This value determines whether the information about the current camera state is "
         "shown on the screen"
     };
 
@@ -174,31 +174,31 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScreenSpaceRotationInfo = {
         "ScreenSpaceRotation",
         "Screen Space Rotation",
-        "Applies a rotation to all screen space renderables. "
-        "Defined using pitch, yaw, roll in radians"
+        "Applies a rotation to all screen space renderables. Defined using pitch, yaw, "
+        "roll in radians"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
         "MasterRotation",
         "Master Rotation",
-        "Applies a view rotation for only the master node, defined using "
-        "pitch, yaw, roll in radians. This can be used to compensate the master view "
-        "direction for tilted display systems in clustered immersive environments"
+        "Applies a view rotation for only the master node, defined using pitch, yaw, "
+        "roll in radians.This can be used to compensate the master view direction for "
+        "tilted display systems in clustered immersive environments"
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
        "DisableHDRPipeline",
        "Disable HDR Rendering",
-       "If this value is enabled, the rendering will disable the HDR color handling "
-       "and the LDR color pipeline will be used. Be aware of possible over exposure "
-       "in the final colors"
+       "If this value is enabled, the rendering will disable the HDR color handling and "
+       "the LDR color pipeline will be used. Be aware of possible over exposure in the "
+        "final colors"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
         "HDRExposure",
         "HDR Exposure",
-        "This value determines the amount of light per unit area reaching the "
-        "equivalent of an electronic image sensor"
+        "This value determines the amount of light per unit area reaching the equivalent "
+        "of an electronic image sensor"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {

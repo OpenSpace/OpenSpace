@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace {
         "TouchActive",
         "True if we want to use touch input as 3d navigation",
         "Use this if we want to turn on or off Touch input navigation. "
-        "Disabling this will reset all current touch inputs to the navigation. "
+        "Disabling this will reset all current touch inputs to the navigation."
     };
 }
 namespace openspace {

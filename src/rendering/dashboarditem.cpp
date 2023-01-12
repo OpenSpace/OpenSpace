@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,25 +40,11 @@ namespace {
         "If this value is set to 'true' this dashboard item is shown in the dashboard"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
-        "Identifier",
-        "Identifier",
-        ""
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
-        "GuiName",
-        "Gui Name",
-        ""
-    };
-
     struct [[codegen::Dictionary(DashboardItem)]] Parameters {
         std::string type;
 
-        // [[codegen::verbatim(IdentifierInfo.description)]]
         std::string identifier;
 
-        // [[codegen::verbatim(GuiNameInfo.description)]]
         std::optional<std::string> guiName;
     };
 #include "dashboarditem_codegen.cpp"
