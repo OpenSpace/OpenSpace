@@ -1795,7 +1795,9 @@ scripting::LuaLibrary OrbitalNavigator::luaLibrary() {
     return {
         "orbitalnavigation",
         {
-            codegen::lua::SetRelativeMinDistance
+            codegen::lua::SetRelativeMinDistance,
+            codegen::lua::SetRelativeMaxDistance,
+            codegen::lua::EnableZoomOutLimit
         }
     };
 }

@@ -25,9 +25,9 @@
 namespace {
 
 /**
-* Set Minimum allowed distance to a multiplier of the interaction sphere of the focus node
+* Set minimum allowed distance to a multiplier of the interaction sphere of the focus node
 */
-[[codegen::luawrap]] void setRelativeMinDistance(double multiplier) {
+[[codegen::luawrap]] void setRelativeMinDistance(float multiplier) {
     using namespace openspace;
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
@@ -37,6 +37,33 @@ namespace {
     double is = node->interactionSphere();
     global::navigationHandler->orbitalNavigator().setMinimumAllowedDistance(
         is * multiplier
+    );
+}
+
+/**
+* Set maximum allowed distance to a multiplier of the interaction sphere of the focus node
+*/
+[[codegen::luawrap]] void setRelativeMaxDistance(float multiplier) {
+    using namespace openspace;
+    const SceneGraphNode* node = global::navigationHandler->anchorNode();
+    if (!node) {
+        throw ghoul::lua::LuaError("Could not determine current focus node");
+    }
+
+    double is = node->interactionSphere();
+    global::navigationHandler->orbitalNavigator().setMaximumAllowedDistance(
+        is * multiplier
+    );
+}
+
+/**
+* Set maximum allowed distance to a multiplier of the interaction sphere of the focus node
+*/
+[[codegen::luawrap]] void enableZoomOutLimit(bool value) {
+    using namespace openspace;
+
+    global::navigationHandler->orbitalNavigator().setEnableZoomOutLimit(
+        value
     );
 }
 
