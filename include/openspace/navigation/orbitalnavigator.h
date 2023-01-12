@@ -112,7 +112,10 @@ public:
     float retargetInterpolationTime() const;
     void setRetargetInterpolationTime(float durationInSeconds);
     void updatePreviousStateVariables();
-    void setMinimumAllowedDistance(double distance);
+
+    void setMinimumAllowedDistance(float distance);
+    void setMaximumAllowedDistance(double distance);
+    void setEnableZoomOutLimit(bool value);
 
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
@@ -191,7 +194,7 @@ private:
         LimitZoomOut();
 
         properties::BoolProperty isEnabled;
-        properties::FloatProperty maximumAllowedDistance;
+        properties::DoubleProperty maximumAllowedDistance;
     };
 
     LimitZoomOut _limitZoomOut;
@@ -351,7 +354,8 @@ private:
      */
     glm::dvec3 pushToSurface(double minHeightAboveGround,
         const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
-        const SurfacePositionHandle& positionHandle) const;
+        const SurfacePositionHandle& positionHandle,
+        std::optional<double> maxHeightAboveGround) const;
 
     /**
      * Interpolates between rotationDiff and a 0 rotation.

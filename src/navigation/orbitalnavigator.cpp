@@ -344,7 +344,12 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 OrbitalNavigator::LimitZoomOut::LimitZoomOut()
     : properties::PropertyOwner({ "LimitZoomOut" })
     , isEnabled(EnabledMaximumDistanceInfo, false)
-    , maximumAllowedDistance(MaximumDistanceInfo, 0.f, 0.f)
+    , maximumAllowedDistance(
+        MaximumDistanceInfo,
+        std::numeric_limits<double>::max(),
+        0.f,
+        std::numeric_limits<double>::max()
+    )
 {
     addProperty(isEnabled);
     addProperty(maximumAllowedDistance);
@@ -728,11 +733,14 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     // Perform the vertical movements based on user input
     pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
+    std::optional<double> maxHeight = _limitZoomOut.isEnabled ?
+        _limitZoomOut.maximumAllowedDistance : std::optional<double>();
     pose.position = pushToSurface(
-        _minimumAllowedDistance,
+        static_cast<double>(_minimumAllowedDistance),
         pose.position,
         anchorPos,
-        posHandle
+        posHandle,
+        maxHeight
     );
 
     pose.rotation = composeCameraRotation(camRot);
@@ -915,8 +923,26 @@ void OrbitalNavigator::updatePreviousStateVariables() {
     updatePreviousAimState();
 }
 
-void OrbitalNavigator::setMinimumAllowedDistance(double distance) {
+void OrbitalNavigator::setMinimumAllowedDistance(float distance) {
+    if (_limitZoomOut.isEnabled && distance > _limitZoomOut.maximumAllowedDistance) {
+        LWARNING("Setting minumum allowed distance larger than maximum allowed distance");
+    }
+
     _minimumAllowedDistance = distance;
+}
+
+void OrbitalNavigator::setMaximumAllowedDistance(double distance) {
+    if (_minimumAllowedDistance > distance) {
+        LWARNING(
+            "Setting maximum allowed distance smaller than minumum allowed distance"
+        );
+    }
+
+    _limitZoomOut.maximumAllowedDistance = distance;
+}
+
+void OrbitalNavigator::setEnableZoomOutLimit(bool value) {
+    _limitZoomOut.isEnabled = value;
 }
 
 void OrbitalNavigator::startRetargetAnchor() {
@@ -1506,8 +1532,14 @@ glm::dquat OrbitalNavigator::rotateHorizontally(double deltaTime,
 glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
                                            const glm::dvec3& cameraPosition,
                                            const glm::dvec3& objectPosition,
-                                        const SurfacePositionHandle& positionHandle) const
+                                           const SurfacePositionHandle& positionHandle,
+                                         std::optional<double> maxHeightAboveGround) const
 {
+    if (maxHeightAboveGround.has_value() && minHeightAboveGround > *maxHeightAboveGround)
+    {
+        LWARNING("Minimum allowed distance is larger than maximum allowed distance");
+    }
+
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
 
     const glm::dvec3 posDiff = cameraPosition - objectPosition;
@@ -1524,8 +1556,18 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
     const double surfaceToCameraSigned = glm::length(actualSurfaceToCamera) *
         glm::sign(dot(actualSurfaceToCamera, referenceSurfaceOutDirection));
 
-    return cameraPosition + referenceSurfaceOutDirection *
-        glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
+    // Adjustment for if the camera is inside the min distance
+    double adjustment = glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
+
+    // Adjustment for if the camera is outside the max distance
+    // Only apply if the min adjustment not already applied
+    if (maxHeightAboveGround.has_value() &&
+        adjustment < std::numeric_limits<double>::epsilon())
+    {
+        adjustment = glm::min(*maxHeightAboveGround - surfaceToCameraSigned, 0.0);
+    }
+
+    return cameraPosition + referenceSurfaceOutDirection * adjustment;
 }
 
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
