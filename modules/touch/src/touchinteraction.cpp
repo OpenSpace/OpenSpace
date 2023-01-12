@@ -181,10 +181,17 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-    ZoomBoundarySphereMultiplierInfo = {
-        "ZoomBoundarySphereMultiplier",
-        "Multiplies a node's boundary sphere by this in order to limit zoom & prevent "
+    ZoomInBoundarySphereMultiplierInfo = {
+        "ZoomInBoundarySphereMultiplier",
+        "Multiplies a node's boundary sphere by this in order to limit zoom in & prevent "
         "surface collision",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+    ZoomOutBoundarySphereMultiplierInfo = {
+        "ZoomOutBoundarySphereMultiplier",
+        "Multiplies a node's boundary sphere by this in order to limit zoom out",
         "" // @TODO Missing documentation
     };
 
@@ -286,13 +293,19 @@ TouchInteraction::TouchInteraction()
         0.01f,
         0.25f
     )
-    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 0.01f, 10000.0f)
-    , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, std::numeric_limits<double>::max())
+    , _zoomInBoundarySphereMultiplier(ZoomInBoundarySphereMultiplierInfo, 1.001f, 0.01f, 4e+27)
+    , _zoomOutBoundarySphereMultiplier(
+        ZoomOutBoundarySphereMultiplierInfo,
+        4e+27,
+        1.f,
+        4e+27
+    )
+    , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, 4e+27)
     , _zoomOutLimit(
         ZoomOutLimitInfo,
-        std::numeric_limits<double>::max(),
+        4e+27,
         1000.0,
-        std::numeric_limits<double>::max()
+        4e+27
     )
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
@@ -336,7 +349,8 @@ TouchInteraction::TouchInteraction()
     addProperty(_zoomSensitivityExponential);
     addProperty(_zoomSensitivityProportionalDist);
     addProperty(_zoomSensitivityDistanceThreshold);
-    addProperty(_zoomBoundarySphereMultiplier);
+    addProperty(_zoomInBoundarySphereMultiplier);
+    addProperty(_zoomOutBoundarySphereMultiplier);
     addProperty(_zoomInLimit);
     addProperty(_zoomOutLimit);
     addProperty(_constTimeDecay_secs);
@@ -351,6 +365,11 @@ TouchInteraction::TouchInteraction()
 #ifdef TOUCH_DEBUG_PROPERTIES
     addPropertySubOwner(_debugProperties);
 #endif
+
+    _zoomInBoundarySphereMultiplier.setExponent(20.f);
+    _zoomOutBoundarySphereMultiplier.setExponent(20.f);
+    _zoomInLimit.setExponent(20.f);
+    _zoomOutLimit.setExponent(20.f);
 
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
@@ -1070,7 +1089,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
             // This is a rough estimate of the node surface
             // If nobody has set another zoom in limit, use this as default zoom in bounds
-            double zoomInBounds = interactionSphere * _zoomBoundarySphereMultiplier;
+            double zoomInBounds = interactionSphere * _zoomInBoundarySphereMultiplier;
             bool isZoomInLimitSet = (_zoomInLimit.value() >= 0.0);
 
             if (isZoomInLimitSet && _zoomInLimit.value() < zoomInBounds) {
@@ -1096,11 +1115,16 @@ void TouchInteraction::step(double dt, bool directTouch) {
                 }
             }
 
+            double zoomOutBounds = std::min(
+                interactionSphere *_zoomOutBoundarySphereMultiplier,
+                _zoomOutLimit.value()
+            );
+
             // Make sure zoom in limit is not larger than zoom out limit
-            if (zoomInBounds > _zoomOutLimit.value()) {
+            if (zoomInBounds > zoomOutBounds) {
                LWARNING(fmt::format(
                    "{}: Zoom In Limit should be smaller than Zoom Out Limit",
-                    _loggerCat, _zoomOutLimit.value()
+                    _loggerCat, zoomOutBounds
                ));
             }
             const double currentPosDistance = length(centerToCamera);
@@ -1130,9 +1154,9 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
             // Possible with other navigations performed outside touch interaction
             const bool currentPosViolatingZoomOutLimit =
-                (currentPosDistance >= _zoomOutLimit);
+                (currentPosDistance >= zoomOutBounds);
             const bool willNewPositionViolateZoomOutLimit =
-                (newPosDistance >= _zoomOutLimit);
+                (newPosDistance >= zoomOutBounds);
             bool willNewPositionViolateZoomInLimit =
                 (newPosDistance < zoomInBounds);
             bool willNewPositionViolateDirection =
@@ -1148,7 +1172,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
 #ifdef TOUCH_DEBUG_PROPERTIES
                 LINFOC("", fmt::format(
                     "{}: You are outside zoom out {} limit, only zoom in allowed",
-                    _loggerCat, _zoomOutLimit.value()));
+                    _loggerCat, zoomOutBounds));
 #endif
                 // Only allow zooming in if you are outside the zoom out limit
                 if (newPosDistance < currentPosDistance) {

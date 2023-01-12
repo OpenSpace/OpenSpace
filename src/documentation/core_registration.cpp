@@ -91,7 +91,6 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(interaction::ActionManager::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
-    engine.addLibrary(interaction::OrbitalNavigator::luaLibrary());
     engine.addLibrary(interaction::PathNavigator::luaLibrary());
     engine.addLibrary(interaction::SessionRecording::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
