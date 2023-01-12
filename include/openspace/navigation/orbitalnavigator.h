@@ -50,6 +50,8 @@ namespace openspace {
     struct SurfacePositionHandle;
 } // namespace
 
+namespace openspace::scripting { struct LuaLibrary; }
+
 namespace openspace::interaction {
 
 class MouseInputState;
@@ -111,6 +113,10 @@ public:
     void setRetargetInterpolationTime(float durationInSeconds);
     void updatePreviousStateVariables();
 
+    void setMinimumAllowedDistance(float distance);
+    void setMaximumAllowedDistance(double distance);
+    void setEnableZoomOutLimit(bool value);
+
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
 
@@ -131,6 +137,12 @@ public:
 
     glm::dvec3 anchorNodeToCameraVector() const;
     glm::quat anchorNodeToCameraRotation() const;
+
+    /**
+    * \return The Lua library that contains all Lua functions available to affect the
+    * orbital navigation
+    */
+    static scripting::LuaLibrary luaLibrary();
 
 private:
     struct CameraRotationDecomposition {
@@ -177,6 +189,15 @@ private:
     properties::BoolProperty _followAnchorNodeRotation;
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
+
+    struct LimitZoomOut : public properties::PropertyOwner {
+        LimitZoomOut();
+
+        properties::BoolProperty isEnabled;
+        properties::FloatProperty maximumAllowedDistance;
+    };
+
+    LimitZoomOut _limitZoomOut;
 
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
@@ -333,7 +354,8 @@ private:
      */
     glm::dvec3 pushToSurface(double minHeightAboveGround,
         const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
-        const SurfacePositionHandle& positionHandle) const;
+        const SurfacePositionHandle& positionHandle,
+        std::optional<double> maxHeightAboveGround) const;
 
     /**
      * Interpolates between rotationDiff and a 0 rotation.
