@@ -194,7 +194,7 @@ private:
         LimitZoomOut();
 
         properties::BoolProperty isEnabled;
-        properties::DoubleProperty maximumAllowedDistance;
+        properties::FloatProperty maximumAllowedDistance;
     };
 
     LimitZoomOut _limitZoomOut;

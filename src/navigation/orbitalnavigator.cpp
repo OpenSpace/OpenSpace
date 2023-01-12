@@ -47,6 +47,7 @@ namespace {
 
     constexpr double AngleEpsilon = 1E-7;
     constexpr double DistanceRatioAimThreshold = 1E-4;
+    constexpr float GigaParsecs140InMeters = 4.3199492e+27;
 
     constexpr openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -346,13 +347,14 @@ OrbitalNavigator::LimitZoomOut::LimitZoomOut()
     , isEnabled(EnabledMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
-        std::numeric_limits<double>::max(),
+        GigaParsecs140InMeters,
         0.f,
-        std::numeric_limits<double>::max()
+        GigaParsecs140InMeters
     )
 {
     addProperty(isEnabled);
     addProperty(maximumAllowedDistance);
+    maximumAllowedDistance.setExponent(20.f);
 }
 
 OrbitalNavigator::OrbitalNavigator()
@@ -734,7 +736,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Perform the vertical movements based on user input
     pose.position = translateVertically(deltaTime, pose.position, anchorPos, posHandle);
     std::optional<double> maxHeight = _limitZoomOut.isEnabled ?
-        _limitZoomOut.maximumAllowedDistance : std::optional<double>();
+        static_cast<double>(_limitZoomOut.maximumAllowedDistance) : std::optional<double>();
     pose.position = pushToSurface(
         static_cast<double>(_minimumAllowedDistance),
         pose.position,
