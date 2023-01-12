@@ -50,6 +50,8 @@ namespace openspace {
     struct SurfacePositionHandle;
 } // namespace
 
+namespace openspace::scripting { struct LuaLibrary; }
+
 namespace openspace::interaction {
 
 class MouseInputState;
@@ -111,6 +113,9 @@ public:
     void setRetargetInterpolationTime(float durationInSeconds);
     void updatePreviousStateVariables();
 
+    void setMinimumAllowedDistance(float distance);
+    void setMaximumAllowedDistance(double distance);
+
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
 
@@ -131,6 +136,12 @@ public:
 
     glm::dvec3 anchorNodeToCameraVector() const;
     glm::quat anchorNodeToCameraRotation() const;
+
+    /**
+    * \return The Lua library that contains all Lua functions available to affect the
+    * orbital navigation
+    */
+    static scripting::LuaLibrary luaLibrary();
 
 private:
     struct CameraRotationDecomposition {

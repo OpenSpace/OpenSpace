@@ -56,17 +56,6 @@ namespace {
     );
 }
 
-/**
-* Set maximum allowed distance to a multiplier of the interaction sphere of the focus node
-*/
-[[codegen::luawrap]] void enableZoomOutLimit(bool value) {
-    using namespace openspace;
-
-    global::navigationHandler->orbitalNavigator().setEnableZoomOutLimit(
-        value
-    );
-}
-
 #include "orbitalnavigator_lua_codegen.cpp"
 
 } // namespace
