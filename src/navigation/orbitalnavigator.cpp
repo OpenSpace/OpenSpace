@@ -40,8 +40,6 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <cmath>
 
-#include "orbitalnavigator_lua.inl"
-
 namespace {
     constexpr std::string_view _loggerCat = "OrbitalNavigator";
 
@@ -924,28 +922,6 @@ void OrbitalNavigator::updatePreviousStateVariables() {
     updatePreviousAimState();
 }
 
-void OrbitalNavigator::setMinimumAllowedDistance(float distance) {
-    if (_limitZoomOut.isEnabled && distance > _limitZoomOut.maximumAllowedDistance) {
-        LWARNING("Setting minumum allowed distance larger than maximum allowed distance");
-    }
-
-    _minimumAllowedDistance = distance;
-}
-
-void OrbitalNavigator::setMaximumAllowedDistance(double distance) {
-    if (_minimumAllowedDistance > distance) {
-        LWARNING(
-            "Setting maximum allowed distance smaller than minumum allowed distance"
-        );
-    }
-
-    _limitZoomOut.maximumAllowedDistance = distance;
-}
-
-void OrbitalNavigator::setEnableZoomOutLimit(bool value) {
-    _limitZoomOut.isEnabled = value;
-}
-
 void OrbitalNavigator::startRetargetAnchor() {
     if (!_anchorNode) {
         return;
@@ -1790,17 +1766,6 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime,
     // Also apply the rotation to the global rotation, so the camera up vector is
     // rotated around the axis as well
     globalRotation = spinRotation * globalRotation;
-}
-
-scripting::LuaLibrary OrbitalNavigator::luaLibrary() {
-    return {
-        "orbitalnavigation",
-        {
-            codegen::lua::SetRelativeMinDistance,
-            codegen::lua::SetRelativeMaxDistance,
-            codegen::lua::EnableZoomOutLimit
-        }
-    };
 }
 
 } // namespace openspace::interaction
