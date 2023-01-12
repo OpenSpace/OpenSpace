@@ -369,7 +369,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     }
     else {
         ghoul_assert(
-            !p.sourceFolder.has_value(),
+            p.sourceFolder.has_value(),
             "sourceFolder not specified though it should not be able to get here"
         );
         std::filesystem::path path = p.sourceFolder.value();
@@ -733,6 +733,26 @@ void RenderableFieldlinesSequenceNew::setModelDependentConstants() {
     _domainR = glm::vec2(0.f, limit * 1.5f);
 }
 
+const double extractTriggerTimeFromOsfls(std::string filePath) {
+    // number of  characters in filename (excluding '.osfls')
+    constexpr int FilenameSize = 23;
+    // size(".osfls")
+    constexpr int ExtSize = 6;
+    const size_t strLength = filePath.size();
+    // Extract the filename from the path (without extension)
+    std::string timeString = filePath.substr(
+        strLength - FilenameSize - ExtSize,
+        FilenameSize - 1
+    );
+    // Ensure the separators are correct
+    timeString.replace(4, 1, "-");
+    timeString.replace(7, 1, "-");
+    timeString.replace(13, 1, ":");
+    timeString.replace(16, 1, ":");
+    timeString.replace(19, 1, ".");
+    return Time::convertTime(timeString);
+}
+
 void RenderableFieldlinesSequenceNew::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArrayObject);
     _vertexArrayObject = 0;
@@ -804,19 +824,38 @@ void RenderableFieldlinesSequenceNew::loadFile(File& file) {
     //}
 
 }
+std::vector<RenderableFieldlinesSequenceNew::File>::iterator
+RenderableFieldlinesSequenceNew::insertToFilesInOrder(File& file) {
+    auto iter = std::upper_bound(_files.begin(), _files.end(), file.timestamp);
+    auto iterToInserted = _files.insert(iter, std::move(file));
+    return iterToInserted;
+}
 
-int RenderableFieldlinesSequenceNew::updateActiveTriggerTimeIndex(const double nowTime) {
+int RenderableFieldlinesSequenceNew::updateActiveIndexForLoaded(const double nowTime) {
     if (_loadedFiles.empty()) return -1;
     int index = 0;
-    auto iter = std::upper_bound(
-        _loadedFiles.begin()->timestamp, _loadedFiles.end()->timestamp, nowTime
-    );
+    auto iter = std::upper_bound(_loadedFiles.begin(), _loadedFiles.end(), nowTime);
     if (iter != _loadedFiles.end()) {
-        index = static_cast<int>(std::distance(_loadedFiles.begin()->timestamp, iter)) -1;
+        index = static_cast<int>(std::distance(_loadedFiles.begin(), iter)) -1;
     }
     else {
         index = static_cast<int>(_loadedFiles.size()) - 1;
     }
+    _activeFile = *iter;
+    return index;
+}
+
+int RenderableFieldlinesSequenceNew::updateActiveIndexForFiles(const double nowTime) {
+    if (_files.empty()) return -1;
+    int index = 0;
+    auto iter = std::upper_bound(_files.begin(), _files.end(), nowTime);
+    if (iter != _files.end()) {
+        index = static_cast<int>(std::distance(_files.begin(), iter)) -1;
+    }
+    else {
+        index = static_cast<int>(_loadedFiles.size()) - 1;
+    }
+    return index;
 }
 
 bool RenderableFieldlinesSequenceNew::isReady() const {
@@ -836,7 +875,29 @@ void RenderableFieldlinesSequenceNew::updateDynamicLoading(const double currentT
 void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double currentTime,
                                                                    const double deltaTime)
 {
-    computeSequenceEndTime();
+    _dynamicdownloaderManager->update(currentTime, deltaTime);
+    const std::vector<std::filesystem::path>& filesToRead =
+        _dynamicdownloaderManager->downloadedFiles();
+    for (std::filesystem::path filePath : filesToRead) {
+        File newFile;
+        newFile.path = filePath;
+        newFile.status = File::FileStatus::Downloaded;
+        //TODO Elon, if other than osfls, check for file typ and extract timestamp correct
+        const double time = extractTriggerTimeFromOsfls(filePath.filename().string());
+        newFile.timestamp = time;
+
+
+        auto inserted = insertToFilesInOrder(newFile);
+        // should not work to tamper with newFile after moved into _files?
+        // ghoul_assert(newFile, "after inserting into _files, newFile should be moved and maybe not even accessable?");
+        // newFile.timestamp = 666.0;
+
+        auto iter = std::upper_bound(_filesToLoad.begin(), _filesToLoad.end(), time);
+        _filesToLoad.insert(iter, *inserted);
+    }
+
+
+
 }
 
 void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
@@ -845,12 +906,6 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
     }
     const double currentTime = data.time.j2000Seconds();
     const double deltaTime = global::timeManager->deltaTime();
-
-    _activeTriggerTimeIndex = updateActiveTriggerTimeIndex(currentTime);
-
-    if (_files[_activeTriggerTimeIndex].status == File::FileStatus::Downloaded) {
-        loadFile(_files[_activeTriggerTimeIndex]);
-    }
 
     switch (_loadingType) {
         case LoadingType::StaticLoading:
@@ -866,6 +921,12 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
             break;
     }
 
+    _activeIndexForLoaded = updateActiveIndexForLoaded(currentTime);
+    if (_activeIndexForLoaded == -1) return;
+    if (_loadingType == LoadingType::DynamicDownloading) {
+        computeSequenceEndTime();
+    }
+
     if (_shouldUpdateColorBuffer) {
         updateVertexColorBuffer();
     }
@@ -876,7 +937,7 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 }
 
 void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTasks&) {
-    if (_states.empty()) {
+    if (_loadedFiles.empty()) {
         return;
     }
     _shaderProgram->activate();
