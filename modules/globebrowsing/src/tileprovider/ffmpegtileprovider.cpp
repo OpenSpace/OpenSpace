@@ -532,7 +532,11 @@ void FfmpegTileProvider::internalInitialize() {
     if (!checkMpvError(result)) {
         LERROR("Could not initialize mpv");
         return;
-    }
+    }    
+    mpv_set_option_string(_mpvHandle, "terminal", "yes");
+    mpv_set_option_string(_mpvHandle, "msg-level", "all=v");
+    mpv_request_log_messages(_mpvHandle, "debug");
+    
     // Request log messages with level "info" or higher.
     // They are received as MPV_EVENT_LOG_MESSAGE.
     mpv_request_log_messages(_mpvHandle, "info");
