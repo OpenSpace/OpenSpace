@@ -6,6 +6,7 @@ local long = 226.2
 local OlympusMonsPosition = {
   Identifier = "OlympusMonsPosition",
   Parent = mars.Mars.Identifier,
+  InteractionSphere = 25000,
   Transform = {
     Translation = {
         Type = "GlobeTranslation",

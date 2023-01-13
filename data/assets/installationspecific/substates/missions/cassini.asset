@@ -242,7 +242,7 @@ local cassiniState = {
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', false)
-    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier", 10.0);
+    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomInBoundarySphereMultiplier", 10.0);
     ]] .. util.fadeInNodes(trails) .. [[
     ]] .. cassiniScripts .. [[
   ]],

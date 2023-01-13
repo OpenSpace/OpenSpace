@@ -98,14 +98,14 @@ local transitions = {
   {
     From = "Home",
     To = "VoyagerPioneer",
-    Action = [[ 
+    Action = [[
       ]] .. util.setTime(today) .. [[
       ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
       ]] .. util.orbitConstantLatitudeOnArrival() .. [[
       ]] .. util.enableRoll() .. [[
       ]] .. util.flyToNavState(voyagerPioneerNavigationState) .. [[
       ]] .. util.fadeInNodes(trails) .. [[
-      openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomBoundarySphereMultiplier", 2000.0);
+      openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomInBoundarySphereMultiplier", 2000.0);
     ]]
   },
   {

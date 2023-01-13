@@ -16,10 +16,13 @@ local homeState = {
     ]] .. util.startOrbiting() .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
     ]] .. util.enableRoll() .. [[
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoomOut.Enabled", false)
+    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
   ]],
   Exit = [[
       ]] .. util.stopOrbiting() .. [[
       ]] .. util.disableRoll() .. [[
+      openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
     ]]
 }
 
