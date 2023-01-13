@@ -150,6 +150,10 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
 Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
 
+    if (!_isInitialized) {
+        return Tile();
+    }
+
     // Look for tile in cache
     cache::ProviderTileKey key = { tileIndex, _prevVideoTime }; // TODO: Improve caching with a better id
     cache::MemoryAwareTileCache* tileCache =
@@ -576,6 +580,36 @@ void FfmpegTileProvider::internalInitialize() {
 
     //Observe video parameters
     mpv_observe_property(_mpvHandle, 0, "video-params", MPV_FORMAT_NODE);
+
+    // Print meta data
+    mpv_node node;
+    mpv_get_property(_mpvHandle, "metadata", MPV_FORMAT_NODE, &node);
+    if (node.format == MPV_FORMAT_NODE_MAP) {
+        for (int n = 0; n < node.u.list->num; n++) {
+            if (node.u.list->values[n].format == MPV_FORMAT_STRING) {
+                LINFO(node.u.list->values[n].u.string);
+            }
+        }
+    }
+    else {
+        LWARNING("No meta data could be read");
+    }
+
+    // Get resolution of video
+    int64_t width, height = 0;
+    result = mpv_get_property(_mpvHandle, "width", MPV_FORMAT_INT64, &width);
+    int result2 = mpv_get_property(_mpvHandle, "height", MPV_FORMAT_INT64, &height);
+    if (!checkMpvError(result) || !checkMpvError(result2))
+    {
+        LWARNING("Could not load video resolution");
+    }
+
+    if (width > 0 && height > 0) {
+        _resolution = { width, height };
+    }
+    else {
+        LWARNING("Invalid video resolution");
+    }
 
     //Create FBO to render video into
     createFBO(_resolution.x, _resolution.y);

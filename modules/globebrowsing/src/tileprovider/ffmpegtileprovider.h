@@ -86,10 +86,10 @@ private:
     glm::ivec2 _resolution = { 2048, 1024 };
 
     // libmpv
-    mpv_handle* _mpvHandle;
-    mpv_render_context* _mpvRenderContext;
-    GLuint _fbo = 0;
+    mpv_handle* _mpvHandle = nullptr;
+    mpv_render_context* _mpvRenderContext = nullptr;
     ghoul::opengl::Texture* _frameTexture = nullptr;
+    GLuint _fbo = 0;
     TileTextureInitData::HashKey _frameTextureHashKey;
 };
 
