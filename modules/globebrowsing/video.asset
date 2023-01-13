@@ -1,6 +1,6 @@
 local layer = {
   Identifier = "TestVideo",
-  File = "C:/Users/ylvaselling/Downloads/equirectangular-projection-testmovie02.mp4",
+  File = "C:/Users/ylvaselling/Documents/Work/Testmovies/video.mp4",
   StartTime = '2022 09 03 21:00:00',
   EndTime = '2022 10 05 21:00:00',
   Name = "Test Video",
