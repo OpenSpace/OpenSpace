@@ -476,6 +476,13 @@ void FfmpegTileProvider::handleMpvEvents() {
                 }
                 break;
             }
+            case MPV_EVENT_LOG_MESSAGE: {
+                struct mpv_event_log_message* msg = (struct mpv_event_log_message*)event->data;
+                std::stringstream ss;
+                ss << "[" << msg->prefix << "] " << msg->level << ": " << msg->text;
+                LINFO(ss.str());
+                break;
+            }
             default: {
                 // Ignore uninteresting or unknown events.
                 break;
@@ -526,6 +533,9 @@ void FfmpegTileProvider::internalInitialize() {
         LERROR("Could not initialize mpv");
         return;
     }
+    // Request log messages with level "info" or higher.
+    // They are received as MPV_EVENT_LOG_MESSAGE.
+    mpv_request_log_messages(_mpvHandle, "info");
 
     // Set mpv parameters to render using openGL
     mpv_opengl_init_params glInitParams{ getOpenGLProcAddress, nullptr};
