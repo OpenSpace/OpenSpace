@@ -1,0 +1,71 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Bock"
+  given-names: "Alexander"
+  orcid: "https://orcid.org/0000-0002-2849-6146"
+- family-names: "Axelsson"
+  given-names: "Emil"
+- family-names: "Costa"
+  given-names: "Jonathas"
+  orcid: "https://orcid.org/0000-0002-5008-5685"
+- family-names: "Payne"
+  given-names: "Gene"
+  orcid: "https://orcid.org/0000-0001-8022-4781"
+- family-names: "Acinapura"
+  given-names: "Micah"
+- family-names: "Trakinski"
+  given-names: "Vivian"
+- family-names: "Emmart"
+  given-names: "Carter"
+- family-names: "Silva"
+  given-names: "Claudio"
+  orcid: "https://orcid.org/0000-0003-2452-2295"
+- family-names: "Hansen"
+  given-names: "Charles"
+  orcid: "https://orcid.org/0000-0002-8480-2152"
+- family-names: "Ynnerman"
+  given-names: "Anders"
+  orcid: "https://orcid.org/0000-0002-9466-9826"
+title: "OpenSpace"
+version: 0.18.2
+date-released: 2022-12-24
+url: "https://github.com/OpenSpace/OpenSpace"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Bock"
+    given-names: "Alexander"
+    orcid: "https://orcid.org/0000-0002-2849-6146"
+  - family-names: "Axelsson"
+    given-names: "Emil"
+  - family-names: "Costa"
+    given-names: "Jonathas"
+    orcid: "https://orcid.org/0000-0002-5008-5685"
+  - family-names: "Payne"
+    given-names: "Gene"
+    orcid: "https://orcid.org/0000-0001-8022-4781"
+  - family-names: "Acinapura"
+    given-names: "Micah"
+  - family-names: "Trakinski"
+    given-names: "Vivian"
+  - family-names: "Emmart"
+    given-names: "Carter"
+  - family-names: "Silva"
+    given-names: "Claudio"
+    orcid: "https://orcid.org/0000-0003-2452-2295"
+  - family-names: "Hansen"
+    given-names: "Charles"
+    orcid: "https://orcid.org/0000-0002-8480-2152"
+  - family-names: "Ynnerman"
+    given-names: "Anders"
+    orcid: "https://orcid.org/0000-0002-9466-9826"
+  doi: "10.1109/TVCG.2019.2934259"
+  journal: "IEEE Transactions on Visualization and Computer Graphics
+  month: 1
+  start: 633
+  end: 642
+  title: "OpenSpace: A System for Astrographics"
+  issue: 1
+  volume: 26
+  year: 2020
