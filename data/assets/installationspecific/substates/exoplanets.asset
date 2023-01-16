@@ -6,17 +6,19 @@ local flyHome = asset.require('./../fly_home_alternatives')
 ----------------------------------------------------------------
 local opacityUri = "Scene.Exoplanets.Renderable.Opacity"
 
+-- No zoom, no camera path to home to reset afterwards. Want to hide that the stars are not aligned with the rings.
 local exoplanetsState = {
     Identifier = "Exoplanets",
     Enter = [[
         ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.startOrbiting() .. [[
         ]] .. util.interpolateProperty(opacityUri, 1.0, 2) .. [[
-        openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.ZoomInBoundarySphereMultiplier', 1500);
+        openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
     ]],
     Exit = [[
         ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[
         ]] .. util.stopOrbiting() .. [[
+        openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
     ]]
 }
 

@@ -29,7 +29,6 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-10days.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', true)" ..
-    "openspace.pathnavigation.zoomToDistance(]] .. tostring(orbitInsertionDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(864000)" .. -- 10 days per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
@@ -44,12 +43,6 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
-  )
-
-  -- Zoom in after orbital insertion
-  openspace.scriptScheduler.loadScheduledScript(
-    "2004-11-01T00:00:00.000", -- 5 months after
-    "openspace.pathnavigation.zoomToDistance(]] .. tostring(primaryDistance) .. [[)"
   )
 
   -- Focus on Saturn again
@@ -67,7 +60,6 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('Scene.primaryMission.Renderable.Enabled', false)" ..
     "openspace.setPropertyValueSingle('Scene.equinoxMission.Renderable.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-dagjamningsuppdraget.png' .. [[')" ..
-    "openspace.pathnavigation.zoomToDistance(]] .. tostring(equinoxDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(864000)" .. -- 10 days per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
@@ -82,7 +74,6 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('Scene.solsticeMission.Renderable.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-solstandsuppdraget.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-15days.png' .. [[')" ..
-    "openspace.pathnavigation.zoomToDistance(]] .. tostring(solsticeDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(1314871)" .. -- 15 days per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
@@ -106,7 +97,6 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('Scene.grandFinale.Renderable.Enabled', true)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-storafinalen.png' .. [[')" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-2days.png' .. [[')" ..
-    "openspace.pathnavigation.zoomToDistance(]] .. tostring(grandFinaleDistance) .. [[)" ..
     "openspace.time.interpolateDeltaTime(172800)" .. -- 2 Days  per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
@@ -242,7 +232,6 @@ local cassiniState = {
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', false)
-    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomInBoundarySphereMultiplier", 10.0);
     ]] .. util.fadeInNodes(trails) .. [[
     ]] .. cassiniScripts .. [[
   ]],
@@ -262,6 +251,7 @@ local cassiniState = {
   ]]
 }
 
+-- No zoom, scheduled scripts
 local huygensState = {
   Identifier = "Huygens",
   Enter = [[

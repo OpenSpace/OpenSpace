@@ -28,7 +28,6 @@ local marsRoversState = {
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
-    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomInBoundarySphereMultiplier", 1.2);
   ]],
   Exit = [[
     ]] .. util.stopOrbiting() .. [[
@@ -60,7 +59,6 @@ local curiosityState = {
     ]] .. reduceAmbientIntensity .. [[
     openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", true);
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 10.0);
-    openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.ZoomInBoundarySphereMultiplier", 4000);
     ]] .. util.setOrbitSpeedFactor(0.8) .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
@@ -86,6 +84,7 @@ local perseverance_TiltedNavState_Path = [[{
   Pitch = -0.000264
 }]]
 
+-- No zoom, scheduled scripts
 local perseveranceState = {
   Identifier = "Perseverance",
   Enter = [[

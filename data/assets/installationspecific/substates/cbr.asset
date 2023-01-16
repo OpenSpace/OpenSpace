@@ -5,6 +5,7 @@ local flyHome = asset.require('./../fly_home_alternatives')
 -- STATES
 ----------------------------------------------------------------
 
+-- No zoom, can "zoom" to predetermined distances using the buttons on the webpage
 local cbrState = {
     Identifier = "CBR",
     Enter = [[

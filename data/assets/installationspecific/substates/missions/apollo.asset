@@ -163,7 +163,6 @@ local apolloMainState = {
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
     ]] .. util.fadeInNodes(insignias) .. [[
-    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.ZoomInBoundarySphereMultiplier', 1.2);
   ]],
   Exit = [[
     ]] .. util.stopOrbiting() .. [[
@@ -171,6 +170,7 @@ local apolloMainState = {
   ]]
 }
 
+-- No zoom, scheduled scripts
 local apollo8State = {
   Identifier = "Apollo8",
   Enter = [[
@@ -181,7 +181,7 @@ local apollo8State = {
   ]],
   Exit = [[
     openspace.scriptScheduler.clear()
-    openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)
+    openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false);
     openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', false);
     ]] .. util.fadeOutNodes({ "Apollo8EarthBarycenterTrail" }) .. [[
     ]] .. util.fadeInNodes({ "ISS_trail", "ISSModel" }) .. [[
@@ -194,7 +194,6 @@ local apollo11State = {
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true);
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true);
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 20.11);
-    openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.ZoomInBoundarySphereMultiplier', 1.3);
     ]] .. util.fadeInNodes({ "Apollo11LemTrail" }) .. [[
     ]] .. util.setOrbitSpeedFactor(0.8) .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
