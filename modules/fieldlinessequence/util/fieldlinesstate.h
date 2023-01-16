@@ -35,10 +35,13 @@ namespace openspace {
 
 class FieldlinesState {
 public:
+    FieldlinesState() = default;
+
     void convertLatLonToCartesian(float scale = 1.f);
     void scalePositions(float scale);
 
     bool loadStateFromOsfls(const std::string& pathToOsflsFile);
+    static FieldlinesState createStateFromOsfls(const std::string& pathToSoflsFile);
     void saveStateToOsfls(const std::string& pathToOsflsFile);
 
     bool loadStateFromJson(const std::string& pathToJsonFile, fls::Model model,

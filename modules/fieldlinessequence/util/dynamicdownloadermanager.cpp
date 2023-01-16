@@ -437,9 +437,12 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
 // 1. When initializing add the already cached files to the _availableData list as downloaded
 //
 // 2. OnChange functions for if a different dataID is selected - reinitialize things
+//     note: can there be different id for other models other than wsa. If that is the
+//     case, it wouldnt make sense to change id, and therefor dataset, for the same
+//     renderable. If they are all the same model, it could work.
 //
 // 3. add functionality for if the data is not a sequence,
-// but just a few random files where order does not matter
+//     but just a few random files where order does not matter?
 //
 // 4. Rename folder for where files are being downloaded to
 //
@@ -449,9 +452,13 @@ void DynamicDownloaderManager::update(const double time, const double deltaTime)
 //
 // 7. ultimet test: test with different data
 //
-// 8. optamize the closestFileToTime function
+// 8. optamize the closestFileToNow function
 //
 // 9. tracy
+//
+// 10. maybe make a copy of the once  that gets returned with downloadedFiles() so that
+//     the originals can be removed with clearDownloaded() before returning out of
+//     downloadedFiles()
 //
 
 }

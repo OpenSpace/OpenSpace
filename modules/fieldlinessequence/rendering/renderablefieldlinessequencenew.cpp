@@ -222,7 +222,7 @@ namespace {
 
         // choose type of loading:
         //0: static loading and static downloading
-        //1: dynamic loading but static downloading
+        //1: dynamic loading and static downloading
         //2: dynamic loading and dynamic downloading
         enum class [[codegen::map(openspace::RenderableFieldlinesSequenceNew::LoadingType)]] LoadingType {
             StaticLoading = 0,
@@ -325,9 +325,9 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _inputFileType = codegen::map<openspace::RenderableFieldlinesSequenceNew::SourceFileType>(p.inputFileType);
+    _inputFileType = codegen::map<SourceFileType>(p.inputFileType);
     if (p.loadingType.has_value()) {
-        _loadingType = codegen::map<openspace::RenderableFieldlinesSequenceNew::LoadingType>(p.loadingType);
+        _loadingType = codegen::map<LoadingType>(*p.loadingType);
     }
     else {
         _loadingType = LoadingType::StaticLoading;
@@ -351,7 +351,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     }
 
     if (p.simulationModel.has_value()) {
-        _model = codegen::map<openspace::fls::Model>(p.simulationModel);
+        _model = codegen::map<openspace::fls::Model>(*p.simulationModel);
     }
     else {
         _model = fls::Model::Invalid;
@@ -412,7 +412,7 @@ RenderableFieldlinesSequenceNew::RenderableFieldlinesSequenceNew(
     _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
     if (p.colorMethod.has_value()) {
         _colorMethod = static_cast<int>(
-            codegen::map<openspace::RenderableFieldlinesSequenceNew::ColorMethod>(p.colorMethod)
+            codegen::map<openspace::RenderableFieldlinesSequenceNew::ColorMethod>(*p.colorMethod)
         );
     }
     else {
@@ -508,13 +508,12 @@ void RenderableFieldlinesSequenceNew::staticallyLoadFiles(
         }
         if (loadSuccess) {
             file.status = File::FileStatus::Loaded;
-            _loadedFiles.push_back(file);
-            std::sort(_loadedFiles.begin(), _loadedFiles.end());
         }
         else {
             LERROR(fmt::format("Failed to load state from: {}", file.path));
         }
     }
+    std::sort(_files.begin(), _files.end());
 }
 
 std::vector<std::string>
@@ -783,23 +782,25 @@ void RenderableFieldlinesSequenceNew::deinitializeGL() {
 }
 
 void RenderableFieldlinesSequenceNew::computeSequenceEndTime() {
-    if (_loadedFiles.size() > 1) {
-        const double lastTriggerTime = _loadedFiles.back().timestamp;
-        const double sequenceDuration = lastTriggerTime - _loadedFiles[0].timestamp;
-        const double averageStateDuration = sequenceDuration / (_loadedFiles.size() - 1);
+    if (_files.size() > 1) {
+        const double lastTriggerTime = _files.back().timestamp;
+        const double sequenceDuration = lastTriggerTime - _files[0].timestamp;
+        const double averageStateDuration = sequenceDuration / (_files.size() - 1);
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
 }
 
 void RenderableFieldlinesSequenceNew::loadFile(File& file) {
     _isLoadingStateFromDisk = true;
-    bool success = false;
     if (_inputFileType == SourceFileType::Osfls) {
-        std::thread readFileThread([this, &file, &success]() {
-            success = file.state.loadStateFromOsfls(file.path.string());
-            if (success) {
+        std::thread readFileThread([this, &file]() {
+            try {
+                file.state = FieldlinesState::createStateFromOsfls(file.path.string());
+                //const bool success = file.state.loadStateFromOsfls(file.path.string());
                 file.status = File::FileStatus::Loaded;
-                _loadedFiles.push_back(file);
+            }
+            catch(const std::exception& e ) {
+                LERROR(e.what());
             }
         });
     }
@@ -825,35 +826,27 @@ void RenderableFieldlinesSequenceNew::loadFile(File& file) {
 
 }
 std::vector<RenderableFieldlinesSequenceNew::File>::iterator
-RenderableFieldlinesSequenceNew::insertToFilesInOrder(File& file) {
-    auto iter = std::upper_bound(_files.begin(), _files.end(), file.timestamp);
+RenderableFieldlinesSequenceNew::insertToFilesInOrder(File file) {
+    auto iter = std::upper_bound(_files.begin(), _files.end(), file);
     auto iterToInserted = _files.insert(iter, std::move(file));
     return iterToInserted;
 }
 
-int RenderableFieldlinesSequenceNew::updateActiveIndexForLoaded(const double nowTime) {
-    if (_loadedFiles.empty()) return -1;
-    int index = 0;
-    auto iter = std::upper_bound(_loadedFiles.begin(), _loadedFiles.end(), nowTime);
-    if (iter != _loadedFiles.end()) {
-        index = static_cast<int>(std::distance(_loadedFiles.begin(), iter)) -1;
-    }
-    else {
-        index = static_cast<int>(_loadedFiles.size()) - 1;
-    }
-    _activeFile = *iter;
-    return index;
-}
-
-int RenderableFieldlinesSequenceNew::updateActiveIndexForFiles(const double nowTime) {
+int RenderableFieldlinesSequenceNew::updateActiveIndex(const double nowTime) {
     if (_files.empty()) return -1;
+    if (_files.begin()->timestamp == nowTime) return 0;
     int index = 0;
-    auto iter = std::upper_bound(_files.begin(), _files.end(), nowTime);
+
+    auto iter = std::upper_bound(
+        _files.begin(), _files.end(), nowTime, [](double t, const File& f) {
+            return f.timestamp < t;
+        }
+    );
     if (iter != _files.end()) {
         index = static_cast<int>(std::distance(_files.begin(), iter)) -1;
     }
     else {
-        index = static_cast<int>(_loadedFiles.size()) - 1;
+        index = static_cast<int>(_files.size()) - 1;
     }
     return index;
 }
@@ -882,22 +875,18 @@ void RenderableFieldlinesSequenceNew::updateDynamicDownloading(const double curr
         File newFile;
         newFile.path = filePath;
         newFile.status = File::FileStatus::Downloaded;
-        //TODO Elon, if other than osfls, check for file typ and extract timestamp correct
+        //TODO Elon, if other than osfls, check for file type and extract timestamp correct
         const double time = extractTriggerTimeFromOsfls(filePath.filename().string());
         newFile.timestamp = time;
 
-
-        auto inserted = insertToFilesInOrder(newFile);
-        // should not work to tamper with newFile after moved into _files?
-        // ghoul_assert(newFile, "after inserting into _files, newFile should be moved and maybe not even accessable?");
-        // newFile.timestamp = 666.0;
-
-        auto iter = std::upper_bound(_filesToLoad.begin(), _filesToLoad.end(), time);
-        _filesToLoad.insert(iter, *inserted);
+        auto inserted = insertToFilesInOrder(std::move(newFile));
+        //updateActiveIndex(currentTime);
     }
 
-
-
+    // if all files are moved into _sourceFiles then we can
+    // empty the DynamicDownloaderManager _downloadedFiles;
+    _dynamicdownloaderManager->clearDownloaded();
+    computeSequenceEndTime();
 }
 
 void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
@@ -921,10 +910,34 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
             break;
     }
 
-    _activeIndexForLoaded = updateActiveIndexForLoaded(currentTime);
-    if (_activeIndexForLoaded == -1) return;
-    if (_loadingType == LoadingType::DynamicDownloading) {
-        computeSequenceEndTime();
+    const bool isInInterval = _files.size() > 0 &&
+        currentTime >= _files[0].timestamp &&
+        currentTime < _sequenceEndTime;
+
+    if (!isInInterval) {
+        return;
+    }
+
+    const int nextIndex = _activeIndex + 1;
+    // for the sake of this if statment, it is easiest to think of activeIndex as the
+    // previous index and nextIndex as the current
+    // if _activeIndex is -1 but we are in interval, it means we were before the start
+    //     of the sequence in the previous frame
+    if (_activeIndex == -1 ||
+        // if currentTime < active timestamp, it means that we stepped back to a
+        // time represented by another state
+        currentTime < _files[_activeIndex].timestamp ||
+        // if currentTime >= next timestamp, it means that we stepped forward to a
+        // time represented by another state
+        (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp))
+    {
+        _activeIndex = updateActiveIndex(currentTime);
+        if (_activeIndex == -1) return;
+        if (_files[_activeIndex].status == File::FileStatus::Downloaded) {
+            // if LoadingType is StaticLoading all files will be Loaded
+            loadFile(_files[_activeIndex]);
+        }
+
     }
 
     if (_shouldUpdateColorBuffer) {
@@ -937,7 +950,7 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
 }
 
 void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTasks&) {
-    if (_loadedFiles.empty()) {
+    if (_files.empty()) {
         return;
     }
     _shaderProgram->activate();
@@ -999,12 +1012,12 @@ void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTas
 #else
     glLineWidth(1.f);
 #endif
-
+    const FieldlinesState& state = _files[_activeIndex].state;
     glMultiDrawArrays(
         GL_LINE_STRIP,
-        _states[_activeStateIndex].lineStart().data(),
-        _states[_activeStateIndex].lineCount().data(),
-        static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
+        state.lineStart().data(),
+        state.lineCount().data(),
+        static_cast<GLsizei>(state.lineStart().size())
     );
 
     glBindVertexArray(0);
@@ -1027,7 +1040,8 @@ void RenderableFieldlinesSequenceNew::updateVertexPositionBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-    const std::vector<glm::vec3>& vertPos = _states[_activeStateIndex].vertexPositions();
+    const FieldlinesState& state = _files[_activeIndex].state;
+    const std::vector<glm::vec3>& vertPos = state.vertexPositions();
 
     glBufferData(
         GL_ARRAY_BUFFER,
@@ -1046,8 +1060,9 @@ void RenderableFieldlinesSequenceNew::updateVertexColorBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
+    const FieldlinesState& state = _files[_activeIndex].state;
     bool isSuccessful;
-    const std::vector<float>& quantities = _states[_activeStateIndex].extraQuantity(
+    const std::vector<float>& quantities = state.extraQuantity(
         _colorQuantity,
         isSuccessful
     );
@@ -1071,8 +1086,9 @@ void RenderableFieldlinesSequenceNew::updateVertexMaskingBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexMaskingBuffer);
 
+    const FieldlinesState& state = _files[_activeIndex].state;
     bool success;
-    const std::vector<float>& maskings = _states[_activeStateIndex].extraQuantity(
+    const std::vector<float>& maskings = state.extraQuantity(
         _maskingQuantity,
         success
     );

@@ -61,6 +61,17 @@ void FieldlinesState::scalePositions(float scale) {
     }
 }
 
+FieldlinesState FieldlinesState::createStateFromOsfls(const std::string& path) {
+    FieldlinesState s;
+    const bool success = s.loadStateFromOsfls(path);
+    if (!success) {
+        throw std::runtime_error(
+            fmt::format("loading state from osfls file from {}", path)
+        );
+    }
+    return s;
+}
+
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
     if (!ifs.is_open()) {

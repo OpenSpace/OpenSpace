@@ -94,9 +94,12 @@ private:
         double timestamp;
         FieldlinesState state;
 
-        //bool operator<(const File& other) const {
-        //    return timestamp < other.timestamp;
-        //}
+        bool operator<(const double other) const {
+            return timestamp < other;
+        }
+        bool operator<(const File& other) const {
+            return timestamp < other.timestamp;
+        }
     };
 
     void definePropertyCallbackFunctions();
@@ -110,8 +113,7 @@ private:
     // line segments
     //bool shouldUpdateColorBuffer();
     //bool shouldUpdateMaskingBuffer();
-    int updateActiveIndexForLoaded(const double currentTime);
-    int updateActiveIndexForFiles(const double currentTime);
+    int updateActiveIndex(const double currentTime);
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexMaskingBuffer();
@@ -120,10 +122,8 @@ private:
                              const std::optional<std::string>& traceVariable);
 
     std::vector<File> _files;
-    std::vector<File&> _loadedFiles;
-    std::vector<File&> _filesToLoad;
     std::vector<RenderableFieldlinesSequenceNew::File>::iterator
-        insertToFilesInOrder(File& file);
+        insertToFilesInOrder(File file);
     void loadFile(File& file);
 
     // Static Loading on default / if not specified
@@ -157,9 +157,8 @@ private:
     bool _shouldUpdateMaskingBuffer;
     bool _shouldUpdateColorBuffer;
     bool _shouldUpdatePositionBuffer;
-    int _activeIndexForLoaded = -1;
-    int _activeIndexForFiles = -1;
-    File& _activeFile;
+    int _activeIndex = -1;
+    //File& _activeFile;
     bool _atLeastOneFileLoaded = false;
 
     bool _isLoadingStateFromDisk = false;
