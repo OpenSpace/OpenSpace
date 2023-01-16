@@ -92,6 +92,12 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DisableDirectInfo = {
+        "DisableDirectManipulation",
+        "Disable direct manipulation",
+        "" // @TODO Missing documentation
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "TouchEvents",
         "True if we have a touch event",
@@ -275,6 +281,7 @@ TouchInteraction::TouchInteraction()
     , _touchActive(EventsInfo, false)
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
+    , _disableDirect(DisableDirectInfo, false)
     , _reset(SetDefaultInfo, false)
     , _maxTapTime(MaxTapTimeInfo, 300, 10, 1000)
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
@@ -335,6 +342,7 @@ TouchInteraction::TouchInteraction()
     addProperty(_touchActive);
     addProperty(_disableZoom);
     addProperty(_disableRoll);
+    addProperty(_disableDirect);
     addProperty(_unitTest);
     addProperty(_reset);
     addProperty(_maxTapTime);
@@ -463,7 +471,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
 
     _wasPrevModeDirectTouch = _directTouchMode;
     // evaluates if current frame is in directTouchMode (will be used next frame)
-    _directTouchMode =
+    _directTouchMode = !_disableDirect &&
         (_currentRadius > _nodeRadiusThreshold && _selected.size() == numFingers);
 }
 

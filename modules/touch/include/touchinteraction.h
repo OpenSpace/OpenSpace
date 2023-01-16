@@ -156,6 +156,7 @@ private:
     properties::BoolProperty _touchActive;
     properties::BoolProperty _disableZoom;
     properties::BoolProperty _disableRoll;
+    properties::BoolProperty _disableDirect;
     properties::BoolProperty _reset;
     properties::IntProperty _maxTapTime;
     properties::IntProperty _deceleratesPerSecond;
