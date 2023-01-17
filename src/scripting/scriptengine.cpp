@@ -469,14 +469,13 @@ nlohmann::json ScriptEngine::generateJsonJson() const {
         nlohmann::json library;
         std::string libraryName = l.name == "" ? "openspace" : "openspace." + l.name;
         library["name"] = libraryName;
-        library["subLibraries"] = nlohmann::json::array();
 
         for (const LuaLibrary::Function& f : l.functions) {
-            library["data"].push_back(toJson(f));
+            library["functions"].push_back(toJson(f));
         }
 
         for (const LuaLibrary::Function& f : l.documentations) {
-            library["data"].push_back(toJson(f));
+            library["functions"].push_back(toJson(f));
         }
         json.push_back(library);
     }

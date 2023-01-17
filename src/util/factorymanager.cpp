@@ -47,11 +47,11 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
 
     json["name"] = d.name;
     json["identifier"] = d.id;
-    json["properties"] = nlohmann::json::array();
+    json["members"] = nlohmann::json::array();
 
     for (const DocumentationEntry& p : d.entries) {
         nlohmann::json entry;
-        entry["key"] = p.key;
+        entry["name"] = p.key;
         entry["optional"] = p.optional ? true : false;
         entry["type"] = p.verifier->type();
         entry["documentation"] = p.documentation;
@@ -87,7 +87,7 @@ nlohmann::json generateJsonDocumentation(const Documentation& d) {
         else {
             entry["description"] = p.verifier->documentation();
         }
-        json["properties"].push_back(entry);
+        json["members"].push_back(entry);
     }
 
     return json;
@@ -185,14 +185,14 @@ nlohmann::json FactoryManager::generateJsonJson() const {
             });
         if (factoryDoc != docs.end()) {
             nlohmann::json documentation = generateJsonDocumentation(*factoryDoc);
-            factory["data"].push_back(documentation);
+            factory["classes"].push_back(documentation);
             // Remove documentation from list check at the end if all docs got put in
             docs.erase(factoryDoc);          }
         else {
             nlohmann::json documentation;
             documentation["name"] = factoryInfo.name;
             documentation["identifier"] = factoryInfo.name;
-            factory["data"].push_back(documentation);
+            factory["classes"].push_back(documentation);
         }
 
         // Add documentation about derived classes
@@ -206,14 +206,14 @@ nlohmann::json FactoryManager::generateJsonJson() const {
                 });
             if (found != docs.end()) {
                 nlohmann::json documentation = generateJsonDocumentation(*found);
-                factory["data"].push_back(documentation);
+                factory["classes"].push_back(documentation);
                 docs.erase(found);
             }
             else {
                 nlohmann::json documentation;
                 documentation["name"] = c;
                 documentation["identifier"] = c;
-                factory["data"].push_back(documentation);
+                factory["classes"].push_back(documentation);
             }
         }
         json.push_back(factory);
@@ -224,7 +224,7 @@ nlohmann::json FactoryManager::generateJsonJson() const {
     leftovers["identifier"] = "other";
 
     for (const Documentation& doc : docs) {
-        leftovers["data"].push_back(generateJsonDocumentation(doc));
+        leftovers["classes"].push_back(generateJsonDocumentation(doc));
     }
     json.push_back(leftovers);
 
