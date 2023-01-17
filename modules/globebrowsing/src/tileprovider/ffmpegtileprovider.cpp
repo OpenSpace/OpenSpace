@@ -240,7 +240,12 @@ void FfmpegTileProvider::update() {
 
     // Double check the video duration
     if (_videoDuration < 0.0) {
-        int result = mpv_get_property(_mpvHandle, "duration", MPV_FORMAT_DOUBLE, &_videoDuration);
+        int result = mpv_get_property_async(
+            _mpvHandle,
+            static_cast<uint64_t>(LibmpvPropertyKey::Duration),
+            "duration",
+            MPV_FORMAT_DOUBLE
+        );
         if (!checkMpvError(result)) {
             LWARNING("Could not find video duration");
             return;
@@ -284,31 +289,39 @@ void FfmpegTileProvider::update() {
     }
 
     // Check if we have reached the end of the file
-    int hasReachedEnd;
-    int result = mpv_get_property(_mpvHandle, "eof-reached", MPV_FORMAT_FLAG, &hasReachedEnd);
+    int result = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Eof),
+        "eof-reached",
+        MPV_FORMAT_FLAG
+    );
     if (!checkMpvError(result)) {
         LWARNING("Could not check if end of video reached");
     }
 
-    if (hasReachedEnd > 0) {
+    if (_hasReachedEnd) {
         LINFO("Reached end of video");
         return;
     }
 
-    double currentVideoTime;
-    result = mpv_get_property(_mpvHandle, "playback-time", MPV_FORMAT_DOUBLE, &currentVideoTime);
+    result = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Time),
+        "playback-time",
+        MPV_FORMAT_DOUBLE
+    );
     if (!checkMpvError(result)) {
         LWARNING("Could not find current time in video");
     }
 
-    if (currentVideoTime > _videoDuration || currentVideoTime < 0.0) {
+    if (_currentVideoTime > _videoDuration || _currentVideoTime < 0.0) {
         LWARNING("Current time is outside range of video");
         return;
     }
 
     LINFO(fmt::format(
         "OS video time: {}, mpv current time: {}",
-        OSvideoTime, currentVideoTime
+        OSvideoTime, _currentVideoTime
     ));
 
     // TODO: deal with backwards
@@ -318,19 +331,24 @@ void FfmpegTileProvider::update() {
     }
 
     // Check if we need to seek in the video
-    if (OSvideoTime - currentVideoTime > 2.0 * _frameTime) {
+    if (OSvideoTime - _currentVideoTime > 2.0 * _frameTime) {
         LINFO(fmt::format(
             "Seek needed OS curr: {}, video curr: {}",
-            OSvideoTime, currentVideoTime
+            OSvideoTime, _currentVideoTime
         ));
-        result = mpv_set_property(_mpvHandle, "playback-time", MPV_FORMAT_DOUBLE, &OSvideoTime);
+        result = mpv_set_property(
+            _mpvHandle,
+            "playback-time",
+            MPV_FORMAT_DOUBLE,
+            &OSvideoTime
+        );
         if (!checkMpvError(result)) {
             LWARNING("Could not seek in video");
         }
     }
 
     // Check if it is time for a new frame
-    if (OSvideoTime - currentVideoTime < _frameTime) {
+    if (OSvideoTime - _currentVideoTime < _frameTime) {
         if (_isWaiting) {
             return;
         }
@@ -385,7 +403,216 @@ void FfmpegTileProvider::update() {
     */
 
     _tileIsReady = true;
-    _prevVideoTime = currentVideoTime;
+    _prevVideoTime = _currentVideoTime;
+}
+
+void FfmpegTileProvider::handleMpvProperties(mpv_event* event) {
+    switch (static_cast<LibmpvPropertyKey>(event->reply_userdata)) {
+        case LibmpvPropertyKey::Duration: {
+            if (!event->data) {
+                LERROR("Could not find duration property");
+                break;
+            }
+
+            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+            double* duration = static_cast<double*>(property->data);
+
+            if (!duration) {
+                LERROR("Could not find duration property");
+                break;
+            }
+
+            _videoDuration = *duration;
+            LINFO(fmt::format("Duration: {}", *duration));
+            break;
+        }
+        case LibmpvPropertyKey::Eof: {
+            if (!event->data) {
+                LERROR("Could not find eof property");
+                break;
+            }
+
+            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+            int* eof = static_cast<int*>(property->data);
+
+            if (!eof) {
+                LERROR("Could not find eof property");
+                break;
+            }
+
+            _hasReachedEnd = *eof > 0;
+            break;
+        }
+        case LibmpvPropertyKey::Height: {
+            if (!event->data) {
+                LERROR("Could not find height property");
+                break;
+            }
+
+            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+            int* height = static_cast<int*>(property->data);
+
+            if (!height) {
+                LERROR("Could not find height property");
+                break;
+            }
+
+            if (*height == _resolution.y) {
+                break;
+            }
+
+            LINFO(fmt::format("New height: {}", *height));
+
+            if (*height > 0) {
+                if (_resolution.x > 0 && _fbo > 0) {
+                    resizeFBO(_resolution.x, *height);
+                }
+                else {
+                    _resolution.y = *height;
+                }
+            }
+            else {
+                LERROR("Could not find height of video");
+            }
+            break;
+        }
+        case LibmpvPropertyKey::Meta: {
+            if (!event->data) {
+                LERROR("Could not find video parameters");
+                break;
+            }
+
+            mpv_node node;
+            int result = mpv_event_to_node(&node, event);
+            if (!checkMpvError(result)) {
+                LWARNING("Could not find video parameters of video");
+            }
+
+            if (node.format == MPV_FORMAT_NODE_MAP) {
+                for (int n = 0; n < node.u.list->num; n++) {
+                    if (node.u.list->values[n].format == MPV_FORMAT_STRING) {
+                        LINFO(node.u.list->values[n].u.string);
+                    }
+                }
+            }
+            else {
+                LWARNING("No meta data could be read");
+            }
+
+            break;
+        }
+        case LibmpvPropertyKey::Params: {
+            if (!event->data) {
+                LERROR("Could not find video parameters");
+                break;
+            }
+
+            mpv_node videoParams;
+            int result = mpv_event_to_node(&videoParams, event);
+            if (!checkMpvError(result)) {
+                LWARNING("Could not find video parameters of video");
+            }
+
+            if (videoParams.format == MPV_FORMAT_NODE_ARRAY ||
+                videoParams.format == MPV_FORMAT_NODE_MAP)
+            {
+                mpv_node_list* list = videoParams.u.list;
+
+                mpv_node width, height;
+                bool foundWidth = false;
+                bool foundHeight = false;
+                for (int i = 0; i < list->num; ++i) {
+                    if (foundWidth && foundHeight) {
+                        break;
+                    }
+
+                    if (list->keys[i] == "w") {
+                        width = list->values[i];
+                        foundWidth = true;
+                    }
+                    else if (list->keys[i] == "h") {
+                        height = list->values[i];
+                        foundHeight = true;
+                    }
+                }
+
+                if (!foundWidth || !foundHeight) {
+                    LERROR("Could not find width or height params");
+                    return;
+                }
+
+                int w = -1;
+                int h = -1;
+                if (width.format == MPV_FORMAT_INT64) {
+                    w = width.u.int64;
+                }
+                if (height.format == MPV_FORMAT_INT64) {
+                    h = height.u.int64;
+                }
+
+                if (w == -1 || h == -1) {
+                    LERROR("Invalid width or height params");
+                    return;
+                }
+                resizeFBO(w, h);
+            }
+            break;
+        }
+        case LibmpvPropertyKey::Time: {
+            if (!event->data) {
+                LERROR("Could not find playback time property");
+                break;
+            }
+
+            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+            double* time = static_cast<double*>(property->data);
+
+            if (!time) {
+                LERROR("Could not find playback time property");
+                break;
+            }
+
+            _currentVideoTime = *time;
+            break;
+        }
+        case LibmpvPropertyKey::Width: {
+            if (!event->data) {
+                LERROR("Could not find height property");
+                break;
+            }
+
+            struct mpv_event_property* property = (struct mpv_event_property*)event->data;
+            int* width = static_cast<int*>(property->data);
+
+            if (!width) {
+                LERROR("Could not find width property");
+                break;
+            }
+
+            if (*width == _resolution.y) {
+                break;
+            }
+
+            LINFO(fmt::format("New width: {}", *width));
+
+            if (*width > 0) {
+                if (_resolution.y > 0 && _fbo > 0) {
+                    resizeFBO(*width, _resolution.y);
+                }
+                else {
+                    _resolution.x = *width;
+                }
+            }
+            else {
+                LERROR("Could not find width of video");
+            }
+            break;
+        }
+        default: {
+            throw ghoul::MissingCaseException();
+            break;
+        }
+    }
 }
 
 void FfmpegTileProvider::handleMpvEvents() {
@@ -397,24 +624,26 @@ void FfmpegTileProvider::handleMpvEvents() {
 
         switch (event->event_id) {
             case MPV_EVENT_VIDEO_RECONFIG: {
-                // Retrieve the new video size.
-                int64_t w, h;
-
+                // Retrieve the new video size
                 // Get width
-                int result1 = mpv_get_property(_mpvHandle, "dwidth", MPV_FORMAT_INT64, &w);
+                int result1 = mpv_get_property_async(
+                    _mpvHandle,
+                    static_cast<uint64_t>(LibmpvPropertyKey::Width),
+                    "dwidth", MPV_FORMAT_INT64
+                );
                 if (!checkMpvError(result1)) {
                     LWARNING("Could not find new width of video");
                 }
 
                 // Get Height
-                int result2 = mpv_get_property(_mpvHandle, "dheight", MPV_FORMAT_INT64, &h);
+                int result2 = mpv_get_property_async(
+                    _mpvHandle,
+                    static_cast<uint64_t>(LibmpvPropertyKey::Height),
+                    "dheight",
+                    MPV_FORMAT_INT64
+                );
                 if (!checkMpvError(result2)) {
                     LWARNING("Could not find new height of video");
-                }
-
-                // Resize FBO
-                if (result1 >= 0 && result2 >= 0 && w > 0 && h > 0) {
-                    resizeFBO(static_cast<int>(w), static_cast<int>(h));
                 }
                 break;
             }
@@ -423,55 +652,15 @@ void FfmpegTileProvider::handleMpvEvents() {
                 if (strcmp(prop->name, "video-params") == 0 &&
                     prop->format == MPV_FORMAT_NODE)
                 {
-                    mpv_node videoParams;
-                    int result = mpv_get_property(_mpvHandle, "video-params", MPV_FORMAT_NODE, &videoParams);
+                    int result = mpv_get_property_async(
+                        _mpvHandle,
+                        static_cast<uint64_t>(LibmpvPropertyKey::Params),
+                        "video-params",
+                        MPV_FORMAT_NODE
+                    );
                     if (!checkMpvError(result)) {
                         LWARNING("Could not find video parameters");
                         return;
-                    }
-
-                    if (videoParams.format == MPV_FORMAT_NODE_ARRAY ||
-                        videoParams.format == MPV_FORMAT_NODE_MAP)
-                    {
-                        mpv_node_list* list = videoParams.u.list;
-
-                        mpv_node width, height;
-                        bool foundWidth = false;
-                        bool foundHeight = false;
-                        for (int i = 0; i < list->num; ++i) {
-                            if (foundWidth && foundHeight) {
-                                break;
-                            }
-
-                            if (list->keys[i] == "w") {
-                                width = list->values[i];
-                                foundWidth = true;
-                            }
-                            else if (list->keys[i] == "h") {
-                                height = list->values[i];
-                                foundHeight = true;
-                            }
-                        }
-
-                        if (!foundWidth || !foundHeight) {
-                            LERROR("Could not find width or height params");
-                            return;
-                        }
-
-                        int w = -1;
-                        int h = -1;
-                        if (width.format == MPV_FORMAT_INT64) {
-                            w = width.u.int64;
-                        }
-                        if (height.format == MPV_FORMAT_INT64) {
-                            h = height.u.int64;
-                        }
-
-                        if (w == -1 || h == -1) {
-                            LERROR("Invalid width or height params");
-                            return;
-                        }
-                        resizeFBO(w, h);
                     }
                     else {
                         LERROR("Invalid video-params");
@@ -481,10 +670,22 @@ void FfmpegTileProvider::handleMpvEvents() {
                 break;
             }
             case MPV_EVENT_LOG_MESSAGE: {
-                struct mpv_event_log_message* msg = (struct mpv_event_log_message*)event->data;
+                struct mpv_event_log_message* msg =
+                    (struct mpv_event_log_message*)event->data;
                 std::stringstream ss;
                 ss << "[" << msg->prefix << "] " << msg->level << ": " << msg->text;
                 LINFO(ss.str());
+                break;
+            }
+            case MPV_EVENT_GET_PROPERTY_REPLY: {
+                int result = event->error;
+                if (!checkMpvError(result)) {
+                    LWARNING(fmt::format(
+                        "Error while gettting property of type: {}", event->reply_userdata
+                    ));
+                    break;
+                }
+                handleMpvProperties(event);
                 break;
             }
             default: {
@@ -536,11 +737,11 @@ void FfmpegTileProvider::internalInitialize() {
     if (!checkMpvError(result)) {
         LERROR("Could not initialize mpv");
         return;
-    }    
+    }
     mpv_set_option_string(_mpvHandle, "terminal", "yes");
     mpv_set_option_string(_mpvHandle, "msg-level", "all=v");
     mpv_request_log_messages(_mpvHandle, "debug");
-    
+
     // Request log messages with level "info" or higher.
     // They are received as MPV_EVENT_LOG_MESSAGE.
     mpv_request_log_messages(_mpvHandle, "info");
@@ -582,43 +783,49 @@ void FfmpegTileProvider::internalInitialize() {
     mpv_observe_property(_mpvHandle, 0, "video-params", MPV_FORMAT_NODE);
 
     // Print meta data
-    mpv_node node;
-    mpv_get_property(_mpvHandle, "metadata", MPV_FORMAT_NODE, &node);
-    if (node.format == MPV_FORMAT_NODE_MAP) {
-        for (int n = 0; n < node.u.list->num; n++) {
-            if (node.u.list->values[n].format == MPV_FORMAT_STRING) {
-                LINFO(node.u.list->values[n].u.string);
-            }
-        }
+    result = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Meta),
+        "metadata",
+        MPV_FORMAT_NODE
+    );
+    if (!checkMpvError(result)) {
+        LWARNING("Could not load meta data");
     }
-    else {
-        LWARNING("No meta data could be read");
-    }
+
 
     // Get resolution of video
-    int64_t width, height = 0;
-    result = mpv_get_property(_mpvHandle, "width", MPV_FORMAT_INT64, &width);
-    int result2 = mpv_get_property(_mpvHandle, "height", MPV_FORMAT_INT64, &height);
-    if (!checkMpvError(result) || !checkMpvError(result2))
-    {
-        LWARNING("Could not load video resolution");
-    }
+    result = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Width),
+        "width", MPV_FORMAT_INT64
+    );
 
-    if (width > 0 && height > 0) {
-        _resolution = { width, height };
-    }
-    else {
-        LWARNING("Invalid video resolution");
+    int result2 = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Height),
+        "height",
+        MPV_FORMAT_INT64
+    );
+
+    if (!checkMpvError(result) || !checkMpvError(result2)) {
+        LWARNING("Could not load video resolution");
     }
 
     //Create FBO to render video into
     createFBO(_resolution.x, _resolution.y);
 
     // Find duration of video
-    result = mpv_get_property(_mpvHandle, "duration", MPV_FORMAT_DOUBLE, &_videoDuration);
+    result = mpv_get_property_async(
+        _mpvHandle,
+        static_cast<uint64_t>(LibmpvPropertyKey::Duration),
+       "duration",
+        MPV_FORMAT_DOUBLE
+    );
     if (!checkMpvError(result)) {
         LWARNING("Could not find video duration");
     }
+    _videoDuration = 41.0;
 
     // TODO: Find the estimated frame time of the video
 
@@ -627,6 +834,11 @@ void FfmpegTileProvider::internalInitialize() {
 
 void FfmpegTileProvider::createFBO(int width, int height) {
     LINFO(fmt::format("Creating new FBO with width: {} and height: {}", width, height));
+
+    if (width <= 0 || height <= 0) {
+        LERROR("Cannot create empty fbo");
+        return;
+    }
 
     // Update resolution of video
     _resolution = glm::ivec2(width, height);
@@ -672,6 +884,8 @@ void FfmpegTileProvider::createFBO(int width, int height) {
 }
 
 void FfmpegTileProvider::resizeFBO(int width, int height) {
+    LINFO(fmt::format("Resizing FBO with width: {} and height: {}", width, height));
+
     if (width == _resolution.x && height == _resolution.y) {
         return;
     }

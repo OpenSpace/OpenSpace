@@ -60,6 +60,7 @@ public:
 private:
     void createFBO(int width, int height);
     void resizeFBO(int width, int height);
+    void handleMpvProperties(mpv_event* event);
     void handleMpvEvents();
 
     void internalInitialize() override final;
@@ -78,8 +79,10 @@ private:
     double _startJ200Time = 0.0;
     double _endJ200Time = 0.0;
     double _videoDuration = -1.0;
+    double _currentVideoTime = 0.0;
     double _prevVideoTime = 0.0;
     double _frameTime = 1.0 / 24.0;
+    bool _hasReachedEnd = false;
     bool _tileIsReady = false;
     bool _isInitialized = false;
     bool _isWaiting = false;
@@ -91,6 +94,17 @@ private:
     ghoul::opengl::Texture* _frameTexture = nullptr;
     GLuint _fbo = 0;
     TileTextureInitData::HashKey _frameTextureHashKey;
+
+    // libmpv property keys
+    enum class LibmpvPropertyKey : uint64_t {
+        Duration = 1,
+        Eof,
+        Height,
+        Meta,
+        Params,
+        Time,
+        Width
+    };
 };
 
 } // namespace openspace::globebrowsing
