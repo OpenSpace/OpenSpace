@@ -96,12 +96,204 @@
       "required": [ "r", "g", "b", "a" ]
     },
 
-    "quality": {
+    "address": {
+      "type": "string",
+      "title": "Address",
+      "description": "The IP address or the DNS name of the node. If the address is a DNS name, the name resolution is delegated to the operating system and might include additional network traffic to the DNS host. If the node ought to be the local machine either 127.0.0.x with x from 0 to 255, or localhost (which corresponds to 127.0.0.1) can be used"
+    },
+    "display": {
+      "type": "object",
+      "properties": {
+        "swapinterval": {
+          "type": "integer",
+          "minimum": 0,
+          "title": "Swap Interval",
+          "description": "Determines the swap interval for the application. This determines the amount of V-Sync that should occur for the application. The two most common values for this are 0 for disabling V-Sync and 1 for regular V-Sync. The number provided determines the number of screen updates to wait before swapping the backbuffers and returning. For example on a 60Hz monitor, swapinterval=\"1\" would lead to a maximum of 60Hz frame rate, swapinterval=\"2\" would lead to a maximum of 30Hz frame rate. Using the same values for a 144Hz monitor would be a refresh rate of 144 and 72 respectively. The default value is 0, meaning that V-Sync is disabled"
+        },
+        "refreshrate": {
+          "type": "integer",
+          "minimum": 0,
+          "title": "Refresh Rate",
+          "description": "Determines the desired refresh rate for full-screen windows of this configuration. This value is disabled for windowed mode windows. The default value is the highest possible refresh rate"
+        }
+      },
+      "title": "Display",
+      "description": "Settings specific for the handling of display-related settings for the whole application"
+    },
+    "draw2d": {
+      "type": "boolean",
+      "title": "Draw 2D",
+      "description": "Determines whether the draw2D callback should be called for viewports in this window. The default value is true"
+    },
+    "draw3d": {
+      "type": "boolean",
+      "title": "Draw 3D",
+      "description": "Determines whether the draw callback should be called for viewports in this window. The default value is true"
+    },
+    "fullscreen": {
+      "type": "boolean",
+      "title": "Full Screen",
+      "description": "Determines whether the window should be created in an exclusive fullscreen mode. The Size of this window will be used to set the screen resolution if this value is true. See also the monitor attribute to determine which monitor should be used as the target for the fullscreen window. The default value is false"
+    },
+    "id": {
+      "type": "integer",
+      "description": "The numerical identifier of this window. By default windows are given numerical value equal to their position in the node-1, meaning that the first window of a node will have the id 0, the second window id 1, etc. This value can be used to overwride this. It is not possible to give the same ID to two different windows"
+    },
+    "masteraddress": {
+      "type": "string",
+      "title": "Master Address",
+      "description": "Contains the address of the node that acts as the server for this cluster. This means that one of the Node elements described in this configuration file has to have an address that corresponds to this masterAddress. This value can be either an IP address or a DNS name, which will be resolved at application startup"
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 0,
+      "title": "Port",
+      "description": "The port at which this node is available at to the server. Since the server has to open bidirectional sockets to all of the client nodes, the port for each Node has to be mutually exclusive, meaning that no two Nodes can have the same port. Please note that operating systems have restricted behavior when trying to open ports lower than a fixed limt. For example, Unix does not allow non-elevated users to open ports < 1024. As a convention, SGCT usually uses ports staring at 20400, but this is an arbitrary convention without a specific reason"
+    },
+    "projectionquality": {
       "type": "string",
       "enum": [
         "low", "256", "medium", "512", "high", "1k", "1024", "1.5k", "1536", "2k", "2048",
         "4k", "4096", "8k", "8192", "16k", "16384", "32k", "32768", "64k", "65536"
-      ]
+      ],
+      "title": "Quality",
+      "description": "Determines the pixel resolution of the cube map faces that are reprojected to create the fisheye rendering. The higher resolution these cube map faces have, the better quality the resulting fisheye rendering, but at the expense of increased rendering times"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "description": "A comma-separated list of tags that are associated with this window. The tags themselves don't have any meaning inside of SGCT, but can be used by the application code as a filter. One common use-case is to tag one of the windows as a “GUI” window, to restrict input to only that window, for example. The default value for this attribute is an empty string"
+    },
+    "tracked": {
+      "type": "boolean",
+      "title": "Tracked",
+      "description": "Determines whether the field-of-view frustum used for this viewport should be tracking changes to the window configuration. If this value is set to false, the field of view set in the beginning will stay unchanged"
+    },
+    "viewportpos": {
+      "$ref": "#/$defs/vec2",
+      "title": "Position",
+      "description": "Specifies the position of the viewport inside its parent Window. The coordinates for x and y, which must both be specified in this node, are usually between 0 and 1, but are not restricted. Parts of the viewport that are outside this range would lie outside the bounds of the window and are clipped. Viewports are free to overlap and the viewports are rendered top to bottom into the window and can overwrite previous results"
+    },
+    "viewportsize": {
+      "$ref": "#/$defs/vec2",
+      "title": "Size",
+      "description": "Specifies the size of this viewport inside its parent Window. The coordinate for x and y, which must both be specified in this node, are between 0 and 1, but are not restricted. Parts of the viewport that are outside this range would lie outside the bounds of the window and are clipped. Viewports are free to overlap and the viewports are rendered top to bottom into the window and can overwrite previous results"
+    },
+    "windowname": {
+      "type": "string",
+      "title": "Name",
+      "description": "The name of the window. This is also used as the title of the window if window decorations are enabled. The default name for a window if this value is not specified is “SGCT Node: %i (%s)” with %i = the address of this node and %s either “server” or “client”, depending on whether the current node is the server or the client in the cluster"
+    },
+    "windowborder": {
+      "type": "boolean",
+      "title": "Border",
+      "description": "Enables or disables the window decorations. Window decorations are the title bar that contains the name of the window and buttons to close, maximize or minimize a window. On some operating systems, the window decorations also include a border around a window and potentially shadow effects, all of which can be disabled with this attribute. The default is true"
+    },
+    "windowpos": {
+      "$ref": "#/$defs/ivec2",
+      "title": "Position",
+      "description": "Sets the position of the window on the overall desktop space provided by the operating system. This node must have x and y floating point attributes that specify the x-y location of the window. Please note that these values also can be negative on some operating systems. On Windows, for example, the top left corner of the primary monitor is (0,0) in this coordinate system, but there can be additional monitors to the left or the top of the primary monitor, which would require negative numbers. The default values are x=0 and y=0"
+    },
+    "windowsize": {
+      "$ref": "#/$defs/ivec2",
+      "title": "Size",
+      "description": "Sets the size of the window in pixels. This node must have x and y floating point attributes that determine that size of the window. The default values are x=640 and y=480"
+    },
+
+    "fovhorizontalvertical": {
+      "type": "object",
+      "properties": {
+        "hfov": {
+          "type": "number",
+          "minimum": 0.0,
+          "title": "Horizontal Field-of-view",
+          "description": "The horizontal angle (in degrees) of the camera"
+        },
+        "vfov": {
+          "type": "number",
+          "minimum": 0.0,
+          "title":" Vertical Field-of-view",
+          "description": "The vertical angle (in degrees) of the camera"
+        }
+      },
+      "required": [ "hfov", "vfov" ],
+      "title": "hFov / vFov"
+    },
+    "fovleftrightvertical": {
+      "type": "object",
+      "properties": {
+        "left": {
+          "type": "number",
+          "title": "Left",
+          "description": "The angle (in degrees) that is covered by the camera between the central point and the left border of the of the viewport. The left and right angles added together are the vertical field of view of the viewport"
+        },
+        "right": {
+          "type": "number",
+          "title": "Right",
+          "description": "The angle (in degrees) that is covered by the camera between the central point and the right border of the of the viewport. The left and right angles added together are the vertical field of view of the viewport"
+        },
+        "vfov": {
+          "type": "number",
+          "minimum": 0.0,
+          "title":" Vertical Field-of-view",
+          "description": "The vertical angle (in degrees) of the camera"
+        }
+      },
+      "required": [ "left", "right", "vfov" ],
+      "title": "left+right / vFov"
+    },
+    "fovdownuphorizontal": {
+      "type": "object",
+      "properties": {
+        "hfov": {
+          "type": "number",
+          "minimum": 0.0,
+          "title": "Horizontal Field-of-view",
+          "description": "The horizontal angle (in degrees) of the camera"
+        },
+        "down": {
+          "type": "number",
+          "title": "Down",
+          "description": "The angle (in degrees) that is covered by the camera between the central point and the bottom border of the of the viewport. The down and up angles added together are the vertical field of view of the viewport"
+        },
+        "up": {
+          "type": "number",
+          "title": "Up",
+          "description": "The angle (in degrees) that is covered by the camera between the central point and the top border of the of the viewport. The down and up angles added together are the vertical field of view of the viewport"
+        }
+      },
+      "required": [ "hfov", "down", "up" ],
+      "title": "hFov / down+up"
+    },
+    "fovleftrightupdown": {
+      "type": "object",
+      "properties": {
+        "left": {
+          "type": "number",
+          "title": "Left",
+          "description": "The angle (in degrees) that is covered by the camera between the central point and the left border of the of the viewport. The left and right angles added together are the vertical field of view of the viewport"
+        },
+        "right": {
+          "type": "number",
+          "title": "Right",
+          "description": "The angle (in degrees) that is covered by the camera between the central point and the right border of the of the viewport. The left and right angles added together are the vertical field of view of the viewport"
+        },
+        "down": {
+          "type": "number",
+          "title": "Down",
+          "description": "The angle (in degrees) that is covered by the camera between the central point and the bottom border of the of the viewport. The down and up angles added together are the vertical field of view of the viewport"
+        },
+        "up": {
+          "type": "number",
+          "title": "Up",
+          "description": "The angle (in degrees) that is covered by the camera between the central point and the top border of the of the viewport. The down and up angles added together are the vertical field of view of the viewport"
+        }
+      },
+      "required": [ "left", "right", "down", "up" ],
+      "title": "left+right / down+up"
     },
 
     "planarprojection": {
@@ -115,94 +307,10 @@
         },
         "fov": {
           "oneOf": [
-            {
-              "type": "object",
-              "properties": {
-                "hfov": {
-                  "type": "number",
-                  "minimum": 0.0,
-                  "title": "Horizontal Field-of-view",
-                  "description": "The horizontal angle (in degrees) of the camera"
-                },
-                "vfov": {
-                  "type": "number",
-                  "minimum": 0.0,
-                  "title":" Vertical Field-of-view",
-                  "description": "The vertical angle (in degrees) of the camera"
-                }
-              },
-              "title": "hFov / vFov"
-            },
-            {
-              "type": "object",
-              "properties": {
-                "left": {
-                  "type": "number",
-                  "title": "Left",
-                  "description": "The angle (in degrees) that is covered by the camera between the central point and the left border of the of the viewport. The left and right angles added together are the vertical field of view of the viewport"
-                },
-                "right": {
-                  "type": "number",
-                  "title": "Right",
-                  "description": "The angle (in degrees) that is covered by the camera between the central point and the right border of the of the viewport. The left and right angles added together are the vertical field of view of the viewport"
-                },
-                "vfov": {
-                  "type": "number",
-                  "minimum": 0.0,
-                  "title":" Vertical Field-of-view",
-                  "description": "The vertical angle (in degrees) of the camera"
-                }
-              },
-              "title": "left+right / vFov"
-            },
-            {
-              "type": "object",
-              "properties": {
-                "hfov": {
-                  "type": "number",
-                  "minimum": 0.0,
-                  "title": "Horizontal Field-of-view",
-                  "description": "The horizontal angle (in degrees) of the camera"
-                },
-                "down": {
-                  "type": "number",
-                  "title": "Down",
-                  "description": "The angle (in degrees) that is covered by the camera between the central point and the bottom border of the of the viewport. The down and up angles added together are the vertical field of view of the viewport"
-                },
-                "up": {
-                  "type": "number",
-                  "title": "Up",
-                  "description": "The angle (in degrees) that is covered by the camera between the central point and the top border of the of the viewport. The down and up angles added together are the vertical field of view of the viewport"
-                }
-              },
-              "title": "hFov / down+up"
-            },
-            {
-              "type": "object",
-              "properties": {
-                "left": {
-                  "type": "number",
-                  "title": "Left",
-                  "description": "The angle (in degrees) that is covered by the camera between the central point and the left border of the of the viewport. The left and right angles added together are the vertical field of view of the viewport"
-                },
-                "right": {
-                  "type": "number",
-                  "title": "Right",
-                  "description": "The angle (in degrees) that is covered by the camera between the central point and the right border of the of the viewport. The left and right angles added together are the vertical field of view of the viewport"
-                },
-                "down": {
-                  "type": "number",
-                  "title": "Down",
-                  "description": "The angle (in degrees) that is covered by the camera between the central point and the bottom border of the of the viewport. The down and up angles added together are the vertical field of view of the viewport"
-                },
-                "up": {
-                  "type": "number",
-                  "title": "Up",
-                  "description": "The angle (in degrees) that is covered by the camera between the central point and the top border of the of the viewport. The down and up angles added together are the vertical field of view of the viewport"
-                }
-              },
-              "title": "left+right / down+up"
-            }
+            { "$ref": "#/$defs/fovhorizontalvertical" },
+            { "$ref": "#/$defs/fovleftrightvertical" },
+            { "$ref": "#/$defs/fovdownuphorizontal" },
+            { "$ref": "#/$defs/fovleftrightupdown" }
           ],
           "title": "Camera Field-of-View",
           "description": "This element describes the field of view used the camera in this planar projection"
@@ -242,9 +350,7 @@
           "description": "Describes the field of view that is covered by the fisheye projection in degrees. The resulting image will always be a circle, and this value determines how much of a field of view is covered by this circle. Please note specifically that this also includes field-of-view settings >180, in which a larger distortion is applied to the image. The default value is 180"
         },
         "quality": {
-          "$ref": "#/$defs/quality",
-          "title": "Quality",
-          "description": "Determines the pixel resolution of the cube map faces that are reprojected to create the fisheye rendering. The higher resolution these cube map faces have, the better quality the resulting fisheye rendering, but at the expense of increased rendering times"
+          "$ref": "#/$defs/projectionquality"
         },
         "interpolation": {
           "type": "string",
@@ -319,9 +425,7 @@
           "readOnly": true
         },
         "quality": {
-          "$ref": "#/$defs/quality",
-          "title": "Quality",
-          "description": "Determines the pixel resolution of the cube map faces that are reprojected to create the spherical mirror projection rendering. The higher resolution these cube map faces have, the better quality the resulting spherical mirror projection rendering, but at the expense of increased rendering times"
+          "$ref": "#/$defs/projectionquality"
         },
         "tilt": {
           "type": "number",
@@ -375,9 +479,7 @@
           "readOnly": true
         },
         "quality": {
-          "$ref": "#/$defs/quality",
-          "title": "Quality",
-          "description": "Determines the pixel resolution of the cube map faces"
+          "$ref": "#/$defs/projectionquality"
         },
         "mapping": {
           "type": "string",
@@ -388,7 +490,7 @@
         "mappingspoutname": {
           "type": "string",
           "title": "Mapping Spout Name",
-          "description": "Sets the name of the texture if the mapping type is “fisheye” or “equirectangular”. If the mapping is “cubemap”, this value is ignored"
+          "description": "Sets the name of the texture if the mapping type is 'fisheye' or 'equirectangular'. If the mapping is 'cubemap', this value is ignored"
         },
         "background": {
           "$ref": "#/$defs/color",
@@ -498,9 +600,7 @@
           "readOnly": true
         },
         "quality": {
-          "$ref": "#/$defs/quality",
-          "title": "Quality",
-          "description": "Determines the pixel resolution of the cube map faces that are reprojected to create the fisheye rendering. The higher resolution these cube map faces have, the better quality the resulting fisheye rendering, but at the expense of increased rendering times"
+          "$ref": "#/$defs/projectionquality"
         },
         "rotation": {
           "type": "number",
@@ -533,9 +633,7 @@
           "readOnly": true
         },
         "quality": {
-          "$ref": "#/$defs/quality",
-          "title": "Title",
-          "description": "Determines the pixel resolution of the cube map faces that are reprojected to create the equirectangular rendering. The higher resolution these cube map faces have, the better quality the resulting fisheye rendering, but at the expense of increased rendering times"
+          "$ref": "#/$defs/projectionquality"
         }
       },
       "required": [ "type" ],
@@ -573,7 +671,6 @@
       "description": "This projection method is based on providing three corner points that are used to construct a virtual image plane. The units of the positions are all relative to the user's position so are ultimately arbitrary"
     },
 
-
     "projection": {
       "oneOf": [
         {
@@ -606,7 +703,7 @@
         }
       ],
       "title": "Projection"
-  },
+    },
 
     "viewport": {
       "type": "object",
@@ -637,9 +734,7 @@
           "description": "Determines a warping mesh file that is used to warp the resulting image. The application's rendering will always be rendered into a rectangular framebuffer, which is then mapped as a texture to the geometry provided by this file. This makes it possible to create non-linear or curved output geometries from a regular projection by providing the proper geometry of the surface that you want to project on. The reader for the warping mesh is determined by the file extension of the file that is provided in this attribute. The default is that no warping mesh is applied. Supported geometry mesh formats: 1. SCISS Mesh (sgc extension). A mesh format that was introduced by SCISS for the Uniview software. SCISS created two versions for this file format, one for 2D warping meshes and a second for 3D cubemap lookups. SGCT only supports the first version of the file format, however. 2. Scalable Mesh (ol extension) A mesh format created by scalable. 3. Dome Projection (csv extension), 4. Paul Bourke Mesh (data extension) A file format created by Paul Bourke, his webpage also contains more information abuot the individual steps of the warping. 5. Waveform OBJ (obj extension) The well known textual mesh format. 6. MPCDI (mpcdi extension) A subset of the VESA standard. 7. SimCAD (simcad extension)"
         },
         "tracked": {
-          "type": "boolean",
-          "title": "Tracked",
-          "description": "Determines whether the field-of-view frustum used for this viewport should be tracking changes to the window configuration. If this value is set to false, the field of view set in the beginning will stay unchanged"
+          "$ref": "#/$defs/tracked"
         },
         "eye": {
           "type": "string",
@@ -648,14 +743,10 @@
           "description": "Forces this viewport to be rendered with a specific eye, using the corresponding Users eye separation to compute the correct frustum. If this value is not set, the viewport will be rendered according to the parent Window's stereo attribute"
         },
         "pos": {
-          "$ref": "#/$defs/vec2",
-          "title": "Position",
-          "description": "Specifies the position of the viewport inside its parent Window. The coordinates for x and y, which must both be specified in this node, are usually between 0 and 1, but are not restricted. Parts of the viewport that are outside this range would lie outside the bounds of the window and are clipped. Viewports are free to overlap and the viewports are rendered top to bottom into the window and can overwrite previous results"
+          "$ref": "#/$defs/viewportpos"
         },
         "size": {
-          "$ref": "#/$defs/vec2",
-          "title": "Size",
-          "description": "Specifies the size of this viewport inside its parent Window. The coordinate for x and y, which must both be specified in this node, are between 0 and 1, but are not restricted. Parts of the viewport that are outside this range would lie outside the bounds of the window and are clipped. Viewports are free to overlap and the viewports are rendered top to bottom into the window and can overwrite previous results"
+          "$ref": "#/$defs/viewportsize"
         },
         "projection": {
           "$ref": "#/$defs/projection"
@@ -668,21 +759,13 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
-          "description": "The numerical identifier of this window. By default windows are given numerical value equal to their position in the node-1, meaning that the first window of a node will have the id 0, the second window id 1, etc. This value can be used to overwride this. It is not possible to give the same ID to two different windows"
+            "$ref": "#/$defs/id"
         },
         "name": {
-          "type": "string",
-          "title": "Name",
-          "description": "The name of the window. This is also used as the title of the window if window decorations are enabled. The default name for a window if this value is not specified is “SGCT Node: %i (%s)” with %i = the address of this node and %s either “server” or “client”, depending on whether the current node is the server or the client in the cluster"
+          "$ref": "#/$defs/windowname"
         },
         "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "description": "A comma-separated list of tags that are associated with this window. The tags themselves don't have any meaning inside of SGCT, but can be used by the application code as a filter. One common use-case is to tag one of the windows as a “GUI” window, to restrict input to only that window, for example. The default value for this attribute is an empty string"
+          "$ref": "#/$defs/tags"
         },
         "bufferbitdepth": {
           "type": "string",
@@ -691,9 +774,7 @@
           "description": "Sets the bit depth and format of the color texture that is used as the render backend for this entire window. The parameters passed into this attribute are converted to the following OpenGL parameters (internal color format and data type) to the texture creation: 8: GL_RGBA8, GL_UNSIGNED_BYTE, 16: GL_RGBA16, GL_UNSIGNED_SHORT, 16f: GL_RGBA16F, GL_HALF_FLOAT, 32f: GL_RGBA32F, GL_FLOAT, 16i: GL_RGBA16I, GL_SHORT, 32i: GL_RGBA32I, GL_INT, 16ui: GL_RGBA16UI, GL_UNSIGNED_SHORT, 32ui: GL_RGBA32UI, GL_UNSIGNED_INT. The default value for this attribute is 8"
         },
         "fullscreen": {
-          "type": "boolean",
-          "title": "Full Screen",
-          "description": "Determines whether the window should be created in an exclusive fullscreen mode. The Size of this window will be used to set the screen resolution if this value is true. See also the monitor attribute to determine which monitor should be used as the target for the fullscreen window. The default value is false"
+          "$ref": "#/$defs/fullscreen"
         },
         "autoiconify": {
           "type": "boolean",
@@ -742,9 +823,7 @@
           "description": "Determines whether fast approximate antialiasing is used for the contents of this window. This antialiasing is a postprocessing that does not significantly increase rendering time, but the results are not as good as msaa. The default is false"
         },
         "border": {
-          "type": "boolean",
-          "title": "Border",
-          "description": "Enables or disables the window decorations. Window decorations are the title bar that contains the name of the window and buttons to close, maximize or minimize a window. On some operating systems, the window decorations also include a border around a window and potentially shadow effects, all of which can be disabled with this attribute. The default is true"
+          "$ref": "#/$defs/windowborder"
         },
         "resizable": {
           "type": "boolean",
@@ -757,14 +836,10 @@
           "description": "Flips the resulting image vertically"
         },
         "draw2d": {
-          "type": "boolean",
-          "title": "Draw 2D",
-          "description": "Determines whether the draw2D callback should be called for viewports in this window. The default value is true"
+          "$ref": "#/$defs/draw2d"
         },
         "draw3d": {
-          "type": "boolean",
-          "title": "Draw 3D",
-          "description": "Determines whether the draw callback should be called for viewports in this window. The default value is true"
+          "$ref": "#/$defs/draw3d"
         },
         "blitwindowid": {
           "type": "integer",
@@ -804,14 +879,10 @@
           "description": "Determines whether the contents of this window should be rendered stereoscopically and which stereoscopic rendering method should be used. The only allowed attribute for this node is the type, which determines the type of stereo rendering. It has to be one of: 1. none: No stereo rendering is performed. This is the same as if this entire node was not specified. 2. active: Using active stereo using quad buffering. This is only a valid option for systems that support quad buffering. 3. checkerboard: Using a checkerboard pattern for stereoscopy in which left and right eyes are rendered on interleaved checkerboard patterns. 4. checkerboard_inverted: Using the same pattern as checkerboard, but with the left and right eyes inverted. 5. anaglyph_red_cyan: Applying color filters to the rendering for the left and right eyes such that red-cyan anaglyph glasses can be used to view the stereo content. 6. anaglyph_amber_blue: Applying color filters to the rendering for the left and right eyes such that amber-blue anaglyph glasses can be used to view the stereo content. 7. anaglyph_wimmer: ¯|(ツ)/¯. 8. vertical_interlaced: A stereo format in which the left and right eye images are interlaced vertically, meaning that each row of the final image is either left or right, switching each row. 9. vertical_interlaced_inverted: The same as vertical_interlaced, but with the left and right eye flipped. 10. dummy: A dummy stereo mode to test streoscopic rendering without needing extra equipment. In this stereo mode, the left and the right eye images are rendered on top of each other without any other processing. This option is available to verify that stereo rendering is working for a specific application. 11. side_by_side: The resolution of the window is split into a left half and a right half, with each eye being rendered into its half. This is a common stereo format for 3D TVs. 12. side_by_side_inverted: The same as side_by_side, but the left and right images are flipped. 13. top_bottom: The same as side_by_side, but instead of separating the window horizontally, the window is split vertically, with the left eye being rendered in the top half of the window and the right image being rendered in the bottom half. 14. top_bottom_inverted: The same as top_bottom_inverted, but with the left and right eyes flipped. The default value is none"
         },
         "pos": {
-          "$ref": "#/$defs/ivec2",
-          "title": "Position",
-          "description": "Sets the position of the window on the overall desktop space provided by the operating system. This node must have x and y floating point attributes that specify the x-y location of the window. Please note that these values also can be negative on some operating systems. On Windows, for example, the top left corner of the primary monitor is (0,0) in this coordinate system, but there can be additional monitors to the left or the top of the primary monitor, which would require negative numbers. The default values are x=0 and y=0"
+          "$ref": "#/$defs/windowpos"
         },
         "size": {
-          "$ref": "#/$defs/ivec2",
-          "title": "Size",
-          "description": "Sets the size of the window in pixels. This node must have x and y floating point attributes that determine that size of the window. The default values are x=640 and y=480"
+          "$ref": "#/$defs/windowsize"
         },
         "res": {
           "$ref": "#/$defs/ivec2",
@@ -830,15 +901,10 @@
       "type": "object",
       "properties": {
         "address": {
-          "type": "string",
-          "title": "Address",
-          "description": "The IP address or the DNS name of the node. If the address is a DNS name, the name resolution is delegated to the operating system and might include additional network traffic to the DNS host. If the node ought to be the local machine either 127.0.0.x with x from 0 to 255, or localhost (which corresponds to 127.0.0.1) can be used"
+          "$ref": "#/$defs/address"
         },
         "port": {
-          "type": "integer",
-          "minimum": 0,
-          "title": "Port",
-          "description": "The port at which this node is available at to the server. Since the server has to open bidirectional sockets to all of the client nodes, the port for each Node has to be mutually exclusive, meaning that no two Nodes can have the same port. Please note that operating systems have restricted behavior when trying to open ports lower than a fixed limt. For example, Unix does not allow non-elevated users to open ports < 1024. As a convention, SGCT usually uses ports staring at 20400, but this is an arbitrary convention without a specific reason"
+          "$ref": "#/$defs/port"
         },
         "datatransferport": {
           "type": "integer",
@@ -963,23 +1029,7 @@
           "description": "Determines the floating point precision for the normal and position textures if they are enabled. Setting this value if NormalTexture and PositionTexture are disabled does not have any effect. This value defaults to 32"
         },
         "display": {
-          "type": "object",
-          "properties": {
-            "swapinterval": {
-              "type": "integer",
-              "minimum": 0,
-              "title": "Swap Interval",
-              "description": "Determines the swap interval for the application. This determines the amount of V-Sync that should occur for the application. The two most common values for this are 0 for disabling V-Sync and 1 for regular V-Sync. The number provided determines the number of screen updates to wait before swapping the backbuffers and returning. For example on a 60Hz monitor, swapinterval=\"1\" would lead to a maximum of 60Hz frame rate, swapinterval=\"2\" would lead to a maximum of 30Hz frame rate. Using the same values for a 144Hz monitor would be a refresh rate of 144 and 72 respectively. The default value is 0, meaning that V-Sync is disabled"
-            },
-            "refreshrate": {
-              "type": "integer",
-              "minimum": 0,
-              "title": "Refresh Rate",
-              "description": "Determines the desired refresh rate for full-screen windows of this configuration. This value is disabled for windowed mode windows. The default value is the highest possible refresh rate"
-            }
-          },
-          "title": "Display",
-          "description": "Settings specific for the handling of display-related settings for the whole application"
+          "$ref": "#/$defs/display"
         }
       },
       "description": "Controls global settings that affect the overall behavior of the SGCT library that are not limited just to a single window"
@@ -1137,9 +1187,7 @@
   "type": "object",
   "properties": {
     "masteraddress": {
-      "type": "string",
-      "title": "Master Address",
-      "description": "Contains the address of the node that acts as the server for this cluster. This means that one of the Node elements described in this configuration file has to have an address that corresponds to this masterAddress. This value can be either an IP address or a DNS name, which will be resolved at application startup"
+      "$ref": "#/$defs/masteraddress"
     },
     "nodes": {
       "type": "array",
@@ -1185,20 +1233,13 @@
       "items": {"$ref": "#/$defs/tracker" },
       "title": "Trackers"
     },
-    "version": { "type": "integer" },
+    "version": {
+      "type": "integer"
+    },
     "users": {
       "type": "array",
       "items": { "$ref": "#/$defs/user" },
       "title": "Users"
-    },
-	"generator": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "major": { "type": "integer" },
-        "minor": { "type": "integer" }
-      },
-      "required": [ "name", "major", "minor" ]
     }
   },
   "required": [
