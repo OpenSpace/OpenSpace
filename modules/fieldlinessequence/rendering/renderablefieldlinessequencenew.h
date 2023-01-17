@@ -54,9 +54,9 @@ public:
         DynamicDownloading = 2
     };
     enum class SourceFileType {
-        Cdf = 0,
-        Json = 1,
-        Osfls = 2
+        Cdf,
+        Json,
+        Osfls
     };
     // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
     enum class ColorMethod {

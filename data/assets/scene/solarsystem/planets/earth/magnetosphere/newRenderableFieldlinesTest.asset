@@ -1,0 +1,48 @@
+local transforms = asset.require("./transforms_magnetosphere")
+local transferFunction = asset.localResource("./CMR-illuminance2.txt")
+
+local fieldlinesDirectory = asset.syncedResource({
+  Name = "Magnetosphere 2012 event",
+  Type = "HttpSynchronization",
+  Identifier = "magnetosphere_2012_event",
+  Version = 1
+})
+
+local fieldlineTest = {
+    Identifier = "fieldlineTest1",
+    Parent = transforms.GSMReferenceFrame.Identifier,
+    InteractionSphere = 6380000,
+    Renderable = {
+        Type = "RenderableFieldlinesSequenceNew",
+        SourceFolder = fieldlinesDirectory,
+        LineWidth = 10,
+        InputFileType = "Osfls",
+        ColorMethod = "ByQuantity",
+        ColorQuantity = 4, --speed
+        ColorTableRanges = {{50,300}},
+        ColorTablePaths = {transferFunction}
+    },
+    GUI = {
+        Path = "/Solar System/heliosphere",
+        Name = "TestingNewRenderable"
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(fieldlineTest)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(fieldlineTest)
+end)
+
+asset.export(fieldlineTest)
+
+asset.meta = {
+    Name = "Static generic magnetosphere of fieldlines",
+    Version = "1.1",
+    Description = "Generic static magnetosphere fieldlines. Actual timestep 2012-07-14T00-00-00-000. Defaultly colored by speed; 50-300 km/s",
+    Author = "CCMC",
+    URL = "",
+    License = "CC-BY"
+  }

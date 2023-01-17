@@ -798,6 +798,8 @@ void RenderableFieldlinesSequenceNew::loadFile(File& file) {
                 file.state = FieldlinesState::createStateFromOsfls(file.path.string());
                 //const bool success = file.state.loadStateFromOsfls(file.path.string());
                 file.status = File::FileStatus::Loaded;
+                file.timestamp = extractTriggerTimeFromOsfls(file.path.string());
+                computeSequenceEndTime();
             }
             catch(const std::exception& e ) {
                 LERROR(e.what());

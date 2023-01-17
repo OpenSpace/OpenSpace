@@ -26,10 +26,11 @@ local fieldlines = {
     Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
   },
   Renderable = {
-    Type = "RenderableFieldlinesSequence",
+    Type = "RenderableFieldlinesSequenceNew",
     SourceFolder = fieldlinesDirectory,
     AlphaBlendlingEnabled = false,
     InputFileType = "Osfls",
+    LineWidth = 10,
     ColorTablePaths = {
       asset.localResource("transferfunctions/density-fieldlines.txt"),
       asset.localResource("transferfunctions/velocity-fieldlines.txt")
@@ -38,7 +39,7 @@ local fieldlines = {
       { 0, 1000000 },
       { 100, 2000 }
     },
-    SimulationModel = "mas",
+    --SimulationModel = "mas",
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
