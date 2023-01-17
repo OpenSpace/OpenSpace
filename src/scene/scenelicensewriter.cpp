@@ -84,10 +84,7 @@ nlohmann::json SceneLicenseWriter::generateJsonJson() const {
             continue;
         }
 
-        constexpr std::string_view replStr = R"("{}": "{}", )";
-        constexpr std::string_view replStr2 = R"("{}": "{}")";
         nlohmann::json assetJson;
-
         assetJson["name"] = meta->name;
         assetJson["version"] = meta->version;
         assetJson["description"] = meta->description;
