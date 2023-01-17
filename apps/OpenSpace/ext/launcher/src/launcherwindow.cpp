@@ -41,6 +41,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <sgct/error.h>
 #include <sgct/readconfig.h>
 
 using namespace openspace;
@@ -153,7 +154,7 @@ namespace {
     }
 
     void saveWindowConfig(QWidget* parent, const std::filesystem::path& path,
-                          sgct::config::Cluster& cluster)
+                          const sgct::config::Cluster& cluster)
     {
         std::ofstream outFile;
         try {
@@ -659,26 +660,33 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 }
 
 void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinCfg) {
-    std::string saveWindowCfgPath = isUserWinCfg? _userConfigPath : _configPath;
+    std::string saveWindowCfgPath = isUserWinCfg ? _userConfigPath : _configPath;
     int ret = QDialog::DialogCode::Rejected;
     sgct::config::Cluster preview;
+    std::string resultMessage;
 
     if (winCfg.empty()) {
-        SgctEdit editor(this, saveWindowCfgPath);
+        SgctEdit editor(this, _userConfigPath);
         ret = editor.exec();
+        if (ret == QDialog::DialogCode::Accepted) {
+            handleReturnFromWindowEditor(
+                editor.cluster(),
+                editor.saveFilename(),
+                saveWindowCfgPath
+            );
+        }
     }
     else {
-        sgct::config::GeneratorVersion previewGenVersion =
-            sgct::readJsonGeneratorVersion(winCfg);
-        if (previewGenVersion.versionCheck(minimumVersion)) {
-            preview = sgct::readConfig(winCfg);
-            std::string configToValidate = stringifyJsonFile(winCfg);
-            bool passesSchemaValidation = sgct::validateConfigAgainstSchema(
-                configToValidate,
-                _configPath(absPath(globalConfig.pathTokens.at("CONFIG")).string()
-                            + '/schema/sgcteditor.schema.json')
-            );
-            if (passesSchemaValidation) {
+        try {
+            sgct::config::GeneratorVersion previewGenVersion =
+                sgct::readJsonGeneratorVersion(winCfg);
+            if (previewGenVersion.versionCheck(minimumVersion)) {
+                preview = sgct::readConfig(winCfg);
+                sgct::validateConfigAgainstSchema(
+                    winCfg,
+                    _configPath + "/schema/sgcteditor.schema.json",
+                    resultMessage
+                );
                 SgctEdit editor(
                     preview,
                     winCfg,
@@ -687,17 +695,54 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                     this
                 );
                 ret = editor.exec();
+                if (ret == QDialog::DialogCode::Accepted) {
+                    handleReturnFromWindowEditor(
+                        editor.cluster(),
+                        editor.saveFilename(),
+                        saveWindowCfgPath
+                    );
+                }
+            }
+            else {
+                std::string versionDescription = fmt::format(
+                    "This file does not meet the minimum required version of {}.",
+                    minimumVersion.versionString()
+                );
+                //std::cout << versionDescription << std::endl;
+                QMessageBox msgBox;
+                msgBox.setText(QString::fromUtf8(versionDescription.c_str()));
+                msgBox.setWindowTitle("File Format Version Error");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.exec();
             }
         }
+        catch (sgct::Error& e) {
+            std::cout << e.message << std::endl;
+            QMessageBox msgBox;
+            msgBox.setText(QString::fromUtf8(e.message.c_str()));
+            msgBox.setWindowTitle("Format Validation Error");
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.exec();
+        }
+        catch (std::runtime_error& e) {
+            std::cout << e.what() << std::endl;
+            QMessageBox msgBox;
+            msgBox.setText(QString::fromUtf8(std::string(e.what()).c_str()));
+            msgBox.setWindowTitle("Format Validation Error");
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.exec();
+        }
     }
-    if (ret == QDialog::DialogCode::Accepted) {
-        sgct::config::Cluster cluster = editor.cluster();
-        std::filesystem::path savePath = editor.saveFilename();
-        saveWindowConfig(this, savePath, cluster);
-        // Truncate path to convert this back to path relative to _userConfigPath
-        std::string p = savePath.string().substr(saveWindowCfgPath.size());
-        populateWindowConfigsList(p);
-    }
+}
+
+void LauncherWindow::handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
+                                                  const std::filesystem::path savePath,
+                                                  const std::string saveWindowCfgPath)
+{
+    saveWindowConfig(this, savePath, cluster);
+    // Truncate path to convert this back to path relative to _userConfigPath
+    std::string p = savePath.string().substr(saveWindowCfgPath.size());
+    populateWindowConfigsList(p);
 }
 
 bool LauncherWindow::wasLaunchSelected() const {
