@@ -834,7 +834,10 @@ RenderableFieldlinesSequenceNew::insertToFilesInOrder(File file) {
 
 int RenderableFieldlinesSequenceNew::updateActiveIndex(const double nowTime) {
     if (_files.empty()) return -1;
-    if (_files.begin()->timestamp == nowTime) return 0;
+    // if == nowTime, sets correct index if exactly the same
+    // if size == 1 at this point, we can expect to not have a sequence and wants to show
+    // the one files fieldlines at any point in time
+    if (_files.begin()->timestamp == nowTime || _files.size() == 1) return 0;
     int index = 0;
 
     auto iter = std::upper_bound(
@@ -918,9 +921,9 @@ void RenderableFieldlinesSequenceNew::update(const UpdateData& data) {
         return;
     }
 
-    const int nextIndex = _activeIndex + 1;
     // for the sake of this if statment, it is easiest to think of activeIndex as the
     // previous index and nextIndex as the current
+    const int nextIndex = _activeIndex + 1;
     // if _activeIndex is -1 but we are in interval, it means we were before the start
     //     of the sequence in the previous frame
     if (_activeIndex == -1 ||
@@ -1012,7 +1015,22 @@ void RenderableFieldlinesSequenceNew::render(const RenderData& data, RendererTas
 #else
     glLineWidth(1.f);
 #endif
-    const FieldlinesState& state = _files[_activeIndex].state;
+
+    int loadedIndex = _activeIndex;
+    if (loadedIndex > -1) {
+        while (_files[loadedIndex].status != File::FileStatus::Loaded) {
+            --loadedIndex;
+            if (loadedIndex < 0) {
+                LWARNING("no file at or before current time is loaded");
+                return;
+            }
+        }
+    }
+    else return;
+
+    const FieldlinesState& state = _files[loadedIndex].state;
+    double timeTest = _files[_activeIndex].timestamp;
+    ghoul_assert(timeTest != -1.0, "trying to use an empty state in render");
     glMultiDrawArrays(
         GL_LINE_STRIP,
         state.lineStart().data(),
