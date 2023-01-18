@@ -82,7 +82,6 @@ namespace {
 #include "ffmpegtileprovider_codegen.cpp"
 } // namespace
 
-
 namespace openspace::globebrowsing {
 
 void save_gray_frame(unsigned char* buf, int wrap, int xsize, int ysize,
@@ -627,8 +626,8 @@ ChunkTile FfmpegTileProvider::chunkTile(TileIndex tileIndex, int parents, int ma
     glm::vec2 ratios = { 1.f / noOfTiles.x, 1.f / noOfTiles.y };
     float offsetX = ratios.x * static_cast<float>(tileIndex.x);
     // The tiles on the y-axis should be traversed backwards
-    float offsetY = ratios.y * (noOfTiles.y - static_cast<float>(tileIndex.y - 1));
-
+    float offsetY = ratios.y * (noOfTiles.y - static_cast<float>(tileIndex.y) - 1.f);
+    
     TileUvTransform uvTransform = { glm::vec2(offsetX, offsetY), ratios };
 
     return traverseTree(tileIndex, parents, maxParents, ascendToParent, uvTransform);
