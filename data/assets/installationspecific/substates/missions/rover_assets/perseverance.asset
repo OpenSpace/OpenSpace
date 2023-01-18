@@ -1,0 +1,3 @@
+asset.require("./mars_perseverance_path.asset")
+asset.require("./perserverance_sampling_locations.asset")
+asset.require("./hirise_jezero_map.asset")

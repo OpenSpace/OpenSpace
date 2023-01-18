@@ -10,34 +10,40 @@ local models = asset.syncedResource({
   Version = 2
 })
 
+local ingenuity_models = asset.syncedResource({
+  Name = "Ingenuity Models",
+  Type = "HttpSynchronization",
+  Identifier = "ingenuity_model",
+  Version = 1
+})
+
  -- Coordinate offset to match hirise image in Jezero crater
-local offset = { -0.0024, 0.0 }
+local LatLongOffset = { -0.0019, 0.0009 }
 
 -- Some useful lat, long positions
 local landingPosition = { 18.444634598608634, 77.45088440206018 }
-local handlePosition = { 18.43532532679642, 77.4481201276649 }
-local finalPosition = { 18.43379229870882,  77.4421387910843 } -- position as of 2021-10-04
-local ingenuityPosition = { 18.43286833,  77.43914669 } -- position as of 2021-10-04
+local finalPosition = { 18.45273043, 77.40833265 }
+local handlePosition = finalPosition
+local ingenuityPosition = { 18.45725338, 77.40988779 }
 
 -- A "handle" that can be used for navigation and such
 local Handle = {
   Identifier = "Mars-Perseverance-Handle",
   Parent = globeIdentifier,
-  InteractionSphere = 10,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = globeIdentifier,
-      Latitude = handlePosition[1] + offset[1],
-      Longitude = handlePosition[2] + offset[2],
-      Altitude = -2570.0, -- put on surface. Need a static position for camera paths
+      Latitude = handlePosition[1] + LatLongOffset[1],
+      Longitude = handlePosition[2] + LatLongOffset[2],
+      Altitude = -2540.0, -- put on surface. Need a static position for camera paths
       UseHeightmap = false
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = globeIdentifier,
-      Latitude = handlePosition[1] + offset[1],
-      Longitude = handlePosition[2] + offset[2]
+      Latitude = handlePosition[1] + LatLongOffset[1],
+      Longitude = handlePosition[2] + LatLongOffset[2]
     }
   },
   GUI = {
@@ -46,15 +52,19 @@ local Handle = {
   }
 }
 
+-------------------------------------
+-- ROVER PATH
+-------------------------------------
+
 local Path = {
   Identifier = "Mars-Perseverance-Rover-Path",
   Parent = globeIdentifier,
   Renderable = {
     Type = "RenderableGeoJsonObject",
     Globe = globeIdentifier,
-    File = asset.localResource("./roverpath_perseverance.geojson"),
+    File = asset.localResource("./geojson/roverpath_perseverance_230113.geojson"),
     HeightOffset = 10.0,
-    CoordinateOffset = offset,
+    CoordinateOffset = LatLongOffset,
     LineWidth = 2.0,
     UseHeightmap = true
   },
@@ -64,6 +74,10 @@ local Path = {
   }
 }
 
+-------------------------------------
+-- POSITIONS
+-------------------------------------
+
 local LandingPosition = {
   Identifier = "Mars-Perseverance-Landing-Position",
   Parent = globeIdentifier,
@@ -71,23 +85,24 @@ local LandingPosition = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = globeIdentifier,
-      Latitude = landingPosition[1] + offset[1],
-      Longitude = landingPosition[2] + offset[2],
+      Latitude = landingPosition[1] + LatLongOffset[1],
+      Longitude = landingPosition[2] + LatLongOffset[2],
       Altitude = 10,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = globeIdentifier,
-      Latitude = landingPosition[1] + offset[1],
-      Longitude = landingPosition[2] + offset[2]
+      Latitude = landingPosition[1] + LatLongOffset[1],
+      Longitude = landingPosition[2] + LatLongOffset[2]
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 10.0,
     Billboard = true,
-    Texture = asset.localResource('./images/M20_JPL_second_insignia.svg.png')
+    Texture = asset.localResource('./images/M20_JPL_second_insignia.svg.png'),
+    RenderBinMode = "PostDeferredTransparent"
   },
   GUI = {
     Name = "Perseverance Rover Landing Position",
@@ -102,23 +117,24 @@ local RoverPosition = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = globeIdentifier,
-      Latitude = finalPosition[1] + offset[1],
-      Longitude = finalPosition[2] + offset[2],
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2],
       Altitude = 10,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = globeIdentifier,
-      Latitude = finalPosition[1] + offset[1],
-      Longitude = finalPosition[2] + offset[2]
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2]
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 50.0,
     Billboard = true,
-    Texture = asset.localResource('./images/rover_icon.png')
+    Texture = asset.localResource('./images/rover_icon.png'),
+    RenderBinMode = "PostDeferredTransparent"
   },
   GUI = {
     Name = "Perseverance Rover Position",
@@ -133,29 +149,101 @@ local IngenuityPosition = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = globeIdentifier,
-      Latitude = ingenuityPosition[1] + offset[1],
-      Longitude = ingenuityPosition[2] + offset[2],
-      Altitude = 10,
+      Latitude = ingenuityPosition[1] + LatLongOffset[1],
+      Longitude = ingenuityPosition[2] + LatLongOffset[2],
+      Altitude = 5,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = globeIdentifier,
-      Latitude = ingenuityPosition[1] + offset[1],
-      Longitude = ingenuityPosition[2] + offset[2]
+      Latitude = ingenuityPosition[1] + LatLongOffset[1],
+      Longitude = ingenuityPosition[2] + LatLongOffset[2]
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 50.0,
     Billboard = true,
-    Texture = asset.localResource('./images/helicoper_icon.png')
+    Texture = asset.localResource('./images/helicoper_icon.png'),
+    RenderBinMode = "PostDeferredTransparent"
   },
   GUI = {
     Name = "Ingenuity Position",
     Path = "/Missions/Mars2020"
   }
 }
+
+-------------------------------------
+-- LABELS
+-------------------------------------
+local RoverLabel = {
+  Identifier = "Perseverance-Rover-Label",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2],
+      Altitude = 4,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 2.0,
+    Billboard = true,
+    Texture = asset.localResource('./images/perseverance_label.png'),
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Name = "Perseverance Label",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+local IngenuityLabel = {
+  Identifier = "Ingenuity-Label",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = ingenuityPosition[1] + LatLongOffset[1],
+      Longitude = ingenuityPosition[2] + LatLongOffset[2],
+      Altitude = 2.2,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = ingenuityPosition[1] + LatLongOffset[1],
+      Longitude = ingenuityPosition[2] + LatLongOffset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 1.5,
+    Billboard = true,
+    Texture = asset.localResource('./images/ingenuity_label.png'),
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Name = "Ingenuity Label",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+-------------------------------------
+-- MODELS
+-------------------------------------
 
 -- Perseverance Model --
 local PerseveranceModel = {
@@ -165,16 +253,16 @@ local PerseveranceModel = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = globeIdentifier,
-      Latitude = finalPosition[1] + offset[1],
-      Longitude = finalPosition[2] + offset[2],
-      Altitude = -2575.0, -- put on surface. Need a static position for camera paths
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2],
+      Altitude = -2540.0, -- put on surface. Need a static position for camera paths
       UseHeightmap = false
     },
     Rotation = {
       Type = "GlobeRotation",
       Globe = globeIdentifier,
-      Latitude = finalPosition[1] + offset[1],
-      Longitude = finalPosition[2] + offset[2]
+      Latitude = finalPosition[1] + LatLongOffset[1],
+      Longitude = finalPosition[2] + LatLongOffset[2]
     }
   },
   Renderable = {
@@ -200,21 +288,78 @@ local PerseveranceModel = {
   }
 }
 
+-- Ingenuity Model --
+local IngenuityModel = {
+  Identifier = "IngenuityModel",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = ingenuityPosition[1] + LatLongOffset[1],
+      Longitude = ingenuityPosition[2] + LatLongOffset[2],
+      Altitude = -2536.0, -- put on surface. Need a static position for camera paths
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = ingenuityPosition[1] + LatLongOffset[1],
+      Longitude = ingenuityPosition[2] + LatLongOffset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = ingenuity_models .. "/Ingenuity.glb",
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      },
+      {
+        Type = "CameraLightSource",
+        Identifier = "Camera",
+        Intensity = 0.5
+      }
+    }
+  },
+  GUI = {
+    Name = "Ingenuity Model",
+    Path = "/Missions/Mars2020"
+  }
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Handle)
+
   openspace.addSceneGraphNode(Path)
+
   openspace.addSceneGraphNode(LandingPosition)
-  openspace.addSceneGraphNode(PerseveranceModel)
   openspace.addSceneGraphNode(RoverPosition)
   openspace.addSceneGraphNode(IngenuityPosition)
+
+  openspace.addSceneGraphNode(RoverLabel)
+  openspace.addSceneGraphNode(IngenuityLabel)
+
+  openspace.addSceneGraphNode(PerseveranceModel)
+  openspace.addSceneGraphNode(IngenuityModel)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IngenuityModel)
+  openspace.removeSceneGraphNode(PerseveranceModel)
+
+  openspace.removeSceneGraphNode(IngenuityLabel)
+  openspace.removeSceneGraphNode(RoverLabel)
+
   openspace.removeSceneGraphNode(IngenuityPosition)
   openspace.removeSceneGraphNode(RoverPosition)
-  openspace.removeSceneGraphNode(PerseveranceModel)
   openspace.removeSceneGraphNode(LandingPosition)
+
   openspace.removeSceneGraphNode(Path)
+
   openspace.removeSceneGraphNode(Handle)
 end)
 
@@ -224,6 +369,8 @@ asset.export(LandingPosition)
 asset.export(PerseveranceModel)
 asset.export(RoverPosition)
 asset.export(IngenuityPosition)
+asset.export("LatLongOffset", LatLongOffset)
+asset.export("RoverLatLongPosition", finalPosition)
 
 
 asset.meta = {
@@ -231,7 +378,8 @@ asset.meta = {
   Version = "1.0",
   Description = [[
     Renderables used to show the traversal path of the Perseverance rover and the 
-    position of the helicopter Ingenuity. Also includes the Perseverance rover model.
+    position of the helicopter Ingenuity. Also includes models of te perseverance
+    rover and ingenuity model.
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
