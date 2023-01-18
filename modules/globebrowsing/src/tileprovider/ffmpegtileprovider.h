@@ -76,8 +76,6 @@ private:
 
     AnimationMode _animationMode = AnimationMode::MapToSimulationTime;
     std::filesystem::path _videoFile;
-    std::string _startTime;
-    std::string _endTime;
     double _startJ200Time = 0.0;
     double _endJ200Time = 0.0;
     double _videoDuration = -1.0;

@@ -127,8 +127,6 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _videoFile = p.file;
-    _startTime = p.startTime;
-    _endTime = p.endTime;
 
     if (p.animationMode.has_value()) {
         switch (*p.animationMode) {
@@ -145,8 +143,8 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
                 throw ghoul::MissingCaseException();
         }
     }
-    _startJ200Time = Time::convertTime(_startTime);
-    _endJ200Time = Time::convertTime(_endTime);
+    _startJ200Time = Time::convertTime(p.startTime);
+    _endJ200Time = Time::convertTime(p.endTime);
     ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
 }
 
