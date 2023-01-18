@@ -347,7 +347,7 @@ OrbitalNavigator::LimitZoomOut::LimitZoomOut()
     , maximumAllowedDistance(
         MaximumDistanceInfo,
         4E+27,
-        0.f,
+        50.f,
         4E+27
     )
 {
@@ -933,6 +933,11 @@ void OrbitalNavigator::setMinimumAllowedDistance(float distance) {
 }
 
 void OrbitalNavigator::setMaximumAllowedDistance(double distance) {
+    if (distance < 50.f) {
+        LWARNING("Setting maximum allowed distance below 50 meters is not allowed");
+        return;
+    }
+
     if (_minimumAllowedDistance > distance) {
         LWARNING(
             "Setting maximum allowed distance smaller than minumum allowed distance"
