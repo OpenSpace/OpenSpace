@@ -106,6 +106,12 @@ asset.onInitialize(function ()
   openspace.setPropertyValue("{moonTrail_minor}.Renderable.Enabled", false)
   openspace.setPropertyValue("{moon_minor}.Renderable.Enabled", false)
 
+  -- Disable dwarf planets on startup
+  openspace.setPropertyValue("{dwarf_planet}.Renderable.Enabled", false)
+  openspace.setPropertyValue("{planetTrail_dwarf}.Renderable.Enabled", false)
+  openspace.setPropertyValue("{moon_dwarf}.Renderable.Enabled", false)
+  openspace.setPropertyValue("{moonTrail_dwarf}.Renderable.Enabled", false)
+
   -- Ambient intesity of a bunch of planets and moons (to make the dark side less dark)
   openspace.setPropertyValue("{planet_solarSystem}.Renderable.AmbientIntensity", 0.3)
   openspace.setPropertyValue("{moon_solarSystem}.Renderable.AmbientIntensity", 0.3)
