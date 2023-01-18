@@ -145,6 +145,9 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
                 throw ghoul::MissingCaseException();
         }
     }
+    _startJ200Time = Time::convertTime(_startTime);
+    _endJ200Time = Time::convertTime(_endTime);
+    ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
 }
 
 Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
@@ -206,8 +209,6 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
 }
 
 Tile::Status FfmpegTileProvider::tileStatus(const TileIndex& tileIndex) {
-    //return _tileIsReady ? Tile::Status::OK : Tile::Status::Unavailable;
-
     if (tileIndex.level > maxLevel()) {
         return Tile::Status::OutOfRange;
     }
@@ -721,8 +722,7 @@ float FfmpegTileProvider::noDataValueAsFloat() {
 }
 
 void FfmpegTileProvider::internalInitialize() {
-    _startJ200Time = Time::convertTime(_startTime);
-    _endJ200Time = Time::convertTime(_endTime);
+
     std::string path = absPath(_videoFile).string();
 
 
