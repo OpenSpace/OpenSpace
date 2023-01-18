@@ -55,6 +55,8 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
+    ChunkTile chunkTile(TileIndex tileIndex, int parents, int maxParents = 1337) override;
+
     static documentation::Documentation Documentation();
 
 private:

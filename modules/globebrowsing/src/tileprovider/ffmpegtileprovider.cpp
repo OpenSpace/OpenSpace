@@ -616,6 +616,26 @@ void FfmpegTileProvider::handleMpvProperties(mpv_event* event) {
     }
 }
 
+ChunkTile FfmpegTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
+    ZoneScoped
+
+    ghoul_assert(_isInitialized, "FfmpegTileProvider was not initialized");
+
+    lambda ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
+        ti.level--;
+    };
+
+    glm::vec2 noOfTiles = { pow(2, tileIndex.level), pow(2, tileIndex.level - 1) };
+    glm::vec2 ratios = { 1.f / noOfTiles.x, 1.f / noOfTiles.y };
+    float offsetX = ratios.x * static_cast<float>(tileIndex.x);
+    // The tiles on the y-axis should be traversed backwards
+    float offsetY = ratios.y * (noOfTiles.y - static_cast<float>(tileIndex.y - 1));
+
+    TileUvTransform uvTransform = { glm::vec2(offsetX, offsetY), ratios };
+
+    return traverseTree(tileIndex, parents, maxParents, ascendToParent, uvTransform);
+}
+
 void FfmpegTileProvider::handleMpvEvents() {
     while (_mpvHandle) {
         mpv_event* event = mpv_wait_event(_mpvHandle, 0);
@@ -702,9 +722,9 @@ int FfmpegTileProvider::minLevel() {
 }
 
 int FfmpegTileProvider::maxLevel() {
-    // Every tile needs to be 512 by 512, how far can we subdivide this video
-    // TODO: Check if it should be floor or ceil
-    return std::floor(std::log2(_resolution.x) - std::log2(1024)) + 1;
+    // This is the level where above the tile is marked as unavailable and is no longer 
+    // displayed. Since we want to display the tiles at all times we set the max level
+    return 1337;
 }
 
 void FfmpegTileProvider::reset() {
