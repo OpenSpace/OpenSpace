@@ -110,6 +110,7 @@ asset.onInitialize(function ()
   openspace.setPropertyValue("{moon_minor}.Renderable.Enabled", false)
 
   -- Disable dwarf planets on startup
+  openspace.setPropertyValueSingle("Scene.CeresTrail.Renderable.Period", 336.4)
   openspace.setPropertyValue("{dwarf_planet}.Renderable.Enabled", false)
   openspace.setPropertyValue("{planetTrail_dwarf}.Renderable.Enabled", false)
   openspace.setPropertyValue("{moon_dwarf}.Renderable.Enabled", false)
