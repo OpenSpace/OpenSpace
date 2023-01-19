@@ -1040,6 +1040,9 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
     else if (type == "IntProperty") {
         createCustomProperty<properties::IntProperty>(info, std::move(onChange));
     }
+    else if (type == "StringProperty") {
+        createCustomProperty<properties::StringProperty>(info, std::move(onChange));
+    }
     else if (type == "LongProperty") {
         createCustomProperty<properties::LongProperty>(info, std::move(onChange));
     }
