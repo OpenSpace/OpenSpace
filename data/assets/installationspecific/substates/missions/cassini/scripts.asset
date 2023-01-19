@@ -1,0 +1,11 @@
+local isOneScreen = false;
+local scripts = nil
+
+if isOneScreen then
+  scripts = asset.require("./scripts/one_screen")
+else
+  scripts = asset.require("./scripts/two_screens")
+end
+
+asset.export("cassiniScripts", scripts.cassiniScripts)
+asset.export("huygensScripts", scripts.huygensScripts)

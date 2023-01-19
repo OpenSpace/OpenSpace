@@ -59,9 +59,17 @@ local Apollo11Handle = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SunHandle)
   openspace.addSceneGraphNode(Apollo11Handle)
+
+  openspace.addCustomProperty("MissionTitle", "StringProperty", "Mission Title Property")
+  openspace.addCustomProperty("DeltaTimeValue", "IntProperty", "Delta Time ValueProperty")
+  openspace.addCustomProperty("DeltaTimeUnit", "StringProperty", "Delta Time Unit Property")
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeCustomProperty("DeltaTimeUnit")
+  openspace.removeCustomProperty("DeltaTimeValue")
+  openspace.removeCustomProperty("MissionTitle")
+
   openspace.removeSceneGraphNode(Apollo11Handle)
   openspace.removeSceneGraphNode(SunHandle)
 end)

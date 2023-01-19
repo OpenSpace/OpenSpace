@@ -1,0 +1,10 @@
+local isOneScreen = false;
+local scripts = nil
+
+if isOneScreen then
+  scripts = asset.require("./one_screen")
+else
+  scripts = asset.require("./two_screens")
+end
+
+asset.export("apolloScripts", scripts.apolloScripts)
