@@ -38,7 +38,7 @@
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/ffmpegtileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/videotileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
@@ -317,7 +317,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileLayer");
     fTileProvider->registerClass<TileProviderByLevel>("ByLevelTileLayer");
     fTileProvider->registerClass<TileProviderByIndex>("ByIndexTileLayer");
-    fTileProvider->registerClass<FfmpegTileProvider>("VideoTileLayer");
+    fTileProvider->registerClass<VideoTileProvider>("VideoTileLayer");
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
@@ -345,7 +345,7 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::TemporalTileProvider::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
-        globebrowsing::FfmpegTileProvider::Documentation(),
+        globebrowsing::VideoTileProvider::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation()

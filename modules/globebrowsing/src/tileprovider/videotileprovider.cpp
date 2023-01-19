@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/tileprovider/ffmpegtileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/videotileprovider.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
@@ -35,7 +35,7 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "FfmpegTileProvider";
+    constexpr std::string_view _loggerCat = "VideoTileProvider";
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
@@ -58,7 +58,7 @@ namespace {
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    struct [[codegen::Dictionary(FfmpegTileProvider)]] Parameters {
+    struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
 
@@ -79,7 +79,7 @@ namespace {
         std::optional<AnimationMode> animationMode;
 
     };
-#include "ffmpegtileprovider_codegen.cpp"
+#include "videotileprovider_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -116,11 +116,11 @@ void mpvRenderUpdate(void*) {
     LINFO("libmpv: new video frame");
 }
 
-documentation::Documentation FfmpegTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_ffmpegtileprovider");
+documentation::Documentation VideoTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_videotileprovider");
 }
 
-FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
+VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary) {
     ZoneScoped
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -147,7 +147,7 @@ FfmpegTileProvider::FfmpegTileProvider(const ghoul::Dictionary& dictionary) {
     ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
 }
 
-Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
+Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
 
     if (!_isInitialized) {
@@ -205,7 +205,7 @@ Tile FfmpegTileProvider::tile(const TileIndex& tileIndex) {
     return ourTile;
 }
 
-Tile::Status FfmpegTileProvider::tileStatus(const TileIndex& tileIndex) {
+Tile::Status VideoTileProvider::tileStatus(const TileIndex& tileIndex) {
     if (tileIndex.level > maxLevel()) {
         return Tile::Status::OutOfRange;
     }
@@ -217,11 +217,11 @@ Tile::Status FfmpegTileProvider::tileStatus(const TileIndex& tileIndex) {
     }
 }
 
-TileDepthTransform FfmpegTileProvider::depthTransform() {
+TileDepthTransform VideoTileProvider::depthTransform() {
     return { 0.f, 1.f };
 }
 
-void FfmpegTileProvider::update() {
+void VideoTileProvider::update() {
     ZoneScoped
 
     // Always check that our framebuffer is ok
@@ -404,7 +404,7 @@ void FfmpegTileProvider::update() {
     _prevVideoTime = _currentVideoTime;
 }
 
-void FfmpegTileProvider::handleMpvProperties(mpv_event* event) {
+void VideoTileProvider::handleMpvProperties(mpv_event* event) {
     switch (static_cast<LibmpvPropertyKey>(event->reply_userdata)) {
         case LibmpvPropertyKey::Duration: {
             if (!event->data) {
@@ -613,10 +613,10 @@ void FfmpegTileProvider::handleMpvProperties(mpv_event* event) {
     }
 }
 
-ChunkTile FfmpegTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
+ChunkTile VideoTileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
     ZoneScoped
 
-    ghoul_assert(_isInitialized, "FfmpegTileProvider was not initialized");
+    ghoul_assert(_isInitialized, "VideoTileProvider was not initialized");
 
     lambda ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
         ti.level--;
@@ -633,7 +633,7 @@ ChunkTile FfmpegTileProvider::chunkTile(TileIndex tileIndex, int parents, int ma
     return traverseTree(tileIndex, parents, maxParents, ascendToParent, uvTransform);
 }
 
-void FfmpegTileProvider::handleMpvEvents() {
+void VideoTileProvider::handleMpvEvents() {
     while (_mpvHandle) {
         mpv_event* event = mpv_wait_event(_mpvHandle, 0);
         if (event->event_id == MPV_EVENT_NONE) {
@@ -714,17 +714,17 @@ void FfmpegTileProvider::handleMpvEvents() {
     }
 }
 
-int FfmpegTileProvider::minLevel() {
+int VideoTileProvider::minLevel() {
     return 1;
 }
 
-int FfmpegTileProvider::maxLevel() {
+int VideoTileProvider::maxLevel() {
     // This is the level where above the tile is marked as unavailable and is no longer 
     // displayed. Since we want to display the tiles at all times we set the max level
     return 1337;
 }
 
-void FfmpegTileProvider::reset() {
+void VideoTileProvider::reset() {
     if (_videoFile.empty()) {
         return;
     }
@@ -734,11 +734,11 @@ void FfmpegTileProvider::reset() {
 }
 
 
-float FfmpegTileProvider::noDataValueAsFloat() {
+float VideoTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-void FfmpegTileProvider::internalInitialize() {
+void VideoTileProvider::internalInitialize() {
 
     std::string path = absPath(_videoFile).string();
 
@@ -849,7 +849,7 @@ void FfmpegTileProvider::internalInitialize() {
     _isInitialized = true;
 }
 
-void FfmpegTileProvider::createFBO(int width, int height) {
+void VideoTileProvider::createFBO(int width, int height) {
     LINFO(fmt::format("Creating new FBO with width: {} and height: {}", width, height));
 
     if (width <= 0 || height <= 0) {
@@ -900,7 +900,7 @@ void FfmpegTileProvider::createFBO(int width, int height) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FfmpegTileProvider::resizeFBO(int width, int height) {
+void VideoTileProvider::resizeFBO(int width, int height) {
     LINFO(fmt::format("Resizing FBO with width: {} and height: {}", width, height));
 
     if (width == _resolution.x && height == _resolution.y) {
@@ -917,11 +917,11 @@ void FfmpegTileProvider::resizeFBO(int width, int height) {
     createFBO(width, height);
 }
 
-FfmpegTileProvider::~FfmpegTileProvider() {
+VideoTileProvider::~VideoTileProvider() {
 
 }
 
-void FfmpegTileProvider::internalDeinitialize() {
+void VideoTileProvider::internalDeinitialize() {
     // lib mpv
     // Destroy the GL renderer and all of the GL objects it allocated. If video
     // is still running, the video track will be deselected.

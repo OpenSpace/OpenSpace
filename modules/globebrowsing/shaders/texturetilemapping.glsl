@@ -166,7 +166,7 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
   c.rgb = #{layerGroup}[#{i}].color;
 #elif (#{#{layerGroup}#{i}LayerType} == 9) // SpoutImageTileLayer
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 10) // FfmpegTileProvider
+#elif (#{#{layerGroup}#{i}LayerType} == 10) // VideoTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #endif
 

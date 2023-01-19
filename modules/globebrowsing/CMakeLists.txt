@@ -60,7 +60,7 @@ set(HEADER_FILES
   src/tiletextureinitdata.h
   src/timequantizer.h
   src/tileprovider/defaulttileprovider.h
-  src/tileprovider/ffmpegtileprovider.h
+  src/tileprovider/videotileprovider.h
   src/tileprovider/imagesequencetileprovider.h
   src/tileprovider/singleimagetileprovider.h
   src/tileprovider/sizereferencetileprovider.h
@@ -102,7 +102,7 @@ set(SOURCE_FILES
   src/tiletextureinitdata.cpp
   src/timequantizer.cpp
   src/tileprovider/defaulttileprovider.cpp
-  src/tileprovider/ffmpegtileprovider.cpp
+  src/tileprovider/videotileprovider.cpp
   src/tileprovider/imagesequencetileprovider.cpp
   src/tileprovider/singleimagetileprovider.cpp
   src/tileprovider/sizereferencetileprovider.cpp

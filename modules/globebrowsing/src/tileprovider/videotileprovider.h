@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__FFMPEGTILEPROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__FFMPEGTILEPROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__VIDEOTILEPROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__VIDEOTILEPROVIDER___H__
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
@@ -37,14 +37,14 @@ namespace openspace { struct Documentation; }
 
 namespace openspace::globebrowsing {
 
-class FfmpegTileProvider : public TileProvider {
+class VideoTileProvider : public TileProvider {
 public:
     static constexpr glm::ivec2 TileSize = { 512, 512 };
     //static constexpr glm::ivec2 FinalResolution = { 2048, 1024 };
     static constexpr int NumTilePixels = 262144;
 
-    FfmpegTileProvider(const ghoul::Dictionary& dictionary);
-    ~FfmpegTileProvider();
+    VideoTileProvider(const ghoul::Dictionary& dictionary);
+    ~VideoTileProvider();
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& tileIndex) override final;
@@ -109,4 +109,4 @@ private:
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__FFMPEGTILEPROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__VIDEOTILEPROVIDER___H__
