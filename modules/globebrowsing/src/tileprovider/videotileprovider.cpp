@@ -398,7 +398,6 @@ void VideoTileProvider::initializeMpv() {
 
     mpv_opengl_init_params gl_init_params{ getOpenGLProcAddress, nullptr };
     int adv{ 1 }; // we will use the update callback
-    int blockTarget{ 0 }; // we will use the update callback
 
     mpv_render_param params[]{
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},
@@ -407,7 +406,6 @@ void VideoTileProvider::initializeMpv() {
         {MPV_RENDER_PARAM_BLOCK_FOR_TARGET_TIME, (int*)0},
         {MPV_RENDER_PARAM_INVALID, nullptr},
     };
-
 
     // This makes mpv use the currently set GL context. It will use the callback
     // (passed via params) to resolve GL builtin functions, as well as extensions.
